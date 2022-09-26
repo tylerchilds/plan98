@@ -1,0 +1,15 @@
+{
+  "name": "statebus-server-test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "statebus": "^7.0.14",
+    "web-streams-polyfill": "^3.2.1"
+  }
+}
