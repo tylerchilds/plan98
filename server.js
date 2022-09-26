@@ -3,7 +3,7 @@ var bus = require('statebus')()
 // Create the HTTP server
 require('http')
     .createServer(bus.libs.http_in)
-    .listen(4323, () => console.log('listening on 4323'))
+    .listen(1989, () => console.log('listening on 1989'))
 
 // Setup the statebus!
 bus.honk = 1                // Print handy debugging output
