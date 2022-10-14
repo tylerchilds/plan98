@@ -1,8 +1,11 @@
+require('dotenv').config()
 const { createClient } = require('@supabase/supabase-js')
 
 const bus = require('statebus')()
 const express = require('express')
-require('dotenv').config()
+
+const bodyParser = require('body-parser');
+const OAuthServer = require('express-oauth-server');
 
 const options = {
   db: {
@@ -27,6 +30,9 @@ const supabase = createClient(
 const app = express()
 const port = 1989
 
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bus.libs.http_in)
 
 app.listen(port, () => {
