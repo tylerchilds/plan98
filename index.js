@@ -1,5 +1,29 @@
-var bus = require('statebus')()
+const { createClient } = require('@supabase/supabase-js')
+
+const bus = require('statebus')()
 const express = require('express')
+require('dotenv').config()
+
+const options = {
+  db: {
+    schema: 'public',
+  },
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  },
+  global: {
+    headers: { 'x-my-custom-header': 'my-app-name' },
+  },
+}
+
+const supabase = createClient(
+	process.env.SUPABASE_PROJECT_URL,
+	process.env.SUPABASE_PROJECT_KEY,
+	options
+)
+
 const app = express()
 const port = 1989
 

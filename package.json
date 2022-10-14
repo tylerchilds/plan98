@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "statebus": "^7.0.14",
     "web-streams-polyfill": "^3.2.1"
