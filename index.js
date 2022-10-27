@@ -7,9 +7,11 @@ const bus = require('statebus')({
         return client.state.current_user.logged_in
           ? bus.state[key] : null
       },
-      set: ({ key, val }) => {
+      set: ({ key, val }, t) => {
         if(client.state.current_user.logged_in) {
           master.state[key] = val
+        } else {
+          t.abort()
         }
       }
     })
