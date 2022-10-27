@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const bus = require('statebus')({
   client: (client) => {
+    client.honk = 1
     client('profile/*', {
       get: (key) => {
         return client.state.current_user.logged_in
