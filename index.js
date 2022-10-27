@@ -1,7 +1,22 @@
 require('dotenv').config()
-const { createClient } = require('@supabase/supabase-js')
 
-const bus = require('statebus')()
+const bus = require('statebus')({
+  client: (client) => {
+    client('profile/*', {
+      get: (key) => {
+        return client.state.current_user.logged_in
+          ? bus.state[key] : null
+      },
+      set: ({ key, val }) => {
+        if(client.state.current_user.logged_in) {
+          master.state[key] = val
+        }
+      }
+    })
+
+    client.shadows(bus)
+  }
+})
 const express = require('express')
 
 const bodyParser = require('body-parser');
@@ -21,11 +36,6 @@ const options = {
   },
 }
 
-const supabase = createClient(
-	process.env.SUPABASE_PROJECT_URL,
-	process.env.SUPABASE_PROJECT_KEY,
-	options
-)
 
 const app = express()
 const port = 1989
