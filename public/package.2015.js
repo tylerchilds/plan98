@@ -903,7 +903,6 @@
     event.preventDefault();
     const args = attributes(event.target, $);
     const { command } = event.target.dataset;
-    console.log(command);
     execute(command);
     args.root.trap.deactivate();
   });

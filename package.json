@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "java -jar bin/closure-compiler-v20221004.jar --js public/main.js --js_output_file public/package.js",
+    "build": "npm run to2015 && npm run to1996",
+    "to2015": "esbuild --bundle public/main.js --outfile=public/package.2015.js",
+    "to1996": "java -jar bin/closure-compiler-v20221004.jar --js public/package.js --js_output_file public/package.1996.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -16,7 +18,11 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "express-oauth-server": "^2.0.0",
+    "focus-trap": "^7.0.0",
     "statebus": "^7.0.14",
     "web-streams-polyfill": "^3.2.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.15.12"
   }
 }
