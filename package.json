@@ -7,12 +7,13 @@
     "start": "node index.js",
     "build": "npm run to2015 && npm run to1996",
     "to2015": "esbuild --bundle public/main.js --outfile=public/package.2015.js",
-    "to1996": "java -jar bin/closure-compiler-v20221004.jar --js public/package.js --js_output_file public/package.1996.js",
+    "to1996": "java -jar bin/closure-compiler-v20221004.jar --js public/package.2015.js --js_output_file public/package.1996.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@codemirror/basic-setup": "^0.20.0",
     "@supabase/supabase-js": "^2.0.0",
     "body-parser": "^1.20.1",
     "dotenv": "^16.0.3",

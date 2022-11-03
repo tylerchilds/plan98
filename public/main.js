@@ -1,1 +1,2 @@
-import './packages/console.js'
+import './packages/console-module.js'
+import './packages/code-module.js'
