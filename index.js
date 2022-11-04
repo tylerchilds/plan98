@@ -1,3 +1,4 @@
+const fetch = require('node-fetch')
 require('dotenv').config()
 
 const bus = require('statebus')({
@@ -43,6 +44,25 @@ const options = {
 
 const app = express()
 const port = 1989
+
+app.get('/exec/*', async (req, res) => {
+  const pathname = req.params[0]
+  const defaultHandler = (req, res) => res.send('default handler')
+  const {
+    handler = defaultHandler
+  } = await fetch(`http://localhost:1989/edge/${pathname}.js`)
+    .then((response) => response.json())
+    .then(async (data) => {
+      console.log(data)
+      if(!data || !data.file) return 'did we edgespect that??'
+      const b64moduleData = "data:text/javascript;base64," + btoa(data.file);
+
+      console.log(b64moduleData)
+      return await import(b64moduleData);
+    })
+
+  handler(req, res)
+})
 
 app.use(express.static('public'))
 

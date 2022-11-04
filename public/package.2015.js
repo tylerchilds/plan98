@@ -22,10 +22,10 @@
   }
   function style(selector, stylesheet) {
     const styles = `
-		<style type="text/css" data-module=${selector}>
-			${stylesheet.replaceAll("&", selector)}
-		</style>
-	`;
+    <style type="text/css" data-module=${selector}>
+      ${stylesheet.replaceAll("&", selector)}
+    </style>
+  `;
     document.body.insertAdjacentHTML("beforeend", styles);
   }
   function read(selector) {
@@ -17967,11 +17967,31 @@
 
   // public/packages/code-module.js
   var $2 = module("code-module");
+  $2.on("click", ".publish", (event) => {
+    const link = event.target.closest($2.selector).getAttribute("src");
+    const { file } = $2.read();
+    fetch(link, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ file })
+    }).then(() => {
+      window.location.href = window.location.href;
+    });
+  });
   $2.render((target) => {
     const link = target.getAttribute("src");
     console.log(link);
     const { file } = $2.read();
+    if (!file) {
+      fetch(link).then((res) => res.json()).then(({ file: file2 }) => $2.write({ file: file2 }));
+      return;
+    }
     if (!target.view) {
+      target.innerHTML = `
+      <button class="publish">Publish</button>
+    `;
       const config2 = {
         extensions: [
           basicSetup,
