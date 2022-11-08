@@ -1,4 +1,33 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __defNormalProp = (obj, key, value2) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value: value2 }) : obj[key] = value2;
+  var __publicField = (obj, key, value2) => {
+    __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value2);
+    return value2;
+  };
+  var __accessCheck = (obj, member, msg) => {
+    if (!member.has(obj))
+      throw TypeError("Cannot " + msg);
+  };
+  var __privateGet = (obj, member, getter) => {
+    __accessCheck(obj, member, "read from private field");
+    return getter ? getter.call(obj) : member.get(obj);
+  };
+  var __privateAdd = (obj, member, value2) => {
+    if (member.has(obj))
+      throw TypeError("Cannot add the same private member more than once");
+    member instanceof WeakSet ? member.add(obj) : member.set(obj, value2);
+  };
+  var __privateSet = (obj, member, value2, setter) => {
+    __accessCheck(obj, member, "write to private field");
+    setter ? setter.call(obj, value2) : member.set(obj, value2);
+    return value2;
+  };
+  var __privateMethod = (obj, member, method) => {
+    __accessCheck(obj, member, "access private method");
+    return method;
+  };
+
   // public/module.js
   var noop = () => null;
   var CREATE_EVENT = "create";
@@ -31,14 +60,14 @@
   function read(selector) {
     return store.get(selector) || {};
   }
-  function write(selector, payload, handler = (s, p) => ({ ...s, ...p })) {
+  function write(selector, payload, handler = (s, p2) => ({ ...s, ...p2 })) {
     store.set(selector, payload, handler);
   }
   function on(selector1, eventName, selector2, callback) {
     listen(eventName, `${selector1} ${selector2}`, callback);
   }
-  function module(selector, initialState = {}) {
-    write(selector, initialState);
+  function module(selector, initialState3 = {}) {
+    write(selector, initialState3);
     return {
       selector,
       read: read.bind(null, selector),
@@ -48,21 +77,21 @@
       write: write.bind(null, selector)
     };
   }
-  function listen(type, selector, handler = () => null) {
+  function listen(type2, selector, handler = () => null) {
     const callback = (event) => {
       if (event.target && event.target.matches && event.target.matches(selector)) {
         handler.call(null, event);
       }
     };
-    document.addEventListener(type, callback, true);
-    if (observableEvents.includes(type)) {
+    document.addEventListener(type2, callback, true);
+    if (observableEvents.includes(type2)) {
       observe(selector);
     }
     return function unlisten() {
-      if (type === CREATE_EVENT) {
+      if (type2 === CREATE_EVENT) {
         disregard(selector);
       }
-      document.removeEventListener(type, callback, true);
+      document.removeEventListener(type2, callback, true);
     };
   }
   var selectors = [];
@@ -99,16 +128,16 @@
     maybeCreateReactive(targets);
   }).observe(document.body, { childList: true, subtree: true });
   function sufficientlyUniqueId() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c) {
-      const r = Math.random() * 16 | 0, v = c == "x" ? r : r & 3 | 8;
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function(c4) {
+      const r = Math.random() * 16 | 0, v = c4 == "x" ? r : r & 3 | 8;
       return v.toString(16);
     });
   }
-  function createStore(initialState = {}, notify = () => null) {
+  function createStore(initialState3 = {}, notify = () => null) {
     let state = {
-      ...initialState
+      ...initialState3
     };
-    const context = {
+    const context2 = {
       set: function(selector, payload, mergeHandler) {
         const newResource = mergeHandler(state[selector] || {}, payload);
         state = {
@@ -121,7 +150,7 @@
         return state[selector];
       }
     };
-    return context;
+    return context2;
   }
 
   // node_modules/tabbable/dist/index.esm.js
@@ -192,8 +221,8 @@
     }
     return node.tabIndex;
   };
-  var sortOrderedTabbables = function sortOrderedTabbables2(a, b) {
-    return a.tabIndex === b.tabIndex ? a.documentOrder - b.documentOrder : a.tabIndex - b.tabIndex;
+  var sortOrderedTabbables = function sortOrderedTabbables2(a2, b2) {
+    return a2.tabIndex === b2.tabIndex ? a2.documentOrder - b2.documentOrder : a2.tabIndex - b2.tabIndex;
   };
   var isInput = function isInput2(node) {
     return node.tagName === "INPUT";
@@ -431,16 +460,16 @@
     }
     return target;
   }
-  function _defineProperty(obj, key, value) {
+  function _defineProperty(obj, key, value2) {
     if (key in obj) {
       Object.defineProperty(obj, key, {
-        value,
+        value: value2,
         enumerable: true,
         configurable: true,
         writable: true
       });
     } else {
-      obj[key] = value;
+      obj[key] = value2;
     }
     return obj;
   }
@@ -487,8 +516,8 @@
   };
   var findIndex = function findIndex2(arr, fn) {
     var idx = -1;
-    arr.every(function(value, i) {
-      if (fn(value)) {
+    arr.every(function(value2, i) {
+      if (fn(value2)) {
         idx = i;
         return false;
       }
@@ -496,11 +525,11 @@
     });
     return idx;
   };
-  var valueOrHandler = function valueOrHandler2(value) {
+  var valueOrHandler = function valueOrHandler2(value2) {
     for (var _len = arguments.length, params = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
       params[_key - 1] = arguments[_key];
     }
-    return typeof value === "function" ? value.apply(void 0, params) : value;
+    return typeof value2 === "function" ? value2.apply(void 0, params) : value2;
   };
   var getActualTarget = function getActualTarget2(event) {
     return event.target.shadowRoot && typeof event.composedPath === "function" ? event.composedPath()[0] : event.target;
@@ -591,19 +620,19 @@
           lastTabbableNode: tabbableNodes.length > 0 ? tabbableNodes[tabbableNodes.length - 1] : null,
           nextTabbableNode: function nextTabbableNode(node) {
             var forward = arguments.length > 1 && arguments[1] !== void 0 ? arguments[1] : true;
-            var nodeIdx = focusableNodes.findIndex(function(n) {
-              return n === node;
+            var nodeIdx = focusableNodes.findIndex(function(n2) {
+              return n2 === node;
             });
             if (nodeIdx < 0) {
               return void 0;
             }
             if (forward) {
-              return focusableNodes.slice(nodeIdx + 1).find(function(n) {
-                return isTabbable(n, config2.tabbableOptions);
+              return focusableNodes.slice(nodeIdx + 1).find(function(n2) {
+                return isTabbable(n2, config2.tabbableOptions);
               });
             }
-            return focusableNodes.slice(0, nodeIdx).reverse().find(function(n) {
-              return isTabbable(n, config2.tabbableOptions);
+            return focusableNodes.slice(0, nodeIdx).reverse().find(function(n2) {
+              return isTabbable(n2, config2.tabbableOptions);
             });
           }
         };
@@ -944,8 +973,8 @@
     </div>
   `;
   });
-  function attributes(node, $3) {
-    const root = node.closest($3.selector);
+  function attributes(node, $7) {
+    const root = node.closest($7.selector);
     return { root };
   }
   function toggleActive(event) {
@@ -957,8 +986,8 @@
     }
   }
   function setFilter(event) {
-    const { value } = event.target;
-    $.write({ filter: value });
+    const { value: value2 } = event.target;
+    $.write({ filter: value2 });
   }
   function onActivate(target) {
     return () => {
@@ -1060,26 +1089,26 @@
         throw new RangeError(`Invalid position ${pos} in document of length ${this.length}`);
       return this.lineInner(pos, false, 1, 0);
     }
-    line(n) {
-      if (n < 1 || n > this.lines)
-        throw new RangeError(`Invalid line number ${n} in ${this.lines}-line document`);
-      return this.lineInner(n, true, 1, 0);
+    line(n2) {
+      if (n2 < 1 || n2 > this.lines)
+        throw new RangeError(`Invalid line number ${n2} in ${this.lines}-line document`);
+      return this.lineInner(n2, true, 1, 0);
     }
-    replace(from, to, text) {
+    replace(from, to2, text) {
       let parts = [];
       this.decompose(0, from, parts, 2);
       if (text.length)
         text.decompose(0, text.length, parts, 1 | 2);
-      this.decompose(to, this.length, parts, 1);
-      return TextNode.from(parts, this.length - (to - from) + text.length);
+      this.decompose(to2, this.length, parts, 1);
+      return TextNode.from(parts, this.length - (to2 - from) + text.length);
     }
     append(other) {
       return this.replace(this.length, this.length, other);
     }
-    slice(from, to = this.length) {
+    slice(from, to2 = this.length) {
       let parts = [];
-      this.decompose(from, to, parts, 0);
-      return TextNode.from(parts, to - from);
+      this.decompose(from, to2, parts, 0);
+      return TextNode.from(parts, to2 - from);
     }
     eq(other) {
       if (other == this)
@@ -1087,33 +1116,33 @@
       if (other.length != this.length || other.lines != this.lines)
         return false;
       let start = this.scanIdentical(other, 1), end = this.length - this.scanIdentical(other, -1);
-      let a = new RawTextCursor(this), b = new RawTextCursor(other);
+      let a2 = new RawTextCursor(this), b2 = new RawTextCursor(other);
       for (let skip = start, pos = start; ; ) {
-        a.next(skip);
-        b.next(skip);
+        a2.next(skip);
+        b2.next(skip);
         skip = 0;
-        if (a.lineBreak != b.lineBreak || a.done != b.done || a.value != b.value)
+        if (a2.lineBreak != b2.lineBreak || a2.done != b2.done || a2.value != b2.value)
           return false;
-        pos += a.value.length;
-        if (a.done || pos >= end)
+        pos += a2.value.length;
+        if (a2.done || pos >= end)
           return true;
       }
     }
     iter(dir = 1) {
       return new RawTextCursor(this, dir);
     }
-    iterRange(from, to = this.length) {
-      return new PartialTextCursor(this, from, to);
+    iterRange(from, to2 = this.length) {
+      return new PartialTextCursor(this, from, to2);
     }
-    iterLines(from, to) {
+    iterLines(from, to2) {
       let inner;
       if (from == null) {
         inner = this.iter();
       } else {
-        if (to == null)
-          to = this.lines + 1;
+        if (to2 == null)
+          to2 = this.lines + 1;
         let start = this.line(from).from;
-        inner = this.iterRange(start, Math.max(start, to == this.lines + 1 ? this.length : to <= 1 ? 0 : this.line(to - 1).to));
+        inner = this.iterRange(start, Math.max(start, to2 == this.lines + 1 ? this.length : to2 <= 1 ? 0 : this.line(to2 - 1).to));
       }
       return new LineCursor(inner);
     }
@@ -1154,8 +1183,8 @@
         line++;
       }
     }
-    decompose(from, to, target, open) {
-      let text = from <= 0 && to >= this.length ? this : new TextLeaf(sliceText(this.text, from, to), Math.min(to, this.length) - Math.max(0, from));
+    decompose(from, to2, target, open) {
+      let text = from <= 0 && to2 >= this.length ? this : new TextLeaf(sliceText(this.text, from, to2), Math.min(to2, this.length) - Math.max(0, from));
       if (open & 1) {
         let prev = target.pop();
         let joined = appendText(text.text, prev.text.slice(), 0, text.length);
@@ -1169,23 +1198,23 @@
         target.push(text);
       }
     }
-    replace(from, to, text) {
+    replace(from, to2, text) {
       if (!(text instanceof TextLeaf))
-        return super.replace(from, to, text);
-      let lines = appendText(this.text, appendText(text.text, sliceText(this.text, 0, from)), to);
-      let newLen = this.length + text.length - (to - from);
+        return super.replace(from, to2, text);
+      let lines = appendText(this.text, appendText(text.text, sliceText(this.text, 0, from)), to2);
+      let newLen = this.length + text.length - (to2 - from);
       if (lines.length <= 32)
         return new TextLeaf(lines, newLen);
       return TextNode.from(TextLeaf.split(lines, []), newLen);
     }
-    sliceString(from, to = this.length, lineSep = "\n") {
+    sliceString(from, to2 = this.length, lineSep = "\n") {
       let result = "";
-      for (let pos = 0, i = 0; pos <= to && i < this.text.length; i++) {
+      for (let pos = 0, i = 0; pos <= to2 && i < this.text.length; i++) {
         let line = this.text[i], end = pos + line.length;
         if (pos > from && i)
           result += lineSep;
-        if (from < end && to > pos)
-          result += line.slice(Math.max(0, from - pos), to - pos);
+        if (from < end && to2 > pos)
+          result += line.slice(Math.max(0, from - pos), to2 - pos);
         pos = end + 1;
       }
       return result;
@@ -1231,45 +1260,45 @@
         line = endLine + 1;
       }
     }
-    decompose(from, to, target, open) {
-      for (let i = 0, pos = 0; pos <= to && i < this.children.length; i++) {
+    decompose(from, to2, target, open) {
+      for (let i = 0, pos = 0; pos <= to2 && i < this.children.length; i++) {
         let child = this.children[i], end = pos + child.length;
-        if (from <= end && to >= pos) {
-          let childOpen = open & ((pos <= from ? 1 : 0) | (end >= to ? 2 : 0));
-          if (pos >= from && end <= to && !childOpen)
+        if (from <= end && to2 >= pos) {
+          let childOpen = open & ((pos <= from ? 1 : 0) | (end >= to2 ? 2 : 0));
+          if (pos >= from && end <= to2 && !childOpen)
             target.push(child);
           else
-            child.decompose(from - pos, to - pos, target, childOpen);
+            child.decompose(from - pos, to2 - pos, target, childOpen);
         }
         pos = end + 1;
       }
     }
-    replace(from, to, text) {
+    replace(from, to2, text) {
       if (text.lines < this.lines)
         for (let i = 0, pos = 0; i < this.children.length; i++) {
           let child = this.children[i], end = pos + child.length;
-          if (from >= pos && to <= end) {
-            let updated = child.replace(from - pos, to - pos, text);
+          if (from >= pos && to2 <= end) {
+            let updated = child.replace(from - pos, to2 - pos, text);
             let totalLines = this.lines - child.lines + updated.lines;
             if (updated.lines < totalLines >> 5 - 1 && updated.lines > totalLines >> 5 + 1) {
               let copy = this.children.slice();
               copy[i] = updated;
-              return new TextNode(copy, this.length - (to - from) + text.length);
+              return new TextNode(copy, this.length - (to2 - from) + text.length);
             }
             return super.replace(pos, end, updated);
           }
           pos = end + 1;
         }
-      return super.replace(from, to, text);
+      return super.replace(from, to2, text);
     }
-    sliceString(from, to = this.length, lineSep = "\n") {
+    sliceString(from, to2 = this.length, lineSep = "\n") {
       let result = "";
-      for (let i = 0, pos = 0; i < this.children.length && pos <= to; i++) {
+      for (let i = 0, pos = 0; i < this.children.length && pos <= to2; i++) {
         let child = this.children[i], end = pos + child.length;
         if (pos > from && i)
           result += lineSep;
-        if (from < end && to > pos)
-          result += child.sliceString(from - pos, to - pos, lineSep);
+        if (from < end && to2 > pos)
+          result += child.sliceString(from - pos, to2 - pos, lineSep);
         pos = end + 1;
       }
       return result;
@@ -1305,17 +1334,17 @@
       let chunk = Math.max(32, lines >> 5), maxChunk = chunk << 1, minChunk = chunk >> 1;
       let chunked = [], currentLines = 0, currentLen = -1, currentChunk = [];
       function add2(child) {
-        let last;
+        let last2;
         if (child.lines > maxChunk && child instanceof TextNode) {
           for (let node of child.children)
             add2(node);
         } else if (child.lines > minChunk && (currentLines > minChunk || !currentLines)) {
           flush();
           chunked.push(child);
-        } else if (child instanceof TextLeaf && currentLines && (last = currentChunk[currentChunk.length - 1]) instanceof TextLeaf && child.lines + last.lines <= 32) {
+        } else if (child instanceof TextLeaf && currentLines && (last2 = currentChunk[currentChunk.length - 1]) instanceof TextLeaf && child.lines + last2.lines <= 32) {
           currentLines += child.lines;
           currentLen += child.length + 1;
-          currentChunk[currentChunk.length - 1] = new TextLeaf(last.text.concat(child.text), last.length + 1 + child.length);
+          currentChunk[currentChunk.length - 1] = new TextLeaf(last2.text.concat(child.text), last2.length + 1 + child.length);
         } else {
           if (currentLines + child.lines > chunk)
             flush();
@@ -1344,12 +1373,12 @@
       length += line.length + 1;
     return length;
   }
-  function appendText(text, target, from = 0, to = 1e9) {
-    for (let pos = 0, i = 0, first = true; i < text.length && pos <= to; i++) {
+  function appendText(text, target, from = 0, to2 = 1e9) {
+    for (let pos = 0, i = 0, first = true; i < text.length && pos <= to2; i++) {
       let line = text[i], end = pos + line.length;
       if (end >= from) {
-        if (end > to)
-          line = line.slice(0, to - pos);
+        if (end > to2)
+          line = line.slice(0, to2 - pos);
         if (pos < from)
           line = line.slice(from - pos);
         if (first) {
@@ -1362,8 +1391,8 @@
     }
     return target;
   }
-  function sliceText(text, from, to) {
-    return appendText(text, [""], from, to);
+  function sliceText(text, from, to2) {
+    return appendText(text, [""], from, to2);
   }
   var RawTextCursor = class {
     constructor(text, dir = 1) {
@@ -1377,21 +1406,21 @@
     nextInner(skip, dir) {
       this.done = this.lineBreak = false;
       for (; ; ) {
-        let last = this.nodes.length - 1;
-        let top2 = this.nodes[last], offsetValue = this.offsets[last], offset = offsetValue >> 1;
+        let last2 = this.nodes.length - 1;
+        let top2 = this.nodes[last2], offsetValue = this.offsets[last2], offset = offsetValue >> 1;
         let size = top2 instanceof TextLeaf ? top2.text.length : top2.children.length;
         if (offset == (dir > 0 ? size : 0)) {
-          if (last == 0) {
+          if (last2 == 0) {
             this.done = true;
             this.value = "";
             return this;
           }
           if (dir > 0)
-            this.offsets[last - 1]++;
+            this.offsets[last2 - 1]++;
           this.nodes.pop();
           this.offsets.pop();
         } else if ((offsetValue & 1) == (dir > 0 ? 0 : 1)) {
-          this.offsets[last] += dir;
+          this.offsets[last2] += dir;
           if (skip == 0) {
             this.lineBreak = true;
             this.value = "\n";
@@ -1400,7 +1429,7 @@
           skip--;
         } else if (top2 instanceof TextLeaf) {
           let next = top2.text[offset + (dir < 0 ? -1 : 0)];
-          this.offsets[last] += dir;
+          this.offsets[last2] += dir;
           if (next.length > Math.max(0, skip)) {
             this.value = skip == 0 ? next : dir > 0 ? next.slice(skip) : next.slice(0, next.length - skip);
             return this;
@@ -1410,10 +1439,10 @@
           let next = top2.children[offset + (dir < 0 ? -1 : 0)];
           if (skip > next.length) {
             skip -= next.length;
-            this.offsets[last] += dir;
+            this.offsets[last2] += dir;
           } else {
             if (dir < 0)
-              this.offsets[last]--;
+              this.offsets[last2]--;
             this.nodes.push(next);
             this.offsets.push(dir > 0 ? 1 : (next instanceof TextLeaf ? next.text.length : next.children.length) << 1);
           }
@@ -1448,9 +1477,9 @@
       if (skip > limit)
         skip = limit;
       limit -= skip;
-      let { value } = this.cursor.next(skip);
-      this.pos += (value.length + skip) * dir;
-      this.value = value.length <= limit ? value : dir < 0 ? value.slice(value.length - limit) : value.slice(0, limit);
+      let { value: value2 } = this.cursor.next(skip);
+      this.pos += (value2.length + skip) * dir;
+      this.value = value2.length <= limit ? value2 : dir < 0 ? value2.slice(value2.length - limit) : value2.slice(0, limit);
       this.done = !this.value;
       return this;
     }
@@ -1473,7 +1502,7 @@
       this.done = false;
     }
     next(skip = 0) {
-      let { done, lineBreak, value } = this.inner.next(skip);
+      let { done, lineBreak, value: value2 } = this.inner.next(skip);
       if (done) {
         this.done = true;
         this.value = "";
@@ -1485,7 +1514,7 @@
           this.next();
         }
       } else {
-        this.value = value;
+        this.value = value2;
         this.afterBreak = false;
       }
       return this;
@@ -1503,9 +1532,9 @@
     };
   }
   var Line = class {
-    constructor(from, to, number2, text) {
+    constructor(from, to2, number2, text) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.number = number2;
       this.text = text;
     }
@@ -1672,11 +1701,11 @@
         throw new RangeError(`Position ${pos} is out of range for changeset of length ${posA}`);
       return posB;
     }
-    touchesRange(from, to = from) {
-      for (let i = 0, pos = 0; i < this.sections.length && pos <= to; ) {
+    touchesRange(from, to2 = from) {
+      for (let i = 0, pos = 0; i < this.sections.length && pos <= to2; ) {
         let len = this.sections[i++], ins = this.sections[i++], end = pos + len;
-        if (ins >= 0 && pos <= to && end >= from)
-          return pos < from && end > to ? "cover" : true;
+        if (ins >= 0 && pos <= to2 && end >= from)
+          return pos < from && end > to2 ? "cover" : true;
         pos = end;
       }
       return false;
@@ -1693,7 +1722,7 @@
       return this.sections;
     }
     static fromJSON(json) {
-      if (!Array.isArray(json) || json.length % 2 || json.some((a) => typeof a != "number"))
+      if (!Array.isArray(json) || json.length % 2 || json.some((a2) => typeof a2 != "number"))
         throw new RangeError("Invalid JSON representation of ChangeDesc");
       return new ChangeDesc(json);
     }
@@ -1798,8 +1827,8 @@
           return;
         if (pos < length)
           addSection(sections, length - pos, -1);
-        let set = new ChangeSet(sections, inserted);
-        total = total ? total.compose(set.map(total)) : set;
+        let set2 = new ChangeSet(sections, inserted);
+        total = total ? total.compose(set2.map(total)) : set2;
         sections = [];
         inserted = [];
         pos = 0;
@@ -1814,20 +1843,20 @@
           flush();
           total = total ? total.compose(spec.map(total)) : spec;
         } else {
-          let { from, to = from, insert: insert2 } = spec;
-          if (from > to || from < 0 || to > length)
-            throw new RangeError(`Invalid change range ${from} to ${to} (in doc of length ${length})`);
+          let { from, to: to2 = from, insert: insert2 } = spec;
+          if (from > to2 || from < 0 || to2 > length)
+            throw new RangeError(`Invalid change range ${from} to ${to2} (in doc of length ${length})`);
           let insText = !insert2 ? Text.empty : typeof insert2 == "string" ? Text.of(insert2.split(lineSep || DefaultSplit)) : insert2;
           let insLen = insText.length;
-          if (from == to && insLen == 0)
+          if (from == to2 && insLen == 0)
             return;
           if (from < pos)
             flush();
           if (from > pos)
             addSection(sections, from - pos, -1);
-          addSection(sections, to - from, insLen);
+          addSection(sections, to2 - from, insLen);
           addInsert(inserted, sections, insText);
-          pos = to;
+          pos = to2;
         }
       }
       process(changes);
@@ -1865,27 +1894,27 @@
   function addSection(sections, len, ins, forceJoin = false) {
     if (len == 0 && ins <= 0)
       return;
-    let last = sections.length - 2;
-    if (last >= 0 && ins <= 0 && ins == sections[last + 1])
-      sections[last] += len;
-    else if (len == 0 && sections[last] == 0)
-      sections[last + 1] += ins;
+    let last2 = sections.length - 2;
+    if (last2 >= 0 && ins <= 0 && ins == sections[last2 + 1])
+      sections[last2] += len;
+    else if (len == 0 && sections[last2] == 0)
+      sections[last2 + 1] += ins;
     else if (forceJoin) {
-      sections[last] += len;
-      sections[last + 1] += ins;
+      sections[last2] += len;
+      sections[last2 + 1] += ins;
     } else
       sections.push(len, ins);
   }
-  function addInsert(values, sections, value) {
-    if (value.length == 0)
+  function addInsert(values, sections, value2) {
+    if (value2.length == 0)
       return;
     let index = sections.length - 2 >> 1;
     if (index < values.length) {
-      values[values.length - 1] = values[values.length - 1].append(value);
+      values[values.length - 1] = values[values.length - 1].append(value2);
     } else {
       while (values.length < index)
         values.push(Text.empty);
-      values.push(value);
+      values.push(value2);
     }
   }
   function iterChanges(desc, f, individual) {
@@ -1915,46 +1944,46 @@
   }
   function mapSet(setA, setB, before, mkSet = false) {
     let sections = [], insert2 = mkSet ? [] : null;
-    let a = new SectionIter(setA), b = new SectionIter(setB);
+    let a2 = new SectionIter(setA), b2 = new SectionIter(setB);
     for (let posA = 0, posB = 0; ; ) {
-      if (a.ins == -1) {
-        posA += a.len;
-        a.next();
-      } else if (b.ins == -1 && posB < posA) {
-        let skip = Math.min(b.len, posA - posB);
-        b.forward(skip);
+      if (a2.ins == -1) {
+        posA += a2.len;
+        a2.next();
+      } else if (b2.ins == -1 && posB < posA) {
+        let skip = Math.min(b2.len, posA - posB);
+        b2.forward(skip);
         addSection(sections, skip, -1);
         posB += skip;
-      } else if (b.ins >= 0 && (a.done || posB < posA || posB == posA && (b.len < a.len || b.len == a.len && !before))) {
-        addSection(sections, b.ins, -1);
-        while (posA > posB && !a.done && posA + a.len < posB + b.len) {
-          posA += a.len;
-          a.next();
+      } else if (b2.ins >= 0 && (a2.done || posB < posA || posB == posA && (b2.len < a2.len || b2.len == a2.len && !before))) {
+        addSection(sections, b2.ins, -1);
+        while (posA > posB && !a2.done && posA + a2.len < posB + b2.len) {
+          posA += a2.len;
+          a2.next();
         }
-        posB += b.len;
-        b.next();
-      } else if (a.ins >= 0) {
-        let len = 0, end = posA + a.len;
+        posB += b2.len;
+        b2.next();
+      } else if (a2.ins >= 0) {
+        let len = 0, end = posA + a2.len;
         for (; ; ) {
-          if (b.ins >= 0 && posB > posA && posB + b.len < end) {
-            len += b.ins;
-            posB += b.len;
-            b.next();
-          } else if (b.ins == -1 && posB < end) {
-            let skip = Math.min(b.len, end - posB);
+          if (b2.ins >= 0 && posB > posA && posB + b2.len < end) {
+            len += b2.ins;
+            posB += b2.len;
+            b2.next();
+          } else if (b2.ins == -1 && posB < end) {
+            let skip = Math.min(b2.len, end - posB);
             len += skip;
-            b.forward(skip);
+            b2.forward(skip);
             posB += skip;
           } else {
             break;
           }
         }
-        addSection(sections, len, a.ins);
+        addSection(sections, len, a2.ins);
         if (insert2)
-          addInsert(insert2, sections, a.text);
+          addInsert(insert2, sections, a2.text);
         posA = end;
-        a.next();
-      } else if (a.done && b.done) {
+        a2.next();
+      } else if (a2.done && b2.done) {
         return insert2 ? ChangeSet.createSet(sections, insert2) : ChangeDesc.create(sections);
       } else {
         throw new Error("Mismatched change set lengths");
@@ -1964,45 +1993,45 @@
   function composeSets(setA, setB, mkSet = false) {
     let sections = [];
     let insert2 = mkSet ? [] : null;
-    let a = new SectionIter(setA), b = new SectionIter(setB);
+    let a2 = new SectionIter(setA), b2 = new SectionIter(setB);
     for (let open = false; ; ) {
-      if (a.done && b.done) {
+      if (a2.done && b2.done) {
         return insert2 ? ChangeSet.createSet(sections, insert2) : ChangeDesc.create(sections);
-      } else if (a.ins == 0) {
-        addSection(sections, a.len, 0, open);
-        a.next();
-      } else if (b.len == 0 && !b.done) {
-        addSection(sections, 0, b.ins, open);
+      } else if (a2.ins == 0) {
+        addSection(sections, a2.len, 0, open);
+        a2.next();
+      } else if (b2.len == 0 && !b2.done) {
+        addSection(sections, 0, b2.ins, open);
         if (insert2)
-          addInsert(insert2, sections, b.text);
-        b.next();
-      } else if (a.done || b.done) {
+          addInsert(insert2, sections, b2.text);
+        b2.next();
+      } else if (a2.done || b2.done) {
         throw new Error("Mismatched change set lengths");
       } else {
-        let len = Math.min(a.len2, b.len), sectionLen = sections.length;
-        if (a.ins == -1) {
-          let insB = b.ins == -1 ? -1 : b.off ? 0 : b.ins;
+        let len = Math.min(a2.len2, b2.len), sectionLen = sections.length;
+        if (a2.ins == -1) {
+          let insB = b2.ins == -1 ? -1 : b2.off ? 0 : b2.ins;
           addSection(sections, len, insB, open);
           if (insert2 && insB)
-            addInsert(insert2, sections, b.text);
-        } else if (b.ins == -1) {
-          addSection(sections, a.off ? 0 : a.len, len, open);
+            addInsert(insert2, sections, b2.text);
+        } else if (b2.ins == -1) {
+          addSection(sections, a2.off ? 0 : a2.len, len, open);
           if (insert2)
-            addInsert(insert2, sections, a.textBit(len));
+            addInsert(insert2, sections, a2.textBit(len));
         } else {
-          addSection(sections, a.off ? 0 : a.len, b.off ? 0 : b.ins, open);
-          if (insert2 && !b.off)
-            addInsert(insert2, sections, b.text);
+          addSection(sections, a2.off ? 0 : a2.len, b2.off ? 0 : b2.ins, open);
+          if (insert2 && !b2.off)
+            addInsert(insert2, sections, b2.text);
         }
-        open = (a.ins > len || b.ins >= 0 && b.len > len) && (open || sections.length > sectionLen);
-        a.forward2(len);
-        b.forward(len);
+        open = (a2.ins > len || b2.ins >= 0 && b2.len > len) && (open || sections.length > sectionLen);
+        a2.forward2(len);
+        b2.forward(len);
       }
     }
   }
   var SectionIter = class {
-    constructor(set) {
-      this.set = set;
+    constructor(set2) {
+      this.set = set2;
       this.i = 0;
       this.next();
     }
@@ -2051,9 +2080,9 @@
     }
   };
   var SelectionRange = class {
-    constructor(from, to, flags) {
+    constructor(from, to2, flags) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.flags = flags;
     }
     get anchor() {
@@ -2073,23 +2102,23 @@
       return level == 3 ? null : level;
     }
     get goalColumn() {
-      let value = this.flags >> 5;
-      return value == 33554431 ? void 0 : value;
+      let value2 = this.flags >> 5;
+      return value2 == 33554431 ? void 0 : value2;
     }
     map(change, assoc = -1) {
-      let from, to;
+      let from, to2;
       if (this.empty) {
-        from = to = change.mapPos(this.from, assoc);
+        from = to2 = change.mapPos(this.from, assoc);
       } else {
         from = change.mapPos(this.from, 1);
-        to = change.mapPos(this.to, -1);
+        to2 = change.mapPos(this.to, -1);
       }
-      return from == this.from && to == this.to ? this : new SelectionRange(from, to, this.flags);
+      return from == this.from && to2 == this.to ? this : new SelectionRange(from, to2, this.flags);
     }
-    extend(from, to = from) {
-      if (from <= this.anchor && to >= this.anchor)
-        return EditorSelection.range(from, to);
-      let head = Math.abs(from - this.anchor) > Math.abs(to - this.anchor) ? from : to;
+    extend(from, to2 = from) {
+      if (from <= this.anchor && to2 >= this.anchor)
+        return EditorSelection.range(from, to2);
+      let head = Math.abs(from - this.anchor) > Math.abs(to2 - this.anchor) ? from : to2;
       return EditorSelection.range(this.anchor, head);
     }
     eq(other) {
@@ -2103,8 +2132,8 @@
         throw new RangeError("Invalid JSON representation for SelectionRange");
       return EditorSelection.range(json.anchor, json.head);
     }
-    static create(from, to, flags) {
-      return new SelectionRange(from, to, flags);
+    static create(from, to2, flags) {
+      return new SelectionRange(from, to2, flags);
     }
   };
   var EditorSelection = class {
@@ -2131,12 +2160,12 @@
     asSingle() {
       return this.ranges.length == 1 ? this : new EditorSelection([this.main], 0);
     }
-    addRange(range, main = true) {
-      return EditorSelection.create([range].concat(this.ranges), main ? 0 : this.mainIndex + 1);
+    addRange(range2, main = true) {
+      return EditorSelection.create([range2].concat(this.ranges), main ? 0 : this.mainIndex + 1);
     }
-    replaceRange(range, which = this.mainIndex) {
+    replaceRange(range2, which = this.mainIndex) {
       let ranges = this.ranges.slice();
-      ranges[which] = range;
+      ranges[which] = range2;
       return EditorSelection.create(ranges, this.mainIndex);
     }
     toJSON() {
@@ -2154,10 +2183,10 @@
       if (ranges.length == 0)
         throw new RangeError("A selection needs at least one range");
       for (let pos = 0, i = 0; i < ranges.length; i++) {
-        let range = ranges[i];
-        if (range.empty ? range.from <= pos : range.from < pos)
+        let range2 = ranges[i];
+        if (range2.empty ? range2.from <= pos : range2.from < pos)
           return EditorSelection.normalized(ranges.slice(), mainIndex);
-        pos = range.to;
+        pos = range2.to;
       }
       return new EditorSelection(ranges, mainIndex);
     }
@@ -2170,23 +2199,23 @@
     }
     static normalized(ranges, mainIndex = 0) {
       let main = ranges[mainIndex];
-      ranges.sort((a, b) => a.from - b.from);
+      ranges.sort((a2, b2) => a2.from - b2.from);
       mainIndex = ranges.indexOf(main);
       for (let i = 1; i < ranges.length; i++) {
-        let range = ranges[i], prev = ranges[i - 1];
-        if (range.empty ? range.from <= prev.to : range.from < prev.to) {
-          let from = prev.from, to = Math.max(range.to, prev.to);
+        let range2 = ranges[i], prev = ranges[i - 1];
+        if (range2.empty ? range2.from <= prev.to : range2.from < prev.to) {
+          let from = prev.from, to2 = Math.max(range2.to, prev.to);
           if (i <= mainIndex)
             mainIndex--;
-          ranges.splice(--i, 2, range.anchor > range.head ? EditorSelection.range(to, from) : EditorSelection.range(from, to));
+          ranges.splice(--i, 2, range2.anchor > range2.head ? EditorSelection.range(to2, from) : EditorSelection.range(from, to2));
         }
       }
       return new EditorSelection(ranges, mainIndex);
     }
   };
   function checkSelection(selection, docLength) {
-    for (let range of selection.ranges)
-      if (range.to > docLength)
+    for (let range2 of selection.ranges)
+      if (range2.to > docLength)
         throw new RangeError("Selection points outside of document");
   }
   var nextID = 0;
@@ -2201,36 +2230,36 @@
       this.default = combine([]);
     }
     static define(config2 = {}) {
-      return new Facet(config2.combine || ((a) => a), config2.compareInput || ((a, b) => a === b), config2.compare || (!config2.combine ? sameArray : (a, b) => a === b), !!config2.static, config2.enables);
+      return new Facet(config2.combine || ((a2) => a2), config2.compareInput || ((a2, b2) => a2 === b2), config2.compare || (!config2.combine ? sameArray : (a2, b2) => a2 === b2), !!config2.static, config2.enables);
     }
-    of(value) {
-      return new FacetProvider([], this, 0, value);
+    of(value2) {
+      return new FacetProvider([], this, 0, value2);
     }
-    compute(deps, get) {
+    compute(deps, get2) {
       if (this.isStatic)
         throw new Error("Can't compute a static facet");
-      return new FacetProvider(deps, this, 1, get);
+      return new FacetProvider(deps, this, 1, get2);
     }
-    computeN(deps, get) {
+    computeN(deps, get2) {
       if (this.isStatic)
         throw new Error("Can't compute a static facet");
-      return new FacetProvider(deps, this, 2, get);
+      return new FacetProvider(deps, this, 2, get2);
     }
-    from(field, get) {
-      if (!get)
-        get = (x) => x;
-      return this.compute([field], (state) => get(state.field(field)));
+    from(field, get2) {
+      if (!get2)
+        get2 = (x) => x;
+      return this.compute([field], (state) => get2(state.field(field)));
     }
   };
-  function sameArray(a, b) {
-    return a == b || a.length == b.length && a.every((e, i) => e === b[i]);
+  function sameArray(a2, b2) {
+    return a2 == b2 || a2.length == b2.length && a2.every((e, i) => e === b2[i]);
   }
   var FacetProvider = class {
-    constructor(dependencies, facet, type, value) {
+    constructor(dependencies, facet, type2, value2) {
       this.dependencies = dependencies;
       this.facet = facet;
-      this.type = type;
-      this.value = value;
+      this.type = type2;
+      this.value = value2;
       this.id = nextID++;
     }
     dynamicSlot(addresses) {
@@ -2280,11 +2309,11 @@
       };
     }
   };
-  function compareArray(a, b, compare2) {
-    if (a.length != b.length)
+  function compareArray(a2, b2, compare2) {
+    if (a2.length != b2.length)
       return false;
-    for (let i = 0; i < a.length; i++)
-      if (!compare2(a[i], b[i]))
+    for (let i = 0; i < a2.length; i++)
+      if (!compare2(a2[i], b2[i]))
         return false;
     return true;
   }
@@ -2296,19 +2325,19 @@
     return changed;
   }
   function dynamicFacetSlot(addresses, facet, providers) {
-    let providerAddrs = providers.map((p) => addresses[p.id]);
-    let providerTypes = providers.map((p) => p.type);
-    let dynamic = providerAddrs.filter((p) => !(p & 1));
+    let providerAddrs = providers.map((p2) => addresses[p2.id]);
+    let providerTypes = providers.map((p2) => p2.type);
+    let dynamic = providerAddrs.filter((p2) => !(p2 & 1));
     let idx = addresses[facet.id] >> 1;
-    function get(state) {
+    function get2(state) {
       let values = [];
       for (let i = 0; i < providerAddrs.length; i++) {
-        let value = getAddr(state, providerAddrs[i]);
+        let value2 = getAddr(state, providerAddrs[i]);
         if (providerTypes[i] == 2)
-          for (let val of value)
+          for (let val of value2)
             values.push(val);
         else
-          values.push(value);
+          values.push(value2);
       }
       return facet.combine(values);
     }
@@ -2316,16 +2345,16 @@
       create(state) {
         for (let addr of providerAddrs)
           ensureAddr(state, addr);
-        state.values[idx] = get(state);
+        state.values[idx] = get2(state);
         return 1;
       },
       update(state, tr) {
         if (!ensureAll(state, dynamic))
           return 0;
-        let value = get(state);
-        if (facet.compare(value, state.values[idx]))
+        let value2 = get2(state);
+        if (facet.compare(value2, state.values[idx]))
           return 0;
-        state.values[idx] = value;
+        state.values[idx] = value2;
         return 1;
       },
       reconfigure(state, oldState) {
@@ -2335,12 +2364,12 @@
           state.values[idx] = oldValue;
           return 0;
         }
-        let value = get(state);
-        if (facet.compare(value, oldValue)) {
+        let value2 = get2(state);
+        if (facet.compare(value2, oldValue)) {
           state.values[idx] = oldValue;
           return 0;
         }
-        state.values[idx] = value;
+        state.values[idx] = value2;
         return 1;
       }
     };
@@ -2356,7 +2385,7 @@
       this.provides = void 0;
     }
     static define(config2) {
-      let field = new StateField(nextID++, config2.create, config2.update, config2.compare || ((a, b) => a === b), config2);
+      let field = new StateField(nextID++, config2.create, config2.update, config2.compare || ((a2, b2) => a2 === b2), config2);
       if (config2.provide)
         field.provides = config2.provide(field);
       return field;
@@ -2374,10 +2403,10 @@
         },
         update: (state, tr) => {
           let oldVal = state.values[idx];
-          let value = this.updateF(oldVal, tr);
-          if (this.compareF(oldVal, value))
+          let value2 = this.updateF(oldVal, tr);
+          if (this.compareF(oldVal, value2))
             return 0;
-          state.values[idx] = value;
+          state.values[idx] = value2;
           return 1;
         },
         reconfigure: (state, oldState) => {
@@ -2398,8 +2427,8 @@
     }
   };
   var Prec_ = { lowest: 4, low: 3, default: 2, high: 1, highest: 0 };
-  function prec(value) {
-    return (ext) => new PrecExtension(ext, value);
+  function prec(value2) {
+    return (ext) => new PrecExtension(ext, value2);
   }
   var Prec = {
     highest: /* @__PURE__ */ prec(Prec_.highest),
@@ -2462,32 +2491,32 @@
       let dynamicSlots = [];
       for (let field of fields) {
         address[field.id] = dynamicSlots.length << 1;
-        dynamicSlots.push((a) => field.slot(a));
+        dynamicSlots.push((a2) => field.slot(a2));
       }
       let oldFacets = oldState === null || oldState === void 0 ? void 0 : oldState.config.facets;
       for (let id in facets) {
         let providers = facets[id], facet = providers[0].facet;
         let oldProviders = oldFacets && oldFacets[id] || [];
-        if (providers.every((p) => p.type == 0)) {
+        if (providers.every((p2) => p2.type == 0)) {
           address[facet.id] = staticValues.length << 1 | 1;
           if (sameArray(oldProviders, providers)) {
             staticValues.push(oldState.facet(facet));
           } else {
-            let value = facet.combine(providers.map((p) => p.value));
-            staticValues.push(oldState && facet.compare(value, oldState.facet(facet)) ? oldState.facet(facet) : value);
+            let value2 = facet.combine(providers.map((p2) => p2.value));
+            staticValues.push(oldState && facet.compare(value2, oldState.facet(facet)) ? oldState.facet(facet) : value2);
           }
         } else {
-          for (let p of providers) {
-            if (p.type == 0) {
-              address[p.id] = staticValues.length << 1 | 1;
-              staticValues.push(p.value);
+          for (let p2 of providers) {
+            if (p2.type == 0) {
+              address[p2.id] = staticValues.length << 1 | 1;
+              staticValues.push(p2.value);
             } else {
-              address[p.id] = dynamicSlots.length << 1;
-              dynamicSlots.push((a) => p.dynamicSlot(a));
+              address[p2.id] = dynamicSlots.length << 1;
+              dynamicSlots.push((a2) => p2.dynamicSlot(a2));
             }
           }
           address[facet.id] = dynamicSlots.length << 1;
-          dynamicSlots.push((a) => dynamicFacetSlot(a, facet, providers));
+          dynamicSlots.push((a2) => dynamicFacetSlot(a2, facet, providers));
         }
       }
       let dynamic = dynamicSlots.map((f) => f(address));
@@ -2536,7 +2565,7 @@
       }
     }
     inner(extension, Prec_.default);
-    return result.reduce((a, b) => a.concat(b));
+    return result.reduce((a2, b2) => a2.concat(b2));
   }
   function ensureAddr(state, addr) {
     if (addr & 1)
@@ -2570,38 +2599,38 @@
     combine: (values) => values.length ? values[0] : false
   });
   var Annotation = class {
-    constructor(type, value) {
-      this.type = type;
-      this.value = value;
+    constructor(type2, value2) {
+      this.type = type2;
+      this.value = value2;
     }
     static define() {
       return new AnnotationType();
     }
   };
   var AnnotationType = class {
-    of(value) {
-      return new Annotation(this, value);
+    of(value2) {
+      return new Annotation(this, value2);
     }
   };
   var StateEffectType = class {
     constructor(map) {
       this.map = map;
     }
-    of(value) {
-      return new StateEffect(this, value);
+    of(value2) {
+      return new StateEffect(this, value2);
     }
   };
   var StateEffect = class {
-    constructor(type, value) {
-      this.type = type;
-      this.value = value;
+    constructor(type2, value2) {
+      this.type = type2;
+      this.value = value2;
     }
     map(mapping) {
       let mapped = this.type.map(this.value, mapping);
       return mapped === void 0 ? void 0 : mapped == this.value ? this : new StateEffect(this.type, mapped);
     }
-    is(type) {
-      return this.type == type;
+    is(type2) {
+      return this.type == type2;
     }
     static define(spec = {}) {
       return new StateEffectType(spec.map || ((v) => v));
@@ -2632,7 +2661,7 @@
       this._state = null;
       if (selection)
         checkSelection(selection, changes.newLength);
-      if (!annotations.some((a) => a.type == Transaction.time))
+      if (!annotations.some((a2) => a2.type == Transaction.time))
         this.annotations = annotations.concat(Transaction.time.of(Date.now()));
     }
     static create(startState, changes, selection, effects, annotations, scrollIntoView3) {
@@ -2649,9 +2678,9 @@
         this.startState.applyTransaction(this);
       return this._state;
     }
-    annotation(type) {
+    annotation(type2) {
       for (let ann of this.annotations)
-        if (ann.type == type)
+        if (ann.type == type2)
           return ann.value;
       return void 0;
     }
@@ -2670,42 +2699,42 @@
   Transaction.userEvent = /* @__PURE__ */ Annotation.define();
   Transaction.addToHistory = /* @__PURE__ */ Annotation.define();
   Transaction.remote = /* @__PURE__ */ Annotation.define();
-  function joinRanges(a, b) {
+  function joinRanges(a2, b2) {
     let result = [];
     for (let iA = 0, iB = 0; ; ) {
-      let from, to;
-      if (iA < a.length && (iB == b.length || b[iB] >= a[iA])) {
-        from = a[iA++];
-        to = a[iA++];
-      } else if (iB < b.length) {
-        from = b[iB++];
-        to = b[iB++];
+      let from, to2;
+      if (iA < a2.length && (iB == b2.length || b2[iB] >= a2[iA])) {
+        from = a2[iA++];
+        to2 = a2[iA++];
+      } else if (iB < b2.length) {
+        from = b2[iB++];
+        to2 = b2[iB++];
       } else
         return result;
       if (!result.length || result[result.length - 1] < from)
-        result.push(from, to);
-      else if (result[result.length - 1] < to)
-        result[result.length - 1] = to;
+        result.push(from, to2);
+      else if (result[result.length - 1] < to2)
+        result[result.length - 1] = to2;
     }
   }
-  function mergeTransaction(a, b, sequential) {
+  function mergeTransaction(a2, b2, sequential) {
     var _a2;
     let mapForA, mapForB, changes;
     if (sequential) {
-      mapForA = b.changes;
-      mapForB = ChangeSet.empty(b.changes.length);
-      changes = a.changes.compose(b.changes);
+      mapForA = b2.changes;
+      mapForB = ChangeSet.empty(b2.changes.length);
+      changes = a2.changes.compose(b2.changes);
     } else {
-      mapForA = b.changes.map(a.changes);
-      mapForB = a.changes.mapDesc(b.changes, true);
-      changes = a.changes.compose(mapForA);
+      mapForA = b2.changes.map(a2.changes);
+      mapForB = a2.changes.mapDesc(b2.changes, true);
+      changes = a2.changes.compose(mapForA);
     }
     return {
       changes,
-      selection: b.selection ? b.selection.map(mapForB) : (_a2 = a.selection) === null || _a2 === void 0 ? void 0 : _a2.map(mapForA),
-      effects: StateEffect.mapEffects(a.effects, mapForA).concat(StateEffect.mapEffects(b.effects, mapForB)),
-      annotations: a.annotations.length ? a.annotations.concat(b.annotations) : b.annotations,
-      scrollIntoView: a.scrollIntoView || b.scrollIntoView
+      selection: b2.selection ? b2.selection.map(mapForB) : (_a2 = a2.selection) === null || _a2 === void 0 ? void 0 : _a2.map(mapForA),
+      effects: StateEffect.mapEffects(a2.effects, mapForA).concat(StateEffect.mapEffects(b2.effects, mapForB)),
+      annotations: a2.annotations.length ? a2.annotations.concat(b2.annotations) : b2.annotations,
+      scrollIntoView: a2.scrollIntoView || b2.scrollIntoView
     };
   }
   function resolveTransactionInner(state, spec, docSize) {
@@ -2737,13 +2766,13 @@
     let state = tr.startState;
     let result = true;
     for (let filter of state.facet(changeFilter)) {
-      let value = filter(tr);
-      if (value === false) {
+      let value2 = filter(tr);
+      if (value2 === false) {
         result = false;
         break;
       }
-      if (Array.isArray(value))
-        result = result === true ? value : joinRanges(result, value);
+      if (Array.isArray(value2))
+        result = result === true ? value2 : joinRanges(result, value2);
     }
     if (result !== true) {
       let changes, back;
@@ -2779,8 +2808,8 @@
     return spec == tr ? tr : Transaction.create(state, tr.changes, tr.selection, spec.effects, spec.annotations, spec.scrollIntoView);
   }
   var none = [];
-  function asArray(value) {
-    return value == null ? none : Array.isArray(value) ? value : [value];
+  function asArray(value2) {
+    return value2 == null ? none : Array.isArray(value2) ? value2 : [value2];
   }
   var CharCategory = /* @__PURE__ */ function(CharCategory2) {
     CharCategory2[CharCategory2["Word"] = 0] = "Word";
@@ -2874,9 +2903,9 @@
     replaceSelection(text) {
       if (typeof text == "string")
         text = this.toText(text);
-      return this.changeByRange((range) => ({
-        changes: { from: range.from, to: range.to, insert: text },
-        range: EditorSelection.cursor(range.from + text.length)
+      return this.changeByRange((range2) => ({
+        changes: { from: range2.from, to: range2.to, insert: text },
+        range: EditorSelection.cursor(range2.from + text.length)
       }));
     }
     changeByRange(f) {
@@ -2908,8 +2937,8 @@
     toText(string2) {
       return Text.of(string2.split(this.facet(EditorState.lineSeparator) || DefaultSplit));
     }
-    sliceDoc(from = 0, to = this.doc.length) {
-      return this.doc.sliceString(from, to, this.lineBreak);
+    sliceDoc(from = 0, to2 = this.doc.length) {
+      return this.doc.sliceString(from, to2, this.lineBreak);
     }
     facet(facet) {
       let addr = this.config.address[facet.id];
@@ -2925,9 +2954,9 @@
       };
       if (fields)
         for (let prop in fields) {
-          let value = fields[prop];
-          if (value instanceof StateField)
-            result[prop] = value.spec.toJSON(this.field(fields[prop]), this);
+          let value2 = fields[prop];
+          if (value2 instanceof StateField)
+            result[prop] = value2.spec.toJSON(this.field(fields[prop]), this);
         }
       return result;
     }
@@ -2937,8 +2966,8 @@
       let fieldInit = [];
       if (fields)
         for (let prop in fields) {
-          let field = fields[prop], value = json[prop];
-          fieldInit.push(field.init((state) => field.spec.fromJSON(value, state)));
+          let field = fields[prop], value2 = json[prop];
+          fieldInit.push(field.init((state) => field.spec.fromJSON(value2, state)));
         }
       return EditorState.create({
         doc: json.doc,
@@ -2971,11 +3000,11 @@
           break;
         }
       if (insert2.length)
-        phrase2 = phrase2.replace(/\$(\$|\d*)/g, (m, i) => {
+        phrase2 = phrase2.replace(/\$(\$|\d*)/g, (m3, i) => {
           if (i == "$")
             return "$";
-          let n = +(i || 1);
-          return n > insert2.length ? m : insert2[n - 1];
+          let n2 = +(i || 1);
+          return n2 > insert2.length ? m3 : insert2[n2 - 1];
         });
       return phrase2;
     }
@@ -3018,9 +3047,9 @@
   EditorState.lineSeparator = lineSeparator;
   EditorState.readOnly = readOnly;
   EditorState.phrases = /* @__PURE__ */ Facet.define({
-    compare(a, b) {
-      let kA = Object.keys(a), kB = Object.keys(b);
-      return kA.length == kB.length && kA.every((k) => a[k] == b[k]);
+    compare(a2, b2) {
+      let kA = Object.keys(a2), kB = Object.keys(b2);
+      return kA.length == kB.length && kA.every((k) => a2[k] == b2[k]);
     }
   });
   EditorState.languageData = languageData;
@@ -3028,54 +3057,54 @@
   EditorState.transactionFilter = transactionFilter;
   EditorState.transactionExtender = transactionExtender;
   Compartment.reconfigure = /* @__PURE__ */ StateEffect.define();
-  function combineConfig(configs, defaults3, combine = {}) {
+  function combineConfig(configs, defaults4, combine = {}) {
     let result = {};
     for (let config2 of configs)
       for (let key of Object.keys(config2)) {
-        let value = config2[key], current = result[key];
+        let value2 = config2[key], current = result[key];
         if (current === void 0)
-          result[key] = value;
-        else if (current === value || value === void 0)
+          result[key] = value2;
+        else if (current === value2 || value2 === void 0)
           ;
         else if (Object.hasOwnProperty.call(combine, key))
-          result[key] = combine[key](current, value);
+          result[key] = combine[key](current, value2);
         else
           throw new Error("Config merge conflict for field " + key);
       }
-    for (let key in defaults3)
+    for (let key in defaults4)
       if (result[key] === void 0)
-        result[key] = defaults3[key];
+        result[key] = defaults4[key];
     return result;
   }
   var RangeValue = class {
     eq(other) {
       return this == other;
     }
-    range(from, to = from) {
-      return Range.create(from, to, this);
+    range(from, to2 = from) {
+      return Range.create(from, to2, this);
     }
   };
   RangeValue.prototype.startSide = RangeValue.prototype.endSide = 0;
   RangeValue.prototype.point = false;
   RangeValue.prototype.mapMode = MapMode.TrackDel;
   var Range = class {
-    constructor(from, to, value) {
+    constructor(from, to2, value2) {
       this.from = from;
-      this.to = to;
-      this.value = value;
+      this.to = to2;
+      this.value = value2;
     }
-    static create(from, to, value) {
-      return new Range(from, to, value);
+    static create(from, to2, value2) {
+      return new Range(from, to2, value2);
     }
   };
-  function cmpRange(a, b) {
-    return a.from - b.from || a.value.startSide - b.value.startSide;
+  function cmpRange(a2, b2) {
+    return a2.from - b2.from || a2.value.startSide - b2.value.startSide;
   }
   var Chunk = class {
-    constructor(from, to, value, maxPoint) {
+    constructor(from, to2, value2, maxPoint) {
       this.from = from;
-      this.to = to;
-      this.value = value;
+      this.to = to2;
+      this.value = value2;
       this.maxPoint = maxPoint;
     }
     get length() {
@@ -3096,13 +3125,13 @@
           lo = mid + 1;
       }
     }
-    between(offset, from, to, f) {
-      for (let i = this.findIndex(from, -1e9, true), e = this.findIndex(to, 1e9, false, i); i < e; i++)
+    between(offset, from, to2, f) {
+      for (let i = this.findIndex(from, -1e9, true), e = this.findIndex(to2, 1e9, false, i); i < e; i++)
         if (f(this.from[i] + offset, this.to[i] + offset, this.value[i]) === false)
           return false;
     }
     map(offset, changes) {
-      let value = [], from = [], to = [], newPos = -1, maxPoint = -1;
+      let value2 = [], from = [], to2 = [], newPos = -1, maxPoint = -1;
       for (let i = 0; i < this.value.length; i++) {
         let val = this.value[i], curFrom = this.from[i] + offset, curTo = this.to[i] + offset, newFrom, newTo;
         if (curFrom == curTo) {
@@ -3127,11 +3156,11 @@
           newPos = newFrom;
         if (val.point)
           maxPoint = Math.max(maxPoint, newTo - newFrom);
-        value.push(val);
+        value2.push(val);
         from.push(newFrom - newPos);
-        to.push(newTo - newPos);
+        to2.push(newTo - newPos);
       }
-      return { mapped: value.length ? new Chunk(from, to, value, maxPoint) : null, pos: newPos };
+      return { mapped: value2.length ? new Chunk(from, to2, value2, maxPoint) : null, pos: newPos };
     }
   };
   var RangeSet = class {
@@ -3145,8 +3174,8 @@
       return new RangeSet(chunkPos, chunk, nextLayer, maxPoint);
     }
     get length() {
-      let last = this.chunk.length - 1;
-      return last < 0 ? 0 : Math.max(this.chunkEnd(last), this.nextLayer.length);
+      let last2 = this.chunk.length - 1;
+      return last2 < 0 ? 0 : Math.max(this.chunkEnd(last2), this.nextLayer.length);
     }
     get size() {
       if (this.isEmpty)
@@ -3172,9 +3201,9 @@
       let builder = new RangeSetBuilder();
       while (cur2.value || i < add2.length) {
         if (i < add2.length && (cur2.from - add2[i].from || cur2.startSide - add2[i].value.startSide) >= 0) {
-          let range = add2[i++];
-          if (!builder.addInner(range.from, range.to, range.value))
-            spill.push(range);
+          let range2 = add2[i++];
+          if (!builder.addInner(range2.from, range2.to, range2.value))
+            spill.push(range2);
         } else if (cur2.rangeIndex == 1 && cur2.chunkIndex < this.chunk.length && (i == add2.length || this.chunkEnd(cur2.chunkIndex) < add2[i].from) && (!filter || filterFrom > this.chunkEnd(cur2.chunkIndex) || filterTo < this.chunkPos[cur2.chunkIndex]) && builder.addChunk(this.chunkPos[cur2.chunkIndex], this.chunk[cur2.chunkIndex])) {
           cur2.nextChunk();
         } else {
@@ -3210,15 +3239,15 @@
       let next = this.nextLayer.map(changes);
       return chunks.length == 0 ? next : new RangeSet(chunkPos, chunks, next || RangeSet.empty, maxPoint);
     }
-    between(from, to, f) {
+    between(from, to2, f) {
       if (this.isEmpty)
         return;
       for (let i = 0; i < this.chunk.length; i++) {
         let start = this.chunkPos[i], chunk = this.chunk[i];
-        if (to >= start && from <= start + chunk.length && chunk.between(start, from - start, to - start, f) === false)
+        if (to2 >= start && from <= start + chunk.length && chunk.between(start, from - start, to2 - start, f) === false)
           return;
       }
-      this.nextLayer.between(from, to, f);
+      this.nextLayer.between(from, to2, f);
     }
     iter(from = 0) {
       return HeapCursor.from([this]).goto(from);
@@ -3230,40 +3259,40 @@
       return HeapCursor.from(sets).goto(from);
     }
     static compare(oldSets, newSets, textDiff, comparator, minPointSize = -1) {
-      let a = oldSets.filter((set) => set.maxPoint > 0 || !set.isEmpty && set.maxPoint >= minPointSize);
-      let b = newSets.filter((set) => set.maxPoint > 0 || !set.isEmpty && set.maxPoint >= minPointSize);
-      let sharedChunks = findSharedChunks(a, b, textDiff);
-      let sideA = new SpanCursor(a, sharedChunks, minPointSize);
-      let sideB = new SpanCursor(b, sharedChunks, minPointSize);
+      let a2 = oldSets.filter((set2) => set2.maxPoint > 0 || !set2.isEmpty && set2.maxPoint >= minPointSize);
+      let b2 = newSets.filter((set2) => set2.maxPoint > 0 || !set2.isEmpty && set2.maxPoint >= minPointSize);
+      let sharedChunks = findSharedChunks(a2, b2, textDiff);
+      let sideA = new SpanCursor(a2, sharedChunks, minPointSize);
+      let sideB = new SpanCursor(b2, sharedChunks, minPointSize);
       textDiff.iterGaps((fromA, fromB, length) => compare(sideA, fromA, sideB, fromB, length, comparator));
       if (textDiff.empty && textDiff.length == 0)
         compare(sideA, 0, sideB, 0, 0, comparator);
     }
-    static eq(oldSets, newSets, from = 0, to) {
-      if (to == null)
-        to = 1e9;
-      let a = oldSets.filter((set) => !set.isEmpty && newSets.indexOf(set) < 0);
-      let b = newSets.filter((set) => !set.isEmpty && oldSets.indexOf(set) < 0);
-      if (a.length != b.length)
+    static eq(oldSets, newSets, from = 0, to2) {
+      if (to2 == null)
+        to2 = 1e9;
+      let a2 = oldSets.filter((set2) => !set2.isEmpty && newSets.indexOf(set2) < 0);
+      let b2 = newSets.filter((set2) => !set2.isEmpty && oldSets.indexOf(set2) < 0);
+      if (a2.length != b2.length)
         return false;
-      if (!a.length)
+      if (!a2.length)
         return true;
-      let sharedChunks = findSharedChunks(a, b);
-      let sideA = new SpanCursor(a, sharedChunks, 0).goto(from), sideB = new SpanCursor(b, sharedChunks, 0).goto(from);
+      let sharedChunks = findSharedChunks(a2, b2);
+      let sideA = new SpanCursor(a2, sharedChunks, 0).goto(from), sideB = new SpanCursor(b2, sharedChunks, 0).goto(from);
       for (; ; ) {
         if (sideA.to != sideB.to || !sameValues(sideA.active, sideB.active) || sideA.point && (!sideB.point || !sideA.point.eq(sideB.point)))
           return false;
-        if (sideA.to > to)
+        if (sideA.to > to2)
           return true;
         sideA.next();
         sideB.next();
       }
     }
-    static spans(sets, from, to, iterator, minPointSize = -1) {
+    static spans(sets, from, to2, iterator, minPointSize = -1) {
       let cursor = new SpanCursor(sets, null, minPointSize).goto(from), pos = from;
       let open = cursor.openStart;
       for (; ; ) {
-        let curTo = Math.min(cursor.to, to);
+        let curTo = Math.min(cursor.to, to2);
         if (cursor.point) {
           iterator.point(pos, curTo, cursor.point, cursor.activeForPoint(cursor.to), open, cursor.pointRank);
           open = cursor.openEnd(curTo) + (cursor.to > curTo ? 1 : 0);
@@ -3271,7 +3300,7 @@
           iterator.span(pos, curTo, cursor.active, open);
           open = cursor.openEnd(curTo);
         }
-        if (cursor.to > to)
+        if (cursor.to > to2)
           break;
         pos = cursor.to;
         cursor.next();
@@ -3280,8 +3309,8 @@
     }
     static of(ranges, sort = false) {
       let build = new RangeSetBuilder();
-      for (let range of ranges instanceof Range ? [ranges] : sort ? lazySort(ranges) : ranges)
-        build.add(range.from, range.to, range.value);
+      for (let range2 of ranges instanceof Range ? [ranges] : sort ? lazySort(ranges) : ranges)
+        build.add(range2.from, range2.to, range2.value);
       return build.finish();
     }
   };
@@ -3324,13 +3353,13 @@
         this.value = [];
       }
     }
-    add(from, to, value) {
-      if (!this.addInner(from, to, value))
-        (this.nextLayer || (this.nextLayer = new RangeSetBuilder())).add(from, to, value);
+    add(from, to2, value2) {
+      if (!this.addInner(from, to2, value2))
+        (this.nextLayer || (this.nextLayer = new RangeSetBuilder())).add(from, to2, value2);
     }
-    addInner(from, to, value) {
-      let diff = from - this.lastTo || value.startSide - this.last.endSide;
-      if (diff <= 0 && (from - this.lastFrom || value.startSide - this.last.startSide) < 0)
+    addInner(from, to2, value2) {
+      let diff = from - this.lastTo || value2.startSide - this.last.endSide;
+      if (diff <= 0 && (from - this.lastFrom || value2.startSide - this.last.startSide) < 0)
         throw new Error("Ranges must be added sorted by `from` position and `startSide`");
       if (diff < 0)
         return false;
@@ -3339,13 +3368,13 @@
       if (this.chunkStart < 0)
         this.chunkStart = from;
       this.from.push(from - this.chunkStart);
-      this.to.push(to - this.chunkStart);
-      this.last = value;
+      this.to.push(to2 - this.chunkStart);
+      this.last = value2;
       this.lastFrom = from;
-      this.lastTo = to;
-      this.value.push(value);
-      if (value.point)
-        this.maxPoint = Math.max(this.maxPoint, to - from);
+      this.lastTo = to2;
+      this.value.push(value2);
+      if (value2.point)
+        this.maxPoint = Math.max(this.maxPoint, to2 - from);
       return true;
     }
     addChunk(from, chunk) {
@@ -3356,10 +3385,10 @@
       this.setMaxPoint = Math.max(this.setMaxPoint, chunk.maxPoint);
       this.chunks.push(chunk);
       this.chunkPos.push(from);
-      let last = chunk.value.length - 1;
-      this.last = chunk.value[last];
-      this.lastFrom = chunk.from[last] + from;
-      this.lastTo = chunk.to[last] + from;
+      let last2 = chunk.value.length - 1;
+      this.last = chunk.value[last2];
+      this.lastFrom = chunk.from[last2] + from;
+      this.lastTo = chunk.to[last2] + from;
       return true;
     }
     finish() {
@@ -3375,18 +3404,18 @@
       return result;
     }
   };
-  function findSharedChunks(a, b, textDiff) {
+  function findSharedChunks(a2, b2, textDiff) {
     let inA = /* @__PURE__ */ new Map();
-    for (let set of a)
-      for (let i = 0; i < set.chunk.length; i++)
-        if (set.chunk[i].maxPoint <= 0)
-          inA.set(set.chunk[i], set.chunkPos[i]);
+    for (let set2 of a2)
+      for (let i = 0; i < set2.chunk.length; i++)
+        if (set2.chunk[i].maxPoint <= 0)
+          inA.set(set2.chunk[i], set2.chunkPos[i]);
     let shared = /* @__PURE__ */ new Set();
-    for (let set of b)
-      for (let i = 0; i < set.chunk.length; i++) {
-        let known = inA.get(set.chunk[i]);
-        if (known != null && (textDiff ? textDiff.mapPos(known) : known) == set.chunkPos[i] && !(textDiff === null || textDiff === void 0 ? void 0 : textDiff.touchesRange(known, known + set.chunk[i].length)))
-          shared.add(set.chunk[i]);
+    for (let set2 of b2)
+      for (let i = 0; i < set2.chunk.length; i++) {
+        let known = inA.get(set2.chunk[i]);
+        if (known != null && (textDiff ? textDiff.mapPos(known) : known) == set2.chunkPos[i] && !(textDiff === null || textDiff === void 0 ? void 0 : textDiff.touchesRange(known, known + set2.chunk[i].length)))
+          shared.add(set2.chunk[i]);
       }
     return shared;
   }
@@ -3570,11 +3599,11 @@
       this.minActive = findMinIndex(this.active, this.activeTo);
     }
     addActive(trackOpen) {
-      let i = 0, { value, to, rank } = this.cursor;
+      let i = 0, { value: value2, to: to2, rank } = this.cursor;
       while (i < this.activeRank.length && this.activeRank[i] <= rank)
         i++;
-      insert(this.active, i, value);
-      insert(this.activeTo, i, to);
+      insert(this.active, i, value2);
+      insert(this.activeTo, i, to2);
       insert(this.activeRank, i, rank);
       if (trackOpen)
         insert(trackOpen, i, this.cursor.from);
@@ -3585,16 +3614,16 @@
       this.point = null;
       let trackOpen = this.openStart < 0 ? [] : null, trackExtra = 0;
       for (; ; ) {
-        let a = this.minActive;
-        if (a > -1 && (this.activeTo[a] - this.cursor.from || this.active[a].endSide - this.cursor.startSide) < 0) {
-          if (this.activeTo[a] > from) {
-            this.to = this.activeTo[a];
-            this.endSide = this.active[a].endSide;
+        let a2 = this.minActive;
+        if (a2 > -1 && (this.activeTo[a2] - this.cursor.from || this.active[a2].endSide - this.cursor.startSide) < 0) {
+          if (this.activeTo[a2] > from) {
+            this.to = this.activeTo[a2];
+            this.endSide = this.active[a2].endSide;
             break;
           }
-          this.removeActive(a);
+          this.removeActive(a2);
           if (trackOpen)
-            remove(trackOpen, a);
+            remove(trackOpen, a2);
         } else if (!this.cursor.value) {
           this.to = this.endSide = 1e9;
           break;
@@ -3630,54 +3659,54 @@
         this.openStart = openStart + trackExtra;
       }
     }
-    activeForPoint(to) {
+    activeForPoint(to2) {
       if (!this.active.length)
         return this.active;
       let active = [];
       for (let i = this.active.length - 1; i >= 0; i--) {
         if (this.activeRank[i] < this.pointRank)
           break;
-        if (this.activeTo[i] > to || this.activeTo[i] == to && this.active[i].endSide >= this.point.endSide)
+        if (this.activeTo[i] > to2 || this.activeTo[i] == to2 && this.active[i].endSide >= this.point.endSide)
           active.push(this.active[i]);
       }
       return active.reverse();
     }
-    openEnd(to) {
+    openEnd(to2) {
       let open = 0;
-      for (let i = this.activeTo.length - 1; i >= 0 && this.activeTo[i] > to; i--)
+      for (let i = this.activeTo.length - 1; i >= 0 && this.activeTo[i] > to2; i--)
         open++;
       return open;
     }
   };
-  function compare(a, startA, b, startB, length, comparator) {
-    a.goto(startA);
-    b.goto(startB);
+  function compare(a2, startA, b2, startB, length, comparator) {
+    a2.goto(startA);
+    b2.goto(startB);
     let endB = startB + length;
     let pos = startB, dPos = startB - startA;
     for (; ; ) {
-      let diff = a.to + dPos - b.to || a.endSide - b.endSide;
-      let end = diff < 0 ? a.to + dPos : b.to, clipEnd = Math.min(end, endB);
-      if (a.point || b.point) {
-        if (!(a.point && b.point && (a.point == b.point || a.point.eq(b.point)) && sameValues(a.activeForPoint(a.to + dPos), b.activeForPoint(b.to))))
-          comparator.comparePoint(pos, clipEnd, a.point, b.point);
+      let diff = a2.to + dPos - b2.to || a2.endSide - b2.endSide;
+      let end = diff < 0 ? a2.to + dPos : b2.to, clipEnd = Math.min(end, endB);
+      if (a2.point || b2.point) {
+        if (!(a2.point && b2.point && (a2.point == b2.point || a2.point.eq(b2.point)) && sameValues(a2.activeForPoint(a2.to + dPos), b2.activeForPoint(b2.to))))
+          comparator.comparePoint(pos, clipEnd, a2.point, b2.point);
       } else {
-        if (clipEnd > pos && !sameValues(a.active, b.active))
-          comparator.compareRange(pos, clipEnd, a.active, b.active);
+        if (clipEnd > pos && !sameValues(a2.active, b2.active))
+          comparator.compareRange(pos, clipEnd, a2.active, b2.active);
       }
       if (end > endB)
         break;
       pos = end;
       if (diff <= 0)
-        a.next();
+        a2.next();
       if (diff >= 0)
-        b.next();
+        b2.next();
     }
   }
-  function sameValues(a, b) {
-    if (a.length != b.length)
+  function sameValues(a2, b2) {
+    if (a2.length != b2.length)
       return false;
-    for (let i = 0; i < a.length; i++)
-      if (a[i] != b[i] && !a[i].eq(b[i]))
+    for (let i = 0; i < a2.length; i++)
+      if (a2[i] != b2[i] && !a2[i].eq(b2[i]))
         return false;
     return true;
   }
@@ -3686,40 +3715,40 @@
       array[i] = array[i + 1];
     array.pop();
   }
-  function insert(array, index, value) {
+  function insert(array, index, value2) {
     for (let i = array.length - 1; i >= index; i--)
       array[i + 1] = array[i];
-    array[index] = value;
+    array[index] = value2;
   }
-  function findMinIndex(value, array) {
+  function findMinIndex(value2, array) {
     let found = -1, foundPos = 1e9;
     for (let i = 0; i < array.length; i++)
-      if ((array[i] - foundPos || value[i].endSide - value[found].endSide) < 0) {
+      if ((array[i] - foundPos || value2[i].endSide - value2[found].endSide) < 0) {
         found = i;
         foundPos = array[i];
       }
     return found;
   }
-  function countColumn(string2, tabSize, to = string2.length) {
-    let n = 0;
-    for (let i = 0; i < to; ) {
+  function countColumn(string2, tabSize, to2 = string2.length) {
+    let n2 = 0;
+    for (let i = 0; i < to2; ) {
       if (string2.charCodeAt(i) == 9) {
-        n += tabSize - n % tabSize;
+        n2 += tabSize - n2 % tabSize;
         i++;
       } else {
-        n++;
+        n2++;
         i = findClusterBreak(string2, i);
       }
     }
-    return n;
+    return n2;
   }
   function findColumn(string2, col, tabSize, strict) {
-    for (let i = 0, n = 0; ; ) {
-      if (n >= col)
+    for (let i = 0, n2 = 0; ; ) {
+      if (n2 >= col)
         return i;
       if (i == string2.length)
         break;
-      n += string2.charCodeAt(i) == 9 ? tabSize - n % tabSize : 1;
+      n2 += string2.charCodeAt(i) == 9 ? tabSize - n2 % tabSize : 1;
       i = findClusterBreak(string2, i);
     }
     return strict === true ? -1 : string2.length;
@@ -3742,19 +3771,19 @@
         if (isAt && spec2 == null)
           return target.push(selectors2[0] + ";");
         for (let prop in spec2) {
-          let value = spec2[prop];
+          let value2 = spec2[prop];
           if (/&/.test(prop)) {
             render2(
-              prop.split(/,\s*/).map((part) => selectors2.map((sel) => part.replace(/&/, sel))).reduce((a, b) => a.concat(b)),
-              value,
+              prop.split(/,\s*/).map((part) => selectors2.map((sel) => part.replace(/&/, sel))).reduce((a2, b2) => a2.concat(b2)),
+              value2,
               target
             );
-          } else if (value && typeof value == "object") {
+          } else if (value2 && typeof value2 == "object") {
             if (!isAt)
               throw new RangeError("The value of a property (" + prop + ") should be a primitive value.");
-            render2(splitSelector(prop), value, local, keyframes);
-          } else if (value != null) {
-            local.push(prop.replace(/_.*/, "").replace(/[A-Z]/g, (l) => "-" + l.toLowerCase()) + ": " + value + ";");
+            render2(splitSelector(prop), value2, local, keyframes);
+          } else if (value2 != null) {
+            local.push(prop.replace(/_.*/, "").replace(/[A-Z]/g, (l) => "-" + l.toLowerCase()) + ": " + value2 + ";");
           }
         }
         if (local.length || keyframes) {
@@ -3799,21 +3828,21 @@
       let sheet = this.sheet;
       let pos = 0, j = 0;
       for (let i = 0; i < modules.length; i++) {
-        let mod = modules[i], index = this.modules.indexOf(mod);
+        let mod2 = modules[i], index = this.modules.indexOf(mod2);
         if (index < j && index > -1) {
           this.modules.splice(index, 1);
           j--;
           index = -1;
         }
         if (index == -1) {
-          this.modules.splice(j++, 0, mod);
+          this.modules.splice(j++, 0, mod2);
           if (sheet)
-            for (let k = 0; k < mod.rules.length; k++)
-              sheet.insertRule(mod.rules[k], pos++);
+            for (let k = 0; k < mod2.rules.length; k++)
+              sheet.insertRule(mod2.rules[k], pos++);
         } else {
           while (j < index)
             pos += this.modules[j++].rules.length;
-          pos += mod.rules.length;
+          pos += mod2.rules.length;
           j++;
         }
       }
@@ -4122,8 +4151,8 @@
     eq(domSel) {
       return this.anchorNode == domSel.anchorNode && this.anchorOffset == domSel.anchorOffset && this.focusNode == domSel.focusNode && this.focusOffset == domSel.focusOffset;
     }
-    setRange(range) {
-      this.set(range.anchorNode, range.anchorOffset, range.focusNode, range.focusOffset);
+    setRange(range2) {
+      this.set(range2.anchorNode, range2.anchorOffset, range2.focusNode, range2.focusOffset);
     }
     set(anchorNode, anchorOffset, focusNode, focusOffset) {
       this.anchorNode = anchorNode;
@@ -4162,11 +4191,11 @@
     }
   }
   var scratchRange;
-  function textRange(node, from, to = from) {
-    let range = scratchRange || (scratchRange = document.createRange());
-    range.setEnd(node, to);
-    range.setStart(node, from);
-    return range;
+  function textRange(node, from, to2 = from) {
+    let range2 = scratchRange || (scratchRange = document.createRange());
+    range2.setEnd(node, to2);
+    range2.setStart(node, from);
+    return range2;
   }
   function dispatchKey(elt, name2, code) {
     let options = { key: name2, code: name2, keyCode: code, which: code, cancelable: true };
@@ -4315,17 +4344,17 @@
         pos += child.length + child.breakAfter;
       }
     }
-    domBoundsAround(from, to, offset = 0) {
+    domBoundsAround(from, to2, offset = 0) {
       let fromI = -1, fromStart = -1, toI = -1, toEnd = -1;
       for (let i = 0, pos = offset, prevEnd = offset; i < this.children.length; i++) {
         let child = this.children[i], end = pos + child.length;
-        if (pos < from && end > to)
-          return child.domBoundsAround(from, to, pos);
+        if (pos < from && end > to2)
+          return child.domBoundsAround(from, to2, pos);
         if (end >= from && fromI == -1) {
           fromI = i;
           fromStart = pos;
         }
-        if (pos > to && child.dom.parentNode == this.dom) {
+        if (pos > to2 && child.dom.parentNode == this.dom) {
           toI = i;
           toEnd = prevEnd;
           break;
@@ -4375,14 +4404,14 @@
         v = parent;
       }
     }
-    replaceChildren(from, to, children = noChildren) {
+    replaceChildren(from, to2, children = noChildren) {
       this.markDirty();
-      for (let i = from; i < to; i++) {
+      for (let i = from; i < to2; i++) {
         let child = this.children[i];
         if (child.parent == this)
           child.destroy();
       }
-      this.children.splice(from, to - from, ...children);
+      this.children.splice(from, to2 - from, ...children);
       for (let i = 0; i < children.length; i++)
         children[i].setParent(this);
     }
@@ -4408,7 +4437,7 @@
     get isEditable() {
       return true;
     }
-    merge(from, to, source, hasStart, openStart, openEnd) {
+    merge(from, to2, source, hasStart, openStart, openEnd) {
       return false;
     }
     become(other) {
@@ -4448,9 +4477,9 @@
   function replaceRange(parent, fromI, fromOff, toI, toOff, insert2, breakAtStart, openStart, openEnd) {
     let { children } = parent;
     let before = children.length ? children[fromI] : null;
-    let last = insert2.length ? insert2[insert2.length - 1] : null;
-    let breakAtEnd = last ? last.breakAfter : breakAtStart;
-    if (fromI == toI && before && !breakAtStart && !breakAtEnd && insert2.length < 2 && before.merge(fromOff, toOff, insert2.length ? last : null, fromOff == 0, openStart, openEnd))
+    let last2 = insert2.length ? insert2[insert2.length - 1] : null;
+    let breakAtEnd = last2 ? last2.breakAfter : breakAtStart;
+    if (fromI == toI && before && !breakAtStart && !breakAtEnd && insert2.length < 2 && before.merge(fromOff, toOff, insert2.length ? last2 : null, fromOff == 0, openStart, openEnd))
       return;
     if (toI < children.length) {
       let after = children[toI];
@@ -4459,7 +4488,7 @@
           after = after.split(toOff);
           toOff = 0;
         }
-        if (!breakAtEnd && last && after.merge(0, toOff, last, true, 0, openEnd)) {
+        if (!breakAtEnd && last2 && after.merge(0, toOff, last2, true, 0, openEnd)) {
           insert2[insert2.length - 1] = after;
         } else {
           if (toOff)
@@ -4467,8 +4496,8 @@
           insert2.push(after);
         }
       } else if (after === null || after === void 0 ? void 0 : after.breakAfter) {
-        if (last)
-          last.breakAfter = 1;
+        if (last2)
+          last2.breakAfter = 1;
         else
           breakAtStart = 1;
       }
@@ -4503,11 +4532,11 @@
     if (fromI < toI || insert2.length)
       parent.replaceChildren(fromI, toI, insert2);
   }
-  function mergeChildrenInto(parent, from, to, insert2, openStart, openEnd) {
+  function mergeChildrenInto(parent, from, to2, insert2, openStart, openEnd) {
     let cur2 = parent.childCursor();
-    let { i: toI, off: toOff } = cur2.findPos(to, 1);
+    let { i: toI, off: toOff } = cur2.findPos(to2, 1);
     let { i: fromI, off: fromOff } = cur2.findPos(from, -1);
-    let dLen = from - to;
+    let dLen = from - to2;
     for (let view of insert2)
       dLen += view.length;
     parent.length += dLen;
@@ -4566,10 +4595,10 @@
       if (dom.nodeType == 3)
         this.createDOM(dom);
     }
-    merge(from, to, source) {
-      if (source && (!(source instanceof TextView) || this.length - (to - from) + source.length > MaxJoinLen))
+    merge(from, to2, source) {
+      if (source && (!(source instanceof TextView) || this.length - (to2 - from) + source.length > MaxJoinLen))
         return false;
-      this.text = this.text.slice(0, from) + (source ? source.text : "") + this.text.slice(to);
+      this.text = this.text.slice(0, from) + (source ? source.text : "") + this.text.slice(to2);
       this.markDirty();
       return true;
     }
@@ -4623,10 +4652,10 @@
         this.setAttrs(this.dom);
       super.sync(track);
     }
-    merge(from, to, source, _hasStart, openStart, openEnd) {
-      if (source && (!(source instanceof MarkView && source.mark.eq(this.mark)) || from && openStart <= 0 || to < this.length && openEnd <= 0))
+    merge(from, to2, source, _hasStart, openStart, openEnd) {
+      if (source && (!(source instanceof MarkView && source.mark.eq(this.mark)) || from && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      mergeChildrenInto(this, from, to, source ? source.children : [], openStart - 1, openEnd - 1);
+      mergeChildrenInto(this, from, to2, source ? source.children : [], openStart - 1, openEnd - 1);
       this.markDirty();
       return true;
     }
@@ -4660,24 +4689,24 @@
     let length = text.nodeValue.length;
     if (pos > length)
       pos = length;
-    let from = pos, to = pos, flatten2 = 0;
+    let from = pos, to2 = pos, flatten2 = 0;
     if (pos == 0 && side < 0 || pos == length && side >= 0) {
       if (!(browser.chrome || browser.gecko)) {
         if (pos) {
           from--;
           flatten2 = 1;
-        } else if (to < length) {
-          to++;
+        } else if (to2 < length) {
+          to2++;
           flatten2 = -1;
         }
       }
     } else {
       if (side < 0)
         from--;
-      else if (to < length)
-        to++;
+      else if (to2 < length)
+        to2++;
     }
-    let rects = textRange(text, from, to).getClientRects();
+    let rects = textRange(text, from, to2).getClientRects();
     if (!rects.length)
       return Rect0;
     let rect = rects[(flatten2 ? flatten2 < 0 : side >= 0) ? 0 : rects.length - 1];
@@ -4713,10 +4742,10 @@
     getSide() {
       return this.side;
     }
-    merge(from, to, source, hasStart, openStart, openEnd) {
-      if (source && (!(source instanceof WidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to < this.length && openEnd <= 0))
+    merge(from, to2, source, hasStart, openStart, openEnd) {
+      if (source && (!(source instanceof WidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      this.length = from + (source ? source.length : 0) + (this.length - to);
+      this.length = from + (source ? source.length : 0) + (this.length - to2);
       return true;
     }
     become(other) {
@@ -4778,7 +4807,7 @@
       let { topView, text } = this.widget;
       if (!topView)
         return new DOMPos(text, Math.min(pos, text.nodeValue.length));
-      return scanCompositionTree(pos, 0, topView, text, (v, p) => v.domAtPos(p), (p) => new DOMPos(text, Math.min(p, text.nodeValue.length)));
+      return scanCompositionTree(pos, 0, topView, text, (v, p2) => v.domAtPos(p2), (p2) => new DOMPos(text, Math.min(p2, text.nodeValue.length)));
     }
     sync() {
       this.setDOM(this.widget.toDOM());
@@ -4901,9 +4930,9 @@
         index = parent.parent.children.indexOf(parent) + (side < 0 ? 0 : 1);
         parent = parent.parent;
       } else {
-        let last = parent.dom.lastChild;
-        if (last && last.nodeName == "BR")
-          return last.getClientRects()[0];
+        let last2 = parent.dom.lastChild;
+        if (last2 && last2.nodeName == "BR")
+          return last2.getClientRects()[0];
         break;
       }
     }
@@ -4929,9 +4958,9 @@
     return new DOMPos(dom, 0);
   }
   function joinInlineInto(parent, view, open) {
-    let last, { children } = parent;
-    if (open > 0 && view instanceof MarkView && children.length && (last = children[children.length - 1]) instanceof MarkView && last.mark.eq(view.mark)) {
-      joinInlineInto(last, view.children[0], open - 1);
+    let last2, { children } = parent;
+    if (open > 0 && view instanceof MarkView && children.length && (last2 = children[children.length - 1]) instanceof MarkView && last2.mark.eq(view.mark)) {
+      joinInlineInto(last2, view.children[0], open - 1);
     } else {
       children.push(view);
       view.setParent(parent);
@@ -4953,10 +4982,10 @@
       }
       off = end;
     }
-    let last = view.dom.lastChild;
-    if (!last)
+    let last2 = view.dom.lastChild;
+    if (!last2)
       return view.dom.getBoundingClientRect();
-    let rects = clientRectsFor(last);
+    let rects = clientRectsFor(last2);
     return rects[rects.length - 1] || null;
   }
   function combineAttrs(source, target) {
@@ -4970,16 +4999,16 @@
     }
     return target;
   }
-  function attrsEq(a, b) {
-    if (a == b)
+  function attrsEq(a2, b2) {
+    if (a2 == b2)
       return true;
-    if (!a || !b)
+    if (!a2 || !b2)
       return false;
-    let keysA = Object.keys(a), keysB = Object.keys(b);
+    let keysA = Object.keys(a2), keysB = Object.keys(b2);
     if (keysA.length != keysB.length)
       return false;
     for (let key of keysA) {
-      if (keysB.indexOf(key) == -1 || a[key] !== b[key])
+      if (keysB.indexOf(key) == -1 || a2[key] !== b2[key])
         return false;
     }
     return true;
@@ -5080,10 +5109,10 @@
     eq(other) {
       return this == other || other instanceof MarkDecoration && this.tagName == other.tagName && this.class == other.class && attrsEq(this.attrs, other.attrs);
     }
-    range(from, to = from) {
-      if (from >= to)
+    range(from, to2 = from) {
+      if (from >= to2)
         throw new RangeError("Mark decorations may not be empty");
-      return super.range(from, to);
+      return super.range(from, to2);
     }
   };
   MarkDecoration.prototype.point = false;
@@ -5094,10 +5123,10 @@
     eq(other) {
       return other instanceof LineDecoration && attrsEq(this.spec.attributes, other.spec.attributes);
     }
-    range(from, to = from) {
-      if (to != from)
+    range(from, to2 = from) {
+      if (to2 != from)
         throw new RangeError("Line decoration ranges must be zero-length");
-      return super.range(from, to);
+      return super.range(from, to2);
     }
   };
   LineDecoration.prototype.mapMode = MapMode.TrackBefore;
@@ -5118,12 +5147,12 @@
     eq(other) {
       return other instanceof PointDecoration && widgetsEq(this.widget, other.widget) && this.block == other.block && this.startSide == other.startSide && this.endSide == other.endSide;
     }
-    range(from, to = from) {
-      if (this.isReplace && (from > to || from == to && this.startSide > 0 && this.endSide <= 0))
+    range(from, to2 = from) {
+      if (this.isReplace && (from > to2 || from == to2 && this.startSide > 0 && this.endSide <= 0))
         throw new RangeError("Invalid range for replacement decoration");
-      if (!this.isReplace && to != from)
+      if (!this.isReplace && to2 != from)
         throw new RangeError("Widget decorations can only have zero-length ranges");
-      return super.range(from, to);
+      return super.range(from, to2);
     }
   };
   PointDecoration.prototype.point = true;
@@ -5135,15 +5164,15 @@
       end = spec.inclusive;
     return { start: start !== null && start !== void 0 ? start : block, end: end !== null && end !== void 0 ? end : block };
   }
-  function widgetsEq(a, b) {
-    return a == b || !!(a && b && a.compare(b));
+  function widgetsEq(a2, b2) {
+    return a2 == b2 || !!(a2 && b2 && a2.compare(b2));
   }
-  function addRange(from, to, ranges, margin = 0) {
-    let last = ranges.length - 1;
-    if (last >= 0 && ranges[last] + margin >= from)
-      ranges[last] = Math.max(ranges[last], to);
+  function addRange(from, to2, ranges, margin = 0) {
+    let last2 = ranges.length - 1;
+    if (last2 >= 0 && ranges[last2] + margin >= from)
+      ranges[last2] = Math.max(ranges[last2], to2);
     else
-      ranges.push(from, to);
+      ranges.push(from, to2);
   }
   var LineView = class extends ContentView {
     constructor() {
@@ -5154,7 +5183,7 @@
       this.attrs = null;
       this.breakAfter = 0;
     }
-    merge(from, to, source, hasStart, openStart, openEnd) {
+    merge(from, to2, source, hasStart, openStart, openEnd) {
       if (source) {
         if (!(source instanceof LineView))
           return false;
@@ -5163,7 +5192,7 @@
       }
       if (hasStart)
         this.setDeco(source ? source.attrs : null);
-      mergeChildrenInto(this, from, to, source ? source.children : [], openStart, openEnd);
+      mergeChildrenInto(this, from, to2, source ? source.children : [], openStart, openEnd);
       return true;
     }
     split(at) {
@@ -5240,10 +5269,10 @@
         this.prevAttrs = void 0;
       }
       super.sync(track);
-      let last = this.dom.lastChild;
-      while (last && ContentView.get(last) instanceof MarkView)
-        last = last.lastChild;
-      if (!last || !this.length || last.nodeName != "BR" && ((_a2 = ContentView.get(last)) === null || _a2 === void 0 ? void 0 : _a2.isEditable) == false && (!browser.ios || !this.children.some((ch) => ch instanceof TextView))) {
+      let last2 = this.dom.lastChild;
+      while (last2 && ContentView.get(last2) instanceof MarkView)
+        last2 = last2.lastChild;
+      if (!last2 || !this.length || last2.nodeName != "BR" && ((_a2 = ContentView.get(last2)) === null || _a2 === void 0 ? void 0 : _a2.isEditable) == false && (!browser.ios || !this.children.some((ch) => ch instanceof TextView))) {
         let hack = document.createElement("BR");
         hack.cmIgnore = true;
         this.dom.appendChild(hack);
@@ -5290,18 +5319,18 @@
     }
   };
   var BlockWidgetView = class extends ContentView {
-    constructor(widget, length, type) {
+    constructor(widget, length, type2) {
       super();
       this.widget = widget;
       this.length = length;
-      this.type = type;
+      this.type = type2;
       this.breakAfter = 0;
       this.prevWidget = null;
     }
-    merge(from, to, source, _takeDeco, openStart, openEnd) {
-      if (source && (!(source instanceof BlockWidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to < this.length && openEnd <= 0))
+    merge(from, to2, source, _takeDeco, openStart, openEnd) {
+      if (source && (!(source instanceof BlockWidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      this.length = from + (source ? source.length : 0) + (this.length - to);
+      this.length = from + (source ? source.length : 0) + (this.length - to2);
       return true;
     }
     domAtPos(pos) {
@@ -5378,8 +5407,8 @@
     posCovered() {
       if (this.content.length == 0)
         return !this.breakAtStart && this.doc.lineAt(this.pos).from != this.pos;
-      let last = this.content[this.content.length - 1];
-      return !last.breakAfter && !(last instanceof BlockWidgetView && last.type == BlockType.WidgetBefore);
+      let last2 = this.content[this.content.length - 1];
+      return !last2.breakAfter && !(last2 instanceof BlockWidgetView && last2.type == BlockType.WidgetBefore);
     }
     getLine() {
       if (!this.curLine) {
@@ -5410,7 +5439,7 @@
     buildText(length, active, openStart) {
       while (length > 0) {
         if (this.textOff == this.text.length) {
-          let { value, lineBreak, done } = this.cursor.next(this.skip);
+          let { value: value2, lineBreak, done } = this.cursor.next(this.skip);
           this.skip = 0;
           if (done)
             throw new Error("Ran out of text content when drawing inline views");
@@ -5426,7 +5455,7 @@
             length--;
             continue;
           } else {
-            this.text = value;
+            this.text = value2;
             this.textOff = 0;
           }
         }
@@ -5439,30 +5468,30 @@
         openStart = 0;
       }
     }
-    span(from, to, active, openStart) {
-      this.buildText(to - from, active, openStart);
-      this.pos = to;
+    span(from, to2, active, openStart) {
+      this.buildText(to2 - from, active, openStart);
+      this.pos = to2;
       if (this.openStart < 0)
         this.openStart = openStart;
     }
-    point(from, to, deco, active, openStart, index) {
+    point(from, to2, deco, active, openStart, index) {
       if (this.disallowBlockEffectsFor[index] && deco instanceof PointDecoration) {
         if (deco.block)
           throw new RangeError("Block decorations may not be specified via plugins");
-        if (to > this.doc.lineAt(this.pos).to)
+        if (to2 > this.doc.lineAt(this.pos).to)
           throw new RangeError("Decorations that replace line breaks may not be specified via plugins");
       }
-      let len = to - from;
+      let len = to2 - from;
       if (deco instanceof PointDecoration) {
         if (deco.block) {
-          let { type } = deco;
-          if (type == BlockType.WidgetAfter && !this.posCovered())
+          let { type: type2 } = deco;
+          if (type2 == BlockType.WidgetAfter && !this.posCovered())
             this.getLine();
-          this.addBlockWidget(new BlockWidgetView(deco.widget || new NullWidget("div"), len, type));
+          this.addBlockWidget(new BlockWidgetView(deco.widget || new NullWidget("div"), len, type2));
         } else {
           let view = WidgetView.create(deco.widget || new NullWidget("span"), len, deco.startSide);
-          let cursorBefore = this.atCursorPos && !view.isEditable && openStart <= active.length && (from < to || deco.startSide > 0);
-          let cursorAfter = !view.isEditable && (from < to || deco.startSide <= 0);
+          let cursorBefore = this.atCursorPos && !view.isEditable && openStart <= active.length && (from < to2 || deco.startSide > 0);
+          let cursorAfter = !view.isEditable && (from < to2 || deco.startSide <= 0);
           let line = this.getLine();
           if (this.pendingBuffer == 2 && !cursorBefore)
             this.pendingBuffer = 0;
@@ -5473,7 +5502,7 @@
           }
           line.append(wrapMarks(view, active), openStart);
           this.atCursorPos = cursorAfter;
-          this.pendingBuffer = !cursorAfter ? 0 : from < to ? 1 : 2;
+          this.pendingBuffer = !cursorAfter ? 0 : from < to2 ? 1 : 2;
         }
       } else if (this.doc.lineAt(this.pos).from == this.pos) {
         this.getLine().addLineDeco(deco);
@@ -5486,14 +5515,14 @@
           this.text = "";
           this.textOff = 0;
         }
-        this.pos = to;
+        this.pos = to2;
       }
       if (this.openStart < 0)
         this.openStart = openStart;
     }
-    static build(text, from, to, decorations2, dynamicDecorationMap) {
-      let builder = new ContentBuilder(text, from, to, dynamicDecorationMap);
-      builder.openEnd = RangeSet.spans(decorations2, from, to, builder);
+    static build(text, from, to2, decorations2, dynamicDecorationMap) {
+      let builder = new ContentBuilder(text, from, to2, dynamicDecorationMap);
+      builder.openEnd = RangeSet.spans(decorations2, from, to2, builder);
       if (builder.openStart < 0)
         builder.openStart = builder.openEnd;
       builder.finish(builder.openEnd);
@@ -5530,8 +5559,8 @@
     combine: (values) => values.some((x) => x)
   });
   var ScrollTarget = class {
-    constructor(range, y = "nearest", x = "nearest", yMargin = 5, xMargin = 5) {
-      this.range = range;
+    constructor(range2, y = "nearest", x = "nearest", yMargin = 5, xMargin = 5) {
+      this.range = range2;
       this.y = y;
       this.x = x;
       this.yMargin = yMargin;
@@ -5542,14 +5571,14 @@
     }
   };
   var scrollIntoView = /* @__PURE__ */ StateEffect.define({ map: (t2, ch) => t2.map(ch) });
-  function logException(state, exception, context) {
+  function logException(state, exception, context2) {
     let handler = state.facet(exceptionSink);
     if (handler.length)
       handler[0](exception);
     else if (window.onerror)
-      window.onerror(String(exception), context, void 0, void 0, exception);
-    else if (context)
-      console.error(context + ":", exception);
+      window.onerror(String(exception), context2, void 0, void 0, exception);
+    else if (context2)
+      console.error(context2 + ":", exception);
     else
       console.error(exception);
   }
@@ -5646,19 +5675,19 @@
     join(other) {
       return new ChangedRange(Math.min(this.fromA, other.fromA), Math.max(this.toA, other.toA), Math.min(this.fromB, other.fromB), Math.max(this.toB, other.toB));
     }
-    addToSet(set) {
-      let i = set.length, me = this;
+    addToSet(set2) {
+      let i = set2.length, me = this;
       for (; i > 0; i--) {
-        let range = set[i - 1];
-        if (range.fromA > me.toA)
+        let range2 = set2[i - 1];
+        if (range2.fromA > me.toA)
           continue;
-        if (range.toA < me.fromA)
+        if (range2.toA < me.fromA)
           break;
-        me = me.join(range);
-        set.splice(i - 1, 1);
+        me = me.join(range2);
+        set2.splice(i - 1, 1);
       }
-      set.splice(i, 0, me);
-      return set;
+      set2.splice(i, 0, me);
+      return set2;
     }
     static extendWithRanges(diff, ranges) {
       if (ranges.length == 0)
@@ -5668,11 +5697,11 @@
         let next = dI == diff.length ? null : diff[dI], off = posA - posB;
         let end = next ? next.fromB : 1e9;
         while (rI < ranges.length && ranges[rI] < end) {
-          let from = ranges[rI], to = ranges[rI + 1];
-          let fromB = Math.max(posB, from), toB = Math.min(end, to);
+          let from = ranges[rI], to2 = ranges[rI + 1];
+          let fromB = Math.max(posB, from), toB = Math.min(end, to2);
           if (fromB <= toB)
             new ChangedRange(fromB + off, toB + off, fromB, toB).addToSet(result);
-          if (to > end)
+          if (to2 > end)
             break;
           else
             rI += 2;
@@ -5746,8 +5775,8 @@
   var ArabicTypes = /* @__PURE__ */ dec("4444448826627288999999999992222222222222222222222222222222222222222222222229999999999999999999994444444444644222822222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222999999949999999229989999223333333333");
   var Brackets = /* @__PURE__ */ Object.create(null);
   var BracketStack = [];
-  for (let p of ["()", "[]", "{}"]) {
-    let l = /* @__PURE__ */ p.charCodeAt(0), r = /* @__PURE__ */ p.charCodeAt(1);
+  for (let p2 of ["()", "[]", "{}"]) {
+    let l = /* @__PURE__ */ p2.charCodeAt(0), r = /* @__PURE__ */ p2.charCodeAt(1);
     Brackets[l] = r;
     Brackets[r] = -l;
   }
@@ -5756,9 +5785,9 @@
   }
   var BidiRE = /[\u0590-\u05f4\u0600-\u06ff\u0700-\u08ac]/;
   var BidiSpan = class {
-    constructor(from, to, level) {
+    constructor(from, to2, level) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.level = level;
     }
     get dir() {
@@ -5789,24 +5818,24 @@
     if (!line || outerType == 1 && !BidiRE.test(line))
       return trivialOrder(len);
     for (let i = 0, prev = outerType, prevStrong = outerType; i < len; i++) {
-      let type = charType(line.charCodeAt(i));
-      if (type == 512)
-        type = prev;
-      else if (type == 8 && prevStrong == 4)
-        type = 16;
-      types[i] = type == 4 ? 2 : type;
-      if (type & 7)
-        prevStrong = type;
-      prev = type;
+      let type2 = charType(line.charCodeAt(i));
+      if (type2 == 512)
+        type2 = prev;
+      else if (type2 == 8 && prevStrong == 4)
+        type2 = 16;
+      types[i] = type2 == 4 ? 2 : type2;
+      if (type2 & 7)
+        prevStrong = type2;
+      prev = type2;
     }
     for (let i = 0, prev = outerType, prevStrong = outerType; i < len; i++) {
-      let type = types[i];
-      if (type == 128) {
+      let type2 = types[i];
+      if (type2 == 128) {
         if (i < len - 1 && prev == types[i + 1] && prev & 24)
-          type = types[i] = prev;
+          type2 = types[i] = prev;
         else
           types[i] = 256;
-      } else if (type == 64) {
+      } else if (type2 == 64) {
         let end = i + 1;
         while (end < len && types[end] == 64)
           end++;
@@ -5814,22 +5843,22 @@
         for (let j = i; j < end; j++)
           types[j] = replace;
         i = end - 1;
-      } else if (type == 8 && prevStrong == 1) {
+      } else if (type2 == 8 && prevStrong == 1) {
         types[i] = 1;
       }
-      prev = type;
-      if (type & 7)
-        prevStrong = type;
+      prev = type2;
+      if (type2 & 7)
+        prevStrong = type2;
     }
-    for (let i = 0, sI = 0, context = 0, ch, br, type; i < len; i++) {
+    for (let i = 0, sI = 0, context2 = 0, ch, br, type2; i < len; i++) {
       if (br = Brackets[ch = line.charCodeAt(i)]) {
         if (br < 0) {
           for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
             if (BracketStack[sJ + 1] == -br) {
               let flags = BracketStack[sJ + 2];
-              let type2 = flags & 2 ? outerType : !(flags & 4) ? 0 : flags & 1 ? oppositeType : outerType;
-              if (type2)
-                types[i] = types[BracketStack[sJ]] = type2;
+              let type3 = flags & 2 ? outerType : !(flags & 4) ? 0 : flags & 1 ? oppositeType : outerType;
+              if (type3)
+                types[i] = types[BracketStack[sJ]] = type3;
               sI = sJ;
               break;
             }
@@ -5839,11 +5868,11 @@
         } else {
           BracketStack[sI++] = i;
           BracketStack[sI++] = ch;
-          BracketStack[sI++] = context;
+          BracketStack[sI++] = context2;
         }
-      } else if ((type = types[i]) == 2 || type == 1) {
-        let embed = type == outerType;
-        context = embed ? 0 : 1;
+      } else if ((type2 = types[i]) == 2 || type2 == 1) {
+        let embed = type2 == outerType;
+        context2 = embed ? 0 : 1;
         for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
           let cur2 = BracketStack[sJ + 2];
           if (cur2 & 2)
@@ -5915,9 +5944,9 @@
     } else if (startIndex == line.length) {
       if (forward)
         return null;
-      let last = order[order.length - 1];
-      if (last.level != dir) {
-        startIndex = last.side(true, dir);
+      let last2 = order[order.length - 1];
+      if (last2.level != dir) {
+        startIndex = last2.side(true, dir);
         spanI = order.length - 1;
       }
     }
@@ -5977,13 +6006,13 @@
         if (point.node == node)
           point.pos = this.text.length + Math.min(point.offset, text.length);
       for (let off = 0, re = this.lineSeparator ? null : /\r\n?|\n/g; ; ) {
-        let nextBreak = -1, breakSize = 1, m;
+        let nextBreak = -1, breakSize = 1, m3;
         if (this.lineSeparator) {
           nextBreak = text.indexOf(this.lineSeparator, off);
           breakSize = this.lineSeparator.length;
-        } else if (m = re.exec(text)) {
-          nextBreak = m.index;
-          breakSize = m[0].length;
+        } else if (m3 = re.exec(text)) {
+          nextBreak = m3.index;
+          breakSize = m3[0].length;
         }
         this.append(text.slice(off, nextBreak < 0 ? text.length : nextBreak));
         if (nextBreak < 0)
@@ -6172,13 +6201,13 @@
             rawSel.collapse(anchor.node, anchor.offset);
             rawSel.extend(head.node, head.offset);
           } else {
-            let range = document.createRange();
+            let range2 = document.createRange();
             if (main.anchor > main.head)
               [anchor, head] = [head, anchor];
-            range.setEnd(head.node, head.offset);
-            range.setStart(anchor.node, anchor.offset);
+            range2.setEnd(head.node, head.offset);
+            range2.setStart(anchor.node, anchor.offset);
             rawSel.removeAllRanges();
-            rawSel.addRange(range);
+            rawSel.addRange(range2);
           }
         });
         this.view.observer.setSelectionRange(anchor, head);
@@ -6244,20 +6273,20 @@
       }
     }
     measureVisibleLineHeights(viewport) {
-      let result = [], { from, to } = viewport;
+      let result = [], { from, to: to2 } = viewport;
       let contentWidth = this.view.contentDOM.clientWidth;
       let isWider = contentWidth > Math.max(this.view.scrollDOM.clientWidth, this.minWidth) + 1;
       let widest = -1, ltr = this.view.textDirection == Direction.LTR;
       for (let pos = 0, i = 0; i < this.children.length; i++) {
         let child = this.children[i], end = pos + child.length;
-        if (end > to)
+        if (end > to2)
           break;
         if (pos >= from) {
           let childRect = child.dom.getBoundingClientRect();
           result.push(childRect.height);
           if (isWider) {
-            let last = child.dom.lastChild;
-            let rects = last ? clientRectsFor(last) : [];
+            let last2 = child.dom.lastChild;
+            let rects = last2 ? clientRectsFor(last2) : [];
             if (rects.length) {
               let rect = rects[rects.length - 1];
               let width = ltr ? rect.right - childRect.left : childRect.right - rect.left;
@@ -6325,9 +6354,9 @@
       return Decoration.set(deco);
     }
     updateDeco() {
-      let allDeco = this.view.state.facet(decorations).map((d, i) => {
-        let dynamic = this.dynamicDecorationMap[i] = typeof d == "function";
-        return dynamic ? d(this.view) : d;
+      let allDeco = this.view.state.facet(decorations).map((d2, i) => {
+        let dynamic = this.dynamicDecorationMap[i] = typeof d2 == "function";
+        return dynamic ? d2(this.view) : d2;
       });
       for (let i = allDeco.length; i < allDeco.length + 3; i++)
         this.dynamicDecorationMap[i] = false;
@@ -6339,11 +6368,11 @@
       ];
     }
     scrollIntoView(target) {
-      let { range } = target;
-      let rect = this.coordsAt(range.head, range.empty ? range.assoc : range.head > range.anchor ? -1 : 1), other;
+      let { range: range2 } = target;
+      let rect = this.coordsAt(range2.head, range2.empty ? range2.assoc : range2.head > range2.anchor ? -1 : 1), other;
       if (!rect)
         return;
-      if (!range.empty && (other = this.coordsAt(range.anchor, range.anchor > range.head ? -1 : 1)))
+      if (!range2.empty && (other = this.coordsAt(range2.anchor, range2.anchor > range2.head ? -1 : 1)))
         rect = {
           left: Math.min(rect.left, other.left),
           top: Math.min(rect.top, other.top),
@@ -6369,7 +6398,7 @@
         right: rect.right + mRight,
         bottom: rect.bottom + mBottom
       };
-      scrollRectIntoView(this.view.scrollDOM, targetRect, range.head < range.anchor ? -1 : 1, target.x, target.y, target.xMargin, target.yMargin, this.view.textDirection == Direction.LTR);
+      scrollRectIntoView(this.view.scrollDOM, targetRect, range2.head < range2.anchor ? -1 : 1, target.x, target.y, target.xMargin, target.yMargin, this.view.textDirection == Direction.LTR);
     }
   };
   function betweenUneditable(pos) {
@@ -6430,8 +6459,8 @@
     let surrounding = compositionSurroundingNode(view);
     if (!surrounding)
       return Decoration.none;
-    let { from, to, node, text: textNode } = surrounding;
-    let newFrom = changes.mapPos(from, 1), newTo = Math.max(newFrom, changes.mapPos(to, -1));
+    let { from, to: to2, node, text: textNode } = surrounding;
+    let newFrom = changes.mapPos(from, 1), newTo = Math.max(newFrom, changes.mapPos(to2, -1));
     let { state } = view, text = node.nodeType == 3 ? node.nodeValue : new DOMReader([], state).readRange(node.firstChild, null).text;
     if (newTo - newFrom < text.length) {
       if (state.doc.sliceString(newFrom, Math.min(state.doc.length, newFrom + text.length), LineBreakPlaceholder) == text)
@@ -6494,16 +6523,16 @@
     constructor() {
       this.changes = [];
     }
-    compareRange(from, to) {
-      addRange(from, to, this.changes);
+    compareRange(from, to2) {
+      addRange(from, to2, this.changes);
     }
-    comparePoint(from, to) {
-      addRange(from, to, this.changes);
+    comparePoint(from, to2) {
+      addRange(from, to2, this.changes);
     }
   };
-  function findChangedDeco(a, b, diff) {
+  function findChangedDeco(a2, b2, diff) {
     let comp = new DecorationComparator$1();
-    RangeSet.compare(a, b, diff, comp);
+    RangeSet.compare(a2, b2, diff, comp);
     return comp.changes;
   }
   function inUneditable(node, inside2) {
@@ -6523,25 +6552,25 @@
       bias = 1;
     else if (linePos == line.length)
       bias = -1;
-    let from = linePos, to = linePos;
+    let from = linePos, to2 = linePos;
     if (bias < 0)
       from = findClusterBreak(line.text, linePos, false);
     else
-      to = findClusterBreak(line.text, linePos);
-    let cat = categorize(line.text.slice(from, to));
+      to2 = findClusterBreak(line.text, linePos);
+    let cat = categorize(line.text.slice(from, to2));
     while (from > 0) {
       let prev = findClusterBreak(line.text, from, false);
       if (categorize(line.text.slice(prev, from)) != cat)
         break;
       from = prev;
     }
-    while (to < line.length) {
-      let next = findClusterBreak(line.text, to);
-      if (categorize(line.text.slice(to, next)) != cat)
+    while (to2 < line.length) {
+      let next = findClusterBreak(line.text, to2);
+      if (categorize(line.text.slice(to2, next)) != cat)
         break;
-      to = next;
+      to2 = next;
     }
-    return EditorSelection.range(from + line.from, to + line.from);
+    return EditorSelection.range(from + line.from, to2 + line.from);
   }
   function getdx(x, rect) {
     return rect.left > x ? rect.left - x : Math.max(0, x - rect.right);
@@ -6549,8 +6578,8 @@
   function getdy(y, rect) {
     return rect.top > y ? rect.top - y : Math.max(0, y - rect.bottom);
   }
-  function yOverlap(a, b) {
-    return a.top < b.bottom - 1 && a.bottom > b.top + 1;
+  function yOverlap(a2, b2) {
+    return a2.top < b2.bottom - 1 && a2.bottom > b2.top + 1;
   }
   function upTop(rect, top2) {
     return top2 < rect.top ? { top: top2, left: rect.left, right: rect.right, bottom: rect.bottom } : rect;
@@ -6683,9 +6712,9 @@
         if (pos)
           ({ offsetNode: node, offset } = pos);
       } else if (doc2.caretRangeFromPoint) {
-        let range = doc2.caretRangeFromPoint(x, y);
-        if (range) {
-          ({ startContainer: node, startOffset: offset } = range);
+        let range2 = doc2.caretRangeFromPoint(x, y);
+        if (range2) {
+          ({ startContainer: node, startOffset: offset } = range2);
           if (browser.safari && isSuspiciousCaretResult(node, offset, x))
             node = void 0;
         }
@@ -6767,7 +6796,7 @@
       return cat == nextCat;
     };
   }
-  function moveVertically(view, start, forward, distance) {
+  function moveVertically(view, start, forward, distance2) {
     let startPos = start.head, dir = forward ? 1 : -1;
     if (startPos == (forward ? view.state.doc.length : 0))
       return EditorSelection.cursor(startPos, start.assoc);
@@ -6785,7 +6814,7 @@
       startY = (dir < 0 ? line.top : line.bottom) + docTop;
     }
     let resolvedGoal = rect.left + goal;
-    let dist = distance !== null && distance !== void 0 ? distance : view.defaultLineHeight >> 1;
+    let dist = distance2 !== null && distance2 !== void 0 ? distance2 : view.defaultLineHeight >> 1;
     for (let extra = 0; ; extra += 10) {
       let curY = startY + (dist + extra) * dir;
       let pos = posAtCoords(view, { x: resolvedGoal, y: curY }, false, dir);
@@ -6797,10 +6826,10 @@
     let atoms = view.state.facet(atomicRanges).map((f) => f(view));
     for (; ; ) {
       let moved = false;
-      for (let set of atoms) {
-        set.between(pos.from - 1, pos.from + 1, (from, to, value) => {
-          if (pos.from > from && pos.from < to) {
-            pos = oldPos.from > pos.from ? EditorSelection.cursor(from, 1) : EditorSelection.cursor(to, -1);
+      for (let set2 of atoms) {
+        set2.between(pos.from - 1, pos.from + 1, (from, to2, value2) => {
+          if (pos.from > from && pos.from < to2) {
+            pos = oldPos.from > pos.from ? EditorSelection.cursor(from, 1) : EditorSelection.cursor(to2, -1);
             moved = true;
           }
         });
@@ -6827,21 +6856,21 @@
       this.compositionEndedAt = 0;
       this.rapidCompositionStart = false;
       this.mouseSelection = null;
-      for (let type in handlers) {
-        let handler = handlers[type];
-        view.contentDOM.addEventListener(type, (event) => {
+      for (let type2 in handlers) {
+        let handler = handlers[type2];
+        view.contentDOM.addEventListener(type2, (event) => {
           if (!eventBelongsToEditor(view, event) || this.ignoreDuringComposition(event))
             return;
-          if (type == "keydown" && this.keydown(view, event))
+          if (type2 == "keydown" && this.keydown(view, event))
             return;
           if (this.mustFlushObserver(event))
             view.observer.forceFlush();
-          if (this.runCustomHandlers(type, view, event))
+          if (this.runCustomHandlers(type2, view, event))
             event.preventDefault();
           else
             handler(view, event);
         });
-        this.registeredEvents.push(type);
+        this.registeredEvents.push(type2);
       }
       if (browser.chrome && browser.chrome_version >= 102) {
         view.scrollDOM.addEventListener("wheel", () => {
@@ -6870,24 +6899,24 @@
       for (let plugin of plugins)
         if (handlers2 = (_a2 = plugin.update(view).spec) === null || _a2 === void 0 ? void 0 : _a2.domEventHandlers) {
           this.customHandlers.push({ plugin: plugin.value, handlers: handlers2 });
-          for (let type in handlers2)
-            if (this.registeredEvents.indexOf(type) < 0 && type != "scroll") {
-              this.registeredEvents.push(type);
-              view.contentDOM.addEventListener(type, (event) => {
+          for (let type2 in handlers2)
+            if (this.registeredEvents.indexOf(type2) < 0 && type2 != "scroll") {
+              this.registeredEvents.push(type2);
+              view.contentDOM.addEventListener(type2, (event) => {
                 if (!eventBelongsToEditor(view, event))
                   return;
-                if (this.runCustomHandlers(type, view, event))
+                if (this.runCustomHandlers(type2, view, event))
                   event.preventDefault();
               });
             }
         }
     }
-    runCustomHandlers(type, view, event) {
-      for (let set of this.customHandlers) {
-        let handler = set.handlers[type];
+    runCustomHandlers(type2, view, event) {
+      for (let set2 of this.customHandlers) {
+        let handler = set2.handlers[type2];
         if (handler) {
           try {
-            if (handler.call(set.plugin, event, view) || event.defaultPrevented)
+            if (handler.call(set2.plugin, event, view) || event.defaultPrevented)
               return true;
           } catch (e) {
             logException(view.state, e);
@@ -6897,11 +6926,11 @@
       return false;
     }
     runScrollHandlers(view, event) {
-      for (let set of this.customHandlers) {
-        let handler = set.handlers.scroll;
+      for (let set2 of this.customHandlers) {
+        let handler = set2.handlers.scroll;
         if (handler) {
           try {
-            handler.call(set.plugin, event, view);
+            handler.call(set2.plugin, event, view);
           } catch (e) {
             logException(view.state, e);
           }
@@ -7077,23 +7106,23 @@
     let linewise = lastLinewiseCopy != null && state.selection.ranges.every((r) => r.empty) && lastLinewiseCopy == text.toString();
     if (linewise) {
       let lastLine = -1;
-      changes = state.changeByRange((range) => {
-        let line = state.doc.lineAt(range.from);
+      changes = state.changeByRange((range2) => {
+        let line = state.doc.lineAt(range2.from);
         if (line.from == lastLine)
-          return { range };
+          return { range: range2 };
         lastLine = line.from;
         let insert2 = state.toText((byLine ? text.line(i++).text : input) + state.lineBreak);
         return {
           changes: { from: line.from, insert: insert2 },
-          range: EditorSelection.cursor(range.from + insert2.length)
+          range: EditorSelection.cursor(range2.from + insert2.length)
         };
       });
     } else if (byLine) {
-      changes = state.changeByRange((range) => {
+      changes = state.changeByRange((range2) => {
         let line = text.line(i++);
         return {
-          changes: { from: range.from, to: range.to, insert: line.text },
-          range: EditorSelection.cursor(range.from + line.length)
+          changes: { from: range2.from, to: range2.to, insert: line.text },
+          range: EditorSelection.cursor(range2.from + line.length)
         };
       });
     } else {
@@ -7138,17 +7167,17 @@
       view.inputState.startMouseSelection(new MouseSelection(view, event, style2, mustFocus));
     }
   };
-  function rangeForClick(view, pos, bias, type) {
-    if (type == 1) {
+  function rangeForClick(view, pos, bias, type2) {
+    if (type2 == 1) {
       return EditorSelection.cursor(pos, bias);
-    } else if (type == 2) {
+    } else if (type2 == 2) {
       return groupAt(view.state, pos, bias);
     } else {
       let visual = LineView.find(view.docView, pos), line = view.state.doc.lineAt(visual ? visual.posAtEnd : pos);
-      let from = visual ? visual.posAtStart : line.from, to = visual ? visual.posAtEnd : line.to;
-      if (to < view.state.doc.length && to == line.to)
-        to++;
-      return EditorSelection.range(from, to);
+      let from = visual ? visual.posAtStart : line.from, to2 = visual ? visual.posAtEnd : line.to;
+      if (to2 < view.state.doc.length && to2 == line.to)
+        to2++;
+      return EditorSelection.range(from, to2);
     }
   }
   var insideY = (y, rect) => y >= rect.top && y <= rect.bottom;
@@ -7181,15 +7210,15 @@
   function getClickType(event) {
     if (!BadMouseDetail)
       return event.detail;
-    let last = lastMouseDown, lastTime = lastMouseDownTime;
+    let last2 = lastMouseDown, lastTime = lastMouseDownTime;
     lastMouseDown = event;
     lastMouseDownTime = Date.now();
-    return lastMouseDownCount = !last || lastTime > Date.now() - 400 && Math.abs(last.clientX - event.clientX) < 2 && Math.abs(last.clientY - event.clientY) < 2 ? (lastMouseDownCount + 1) % 3 : 1;
+    return lastMouseDownCount = !last2 || lastTime > Date.now() - 400 && Math.abs(last2.clientX - event.clientX) < 2 && Math.abs(last2.clientY - event.clientY) < 2 ? (lastMouseDownCount + 1) % 3 : 1;
   }
   function basicMouseSelection(view, event) {
-    let start = queryPos(view, event), type = getClickType(event);
+    let start = queryPos(view, event), type2 = getClickType(event);
     let startSel = view.state.selection;
-    let last = start, lastEvent = event;
+    let last2 = start, lastEvent = event;
     return {
       update(update3) {
         if (update3.docChanged) {
@@ -7202,25 +7231,25 @@
       get(event2, extend2, multiple) {
         let cur2;
         if (lastEvent && event2.clientX == lastEvent.clientX && event2.clientY == lastEvent.clientY)
-          cur2 = last;
+          cur2 = last2;
         else {
-          cur2 = last = queryPos(view, event2);
+          cur2 = last2 = queryPos(view, event2);
           lastEvent = event2;
         }
         if (!cur2 || !start)
           return startSel;
-        let range = rangeForClick(view, cur2.pos, cur2.bias, type);
+        let range2 = rangeForClick(view, cur2.pos, cur2.bias, type2);
         if (start.pos != cur2.pos && !extend2) {
-          let startRange = rangeForClick(view, start.pos, start.bias, type);
-          let from = Math.min(startRange.from, range.from), to = Math.max(startRange.to, range.to);
-          range = from < range.from ? EditorSelection.range(from, to) : EditorSelection.range(to, from);
+          let startRange = rangeForClick(view, start.pos, start.bias, type2);
+          let from = Math.min(startRange.from, range2.from), to2 = Math.max(startRange.to, range2.to);
+          range2 = from < range2.from ? EditorSelection.range(from, to2) : EditorSelection.range(to2, from);
         }
         if (extend2)
-          return startSel.replaceRange(startSel.main.extend(range.from, range.to));
+          return startSel.replaceRange(startSel.main.extend(range2.from, range2.to));
         else if (multiple)
-          return startSel.addRange(range);
+          return startSel.addRange(range2);
         else
-          return EditorSelection.create([range]);
+          return EditorSelection.create([range2]);
       }
     };
   }
@@ -7306,10 +7335,10 @@
   }
   function copiedRange(state) {
     let content2 = [], ranges = [], linewise = false;
-    for (let range of state.selection.ranges)
-      if (!range.empty) {
-        content2.push(state.sliceDoc(range.from, range.to));
-        ranges.push(range);
+    for (let range2 of state.selection.ranges)
+      if (!range2.empty) {
+        content2.push(state.sliceDoc(range2.from, range2.to));
+        ranges.push(range2);
       }
     if (!content2.length) {
       let upto = -1;
@@ -7418,10 +7447,10 @@
       this.lineLength = 30;
       this.heightChanged = false;
     }
-    heightForGap(from, to) {
-      let lines = this.doc.lineAt(to).number - this.doc.lineAt(from).number + 1;
+    heightForGap(from, to2) {
+      let lines = this.doc.lineAt(to2).number - this.doc.lineAt(from).number + 1;
       if (this.lineWrapping)
-        lines += Math.ceil((to - from - lines * this.lineLength * 0.5) / this.lineLength);
+        lines += Math.ceil((to2 - from - lines * this.lineLength * 0.5) / this.lineLength);
       return this.lineHeight * lines;
     }
     heightForLine(length) {
@@ -7481,12 +7510,12 @@
     }
   };
   var BlockInfo = class {
-    constructor(from, length, top2, height, type) {
+    constructor(from, length, top2, height, type2) {
       this.from = from;
       this.length = length;
       this.top = top2;
       this.height = height;
-      this.type = type;
+      this.type = type2;
     }
     get to() {
       return this.from + this.length;
@@ -7515,8 +7544,8 @@
     get outdated() {
       return (this.flags & 2) > 0;
     }
-    set outdated(value) {
-      this.flags = (value ? 2 : 0) | this.flags & ~2;
+    set outdated(value2) {
+      this.flags = (value2 ? 2 : 0) | this.flags & ~2;
     }
     setHeight(oracle, height) {
       if (this.height != height) {
@@ -7607,9 +7636,9 @@
   };
   HeightMap.prototype.size = 1;
   var HeightMapBlock = class extends HeightMap {
-    constructor(length, height, type) {
+    constructor(length, height, type2) {
       super(length, height);
-      this.type = type;
+      this.type = type2;
     }
     blockAt(_height, _doc, top2, offset) {
       return new BlockInfo(offset, this.length, top2, this.height, this.type);
@@ -7617,8 +7646,8 @@
     lineAt(_value, _type, doc2, top2, offset) {
       return this.blockAt(0, doc2, top2, offset);
     }
-    forEachLine(from, to, doc2, top2, offset, f) {
-      if (from <= offset + this.length && to >= offset)
+    forEachLine(from, to2, doc2, top2, offset, f) {
+      if (from <= offset + this.length && to2 >= offset)
         f(this.blockAt(0, doc2, top2, offset));
     }
     updateHeight(oracle, offset = 0, _force = false, measured) {
@@ -7677,20 +7706,20 @@
       let { from, length } = doc2.line(firstLine + line);
       return new BlockInfo(from, length, top2 + lineHeight * line, lineHeight, BlockType.Text);
     }
-    lineAt(value, type, doc2, top2, offset) {
-      if (type == QueryType.ByHeight)
-        return this.blockAt(value, doc2, top2, offset);
-      if (type == QueryType.ByPosNoHeight) {
-        let { from: from2, to } = doc2.lineAt(value);
-        return new BlockInfo(from2, to - from2, 0, 0, BlockType.Text);
+    lineAt(value2, type2, doc2, top2, offset) {
+      if (type2 == QueryType.ByHeight)
+        return this.blockAt(value2, doc2, top2, offset);
+      if (type2 == QueryType.ByPosNoHeight) {
+        let { from: from2, to: to2 } = doc2.lineAt(value2);
+        return new BlockInfo(from2, to2 - from2, 0, 0, BlockType.Text);
       }
       let { firstLine, lineHeight } = this.lines(doc2, offset);
-      let { from, length, number: number2 } = doc2.lineAt(value);
+      let { from, length, number: number2 } = doc2.lineAt(value2);
       return new BlockInfo(from, length, top2 + lineHeight * (number2 - firstLine), lineHeight, BlockType.Text);
     }
-    forEachLine(from, to, doc2, top2, offset, f) {
+    forEachLine(from, to2, doc2, top2, offset, f) {
       let { firstLine, lineHeight } = this.lines(doc2, offset);
-      for (let pos = Math.max(from, offset), end = Math.min(offset + this.length, to); pos <= end; ) {
+      for (let pos = Math.max(from, offset), end = Math.min(offset + this.length, to2); pos <= end; ) {
         let line = doc2.lineAt(pos);
         if (pos == from)
           top2 += lineHeight * (line.number - firstLine);
@@ -7699,12 +7728,12 @@
         pos = line.to + 1;
       }
     }
-    replace(from, to, nodes) {
-      let after = this.length - to;
+    replace(from, to2, nodes) {
+      let after = this.length - to2;
       if (after > 0) {
-        let last = nodes[nodes.length - 1];
-        if (last instanceof HeightMapGap)
-          nodes[nodes.length - 1] = new HeightMapGap(last.length + after);
+        let last2 = nodes[nodes.length - 1];
+        if (last2 instanceof HeightMapGap)
+          nodes[nodes.length - 1] = new HeightMapGap(last2.length + after);
         else
           nodes.push(null, new HeightMapGap(after - 1));
       }
@@ -7717,8 +7746,8 @@
       }
       return HeightMap.of(nodes);
     }
-    decomposeLeft(to, result) {
-      result.push(new HeightMapGap(to - 1), null);
+    decomposeLeft(to2, result) {
+      result.push(new HeightMapGap(to2 - 1), null);
     }
     decomposeRight(from, result) {
       result.push(null, new HeightMapGap(this.length - from - 1));
@@ -7773,41 +7802,41 @@
       let mid = top2 + this.left.height;
       return height < mid ? this.left.blockAt(height, doc2, top2, offset) : this.right.blockAt(height, doc2, mid, offset + this.left.length + this.break);
     }
-    lineAt(value, type, doc2, top2, offset) {
+    lineAt(value2, type2, doc2, top2, offset) {
       let rightTop = top2 + this.left.height, rightOffset = offset + this.left.length + this.break;
-      let left = type == QueryType.ByHeight ? value < rightTop : value < rightOffset;
-      let base2 = left ? this.left.lineAt(value, type, doc2, top2, offset) : this.right.lineAt(value, type, doc2, rightTop, rightOffset);
+      let left = type2 == QueryType.ByHeight ? value2 < rightTop : value2 < rightOffset;
+      let base2 = left ? this.left.lineAt(value2, type2, doc2, top2, offset) : this.right.lineAt(value2, type2, doc2, rightTop, rightOffset);
       if (this.break || (left ? base2.to < rightOffset : base2.from > rightOffset))
         return base2;
-      let subQuery = type == QueryType.ByPosNoHeight ? QueryType.ByPosNoHeight : QueryType.ByPos;
+      let subQuery = type2 == QueryType.ByPosNoHeight ? QueryType.ByPosNoHeight : QueryType.ByPos;
       if (left)
         return base2.join(this.right.lineAt(rightOffset, subQuery, doc2, rightTop, rightOffset));
       else
         return this.left.lineAt(rightOffset, subQuery, doc2, top2, offset).join(base2);
     }
-    forEachLine(from, to, doc2, top2, offset, f) {
+    forEachLine(from, to2, doc2, top2, offset, f) {
       let rightTop = top2 + this.left.height, rightOffset = offset + this.left.length + this.break;
       if (this.break) {
         if (from < rightOffset)
-          this.left.forEachLine(from, to, doc2, top2, offset, f);
-        if (to >= rightOffset)
-          this.right.forEachLine(from, to, doc2, rightTop, rightOffset, f);
+          this.left.forEachLine(from, to2, doc2, top2, offset, f);
+        if (to2 >= rightOffset)
+          this.right.forEachLine(from, to2, doc2, rightTop, rightOffset, f);
       } else {
         let mid = this.lineAt(rightOffset, QueryType.ByPos, doc2, top2, offset);
         if (from < mid.from)
           this.left.forEachLine(from, mid.from - 1, doc2, top2, offset, f);
-        if (mid.to >= from && mid.from <= to)
+        if (mid.to >= from && mid.from <= to2)
           f(mid);
-        if (to > mid.to)
-          this.right.forEachLine(mid.to + 1, to, doc2, rightTop, rightOffset, f);
+        if (to2 > mid.to)
+          this.right.forEachLine(mid.to + 1, to2, doc2, rightTop, rightOffset, f);
       }
     }
-    replace(from, to, nodes) {
+    replace(from, to2, nodes) {
       let rightStart = this.left.length + this.break;
-      if (to < rightStart)
-        return this.balanced(this.left.replace(from, to, nodes), this.right);
+      if (to2 < rightStart)
+        return this.balanced(this.left.replace(from, to2, nodes), this.right);
       if (from > this.left.length)
-        return this.balanced(this.left, this.right.replace(from - rightStart, to - rightStart, nodes));
+        return this.balanced(this.left, this.right.replace(from - rightStart, to2 - rightStart, nodes));
       let result = [];
       if (from > 0)
         this.decomposeLeft(from, result);
@@ -7816,25 +7845,25 @@
         result.push(node);
       if (from > 0)
         mergeGaps(result, left - 1);
-      if (to < this.length) {
+      if (to2 < this.length) {
         let right = result.length;
-        this.decomposeRight(to, result);
+        this.decomposeRight(to2, result);
         mergeGaps(result, right);
       }
       return HeightMap.of(result);
     }
-    decomposeLeft(to, result) {
+    decomposeLeft(to2, result) {
       let left = this.left.length;
-      if (to <= left)
-        return this.left.decomposeLeft(to, result);
+      if (to2 <= left)
+        return this.left.decomposeLeft(to2, result);
       result.push(this.left);
       if (this.break) {
         left++;
-        if (to >= left)
+        if (to2 >= left)
           result.push(null);
       }
-      if (to > left)
-        this.right.decomposeLeft(to - left, result);
+      if (to2 > left)
+        this.right.decomposeLeft(to2 - left, result);
     }
     decomposeRight(from, result) {
       let left = this.left.length, right = left + this.break;
@@ -7896,35 +7925,35 @@
     get isCovered() {
       return this.covering && this.nodes[this.nodes.length - 1] == this.covering;
     }
-    span(_from, to) {
+    span(_from, to2) {
       if (this.lineStart > -1) {
-        let end = Math.min(to, this.lineEnd), last = this.nodes[this.nodes.length - 1];
-        if (last instanceof HeightMapText)
-          last.length += end - this.pos;
+        let end = Math.min(to2, this.lineEnd), last2 = this.nodes[this.nodes.length - 1];
+        if (last2 instanceof HeightMapText)
+          last2.length += end - this.pos;
         else if (end > this.pos || !this.isCovered)
           this.nodes.push(new HeightMapText(end - this.pos, -1));
         this.writtenTo = end;
-        if (to > end) {
+        if (to2 > end) {
           this.nodes.push(null);
           this.writtenTo++;
           this.lineStart = -1;
         }
       }
-      this.pos = to;
+      this.pos = to2;
     }
-    point(from, to, deco) {
-      if (from < to || deco.heightRelevant) {
+    point(from, to2, deco) {
+      if (from < to2 || deco.heightRelevant) {
         let height = deco.widget ? deco.widget.estimatedHeight : 0;
         if (height < 0)
           height = this.oracle.lineHeight;
-        let len = to - from;
+        let len = to2 - from;
         if (deco.block) {
           this.addBlock(new HeightMapBlock(len, height, deco.type));
         } else if (len || height >= relevantWidgetHeight) {
           this.addLineDeco(height, len);
         }
-      } else if (to > from) {
-        this.span(from, to);
+      } else if (to2 > from) {
+        this.span(from, to2);
       }
       if (this.lineEnd > -1 && this.lineEnd < this.pos)
         this.lineEnd = this.oracle.doc.lineAt(this.pos).to;
@@ -7932,9 +7961,9 @@
     enterLine() {
       if (this.lineStart > -1)
         return;
-      let { from, to } = this.oracle.doc.lineAt(this.pos);
+      let { from, to: to2 } = this.oracle.doc.lineAt(this.pos);
       this.lineStart = from;
-      this.lineEnd = to;
+      this.lineEnd = to2;
       if (this.writtenTo < from) {
         if (this.writtenTo < from - 1 || this.nodes[this.nodes.length - 1] == null)
           this.nodes.push(this.blankContent(this.writtenTo, from - 1));
@@ -7944,17 +7973,17 @@
         this.nodes.push(new HeightMapText(this.pos - from, -1));
       this.writtenTo = this.pos;
     }
-    blankContent(from, to) {
-      let gap = new HeightMapGap(to - from);
-      if (this.oracle.doc.lineAt(from).to == to)
+    blankContent(from, to2) {
+      let gap = new HeightMapGap(to2 - from);
+      if (this.oracle.doc.lineAt(from).to == to2)
         gap.flags |= 4;
       return gap;
     }
     ensureLine() {
       this.enterLine();
-      let last = this.nodes.length ? this.nodes[this.nodes.length - 1] : null;
-      if (last instanceof HeightMapText)
-        return last;
+      let last2 = this.nodes.length ? this.nodes[this.nodes.length - 1] : null;
+      if (last2 instanceof HeightMapText)
+        return last2;
       let line = new HeightMapText(0, -1);
       this.nodes.push(line);
       return line;
@@ -7976,10 +8005,10 @@
       this.writtenTo = this.pos = this.pos + length;
     }
     finish(from) {
-      let last = this.nodes.length == 0 ? null : this.nodes[this.nodes.length - 1];
-      if (this.lineStart > -1 && !(last instanceof HeightMapText) && !this.isCovered)
+      let last2 = this.nodes.length == 0 ? null : this.nodes[this.nodes.length - 1];
+      if (this.lineStart > -1 && !(last2 instanceof HeightMapText) && !this.isCovered)
         this.nodes.push(new HeightMapText(0, -1));
-      else if (this.writtenTo < this.pos || last == null)
+      else if (this.writtenTo < this.pos || last2 == null)
         this.nodes.push(this.blankContent(this.writtenTo, this.pos));
       let pos = from;
       for (let node of this.nodes) {
@@ -7989,15 +8018,15 @@
       }
       return this.nodes;
     }
-    static build(oracle, decorations2, from, to) {
+    static build(oracle, decorations2, from, to2) {
       let builder = new NodeBuilder(from, oracle);
-      RangeSet.spans(decorations2, from, to, builder, 0);
+      RangeSet.spans(decorations2, from, to2, builder, 0);
       return builder.finish(from);
     }
   };
-  function heightRelevantDecoChanges(a, b, diff) {
+  function heightRelevantDecoChanges(a2, b2, diff) {
     let comp = new DecorationComparator();
-    RangeSet.compare(a, b, diff, comp, 0);
+    RangeSet.compare(a2, b2, diff, comp, 0);
     return comp.changes;
   }
   var DecorationComparator = class {
@@ -8006,9 +8035,9 @@
     }
     compareRange() {
     }
-    comparePoint(from, to, a, b) {
-      if (from < to || a && a.heightRelevant || b && b.heightRelevant)
-        addRange(from, to, this.changes, 5);
+    comparePoint(from, to2, a2, b2) {
+      if (from < to2 || a2 && a2.heightRelevant || b2 && b2.heightRelevant)
+        addRange(from, to2, this.changes, 5);
     }
   };
   function visiblePixelRange(dom, paddingTop) {
@@ -8051,16 +8080,16 @@
     };
   }
   var LineGap = class {
-    constructor(from, to, size) {
+    constructor(from, to2, size) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.size = size;
     }
-    static same(a, b) {
-      if (a.length != b.length)
+    static same(a2, b2) {
+      if (a2.length != b2.length)
         return false;
-      for (let i = 0; i < a.length; i++) {
-        let gA = a[i], gB = b[i];
+      for (let i = 0; i < a2.length; i++) {
+        let gA = a2[i], gB = b2[i];
         if (gA.from != gB.from || gA.to != gB.to || gA.size != gB.size)
           return false;
       }
@@ -8113,7 +8142,7 @@
       this.defaultTextDirection = Direction.RTL;
       this.visibleRanges = [];
       this.mustEnforceCursorAssoc = false;
-      this.stateDeco = state.facet(decorations).filter((d) => typeof d != "function");
+      this.stateDeco = state.facet(decorations).filter((d2) => typeof d2 != "function");
       this.heightMap = HeightMap.empty().applyChanges(this.stateDeco, Text.empty, this.heightOracle.setDoc(state.doc), [new ChangedRange(0, 0, 0, state.doc.length)]);
       this.viewport = this.getViewport(0, null);
       this.updateViewportLines();
@@ -8126,12 +8155,12 @@
       let viewports = [this.viewport], { main } = this.state.selection;
       for (let i = 0; i <= 1; i++) {
         let pos = i ? main.head : main.anchor;
-        if (!viewports.some(({ from, to }) => pos >= from && pos <= to)) {
-          let { from, to } = this.lineBlockAt(pos);
-          viewports.push(new Viewport(from, to));
+        if (!viewports.some(({ from, to: to2 }) => pos >= from && pos <= to2)) {
+          let { from, to: to2 } = this.lineBlockAt(pos);
+          viewports.push(new Viewport(from, to2));
         }
       }
-      this.viewports = viewports.sort((a, b) => a.from - b.from);
+      this.viewports = viewports.sort((a2, b2) => a2.from - b2.from);
       this.scaler = this.heightMap.height <= 7e6 ? IdScaler : new BigScaler(this.heightOracle.doc, this.heightMap, this.viewports);
     }
     updateViewportLines() {
@@ -8143,7 +8172,7 @@
     update(update3, scrollTarget = null) {
       this.state = update3.state;
       let prevDeco = this.stateDeco;
-      this.stateDeco = this.state.facet(decorations).filter((d) => typeof d != "function");
+      this.stateDeco = this.state.facet(decorations).filter((d2) => typeof d2 != "function");
       let contentChanges = update3.changedRanges;
       let heightChanges = ChangedRange.extendWithRanges(contentChanges, heightRelevantDecoChanges(prevDeco, this.stateDeco, update3 ? update3.changes : ChangeSet.empty(this.state.doc.length)));
       let prevHeight = this.heightMap.height;
@@ -8271,16 +8300,16 @@
       return viewport;
     }
     mapViewport(viewport, changes) {
-      let from = changes.mapPos(viewport.from, -1), to = changes.mapPos(viewport.to, 1);
-      return new Viewport(this.heightMap.lineAt(from, QueryType.ByPos, this.state.doc, 0, 0).from, this.heightMap.lineAt(to, QueryType.ByPos, this.state.doc, 0, 0).to);
+      let from = changes.mapPos(viewport.from, -1), to2 = changes.mapPos(viewport.to, 1);
+      return new Viewport(this.heightMap.lineAt(from, QueryType.ByPos, this.state.doc, 0, 0).from, this.heightMap.lineAt(to2, QueryType.ByPos, this.state.doc, 0, 0).to);
     }
-    viewportIsAppropriate({ from, to }, bias = 0) {
+    viewportIsAppropriate({ from, to: to2 }, bias = 0) {
       if (!this.inView)
         return true;
       let { top: top2 } = this.heightMap.lineAt(from, QueryType.ByPos, this.state.doc, 0, 0);
-      let { bottom } = this.heightMap.lineAt(to, QueryType.ByPos, this.state.doc, 0, 0);
+      let { bottom } = this.heightMap.lineAt(to2, QueryType.ByPos, this.state.doc, 0, 0);
       let { visibleTop, visibleBottom } = this;
-      return (from == 0 || top2 <= visibleTop - Math.max(10, Math.min(-bias, 250))) && (to == this.state.doc.length || bottom >= visibleBottom + Math.max(10, Math.min(bias, 250))) && (top2 > visibleTop - 2 * 1e3 && bottom < visibleBottom + 2 * 1e3);
+      return (from == 0 || top2 <= visibleTop - Math.max(10, Math.min(-bias, 250))) && (to2 == this.state.doc.length || bottom >= visibleBottom + Math.max(10, Math.min(bias, 250))) && (top2 > visibleTop - 2 * 1e3 && bottom < visibleBottom + 2 * 1e3);
     }
     mapLineGaps(gaps, changes) {
       if (!gaps.length || changes.empty)
@@ -8322,15 +8351,15 @@
           cutRange(outside, sel.from - 10, sel.from + 10);
         if (!sel.empty && sel.to >= line.from && sel.to <= line.to)
           cutRange(outside, sel.to - 10, sel.to + 10);
-        for (let { from, to } of outside)
-          if (to - from > 1e3) {
-            gaps.push(find(current, (gap) => gap.from >= line.from && gap.to <= line.to && Math.abs(gap.from - from) < 1e3 && Math.abs(gap.to - to) < 1e3) || new LineGap(from, to, this.gapSize(line, from, to, structure)));
+        for (let { from, to: to2 } of outside)
+          if (to2 - from > 1e3) {
+            gaps.push(find(current, (gap) => gap.from >= line.from && gap.to <= line.to && Math.abs(gap.from - from) < 1e3 && Math.abs(gap.to - to2) < 1e3) || new LineGap(from, to2, this.gapSize(line, from, to2, structure)));
           }
       }
       return gaps;
     }
-    gapSize(line, from, to, structure) {
-      let fraction = findFraction(structure, to) - findFraction(structure, from);
+    gapSize(line, from, to2, structure) {
+      let fraction = findFraction(structure, to2) - findFraction(structure, from);
       if (this.heightOracle.lineWrapping) {
         return line.height * fraction;
       } else {
@@ -8349,8 +8378,8 @@
         deco = deco.concat(this.lineGapDeco);
       let ranges = [];
       RangeSet.spans(deco, this.viewport.from, this.viewport.to, {
-        span(from, to) {
-          ranges.push({ from, to });
+        span(from, to2) {
+          ranges.push({ from, to: to2 });
         },
         point() {
         }
@@ -8360,7 +8389,7 @@
       return changed ? 4 : 0;
     }
     lineBlockAt(pos) {
-      return pos >= this.viewport.from && pos <= this.viewport.to && this.viewportLines.find((b) => b.from <= pos && b.to >= pos) || scaleBlock(this.heightMap.lineAt(pos, QueryType.ByPos, this.state.doc, 0, 0), this.scaler);
+      return pos >= this.viewport.from && pos <= this.viewport.to && this.viewportLines.find((b2) => b2.from <= pos && b2.to >= pos) || scaleBlock(this.heightMap.lineAt(pos, QueryType.ByPos, this.state.doc, 0, 0), this.scaler);
     }
     lineBlockAtHeight(height) {
       return scaleBlock(this.heightMap.lineAt(this.scaler.fromDOM(height), QueryType.ByHeight, this.state.doc, 0, 0), this.scaler);
@@ -8376,27 +8405,27 @@
     }
   };
   var Viewport = class {
-    constructor(from, to) {
+    constructor(from, to2) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
     }
   };
-  function lineStructure(from, to, stateDeco) {
+  function lineStructure(from, to2, stateDeco) {
     let ranges = [], pos = from, total = 0;
-    RangeSet.spans(stateDeco, from, to, {
+    RangeSet.spans(stateDeco, from, to2, {
       span() {
       },
-      point(from2, to2) {
+      point(from2, to3) {
         if (from2 > pos) {
           ranges.push({ from: pos, to: from2 });
           total += from2 - pos;
         }
-        pos = to2;
+        pos = to3;
       }
     }, 20);
-    if (pos < to) {
-      ranges.push({ from: pos, to });
-      total += to - pos;
+    if (pos < to2) {
+      ranges.push({ from: pos, to: to2 });
+      total += to2 - pos;
     }
     return { total, ranges };
   }
@@ -8407,7 +8436,7 @@
       return ranges[ranges.length - 1].to;
     let dist = Math.floor(total * ratio);
     for (let i = 0; ; i++) {
-      let { from, to } = ranges[i], size = to - from;
+      let { from, to: to2 } = ranges[i], size = to2 - from;
       if (dist <= size)
         return from + dist;
       dist -= size;
@@ -8415,24 +8444,24 @@
   }
   function findFraction(structure, pos) {
     let counted = 0;
-    for (let { from, to } of structure.ranges) {
-      if (pos <= to) {
+    for (let { from, to: to2 } of structure.ranges) {
+      if (pos <= to2) {
         counted += pos - from;
         break;
       }
-      counted += to - from;
+      counted += to2 - from;
     }
     return counted / structure.total;
   }
-  function cutRange(ranges, from, to) {
+  function cutRange(ranges, from, to2) {
     for (let i = 0; i < ranges.length; i++) {
       let r = ranges[i];
-      if (r.from < to && r.to > from) {
+      if (r.from < to2 && r.to > from) {
         let pieces = [];
         if (r.from < from)
           pieces.push({ from: r.from, to: from });
-        if (r.to > to)
-          pieces.push({ from: to, to: r.to });
+        if (r.to > to2)
+          pieces.push({ from: to2, to: r.to });
         ranges.splice(i, 1, ...pieces);
         i += pieces.length - 1;
       }
@@ -8445,22 +8474,22 @@
     return void 0;
   }
   var IdScaler = {
-    toDOM(n) {
-      return n;
+    toDOM(n2) {
+      return n2;
     },
-    fromDOM(n) {
-      return n;
+    fromDOM(n2) {
+      return n2;
     },
     scale: 1
   };
   var BigScaler = class {
     constructor(doc2, heightMap, viewports) {
       let vpHeight = 0, base2 = 0, domBase = 0;
-      this.viewports = viewports.map(({ from, to }) => {
+      this.viewports = viewports.map(({ from, to: to2 }) => {
         let top2 = heightMap.lineAt(from, QueryType.ByPos, doc2, 0, 0).top;
-        let bottom = heightMap.lineAt(to, QueryType.ByPos, doc2, 0, 0).bottom;
+        let bottom = heightMap.lineAt(to2, QueryType.ByPos, doc2, 0, 0).bottom;
         vpHeight += bottom - top2;
-        return { from, to, top: top2, bottom, domTop: 0, domBottom: 0 };
+        return { from, to: to2, top: top2, bottom, domTop: 0, domBottom: 0 };
       });
       this.scale = (7e6 - vpHeight) / (heightMap.height - vpHeight);
       for (let obj of this.viewports) {
@@ -8469,24 +8498,24 @@
         base2 = obj.bottom;
       }
     }
-    toDOM(n) {
+    toDOM(n2) {
       for (let i = 0, base2 = 0, domBase = 0; ; i++) {
         let vp = i < this.viewports.length ? this.viewports[i] : null;
-        if (!vp || n < vp.top)
-          return domBase + (n - base2) * this.scale;
-        if (n <= vp.bottom)
-          return vp.domTop + (n - vp.top);
+        if (!vp || n2 < vp.top)
+          return domBase + (n2 - base2) * this.scale;
+        if (n2 <= vp.bottom)
+          return vp.domTop + (n2 - vp.top);
         base2 = vp.bottom;
         domBase = vp.domBottom;
       }
     }
-    fromDOM(n) {
+    fromDOM(n2) {
       for (let i = 0, base2 = 0, domBase = 0; ; i++) {
         let vp = i < this.viewports.length ? this.viewports[i] : null;
-        if (!vp || n < vp.domTop)
-          return base2 + (n - domBase) / this.scale;
-        if (n <= vp.domBottom)
-          return vp.top + (n - vp.domTop);
+        if (!vp || n2 < vp.domTop)
+          return base2 + (n2 - domBase) / this.scale;
+        if (n2 <= vp.domBottom)
+          return vp.top + (n2 - vp.domTop);
         base2 = vp.bottom;
         domBase = vp.domBottom;
       }
@@ -8496,7 +8525,7 @@
     if (scaler.scale == 1)
       return block;
     let bTop = scaler.toDOM(block.top), bBottom = scaler.toDOM(block.bottom);
-    return new BlockInfo(block.from, block.length, bTop, bBottom - bTop, Array.isArray(block.type) ? block.type.map((b) => scaleBlock(b, scaler)) : block.type);
+    return new BlockInfo(block.from, block.length, bTop, bBottom - bTop, Array.isArray(block.type) ? block.type.map((b2) => scaleBlock(b2, scaler)) : block.type);
   }
   var theme = /* @__PURE__ */ Facet.define({ combine: (strs) => strs.join(" ") });
   var darkTheme = /* @__PURE__ */ Facet.define({ combine: (values) => values.indexOf(true) > -1 });
@@ -8507,12 +8536,12 @@
   function buildTheme(main, spec, scopes) {
     return new StyleModule(spec, {
       finish(sel) {
-        return /&/.test(sel) ? sel.replace(/&\w*/, (m) => {
-          if (m == "&")
+        return /&/.test(sel) ? sel.replace(/&\w*/, (m3) => {
+          if (m3 == "&")
             return main;
-          if (!scopes || !scopes[m])
-            throw new RangeError(`Unsupported selector: ${m}`);
-          return scopes[m];
+          if (!scopes || !scopes[m3])
+            throw new RangeError(`Unsupported selector: ${m3}`);
+          return scopes[m3];
         }) : main + " " + sel;
       }
     });
@@ -8752,7 +8781,7 @@
       this.observer = new MutationObserver((mutations) => {
         for (let mut of mutations)
           this.queue.push(mut);
-        if ((browser.ie && browser.ie_version <= 11 || browser.ios && view.composing) && mutations.some((m) => m.type == "childList" && m.removedNodes.length || m.type == "characterData" && m.oldValue.length > m.target.nodeValue.length))
+        if ((browser.ie && browser.ie_version <= 11 || browser.ios && view.composing) && mutations.some((m3) => m3.type == "childList" && m3.removedNodes.length || m3.type == "characterData" && m3.oldValue.length > m3.target.nodeValue.length))
           this.flushSoon();
         else
           this.flush();
@@ -8819,7 +8848,7 @@
       }, 500);
     }
     updateGaps(gaps) {
-      if (this.gapIntersection && (gaps.length != this.gaps.length || this.gaps.some((g, i) => g != gaps[i]))) {
+      if (this.gapIntersection && (gaps.length != this.gaps.length || this.gaps.some((g2, i) => g2 != gaps[i]))) {
         this.gapIntersection.disconnect();
         for (let gap of gaps)
           this.gapIntersection.observe(gap);
@@ -8832,8 +8861,8 @@
       let { view } = this, sel = this.selectionRange;
       if (view.state.facet(editable) ? view.root.activeElement != this.dom : !hasSelection(view.dom, sel))
         return;
-      let context = sel.anchorNode && view.docView.nearest(sel.anchorNode);
-      if (context && context.ignoreEvent(event))
+      let context2 = sel.anchorNode && view.docView.nearest(sel.anchorNode);
+      if (context2 && context2.ignoreEvent(event))
         return;
       if ((browser.ie && browser.ie_version <= 11 || browser.android && browser.chrome) && !view.state.selection.main.empty && sel.focusNode && isEquivalentPosition(sel.focusNode, sel.focusOffset, sel.anchorNode, sel.anchorOffset))
         this.flushSoon();
@@ -8842,10 +8871,10 @@
     }
     readSelectionRange() {
       let { root } = this.view, domSel = getSelection(root);
-      let range = browser.safari && root.nodeType == 11 && deepActiveElement() == this.view.contentDOM && safariSelectionRangeHack(this.view) || domSel;
-      if (this.selectionRange.eq(range))
+      let range2 = browser.safari && root.nodeType == 11 && deepActiveElement() == this.view.contentDOM && safariSelectionRangeHack(this.view) || domSel;
+      if (this.selectionRange.eq(range2))
         return false;
-      this.selectionRange.setRange(range);
+      this.selectionRange.setRange(range2);
       return this.selectionChanged = true;
     }
     setSelectionRange(anchor, head) {
@@ -8946,34 +8975,34 @@
         records.push(mut);
       if (records.length)
         this.queue = [];
-      let from = -1, to = -1, typeOver = false;
+      let from = -1, to2 = -1, typeOver = false;
       for (let record of records) {
-        let range = this.readMutation(record);
-        if (!range)
+        let range2 = this.readMutation(record);
+        if (!range2)
           continue;
-        if (range.typeOver)
+        if (range2.typeOver)
           typeOver = true;
         if (from == -1) {
-          ({ from, to } = range);
+          ({ from, to: to2 } = range2);
         } else {
-          from = Math.min(range.from, from);
-          to = Math.max(range.to, to);
+          from = Math.min(range2.from, from);
+          to2 = Math.max(range2.to, to2);
         }
       }
-      return { from, to, typeOver };
+      return { from, to: to2, typeOver };
     }
     flush(readSelection = true) {
       if (this.delayedFlush >= 0 || this.delayedAndroidKey)
         return;
       if (readSelection)
         this.readSelectionRange();
-      let { from, to, typeOver } = this.processRecords();
+      let { from, to: to2, typeOver } = this.processRecords();
       let newSel = this.selectionChanged && hasSelection(this.dom, this.selectionRange);
       if (from < 0 && !newSel)
         return;
       this.selectionChanged = false;
       let startState = this.view.state;
-      let handled = this.onChange(from, to, typeOver);
+      let handled = this.onChange(from, to2, typeOver);
       if (this.view.state == startState)
         this.view.update([]);
       return handled;
@@ -9051,16 +9080,16 @@
       let bounds = view.docView.domBoundsAround(start, end, 0);
       if (!bounds || view.state.readOnly)
         return false;
-      let { from, to } = bounds;
+      let { from, to: to2 } = bounds;
       let selPoints = view.docView.impreciseHead || view.docView.impreciseAnchor ? [] : selectionPoints(view);
       let reader = new DOMReader(selPoints, view.state);
       reader.readRange(bounds.startDOM, bounds.endDOM);
       let preferredPos = sel.from, preferredSide = null;
-      if (view.inputState.lastKeyCode === 8 && view.inputState.lastKeyTime > Date.now() - 100 || browser.android && reader.text.length < to - from) {
+      if (view.inputState.lastKeyCode === 8 && view.inputState.lastKeyTime > Date.now() - 100 || browser.android && reader.text.length < to2 - from) {
         preferredPos = sel.to;
         preferredSide = "end";
       }
-      let diff = findDiff(view.state.doc.sliceString(from, to, LineBreakPlaceholder), reader.text, preferredPos - from, preferredSide);
+      let diff = findDiff(view.state.doc.sliceString(from, to2, LineBreakPlaceholder), reader.text, preferredPos - from, preferredSide);
       if (diff) {
         if (browser.chrome && view.inputState.lastKeyCode == 13 && diff.toB == diff.from + 2 && reader.text.slice(diff.from, diff.toB) == LineBreakPlaceholder + LineBreakPlaceholder)
           diff.toB--;
@@ -9114,16 +9143,16 @@
           let replaced = view.state.sliceDoc(change.from, change.to);
           let compositionRange = compositionSurroundingNode(view) || view.state.doc.lineAt(sel.head);
           let offset = sel.to - change.to, size = sel.to - sel.from;
-          tr = startState.changeByRange((range) => {
-            if (range.from == sel.from && range.to == sel.to)
-              return { changes, range: mainSel || range.map(changes) };
-            let to = range.to - offset, from = to - replaced.length;
-            if (range.to - range.from != size || view.state.sliceDoc(from, to) != replaced || compositionRange && range.to >= compositionRange.from && range.from <= compositionRange.to)
-              return { range };
-            let rangeChanges = startState.changes({ from, to, insert: change.insert }), selOff = range.to - sel.to;
+          tr = startState.changeByRange((range2) => {
+            if (range2.from == sel.from && range2.to == sel.to)
+              return { changes, range: mainSel || range2.map(changes) };
+            let to2 = range2.to - offset, from = to2 - replaced.length;
+            if (range2.to - range2.from != size || view.state.sliceDoc(from, to2) != replaced || compositionRange && range2.to >= compositionRange.from && range2.from <= compositionRange.to)
+              return { range: range2 };
+            let rangeChanges = startState.changes({ from, to: to2, insert: change.insert }), selOff = range2.to - sel.to;
             return {
               changes: rangeChanges,
-              range: !mainSel ? range.map(rangeChanges) : EditorSelection.range(Math.max(0, mainSel.anchor + selOff), Math.max(0, mainSel.head + selOff))
+              range: !mainSel ? range2.map(rangeChanges) : EditorSelection.range(Math.max(0, mainSel.anchor + selOff), Math.max(0, mainSel.head + selOff))
             };
           });
         } else {
@@ -9156,23 +9185,23 @@
       return false;
     }
   }
-  function findDiff(a, b, preferredPos, preferredSide) {
-    let minLen = Math.min(a.length, b.length);
+  function findDiff(a2, b2, preferredPos, preferredSide) {
+    let minLen = Math.min(a2.length, b2.length);
     let from = 0;
-    while (from < minLen && a.charCodeAt(from) == b.charCodeAt(from))
+    while (from < minLen && a2.charCodeAt(from) == b2.charCodeAt(from))
       from++;
-    if (from == minLen && a.length == b.length)
+    if (from == minLen && a2.length == b2.length)
       return null;
-    let toA = a.length, toB = b.length;
-    while (toA > 0 && toB > 0 && a.charCodeAt(toA - 1) == b.charCodeAt(toB - 1)) {
+    let toA = a2.length, toB = b2.length;
+    while (toA > 0 && toB > 0 && a2.charCodeAt(toA - 1) == b2.charCodeAt(toB - 1)) {
       toA--;
       toB--;
     }
     if (preferredSide == "end") {
-      let adjust = Math.max(0, from - Math.min(toA, toB));
-      preferredPos -= toA + adjust - from;
+      let adjust2 = Math.max(0, from - Math.min(toA, toB));
+      preferredPos -= toA + adjust2 - from;
     }
-    if (toA < from && a.length < b.length) {
+    if (toA < from && a2.length < b2.length) {
       let move = preferredPos <= from && preferredPos >= toA ? from - preferredPos : 0;
       from -= move;
       toB = from + (toB - toA);
@@ -9232,8 +9261,8 @@
       this.plugins = this.state.facet(viewPlugin).map((spec) => new PluginInstance(spec));
       for (let plugin of this.plugins)
         plugin.update(this);
-      this.observer = new DOMObserver(this, (from, to, typeOver) => {
-        return applyDOMChange(this, from, to, typeOver);
+      this.observer = new DOMObserver(this, (from, to2, typeOver) => {
+        return applyDOMChange(this, from, to2, typeOver);
       }, (event) => {
         this.inputState.runScrollHandlers(this, event);
         if (this.observer.intersecting)
@@ -9375,8 +9404,8 @@
         this.pluginMap.clear();
         this.inputState.ensureHandlers(this, this.plugins);
       } else {
-        for (let p of this.plugins)
-          p.mustUpdate = update3;
+        for (let p2 of this.plugins)
+          p2.mustUpdate = update3;
       }
       for (let i = 0; i < this.plugins.length; i++)
         this.plugins[i].update(this);
@@ -9404,9 +9433,9 @@
           let measuring = [];
           if (!(changed & 4))
             [this.measureRequests, measuring] = [measuring, this.measureRequests];
-          let measured = measuring.map((m) => {
+          let measured = measuring.map((m3) => {
             try {
-              return m.read(this);
+              return m3.read(this);
             } catch (e) {
               logException(this.state, e);
               return BadMeasure;
@@ -9428,9 +9457,9 @@
           for (let i2 = 0; i2 < measuring.length; i2++)
             if (measured[i2] != BadMeasure) {
               try {
-                let m = measuring[i2];
-                if (m.write)
-                  m.write(measured[i2], this);
+                let m3 = measuring[i2];
+                if (m3.write)
+                  m3.write(measured[i2], this);
               } catch (e) {
                 logException(this.state, e);
               }
@@ -9522,7 +9551,7 @@
     plugin(plugin) {
       let known = this.pluginMap.get(plugin);
       if (known === void 0 || known && known.spec != plugin)
-        this.pluginMap.set(plugin, known = this.plugins.find((p) => p.spec == plugin) || null);
+        this.pluginMap.set(plugin, known = this.plugins.find((p2) => p2.spec == plugin) || null);
       return known && known.update(this).value;
     }
     get documentTop() {
@@ -9557,8 +9586,8 @@
     moveToLineBoundary(start, forward, includeWrap = true) {
       return moveToLineBoundary(this, start, forward, includeWrap);
     }
-    moveVertically(start, forward, distance) {
-      return skipAtoms(this, start, moveVertically(this, start, forward, distance));
+    moveVertically(start, forward, distance2) {
+      return skipAtoms(this, start, moveVertically(this, start, forward, distance2));
     }
     domAtPos(pos) {
       return this.docView.domAtPos(pos);
@@ -9667,9 +9696,9 @@
   var MaxBidiLine = 4096;
   var BadMeasure = {};
   var CachedOrder = class {
-    constructor(from, to, dir, order) {
+    constructor(from, to2, dir, order) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.dir = dir;
       this.order = order;
     }
@@ -9687,9 +9716,9 @@
   };
   function attrsFromFacet(view, facet, base2) {
     for (let sources = view.state.facet(facet), i = sources.length - 1; i >= 0; i--) {
-      let source = sources[i], value = typeof source == "function" ? source(view) : source;
-      if (value)
-        combineAttrs(value, base2);
+      let source = sources[i], value2 = typeof source == "function" ? source(view) : source;
+      if (value2)
+        combineAttrs(value2, base2);
     }
     return base2;
   }
@@ -9701,22 +9730,22 @@
       result = " ";
     let alt, ctrl, shift2, meta2;
     for (let i = 0; i < parts.length - 1; ++i) {
-      const mod = parts[i];
-      if (/^(cmd|meta|m)$/i.test(mod))
+      const mod2 = parts[i];
+      if (/^(cmd|meta|m)$/i.test(mod2))
         meta2 = true;
-      else if (/^a(lt)?$/i.test(mod))
+      else if (/^a(lt)?$/i.test(mod2))
         alt = true;
-      else if (/^(c|ctrl|control)$/i.test(mod))
+      else if (/^(c|ctrl|control)$/i.test(mod2))
         ctrl = true;
-      else if (/^s(hift)?$/i.test(mod))
+      else if (/^s(hift)?$/i.test(mod2))
         shift2 = true;
-      else if (/^mod$/i.test(mod)) {
+      else if (/^mod$/i.test(mod2)) {
         if (platform == "mac")
           meta2 = true;
         else
           ctrl = true;
       } else
-        throw new Error("Unrecognized modifier name: " + mod);
+        throw new Error("Unrecognized modifier name: " + mod2);
     }
     if (alt)
       result = "Alt-" + result;
@@ -9750,7 +9779,7 @@
     let bindings = state.facet(keymap);
     let map = Keymaps.get(bindings);
     if (!map)
-      Keymaps.set(bindings, map = buildKeymap(bindings.reduce((a, b) => a.concat(b), [])));
+      Keymaps.set(bindings, map = buildKeymap(bindings.reduce((a2, b2) => a2.concat(b2), [])));
     return map;
   }
   function runScopeHandlers(view, event, scope) {
@@ -9794,14 +9823,14 @@
       if (preventDefault)
         binding.preventDefault = true;
     };
-    for (let b of bindings) {
-      let name2 = b[platform] || b.key;
+    for (let b2 of bindings) {
+      let name2 = b2[platform] || b2.key;
       if (!name2)
         continue;
-      for (let scope of b.scope ? b.scope.split(" ") : ["editor"]) {
-        add2(scope, name2, b.run, b.preventDefault);
-        if (b.shift)
-          add2(scope, "Shift-" + name2, b.shift, b.preventDefault);
+      for (let scope of b2.scope ? b2.scope.split(" ") : ["editor"]) {
+        add2(scope, name2, b2.run, b2.preventDefault);
+        if (b2.shift)
+          add2(scope, "Shift-" + name2, b2.shift, b2.preventDefault);
       }
     }
     return bound;
@@ -9845,8 +9874,8 @@
         cursorBlinkRate: 1200,
         drawRangeCursor: true
       }, {
-        cursorBlinkRate: (a, b) => Math.min(a, b),
-        drawRangeCursor: (a, b) => a || b
+        cursorBlinkRate: (a2, b2) => Math.min(a2, b2),
+        drawRangeCursor: (a2, b2) => a2 || b2
       });
     }
   });
@@ -9878,8 +9907,8 @@
         elt.style.width = this.width + "px";
       elt.style.height = this.height + "px";
     }
-    eq(p) {
-      return this.left == p.left && this.top == p.top && this.width == p.width && this.height == p.height && this.className == p.className;
+    eq(p2) {
+      return this.left == p2.left && this.top == p2.top && this.width == p2.width && this.height == p2.height && this.className == p2.className;
     }
   };
   var drawSelectionPlugin = /* @__PURE__ */ ViewPlugin.fromClass(class {
@@ -9911,7 +9940,7 @@
     }
     readPos() {
       let { state } = this.view, conf = state.facet(selectionConfig);
-      let rangePieces = state.selection.ranges.map((r) => r.empty ? [] : measureRange(this.view, r)).reduce((a, b) => a.concat(b));
+      let rangePieces = state.selection.ranges.map((r) => r.empty ? [] : measureRange(this.view, r)).reduce((a2, b2) => a2.concat(b2));
       let cursors = [];
       for (let r of state.selection.ranges) {
         let prim = r == state.selection.main;
@@ -9924,20 +9953,20 @@
       return { rangePieces, cursors };
     }
     drawSel({ rangePieces, cursors }) {
-      if (rangePieces.length != this.rangePieces.length || rangePieces.some((p, i) => !p.eq(this.rangePieces[i]))) {
+      if (rangePieces.length != this.rangePieces.length || rangePieces.some((p2, i) => !p2.eq(this.rangePieces[i]))) {
         this.selectionLayer.textContent = "";
-        for (let p of rangePieces)
-          this.selectionLayer.appendChild(p.draw());
+        for (let p2 of rangePieces)
+          this.selectionLayer.appendChild(p2.draw());
         this.rangePieces = rangePieces;
       }
-      if (cursors.length != this.cursors.length || cursors.some((c, i) => !c.eq(this.cursors[i]))) {
+      if (cursors.length != this.cursors.length || cursors.some((c4, i) => !c4.eq(this.cursors[i]))) {
         let oldCursors = this.cursorLayer.children;
         if (oldCursors.length !== cursors.length) {
           this.cursorLayer.textContent = "";
-          for (const c of cursors)
-            this.cursorLayer.appendChild(c.draw());
+          for (const c4 of cursors)
+            this.cursorLayer.appendChild(c4.draw());
         } else {
-          cursors.forEach((c, idx) => c.adjust(oldCursors[idx]));
+          cursors.forEach((c4, idx) => c4.adjust(oldCursors[idx]));
         }
         this.cursors = cursors;
       }
@@ -9962,10 +9991,10 @@
     return { left: left - view.scrollDOM.scrollLeft, top: rect.top - view.scrollDOM.scrollTop };
   }
   function wrappedLine(view, pos, inside2) {
-    let range = EditorSelection.cursor(pos);
+    let range2 = EditorSelection.cursor(pos);
     return {
-      from: Math.max(inside2.from, view.moveToLineBoundary(range, false, true).from),
-      to: Math.min(inside2.to, view.moveToLineBoundary(range, true, true).from),
+      from: Math.max(inside2.from, view.moveToLineBoundary(range2, false, true).from),
+      to: Math.min(inside2.to, view.moveToLineBoundary(range2, true, true).from),
       type: BlockType.Text
     };
   }
@@ -9978,29 +10007,29 @@
       }
     return line;
   }
-  function measureRange(view, range) {
-    if (range.to <= view.viewport.from || range.from >= view.viewport.to)
+  function measureRange(view, range2) {
+    if (range2.to <= view.viewport.from || range2.from >= view.viewport.to)
       return [];
-    let from = Math.max(range.from, view.viewport.from), to = Math.min(range.to, view.viewport.to);
+    let from = Math.max(range2.from, view.viewport.from), to2 = Math.min(range2.to, view.viewport.to);
     let ltr = view.textDirection == Direction.LTR;
     let content2 = view.contentDOM, contentRect = content2.getBoundingClientRect(), base2 = getBase(view);
     let lineStyle = window.getComputedStyle(content2.firstChild);
     let leftSide = contentRect.left + parseInt(lineStyle.paddingLeft) + Math.min(0, parseInt(lineStyle.textIndent));
     let rightSide = contentRect.right - parseInt(lineStyle.paddingRight);
-    let startBlock = blockAt(view, from), endBlock = blockAt(view, to);
+    let startBlock = blockAt(view, from), endBlock = blockAt(view, to2);
     let visualStart = startBlock.type == BlockType.Text ? startBlock : null;
     let visualEnd = endBlock.type == BlockType.Text ? endBlock : null;
     if (view.lineWrapping) {
       if (visualStart)
         visualStart = wrappedLine(view, from, visualStart);
       if (visualEnd)
-        visualEnd = wrappedLine(view, to, visualEnd);
+        visualEnd = wrappedLine(view, to2, visualEnd);
     }
     if (visualStart && visualEnd && visualStart.from == visualEnd.from) {
-      return pieces(drawForLine(range.from, range.to, visualStart));
+      return pieces(drawForLine(range2.from, range2.to, visualStart));
     } else {
-      let top2 = visualStart ? drawForLine(range.from, null, visualStart) : drawForWidget(startBlock, false);
-      let bottom = visualEnd ? drawForLine(null, range.to, visualEnd) : drawForWidget(endBlock, true);
+      let top2 = visualStart ? drawForLine(range2.from, null, visualStart) : drawForWidget(startBlock, false);
+      let bottom = visualEnd ? drawForLine(null, range2.to, visualEnd) : drawForWidget(endBlock, true);
       let between = [];
       if ((visualStart || startBlock).to < (visualEnd || endBlock).from - 1)
         between.push(piece(leftSide, top2.bottom, rightSide, bottom.top));
@@ -10017,11 +10046,11 @@
         pieces2.push(piece(horizontal[i], top2, horizontal[i + 1], bottom));
       return pieces2;
     }
-    function drawForLine(from2, to2, line) {
+    function drawForLine(from2, to3, line) {
       let top2 = 1e9, bottom = -1e9, horizontal = [];
-      function addSpan(from3, fromOpen, to3, toOpen, dir) {
+      function addSpan(from3, fromOpen, to4, toOpen, dir) {
         let fromCoords = view.coordsAtPos(from3, from3 == line.to ? -2 : 2);
-        let toCoords = view.coordsAtPos(to3, to3 == line.from ? 2 : -2);
+        let toCoords = view.coordsAtPos(to4, to4 == line.from ? 2 : -2);
         top2 = Math.min(fromCoords.top, toCoords.top, top2);
         bottom = Math.max(fromCoords.bottom, toCoords.bottom, bottom);
         if (dir == Direction.LTR)
@@ -10029,7 +10058,7 @@
         else
           horizontal.push(!ltr && toOpen ? leftSide : toCoords.left, !ltr && fromOpen ? rightSide : fromCoords.right);
       }
-      let start = from2 !== null && from2 !== void 0 ? from2 : line.from, end = to2 !== null && to2 !== void 0 ? to2 : line.to;
+      let start = from2 !== null && from2 !== void 0 ? from2 : line.from, end = to3 !== null && to3 !== void 0 ? to3 : line.to;
       for (let r of view.visibleRanges)
         if (r.to > start && r.from < end) {
           for (let pos = Math.max(r.from, start), endPos = Math.min(r.to, end); ; ) {
@@ -10039,7 +10068,7 @@
               if (spanFrom >= endPos)
                 break;
               if (spanTo > pos)
-                addSpan(Math.max(spanFrom, pos), from2 == null && spanFrom <= start, Math.min(spanTo, endPos), to2 == null && spanTo >= end, span.dir);
+                addSpan(Math.max(spanFrom, pos), from2 == null && spanFrom <= start, Math.min(spanTo, endPos), to3 == null && spanTo >= end, span.dir);
             }
             pos = docLine.to + 1;
             if (pos >= endPos)
@@ -10047,7 +10076,7 @@
           }
         }
       if (horizontal.length == 0)
-        addSpan(start, from2 == null, end, to2 == null, view.textDirection);
+        addSpan(start, from2 == null, end, to3 == null, view.textDirection);
       return { top: top2, bottom, horizontal };
     }
     function drawForWidget(block, top2) {
@@ -10151,12 +10180,12 @@
   function dropCursor() {
     return [dropCursorPos, drawDropCursor];
   }
-  function iterMatches(doc2, re, from, to, f) {
+  function iterMatches(doc2, re, from, to2, f) {
     re.lastIndex = 0;
-    for (let cursor = doc2.iterRange(from, to), pos = from, m; !cursor.next().done; pos += cursor.value.length) {
+    for (let cursor = doc2.iterRange(from, to2), pos = from, m3; !cursor.next().done; pos += cursor.value.length) {
       if (!cursor.lineBreak)
-        while (m = re.exec(cursor.value))
-          f(pos + m.index, pos + m.index + m[0].length, m);
+        while (m3 = re.exec(cursor.value))
+          f(pos + m3.index, pos + m3.index + m3[0].length, m3);
     }
   }
   function matchRanges(view, maxLength) {
@@ -10164,13 +10193,13 @@
     if (visible.length == 1 && visible[0].from == view.viewport.from && visible[0].to == view.viewport.to)
       return visible;
     let result = [];
-    for (let { from, to } of visible) {
+    for (let { from, to: to2 } of visible) {
       from = Math.max(view.state.doc.lineAt(from).from, from - maxLength);
-      to = Math.min(view.state.doc.lineAt(to).to, to + maxLength);
+      to2 = Math.min(view.state.doc.lineAt(to2).to, to2 + maxLength);
       if (result.length && result[result.length - 1].to >= from)
-        result[result.length - 1].to = to;
+        result[result.length - 1].to = to2;
       else
-        result.push({ from, to });
+        result.push({ from, to: to2 });
     }
     return result;
   }
@@ -10186,17 +10215,17 @@
     }
     createDeco(view) {
       let build = new RangeSetBuilder();
-      for (let { from, to } of matchRanges(view, this.maxLength))
-        iterMatches(view.state.doc, this.regexp, from, to, (a, b, m) => build.add(a, b, this.getDeco(m, view, a)));
+      for (let { from, to: to2 } of matchRanges(view, this.maxLength))
+        iterMatches(view.state.doc, this.regexp, from, to2, (a2, b2, m3) => build.add(a2, b2, this.getDeco(m3, view, a2)));
       return build.finish();
     }
     updateDeco(update3, deco) {
       let changeFrom = 1e9, changeTo = -1;
       if (update3.docChanged)
-        update3.changes.iterChanges((_f, _t, from, to) => {
-          if (to > update3.view.viewport.from && from < update3.view.viewport.to) {
+        update3.changes.iterChanges((_f, _t, from, to2) => {
+          if (to2 > update3.view.viewport.from && from < update3.view.viewport.to) {
             changeFrom = Math.min(from, changeFrom);
-            changeTo = Math.max(to, changeTo);
+            changeTo = Math.max(to2, changeTo);
           }
         });
       if (update3.viewportChanged || changeTo - changeFrom > 1e3)
@@ -10207,9 +10236,9 @@
     }
     updateRange(view, deco, updateFrom, updateTo) {
       for (let r of view.visibleRanges) {
-        let from = Math.max(r.from, updateFrom), to = Math.min(r.to, updateTo);
-        if (to > from) {
-          let fromLine = view.state.doc.lineAt(from), toLine = fromLine.to < to ? view.state.doc.lineAt(to) : fromLine;
+        let from = Math.max(r.from, updateFrom), to2 = Math.min(r.to, updateTo);
+        if (to2 > from) {
+          let fromLine = view.state.doc.lineAt(from), toLine = fromLine.to < to2 ? view.state.doc.lineAt(to2) : fromLine;
           let start = Math.max(r.from, fromLine.from), end = Math.min(r.to, toLine.to);
           if (this.boundary) {
             for (; from > fromLine.from; from--)
@@ -10217,23 +10246,23 @@
                 start = from;
                 break;
               }
-            for (; to < toLine.to; to++)
-              if (this.boundary.test(toLine.text[to - toLine.from])) {
-                end = to;
+            for (; to2 < toLine.to; to2++)
+              if (this.boundary.test(toLine.text[to2 - toLine.from])) {
+                end = to2;
                 break;
               }
           }
-          let ranges = [], m;
+          let ranges = [], m3;
           if (fromLine == toLine) {
             this.regexp.lastIndex = start - fromLine.from;
-            while ((m = this.regexp.exec(fromLine.text)) && m.index < end - fromLine.from) {
-              let pos = m.index + fromLine.from;
-              ranges.push(this.getDeco(m, view, pos).range(pos, pos + m[0].length));
+            while ((m3 = this.regexp.exec(fromLine.text)) && m3.index < end - fromLine.from) {
+              let pos = m3.index + fromLine.from;
+              ranges.push(this.getDeco(m3, view, pos).range(pos, pos + m3[0].length));
             }
           } else {
-            iterMatches(view.state.doc, this.regexp, start, end, (from2, to2, m2) => ranges.push(this.getDeco(m2, view, from2).range(from2, to2)));
+            iterMatches(view.state.doc, this.regexp, start, end, (from2, to3, m4) => ranges.push(this.getDeco(m4, view, from2).range(from2, to3)));
           }
-          deco = deco.update({ filterFrom: start, filterTo: end, filter: (from2, to2) => from2 < start || to2 > end, add: ranges });
+          deco = deco.update({ filterFrom: start, filterTo: end, filter: (from2, to3) => from2 < start || to3 > end, add: ranges });
         }
       }
       return deco;
@@ -10300,9 +10329,9 @@
       makeDecorator(conf) {
         return new MatchDecorator({
           regexp: conf.specialChars,
-          decoration: (m, view, pos) => {
+          decoration: (m3, view, pos) => {
             let { doc: doc2 } = view.state;
-            let code = codePointAt(m[0], 0);
+            let code = codePointAt(m3[0], 0);
             if (code == 9) {
               let line = doc2.lineAt(pos);
               let size = view.state.tabSize, col = countColumn(line.text, size, pos - line.from);
@@ -10408,18 +10437,18 @@
     decorations: (v) => v.decorations
   });
   var MaxOff = 2e3;
-  function rectangleFor(state, a, b) {
-    let startLine = Math.min(a.line, b.line), endLine = Math.max(a.line, b.line);
+  function rectangleFor(state, a2, b2) {
+    let startLine = Math.min(a2.line, b2.line), endLine = Math.max(a2.line, b2.line);
     let ranges = [];
-    if (a.off > MaxOff || b.off > MaxOff || a.col < 0 || b.col < 0) {
-      let startOff = Math.min(a.off, b.off), endOff = Math.max(a.off, b.off);
+    if (a2.off > MaxOff || b2.off > MaxOff || a2.col < 0 || b2.col < 0) {
+      let startOff = Math.min(a2.off, b2.off), endOff = Math.max(a2.off, b2.off);
       for (let i = startLine; i <= endLine; i++) {
         let line = state.doc.line(i);
         if (line.length <= endOff)
           ranges.push(EditorSelection.range(line.from + startOff, line.to + endOff));
       }
     } else {
-      let startCol = Math.min(a.col, b.col), endCol = Math.max(a.col, b.col);
+      let startCol = Math.min(a2.col, b2.col), endCol = Math.max(a2.col, b2.col);
       for (let i = startLine; i <= endLine; i++) {
         let line = state.doc.line(i);
         let start = findColumn(line.text, startCol, state.tabSize, true);
@@ -10946,13 +10975,13 @@
         return true;
     return false;
   }
-  function isOverRange(view, from, to, x, y, margin) {
-    let range = document.createRange();
-    let fromDOM = view.domAtPos(from), toDOM = view.domAtPos(to);
-    range.setEnd(toDOM.node, toDOM.offset);
-    range.setStart(fromDOM.node, fromDOM.offset);
-    let rects = range.getClientRects();
-    range.detach();
+  function isOverRange(view, from, to2, x, y, margin) {
+    let range2 = document.createRange();
+    let fromDOM = view.domAtPos(from), toDOM = view.domAtPos(to2);
+    range2.setEnd(toDOM.node, toDOM.offset);
+    range2.setStart(fromDOM.node, fromDOM.offset);
+    let rects = range2.getClientRects();
+    range2.detach();
     for (let i = 0; i < rects.length; i++) {
       let rect = rects[i];
       let dist = Math.max(rect.top - y, y - rect.bottom, rect.left - x, x - rect.right);
@@ -10967,26 +10996,26 @@
       create() {
         return null;
       },
-      update(value, tr) {
-        if (value && (options.hideOnChange && (tr.docChanged || tr.selection) || options.hideOn && options.hideOn(tr, value)))
+      update(value2, tr) {
+        if (value2 && (options.hideOnChange && (tr.docChanged || tr.selection) || options.hideOn && options.hideOn(tr, value2)))
           return null;
-        if (value && tr.docChanged) {
-          let newPos = tr.changes.mapPos(value.pos, -1, MapMode.TrackDel);
+        if (value2 && tr.docChanged) {
+          let newPos = tr.changes.mapPos(value2.pos, -1, MapMode.TrackDel);
           if (newPos == null)
             return null;
-          let copy = Object.assign(/* @__PURE__ */ Object.create(null), value);
+          let copy = Object.assign(/* @__PURE__ */ Object.create(null), value2);
           copy.pos = newPos;
-          if (value.end != null)
-            copy.end = tr.changes.mapPos(value.end);
-          value = copy;
+          if (value2.end != null)
+            copy.end = tr.changes.mapPos(value2.end);
+          value2 = copy;
         }
         for (let effect of tr.effects) {
           if (effect.is(setHover))
-            value = effect.value;
+            value2 = effect.value;
           if (effect.is(closeHoverTooltipEffect))
-            value = null;
+            value2 = null;
         }
-        return value;
+        return value2;
       },
       provide: (f) => showHoverTooltip.from(f)
     });
@@ -11007,9 +11036,9 @@
   var panelConfig = /* @__PURE__ */ Facet.define({
     combine(configs) {
       let topContainer, bottomContainer;
-      for (let c of configs) {
-        topContainer = topContainer || c.topContainer;
-        bottomContainer = bottomContainer || c.bottomContainer;
+      for (let c4 of configs) {
+        topContainer = topContainer || c4.topContainer;
+        bottomContainer = bottomContainer || c4.bottomContainer;
       }
       return { topContainer, bottomContainer };
     }
@@ -11027,12 +11056,12 @@
       let conf = view.state.facet(panelConfig);
       this.top = new PanelGroup(view, true, conf.topContainer);
       this.bottom = new PanelGroup(view, false, conf.bottomContainer);
-      this.top.sync(this.panels.filter((p) => p.top));
-      this.bottom.sync(this.panels.filter((p) => !p.top));
-      for (let p of this.panels) {
-        p.dom.classList.add("cm-panel");
-        if (p.mount)
-          p.mount();
+      this.top.sync(this.panels.filter((p2) => p2.top));
+      this.bottom.sync(this.panels.filter((p2) => !p2.top));
+      for (let p2 of this.panels) {
+        p2.dom.classList.add("cm-panel");
+        if (p2.mount)
+          p2.mount();
       }
     }
     update(update3) {
@@ -11068,15 +11097,15 @@
         this.panels = panels;
         this.top.sync(top2);
         this.bottom.sync(bottom);
-        for (let p of mount) {
-          p.dom.classList.add("cm-panel");
-          if (p.mount)
-            p.mount();
+        for (let p2 of mount) {
+          p2.dom.classList.add("cm-panel");
+          if (p2.mount)
+            p2.mount();
         }
       } else {
-        for (let p of this.panels)
-          if (p.update)
-            p.update(update3);
+        for (let p2 of this.panels)
+          if (p2.update)
+            p2.update(update3);
       }
     }
     destroy() {
@@ -11085,8 +11114,8 @@
     }
   }, {
     provide: (plugin) => EditorView.scrollMargins.of((view) => {
-      let value = view.plugin(plugin);
-      return value && { top: value.top.scrollMargin(), bottom: value.bottom.scrollMargin() };
+      let value2 = view.plugin(plugin);
+      return value2 && { top: value2.top.scrollMargin(), bottom: value2.bottom.scrollMargin() };
     })
   });
   var PanelGroup = class {
@@ -11100,9 +11129,9 @@
       this.syncClasses();
     }
     sync(panels) {
-      for (let p of this.panels)
-        if (p.destroy && panels.indexOf(p) < 0)
-          p.destroy();
+      for (let p2 of this.panels)
+        if (p2.destroy && panels.indexOf(p2) < 0)
+          p2.destroy();
       this.panels = panels;
       this.syncDOM();
     }
@@ -11240,9 +11269,9 @@
       for (let line of this.view.viewportLineBlocks) {
         let text;
         if (Array.isArray(line.type)) {
-          for (let b of line.type)
-            if (b.type == BlockType.Text) {
-              text = b;
+          for (let b2 of line.type)
+            if (b2.type == BlockType.Text) {
+              text = b2;
               break;
             }
         } else {
@@ -11280,13 +11309,13 @@
             gutters2.push(this.gutters[known]);
           }
         }
-        for (let g of this.gutters) {
-          g.dom.remove();
-          if (gutters2.indexOf(g) < 0)
-            g.destroy();
+        for (let g2 of this.gutters) {
+          g2.dom.remove();
+          if (gutters2.indexOf(g2) < 0)
+            g2.destroy();
         }
-        for (let g of gutters2)
-          this.dom.appendChild(g.dom);
+        for (let g2 of gutters2)
+          this.dom.appendChild(g2.dom);
         this.gutters = gutters2;
       }
       return change;
@@ -11298,10 +11327,10 @@
     }
   }, {
     provide: (plugin) => EditorView.scrollMargins.of((view) => {
-      let value = view.plugin(plugin);
-      if (!value || value.gutters.length == 0 || !value.fixed)
+      let value2 = view.plugin(plugin);
+      if (!value2 || value2.gutters.length == 0 || !value2.fixed)
         return null;
-      return view.textDirection == Direction.LTR ? { left: value.dom.offsetWidth } : { right: value.dom.offsetWidth };
+      return view.textDirection == Direction.LTR ? { left: value2.dom.offsetWidth } : { right: value2.dom.offsetWidth };
     })
   });
   function asArray2(val) {
@@ -11347,9 +11376,9 @@
     finish() {
       let gutter2 = this.gutter;
       while (gutter2.elements.length > this.i) {
-        let last = gutter2.elements.pop();
-        gutter2.dom.removeChild(last.dom);
-        last.destroy();
+        let last2 = gutter2.elements.pop();
+        gutter2.dom.removeChild(last2.dom);
+        last2.destroy();
       }
     }
   };
@@ -11413,9 +11442,9 @@
       for (let iNew = 0, iOld = 0; ; ) {
         let skipTo = iOld, marker = iNew < markers.length ? markers[iNew++] : null, matched = false;
         if (marker) {
-          let c = marker.elementClass;
-          if (c)
-            cls += " " + c;
+          let c4 = marker.elementClass;
+          if (c4)
+            cls += " " + c4;
           for (let i = iOld; i < this.markers.length; i++)
             if (this.markers[i].compare(marker)) {
               skipTo = i;
@@ -11452,11 +11481,11 @@
       this.setMarkers(null, []);
     }
   };
-  function sameMarkers(a, b) {
-    if (a.length != b.length)
+  function sameMarkers(a2, b2) {
+    if (a2.length != b2.length)
       return false;
-    for (let i = 0; i < a.length; i++)
-      if (!a[i].compare(b[i]))
+    for (let i = 0; i < a2.length; i++)
+      if (!a2[i].compare(b2[i]))
         return false;
     return true;
   }
@@ -11464,10 +11493,10 @@
   var lineNumberConfig = /* @__PURE__ */ Facet.define({
     combine(values) {
       return combineConfig(values, { formatNumber: String, domEventHandlers: {} }, {
-        domEventHandlers(a, b) {
-          let result = Object.assign({}, a);
-          for (let event in b) {
-            let exists = result[event], add2 = b[event];
+        domEventHandlers(a2, b2) {
+          let result = Object.assign({}, a2);
+          for (let event in b2) {
+            let exists = result[event], add2 = b2[event];
             result[event] = exists ? (view, line, event2) => exists(view, line, event2) || add2(view, line, event2) : add2;
           }
           return result;
@@ -11497,7 +11526,7 @@
       return view.state.facet(lineNumberMarkers);
     },
     lineMarker(view, line, others) {
-      if (others.some((m) => m.toDOM))
+      if (others.some((m3) => m3.toDOM))
         return null;
       return new NumberMarker(formatNumber(view, view.state.doc.lineAt(line.from).number));
     },
@@ -11506,8 +11535,8 @@
       return new NumberMarker(formatNumber(view, maxLineNumber(view.state.doc.lines)));
     },
     updateSpacer(spacer, update3) {
-      let max = formatNumber(update3.view, maxLineNumber(update3.view.state.doc.lines));
-      return max == spacer.number ? spacer : new NumberMarker(max);
+      let max2 = formatNumber(update3.view, maxLineNumber(update3.view.state.doc.lines));
+      return max2 == spacer.number ? spacer : new NumberMarker(max2);
     },
     domEventHandlers: state.facet(lineNumberConfig).domEventHandlers
   }));
@@ -11519,10 +11548,10 @@
     ];
   }
   function maxLineNumber(lines) {
-    let last = 9;
-    while (last < lines)
-      last = last * 10 + 9;
-    return last;
+    let last2 = 9;
+    while (last2 < lines)
+      last2 = last2 * 10 + 9;
+    return last2;
   }
   var activeLineGutterMarker = /* @__PURE__ */ new class extends GutterMarker {
     constructor() {
@@ -11531,12 +11560,12 @@
     }
   }();
   var activeLineGutterHighlighter = /* @__PURE__ */ gutterLineClass.compute(["selection"], (state) => {
-    let marks = [], last = -1;
-    for (let range of state.selection.ranges)
-      if (range.empty) {
-        let linePos = state.doc.lineAt(range.head).from;
-        if (linePos > last) {
-          last = linePos;
+    let marks = [], last2 = -1;
+    for (let range2 of state.selection.ranges)
+      if (range2.empty) {
+        let linePos = state.doc.lineAt(range2.head).from;
+        if (linePos > last2) {
+          last2 = linePos;
           marks.push(activeLineGutterMarker.range(linePos));
         }
       }
@@ -11550,9 +11579,9 @@
   var DefaultBufferLength = 1024;
   var nextPropID = 0;
   var Range2 = class {
-    constructor(from, to) {
+    constructor(from, to2) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
     }
   };
   var NodeProp = class {
@@ -11568,8 +11597,8 @@
         throw new RangeError("Can't add per-node props to node types");
       if (typeof match != "function")
         match = NodeType.match(match);
-      return (type) => {
-        let result = match(type);
+      return (type2) => {
+        let result = match(type2);
         return result === void 0 ? null : [this, result];
       };
     }
@@ -11591,18 +11620,18 @@
     static define(spec) {
       let props = spec.props && spec.props.length ? /* @__PURE__ */ Object.create(null) : noProps;
       let flags = (spec.top ? 1 : 0) | (spec.skipped ? 2 : 0) | (spec.error ? 4 : 0) | (spec.name == null ? 8 : 0);
-      let type = new NodeType(spec.name || "", props, spec.id, flags);
+      let type2 = new NodeType(spec.name || "", props, spec.id, flags);
       if (spec.props)
         for (let src of spec.props) {
           if (!Array.isArray(src))
-            src = src(type);
+            src = src(type2);
           if (src) {
             if (src[0].perNode)
               throw new RangeError("Can't store a per-node prop on a node type");
             props[src[0].id] = src[1];
           }
         }
-      return type;
+      return type2;
     }
     prop(prop) {
       return this.props[prop.id];
@@ -11653,16 +11682,16 @@
     IterMode2[IterMode2["IgnoreOverlays"] = 8] = "IgnoreOverlays";
   })(IterMode || (IterMode = {}));
   var Tree = class {
-    constructor(type, children, positions, length, props) {
-      this.type = type;
+    constructor(type2, children, positions, length, props) {
+      this.type = type2;
       this.children = children;
       this.positions = positions;
       this.length = length;
       this.props = null;
       if (props && props.length) {
         this.props = /* @__PURE__ */ Object.create(null);
-        for (let [prop, value] of props)
-          this.props[typeof prop == "number" ? prop : prop.id] = value;
+        for (let [prop, value2] of props)
+          this.props[typeof prop == "number" ? prop : prop.id] = value2;
       }
     }
     toString() {
@@ -11704,20 +11733,20 @@
       return node;
     }
     iterate(spec) {
-      let { enter, leave, from = 0, to = this.length } = spec;
-      for (let c = this.cursor((spec.mode || 0) | IterMode.IncludeAnonymous); ; ) {
+      let { enter, leave, from = 0, to: to2 = this.length } = spec;
+      for (let c4 = this.cursor((spec.mode || 0) | IterMode.IncludeAnonymous); ; ) {
         let entered = false;
-        if (c.from <= to && c.to >= from && (c.type.isAnonymous || enter(c) !== false)) {
-          if (c.firstChild())
+        if (c4.from <= to2 && c4.to >= from && (c4.type.isAnonymous || enter(c4) !== false)) {
+          if (c4.firstChild())
             continue;
           entered = true;
         }
         for (; ; ) {
-          if (entered && leave && !c.type.isAnonymous)
-            leave(c);
-          if (c.nextSibling())
+          if (entered && leave && !c4.type.isAnonymous)
+            leave(c4);
+          if (c4.nextSibling())
             break;
-          if (!c.parent())
+          if (!c4.parent())
             return;
           entered = true;
         }
@@ -11769,10 +11798,10 @@
     }
   };
   var TreeBuffer = class {
-    constructor(buffer, length, set) {
+    constructor(buffer, length, set2) {
       this.buffer = buffer;
       this.length = length;
-      this.set = set;
+      this.set = set2;
     }
     get type() {
       return NodeType.none;
@@ -11787,8 +11816,8 @@
     }
     childString(index) {
       let id = this.buffer[index], endIndex = this.buffer[index + 3];
-      let type = this.set.types[id], result = type.name;
-      if (/\W/.test(result) && !type.isError)
+      let type2 = this.set.types[id], result = type2.name;
+      if (/\W/.test(result) && !type2.isError)
         result = JSON.stringify(result);
       index += 4;
       if (endIndex == index)
@@ -11811,30 +11840,30 @@
       }
       return pick;
     }
-    slice(startI, endI, from, to) {
-      let b = this.buffer;
+    slice(startI, endI, from, to2) {
+      let b2 = this.buffer;
       let copy = new Uint16Array(endI - startI);
       for (let i = startI, j = 0; i < endI; ) {
-        copy[j++] = b[i++];
-        copy[j++] = b[i++] - from;
-        copy[j++] = b[i++] - from;
-        copy[j++] = b[i++] - startI;
+        copy[j++] = b2[i++];
+        copy[j++] = b2[i++] - from;
+        copy[j++] = b2[i++] - from;
+        copy[j++] = b2[i++] - startI;
       }
-      return new TreeBuffer(copy, to - from, this.set);
+      return new TreeBuffer(copy, to2 - from, this.set);
     }
   };
-  function checkSide(side, pos, from, to) {
+  function checkSide(side, pos, from, to2) {
     switch (side) {
       case -2:
         return from < pos;
       case -1:
-        return to >= pos && from < pos;
+        return to2 >= pos && from < pos;
       case 0:
-        return from < pos && to > pos;
+        return from < pos && to2 > pos;
       case 1:
-        return from <= pos && to > pos;
+        return from <= pos && to2 > pos;
       case 2:
-        return to > pos;
+        return to2 > pos;
       case 4:
         return true;
     }
@@ -11842,14 +11871,14 @@
   function enterUnfinishedNodesBefore(node, pos) {
     let scan = node.childBefore(pos);
     while (scan) {
-      let last = scan.lastChild;
-      if (!last || last.to != scan.to)
+      let last2 = scan.lastChild;
+      if (!last2 || last2.to != scan.to)
         break;
-      if (last.type.isError && last.from == last.to) {
+      if (last2.type.isError && last2.from == last2.to) {
         node = scan;
-        scan = last.prevSibling;
+        scan = last2.prevSibling;
       } else {
-        scan = last;
+        scan = last2;
       }
     }
     return node;
@@ -11938,8 +11967,8 @@
       let mounted;
       if (!(mode & IterMode.IgnoreOverlays) && (mounted = this._tree.prop(NodeProp.mounted)) && mounted.overlay) {
         let rPos = pos - this.from;
-        for (let { from, to } of mounted.overlay) {
-          if ((side > 0 ? from <= rPos : from < rPos) && (side < 0 ? to >= rPos : to > rPos))
+        for (let { from, to: to2 } of mounted.overlay) {
+          if ((side > 0 ? from <= rPos : from < rPos) && (side < 0 ? to2 >= rPos : to2 > rPos))
             return new TreeNode(mounted.tree, mounted.overlay[0].from + this.from, -1, this);
         }
       }
@@ -11978,12 +12007,12 @@
     enterUnfinishedNodesBefore(pos) {
       return enterUnfinishedNodesBefore(this, pos);
     }
-    getChild(type, before = null, after = null) {
-      let r = getChildren(this, type, before, after);
+    getChild(type2, before = null, after = null) {
+      let r = getChildren(this, type2, before, after);
       return r.length ? r[0] : null;
     }
-    getChildren(type, before = null, after = null) {
-      return getChildren(this, type, before, after);
+    getChildren(type2, before = null, after = null) {
+      return getChildren(this, type2, before, after);
     }
     toString() {
       return this._tree.toString();
@@ -11991,11 +12020,11 @@
     get node() {
       return this;
     }
-    matchContext(context) {
-      return matchNodeContext(this, context);
+    matchContext(context2) {
+      return matchNodeContext(this, context2);
     }
   };
-  function getChildren(node, type, before, after) {
+  function getChildren(node, type2, before, after) {
     let cur2 = node.cursor(), result = [];
     if (!cur2.firstChild())
       return result;
@@ -12007,18 +12036,18 @@
     for (; ; ) {
       if (after != null && cur2.type.is(after))
         return result;
-      if (cur2.type.is(type))
+      if (cur2.type.is(type2))
         result.push(cur2.node);
       if (!cur2.nextSibling())
         return after == null ? result : [];
     }
   }
-  function matchNodeContext(node, context, i = context.length - 1) {
-    for (let p = node.parent; i >= 0; p = p.parent) {
-      if (!p)
+  function matchNodeContext(node, context2, i = context2.length - 1) {
+    for (let p2 = node.parent; i >= 0; p2 = p2.parent) {
+      if (!p2)
         return false;
-      if (!p.type.isAnonymous) {
-        if (context[i] && context[i] != p.name)
+      if (!p2.type.isAnonymous) {
+        if (context2[i] && context2[i] != p2.name)
           return false;
         i--;
       }
@@ -12034,11 +12063,11 @@
     }
   };
   var BufferNode = class {
-    constructor(context, _parent, index) {
-      this.context = context;
+    constructor(context2, _parent, index) {
+      this.context = context2;
       this._parent = _parent;
       this.index = index;
-      this.type = context.buffer.set.types[context.buffer.buffer[index]];
+      this.type = context2.buffer.set.types[context2.buffer.buffer[index]];
     }
     get name() {
       return this.type.name;
@@ -12104,8 +12133,8 @@
       let { buffer } = this.context;
       let startI = this.index + 4, endI = buffer.buffer[this.index + 3];
       if (endI > startI) {
-        let from = buffer.buffer[this.index + 1], to = buffer.buffer[this.index + 2];
-        children.push(buffer.slice(startI, endI, from, to));
+        let from = buffer.buffer[this.index + 1], to2 = buffer.buffer[this.index + 2];
+        children.push(buffer.slice(startI, endI, from, to2));
         positions.push(0);
       }
       return new Tree(this.type, children, positions, this.to - this.from);
@@ -12122,18 +12151,18 @@
     toString() {
       return this.context.buffer.childString(this.index);
     }
-    getChild(type, before = null, after = null) {
-      let r = getChildren(this, type, before, after);
+    getChild(type2, before = null, after = null) {
+      let r = getChildren(this, type2, before, after);
       return r.length ? r[0] : null;
     }
-    getChildren(type, before = null, after = null) {
-      return getChildren(this, type, before, after);
+    getChildren(type2, before = null, after = null) {
+      return getChildren(this, type2, before, after);
     }
     get node() {
       return this;
     }
-    matchContext(context) {
-      return matchNodeContext(this, context);
+    matchContext(context2) {
+      return matchNodeContext(this, context2);
     }
   };
   var TreeCursor = class {
@@ -12148,8 +12177,8 @@
       } else {
         this._tree = node.context.parent;
         this.buffer = node.context;
-        for (let n = node._parent; n; n = n._parent)
-          this.stack.unshift(n.index);
+        for (let n2 = node._parent; n2; n2 = n2._parent)
+          this.stack.unshift(n2.index);
         this.bufferNode = node;
         this.yieldBuf(node.index);
       }
@@ -12166,10 +12195,10 @@
       this.to = node.to;
       return true;
     }
-    yieldBuf(index, type) {
+    yieldBuf(index, type2) {
       this.index = index;
       let { start, buffer } = this.buffer;
-      this.type = type || buffer.set.types[buffer.buffer[index]];
+      this.type = type2 || buffer.set.types[buffer.buffer[index]];
       this.from = start + buffer.buffer[index + 1];
       this.to = start + buffer.buffer[index + 2];
       return true;
@@ -12226,17 +12255,17 @@
     sibling(dir) {
       if (!this.buffer)
         return !this._tree._parent ? false : this.yield(this._tree.index < 0 ? null : this._tree._parent.nextChild(this._tree.index + dir, dir, 0, 4, this.mode));
-      let { buffer } = this.buffer, d = this.stack.length - 1;
+      let { buffer } = this.buffer, d2 = this.stack.length - 1;
       if (dir < 0) {
-        let parentStart = d < 0 ? 0 : this.stack[d] + 4;
+        let parentStart = d2 < 0 ? 0 : this.stack[d2] + 4;
         if (this.index != parentStart)
           return this.yieldBuf(buffer.findChild(parentStart, this.index, -1, 0, 4));
       } else {
         let after = buffer.buffer[this.index + 3];
-        if (after < (d < 0 ? buffer.buffer.length : buffer.buffer[this.stack[d] + 3]))
+        if (after < (d2 < 0 ? buffer.buffer.length : buffer.buffer[this.stack[d2] + 3]))
           return this.yieldBuf(after);
       }
-      return d < 0 ? this.yield(this.buffer.parent.nextChild(this.buffer.index + dir, dir, 0, 4, this.mode)) : false;
+      return d2 < 0 ? this.yield(this.buffer.parent.nextChild(this.buffer.index + dir, dir, 0, 4, this.mode)) : false;
     }
     nextSibling() {
       return this.sibling(1);
@@ -12299,16 +12328,16 @@
       let cache = this.bufferNode, result = null, depth = 0;
       if (cache && cache.context == this.buffer) {
         scan:
-          for (let index = this.index, d = this.stack.length; d >= 0; ) {
-            for (let c = cache; c; c = c._parent)
-              if (c.index == index) {
+          for (let index = this.index, d2 = this.stack.length; d2 >= 0; ) {
+            for (let c4 = cache; c4; c4 = c4._parent)
+              if (c4.index == index) {
                 if (index == this.index)
-                  return c;
-                result = c;
-                depth = d + 1;
+                  return c4;
+                result = c4;
+                depth = d2 + 1;
                 break scan;
               }
-            index = this.stack[--d];
+            index = this.stack[--d2];
           }
       }
       for (let i = depth; i < this.stack.length; i++)
@@ -12343,16 +12372,16 @@
         }
       }
     }
-    matchContext(context) {
+    matchContext(context2) {
       if (!this.buffer)
-        return matchNodeContext(this.node, context);
+        return matchNodeContext(this.node, context2);
       let { buffer } = this.buffer, { types: types2 } = buffer.set;
-      for (let i = context.length - 1, d = this.stack.length - 1; i >= 0; d--) {
-        if (d < 0)
-          return matchNodeContext(this.node, context, i);
-        let type = types2[buffer.buffer[this.stack[d]]];
-        if (!type.isAnonymous) {
-          if (context[i] && context[i] != type.name)
+      for (let i = context2.length - 1, d2 = this.stack.length - 1; i >= 0; d2--) {
+        if (d2 < 0)
+          return matchNodeContext(this.node, context2, i);
+        let type2 = types2[buffer.buffer[this.stack[d2]]];
+        if (!type2.isAnonymous) {
+          if (context2[i] && context2[i] != type2.name)
             return false;
           i--;
         }
@@ -12389,7 +12418,7 @@
           throw new RangeError(`Unrecognized record size: ${size}`);
         }
       }
-      let type = types2[id], node, buffer2;
+      let type2 = types2[id], node, buffer2;
       let startPos = start - parentStart;
       if (end - start <= maxBufferLength && (buffer2 = findBufferSize(cursor.pos - minPos, inRepeat))) {
         let data2 = new Uint16Array(buffer2.size - buffer2.skip);
@@ -12421,37 +12450,37 @@
         localChildren.reverse();
         localPositions.reverse();
         if (localInRepeat > -1 && lastGroup > 0) {
-          let make = makeBalanced(type);
-          node = balanceRange(type, localChildren, localPositions, 0, localChildren.length, 0, end - start, make, make);
+          let make = makeBalanced(type2);
+          node = balanceRange(type2, localChildren, localPositions, 0, localChildren.length, 0, end - start, make, make);
         } else {
-          node = makeTree(type, localChildren, localPositions, end - start, lookAheadAtStart - end);
+          node = makeTree(type2, localChildren, localPositions, end - start, lookAheadAtStart - end);
         }
       }
       children2.push(node);
       positions2.push(startPos);
     }
-    function makeBalanced(type) {
+    function makeBalanced(type2) {
       return (children2, positions2, length2) => {
-        let lookAhead2 = 0, lastI = children2.length - 1, last, lookAheadProp;
-        if (lastI >= 0 && (last = children2[lastI]) instanceof Tree) {
-          if (!lastI && last.type == type && last.length == length2)
-            return last;
-          if (lookAheadProp = last.prop(NodeProp.lookAhead))
-            lookAhead2 = positions2[lastI] + last.length + lookAheadProp;
+        let lookAhead2 = 0, lastI = children2.length - 1, last2, lookAheadProp;
+        if (lastI >= 0 && (last2 = children2[lastI]) instanceof Tree) {
+          if (!lastI && last2.type == type2 && last2.length == length2)
+            return last2;
+          if (lookAheadProp = last2.prop(NodeProp.lookAhead))
+            lookAhead2 = positions2[lastI] + last2.length + lookAheadProp;
         }
-        return makeTree(type, children2, positions2, length2, lookAhead2);
+        return makeTree(type2, children2, positions2, length2, lookAhead2);
       };
     }
-    function makeRepeatLeaf(children2, positions2, base2, i, from, to, type, lookAhead2) {
+    function makeRepeatLeaf(children2, positions2, base2, i, from, to2, type2, lookAhead2) {
       let localChildren = [], localPositions = [];
       while (children2.length > i) {
         localChildren.push(children2.pop());
         localPositions.push(positions2.pop() + base2 - from);
       }
-      children2.push(makeTree(nodeSet.types[type], localChildren, localPositions, to - from, lookAhead2 - to));
+      children2.push(makeTree(nodeSet.types[type2], localChildren, localPositions, to2 - from, lookAhead2 - to2));
       positions2.push(from - base2);
     }
-    function makeTree(type, children2, positions2, length2, lookAhead2 = 0, props) {
+    function makeTree(type2, children2, positions2, length2, lookAhead2 = 0, props) {
       if (contextHash) {
         let pair = [NodeProp.contextHash, contextHash];
         props = props ? [pair].concat(props) : [pair];
@@ -12460,7 +12489,7 @@
         let pair = [NodeProp.lookAhead, lookAhead2];
         props = props ? [pair].concat(props) : [pair];
       }
-      return new Tree(type, children2, positions2, length2, props);
+      return new Tree(type2, children2, positions2, length2, props);
     }
     function findBufferSize(maxSize, inRepeat) {
       let fork = cursor.fork();
@@ -12551,17 +12580,17 @@
     }
     return size;
   }
-  function balanceRange(balanceType, children, positions, from, to, start, length, mkTop, mkTree) {
+  function balanceRange(balanceType, children, positions, from, to2, start, length, mkTop, mkTree) {
     let total = 0;
-    for (let i = from; i < to; i++)
+    for (let i = from; i < to2; i++)
       total += nodeSize(balanceType, children[i]);
     let maxChild = Math.ceil(total * 1.5 / 8);
     let localChildren = [], localPositions = [];
-    function divide(children2, positions2, from2, to2, offset) {
-      for (let i = from2; i < to2; ) {
+    function divide(children2, positions2, from2, to3, offset) {
+      for (let i = from2; i < to3; ) {
         let groupFrom = i, groupStart = positions2[i], groupSize = nodeSize(balanceType, children2[i]);
         i++;
-        for (; i < to2; i++) {
+        for (; i < to3; i++) {
           let nextSize = nodeSize(balanceType, children2[i]);
           if (groupSize + nextSize >= maxChild)
             break;
@@ -12581,13 +12610,13 @@
         localPositions.push(groupStart + offset - start);
       }
     }
-    divide(children, positions, from, to, 0);
+    divide(children, positions, from, to2, 0);
     return (mkTop || mkTree)(localChildren, localPositions, length);
   }
   var TreeFragment = class {
-    constructor(from, to, tree, offset, openStart = false, openEnd = false) {
+    constructor(from, to2, tree, offset, openStart = false, openEnd = false) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.tree = tree;
       this.offset = offset;
       this.open = (openStart ? 1 : 0) | (openEnd ? 2 : 0);
@@ -12642,9 +12671,9 @@
       return this.createParse(input, fragments || [], ranges);
     }
     parse(input, fragments, ranges) {
-      let parse = this.startParse(input, fragments, ranges);
+      let parse2 = this.startParse(input, fragments, ranges);
       for (; ; ) {
-        let done = parse.advance();
+        let done = parse2.advance();
         if (done)
           return done;
       }
@@ -12663,8 +12692,8 @@
     get lineChunks() {
       return false;
     }
-    read(from, to) {
-      return this.string.slice(from, to);
+    read(from, to2) {
+      return this.string.slice(from, to2);
     }
   };
   var stoppedInner = new NodeProp({ perNode: true });
@@ -12672,8 +12701,8 @@
   // node_modules/@lezer/highlight/dist/index.js
   var nextTagID = 0;
   var Tag = class {
-    constructor(set, base2, modified) {
-      this.set = set;
+    constructor(set2, base2, modified) {
+      this.set = set2;
       this.base = base2;
       this.modified = modified;
       this.id = nextTagID++;
@@ -12689,11 +12718,11 @@
       return tag;
     }
     static defineModifier() {
-      let mod = new Modifier();
+      let mod2 = new Modifier();
       return (tag) => {
-        if (tag.modified.indexOf(mod) > -1)
+        if (tag.modified.indexOf(mod2) > -1)
           return tag;
-        return Modifier.get(tag.base || tag, tag.modified.concat(mod).sort((a, b) => a.id - b.id));
+        return Modifier.get(tag.base || tag, tag.modified.concat(mod2).sort((a2, b2) => a2.id - b2.id));
       };
     }
   };
@@ -12709,24 +12738,24 @@
       let exists = mods[0].instances.find((t2) => t2.base == base2 && sameArray2(mods, t2.modified));
       if (exists)
         return exists;
-      let set = [], tag = new Tag(set, base2, mods);
-      for (let m of mods)
-        m.instances.push(tag);
+      let set2 = [], tag = new Tag(set2, base2, mods);
+      for (let m3 of mods)
+        m3.instances.push(tag);
       let configs = permute(mods);
       for (let parent of base2.set)
         for (let config2 of configs)
-          set.push(Modifier.get(parent, config2));
+          set2.push(Modifier.get(parent, config2));
       return tag;
     }
   };
-  function sameArray2(a, b) {
-    return a.length == b.length && a.every((x, i) => x == b[i]);
+  function sameArray2(a2, b2) {
+    return a2.length == b2.length && a2.every((x, i) => x == b2[i]);
   }
   function permute(array) {
     let result = [array];
     for (let i = 0; i < array.length; i++) {
-      for (let a of permute(array.slice(0, i).concat(array.slice(i + 1))))
-        result.push(a);
+      for (let a2 of permute(array.slice(0, i).concat(array.slice(i + 1))))
+        result.push(a2);
     }
     return result;
   }
@@ -12744,11 +12773,11 @@
               mode = 1;
               break;
             }
-            let m = /^"(?:[^"\\]|\\.)*?"|[^\/!]+/.exec(rest);
-            if (!m)
+            let m3 = /^"(?:[^"\\]|\\.)*?"|[^\/!]+/.exec(rest);
+            if (!m3)
               throw new RangeError("Invalid path: " + part);
-            pieces.push(m[0] == "*" ? "" : m[0][0] == '"' ? JSON.parse(m[0]) : m[0]);
-            pos += m[0].length;
+            pieces.push(m3[0] == "*" ? "" : m3[0][0] == '"' ? JSON.parse(m3[0]) : m3[0]);
+            pos += m3[0].length;
             if (pos == part.length)
               break;
             let next = part[pos++];
@@ -12760,10 +12789,10 @@
               throw new RangeError("Invalid path: " + part);
             rest = part.slice(pos);
           }
-          let last = pieces.length - 1, inner = pieces[last];
+          let last2 = pieces.length - 1, inner = pieces[last2];
           if (!inner)
             throw new RangeError("Invalid path: " + part);
-          let rule = new Rule(tags2, mode, last > 0 ? pieces.slice(0, last) : null);
+          let rule = new Rule(tags2, mode, last2 > 0 ? pieces.slice(0, last2) : null);
           byName[inner] = rule.sort(byName[inner]);
         }
     }
@@ -12771,10 +12800,10 @@
   }
   var ruleNodeProp = new NodeProp();
   var Rule = class {
-    constructor(tags2, mode, context, next) {
+    constructor(tags2, mode, context2, next) {
       this.tags = tags2;
       this.mode = mode;
-      this.context = context;
+      this.context = context2;
       this.next = next;
     }
     sort(other) {
@@ -12819,16 +12848,16 @@
   function highlightTags(highlighters, tags2) {
     let result = null;
     for (let highlighter of highlighters) {
-      let value = highlighter.style(tags2);
-      if (value)
-        result = result ? result + " " + value : value;
+      let value2 = highlighter.style(tags2);
+      if (value2)
+        result = result ? result + " " + value2 : value2;
     }
     return result;
   }
-  function highlightTree(tree, highlighter, putStyle, from = 0, to = tree.length) {
+  function highlightTree(tree, highlighter, putStyle, from = 0, to2 = tree.length) {
     let builder = new HighlightBuilder(from, Array.isArray(highlighter) ? highlighter : [highlighter], putStyle);
-    builder.highlightRange(tree.cursor(), from, to, "", builder.highlighters);
-    builder.flush(to);
+    builder.highlightRange(tree.cursor(), from, to2, "", builder.highlighters);
+    builder.flush(to2);
   }
   var HighlightBuilder = class {
     constructor(at, highlighters, span) {
@@ -12845,18 +12874,18 @@
         this.class = cls;
       }
     }
-    flush(to) {
-      if (to > this.at && this.class)
-        this.span(this.at, to, this.class);
+    flush(to2) {
+      if (to2 > this.at && this.class)
+        this.span(this.at, to2, this.class);
     }
-    highlightRange(cursor, from, to, inheritedClass, highlighters) {
-      let { type, from: start, to: end } = cursor;
-      if (start >= to || end <= from)
+    highlightRange(cursor, from, to2, inheritedClass, highlighters) {
+      let { type: type2, from: start, to: end } = cursor;
+      if (start >= to2 || end <= from)
         return;
-      if (type.isTop)
-        highlighters = this.highlighters.filter((h) => !h.scope || h.scope(type));
+      if (type2.isTop)
+        highlighters = this.highlighters.filter((h) => !h.scope || h.scope(type2));
       let cls = inheritedClass;
-      let rule = type.prop(ruleNodeProp), opaque = false;
+      let rule = type2.prop(ruleNodeProp), opaque = false;
       while (rule) {
         if (!rule.context || cursor.matchContext(rule.context)) {
           let tagCls = highlightTags(highlighters, rule.tags);
@@ -12884,20 +12913,20 @@
         for (let i = 0, pos = start; ; i++) {
           let next = i < mounted.overlay.length ? mounted.overlay[i] : null;
           let nextPos = next ? next.from + start : end;
-          let rangeFrom = Math.max(from, pos), rangeTo = Math.min(to, nextPos);
+          let rangeFrom = Math.max(from, pos), rangeTo = Math.min(to2, nextPos);
           if (rangeFrom < rangeTo && hasChild2) {
             while (cursor.from < rangeTo) {
               this.highlightRange(cursor, rangeFrom, rangeTo, inheritedClass, highlighters);
-              this.startSpan(Math.min(to, cursor.to), cls);
+              this.startSpan(Math.min(to2, cursor.to), cls);
               if (cursor.to >= nextPos || !cursor.nextSibling())
                 break;
             }
           }
-          if (!next || nextPos > to)
+          if (!next || nextPos > to2)
             break;
           pos = next.to + start;
           if (pos > from) {
-            this.highlightRange(inner.cursor(), Math.max(from, next.from + start), Math.min(to, pos), inheritedClass, innerHighlighters);
+            this.highlightRange(inner.cursor(), Math.max(from, next.from + start), Math.min(to2, pos), inheritedClass, innerHighlighters);
             this.startSpan(pos, cls);
           }
         }
@@ -12907,10 +12936,10 @@
         do {
           if (cursor.to <= from)
             continue;
-          if (cursor.from >= to)
+          if (cursor.from >= to2)
             break;
-          this.highlightRange(cursor, from, to, inheritedClass, highlighters);
-          this.startSpan(Math.min(to, cursor.to), cls);
+          this.highlightRange(cursor, from, to2, inheritedClass, highlighters);
+          this.startSpan(Math.min(to2, cursor.to), cls);
         } while (cursor.nextSibling());
         cursor.parent();
       }
@@ -13146,12 +13175,12 @@
     get lineChunks() {
       return true;
     }
-    read(from, to) {
+    read(from, to2) {
       let stringStart = this.cursorPos - this.string.length;
-      if (from < stringStart || to >= this.cursorPos)
-        return this.doc.sliceString(from, to);
+      if (from < stringStart || to2 >= this.cursorPos)
+        return this.doc.sliceString(from, to2);
       else
-        return this.string.slice(from - stringStart, to - stringStart);
+        return this.string.slice(from - stringStart, to2 - stringStart);
     }
   };
   var currentContext = null;
@@ -13250,9 +13279,9 @@
         if (this.skipped.length) {
           skipped = [];
           for (let r of this.skipped) {
-            let from = changes.mapPos(r.from, 1), to = changes.mapPos(r.to, -1);
-            if (from < to)
-              skipped.push({ from, to });
+            let from = changes.mapPos(r.from, 1), to2 = changes.mapPos(r.to, -1);
+            if (from < to2)
+              skipped.push({ from, to: to2 });
           }
         }
       }
@@ -13264,9 +13293,9 @@
       this.viewport = viewport;
       let startLen = this.skipped.length;
       for (let i = 0; i < this.skipped.length; i++) {
-        let { from, to } = this.skipped[i];
-        if (from < viewport.to && to > viewport.from) {
-          this.fragments = cutFragments(this.fragments, from, to);
+        let { from, to: to2 } = this.skipped[i];
+        if (from < viewport.to && to2 > viewport.from) {
+          this.fragments = cutFragments(this.fragments, from, to2);
           this.skipped.splice(i--, 1);
         }
       }
@@ -13281,13 +13310,13 @@
         this.parse = null;
       }
     }
-    skipUntilInView(from, to) {
-      this.skipped.push({ from, to });
+    skipUntilInView(from, to2) {
+      this.skipped.push({ from, to: to2 });
     }
     static getSkippingParser(until) {
       return new class extends Parser {
         createParse(input, fragments, ranges) {
-          let from = ranges[0].from, to = ranges[ranges.length - 1].to;
+          let from = ranges[0].from, to2 = ranges[ranges.length - 1].to;
           let parser = {
             parsedPos: from,
             advance() {
@@ -13298,8 +13327,8 @@
                 if (until)
                   cx.scheduleOn = cx.scheduleOn ? Promise.all([cx.scheduleOn, until]) : until;
               }
-              this.parsedPos = to;
-              return new Tree(NodeType.none, [], [], to - from);
+              this.parsedPos = to2;
+              return new Tree(NodeType.none, [], [], to2 - from);
             },
             stoppedAt: null,
             stopAt() {
@@ -13318,13 +13347,13 @@
       return currentContext;
     }
   };
-  function cutFragments(fragments, from, to) {
-    return TreeFragment.applyChanges(fragments, [{ fromA: from, toA: to, fromB: from, toB: to }]);
+  function cutFragments(fragments, from, to2) {
+    return TreeFragment.applyChanges(fragments, [{ fromA: from, toA: to2, fromB: from, toB: to2 }]);
   }
   var LanguageState = class {
-    constructor(context) {
-      this.context = context;
-      this.tree = context.tree;
+    constructor(context2) {
+      this.context = context2;
+      this.tree = context2.tree;
     }
     apply(tr) {
       if (!tr.docChanged && this.tree == this.context.tree)
@@ -13345,13 +13374,13 @@
   };
   Language.state = /* @__PURE__ */ StateField.define({
     create: LanguageState.init,
-    update(value, tr) {
+    update(value2, tr) {
       for (let e of tr.effects)
         if (e.is(Language.setState))
           return e.value;
       if (tr.startState.facet(language) != tr.state.facet(language))
         return LanguageState.init(tr.state);
-      return value.apply(tr);
+      return value2.apply(tr);
     }
   });
   var requestIdle = (callback) => {
@@ -13470,16 +13499,16 @@
       result += " ";
     return result;
   }
-  function getIndentation(context, pos) {
-    if (context instanceof EditorState)
-      context = new IndentContext(context);
-    for (let service of context.state.facet(indentService)) {
-      let result = service(context, pos);
+  function getIndentation(context2, pos) {
+    if (context2 instanceof EditorState)
+      context2 = new IndentContext(context2);
+    for (let service of context2.state.facet(indentService)) {
+      let result = service(context2, pos);
       if (result != null)
         return result;
     }
-    let tree = syntaxTree(context.state);
-    return tree ? syntaxIndentation(context, tree, pos) : null;
+    let tree = syntaxTree(context2.state);
+    return tree ? syntaxIndentation(context2, tree, pos) : null;
   }
   var IndentContext = class {
     constructor(state, options = {}) {
@@ -13544,8 +13573,8 @@
       return strategy;
     let first = tree.firstChild, close;
     if (first && (close = first.type.prop(NodeProp.closedBy))) {
-      let last = tree.lastChild, closed = last && close.indexOf(last.name) > -1;
-      return (cx) => delimitedStrategy(cx, true, 1, void 0, closed && !ignoreClosed(cx) ? last.from : void 0);
+      let last2 = tree.lastChild, closed = last2 && close.indexOf(last2.name) > -1;
+      return (cx) => delimitedStrategy(cx, true, 1, void 0, closed && !ignoreClosed(cx) ? last2.from : void 0);
     }
     return tree.parent == null ? topIndent : null;
   }
@@ -13596,30 +13625,30 @@
         return true;
     return false;
   }
-  function bracketedAligned(context) {
-    let tree = context.node;
-    let openToken = tree.childAfter(tree.from), last = tree.lastChild;
+  function bracketedAligned(context2) {
+    let tree = context2.node;
+    let openToken = tree.childAfter(tree.from), last2 = tree.lastChild;
     if (!openToken)
       return null;
-    let sim = context.options.simulateBreak;
-    let openLine = context.state.doc.lineAt(openToken.from);
+    let sim = context2.options.simulateBreak;
+    let openLine = context2.state.doc.lineAt(openToken.from);
     let lineEnd = sim == null || sim <= openLine.from ? openLine.to : Math.min(openLine.to, sim);
     for (let pos = openToken.to; ; ) {
       let next = tree.childAfter(pos);
-      if (!next || next == last)
+      if (!next || next == last2)
         return null;
       if (!next.type.isSkipped)
         return next.from < lineEnd ? openToken : null;
       pos = next.to;
     }
   }
-  function delimitedStrategy(context, align, units, closing2, closedAt) {
-    let after = context.textAfter, space = after.match(/^\s*/)[0].length;
-    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context.pos + space;
-    let aligned = align ? bracketedAligned(context) : null;
+  function delimitedStrategy(context2, align, units, closing2, closedAt) {
+    let after = context2.textAfter, space = after.match(/^\s*/)[0].length;
+    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context2.pos + space;
+    let aligned = align ? bracketedAligned(context2) : null;
     if (aligned)
-      return closed ? context.column(aligned.from) : context.column(aligned.to);
-    return context.baseIndent + (closed ? 0 : context.unit * units);
+      return closed ? context2.column(aligned.from) : context2.column(aligned.to);
+    return context2.baseIndent + (closed ? 0 : context2.unit * units);
   }
   var DontIndentBeyond = 200;
   function indentOnInput() {
@@ -13635,12 +13664,12 @@
       let lineStart = doc2.sliceString(line.from, head);
       if (!rules.some((r) => r.test(lineStart)))
         return tr;
-      let { state } = tr, last = -1, changes = [];
+      let { state } = tr, last2 = -1, changes = [];
       for (let { head: head2 } of state.selection.ranges) {
         let line2 = state.doc.lineAt(head2);
-        if (line2.from == last)
+        if (line2.from == last2)
           continue;
-        last = line2.from;
+        last2 = line2.from;
         let indent = getIndentation(state, line2.from);
         if (indent == null)
           continue;
@@ -13667,9 +13696,9 @@
         break;
       let prop = cur2.type.prop(foldNodeProp);
       if (prop && (cur2.to < tree.length - 50 || tree.length == state.doc.length || !isUnfinished(cur2))) {
-        let value = prop(cur2, state);
-        if (value && value.from <= end && value.from >= start && value.to > end)
-          found = value;
+        let value2 = prop(cur2, state);
+        if (value2 && value2.from <= end && value2.from >= start && value2.to > end)
+          found = value2;
       }
     }
     return found;
@@ -13686,9 +13715,9 @@
     }
     return syntaxFolding(state, lineStart, lineEnd);
   }
-  function mapRange(range, mapping) {
-    let from = mapping.mapPos(range.from, 1), to = mapping.mapPos(range.to, -1);
-    return from >= to ? void 0 : { from, to };
+  function mapRange(range2, mapping) {
+    let from = mapping.mapPos(range2.from, 1), to2 = mapping.mapPos(range2.to, -1);
+    return from >= to2 ? void 0 : { from, to: to2 };
   }
   var foldEffect = /* @__PURE__ */ StateEffect.define({ map: mapRange });
   var unfoldEffect = /* @__PURE__ */ StateEffect.define({ map: mapRange });
@@ -13712,41 +13741,41 @@
           folded = folded.update({ add: [foldWidget.range(e.value.from, e.value.to)] });
         else if (e.is(unfoldEffect))
           folded = folded.update({
-            filter: (from, to) => e.value.from != from || e.value.to != to,
+            filter: (from, to2) => e.value.from != from || e.value.to != to2,
             filterFrom: e.value.from,
             filterTo: e.value.to
           });
       }
       if (tr.selection) {
         let onSelection = false, { head } = tr.selection.main;
-        folded.between(head, head, (a, b) => {
-          if (a < head && b > head)
+        folded.between(head, head, (a2, b2) => {
+          if (a2 < head && b2 > head)
             onSelection = true;
         });
         if (onSelection)
           folded = folded.update({
             filterFrom: head,
             filterTo: head,
-            filter: (a, b) => b <= head || a >= head
+            filter: (a2, b2) => b2 <= head || a2 >= head
           });
       }
       return folded;
     },
     provide: (f) => EditorView.decorations.from(f)
   });
-  function findFold(state, from, to) {
+  function findFold(state, from, to2) {
     var _a2;
     let found = null;
-    (_a2 = state.field(foldState, false)) === null || _a2 === void 0 ? void 0 : _a2.between(from, to, (from2, to2) => {
+    (_a2 = state.field(foldState, false)) === null || _a2 === void 0 ? void 0 : _a2.between(from, to2, (from2, to3) => {
       if (!found || found.from > from2)
-        found = { from: from2, to: to2 };
+        found = { from: from2, to: to3 };
     });
     return found;
   }
-  function foldExists(folded, from, to) {
+  function foldExists(folded, from, to2) {
     let found = false;
-    folded.between(from, from, (a, b) => {
-      if (a == from && b == to)
+    folded.between(from, from, (a2, b2) => {
+      if (a2 == from && b2 == to2)
         found = true;
     });
     return found;
@@ -13756,9 +13785,9 @@
   }
   var foldCode = (view) => {
     for (let line of selectedLines(view)) {
-      let range = foldable(view.state, line.from, line.to);
-      if (range) {
-        view.dispatch({ effects: maybeEnable(view.state, [foldEffect.of(range), announceFold(view, range)]) });
+      let range2 = foldable(view.state, line.from, line.to);
+      if (range2) {
+        view.dispatch({ effects: maybeEnable(view.state, [foldEffect.of(range2), announceFold(view, range2)]) });
         return true;
       }
     }
@@ -13777,17 +13806,17 @@
       view.dispatch({ effects });
     return effects.length > 0;
   };
-  function announceFold(view, range, fold = true) {
-    let lineFrom = view.state.doc.lineAt(range.from).number, lineTo = view.state.doc.lineAt(range.to).number;
+  function announceFold(view, range2, fold = true) {
+    let lineFrom = view.state.doc.lineAt(range2.from).number, lineTo = view.state.doc.lineAt(range2.to).number;
     return EditorView.announce.of(`${view.state.phrase(fold ? "Folded lines" : "Unfolded lines")} ${lineFrom} ${view.state.phrase("to")} ${lineTo}.`);
   }
   var foldAll = (view) => {
     let { state } = view, effects = [];
     for (let pos = 0; pos < state.doc.length; ) {
-      let line = view.lineBlockAt(pos), range = foldable(state, line.from, line.to);
-      if (range)
-        effects.push(foldEffect.of(range));
-      pos = (range ? view.lineBlockAt(range.to) : line).to + 1;
+      let line = view.lineBlockAt(pos), range2 = foldable(state, line.from, line.to);
+      if (range2)
+        effects.push(foldEffect.of(range2));
+      pos = (range2 ? view.lineBlockAt(range2.to) : line).to + 1;
     }
     if (effects.length)
       view.dispatch({ effects: maybeEnable(view.state, effects) });
@@ -13798,8 +13827,8 @@
     if (!field || !field.size)
       return false;
     let effects = [];
-    field.between(0, view.state.doc.length, (from, to) => {
-      effects.push(unfoldEffect.of({ from, to }));
+    field.between(0, view.state.doc.length, (from, to2) => {
+      effects.push(unfoldEffect.of({ from, to: to2 }));
     });
     view.dispatch({ effects });
     return true;
@@ -13912,9 +13941,9 @@
             view.dispatch({ effects: unfoldEffect.of(folded) });
             return true;
           }
-          let range = foldable(view.state, line.from, line.to);
-          if (range) {
-            view.dispatch({ effects: foldEffect.of(range) });
+          let range2 = foldable(view.state, line.from, line.to);
+          if (range2) {
+            view.dispatch({ effects: foldEffect.of(range2) });
             return true;
           }
           return false;
@@ -13948,7 +13977,7 @@
       }
       const all = typeof options.all == "string" ? options.all : options.all ? def(options.all) : void 0;
       const scopeOpt = options.scope;
-      this.scope = scopeOpt instanceof Language ? (type) => type.prop(languageDataProp) == scopeOpt.data : scopeOpt ? (type) => type == scopeOpt : void 0;
+      this.scope = scopeOpt instanceof Language ? (type2) => type2.prop(languageDataProp) == scopeOpt.data : scopeOpt ? (type2) => type2 == scopeOpt : void 0;
       this.style = tagHighlighter(spec.map((style2) => ({
         tag: style2.tag,
         class: style2.class || def(Object.assign({}, style2, { tag: null }))
@@ -14009,10 +14038,10 @@
       if (!highlighters || !this.tree.length)
         return Decoration.none;
       let builder = new RangeSetBuilder();
-      for (let { from, to } of view.visibleRanges) {
-        highlightTree(this.tree, highlighters, (from2, to2, style2) => {
-          builder.add(from2, to2, this.markCache[style2] || (this.markCache[style2] = Decoration.mark({ class: style2 })));
-        }, from, to);
+      for (let { from, to: to2 } of view.visibleRanges) {
+        highlightTree(this.tree, highlighters, (from2, to3, style2) => {
+          builder.add(from2, to3, this.markCache[style2] || (this.markCache[style2] = Decoration.mark({ class: style2 })));
+        }, from, to2);
       }
       return builder.finish();
     }
@@ -14134,10 +14163,10 @@
         return deco;
       let decorations2 = [];
       let config2 = tr.state.facet(bracketMatchingConfig);
-      for (let range of tr.state.selection.ranges) {
-        if (!range.empty)
+      for (let range2 of tr.state.selection.ranges) {
+        if (!range2.empty)
           continue;
-        let match = matchBrackets(tr.state, range.head, -1, config2) || range.head > 0 && matchBrackets(tr.state, range.head - 1, 1, config2) || config2.afterCursor && (matchBrackets(tr.state, range.head, 1, config2) || range.head < tr.state.doc.length && matchBrackets(tr.state, range.head + 1, -1, config2));
+        let match = matchBrackets(tr.state, range2.head, -1, config2) || range2.head > 0 && matchBrackets(tr.state, range2.head - 1, 1, config2) || config2.afterCursor && (matchBrackets(tr.state, range2.head, 1, config2) || range2.head < tr.state.doc.length && matchBrackets(tr.state, range2.head + 1, -1, config2));
         if (match)
           decorations2 = decorations2.concat(config2.renderMatch(match, tr.state));
       }
@@ -14203,11 +14232,11 @@
       return null;
     let startToken = { from: dir < 0 ? pos - 1 : pos, to: dir > 0 ? pos + 1 : pos };
     let iter = state.doc.iterRange(pos, dir > 0 ? state.doc.length : 0), depth = 0;
-    for (let distance = 0; !iter.next().done && distance <= maxScanDistance; ) {
+    for (let distance2 = 0; !iter.next().done && distance2 <= maxScanDistance; ) {
       let text = iter.value;
       if (dir < 0)
-        distance += text.length;
-      let basePos = pos + distance * dir;
+        distance2 += text.length;
+      let basePos = pos + distance2 * dir;
       for (let pos2 = dir > 0 ? 0 : text.length - 1, end = dir > 0 ? text.length : -1; pos2 != end; pos2 += dir) {
         let found = brackets.indexOf(text[pos2]);
         if (found < 0 || tree.resolve(basePos + pos2, 1).type != tokenType)
@@ -14221,7 +14250,7 @@
         }
       }
       if (dir > 0)
-        distance += text.length;
+        distance2 += text.length;
     }
     return iter.done ? { start: startToken, matched: false } : null;
   }
@@ -14253,30 +14282,30 @@
   function createTokenType(extra, tagStr) {
     let tag = null;
     for (let part of tagStr.split(".")) {
-      let value = extra[part] || tags[part];
-      if (!value) {
+      let value2 = extra[part] || tags[part];
+      if (!value2) {
         warnForPart(part, `Unknown highlighting tag ${part}`);
-      } else if (typeof value == "function") {
+      } else if (typeof value2 == "function") {
         if (!tag)
           warnForPart(part, `Modifier ${part} used at start of tag`);
         else
-          tag = value(tag);
+          tag = value2(tag);
       } else {
         if (tag)
           warnForPart(part, `Tag ${part} used as modifier`);
         else
-          tag = value;
+          tag = value2;
       }
     }
     if (!tag)
       return 0;
-    let name2 = tagStr.replace(/ /g, "_"), type = NodeType.define({
+    let name2 = tagStr.replace(/ /g, "_"), type2 = NodeType.define({
       id: typeArray.length,
       name: name2,
       props: [styleTags({ [name2]: tag })]
     });
-    typeArray.push(type);
-    return type.id;
+    typeArray.push(type2);
+    return type2.id;
   }
 
   // node_modules/@codemirror/commands/dist/index.js
@@ -14303,23 +14332,23 @@
     return data.length ? data[0] : {};
   }
   var SearchMargin = 50;
-  function findBlockComment(state, { open, close }, from, to) {
+  function findBlockComment(state, { open, close }, from, to2) {
     let textBefore = state.sliceDoc(from - SearchMargin, from);
-    let textAfter = state.sliceDoc(to, to + SearchMargin);
+    let textAfter = state.sliceDoc(to2, to2 + SearchMargin);
     let spaceBefore = /\s*$/.exec(textBefore)[0].length, spaceAfter = /^\s*/.exec(textAfter)[0].length;
     let beforeOff = textBefore.length - spaceBefore;
     if (textBefore.slice(beforeOff - open.length, beforeOff) == open && textAfter.slice(spaceAfter, spaceAfter + close.length) == close) {
       return {
         open: { pos: from - spaceBefore, margin: spaceBefore && 1 },
-        close: { pos: to + spaceAfter, margin: spaceAfter && 1 }
+        close: { pos: to2 + spaceAfter, margin: spaceAfter && 1 }
       };
     }
     let startText, endText;
-    if (to - from <= 2 * SearchMargin) {
-      startText = endText = state.sliceDoc(from, to);
+    if (to2 - from <= 2 * SearchMargin) {
+      startText = endText = state.sliceDoc(from, to2);
     } else {
       startText = state.sliceDoc(from, from + SearchMargin);
-      endText = state.sliceDoc(to - SearchMargin, to);
+      endText = state.sliceDoc(to2 - SearchMargin, to2);
     }
     let startSpace = /^\s*/.exec(startText)[0].length, endSpace = /\s*$/.exec(endText)[0].length;
     let endOff = endText.length - endSpace - close.length;
@@ -14330,7 +14359,7 @@
           margin: /\s/.test(startText.charAt(startSpace + open.length)) ? 1 : 0
         },
         close: {
-          pos: to - endSpace - close.length,
+          pos: to2 - endSpace - close.length,
           margin: /\s/.test(endText.charAt(endOff - 1)) ? 1 : 0
         }
       };
@@ -14342,9 +14371,9 @@
     for (let r of state.selection.ranges) {
       let fromLine = state.doc.lineAt(r.from);
       let toLine = r.to <= fromLine.to ? fromLine : state.doc.lineAt(r.to);
-      let last = ranges.length - 1;
-      if (last >= 0 && ranges[last].to > fromLine.from)
-        ranges[last].to = toLine.to;
+      let last2 = ranges.length - 1;
+      if (last2 >= 0 && ranges[last2].to > fromLine.from)
+        ranges[last2].to = toLine.to;
       else
         ranges.push({ from: fromLine.from, to: toLine.to });
     }
@@ -14352,16 +14381,16 @@
   }
   function changeBlockComment(option, state, ranges = state.selection.ranges) {
     let tokens = ranges.map((r) => getConfig(state, r.from).block);
-    if (!tokens.every((c) => c))
+    if (!tokens.every((c4) => c4))
       return null;
     let comments = ranges.map((r, i) => findBlockComment(state, tokens[i], r.from, r.to));
-    if (option != 2 && !comments.every((c) => c)) {
-      return { changes: state.changes(ranges.map((range, i) => {
+    if (option != 2 && !comments.every((c4) => c4)) {
+      return { changes: state.changes(ranges.map((range2, i) => {
         if (comments[i])
           return [];
-        return [{ from: range.from, insert: tokens[i].open + " " }, { from: range.to, insert: " " + tokens[i].close }];
+        return [{ from: range2.from, insert: tokens[i].open + " " }, { from: range2.to, insert: " " + tokens[i].close }];
       })) };
-    } else if (option != 1 && comments.some((c) => c)) {
+    } else if (option != 1 && comments.some((c4) => c4)) {
       let changes = [];
       for (let i = 0, comment2; i < comments.length; i++)
         if (comment2 = comments[i]) {
@@ -14375,11 +14404,11 @@
   function changeLineComment(option, state, ranges = state.selection.ranges) {
     let lines = [];
     let prevLine = -1;
-    for (let { from, to } of ranges) {
+    for (let { from, to: to2 } of ranges) {
       let startI = lines.length, minIndent = 1e9;
-      for (let pos = from; pos <= to; ) {
+      for (let pos = from; pos <= to2; ) {
         let line = state.doc.lineAt(pos);
-        if (line.from > prevLine && (from == to || to > line.from)) {
+        if (line.from > prevLine && (from == to2 || to2 > line.from)) {
           prevLine = line.from;
           let token = getConfig(state, pos).line;
           if (!token)
@@ -14412,10 +14441,10 @@
       let changes = [];
       for (let { line, comment: comment2, token } of lines)
         if (comment2 >= 0) {
-          let from = line.from + comment2, to = from + token.length;
-          if (line.text[to - line.from] == " ")
-            to++;
-          changes.push({ from, to });
+          let from = line.from + comment2, to2 = from + token.length;
+          if (line.text[to2 - line.from] == " ")
+            to2++;
+          changes.push({ from, to: to2 });
         }
       return { changes };
     }
@@ -14434,7 +14463,7 @@
   });
   function changeEnd(changes) {
     let end = 0;
-    changes.iterChangedRanges((_, to) => end = to);
+    changes.iterChangedRanges((_, to2) => end = to2);
     return end;
   }
   var historyField_ = /* @__PURE__ */ StateField.define({
@@ -14469,8 +14498,8 @@
         state = state.isolate();
       return state;
     },
-    toJSON(value) {
-      return { done: value.done.map((e) => e.toJSON()), undone: value.undone.map((e) => e.toJSON()) };
+    toJSON(value2) {
+      return { done: value2.done.map((e) => e.toJSON()), undone: value2.undone.map((e) => e.toJSON()) };
     },
     fromJSON(json) {
       return new HistoryState(json.done.map(HistEvent.fromJSON), json.undone.map(HistEvent.fromJSON));
@@ -14547,29 +14576,29 @@
       return new HistEvent(void 0, none2, void 0, void 0, selections);
     }
   };
-  function updateBranch(branch, to, maxLen, newEvent) {
-    let start = to + 1 > maxLen + 20 ? to - maxLen - 1 : 0;
-    let newBranch = branch.slice(start, to);
+  function updateBranch(branch, to2, maxLen, newEvent) {
+    let start = to2 + 1 > maxLen + 20 ? to2 - maxLen - 1 : 0;
+    let newBranch = branch.slice(start, to2);
     newBranch.push(newEvent);
     return newBranch;
   }
-  function isAdjacent(a, b) {
+  function isAdjacent(a2, b2) {
     let ranges = [], isAdjacent2 = false;
-    a.iterChangedRanges((f, t2) => ranges.push(f, t2));
-    b.iterChangedRanges((_f, _t, f, t2) => {
+    a2.iterChangedRanges((f, t2) => ranges.push(f, t2));
+    b2.iterChangedRanges((_f, _t, f, t2) => {
       for (let i = 0; i < ranges.length; ) {
-        let from = ranges[i++], to = ranges[i++];
-        if (t2 >= from && f <= to)
+        let from = ranges[i++], to2 = ranges[i++];
+        if (t2 >= from && f <= to2)
           isAdjacent2 = true;
       }
     });
     return isAdjacent2;
   }
-  function eqSelectionShape(a, b) {
-    return a.ranges.length == b.ranges.length && a.ranges.filter((r, i) => r.empty != b.ranges[i].empty).length === 0;
+  function eqSelectionShape(a2, b2) {
+    return a2.ranges.length == b2.ranges.length && a2.ranges.filter((r, i) => r.empty != b2.ranges[i].empty).length === 0;
   }
-  function conc(a, b) {
-    return !a.length ? b : !b.length ? a : a.concat(b);
+  function conc(a2, b2) {
+    return !a2.length ? b2 : !b2.length ? a2 : a2.concat(b2);
   }
   var none2 = [];
   var MaxSelectionsPerEvent = 200;
@@ -14586,9 +14615,9 @@
     }
   }
   function popSelection(branch) {
-    let last = branch[branch.length - 1];
+    let last2 = branch[branch.length - 1];
     let newBranch = branch.slice();
-    newBranch[branch.length - 1] = last.setSelAfter(last.selectionsAfter.slice(0, last.selectionsAfter.length - 1));
+    newBranch[branch.length - 1] = last2.setSelAfter(last2.selectionsAfter.slice(0, last2.selectionsAfter.length - 1));
     return newBranch;
   }
   function addMappingToBranch(branch, mapping) {
@@ -14638,8 +14667,8 @@
       return new HistoryState(done, none2, time, userEvent);
     }
     addSelection(selection, time, userEvent, newGroupDelay) {
-      let last = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none2;
-      if (last.length > 0 && time - this.prevTime < newGroupDelay && userEvent == this.prevUserEvent && userEvent && /^select($|\.)/.test(userEvent) && eqSelectionShape(last[last.length - 1], selection))
+      let last2 = this.done.length ? this.done[this.done.length - 1].selectionsAfter : none2;
+      if (last2.length > 0 && time - this.prevTime < newGroupDelay && userEvent == this.prevUserEvent && userEvent && /^select($|\.)/.test(userEvent) && eqSelectionShape(last2[last2.length - 1], selection))
         return this;
       return new HistoryState(addSelection(this.done, selection), this.undone, time, userEvent);
     }
@@ -14696,11 +14725,11 @@
     dispatch(setSel(state, selection));
     return true;
   }
-  function rangeEnd(range, forward) {
-    return EditorSelection.cursor(forward ? range.to : range.from);
+  function rangeEnd(range2, forward) {
+    return EditorSelection.cursor(forward ? range2.to : range2.from);
   }
   function cursorByChar(view, forward) {
-    return moveSel(view, (range) => range.empty ? view.moveByChar(range, forward) : rangeEnd(range, forward));
+    return moveSel(view, (range2) => range2.empty ? view.moveByChar(range2, forward) : rangeEnd(range2, forward));
   }
   function ltrAtCursor(view) {
     return view.textDirectionAt(view.state.selection.main.head) == Direction.LTR;
@@ -14708,7 +14737,7 @@
   var cursorCharLeft = (view) => cursorByChar(view, !ltrAtCursor(view));
   var cursorCharRight = (view) => cursorByChar(view, ltrAtCursor(view));
   function cursorByGroup(view, forward) {
-    return moveSel(view, (range) => range.empty ? view.moveByGroup(range, forward) : rangeEnd(range, forward));
+    return moveSel(view, (range2) => range2.empty ? view.moveByGroup(range2, forward) : rangeEnd(range2, forward));
   }
   var cursorGroupLeft = (view) => cursorByGroup(view, !ltrAtCursor(view));
   var cursorGroupRight = (view) => cursorByGroup(view, ltrAtCursor(view));
@@ -14737,21 +14766,21 @@
       newPos = forward ? pos.to : pos.from;
     return EditorSelection.cursor(newPos, forward ? -1 : 1);
   }
-  var cursorSyntaxLeft = (view) => moveSel(view, (range) => moveBySyntax(view.state, range, !ltrAtCursor(view)));
-  var cursorSyntaxRight = (view) => moveSel(view, (range) => moveBySyntax(view.state, range, ltrAtCursor(view)));
+  var cursorSyntaxLeft = (view) => moveSel(view, (range2) => moveBySyntax(view.state, range2, !ltrAtCursor(view)));
+  var cursorSyntaxRight = (view) => moveSel(view, (range2) => moveBySyntax(view.state, range2, ltrAtCursor(view)));
   function cursorByLine(view, forward) {
-    return moveSel(view, (range) => {
-      if (!range.empty)
-        return rangeEnd(range, forward);
-      let moved = view.moveVertically(range, forward);
-      return moved.head != range.head ? moved : view.moveToLineBoundary(range, forward);
+    return moveSel(view, (range2) => {
+      if (!range2.empty)
+        return rangeEnd(range2, forward);
+      let moved = view.moveVertically(range2, forward);
+      return moved.head != range2.head ? moved : view.moveToLineBoundary(range2, forward);
     });
   }
   var cursorLineUp = (view) => cursorByLine(view, false);
   var cursorLineDown = (view) => cursorByLine(view, true);
   function cursorByPage(view, forward) {
-    let { state } = view, selection = updateSel(state.selection, (range) => {
-      return range.empty ? view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight)) : rangeEnd(range, forward);
+    let { state } = view, selection = updateSel(state.selection, (range2) => {
+      return range2.empty ? view.moveVertically(range2, forward, Math.min(view.dom.clientHeight, innerHeight)) : rangeEnd(range2, forward);
     });
     if (selection.eq(state.selection))
       return false;
@@ -14776,18 +14805,18 @@
     }
     return moved;
   }
-  var cursorLineBoundaryForward = (view) => moveSel(view, (range) => moveByLineBoundary(view, range, true));
-  var cursorLineBoundaryBackward = (view) => moveSel(view, (range) => moveByLineBoundary(view, range, false));
-  var cursorLineStart = (view) => moveSel(view, (range) => EditorSelection.cursor(view.lineBlockAt(range.head).from, 1));
-  var cursorLineEnd = (view) => moveSel(view, (range) => EditorSelection.cursor(view.lineBlockAt(range.head).to, -1));
+  var cursorLineBoundaryForward = (view) => moveSel(view, (range2) => moveByLineBoundary(view, range2, true));
+  var cursorLineBoundaryBackward = (view) => moveSel(view, (range2) => moveByLineBoundary(view, range2, false));
+  var cursorLineStart = (view) => moveSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).from, 1));
+  var cursorLineEnd = (view) => moveSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).to, -1));
   function toMatchingBracket(state, dispatch, extend2) {
-    let found = false, selection = updateSel(state.selection, (range) => {
-      let matching = matchBrackets(state, range.head, -1) || matchBrackets(state, range.head, 1) || range.head > 0 && matchBrackets(state, range.head - 1, 1) || range.head < state.doc.length && matchBrackets(state, range.head + 1, -1);
+    let found = false, selection = updateSel(state.selection, (range2) => {
+      let matching = matchBrackets(state, range2.head, -1) || matchBrackets(state, range2.head, 1) || range2.head > 0 && matchBrackets(state, range2.head - 1, 1) || range2.head < state.doc.length && matchBrackets(state, range2.head + 1, -1);
       if (!matching || !matching.end)
-        return range;
+        return range2;
       found = true;
-      let head = matching.start.from == range.head ? matching.end.to : matching.end.from;
-      return extend2 ? EditorSelection.range(range.anchor, head) : EditorSelection.cursor(head);
+      let head = matching.start.from == range2.head ? matching.end.to : matching.end.from;
+      return extend2 ? EditorSelection.range(range2.anchor, head) : EditorSelection.cursor(head);
     });
     if (!found)
       return false;
@@ -14796,9 +14825,9 @@
   }
   var cursorMatchingBracket = ({ state, dispatch }) => toMatchingBracket(state, dispatch, false);
   function extendSel(view, how) {
-    let selection = updateSel(view.state.selection, (range) => {
-      let head = how(range);
-      return EditorSelection.range(range.anchor, head.head, head.goalColumn);
+    let selection = updateSel(view.state.selection, (range2) => {
+      let head = how(range2);
+      return EditorSelection.range(range2.anchor, head.head, head.goalColumn);
     });
     if (selection.eq(view.state.selection))
       return false;
@@ -14806,31 +14835,31 @@
     return true;
   }
   function selectByChar(view, forward) {
-    return extendSel(view, (range) => view.moveByChar(range, forward));
+    return extendSel(view, (range2) => view.moveByChar(range2, forward));
   }
   var selectCharLeft = (view) => selectByChar(view, !ltrAtCursor(view));
   var selectCharRight = (view) => selectByChar(view, ltrAtCursor(view));
   function selectByGroup(view, forward) {
-    return extendSel(view, (range) => view.moveByGroup(range, forward));
+    return extendSel(view, (range2) => view.moveByGroup(range2, forward));
   }
   var selectGroupLeft = (view) => selectByGroup(view, !ltrAtCursor(view));
   var selectGroupRight = (view) => selectByGroup(view, ltrAtCursor(view));
-  var selectSyntaxLeft = (view) => extendSel(view, (range) => moveBySyntax(view.state, range, !ltrAtCursor(view)));
-  var selectSyntaxRight = (view) => extendSel(view, (range) => moveBySyntax(view.state, range, ltrAtCursor(view)));
+  var selectSyntaxLeft = (view) => extendSel(view, (range2) => moveBySyntax(view.state, range2, !ltrAtCursor(view)));
+  var selectSyntaxRight = (view) => extendSel(view, (range2) => moveBySyntax(view.state, range2, ltrAtCursor(view)));
   function selectByLine(view, forward) {
-    return extendSel(view, (range) => view.moveVertically(range, forward));
+    return extendSel(view, (range2) => view.moveVertically(range2, forward));
   }
   var selectLineUp = (view) => selectByLine(view, false);
   var selectLineDown = (view) => selectByLine(view, true);
   function selectByPage(view, forward) {
-    return extendSel(view, (range) => view.moveVertically(range, forward, Math.min(view.dom.clientHeight, innerHeight)));
+    return extendSel(view, (range2) => view.moveVertically(range2, forward, Math.min(view.dom.clientHeight, innerHeight)));
   }
   var selectPageUp = (view) => selectByPage(view, false);
   var selectPageDown = (view) => selectByPage(view, true);
-  var selectLineBoundaryForward = (view) => extendSel(view, (range) => moveByLineBoundary(view, range, true));
-  var selectLineBoundaryBackward = (view) => extendSel(view, (range) => moveByLineBoundary(view, range, false));
-  var selectLineStart = (view) => extendSel(view, (range) => EditorSelection.cursor(view.lineBlockAt(range.head).from));
-  var selectLineEnd = (view) => extendSel(view, (range) => EditorSelection.cursor(view.lineBlockAt(range.head).to));
+  var selectLineBoundaryForward = (view) => extendSel(view, (range2) => moveByLineBoundary(view, range2, true));
+  var selectLineBoundaryBackward = (view) => extendSel(view, (range2) => moveByLineBoundary(view, range2, false));
+  var selectLineStart = (view) => extendSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).from));
+  var selectLineEnd = (view) => extendSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).to));
   var cursorDocStart = ({ state, dispatch }) => {
     dispatch(setSel(state, { anchor: 0 }));
     return true;
@@ -14852,17 +14881,17 @@
     return true;
   };
   var selectLine = ({ state, dispatch }) => {
-    let ranges = selectedLineBlocks(state).map(({ from, to }) => EditorSelection.range(from, Math.min(to + 1, state.doc.length)));
+    let ranges = selectedLineBlocks(state).map(({ from, to: to2 }) => EditorSelection.range(from, Math.min(to2 + 1, state.doc.length)));
     dispatch(state.update({ selection: EditorSelection.create(ranges), userEvent: "select" }));
     return true;
   };
   var selectParentSyntax = ({ state, dispatch }) => {
-    let selection = updateSel(state.selection, (range) => {
+    let selection = updateSel(state.selection, (range2) => {
       var _a2;
-      let context = syntaxTree(state).resolveInner(range.head, 1);
-      while (!(context.from < range.from && context.to >= range.to || context.to > range.to && context.from <= range.from || !((_a2 = context.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
-        context = context.parent;
-      return EditorSelection.range(context.to, context.from);
+      let context2 = syntaxTree(state).resolveInner(range2.head, 1);
+      while (!(context2.from < range2.from && context2.to >= range2.to || context2.to > range2.to && context2.from <= range2.from || !((_a2 = context2.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
+        context2 = context2.parent;
+      return EditorSelection.range(context2.to, context2.from);
     });
     dispatch(setSel(state, selection));
     return true;
@@ -14882,18 +14911,18 @@
     if (state.readOnly)
       return false;
     let event = "delete.selection";
-    let changes = state.changeByRange((range) => {
-      let { from, to } = range;
-      if (from == to) {
+    let changes = state.changeByRange((range2) => {
+      let { from, to: to2 } = range2;
+      if (from == to2) {
         let towards = by(from);
         if (towards < from)
           event = "delete.backward";
         else if (towards > from)
           event = "delete.forward";
         from = Math.min(from, towards);
-        to = Math.max(to, towards);
+        to2 = Math.max(to2, towards);
       }
-      return from == to ? { range } : { changes: { from, to }, range: EditorSelection.cursor(from) };
+      return from == to2 ? { range: range2 } : { changes: { from, to: to2 }, range: EditorSelection.cursor(from) };
     });
     if (changes.changes.empty)
       return false;
@@ -14903,9 +14932,9 @@
   function skipAtomic(target, pos, forward) {
     if (target instanceof EditorView)
       for (let ranges of target.state.facet(EditorView.atomicRanges).map((f) => f(target)))
-        ranges.between(pos, pos, (from, to) => {
-          if (from < pos && to > pos)
-            pos = forward ? to : from;
+        ranges.between(pos, pos, (from, to2) => {
+          if (from < pos && to2 > pos)
+            pos = forward ? to2 : from;
         });
     return pos;
   }
@@ -14960,10 +14989,10 @@
   var splitLine = ({ state, dispatch }) => {
     if (state.readOnly)
       return false;
-    let changes = state.changeByRange((range) => {
+    let changes = state.changeByRange((range2) => {
       return {
-        changes: { from: range.from, to: range.to, insert: Text.of(["", ""]) },
-        range: EditorSelection.cursor(range.from)
+        changes: { from: range2.from, to: range2.to, insert: Text.of(["", ""]) },
+        range: EditorSelection.cursor(range2.from)
       };
     });
     dispatch(state.update(changes, { scrollIntoView: true, userEvent: "input" }));
@@ -14972,15 +15001,15 @@
   var transposeChars = ({ state, dispatch }) => {
     if (state.readOnly)
       return false;
-    let changes = state.changeByRange((range) => {
-      if (!range.empty || range.from == 0 || range.from == state.doc.length)
-        return { range };
-      let pos = range.from, line = state.doc.lineAt(pos);
+    let changes = state.changeByRange((range2) => {
+      if (!range2.empty || range2.from == 0 || range2.from == state.doc.length)
+        return { range: range2 };
+      let pos = range2.from, line = state.doc.lineAt(pos);
       let from = pos == line.from ? pos - 1 : findClusterBreak(line.text, pos - line.from, false) + line.from;
-      let to = pos == line.to ? pos + 1 : findClusterBreak(line.text, pos - line.from, true) + line.from;
+      let to2 = pos == line.to ? pos + 1 : findClusterBreak(line.text, pos - line.from, true) + line.from;
       return {
-        changes: { from, to, insert: state.doc.slice(pos, to).append(state.doc.slice(from, pos)) },
-        range: EditorSelection.cursor(to)
+        changes: { from, to: to2, insert: state.doc.slice(pos, to2).append(state.doc.slice(from, pos)) },
+        range: EditorSelection.cursor(to2)
       };
     });
     if (changes.changes.empty)
@@ -14990,16 +15019,16 @@
   };
   function selectedLineBlocks(state) {
     let blocks = [], upto = -1;
-    for (let range of state.selection.ranges) {
-      let startLine = state.doc.lineAt(range.from), endLine = state.doc.lineAt(range.to);
-      if (!range.empty && range.to == endLine.from)
-        endLine = state.doc.lineAt(range.to - 1);
+    for (let range2 of state.selection.ranges) {
+      let startLine = state.doc.lineAt(range2.from), endLine = state.doc.lineAt(range2.to);
+      if (!range2.empty && range2.to == endLine.from)
+        endLine = state.doc.lineAt(range2.to - 1);
       if (upto >= startLine.number) {
         let prev = blocks[blocks.length - 1];
         prev.to = endLine.to;
-        prev.ranges.push(range);
+        prev.ranges.push(range2);
       } else {
-        blocks.push({ from: startLine.from, to: endLine.to, ranges: [range] });
+        blocks.push({ from: startLine.from, to: endLine.to, ranges: [range2] });
       }
       upto = endLine.number + 1;
     }
@@ -15054,22 +15083,22 @@
   var deleteLine = (view) => {
     if (view.state.readOnly)
       return false;
-    let { state } = view, changes = state.changes(selectedLineBlocks(state).map(({ from, to }) => {
+    let { state } = view, changes = state.changes(selectedLineBlocks(state).map(({ from, to: to2 }) => {
       if (from > 0)
         from--;
-      else if (to < state.doc.length)
-        to++;
-      return { from, to };
+      else if (to2 < state.doc.length)
+        to2++;
+      return { from, to: to2 };
     }));
-    let selection = updateSel(state.selection, (range) => view.moveVertically(range, true)).map(changes);
+    let selection = updateSel(state.selection, (range2) => view.moveVertically(range2, true)).map(changes);
     view.dispatch({ changes, selection, scrollIntoView: true, userEvent: "delete.line" });
     return true;
   };
   function isBetweenBrackets(state, pos) {
     if (/\(\)|\[\]|\{\}/.test(state.sliceDoc(pos - 1, pos + 1)))
       return { from: pos, to: pos };
-    let context = syntaxTree(state).resolveInner(pos);
-    let before = context.childBefore(pos), after = context.childAfter(pos), closedBy;
+    let context2 = syntaxTree(state).resolveInner(pos);
+    let before = context2.childBefore(pos), after = context2.childAfter(pos), closedBy;
     if (before && after && before.to <= pos && after.from >= pos && (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 && state.doc.lineAt(before.to).from == state.doc.lineAt(after.from).from)
       return { from: before.to, to: after.from };
     return null;
@@ -15080,26 +15109,26 @@
     return ({ state, dispatch }) => {
       if (state.readOnly)
         return false;
-      let changes = state.changeByRange((range) => {
-        let { from, to } = range, line = state.doc.lineAt(from);
-        let explode = !atEof && from == to && isBetweenBrackets(state, from);
+      let changes = state.changeByRange((range2) => {
+        let { from, to: to2 } = range2, line = state.doc.lineAt(from);
+        let explode = !atEof && from == to2 && isBetweenBrackets(state, from);
         if (atEof)
-          from = to = (to <= line.to ? line : state.doc.lineAt(to)).to;
+          from = to2 = (to2 <= line.to ? line : state.doc.lineAt(to2)).to;
         let cx = new IndentContext(state, { simulateBreak: from, simulateDoubleBreak: !!explode });
         let indent = getIndentation(cx, from);
         if (indent == null)
           indent = /^\s*/.exec(state.doc.lineAt(from).text)[0].length;
-        while (to < line.to && /\s/.test(line.text[to - line.from]))
-          to++;
+        while (to2 < line.to && /\s/.test(line.text[to2 - line.from]))
+          to2++;
         if (explode)
-          ({ from, to } = explode);
+          ({ from, to: to2 } = explode);
         else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from)))
           from = line.from;
         let insert2 = ["", indentString(state, indent)];
         if (explode)
           insert2.push(indentString(state, cx.lineIndent(line.from, -1)));
         return {
-          changes: { from, to, insert: Text.of(insert2) },
+          changes: { from, to: to2, insert: Text.of(insert2) },
           range: EditorSelection.cursor(from + 1 + insert2[1].length)
         };
       });
@@ -15109,12 +15138,12 @@
   }
   function changeBySelectedLine(state, f) {
     let atLine = -1;
-    return state.changeByRange((range) => {
+    return state.changeByRange((range2) => {
       let changes = [];
-      for (let pos = range.from; pos <= range.to; ) {
+      for (let pos = range2.from; pos <= range2.to; ) {
         let line = state.doc.lineAt(pos);
-        if (line.number > atLine && (range.empty || range.to > line.from)) {
-          f(line, changes, range);
+        if (line.number > atLine && (range2.empty || range2.to > line.from)) {
+          f(line, changes, range2);
           atLine = line.number;
         }
         pos = line.to + 1;
@@ -15122,7 +15151,7 @@
       let changeSet = state.changes(changes);
       return {
         changes,
-        range: EditorSelection.range(changeSet.mapPos(range.anchor, 1), changeSet.mapPos(range.head, 1))
+        range: EditorSelection.range(changeSet.mapPos(range2.anchor, 1), changeSet.mapPos(range2.head, 1))
       };
     });
   }
@@ -15130,19 +15159,19 @@
     if (state.readOnly)
       return false;
     let updated = /* @__PURE__ */ Object.create(null);
-    let context = new IndentContext(state, { overrideIndentation: (start) => {
+    let context2 = new IndentContext(state, { overrideIndentation: (start) => {
       let found = updated[start];
       return found == null ? -1 : found;
     } });
-    let changes = changeBySelectedLine(state, (line, changes2, range) => {
-      let indent = getIndentation(context, line.from);
+    let changes = changeBySelectedLine(state, (line, changes2, range2) => {
+      let indent = getIndentation(context2, line.from);
       if (indent == null)
         return;
       if (!/\S/.test(line.text))
         indent = 0;
       let cur2 = /^\s*/.exec(line.text)[0];
       let norm = indentString(state, indent);
-      if (cur2 != norm || range.from < line.from + cur2.length) {
+      if (cur2 != norm || range2.from < line.from + cur2.length) {
         updated[line.from] = indent;
         changes2.push({ from: line.from, to: line.from + cur2.length, insert: norm });
       }
@@ -15216,7 +15245,7 @@
     { key: "Mod-Delete", mac: "Alt-Delete", run: deleteGroupForward },
     { mac: "Mod-Backspace", run: deleteToLineStart },
     { mac: "Mod-Delete", run: deleteToLineEnd }
-  ].concat(/* @__PURE__ */ emacsStyleKeymap.map((b) => ({ mac: b.key, run: b.run, shift: b.shift })));
+  ].concat(/* @__PURE__ */ emacsStyleKeymap.map((b2) => ({ mac: b2.key, run: b2.run, shift: b2.shift })));
   var defaultKeymap = /* @__PURE__ */ [
     { key: "Alt-ArrowLeft", mac: "Ctrl-ArrowLeft", run: cursorSyntaxLeft, shift: selectSyntaxLeft },
     { key: "Alt-ArrowRight", mac: "Ctrl-ArrowRight", run: cursorSyntaxRight, shift: selectSyntaxRight },
@@ -15246,11 +15275,11 @@
     if (next && typeof next == "object" && next.nodeType == null && !Array.isArray(next)) {
       for (var name2 in next)
         if (Object.prototype.hasOwnProperty.call(next, name2)) {
-          var value = next[name2];
-          if (typeof value == "string")
-            elt.setAttribute(name2, value);
-          else if (value != null)
-            elt[name2] = value;
+          var value2 = next[name2];
+          if (typeof value2 == "string")
+            elt.setAttribute(name2, value2);
+          else if (value2 != null)
+            elt[name2] = value2;
         }
       i++;
     }
@@ -15275,13 +15304,13 @@
   // node_modules/@codemirror/search/dist/index.js
   var basicNormalize = typeof String.prototype.normalize == "function" ? (x) => x.normalize("NFKD") : (x) => x;
   var SearchCursor = class {
-    constructor(text, query, from = 0, to = text.length, normalize) {
+    constructor(text, query, from = 0, to2 = text.length, normalize) {
       this.value = { from: 0, to: 0 };
       this.done = false;
       this.matches = [];
       this.buffer = "";
       this.bufferPos = 0;
-      this.iter = text.iterRange(from, to);
+      this.iter = text.iterRange(from, to2);
       this.bufferStart = from;
       this.normalize = normalize ? (x) => normalize(basicNormalize(x)) : basicNormalize;
       this.query = this.normalize(query);
@@ -15359,13 +15388,13 @@
   var empty = { from: -1, to: -1, match: /* @__PURE__ */ /.*/.exec("") };
   var baseFlags = "gm" + (/x/.unicode == null ? "" : "u");
   var RegExpCursor = class {
-    constructor(text, query, options, from = 0, to = text.length) {
-      this.to = to;
+    constructor(text, query, options, from = 0, to2 = text.length) {
+      this.to = to2;
       this.curLine = "";
       this.done = false;
       this.value = empty;
       if (/\\[sWDnr]|\n|\r|\[\^/.test(query))
-        return new MultilineRegExpCursor(text, query, options, from, to);
+        return new MultilineRegExpCursor(text, query, options, from, to2);
       this.re = new RegExp(query, baseFlags + ((options === null || options === void 0 ? void 0 : options.ignoreCase) ? "i" : ""));
       this.iter = text.iter();
       let startLine = text.lineAt(from);
@@ -15396,12 +15425,12 @@
         this.re.lastIndex = off;
         let match = this.matchPos <= this.to && this.re.exec(this.curLine);
         if (match) {
-          let from = this.curLineStart + match.index, to = from + match[0].length;
-          this.matchPos = to + (from == to ? 1 : 0);
+          let from = this.curLineStart + match.index, to2 = from + match[0].length;
+          this.matchPos = to2 + (from == to2 ? 1 : 0);
           if (from == this.curLine.length)
             this.nextLine();
-          if (from < to || from > this.value.to) {
-            this.value = { from, to, match };
+          if (from < to2 || from > this.value.to) {
+            this.value = { from, to: to2, match };
             return this;
           }
           off = this.matchPos - this.curLineStart;
@@ -15424,30 +15453,30 @@
     get to() {
       return this.from + this.text.length;
     }
-    static get(doc2, from, to) {
+    static get(doc2, from, to2) {
       let cached = flattened.get(doc2);
-      if (!cached || cached.from >= to || cached.to <= from) {
-        let flat = new FlattenedDoc(from, doc2.sliceString(from, to));
+      if (!cached || cached.from >= to2 || cached.to <= from) {
+        let flat = new FlattenedDoc(from, doc2.sliceString(from, to2));
         flattened.set(doc2, flat);
         return flat;
       }
-      if (cached.from == from && cached.to == to)
+      if (cached.from == from && cached.to == to2)
         return cached;
       let { text, from: cachedFrom } = cached;
       if (cachedFrom > from) {
         text = doc2.sliceString(from, cachedFrom) + text;
         cachedFrom = from;
       }
-      if (cached.to < to)
-        text += doc2.sliceString(cached.to, to);
+      if (cached.to < to2)
+        text += doc2.sliceString(cached.to, to2);
       flattened.set(doc2, new FlattenedDoc(cachedFrom, text));
-      return new FlattenedDoc(from, text.slice(from - cachedFrom, to - cachedFrom));
+      return new FlattenedDoc(from, text.slice(from - cachedFrom, to2 - cachedFrom));
     }
   };
   var MultilineRegExpCursor = class {
-    constructor(text, query, options, from, to) {
+    constructor(text, query, options, from, to2) {
       this.text = text;
-      this.to = to;
+      this.to = to2;
       this.done = false;
       this.value = empty;
       this.matchPos = from;
@@ -15468,9 +15497,9 @@
         if (match && this.flat.to < this.to && match.index + match[0].length > this.flat.text.length - 10)
           match = null;
         if (match) {
-          let from = this.flat.from + match.index, to = from + match[0].length;
-          this.value = { from, to, match };
-          this.matchPos = to + (from == to ? 1 : 0);
+          let from = this.flat.from + match.index, to2 = from + match[0].length;
+          this.value = { from, to: to2, match };
+          this.matchPos = to2 + (from == to2 ? 1 : 0);
           return this;
         } else {
           if (this.flat.to == this.to) {
@@ -15545,11 +15574,11 @@
     create() {
       return true;
     },
-    update(value, tr) {
+    update(value2, tr) {
       for (let e of tr.effects)
         if (e.is(dialogEffect))
-          value = e.value;
-      return value;
+          value2 = e.value;
+      return value2;
     },
     provide: (f) => showPanel.from(f, (val) => val ? createLineDialog : null)
   });
@@ -15581,7 +15610,7 @@
   var highlightConfig = /* @__PURE__ */ Facet.define({
     combine(options) {
       return combineConfig(options, defaultHighlightOptions, {
-        highlightWordAroundCursor: (a, b) => a || b,
+        highlightWordAroundCursor: (a2, b2) => a2 || b2,
         minSelectionLength: Math.min,
         maxMatches: Math.min
       });
@@ -15595,11 +15624,11 @@
   }
   var matchDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-selectionMatch" });
   var mainMatchDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-selectionMatch cm-selectionMatch-main" });
-  function insideWordBoundaries(check, state, from, to) {
-    return (from == 0 || check(state.sliceDoc(from - 1, from)) != CharCategory.Word) && (to == state.doc.length || check(state.sliceDoc(to, to + 1)) != CharCategory.Word);
+  function insideWordBoundaries(check, state, from, to2) {
+    return (from == 0 || check(state.sliceDoc(from - 1, from)) != CharCategory.Word) && (to2 == state.doc.length || check(state.sliceDoc(to2, to2 + 1)) != CharCategory.Word);
   }
-  function insideWord(check, state, from, to) {
-    return check(state.sliceDoc(from, from + 1)) == CharCategory.Word && check(state.sliceDoc(to - 1, to)) == CharCategory.Word;
+  function insideWord(check, state, from, to2) {
+    return check(state.sliceDoc(from, from + 1)) == CharCategory.Word && check(state.sliceDoc(to2 - 1, to2)) == CharCategory.Word;
   }
   var matchHighlighter = /* @__PURE__ */ ViewPlugin.fromClass(class {
     constructor(view) {
@@ -15614,26 +15643,26 @@
       let { state } = view, sel = state.selection;
       if (sel.ranges.length > 1)
         return Decoration.none;
-      let range = sel.main, query, check = null;
-      if (range.empty) {
+      let range2 = sel.main, query, check = null;
+      if (range2.empty) {
         if (!conf.highlightWordAroundCursor)
           return Decoration.none;
-        let word = state.wordAt(range.head);
+        let word = state.wordAt(range2.head);
         if (!word)
           return Decoration.none;
-        check = state.charCategorizer(range.head);
+        check = state.charCategorizer(range2.head);
         query = state.sliceDoc(word.from, word.to);
       } else {
-        let len = range.to - range.from;
+        let len = range2.to - range2.from;
         if (len < conf.minSelectionLength || len > 200)
           return Decoration.none;
         if (conf.wholeWords) {
-          query = state.sliceDoc(range.from, range.to);
-          check = state.charCategorizer(range.head);
-          if (!(insideWordBoundaries(check, state, range.from, range.to) && insideWord(check, state, range.from, range.to)))
+          query = state.sliceDoc(range2.from, range2.to);
+          check = state.charCategorizer(range2.head);
+          if (!(insideWordBoundaries(check, state, range2.from, range2.to) && insideWord(check, state, range2.from, range2.to)))
             return Decoration.none;
         } else {
-          query = state.sliceDoc(range.from, range.to).trim();
+          query = state.sliceDoc(range2.from, range2.to).trim();
           if (!query)
             return Decoration.none;
         }
@@ -15642,12 +15671,12 @@
       for (let part of view.visibleRanges) {
         let cursor = new SearchCursor(state.doc, query, part.from, part.to);
         while (!cursor.next().done) {
-          let { from, to } = cursor.value;
-          if (!check || insideWordBoundaries(check, state, from, to)) {
-            if (range.empty && from <= range.from && to >= range.to)
-              deco.push(mainMatchDeco.range(from, to));
-            else if (from >= range.to || to <= range.from)
-              deco.push(matchDeco.range(from, to));
+          let { from, to: to2 } = cursor.value;
+          if (!check || insideWordBoundaries(check, state, from, to2)) {
+            if (range2.empty && from <= range2.from && to2 >= range2.to)
+              deco.push(mainMatchDeco.range(from, to2));
+            else if (from >= range2.to || to2 <= range2.from)
+              deco.push(matchDeco.range(from, to2));
             if (deco.length > conf.maxMatches)
               return Decoration.none;
           }
@@ -15664,7 +15693,7 @@
   });
   var selectWord = ({ state, dispatch }) => {
     let { selection } = state;
-    let newSel = EditorSelection.create(selection.ranges.map((range) => state.wordAt(range.head) || EditorSelection.cursor(range.head)), selection.mainIndex);
+    let newSel = EditorSelection.create(selection.ranges.map((range2) => state.wordAt(range2.head) || EditorSelection.cursor(range2.head)), selection.mainIndex);
     if (newSel.eq(selection))
       return false;
     dispatch(state.update({ selection: newSel }));
@@ -15699,12 +15728,12 @@
     let searchedText = state.sliceDoc(ranges[0].from, ranges[0].to);
     if (state.selection.ranges.some((r) => state.sliceDoc(r.from, r.to) != searchedText))
       return false;
-    let range = findNextOccurrence(state, searchedText);
-    if (!range)
+    let range2 = findNextOccurrence(state, searchedText);
+    if (!range2)
       return false;
     dispatch(state.update({
-      selection: state.selection.addRange(EditorSelection.range(range.from, range.to), false),
-      effects: EditorView.scrollIntoView(range.to)
+      selection: state.selection.addRange(EditorSelection.range(range2.from, range2.to), false),
+      effects: EditorView.scrollIntoView(range2.to)
     }));
     return true;
   };
@@ -15714,7 +15743,7 @@
       return {
         top: configs.reduce((val, conf) => val !== null && val !== void 0 ? val : conf.top, void 0) || false,
         caseSensitive: configs.reduce((val, conf) => val !== null && val !== void 0 ? val : conf.caseSensitive, void 0) || false,
-        createPanel: ((_a2 = configs.find((c) => c.createPanel)) === null || _a2 === void 0 ? void 0 : _a2.createPanel) || ((view) => new SearchPanel(view))
+        createPanel: ((_a2 = configs.find((c4) => c4.createPanel)) === null || _a2 === void 0 ? void 0 : _a2.createPanel) || ((view) => new SearchPanel(view))
       };
     }
   });
@@ -15733,8 +15762,8 @@
     create() {
       return this.regexp ? new RegExpQuery(this) : new StringQuery(this);
     }
-    getCursor(doc2, from = 0, to = doc2.length) {
-      return this.regexp ? regexpCursor(this, doc2, from, to) : stringCursor(this, doc2, from, to);
+    getCursor(doc2, from = 0, to2 = doc2.length) {
+      return this.regexp ? regexpCursor(this, doc2, from, to2) : stringCursor(this, doc2, from, to2);
     }
   };
   var QueryType2 = class {
@@ -15742,8 +15771,8 @@
       this.spec = spec;
     }
   };
-  function stringCursor(spec, doc2, from, to) {
-    return new SearchCursor(doc2, spec.unquoted, from, to, spec.caseSensitive ? void 0 : (x) => x.toLowerCase());
+  function stringCursor(spec, doc2, from, to2) {
+    return new SearchCursor(doc2, spec.unquoted, from, to2, spec.caseSensitive ? void 0 : (x) => x.toLowerCase());
   }
   var StringQuery = class extends QueryType2 {
     constructor(spec) {
@@ -15755,14 +15784,14 @@
         cursor = stringCursor(this.spec, doc2, 0, curFrom).nextOverlapping();
       return cursor.done ? null : cursor.value;
     }
-    prevMatchInRange(doc2, from, to) {
-      for (let pos = to; ; ) {
+    prevMatchInRange(doc2, from, to2) {
+      for (let pos = to2; ; ) {
         let start = Math.max(from, pos - 1e4 - this.spec.unquoted.length);
-        let cursor = stringCursor(this.spec, doc2, start, pos), range = null;
+        let cursor = stringCursor(this.spec, doc2, start, pos), range2 = null;
         while (!cursor.nextOverlapping().done)
-          range = cursor.value;
-        if (range)
-          return range;
+          range2 = cursor.value;
+        if (range2)
+          return range2;
         if (start == from)
           return null;
         pos -= 1e4;
@@ -15783,14 +15812,14 @@
       }
       return ranges;
     }
-    highlight(doc2, from, to, add2) {
-      let cursor = stringCursor(this.spec, doc2, Math.max(0, from - this.spec.unquoted.length), Math.min(to + this.spec.unquoted.length, doc2.length));
+    highlight(doc2, from, to2, add2) {
+      let cursor = stringCursor(this.spec, doc2, Math.max(0, from - this.spec.unquoted.length), Math.min(to2 + this.spec.unquoted.length, doc2.length));
       while (!cursor.next().done)
         add2(cursor.value.from, cursor.value.to);
     }
   };
-  function regexpCursor(spec, doc2, from, to) {
-    return new RegExpCursor(doc2, spec.search, spec.caseSensitive ? void 0 : { ignoreCase: true }, from, to);
+  function regexpCursor(spec, doc2, from, to2) {
+    return new RegExpCursor(doc2, spec.search, spec.caseSensitive ? void 0 : { ignoreCase: true }, from, to2);
   }
   var RegExpQuery = class extends QueryType2 {
     nextMatch(doc2, curFrom, curTo) {
@@ -15799,14 +15828,14 @@
         cursor = regexpCursor(this.spec, doc2, 0, curFrom).next();
       return cursor.done ? null : cursor.value;
     }
-    prevMatchInRange(doc2, from, to) {
+    prevMatchInRange(doc2, from, to2) {
       for (let size = 1; ; size++) {
-        let start = Math.max(from, to - size * 1e4);
-        let cursor = regexpCursor(this.spec, doc2, start, to), range = null;
+        let start = Math.max(from, to2 - size * 1e4);
+        let cursor = regexpCursor(this.spec, doc2, start, to2), range2 = null;
         while (!cursor.next().done)
-          range = cursor.value;
-        if (range && (start == from || range.from > start + 10))
-          return range;
+          range2 = cursor.value;
+        if (range2 && (start == from || range2.from > start + 10))
+          return range2;
         if (start == from)
           return null;
       }
@@ -15815,7 +15844,7 @@
       return this.prevMatchInRange(doc2, 0, curFrom) || this.prevMatchInRange(doc2, curTo, doc2.length);
     }
     getReplacement(result) {
-      return this.spec.replace.replace(/\$([$&\d+])/g, (m, i) => i == "$" ? "$" : i == "&" ? result.match[0] : i != "0" && +i < result.match.length ? result.match[i] : m);
+      return this.spec.replace.replace(/\$([$&\d+])/g, (m3, i) => i == "$" ? "$" : i == "&" ? result.match[0] : i != "0" && +i < result.match.length ? result.match[i] : m3);
     }
     matchAll(doc2, limit) {
       let cursor = regexpCursor(this.spec, doc2, 0, doc2.length), ranges = [];
@@ -15826,8 +15855,8 @@
       }
       return ranges;
     }
-    highlight(doc2, from, to, add2) {
-      let cursor = regexpCursor(this.spec, doc2, Math.max(0, from - 250), Math.min(to + 250, doc2.length));
+    highlight(doc2, from, to2, add2) {
+      let cursor = regexpCursor(this.spec, doc2, Math.max(0, from - 250), Math.min(to2 + 250, doc2.length));
       while (!cursor.next().done)
         add2(cursor.value.from, cursor.value.to);
     }
@@ -15838,14 +15867,14 @@
     create(state) {
       return new SearchState(defaultQuery(state).create(), null);
     },
-    update(value, tr) {
+    update(value2, tr) {
       for (let effect of tr.effects) {
         if (effect.is(setSearchQuery))
-          value = new SearchState(effect.value.create(), value.panel);
+          value2 = new SearchState(effect.value.create(), value2.panel);
         else if (effect.is(togglePanel))
-          value = new SearchState(value.query, effect.value ? createSearchPanel : null);
+          value2 = new SearchState(value2.query, effect.value ? createSearchPanel : null);
       }
-      return value;
+      return value2;
     },
     provide: (f) => showPanel.from(f, (val) => val.panel)
   });
@@ -15873,12 +15902,12 @@
       let { view } = this;
       let builder = new RangeSetBuilder();
       for (let i = 0, ranges = view.visibleRanges, l = ranges.length; i < l; i++) {
-        let { from, to } = ranges[i];
-        while (i < l - 1 && to > ranges[i + 1].from - 2 * 250)
-          to = ranges[++i].to;
-        query.highlight(view.state.doc, from, to, (from2, to2) => {
-          let selected = view.state.selection.ranges.some((r) => r.from == from2 && r.to == to2);
-          builder.add(from2, to2, selected ? selectedMatchMark : matchMark);
+        let { from, to: to2 } = ranges[i];
+        while (i < l - 1 && to2 > ranges[i + 1].from - 2 * 250)
+          to2 = ranges[++i].to;
+        query.highlight(view.state.doc, from, to2, (from2, to3) => {
+          let selected = view.state.selection.ranges.some((r) => r.from == from2 && r.to == to3);
+          builder.add(from2, to3, selected ? selectedMatchMark : matchMark);
         });
       }
       return builder.finish();
@@ -15893,9 +15922,9 @@
     };
   }
   var findNext = /* @__PURE__ */ searchCommand((view, { query }) => {
-    let { from, to } = view.state.selection.main;
-    let next = query.nextMatch(view.state.doc, from, to);
-    if (!next || next.from == from && next.to == to)
+    let { from, to: to2 } = view.state.selection.main;
+    let next = query.nextMatch(view.state.doc, from, to2);
+    if (!next || next.from == from && next.to == to2)
       return false;
     view.dispatch({
       selection: { anchor: next.from, head: next.to },
@@ -15906,14 +15935,14 @@
     return true;
   });
   var findPrevious = /* @__PURE__ */ searchCommand((view, { query }) => {
-    let { state } = view, { from, to } = state.selection.main;
-    let range = query.prevMatch(state.doc, from, to);
-    if (!range)
+    let { state } = view, { from, to: to2 } = state.selection.main;
+    let range2 = query.prevMatch(state.doc, from, to2);
+    if (!range2)
       return false;
     view.dispatch({
-      selection: { anchor: range.from, head: range.to },
+      selection: { anchor: range2.from, head: range2.to },
       scrollIntoView: true,
-      effects: announceMatch(view, range),
+      effects: announceMatch(view, range2),
       userEvent: "select.search"
     });
     return true;
@@ -15932,9 +15961,9 @@
     let sel = state.selection;
     if (sel.ranges.length > 1 || sel.main.empty)
       return false;
-    let { from, to } = sel.main;
+    let { from, to: to2 } = sel.main;
     let ranges = [], main = 0;
-    for (let cur2 = new SearchCursor(state.doc, state.sliceDoc(from, to)); !cur2.next().done; ) {
+    for (let cur2 = new SearchCursor(state.doc, state.sliceDoc(from, to2)); !cur2.next().done; ) {
       if (ranges.length > 1e3)
         return false;
       if (cur2.value.from == from)
@@ -15948,14 +15977,14 @@
     return true;
   };
   var replaceNext = /* @__PURE__ */ searchCommand((view, { query }) => {
-    let { state } = view, { from, to } = state.selection.main;
+    let { state } = view, { from, to: to2 } = state.selection.main;
     if (state.readOnly)
       return false;
     let next = query.nextMatch(state.doc, from, from);
     if (!next)
       return false;
     let changes = [], selection, replacement;
-    if (next.from == from && next.to == to) {
+    if (next.from == from && next.to == to2) {
       replacement = state.toText(query.getReplacement(next));
       changes.push({ from: next.from, to: next.to, insert: replacement });
       next = query.nextMatch(state.doc, next.from, next.to);
@@ -15977,8 +16006,8 @@
     if (view.state.readOnly)
       return false;
     let changes = query.matchAll(view.state.doc, 1e9).map((match) => {
-      let { from, to } = match;
-      return { from, to, insert: query.getReplacement(match) };
+      let { from, to: to2 } = match;
+      return { from, to: to2, insert: query.getReplacement(match) };
     });
     if (!changes.length)
       return false;
@@ -16150,9 +16179,9 @@
   }
   var AnnounceMargin = 30;
   var Break = /[\s\.,:;?!]/;
-  function announceMatch(view, { from, to }) {
-    let lineStart = view.state.doc.lineAt(from).from, lineEnd = view.state.doc.lineAt(to).to;
-    let start = Math.max(lineStart, from - AnnounceMargin), end = Math.min(lineEnd, to + AnnounceMargin);
+  function announceMatch(view, { from, to: to2 }) {
+    let lineStart = view.state.doc.lineAt(from).from, lineEnd = view.state.doc.lineAt(to2).to;
+    let start = Math.max(lineStart, from - AnnounceMargin), end = Math.min(lineEnd, to2 + AnnounceMargin);
     let text = view.state.sliceDoc(start, end);
     if (start != lineStart) {
       for (let i = 0; i < AnnounceMargin; i++)
@@ -16235,8 +16264,8 @@
     get aborted() {
       return this.abortListeners == null;
     }
-    addEventListener(type, listener) {
-      if (type == "abort" && this.abortListeners)
+    addEventListener(type2, listener) {
+      if (type2 == "abort" && this.abortListeners)
         this.abortListeners.push(listener);
     }
   };
@@ -16260,9 +16289,9 @@
   function completeFromList(list) {
     let options = list.map((o) => typeof o == "string" ? { label: o } : o);
     let [validFor, match] = options.every((o) => /^\w+$/.test(o.label)) ? [/\w*$/, /\w+$/] : prefixMatch(options);
-    return (context) => {
-      let token = context.matchBefore(match);
-      return token || context.explicit ? { from: token ? token.from : context.pos, options, validFor } : null;
+    return (context2) => {
+      let token = context2.matchBefore(match);
+      return token || context2.explicit ? { from: token ? token.from : context2.pos, options, validFor } : null;
     };
   }
   var Option = class {
@@ -16283,19 +16312,19 @@
       return expr;
     return new RegExp(`${addStart ? "^" : ""}(?:${source})${addEnd ? "$" : ""}`, (_a2 = expr.flags) !== null && _a2 !== void 0 ? _a2 : expr.ignoreCase ? "i" : "");
   }
-  function insertCompletionText(state, text, from, to) {
-    return Object.assign(Object.assign({}, state.changeByRange((range) => {
-      if (range == state.selection.main)
+  function insertCompletionText(state, text, from, to2) {
+    return Object.assign(Object.assign({}, state.changeByRange((range2) => {
+      if (range2 == state.selection.main)
         return {
-          changes: { from, to, insert: text },
+          changes: { from, to: to2, insert: text },
           range: EditorSelection.cursor(from + text.length)
         };
-      let len = to - from;
-      if (!range.empty || len && state.sliceDoc(range.from - len, range.from) != state.sliceDoc(from, to))
-        return { range };
+      let len = to2 - from;
+      if (!range2.empty || len && state.sliceDoc(range2.from - len, range2.from) != state.sliceDoc(from, to2))
+        return { range: range2 };
       return {
-        changes: { from: range.from - len, to: range.from, insert: text },
-        range: EditorSelection.cursor(range.from - len + text.length)
+        changes: { from: range2.from - len, to: range2.from, insert: text },
+        range: EditorSelection.cursor(range2.from - len + text.length)
       };
     })), { userEvent: "input.complete" });
   }
@@ -16324,12 +16353,12 @@
       this.any = [];
       this.precise = [];
       this.byWord = [];
-      for (let p = 0; p < pattern.length; ) {
-        let char = codePointAt(pattern, p), size = codePointSize(char);
+      for (let p2 = 0; p2 < pattern.length; ) {
+        let char = codePointAt(pattern, p2), size = codePointSize(char);
         this.chars.push(char);
-        let part = pattern.slice(p, p + size), upper = part.toUpperCase();
+        let part = pattern.slice(p2, p2 + size), upper = part.toUpperCase();
         this.folded.push(codePointAt(upper == part ? part.toLowerCase() : upper, 0));
-        p += size;
+        p2 += size;
       }
       this.astral = pattern.length != this.chars.length;
     }
@@ -16377,14 +16406,14 @@
             }
           }
         }
-        let ch, type = next < 255 ? next >= 48 && next <= 57 || next >= 97 && next <= 122 ? 2 : next >= 65 && next <= 90 ? 1 : 0 : (ch = fromCodePoint(next)) != ch.toLowerCase() ? 1 : ch != ch.toUpperCase() ? 2 : 0;
-        if (!i || type == 1 && hasLower || prevType == 0 && type != 0) {
+        let ch, type2 = next < 255 ? next >= 48 && next <= 57 || next >= 97 && next <= 122 ? 2 : next >= 65 && next <= 90 ? 1 : 0 : (ch = fromCodePoint(next)) != ch.toLowerCase() ? 1 : ch != ch.toUpperCase() ? 2 : 0;
+        if (!i || type2 == 1 && hasLower || prevType == 0 && type2 != 0) {
           if (chars[byWordTo] == next || folded[byWordTo] == next && (byWordFolded = true))
             byWord[byWordTo++] = i;
           else if (byWord.length)
             wordAdjacent = false;
         }
-        prevType = type;
+        prevType = type2;
         i += codePointSize(next);
       }
       if (byWordTo == len && byWord[0] == 0 && wordAdjacent)
@@ -16402,12 +16431,12 @@
     result(score2, positions, word) {
       let result = [score2 - word.length], i = 1;
       for (let pos of positions) {
-        let to = pos + (this.astral ? codePointSize(codePointAt(word, pos)) : 1);
+        let to2 = pos + (this.astral ? codePointSize(codePointAt(word, pos)) : 1);
         if (i > 1 && result[i - 1] == pos)
-          result[i - 1] = to;
+          result[i - 1] = to2;
         else {
           result[i++] = pos;
-          result[i++] = to;
+          result[i++] = to2;
         }
       }
       return result;
@@ -16426,16 +16455,16 @@
         icons: true,
         addToOptions: []
       }, {
-        defaultKeymap: (a, b) => a && b,
-        closeOnBlur: (a, b) => a && b,
-        icons: (a, b) => a && b,
-        optionClass: (a, b) => (c) => joinClass(a(c), b(c)),
-        addToOptions: (a, b) => a.concat(b)
+        defaultKeymap: (a2, b2) => a2 && b2,
+        closeOnBlur: (a2, b2) => a2 && b2,
+        icons: (a2, b2) => a2 && b2,
+        optionClass: (a2, b2) => (c4) => joinClass(a2(c4), b2(c4)),
+        addToOptions: (a2, b2) => a2.concat(b2)
       });
     }
   });
-  function joinClass(a, b) {
-    return a ? b ? a + " " + b : a : b;
+  function joinClass(a2, b2) {
+    return a2 ? b2 ? a2 + " " + b2 : a2 : b2;
   }
   function optionContent(config2) {
     let content2 = config2.addToOptions.slice();
@@ -16457,13 +16486,13 @@
         labelElt.className = "cm-completionLabel";
         let { label } = completion, off = 0;
         for (let j = 1; j < match.length; ) {
-          let from = match[j++], to = match[j++];
+          let from = match[j++], to2 = match[j++];
           if (from > off)
             labelElt.appendChild(document.createTextNode(label.slice(off, from)));
           let span = labelElt.appendChild(document.createElement("span"));
-          span.appendChild(document.createTextNode(label.slice(from, to)));
+          span.appendChild(document.createTextNode(label.slice(from, to2)));
           span.className = "cm-completionMatchedText";
-          off = to;
+          off = to2;
         }
         if (off < label.length)
           labelElt.appendChild(document.createTextNode(label.slice(off)));
@@ -16481,17 +16510,17 @@
       },
       position: 80
     });
-    return content2.sort((a, b) => a.position - b.position).map((a) => a.render);
+    return content2.sort((a2, b2) => a2.position - b2.position).map((a2) => a2.render);
   }
-  function rangeAroundSelected(total, selected, max) {
-    if (total <= max)
+  function rangeAroundSelected(total, selected, max2) {
+    if (total <= max2)
       return { from: 0, to: total };
     if (selected <= total >> 1) {
-      let off2 = Math.floor(selected / max);
-      return { from: off2 * max, to: (off2 + 1) * max };
+      let off2 = Math.floor(selected / max2);
+      return { from: off2 * max2, to: (off2 + 1) * max2 };
     }
-    let off = Math.floor((total - selected) / max);
-    return { from: total - (off + 1) * max, to: total - off * max };
+    let off = Math.floor((total - selected) / max2);
+    return { from: total - (off + 1) * max2, to: total - off * max2 };
   }
   var CompletionTooltip = class {
     constructor(view, stateField) {
@@ -16578,21 +16607,21 @@
       this.view.requestMeasure(this.placeInfo);
     }
     updateSelectedOption(selected) {
-      let set = null;
+      let set2 = null;
       for (let opt = this.list.firstChild, i = this.range.from; opt; opt = opt.nextSibling, i++) {
         if (i == selected) {
           if (!opt.hasAttribute("aria-selected")) {
             opt.setAttribute("aria-selected", "true");
-            set = opt;
+            set2 = opt;
           }
         } else {
           if (opt.hasAttribute("aria-selected"))
             opt.removeAttribute("aria-selected");
         }
       }
-      if (set)
-        scrollIntoView2(this.list, set);
-      return set;
+      if (set2)
+        scrollIntoView2(this.list, set2);
+      return set2;
     }
     measureInfo() {
       let sel = this.dom.querySelector("[aria-selected]");
@@ -16621,13 +16650,13 @@
         }
       }
     }
-    createListBox(options, id, range) {
+    createListBox(options, id, range2) {
       const ul = document.createElement("ul");
       ul.id = id;
       ul.setAttribute("role", "listbox");
       ul.setAttribute("aria-expanded", "true");
       ul.setAttribute("aria-label", this.view.state.phrase("Completions"));
-      for (let i = range.from; i < range.to; i++) {
+      for (let i = range2.from; i < range2.to; i++) {
         let { completion, match } = options[i];
         const li = ul.appendChild(document.createElement("li"));
         li.id = id + "-" + i;
@@ -16641,9 +16670,9 @@
             li.appendChild(node);
         }
       }
-      if (range.from)
+      if (range2.from)
         ul.classList.add("cm-completionListIncompleteTop");
-      if (range.to < options.length)
+      if (range2.to < options.length)
         ul.classList.add("cm-completionListIncompleteBottom");
       return ul;
     }
@@ -16664,24 +16693,24 @@
   }
   function sortOptions(active, state) {
     let options = [], i = 0;
-    for (let a of active)
-      if (a.hasResult()) {
-        if (a.result.filter === false) {
-          let getMatch = a.result.getMatch;
-          for (let option of a.result.options) {
+    for (let a2 of active)
+      if (a2.hasResult()) {
+        if (a2.result.filter === false) {
+          let getMatch = a2.result.getMatch;
+          for (let option of a2.result.options) {
             let match = [1e9 - i++];
             if (getMatch)
-              for (let n of getMatch(option))
-                match.push(n);
-            options.push(new Option(option, a, match));
+              for (let n2 of getMatch(option))
+                match.push(n2);
+            options.push(new Option(option, a2, match));
           }
         } else {
-          let matcher = new FuzzyMatcher(state.sliceDoc(a.from, a.to)), match;
-          for (let option of a.result.options)
+          let matcher = new FuzzyMatcher(state.sliceDoc(a2.from, a2.to)), match;
+          for (let option of a2.result.options)
             if (match = matcher.match(option.label)) {
               if (option.boost != null)
                 match[0] += option.boost;
-              options.push(new Option(option, a, match));
+              options.push(new Option(option, a2, match));
             }
         }
       }
@@ -16720,7 +16749,7 @@
           }
       }
       return new CompletionDialog(options, makeAttrs(id, selected), {
-        pos: active.reduce((a, b) => b.hasResult() ? Math.min(a, b.from) : a, 1e8),
+        pos: active.reduce((a2, b2) => b2.hasResult() ? Math.min(a2, b2.from) : a2, 1e8),
         create: completionTooltip(completionState),
         above: conf.aboveCursor
       }, prev ? prev.timestamp : Date.now(), selected);
@@ -16742,14 +16771,14 @@
       let { state } = tr, conf = state.facet(completionConfig);
       let sources = conf.override || state.languageDataAt("autocomplete", cur(state)).map(asSource);
       let active = sources.map((source) => {
-        let value = this.active.find((s) => s.source == source) || new ActiveSource(source, this.active.some((a) => a.state != 0) ? 1 : 0);
-        return value.update(tr, conf);
+        let value2 = this.active.find((s) => s.source == source) || new ActiveSource(source, this.active.some((a2) => a2.state != 0) ? 1 : 0);
+        return value2.update(tr, conf);
       });
-      if (active.length == this.active.length && active.every((a, i) => a == this.active[i]))
+      if (active.length == this.active.length && active.every((a2, i) => a2 == this.active[i]))
         active = this.active;
-      let open = tr.selection || active.some((a) => a.hasResult() && tr.changes.touchesRange(a.from, a.to)) || !sameResults(active, this.active) ? CompletionDialog.build(active, state, this.id, this.open, conf) : this.open && tr.docChanged ? this.open.map(tr.changes) : this.open;
-      if (!open && active.every((a) => a.state != 1) && active.some((a) => a.hasResult()))
-        active = active.map((a) => a.hasResult() ? new ActiveSource(a.source, 0) : a);
+      let open = tr.selection || active.some((a2) => a2.hasResult() && tr.changes.touchesRange(a2.from, a2.to)) || !sameResults(active, this.active) ? CompletionDialog.build(active, state, this.id, this.open, conf) : this.open && tr.docChanged ? this.open.map(tr.changes) : this.open;
+      if (!open && active.every((a2) => a2.state != 1) && active.some((a2) => a2.hasResult()))
+        active = active.map((a2) => a2.hasResult() ? new ActiveSource(a2.source, 0) : a2);
       for (let effect of tr.effects)
         if (effect.is(setSelectedEffect))
           open = open && open.setSelected(effect.value, this.id);
@@ -16762,18 +16791,18 @@
       return this.open ? this.open.attrs : baseAttrs;
     }
   };
-  function sameResults(a, b) {
-    if (a == b)
+  function sameResults(a2, b2) {
+    if (a2 == b2)
       return true;
     for (let iA = 0, iB = 0; ; ) {
-      while (iA < a.length && !a[iA].hasResult)
+      while (iA < a2.length && !a2[iA].hasResult)
         iA++;
-      while (iB < b.length && !b[iB].hasResult)
+      while (iB < b2.length && !b2[iB].hasResult)
         iB++;
-      let endA = iA == a.length, endB = iB == b.length;
+      let endA = iA == a2.length, endB = iB == b2.length;
       if (endA || endB)
         return endA == endB;
-      if (a[iA++].result != b[iB++].result)
+      if (a2[iA++].result != b2[iB++].result)
         return false;
     }
   }
@@ -16789,11 +16818,11 @@
     };
   }
   var none3 = [];
-  function cmpOption(a, b) {
-    let dScore = b.match[0] - a.match[0];
+  function cmpOption(a2, b2) {
+    let dScore = b2.match[0] - a2.match[0];
     if (dScore)
       return dScore;
-    return a.completion.label.localeCompare(b.completion.label);
+    return a2.completion.label.localeCompare(b2.completion.label);
   }
   function getUserEvent(tr) {
     return tr.isUserEvent("input.type") ? "input" : tr.isUserEvent("delete.backward") ? "delete" : null;
@@ -16808,28 +16837,28 @@
       return false;
     }
     update(tr, conf) {
-      let event = getUserEvent(tr), value = this;
+      let event = getUserEvent(tr), value2 = this;
       if (event)
-        value = value.handleUserEvent(tr, event, conf);
+        value2 = value2.handleUserEvent(tr, event, conf);
       else if (tr.docChanged)
-        value = value.handleChange(tr);
-      else if (tr.selection && value.state != 0)
-        value = new ActiveSource(value.source, 0);
+        value2 = value2.handleChange(tr);
+      else if (tr.selection && value2.state != 0)
+        value2 = new ActiveSource(value2.source, 0);
       for (let effect of tr.effects) {
         if (effect.is(startCompletionEffect))
-          value = new ActiveSource(value.source, 1, effect.value ? cur(tr.state) : -1);
+          value2 = new ActiveSource(value2.source, 1, effect.value ? cur(tr.state) : -1);
         else if (effect.is(closeCompletionEffect))
-          value = new ActiveSource(value.source, 0);
+          value2 = new ActiveSource(value2.source, 0);
         else if (effect.is(setActiveEffect)) {
           for (let active of effect.value)
-            if (active.source == value.source)
-              value = active;
+            if (active.source == value2.source)
+              value2 = active;
         }
       }
-      return value;
+      return value2;
     }
-    handleUserEvent(tr, type, conf) {
-      return type == "delete" || !conf.activateOnTyping ? this.map(tr.changes) : new ActiveSource(this.source, 1);
+    handleUserEvent(tr, type2, conf) {
+      return type2 == "delete" || !conf.activateOnTyping ? this.map(tr.changes) : new ActiveSource(this.source, 1);
     }
     handleChange(tr) {
       return tr.changes.touchesRange(cur(tr.startState)) ? new ActiveSource(this.source, 0) : this.map(tr.changes);
@@ -16839,25 +16868,25 @@
     }
   };
   var ActiveResult = class extends ActiveSource {
-    constructor(source, explicitPos, result, from, to) {
+    constructor(source, explicitPos, result, from, to2) {
       super(source, 2, explicitPos);
       this.result = result;
       this.from = from;
-      this.to = to;
+      this.to = to2;
     }
     hasResult() {
       return true;
     }
-    handleUserEvent(tr, type, conf) {
+    handleUserEvent(tr, type2, conf) {
       var _a2;
-      let from = tr.changes.mapPos(this.from), to = tr.changes.mapPos(this.to, 1);
+      let from = tr.changes.mapPos(this.from), to2 = tr.changes.mapPos(this.to, 1);
       let pos = cur(tr.state);
-      if ((this.explicitPos < 0 ? pos <= from : pos < this.from) || pos > to || type == "delete" && cur(tr.startState) == this.from)
-        return new ActiveSource(this.source, type == "input" && conf.activateOnTyping ? 1 : 0);
+      if ((this.explicitPos < 0 ? pos <= from : pos < this.from) || pos > to2 || type2 == "delete" && cur(tr.startState) == this.from)
+        return new ActiveSource(this.source, type2 == "input" && conf.activateOnTyping ? 1 : 0);
       let explicitPos = this.explicitPos < 0 ? -1 : tr.changes.mapPos(this.explicitPos), updated;
-      if (checkValid(this.result.validFor, tr.state, from, to))
-        return new ActiveResult(this.source, explicitPos, this.result, from, to);
-      if (this.result.update && (updated = this.result.update(this.result, from, to, new CompletionContext(tr.state, pos, explicitPos >= 0))))
+      if (checkValid(this.result.validFor, tr.state, from, to2))
+        return new ActiveResult(this.source, explicitPos, this.result, from, to2);
+      if (this.result.update && (updated = this.result.update(this.result, from, to2, new CompletionContext(tr.state, pos, explicitPos >= 0))))
         return new ActiveResult(this.source, explicitPos, updated, updated.from, (_a2 = updated.to) !== null && _a2 !== void 0 ? _a2 : cur(tr.state));
       return new ActiveSource(this.source, 1, explicitPos);
     }
@@ -16868,11 +16897,11 @@
       return mapping.empty ? this : new ActiveResult(this.source, this.explicitPos < 0 ? -1 : mapping.mapPos(this.explicitPos), this.result, mapping.mapPos(this.from), mapping.mapPos(this.to, 1));
     }
   };
-  function checkValid(validFor, state, from, to) {
+  function checkValid(validFor, state, from, to2) {
     if (!validFor)
       return false;
-    let text = state.sliceDoc(from, to);
-    return typeof validFor == "function" ? validFor(text, from, to, state) : ensureAnchor(validFor, true).test(text);
+    let text = state.sliceDoc(from, to2);
+    return typeof validFor == "function" ? validFor(text, from, to2, state) : ensureAnchor(validFor, true).test(text);
   }
   var startCompletionEffect = /* @__PURE__ */ StateEffect.define();
   var closeCompletionEffect = /* @__PURE__ */ StateEffect.define();
@@ -16886,8 +16915,8 @@
     create() {
       return CompletionState.start();
     },
-    update(value, tr) {
-      return value.update(tr);
+    update(value2, tr) {
+      return value2.update(tr);
     },
     provide: (f) => [
       showTooltip.from(f, (val) => val.tooltip),
@@ -16928,15 +16957,15 @@
   };
   var closeCompletion = (view) => {
     let cState = view.state.field(completionState, false);
-    if (!cState || !cState.active.some((a) => a.state != 0))
+    if (!cState || !cState.active.some((a2) => a2.state != 0))
       return false;
     view.dispatch({ effects: closeCompletionEffect.of(null) });
     return true;
   };
   var RunningQuery = class {
-    constructor(active, context) {
+    constructor(active, context2) {
       this.active = active;
-      this.context = context;
+      this.context = context2;
       this.time = Date.now();
       this.updates = [];
       this.done = void 0;
@@ -16981,7 +17010,7 @@
       }
       if (this.debounceUpdate > -1)
         clearTimeout(this.debounceUpdate);
-      this.debounceUpdate = cState.active.some((a) => a.state == 1 && !this.running.some((q) => q.active.source == a.source)) ? setTimeout(() => this.startUpdate(), DebounceTime) : -1;
+      this.debounceUpdate = cState.active.some((a2) => a2.state == 1 && !this.running.some((q) => q.active.source == a2.source)) ? setTimeout(() => this.startUpdate(), DebounceTime) : -1;
       if (this.composing != 0)
         for (let tr of update3.transactions) {
           if (getUserEvent(tr) == "input")
@@ -17000,10 +17029,10 @@
     }
     startQuery(active) {
       let { state } = this.view, pos = cur(state);
-      let context = new CompletionContext(state, pos, active.explicitPos == pos);
-      let pending = new RunningQuery(active, context);
+      let context2 = new CompletionContext(state, pos, active.explicitPos == pos);
+      let pending = new RunningQuery(active, context2);
       this.running.push(pending);
-      Promise.resolve(active.source(context)).then((result) => {
+      Promise.resolve(active.source(context2)).then((result) => {
         if (!pending.context.aborted) {
           pending.done = result || null;
           this.scheduleAccept();
@@ -17040,7 +17069,7 @@
             continue;
           }
         }
-        let current = this.view.state.field(completionState).active.find((a) => a.source == query.active.source);
+        let current = this.view.state.field(completionState).active.find((a2) => a2.source == query.active.source);
         if (current && current.state == 1) {
           if (query.done == null) {
             let active = new ActiveSource(query.active.source, 0);
@@ -17181,14 +17210,14 @@
     before: ")]}:;>"
   };
   var closeBracketEffect = /* @__PURE__ */ StateEffect.define({
-    map(value, mapping) {
-      let mapped = mapping.mapPos(value, -1, MapMode.TrackAfter);
+    map(value2, mapping) {
+      let mapped = mapping.mapPos(value2, -1, MapMode.TrackAfter);
       return mapped == null ? void 0 : mapped;
     }
   });
   var skipBracketEffect = /* @__PURE__ */ StateEffect.define({
-    map(value, mapping) {
-      return mapping.mapPos(value);
+    map(value2, mapping) {
+      return mapping.mapPos(value2);
     }
   });
   var closedBracket = /* @__PURE__ */ new class extends RangeValue {
@@ -17199,21 +17228,21 @@
     create() {
       return RangeSet.empty;
     },
-    update(value, tr) {
+    update(value2, tr) {
       if (tr.selection) {
         let lineStart = tr.state.doc.lineAt(tr.selection.main.head).from;
         let prevLineStart = tr.startState.doc.lineAt(tr.startState.selection.main.head).from;
         if (lineStart != tr.changes.mapPos(prevLineStart, -1))
-          value = RangeSet.empty;
+          value2 = RangeSet.empty;
       }
-      value = value.map(tr.changes);
+      value2 = value2.map(tr.changes);
       for (let effect of tr.effects) {
         if (effect.is(closeBracketEffect))
-          value = value.update({ add: [closedBracket.range(effect.value, effect.value + 1)] });
+          value2 = value2.update({ add: [closedBracket.range(effect.value, effect.value + 1)] });
         else if (effect.is(skipBracketEffect))
-          value = value.update({ filter: (from) => from != effect.value });
+          value2 = value2.update({ filter: (from) => from != effect.value });
       }
-      return value;
+      return value2;
     }
   });
   function closeBrackets() {
@@ -17230,11 +17259,11 @@
     return state.languageDataAt("closeBrackets", pos)[0] || defaults2;
   }
   var android = typeof navigator == "object" && /* @__PURE__ */ /Android\b/.test(navigator.userAgent);
-  var inputHandler2 = /* @__PURE__ */ EditorView.inputHandler.of((view, from, to, insert2) => {
+  var inputHandler2 = /* @__PURE__ */ EditorView.inputHandler.of((view, from, to2, insert2) => {
     if ((android ? view.composing : view.compositionStarted) || view.state.readOnly)
       return false;
     let sel = view.state.selection.main;
-    if (insert2.length > 2 || insert2.length == 2 && codePointSize(codePointAt(insert2, 0)) == 1 || from != sel.from || to != sel.to)
+    if (insert2.length > 2 || insert2.length == 2 && codePointSize(codePointAt(insert2, 0)) == 1 || from != sel.from || to2 != sel.to)
       return false;
     let tr = insertBracket(view.state, insert2);
     if (!tr)
@@ -17247,19 +17276,19 @@
       return false;
     let conf = config(state, state.selection.main.head);
     let tokens = conf.brackets || defaults2.brackets;
-    let dont = null, changes = state.changeByRange((range) => {
-      if (range.empty) {
-        let before = prevChar(state.doc, range.head);
+    let dont = null, changes = state.changeByRange((range2) => {
+      if (range2.empty) {
+        let before = prevChar(state.doc, range2.head);
         for (let token of tokens) {
-          if (token == before && nextChar(state.doc, range.head) == closing(codePointAt(token, 0)))
+          if (token == before && nextChar(state.doc, range2.head) == closing(codePointAt(token, 0)))
             return {
-              changes: { from: range.head - token.length, to: range.head + token.length },
-              range: EditorSelection.cursor(range.head - token.length),
+              changes: { from: range2.head - token.length, to: range2.head + token.length },
+              range: EditorSelection.cursor(range2.head - token.length),
               userEvent: "delete.backward"
             };
         }
       }
-      return { range: dont = range };
+      return { range: dont = range2 };
     });
     if (!dont)
       dispatch(state.update(changes, { scrollIntoView: true }));
@@ -17297,21 +17326,21 @@
     return codePointSize(codePointAt(prev, 0)) == prev.length ? prev : prev.slice(1);
   }
   function handleOpen(state, open, close, closeBefore) {
-    let dont = null, changes = state.changeByRange((range) => {
-      if (!range.empty)
+    let dont = null, changes = state.changeByRange((range2) => {
+      if (!range2.empty)
         return {
-          changes: [{ insert: open, from: range.from }, { insert: close, from: range.to }],
-          effects: closeBracketEffect.of(range.to + open.length),
-          range: EditorSelection.range(range.anchor + open.length, range.head + open.length)
+          changes: [{ insert: open, from: range2.from }, { insert: close, from: range2.to }],
+          effects: closeBracketEffect.of(range2.to + open.length),
+          range: EditorSelection.range(range2.anchor + open.length, range2.head + open.length)
         };
-      let next = nextChar(state.doc, range.head);
+      let next = nextChar(state.doc, range2.head);
       if (!next || /\s/.test(next) || closeBefore.indexOf(next) > -1)
         return {
-          changes: { insert: open + close, from: range.head },
-          effects: closeBracketEffect.of(range.head + open.length),
-          range: EditorSelection.cursor(range.head + open.length)
+          changes: { insert: open + close, from: range2.head },
+          effects: closeBracketEffect.of(range2.head + open.length),
+          range: EditorSelection.cursor(range2.head + open.length)
         };
-      return { range: dont = range };
+      return { range: dont = range2 };
     });
     return dont ? null : state.update(changes, {
       scrollIntoView: true,
@@ -17319,10 +17348,10 @@
     });
   }
   function handleClose(state, _open, close) {
-    let dont = null, moved = state.selection.ranges.map((range) => {
-      if (range.empty && nextChar(state.doc, range.head) == close)
-        return EditorSelection.cursor(range.head + close.length);
-      return dont = range;
+    let dont = null, moved = state.selection.ranges.map((range2) => {
+      if (range2.empty && nextChar(state.doc, range2.head) == close)
+        return EditorSelection.cursor(range2.head + close.length);
+      return dont = range2;
     });
     return dont ? null : state.update({
       selection: EditorSelection.create(moved, state.selection.mainIndex),
@@ -17331,14 +17360,14 @@
     });
   }
   function handleSame(state, token, allowTriple) {
-    let dont = null, changes = state.changeByRange((range) => {
-      if (!range.empty)
+    let dont = null, changes = state.changeByRange((range2) => {
+      if (!range2.empty)
         return {
-          changes: [{ insert: token, from: range.from }, { insert: token, from: range.to }],
-          effects: closeBracketEffect.of(range.to + token.length),
-          range: EditorSelection.range(range.anchor + token.length, range.head + token.length)
+          changes: [{ insert: token, from: range2.from }, { insert: token, from: range2.to }],
+          effects: closeBracketEffect.of(range2.to + token.length),
+          range: EditorSelection.range(range2.anchor + token.length, range2.head + token.length)
         };
-      let pos = range.head, next = nextChar(state.doc, pos);
+      let pos = range2.head, next = nextChar(state.doc, pos);
       if (next == token) {
         if (nodeStart(state, pos)) {
           return {
@@ -17368,7 +17397,7 @@
             range: EditorSelection.cursor(pos + token.length)
           };
       }
-      return { range: dont = range };
+      return { range: dont = range2 };
     });
     return dont ? null : state.update(changes, {
       scrollIntoView: true,
@@ -17413,9 +17442,9 @@
 
   // node_modules/@codemirror/lint/dist/index.js
   var SelectedDiagnostic = class {
-    constructor(from, to, diagnostic) {
+    constructor(from, to2, diagnostic) {
       this.from = from;
-      this.to = to;
+      this.to = to2;
       this.diagnostic = diagnostic;
     }
   };
@@ -17430,24 +17459,24 @@
       let diagnosticFilter = state.facet(lintConfig).markerFilter;
       if (diagnosticFilter)
         markedDiagnostics = diagnosticFilter(markedDiagnostics);
-      let ranges = Decoration.set(markedDiagnostics.map((d) => {
-        return d.from == d.to || d.from == d.to - 1 && state.doc.lineAt(d.from).to == d.from ? Decoration.widget({
-          widget: new DiagnosticWidget(d),
-          diagnostic: d
-        }).range(d.from) : Decoration.mark({
-          attributes: { class: "cm-lintRange cm-lintRange-" + d.severity },
-          diagnostic: d
-        }).range(d.from, d.to);
+      let ranges = Decoration.set(markedDiagnostics.map((d2) => {
+        return d2.from == d2.to || d2.from == d2.to - 1 && state.doc.lineAt(d2.from).to == d2.from ? Decoration.widget({
+          widget: new DiagnosticWidget(d2),
+          diagnostic: d2
+        }).range(d2.from) : Decoration.mark({
+          attributes: { class: "cm-lintRange cm-lintRange-" + d2.severity },
+          diagnostic: d2
+        }).range(d2.from, d2.to);
       }), true);
       return new LintState(ranges, panel, findDiagnostic(ranges));
     }
   };
   function findDiagnostic(diagnostics, diagnostic = null, after = 0) {
     let found = null;
-    diagnostics.between(after, 1e9, (from, to, { spec }) => {
+    diagnostics.between(after, 1e9, (from, to2, { spec }) => {
       if (diagnostic && spec.diagnostic != diagnostic)
         return;
-      found = new SelectedDiagnostic(from, to, spec.diagnostic);
+      found = new SelectedDiagnostic(from, to2, spec.diagnostic);
       return false;
     });
     return found;
@@ -17480,25 +17509,25 @@
     create() {
       return new LintState(Decoration.none, null, null);
     },
-    update(value, tr) {
+    update(value2, tr) {
       if (tr.docChanged) {
-        let mapped = value.diagnostics.map(tr.changes), selected = null;
-        if (value.selected) {
-          let selPos = tr.changes.mapPos(value.selected.from, 1);
-          selected = findDiagnostic(mapped, value.selected.diagnostic, selPos) || findDiagnostic(mapped, null, selPos);
+        let mapped = value2.diagnostics.map(tr.changes), selected = null;
+        if (value2.selected) {
+          let selPos = tr.changes.mapPos(value2.selected.from, 1);
+          selected = findDiagnostic(mapped, value2.selected.diagnostic, selPos) || findDiagnostic(mapped, null, selPos);
         }
-        value = new LintState(mapped, value.panel, selected);
+        value2 = new LintState(mapped, value2.panel, selected);
       }
       for (let effect of tr.effects) {
         if (effect.is(setDiagnosticsEffect)) {
-          value = LintState.init(effect.value, value.panel, tr.state);
+          value2 = LintState.init(effect.value, value2.panel, tr.state);
         } else if (effect.is(togglePanel2)) {
-          value = new LintState(value.diagnostics, effect.value ? LintPanel.open : null, value.selected);
+          value2 = new LintState(value2.diagnostics, effect.value ? LintPanel.open : null, value2.selected);
         } else if (effect.is(movePanelSelection)) {
-          value = new LintState(value.diagnostics, value.panel, effect.value);
+          value2 = new LintState(value2.diagnostics, value2.panel, effect.value);
         }
       }
-      return value;
+      return value2;
     },
     provide: (f) => [
       showPanel.from(f, (val) => val.panel),
@@ -17509,11 +17538,11 @@
   function lintTooltip(view, pos, side) {
     let { diagnostics } = view.state.field(lintState);
     let found = [], stackStart = 2e8, stackEnd = 0;
-    diagnostics.between(pos - (side < 0 ? 1 : 0), pos + (side > 0 ? 1 : 0), (from, to, { spec }) => {
-      if (pos >= from && pos <= to && (from == to || (pos > from || side > 0) && (pos < to || side < 0))) {
+    diagnostics.between(pos - (side < 0 ? 1 : 0), pos + (side > 0 ? 1 : 0), (from, to2, { spec }) => {
+      if (pos >= from && pos <= to2 && (from == to2 || (pos > from || side > 0) && (pos < to2 || side < 0))) {
         found.push(spec.diagnostic);
         stackStart = Math.min(from, stackStart);
-        stackEnd = Math.max(to, stackEnd);
+        stackEnd = Math.max(to2, stackEnd);
       }
     });
     let diagnosticFilter = view.state.facet(lintConfig).tooltipFilter;
@@ -17531,7 +17560,7 @@
     };
   }
   function diagnosticsTooltip(view, diagnostics) {
-    return crelt("ul", { class: "cm-tooltip-lint" }, diagnostics.map((d) => renderDiagnostic(view, d, false)));
+    return crelt("ul", { class: "cm-tooltip-lint" }, diagnostics.map((d2) => renderDiagnostic(view, d2, false)));
   }
   var openLintPanel = (view) => {
     let field = view.state.field(lintState, false);
@@ -17584,7 +17613,7 @@
         this.set = false;
         let { state } = this.view, { sources } = state.facet(lintConfig);
         Promise.all(sources.map((source) => Promise.resolve(source(this.view)))).then((annotations) => {
-          let all = annotations.reduce((a, b) => a.concat(b));
+          let all = annotations.reduce((a2, b2) => a2.concat(b2));
           if (this.view.state.doc == state.doc)
             this.view.dispatch(setDiagnostics(this.view.state, all));
         }, (error) => {
@@ -17629,7 +17658,7 @@
         for (let { name: name2 } of actions) {
           for (let i = 0; i < name2.length; i++) {
             let ch = name2[i];
-            if (/[a-zA-Z]/.test(ch) && !assigned.some((c) => c.toLowerCase() == ch.toLowerCase())) {
+            if (/[a-zA-Z]/.test(ch) && !assigned.some((c4) => c4.toLowerCase() == ch.toLowerCase())) {
               assigned.push(ch);
               continue actions;
             }
@@ -18010,12 +18039,12 @@
       });
     }
   });
-  function persist(_target, $3, _flags) {
+  function persist(_target, $7, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
-      $3.write({ file });
+      $7.write({ file });
     };
   }
   $2.style(`
@@ -18025,6 +18054,3583 @@
     overflow: scroll;
   }
 `);
+
+  // node_modules/colorjs.io/dist/color.js
+  function multiplyMatrices(A, B) {
+    let m3 = A.length;
+    if (!Array.isArray(A[0])) {
+      A = [A];
+    }
+    if (!Array.isArray(B[0])) {
+      B = B.map((x) => [x]);
+    }
+    let p2 = B[0].length;
+    let B_cols = B[0].map((_, i) => B.map((x) => x[i]));
+    let product = A.map((row) => B_cols.map((col) => {
+      let ret = 0;
+      if (!Array.isArray(row)) {
+        for (let c4 of col) {
+          ret += row * c4;
+        }
+        return ret;
+      }
+      for (let i = 0; i < row.length; i++) {
+        ret += row[i] * (col[i] || 0);
+      }
+      return ret;
+    }));
+    if (m3 === 1) {
+      product = product[0];
+    }
+    if (p2 === 1) {
+      return product.map((x) => x[0]);
+    }
+    return product;
+  }
+  function isString(str) {
+    return type(str) === "string";
+  }
+  function type(o) {
+    let str = Object.prototype.toString.call(o);
+    return (str.match(/^\[object\s+(.*?)\]$/)[1] || "").toLowerCase();
+  }
+  function toPrecision(n2, precision) {
+    n2 = +n2;
+    precision = +precision;
+    let integerLength = (Math.floor(n2) + "").length;
+    if (precision > integerLength) {
+      return +n2.toFixed(precision - integerLength);
+    } else {
+      let p10 = 10 ** (integerLength - precision);
+      return Math.round(n2 / p10) * p10;
+    }
+  }
+  function parseFunction(str) {
+    if (!str) {
+      return;
+    }
+    str = str.trim();
+    const isFunctionRegex = /^([a-z]+)\((.+?)\)$/i;
+    const isNumberRegex = /^-?[\d.]+$/;
+    let parts = str.match(isFunctionRegex);
+    if (parts) {
+      let args = [];
+      parts[2].replace(/\/?\s*([-\w.]+(?:%|deg)?)/g, ($0, arg) => {
+        if (/%$/.test(arg)) {
+          arg = new Number(arg.slice(0, -1) / 100);
+          arg.type = "<percentage>";
+        } else if (/deg$/.test(arg)) {
+          arg = new Number(+arg.slice(0, -3));
+          arg.type = "<angle>";
+          arg.unit = "deg";
+        } else if (isNumberRegex.test(arg)) {
+          arg = new Number(arg);
+          arg.type = "<number>";
+        }
+        if ($0.startsWith("/")) {
+          arg = arg instanceof Number ? arg : new Number(arg);
+          arg.alpha = true;
+        }
+        args.push(arg);
+      });
+      return {
+        name: parts[1].toLowerCase(),
+        rawName: parts[1],
+        rawArgs: parts[2],
+        args
+      };
+    }
+  }
+  function last(arr) {
+    return arr[arr.length - 1];
+  }
+  function interpolate(start, end, p2) {
+    if (isNaN(start)) {
+      return end;
+    }
+    if (isNaN(end)) {
+      return start;
+    }
+    return start + (end - start) * p2;
+  }
+  function interpolateInv(start, end, value2) {
+    return (value2 - start) / (end - start);
+  }
+  function mapRange2(from, to2, value2) {
+    return interpolate(to2[0], to2[1], interpolateInv(from[0], from[1], value2));
+  }
+  function parseCoordGrammar(coordGrammars) {
+    return coordGrammars.map((coordGrammar2) => {
+      return coordGrammar2.split("|").map((type2) => {
+        type2 = type2.trim();
+        let range2 = type2.match(/^(<[a-z]+>)\[(-?[.\d]+),\s*(-?[.\d]+)\]?$/);
+        if (range2) {
+          let ret = new String(range2[1]);
+          ret.range = [+range2[2], +range2[3]];
+          return ret;
+        }
+        return type2;
+      });
+    });
+  }
+  var util = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    isString,
+    type,
+    toPrecision,
+    parseFunction,
+    last,
+    interpolate,
+    interpolateInv,
+    mapRange: mapRange2,
+    parseCoordGrammar,
+    multiplyMatrices
+  });
+  var Hooks = class {
+    add(name2, callback, first) {
+      if (typeof arguments[0] != "string") {
+        for (var name2 in arguments[0]) {
+          this.add(name2, arguments[0][name2], arguments[1]);
+        }
+        return;
+      }
+      (Array.isArray(name2) ? name2 : [name2]).forEach(function(name3) {
+        this[name3] = this[name3] || [];
+        if (callback) {
+          this[name3][first ? "unshift" : "push"](callback);
+        }
+      }, this);
+    }
+    run(name2, env) {
+      this[name2] = this[name2] || [];
+      this[name2].forEach(function(callback) {
+        callback.call(env && env.context ? env.context : env, env);
+      });
+    }
+  };
+  var hooks = new Hooks();
+  var defaults3 = {
+    gamut_mapping: "lch.c",
+    precision: 5,
+    deltaE: "76"
+  };
+  var WHITES = {
+    D50: [0.3457 / 0.3585, 1, (1 - 0.3457 - 0.3585) / 0.3585],
+    D65: [0.3127 / 0.329, 1, (1 - 0.3127 - 0.329) / 0.329]
+  };
+  function getWhite(name2) {
+    if (Array.isArray(name2)) {
+      return name2;
+    }
+    return WHITES[name2];
+  }
+  function adapt$1(W1, W2, XYZ, options = {}) {
+    W1 = getWhite(W1);
+    W2 = getWhite(W2);
+    if (!W1 || !W2) {
+      throw new TypeError(`Missing white point to convert ${!W1 ? "from" : ""}${!W1 && !W2 ? "/" : ""}${!W2 ? "to" : ""}`);
+    }
+    if (W1 === W2) {
+      return XYZ;
+    }
+    let env = { W1, W2, XYZ, options };
+    hooks.run("chromatic-adaptation-start", env);
+    if (!env.M) {
+      if (env.W1 === WHITES.D65 && env.W2 === WHITES.D50) {
+        env.M = [
+          [1.0479298208405488, 0.022946793341019088, -0.05019222954313557],
+          [0.029627815688159344, 0.990434484573249, -0.01707382502938514],
+          [-0.009243058152591178, 0.015055144896577895, 0.7518742899580008]
+        ];
+      } else if (env.W1 === WHITES.D50 && env.W2 === WHITES.D65) {
+        env.M = [
+          [0.9554734527042182, -0.023098536874261423, 0.0632593086610217],
+          [-0.028369706963208136, 1.0099954580058226, 0.021041398966943008],
+          [0.012314001688319899, -0.020507696433477912, 1.3303659366080753]
+        ];
+      }
+    }
+    hooks.run("chromatic-adaptation-end", env);
+    if (env.M) {
+      return multiplyMatrices(env.M, env.XYZ);
+    } else {
+      throw new TypeError("Only Bradford CAT with white points D50 and D65 supported for now.");
+    }
+  }
+  var \u03B5$4 = 75e-6;
+  var _processFormat, processFormat_fn, _path, _getPath, getPath_fn;
+  var _ColorSpace = class {
+    constructor(options) {
+      __privateAdd(this, _processFormat);
+      __privateAdd(this, _getPath);
+      __privateAdd(this, _path, void 0);
+      this.id = options.id;
+      this.name = options.name;
+      this.base = options.base ? _ColorSpace.get(options.base) : null;
+      this.aliases = options.aliases;
+      if (this.base) {
+        this.fromBase = options.fromBase;
+        this.toBase = options.toBase;
+      }
+      let coords = options.coords ?? this.base.coords;
+      this.coords = coords;
+      let white2 = options.white ?? this.base.white ?? "D65";
+      this.white = getWhite(white2);
+      this.formats = options.formats ?? {};
+      for (let name2 in this.formats) {
+        let format = this.formats[name2];
+        format.type ||= "function";
+        format.name ||= name2;
+      }
+      if (options.cssId && !this.formats.functions?.color) {
+        this.formats.color = { id: options.cssId };
+        Object.defineProperty(this, "cssId", { value: options.cssId });
+      } else if (this.formats?.color && !this.formats?.color.id) {
+        this.formats.color.id = this.id;
+      }
+      this.referred = options.referred;
+      __privateSet(this, _path, __privateMethod(this, _getPath, getPath_fn).call(this).reverse());
+      hooks.run("colorspace-init-end", this);
+    }
+    inGamut(coords, { epsilon = \u03B5$4 } = {}) {
+      if (this.isPolar) {
+        coords = this.toBase(coords);
+        return this.base.inGamut(coords, { epsilon });
+      }
+      let coordMeta = Object.values(this.coords);
+      return coords.every((c4, i) => {
+        let meta2 = coordMeta[i];
+        if (meta2.type !== "angle" && meta2.range) {
+          if (Number.isNaN(c4)) {
+            return true;
+          }
+          let [min, max2] = meta2.range;
+          return (min === void 0 || c4 >= min - epsilon) && (max2 === void 0 || c4 <= max2 + epsilon);
+        }
+        return true;
+      });
+    }
+    get cssId() {
+      return this.formats.functions?.color?.id || this.id;
+    }
+    get isPolar() {
+      for (let id in this.coords) {
+        if (this.coords[id].type === "angle") {
+          return true;
+        }
+      }
+      return false;
+    }
+    getFormat(format) {
+      if (typeof format === "object") {
+        format = __privateMethod(this, _processFormat, processFormat_fn).call(this, format);
+        return format;
+      }
+      let ret;
+      if (format === "default") {
+        ret = Object.values(this.formats)[0];
+      } else {
+        ret = this.formats[format];
+      }
+      if (ret) {
+        ret = __privateMethod(this, _processFormat, processFormat_fn).call(this, ret);
+        return ret;
+      }
+      return null;
+    }
+    to(space, coords) {
+      if (arguments.length === 1) {
+        [space, coords] = [space.space, space.coords];
+      }
+      space = _ColorSpace.get(space);
+      if (this === space) {
+        return coords;
+      }
+      coords = coords.map((c4) => Number.isNaN(c4) ? 0 : c4);
+      let myPath = __privateGet(this, _path);
+      let otherPath = __privateGet(space, _path);
+      let connectionSpace, connectionSpaceIndex;
+      for (let i = 0; i < myPath.length; i++) {
+        if (myPath[i] === otherPath[i]) {
+          connectionSpace = myPath[i];
+          connectionSpaceIndex = i;
+        } else {
+          break;
+        }
+      }
+      if (!connectionSpace) {
+        throw new Error(`Cannot convert between color spaces ${this} and ${space}: no connection space was found`);
+      }
+      for (let i = myPath.length - 1; i > connectionSpaceIndex; i--) {
+        coords = myPath[i].toBase(coords);
+      }
+      for (let i = connectionSpaceIndex + 1; i < otherPath.length; i++) {
+        coords = otherPath[i].fromBase(coords);
+      }
+      return coords;
+    }
+    from(space, coords) {
+      if (arguments.length === 1) {
+        [space, coords] = [space.space, space.coords];
+      }
+      space = _ColorSpace.get(space);
+      return space.to(this, coords);
+    }
+    toString() {
+      return `${this.name} (${this.id})`;
+    }
+    getMinCoords() {
+      let ret = [];
+      for (let id in this.coords) {
+        let meta2 = this.coords[id];
+        let range2 = meta2.range || meta2.refRange;
+        ret.push(range2?.min ?? 0);
+      }
+      return ret;
+    }
+    static get all() {
+      return [...new Set(Object.values(_ColorSpace.registry))];
+    }
+    static register(id, space) {
+      if (arguments.length === 1) {
+        space = arguments[0];
+        id = space.id;
+      }
+      space = this.get(space);
+      if (this.registry[id] && this.registry[id] !== space) {
+        throw new Error(`Duplicate color space registration: '${id}'`);
+      }
+      this.registry[id] = space;
+      if (arguments.length === 1 && space.aliases) {
+        for (let alias of space.aliases) {
+          this.register(alias, space);
+        }
+      }
+      return space;
+    }
+    static get(space, ...alternatives) {
+      if (!space || space instanceof _ColorSpace) {
+        return space;
+      }
+      let argType = type(space);
+      if (argType === "string") {
+        let ret = _ColorSpace.registry[space.toLowerCase()];
+        if (!ret) {
+          throw new TypeError(`No color space found with id = "${space}"`);
+        }
+        return ret;
+      }
+      if (alternatives.length) {
+        return _ColorSpace.get(...alternatives);
+      }
+      throw new TypeError(`${space} is not a valid color space`);
+    }
+    static resolveCoord(ref, workingSpace) {
+      let coordType = type(ref);
+      let space, coord;
+      if (coordType === "string") {
+        if (ref.includes(".")) {
+          [space, coord] = ref.split(".");
+        } else {
+          [space, coord] = [, ref];
+        }
+      } else if (Array.isArray(ref)) {
+        [space, coord] = ref;
+      } else {
+        space = ref.space;
+        coord = ref.coordId;
+      }
+      space = _ColorSpace.get(space);
+      if (!space) {
+        space = workingSpace;
+      }
+      if (!space) {
+        throw new TypeError(`Cannot resolve coordinate reference ${ref}: No color space specified and relative references are not allowed here`);
+      }
+      coordType = type(coord);
+      if (coordType === "number" || coordType === "string" && coord >= 0) {
+        let meta2 = Object.entries(space.coords)[coord];
+        if (meta2) {
+          return { space, id: meta2[0], index: coord, ...meta2[1] };
+        }
+      }
+      space = _ColorSpace.get(space);
+      let normalizedCoord = coord.toLowerCase();
+      let i = 0;
+      for (let id in space.coords) {
+        let meta2 = space.coords[id];
+        if (id.toLowerCase() === normalizedCoord || meta2.name?.toLowerCase() === normalizedCoord) {
+          return { space, id, index: i, ...meta2 };
+        }
+        i++;
+      }
+      throw new TypeError(`No "${coord}" coordinate found in ${space.name}. Its coordinates are: ${Object.keys(space.coords).join(", ")}`);
+    }
+  };
+  var ColorSpace = _ColorSpace;
+  _processFormat = new WeakSet();
+  processFormat_fn = function(format) {
+    if (format.coords && !format.coordGrammar) {
+      format.type ||= "function";
+      format.name ||= "color";
+      format.coordGrammar = parseCoordGrammar(format.coords);
+      let coordFormats = Object.entries(this.coords).map(([id, coordMeta], i) => {
+        let outputType = format.coordGrammar[i][0];
+        let fromRange = coordMeta.range || coordMeta.refRange;
+        let toRange = outputType.range, suffix = "";
+        if (outputType == "<percentage>") {
+          toRange = [0, 100];
+          suffix = "%";
+        } else if (outputType == "<angle>") {
+          suffix = "deg";
+        }
+        return { fromRange, toRange, suffix };
+      });
+      format.serializeCoords = (coords, precision) => {
+        return coords.map((c4, i) => {
+          let { fromRange, toRange, suffix } = coordFormats[i];
+          if (fromRange && toRange) {
+            c4 = mapRange2(fromRange, toRange, c4);
+          }
+          c4 = toPrecision(c4, precision);
+          if (suffix) {
+            c4 += suffix;
+          }
+          return c4;
+        });
+      };
+    }
+    return format;
+  };
+  _path = new WeakMap();
+  _getPath = new WeakSet();
+  getPath_fn = function() {
+    let ret = [this];
+    for (let space = this; space = space.base; ) {
+      ret.push(space);
+    }
+    return ret;
+  };
+  __publicField(ColorSpace, "registry", {});
+  __publicField(ColorSpace, "DEFAULT_FORMAT", {
+    type: "functions",
+    name: "color"
+  });
+  var XYZ_D65 = new ColorSpace({
+    id: "xyz-d65",
+    name: "XYZ D65",
+    coords: {
+      x: { name: "X" },
+      y: { name: "Y" },
+      z: { name: "Z" }
+    },
+    white: "D65",
+    formats: {
+      color: {
+        ids: ["xyz-d65", "xyz"]
+      }
+    },
+    aliases: ["xyz"]
+  });
+  var RGBColorSpace = class extends ColorSpace {
+    constructor(options) {
+      if (!options.coords) {
+        options.coords = {
+          r: {
+            range: [0, 1],
+            name: "Red"
+          },
+          g: {
+            range: [0, 1],
+            name: "Green"
+          },
+          b: {
+            range: [0, 1],
+            name: "Blue"
+          }
+        };
+      }
+      if (!options.base) {
+        options.base = XYZ_D65;
+      }
+      if (options.toXYZ_M && options.fromXYZ_M) {
+        options.toBase ??= (rgb) => {
+          let xyz = multiplyMatrices(options.toXYZ_M, rgb);
+          if (this.white !== this.base.white) {
+            xyz = adapt$1(this.white, this.base.white, xyz);
+          }
+          return xyz;
+        };
+        options.fromBase ??= (xyz) => {
+          xyz = adapt$1(this.base.white, this.white, xyz);
+          return multiplyMatrices(options.fromXYZ_M, xyz);
+        };
+      }
+      options.referred ??= "display";
+      super(options);
+    }
+  };
+  function parse(str) {
+    let env = { "str": String(str)?.trim() };
+    hooks.run("parse-start", env);
+    if (env.color) {
+      return env.color;
+    }
+    env.parsed = parseFunction(env.str);
+    if (env.parsed) {
+      let name2 = env.parsed.name;
+      if (name2 === "color") {
+        let id = env.parsed.args.shift();
+        let alpha = env.parsed.rawArgs.indexOf("/") > 0 ? env.parsed.args.pop() : 1;
+        for (let space of ColorSpace.all) {
+          let colorSpec = space.getFormat("color");
+          if (colorSpec) {
+            if (id === colorSpec.id || colorSpec.ids?.includes(id)) {
+              let argCount = Object.keys(space.coords).length;
+              let coords = Array(argCount).fill(0);
+              coords.forEach((_, i) => coords[i] = env.parsed.args[i] || 0);
+              return { spaceId: space.id, coords, alpha };
+            }
+          }
+        }
+        let didYouMean = "";
+        if (id in ColorSpace.registry) {
+          let cssId = ColorSpace.registry[id].formats?.functions?.color?.id;
+          if (cssId) {
+            didYouMean = `Did you mean color(${cssId})?`;
+          }
+        }
+        throw new TypeError(`Cannot parse color(${id}). ` + (didYouMean || "Missing a plugin?"));
+      } else {
+        for (let space of ColorSpace.all) {
+          let format = space.getFormat(name2);
+          if (format && format.type === "function") {
+            let alpha = 1;
+            if (format.lastAlpha || last(env.parsed.args).alpha) {
+              alpha = env.parsed.args.pop();
+            }
+            let coords = env.parsed.args;
+            if (format.coordGrammar) {
+              Object.entries(space.coords).forEach(([id, coordMeta], i) => {
+                let coordGrammar2 = format.coordGrammar[i];
+                let providedType = coords[i]?.type;
+                coordGrammar2 = coordGrammar2.find((c4) => c4 == providedType);
+                if (!coordGrammar2) {
+                  let coordName = coordMeta.name || id;
+                  throw new TypeError(`${providedType} not allowed for ${coordName} in ${name2}()`);
+                }
+                let fromRange = coordGrammar2.range;
+                if (providedType === "<percentage>") {
+                  fromRange ||= [0, 1];
+                }
+                let toRange = coordMeta.range || coordMeta.refRange;
+                if (fromRange && toRange) {
+                  coords[i] = mapRange2(fromRange, toRange, coords[i]);
+                }
+              });
+            }
+            return {
+              spaceId: space.id,
+              coords,
+              alpha
+            };
+          }
+        }
+      }
+    } else {
+      for (let space of ColorSpace.all) {
+        for (let formatId in space.formats) {
+          let format = space.formats[formatId];
+          if (format.type !== "custom") {
+            continue;
+          }
+          if (format.test && !format.test(env.str)) {
+            continue;
+          }
+          let color = format.parse(env.str);
+          if (color) {
+            color.alpha ??= 1;
+            return color;
+          }
+        }
+      }
+    }
+    throw new TypeError(`Could not parse ${str} as a color. Missing a plugin?`);
+  }
+  function getColor(color) {
+    if (!color) {
+      throw new TypeError("Empty color reference");
+    }
+    if (isString(color)) {
+      color = parse(color);
+    }
+    let space = color.space || color.spaceId;
+    if (!(space instanceof ColorSpace)) {
+      color.space = ColorSpace.get(space);
+    }
+    if (color.alpha === void 0) {
+      color.alpha = 1;
+    }
+    return color;
+  }
+  function getAll(color, space) {
+    space = ColorSpace.get(space);
+    return space.from(color);
+  }
+  function get(color, prop) {
+    let { space, index } = ColorSpace.resolveCoord(prop, color.space);
+    let coords = getAll(color, space);
+    return coords[index];
+  }
+  function setAll(color, space, coords) {
+    space = ColorSpace.get(space);
+    color.coords = space.to(color.space, coords);
+    return color;
+  }
+  function set$1(color, prop, value2) {
+    color = getColor(color);
+    if (arguments.length === 2 && type(arguments[1]) === "object") {
+      let object = arguments[1];
+      for (let p2 in object) {
+        set$1(color, p2, object[p2]);
+      }
+    } else {
+      if (typeof value2 === "function") {
+        value2 = value2(get(color, prop));
+      }
+      let { space, index } = ColorSpace.resolveCoord(prop, color.space);
+      let coords = getAll(color, space);
+      coords[index] = value2;
+      setAll(color, space, coords);
+    }
+    return color;
+  }
+  var XYZ_D50 = new ColorSpace({
+    id: "xyz-d50",
+    name: "XYZ D50",
+    white: "D50",
+    base: XYZ_D65,
+    fromBase: (coords) => adapt$1(XYZ_D65.white, "D50", coords),
+    toBase: (coords) => adapt$1("D50", XYZ_D65.white, coords),
+    formats: {
+      color: {}
+    }
+  });
+  var \u03B5$3 = 216 / 24389;
+  var \u03B53$1 = 24 / 116;
+  var \u03BA$1 = 24389 / 27;
+  var white$1 = WHITES.D50;
+  var lab = new ColorSpace({
+    id: "lab",
+    name: "Lab",
+    coords: {
+      l: {
+        refRange: [0, 100],
+        name: "L"
+      },
+      a: {
+        refRange: [-125, 125]
+      },
+      b: {
+        refRange: [-125, 125]
+      }
+    },
+    white: white$1,
+    base: XYZ_D50,
+    fromBase(XYZ) {
+      let xyz = XYZ.map((value2, i) => value2 / white$1[i]);
+      let f = xyz.map((value2) => value2 > \u03B5$3 ? Math.cbrt(value2) : (\u03BA$1 * value2 + 16) / 116);
+      return [
+        116 * f[1] - 16,
+        500 * (f[0] - f[1]),
+        200 * (f[1] - f[2])
+      ];
+    },
+    toBase(Lab) {
+      let f = [];
+      f[1] = (Lab[0] + 16) / 116;
+      f[0] = Lab[1] / 500 + f[1];
+      f[2] = f[1] - Lab[2] / 200;
+      let xyz = [
+        f[0] > \u03B53$1 ? Math.pow(f[0], 3) : (116 * f[0] - 16) / \u03BA$1,
+        Lab[0] > 8 ? Math.pow((Lab[0] + 16) / 116, 3) : Lab[0] / \u03BA$1,
+        f[2] > \u03B53$1 ? Math.pow(f[2], 3) : (116 * f[2] - 16) / \u03BA$1
+      ];
+      return xyz.map((value2, i) => value2 * white$1[i]);
+    },
+    formats: {
+      "lab": {
+        coords: ["<number> | <percentage>", "<number>", "<number>"]
+      }
+    }
+  });
+  function constrain(angle) {
+    return (angle % 360 + 360) % 360;
+  }
+  function adjust(arc, angles) {
+    if (arc === "raw") {
+      return angles;
+    }
+    let [a1, a2] = angles.map(constrain);
+    let angleDiff = a2 - a1;
+    if (arc === "increasing") {
+      if (angleDiff < 0) {
+        a2 += 360;
+      }
+    } else if (arc === "decreasing") {
+      if (angleDiff > 0) {
+        a1 += 360;
+      }
+    } else if (arc === "longer") {
+      if (-180 < angleDiff && angleDiff < 180) {
+        if (angleDiff > 0) {
+          a2 += 360;
+        } else {
+          a1 += 360;
+        }
+      }
+    } else if (arc === "shorter") {
+      if (angleDiff > 180) {
+        a1 += 360;
+      } else if (angleDiff < -180) {
+        a2 += 360;
+      }
+    }
+    return [a1, a2];
+  }
+  var lch = new ColorSpace({
+    id: "lch",
+    name: "LCH",
+    coords: {
+      l: {
+        refRange: [0, 100],
+        name: "Lightness"
+      },
+      c: {
+        refRange: [0, 150],
+        name: "Chroma"
+      },
+      h: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      }
+    },
+    base: lab,
+    fromBase(Lab) {
+      let [L, a2, b2] = Lab;
+      let hue;
+      const \u03B52 = 0.02;
+      if (Math.abs(a2) < \u03B52 && Math.abs(b2) < \u03B52) {
+        hue = NaN;
+      } else {
+        hue = Math.atan2(b2, a2) * 180 / Math.PI;
+      }
+      return [
+        L,
+        Math.sqrt(a2 ** 2 + b2 ** 2),
+        constrain(hue)
+      ];
+    },
+    toBase(LCH) {
+      let [Lightness, Chroma, Hue] = LCH;
+      if (Chroma < 0) {
+        Chroma = 0;
+      }
+      if (isNaN(Hue)) {
+        Hue = 0;
+      }
+      return [
+        Lightness,
+        Chroma * Math.cos(Hue * Math.PI / 180),
+        Chroma * Math.sin(Hue * Math.PI / 180)
+      ];
+    },
+    formats: {
+      "lch": {
+        coords: ["<number> | <percentage>", "<number>", "<number> | <angle>"]
+      }
+    }
+  });
+  var Gfactor = 25 ** 7;
+  var \u03C0$1 = Math.PI;
+  var r2d = 180 / \u03C0$1;
+  var d2r$1 = \u03C0$1 / 180;
+  function deltaE2000(color, sample, { kL = 1, kC = 1, kH = 1 } = {}) {
+    let [L1, a1, b1] = lab.from(color);
+    let C1 = lch.from(lab, [L1, a1, b1])[1];
+    let [L2, a2, b2] = lab.from(sample);
+    let C2 = lch.from(lab, [L2, a2, b2])[1];
+    if (C1 < 0) {
+      C1 = 0;
+    }
+    if (C2 < 0) {
+      C2 = 0;
+    }
+    let Cbar = (C1 + C2) / 2;
+    let C7 = Cbar ** 7;
+    let G = 0.5 * (1 - Math.sqrt(C7 / (C7 + Gfactor)));
+    let adash1 = (1 + G) * a1;
+    let adash2 = (1 + G) * a2;
+    let Cdash1 = Math.sqrt(adash1 ** 2 + b1 ** 2);
+    let Cdash2 = Math.sqrt(adash2 ** 2 + b2 ** 2);
+    let h1 = adash1 === 0 && b1 === 0 ? 0 : Math.atan2(b1, adash1);
+    let h2 = adash2 === 0 && b2 === 0 ? 0 : Math.atan2(b2, adash2);
+    if (h1 < 0) {
+      h1 += 2 * \u03C0$1;
+    }
+    if (h2 < 0) {
+      h2 += 2 * \u03C0$1;
+    }
+    h1 *= r2d;
+    h2 *= r2d;
+    let \u0394L = L2 - L1;
+    let \u0394C = Cdash2 - Cdash1;
+    let hdiff = h2 - h1;
+    let hsum = h1 + h2;
+    let habs = Math.abs(hdiff);
+    let \u0394h;
+    if (Cdash1 * Cdash2 === 0) {
+      \u0394h = 0;
+    } else if (habs <= 180) {
+      \u0394h = hdiff;
+    } else if (hdiff > 180) {
+      \u0394h = hdiff - 360;
+    } else if (hdiff < -180) {
+      \u0394h = hdiff + 360;
+    } else {
+      console.log("the unthinkable has happened");
+    }
+    let \u0394H = 2 * Math.sqrt(Cdash2 * Cdash1) * Math.sin(\u0394h * d2r$1 / 2);
+    let Ldash = (L1 + L2) / 2;
+    let Cdash = (Cdash1 + Cdash2) / 2;
+    let Cdash7 = Math.pow(Cdash, 7);
+    let hdash;
+    if (Cdash1 * Cdash2 === 0) {
+      hdash = hsum;
+    } else if (habs <= 180) {
+      hdash = hsum / 2;
+    } else if (hsum < 360) {
+      hdash = (hsum + 360) / 2;
+    } else {
+      hdash = (hsum - 360) / 2;
+    }
+    let lsq = (Ldash - 50) ** 2;
+    let SL = 1 + 0.015 * lsq / Math.sqrt(20 + lsq);
+    let SC = 1 + 0.045 * Cdash;
+    let T = 1;
+    T -= 0.17 * Math.cos((hdash - 30) * d2r$1);
+    T += 0.24 * Math.cos(2 * hdash * d2r$1);
+    T += 0.32 * Math.cos((3 * hdash + 6) * d2r$1);
+    T -= 0.2 * Math.cos((4 * hdash - 63) * d2r$1);
+    let SH = 1 + 0.015 * Cdash * T;
+    let \u0394\u03B8 = 30 * Math.exp(-1 * ((hdash - 275) / 25) ** 2);
+    let RC = 2 * Math.sqrt(Cdash7 / (Cdash7 + Gfactor));
+    let RT = -1 * Math.sin(2 * \u0394\u03B8 * d2r$1) * RC;
+    let dE = (\u0394L / (kL * SL)) ** 2;
+    dE += (\u0394C / (kC * SC)) ** 2;
+    dE += (\u0394H / (kH * SH)) ** 2;
+    dE += RT * (\u0394C / (kC * SC)) * (\u0394H / (kH * SH));
+    return Math.sqrt(dE);
+  }
+  var \u03B5$2 = 75e-6;
+  function inGamut(color, space = color.space, { epsilon = \u03B5$2 } = {}) {
+    color = getColor(color);
+    space = ColorSpace.get(space);
+    let coords = color.coords;
+    if (space !== color.space) {
+      coords = space.from(color);
+    }
+    return space.inGamut(coords, { epsilon });
+  }
+  function clone(color) {
+    return {
+      space: color.space,
+      coords: color.coords.slice(),
+      alpha: color.alpha
+    };
+  }
+  function toGamut(color, { method = defaults3.gamut_mapping, space = color.space } = {}) {
+    if (isString(arguments[1])) {
+      space = arguments[1];
+    }
+    space = ColorSpace.get(space);
+    if (inGamut(color, space, { epsilon: 0 })) {
+      return color;
+    }
+    let spaceColor = to(color, space);
+    if (method !== "clip" && !inGamut(color, space)) {
+      let clipped = toGamut(clone(spaceColor), { method: "clip", space });
+      if (deltaE2000(color, clipped) > 2) {
+        let coordMeta = ColorSpace.resolveCoord(method);
+        let mapSpace = coordMeta.space;
+        let coordId = coordMeta.id;
+        let mappedColor = to(spaceColor, mapSpace);
+        let bounds = coordMeta.range || coordMeta.refRange;
+        let min = bounds[0];
+        let \u03B52 = 0.01;
+        let low = min;
+        let high = get(mappedColor, coordId);
+        while (high - low > \u03B52) {
+          let clipped2 = clone(mappedColor);
+          clipped2 = toGamut(clipped2, { space, method: "clip" });
+          let deltaE2 = deltaE2000(mappedColor, clipped2);
+          if (deltaE2 - 2 < \u03B52) {
+            low = get(mappedColor, coordId);
+          } else {
+            high = get(mappedColor, coordId);
+          }
+          set$1(mappedColor, coordId, (low + high) / 2);
+        }
+        spaceColor = to(mappedColor, space);
+      } else {
+        spaceColor = clipped;
+      }
+    }
+    if (method === "clip" || !inGamut(spaceColor, space, { epsilon: 0 })) {
+      let bounds = Object.values(space.coords).map((c4) => c4.range || []);
+      spaceColor.coords = spaceColor.coords.map((c4, i) => {
+        let [min, max2] = bounds[i];
+        if (min !== void 0) {
+          c4 = Math.max(min, c4);
+        }
+        if (max2 !== void 0) {
+          c4 = Math.min(c4, max2);
+        }
+        return c4;
+      });
+    }
+    if (space !== color.space) {
+      spaceColor = to(spaceColor, color.space);
+    }
+    color.coords = spaceColor.coords;
+    return color;
+  }
+  toGamut.returns = "color";
+  function to(color, space, { inGamut: inGamut2 } = {}) {
+    color = getColor(color);
+    space = ColorSpace.get(space);
+    let coords = space.from(color);
+    let ret = { space, coords, alpha: color.alpha };
+    if (inGamut2) {
+      ret = toGamut(ret);
+    }
+    return ret;
+  }
+  to.returns = "color";
+  function serialize(color, {
+    precision = defaults3.precision,
+    format = "default",
+    inGamut: inGamut$1 = true,
+    ...customOptions
+  } = {}) {
+    let ret;
+    color = getColor(color);
+    let formatId = format;
+    format = color.space.getFormat(format) ?? color.space.getFormat("default") ?? ColorSpace.DEFAULT_FORMAT;
+    inGamut$1 ||= format.toGamut;
+    let coords = color.coords;
+    coords = coords.map((c4) => c4 ? c4 : 0);
+    if (inGamut$1 && !inGamut(color)) {
+      coords = toGamut(clone(color), inGamut$1 === true ? void 0 : inGamut$1).coords;
+    }
+    if (format.type === "custom") {
+      customOptions.precision = precision;
+      if (format.serialize) {
+        ret = format.serialize(coords, color.alpha, customOptions);
+      } else {
+        throw new TypeError(`format ${formatId} can only be used to parse colors, not for serialization`);
+      }
+    } else {
+      let name2 = format.name || "color";
+      if (format.serializeCoords) {
+        coords = format.serializeCoords(coords, precision);
+      } else {
+        if (precision !== null) {
+          coords = coords.map((c4) => toPrecision(c4, precision));
+        }
+      }
+      let args = [...coords];
+      if (name2 === "color") {
+        let cssId = format.id || format.ids?.[0] || color.space.id;
+        args.unshift(cssId);
+      }
+      let alpha = color.alpha;
+      if (precision !== null) {
+        alpha = toPrecision(alpha, precision);
+      }
+      let strAlpha = color.alpha < 1 ? ` ${format.commas ? "," : "/"} ${alpha}` : "";
+      ret = `${name2}(${args.join(format.commas ? ", " : " ")}${strAlpha})`;
+    }
+    return ret;
+  }
+  var toXYZ_M$5 = [
+    [0.6369580483012914, 0.14461690358620832, 0.1688809751641721],
+    [0.2627002120112671, 0.6779980715188708, 0.05930171646986196],
+    [0, 0.028072693049087428, 1.060985057710791]
+  ];
+  var fromXYZ_M$5 = [
+    [1.716651187971268, -0.355670783776392, -0.25336628137366],
+    [-0.666684351832489, 1.616481236634939, 0.0157685458139111],
+    [0.017639857445311, -0.042770613257809, 0.942103121235474]
+  ];
+  var REC2020Linear = new RGBColorSpace({
+    id: "rec2020-linear",
+    name: "Linear REC.2020",
+    white: "D65",
+    toXYZ_M: toXYZ_M$5,
+    fromXYZ_M: fromXYZ_M$5
+  });
+  var \u03B1 = 1.09929682680944;
+  var \u03B2 = 0.018053968510807;
+  var REC2020 = new RGBColorSpace({
+    id: "rec2020",
+    name: "REC.2020",
+    base: REC2020Linear,
+    toBase(RGB) {
+      return RGB.map(function(val) {
+        if (val < \u03B2 * 4.5) {
+          return val / 4.5;
+        }
+        return Math.pow((val + \u03B1 - 1) / \u03B1, 1 / 0.45);
+      });
+    },
+    fromBase(RGB) {
+      return RGB.map(function(val) {
+        if (val >= \u03B2) {
+          return \u03B1 * Math.pow(val, 0.45) - (\u03B1 - 1);
+        }
+        return 4.5 * val;
+      });
+    },
+    formats: {
+      color: {}
+    }
+  });
+  var toXYZ_M$4 = [
+    [0.4865709486482162, 0.26566769316909306, 0.1982172852343625],
+    [0.2289745640697488, 0.6917385218365064, 0.079286914093745],
+    [0, 0.04511338185890264, 1.043944368900976]
+  ];
+  var fromXYZ_M$4 = [
+    [2.493496911941425, -0.9313836179191239, -0.40271078445071684],
+    [-0.8294889695615747, 1.7626640603183463, 0.023624685841943577],
+    [0.03584583024378447, -0.07617238926804182, 0.9568845240076872]
+  ];
+  var P3Linear = new RGBColorSpace({
+    id: "p3-linear",
+    name: "Linear P3",
+    white: "D65",
+    toXYZ_M: toXYZ_M$4,
+    fromXYZ_M: fromXYZ_M$4
+  });
+  var toXYZ_M$3 = [
+    [0.41239079926595934, 0.357584339383878, 0.1804807884018343],
+    [0.21263900587151027, 0.715168678767756, 0.07219231536073371],
+    [0.01933081871559182, 0.11919477979462598, 0.9505321522496607]
+  ];
+  var fromXYZ_M$3 = [
+    [3.2409699419045226, -1.537383177570094, -0.4986107602930034],
+    [-0.9692436362808796, 1.8759675015077202, 0.04155505740717559],
+    [0.05563007969699366, -0.20397695888897652, 1.0569715142428786]
+  ];
+  var sRGBLinear = new RGBColorSpace({
+    id: "srgb-linear",
+    name: "Linear sRGB",
+    white: "D65",
+    toXYZ_M: toXYZ_M$3,
+    fromXYZ_M: fromXYZ_M$3,
+    formats: {
+      color: {}
+    }
+  });
+  var KEYWORDS = {
+    "aliceblue": [240 / 255, 248 / 255, 1],
+    "antiquewhite": [250 / 255, 235 / 255, 215 / 255],
+    "aqua": [0, 1, 1],
+    "aquamarine": [127 / 255, 1, 212 / 255],
+    "azure": [240 / 255, 1, 1],
+    "beige": [245 / 255, 245 / 255, 220 / 255],
+    "bisque": [1, 228 / 255, 196 / 255],
+    "black": [0, 0, 0],
+    "blanchedalmond": [1, 235 / 255, 205 / 255],
+    "blue": [0, 0, 1],
+    "blueviolet": [138 / 255, 43 / 255, 226 / 255],
+    "brown": [165 / 255, 42 / 255, 42 / 255],
+    "burlywood": [222 / 255, 184 / 255, 135 / 255],
+    "cadetblue": [95 / 255, 158 / 255, 160 / 255],
+    "chartreuse": [127 / 255, 1, 0],
+    "chocolate": [210 / 255, 105 / 255, 30 / 255],
+    "coral": [1, 127 / 255, 80 / 255],
+    "cornflowerblue": [100 / 255, 149 / 255, 237 / 255],
+    "cornsilk": [1, 248 / 255, 220 / 255],
+    "crimson": [220 / 255, 20 / 255, 60 / 255],
+    "cyan": [0, 1, 1],
+    "darkblue": [0, 0, 139 / 255],
+    "darkcyan": [0, 139 / 255, 139 / 255],
+    "darkgoldenrod": [184 / 255, 134 / 255, 11 / 255],
+    "darkgray": [169 / 255, 169 / 255, 169 / 255],
+    "darkgreen": [0, 100 / 255, 0],
+    "darkgrey": [169 / 255, 169 / 255, 169 / 255],
+    "darkkhaki": [189 / 255, 183 / 255, 107 / 255],
+    "darkmagenta": [139 / 255, 0, 139 / 255],
+    "darkolivegreen": [85 / 255, 107 / 255, 47 / 255],
+    "darkorange": [1, 140 / 255, 0],
+    "darkorchid": [153 / 255, 50 / 255, 204 / 255],
+    "darkred": [139 / 255, 0, 0],
+    "darksalmon": [233 / 255, 150 / 255, 122 / 255],
+    "darkseagreen": [143 / 255, 188 / 255, 143 / 255],
+    "darkslateblue": [72 / 255, 61 / 255, 139 / 255],
+    "darkslategray": [47 / 255, 79 / 255, 79 / 255],
+    "darkslategrey": [47 / 255, 79 / 255, 79 / 255],
+    "darkturquoise": [0, 206 / 255, 209 / 255],
+    "darkviolet": [148 / 255, 0, 211 / 255],
+    "deeppink": [1, 20 / 255, 147 / 255],
+    "deepskyblue": [0, 191 / 255, 1],
+    "dimgray": [105 / 255, 105 / 255, 105 / 255],
+    "dimgrey": [105 / 255, 105 / 255, 105 / 255],
+    "dodgerblue": [30 / 255, 144 / 255, 1],
+    "firebrick": [178 / 255, 34 / 255, 34 / 255],
+    "floralwhite": [1, 250 / 255, 240 / 255],
+    "forestgreen": [34 / 255, 139 / 255, 34 / 255],
+    "fuchsia": [1, 0, 1],
+    "gainsboro": [220 / 255, 220 / 255, 220 / 255],
+    "ghostwhite": [248 / 255, 248 / 255, 1],
+    "gold": [1, 215 / 255, 0],
+    "goldenrod": [218 / 255, 165 / 255, 32 / 255],
+    "gray": [128 / 255, 128 / 255, 128 / 255],
+    "green": [0, 128 / 255, 0],
+    "greenyellow": [173 / 255, 1, 47 / 255],
+    "grey": [128 / 255, 128 / 255, 128 / 255],
+    "honeydew": [240 / 255, 1, 240 / 255],
+    "hotpink": [1, 105 / 255, 180 / 255],
+    "indianred": [205 / 255, 92 / 255, 92 / 255],
+    "indigo": [75 / 255, 0, 130 / 255],
+    "ivory": [1, 1, 240 / 255],
+    "khaki": [240 / 255, 230 / 255, 140 / 255],
+    "lavender": [230 / 255, 230 / 255, 250 / 255],
+    "lavenderblush": [1, 240 / 255, 245 / 255],
+    "lawngreen": [124 / 255, 252 / 255, 0],
+    "lemonchiffon": [1, 250 / 255, 205 / 255],
+    "lightblue": [173 / 255, 216 / 255, 230 / 255],
+    "lightcoral": [240 / 255, 128 / 255, 128 / 255],
+    "lightcyan": [224 / 255, 1, 1],
+    "lightgoldenrodyellow": [250 / 255, 250 / 255, 210 / 255],
+    "lightgray": [211 / 255, 211 / 255, 211 / 255],
+    "lightgreen": [144 / 255, 238 / 255, 144 / 255],
+    "lightgrey": [211 / 255, 211 / 255, 211 / 255],
+    "lightpink": [1, 182 / 255, 193 / 255],
+    "lightsalmon": [1, 160 / 255, 122 / 255],
+    "lightseagreen": [32 / 255, 178 / 255, 170 / 255],
+    "lightskyblue": [135 / 255, 206 / 255, 250 / 255],
+    "lightslategray": [119 / 255, 136 / 255, 153 / 255],
+    "lightslategrey": [119 / 255, 136 / 255, 153 / 255],
+    "lightsteelblue": [176 / 255, 196 / 255, 222 / 255],
+    "lightyellow": [1, 1, 224 / 255],
+    "lime": [0, 1, 0],
+    "limegreen": [50 / 255, 205 / 255, 50 / 255],
+    "linen": [250 / 255, 240 / 255, 230 / 255],
+    "magenta": [1, 0, 1],
+    "maroon": [128 / 255, 0, 0],
+    "mediumaquamarine": [102 / 255, 205 / 255, 170 / 255],
+    "mediumblue": [0, 0, 205 / 255],
+    "mediumorchid": [186 / 255, 85 / 255, 211 / 255],
+    "mediumpurple": [147 / 255, 112 / 255, 219 / 255],
+    "mediumseagreen": [60 / 255, 179 / 255, 113 / 255],
+    "mediumslateblue": [123 / 255, 104 / 255, 238 / 255],
+    "mediumspringgreen": [0, 250 / 255, 154 / 255],
+    "mediumturquoise": [72 / 255, 209 / 255, 204 / 255],
+    "mediumvioletred": [199 / 255, 21 / 255, 133 / 255],
+    "midnightblue": [25 / 255, 25 / 255, 112 / 255],
+    "mintcream": [245 / 255, 1, 250 / 255],
+    "mistyrose": [1, 228 / 255, 225 / 255],
+    "moccasin": [1, 228 / 255, 181 / 255],
+    "navajowhite": [1, 222 / 255, 173 / 255],
+    "navy": [0, 0, 128 / 255],
+    "oldlace": [253 / 255, 245 / 255, 230 / 255],
+    "olive": [128 / 255, 128 / 255, 0],
+    "olivedrab": [107 / 255, 142 / 255, 35 / 255],
+    "orange": [1, 165 / 255, 0],
+    "orangered": [1, 69 / 255, 0],
+    "orchid": [218 / 255, 112 / 255, 214 / 255],
+    "palegoldenrod": [238 / 255, 232 / 255, 170 / 255],
+    "palegreen": [152 / 255, 251 / 255, 152 / 255],
+    "paleturquoise": [175 / 255, 238 / 255, 238 / 255],
+    "palevioletred": [219 / 255, 112 / 255, 147 / 255],
+    "papayawhip": [1, 239 / 255, 213 / 255],
+    "peachpuff": [1, 218 / 255, 185 / 255],
+    "peru": [205 / 255, 133 / 255, 63 / 255],
+    "pink": [1, 192 / 255, 203 / 255],
+    "plum": [221 / 255, 160 / 255, 221 / 255],
+    "powderblue": [176 / 255, 224 / 255, 230 / 255],
+    "purple": [128 / 255, 0, 128 / 255],
+    "rebeccapurple": [102 / 255, 51 / 255, 153 / 255],
+    "red": [1, 0, 0],
+    "rosybrown": [188 / 255, 143 / 255, 143 / 255],
+    "royalblue": [65 / 255, 105 / 255, 225 / 255],
+    "saddlebrown": [139 / 255, 69 / 255, 19 / 255],
+    "salmon": [250 / 255, 128 / 255, 114 / 255],
+    "sandybrown": [244 / 255, 164 / 255, 96 / 255],
+    "seagreen": [46 / 255, 139 / 255, 87 / 255],
+    "seashell": [1, 245 / 255, 238 / 255],
+    "sienna": [160 / 255, 82 / 255, 45 / 255],
+    "silver": [192 / 255, 192 / 255, 192 / 255],
+    "skyblue": [135 / 255, 206 / 255, 235 / 255],
+    "slateblue": [106 / 255, 90 / 255, 205 / 255],
+    "slategray": [112 / 255, 128 / 255, 144 / 255],
+    "slategrey": [112 / 255, 128 / 255, 144 / 255],
+    "snow": [1, 250 / 255, 250 / 255],
+    "springgreen": [0, 1, 127 / 255],
+    "steelblue": [70 / 255, 130 / 255, 180 / 255],
+    "tan": [210 / 255, 180 / 255, 140 / 255],
+    "teal": [0, 128 / 255, 128 / 255],
+    "thistle": [216 / 255, 191 / 255, 216 / 255],
+    "tomato": [1, 99 / 255, 71 / 255],
+    "turquoise": [64 / 255, 224 / 255, 208 / 255],
+    "violet": [238 / 255, 130 / 255, 238 / 255],
+    "wheat": [245 / 255, 222 / 255, 179 / 255],
+    "white": [1, 1, 1],
+    "whitesmoke": [245 / 255, 245 / 255, 245 / 255],
+    "yellow": [1, 1, 0],
+    "yellowgreen": [154 / 255, 205 / 255, 50 / 255]
+  };
+  var coordGrammar = Array(3).fill("<percentage> | <number>[0, 255]");
+  var sRGB = new RGBColorSpace({
+    id: "srgb",
+    name: "sRGB",
+    base: sRGBLinear,
+    fromBase: (rgb) => {
+      return rgb.map((val) => {
+        let sign = val < 0 ? -1 : 1;
+        let abs = val * sign;
+        if (abs > 31308e-7) {
+          return sign * (1.055 * abs ** (1 / 2.4) - 0.055);
+        }
+        return 12.92 * val;
+      });
+    },
+    toBase: (rgb) => {
+      return rgb.map((val) => {
+        let sign = val < 0 ? -1 : 1;
+        let abs = val * sign;
+        if (abs < 0.04045) {
+          return val / 12.92;
+        }
+        return sign * ((abs + 0.055) / 1.055) ** 2.4;
+      });
+    },
+    formats: {
+      "rgb": {
+        coords: coordGrammar
+      },
+      "color": {},
+      "rgba": {
+        coords: coordGrammar,
+        commas: true,
+        lastAlpha: true
+      },
+      "hex": {
+        type: "custom",
+        toGamut: true,
+        test: (str) => /^#([a-f0-9]{3,4}){1,2}$/i.test(str),
+        parse(str) {
+          if (str.length <= 5) {
+            str = str.replace(/[a-f0-9]/gi, "$&$&");
+          }
+          let rgba = [];
+          str.replace(/[a-f0-9]{2}/gi, (component) => {
+            rgba.push(parseInt(component, 16) / 255);
+          });
+          return {
+            spaceId: "srgb",
+            coords: rgba.slice(0, 3),
+            alpha: rgba.slice(3)[0]
+          };
+        },
+        serialize: (coords, alpha, {
+          collapse = true
+        } = {}) => {
+          if (alpha < 1) {
+            coords.push(alpha);
+          }
+          coords = coords.map((c4) => Math.round(c4 * 255));
+          let collapsible = collapse && coords.every((c4) => c4 % 17 === 0);
+          let hex = coords.map((c4) => {
+            if (collapsible) {
+              return (c4 / 17).toString(16);
+            }
+            return c4.toString(16).padStart(2, "0");
+          }).join("");
+          return "#" + hex;
+        }
+      },
+      "keyword": {
+        type: "custom",
+        test: (str) => /^[a-z]+$/i.test(str),
+        parse(str) {
+          str = str.toLowerCase();
+          let ret = { spaceId: "srgb", coords: null, alpha: 1 };
+          if (str === "transparent") {
+            ret.coords = KEYWORDS.black;
+            ret.alpha = 0;
+          } else {
+            ret.coords = KEYWORDS[str];
+          }
+          if (ret.coords) {
+            return ret;
+          }
+        }
+      }
+    }
+  });
+  var P3 = new RGBColorSpace({
+    id: "p3",
+    name: "P3",
+    base: P3Linear,
+    fromBase: sRGB.fromBase,
+    toBase: sRGB.toBase,
+    formats: {
+      color: {
+        id: "display-p3"
+      }
+    }
+  });
+  defaults3.display_space = sRGB;
+  if (typeof CSS !== "undefined" && CSS.supports) {
+    for (let space of [lab, REC2020, P3]) {
+      let coords = space.getMinCoords();
+      let color = { space, coords, alpha: 1 };
+      let str = serialize(color);
+      if (CSS.supports("color", str)) {
+        defaults3.display_space = space;
+        break;
+      }
+    }
+  }
+  function display(color, { space = defaults3.display_space, ...options } = {}) {
+    let ret = serialize(color, options);
+    if (typeof CSS === "undefined" || CSS.supports("color", ret) || !defaults3.display_space) {
+      ret = new String(ret);
+      ret.color = color;
+    } else {
+      let fallbackColor = to(color, space);
+      ret = new String(serialize(fallbackColor, options));
+      ret.color = fallbackColor;
+    }
+    return ret;
+  }
+  function distance(color1, color2, space = "lab") {
+    space = ColorSpace.get(space);
+    let coords1 = space.from(color1);
+    let coords2 = space.from(color2);
+    return Math.sqrt(coords1.reduce((acc, c12, i) => {
+      let c22 = coords2[i];
+      if (isNaN(c12) || isNaN(c22)) {
+        return acc;
+      }
+      return acc + (c22 - c12) ** 2;
+    }, 0));
+  }
+  function equals(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    return color1.space === color2.space && color1.alpha === color2.alpha && color1.coords.every((c4, i) => c4 === color2.coords[i]);
+  }
+  function getLuminance(color) {
+    return get(color, [XYZ_D65, "y"]);
+  }
+  function setLuminance(color) {
+    set(color, [XYZ_D65, "y"], value);
+  }
+  function register$2(Color2) {
+    Object.defineProperty(Color2.prototype, "luminance", {
+      get() {
+        return getLuminance(this);
+      },
+      set(value2) {
+        setLuminance(this);
+      }
+    });
+  }
+  var luminance = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    getLuminance,
+    setLuminance,
+    register: register$2
+  });
+  function contrastWCAG21(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    let Y1 = Math.max(getLuminance(color1), 0);
+    let Y2 = Math.max(getLuminance(color2), 0);
+    if (Y2 > Y1) {
+      [Y1, Y2] = [Y2, Y1];
+    }
+    return (Y1 + 0.05) / (Y2 + 0.05);
+  }
+  var normBG = 0.56;
+  var normTXT = 0.57;
+  var revTXT = 0.62;
+  var revBG = 0.65;
+  var blkThrs = 0.022;
+  var blkClmp = 1.414;
+  var loClip = 0.1;
+  var deltaYmin = 5e-4;
+  var scaleBoW = 1.14;
+  var loBoWoffset = 0.027;
+  var scaleWoB = 1.14;
+  function fclamp(Y) {
+    if (Y >= blkThrs)
+      return Y;
+    return Y + (blkThrs - Y) ** blkClmp;
+  }
+  function linearize(val) {
+    let sign = val < 0 ? -1 : 1;
+    let abs = Math.abs(val);
+    return sign * Math.pow(abs, 2.4);
+  }
+  function contrastAPCA(background, foreground) {
+    foreground = getColor(foreground);
+    background = getColor(background);
+    let S;
+    let C2;
+    let Sapc;
+    let R, G, B;
+    foreground = to(foreground, "srgb");
+    [R, G, B] = foreground.coords;
+    let lumTxt = linearize(R) * 0.2126729 + linearize(G) * 0.7151522 + linearize(B) * 0.072175;
+    background = to(background, "srgb");
+    [R, G, B] = background.coords;
+    let lumBg = linearize(R) * 0.2126729 + linearize(G) * 0.7151522 + linearize(B) * 0.072175;
+    let Ytxt = fclamp(lumTxt);
+    let Ybg = fclamp(lumBg);
+    let BoW = Ybg > Ytxt;
+    if (Math.abs(Ybg - Ytxt) < deltaYmin) {
+      C2 = 0;
+    } else {
+      if (BoW) {
+        S = Ybg ** normBG - Ytxt ** normTXT;
+        C2 = S * scaleBoW;
+      } else {
+        S = Ybg ** revBG - Ytxt ** revTXT;
+        C2 = S * scaleWoB;
+      }
+    }
+    if (Math.abs(C2) < loClip) {
+      Sapc = 0;
+    } else if (C2 > 0) {
+      Sapc = C2 - loBoWoffset;
+    } else {
+      Sapc = C2 + loBoWoffset;
+    }
+    return Sapc * 100;
+  }
+  function contrastMichelson(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    let Y1 = Math.max(getLuminance(color1), 0);
+    let Y2 = Math.max(getLuminance(color2), 0);
+    if (Y2 > Y1) {
+      [Y1, Y2] = [Y2, Y1];
+    }
+    let denom = Y1 + Y2;
+    return denom === 0 ? 0 : (Y1 - Y2) / denom;
+  }
+  var max = 5e4;
+  function contrastWeber(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    let Y1 = Math.max(getLuminance(color1), 0);
+    let Y2 = Math.max(getLuminance(color2), 0);
+    if (Y2 > Y1) {
+      [Y1, Y2] = [Y2, Y1];
+    }
+    return Y2 === 0 ? max : (Y1 - Y2) / Y2;
+  }
+  function contrastLstar(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    let L1 = get(color1, [lab, "l"]);
+    let L2 = get(color2, [lab, "l"]);
+    return Math.abs(L1 - L2);
+  }
+  var \u03B5$1 = 216 / 24389;
+  var \u03B53 = 24 / 116;
+  var \u03BA = 24389 / 27;
+  var white = WHITES.D65;
+  var lab_d65 = new ColorSpace({
+    id: "lab-d65",
+    name: "Lab D65",
+    coords: {
+      l: {
+        refRange: [0, 100],
+        name: "L"
+      },
+      a: {
+        refRange: [-125, 125]
+      },
+      b: {
+        refRange: [-125, 125]
+      }
+    },
+    white,
+    base: XYZ_D65,
+    fromBase(XYZ) {
+      let xyz = XYZ.map((value2, i) => value2 / white[i]);
+      let f = xyz.map((value2) => value2 > \u03B5$1 ? Math.cbrt(value2) : (\u03BA * value2 + 16) / 116);
+      return [
+        116 * f[1] - 16,
+        500 * (f[0] - f[1]),
+        200 * (f[1] - f[2])
+      ];
+    },
+    toBase(Lab) {
+      let f = [];
+      f[1] = (Lab[0] + 16) / 116;
+      f[0] = Lab[1] / 500 + f[1];
+      f[2] = f[1] - Lab[2] / 200;
+      let xyz = [
+        f[0] > \u03B53 ? Math.pow(f[0], 3) : (116 * f[0] - 16) / \u03BA,
+        Lab[0] > 8 ? Math.pow((Lab[0] + 16) / 116, 3) : Lab[0] / \u03BA,
+        f[2] > \u03B53 ? Math.pow(f[2], 3) : (116 * f[2] - 16) / \u03BA
+      ];
+      return xyz.map((value2, i) => value2 * white[i]);
+    },
+    formats: {
+      "lab-d65": {
+        coords: ["<number> | <percentage>", "<number>", "<number>"]
+      }
+    }
+  });
+  var phi = Math.pow(5, 0.5) * 0.5 + 0.5;
+  function contrastDeltaPhi(color1, color2) {
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    let Lstr1 = get(color1, [lab_d65, "l"]);
+    let Lstr2 = get(color2, [lab_d65, "l"]);
+    let deltaPhiStar = Math.abs(Math.pow(Lstr1, phi) - Math.pow(Lstr2, phi));
+    let contrast2 = Math.pow(deltaPhiStar, 1 / phi) * Math.SQRT2 - 40;
+    return contrast2 < 7.5 ? 0 : contrast2;
+  }
+  var contrastMethods = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    contrastWCAG21,
+    contrastAPCA,
+    contrastMichelson,
+    contrastWeber,
+    contrastLstar,
+    contrastDeltaPhi
+  });
+  function contrast(background, foreground, o = {}) {
+    if (isString(o)) {
+      o = { algorithm: o };
+    }
+    let { algorithm, ...rest } = o;
+    if (!algorithm) {
+      let algorithms = Object.keys(contrastMethods).map((a2) => a2.replace(/^contrast/, "")).join(", ");
+      throw new TypeError(`contrast() function needs a contrast algorithm. Please specify one of: ${algorithms}`);
+    }
+    background = getColor(background);
+    foreground = getColor(foreground);
+    for (let a2 in contrastMethods) {
+      if ("contrast" + algorithm.toLowerCase() === a2.toLowerCase()) {
+        return contrastMethods[a2](background, foreground, rest);
+      }
+    }
+    throw new TypeError(`Unknown contrast algorithm: ${algorithm}`);
+  }
+  function uv(color) {
+    let [X, Y, Z] = getAll(color, XYZ_D65);
+    let denom = X + 15 * Y + 3 * Z;
+    return [4 * X / denom, 9 * Y / denom];
+  }
+  function xy(color) {
+    let [X, Y, Z] = getAll(color, XYZ_D65);
+    let sum = X + Y + Z;
+    return [X / sum, Y / sum];
+  }
+  function register$1(Color2) {
+    Object.defineProperty(Color2.prototype, "uv", {
+      get() {
+        return uv(this);
+      }
+    });
+    Object.defineProperty(Color2.prototype, "xy", {
+      get() {
+        return xy(this);
+      }
+    });
+  }
+  var chromaticity = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    uv,
+    xy,
+    register: register$1
+  });
+  function deltaE76(color, sample) {
+    return distance(color, sample, "lab");
+  }
+  var \u03C0 = Math.PI;
+  var d2r = \u03C0 / 180;
+  function deltaECMC(color, sample, { l = 2, c: c4 = 1 } = {}) {
+    let [L1, a1, b1] = lab.from(color);
+    let [, C1, H1] = lch.from(lab, [L1, a1, b1]);
+    let [L2, a2, b2] = lab.from(sample);
+    let C2 = lch.from(lab, [L2, a2, b2])[1];
+    if (C1 < 0) {
+      C1 = 0;
+    }
+    if (C2 < 0) {
+      C2 = 0;
+    }
+    let \u0394L = L1 - L2;
+    let \u0394C = C1 - C2;
+    let \u0394a = a1 - a2;
+    let \u0394b = b1 - b2;
+    let H2 = \u0394a ** 2 + \u0394b ** 2 - \u0394C ** 2;
+    let SL = 0.511;
+    if (L1 >= 16) {
+      SL = 0.040975 * L1 / (1 + 0.01765 * L1);
+    }
+    let SC = 0.0638 * C1 / (1 + 0.0131 * C1) + 0.638;
+    let T;
+    if (Number.isNaN(H1)) {
+      H1 = 0;
+    }
+    if (H1 >= 164 && H1 <= 345) {
+      T = 0.56 + Math.abs(0.2 * Math.cos((H1 + 168) * d2r));
+    } else {
+      T = 0.36 + Math.abs(0.4 * Math.cos((H1 + 35) * d2r));
+    }
+    let C4 = Math.pow(C1, 4);
+    let F = Math.sqrt(C4 / (C4 + 1900));
+    let SH = SC * (F * T + 1 - F);
+    let dE = (\u0394L / (l * SL)) ** 2;
+    dE += (\u0394C / (c4 * SC)) ** 2;
+    dE += H2 / SH ** 2;
+    return Math.sqrt(dE);
+  }
+  var Yw$1 = 203;
+  var XYZ_Abs_D65 = new ColorSpace({
+    id: "xyz-abs-d65",
+    name: "Absolute XYZ D65",
+    coords: {
+      x: {
+        refRange: [0, 9504.7],
+        name: "Xa"
+      },
+      y: {
+        refRange: [0, 1e4],
+        name: "Ya"
+      },
+      z: {
+        refRange: [0, 10888.3],
+        name: "Za"
+      }
+    },
+    base: XYZ_D65,
+    fromBase(XYZ) {
+      return XYZ.map((v) => Math.max(v * Yw$1, 0));
+    },
+    toBase(AbsXYZ) {
+      return AbsXYZ.map((v) => Math.max(v / Yw$1, 0));
+    }
+  });
+  var b$1 = 1.15;
+  var g = 0.66;
+  var n$1 = 2610 / 2 ** 14;
+  var ninv$1 = 2 ** 14 / 2610;
+  var c1$2 = 3424 / 2 ** 12;
+  var c2$2 = 2413 / 2 ** 7;
+  var c3$2 = 2392 / 2 ** 7;
+  var p = 1.7 * 2523 / 2 ** 5;
+  var pinv = 2 ** 5 / (1.7 * 2523);
+  var d = -0.56;
+  var d0 = 16295499532821565e-27;
+  var XYZtoCone_M = [
+    [0.41478972, 0.579999, 0.014648],
+    [-0.20151, 1.120649, 0.0531008],
+    [-0.0166008, 0.2648, 0.6684799]
+  ];
+  var ConetoXYZ_M = [
+    [1.9242264357876067, -1.0047923125953657, 0.037651404030618],
+    [0.35031676209499907, 0.7264811939316552, -0.06538442294808501],
+    [-0.09098281098284752, -0.3127282905230739, 1.5227665613052603]
+  ];
+  var ConetoIab_M = [
+    [0.5, 0.5, 0],
+    [3.524, -4.066708, 0.542708],
+    [0.199076, 1.096799, -1.295875]
+  ];
+  var IabtoCone_M = [
+    [1, 0.1386050432715393, 0.05804731615611886],
+    [0.9999999999999999, -0.1386050432715393, -0.05804731615611886],
+    [0.9999999999999998, -0.09601924202631895, -0.8118918960560388]
+  ];
+  var Jzazbz = new ColorSpace({
+    id: "jzazbz",
+    name: "Jzazbz",
+    coords: {
+      jz: {
+        refRange: [0, 1],
+        name: "Jz"
+      },
+      az: {
+        refRange: [-0.5, 0.5]
+      },
+      bz: {
+        refRange: [-0.5, 0.5]
+      }
+    },
+    base: XYZ_Abs_D65,
+    fromBase(XYZ) {
+      let [Xa, Ya, Za] = XYZ;
+      let Xm = b$1 * Xa - (b$1 - 1) * Za;
+      let Ym = g * Ya - (g - 1) * Xa;
+      let LMS = multiplyMatrices(XYZtoCone_M, [Xm, Ym, Za]);
+      let PQLMS = LMS.map(function(val) {
+        let num = c1$2 + c2$2 * (val / 1e4) ** n$1;
+        let denom = 1 + c3$2 * (val / 1e4) ** n$1;
+        return (num / denom) ** p;
+      });
+      let [Iz, az, bz] = multiplyMatrices(ConetoIab_M, PQLMS);
+      let Jz = (1 + d) * Iz / (1 + d * Iz) - d0;
+      return [Jz, az, bz];
+    },
+    toBase(Jzazbz2) {
+      let [Jz, az, bz] = Jzazbz2;
+      let Iz = (Jz + d0) / (1 + d - d * (Jz + d0));
+      let PQLMS = multiplyMatrices(IabtoCone_M, [Iz, az, bz]);
+      let LMS = PQLMS.map(function(val) {
+        let num = c1$2 - val ** pinv;
+        let denom = c3$2 * val ** pinv - c2$2;
+        let x = 1e4 * (num / denom) ** ninv$1;
+        return x;
+      });
+      let [Xm, Ym, Za] = multiplyMatrices(ConetoXYZ_M, LMS);
+      let Xa = (Xm + (b$1 - 1) * Za) / b$1;
+      let Ya = (Ym + (g - 1) * Xa) / g;
+      return [Xa, Ya, Za];
+    },
+    formats: {
+      "color": {}
+    }
+  });
+  var jzczhz = new ColorSpace({
+    id: "jzczhz",
+    name: "JzCzHz",
+    coords: {
+      jz: {
+        refRange: [0, 1],
+        name: "Jz"
+      },
+      cz: {
+        refRange: [0, 1],
+        name: "Chroma"
+      },
+      hz: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      }
+    },
+    base: Jzazbz,
+    fromBase(jzazbz) {
+      let [Jz, az, bz] = jzazbz;
+      let hue;
+      const \u03B52 = 2e-4;
+      if (Math.abs(az) < \u03B52 && Math.abs(bz) < \u03B52) {
+        hue = NaN;
+      } else {
+        hue = Math.atan2(bz, az) * 180 / Math.PI;
+      }
+      return [
+        Jz,
+        Math.sqrt(az ** 2 + bz ** 2),
+        constrain(hue)
+      ];
+    },
+    toBase(jzczhz2) {
+      return [
+        jzczhz2[0],
+        jzczhz2[1] * Math.cos(jzczhz2[2] * Math.PI / 180),
+        jzczhz2[1] * Math.sin(jzczhz2[2] * Math.PI / 180)
+      ];
+    },
+    formats: {
+      color: {}
+    }
+  });
+  function deltaEJz(color, sample) {
+    let [Jz1, Cz1, Hz1] = jzczhz.from(color);
+    let [Jz2, Cz2, Hz2] = jzczhz.from(sample);
+    let \u0394J = Jz1 - Jz2;
+    let \u0394C = Cz1 - Cz2;
+    if (Number.isNaN(Hz1) && Number.isNaN(Hz2)) {
+      Hz1 = 0;
+      Hz2 = 0;
+    } else if (Number.isNaN(Hz1)) {
+      Hz1 = Hz2;
+    } else if (Number.isNaN(Hz2)) {
+      Hz2 = Hz1;
+    }
+    let \u0394h = Hz1 - Hz2;
+    let \u0394H = 2 * Math.sqrt(Cz1 * Cz2) * Math.sin(\u0394h / 2 * (Math.PI / 180));
+    return Math.sqrt(\u0394J ** 2 + \u0394C ** 2 + \u0394H ** 2);
+  }
+  var c1$1 = 3424 / 4096;
+  var c2$1 = 2413 / 128;
+  var c3$1 = 2392 / 128;
+  var m1 = 2610 / 16384;
+  var m2 = 2523 / 32;
+  var im1 = 16384 / 2610;
+  var im2 = 32 / 2523;
+  var XYZtoLMS_M$1 = [
+    [0.3592, 0.6976, -0.0358],
+    [-0.1922, 1.1004, 0.0755],
+    [7e-3, 0.0749, 0.8434]
+  ];
+  var LMStoIPT_M = [
+    [2048 / 4096, 2048 / 4096, 0],
+    [6610 / 4096, -13613 / 4096, 7003 / 4096],
+    [17933 / 4096, -17390 / 4096, -543 / 4096]
+  ];
+  var IPTtoLMS_M = [
+    [0.9999888965628402, 0.008605050147287059, 0.11103437159861648],
+    [1.00001110343716, -0.008605050147287059, -0.11103437159861648],
+    [1.0000320633910054, 0.56004913547279, -0.3206339100541203]
+  ];
+  var LMStoXYZ_M$1 = [
+    [2.0701800566956137, -1.326456876103021, 0.20661600684785517],
+    [0.3649882500326575, 0.6804673628522352, -0.04542175307585323],
+    [-0.04959554223893211, -0.04942116118675749, 1.1879959417328034]
+  ];
+  var ictcp = new ColorSpace({
+    id: "ictcp",
+    name: "ICTCP",
+    coords: {
+      i: {
+        refRange: [0, 1],
+        name: "I"
+      },
+      ct: {
+        refRange: [-0.5, 0.5],
+        name: "CT"
+      },
+      cp: {
+        refRange: [-0.5, 0.5],
+        name: "CP"
+      }
+    },
+    base: XYZ_Abs_D65,
+    fromBase(XYZ) {
+      let LMS = multiplyMatrices(XYZtoLMS_M$1, XYZ);
+      return LMStoICtCp(LMS);
+    },
+    toBase(ICtCp) {
+      let LMS = ICtCptoLMS(ICtCp);
+      return multiplyMatrices(LMStoXYZ_M$1, LMS);
+    },
+    formats: {
+      color: {}
+    }
+  });
+  function LMStoICtCp(LMS) {
+    let PQLMS = LMS.map(function(val) {
+      let num = c1$1 + c2$1 * (val / 1e4) ** m1;
+      let denom = 1 + c3$1 * (val / 1e4) ** m1;
+      return (num / denom) ** m2;
+    });
+    return multiplyMatrices(LMStoIPT_M, PQLMS);
+  }
+  function ICtCptoLMS(ICtCp) {
+    let PQLMS = multiplyMatrices(IPTtoLMS_M, ICtCp);
+    let LMS = PQLMS.map(function(val) {
+      let num = Math.max(val ** im2 - c1$1, 0);
+      let denom = c2$1 - c3$1 * val ** im2;
+      return 1e4 * (num / denom) ** im1;
+    });
+    return LMS;
+  }
+  function deltaEITP(color, sample) {
+    let [I1, T1, P1] = ictcp.from(color);
+    let [I2, T2, P2] = ictcp.from(sample);
+    return 720 * Math.sqrt((I1 - I2) ** 2 + 0.25 * (T1 - T2) ** 2 + (P1 - P2) ** 2);
+  }
+  var XYZtoLMS_M = [
+    [0.8190224432164319, 0.3619062562801221, -0.12887378261216414],
+    [0.0329836671980271, 0.9292868468965546, 0.03614466816999844],
+    [0.048177199566046255, 0.26423952494422764, 0.6335478258136937]
+  ];
+  var LMStoXYZ_M = [
+    [1.2268798733741557, -0.5578149965554813, 0.28139105017721583],
+    [-0.04057576262431372, 1.1122868293970594, -0.07171106666151701],
+    [-0.07637294974672142, -0.4214933239627914, 1.5869240244272418]
+  ];
+  var LMStoLab_M = [
+    [0.2104542553, 0.793617785, -0.0040720468],
+    [1.9779984951, -2.428592205, 0.4505937099],
+    [0.0259040371, 0.7827717662, -0.808675766]
+  ];
+  var LabtoLMS_M = [
+    [0.9999999984505198, 0.39633779217376786, 0.2158037580607588],
+    [1.0000000088817609, -0.10556134232365635, -0.06385417477170591],
+    [1.0000000546724108, -0.08948418209496575, -1.2914855378640917]
+  ];
+  var OKLab = new ColorSpace({
+    id: "oklab",
+    name: "OKLab",
+    coords: {
+      l: {
+        refRange: [0, 1],
+        name: "L"
+      },
+      a: {
+        refRange: [-0.4, 0.4]
+      },
+      b: {
+        refRange: [-0.4, 0.4]
+      }
+    },
+    white: "D65",
+    base: XYZ_D65,
+    fromBase(XYZ) {
+      let LMS = multiplyMatrices(XYZtoLMS_M, XYZ);
+      let LMSg = LMS.map((val) => Math.cbrt(val));
+      return multiplyMatrices(LMStoLab_M, LMSg);
+    },
+    toBase(OKLab2) {
+      let LMSg = multiplyMatrices(LabtoLMS_M, OKLab2);
+      let LMS = LMSg.map((val) => val ** 3);
+      return multiplyMatrices(LMStoXYZ_M, LMS);
+    },
+    formats: {
+      "oklab": {
+        coords: ["<number> | <percentage>", "<number>", "<number>"]
+      }
+    }
+  });
+  function deltaEOK(color, sample) {
+    let [L1, a1, b1] = OKLab.from(color);
+    let [L2, a2, b2] = OKLab.from(sample);
+    let \u0394L = L1 - L2;
+    let \u0394a = a1 - a2;
+    let \u0394b = b1 - b2;
+    return Math.sqrt(\u0394L ** 2 + \u0394a ** 2 + \u0394b ** 2);
+  }
+  var deltaEMethods = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    deltaE76,
+    deltaECMC,
+    deltaE2000,
+    deltaEJz,
+    deltaEITP,
+    deltaEOK
+  });
+  function deltaE(c12, c22, o = {}) {
+    if (isString(o)) {
+      o = { method: o };
+    }
+    let { method = defaults3.deltaE, ...rest } = o;
+    c12 = getColor(c12);
+    c22 = getColor(c22);
+    for (let m3 in deltaEMethods) {
+      if ("deltae" + method.toLowerCase() === m3.toLowerCase()) {
+        return deltaEMethods[m3](c12, c22, rest);
+      }
+    }
+    throw new TypeError(`Unknown deltaE method: ${method}`);
+  }
+  var deltaE$1 = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    "default": deltaE
+  });
+  function lighten(color, amount = 0.25) {
+    let space = ColorSpace.get("oklch", "lch");
+    let lightness = [space, "l"];
+    return set$1(color, lightness, (l) => l * (1 + amount));
+  }
+  function darken(color, amount = 0.25) {
+    let space = ColorSpace.get("oklch", "lch");
+    let lightness = [space, "l"];
+    return set$1(color, lightness, (l) => l * (1 - amount));
+  }
+  var variations = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    lighten,
+    darken
+  });
+  function mix(c12, c22, p2 = 0.5, o = {}) {
+    [c12, c22] = [getColor(c12), getColor(c22)];
+    if (type(p2) === "object") {
+      [p2, o] = [0.5, p2];
+    }
+    let { space, outputSpace, premultiplied } = o;
+    let r = range(c12, c22, { space, outputSpace, premultiplied });
+    return r(p2);
+  }
+  function steps(c12, c22, options = {}) {
+    let colorRange;
+    if (isRange(c12)) {
+      [colorRange, options] = [c12, c22];
+      [c12, c22] = colorRange.rangeArgs.colors;
+    }
+    let {
+      maxDeltaE,
+      deltaEMethod,
+      steps: steps2 = 2,
+      maxSteps = 1e3,
+      ...rangeOptions
+    } = options;
+    if (!colorRange) {
+      [c12, c22] = [getColor(c12), getColor(c22)];
+      colorRange = range(c12, c22, rangeOptions);
+    }
+    let totalDelta = deltaE(c12, c22);
+    let actualSteps = maxDeltaE > 0 ? Math.max(steps2, Math.ceil(totalDelta / maxDeltaE) + 1) : steps2;
+    let ret = [];
+    if (maxSteps !== void 0) {
+      actualSteps = Math.min(actualSteps, maxSteps);
+    }
+    if (actualSteps === 1) {
+      ret = [{ p: 0.5, color: colorRange(0.5) }];
+    } else {
+      let step = 1 / (actualSteps - 1);
+      ret = Array.from({ length: actualSteps }, (_, i) => {
+        let p2 = i * step;
+        return { p: p2, color: colorRange(p2) };
+      });
+    }
+    if (maxDeltaE > 0) {
+      let maxDelta = ret.reduce((acc, cur2, i) => {
+        if (i === 0) {
+          return 0;
+        }
+        let \u0394\u0395 = deltaE(cur2.color, ret[i - 1].color, deltaEMethod);
+        return Math.max(acc, \u0394\u0395);
+      }, 0);
+      while (maxDelta > maxDeltaE) {
+        maxDelta = 0;
+        for (let i = 1; i < ret.length && ret.length < maxSteps; i++) {
+          let prev = ret[i - 1];
+          let cur2 = ret[i];
+          let p2 = (cur2.p + prev.p) / 2;
+          let color = colorRange(p2);
+          maxDelta = Math.max(maxDelta, deltaE(color, prev.color), deltaE(color, cur2.color));
+          ret.splice(i, 0, { p: p2, color: colorRange(p2) });
+          i++;
+        }
+      }
+    }
+    ret = ret.map((a2) => a2.color);
+    return ret;
+  }
+  function range(color1, color2, options = {}) {
+    if (isRange(color1)) {
+      let [r, options2] = [color1, color2];
+      return range(...r.rangeArgs.colors, { ...r.rangeArgs.options, ...options2 });
+    }
+    let { space, outputSpace, progression, premultiplied } = options;
+    color1 = getColor(color1);
+    color2 = getColor(color2);
+    color1 = clone(color1);
+    color2 = clone(color2);
+    let rangeArgs = { colors: [color1, color2], options };
+    if (space) {
+      space = ColorSpace.get(space);
+    } else {
+      space = ColorSpace.registry[defaults3.interpolationSpace] || color1.space;
+    }
+    outputSpace = outputSpace ? ColorSpace.get(outputSpace) : space;
+    color1 = to(color1, space);
+    color2 = to(color2, space);
+    color1 = toGamut(color1);
+    color2 = toGamut(color2);
+    if (space.coords.h && space.coords.h.type === "angle") {
+      let arc = options.hue = options.hue || "shorter";
+      let hue = [space, "h"];
+      let [\u03B81, \u03B82] = [get(color1, hue), get(color2, hue)];
+      [\u03B81, \u03B82] = adjust(arc, [\u03B81, \u03B82]);
+      set$1(color1, hue, \u03B81);
+      set$1(color2, hue, \u03B82);
+    }
+    if (premultiplied) {
+      color1.coords = color1.coords.map((c4) => c4 * color1.alpha);
+      color2.coords = color2.coords.map((c4) => c4 * color2.alpha);
+    }
+    return Object.assign((p2) => {
+      p2 = progression ? progression(p2) : p2;
+      let coords = color1.coords.map((start, i) => {
+        let end = color2.coords[i];
+        return interpolate(start, end, p2);
+      });
+      let alpha = interpolate(color1.alpha, color2.alpha, p2);
+      let ret = { space, coords, alpha };
+      if (premultiplied) {
+        ret.coords = ret.coords.map((c4) => c4 / alpha);
+      }
+      if (outputSpace !== space) {
+        ret = to(ret, outputSpace);
+      }
+      return ret;
+    }, {
+      rangeArgs
+    });
+  }
+  function isRange(val) {
+    return type(val) === "function" && !!val.rangeArgs;
+  }
+  defaults3.interpolationSpace = "lab";
+  function register(Color2) {
+    Color2.defineFunction("mix", mix, { returns: "color" });
+    Color2.defineFunction("range", range, { returns: "function<color>" });
+    Color2.defineFunction("steps", steps, { returns: "array<color>" });
+  }
+  var interpolation = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    mix,
+    steps,
+    range,
+    isRange,
+    register
+  });
+  var HSL = new ColorSpace({
+    id: "hsl",
+    name: "HSL",
+    coords: {
+      h: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      },
+      s: {
+        range: [0, 100],
+        name: "Saturation"
+      },
+      l: {
+        range: [0, 100],
+        name: "Lightness"
+      }
+    },
+    base: sRGB,
+    fromBase: (rgb) => {
+      let max2 = Math.max(...rgb);
+      let min = Math.min(...rgb);
+      let [r, g2, b2] = rgb;
+      let [h, s, l] = [NaN, 0, (min + max2) / 2];
+      let d2 = max2 - min;
+      if (d2 !== 0) {
+        s = l === 0 || l === 1 ? 0 : (max2 - l) / Math.min(l, 1 - l);
+        switch (max2) {
+          case r:
+            h = (g2 - b2) / d2 + (g2 < b2 ? 6 : 0);
+            break;
+          case g2:
+            h = (b2 - r) / d2 + 2;
+            break;
+          case b2:
+            h = (r - g2) / d2 + 4;
+        }
+        h = h * 60;
+      }
+      return [h, s * 100, l * 100];
+    },
+    toBase: (hsl) => {
+      let [h, s, l] = hsl;
+      h = h % 360;
+      if (h < 0) {
+        h += 360;
+      }
+      s /= 100;
+      l /= 100;
+      function f(n2) {
+        let k = (n2 + h / 30) % 12;
+        let a2 = s * Math.min(l, 1 - l);
+        return l - a2 * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+      }
+      return [f(0), f(8), f(4)];
+    },
+    formats: {
+      "hsl": {
+        toGamut: true,
+        coords: ["<number> | <angle>", "<percentage>", "<percentage>"]
+      },
+      "hsla": {
+        coords: ["<number> | <angle>", "<percentage>", "<percentage>"],
+        commas: true,
+        lastAlpha: true
+      }
+    }
+  });
+  var HSV = new ColorSpace({
+    id: "hsv",
+    name: "HSV",
+    coords: {
+      h: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      },
+      s: {
+        range: [0, 100],
+        name: "Saturation"
+      },
+      v: {
+        range: [0, 100],
+        name: "Value"
+      }
+    },
+    base: HSL,
+    fromBase(hsl) {
+      let [h, s, l] = hsl;
+      s /= 100;
+      l /= 100;
+      let v = l + s * Math.min(l, 1 - l);
+      return [
+        h,
+        v === 0 ? 0 : 200 * (1 - l / v),
+        100 * v
+      ];
+    },
+    toBase(hsv) {
+      let [h, s, v] = hsv;
+      s /= 100;
+      v /= 100;
+      let l = v * (1 - s / 2);
+      return [
+        h,
+        l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l) * 100,
+        l * 100
+      ];
+    },
+    formats: {
+      color: {
+        toGamut: true
+      }
+    }
+  });
+  var hwb = new ColorSpace({
+    id: "hwb",
+    name: "HWB",
+    coords: {
+      h: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      },
+      w: {
+        range: [0, 100],
+        name: "Whiteness"
+      },
+      b: {
+        range: [0, 100],
+        name: "Blackness"
+      }
+    },
+    base: HSV,
+    fromBase(hsv) {
+      let [h, s, v] = hsv;
+      return [h, v * (100 - s) / 100, 100 - v];
+    },
+    toBase(hwb2) {
+      let [h, w, b2] = hwb2;
+      w /= 100;
+      b2 /= 100;
+      let sum = w + b2;
+      if (sum >= 1) {
+        let gray = w / sum;
+        return [h, 0, gray * 100];
+      }
+      let v = 1 - b2;
+      let s = v === 0 ? 0 : 1 - w / v;
+      return [h, s * 100, v * 100];
+    },
+    formats: {
+      "hwb": {
+        toGamut: true,
+        coords: ["<number> | <angle>", "<percentage>", "<percentage>"]
+      }
+    }
+  });
+  var toXYZ_M$2 = [
+    [0.5766690429101305, 0.1855582379065463, 0.1882286462349947],
+    [0.29734497525053605, 0.6273635662554661, 0.07529145849399788],
+    [0.02703136138641234, 0.07068885253582723, 0.9913375368376388]
+  ];
+  var fromXYZ_M$2 = [
+    [2.0415879038107465, -0.5650069742788596, -0.34473135077832956],
+    [-0.9692436362808795, 1.8759675015077202, 0.04155505740717557],
+    [0.013444280632031142, -0.11836239223101838, 1.0151749943912054]
+  ];
+  var A98Linear = new RGBColorSpace({
+    id: "a98rgb-linear",
+    name: "Linear Adobe\xAE 98 RGB compatible",
+    white: "D65",
+    toXYZ_M: toXYZ_M$2,
+    fromXYZ_M: fromXYZ_M$2
+  });
+  var a98rgb = new RGBColorSpace({
+    id: "a98rgb",
+    name: "Adobe\xAE 98 RGB compatible",
+    base: A98Linear,
+    toBase: (RGB) => RGB.map((val) => Math.pow(Math.abs(val), 563 / 256) * Math.sign(val)),
+    fromBase: (RGB) => RGB.map((val) => Math.pow(Math.abs(val), 256 / 563) * Math.sign(val)),
+    formats: {
+      color: {
+        id: "a98-rgb"
+      }
+    }
+  });
+  var toXYZ_M$1 = [
+    [0.7977604896723027, 0.13518583717574031, 0.0313493495815248],
+    [0.2880711282292934, 0.7118432178101014, 8565396060525902e-20],
+    [0, 0, 0.8251046025104601]
+  ];
+  var fromXYZ_M$1 = [
+    [1.3457989731028281, -0.25558010007997534, -0.05110628506753401],
+    [-0.5446224939028347, 1.5082327413132781, 0.02053603239147973],
+    [0, 0, 1.2119675456389454]
+  ];
+  var ProPhotoLinear = new RGBColorSpace({
+    id: "prophoto-linear",
+    name: "Linear ProPhoto",
+    white: "D50",
+    base: XYZ_D50,
+    toXYZ_M: toXYZ_M$1,
+    fromXYZ_M: fromXYZ_M$1
+  });
+  var Et = 1 / 512;
+  var Et2 = 16 / 512;
+  var prophoto = new RGBColorSpace({
+    id: "prophoto",
+    name: "ProPhoto",
+    base: ProPhotoLinear,
+    toBase(RGB) {
+      return RGB.map((v) => v < Et2 ? v / 16 : v ** 1.8);
+    },
+    fromBase(RGB) {
+      return RGB.map((v) => v >= Et ? v ** (1 / 1.8) : 16 * v);
+    },
+    formats: {
+      color: {
+        id: "prophoto-rgb"
+      }
+    }
+  });
+  var oklch = new ColorSpace({
+    id: "oklch",
+    name: "OKLCh",
+    coords: {
+      l: {
+        refRange: [0, 1],
+        name: "Lightness"
+      },
+      c: {
+        refRange: [0, 0.4],
+        name: "Chroma"
+      },
+      h: {
+        refRange: [0, 360],
+        type: "angle",
+        name: "Hue"
+      }
+    },
+    white: "D65",
+    base: OKLab,
+    fromBase(oklab) {
+      let [L, a2, b2] = oklab;
+      let h;
+      const \u03B52 = 2e-4;
+      if (Math.abs(a2) < \u03B52 && Math.abs(b2) < \u03B52) {
+        h = NaN;
+      } else {
+        h = Math.atan2(b2, a2) * 180 / Math.PI;
+      }
+      return [
+        L,
+        Math.sqrt(a2 ** 2 + b2 ** 2),
+        constrain(h)
+      ];
+    },
+    toBase(oklch2) {
+      let [L, C2, h] = oklch2;
+      let a2, b2;
+      if (isNaN(h)) {
+        a2 = 0;
+        b2 = 0;
+      } else {
+        a2 = C2 * Math.cos(h * Math.PI / 180);
+        b2 = C2 * Math.sin(h * Math.PI / 180);
+      }
+      return [L, a2, b2];
+    },
+    formats: {
+      "oklch": {
+        coords: ["<number> | <percentage>", "<number>", "<number> | <angle>"]
+      }
+    }
+  });
+  var Yw = 203;
+  var n = 2610 / 2 ** 14;
+  var ninv = 2 ** 14 / 2610;
+  var m = 2523 / 2 ** 5;
+  var minv = 2 ** 5 / 2523;
+  var c1 = 3424 / 2 ** 12;
+  var c2 = 2413 / 2 ** 7;
+  var c3 = 2392 / 2 ** 7;
+  var rec2100Pq = new RGBColorSpace({
+    id: "rec2100pq",
+    name: "REC.2100-PQ",
+    base: REC2020Linear,
+    toBase(RGB) {
+      return RGB.map(function(val) {
+        let x = (Math.max(val ** minv - c1, 0) / (c2 - c3 * val ** minv)) ** ninv;
+        return x * 1e4 / Yw;
+      });
+    },
+    fromBase(RGB) {
+      return RGB.map(function(val) {
+        let x = Math.max(val * Yw / 1e4, 0);
+        let num = c1 + c2 * x ** n;
+        let denom = 1 + c3 * x ** n;
+        return (num / denom) ** m;
+      });
+    },
+    formats: {
+      color: {
+        id: "rec2100-pq"
+      }
+    }
+  });
+  var a = 0.17883277;
+  var b = 0.28466892;
+  var c = 0.55991073;
+  var rec2100Hlg = new RGBColorSpace({
+    id: "rec2100hlg",
+    cssid: "rec2100-hlg",
+    name: "REC.2100-HLG",
+    referred: "scene",
+    base: REC2020Linear,
+    toBase(RGB) {
+      return RGB.map(function(val) {
+        if (val <= 1 / 12) {
+          return Math.sqrt(3 * val);
+        }
+        return a * Math.log(12 * val - b) + c;
+      });
+    },
+    fromBase(RGB) {
+      return RGB.map(function(val) {
+        if (val <= 0.5) {
+          return val ** 2 / 3;
+        }
+        return Math.exp((val - c) / a + b) / 12;
+      });
+    },
+    formats: {
+      color: {
+        id: "rec2100-hlg"
+      }
+    }
+  });
+  var CATs = {};
+  hooks.add("chromatic-adaptation-start", (env) => {
+    if (env.options.method) {
+      env.M = adapt(env.W1, env.W2, env.options.method);
+    }
+  });
+  hooks.add("chromatic-adaptation-end", (env) => {
+    if (!env.M) {
+      env.M = adapt(env.W1, env.W2, env.options.method);
+    }
+  });
+  function defineCAT({ id, toCone_M, fromCone_M }) {
+    CATs[id] = arguments[0];
+  }
+  function adapt(W1, W2, id = "Bradford") {
+    let method = CATs[id];
+    let [\u03C1s, \u03B3s, \u03B2s] = multiplyMatrices(method.toCone_M, W1);
+    let [\u03C1d, \u03B3d, \u03B2d] = multiplyMatrices(method.toCone_M, W2);
+    let scale = [
+      [\u03C1d / \u03C1s, 0, 0],
+      [0, \u03B3d / \u03B3s, 0],
+      [0, 0, \u03B2d / \u03B2s]
+    ];
+    let scaled_cone_M = multiplyMatrices(scale, method.toCone_M);
+    let adapt_M = multiplyMatrices(method.fromCone_M, scaled_cone_M);
+    return adapt_M;
+  }
+  defineCAT({
+    id: "von Kries",
+    toCone_M: [
+      [0.40024, 0.7076, -0.08081],
+      [-0.2263, 1.16532, 0.0457],
+      [0, 0, 0.91822]
+    ],
+    fromCone_M: [
+      [1.8599364, -1.1293816, 0.2198974],
+      [0.3611914, 0.6388125, -64e-7],
+      [0, 0, 1.0890636]
+    ]
+  });
+  defineCAT({
+    id: "Bradford",
+    toCone_M: [
+      [0.8951, 0.2664, -0.1614],
+      [-0.7502, 1.7135, 0.0367],
+      [0.0389, -0.0685, 1.0296]
+    ],
+    fromCone_M: [
+      [0.9869929, -0.1470543, 0.1599627],
+      [0.4323053, 0.5183603, 0.0492912],
+      [-85287e-7, 0.0400428, 0.9684867]
+    ]
+  });
+  defineCAT({
+    id: "CAT02",
+    toCone_M: [
+      [0.7328, 0.4296, -0.1624],
+      [-0.7036, 1.6975, 61e-4],
+      [3e-3, 0.0136, 0.9834]
+    ],
+    fromCone_M: [
+      [1.0961238, -0.278869, 0.1827452],
+      [0.454369, 0.4735332, 0.0720978],
+      [-96276e-7, -5698e-6, 1.0153256]
+    ]
+  });
+  defineCAT({
+    id: "CAT16",
+    toCone_M: [
+      [0.401288, 0.650173, -0.051461],
+      [-0.250268, 1.204414, 0.045854],
+      [-2079e-6, 0.048952, 0.953127]
+    ],
+    fromCone_M: [
+      [1.862067855087233, -1.011254630531685, 0.1491867754444518],
+      [0.3875265432361372, 0.6214474419314753, -0.008973985167612518],
+      [-0.01584149884933386, -0.03412293802851557, 1.04996443687785]
+    ]
+  });
+  Object.assign(WHITES, {
+    A: [1.0985, 1, 0.35585],
+    C: [0.98074, 1, 1.18232],
+    D55: [0.95682, 1, 0.92149],
+    D75: [0.94972, 1, 1.22638],
+    E: [1, 1, 1],
+    F2: [0.99186, 1, 0.67393],
+    F7: [0.95041, 1, 1.08747],
+    F11: [1.00962, 1, 0.6435]
+  });
+  WHITES.ACES = [0.32168 / 0.33767, 1, (1 - 0.32168 - 0.33767) / 0.33767];
+  var toXYZ_M = [
+    [0.6624541811085053, 0.13400420645643313, 0.1561876870049078],
+    [0.27222871678091454, 0.6740817658111484, 0.05368951740793705],
+    [-0.005574649490394108, 0.004060733528982826, 1.0103391003129971]
+  ];
+  var fromXYZ_M = [
+    [1.6410233796943257, -0.32480329418479, -0.23642469523761225],
+    [-0.6636628587229829, 1.6153315916573379, 0.016756347685530137],
+    [0.011721894328375376, -0.008284441996237409, 0.9883948585390215]
+  ];
+  var ACEScg = new RGBColorSpace({
+    id: "acescg",
+    name: "ACEScg",
+    coords: {
+      r: {
+        range: [0, 65504],
+        name: "Red"
+      },
+      g: {
+        range: [0, 65504],
+        name: "Green"
+      },
+      b: {
+        range: [0, 65504],
+        name: "Blue"
+      }
+    },
+    referred: "scene",
+    white: WHITES.ACES,
+    toXYZ_M,
+    fromXYZ_M,
+    formats: {
+      color: {}
+    }
+  });
+  var \u03B5 = 2 ** -16;
+  var ACES_min_nonzero = -0.35828683;
+  var ACES_cc_max = (Math.log2(65504) + 9.72) / 17.52;
+  var acescc = new RGBColorSpace({
+    id: "acescc",
+    name: "ACEScc",
+    coords: {
+      r: {
+        range: [ACES_min_nonzero, ACES_cc_max],
+        name: "Red"
+      },
+      g: {
+        range: [ACES_min_nonzero, ACES_cc_max],
+        name: "Green"
+      },
+      b: {
+        range: [ACES_min_nonzero, ACES_cc_max],
+        name: "Blue"
+      }
+    },
+    referred: "scene",
+    base: ACEScg,
+    toBase(RGB) {
+      const low = (9.72 - 15) / 17.52;
+      return RGB.map(function(val) {
+        if (val <= low) {
+          return (2 ** (val * 17.52 - 9.72) - \u03B5) * 2;
+        } else if (val < ACES_cc_max) {
+          return 2 ** (val * 17.52 - 9.72);
+        } else {
+          return 65504;
+        }
+      });
+    },
+    fromBase(RGB) {
+      return RGB.map(function(val) {
+        if (val <= 0) {
+          return (Math.log2(\u03B5) + 9.72) / 17.52;
+        } else if (val < \u03B5) {
+          return (Math.log2(\u03B5 + val * 0.5) + 9.72) / 17.52;
+        } else {
+          return (Math.log2(val) + 9.72) / 17.52;
+        }
+      });
+    },
+    formats: {
+      color: {}
+    }
+  });
+  var spaces = /* @__PURE__ */ Object.freeze({
+    __proto__: null,
+    XYZ_D65,
+    XYZ_D50,
+    XYZ_ABS_D65: XYZ_Abs_D65,
+    Lab_D65: lab_d65,
+    Lab: lab,
+    LCH: lch,
+    sRGB_Linear: sRGBLinear,
+    sRGB,
+    HSL,
+    HWB: hwb,
+    HSV,
+    P3_Linear: P3Linear,
+    P3,
+    A98RGB_Linear: A98Linear,
+    A98RGB: a98rgb,
+    ProPhoto_Linear: ProPhotoLinear,
+    ProPhoto: prophoto,
+    REC_2020_Linear: REC2020Linear,
+    REC_2020: REC2020,
+    OKLab,
+    OKLCH: oklch,
+    Jzazbz,
+    JzCzHz: jzczhz,
+    ICTCP: ictcp,
+    REC_2100_PQ: rec2100Pq,
+    REC_2100_HLG: rec2100Hlg,
+    ACEScg,
+    ACEScc: acescc
+  });
+  var Color = class {
+    constructor(...args) {
+      let color;
+      if (args.length === 1) {
+        color = getColor(args[0]);
+      }
+      let space, coords, alpha;
+      if (color) {
+        space = color.space || color.spaceId;
+        coords = color.coords;
+        alpha = color.alpha;
+      } else {
+        [space, coords, alpha] = args;
+      }
+      this.#space = ColorSpace.get(space);
+      this.coords = coords ? coords.slice() : [0, 0, 0];
+      this.alpha = alpha < 1 ? alpha : 1;
+      for (let i = 0; i < this.coords.length; i++) {
+        if (this.coords[i] === "NaN") {
+          this.coords[i] = NaN;
+        }
+      }
+      for (let id in this.#space.coords) {
+        Object.defineProperty(this, id, {
+          get: () => this.get(id),
+          set: (value2) => this.set(id, value2)
+        });
+      }
+    }
+    #space;
+    get space() {
+      return this.#space;
+    }
+    get spaceId() {
+      return this.#space.id;
+    }
+    clone() {
+      return new Color(this.space, this.coords, this.alpha);
+    }
+    toJSON() {
+      return {
+        spaceId: this.spaceId,
+        coords: this.coords,
+        alpha: this.alpha
+      };
+    }
+    display(...args) {
+      let ret = display(this, ...args);
+      ret.color = new Color(ret.color);
+      return ret;
+    }
+    static get(color, ...args) {
+      if (color instanceof Color) {
+        return color;
+      }
+      return new Color(color, ...args);
+    }
+    static defineFunction(name2, code, o = code) {
+      if (arguments.length === 1) {
+        [name2, code, o] = [arguments[0].name, arguments[0], arguments[0]];
+      }
+      let { instance = true, returns } = o;
+      let func = function(...args) {
+        let ret = code(...args);
+        if (returns === "color") {
+          ret = Color.get(ret);
+        } else if (returns === "function<color>") {
+          let f = ret;
+          ret = function(...args2) {
+            let ret2 = f(...args2);
+            return Color.get(ret2);
+          };
+          Object.assign(ret, f);
+        } else if (returns === "array<color>") {
+          ret = ret.map((c4) => Color.get(c4));
+        }
+        return ret;
+      };
+      if (!(name2 in Color)) {
+        Color[name2] = func;
+      }
+      if (instance) {
+        Color.prototype[name2] = function(...args) {
+          return func(this, ...args);
+        };
+      }
+    }
+    static defineFunctions(o) {
+      for (let name2 in o) {
+        Color.defineFunction(name2, o[name2], o[name2]);
+      }
+    }
+    static extend(exports) {
+      if (exports.register) {
+        exports.register(Color);
+      } else if (exports.default) {
+        Color.defineFunction(exports.default.name, exports.default);
+      } else if (typeof exports === "function") {
+        Color.defineFunction(exports);
+      } else {
+        for (let name2 in exports) {
+          Color.defineFunction(name2, exports[name2]);
+        }
+      }
+    }
+  };
+  Color.defineFunctions({
+    get,
+    getAll,
+    set: set$1,
+    setAll,
+    to,
+    equals,
+    inGamut,
+    toGamut,
+    distance,
+    toString: serialize
+  });
+  Object.assign(Color, {
+    util,
+    hooks,
+    WHITES,
+    Space: ColorSpace,
+    spaces: ColorSpace.registry,
+    parse,
+    defaults: defaults3
+  });
+  for (let key of Object.keys(spaces)) {
+    ColorSpace.register(spaces[key]);
+  }
+  for (let id in ColorSpace.registry) {
+    addSpaceAccessors(id, ColorSpace.registry[id]);
+  }
+  hooks.add("colorspace-init-end", addSpaceAccessors);
+  function addSpaceAccessors(id, space) {
+    Object.keys(space.coords);
+    Object.values(space.coords).map((c4) => c4.name);
+    let propId = id.replace(/-/g, "_");
+    Object.defineProperty(Color.prototype, propId, {
+      get() {
+        let ret = this.getAll(id);
+        if (typeof Proxy === "undefined") {
+          return ret;
+        }
+        return new Proxy(ret, {
+          has: (obj, property) => {
+            try {
+              ColorSpace.resolveCoord([space, property]);
+              return true;
+            } catch (e) {
+            }
+            return Reflect.has(obj, property);
+          },
+          get: (obj, property, receiver) => {
+            if (property && typeof property !== "symbol" && !(property in obj)) {
+              let { index } = ColorSpace.resolveCoord([space, property]);
+              if (index >= 0) {
+                return obj[index];
+              }
+            }
+            return Reflect.get(obj, property, receiver);
+          },
+          set: (obj, property, value2, receiver) => {
+            if (property && typeof property !== "symbol" && !(property in obj) || property >= 0) {
+              let { index } = ColorSpace.resolveCoord([space, property]);
+              if (index >= 0) {
+                obj[index] = value2;
+                this.setAll(id, obj);
+                return true;
+              }
+            }
+            return Reflect.set(obj, property, value2, receiver);
+          }
+        });
+      },
+      set(coords) {
+        this.setAll(id, coords);
+      },
+      configurable: true,
+      enumerable: true
+    });
+  }
+  Color.extend(deltaEMethods);
+  Color.extend(deltaE$1);
+  Color.extend(variations);
+  Color.extend(contrast);
+  Color.extend(chromaticity);
+  Color.extend(luminance);
+  Color.extend(interpolation);
+  Color.extend(contrastMethods);
+
+  // public/packages/gamepad.js
+  var controllers = {};
+  function gamepads() {
+    const ids = Object.keys(controllers) || [];
+    return ids.map((x) => controllers[x]).map(gatherInputs);
+  }
+  var initialState = {};
+  var $3 = module("gamepad-debug", initialState);
+  $3.render((target) => renderGamepads(target, $3));
+  function connecthandler(e) {
+    const { index } = e.gamepad;
+    controllers[index] = e.gamepad;
+  }
+  function disconnecthandler(e) {
+    const { index } = e.gamepad;
+    delete controllers[index];
+  }
+  function renderValue(value2, index) {
+    const offset = parseFloat(value2) - 2 + "rem";
+    return `
+    <li
+      class="input"
+      style="--value: ${offset};"
+    >${index}</li>
+  `;
+  }
+  function renderInputs(_$, flags) {
+    const { gamepad } = flags;
+    return `
+    <ul class="buttons">
+      ${gamepad.buttons.map(renderValue).join("")}
+    </ul>
+    <ul class="axes">
+      ${gamepad.axes.map(renderValue).join("")}
+    </ul>
+  `;
+  }
+  function renderGamepads(_target, $7) {
+    const list = gamepads().map((gamepad, index) => `
+      <li class="gamepad" id="${gamepad.id}">
+        <label>${index + 1}: ${gamepad.id}</label>
+        ${renderInputs($7, { gamepad })}
+      </li>
+    `).join("");
+    return `<ul class="gamepads">${list}</ul>`;
+  }
+  function gatherInputs(gamepad, _index) {
+    const buttons = [...gamepad.buttons].map((button, _i) => {
+      let value2 = button;
+      if (typeof value2 == "object") {
+        value2 = value2.value;
+      }
+      return value2;
+    });
+    const axes = [...gamepad.axes].map((axis, _i) => {
+      const value2 = axis;
+      return value2;
+    });
+    return { buttons, axes, id: gamepad.id, index: gamepad.index };
+  }
+  globalThis.addEventListener("gamepadconnected", connecthandler);
+  globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
+  $3.style(`
+  & .gamepads {
+    background: rgba(0,0,0,.04);
+    border: 1px solid rgba(0,0,0,.1);
+    border-radius: 1rem;
+    list-style-type: none;
+    padding: 0 1rem;
+  }
+  & .gamepad {
+    border-bottom: 1px solid rgba(0,0,0,.1);
+    padding: 1rem 0;
+  }
+  & .gamepad:last-child {
+    border-bottom: none;
+
+  }
+  & .buttons,
+  & .axes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2rem, 1fr));
+    list-style-type: none;
+    padding: .5rem 0 0;
+  }
+  & .input {
+    background: linear-gradient(lime 0%, orange 50%, rebeccapurple 100%);
+    background-size: 1px 6rem;
+    background-repeat: repeat-x;
+    background-position-y: var(--value);
+    border-radius: 2rem;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-content: center;
+  }
+`);
+
+  // public/packages/guitar.js
+  var initialState2 = {
+    activeFrets: [],
+    activeRegisters: [],
+    activeMotions: [],
+    frames: {}
+  };
+  var $4 = module("guitar-debug", initialState2);
+  var fretMap = [0, 1, 3, 2, 4];
+  var registers = [
+    "     ",
+    "x    ",
+    "x   x",
+    " x   ",
+    " x  x",
+    "  x  ",
+    "  x x",
+    "   x ",
+    "   xx",
+    "xx   ",
+    "xx  x",
+    " xx  ",
+    " xx x",
+    "x x x",
+    "xxxxx"
+  ];
+  requestAnimationFrame(loop);
+  function loop(time) {
+    const activeFrets = gamepads().map((x) => toFrets($4, x));
+    const activeRegisters = activeFrets.map((x) => toRegisters($4, x));
+    const activeMotions = gamepads().map((x) => toMotion($4, x));
+    $4.write({
+      time,
+      activeFrets,
+      activeRegisters,
+      activeMotions
+    });
+    requestAnimationFrame(loop);
+  }
+  $4.render(() => {
+    const {
+      activeRegisters,
+      activeMotions
+    } = $4.read();
+    const classes = (i) => {
+      return ["up", "down", "left", "right"].map((x) => activeMotions[i][x] ? x : "").join(" ");
+    };
+    return activeRegisters.map((x, i) => `
+    <div class="${classes(i)}">
+      ${x}
+    </div>
+  `).join("");
+  });
+  function toFrets(_$, flags) {
+    const pressed = (value2) => value2 === 1 ? "x" : " ";
+    const frets = flags.buttons.map(pressed).slice(0, 5);
+    return fretMap.map((i) => frets[i]).join("");
+  }
+  function toRegisters(_$, frets) {
+    return registers.indexOf(frets);
+  }
+  function toMotion(_$, flags) {
+    const [vertical] = [...flags.axes].splice(-1);
+    const [horizontal] = [...flags.axes].splice(-2);
+    return {
+      up: vertical === -1,
+      down: vertical === 1,
+      left: horizontal === -1,
+      right: horizontal === 1
+    };
+  }
+  $4.style(`
+  & {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+    width: 100vw;
+    place-items: center;
+  }
+  & .note {
+    font-size: 10vh;
+    line-height: 1;
+  }
+
+  & .strummed {
+    transform: scale(2);
+  }
+`);
+  var guitar_default = $4;
+
+  // public/packages/synth-module.js
+  var context = new AudioContext();
+  async function loadSample(url) {
+    const sample = await fetch(url).then((response) => response.arrayBuffer()).then((buffer) => context.decodeAudioData(buffer));
+    debugger;
+    return sample;
+  }
+  function playSample(sample, sampleNote, noteToPlay) {
+    const source = context.createBufferSource();
+    source.buffer = sample;
+    source.playbackRate.value = 2 ** ((noteToPlay - sampleNote) / 12);
+    source.connect(context.destination);
+    source.start(0);
+  }
+  var synths = [];
+  Promise.all([
+    loadSample("/samples/1.mp3"),
+    loadSample("/samples/2.mp3"),
+    loadSample("/samples/3.mp3"),
+    loadSample("/samples/4.mp3"),
+    loadSample("/samples/5.mp3"),
+    loadSample("/samples/6.mp3"),
+    loadSample("/samples/7.mp3"),
+    loadSample("/samples/8.mp3")
+  ]).then((s) => synths = s);
+  var $5 = module("synth-module", {
+    colors: [],
+    start: 0,
+    length: 360,
+    octave: 4,
+    reverse: false,
+    pitch: 0,
+    synth: 0
+  });
+  var strumVelocity = 75;
+  var sustainedDuration = 100;
+  var actionableFPS = 4;
+  var majorScale = [
+    "C",
+    "G",
+    "D",
+    "A",
+    "E",
+    "B",
+    "F#",
+    "Db",
+    "Ab",
+    "Eb",
+    "Bb",
+    "F"
+  ];
+  var minorScale = [
+    "a",
+    "e",
+    "b",
+    "f#",
+    "c#",
+    "g#",
+    "d#",
+    "bb",
+    "f",
+    "c",
+    "g",
+    "d"
+  ];
+  var lightnessStops = [
+    [5, 30],
+    [20, 45],
+    [35, 60],
+    [50, 75],
+    [65, 90],
+    [80, 105],
+    [95, 120]
+  ];
+  var octaveUp = () => {
+    const octave = $5.read().octave + 1;
+    if (octave > 6) {
+      return;
+    }
+    $5.write({ octave });
+  };
+  var octaveDown = () => {
+    const octave = $5.read().octave - 1;
+    if (octave < 0) {
+      return;
+    }
+    $5.write({ octave });
+  };
+  var pitchUp = () => {
+    const pitch = $5.read().pitch + 1;
+    $5.write({ pitch });
+  };
+  var pitchDown = () => {
+    const pitch = $5.read().pitch - 1;
+    $5.write({ pitch });
+  };
+  function attack(event) {
+    event.preventDefault();
+    const { colors, synth } = $5.read();
+    const { octave, index, hue } = event.target.dataset;
+    playSample(synths[synth], 60, parseInt(octave) * 12 + parseInt(index));
+    event.target.classList.add("active");
+    document.querySelector("html").style.setProperty(
+      "--theme",
+      `var(${colors[parseInt(hue)][parseInt(octave)].name})`
+    );
+  }
+  function release(event) {
+    event.preventDefault();
+    event.target.classList.remove("active");
+  }
+  var chords = [
+    [],
+    [0, 4, 1],
+    [0, 9, 1],
+    [1, 5, 2],
+    [1, 10, 2],
+    [2, 6, 3],
+    [2, 11, 3],
+    [4, 8, 5],
+    [4, 2, 5],
+    [3, 9, 4],
+    [3, 0, 4],
+    [11, 3, 0],
+    [11, 8, 0],
+    [],
+    []
+  ];
+  var activeSynths = [];
+  requestAnimationFrame(loop2);
+  function loop2(time) {
+    const { activeRegisters, activeFrets, activeMotions } = guitar_default.read();
+    activeRegisters.map((register2, i) => {
+      const { up, down } = activeMotions[i];
+      if (activeFrets[i] === "x x x") {
+        [[up, octaveUp], [down, octaveDown]].map(([flag, feature2]) => {
+          flag && throttle({ key: "octave-shift", time, feature: feature2 });
+        });
+      }
+      if (activeFrets[i] === "xxxxx") {
+        [[up, pitchUp], [down, pitchDown]].map(([flag, feature2]) => {
+          flag && throttle({ key: "pitch-shift", time, feature: feature2 });
+        });
+      }
+      if (!chords[register2])
+        return;
+      const feature = () => {
+        if (up || down && register2 > 0) {
+          activeSynths = chords[register2];
+          activeSynths.map((x, i2) => {
+            const index = down ? x : activeSynths[activeSynths.length - 1 - i2];
+            const node = document.querySelector(`[data-index='${index}']`);
+            node && queueAttack(node, i2);
+          });
+        }
+      };
+      feature();
+    });
+    requestAnimationFrame(loop2);
+  }
+  function throttle({ key, time, feature }) {
+    const { frames = {} } = $5.read();
+    const frame = frames[key] || {};
+    if (time - 1e3 / actionableFPS > (frame.time || 0)) {
+      feature();
+      $5.write({ time }, (state, payload) => {
+        return {
+          ...state,
+          frames: {
+            ...frames,
+            [key]: {
+              time: payload.time
+            }
+          }
+        };
+      });
+    }
+  }
+  function queueRelease(node) {
+    setTimeout(() => {
+      node.dispatchEvent(new Event("touchend"));
+    }, sustainedDuration);
+  }
+  function queueAttack(node, i) {
+    setTimeout(() => {
+      node.dispatchEvent(new Event("touchstart"));
+      queueRelease(node);
+    }, i * strumVelocity);
+  }
+  $5.write({ colors: recalculate() });
+  $5.render(() => {
+    const { start, length, reverse, colors, octave, pitch, debug } = $5.read();
+    const wheel = majorScale.map((majorNote, index) => {
+      const majorScaleIndex = mod(index - pitch * 7, majorScale.length);
+      const minorNote = minorScale[mod(majorScaleIndex + pitch * 7, minorScale.length)];
+      const minorScaleIndex = mod(majorScaleIndex + 3, minorScale.length);
+      const majorColorIndex = mod(
+        mod(majorScaleIndex * 7, colors.length) + pitch,
+        colors.length
+      );
+      const minorColorIndex = mod(
+        mod(minorScaleIndex * 7, colors.length) + pitch,
+        colors.length
+      );
+      const majorColorScales = colors[majorColorIndex].map((x) => x.name);
+      const minorColorScales = colors[minorColorIndex].map((x) => x.name);
+      const majorStepClass = majorNote.length === 2 ? "step half" : "step";
+      const minorStepClass = minorNote.length === 2 ? "step half" : "step";
+      const majorSynth = majorScaleIndex;
+      const minorSynth = minorScaleIndex + majorScale.length;
+      return `
+      <div class="group" style="
+				transform: rotate(${majorScaleIndex * 30}deg)
+				
+			">
+        <button
+          class="${majorStepClass}"
+					data-index="${majorSynth}"
+          data-octave="${octave}"
+          data-note="${majorNote}"
+					data-hue="${majorColorIndex}"
+          style="${printColorScale(majorColorScales)}"
+        >
+					<div class="label">
+						<label>${majorNote}</label>
+					</div>
+        </button>
+        <button
+          class="${minorStepClass}"
+					data-index="${minorSynth}"
+          data-octave="${octave}"
+          data-note="${minorNote}"
+					data-hue="${minorColorIndex}"
+          style="${printColorScale(minorColorScales)}"
+        >
+					<div class="label">
+						<label>${minorNote}</label>
+					</div>
+        </button>
+      </div>
+    `;
+    }).join("");
+    return `
+    <div class="wheel">
+      ${wheel}
+			${controls()}
+    </div>
+    <form>
+      ${start} ${length} ${reverse}
+      <input min="0" max="360" value="${start}" name="start" type="range" />
+      <input min="0" max="360" value="${length}" name="length" type="range" />
+      <input name="reverse" type="checkbox" />
+      <label for="reverse">Reverse</label>
+    </form>
+    <style>
+      play-wheel form {
+        display: ${debug ? "block" : "none"}
+      }
+    </style>
+  `;
+  });
+  function controls() {
+    const { pitch, colors, octave } = $5.read();
+    const hue = colors[mod(pitch, colors.length)];
+    const upHue = colors[mod(pitch + 1, colors.length)];
+    const downHue = colors[mod(pitch - 1, colors.length)];
+    const variables = `
+		--wheel-up: var(${hue[Math.min(octave + 1, 6)].name});
+		--wheel-right: var(${upHue[octave].name});
+		--wheel-down: var(${hue[Math.max(octave - 1, 0)].name});
+		--wheel-left: var(${downHue[octave].name});
+	`;
+    return `
+		<div class="controls" style="transform: rotate(45deg); ${variables}">
+			<button class="octave-up"></button>
+			<button class="pitch-up"></button>
+			<button class="pitch-down"></button>
+			<button class="octave-down"></button>
+		</div>
+	`;
+  }
+  $5.on("click", ".octave-up", octaveUp);
+  $5.on("click", ".octave-down", octaveDown);
+  $5.on("click", ".pitch-up", pitchUp);
+  $5.on("click", ".pitch-down", pitchDown);
+  $5.style(`
+  & {
+    height: 100%;
+    display: grid;
+    place-content: center;
+  }
+  & .wheel {
+    display: grid;
+    grid-template-areas: "slot";
+    grid-template-rows: 45vmin;
+    grid-template-columns: 40vmin;
+    place-content: start center;
+    padding: 0 1rem;
+    height: 90vmin;
+		user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: manipulation;
+  }
+  & .group {
+    grid-area: slot;
+    transform-origin: bottom;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    clip-path: polygon(20% 0%, 50% 100%, 80% 0%);
+    gap: 1px;
+  }
+  & .step {
+    border: none;
+    width: 100%;
+    height: auto;
+    display: grid;
+    place-items: start;
+    color: black;
+		position: relative;
+		background: linear-gradient(
+			white 2em,
+			var(--color-step-4) 2em,
+			var(--color-step-3),
+			var(--color-step-2)
+		);
+  }
+
+  & .step.half {
+    color: white;
+		background: linear-gradient(
+			black 2em,
+			var(--color-step-4) 2em,
+			var(--color-step-3),
+			var(--color-step-2)
+		)
+  }
+
+	& .step::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			rgba(0, 0, 0, .25),
+			transparent,
+			rgba(255, 255, 255, .75),
+			transparent,
+			transparent,
+			transparent
+		);
+		background-size: 300% 300%;
+		background-position-y: 100%;
+		animation: &-decay 100ms ease-out forwards;
+	}
+
+	& .step.active::before {
+		animation: &-attack 100ms ease-out forwards;
+	}
+
+	@keyframes &-attack {
+		0% {
+			background-position-y: 50%;
+		}
+		100% {
+			background-position-y: 0%;
+		}
+	}
+
+	@keyframes &-decay {
+		0% {
+			background-position-y: 50%;
+		}
+		100% {
+			background-position-y: 100%;
+		}
+	}
+
+
+  & .label {
+    display: grid;
+    padding: .5em;
+    width: 100%;
+    pointer-events: none;
+  }
+
+
+  & .label:first-child label {
+    place-self: end center;
+  }
+
+  & .label:last-child label {
+    place-self: start center;
+  }
+
+	& .controls {
+		display: grid;
+		grid-area: slot;
+		grid-template-columns: 1fr 1fr;
+		width: 32vmin;
+		height: 32vmin;
+		clip-path: circle(50%);
+		place-self: end center;
+		margin-bottom: -16vmin;
+	}
+
+	& .controls button {
+		width: 100%;
+		height: 100%;
+	}
+
+	& .octave-up {
+		background: var(--wheel-up);
+	}
+
+	& .octave-down {
+		background: var(--wheel-down);
+	}
+
+	& .pitch-up {
+		background: var(--wheel-right);
+	}
+
+	& .pitch-down {
+		background: var(--wheel-left);
+	}
+
+  ${invertedLabels()}
+
+  &.clean .step {
+		background: linear-gradient(
+			var(--color-step-4) 2em,
+			var(--color-step-3),
+			var(--color-step-2)
+		);
+  }
+
+  &.clean .step.half {
+		background: linear-gradient(
+			var(--color-step-4) 2em,
+			var(--color-step-3),
+			var(--color-step-2)
+		)
+  }
+  &.clean .label {
+    display: none;
+  }
+`);
+  function invertedLabels() {
+    const rulesets = [];
+    for (let i = 1; i < 360; i++) {
+      rulesets.push(`
+      & [style*="rotate(${i}deg)"] label {
+        transform: rotate(${-1 * i}deg);
+      }
+    `);
+    }
+    return rulesets.join("");
+  }
+  function printColorScale(scale) {
+    return scale.map((name2, i) => `--color-step-${i}: var(${name2})`).join(";");
+  }
+  function recalculate() {
+    const { start, length, reverse } = $5.read();
+    const colors = [...Array(12)].map((_, hueIndex) => {
+      const step = length / 12 * hueIndex;
+      const hue = reverse ? start - step : start + step;
+      return lightnessStops.map(([l, c4], i) => {
+        const name2 = `--wheel-${hueIndex}-${i}`;
+        const value2 = new Color("oklch", [l, c4, hue]).display().toString();
+        return {
+          name: name2,
+          value: value2,
+          block: hueIndex,
+          inline: i
+        };
+      });
+    });
+    return colors;
+  }
+  document.body.addEventListener("mousedown", (event) => {
+    if (event.target !== document.body)
+      return;
+    $5.write({ start: $5.read().start + 30, colors: recalculate() });
+  });
+  $5.on("change", '[type="range"]', (event) => {
+    const { value: value2, name: name2 } = event.target;
+    $5.write({ [name2]: parseInt(value2), colors: recalculate() });
+  });
+  $5.on("change", '[type="checkbox"]', (event) => {
+    const { checked, name: name2 } = event.target;
+    $5.write({ [name2]: checked, colors: recalculate() });
+  });
+  $5.on("mousedown", ".step", attack);
+  $5.on("mouseup", ".step", release);
+  $5.on("touchstart", ".step", attack);
+  $5.on("touchend", ".step", release);
+  function mod(x, n2) {
+    return (x % n2 + n2) % n2;
+  }
+
+  // public/packages/design-system.js
+  var $6 = module("design-system");
+  $6.render(() => {
+    return `
+    <style>
+      :root {
+        "${colorVariables}"
+      }
+    </style>
+  `;
+  });
 })();
 /*!
 * focus-trap 7.0.0
