@@ -21121,7 +21121,6 @@
   var context = new AudioContext();
   async function loadSample(url) {
     const sample = await fetch(url).then((response) => response.arrayBuffer()).then((buffer) => context.decodeAudioData(buffer));
-    debugger;
     return sample;
   }
   function playSample(sample, sampleNote, noteToPlay) {
@@ -21144,7 +21143,7 @@
   ]).then((s) => synths = s);
   var $5 = module("synth-module", {
     colors: [],
-    start: 0,
+    start: 120,
     length: 360,
     octave: 4,
     reverse: false,
@@ -21364,18 +21363,6 @@
       ${wheel}
 			${controls()}
     </div>
-    <form>
-      ${start} ${length} ${reverse}
-      <input min="0" max="360" value="${start}" name="start" type="range" />
-      <input min="0" max="360" value="${length}" name="length" type="range" />
-      <input name="reverse" type="checkbox" />
-      <label for="reverse">Reverse</label>
-    </form>
-    <style>
-      play-wheel form {
-        display: ${debug ? "block" : "none"}
-      }
-    </style>
   `;
   });
   function controls() {
@@ -21578,6 +21565,18 @@
     }
     return rulesets.join("");
   }
+  function upload(colors) {
+    const palette = colors.flatMap((x) => x).map(({ name: name2, value: value2 }) => `
+    ${name2}: ${value2};
+  `).join("");
+    fetch("/design-system", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ palette })
+    });
+  }
   function printColorScale(scale) {
     return scale.map((name2, i) => `--color-step-${i}: var(${name2})`).join(";");
   }
@@ -21588,7 +21587,7 @@
       const hue = reverse ? start - step : start + step;
       return lightnessStops.map(([l, c4], i) => {
         const name2 = `--wheel-${hueIndex}-${i}`;
-        const value2 = new Color("oklch", [l, c4, hue]).display().toString();
+        const value2 = new Color("lch", [l, c4, hue]).display().toString();
         return {
           name: name2,
           value: value2,
@@ -21597,21 +21596,9 @@
         };
       });
     });
+    upload(colors);
     return colors;
   }
-  document.body.addEventListener("mousedown", (event) => {
-    if (event.target !== document.body)
-      return;
-    $5.write({ start: $5.read().start + 30, colors: recalculate() });
-  });
-  $5.on("change", '[type="range"]', (event) => {
-    const { value: value2, name: name2 } = event.target;
-    $5.write({ [name2]: parseInt(value2), colors: recalculate() });
-  });
-  $5.on("change", '[type="checkbox"]', (event) => {
-    const { checked, name: name2 } = event.target;
-    $5.write({ [name2]: checked, colors: recalculate() });
-  });
   $5.on("mousedown", ".step", attack);
   $5.on("mouseup", ".step", release);
   $5.on("touchstart", ".step", attack);
@@ -21623,10 +21610,15 @@
   // public/packages/design-system.js
   var $6 = module("design-system");
   $6.render(() => {
+    const { palette } = $6.read();
+    if (!palette) {
+      fetch("/design-system").then((res) => res.json()).then(({ palette: palette2 }) => $6.write({ palette: palette2 }));
+      return;
+    }
     return `
     <style>
       :root {
-        "${colorVariables}"
+        "${palette}"
       }
     </style>
   `;

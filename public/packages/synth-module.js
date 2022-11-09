@@ -8,7 +8,6 @@ async function loadSample(url) {
   const sample = await fetch(url)
     .then(response => response.arrayBuffer())
     .then(buffer => context.decodeAudioData(buffer));
-debugger
   return sample
 }
 
@@ -34,7 +33,7 @@ Promise.all([
 
 const $ = module('synth-module', {
   colors: [],
-  start: 0,
+  start: 120,
   length: 360,
   octave: 4,
   reverse: false,
@@ -277,18 +276,6 @@ $.render(() => {
       ${wheel}
 			${controls()}
     </div>
-    <form>
-      ${start} ${length} ${reverse}
-      <input min="0" max="360" value="${start}" name="start" type="range" />
-      <input min="0" max="360" value="${length}" name="length" type="range" />
-      <input name="reverse" type="checkbox" />
-      <label for="reverse">Reverse</label>
-    </form>
-    <style>
-      play-wheel form {
-        display: ${debug ? 'block' : 'none'}
-      }
-    </style>
   `
 })
 
@@ -496,10 +483,18 @@ function invertedLabels() {
   return rulesets.join('')
 }
 
-function print(colors) {
-  return colors.flatMap(x => x).map(({ name, value }) => `
+function upload(colors) {
+  const palette = colors.flatMap(x => x).map(({ name, value }) => `
     ${name}: ${value};
   `).join('')
+
+  fetch('/design-system', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ palette })
+  })
 }
 
 function printColorScale(scale) {
@@ -517,7 +512,7 @@ function recalculate() {
 
     return lightnessStops.map(([l, c], i) => {
       const name = `--wheel-${hueIndex}-${i}`
-      const value = new Color('oklch', [l, c, hue])
+      const value = new Color('lch', [l, c, hue])
         .display()
         .toString()
 
@@ -530,26 +525,10 @@ function recalculate() {
     })
   })
 
+  upload(colors)
+
   return colors
 }
-
-document.body.addEventListener('mousedown', (event) => {
-	if(event.target !== document.body) return
-  $.write({ start: $.read().start + 30, colors: recalculate() })
-});
-
-
-$.on('change', '[type="range"]', (event) => {
-  const { value, name } = event.target
-
-  $.write({ [name]: parseInt(value), colors: recalculate() })
-})
-
-$.on('change', '[type="checkbox"]', (event) => {
-  const { checked, name } = event.target
-
-  $.write({ [name]: checked, colors: recalculate() })
-})
 
 $.on('mousedown', '.step', attack)
 $.on('mouseup', '.step', release)
