@@ -97,9 +97,9 @@ const synthDown =() => {
 function attack(event) {
 	event.preventDefault()
 	const { colors, synth } = $.read()
-  const { octave, index, hue } = event.target.dataset
+  const { octave, note, hue } = event.target.dataset
 
-  playSample(synths[synth], 60, parseInt(octave) * 12 + parseInt(index));
+  playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
   //synths[synth].triggerAttack(`${note}${octave}`, "2n");
 	event.target.classList.add('active')
 
@@ -238,6 +238,8 @@ $.render(() => {
 		const majorSynth = majorScaleIndex
 		const minorSynth = minorScaleIndex + majorScale.length
 
+    const note = mod((index * 7), majorScale.length)
+
     return `
       <div class="group" style="
 				transform: rotate(${majorScaleIndex * 30}deg)
@@ -247,7 +249,7 @@ $.render(() => {
           class="${majorStepClass}"
 					data-index="${majorSynth}"
           data-octave="${octave}"
-          data-note="${majorNote}"
+          data-note="${note}"
 					data-hue="${majorColorIndex}"
           style="${printColorScale(majorColorScales)}"
         >
@@ -259,7 +261,7 @@ $.render(() => {
           class="${minorStepClass}"
 					data-index="${minorSynth}"
           data-octave="${octave}"
-          data-note="${minorNote}"
+          data-note="${minorScaleIndex}"
 					data-hue="${minorColorIndex}"
           style="${printColorScale(minorColorScales)}"
         >

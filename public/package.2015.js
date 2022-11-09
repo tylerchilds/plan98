@@ -21215,8 +21215,8 @@
   function attack(event) {
     event.preventDefault();
     const { colors, synth } = $5.read();
-    const { octave, index, hue } = event.target.dataset;
-    playSample(synths[synth], 60, parseInt(octave) * 12 + parseInt(index));
+    const { octave, note, hue } = event.target.dataset;
+    playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
     event.target.classList.add("active");
     document.querySelector("html").style.setProperty(
       "--theme",
@@ -21326,6 +21326,7 @@
       const minorStepClass = minorNote.length === 2 ? "step half" : "step";
       const majorSynth = majorScaleIndex;
       const minorSynth = minorScaleIndex + majorScale.length;
+      const note = mod(index * 7, majorScale.length);
       return `
       <div class="group" style="
 				transform: rotate(${majorScaleIndex * 30}deg)
@@ -21335,7 +21336,7 @@
           class="${majorStepClass}"
 					data-index="${majorSynth}"
           data-octave="${octave}"
-          data-note="${majorNote}"
+          data-note="${note}"
 					data-hue="${majorColorIndex}"
           style="${printColorScale(majorColorScales)}"
         >
@@ -21347,7 +21348,7 @@
           class="${minorStepClass}"
 					data-index="${minorSynth}"
           data-octave="${octave}"
-          data-note="${minorNote}"
+          data-note="${minorScaleIndex}"
 					data-hue="${minorColorIndex}"
           style="${printColorScale(minorColorScales)}"
         >
