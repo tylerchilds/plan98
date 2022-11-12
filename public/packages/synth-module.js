@@ -103,9 +103,18 @@ function attack(event) {
   //synths[synth].triggerAttack(`${note}${octave}`, "2n");
 	event.target.classList.add('active')
 
+  const body = new Color(colors[parseInt(hue)][parseInt(octave)].value).to('srgb')
+  fetch('/last-color', {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body
+  })
+
   document.querySelector('html').style.setProperty(
 		"--theme",
-		`var(${colors[parseInt(hue)][parseInt(octave)].name})`
+		`var(${body})`
 	)
 }
 
