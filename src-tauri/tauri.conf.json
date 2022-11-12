@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run bundle",
     "beforeDevCommand": "npm run start",
     "devPath": "localhost:1989",
     "distDir": "../public"

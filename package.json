@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "build": "npm run to2015",
+    "build": "tauri build",
+    "bundle": "npm run to2015",
     "to2015": "esbuild --bundle public/main.js --outfile=public/package.2015.js",
     "to1996": "java -jar bin/closure-compiler-v20221004.jar --js public/package.2015.js --js_output_file public/package.1996.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -27,6 +28,7 @@
     "web-streams-polyfill": "^3.2.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^1.2.0",
     "esbuild": "^0.15.12",
     "pkg": "^5.8.0"
   }
