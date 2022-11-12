@@ -21219,17 +21219,7 @@
     playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
     event.target.classList.add("active");
     const body = new Color(colors[parseInt(hue)][parseInt(octave)].value).to("srgb");
-    fetch("/last-color", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body
-    });
-    document.querySelector("html").style.setProperty(
-      "--theme",
-      `var(${body})`
-    );
+    document.querySelector("body").style.setProperty("background", body);
   }
   function release(event) {
     event.preventDefault();
@@ -21328,8 +21318,8 @@
         mod(minorScaleIndex * 7, colors.length) + pitch,
         colors.length
       );
-      const majorColorScales = colors[majorColorIndex].map((x) => x.name);
-      const minorColorScales = colors[minorColorIndex].map((x) => x.name);
+      const majorColorScales = colors[majorColorIndex].map((x) => x.value);
+      const minorColorScales = colors[minorColorIndex].map((x) => x.value);
       const majorStepClass = majorNote.length === 2 ? "step half" : "step";
       const minorStepClass = minorNote.length === 2 ? "step half" : "step";
       const majorSynth = majorScaleIndex;
@@ -21346,11 +21336,8 @@
           data-octave="${octave}"
           data-note="${note}"
 					data-hue="${majorColorIndex}"
-          style="${printColorScale(majorColorScales)}"
+          style="${gradient(majorColorScales, [4, 3, 2])}"
         >
-					<div class="label">
-						<label>${majorNote}</label>
-					</div>
         </button>
         <button
           class="${minorStepClass}"
@@ -21358,11 +21345,8 @@
           data-octave="${octave}"
           data-note="${minorScaleIndex}"
 					data-hue="${minorColorIndex}"
-          style="${printColorScale(minorColorScales)}"
+          style="${gradient(minorColorScales, [4, 3, 2])}"
         >
-					<div class="label">
-						<label>${minorNote}</label>
-					</div>
         </button>
       </div>
     `;
@@ -21375,18 +21359,8 @@
   `;
   });
   function controls() {
-    const { pitch, colors, octave } = $5.read();
-    const hue = colors[mod(pitch, colors.length)];
-    const upHue = colors[mod(pitch + 1, colors.length)];
-    const downHue = colors[mod(pitch - 1, colors.length)];
-    const variables = `
-		--wheel-up: var(${hue[Math.min(octave + 1, 6)].name});
-		--wheel-right: var(${upHue[octave].name});
-		--wheel-down: var(${hue[Math.max(octave - 1, 0)].name});
-		--wheel-left: var(${downHue[octave].name});
-	`;
     return `
-		<div class="controls" style="transform: rotate(45deg); ${variables}">
+		<div class="controls" style="display: none;">
 			<button class="octave-up"></button>
 			<button class="pitch-up"></button>
 			<button class="pitch-down"></button>
@@ -21436,22 +21410,10 @@
     place-items: start;
     color: black;
 		position: relative;
-		background: linear-gradient(
-			white 2em,
-			var(--color-step-4) 2em,
-			var(--color-step-3),
-			var(--color-step-2)
-		);
   }
 
   & .step.half {
     color: white;
-		background: linear-gradient(
-			black 2em,
-			var(--color-step-4) 2em,
-			var(--color-step-3),
-			var(--color-step-2)
-		)
   }
 
 	& .step::before {
@@ -21493,75 +21455,7 @@
 		}
 	}
 
-
-  & .label {
-    display: grid;
-    padding: .5em;
-    width: 100%;
-    pointer-events: none;
-  }
-
-
-  & .label:first-child label {
-    place-self: end center;
-  }
-
-  & .label:last-child label {
-    place-self: start center;
-  }
-
-	& .controls {
-		display: grid;
-		grid-area: slot;
-		grid-template-columns: 1fr 1fr;
-		width: 32vmin;
-		height: 32vmin;
-		clip-path: circle(50%);
-		place-self: end center;
-		margin-bottom: -16vmin;
-	}
-
-	& .controls button {
-		width: 100%;
-		height: 100%;
-	}
-
-	& .octave-up {
-		background: var(--wheel-up);
-	}
-
-	& .octave-down {
-		background: var(--wheel-down);
-	}
-
-	& .pitch-up {
-		background: var(--wheel-right);
-	}
-
-	& .pitch-down {
-		background: var(--wheel-left);
-	}
-
   ${invertedLabels()}
-
-  &.clean .step {
-		background: linear-gradient(
-			var(--color-step-4) 2em,
-			var(--color-step-3),
-			var(--color-step-2)
-		);
-  }
-
-  &.clean .step.half {
-		background: linear-gradient(
-			var(--color-step-4) 2em,
-			var(--color-step-3),
-			var(--color-step-2)
-		)
-  }
-  &.clean .label {
-    display: none;
-  }
 `);
   function invertedLabels() {
     const rulesets = [];
@@ -21586,8 +21480,10 @@
       body: JSON.stringify({ palette })
     });
   }
-  function printColorScale(scale) {
-    return scale.map((name2, i) => `--color-step-${i}: var(${name2})`).join(";");
+  function gradient(scale, stops) {
+    return `
+    background: linear-gradient(${stops.map((x) => scale[x]).join(", ")})
+  `;
   }
   function recalculate() {
     const { start, length, reverse } = $5.read();
@@ -21596,7 +21492,7 @@
       const hue = reverse ? start - step : start + step;
       return lightnessStops.map(([l, c4], i) => {
         const name2 = `--wheel-${hueIndex}-${i}`;
-        const value2 = new Color("lch", [l, c4, hue]).display().toString();
+        const value2 = new Color("lch", [l, c4, hue]).display().toString({ format: "hex" });
         return {
           name: name2,
           value: value2,

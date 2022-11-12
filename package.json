@@ -27,6 +27,7 @@
     "web-streams-polyfill": "^3.2.1"
   },
   "devDependencies": {
-    "esbuild": "^0.15.12"
+    "esbuild": "^0.15.12",
+    "pkg": "^5.8.0"
   }
 }
