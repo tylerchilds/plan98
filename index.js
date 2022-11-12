@@ -61,6 +61,7 @@ app.get('/exec/*', async (req, res) => {
       return await import(b64moduleData);
     })
 
+  console.log(handler)
   handler(req, res)
 })
 

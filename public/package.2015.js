@@ -21218,9 +21218,17 @@
     const { octave, note, hue } = event.target.dataset;
     playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
     event.target.classList.add("active");
+    const body = new Color(colors[parseInt(hue)][parseInt(octave)].value).to("srgb");
+    fetch("/last-color", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body
+    });
     document.querySelector("html").style.setProperty(
       "--theme",
-      `var(${colors[parseInt(hue)][parseInt(octave)].name})`
+      `var(${body})`
     );
   }
   function release(event) {
