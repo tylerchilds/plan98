@@ -2,13 +2,13 @@ import module from '../module.js'
 
 const $ = module('design-system')
 
-$.render(() => {
-  const { palette } = $.read()
+$.draw(() => {
+  const { palette } = $.learn()
 
   if(!palette) {
     fetch('/design-system')
       .then(res => res.json())
-      .then(({ palette }) => $.write({ palette }))
+      .then(({ palette }) => $.teach({ palette }))
     return
   }
 

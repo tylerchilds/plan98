@@ -1,9 +1,9 @@
 <!-- hello-reddit.html -->
 
 <hello-reddit title="Hello Reddit" r="funny" sort="hot"></hello-reddit>
-
 <script type="module">
   import module from './module.js'
+  import $controlBox from './control-box.js'
 
   const emptyReddit = {
     children: [],
@@ -15,16 +15,16 @@
   const $ = module('hello-reddit')
 
   function redditById(id) {
-    return $.read()[id] || emptyReddit
+    return $.learn()[id] || emptyReddit
   }
 
-  $.on('click', '.reset', paginate('reset'))
-  $.on('click', '.more', paginate('after'))
+  $.when('click', '.reset', paginate('reset'))
+  $.when('click', '.more', paginate('after'))
 
-  $.on('click', '.back', step(-1))
-  $.on('click', '.next', step(+1))
+  $.when('click', '.back', step(-1))
+  $.when('click', '.next', step(+1))
 
-  $.render(target => {
+  $.draw(target => {
     const { children = [], loading, position } = query(target)
 
     if(children.length === 0) return
@@ -64,7 +64,7 @@
       'rich:video': (data) => `
         <a href="${data.url}">${data.title}</a>
         (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
-        ${htmlDecode(data.secure_media_embed.content)}
+        ${htmlDecode(data.secure_media.oembed.html)}
       `,
 			'link': (data) => `
         <a href="${data.url}">${data.title}</a>
@@ -89,7 +89,7 @@
     return doc.documentElement.textContent;
   }
 
-  $.style(`
+  $.flair(`
     & {
       border: 1px solid black;
       border-radius: 2px;
@@ -148,11 +148,11 @@
   function query(target) {
     const state = redditById(target.id)
 
-    const r = target.getAttribute('r') || 'all'
+    const { choices=[] } = $.learn()
     const sort = target.getAttribute('sort') || ''
     const { paginate } = state
 
-    const query = { r, sort, paginate }
+    const query = { r: choices.join('+'), sort, paginate }
 
     request(target, query)
 
@@ -168,12 +168,12 @@
       target.dataset.lookup = lookup
 
       const { r, sort = '', paginate = '' } = query
-      const url = `https://www.reddit.com/r/${r}/${sort}/.json?count=25${paginate}`
+      const url = `https://api.reddit.com/r/${r}/${sort}/.json?count=25${paginate}`
 
       await fetch(url)
         .then(res => res.json())
         .then(json => json.data)
-        .then(response => $.write({
+        .then(response => $.teach({
           ...response,
           loading: false
         }, merge(target.id)))
@@ -188,7 +188,7 @@
         ? `&${key}=${state[key]}`
         : ''
 
-      $.write({ paginate: query, loading: true }, merge(id))
+      $.teach({ paginate: query, loading: true }, merge(id))
       document.getElementById(id)
         .querySelector('ol').scrollTop = '0'
     }
@@ -218,7 +218,7 @@
 
       const index = mod((position + i), children.length)
 
-      $.write({
+      $.teach({
         id,
         position: index
       }, merge(id))
@@ -227,12 +227,8 @@
 
 	const eventMap = {
 		37: function() { click('.back') },
-		90: function() { click('.more') },
+		38: function() { click('.more') },
 		39: function() { click('.next') },
-		65: function() { click('.reset') },
-		82: function reload() {
-			window.location.href = window.location.href
-		},
 	};
 	function keys(event) {
 		const handler = eventMap[event.keyCode] || (()=>console.log(event.keyCode)
@@ -247,4 +243,16 @@
 	}
 
 	document.addEventListener('keydown', keys);
+  let lastChoices
+  (function loop() {
+    const { choices } = $controlBox.learn()
+    if(lastChoices !== choices) {
+      lastChoices = choices
+      console.log(choices)
+      $.teach({ choices })
+
+    }
+    console.log()
+    requestAnimationFrame(loop)
+  })()
 </script>

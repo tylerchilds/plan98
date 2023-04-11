@@ -8,9 +8,9 @@ import {
 
 const $ = module('code-module')
 
-$.on('click', '.publish', (event) => {
+$.when('click', '.publish', (event) => {
   const link = event.target.closest($.selector).getAttribute('src')
-  const { file } = $.read()
+  const { file } = $.learn()
   fetch(link, {
     method: 'PUT',
     headers: {
@@ -22,15 +22,15 @@ $.on('click', '.publish', (event) => {
   })
 })
 
-$.render(target => {
+$.draw(target => {
   const link = target.getAttribute('src')
   console.log(link)
-  const { file } = $.read()
+  const { file } = $.learn()
 
   if(!file) {
     fetch(link)
       .then(res => res.json())
-      .then(({ file }) => $.write({ file }))
+      .then(({ file }) => $.teach({ file }))
     return
   }
 
@@ -65,11 +65,11 @@ function persist(_target, $, _flags) {
     if(update.changes.inserted.length < 0) return
 
 		const file = update.view.state.doc.toString()
-    $.write({ file })
+    $.teach({ file })
 	}
 }
 
-$.style(`
+$.flair(`
   & {
 		display: block;
     max-height: 60vh;

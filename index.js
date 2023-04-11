@@ -96,7 +96,7 @@ app.get('/', (req, res) => {
       import tag from 'https://deno.land/x/tag@v0.3.2/mod.js'
       const $ = tag('oauth-flow')
 
-      $.render(target => {
+      $.draw(target => {
         return 'hello world'
       })
     </script>

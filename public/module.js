@@ -16,7 +16,7 @@ function update(target, compositor) {
   if(html) target.innerHTML = html
 }
 
-function render(selector, compositor) {
+function draw(selector, compositor) {
   listen(CREATE_EVENT, selector, (event) => {
     const draw = update.bind(null, event.target, compositor)
     reactiveFunctions[selector] = draw
@@ -24,7 +24,7 @@ function render(selector, compositor) {
   })
 }
 
-function style(selector, stylesheet) {
+function flair(selector, stylesheet) {
   const styles = `
     <style type="text/css" data-module=${selector}>
       ${stylesheet.replaceAll('&', selector)}
@@ -36,28 +36,28 @@ function style(selector, stylesheet) {
     .insertAdjacentHTML("beforeend", styles)
 }
 
-export function read(selector) {
+export function learn(selector) {
   return store.get(selector) || {}
 }
 
-export function write(selector, payload, handler = (s, p) => ({...s,...p})) {
+export function teach(selector, payload, handler = (s, p) => ({...s,...p})) {
   store.set(selector, payload, handler)
 }
 
-export function on(selector1, eventName, selector2, callback) {
+export function when(selector1, eventName, selector2, callback) {
   listen(eventName, `${selector1} ${selector2}`, callback)
 }
 
 export default function module(selector, initialState = {}) {
-  write(selector, initialState)
+  teach(selector, initialState)
 
   return {
     selector,
-    read: read.bind(null, selector),
-    render: render.bind(null, selector),
-    style: style.bind(null, selector),
-    on: on.bind(null, selector),
-    write: write.bind(null, selector),
+    learn: learn.bind(null, selector),
+    draw: draw.bind(null, selector),
+    flair: flair.bind(null, selector),
+    when: when.bind(null, selector),
+    teach: teach.bind(null, selector),
   }
 }
 

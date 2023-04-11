@@ -13,7 +13,7 @@ const initialState = {}
 
 const $ = module('gamepad-debug', initialState)
 
-$.render((target) => renderGamepads(target, $))
+$.draw((target) => renderGamepads(target, $))
 
 function connecthandler(e) {
   const { index } = e.gamepad
@@ -84,7 +84,7 @@ function gatherInputs(gamepad, _index) {
 globalThis.addEventListener("gamepadconnected", connecthandler);
 globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
 
-$.style(`
+$.flair(`
   & .gamepads {
     background: rgba(0,0,0,.04);
     border: 1px solid rgba(0,0,0,.1);

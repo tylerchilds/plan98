@@ -64,39 +64,39 @@ const lightnessStops = [
 ]
 
 const octaveUp = () => {
-	const octave = $.read().octave + 1
+	const octave = $.learn().octave + 1
 	if(octave > 6) { return }
-	$.write({ octave })
+	$.teach({ octave })
 }
 
 const octaveDown = () => {
-	const octave = $.read().octave - 1
+	const octave = $.learn().octave - 1
 	if(octave < 0) { return }
-	$.write({ octave })
+	$.teach({ octave })
 }
 
 const pitchUp = () => {
-	const pitch = $.read().pitch + 1
-	$.write({ pitch })
+	const pitch = $.learn().pitch + 1
+	$.teach({ pitch })
 }
 
 const pitchDown =() => {
-	const pitch = $.read().pitch - 1
-	$.write({ pitch })
+	const pitch = $.learn().pitch - 1
+	$.teach({ pitch })
 }
 
 const synthUp = () => {
-	const synth = $.read().synth + 1
-	$.write({ synth })
+	const synth = $.learn().synth + 1
+	$.teach({ synth })
 }
 
 const synthDown =() => {
-	const synth = $.read().synth - 1
-	$.write({ synth })
+	const synth = $.learn().synth - 1
+	$.teach({ synth })
 }
 function attack(event) {
 	event.preventDefault()
-	const { colors, synth } = $.read()
+	const { colors, synth } = $.learn()
   const { octave, note, hue } = event.target.dataset
 
   playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
@@ -152,7 +152,7 @@ let activeRegister = 0
 
 requestAnimationFrame(loop)
 function loop(time) {
-  const { activeRegisters, activeFrets, activeMotions } = $guitar.read()
+  const { activeRegisters, activeFrets, activeMotions } = $guitar.learn()
   activeRegisters.map((register, i) => {
     const { up, down } = activeMotions[i]
     if(activeFrets[i] === 'x x x') {
@@ -186,12 +186,12 @@ function loop(time) {
 }
 
 function throttle({ key, time, feature }) {
-  const { frames = {}} = $.read()
+  const { frames = {}} = $.learn()
   const frame = frames[key] || {}
 
   if((time - 1000 / actionableFPS) > (frame.time || 0)) {
     feature()
-    $.write({ time }, (state, payload) => {
+    $.teach({ time }, (state, payload) => {
       return {
         ...state,
         frames: {
@@ -218,9 +218,9 @@ function queueAttack(node, i) {
   }, i * strumVelocity)
 }
 
-$.write({ colors: recalculate() })
-$.render(() => {
-  const { start, length, reverse, colors, octave, pitch, debug } = $.read()
+$.teach({ colors: recalculate() })
+$.draw(() => {
+  const { start, length, reverse, colors, octave, pitch, debug } = $.learn()
   const wheel = majorScale.map((majorNote, index) => {
 		const majorScaleIndex = mod((index - pitch * 7), majorScale.length)
     const minorNote = minorScale[
@@ -294,12 +294,12 @@ function controls() {
 	`
 }
 
-$.on('click', '.octave-up', octaveUp)
-$.on('click', '.octave-down', octaveDown)
-$.on('click', '.pitch-up', pitchUp)
-$.on('click', '.pitch-down', pitchDown)
+$.when('click', '.octave-up', octaveUp)
+$.when('click', '.octave-down', octaveDown)
+$.when('click', '.pitch-up', pitchUp)
+$.when('click', '.pitch-down', pitchDown)
 
-$.style(`
+$.flair(`
   & {
     height: 100%;
     display: grid;
@@ -418,7 +418,7 @@ function gradient(scale, stops) {
 }
 
 function recalculate() {
-  const { start, length, reverse } = $.read()
+  const { start, length, reverse } = $.learn()
 
   const colors = [...Array(12)].map((_, hueIndex) => {
     const step = ((length / 12) * hueIndex)
@@ -446,11 +446,11 @@ function recalculate() {
   return colors
 }
 
-$.on('mousedown', '.step', attack)
-$.on('mouseup', '.step', release)
+$.when('mousedown', '.step', attack)
+$.when('mouseup', '.step', release)
 
-$.on('touchstart', '.step', attack)
-$.on('touchend', '.step', release)
+$.when('touchstart', '.step', attack)
+$.when('touchend', '.step', release)
 
 function mod(x, n) {
   return ((x % n) + n) % n;

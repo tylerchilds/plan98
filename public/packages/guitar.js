@@ -41,7 +41,7 @@ function loop(time) {
   const activeRegisters = activeFrets.map(x => toRegisters($, x))
   const activeMotions = gamepads().map(x => toMotion($, x))
 
-  $.write({
+  $.teach({
     time,
     activeFrets,
     activeRegisters,
@@ -51,11 +51,11 @@ function loop(time) {
   requestAnimationFrame(loop)
 }
 
-$.render(() => {
+$.draw(() => {
   const {
     activeRegisters,
     activeMotions,
-  } = $.read()
+  } = $.learn()
 
   const classes = (i) => {
     return ['up', 'down', 'left', 'right']
@@ -93,12 +93,12 @@ function toMotion(_$, flags) {
 }
 
 function throttle($, flags) {
-  const { frames = {}} = $.read()
+  const { frames = {}} = $.learn()
   const frame = frames[flags.key] || {}
 
   if((flags.time - flags.fps) > (frame.time || 0)) {
     flags.activate()
-    $.write({ time: flags.time }, (state, payload) => {
+    $.teach({ time: flags.time }, (state, payload) => {
       return {
         ...state,
         frames: {
@@ -112,7 +112,7 @@ function throttle($, flags) {
   }
 }
 
-$.style(`
+$.flair(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;

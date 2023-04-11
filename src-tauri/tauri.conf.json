@@ -2,7 +2,7 @@
   "build": {
     "beforeBuildCommand": "npm run bundle",
     "beforeDevCommand": "npm run start",
-    "devPath": "localhost:1989",
+    "devPath": "../public",
     "distDir": "../public"
   },
   "package": {

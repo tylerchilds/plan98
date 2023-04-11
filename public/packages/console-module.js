@@ -16,7 +16,7 @@ const $ = module('console-module', {
   filter: ''
 })
 
-$.on('click', '.item', function update(event) {
+$.when('click', '.item', function update(event) {
   event.preventDefault();
   const args = attributes(event.target, $)
 
@@ -26,10 +26,10 @@ $.on('click', '.item', function update(event) {
   args.root.trap.deactivate();
 })
 
-$.on('click', '.bar', toggleActive);
-$.on('keyup', '[name="filter"]', setFilter);
+$.when('click', '.bar', toggleActive);
+$.when('keyup', '[name="filter"]', setFilter);
 
-$.render(target => {
+$.draw(target => {
 	if(!target.trap) {
 		target.trap = focusTrap.createFocusTrap(target, {
 			onActivate: onActivate(target),
@@ -38,7 +38,7 @@ $.render(target => {
 		});
 	}
 
-  const { filter } = $.read()
+  const { filter } = $.learn()
   const choices = []
 
   const list = ENUMS
@@ -91,7 +91,7 @@ function toggleActive(event) {
 
 function setFilter(event) {
 	const { value } = event.target
-	$.write({ filter: value })
+	$.teach({ filter: value })
 }
 
 function onActivate(target){
@@ -104,7 +104,7 @@ function onActivate(target){
 function onDeactivate(target) {
   return () => {
     target.classList.remove('is-active')
-		$.write({ filter: '' })
+		$.teach({ filter: '' })
   }
 }
 
@@ -112,7 +112,7 @@ function isActive(target) {
   return target.matches('.is-active')
 }
 
-$.style(`
+$.flair(`
 	& {
 		display: block;
 		position: relative;
