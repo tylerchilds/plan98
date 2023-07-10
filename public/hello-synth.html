@@ -1,0 +1,22 @@
+<style>
+  html, body { margin: 0; padding: 0; }
+  body { background: cornsilk }
+</style>
+<design-system></design-system>
+<synth-module></synth-module>
+<script data-debug="true">
+	const debugMode = document.querySelector('script[data-debug="true"]')
+
+	if(debugMode) {
+		const logger = (...args) => {
+			document.body.insertAdjacentHTML("beforeend", args.join('\n\r'))
+		}
+		console.log = logger
+		console.info = logger
+		console.error = logger
+		console.warn = logger
+		console.log('debug mode activated', 'yeet')
+	}
+</script>
+<script src="/package.2015.js"></script>
+

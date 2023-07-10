@@ -61,9 +61,9 @@
 
   // node_modules/has-symbols/shams.js
   var require_shams = __commonJS({
-    "node_modules/has-symbols/shams.js"(exports2, module2) {
+    "node_modules/has-symbols/shams.js"(exports2, module3) {
       "use strict";
-      module2.exports = function hasSymbols() {
+      module3.exports = function hasSymbols() {
         if (typeof Symbol !== "function" || typeof Object.getOwnPropertySymbols !== "function") {
           return false;
         }
@@ -113,10 +113,10 @@
 
   // node_modules/has-tostringtag/shams.js
   var require_shams2 = __commonJS({
-    "node_modules/has-tostringtag/shams.js"(exports2, module2) {
+    "node_modules/has-tostringtag/shams.js"(exports2, module3) {
       "use strict";
       var hasSymbols = require_shams();
-      module2.exports = function hasToStringTagShams() {
+      module3.exports = function hasToStringTagShams() {
         return hasSymbols() && !!Symbol.toStringTag;
       };
     }
@@ -124,11 +124,11 @@
 
   // node_modules/has-symbols/index.js
   var require_has_symbols = __commonJS({
-    "node_modules/has-symbols/index.js"(exports2, module2) {
+    "node_modules/has-symbols/index.js"(exports2, module3) {
       "use strict";
       var origSymbol = typeof Symbol !== "undefined" && Symbol;
       var hasSymbolSham = require_shams();
-      module2.exports = function hasNativeSymbols() {
+      module3.exports = function hasNativeSymbols() {
         if (typeof origSymbol !== "function") {
           return false;
         }
@@ -148,13 +148,13 @@
 
   // node_modules/function-bind/implementation.js
   var require_implementation = __commonJS({
-    "node_modules/function-bind/implementation.js"(exports2, module2) {
+    "node_modules/function-bind/implementation.js"(exports2, module3) {
       "use strict";
       var ERROR_MESSAGE = "Function.prototype.bind called on incompatible ";
       var slice = Array.prototype.slice;
       var toStr = Object.prototype.toString;
       var funcType = "[object Function]";
-      module2.exports = function bind2(that) {
+      module3.exports = function bind2(that) {
         var target = this;
         if (typeof target !== "function" || toStr.call(target) !== funcType) {
           throw new TypeError(ERROR_MESSAGE + target);
@@ -198,25 +198,25 @@
 
   // node_modules/function-bind/index.js
   var require_function_bind = __commonJS({
-    "node_modules/function-bind/index.js"(exports2, module2) {
+    "node_modules/function-bind/index.js"(exports2, module3) {
       "use strict";
       var implementation = require_implementation();
-      module2.exports = Function.prototype.bind || implementation;
+      module3.exports = Function.prototype.bind || implementation;
     }
   });
 
   // node_modules/has/src/index.js
   var require_src = __commonJS({
-    "node_modules/has/src/index.js"(exports2, module2) {
+    "node_modules/has/src/index.js"(exports2, module3) {
       "use strict";
       var bind2 = require_function_bind();
-      module2.exports = bind2.call(Function.call, Object.prototype.hasOwnProperty);
+      module3.exports = bind2.call(Function.call, Object.prototype.hasOwnProperty);
     }
   });
 
   // node_modules/get-intrinsic/index.js
   var require_get_intrinsic = __commonJS({
-    "node_modules/get-intrinsic/index.js"(exports2, module2) {
+    "node_modules/get-intrinsic/index.js"(exports2, module3) {
       "use strict";
       var undefined2;
       var $SyntaxError = SyntaxError;
@@ -444,7 +444,7 @@
         }
         throw new $SyntaxError("intrinsic " + name3 + " does not exist!");
       };
-      module2.exports = function GetIntrinsic(name3, allowMissing) {
+      module3.exports = function GetIntrinsic(name3, allowMissing) {
         if (typeof name3 !== "string" || name3.length === 0) {
           throw new $TypeError("intrinsic name must be a non-empty string");
         }
@@ -510,7 +510,7 @@
 
   // node_modules/call-bind/index.js
   var require_call_bind = __commonJS({
-    "node_modules/call-bind/index.js"(exports2, module2) {
+    "node_modules/call-bind/index.js"(exports2, module3) {
       "use strict";
       var bind2 = require_function_bind();
       var GetIntrinsic = require_get_intrinsic();
@@ -527,7 +527,7 @@
           $defineProperty = null;
         }
       }
-      module2.exports = function callBind(originalFunction) {
+      module3.exports = function callBind(originalFunction) {
         var func = $reflectApply(bind2, $call, arguments);
         if ($gOPD && $defineProperty) {
           var desc = $gOPD(func, "length");
@@ -545,21 +545,21 @@
         return $reflectApply(bind2, $apply, arguments);
       };
       if ($defineProperty) {
-        $defineProperty(module2.exports, "apply", { value: applyBind });
+        $defineProperty(module3.exports, "apply", { value: applyBind });
       } else {
-        module2.exports.apply = applyBind;
+        module3.exports.apply = applyBind;
       }
     }
   });
 
   // node_modules/call-bind/callBound.js
   var require_callBound = __commonJS({
-    "node_modules/call-bind/callBound.js"(exports2, module2) {
+    "node_modules/call-bind/callBound.js"(exports2, module3) {
       "use strict";
       var GetIntrinsic = require_get_intrinsic();
       var callBind = require_call_bind();
       var $indexOf = callBind(GetIntrinsic("String.prototype.indexOf"));
-      module2.exports = function callBoundIntrinsic(name3, allowMissing) {
+      module3.exports = function callBoundIntrinsic(name3, allowMissing) {
         var intrinsic = GetIntrinsic(name3, !!allowMissing);
         if (typeof intrinsic === "function" && $indexOf(name3, ".prototype.") > -1) {
           return callBind(intrinsic);
@@ -571,7 +571,7 @@
 
   // node_modules/is-arguments/index.js
   var require_is_arguments = __commonJS({
-    "node_modules/is-arguments/index.js"(exports2, module2) {
+    "node_modules/is-arguments/index.js"(exports2, module3) {
       "use strict";
       var hasToStringTag = require_shams2()();
       var callBound = require_callBound();
@@ -592,13 +592,13 @@
         return isStandardArguments(arguments);
       }();
       isStandardArguments.isLegacyArguments = isLegacyArguments;
-      module2.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
+      module3.exports = supportsStandardArguments ? isStandardArguments : isLegacyArguments;
     }
   });
 
   // node_modules/is-generator-function/index.js
   var require_is_generator_function = __commonJS({
-    "node_modules/is-generator-function/index.js"(exports2, module2) {
+    "node_modules/is-generator-function/index.js"(exports2, module3) {
       "use strict";
       var toStr = Object.prototype.toString;
       var fnToStr = Function.prototype.toString;
@@ -615,7 +615,7 @@
         }
       };
       var GeneratorFunction;
-      module2.exports = function isGeneratorFunction(fn) {
+      module3.exports = function isGeneratorFunction(fn) {
         if (typeof fn !== "function") {
           return false;
         }
@@ -640,7 +640,7 @@
 
   // node_modules/is-callable/index.js
   var require_is_callable = __commonJS({
-    "node_modules/is-callable/index.js"(exports2, module2) {
+    "node_modules/is-callable/index.js"(exports2, module3) {
       "use strict";
       var fnToStr = Function.prototype.toString;
       var reflectApply = typeof Reflect === "object" && Reflect !== null && Reflect.apply;
@@ -713,7 +713,7 @@
         }
       }
       var all;
-      module2.exports = reflectApply ? function isCallable(value2) {
+      module3.exports = reflectApply ? function isCallable(value2) {
         if (isDDA(value2)) {
           return true;
         }
@@ -758,7 +758,7 @@
 
   // node_modules/for-each/index.js
   var require_for_each = __commonJS({
-    "node_modules/for-each/index.js"(exports2, module2) {
+    "node_modules/for-each/index.js"(exports2, module3) {
       "use strict";
       var isCallable = require_is_callable();
       var toStr = Object.prototype.toString;
@@ -810,13 +810,13 @@
           forEachObject(list, iterator, receiver);
         }
       };
-      module2.exports = forEach;
+      module3.exports = forEach;
     }
   });
 
   // node_modules/available-typed-arrays/index.js
   var require_available_typed_arrays = __commonJS({
-    "node_modules/available-typed-arrays/index.js"(exports2, module2) {
+    "node_modules/available-typed-arrays/index.js"(exports2, module3) {
       "use strict";
       var possibleNames = [
         "BigInt64Array",
@@ -832,7 +832,7 @@
         "Uint8ClampedArray"
       ];
       var g2 = typeof globalThis === "undefined" ? global : globalThis;
-      module2.exports = function availableTypedArrays() {
+      module3.exports = function availableTypedArrays() {
         var out = [];
         for (var i2 = 0; i2 < possibleNames.length; i2++) {
           if (typeof g2[possibleNames[i2]] === "function") {
@@ -846,7 +846,7 @@
 
   // node_modules/gopd/index.js
   var require_gopd = __commonJS({
-    "node_modules/gopd/index.js"(exports2, module2) {
+    "node_modules/gopd/index.js"(exports2, module3) {
       "use strict";
       var GetIntrinsic = require_get_intrinsic();
       var $gOPD = GetIntrinsic("%Object.getOwnPropertyDescriptor%", true);
@@ -857,13 +857,13 @@
           $gOPD = null;
         }
       }
-      module2.exports = $gOPD;
+      module3.exports = $gOPD;
     }
   });
 
   // node_modules/is-typed-array/index.js
   var require_is_typed_array = __commonJS({
-    "node_modules/is-typed-array/index.js"(exports2, module2) {
+    "node_modules/is-typed-array/index.js"(exports2, module3) {
       "use strict";
       var forEach = require_for_each();
       var availableTypedArrays = require_available_typed_arrays();
@@ -910,13 +910,13 @@
         });
         return anyTrue;
       };
-      module2.exports = function isTypedArray(value2) {
+      module3.exports = function isTypedArray(value2) {
         if (!value2 || typeof value2 !== "object") {
           return false;
         }
         if (!hasToStringTag || !(Symbol.toStringTag in value2)) {
-          var tag2 = $slice($toString(value2), 8, -1);
-          return $indexOf(typedArrays, tag2) > -1;
+          var tag = $slice($toString(value2), 8, -1);
+          return $indexOf(typedArrays, tag) > -1;
         }
         if (!gOPD) {
           return false;
@@ -928,7 +928,7 @@
 
   // node_modules/which-typed-array/index.js
   var require_which_typed_array = __commonJS({
-    "node_modules/which-typed-array/index.js"(exports2, module2) {
+    "node_modules/which-typed-array/index.js"(exports2, module3) {
       "use strict";
       var forEach = require_for_each();
       var availableTypedArrays = require_available_typed_arrays();
@@ -973,7 +973,7 @@
         return foundName;
       };
       var isTypedArray = require_is_typed_array();
-      module2.exports = function whichTypedArray(value2) {
+      module3.exports = function whichTypedArray(value2) {
         if (!isTypedArray(value2)) {
           return false;
         }
@@ -1217,8 +1217,8 @@
 
   // node_modules/util/support/isBufferBrowser.js
   var require_isBufferBrowser = __commonJS({
-    "node_modules/util/support/isBufferBrowser.js"(exports2, module2) {
-      module2.exports = function isBuffer(arg) {
+    "node_modules/util/support/isBufferBrowser.js"(exports2, module3) {
+      module3.exports = function isBuffer(arg) {
         return arg && typeof arg === "object" && typeof arg.copy === "function" && typeof arg.fill === "function" && typeof arg.readUInt8 === "function";
       };
     }
@@ -1226,9 +1226,9 @@
 
   // node_modules/inherits/inherits_browser.js
   var require_inherits_browser = __commonJS({
-    "node_modules/inherits/inherits_browser.js"(exports2, module2) {
+    "node_modules/inherits/inherits_browser.js"(exports2, module3) {
       if (typeof Object.create === "function") {
-        module2.exports = function inherits(ctor, superCtor) {
+        module3.exports = function inherits(ctor, superCtor) {
           if (superCtor) {
             ctor.super_ = superCtor;
             ctor.prototype = Object.create(superCtor.prototype, {
@@ -1242,7 +1242,7 @@
           }
         };
       } else {
-        module2.exports = function inherits(ctor, superCtor) {
+        module3.exports = function inherits(ctor, superCtor) {
           if (superCtor) {
             ctor.super_ = superCtor;
             var TempCtor = function() {
@@ -3929,7 +3929,7 @@
               return true;
             }
           });
-          var function_for_tag = (tag2) => (...args) => {
+          var function_for_tag = (tag) => (...args) => {
             var children = [];
             var attrs = { style: {} };
             for (var i2 = 0; i2 < args.length; i2++) {
@@ -3940,7 +3940,7 @@
                 children.push(arg);
               else if (arg instanceof Object)
                 for (var k in arg)
-                  if (is_css_prop(k) && !(k in { width: 1, height: 1, size: 1 } && tag2 in { canvas: 1, input: 1, embed: 1, object: 1 }))
+                  if (is_css_prop(k) && !(k in { width: 1, height: 1, size: 1 } && tag in { canvas: 1, input: 1, embed: 1, object: 1 }))
                     attrs.style[k] = arg[k];
                   else if (k === "style")
                     for (var k2 in arg[k])
@@ -3950,7 +3950,7 @@
             }
             return React.createElement.apply(
               null,
-              [tag2, attrs].concat(children)
+              [tag, attrs].concat(children)
             );
           };
           var all_tags = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,svg,table,tbody,td,template,tfoot,th,thead,title,tr,u,ul,video,input,circle,ellipse,g,image,line,path,polygon,polyline,rect,switch,symbol,text,textPath,tspan,use".split(",");
@@ -4181,7 +4181,7 @@
 
   // node_modules/node-fetch/browser.js
   var require_browser = __commonJS({
-    "node_modules/node-fetch/browser.js"(exports2, module2) {
+    "node_modules/node-fetch/browser.js"(exports2, module3) {
       "use strict";
       var getGlobal = function() {
         if (typeof self !== "undefined") {
@@ -4196,7 +4196,7 @@
         throw new Error("unable to locate global object");
       };
       var global3 = getGlobal();
-      module2.exports = exports2 = global3.fetch;
+      module3.exports = exports2 = global3.fetch;
       if (global3.fetch) {
         exports2.default = global3.fetch.bind(global3);
       }
@@ -4208,19 +4208,19 @@
 
   // node_modules/abort-controller/browser.js
   var require_browser2 = __commonJS({
-    "node_modules/abort-controller/browser.js"(exports2, module2) {
+    "node_modules/abort-controller/browser.js"(exports2, module3) {
       "use strict";
       var { AbortController: AbortController2, AbortSignal } = typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : void 0;
-      module2.exports = AbortController2;
-      module2.exports.AbortSignal = AbortSignal;
-      module2.exports.default = AbortController2;
+      module3.exports = AbortController2;
+      module3.exports.AbortSignal = AbortSignal;
+      module3.exports.default = AbortController2;
     }
   });
 
   // node_modules/emitter-component/index.js
   var require_emitter_component = __commonJS({
-    "node_modules/emitter-component/index.js"(exports2, module2) {
-      module2.exports = Emitter;
+    "node_modules/emitter-component/index.js"(exports2, module3) {
+      module3.exports = Emitter;
       function Emitter(obj) {
         if (obj)
           return mixin(obj);
@@ -4293,13 +4293,13 @@
 
   // node_modules/stream/index.js
   var require_stream = __commonJS({
-    "node_modules/stream/index.js"(exports2, module2) {
+    "node_modules/stream/index.js"(exports2, module3) {
       var Emitter = require_emitter_component();
       function Stream() {
         Emitter.call(this);
       }
       Stream.prototype = new Emitter();
-      module2.exports = Stream;
+      module3.exports = Stream;
       Stream.Stream = Stream;
       Stream.prototype.pipe = function(dest, options2) {
         var source = this;
@@ -4367,9 +4367,9 @@
 
   // node_modules/is-stream/index.js
   var require_is_stream = __commonJS({
-    "node_modules/is-stream/index.js"(exports2, module2) {
+    "node_modules/is-stream/index.js"(exports2, module3) {
       "use strict";
-      var isStream = module2.exports = function(stream) {
+      var isStream = module3.exports = function(stream) {
         return stream !== null && typeof stream === "object" && typeof stream.pipe === "function";
       };
       isStream.writable = function(stream) {
@@ -4389,10 +4389,10 @@
 
   // node_modules/node-web-streams/node_modules/web-streams-polyfill/dist/polyfill.min.js
   var require_polyfill_min = __commonJS({
-    "node_modules/node-web-streams/node_modules/web-streams-polyfill/dist/polyfill.min.js"(exports2, module2) {
+    "node_modules/node-web-streams/node_modules/web-streams-polyfill/dist/polyfill.min.js"(exports2, module3) {
       !function(f) {
-        if ("object" == typeof exports2 && "undefined" != typeof module2)
-          module2.exports = f();
+        if ("object" == typeof exports2 && "undefined" != typeof module3)
+          module3.exports = f();
         else if ("function" == typeof define && define.amd)
           define([], f);
         else {
@@ -4423,14 +4423,14 @@
           for (var i2 = "function" == typeof __require && __require, o = 0; o < r.length; o++)
             s(r[o]);
           return s;
-        }({ 1: [function(require2, module3, exports3) {
+        }({ 1: [function(require2, module4, exports3) {
           "use strict";
           Object.defineProperty(exports3, "__esModule", { value: true });
           var _require = require2("./spec/reference-implementation/lib/readable-stream"), ReadableStream = _require.ReadableStream, _require2 = require2("./spec/reference-implementation/lib/writable-stream"), WritableStream = _require2.WritableStream, ByteLengthQueuingStrategy = require2("./spec/reference-implementation/lib/byte-length-queuing-strategy"), CountQueuingStrategy = require2("./spec/reference-implementation/lib/count-queuing-strategy"), TransformStream = require2("./spec/reference-implementation/lib/transform-stream");
           exports3.ByteLengthQueuingStrategy = ByteLengthQueuingStrategy, exports3.CountQueuingStrategy = CountQueuingStrategy, exports3.TransformStream = TransformStream, exports3.ReadableStream = ReadableStream, exports3.WritableStream = WritableStream;
           var interfaces = { ReadableStream, WritableStream, ByteLengthQueuingStrategy, CountQueuingStrategy, TransformStream };
           exports3.default = interfaces, "undefined" != typeof window && Object.assign(window, interfaces);
-        }, { "./spec/reference-implementation/lib/byte-length-queuing-strategy": 7, "./spec/reference-implementation/lib/count-queuing-strategy": 8, "./spec/reference-implementation/lib/readable-stream": 11, "./spec/reference-implementation/lib/transform-stream": 12, "./spec/reference-implementation/lib/writable-stream": 14 }], 2: [function(require2, module3, exports3) {
+        }, { "./spec/reference-implementation/lib/byte-length-queuing-strategy": 7, "./spec/reference-implementation/lib/count-queuing-strategy": 8, "./spec/reference-implementation/lib/readable-stream": 11, "./spec/reference-implementation/lib/transform-stream": 12, "./spec/reference-implementation/lib/writable-stream": 14 }], 2: [function(require2, module4, exports3) {
           function replacer(key2, value2) {
             return util2.isUndefined(value2) ? "" + value2 : util2.isNumber(value2) && !isFinite(value2) ? value2.toString() : util2.isFunction(value2) || util2.isRegExp(value2) ? value2.toString() : value2;
           }
@@ -4499,7 +4499,7 @@
             if (message = (expected && expected.name ? " (" + expected.name + ")." : ".") + (message ? " " + message : "."), shouldThrow && !actual && fail(actual, expected, "Missing expected exception" + message), !shouldThrow && expectedException(actual, expected) && fail(actual, expected, "Got unwanted exception" + message), shouldThrow && actual && expected && !expectedException(actual, expected) || !shouldThrow && actual)
               throw actual;
           }
-          var util2 = require2("util/"), pSlice = Array.prototype.slice, hasOwn = Object.prototype.hasOwnProperty, assert = module3.exports = ok;
+          var util2 = require2("util/"), pSlice = Array.prototype.slice, hasOwn = Object.prototype.hasOwnProperty, assert = module4.exports = ok;
           assert.AssertionError = function(options2) {
             this.name = "AssertionError", this.actual = options2.actual, this.expected = options2.expected, this.operator = options2.operator, options2.message ? (this.message = options2.message, this.generatedMessage = false) : (this.message = getMessage(this), this.generatedMessage = true);
             var stackStartFunction = options2.stackStartFunction || fail;
@@ -4542,16 +4542,16 @@
               hasOwn.call(obj, key2) && keys4.push(key2);
             return keys4;
           };
-        }, { "util/": 6 }], 3: [function(require2, module3, exports3) {
-          "function" == typeof Object.create ? module3.exports = function(ctor, superCtor) {
+        }, { "util/": 6 }], 3: [function(require2, module4, exports3) {
+          "function" == typeof Object.create ? module4.exports = function(ctor, superCtor) {
             ctor.super_ = superCtor, ctor.prototype = Object.create(superCtor.prototype, { constructor: { value: ctor, enumerable: false, writable: true, configurable: true } });
-          } : module3.exports = function(ctor, superCtor) {
+          } : module4.exports = function(ctor, superCtor) {
             ctor.super_ = superCtor;
             var TempCtor = function() {
             };
             TempCtor.prototype = superCtor.prototype, ctor.prototype = new TempCtor(), ctor.prototype.constructor = ctor;
           };
-        }, {}], 4: [function(require2, module3, exports3) {
+        }, {}], 4: [function(require2, module4, exports3) {
           function cleanUpNextTick() {
             draining && currentQueue && (draining = false, currentQueue.length ? queue = currentQueue.concat(queue) : queueIndex = -1, queue.length && drainQueue());
           }
@@ -4572,7 +4572,7 @@
           }
           function noop() {
           }
-          var cachedSetTimeout, cachedClearTimeout, process2 = module3.exports = {};
+          var cachedSetTimeout, cachedClearTimeout, process2 = module4.exports = {};
           !function() {
             try {
               cachedSetTimeout = setTimeout;
@@ -4607,11 +4607,11 @@
           }, process2.umask = function() {
             return 0;
           };
-        }, {}], 5: [function(require2, module3, exports3) {
-          module3.exports = function(arg) {
+        }, {}], 5: [function(require2, module4, exports3) {
+          module4.exports = function(arg) {
             return arg && "object" == typeof arg && "function" == typeof arg.copy && "function" == typeof arg.fill && "function" == typeof arg.readUInt8;
           };
-        }, {}], 6: [function(require2, module3, exports3) {
+        }, {}], 6: [function(require2, module4, exports3) {
           (function(process2, global3) {
             function inspect(obj, opts) {
               var ctx = { seen: [], stylize: stylizeNoColor };
@@ -4833,7 +4833,7 @@
               return origin;
             };
           }).call(this, require2("_process"), "undefined" != typeof global ? global : "undefined" != typeof self ? self : "undefined" != typeof window ? window : {});
-        }, { "./support/isBuffer": 5, _process: 4, inherits: 3 }], 7: [function(require2, module3, exports3) {
+        }, { "./support/isBuffer": 5, _process: 4, inherits: 3 }], 7: [function(require2, module4, exports3) {
           "use strict";
           function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor))
@@ -4850,7 +4850,7 @@
               return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), Constructor;
             };
           }(), _require = require2("./helpers.js"), createDataProperty = _require.createDataProperty;
-          module3.exports = function() {
+          module4.exports = function() {
             function ByteLengthQueuingStrategy(_ref) {
               var highWaterMark = _ref.highWaterMark;
               _classCallCheck(this, ByteLengthQueuingStrategy), createDataProperty(this, "highWaterMark", highWaterMark);
@@ -4859,7 +4859,7 @@
               return chunk.byteLength;
             } }]), ByteLengthQueuingStrategy;
           }();
-        }, { "./helpers.js": 9 }], 8: [function(require2, module3, exports3) {
+        }, { "./helpers.js": 9 }], 8: [function(require2, module4, exports3) {
           "use strict";
           function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor))
@@ -4876,7 +4876,7 @@
               return protoProps && defineProperties(Constructor.prototype, protoProps), staticProps && defineProperties(Constructor, staticProps), Constructor;
             };
           }(), _require = require2("./helpers.js"), createDataProperty = _require.createDataProperty;
-          module3.exports = function() {
+          module4.exports = function() {
             function CountQueuingStrategy(_ref) {
               var highWaterMark = _ref.highWaterMark;
               _classCallCheck(this, CountQueuingStrategy), createDataProperty(this, "highWaterMark", highWaterMark);
@@ -4885,7 +4885,7 @@
               return 1;
             } }]), CountQueuingStrategy;
           }();
-        }, { "./helpers.js": 9 }], 9: [function(require2, module3, exports3) {
+        }, { "./helpers.js": 9 }], 9: [function(require2, module4, exports3) {
           "use strict";
           var _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(obj) {
             return typeof obj;
@@ -4950,7 +4950,7 @@
               throw new TypeError("size property of a queuing strategy must be a function");
             return highWaterMark = exports3.ValidateAndNormalizeHighWaterMark(highWaterMark), { size: size2, highWaterMark };
           };
-        }, { assert: 2 }], 10: [function(require2, module3, exports3) {
+        }, { assert: 2 }], 10: [function(require2, module4, exports3) {
           "use strict";
           var assert = require2("assert"), _require = require2("./helpers.js"), IsFiniteNonNegativeNumber = _require.IsFiniteNonNegativeNumber;
           exports3.DequeueValue = function(queue) {
@@ -4971,7 +4971,7 @@
             var pair = queue[0];
             return pair.value;
           };
-        }, { "./helpers.js": 9, assert: 2 }], 11: [function(require2, module3, exports3) {
+        }, { "./helpers.js": 9, assert: 2 }], 11: [function(require2, module4, exports3) {
           "use strict";
           function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor))
@@ -5764,14 +5764,14 @@
               return ReadableByteStreamControllerGetDesiredSize(this);
             } }]), ReadableByteStreamController2;
           }();
-        }, { "./helpers.js": 9, "./queue-with-sizes.js": 10, "./utils.js": 13, assert: 2 }], 12: [function(require2, module3, exports3) {
+        }, { "./helpers.js": 9, "./queue-with-sizes.js": 10, "./utils.js": 13, assert: 2 }], 12: [function(require2, module4, exports3) {
           "use strict";
           function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor))
               throw new TypeError("Cannot call a class as a function");
           }
           var _require = require2("./readable-stream.js"), ReadableStream = _require.ReadableStream, _require2 = require2("./writable-stream.js"), WritableStream = _require2.WritableStream;
-          module3.exports = function TransformStream(transformer) {
+          module4.exports = function TransformStream(transformer) {
             function maybeDoTransform() {
               if (transforming === false) {
                 transforming = true;
@@ -5812,7 +5812,7 @@
               chunkWrittenButNotYetTransformed === true && maybeDoTransform();
             } }, transformer.readableStrategy);
           };
-        }, { "./readable-stream.js": 11, "./writable-stream.js": 14 }], 13: [function(require2, module3, exports3) {
+        }, { "./readable-stream.js": 11, "./writable-stream.js": 14 }], 13: [function(require2, module4, exports3) {
           "use strict";
           var assert = require2("assert");
           exports3.rethrowAssertionErrorRejection = function(e2) {
@@ -5820,7 +5820,7 @@
               throw e2;
             }, 0);
           };
-        }, { assert: 2 }], 14: [function(require2, module3, exports3) {
+        }, { assert: 2 }], 14: [function(require2, module4, exports3) {
           "use strict";
           function _classCallCheck(instance, Constructor) {
             if (!(instance instanceof Constructor))
@@ -5961,7 +5961,7 @@
 
   // node_modules/node-web-streams/lib/conversions.js
   var require_conversions = __commonJS({
-    "node_modules/node-web-streams/lib/conversions.js"(exports2, module2) {
+    "node_modules/node-web-streams/lib/conversions.js"(exports2, module3) {
       "use strict";
       var Readable = require_stream().Readable;
       var ReadableStream = require_polyfill_min().ReadableStream;
@@ -6025,7 +6025,7 @@
       function readableWebToNode(webStream) {
         return new NodeReadable(webStream);
       }
-      module2.exports = {
+      module3.exports = {
         readable: {
           nodeToWeb: readableNodeToWeb,
           arrayToWeb,
@@ -6037,20 +6037,20 @@
 
   // node_modules/node-web-streams/index.js
   var require_node_web_streams = __commonJS({
-    "node_modules/node-web-streams/index.js"(exports2, module2) {
+    "node_modules/node-web-streams/index.js"(exports2, module3) {
       "use strict";
       var nodeStream = require_stream();
       var isNodeStream = require_is_stream();
       var conversions = require_conversions();
-      module2.exports = require_polyfill_min();
-      module2.exports.toNodeReadable = function(stream) {
-        if (stream instanceof module2.exports.ReadableStream || stream && typeof stream.getReader === "function") {
+      module3.exports = require_polyfill_min();
+      module3.exports.toNodeReadable = function(stream) {
+        if (stream instanceof module3.exports.ReadableStream || stream && typeof stream.getReader === "function") {
           return conversions.readable.webToNode(stream);
         } else {
           throw new TypeError("Expected a ReadableStream.");
         }
       };
-      module2.exports.toWebReadableStream = function(stream) {
+      module3.exports.toWebReadableStream = function(stream) {
         if (isNodeStream(stream) && stream.readable) {
           return conversions.readable.nodeToWeb(stream);
         } else if (Array.isArray(stream)) {
@@ -6066,7 +6066,7 @@
 
   // public/statebus/braidify-client.js
   var require_braidify_client = __commonJS({
-    "public/statebus/braidify-client.js"(exports2, module2) {
+    "public/statebus/braidify-client.js"(exports2, module3) {
       var peer = Math.random().toString(36).substr(2);
       function braidify_http(http) {
         http.normal_get = http.get;
@@ -6407,8 +6407,8 @@ ${patch.content}\r
           message: "cannot parse body without content-length or patches header"
         };
       }
-      if (typeof module2 !== "undefined" && module2.exports)
-        module2.exports = {
+      if (typeof module3 !== "undefined" && module3.exports)
+        module3.exports = {
           fetch: braid_fetch2,
           http: braidify_http,
           subscription_parser,
@@ -6989,9 +6989,9 @@ ${markup.join("\n")}`);
             currentParent = stack[stack.length - 1];
             break;
           } else {
-            const tag2 = kElementsClosedByClosing[currentParent.rawNodeName];
-            if (tag2) {
-              if (tag2[name3]) {
+            const tag = kElementsClosedByClosing[currentParent.rawNodeName];
+            if (tag) {
+              if (tag[name3]) {
                 stack.pop();
                 currentParent = stack[stack.length - 1];
                 continue;
@@ -8092,18 +8092,18 @@ ${markup.join("\n")}`);
     if (!vTree) {
       return output;
     }
-    const { childNodes, nodeType, nodeName: tag2, nodeValue, attributes: attributes2 } = vTree;
+    const { childNodes, nodeType, nodeName: tag, nodeValue, attributes: attributes2 } = vTree;
     if (nodeType === 11) {
       for (let i2 = 0; i2 < childNodes.length; i2++) {
         output += serializeVTree(childNodes[i2]);
       }
     } else if (!childNodes.length && nodeType === 1) {
-      output += `<${tag2}${serializeAttributes(attributes2)}></${tag2}>`;
+      output += `<${tag}${serializeAttributes(attributes2)}></${tag}>`;
     } else if (nodeType === 3) {
       output += nodeValue;
     } else if (childNodes.length) {
       const children = childNodes.map((childNode) => `${serializeVTree(childNode)}`).join("");
-      output += `<${tag2}${serializeAttributes(attributes2)}>${children}</${tag2}>`;
+      output += `<${tag}${serializeAttributes(attributes2)}>${children}</${tag}>`;
     }
     return output;
   }
@@ -8235,6 +8235,7 @@ ${markup.join("\n")}`);
   // public/module.js
   var bus2 = window.bus;
   window.braid_fetch = window.fetch;
+  window.module = module2;
   var CREATE_EVENT = "create";
   var observableEvents = [CREATE_EVENT];
   function update(target, compositor) {
@@ -8267,7 +8268,7 @@ ${markup.join("\n")}`);
   function when(link1, eventName, link2, callback) {
     listen(eventName, `${link1} ${link2}`, callback);
   }
-  function tag(link2, initialState3 = {}) {
+  function module2(link2, initialState3 = {}) {
     teach(link2, initialState3);
     return {
       link: link2,
@@ -9107,7 +9108,7 @@ ${markup.join("\n")}`);
   function execute(command2) {
     alert(`executed ${command2}`);
   }
-  var $ = tag("console-module", {
+  var $ = module2("console-module", {
     filter: ""
   });
   $.when("click", ".item", function update2(event) {
@@ -13717,9 +13718,9 @@ ${markup.join("\n")}`);
     return view;
   }
   var NullWidget = class extends WidgetType {
-    constructor(tag2) {
+    constructor(tag) {
       super();
-      this.tag = tag2;
+      this.tag = tag;
     }
     eq(other) {
       return other.tag == this.tag;
@@ -20892,19 +20893,19 @@ ${markup.join("\n")}`);
     static define(parent) {
       if (parent === null || parent === void 0 ? void 0 : parent.base)
         throw new Error("Can not derive from a modified tag");
-      let tag2 = new Tag([], null, []);
-      tag2.set.push(tag2);
+      let tag = new Tag([], null, []);
+      tag.set.push(tag);
       if (parent)
         for (let t2 of parent.set)
-          tag2.set.push(t2);
-      return tag2;
+          tag.set.push(t2);
+      return tag;
     }
     static defineModifier() {
       let mod2 = new Modifier();
-      return (tag2) => {
-        if (tag2.modified.indexOf(mod2) > -1)
-          return tag2;
-        return Modifier.get(tag2.base || tag2, tag2.modified.concat(mod2).sort((a2, b2) => a2.id - b2.id));
+      return (tag) => {
+        if (tag.modified.indexOf(mod2) > -1)
+          return tag;
+        return Modifier.get(tag.base || tag, tag.modified.concat(mod2).sort((a2, b2) => a2.id - b2.id));
       };
     }
   };
@@ -20920,14 +20921,14 @@ ${markup.join("\n")}`);
       let exists = mods[0].instances.find((t2) => t2.base == base2 && sameArray2(mods, t2.modified));
       if (exists)
         return exists;
-      let set2 = [], tag2 = new Tag(set2, base2, mods);
+      let set2 = [], tag = new Tag(set2, base2, mods);
       for (let m3 of mods)
-        m3.instances.push(tag2);
+        m3.instances.push(tag);
       let configs = permute(mods);
       for (let parent of base2.set)
         for (let config2 of configs)
           set2.push(Modifier.get(parent, config2));
-      return tag2;
+      return tag;
     }
   };
   function sameArray2(a2, b2) {
@@ -21006,15 +21007,15 @@ ${markup.join("\n")}`);
       if (!Array.isArray(style.tag))
         map[style.tag.id] = style.class;
       else
-        for (let tag2 of style.tag)
-          map[tag2.id] = style.class;
+        for (let tag of style.tag)
+          map[tag.id] = style.class;
     }
     let { scope, all = null } = options2 || {};
     return {
       style: (tags3) => {
         let cls = all;
-        for (let tag2 of tags3) {
-          for (let sub of tag2.set) {
+        for (let tag of tags3) {
+          for (let sub of tag.set) {
             let tagClass = map[sub.id];
             if (tagClass) {
               cls = cls ? cls + " " + tagClass : tagClass;
@@ -22462,29 +22463,29 @@ ${markup.join("\n")}`);
     console.warn(msg2);
   }
   function createTokenType(extra, tagStr) {
-    let tag2 = null;
+    let tag = null;
     for (let part of tagStr.split(".")) {
       let value2 = extra[part] || tags[part];
       if (!value2) {
         warnForPart(part, `Unknown highlighting tag ${part}`);
       } else if (typeof value2 == "function") {
-        if (!tag2)
+        if (!tag)
           warnForPart(part, `Modifier ${part} used at start of tag`);
         else
-          tag2 = value2(tag2);
+          tag = value2(tag);
       } else {
-        if (tag2)
+        if (tag)
           warnForPart(part, `Tag ${part} used as modifier`);
         else
-          tag2 = value2;
+          tag = value2;
       }
     }
-    if (!tag2)
+    if (!tag)
       return 0;
     let name3 = tagStr.replace(/ /g, "_"), type2 = NodeType.define({
       id: typeArray.length,
       name: name3,
-      props: [styleTags({ [name3]: tag2 })]
+      props: [styleTags({ [name3]: tag })]
     });
     typeArray.push(type2);
     return type2.id;
@@ -26177,7 +26178,7 @@ ${markup.join("\n")}`);
   ];
 
   // public/packages/code-module.js
-  var $2 = tag("code-module");
+  var $2 = module2("code-module");
   $2.when("click", ".publish", (event) => {
     const link2 = event.target.closest($2.selector).getAttribute("src");
     const { file } = $2.learn();
@@ -29118,7 +29119,7 @@ ${markup.join("\n")}`);
     return ids.map((x) => controllers[x]).map(gatherInputs);
   }
   var initialState = {};
-  var $3 = tag("gamepad-debug", initialState);
+  var $3 = module2("gamepad-debug", initialState);
   $3.draw((target) => renderGamepads(target, $3));
   function connecthandler(e2) {
     const { index } = e2.gamepad;
@@ -29216,7 +29217,7 @@ ${markup.join("\n")}`);
     activeMotions: [],
     frames: {}
   };
-  var $4 = tag("guitar-debug", initialState2);
+  var $4 = module2("guitar-debug", initialState2);
   var fretMap = [0, 1, 3, 2, 4];
   var registers = [
     "     ",
@@ -29323,7 +29324,7 @@ ${markup.join("\n")}`);
     loadSample("/samples/7.mp3"),
     loadSample("/samples/8.mp3")
   ]).then((s) => synths = s);
-  var $5 = tag("synth-module", {
+  var $5 = module2("synth-module", {
     colors: [],
     start: 120,
     length: 360,
@@ -29695,7 +29696,7 @@ ${markup.join("\n")}`);
   }
 
   // public/packages/design-system.js
-  var $6 = tag("design-system");
+  var $6 = module2("design-system");
   $6.draw(() => {
     const { palette } = $6.learn();
     if (!palette) {

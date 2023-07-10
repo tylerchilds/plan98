@@ -1,0 +1,22 @@
+#snackbar{
+  background-color: #323232;
+  bottom: -60px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.27);
+  color: #fff;
+  clear: both;
+  left: 0;
+  padding: 20px 25px;
+  position: fixed;
+  right: 0;
+  transition: bottom 225ms ease-in;
+}
+
+#snackbar.active{
+  bottom: 0px;
+  transition-timing-function: ease-out;
+}
+
+#snackbar a{
+  float: right;
+  text-transform: uppercase;
+}

@@ -6,6 +6,7 @@ import { innerHTML } from 'diffhtml'
 // optimally, we'll import just bus from statebus and everything else will be implemented under the hood. stubbing for now to unblock development using tag
 const bus = window.bus
 window.braid_fetch = window.fetch
+window.module = module
 
 const CREATE_EVENT = 'create'
 
@@ -47,7 +48,7 @@ export function when(link1, eventName, link2, callback) {
   listen(eventName, `${link1} ${link2}`, callback)
 }
 
-export default function tag(link, initialState = {}) {
+export default function module(link, initialState = {}) {
   teach(link, initialState)
 
   return {

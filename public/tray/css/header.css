@@ -1,0 +1,23 @@
+header{
+  background-color: #673ab7;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.35);
+  color: #fff;
+  left: 0;
+  padding: 19px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  overflow: hidden;
+  z-index: 100;
+}
+
+header h1{
+  font-size: 20px;
+  font-weight: normal;
+  line-height: 24px;
+}
+
+header img{
+  float: left;
+  margin-right: 30px;
+}

@@ -1,0 +1,70 @@
+.card{
+  background-color: #fff;
+  border-radius: 1px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.27);
+  left: 0;
+  margin-bottom: 8px;
+  max-height: 400px;
+  padding: 16px;
+  position: relative;
+  transition: all 225ms ease-in;
+  opacity: 1;
+  overflow: hidden;
+}
+
+.card.active{
+  box-shadow: 0 6px 12px rgba(0,0,0,0.27);
+  transition: box-shadow 225ms ease-out;
+  z-index: 10;
+}
+
+.card.remove{
+  margin-bottom: 0;
+  max-height: 0;
+  padding: 0;
+  opacity: 0;
+  transition: left 195ms ease-in 0ms,
+    opacity 195ms ease-in 0ms,
+    max-height 195ms ease-out 195ms,
+    padding 195ms ease-out 195ms,
+    margin 195ms ease-out 195ms;
+}
+
+.card.left{
+  left: -110%;
+}
+
+.card.right{
+  left: 110%;
+}
+
+.card.recover{
+  transition: opacity 195ms ease-out 195ms,
+    max-height 195ms ease-in,
+    padding 195ms ease-in,
+    margin 195ms ease-in;
+}
+
+.meta{
+  clear: both;
+  margin-bottom: 16px;
+}
+
+.meta-photo{
+  border-radius: 40px;
+  float: left;
+  margin-right: 16px;
+  width: 40px;
+  height: 40px;
+}
+
+.meta-name{
+  font-weight: 500;
+  line-height: 22px;
+}
+
+.meta-date{
+  color: rgba(0,0,0,.54);
+  font-size: 12px;
+  line-height: 18px;
+}

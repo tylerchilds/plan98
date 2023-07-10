@@ -1,0 +1,12 @@
+.card-container{
+  padding: 16px;
+  overflow: hidden;
+}
+
+.scroll-disabled{
+  overflow: hidden;
+}
+
+.hidden{
+  visibility: hidden;
+}
