@@ -1,12 +1,6 @@
-# grapevine
+# braid-kit
 
-tiny social creativity
-
-## apps
-
-web: ([alpha](https://sillyz.computer))
-windows, macos, linux: coming soon.
-android, ios: coming later.
+tiny reference peer for a braided http and html experience
 
 ## development
 
@@ -16,9 +10,3 @@ npm start
 ```
 
 [http://localhost:1989](http://localhost:1989)
-
-## packaging
-
-```
-cargo tauri build
-```
