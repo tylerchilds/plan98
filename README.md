@@ -1,6 +1,6 @@
-# braid-kit
+# smugoogle
 
-tiny reference peer for a braided http and html experience
+a smashup prototype of smugmug and google maps
 
 ## development
 
