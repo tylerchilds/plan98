@@ -9159,8 +9159,8 @@ ${markup.join("\n")}`);
     </div>
   `;
   });
-  function attributes(node, $7) {
-    const root = node.closest($7.selector);
+  function attributes(node, $9) {
+    const root = node.closest($9.selector);
     return { root };
   }
   function toggleActive(event) {
@@ -26225,12 +26225,12 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(_target, $7, _flags) {
+  function persist(_target, $9, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
-      $7.teach({ file });
+      $9.teach({ file });
     };
   }
   $2.flair(`
@@ -29152,11 +29152,11 @@ ${markup.join("\n")}`);
     </ul>
   `;
   }
-  function renderGamepads(_target, $7) {
+  function renderGamepads(_target, $9) {
     const list = gamepads().map((gamepad, index) => `
       <li class="gamepad" id="${gamepad.id}">
         <label>${index + 1}: ${gamepad.id}</label>
-        ${renderInputs($7, { gamepad })}
+        ${renderInputs($9, { gamepad })}
       </li>
     `).join("");
     return `<ul class="gamepads">${list}</ul>`;
@@ -29714,6 +29714,28 @@ ${markup.join("\n")}`);
     </style>
   `;
   });
+
+  // public/packages/smug-mug.js
+  var $7 = module2("smug-mug");
+  $7.draw(() => {
+    return `
+    smug mug
+  `;
+  });
+  $7.flair(`
+  & { display: block }
+`);
+
+  // public/packages/google-maps.js
+  var $8 = module2("google-maps");
+  $8.draw(() => {
+    return `
+    google map
+  `;
+  });
+  $8.flair(`
+  & { display: block }
+`);
 })();
 /*!
 * focus-trap 7.0.0
