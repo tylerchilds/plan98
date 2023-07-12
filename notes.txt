@@ -1,0 +1,30 @@
+# The Studio - July 12, 2023
+
+Download a kml file from google maps, drag and drop it onto Smugoogle
+
+@ Ty
+" This converts google data into a more open and easier to work with shape of data
+
+When the map drops, locations open up as question marks
+
+@ Ty
+" These locations meant something in google, but aren't fully Smugoogle-ized yet
+
+After selecting a question mark, a drawer appears with location information.
+
+@ Ty
+" Some location information is already populated, but we need to associate SmugMug galleries.
+
+At the end of the drawer is the gallery section, "No Galleries Associated, add one?"
+
+@ Ty
+" By adding a gallery, we're able to drill into available Smugmug resources
+
+A modal appears with a preview window at the top and a treeview below to browse.
+
+Hours:
+7/10: 1 - Google maps investigations
+7/11: 2 - Development environment setup
+7/12: 1 - Demo Spec Script
+
+

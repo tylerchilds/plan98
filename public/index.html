@@ -1,60 +1,14 @@
-<h1>Smugoogle</h1>
-
-map data
-<google-maps></google-maps>
-
-smugmug data
-<smug-mug></smug-mug>
-
-<braid-chat room="http://localhost:1989/messages"></braid-chat>
-
-<script src="./package.2015.js"></script>
-<script>
-  const $ = module('braid-chat', { name: "Braid User" })
-
-  function initialize(target) {
-    if(target.initialized) return
-    $.teach({ room: target.getAttribute('room') })
-    target.initialized = true
-  }
-
-  $.draw(target => {
-    initialize(target)
-
-    const { name, room } = $.learn()
-
-    const messages = bus.state[room] || []
-
-    const log = messages.map(({ from, body }) => `
-      <div>${from}: ${body}</div>
-    `).join('')
-
-    return `
-      ${log}
-      <form>
-        <input name="name" value="${name}" />
-        <input name="message" />
-        <button type="submit">Send</button>
-      </form>
-    `
-  })
-
-  $.when('change', '[name="name"]', (event) => {
-    $.teach({
-      name: event.target.value
-    })
-  })
-
-  $.when('submit', 'form', (event) => {
-    event.preventDefault()
-    const { name, room } = $.learn()
-    const { value } = event.target.message
-
-    const messages = bus.state[room] || []
-
-    messages.push({
-      from: name,
-      body: value
-    })
-  })
-</script>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smugoogle</title>
+    <link href="/styles/system.css" rel="stylesheet">
+  </head>
+  <body>
+    <smugoogle></smugoogle>
+    <script src="../package.2015.js"></script>
+  </body>
+</html>
