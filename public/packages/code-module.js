@@ -9,7 +9,7 @@ import {
 const $ = module('code-module')
 
 $.when('click', '.publish', (event) => {
-  const link = event.target.closest($.selector).getAttribute('src')
+  const link = event.target.closest($.link).getAttribute('src')
   const { file } = $.learn()
   fetch(link, {
     method: 'PUT',

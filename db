@@ -1,12 +1,21 @@
 {
  "users/passwords": {
   "key": "users/passwords",
-  "val": {}
+  "val": {
+   "hello": {
+    "user": "@hello",
+    "pass": "$2a$10$k7hfbnfiVZX8kMTlSU3M6esUlJoJ0Lijt0WBPp2Wa3vCmGGZZcnrS"
+   },
+   "hello2": {
+    "user": "@hello2",
+    "pass": "$2a$10$HJRAgw5J5Eu/kw47EO42eeMI2VgvuVdTFKxn3Nd31rHkum9mKO3EO"
+   }
+  }
  },
  "edge/sillyz-spec.js": {
   "key": "edge/sillyz-spec.js",
   "val": {
-   "file": "export const handler = (req, res) => {\n  return res.send(`\n    <!DOCTYPE html>\n    <html lang=\"en\">\n      <head>\n        <meta charset=\"utf-8\">\n        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\">\n        <title>The Silly Specification</title>\n\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n        <link href=\"/styles/system.css\" rel=\"stylesheet\">\n      </head>\n      <body>\n\t\t\t\t<article class=\"single-column\" style=\"padding-bottom: 25vh;\">\n\t\t\t\t\t<nav>\n\t\t\t\t\t\t<a href=\"/\">Go Home</a>\n\t\t\t\t\t</nav>\n\t\t\t\t\t<header>\n\t\t\t\t\t\t<h1>\n\t\t\t\t\t\t\t# SILLYZ-SPEC-1\n\t\t\t\t\t\t</h1>\n\t\t\t\t\t</header>\n\t\t\t\t\t<main id=\"main\" class=\"full-bleed single-column\">\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Abstract\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tNature often repeats. Color, waves of light. Music, waves of sound. Categorically, we can organize both.\t\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCode repeats in a similar way. Waves of patterns. When immersed in code, these patterns can be felt in the mind.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tA painter trains the eye with color. A musician trains the ear with notes. A coder trains the mind with relationships.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tSuccessful coders simply study and practice. However, the world of code is vast and spans generations. Where should one begin to study and where can one practice?\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tThe Silly Specification delivers the minimum viable ecosystem for aspiring coders that want real power and not the nerfed alternatives.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Introduction\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tAssume a Tree exists that grows fruits, or Nodes, of many kinds. Specifically, you can see apples, oranges, and bananas. You might be able to identify more fruit with a **Module**, let's build one!\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Module\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Module_ be a Function with two Parameters, Selector and State.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Selector be a required String used to match Nodes.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet State be optional, yet always JSON to serve as a default Structure.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Module_ will Return an Object with Module Selector as a property named \"selector\" and five Methods.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t1. Render\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Render_ be a Function with one Parameter, Compositor.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Compositor be a Function with one Parameter, Target.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Target be a Node.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Render_ will subscribe the Compositor to State updates. Any Nodes matching the Selector will be notified immediately.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<div class=\"full-bleed\">\n\thi\n\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t2. Style\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Style_ be a Function with one Parameter, Rules.  \n\t\t\t\t\t\t\tlet Rules be a String with one special character.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Style_ will register Rules with the Tree to apply Layout, Paint, and Composite effects.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t3. On\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _On_ be a Function with three Parameters, Event Type, Selector, and Macro.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Event Type be a String of the Enumerated Event Types on a Node.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Selector be a String used to match Children of the Compositor Target.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Macro be a Function with one Parameter, Event.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Event be an Object with the evented Node as a property named \"target\".\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _On_ will register the Macro with the Tree to be notified when Selected Children of the Compositor Target are evented.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t4. Read\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Read_ be a Function\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Read_ will Return the current State.\n\t\t\t\t\t\t<p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t5. Write\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Write_ be a Function with two Parameters, Patch and Merge Handler\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Patch be a required JSON to be merged into state as is\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Merge Handler be an optional Function with two Parameters, State and Patch\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet State be Module State\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Patch be Patch\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Write_ will merge the current Patch into State. A custom Merge Handler may be used to manually apply the Patch by Returning the next full State.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Conclusion\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tHopefully by now you are either a human that speaks computer better or a computer that speaks human better!\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<hr/>\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\t\"I've always known what types\n\t\t\t\t\t\t\t<em>\n\t\t\t\t\t\t\t\t_are_\n\t\t\t\t\t\t\t</em>\n\t\t\t\t\t\t\t, I've just never particularly liked their\n\t\t\t\t\t\t\t<strong>\n\t\t\t\t\t\t\t\t**rigorous enforcement**\n\t\t\t\t\t\t\t</strong>\n\t\t\t\t\t\t\t, whether letter graded, peer reviewed, machine learned, or god offended.\" - Tyler Childs\n\t\t\t\t\t\t</p>\n\t\t\t\t\t</main>\n\t\t\t\t\t<footer>\n\t\t\t\t\t\t<stay-in-touch></stay-in-touch>\n\t\t\t\t\t</footer>\n\t\t\t\t</article>\n         <code-module src=\"/edge/index.js\"></code-module>\n         <script src=\"/package.2015.js\"></script>      \n      </body>\n    </html>\n  `)\n}"
+   "file": "export const handler = (req, res) => {\n  return res.send(`\n    <!DOCTYPE html>\n    <html lang=\"en\">\n      <head>\n        <meta charset=\"utf-8\">\n        <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge,chrome=1\">\n        <title>The Silly Specification</title>\n\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n\n        <link href=\"/styles/system.css\" rel=\"stylesheet\">\n      </head>\n      <body>\n\t\t\t\t<article class=\"single-column\" style=\"padding-bottom: 25vh;\">\n\t\t\t\t\t<nav>\n\t\t\t\t\t\t<a href=\"/\">Go Home</a>\n\t\t\t\t\t</nav>\n\t\t\t\t\t<header>\n\t\t\t\t\t\t<h1>\n\t\t\t\t\t\t\t# Solo\n\t\t\t\t\t\t</h1>\n\t\t\t\t\t</header>\n\t\t\t\t\t<main id=\"main\" class=\"full-bleed single-column\">\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Abstract\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tNature often repeats. Color, waves of light. Music, waves of sound. Categorically, we can organize both.\t\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCode repeats in a similar way. Waves of patterns. When immersed in code, these patterns can be felt in the mind.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tA painter trains the eye with color. A musician trains the ear with notes. A coder trains the mind with relationships.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tSuccessful coders simply study and practice. However, the world of code is vast and spans generations. Where should one begin to study and where can one practice?\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tThe Silly Specification delivers the minimum viable ecosystem for aspiring coders that want real power and not the nerfed alternatives.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Introduction\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tAssume a Tree exists that grows fruits, or Nodes, of many kinds. Specifically, you can see apples, oranges, and bananas. You might be able to identify more fruit with a **Module**, let's build one!\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Module\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Module_ be a Function with two Parameters, Selector and State.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Selector be a required String used to match Nodes.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet State be optional, yet always JSON to serve as a default Structure.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Module_ will Return an Object with Module Selector as a property named \"selector\" and five Methods.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t1. Render\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Render_ be a Function with one Parameter, Compositor.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Compositor be a Function with one Parameter, Target.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Target be a Node.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Render_ will subscribe the Compositor to State updates. Any Nodes matching the Selector will be notified immediately.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<div class=\"full-bleed\">\n\thi\n\t\t\t\t\t\t</div>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t2. Style\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Style_ be a Function with one Parameter, Rules.  \n\t\t\t\t\t\t\tlet Rules be a String with one special character.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Style_ will register Rules with the Tree to apply Layout, Paint, and Composite effects.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t3. On\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _On_ be a Function with three Parameters, Event Type, Selector, and Macro.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Event Type be a String of the Enumerated Event Types on a Node.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Selector be a String used to match Children of the Compositor Target.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Macro be a Function with one Parameter, Event.\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Event be an Object with the evented Node as a property named \"target\".\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _On_ will register the Macro with the Tree to be notified when Selected Children of the Compositor Target are evented.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t4. Read\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Read_ be a Function\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Read_ will Return the current State.\n\t\t\t\t\t\t<p>\n\n\t\t\t\t\t\t<h3>\n\t\t\t\t\t\t\t5. Write\n\t\t\t\t\t\t</h3>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tlet _Write_ be a Function with two Parameters, Patch and Merge Handler\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Patch be a required JSON to be merged into state as is\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Merge Handler be an optional Function with two Parameters, State and Patch\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet State be Module State\n\t\t\t\t\t\t\t<br/>\n\t\t\t\t\t\t\tlet Patch be Patch\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tCalling _Write_ will merge the current Patch into State. A custom Merge Handler may be used to manually apply the Patch by Returning the next full State.\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<h2>\n\t\t\t\t\t\t\t## Conclusion\n\t\t\t\t\t\t</h2>\n\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\tHopefully by now you are either a human that speaks computer better or a computer that speaks human better!\n\t\t\t\t\t\t</p>\n\n\t\t\t\t\t\t<hr/>\n\t\t\t\t\t\t<p>\n\t\t\t\t\t\t\t\"I've always known what types\n\t\t\t\t\t\t\t<em>\n\t\t\t\t\t\t\t\t_are_\n\t\t\t\t\t\t\t</em>\n\t\t\t\t\t\t\t, I've just never particularly liked their\n\t\t\t\t\t\t\t<strong>\n\t\t\t\t\t\t\t\t**rigorous enforcement**\n\t\t\t\t\t\t\t</strong>\n\t\t\t\t\t\t\t, whether letter graded, peer reviewed, machine learned, or god offended.\" - Tyler Childs\n\t\t\t\t\t\t</p>\n\t\t\t\t\t</main>\n\t\t\t\t\t<footer>\n\t\t\t\t\t\t<stay-in-touch></stay-in-touch>\n\t\t\t\t\t</footer>\n\t\t\t\t</article>\n         <code-module src=\"/edge/sillyz-spec.js\"></code-module>\n         <script src=\"/package.2015.js\"></script>      \n      </body>\n    </html>\n  `)\n}"
   }
  },
  "edge/index.js": {
@@ -31,7 +40,78 @@
    {
     "from": "Ty",
     "body": "cool"
+   },
+   {
+    "from": "Guy",
+    "body": "That's what I thought"
    }
   ]
+ },
+ "@hello": {
+  "key": "@hello",
+  "val": {
+   "name": "hello",
+   "pass": "$2a$10$k7hfbnfiVZX8kMTlSU3M6esUlJoJ0Lijt0WBPp2Wa3vCmGGZZcnrS"
+  }
+ },
+ "users": {
+  "key": "users",
+  "val": [
+   {
+    "link": "@hello"
+   },
+   {
+    "link": "@hello2"
+   }
+  ]
+ },
+ "logged_in_clients": {
+  "key": "logged_in_clients",
+  "val": {
+   "4usz3it5acpr0grzp1ngoynelzev95k": {
+    "link": "@hello2"
+   }
+  }
+ },
+ "user/ty": {
+  "key": "user/ty",
+  "val": {
+   "email": "aslln@elasn.com",
+   "name": "hi"
+  }
+ },
+ "undefined": {
+  "key": "undefined"
+ },
+ "@hello2": {
+  "key": "@hello2",
+  "val": {
+   "name": "hello2",
+   "pass": "$2a$10$HJRAgw5J5Eu/kw47EO42eeMI2VgvuVdTFKxn3Nd31rHkum9mKO3EO",
+   "some_key": "123"
+  }
+ },
+ "profile": {
+  "key": "profile",
+  "val": {
+   "username": "hi",
+   "account": {
+    "val": "hi"
+   }
+  }
+ },
+ "username": {
+  "key": "username",
+  "val": "tychi"
+ },
+ "hello": {
+  "key": "hello",
+  "val": "hi"
+ },
+ "ok/what": {
+  "key": "ok/what",
+  "val": {
+   "ok": "ok"
+  }
  }
 }

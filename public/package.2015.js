@@ -26180,7 +26180,7 @@ ${markup.join("\n")}`);
   // public/packages/code-module.js
   var $2 = module2("code-module");
   $2.when("click", ".publish", (event) => {
-    const link2 = event.target.closest($2.selector).getAttribute("src");
+    const link2 = event.target.closest($2.link).getAttribute("src");
     const { file } = $2.learn();
     fetch(link2, {
       method: "PUT",

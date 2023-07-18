@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "npm run build && node index.js",
+    "start": "npm run build && node server.js",
     "build": "esbuild --bundle public/main.js --outfile=public/package.2015.js",
     "to1996": "npm run build && java -jar bin/closure-compiler-v20221004.jar --js public/package.2015.js --js_output_file public/package.1996.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -13,7 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@codemirror/basic-setup": "^0.20.0",
-    "@supabase/supabase-js": "^2.0.0",
+    "braidify": "^0.1.23",
     "body-parser": "^1.20.1",
     "colorjs.io": "^0.4.1-patch.1",
     "diffhtml": "^1.0.0-beta.29",
