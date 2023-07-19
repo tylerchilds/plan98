@@ -1,5 +1,39 @@
+const express = require('express')
 const fetch = require('node-fetch')
-var bus = require('statebus')({
+const request = require("request");
+const OAuth = require("oauth-1.0a");
+const crypto = require("crypto");
+const session = require('express-session')
+const grant = require('grant').express()
+require('dotenv').config()
+
+const oauthConfig = {
+  "defaults": {
+    "origin": "http://localhost:1989",
+    "transport": "session"
+  },
+  "smugmug": {
+    "key": process.env.SMUGMUG_API_KEY,
+    "secret": process.env.SMUGMUG_API_SECRET,
+    "callback": "/api/smugmug/callback"
+  }
+}
+
+const oauth = OAuth({
+  consumer: {
+    key: process.env.SMUGMUG_API_KEY, // Replace with your actual consumer key
+    secret: process.env.SMUGMUG_API_SECRET, // Replace with your actual consumer secret
+  },
+  signature_method: "HMAC-SHA1",
+  hash_function(base_string, key) {
+    return crypto
+      .createHmac("sha1", key)
+      .update(base_string)
+      .digest("base64");
+  },
+});
+
+const bus = require('statebus')({
     client: (client) => {
         client.honk = 1
         console.log('client loaded!')
@@ -33,9 +67,15 @@ var bus = require('statebus')({
         client.shadows(bus)
     }
 })
-var express = require('express')
 
 app = express()
+app.use(express.static('public'))
+
+app.use(session({secret: 'grant', saveUninitialized: true, resave: false}))
+app.use(grant(oauthConfig))
+app.get('/api/smugmug/callback', (req, res) => {
+  res.end(JSON.stringify(req.session.grant.response, null, 2))
+})
 
 app.get('/exec/*', async (req, res) => {
   const pathname = req.params[0]
@@ -58,7 +98,6 @@ app.get('/exec/*', async (req, res) => {
 })
 
 
-app.use(express.static('public'))
 
 // Create the HTTP server
 require('http')
@@ -76,6 +115,51 @@ app.get('/statebus-client-library.js',
                          send_file('node_modules/statebus/client-library.js'))
 app.get('/braidify.js',  send_file('node_modules/braidify/braidify-client.js'))
 
+app.get("/albums", (req, res) => {
+  try {
+    // Set up the API endpoint
+    const url = `https://api.smugmug.com/api/v2/user/${userNameOrId}!albums`;
+
+    // Set up the OAuth 1.0a parameters
+    const requestData = {
+      url,
+      method: "GET",
+    };
+    const token = {
+      key: process.env.HARDCODED_ACCESS_TOKEN,
+      secret: process.env.HARDCODED_ACCESS_SECRET,
+    };
+    const headers = oauth.toHeader(oauth.authorize(requestData, token));
+
+    // Make the HTTP GET request using the 'request' package
+    request.get(
+      {
+        url,
+        headers,
+        json: true,
+      },
+      (error, response, body) => {
+        if (error) {
+          return res.status(500).json({ error: "Internal server error" });
+        }
+
+        console.log(response, body)
+        // Check if the request was successful (status code 200)
+        if (response.statusCode === 200) {
+          // Respond with the albums data
+          res.json(body);
+        } else {
+          // Respond with an error message if the request failed
+          res.status(response.statusCode).json({ error: "Request failed" });
+        }
+      }
+    );
+  } catch (error) {
+    console.error(error)
+    // Handle any errors that occurred during the request
+    res.status(500).json({ error: 'whoops' });
+  }
+});
 
 // Setup the statebus!
 bus.honk = 1                // Print handy debugging output

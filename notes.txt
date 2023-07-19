@@ -32,6 +32,9 @@ Hours:
 7/12: 1 - Demo Spec Script
 7/12: 1 - Port in companion sidebar wizard
 7/12: 2 - SmugMug API investigations
-7/12: 1 - Authentication planning
+7/12: 1 - Smugmug Authentication planning
+7/18: 1 - SmugMug Authentication research
+7/19: 4 - SmugMug authentication implementation
+- todo: abstract oauth request for data, store api keys, render user albums
 
 
