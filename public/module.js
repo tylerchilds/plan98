@@ -1,10 +1,14 @@
 import "./statebus/statebus.js"
 import "./statebus/client-library.js"
 import "./statebus/braidify-client.js"
+
 import { innerHTML } from 'diffhtml'
 
 // optimally, we'll import just bus from statebus and everything else will be implemented under the hood. stubbing for now to unblock development using tag
 const bus = window.bus
+const state = bus.state
+bus.libs.localstorage('ls/*')
+bus.libs.http_out('/*', '/')
 window.braid_fetch = window.fetch
 window.module = module
 
@@ -36,12 +40,12 @@ function flair(link, stylesheet) {
 }
 
 export function learn(link) {
-  return bus.state[link] || {}
+  return state[link] || {}
 }
 
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
   const current = bus.cache[link] || {}
-  bus.state[link] = nuance(current.val || {}, knowledge);
+  state[link] = nuance(current.val || {}, knowledge);
 }
 
 export function when(link1, eventName, link2, callback) {

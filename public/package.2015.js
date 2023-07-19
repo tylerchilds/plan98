@@ -5614,18 +5614,18 @@
                 throw new TypeError("ReadableStreamDefaultController.prototype.close can only be used on a ReadableStreamDefaultController");
               if (this._closeRequested === true)
                 throw new TypeError("The stream has already been closed; do not close it again!");
-              var state = this._controlledReadableStream._state;
-              if ("readable" !== state)
-                throw new TypeError("The stream (in " + state + " state) is not in the readable state and cannot be closed");
+              var state2 = this._controlledReadableStream._state;
+              if ("readable" !== state2)
+                throw new TypeError("The stream (in " + state2 + " state) is not in the readable state and cannot be closed");
               ReadableStreamDefaultControllerClose(this);
             } }, { key: "enqueue", value: function(chunk) {
               if (IsReadableStreamDefaultController(this) === false)
                 throw new TypeError("ReadableStreamDefaultController.prototype.enqueue can only be used on a ReadableStreamDefaultController");
               if (this._closeRequested === true)
                 throw new TypeError("stream is closed or draining");
-              var state = this._controlledReadableStream._state;
-              if ("readable" !== state)
-                throw new TypeError("The stream (in " + state + " state) is not in the readable state and cannot be enqueued to");
+              var state2 = this._controlledReadableStream._state;
+              if ("readable" !== state2)
+                throw new TypeError("The stream (in " + state2 + " state) is not in the readable state and cannot be enqueued to");
               return ReadableStreamDefaultControllerEnqueue(this, chunk);
             } }, { key: "error", value: function(e2) {
               if (IsReadableStreamDefaultController(this) === false)
@@ -5693,18 +5693,18 @@
                 throw new TypeError("ReadableByteStreamController.prototype.close can only be used on a ReadableByteStreamController");
               if (this._closeRequested === true)
                 throw new TypeError("The stream has already been closed; do not close it again!");
-              var state = this._controlledReadableStream._state;
-              if ("readable" !== state)
-                throw new TypeError("The stream (in " + state + " state) is not in the readable state and cannot be closed");
+              var state2 = this._controlledReadableStream._state;
+              if ("readable" !== state2)
+                throw new TypeError("The stream (in " + state2 + " state) is not in the readable state and cannot be closed");
               ReadableByteStreamControllerClose(this);
             } }, { key: "enqueue", value: function(chunk) {
               if (IsReadableByteStreamController(this) === false)
                 throw new TypeError("ReadableByteStreamController.prototype.enqueue can only be used on a ReadableByteStreamController");
               if (this._closeRequested === true)
                 throw new TypeError("stream is closed or draining");
-              var state = this._controlledReadableStream._state;
-              if ("readable" !== state)
-                throw new TypeError("The stream (in " + state + " state) is not in the readable state and cannot be enqueued to");
+              var state2 = this._controlledReadableStream._state;
+              if ("readable" !== state2)
+                throw new TypeError("The stream (in " + state2 + " state) is not in the readable state and cannot be enqueued to");
               if (!ArrayBuffer.isView(chunk))
                 throw new TypeError("You can only enqueue array buffer views when using a ReadableByteStreamController");
               ReadableByteStreamControllerEnqueue(this, chunk);
@@ -6280,21 +6280,21 @@ ${patch.content}\r
           } while (this.state.result !== "waiting" && this.state.input.trim() !== "");
         }
       });
-      function parse_version(state) {
-        if (!state.headers) {
-          var parsed = parse_headers(state.input);
+      function parse_version(state2) {
+        if (!state2.headers) {
+          var parsed = parse_headers(state2.input);
           if (parsed.result === "error")
             return parsed;
           if (parsed.result === "waiting") {
-            state.result = "waiting";
-            return state;
+            state2.result = "waiting";
+            return state2;
           }
-          state.headers = parsed.headers;
-          state.version = state.headers.version;
-          state.parents = state.headers.parents;
-          state.input = parsed.input;
+          state2.headers = parsed.headers;
+          state2.version = state2.headers.version;
+          state2.parents = state2.headers.parents;
+          state2.input = parsed.input;
         }
-        return parse_body(state);
+        return parse_body(state2);
       }
       function swallow_blank_lines(input) {
         var blank_lines = /(\r\n|\n)*/.exec(input)[0];
@@ -6333,37 +6333,37 @@ ${patch.content}\r
           input = input.substr(1);
         return { result: "success", headers, input };
       }
-      function parse_body(state) {
-        var content_length = parseInt(state.headers["content-length"]);
+      function parse_body(state2) {
+        var content_length = parseInt(state2.headers["content-length"]);
         if (content_length !== NaN) {
-          if (content_length > state.input.length) {
-            state.result = "waiting";
-            return state;
+          if (content_length > state2.input.length) {
+            state2.result = "waiting";
+            return state2;
           }
           var consumed_length = content_length + 2;
-          state.result = "success";
-          state.body = state.input.substring(0, content_length);
-          state.input = state.input.substring(consumed_length);
-          return state;
-        } else if (state.headers.patches) {
-          state.patches = state.patches || [];
-          var last_patch = state.patches[state.patches.length - 1];
-          while (!(state.patches.length === state.headers.patches && "content" in last_patch)) {
-            state.input = state.input.trimStart();
+          state2.result = "success";
+          state2.body = state2.input.substring(0, content_length);
+          state2.input = state2.input.substring(consumed_length);
+          return state2;
+        } else if (state2.headers.patches) {
+          state2.patches = state2.patches || [];
+          var last_patch = state2.patches[state2.patches.length - 1];
+          while (!(state2.patches.length === state2.headers.patches && "content" in last_patch)) {
+            state2.input = state2.input.trimStart();
             if (!last_patch || "content" in last_patch) {
               last_patch = {};
-              state.patches.push(last_patch);
+              state2.patches.push(last_patch);
             }
             if (!("headers" in last_patch)) {
-              var parsed = parse_headers(state.input);
+              var parsed = parse_headers(state2.input);
               if (parsed.result === "error")
                 return parsed;
               if (parsed.result === "waiting") {
-                state.result = "waiting";
-                return state;
+                state2.result = "waiting";
+                return state2;
               }
               last_patch.headers = parsed.headers;
-              state.input = parsed.input;
+              state2.input = parsed.input;
             }
             {
               if (!("content-length" in last_patch.headers))
@@ -6371,19 +6371,19 @@ ${patch.content}\r
                   result: "error",
                   message: "no content-length in patch",
                   patch: last_patch,
-                  input: state.input
+                  input: state2.input
                 };
               if (!("content-range" in last_patch.headers))
                 return {
                   result: "error",
                   message: "no content-range in patch",
                   patch: last_patch,
-                  input: state.input
+                  input: state2.input
                 };
               var content_length = parseInt(last_patch.headers["content-length"]);
-              if (state.input.length < content_length) {
-                state.result = "waiting";
-                return state;
+              if (state2.input.length < content_length) {
+                state2.result = "waiting";
+                return state2;
               }
               var match = last_patch.headers["content-range"].match(/(\S+) (.*)/);
               if (!match)
@@ -6391,16 +6391,16 @@ ${patch.content}\r
                   result: "error",
                   message: "cannot parse content-range in patch",
                   patch: last_patch,
-                  input: state.input
+                  input: state2.input
                 };
               last_patch.unit = match[1];
               last_patch.range = match[2];
-              last_patch.content = state.input.substr(0, content_length);
-              state.input = state.input.substring(content_length);
+              last_patch.content = state2.input.substr(0, content_length);
+              state2.input = state2.input.substring(content_length);
             }
           }
-          state.result = "success";
-          return state;
+          state2.result = "success";
+          return state2;
         }
         return {
           result: "error",
@@ -7145,38 +7145,38 @@ ${markup.join("\n")}`);
 
   // node_modules/diffhtml/dist/es/tasks/schedule.js
   function schedule(transaction) {
-    let { state, state: { isRendering } } = transaction;
-    state.measure("schedule");
+    let { state: state2, state: { isRendering } } = transaction;
+    state2.measure("schedule");
     StateCache.forEach((val) => {
       const oldMount = val.activeTransaction && val.activeTransaction.mount;
       const newMount = transaction.mount;
       if (!oldMount || !newMount || !val.isRendering) {
         return;
       } else if (oldMount.contains && oldMount.contains(newMount) || newMount.contains && newMount.contains(oldMount)) {
-        state = val;
+        state2 = val;
         isRendering = true;
       } else if (oldMount === newMount) {
-        state = val;
+        state2 = val;
         isRendering = true;
       }
     });
-    const { activeTransaction, nextTransaction } = state;
+    const { activeTransaction, nextTransaction } = state2;
     if (isRendering) {
       const { tasks: tasks2 } = transaction;
-      state.nextTransaction = transaction;
+      state2.nextTransaction = transaction;
       transaction.abort();
       const promise = nextTransaction && nextTransaction.promise || activeTransaction.promise || Promise.resolve();
       return transaction.promise = promise.then(() => {
         transaction.aborted = false;
         transaction.state.isRendering = true;
         transaction.state.activeTransaction = transaction;
-        state.measure("schedule");
+        state2.measure("schedule");
         return Transaction.flow(transaction, tasks2.slice(1));
       });
     }
-    state.isRendering = true;
-    state.activeTransaction = transaction;
-    state.measure("schedule");
+    state2.isRendering = true;
+    state2.activeTransaction = transaction;
+    state2.measure("schedule");
   }
 
   // node_modules/diffhtml/dist/es/tasks/should-update.js
@@ -7230,29 +7230,29 @@ ${markup.join("\n")}`);
 
   // node_modules/diffhtml/dist/es/tasks/reconcile-trees.js
   function reconcileTrees(transaction) {
-    const { state, mount, input, config: options2 } = transaction;
+    const { state: state2, mount, input, config: options2 } = transaction;
     const { inner } = options2;
     const mountAsHTMLEl = mount;
-    if (state.mutationObserver && !state.isDirty) {
-      state.isDirty = Boolean(state.mutationObserver.takeRecords().length);
-    } else if (!state.mutationObserver) {
-      state.isDirty = false;
+    if (state2.mutationObserver && !state2.isDirty) {
+      state2.isDirty = Boolean(state2.mutationObserver.takeRecords().length);
+    } else if (!state2.mutationObserver) {
+      state2.isDirty = false;
     }
-    if (state.isDirty || !state.oldTree) {
+    if (state2.isDirty || !state2.oldTree) {
       release(mountAsHTMLEl);
-      if (mountAsHTMLEl.ownerDocument && state.mutationObserver) {
-        state.mutationObserver.observe(mountAsHTMLEl, { subtree: true, childList: true, attributes: true, characterData: true });
+      if (mountAsHTMLEl.ownerDocument && state2.mutationObserver) {
+        state2.mutationObserver.observe(mountAsHTMLEl, { subtree: true, childList: true, attributes: true, characterData: true });
       }
-      state.oldTree = createTree(mountAsHTMLEl);
-      protectVTree(state.oldTree);
-      StateCache.set(mount, state);
+      state2.oldTree = createTree(mountAsHTMLEl);
+      protectVTree(state2.oldTree);
+      StateCache.set(mount, state2);
     }
-    const { nodeName, attributes: attributes2 } = state.oldTree;
+    const { nodeName, attributes: attributes2 } = state2.oldTree;
     if (!transaction.newTree) {
       transaction.newTree = createTree(input);
     }
     const inputAsVTree = transaction.newTree;
-    if (!inner && inputAsVTree.nodeType === NODE_TYPE.FRAGMENT && state.oldTree.nodeType !== NODE_TYPE.FRAGMENT) {
+    if (!inner && inputAsVTree.nodeType === NODE_TYPE.FRAGMENT && state2.oldTree.nodeType !== NODE_TYPE.FRAGMENT) {
       let foundElements = [];
       for (let i2 = 0; i2 < inputAsVTree.childNodes.length; i2++) {
         const value2 = inputAsVTree.childNodes[i2];
@@ -7267,7 +7267,7 @@ ${markup.join("\n")}`);
         transaction.newTree = createTree(inputAsVTree.childNodes);
       }
     }
-    transaction.oldTree = state.oldTree;
+    transaction.oldTree = state2.oldTree;
     const { oldTree, newTree } = transaction;
     if (inner && oldTree && newTree) {
       const isUnknown = typeof newTree.rawNodeName !== "string";
@@ -7281,12 +7281,12 @@ ${markup.join("\n")}`);
   var { max } = Math;
   var keyNames = ["old", "new"];
   var textName2 = "#text";
-  function syncTree(oldTree, newTree, patches = [], state = {}, transaction = EMPTY.OBJ, attributesOnly) {
+  function syncTree(oldTree, newTree, patches = [], state2 = {}, transaction = EMPTY.OBJ, attributesOnly) {
     if (!oldTree)
       oldTree = EMPTY.OBJ;
     if (!newTree)
       newTree = EMPTY.OBJ;
-    const { svgElements = /* @__PURE__ */ new Set() } = state;
+    const { svgElements = /* @__PURE__ */ new Set() } = state2;
     const oldNodeName = oldTree.nodeName;
     const newNodeName = newTree.nodeName;
     const isEmpty = oldTree === EMPTY.OBJ || attributesOnly;
@@ -7347,7 +7347,7 @@ ${markup.join("\n")}`);
     if (attributesOnly) {
       for (let i2 = 0; i2 < newChildNodes.length; i2++) {
         isSVG && svgElements.add(newChildNodes[i2]);
-        syncTree(null, newChildNodes[i2], patches, state, transaction, true);
+        syncTree(null, newChildNodes[i2], patches, state2, transaction, true);
       }
       return patches;
     }
@@ -7380,14 +7380,14 @@ ${markup.join("\n")}`);
         svgElements.add(newChildNode);
       }
       if (!newChildNode) {
-        if (syncTree(oldChildNode, null, patches, state, transaction, true) === false) {
+        if (syncTree(oldChildNode, null, patches, state2, transaction, true) === false) {
           newChildNodes.splice(i2, 0, oldChildNode);
         }
         continue;
       }
       if (!oldChildNode) {
         oldChildNodes.push(newChildNode);
-        syncTree(null, newChildNode, patches, state, transaction, true);
+        syncTree(null, newChildNode, patches, state2, transaction, true);
         patches.push(PATCH_TYPE.INSERT_BEFORE, oldTree, newChildNode, null);
         continue;
       }
@@ -7398,7 +7398,7 @@ ${markup.join("\n")}`);
       if (oldKey || newKey) {
         if (!oldInNew && !newInOld) {
           oldChildNodes.splice(oldChildNodes.indexOf(oldChildNode), 1, newChildNode);
-          syncTree(null, newChildNode, patches, state, transaction, true);
+          syncTree(null, newChildNode, patches, state2, transaction, true);
           patches.push(PATCH_TYPE.REPLACE_CHILD, newChildNode, oldChildNode);
           i2 = i2 - 1;
           continue;
@@ -7416,14 +7416,14 @@ ${markup.join("\n")}`);
           } else {
             optimalNewNode = newChildNode;
           }
-          syncTree(null, optimalNewNode, patches, state, transaction, true);
+          syncTree(null, optimalNewNode, patches, state2, transaction, true);
           patches.push(PATCH_TYPE.INSERT_BEFORE, oldTree, optimalNewNode, oldChildNode);
           oldChildNodes.splice(i2, 0, optimalNewNode);
           continue;
         }
       }
       const sameType = oldChildNode.nodeName === newChildNode.nodeName;
-      const retVal = syncTree(oldChildNode, newChildNode, patches, state, transaction, !sameType);
+      const retVal = syncTree(oldChildNode, newChildNode, patches, state2, transaction, !sameType);
       if (retVal === false) {
         newChildNodes.splice(i2, 0, oldChildNode);
         maxLength += 1;
@@ -7499,7 +7499,7 @@ ${markup.join("\n")}`);
 
   // node_modules/diffhtml/dist/es/tasks/sync-trees.js
   function syncTrees(transaction) {
-    const { state, state: { measure }, oldTree, newTree, mount } = transaction;
+    const { state: state2, state: { measure }, oldTree, newTree, mount } = transaction;
     measure("sync trees");
     if (process_default.env.NODE_ENV !== "production") {
       if (!oldTree) {
@@ -7516,16 +7516,16 @@ ${markup.join("\n")}`);
         }
       }
       transaction.patches = [PATCH_TYPE.REPLACE_CHILD, newTree, oldTree];
-      transaction.oldTree = state.oldTree = newTree;
+      transaction.oldTree = state2.oldTree = newTree;
       const newNode = createNode(newTree);
       StateCache.delete(mount);
-      StateCache.set(newNode, state);
+      StateCache.set(newNode, state2);
       transaction.mount = newNode;
       if (newTree.nodeName === "script") {
-        state.scriptsToExecute.set(newTree, newTree.attributes.type || EMPTY.STR);
+        state2.scriptsToExecute.set(newTree, newTree.attributes.type || EMPTY.STR);
       }
     } else {
-      transaction.patches = syncTree(oldTree || null, newTree || null, [], state, transaction);
+      transaction.patches = syncTree(oldTree || null, newTree || null, [], state2, transaction);
     }
     measure("sync trees");
   }
@@ -7657,9 +7657,9 @@ ${markup.join("\n")}`);
       htmlElement.nodeValue = nodeValue;
     }
   };
-  function patchNode(patches, state = EMPTY.OBJ) {
+  function patchNode(patches, state2 = EMPTY.OBJ) {
     const promises = [];
-    const { ownerDocument, svgElements = /* @__PURE__ */ new Set() } = state;
+    const { ownerDocument, svgElements = /* @__PURE__ */ new Set() } = state2;
     const { length } = patches;
     let i2 = 0;
     while (true) {
@@ -7794,12 +7794,12 @@ ${markup.join("\n")}`);
 
   // node_modules/diffhtml/dist/es/tasks/patch-node.js
   function patchNode2(transaction) {
-    const { mount, state, patches } = transaction;
-    const { mutationObserver, measure, scriptsToExecute } = state;
+    const { mount, state: state2, patches } = transaction;
+    const { mutationObserver, measure, scriptsToExecute } = state2;
     measure("patch node");
     const { ownerDocument } = mount;
     const promises = transaction.promises || [];
-    state.ownerDocument = ownerDocument || global_default.document;
+    state2.ownerDocument = ownerDocument || global_default.document;
     if (mutationObserver) {
       mutationObserver.disconnect();
     }
@@ -7809,8 +7809,8 @@ ${markup.join("\n")}`);
       }
     };
     CreateNodeHookCache.add(collectScripts);
-    if (state.ownerDocument) {
-      promises.push(...patchNode(patches, state));
+    if (state2.ownerDocument) {
+      promises.push(...patchNode(patches, state2));
     }
     CreateNodeHookCache.delete(collectScripts);
     transaction.promises = promises;
@@ -7924,18 +7924,18 @@ ${markup.join("\n")}`);
       }
     }
     end() {
-      const { state, config: config2, mount } = this;
-      const { mutationObserver, measure, svgElements, scriptsToExecute } = state;
+      const { state: state2, config: config2, mount } = this;
+      const { mutationObserver, measure, svgElements, scriptsToExecute } = state2;
       const mountAsHTMLEl = mount;
       measure("finalize");
       this.completed = true;
       svgElements.clear();
-      state.isRendering = false;
-      state.isDirty = false;
+      state2.isRendering = false;
+      state2.isDirty = false;
       if (mountAsHTMLEl.ownerDocument && mutationObserver) {
         mutationObserver.observe(mountAsHTMLEl, { subtree: true, childList: true, attributes: true, characterData: true });
       } else {
-        state.isDirty = true;
+        state2.isDirty = true;
       }
       scriptsToExecute.forEach((type2, vTree) => {
         const oldNode = NodeCache.get(vTree);
@@ -7951,7 +7951,7 @@ ${markup.join("\n")}`);
         newNode.textContent = oldNode.textContent;
         if (StateCache.has(oldNode)) {
           release(oldNode);
-          StateCache.set(newNode, state);
+          StateCache.set(newNode, state2);
         }
         NodeCache.set(vTree, newNode);
         oldNode.parentNode && oldNode.parentNode.replaceChild(newNode, oldNode);
@@ -7961,8 +7961,8 @@ ${markup.join("\n")}`);
       this.endedCallbacks.clear();
       measure("finalize");
       measure("render");
-      if (state.oldTree)
-        protectVTree(state.oldTree);
+      if (state2.oldTree)
+        protectVTree(state2.oldTree);
       return this;
     }
     onceEnded(callback) {
@@ -7972,8 +7972,8 @@ ${markup.join("\n")}`);
 
   // node_modules/diffhtml/dist/es/tasks/parse-new-tree.js
   function parseNewTree(transaction) {
-    const { state, input, config: options2 } = transaction;
-    const { measure } = state;
+    const { state: state2, input, config: options2 } = transaction;
+    const { measure } = state2;
     if (typeof input === "string") {
       measure("parsing input for new tree");
       const { childNodes } = parse3(input, void 0, options2);
@@ -8234,6 +8234,9 @@ ${markup.join("\n")}`);
 
   // public/module.js
   var bus2 = window.bus;
+  var state = bus2.state;
+  bus2.libs.localstorage("ls/*");
+  bus2.libs.http_out("/*", "/");
   window.braid_fetch = window.fetch;
   window.module = module2;
   var CREATE_EVENT = "create";
@@ -8259,11 +8262,11 @@ ${markup.join("\n")}`);
     document.body.insertAdjacentHTML("beforeend", styles);
   }
   function learn(link2) {
-    return bus2.state[link2] || {};
+    return state[link2] || {};
   }
   function teach(link2, knowledge, nuance = (s, p2) => ({ ...s, ...p2 })) {
     const current = bus2.cache[link2] || {};
-    bus2.state[link2] = nuance(current.val || {}, knowledge);
+    state[link2] = nuance(current.val || {}, knowledge);
   }
   function when(link1, eventName, link2, callback) {
     listen(eventName, `${link1} ${link2}`, callback);
@@ -8724,7 +8727,7 @@ ${markup.join("\n")}`);
       escapeDeactivates: true,
       delayInitialFocus: true
     }, userOptions);
-    var state = {
+    var state2 = {
       containers: [],
       containerGroups: [],
       tabbableGroups: [],
@@ -8739,7 +8742,7 @@ ${markup.join("\n")}`);
       return configOverrideOptions && configOverrideOptions[optionName] !== void 0 ? configOverrideOptions[optionName] : config2[configOptionName || optionName];
     };
     var findContainerIndex = function findContainerIndex2(element3) {
-      return state.containerGroups.findIndex(function(_ref) {
+      return state2.containerGroups.findIndex(function(_ref) {
         var container = _ref.container, tabbableNodes = _ref.tabbableNodes;
         return container.contains(element3) || tabbableNodes.find(function(node) {
           return node === element3;
@@ -8781,7 +8784,7 @@ ${markup.join("\n")}`);
         if (findContainerIndex(doc2.activeElement) >= 0) {
           node = doc2.activeElement;
         } else {
-          var firstTabbableGroup = state.tabbableGroups[0];
+          var firstTabbableGroup = state2.tabbableGroups[0];
           var firstTabbableNode = firstTabbableGroup && firstTabbableGroup.firstTabbableNode;
           node = firstTabbableNode || getNodeForOption("fallbackFocus");
         }
@@ -8792,7 +8795,7 @@ ${markup.join("\n")}`);
       return node;
     };
     var updateTabbableNodes = function updateTabbableNodes2() {
-      state.containerGroups = state.containers.map(function(container) {
+      state2.containerGroups = state2.containers.map(function(container) {
         var tabbableNodes = tabbable(container, config2.tabbableOptions);
         var focusableNodes = focusable(container, config2.tabbableOptions);
         return {
@@ -8820,10 +8823,10 @@ ${markup.join("\n")}`);
           }
         };
       });
-      state.tabbableGroups = state.containerGroups.filter(function(group) {
+      state2.tabbableGroups = state2.containerGroups.filter(function(group) {
         return group.tabbableNodes.length > 0;
       });
-      if (state.tabbableGroups.length <= 0 && !getNodeForOption("fallbackFocus")) {
+      if (state2.tabbableGroups.length <= 0 && !getNodeForOption("fallbackFocus")) {
         throw new Error("Your focus-trap must have at least one container with at least one tabbable node in it at all times");
       }
     };
@@ -8841,7 +8844,7 @@ ${markup.join("\n")}`);
       node.focus({
         preventScroll: !!config2.preventScroll
       });
-      state.mostRecentlyFocusedNode = node;
+      state2.mostRecentlyFocusedNode = node;
       if (isSelectableInput(node)) {
         node.select();
       }
@@ -8871,28 +8874,28 @@ ${markup.join("\n")}`);
       var targetContained = findContainerIndex(target) >= 0;
       if (targetContained || target instanceof Document) {
         if (targetContained) {
-          state.mostRecentlyFocusedNode = target;
+          state2.mostRecentlyFocusedNode = target;
         }
       } else {
         e2.stopImmediatePropagation();
-        tryFocus(state.mostRecentlyFocusedNode || getInitialFocusNode());
+        tryFocus(state2.mostRecentlyFocusedNode || getInitialFocusNode());
       }
     };
     var checkTab = function checkTab2(e2) {
       var target = getActualTarget(e2);
       updateTabbableNodes();
       var destinationNode = null;
-      if (state.tabbableGroups.length > 0) {
+      if (state2.tabbableGroups.length > 0) {
         var containerIndex = findContainerIndex(target);
-        var containerGroup = containerIndex >= 0 ? state.containerGroups[containerIndex] : void 0;
+        var containerGroup = containerIndex >= 0 ? state2.containerGroups[containerIndex] : void 0;
         if (containerIndex < 0) {
           if (e2.shiftKey) {
-            destinationNode = state.tabbableGroups[state.tabbableGroups.length - 1].lastTabbableNode;
+            destinationNode = state2.tabbableGroups[state2.tabbableGroups.length - 1].lastTabbableNode;
           } else {
-            destinationNode = state.tabbableGroups[0].firstTabbableNode;
+            destinationNode = state2.tabbableGroups[0].firstTabbableNode;
           }
         } else if (e2.shiftKey) {
-          var startOfGroupIndex = findIndex(state.tabbableGroups, function(_ref2) {
+          var startOfGroupIndex = findIndex(state2.tabbableGroups, function(_ref2) {
             var firstTabbableNode = _ref2.firstTabbableNode;
             return target === firstTabbableNode;
           });
@@ -8900,12 +8903,12 @@ ${markup.join("\n")}`);
             startOfGroupIndex = containerIndex;
           }
           if (startOfGroupIndex >= 0) {
-            var destinationGroupIndex = startOfGroupIndex === 0 ? state.tabbableGroups.length - 1 : startOfGroupIndex - 1;
-            var destinationGroup = state.tabbableGroups[destinationGroupIndex];
+            var destinationGroupIndex = startOfGroupIndex === 0 ? state2.tabbableGroups.length - 1 : startOfGroupIndex - 1;
+            var destinationGroup = state2.tabbableGroups[destinationGroupIndex];
             destinationNode = destinationGroup.lastTabbableNode;
           }
         } else {
-          var lastOfGroupIndex = findIndex(state.tabbableGroups, function(_ref3) {
+          var lastOfGroupIndex = findIndex(state2.tabbableGroups, function(_ref3) {
             var lastTabbableNode = _ref3.lastTabbableNode;
             return target === lastTabbableNode;
           });
@@ -8913,8 +8916,8 @@ ${markup.join("\n")}`);
             lastOfGroupIndex = containerIndex;
           }
           if (lastOfGroupIndex >= 0) {
-            var _destinationGroupIndex = lastOfGroupIndex === state.tabbableGroups.length - 1 ? 0 : lastOfGroupIndex + 1;
-            var _destinationGroup = state.tabbableGroups[_destinationGroupIndex];
+            var _destinationGroupIndex = lastOfGroupIndex === state2.tabbableGroups.length - 1 ? 0 : lastOfGroupIndex + 1;
+            var _destinationGroup = state2.tabbableGroups[_destinationGroupIndex];
             destinationNode = _destinationGroup.firstTabbableNode;
           }
         }
@@ -8952,11 +8955,11 @@ ${markup.join("\n")}`);
       e2.stopImmediatePropagation();
     };
     var addListeners = function addListeners2() {
-      if (!state.active) {
+      if (!state2.active) {
         return;
       }
       activeFocusTraps.activateTrap(trap);
-      state.delayInitialFocusTimer = config2.delayInitialFocus ? delay(function() {
+      state2.delayInitialFocusTimer = config2.delayInitialFocus ? delay(function() {
         tryFocus(getInitialFocusNode());
       }) : tryFocus(getInitialFocusNode());
       doc2.addEventListener("focusin", checkFocusIn, true);
@@ -8979,7 +8982,7 @@ ${markup.join("\n")}`);
       return trap;
     };
     var removeListeners = function removeListeners2() {
-      if (!state.active) {
+      if (!state2.active) {
         return;
       }
       doc2.removeEventListener("focusin", checkFocusIn, true);
@@ -8991,13 +8994,13 @@ ${markup.join("\n")}`);
     };
     trap = {
       get active() {
-        return state.active;
+        return state2.active;
       },
       get paused() {
-        return state.paused;
+        return state2.paused;
       },
       activate: function activate(activateOptions) {
-        if (state.active) {
+        if (state2.active) {
           return this;
         }
         var onActivate2 = getOption(activateOptions, "onActivate");
@@ -9006,9 +9009,9 @@ ${markup.join("\n")}`);
         if (!checkCanFocusTrap) {
           updateTabbableNodes();
         }
-        state.active = true;
-        state.paused = false;
-        state.nodeFocusedBeforeActivation = doc2.activeElement;
+        state2.active = true;
+        state2.paused = false;
+        state2.nodeFocusedBeforeActivation = doc2.activeElement;
         if (onActivate2) {
           onActivate2();
         }
@@ -9022,14 +9025,14 @@ ${markup.join("\n")}`);
           }
         };
         if (checkCanFocusTrap) {
-          checkCanFocusTrap(state.containers.concat()).then(finishActivation, finishActivation);
+          checkCanFocusTrap(state2.containers.concat()).then(finishActivation, finishActivation);
           return this;
         }
         finishActivation();
         return this;
       },
       deactivate: function deactivate(deactivateOptions) {
-        if (!state.active) {
+        if (!state2.active) {
           return this;
         }
         var options2 = _objectSpread22({
@@ -9037,11 +9040,11 @@ ${markup.join("\n")}`);
           onPostDeactivate: config2.onPostDeactivate,
           checkCanReturnFocus: config2.checkCanReturnFocus
         }, deactivateOptions);
-        clearTimeout(state.delayInitialFocusTimer);
-        state.delayInitialFocusTimer = void 0;
+        clearTimeout(state2.delayInitialFocusTimer);
+        state2.delayInitialFocusTimer = void 0;
         removeListeners();
-        state.active = false;
-        state.paused = false;
+        state2.active = false;
+        state2.paused = false;
         activeFocusTraps.deactivateTrap(trap);
         var onDeactivate2 = getOption(options2, "onDeactivate");
         var onPostDeactivate = getOption(options2, "onPostDeactivate");
@@ -9053,7 +9056,7 @@ ${markup.join("\n")}`);
         var finishDeactivation = function finishDeactivation2() {
           delay(function() {
             if (returnFocus) {
-              tryFocus(getReturnFocusNode(state.nodeFocusedBeforeActivation));
+              tryFocus(getReturnFocusNode(state2.nodeFocusedBeforeActivation));
             }
             if (onPostDeactivate) {
               onPostDeactivate();
@@ -9061,35 +9064,35 @@ ${markup.join("\n")}`);
           });
         };
         if (returnFocus && checkCanReturnFocus) {
-          checkCanReturnFocus(getReturnFocusNode(state.nodeFocusedBeforeActivation)).then(finishDeactivation, finishDeactivation);
+          checkCanReturnFocus(getReturnFocusNode(state2.nodeFocusedBeforeActivation)).then(finishDeactivation, finishDeactivation);
           return this;
         }
         finishDeactivation();
         return this;
       },
       pause: function pause() {
-        if (state.paused || !state.active) {
+        if (state2.paused || !state2.active) {
           return this;
         }
-        state.paused = true;
+        state2.paused = true;
         removeListeners();
         return this;
       },
       unpause: function unpause() {
-        if (!state.paused || !state.active) {
+        if (!state2.paused || !state2.active) {
           return this;
         }
-        state.paused = false;
+        state2.paused = false;
         updateTabbableNodes();
         addListeners();
         return this;
       },
       updateContainerElements: function updateContainerElements(containerElements) {
         var elementsAsArray = [].concat(containerElements).filter(Boolean);
-        state.containers = elementsAsArray.map(function(element3) {
+        state2.containers = elementsAsArray.map(function(element3) {
           return typeof element3 === "string" ? doc2.querySelector(element3) : element3;
         });
-        if (state.active) {
+        if (state2.active) {
           updateTabbableNodes();
         }
         return this;
@@ -10431,7 +10434,7 @@ ${markup.join("\n")}`);
     from(field, get3) {
       if (!get3)
         get3 = (x) => x;
-      return this.compute([field], (state) => get3(state.field(field)));
+      return this.compute([field], (state2) => get3(state2.field(field)));
     }
   };
   function sameArray(a2, b2) {
@@ -10460,33 +10463,33 @@ ${markup.join("\n")}`);
           depAddrs.push(addresses[dep.id]);
       }
       return {
-        create(state) {
-          state.values[idx] = getter(state);
+        create(state2) {
+          state2.values[idx] = getter(state2);
           return 1;
         },
-        update(state, tr) {
-          if (depDoc && tr.docChanged || depSel && (tr.docChanged || tr.selection) || ensureAll(state, depAddrs)) {
-            let newVal = getter(state);
-            if (multi ? !compareArray(newVal, state.values[idx], compare2) : !compare2(newVal, state.values[idx])) {
-              state.values[idx] = newVal;
+        update(state2, tr) {
+          if (depDoc && tr.docChanged || depSel && (tr.docChanged || tr.selection) || ensureAll(state2, depAddrs)) {
+            let newVal = getter(state2);
+            if (multi ? !compareArray(newVal, state2.values[idx], compare2) : !compare2(newVal, state2.values[idx])) {
+              state2.values[idx] = newVal;
               return 1;
             }
           }
           return 0;
         },
-        reconfigure: (state, oldState) => {
-          let newVal = getter(state);
+        reconfigure: (state2, oldState) => {
+          let newVal = getter(state2);
           let oldAddr = oldState.config.address[id2];
           if (oldAddr != null) {
             let oldVal = getAddr(oldState, oldAddr);
             if (this.dependencies.every((dep) => {
-              return dep instanceof Facet ? oldState.facet(dep) === state.facet(dep) : dep instanceof StateField ? oldState.field(dep, false) == state.field(dep, false) : true;
+              return dep instanceof Facet ? oldState.facet(dep) === state2.facet(dep) : dep instanceof StateField ? oldState.field(dep, false) == state2.field(dep, false) : true;
             }) || (multi ? compareArray(newVal, oldVal, compare2) : compare2(newVal, oldVal))) {
-              state.values[idx] = oldVal;
+              state2.values[idx] = oldVal;
               return 0;
             }
           }
-          state.values[idx] = newVal;
+          state2.values[idx] = newVal;
           return 1;
         }
       };
@@ -10500,10 +10503,10 @@ ${markup.join("\n")}`);
         return false;
     return true;
   }
-  function ensureAll(state, addrs) {
+  function ensureAll(state2, addrs) {
     let changed2 = false;
     for (let addr of addrs)
-      if (ensureAddr(state, addr) & 1)
+      if (ensureAddr(state2, addr) & 1)
         changed2 = true;
     return changed2;
   }
@@ -10512,10 +10515,10 @@ ${markup.join("\n")}`);
     let providerTypes = providers.map((p2) => p2.type);
     let dynamic = providerAddrs.filter((p2) => !(p2 & 1));
     let idx = addresses[facet.id] >> 1;
-    function get3(state) {
+    function get3(state2) {
       let values = [];
       for (let i2 = 0; i2 < providerAddrs.length; i2++) {
-        let value2 = getAddr(state, providerAddrs[i2]);
+        let value2 = getAddr(state2, providerAddrs[i2]);
         if (providerTypes[i2] == 2)
           for (let val of value2)
             values.push(val);
@@ -10525,34 +10528,34 @@ ${markup.join("\n")}`);
       return facet.combine(values);
     }
     return {
-      create(state) {
+      create(state2) {
         for (let addr of providerAddrs)
-          ensureAddr(state, addr);
-        state.values[idx] = get3(state);
+          ensureAddr(state2, addr);
+        state2.values[idx] = get3(state2);
         return 1;
       },
-      update(state, tr) {
-        if (!ensureAll(state, dynamic))
+      update(state2, tr) {
+        if (!ensureAll(state2, dynamic))
           return 0;
-        let value2 = get3(state);
-        if (facet.compare(value2, state.values[idx]))
+        let value2 = get3(state2);
+        if (facet.compare(value2, state2.values[idx]))
           return 0;
-        state.values[idx] = value2;
+        state2.values[idx] = value2;
         return 1;
       },
-      reconfigure(state, oldState) {
-        let depChanged = ensureAll(state, providerAddrs);
+      reconfigure(state2, oldState) {
+        let depChanged = ensureAll(state2, providerAddrs);
         let oldProviders = oldState.config.facets[facet.id], oldValue = oldState.facet(facet);
         if (oldProviders && !depChanged && sameArray(providers, oldProviders)) {
-          state.values[idx] = oldValue;
+          state2.values[idx] = oldValue;
           return 0;
         }
-        let value2 = get3(state);
+        let value2 = get3(state2);
         if (facet.compare(value2, oldValue)) {
-          state.values[idx] = oldValue;
+          state2.values[idx] = oldValue;
           return 0;
         }
-        state.values[idx] = value2;
+        state2.values[idx] = value2;
         return 1;
       }
     };
@@ -10573,31 +10576,31 @@ ${markup.join("\n")}`);
         field.provides = config2.provide(field);
       return field;
     }
-    create(state) {
-      let init = state.facet(initField).find((i2) => i2.field == this);
-      return ((init === null || init === void 0 ? void 0 : init.create) || this.createF)(state);
+    create(state2) {
+      let init = state2.facet(initField).find((i2) => i2.field == this);
+      return ((init === null || init === void 0 ? void 0 : init.create) || this.createF)(state2);
     }
     slot(addresses) {
       let idx = addresses[this.id] >> 1;
       return {
-        create: (state) => {
-          state.values[idx] = this.create(state);
+        create: (state2) => {
+          state2.values[idx] = this.create(state2);
           return 1;
         },
-        update: (state, tr) => {
-          let oldVal = state.values[idx];
+        update: (state2, tr) => {
+          let oldVal = state2.values[idx];
           let value2 = this.updateF(oldVal, tr);
           if (this.compareF(oldVal, value2))
             return 0;
-          state.values[idx] = value2;
+          state2.values[idx] = value2;
           return 1;
         },
-        reconfigure: (state, oldState) => {
+        reconfigure: (state2, oldState) => {
           if (oldState.config.address[this.id] != null) {
-            state.values[idx] = oldState.field(this);
+            state2.values[idx] = oldState.field(this);
             return 0;
           }
-          state.values[idx] = this.create(state);
+          state2.values[idx] = this.create(state2);
           return 1;
         }
       };
@@ -10633,8 +10636,8 @@ ${markup.join("\n")}`);
     reconfigure(content2) {
       return Compartment.reconfigure.of({ compartment: this, extension: content2 });
     }
-    get(state) {
-      return state.config.compartments.get(this);
+    get(state2) {
+      return state2.config.compartments.get(this);
     }
   };
   var CompartmentInstance = class {
@@ -10750,21 +10753,21 @@ ${markup.join("\n")}`);
     inner(extension, Prec_.default);
     return result.reduce((a2, b2) => a2.concat(b2));
   }
-  function ensureAddr(state, addr) {
+  function ensureAddr(state2, addr) {
     if (addr & 1)
       return 2;
     let idx = addr >> 1;
-    let status = state.status[idx];
+    let status = state2.status[idx];
     if (status == 4)
       throw new Error("Cyclic dependency between fields and/or facets");
     if (status & 2)
       return status;
-    state.status[idx] = 4;
-    let changed2 = state.computeSlot(state, state.config.dynamicSlots[idx]);
-    return state.status[idx] = 2 | changed2;
+    state2.status[idx] = 4;
+    let changed2 = state2.computeSlot(state2, state2.config.dynamicSlots[idx]);
+    return state2.status[idx] = 2 | changed2;
   }
-  function getAddr(state, addr) {
-    return addr & 1 ? state.config.staticValues[addr >> 1] : state.values[addr >> 1];
+  function getAddr(state2, addr) {
+    return addr & 1 ? state2.config.staticValues[addr >> 1] : state2.values[addr >> 1];
   }
   var languageData = /* @__PURE__ */ Facet.define();
   var allowMultipleSelections = /* @__PURE__ */ Facet.define({
@@ -10920,35 +10923,35 @@ ${markup.join("\n")}`);
       scrollIntoView: a2.scrollIntoView || b2.scrollIntoView
     };
   }
-  function resolveTransactionInner(state, spec, docSize) {
+  function resolveTransactionInner(state2, spec, docSize) {
     let sel = spec.selection, annotations = asArray(spec.annotations);
     if (spec.userEvent)
       annotations = annotations.concat(Transaction2.userEvent.of(spec.userEvent));
     return {
-      changes: spec.changes instanceof ChangeSet ? spec.changes : ChangeSet.of(spec.changes || [], docSize, state.facet(lineSeparator)),
+      changes: spec.changes instanceof ChangeSet ? spec.changes : ChangeSet.of(spec.changes || [], docSize, state2.facet(lineSeparator)),
       selection: sel && (sel instanceof EditorSelection ? sel : EditorSelection.single(sel.anchor, sel.head)),
       effects: asArray(spec.effects),
       annotations,
       scrollIntoView: !!spec.scrollIntoView
     };
   }
-  function resolveTransaction(state, specs, filter) {
-    let s = resolveTransactionInner(state, specs.length ? specs[0] : {}, state.doc.length);
+  function resolveTransaction(state2, specs, filter) {
+    let s = resolveTransactionInner(state2, specs.length ? specs[0] : {}, state2.doc.length);
     if (specs.length && specs[0].filter === false)
       filter = false;
     for (let i2 = 1; i2 < specs.length; i2++) {
       if (specs[i2].filter === false)
         filter = false;
       let seq = !!specs[i2].sequential;
-      s = mergeTransaction(s, resolveTransactionInner(state, specs[i2], seq ? s.changes.newLength : state.doc.length), seq);
+      s = mergeTransaction(s, resolveTransactionInner(state2, specs[i2], seq ? s.changes.newLength : state2.doc.length), seq);
     }
-    let tr = Transaction2.create(state, s.changes, s.selection, s.effects, s.annotations, s.scrollIntoView);
+    let tr = Transaction2.create(state2, s.changes, s.selection, s.effects, s.annotations, s.scrollIntoView);
     return extendTransaction(filter ? filterTransaction(tr) : tr);
   }
   function filterTransaction(tr) {
-    let state = tr.startState;
+    let state2 = tr.startState;
     let result = true;
-    for (let filter of state.facet(changeFilter)) {
+    for (let filter of state2.facet(changeFilter)) {
       let value2 = filter(tr);
       if (value2 === false) {
         result = false;
@@ -10961,15 +10964,15 @@ ${markup.join("\n")}`);
       let changes, back;
       if (result === false) {
         back = tr.changes.invertedDesc;
-        changes = ChangeSet.empty(state.doc.length);
+        changes = ChangeSet.empty(state2.doc.length);
       } else {
         let filtered = tr.changes.filter(result);
         changes = filtered.changes;
         back = filtered.filtered.invertedDesc;
       }
-      tr = Transaction2.create(state, changes, tr.selection && tr.selection.map(back), StateEffect.mapEffects(tr.effects, back), tr.annotations, tr.scrollIntoView);
+      tr = Transaction2.create(state2, changes, tr.selection && tr.selection.map(back), StateEffect.mapEffects(tr.effects, back), tr.annotations, tr.scrollIntoView);
     }
-    let filters = state.facet(transactionFilter);
+    let filters = state2.facet(transactionFilter);
     for (let i2 = filters.length - 1; i2 >= 0; i2--) {
       let filtered = filters[i2](tr);
       if (filtered instanceof Transaction2)
@@ -10977,18 +10980,18 @@ ${markup.join("\n")}`);
       else if (Array.isArray(filtered) && filtered.length == 1 && filtered[0] instanceof Transaction2)
         tr = filtered[0];
       else
-        tr = resolveTransaction(state, asArray(filtered), false);
+        tr = resolveTransaction(state2, asArray(filtered), false);
     }
     return tr;
   }
   function extendTransaction(tr) {
-    let state = tr.startState, extenders = state.facet(transactionExtender), spec = tr;
+    let state2 = tr.startState, extenders = state2.facet(transactionExtender), spec = tr;
     for (let i2 = extenders.length - 1; i2 >= 0; i2--) {
       let extension = extenders[i2](tr);
       if (extension && Object.keys(extension).length)
-        spec = mergeTransaction(tr, resolveTransactionInner(state, extension, tr.changes.newLength), true);
+        spec = mergeTransaction(tr, resolveTransactionInner(state2, extension, tr.changes.newLength), true);
     }
-    return spec == tr ? tr : Transaction2.create(state, tr.changes, tr.selection, spec.effects, spec.annotations, spec.scrollIntoView);
+    return spec == tr ? tr : Transaction2.create(state2, tr.changes, tr.selection, spec.effects, spec.annotations, spec.scrollIntoView);
   }
   var none = [];
   function asArray(value2) {
@@ -11076,12 +11079,12 @@ ${markup.join("\n")}`);
       let startValues;
       if (!conf) {
         conf = Configuration.resolve(base2, compartments, this);
-        let intermediateState = new EditorState(conf, this.doc, this.selection, conf.dynamicSlots.map(() => null), (state, slot) => slot.reconfigure(state, this), null);
+        let intermediateState = new EditorState(conf, this.doc, this.selection, conf.dynamicSlots.map(() => null), (state2, slot) => slot.reconfigure(state2, this), null);
         startValues = intermediateState.values;
       } else {
         startValues = tr.startState.values.slice();
       }
-      new EditorState(conf, tr.newDoc, tr.newSelection, startValues, (state, slot) => slot.update(state, tr), tr);
+      new EditorState(conf, tr.newDoc, tr.newSelection, startValues, (state2, slot) => slot.update(state2, tr), tr);
     }
     replaceSelection(text) {
       if (typeof text == "string")
@@ -11150,7 +11153,7 @@ ${markup.join("\n")}`);
       if (fields)
         for (let prop in fields) {
           let field = fields[prop], value2 = json[prop];
-          fieldInit.push(field.init((state) => field.spec.fromJSON(value2, state)));
+          fieldInit.push(field.init((state2) => field.spec.fromJSON(value2, state2)));
         }
       return EditorState.create({
         doc: json.doc,
@@ -11165,7 +11168,7 @@ ${markup.join("\n")}`);
       checkSelection(selection, doc2.length);
       if (!configuration.staticFacet(allowMultipleSelections))
         selection = selection.asSingle();
-      return new EditorState(configuration, doc2, selection, configuration.dynamicSlots.map(() => null), (state, slot) => slot.create(state), null);
+      return new EditorState(configuration, doc2, selection, configuration.dynamicSlots.map(() => null), (state2, slot) => slot.create(state2), null);
     }
     get tabSize() {
       return this.facet(EditorState.tabSize);
@@ -13754,8 +13757,8 @@ ${markup.join("\n")}`);
     }
   };
   var scrollIntoView = /* @__PURE__ */ StateEffect.define({ map: (t2, ch) => t2.map(ch) });
-  function logException(state, exception, context2) {
-    let handler = state.facet(exceptionSink);
+  function logException(state2, exception, context2) {
+    let handler = state2.facet(exceptionSink);
     if (handler.length)
       handler[0](exception);
     else if (window.onerror)
@@ -13898,9 +13901,9 @@ ${markup.join("\n")}`);
     }
   };
   var ViewUpdate = class {
-    constructor(view, state, transactions) {
+    constructor(view, state2, transactions) {
       this.view = view;
-      this.state = state;
+      this.state = state2;
       this.transactions = transactions;
       this.flags = 0;
       this.startState = view.state;
@@ -13916,8 +13919,8 @@ ${markup.join("\n")}`);
         this.flags |= 1;
       }
     }
-    static create(view, state, transactions) {
-      return new ViewUpdate(view, state, transactions);
+    static create(view, state2, transactions) {
+      return new ViewUpdate(view, state2, transactions);
     }
     get viewportChanged() {
       return (this.flags & 4) > 0;
@@ -14154,10 +14157,10 @@ ${markup.join("\n")}`);
   }
   var LineBreakPlaceholder = "\uFFFF";
   var DOMReader = class {
-    constructor(points, state) {
+    constructor(points, state2) {
       this.points = points;
       this.text = "";
-      this.lineSeparator = state.facet(EditorState.lineSeparator);
+      this.lineSeparator = state2.facet(EditorState.lineSeparator);
     }
     append(text) {
       this.text += text;
@@ -14644,15 +14647,15 @@ ${markup.join("\n")}`);
       return Decoration.none;
     let { from, to: to2, node, text: textNode } = surrounding;
     let newFrom = changes.mapPos(from, 1), newTo = Math.max(newFrom, changes.mapPos(to2, -1));
-    let { state } = view, text = node.nodeType == 3 ? node.nodeValue : new DOMReader([], state).readRange(node.firstChild, null).text;
+    let { state: state2 } = view, text = node.nodeType == 3 ? node.nodeValue : new DOMReader([], state2).readRange(node.firstChild, null).text;
     if (newTo - newFrom < text.length) {
-      if (state.doc.sliceString(newFrom, Math.min(state.doc.length, newFrom + text.length), LineBreakPlaceholder) == text)
+      if (state2.doc.sliceString(newFrom, Math.min(state2.doc.length, newFrom + text.length), LineBreakPlaceholder) == text)
         newTo = newFrom + text.length;
-      else if (state.doc.sliceString(Math.max(0, newTo - text.length), newTo, LineBreakPlaceholder) == text)
+      else if (state2.doc.sliceString(Math.max(0, newTo - text.length), newTo, LineBreakPlaceholder) == text)
         newFrom = newTo - text.length;
       else
         return Decoration.none;
-    } else if (state.doc.sliceString(newFrom, newTo, LineBreakPlaceholder) != text) {
+    } else if (state2.doc.sliceString(newFrom, newTo, LineBreakPlaceholder) != text) {
       return Decoration.none;
     }
     let topView = ContentView.get(node);
@@ -14726,9 +14729,9 @@ ${markup.join("\n")}`);
     }
     return false;
   }
-  function groupAt(state, pos, bias = 1) {
-    let categorize = state.charCategorizer(pos);
-    let line = state.doc.lineAt(pos), linePos = pos - line.from;
+  function groupAt(state2, pos, bias = 1) {
+    let categorize = state2.charCategorizer(pos);
+    let line = state2.doc.lineAt(pos), linePos = pos - line.from;
     if (line.length == 0)
       return EditorSelection.cursor(pos);
     if (linePos == 0)
@@ -15284,24 +15287,24 @@ ${markup.join("\n")}`);
     }, 50);
   }
   function doPaste(view, input) {
-    let { state } = view, changes, i2 = 1, text = state.toText(input);
-    let byLine = text.lines == state.selection.ranges.length;
-    let linewise = lastLinewiseCopy != null && state.selection.ranges.every((r) => r.empty) && lastLinewiseCopy == text.toString();
+    let { state: state2 } = view, changes, i2 = 1, text = state2.toText(input);
+    let byLine = text.lines == state2.selection.ranges.length;
+    let linewise = lastLinewiseCopy != null && state2.selection.ranges.every((r) => r.empty) && lastLinewiseCopy == text.toString();
     if (linewise) {
       let lastLine = -1;
-      changes = state.changeByRange((range2) => {
-        let line = state.doc.lineAt(range2.from);
+      changes = state2.changeByRange((range2) => {
+        let line = state2.doc.lineAt(range2.from);
         if (line.from == lastLine)
           return { range: range2 };
         lastLine = line.from;
-        let insert2 = state.toText((byLine ? text.line(i2++).text : input) + state.lineBreak);
+        let insert2 = state2.toText((byLine ? text.line(i2++).text : input) + state2.lineBreak);
         return {
           changes: { from: line.from, insert: insert2 },
           range: EditorSelection.cursor(range2.from + insert2.length)
         };
       });
     } else if (byLine) {
-      changes = state.changeByRange((range2) => {
+      changes = state2.changeByRange((range2) => {
         let line = text.line(i2++);
         return {
           changes: { from: range2.from, to: range2.to, insert: line.text },
@@ -15309,7 +15312,7 @@ ${markup.join("\n")}`);
         };
       });
     } else {
-      changes = state.replaceSelection(text);
+      changes = state2.replaceSelection(text);
     }
     view.dispatch(changes, {
       userEvent: "input.paste",
@@ -15516,26 +15519,26 @@ ${markup.join("\n")}`);
       view.focus();
     }, 50);
   }
-  function copiedRange(state) {
+  function copiedRange(state2) {
     let content2 = [], ranges = [], linewise = false;
-    for (let range2 of state.selection.ranges)
+    for (let range2 of state2.selection.ranges)
       if (!range2.empty) {
-        content2.push(state.sliceDoc(range2.from, range2.to));
+        content2.push(state2.sliceDoc(range2.from, range2.to));
         ranges.push(range2);
       }
     if (!content2.length) {
       let upto = -1;
-      for (let { from } of state.selection.ranges) {
-        let line = state.doc.lineAt(from);
+      for (let { from } of state2.selection.ranges) {
+        let line = state2.doc.lineAt(from);
         if (line.number > upto) {
           content2.push(line.text);
-          ranges.push({ from: line.from, to: Math.min(state.doc.length, line.to + 1) });
+          ranges.push({ from: line.from, to: Math.min(state2.doc.length, line.to + 1) });
         }
         upto = line.number;
       }
       linewise = true;
     }
-    return { text: content2.join(state.lineBreak), ranges, linewise };
+    return { text: content2.join(state2.lineBreak), ranges, linewise };
   }
   var lastLinewiseCopy = null;
   handlers2.copy = handlers2.cut = (view, event) => {
@@ -16307,8 +16310,8 @@ ${markup.join("\n")}`);
     }
   };
   var ViewState = class {
-    constructor(state) {
-      this.state = state;
+    constructor(state2) {
+      this.state = state2;
       this.pixelViewport = { left: 0, right: window.innerWidth, top: 0, bottom: 0 };
       this.inView = true;
       this.paddingTop = 0;
@@ -16325,8 +16328,8 @@ ${markup.join("\n")}`);
       this.defaultTextDirection = Direction.RTL;
       this.visibleRanges = [];
       this.mustEnforceCursorAssoc = false;
-      this.stateDeco = state.facet(decorations).filter((d2) => typeof d2 != "function");
-      this.heightMap = HeightMap.empty().applyChanges(this.stateDeco, Text.empty, this.heightOracle.setDoc(state.doc), [new ChangedRange(0, 0, 0, state.doc.length)]);
+      this.stateDeco = state2.facet(decorations).filter((d2) => typeof d2 != "function");
+      this.heightMap = HeightMap.empty().applyChanges(this.stateDeco, Text.empty, this.heightOracle.setDoc(state2.doc), [new ChangedRange(0, 0, 0, state2.doc.length)]);
       this.viewport = this.getViewport(0, null);
       this.updateViewportLines();
       this.updateForViewport();
@@ -17486,20 +17489,20 @@ ${markup.join("\n")}`);
       if (this.updateState != 0)
         throw new Error("Calls to EditorView.update are not allowed while an update is in progress");
       let redrawn = false, attrsChanged = false, update3;
-      let state = this.state;
+      let state2 = this.state;
       for (let tr of transactions) {
-        if (tr.startState != state)
+        if (tr.startState != state2)
           throw new RangeError("Trying to update state with a transaction that doesn't start from the previous state.");
-        state = tr.state;
+        state2 = tr.state;
       }
       if (this.destroyed) {
-        this.viewState.state = state;
+        this.viewState.state = state2;
         return;
       }
       this.observer.clear();
-      if (state.facet(EditorState.phrases) != this.state.facet(EditorState.phrases))
-        return this.setState(state);
-      update3 = ViewUpdate.create(this, state, transactions);
+      if (state2.facet(EditorState.phrases) != this.state.facet(EditorState.phrases))
+        return this.setState(state2);
+      update3 = ViewUpdate.create(this, state2, transactions);
       let scrollTarget = this.viewState.scrollTarget;
       try {
         this.updateState = 2;
@@ -17958,8 +17961,8 @@ ${markup.join("\n")}`);
   });
   var keymap = /* @__PURE__ */ Facet.define({ enables: handleKeyEvents });
   var Keymaps = /* @__PURE__ */ new WeakMap();
-  function getKeymap(state) {
-    let bindings2 = state.facet(keymap);
+  function getKeymap(state2) {
+    let bindings2 = state2.facet(keymap);
     let map = Keymaps.get(bindings2);
     if (!map)
       Keymaps.set(bindings2, map = buildKeymap(bindings2.reduce((a2, b2) => a2.concat(b2), [])));
@@ -18122,11 +18125,11 @@ ${markup.join("\n")}`);
         this.setBlinkRate();
     }
     readPos() {
-      let { state } = this.view, conf = state.facet(selectionConfig);
-      let rangePieces = state.selection.ranges.map((r) => r.empty ? [] : measureRange(this.view, r)).reduce((a2, b2) => a2.concat(b2));
+      let { state: state2 } = this.view, conf = state2.facet(selectionConfig);
+      let rangePieces = state2.selection.ranges.map((r) => r.empty ? [] : measureRange(this.view, r)).reduce((a2, b2) => a2.concat(b2));
       let cursors = [];
-      for (let r of state.selection.ranges) {
-        let prim = r == state.selection.main;
+      for (let r of state2.selection.ranges) {
+        let prim = r == state2.selection.main;
         if (r.empty ? !prim || CanHidePrimary : conf.drawRangeCursor) {
           let piece = measureCursor(this.view, r, prim);
           if (piece)
@@ -18620,23 +18623,23 @@ ${markup.join("\n")}`);
     decorations: (v) => v.decorations
   });
   var MaxOff = 2e3;
-  function rectangleFor(state, a2, b2) {
+  function rectangleFor(state2, a2, b2) {
     let startLine = Math.min(a2.line, b2.line), endLine = Math.max(a2.line, b2.line);
     let ranges = [];
     if (a2.off > MaxOff || b2.off > MaxOff || a2.col < 0 || b2.col < 0) {
       let startOff = Math.min(a2.off, b2.off), endOff = Math.max(a2.off, b2.off);
       for (let i2 = startLine; i2 <= endLine; i2++) {
-        let line = state.doc.line(i2);
+        let line = state2.doc.line(i2);
         if (line.length <= endOff)
           ranges.push(EditorSelection.range(line.from + startOff, line.to + endOff));
       }
     } else {
       let startCol = Math.min(a2.col, b2.col), endCol = Math.max(a2.col, b2.col);
       for (let i2 = startLine; i2 <= endLine; i2++) {
-        let line = state.doc.line(i2);
-        let start = findColumn(line.text, startCol, state.tabSize, true);
+        let line = state2.doc.line(i2);
+        let start = findColumn(line.text, startCol, state2.tabSize, true);
         if (start > -1) {
-          let end = findColumn(line.text, endCol, state.tabSize);
+          let end = findColumn(line.text, endCol, state2.tabSize);
           ranges.push(EditorSelection.range(line.from + start, line.from + end));
         }
       }
@@ -19054,8 +19057,8 @@ ${markup.join("\n")}`);
       this.manager.update(update3);
     }
   };
-  var showHoverTooltipHost = /* @__PURE__ */ showTooltip.compute([showHoverTooltip], (state) => {
-    let tooltips = state.facet(showHoverTooltip).filter((t2) => t2);
+  var showHoverTooltipHost = /* @__PURE__ */ showTooltip.compute([showHoverTooltip], (state2) => {
+    let tooltips = state2.facet(showHoverTooltip).filter((t2) => t2);
     if (tooltips.length === 0)
       return null;
     return {
@@ -19702,7 +19705,7 @@ ${markup.join("\n")}`);
   function formatNumber(view, number2) {
     return view.state.facet(lineNumberConfig).formatNumber(number2, view.state);
   }
-  var lineNumberGutter = /* @__PURE__ */ activeGutters.compute([lineNumberConfig], (state) => ({
+  var lineNumberGutter = /* @__PURE__ */ activeGutters.compute([lineNumberConfig], (state2) => ({
     class: "cm-lineNumbers",
     renderEmptyElements: false,
     markers(view) {
@@ -19721,7 +19724,7 @@ ${markup.join("\n")}`);
       let max3 = formatNumber(update3.view, maxLineNumber(update3.view.state.doc.lines));
       return max3 == spacer.number ? spacer : new NumberMarker(max3);
     },
-    domEventHandlers: state.facet(lineNumberConfig).domEventHandlers
+    domEventHandlers: state2.facet(lineNumberConfig).domEventHandlers
   }));
   function lineNumbers(config2 = {}) {
     return [
@@ -19742,11 +19745,11 @@ ${markup.join("\n")}`);
       this.elementClass = "cm-activeLineGutter";
     }
   }();
-  var activeLineGutterHighlighter = /* @__PURE__ */ gutterLineClass.compute(["selection"], (state) => {
+  var activeLineGutterHighlighter = /* @__PURE__ */ gutterLineClass.compute(["selection"], (state2) => {
     let marks2 = [], last2 = -1;
-    for (let range2 of state.selection.ranges)
+    for (let range2 of state2.selection.ranges)
       if (range2.empty) {
-        let linePos = state.doc.lineAt(range2.head).from;
+        let linePos = state2.doc.lineAt(range2.head).from;
         if (linePos > last2) {
           last2 = linePos;
           marks2.push(activeLineGutterMarker.range(linePos));
@@ -21275,16 +21278,16 @@ ${markup.join("\n")}`);
       this.parser = parser;
       this.extension = [
         language.of(this),
-        EditorState.languageData.of((state, pos, side) => state.facet(languageDataFacetAt(state, pos, side)))
+        EditorState.languageData.of((state2, pos, side) => state2.facet(languageDataFacetAt(state2, pos, side)))
       ].concat(extraExtensions);
     }
-    isActiveAt(state, pos, side = -1) {
-      return languageDataFacetAt(state, pos, side) == this.data;
+    isActiveAt(state2, pos, side = -1) {
+      return languageDataFacetAt(state2, pos, side) == this.data;
     }
-    findRegions(state) {
-      let lang = state.facet(language);
+    findRegions(state2) {
+      let lang = state2.facet(language);
       if ((lang === null || lang === void 0 ? void 0 : lang.data) == this.data)
-        return [{ from: 0, to: state.doc.length }];
+        return [{ from: 0, to: state2.doc.length }];
       if (!lang || !lang.allowsNesting)
         return [];
       let result = [];
@@ -21315,7 +21318,7 @@ ${markup.join("\n")}`);
             explore(ch, tree.positions[i2] + from);
         }
       };
-      explore(syntaxTree(state), 0);
+      explore(syntaxTree(state2), 0);
       return result;
     }
     get allowsNesting() {
@@ -21323,19 +21326,19 @@ ${markup.join("\n")}`);
     }
   };
   Language.setState = /* @__PURE__ */ StateEffect.define();
-  function languageDataFacetAt(state, pos, side) {
-    let topLang = state.facet(language);
+  function languageDataFacetAt(state2, pos, side) {
+    let topLang = state2.facet(language);
     if (!topLang)
       return null;
     let facet = topLang.data;
     if (topLang.allowsNesting) {
-      for (let node = syntaxTree(state).topNode; node; node = node.enter(pos, side, IterMode.ExcludeBuffers))
+      for (let node = syntaxTree(state2).topNode; node; node = node.enter(pos, side, IterMode.ExcludeBuffers))
         facet = node.type.prop(languageDataProp) || facet;
     }
     return facet;
   }
-  function syntaxTree(state) {
-    let field = state.field(Language.state, false);
+  function syntaxTree(state2) {
+    let field = state2.field(Language.state, false);
     return field ? field.tree : Tree.empty;
   }
   var DocInput = class {
@@ -21368,9 +21371,9 @@ ${markup.join("\n")}`);
   };
   var currentContext = null;
   var ParseContext = class {
-    constructor(parser, state, fragments = [], tree, treeLen, viewport, skipped, scheduleOn) {
+    constructor(parser, state2, fragments = [], tree, treeLen, viewport, skipped, scheduleOn) {
       this.parser = parser;
-      this.state = state;
+      this.state = state2;
       this.fragments = fragments;
       this.tree = tree;
       this.treeLen = treeLen;
@@ -21380,8 +21383,8 @@ ${markup.join("\n")}`);
       this.parse = null;
       this.tempSkipped = [];
     }
-    static create(parser, state, viewport) {
-      return new ParseContext(parser, state, [], Tree.empty, 0, viewport, [], null);
+    static create(parser, state2, viewport) {
+      return new ParseContext(parser, state2, [], Tree.empty, 0, viewport, [], null);
     }
     startParse() {
       return this.parser.startParse(new DocInput(this.state.doc), this.fragments);
@@ -21547,9 +21550,9 @@ ${markup.join("\n")}`);
         newCx.takeTree();
       return new LanguageState(newCx);
     }
-    static init(state) {
-      let vpTo = Math.min(3e3, state.doc.length);
-      let parseState = ParseContext.create(state.facet(language).parser, state, { from: 0, to: vpTo });
+    static init(state2) {
+      let vpTo = Math.min(3e3, state2.doc.length);
+      let parseState = ParseContext.create(state2.facet(language).parser, state2, { from: 0, to: vpTo });
       if (!parseState.work(20, vpTo))
         parseState.takeTree();
       return new LanguageState(parseState);
@@ -21602,8 +21605,8 @@ ${markup.join("\n")}`);
     scheduleWork() {
       if (this.working)
         return;
-      let { state } = this.view, field = state.field(Language.state);
-      if (field.tree != field.context.tree || !field.context.isDone(state.doc.length))
+      let { state: state2 } = this.view, field = state2.field(Language.state);
+      if (field.tree != field.context.tree || !field.context.isDone(state2.doc.length))
         this.working = requestIdle(this.work);
     }
     work(deadline) {
@@ -21615,11 +21618,11 @@ ${markup.join("\n")}`);
       }
       if (this.chunkBudget <= 0)
         return;
-      let { state, viewport: { to: vpTo } } = this.view, field = state.field(Language.state);
+      let { state: state2, viewport: { to: vpTo } } = this.view, field = state2.field(Language.state);
       if (field.tree == field.context.tree && field.context.isDone(vpTo + 1e5))
         return;
       let endTime = Date.now() + Math.min(this.chunkBudget, 100, deadline && !isInputPending ? Math.max(25, deadline.timeRemaining() - 5) : 1e9);
-      let viewportFirst = field.context.treeLen < vpTo && state.doc.length > vpTo + 1e3;
+      let viewportFirst = field.context.treeLen < vpTo && state2.doc.length > vpTo + 1e3;
       let done = field.context.work(() => {
         return isInputPending && isInputPending() || Date.now() > endTime;
       }, vpTo + (viewportFirst ? 0 : 1e5));
@@ -21667,13 +21670,13 @@ ${markup.join("\n")}`);
       return values[0];
     }
   });
-  function getIndentUnit(state) {
-    let unit = state.facet(indentUnit);
-    return unit.charCodeAt(0) == 9 ? state.tabSize * unit.length : unit.length;
+  function getIndentUnit(state2) {
+    let unit = state2.facet(indentUnit);
+    return unit.charCodeAt(0) == 9 ? state2.tabSize * unit.length : unit.length;
   }
-  function indentString(state, cols) {
-    let result = "", ts = state.tabSize;
-    if (state.facet(indentUnit).charCodeAt(0) == 9)
+  function indentString(state2, cols) {
+    let result = "", ts = state2.tabSize;
+    if (state2.facet(indentUnit).charCodeAt(0) == 9)
       while (cols >= ts) {
         result += "	";
         cols -= ts;
@@ -21694,10 +21697,10 @@ ${markup.join("\n")}`);
     return tree ? syntaxIndentation(context2, tree, pos) : null;
   }
   var IndentContext = class {
-    constructor(state, options2 = {}) {
-      this.state = state;
+    constructor(state2, options2 = {}) {
+      this.state = state2;
       this.options = options2;
-      this.unit = getIndentUnit(state);
+      this.unit = getIndentUnit(state2);
     }
     lineAt(pos, bias = 1) {
       let line = this.state.doc.lineAt(pos);
@@ -21847,17 +21850,17 @@ ${markup.join("\n")}`);
       let lineStart = doc2.sliceString(line.from, head);
       if (!rules.some((r) => r.test(lineStart)))
         return tr;
-      let { state } = tr, last2 = -1, changes = [];
-      for (let { head: head2 } of state.selection.ranges) {
-        let line2 = state.doc.lineAt(head2);
+      let { state: state2 } = tr, last2 = -1, changes = [];
+      for (let { head: head2 } of state2.selection.ranges) {
+        let line2 = state2.doc.lineAt(head2);
         if (line2.from == last2)
           continue;
         last2 = line2.from;
-        let indent = getIndentation(state, line2.from);
+        let indent = getIndentation(state2, line2.from);
         if (indent == null)
           continue;
         let cur2 = /^\s*/.exec(line2.text)[0];
-        let norm = indentString(state, indent);
+        let norm = indentString(state2, indent);
         if (cur2 != norm)
           changes.push({ from: line2.from, to: line2.from + cur2.length, insert: norm });
       }
@@ -21866,8 +21869,8 @@ ${markup.join("\n")}`);
   }
   var foldService = /* @__PURE__ */ Facet.define();
   var foldNodeProp = /* @__PURE__ */ new NodeProp();
-  function syntaxFolding(state, start, end) {
-    let tree = syntaxTree(state);
+  function syntaxFolding(state2, start, end) {
+    let tree = syntaxTree(state2);
     if (tree.length < end)
       return null;
     let inner = tree.resolveInner(end);
@@ -21878,8 +21881,8 @@ ${markup.join("\n")}`);
       if (found && cur2.from < start)
         break;
       let prop = cur2.type.prop(foldNodeProp);
-      if (prop && (cur2.to < tree.length - 50 || tree.length == state.doc.length || !isUnfinished(cur2))) {
-        let value2 = prop(cur2, state);
+      if (prop && (cur2.to < tree.length - 50 || tree.length == state2.doc.length || !isUnfinished(cur2))) {
+        let value2 = prop(cur2, state2);
         if (value2 && value2.from <= end && value2.from >= start && value2.to > end)
           found = value2;
       }
@@ -21890,13 +21893,13 @@ ${markup.join("\n")}`);
     let ch = node.lastChild;
     return ch && ch.to == node.to && ch.type.isError;
   }
-  function foldable(state, lineStart, lineEnd) {
-    for (let service of state.facet(foldService)) {
-      let result = service(state, lineStart, lineEnd);
+  function foldable(state2, lineStart, lineEnd) {
+    for (let service of state2.facet(foldService)) {
+      let result = service(state2, lineStart, lineEnd);
       if (result)
         return result;
     }
-    return syntaxFolding(state, lineStart, lineEnd);
+    return syntaxFolding(state2, lineStart, lineEnd);
   }
   function mapRange(range2, mapping) {
     let from = mapping.mapPos(range2.from, 1), to2 = mapping.mapPos(range2.to, -1);
@@ -21946,10 +21949,10 @@ ${markup.join("\n")}`);
     },
     provide: (f) => EditorView.decorations.from(f)
   });
-  function findFold(state, from, to2) {
+  function findFold(state2, from, to2) {
     var _a2;
     let found = null;
-    (_a2 = state.field(foldState, false)) === null || _a2 === void 0 ? void 0 : _a2.between(from, to2, (from2, to3) => {
+    (_a2 = state2.field(foldState, false)) === null || _a2 === void 0 ? void 0 : _a2.between(from, to2, (from2, to3) => {
       if (!found || found.from > from2)
         found = { from: from2, to: to3 };
     });
@@ -21963,8 +21966,8 @@ ${markup.join("\n")}`);
     });
     return found;
   }
-  function maybeEnable(state, other) {
-    return state.field(foldState, false) ? other : other.concat(StateEffect.appendConfig.of(codeFolding()));
+  function maybeEnable(state2, other) {
+    return state2.field(foldState, false) ? other : other.concat(StateEffect.appendConfig.of(codeFolding()));
   }
   var foldCode = (view) => {
     for (let line of selectedLines(view)) {
@@ -21994,9 +21997,9 @@ ${markup.join("\n")}`);
     return EditorView.announce.of(`${view.state.phrase(fold ? "Folded lines" : "Unfolded lines")} ${lineFrom} ${view.state.phrase("to")} ${lineTo}.`);
   }
   var foldAll = (view) => {
-    let { state } = view, effects = [];
-    for (let pos = 0; pos < state.doc.length; ) {
-      let line = view.lineBlockAt(pos), range2 = foldable(state, line.from, line.to);
+    let { state: state2 } = view, effects = [];
+    for (let pos = 0; pos < state2.doc.length; ) {
+      let line = view.lineBlockAt(pos), range2 = foldable(state2, line.from, line.to);
       if (range2)
         effects.push(foldEffect.of(range2));
       pos = (range2 ? view.lineBlockAt(range2.to) : line).to + 1;
@@ -22039,7 +22042,7 @@ ${markup.join("\n")}`);
   }
   var foldWidget = /* @__PURE__ */ Decoration.replace({ widget: /* @__PURE__ */ new class extends WidgetType {
     toDOM(view) {
-      let { state } = view, conf = state.facet(foldConfig);
+      let { state: state2 } = view, conf = state2.facet(foldConfig);
       let onclick = (event) => {
         let line = view.lineBlockAt(view.posAtDOM(event.target));
         let folded = findFold(view.state, line.from, line.to);
@@ -22051,8 +22054,8 @@ ${markup.join("\n")}`);
         return conf.placeholderDOM(view, onclick);
       let element3 = document.createElement("span");
       element3.textContent = conf.placeholderText;
-      element3.setAttribute("aria-label", state.phrase("folded code"));
-      element3.title = state.phrase("unfold");
+      element3.setAttribute("aria-label", state2.phrase("folded code"));
+      element3.title = state2.phrase("unfold");
       element3.className = "cm-foldPlaceholder";
       element3.onclick = onclick;
       return element3;
@@ -22180,9 +22183,9 @@ ${markup.join("\n")}`);
       return values.length ? [values[0]] : null;
     }
   });
-  function getHighlighters(state) {
-    let main = state.facet(highlighterFacet);
-    return main.length ? main : state.facet(fallbackHighlighter);
+  function getHighlighters(state2) {
+    let main = state2.facet(highlighterFacet);
+    return main.length ? main : state2.facet(fallbackHighlighter);
   }
   function syntaxHighlighting(highlighter, options2) {
     let ext = [treeHighlighter], themeType;
@@ -22194,8 +22197,8 @@ ${markup.join("\n")}`);
     if (options2 === null || options2 === void 0 ? void 0 : options2.fallback)
       ext.push(fallbackHighlighter.of(highlighter));
     else if (themeType)
-      ext.push(highlighterFacet.computeN([EditorView.darkTheme], (state) => {
-        return state.facet(EditorView.darkTheme) == (themeType == "dark") ? [highlighter] : [];
+      ext.push(highlighterFacet.computeN([EditorView.darkTheme], (state2) => {
+        return state2.facet(EditorView.darkTheme) == (themeType == "dark") ? [highlighter] : [];
       }));
     else
       ext.push(highlighterFacet.of(highlighter));
@@ -22375,15 +22378,15 @@ ${markup.join("\n")}`);
     }
     return null;
   }
-  function matchBrackets(state, pos, dir, config2 = {}) {
+  function matchBrackets(state2, pos, dir, config2 = {}) {
     let maxScanDistance = config2.maxScanDistance || DefaultScanDist, brackets = config2.brackets || DefaultBrackets;
-    let tree = syntaxTree(state), node = tree.resolveInner(pos, dir);
+    let tree = syntaxTree(state2), node = tree.resolveInner(pos, dir);
     for (let cur2 = node; cur2; cur2 = cur2.parent) {
       let matches2 = matchingNodes(cur2.type, dir, brackets);
       if (matches2 && cur2.from < cur2.to)
-        return matchMarkedBrackets(state, pos, dir, cur2, matches2, brackets);
+        return matchMarkedBrackets(state2, pos, dir, cur2, matches2, brackets);
     }
-    return matchPlainBrackets(state, pos, dir, tree, node.type, maxScanDistance, brackets);
+    return matchPlainBrackets(state2, pos, dir, tree, node.type, maxScanDistance, brackets);
   }
   function matchMarkedBrackets(_state, _pos, dir, token, matching, brackets) {
     let parent = token.parent, firstToken = { from: token.from, to: token.to };
@@ -22408,13 +22411,13 @@ ${markup.join("\n")}`);
       } while (dir < 0 ? cursor.prevSibling() : cursor.nextSibling());
     return { start: firstToken, matched: false };
   }
-  function matchPlainBrackets(state, pos, dir, tree, tokenType, maxScanDistance, brackets) {
-    let startCh = dir < 0 ? state.sliceDoc(pos - 1, pos) : state.sliceDoc(pos, pos + 1);
+  function matchPlainBrackets(state2, pos, dir, tree, tokenType, maxScanDistance, brackets) {
+    let startCh = dir < 0 ? state2.sliceDoc(pos - 1, pos) : state2.sliceDoc(pos, pos + 1);
     let bracket2 = brackets.indexOf(startCh);
     if (bracket2 < 0 || bracket2 % 2 == 0 != dir > 0)
       return null;
     let startToken = { from: dir < 0 ? pos - 1 : pos, to: dir > 0 ? pos + 1 : pos };
-    let iter = state.doc.iterRange(pos, dir > 0 ? state.doc.length : 0), depth = 0;
+    let iter = state2.doc.iterRange(pos, dir > 0 ? state2.doc.length : 0), depth = 0;
     for (let distance2 = 0; !iter.next().done && distance2 <= maxScanDistance; ) {
       let text = iter.value;
       if (dir < 0)
@@ -22497,27 +22500,27 @@ ${markup.join("\n")}`);
     return config2.line ? toggleLineComment(target) : config2.block ? toggleBlockCommentByLine(target) : false;
   };
   function command(f, option) {
-    return ({ state, dispatch }) => {
-      if (state.readOnly)
+    return ({ state: state2, dispatch }) => {
+      if (state2.readOnly)
         return false;
-      let tr = f(option, state);
+      let tr = f(option, state2);
       if (!tr)
         return false;
-      dispatch(state.update(tr));
+      dispatch(state2.update(tr));
       return true;
     };
   }
   var toggleLineComment = /* @__PURE__ */ command(changeLineComment, 0);
   var toggleBlockComment = /* @__PURE__ */ command(changeBlockComment, 0);
   var toggleBlockCommentByLine = /* @__PURE__ */ command((o, s) => changeBlockComment(o, s, selectedLineRanges(s)), 0);
-  function getConfig2(state, pos = state.selection.main.head) {
-    let data = state.languageDataAt("commentTokens", pos);
+  function getConfig2(state2, pos = state2.selection.main.head) {
+    let data = state2.languageDataAt("commentTokens", pos);
     return data.length ? data[0] : {};
   }
   var SearchMargin = 50;
-  function findBlockComment(state, { open, close }, from, to2) {
-    let textBefore = state.sliceDoc(from - SearchMargin, from);
-    let textAfter = state.sliceDoc(to2, to2 + SearchMargin);
+  function findBlockComment(state2, { open, close }, from, to2) {
+    let textBefore = state2.sliceDoc(from - SearchMargin, from);
+    let textAfter = state2.sliceDoc(to2, to2 + SearchMargin);
     let spaceBefore = /\s*$/.exec(textBefore)[0].length, spaceAfter = /^\s*/.exec(textAfter)[0].length;
     let beforeOff = textBefore.length - spaceBefore;
     if (textBefore.slice(beforeOff - open.length, beforeOff) == open && textAfter.slice(spaceAfter, spaceAfter + close.length) == close) {
@@ -22528,10 +22531,10 @@ ${markup.join("\n")}`);
     }
     let startText, endText;
     if (to2 - from <= 2 * SearchMargin) {
-      startText = endText = state.sliceDoc(from, to2);
+      startText = endText = state2.sliceDoc(from, to2);
     } else {
-      startText = state.sliceDoc(from, from + SearchMargin);
-      endText = state.sliceDoc(to2 - SearchMargin, to2);
+      startText = state2.sliceDoc(from, from + SearchMargin);
+      endText = state2.sliceDoc(to2 - SearchMargin, to2);
     }
     let startSpace = /^\s*/.exec(startText)[0].length, endSpace = /\s*$/.exec(endText)[0].length;
     let endOff = endText.length - endSpace - close.length;
@@ -22549,11 +22552,11 @@ ${markup.join("\n")}`);
     }
     return null;
   }
-  function selectedLineRanges(state) {
+  function selectedLineRanges(state2) {
     let ranges = [];
-    for (let r of state.selection.ranges) {
-      let fromLine = state.doc.lineAt(r.from);
-      let toLine = r.to <= fromLine.to ? fromLine : state.doc.lineAt(r.to);
+    for (let r of state2.selection.ranges) {
+      let fromLine = state2.doc.lineAt(r.from);
+      let toLine = r.to <= fromLine.to ? fromLine : state2.doc.lineAt(r.to);
       let last2 = ranges.length - 1;
       if (last2 >= 0 && ranges[last2].to > fromLine.from)
         ranges[last2].to = toLine.to;
@@ -22562,13 +22565,13 @@ ${markup.join("\n")}`);
     }
     return ranges;
   }
-  function changeBlockComment(option, state, ranges = state.selection.ranges) {
-    let tokens = ranges.map((r) => getConfig2(state, r.from).block);
+  function changeBlockComment(option, state2, ranges = state2.selection.ranges) {
+    let tokens = ranges.map((r) => getConfig2(state2, r.from).block);
     if (!tokens.every((c4) => c4))
       return null;
-    let comments = ranges.map((r, i2) => findBlockComment(state, tokens[i2], r.from, r.to));
+    let comments = ranges.map((r, i2) => findBlockComment(state2, tokens[i2], r.from, r.to));
     if (option != 2 && !comments.every((c4) => c4)) {
-      return { changes: state.changes(ranges.map((range2, i2) => {
+      return { changes: state2.changes(ranges.map((range2, i2) => {
         if (comments[i2])
           return [];
         return [{ from: range2.from, insert: tokens[i2].open + " " }, { from: range2.to, insert: " " + tokens[i2].close }];
@@ -22584,16 +22587,16 @@ ${markup.join("\n")}`);
     }
     return null;
   }
-  function changeLineComment(option, state, ranges = state.selection.ranges) {
+  function changeLineComment(option, state2, ranges = state2.selection.ranges) {
     let lines = [];
     let prevLine = -1;
     for (let { from, to: to2 } of ranges) {
       let startI = lines.length, minIndent = 1e9;
       for (let pos = from; pos <= to2; ) {
-        let line = state.doc.lineAt(pos);
+        let line = state2.doc.lineAt(pos);
         if (line.from > prevLine && (from == to2 || to2 > line.from)) {
           prevLine = line.from;
-          let token = getConfig2(state, pos).line;
+          let token = getConfig2(state2, pos).line;
           if (!token)
             continue;
           let indent = /^\s*/.exec(line.text)[0].length;
@@ -22618,8 +22621,8 @@ ${markup.join("\n")}`);
       for (let { line, token, indent, empty: empty2, single } of lines)
         if (single || !empty2)
           changes.push({ from: line.from + indent, insert: token + " " });
-      let changeSet = state.changes(changes);
-      return { changes: changeSet, selection: state.selection.map(changeSet, 1) };
+      let changeSet = state2.changes(changes);
+      return { changes: changeSet, selection: state2.selection.map(changeSet, 1) };
     } else if (option != 1 && lines.some((l) => l.comment >= 0)) {
       let changes = [];
       for (let { line, comment: comment2, token } of lines)
@@ -22653,13 +22656,13 @@ ${markup.join("\n")}`);
     create() {
       return HistoryState.empty;
     },
-    update(state, tr) {
+    update(state2, tr) {
       let config2 = tr.state.facet(historyConfig);
       let fromHist = tr.annotation(fromHistory);
       if (fromHist) {
         let selection = tr.docChanged ? EditorSelection.single(changeEnd(tr.changes)) : void 0;
         let item = HistEvent.fromTransaction(tr, selection), from = fromHist.side;
-        let other = from == 0 ? state.undone : state.done;
+        let other = from == 0 ? state2.undone : state2.done;
         if (item)
           other = updateBranch(other, other.length, config2.minDepth, item);
         else
@@ -22668,18 +22671,18 @@ ${markup.join("\n")}`);
       }
       let isolate = tr.annotation(isolateHistory);
       if (isolate == "full" || isolate == "before")
-        state = state.isolate();
+        state2 = state2.isolate();
       if (tr.annotation(Transaction2.addToHistory) === false)
-        return !tr.changes.empty ? state.addMapping(tr.changes.desc) : state;
+        return !tr.changes.empty ? state2.addMapping(tr.changes.desc) : state2;
       let event = HistEvent.fromTransaction(tr);
       let time = tr.annotation(Transaction2.time), userEvent = tr.annotation(Transaction2.userEvent);
       if (event)
-        state = state.addChanges(event, time, userEvent, config2.newGroupDelay, config2.minDepth);
+        state2 = state2.addChanges(event, time, userEvent, config2.newGroupDelay, config2.minDepth);
       else if (tr.selection)
-        state = state.addSelection(tr.startState.selection, time, userEvent, config2.newGroupDelay);
+        state2 = state2.addSelection(tr.startState.selection, time, userEvent, config2.newGroupDelay);
       if (isolate == "full" || isolate == "after")
-        state = state.isolate();
-      return state;
+        state2 = state2.isolate();
+      return state2;
     },
     toJSON(value2) {
       return { done: value2.done.map((e2) => e2.toJSON()), undone: value2.undone.map((e2) => e2.toJSON()) };
@@ -22704,13 +22707,13 @@ ${markup.join("\n")}`);
     ];
   }
   function cmd(side, selection) {
-    return function({ state, dispatch }) {
-      if (!selection && state.readOnly)
+    return function({ state: state2, dispatch }) {
+      if (!selection && state2.readOnly)
         return false;
-      let historyState = state.field(historyField_, false);
+      let historyState = state2.field(historyField_, false);
       if (!historyState)
         return false;
-      let tr = historyState.pop(side, state, selection);
+      let tr = historyState.pop(side, state2, selection);
       if (!tr)
         return false;
       dispatch(tr);
@@ -22858,13 +22861,13 @@ ${markup.join("\n")}`);
     addMapping(mapping) {
       return new HistoryState(addMappingToBranch(this.done, mapping), addMappingToBranch(this.undone, mapping), this.prevTime, this.prevUserEvent);
     }
-    pop(side, state, selection) {
+    pop(side, state2, selection) {
       let branch = side == 0 ? this.done : this.undone;
       if (branch.length == 0)
         return null;
       let event = branch[branch.length - 1];
       if (selection && event.selectionsAfter.length) {
-        return state.update({
+        return state2.update({
           selection: event.selectionsAfter[event.selectionsAfter.length - 1],
           annotations: fromHistory.of({ side, rest: popSelection(branch) }),
           userEvent: side == 0 ? "select.undo" : "select.redo",
@@ -22876,7 +22879,7 @@ ${markup.join("\n")}`);
         let rest = branch.length == 1 ? none2 : branch.slice(0, branch.length - 1);
         if (event.mapped)
           rest = addMappingToBranch(rest, event.mapped);
-        return state.update({
+        return state2.update({
           changes: event.changes,
           selection: event.startSelection,
           effects: event.effects,
@@ -22898,14 +22901,14 @@ ${markup.join("\n")}`);
   function updateSel(sel, by) {
     return EditorSelection.create(sel.ranges.map(by), sel.mainIndex);
   }
-  function setSel(state, selection) {
-    return state.update({ selection, scrollIntoView: true, userEvent: "select" });
+  function setSel(state2, selection) {
+    return state2.update({ selection, scrollIntoView: true, userEvent: "select" });
   }
-  function moveSel({ state, dispatch }, how) {
-    let selection = updateSel(state.selection, how);
-    if (selection.eq(state.selection))
+  function moveSel({ state: state2, dispatch }, how) {
+    let selection = updateSel(state2.selection, how);
+    if (selection.eq(state2.selection))
       return false;
-    dispatch(setSel(state, selection));
+    dispatch(setSel(state2, selection));
     return true;
   }
   function rangeEnd(range2, forward) {
@@ -22924,26 +22927,26 @@ ${markup.join("\n")}`);
   }
   var cursorGroupLeft = (view) => cursorByGroup(view, !ltrAtCursor(view));
   var cursorGroupRight = (view) => cursorByGroup(view, ltrAtCursor(view));
-  function interestingNode(state, node, bracketProp) {
+  function interestingNode(state2, node, bracketProp) {
     if (node.type.prop(bracketProp))
       return true;
     let len = node.to - node.from;
-    return len && (len > 2 || /[^\s,.;:]/.test(state.sliceDoc(node.from, node.to))) || node.firstChild;
+    return len && (len > 2 || /[^\s,.;:]/.test(state2.sliceDoc(node.from, node.to))) || node.firstChild;
   }
-  function moveBySyntax(state, start, forward) {
-    let pos = syntaxTree(state).resolveInner(start.head);
+  function moveBySyntax(state2, start, forward) {
+    let pos = syntaxTree(state2).resolveInner(start.head);
     let bracketProp = forward ? NodeProp.closedBy : NodeProp.openedBy;
     for (let at = start.head; ; ) {
       let next = forward ? pos.childAfter(at) : pos.childBefore(at);
       if (!next)
         break;
-      if (interestingNode(state, next, bracketProp))
+      if (interestingNode(state2, next, bracketProp))
         pos = next;
       else
         at = forward ? next.to : next.from;
     }
     let bracket2 = pos.type.prop(bracketProp), match, newPos;
-    if (bracket2 && (match = forward ? matchBrackets(state, pos.from, 1) : matchBrackets(state, pos.to, -1)) && match.matched)
+    if (bracket2 && (match = forward ? matchBrackets(state2, pos.from, 1) : matchBrackets(state2, pos.to, -1)) && match.matched)
       newPos = forward ? match.end.to : match.end.from;
     else
       newPos = forward ? pos.to : pos.from;
@@ -22962,17 +22965,17 @@ ${markup.join("\n")}`);
   var cursorLineUp = (view) => cursorByLine(view, false);
   var cursorLineDown = (view) => cursorByLine(view, true);
   function cursorByPage(view, forward) {
-    let { state } = view, selection = updateSel(state.selection, (range2) => {
+    let { state: state2 } = view, selection = updateSel(state2.selection, (range2) => {
       return range2.empty ? view.moveVertically(range2, forward, Math.min(view.dom.clientHeight, innerHeight)) : rangeEnd(range2, forward);
     });
-    if (selection.eq(state.selection))
+    if (selection.eq(state2.selection))
       return false;
-    let startPos = view.coordsAtPos(state.selection.main.head);
+    let startPos = view.coordsAtPos(state2.selection.main.head);
     let scrollRect = view.scrollDOM.getBoundingClientRect();
     let effect;
     if (startPos && startPos.top > scrollRect.top && startPos.bottom < scrollRect.bottom && startPos.top - scrollRect.top <= view.scrollDOM.scrollHeight - view.scrollDOM.scrollTop - view.scrollDOM.clientHeight)
       effect = EditorView.scrollIntoView(selection.main.head, { y: "start", yMargin: startPos.top - scrollRect.top });
-    view.dispatch(setSel(state, selection), { effects: effect });
+    view.dispatch(setSel(state2, selection), { effects: effect });
     return true;
   }
   var cursorPageUp = (view) => cursorByPage(view, false);
@@ -22992,9 +22995,9 @@ ${markup.join("\n")}`);
   var cursorLineBoundaryBackward = (view) => moveSel(view, (range2) => moveByLineBoundary(view, range2, false));
   var cursorLineStart = (view) => moveSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).from, 1));
   var cursorLineEnd = (view) => moveSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).to, -1));
-  function toMatchingBracket(state, dispatch, extend3) {
-    let found = false, selection = updateSel(state.selection, (range2) => {
-      let matching = matchBrackets(state, range2.head, -1) || matchBrackets(state, range2.head, 1) || range2.head > 0 && matchBrackets(state, range2.head - 1, 1) || range2.head < state.doc.length && matchBrackets(state, range2.head + 1, -1);
+  function toMatchingBracket(state2, dispatch, extend3) {
+    let found = false, selection = updateSel(state2.selection, (range2) => {
+      let matching = matchBrackets(state2, range2.head, -1) || matchBrackets(state2, range2.head, 1) || range2.head > 0 && matchBrackets(state2, range2.head - 1, 1) || range2.head < state2.doc.length && matchBrackets(state2, range2.head + 1, -1);
       if (!matching || !matching.end)
         return range2;
       found = true;
@@ -23003,10 +23006,10 @@ ${markup.join("\n")}`);
     });
     if (!found)
       return false;
-    dispatch(setSel(state, selection));
+    dispatch(setSel(state2, selection));
     return true;
   }
-  var cursorMatchingBracket = ({ state, dispatch }) => toMatchingBracket(state, dispatch, false);
+  var cursorMatchingBracket = ({ state: state2, dispatch }) => toMatchingBracket(state2, dispatch, false);
   function extendSel(view, how) {
     let selection = updateSel(view.state.selection, (range2) => {
       let head = how(range2);
@@ -23043,58 +23046,58 @@ ${markup.join("\n")}`);
   var selectLineBoundaryBackward = (view) => extendSel(view, (range2) => moveByLineBoundary(view, range2, false));
   var selectLineStart = (view) => extendSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).from));
   var selectLineEnd = (view) => extendSel(view, (range2) => EditorSelection.cursor(view.lineBlockAt(range2.head).to));
-  var cursorDocStart = ({ state, dispatch }) => {
-    dispatch(setSel(state, { anchor: 0 }));
+  var cursorDocStart = ({ state: state2, dispatch }) => {
+    dispatch(setSel(state2, { anchor: 0 }));
     return true;
   };
-  var cursorDocEnd = ({ state, dispatch }) => {
-    dispatch(setSel(state, { anchor: state.doc.length }));
+  var cursorDocEnd = ({ state: state2, dispatch }) => {
+    dispatch(setSel(state2, { anchor: state2.doc.length }));
     return true;
   };
-  var selectDocStart = ({ state, dispatch }) => {
-    dispatch(setSel(state, { anchor: state.selection.main.anchor, head: 0 }));
+  var selectDocStart = ({ state: state2, dispatch }) => {
+    dispatch(setSel(state2, { anchor: state2.selection.main.anchor, head: 0 }));
     return true;
   };
-  var selectDocEnd = ({ state, dispatch }) => {
-    dispatch(setSel(state, { anchor: state.selection.main.anchor, head: state.doc.length }));
+  var selectDocEnd = ({ state: state2, dispatch }) => {
+    dispatch(setSel(state2, { anchor: state2.selection.main.anchor, head: state2.doc.length }));
     return true;
   };
-  var selectAll = ({ state, dispatch }) => {
-    dispatch(state.update({ selection: { anchor: 0, head: state.doc.length }, userEvent: "select" }));
+  var selectAll = ({ state: state2, dispatch }) => {
+    dispatch(state2.update({ selection: { anchor: 0, head: state2.doc.length }, userEvent: "select" }));
     return true;
   };
-  var selectLine = ({ state, dispatch }) => {
-    let ranges = selectedLineBlocks(state).map(({ from, to: to2 }) => EditorSelection.range(from, Math.min(to2 + 1, state.doc.length)));
-    dispatch(state.update({ selection: EditorSelection.create(ranges), userEvent: "select" }));
+  var selectLine = ({ state: state2, dispatch }) => {
+    let ranges = selectedLineBlocks(state2).map(({ from, to: to2 }) => EditorSelection.range(from, Math.min(to2 + 1, state2.doc.length)));
+    dispatch(state2.update({ selection: EditorSelection.create(ranges), userEvent: "select" }));
     return true;
   };
-  var selectParentSyntax = ({ state, dispatch }) => {
-    let selection = updateSel(state.selection, (range2) => {
+  var selectParentSyntax = ({ state: state2, dispatch }) => {
+    let selection = updateSel(state2.selection, (range2) => {
       var _a2;
-      let context2 = syntaxTree(state).resolveInner(range2.head, 1);
+      let context2 = syntaxTree(state2).resolveInner(range2.head, 1);
       while (!(context2.from < range2.from && context2.to >= range2.to || context2.to > range2.to && context2.from <= range2.from || !((_a2 = context2.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
         context2 = context2.parent;
       return EditorSelection.range(context2.to, context2.from);
     });
-    dispatch(setSel(state, selection));
+    dispatch(setSel(state2, selection));
     return true;
   };
-  var simplifySelection = ({ state, dispatch }) => {
-    let cur2 = state.selection, selection = null;
+  var simplifySelection = ({ state: state2, dispatch }) => {
+    let cur2 = state2.selection, selection = null;
     if (cur2.ranges.length > 1)
       selection = EditorSelection.create([cur2.main]);
     else if (!cur2.main.empty)
       selection = EditorSelection.create([EditorSelection.cursor(cur2.main.head)]);
     if (!selection)
       return false;
-    dispatch(setSel(state, selection));
+    dispatch(setSel(state2, selection));
     return true;
   };
-  function deleteBy({ state, dispatch }, by) {
-    if (state.readOnly)
+  function deleteBy({ state: state2, dispatch }, by) {
+    if (state2.readOnly)
       return false;
     let event = "delete.selection";
-    let changes = state.changeByRange((range2) => {
+    let changes = state2.changeByRange((range2) => {
       let { from, to: to2 } = range2;
       if (from == to2) {
         let towards = by(from);
@@ -23109,7 +23112,7 @@ ${markup.join("\n")}`);
     });
     if (changes.changes.empty)
       return false;
-    dispatch(state.update(changes, { scrollIntoView: true, userEvent: event }));
+    dispatch(state2.update(changes, { scrollIntoView: true, userEvent: event }));
     return true;
   }
   function skipAtomic(target, pos, forward) {
@@ -23122,17 +23125,17 @@ ${markup.join("\n")}`);
     return pos;
   }
   var deleteByChar = (target, forward) => deleteBy(target, (pos) => {
-    let { state } = target, line = state.doc.lineAt(pos), before, targetPos;
+    let { state: state2 } = target, line = state2.doc.lineAt(pos), before, targetPos;
     if (!forward && pos > line.from && pos < line.from + 200 && !/[^ \t]/.test(before = line.text.slice(0, pos - line.from))) {
       if (before[before.length - 1] == "	")
         return pos - 1;
-      let col = countColumn(before, state.tabSize), drop = col % getIndentUnit(state) || getIndentUnit(state);
+      let col = countColumn(before, state2.tabSize), drop = col % getIndentUnit(state2) || getIndentUnit(state2);
       for (let i2 = 0; i2 < drop && before[before.length - 1 - i2] == " "; i2++)
         pos--;
       targetPos = pos;
     } else {
       targetPos = findClusterBreak(line.text, pos - line.from, forward, forward) + line.from;
-      if (targetPos == pos && line.number != (forward ? state.doc.lines : 1))
+      if (targetPos == pos && line.number != (forward ? state2.doc.lines : 1))
         targetPos += forward ? 1 : -1;
     }
     return skipAtomic(target, targetPos, forward);
@@ -23140,11 +23143,11 @@ ${markup.join("\n")}`);
   var deleteCharBackward = (view) => deleteByChar(view, false);
   var deleteCharForward = (view) => deleteByChar(view, true);
   var deleteByGroup = (target, forward) => deleteBy(target, (start) => {
-    let pos = start, { state } = target, line = state.doc.lineAt(pos);
-    let categorize = state.charCategorizer(pos);
+    let pos = start, { state: state2 } = target, line = state2.doc.lineAt(pos);
+    let categorize = state2.charCategorizer(pos);
     for (let cat = null; ; ) {
       if (pos == (forward ? line.to : line.from)) {
-        if (pos == start && line.number != (forward ? state.doc.lines : 1))
+        if (pos == start && line.number != (forward ? state2.doc.lines : 1))
           pos += forward ? 1 : -1;
         break;
       }
@@ -23169,43 +23172,43 @@ ${markup.join("\n")}`);
     let lineStart = view.lineBlockAt(pos).from;
     return skipAtomic(view, pos > lineStart ? lineStart : Math.max(0, pos - 1), false);
   });
-  var splitLine = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var splitLine = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
-    let changes = state.changeByRange((range2) => {
+    let changes = state2.changeByRange((range2) => {
       return {
         changes: { from: range2.from, to: range2.to, insert: Text.of(["", ""]) },
         range: EditorSelection.cursor(range2.from)
       };
     });
-    dispatch(state.update(changes, { scrollIntoView: true, userEvent: "input" }));
+    dispatch(state2.update(changes, { scrollIntoView: true, userEvent: "input" }));
     return true;
   };
-  var transposeChars = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var transposeChars = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
-    let changes = state.changeByRange((range2) => {
-      if (!range2.empty || range2.from == 0 || range2.from == state.doc.length)
+    let changes = state2.changeByRange((range2) => {
+      if (!range2.empty || range2.from == 0 || range2.from == state2.doc.length)
         return { range: range2 };
-      let pos = range2.from, line = state.doc.lineAt(pos);
+      let pos = range2.from, line = state2.doc.lineAt(pos);
       let from = pos == line.from ? pos - 1 : findClusterBreak(line.text, pos - line.from, false) + line.from;
       let to2 = pos == line.to ? pos + 1 : findClusterBreak(line.text, pos - line.from, true) + line.from;
       return {
-        changes: { from, to: to2, insert: state.doc.slice(pos, to2).append(state.doc.slice(from, pos)) },
+        changes: { from, to: to2, insert: state2.doc.slice(pos, to2).append(state2.doc.slice(from, pos)) },
         range: EditorSelection.cursor(to2)
       };
     });
     if (changes.changes.empty)
       return false;
-    dispatch(state.update(changes, { scrollIntoView: true, userEvent: "move.character" }));
+    dispatch(state2.update(changes, { scrollIntoView: true, userEvent: "move.character" }));
     return true;
   };
-  function selectedLineBlocks(state) {
+  function selectedLineBlocks(state2) {
     let blocks = [], upto = -1;
-    for (let range2 of state.selection.ranges) {
-      let startLine = state.doc.lineAt(range2.from), endLine = state.doc.lineAt(range2.to);
+    for (let range2 of state2.selection.ranges) {
+      let startLine = state2.doc.lineAt(range2.from), endLine = state2.doc.lineAt(range2.to);
       if (!range2.empty && range2.to == endLine.from)
-        endLine = state.doc.lineAt(range2.to - 1);
+        endLine = state2.doc.lineAt(range2.to - 1);
       if (upto >= startLine.number) {
         let prev = blocks[blocks.length - 1];
         prev.to = endLine.to;
@@ -23217,169 +23220,169 @@ ${markup.join("\n")}`);
     }
     return blocks;
   }
-  function moveLine(state, dispatch, forward) {
-    if (state.readOnly)
+  function moveLine(state2, dispatch, forward) {
+    if (state2.readOnly)
       return false;
     let changes = [], ranges = [];
-    for (let block of selectedLineBlocks(state)) {
-      if (forward ? block.to == state.doc.length : block.from == 0)
+    for (let block of selectedLineBlocks(state2)) {
+      if (forward ? block.to == state2.doc.length : block.from == 0)
         continue;
-      let nextLine = state.doc.lineAt(forward ? block.to + 1 : block.from - 1);
+      let nextLine = state2.doc.lineAt(forward ? block.to + 1 : block.from - 1);
       let size2 = nextLine.length + 1;
       if (forward) {
-        changes.push({ from: block.to, to: nextLine.to }, { from: block.from, insert: nextLine.text + state.lineBreak });
+        changes.push({ from: block.to, to: nextLine.to }, { from: block.from, insert: nextLine.text + state2.lineBreak });
         for (let r of block.ranges)
-          ranges.push(EditorSelection.range(Math.min(state.doc.length, r.anchor + size2), Math.min(state.doc.length, r.head + size2)));
+          ranges.push(EditorSelection.range(Math.min(state2.doc.length, r.anchor + size2), Math.min(state2.doc.length, r.head + size2)));
       } else {
-        changes.push({ from: nextLine.from, to: block.from }, { from: block.to, insert: state.lineBreak + nextLine.text });
+        changes.push({ from: nextLine.from, to: block.from }, { from: block.to, insert: state2.lineBreak + nextLine.text });
         for (let r of block.ranges)
           ranges.push(EditorSelection.range(r.anchor - size2, r.head - size2));
       }
     }
     if (!changes.length)
       return false;
-    dispatch(state.update({
+    dispatch(state2.update({
       changes,
       scrollIntoView: true,
-      selection: EditorSelection.create(ranges, state.selection.mainIndex),
+      selection: EditorSelection.create(ranges, state2.selection.mainIndex),
       userEvent: "move.line"
     }));
     return true;
   }
-  var moveLineUp = ({ state, dispatch }) => moveLine(state, dispatch, false);
-  var moveLineDown = ({ state, dispatch }) => moveLine(state, dispatch, true);
-  function copyLine(state, dispatch, forward) {
-    if (state.readOnly)
+  var moveLineUp = ({ state: state2, dispatch }) => moveLine(state2, dispatch, false);
+  var moveLineDown = ({ state: state2, dispatch }) => moveLine(state2, dispatch, true);
+  function copyLine(state2, dispatch, forward) {
+    if (state2.readOnly)
       return false;
     let changes = [];
-    for (let block of selectedLineBlocks(state)) {
+    for (let block of selectedLineBlocks(state2)) {
       if (forward)
-        changes.push({ from: block.from, insert: state.doc.slice(block.from, block.to) + state.lineBreak });
+        changes.push({ from: block.from, insert: state2.doc.slice(block.from, block.to) + state2.lineBreak });
       else
-        changes.push({ from: block.to, insert: state.lineBreak + state.doc.slice(block.from, block.to) });
+        changes.push({ from: block.to, insert: state2.lineBreak + state2.doc.slice(block.from, block.to) });
     }
-    dispatch(state.update({ changes, scrollIntoView: true, userEvent: "input.copyline" }));
+    dispatch(state2.update({ changes, scrollIntoView: true, userEvent: "input.copyline" }));
     return true;
   }
-  var copyLineUp = ({ state, dispatch }) => copyLine(state, dispatch, false);
-  var copyLineDown = ({ state, dispatch }) => copyLine(state, dispatch, true);
+  var copyLineUp = ({ state: state2, dispatch }) => copyLine(state2, dispatch, false);
+  var copyLineDown = ({ state: state2, dispatch }) => copyLine(state2, dispatch, true);
   var deleteLine = (view) => {
     if (view.state.readOnly)
       return false;
-    let { state } = view, changes = state.changes(selectedLineBlocks(state).map(({ from, to: to2 }) => {
+    let { state: state2 } = view, changes = state2.changes(selectedLineBlocks(state2).map(({ from, to: to2 }) => {
       if (from > 0)
         from--;
-      else if (to2 < state.doc.length)
+      else if (to2 < state2.doc.length)
         to2++;
       return { from, to: to2 };
     }));
-    let selection = updateSel(state.selection, (range2) => view.moveVertically(range2, true)).map(changes);
+    let selection = updateSel(state2.selection, (range2) => view.moveVertically(range2, true)).map(changes);
     view.dispatch({ changes, selection, scrollIntoView: true, userEvent: "delete.line" });
     return true;
   };
-  function isBetweenBrackets(state, pos) {
-    if (/\(\)|\[\]|\{\}/.test(state.sliceDoc(pos - 1, pos + 1)))
+  function isBetweenBrackets(state2, pos) {
+    if (/\(\)|\[\]|\{\}/.test(state2.sliceDoc(pos - 1, pos + 1)))
       return { from: pos, to: pos };
-    let context2 = syntaxTree(state).resolveInner(pos);
+    let context2 = syntaxTree(state2).resolveInner(pos);
     let before = context2.childBefore(pos), after = context2.childAfter(pos), closedBy;
-    if (before && after && before.to <= pos && after.from >= pos && (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 && state.doc.lineAt(before.to).from == state.doc.lineAt(after.from).from)
+    if (before && after && before.to <= pos && after.from >= pos && (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 && state2.doc.lineAt(before.to).from == state2.doc.lineAt(after.from).from)
       return { from: before.to, to: after.from };
     return null;
   }
   var insertNewlineAndIndent = /* @__PURE__ */ newlineAndIndent(false);
   var insertBlankLine = /* @__PURE__ */ newlineAndIndent(true);
   function newlineAndIndent(atEof) {
-    return ({ state, dispatch }) => {
-      if (state.readOnly)
+    return ({ state: state2, dispatch }) => {
+      if (state2.readOnly)
         return false;
-      let changes = state.changeByRange((range2) => {
-        let { from, to: to2 } = range2, line = state.doc.lineAt(from);
-        let explode = !atEof && from == to2 && isBetweenBrackets(state, from);
+      let changes = state2.changeByRange((range2) => {
+        let { from, to: to2 } = range2, line = state2.doc.lineAt(from);
+        let explode = !atEof && from == to2 && isBetweenBrackets(state2, from);
         if (atEof)
-          from = to2 = (to2 <= line.to ? line : state.doc.lineAt(to2)).to;
-        let cx = new IndentContext(state, { simulateBreak: from, simulateDoubleBreak: !!explode });
+          from = to2 = (to2 <= line.to ? line : state2.doc.lineAt(to2)).to;
+        let cx = new IndentContext(state2, { simulateBreak: from, simulateDoubleBreak: !!explode });
         let indent = getIndentation(cx, from);
         if (indent == null)
-          indent = /^\s*/.exec(state.doc.lineAt(from).text)[0].length;
+          indent = /^\s*/.exec(state2.doc.lineAt(from).text)[0].length;
         while (to2 < line.to && /\s/.test(line.text[to2 - line.from]))
           to2++;
         if (explode)
           ({ from, to: to2 } = explode);
         else if (from > line.from && from < line.from + 100 && !/\S/.test(line.text.slice(0, from)))
           from = line.from;
-        let insert2 = ["", indentString(state, indent)];
+        let insert2 = ["", indentString(state2, indent)];
         if (explode)
-          insert2.push(indentString(state, cx.lineIndent(line.from, -1)));
+          insert2.push(indentString(state2, cx.lineIndent(line.from, -1)));
         return {
           changes: { from, to: to2, insert: Text.of(insert2) },
           range: EditorSelection.cursor(from + 1 + insert2[1].length)
         };
       });
-      dispatch(state.update(changes, { scrollIntoView: true, userEvent: "input" }));
+      dispatch(state2.update(changes, { scrollIntoView: true, userEvent: "input" }));
       return true;
     };
   }
-  function changeBySelectedLine(state, f) {
+  function changeBySelectedLine(state2, f) {
     let atLine = -1;
-    return state.changeByRange((range2) => {
+    return state2.changeByRange((range2) => {
       let changes = [];
       for (let pos = range2.from; pos <= range2.to; ) {
-        let line = state.doc.lineAt(pos);
+        let line = state2.doc.lineAt(pos);
         if (line.number > atLine && (range2.empty || range2.to > line.from)) {
           f(line, changes, range2);
           atLine = line.number;
         }
         pos = line.to + 1;
       }
-      let changeSet = state.changes(changes);
+      let changeSet = state2.changes(changes);
       return {
         changes,
         range: EditorSelection.range(changeSet.mapPos(range2.anchor, 1), changeSet.mapPos(range2.head, 1))
       };
     });
   }
-  var indentSelection = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var indentSelection = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
     let updated = /* @__PURE__ */ Object.create(null);
-    let context2 = new IndentContext(state, { overrideIndentation: (start) => {
+    let context2 = new IndentContext(state2, { overrideIndentation: (start) => {
       let found = updated[start];
       return found == null ? -1 : found;
     } });
-    let changes = changeBySelectedLine(state, (line, changes2, range2) => {
+    let changes = changeBySelectedLine(state2, (line, changes2, range2) => {
       let indent = getIndentation(context2, line.from);
       if (indent == null)
         return;
       if (!/\S/.test(line.text))
         indent = 0;
       let cur2 = /^\s*/.exec(line.text)[0];
-      let norm = indentString(state, indent);
+      let norm = indentString(state2, indent);
       if (cur2 != norm || range2.from < line.from + cur2.length) {
         updated[line.from] = indent;
         changes2.push({ from: line.from, to: line.from + cur2.length, insert: norm });
       }
     });
     if (!changes.changes.empty)
-      dispatch(state.update(changes, { userEvent: "indent" }));
+      dispatch(state2.update(changes, { userEvent: "indent" }));
     return true;
   };
-  var indentMore = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var indentMore = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
-    dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
-      changes.push({ from: line.from, insert: state.facet(indentUnit) });
+    dispatch(state2.update(changeBySelectedLine(state2, (line, changes) => {
+      changes.push({ from: line.from, insert: state2.facet(indentUnit) });
     }), { userEvent: "input.indent" }));
     return true;
   };
-  var indentLess = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var indentLess = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
-    dispatch(state.update(changeBySelectedLine(state, (line, changes) => {
+    dispatch(state2.update(changeBySelectedLine(state2, (line, changes) => {
       let space = /^\s*/.exec(line.text)[0];
       if (!space)
         return;
-      let col = countColumn(space, state.tabSize), keep = 0;
-      let insert2 = indentString(state, Math.max(0, col - getIndentUnit(state)));
+      let col = countColumn(space, state2.tabSize), keep = 0;
+      let insert2 = indentString(state2, Math.max(0, col - getIndentUnit(state2)));
       while (keep < space.length && keep < insert2.length && space.charCodeAt(keep) == insert2.charCodeAt(keep))
         keep++;
       changes.push({ from: line.from + keep, to: line.from + space.length, insert: insert2.slice(keep) });
@@ -23730,19 +23733,19 @@ ${markup.join("\n")}`);
       let match = /^([+-])?(\d+)?(:\d+)?(%)?$/.exec(input.value);
       if (!match)
         return;
-      let { state } = view, startLine = state.doc.lineAt(state.selection.main.head);
+      let { state: state2 } = view, startLine = state2.doc.lineAt(state2.selection.main.head);
       let [, sign, ln, cl, percent] = match;
       let col = cl ? +cl.slice(1) : 0;
       let line = ln ? +ln : startLine.number;
       if (ln && percent) {
         let pc = line / 100;
         if (sign)
-          pc = pc * (sign == "-" ? -1 : 1) + startLine.number / state.doc.lines;
-        line = Math.round(state.doc.lines * pc);
+          pc = pc * (sign == "-" ? -1 : 1) + startLine.number / state2.doc.lines;
+        line = Math.round(state2.doc.lines * pc);
       } else if (ln && sign) {
         line = line * (sign == "-" ? -1 : 1) + startLine.number;
       }
-      let docLine = state.doc.line(Math.max(1, Math.min(state.doc.lines, line)));
+      let docLine = state2.doc.line(Math.max(1, Math.min(state2.doc.lines, line)));
       view.dispatch({
         effects: dialogEffect.of(false),
         selection: EditorSelection.cursor(docLine.from + Math.max(0, Math.min(col, docLine.length))),
@@ -23807,11 +23810,11 @@ ${markup.join("\n")}`);
   }
   var matchDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-selectionMatch" });
   var mainMatchDeco = /* @__PURE__ */ Decoration.mark({ class: "cm-selectionMatch cm-selectionMatch-main" });
-  function insideWordBoundaries(check, state, from, to2) {
-    return (from == 0 || check(state.sliceDoc(from - 1, from)) != CharCategory.Word) && (to2 == state.doc.length || check(state.sliceDoc(to2, to2 + 1)) != CharCategory.Word);
+  function insideWordBoundaries(check, state2, from, to2) {
+    return (from == 0 || check(state2.sliceDoc(from - 1, from)) != CharCategory.Word) && (to2 == state2.doc.length || check(state2.sliceDoc(to2, to2 + 1)) != CharCategory.Word);
   }
-  function insideWord(check, state, from, to2) {
-    return check(state.sliceDoc(from, from + 1)) == CharCategory.Word && check(state.sliceDoc(to2 - 1, to2)) == CharCategory.Word;
+  function insideWord(check, state2, from, to2) {
+    return check(state2.sliceDoc(from, from + 1)) == CharCategory.Word && check(state2.sliceDoc(to2 - 1, to2)) == CharCategory.Word;
   }
   var matchHighlighter = /* @__PURE__ */ ViewPlugin.fromClass(class {
     constructor(view) {
@@ -23823,39 +23826,39 @@ ${markup.join("\n")}`);
     }
     getDeco(view) {
       let conf = view.state.facet(highlightConfig);
-      let { state } = view, sel = state.selection;
+      let { state: state2 } = view, sel = state2.selection;
       if (sel.ranges.length > 1)
         return Decoration.none;
       let range2 = sel.main, query, check = null;
       if (range2.empty) {
         if (!conf.highlightWordAroundCursor)
           return Decoration.none;
-        let word = state.wordAt(range2.head);
+        let word = state2.wordAt(range2.head);
         if (!word)
           return Decoration.none;
-        check = state.charCategorizer(range2.head);
-        query = state.sliceDoc(word.from, word.to);
+        check = state2.charCategorizer(range2.head);
+        query = state2.sliceDoc(word.from, word.to);
       } else {
         let len = range2.to - range2.from;
         if (len < conf.minSelectionLength || len > 200)
           return Decoration.none;
         if (conf.wholeWords) {
-          query = state.sliceDoc(range2.from, range2.to);
-          check = state.charCategorizer(range2.head);
-          if (!(insideWordBoundaries(check, state, range2.from, range2.to) && insideWord(check, state, range2.from, range2.to)))
+          query = state2.sliceDoc(range2.from, range2.to);
+          check = state2.charCategorizer(range2.head);
+          if (!(insideWordBoundaries(check, state2, range2.from, range2.to) && insideWord(check, state2, range2.from, range2.to)))
             return Decoration.none;
         } else {
-          query = state.sliceDoc(range2.from, range2.to).trim();
+          query = state2.sliceDoc(range2.from, range2.to).trim();
           if (!query)
             return Decoration.none;
         }
       }
       let deco = [];
       for (let part of view.visibleRanges) {
-        let cursor = new SearchCursor(state.doc, query, part.from, part.to);
+        let cursor = new SearchCursor(state2.doc, query, part.from, part.to);
         while (!cursor.next().done) {
           let { from, to: to2 } = cursor.value;
-          if (!check || insideWordBoundaries(check, state, from, to2)) {
+          if (!check || insideWordBoundaries(check, state2, from, to2)) {
             if (range2.empty && from <= range2.from && to2 >= range2.to)
               deco.push(mainMatchDeco.range(from, to2));
             else if (from >= range2.to || to2 <= range2.from)
@@ -23874,29 +23877,29 @@ ${markup.join("\n")}`);
     ".cm-selectionMatch": { backgroundColor: "#99ff7780" },
     ".cm-searchMatch .cm-selectionMatch": { backgroundColor: "transparent" }
   });
-  var selectWord = ({ state, dispatch }) => {
-    let { selection } = state;
-    let newSel = EditorSelection.create(selection.ranges.map((range2) => state.wordAt(range2.head) || EditorSelection.cursor(range2.head)), selection.mainIndex);
+  var selectWord = ({ state: state2, dispatch }) => {
+    let { selection } = state2;
+    let newSel = EditorSelection.create(selection.ranges.map((range2) => state2.wordAt(range2.head) || EditorSelection.cursor(range2.head)), selection.mainIndex);
     if (newSel.eq(selection))
       return false;
-    dispatch(state.update({ selection: newSel }));
+    dispatch(state2.update({ selection: newSel }));
     return true;
   };
-  function findNextOccurrence(state, query) {
-    let { main, ranges } = state.selection;
-    let word = state.wordAt(main.head), fullWord = word && word.from == main.from && word.to == main.to;
-    for (let cycled = false, cursor = new SearchCursor(state.doc, query, ranges[ranges.length - 1].to); ; ) {
+  function findNextOccurrence(state2, query) {
+    let { main, ranges } = state2.selection;
+    let word = state2.wordAt(main.head), fullWord = word && word.from == main.from && word.to == main.to;
+    for (let cycled = false, cursor = new SearchCursor(state2.doc, query, ranges[ranges.length - 1].to); ; ) {
       cursor.next();
       if (cursor.done) {
         if (cycled)
           return null;
-        cursor = new SearchCursor(state.doc, query, 0, Math.max(0, ranges[ranges.length - 1].from - 1));
+        cursor = new SearchCursor(state2.doc, query, 0, Math.max(0, ranges[ranges.length - 1].from - 1));
         cycled = true;
       } else {
         if (cycled && ranges.some((r) => r.from == cursor.value.from))
           continue;
         if (fullWord) {
-          let word2 = state.wordAt(cursor.value.from);
+          let word2 = state2.wordAt(cursor.value.from);
           if (!word2 || word2.from != cursor.value.from || word2.to != cursor.value.to)
             continue;
         }
@@ -23904,18 +23907,18 @@ ${markup.join("\n")}`);
       }
     }
   }
-  var selectNextOccurrence = ({ state, dispatch }) => {
-    let { ranges } = state.selection;
+  var selectNextOccurrence = ({ state: state2, dispatch }) => {
+    let { ranges } = state2.selection;
     if (ranges.some((sel) => sel.from === sel.to))
-      return selectWord({ state, dispatch });
-    let searchedText = state.sliceDoc(ranges[0].from, ranges[0].to);
-    if (state.selection.ranges.some((r) => state.sliceDoc(r.from, r.to) != searchedText))
+      return selectWord({ state: state2, dispatch });
+    let searchedText = state2.sliceDoc(ranges[0].from, ranges[0].to);
+    if (state2.selection.ranges.some((r) => state2.sliceDoc(r.from, r.to) != searchedText))
       return false;
-    let range2 = findNextOccurrence(state, searchedText);
+    let range2 = findNextOccurrence(state2, searchedText);
     if (!range2)
       return false;
-    dispatch(state.update({
-      selection: state.selection.addRange(EditorSelection.range(range2.from, range2.to), false),
+    dispatch(state2.update({
+      selection: state2.selection.addRange(EditorSelection.range(range2.from, range2.to), false),
       effects: EditorView.scrollIntoView(range2.to)
     }));
     return true;
@@ -24047,8 +24050,8 @@ ${markup.join("\n")}`);
   var setSearchQuery = /* @__PURE__ */ StateEffect.define();
   var togglePanel = /* @__PURE__ */ StateEffect.define();
   var searchState = /* @__PURE__ */ StateField.define({
-    create(state) {
-      return new SearchState(defaultQuery(state).create(), null);
+    create(state2) {
+      return new SearchState(defaultQuery(state2).create(), null);
     },
     update(value2, tr) {
       for (let effect of tr.effects) {
@@ -24075,9 +24078,9 @@ ${markup.join("\n")}`);
       this.decorations = this.highlight(view.state.field(searchState));
     }
     update(update3) {
-      let state = update3.state.field(searchState);
-      if (state != update3.startState.field(searchState) || update3.docChanged || update3.selectionSet || update3.viewportChanged)
-        this.decorations = this.highlight(state);
+      let state2 = update3.state.field(searchState);
+      if (state2 != update3.startState.field(searchState) || update3.docChanged || update3.selectionSet || update3.viewportChanged)
+        this.decorations = this.highlight(state2);
     }
     highlight({ query, panel }) {
       if (!panel || !query.spec.valid)
@@ -24100,8 +24103,8 @@ ${markup.join("\n")}`);
   });
   function searchCommand(f) {
     return (view) => {
-      let state = view.state.field(searchState, false);
-      return state && state.query.spec.valid ? f(view, state) : openSearchPanel(view);
+      let state2 = view.state.field(searchState, false);
+      return state2 && state2.query.spec.valid ? f(view, state2) : openSearchPanel(view);
     };
   }
   var findNext = /* @__PURE__ */ searchCommand((view, { query }) => {
@@ -24118,8 +24121,8 @@ ${markup.join("\n")}`);
     return true;
   });
   var findPrevious = /* @__PURE__ */ searchCommand((view, { query }) => {
-    let { state } = view, { from, to: to2 } = state.selection.main;
-    let range2 = query.prevMatch(state.doc, from, to2);
+    let { state: state2 } = view, { from, to: to2 } = state2.selection.main;
+    let range2 = query.prevMatch(state2.doc, from, to2);
     if (!range2)
       return false;
     view.dispatch({
@@ -24140,37 +24143,37 @@ ${markup.join("\n")}`);
     });
     return true;
   });
-  var selectSelectionMatches = ({ state, dispatch }) => {
-    let sel = state.selection;
+  var selectSelectionMatches = ({ state: state2, dispatch }) => {
+    let sel = state2.selection;
     if (sel.ranges.length > 1 || sel.main.empty)
       return false;
     let { from, to: to2 } = sel.main;
     let ranges = [], main = 0;
-    for (let cur2 = new SearchCursor(state.doc, state.sliceDoc(from, to2)); !cur2.next().done; ) {
+    for (let cur2 = new SearchCursor(state2.doc, state2.sliceDoc(from, to2)); !cur2.next().done; ) {
       if (ranges.length > 1e3)
         return false;
       if (cur2.value.from == from)
         main = ranges.length;
       ranges.push(EditorSelection.range(cur2.value.from, cur2.value.to));
     }
-    dispatch(state.update({
+    dispatch(state2.update({
       selection: EditorSelection.create(ranges, main),
       userEvent: "select.search.matches"
     }));
     return true;
   };
   var replaceNext = /* @__PURE__ */ searchCommand((view, { query }) => {
-    let { state } = view, { from, to: to2 } = state.selection.main;
-    if (state.readOnly)
+    let { state: state2 } = view, { from, to: to2 } = state2.selection.main;
+    if (state2.readOnly)
       return false;
-    let next = query.nextMatch(state.doc, from, from);
+    let next = query.nextMatch(state2.doc, from, from);
     if (!next)
       return false;
     let changes = [], selection, replacement;
     if (next.from == from && next.to == to2) {
-      replacement = state.toText(query.getReplacement(next));
+      replacement = state2.toText(query.getReplacement(next));
       changes.push({ from: next.from, to: next.to, insert: replacement });
-      next = query.nextMatch(state.doc, next.from, next.to);
+      next = query.nextMatch(state2.doc, next.from, next.to);
     }
     if (next) {
       let off = changes.length == 0 || changes[0].from >= next.to ? 0 : next.to - next.from - replacement.length;
@@ -24203,22 +24206,22 @@ ${markup.join("\n")}`);
   function createSearchPanel(view) {
     return view.state.facet(searchConfigFacet).createPanel(view);
   }
-  function defaultQuery(state, fallback) {
+  function defaultQuery(state2, fallback) {
     var _a2;
-    let sel = state.selection.main;
-    let selText = sel.empty || sel.to > sel.from + 100 ? "" : state.sliceDoc(sel.from, sel.to);
-    let caseSensitive = (_a2 = fallback === null || fallback === void 0 ? void 0 : fallback.caseSensitive) !== null && _a2 !== void 0 ? _a2 : state.facet(searchConfigFacet).caseSensitive;
+    let sel = state2.selection.main;
+    let selText = sel.empty || sel.to > sel.from + 100 ? "" : state2.sliceDoc(sel.from, sel.to);
+    let caseSensitive = (_a2 = fallback === null || fallback === void 0 ? void 0 : fallback.caseSensitive) !== null && _a2 !== void 0 ? _a2 : state2.facet(searchConfigFacet).caseSensitive;
     return fallback && !selText ? fallback : new SearchQuery({ search: selText.replace(/\n/g, "\\n"), caseSensitive });
   }
   var openSearchPanel = (view) => {
-    let state = view.state.field(searchState, false);
-    if (state && state.panel) {
+    let state2 = view.state.field(searchState, false);
+    if (state2 && state2.panel) {
       let panel = getPanel(view, createSearchPanel);
       if (!panel)
         return false;
       let searchInput = panel.dom.querySelector("[name=search]");
       if (searchInput != view.root.activeElement) {
-        let query = defaultQuery(view.state, state.query.spec);
+        let query = defaultQuery(view.state, state2.query.spec);
         if (query.valid)
           view.dispatch({ effects: setSearchQuery.of(query) });
         searchInput.focus();
@@ -24227,14 +24230,14 @@ ${markup.join("\n")}`);
     } else {
       view.dispatch({ effects: [
         togglePanel.of(true),
-        state ? setSearchQuery.of(defaultQuery(view.state, state.query.spec)) : StateEffect.appendConfig.of(searchExtensions)
+        state2 ? setSearchQuery.of(defaultQuery(view.state, state2.query.spec)) : StateEffect.appendConfig.of(searchExtensions)
       ] });
     }
     return true;
   };
   var closeSearchPanel = (view) => {
-    let state = view.state.field(searchState, false);
-    if (!state || !state.panel)
+    let state2 = view.state.field(searchState, false);
+    if (!state2 || !state2.panel)
       return false;
     let panel = getPanel(view, createSearchPanel);
     if (panel && panel.dom.contains(view.root.activeElement))
@@ -24420,8 +24423,8 @@ ${markup.join("\n")}`);
 
   // node_modules/@codemirror/autocomplete/dist/index.js
   var CompletionContext = class {
-    constructor(state, pos, explicit) {
-      this.state = state;
+    constructor(state2, pos, explicit) {
+      this.state = state2;
       this.pos = pos;
       this.explicit = explicit;
       this.abortListeners = [];
@@ -24484,8 +24487,8 @@ ${markup.join("\n")}`);
       this.match = match;
     }
   };
-  function cur(state) {
-    return state.selection.main.head;
+  function cur(state2) {
+    return state2.selection.main.head;
   }
   function ensureAnchor(expr, start) {
     var _a2;
@@ -24495,15 +24498,15 @@ ${markup.join("\n")}`);
       return expr;
     return new RegExp(`${addStart ? "^" : ""}(?:${source})${addEnd ? "$" : ""}`, (_a2 = expr.flags) !== null && _a2 !== void 0 ? _a2 : expr.ignoreCase ? "i" : "");
   }
-  function insertCompletionText(state, text, from, to2) {
-    return Object.assign(Object.assign({}, state.changeByRange((range2) => {
-      if (range2 == state.selection.main)
+  function insertCompletionText(state2, text, from, to2) {
+    return Object.assign(Object.assign({}, state2.changeByRange((range2) => {
+      if (range2 == state2.selection.main)
         return {
           changes: { from, to: to2, insert: text },
           range: EditorSelection.cursor(from + text.length)
         };
       let len = to2 - from;
-      if (!range2.empty || len && state.sliceDoc(range2.from - len, range2.from) != state.sliceDoc(from, to2))
+      if (!range2.empty || len && state2.sliceDoc(range2.from - len, range2.from) != state2.sliceDoc(from, to2))
         return { range: range2 };
       return {
         changes: { from: range2.from - len, to: range2.from, insert: text },
@@ -24874,7 +24877,7 @@ ${markup.join("\n")}`);
   function score(option) {
     return (option.boost || 0) * 100 + (option.apply ? 10 : 0) + (option.info ? 5 : 0) + (option.type ? 1 : 0);
   }
-  function sortOptions(active, state) {
+  function sortOptions(active, state2) {
     let options2 = [], i2 = 0;
     for (let a2 of active)
       if (a2.hasResult()) {
@@ -24888,7 +24891,7 @@ ${markup.join("\n")}`);
             options2.push(new Option(option, a2, match));
           }
         } else {
-          let matcher = new FuzzyMatcher(state.sliceDoc(a2.from, a2.to)), match;
+          let matcher = new FuzzyMatcher(state2.sliceDoc(a2.from, a2.to)), match;
           for (let option of a2.result.options)
             if (match = matcher.match(option.label)) {
               if (option.boost != null)
@@ -24918,8 +24921,8 @@ ${markup.join("\n")}`);
     setSelected(selected, id2) {
       return selected == this.selected || selected >= this.options.length ? this : new CompletionDialog(this.options, makeAttrs(id2, selected), this.tooltip, this.timestamp, selected);
     }
-    static build(active, state, id2, prev, conf) {
-      let options2 = sortOptions(active, state);
+    static build(active, state2, id2, prev, conf) {
+      let options2 = sortOptions(active, state2);
       if (!options2.length)
         return null;
       let selected = 0;
@@ -24951,15 +24954,15 @@ ${markup.join("\n")}`);
       return new CompletionState(none3, "cm-ac-" + Math.floor(Math.random() * 2e6).toString(36), null);
     }
     update(tr) {
-      let { state } = tr, conf = state.facet(completionConfig);
-      let sources = conf.override || state.languageDataAt("autocomplete", cur(state)).map(asSource);
+      let { state: state2 } = tr, conf = state2.facet(completionConfig);
+      let sources = conf.override || state2.languageDataAt("autocomplete", cur(state2)).map(asSource);
       let active = sources.map((source) => {
         let value2 = this.active.find((s) => s.source == source) || new ActiveSource(source, this.active.some((a2) => a2.state != 0) ? 1 : 0);
         return value2.update(tr, conf);
       });
       if (active.length == this.active.length && active.every((a2, i2) => a2 == this.active[i2]))
         active = this.active;
-      let open = tr.selection || active.some((a2) => a2.hasResult() && tr.changes.touchesRange(a2.from, a2.to)) || !sameResults(active, this.active) ? CompletionDialog.build(active, state, this.id, this.open, conf) : this.open && tr.docChanged ? this.open.map(tr.changes) : this.open;
+      let open = tr.selection || active.some((a2) => a2.hasResult() && tr.changes.touchesRange(a2.from, a2.to)) || !sameResults(active, this.active) ? CompletionDialog.build(active, state2, this.id, this.open, conf) : this.open && tr.docChanged ? this.open.map(tr.changes) : this.open;
       if (!open && active.every((a2) => a2.state != 1) && active.some((a2) => a2.hasResult()))
         active = active.map((a2) => a2.hasResult() ? new ActiveSource(a2.source, 0) : a2);
       for (let effect of tr.effects)
@@ -25011,9 +25014,9 @@ ${markup.join("\n")}`);
     return tr.isUserEvent("input.type") ? "input" : tr.isUserEvent("delete.backward") ? "delete" : null;
   }
   var ActiveSource = class {
-    constructor(source, state, explicitPos = -1) {
+    constructor(source, state2, explicitPos = -1) {
       this.source = source;
-      this.state = state;
+      this.state = state2;
       this.explicitPos = explicitPos;
     }
     hasResult() {
@@ -25080,11 +25083,11 @@ ${markup.join("\n")}`);
       return mapping.empty ? this : new ActiveResult(this.source, this.explicitPos < 0 ? -1 : mapping.mapPos(this.explicitPos), this.result, mapping.mapPos(this.from), mapping.mapPos(this.to, 1));
     }
   };
-  function checkValid(validFor, state, from, to2) {
+  function checkValid(validFor, state2, from, to2) {
     if (!validFor)
       return false;
-    let text = state.sliceDoc(from, to2);
-    return typeof validFor == "function" ? validFor(text, from, to2, state) : ensureAnchor(validFor, true).test(text);
+    let text = state2.sliceDoc(from, to2);
+    return typeof validFor == "function" ? validFor(text, from, to2, state2) : ensureAnchor(validFor, true).test(text);
   }
   var startCompletionEffect = /* @__PURE__ */ StateEffect.define();
   var closeCompletionEffect = /* @__PURE__ */ StateEffect.define();
@@ -25103,7 +25106,7 @@ ${markup.join("\n")}`);
     },
     provide: (f) => [
       showTooltip.from(f, (val) => val.tooltip),
-      EditorView.contentAttributes.from(f, (state) => state.attrs)
+      EditorView.contentAttributes.from(f, (state2) => state2.attrs)
     ]
   });
   var CompletionInteractMargin = 75;
@@ -25204,15 +25207,15 @@ ${markup.join("\n")}`);
     }
     startUpdate() {
       this.debounceUpdate = -1;
-      let { state } = this.view, cState = state.field(completionState);
+      let { state: state2 } = this.view, cState = state2.field(completionState);
       for (let active of cState.active) {
         if (active.state == 1 && !this.running.some((r) => r.active.source == active.source))
           this.startQuery(active);
       }
     }
     startQuery(active) {
-      let { state } = this.view, pos = cur(state);
-      let context2 = new CompletionContext(state, pos, active.explicitPos == pos);
+      let { state: state2 } = this.view, pos = cur(state2);
+      let context2 = new CompletionContext(state2, pos, active.explicitPos == pos);
       let pending = new RunningQuery(active, context2);
       this.running.push(pending);
       Promise.resolve(active.source(context2)).then((result) => {
@@ -25271,8 +25274,8 @@ ${markup.join("\n")}`);
   }, {
     eventHandlers: {
       blur() {
-        let state = this.view.state.field(completionState, false);
-        if (state && state.tooltip && this.view.state.facet(completionConfig).closeOnBlur)
+        let state2 = this.view.state.field(completionState, false);
+        if (state2 && state2.tooltip && this.view.state.facet(completionConfig).closeOnBlur)
           this.view.dispatch({ effects: closeCompletionEffect.of(null) });
       },
       compositionstart() {
@@ -25438,8 +25441,8 @@ ${markup.join("\n")}`);
         return definedClosing.charAt(i2 + 1);
     return fromCodePoint(ch < 128 ? ch : ch + 1);
   }
-  function config(state, pos) {
-    return state.languageDataAt("closeBrackets", pos)[0] || defaults2;
+  function config(state2, pos) {
+    return state2.languageDataAt("closeBrackets", pos)[0] || defaults2;
   }
   var android = typeof navigator == "object" && /* @__PURE__ */ /Android\b/.test(navigator.userAgent);
   var inputHandler2 = /* @__PURE__ */ EditorView.inputHandler.of((view, from, to2, insert2) => {
@@ -25454,16 +25457,16 @@ ${markup.join("\n")}`);
     view.dispatch(tr);
     return true;
   });
-  var deleteBracketPair = ({ state, dispatch }) => {
-    if (state.readOnly)
+  var deleteBracketPair = ({ state: state2, dispatch }) => {
+    if (state2.readOnly)
       return false;
-    let conf = config(state, state.selection.main.head);
+    let conf = config(state2, state2.selection.main.head);
     let tokens = conf.brackets || defaults2.brackets;
-    let dont = null, changes = state.changeByRange((range2) => {
+    let dont = null, changes = state2.changeByRange((range2) => {
       if (range2.empty) {
-        let before = prevChar(state.doc, range2.head);
+        let before = prevChar(state2.doc, range2.head);
         for (let token of tokens) {
-          if (token == before && nextChar(state.doc, range2.head) == closing(codePointAt(token, 0)))
+          if (token == before && nextChar(state2.doc, range2.head) == closing(codePointAt(token, 0)))
             return {
               changes: { from: range2.head - token.length, to: range2.head + token.length },
               range: EditorSelection.cursor(range2.head - token.length),
@@ -25474,27 +25477,27 @@ ${markup.join("\n")}`);
       return { range: dont = range2 };
     });
     if (!dont)
-      dispatch(state.update(changes, { scrollIntoView: true }));
+      dispatch(state2.update(changes, { scrollIntoView: true }));
     return !dont;
   };
   var closeBracketsKeymap = [
     { key: "Backspace", run: deleteBracketPair }
   ];
-  function insertBracket(state, bracket2) {
-    let conf = config(state, state.selection.main.head);
+  function insertBracket(state2, bracket2) {
+    let conf = config(state2, state2.selection.main.head);
     let tokens = conf.brackets || defaults2.brackets;
     for (let tok of tokens) {
       let closed = closing(codePointAt(tok, 0));
       if (bracket2 == tok)
-        return closed == tok ? handleSame(state, tok, tokens.indexOf(tok + tok + tok) > -1) : handleOpen(state, tok, closed, conf.before || defaults2.before);
-      if (bracket2 == closed && closedBracketAt(state, state.selection.main.from))
-        return handleClose(state, tok, closed);
+        return closed == tok ? handleSame(state2, tok, tokens.indexOf(tok + tok + tok) > -1) : handleOpen(state2, tok, closed, conf.before || defaults2.before);
+      if (bracket2 == closed && closedBracketAt(state2, state2.selection.main.from))
+        return handleClose(state2, tok, closed);
     }
     return null;
   }
-  function closedBracketAt(state, pos) {
+  function closedBracketAt(state2, pos) {
     let found = false;
-    state.field(bracketState).between(0, state.doc.length, (from) => {
+    state2.field(bracketState).between(0, state2.doc.length, (from) => {
       if (from == pos)
         found = true;
     });
@@ -25508,15 +25511,15 @@ ${markup.join("\n")}`);
     let prev = doc2.sliceString(pos - 2, pos);
     return codePointSize(codePointAt(prev, 0)) == prev.length ? prev : prev.slice(1);
   }
-  function handleOpen(state, open, close, closeBefore) {
-    let dont = null, changes = state.changeByRange((range2) => {
+  function handleOpen(state2, open, close, closeBefore) {
+    let dont = null, changes = state2.changeByRange((range2) => {
       if (!range2.empty)
         return {
           changes: [{ insert: open, from: range2.from }, { insert: close, from: range2.to }],
           effects: closeBracketEffect.of(range2.to + open.length),
           range: EditorSelection.range(range2.anchor + open.length, range2.head + open.length)
         };
-      let next = nextChar(state.doc, range2.head);
+      let next = nextChar(state2.doc, range2.head);
       if (!next || /\s/.test(next) || closeBefore.indexOf(next) > -1)
         return {
           changes: { insert: open + close, from: range2.head },
@@ -25525,55 +25528,55 @@ ${markup.join("\n")}`);
         };
       return { range: dont = range2 };
     });
-    return dont ? null : state.update(changes, {
+    return dont ? null : state2.update(changes, {
       scrollIntoView: true,
       userEvent: "input.type"
     });
   }
-  function handleClose(state, _open, close) {
-    let dont = null, moved = state.selection.ranges.map((range2) => {
-      if (range2.empty && nextChar(state.doc, range2.head) == close)
+  function handleClose(state2, _open, close) {
+    let dont = null, moved = state2.selection.ranges.map((range2) => {
+      if (range2.empty && nextChar(state2.doc, range2.head) == close)
         return EditorSelection.cursor(range2.head + close.length);
       return dont = range2;
     });
-    return dont ? null : state.update({
-      selection: EditorSelection.create(moved, state.selection.mainIndex),
+    return dont ? null : state2.update({
+      selection: EditorSelection.create(moved, state2.selection.mainIndex),
       scrollIntoView: true,
-      effects: state.selection.ranges.map(({ from }) => skipBracketEffect.of(from))
+      effects: state2.selection.ranges.map(({ from }) => skipBracketEffect.of(from))
     });
   }
-  function handleSame(state, token, allowTriple) {
-    let dont = null, changes = state.changeByRange((range2) => {
+  function handleSame(state2, token, allowTriple) {
+    let dont = null, changes = state2.changeByRange((range2) => {
       if (!range2.empty)
         return {
           changes: [{ insert: token, from: range2.from }, { insert: token, from: range2.to }],
           effects: closeBracketEffect.of(range2.to + token.length),
           range: EditorSelection.range(range2.anchor + token.length, range2.head + token.length)
         };
-      let pos = range2.head, next = nextChar(state.doc, pos);
+      let pos = range2.head, next = nextChar(state2.doc, pos);
       if (next == token) {
-        if (nodeStart(state, pos)) {
+        if (nodeStart(state2, pos)) {
           return {
             changes: { insert: token + token, from: pos },
             effects: closeBracketEffect.of(pos + token.length),
             range: EditorSelection.cursor(pos + token.length)
           };
-        } else if (closedBracketAt(state, pos)) {
-          let isTriple = allowTriple && state.sliceDoc(pos, pos + token.length * 3) == token + token + token;
+        } else if (closedBracketAt(state2, pos)) {
+          let isTriple = allowTriple && state2.sliceDoc(pos, pos + token.length * 3) == token + token + token;
           return {
             range: EditorSelection.cursor(pos + token.length * (isTriple ? 3 : 1)),
             effects: skipBracketEffect.of(pos)
           };
         }
-      } else if (allowTriple && state.sliceDoc(pos - 2 * token.length, pos) == token + token && nodeStart(state, pos - 2 * token.length)) {
+      } else if (allowTriple && state2.sliceDoc(pos - 2 * token.length, pos) == token + token && nodeStart(state2, pos - 2 * token.length)) {
         return {
           changes: { insert: token + token + token + token, from: pos },
           effects: closeBracketEffect.of(pos + token.length),
           range: EditorSelection.cursor(pos + token.length)
         };
-      } else if (state.charCategorizer(pos)(next) != CharCategory.Word) {
-        let prev = state.sliceDoc(pos - 1, pos);
-        if (prev != token && state.charCategorizer(pos)(prev) != CharCategory.Word && !probablyInString(state, pos, token))
+      } else if (state2.charCategorizer(pos)(next) != CharCategory.Word) {
+        let prev = state2.sliceDoc(pos - 1, pos);
+        if (prev != token && state2.charCategorizer(pos)(prev) != CharCategory.Word && !probablyInString(state2, pos, token))
           return {
             changes: { insert: token + token, from: pos },
             effects: closeBracketEffect.of(pos + token.length),
@@ -25582,19 +25585,19 @@ ${markup.join("\n")}`);
       }
       return { range: dont = range2 };
     });
-    return dont ? null : state.update(changes, {
+    return dont ? null : state2.update(changes, {
       scrollIntoView: true,
       userEvent: "input.type"
     });
   }
-  function nodeStart(state, pos) {
-    let tree = syntaxTree(state).resolveInner(pos + 1);
+  function nodeStart(state2, pos) {
+    let tree = syntaxTree(state2).resolveInner(pos + 1);
     return tree.parent && tree.from == pos;
   }
-  function probablyInString(state, pos, quoteToken) {
-    let node = syntaxTree(state).resolveInner(pos, -1);
+  function probablyInString(state2, pos, quoteToken) {
+    let node = syntaxTree(state2).resolveInner(pos, -1);
     for (let i2 = 0; i2 < 5; i2++) {
-      if (state.sliceDoc(node.from, node.from + quoteToken.length) == quoteToken)
+      if (state2.sliceDoc(node.from, node.from + quoteToken.length) == quoteToken)
         return true;
       let parent = node.to == pos && node.parent;
       if (!parent)
@@ -25621,7 +25624,7 @@ ${markup.join("\n")}`);
     { key: "PageUp", run: /* @__PURE__ */ moveCompletionSelection(false, "page") },
     { key: "Enter", run: acceptCompletion }
   ];
-  var completionKeymapExt = /* @__PURE__ */ Prec.highest(/* @__PURE__ */ keymap.computeN([completionConfig], (state) => state.facet(completionConfig).defaultKeymap ? [completionKeymap] : []));
+  var completionKeymapExt = /* @__PURE__ */ Prec.highest(/* @__PURE__ */ keymap.computeN([completionConfig], (state2) => state2.facet(completionConfig).defaultKeymap ? [completionKeymap] : []));
 
   // node_modules/@codemirror/lint/dist/index.js
   var SelectedDiagnostic = class {
@@ -25637,13 +25640,13 @@ ${markup.join("\n")}`);
       this.panel = panel;
       this.selected = selected;
     }
-    static init(diagnostics, panel, state) {
+    static init(diagnostics, panel, state2) {
       let markedDiagnostics = diagnostics;
-      let diagnosticFilter = state.facet(lintConfig).markerFilter;
+      let diagnosticFilter = state2.facet(lintConfig).markerFilter;
       if (diagnosticFilter)
         markedDiagnostics = diagnosticFilter(markedDiagnostics);
       let ranges = Decoration.set(markedDiagnostics.map((d2) => {
-        return d2.from == d2.to || d2.from == d2.to - 1 && state.doc.lineAt(d2.from).to == d2.from ? Decoration.widget({
+        return d2.from == d2.to || d2.from == d2.to - 1 && state2.doc.lineAt(d2.from).to == d2.from ? Decoration.widget({
           widget: new DiagnosticWidget(d2),
           diagnostic: d2
         }).range(d2.from) : Decoration.mark({
@@ -25667,11 +25670,11 @@ ${markup.join("\n")}`);
   function hideTooltip(tr, tooltip) {
     return !!(tr.effects.some((e2) => e2.is(setDiagnosticsEffect)) || tr.changes.touchesRange(tooltip.pos));
   }
-  function maybeEnableLint(state, effects) {
-    return state.field(lintState, false) ? effects : effects.concat(StateEffect.appendConfig.of([
+  function maybeEnableLint(state2, effects) {
+    return state2.field(lintState, false) ? effects : effects.concat(StateEffect.appendConfig.of([
       lintState,
-      EditorView.decorations.compute([lintState], (state2) => {
-        let { selected, panel } = state2.field(lintState);
+      EditorView.decorations.compute([lintState], (state3) => {
+        let { selected, panel } = state3.field(lintState);
         return !selected || !panel || selected.from == selected.to ? Decoration.none : Decoration.set([
           activeMark.range(selected.from, selected.to)
         ]);
@@ -25680,9 +25683,9 @@ ${markup.join("\n")}`);
       baseTheme5
     ]));
   }
-  function setDiagnostics(state, diagnostics) {
+  function setDiagnostics(state2, diagnostics) {
     return {
-      effects: maybeEnableLint(state, [setDiagnosticsEffect.of(diagnostics)])
+      effects: maybeEnableLint(state2, [setDiagnosticsEffect.of(diagnostics)])
     };
   }
   var setDiagnosticsEffect = /* @__PURE__ */ StateEffect.define();
@@ -25794,10 +25797,10 @@ ${markup.join("\n")}`);
         setTimeout(this.run, this.lintTime - now);
       } else {
         this.set = false;
-        let { state } = this.view, { sources } = state.facet(lintConfig);
+        let { state: state2 } = this.view, { sources } = state2.facet(lintConfig);
         Promise.all(sources.map((source) => Promise.resolve(source(this.view)))).then((annotations) => {
           let all = annotations.reduce((a2, b2) => a2.concat(b2));
-          if (this.view.state.doc == state.doc)
+          if (this.view.state.doc == state2.doc)
             this.view.dispatch(setDiagnostics(this.view.state, all));
         }, (error) => {
           logException(this.view.state, error);
@@ -26212,13 +26215,13 @@ ${markup.join("\n")}`);
           )
         ]
       };
-      const state = EditorState.create({
+      const state2 = EditorState.create({
         ...config2,
         doc: file
       });
       target.view = new EditorView({
         parent: target,
-        state
+        state: state2
       });
     }
   });
@@ -29462,9 +29465,9 @@ ${markup.join("\n")}`);
     const frame = frames[key2] || {};
     if (time - 1e3 / actionableFPS > (frame.time || 0)) {
       feature();
-      $5.teach({ time }, (state, payload) => {
+      $5.teach({ time }, (state2, payload) => {
         return {
-          ...state,
+          ...state2,
           frames: {
             ...frames,
             [key2]: {
