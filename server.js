@@ -97,7 +97,10 @@ app.get('/exec/*', async (req, res) => {
   handler(req, res)
 })
 
-
+function uriByType(user) {
+  return {
+  }
+}
 
 // Create the HTTP server
 require('http')
@@ -115,15 +118,19 @@ app.get('/statebus-client-library.js',
                          send_file('node_modules/statebus/client-library.js'))
 app.get('/braidify.js',  send_file('node_modules/braidify/braidify-client.js'))
 
-app.get("/albums", (req, res) => {
-  try {
-    // Set up the API endpoint
-    const url = `https://api.smugmug.com/api/v2/user/${userNameOrId}!albums`;
+app.get("/api/smugmug/current-user", (req, res) => {
+  const url = `https://api.smugmug.com/api/v2!authuser`;
+  smugmug({ url }, req, res)
+})
 
+function smugmug(options, req, res) {
+  const { url, method="GET", key, secret } = options
+
+  try {
     // Set up the OAuth 1.0a parameters
     const requestData = {
       url,
-      method: "GET",
+      method,
     };
     const token = {
       key: process.env.HARDCODED_ACCESS_TOKEN,
@@ -159,6 +166,12 @@ app.get("/albums", (req, res) => {
     // Handle any errors that occurred during the request
     res.status(500).json({ error: 'whoops' });
   }
+
+}
+
+app.get("/api/smugmug/node", (req, res) => {
+  const url = `https://api.smugmug.com/api/v2/user/${process.env.HARDCODED_USER_ID}?_expand=Node.ChildNodes`;
+  smugmug({ url }, req, res)
 });
 
 // Setup the statebus!
