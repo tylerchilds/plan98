@@ -11,6 +11,7 @@ bus.libs.localstorage('ls/*')
 bus.libs.http_out('/*', '/')
 window.braid_fetch = window.fetch
 window.module = module
+window.state = state
 
 const CREATE_EVENT = 'create'
 

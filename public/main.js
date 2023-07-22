@@ -5,4 +5,5 @@ import './packages/synth-module.js'
 import './packages/design-system.js'
 import './packages/smug-mug.js'
 import './packages/google-maps.js'
+import './packages/script-type.js'
 
