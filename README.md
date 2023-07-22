@@ -1,6 +1,8 @@
-# smugoogle
+# JMAP Inbox
 
-a smashup prototype of smugmug and google maps
+google profits of engagement. inbox was an nlogn algo for users and that was bad for ads.
+
+JMAP inbox starts over.
 
 ## development
 
