@@ -17,12 +17,11 @@
     Snackbar.hide();
     var req = new XMLHttpRequest();
 
-    req.open('GET', this.url + 'messages?pageToken=' + this.pageToken + '&limit=' + this.limit);
+    req.open('GET', this.url);
 
     req.onload = function() {
       if (req.status === 200) {
         thisList.fetchable = true;
-
         var res = JSON.parse(req.responseText);
         thisList.pageToken = res.pageToken;
 

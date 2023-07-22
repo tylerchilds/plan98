@@ -2,7 +2,7 @@
 
   new MessageList({
     limit: 10,
-    url: 'https://message-list.appspot.com/'
+    url: 'http://localhost:1989/api/fastmail/fetchTen'
   });
 
 })(window.MessageList)

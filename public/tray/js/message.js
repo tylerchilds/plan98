@@ -8,12 +8,14 @@
     Element.apply(this)
 
     this.parent = parent;
+    this.message = m;
+    console.log(parent)
 
     var message = this.create('div', {
       className: "card"
     });
 
-    var photo = parent.url + m.author.photoUrl;
+    var photo = m.author.photoUrl;
     var meta = new Meta(photo, m.author.name, m.updated);
 
     message.appendChild(meta.getElem())
@@ -31,6 +33,7 @@
     this.$elem.addEventListener('touchstart', this.touchStart.bind(this))
     this.$elem.addEventListener('touchmove', this.touchMove.bind(this))
     this.$elem.addEventListener('touchend', this.touchEnd.bind(this))
+    this.$elem.addEventListener('click', this.click.bind(this))
   },
 
   Message.prototype.touchStart = function(e){
@@ -98,6 +101,10 @@
 
     return false;
   }
+
+  Message.prototype.click = function(e){
+    alert(this.message.textBody)
+  },
 
   Message.prototype.recover = function(){
     this.$elem.className = "card recover";
