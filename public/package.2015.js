@@ -6681,7 +6681,7 @@ ${patch.content}\r
             const e3 = new URL(t3), r2 = window.location;
             return e3.protocol === r2.protocol && e3.host === r2.host;
           }
-          function $11(t3, e3, r2) {
+          function $12(t3, e3, r2) {
             r2[t3] && -1 !== r2[t3].indexOf(e3) || (r2[t3] = r2[t3] || [], r2[t3].push(e3));
           }
           function D(t3, e3, r2) {
@@ -6702,13 +6702,13 @@ ${patch.content}\r
           }
           class R {
             on(t3, e3) {
-              return this._listeners = this._listeners || {}, $11(t3, e3, this._listeners), this;
+              return this._listeners = this._listeners || {}, $12(t3, e3, this._listeners), this;
             }
             off(t3, e3) {
               return D(t3, e3, this._listeners), D(t3, e3, this._oneTimeListeners), this;
             }
             once(t3, e3) {
-              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $11(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
+              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $12(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
             }
             fire(t3, e3) {
               "string" == typeof t3 && (t3 = new O(t3, e3 || {}));
@@ -13899,8 +13899,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 const t4 = Math.sin(L2), e4 = Math.cos(L2), r3 = [e4, -t4, t4, e4];
                 B2._matMult(r3), C3._matMult(r3), E2._matMult(r3), V2._matMult(r3);
               }
-              const $12 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
-              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $12, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $12, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
+              const $13 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
+              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $13, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $13, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
             };
             if (n3 && (s2.stretchX || s2.stretchY)) {
               const t4 = bc(p3, g3, y2), e4 = bc(f2, x2, m4);
@@ -14131,7 +14131,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const C3 = (l3, p4) => {
               p4.x < 0 || p4.x >= ja || p4.y < 0 || p4.y >= ja || function(e4, r3, n4, i4, a4, s3, o3, l4, u3, c6, h3, p5, f3, d4, y3, m5, g4, v3, b4, w3, _3, A3, k3, S3, I3) {
                 const z3 = e4.addToLineVertexArray(r3, n4);
-                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $12 = -1;
+                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $13 = -1;
                 const D2 = {};
                 let O2 = Aa(""), U2 = 0, R2 = 0;
                 if (void 0 === l4._unevaluatedLayout.getValue("text-radial-offset") ? [U2, R2] = l4.layout.get("text-offset").evaluate(_3, {}, S3).map((t3) => t3 * vl) : (U2 = l4.layout.get("text-radial-offset").evaluate(_3, {}, S3) * vl, R2 = Pc), e4.allowVerticalPlacement && i4.vertical) {
@@ -14143,7 +14143,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   P4 = new Ac(u3, r3, c6, h3, p5, a4, g4, v3, false, n5), V2 = 4 * s4.length;
                   const d5 = e4.iconSizeData;
                   let y4 = null;
-                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $12 = e4.icon.placedSymbolArray.length - 1);
+                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $13 = e4.icon.placedSymbolArray.length - 1);
                 }
                 const q2 = Object.keys(i4.horizontal);
                 for (const n5 of q2) {
@@ -14157,13 +14157,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   if (F2 += Ec(e4, r3, a5, s3, l4, y3, _3, m5, z3, i4.vertical ? t2.WritingMode.horizontal : t2.WritingMode.horizontalOnly, o4 ? q2 : [n5], D2, L2, A3, S3), o4)
                     break;
                 }
-                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $12, A3, S3));
+                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $13, A3, S3));
                 const j2 = M3 ? M3.boxStartIndex : e4.collisionBoxArray.length, N2 = M3 ? M3.boxEndIndex : e4.collisionBoxArray.length, Z2 = B3 ? B3.boxStartIndex : e4.collisionBoxArray.length, K2 = B3 ? B3.boxEndIndex : e4.collisionBoxArray.length, G2 = P4 ? P4.boxStartIndex : e4.collisionBoxArray.length, J2 = P4 ? P4.boxEndIndex : e4.collisionBoxArray.length, X2 = C4 ? C4.boxStartIndex : e4.collisionBoxArray.length, Y2 = C4 ? C4.boxEndIndex : e4.collisionBoxArray.length;
                 let H2 = -1;
                 const W2 = (t3, e5) => t3 && t3.circleDiameter ? Math.max(t3.circleDiameter, e5) : e5;
                 H2 = W2(M3, H2), H2 = W2(B3, H2), H2 = W2(P4, H2), H2 = W2(C4, H2);
                 const Q2 = H2 > -1 ? 1 : 0;
-                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $12, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
+                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $13, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
               }(e3, p4, l3, n3, i3, a3, B2, e3.layers[0], e3.collisionBoxArray, r2.index, r2.sourceLayerIndex, e3.index, g3, [_2, _2, _2, _2], S2, u2, b3, A2, I2, d3, r2, s2, c5, h2, o2);
             };
             if ("line" === z2)
@@ -15352,11 +15352,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           }
           function X(e3, t3) {
-            t3.push($11(e3[0])), t3.push(U(e3[1])), t3.push(0);
+            t3.push($12(e3[0])), t3.push(U(e3[1])), t3.push(0);
           }
           function W(e3, t3, o2, i3) {
             for (var r2, s2, n3 = 0, a3 = 0; a3 < e3.length; a3++) {
-              var l2 = $11(e3[a3][0]), c5 = U(e3[a3][1]);
+              var l2 = $12(e3[a3][0]), c5 = U(e3[a3][1]);
               t3.push(l2), t3.push(c5), t3.push(0), a3 > 0 && (n3 += i3 ? (r2 * c5 - l2 * s2) / 2 : Math.sqrt(Math.pow(l2 - r2, 2) + Math.pow(c5 - s2, 2))), r2 = l2, s2 = c5;
             }
             var u2 = t3.length - 3;
@@ -15368,7 +15368,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               W(e3[r2], s2, o2, i3), t3.push(s2);
             }
           }
-          function $11(e3) {
+          function $12(e3) {
             return e3 / 360 + 0.5;
           }
           function U(e3) {
@@ -17021,7 +17021,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const s2 = t2.create();
             return t2.translate(s2, s2, [1, 1, 0]), t2.scale(s2, s2, [0.5 * e3.width, 0.5 * e3.height, 1]), t2.multiply(s2, s2, e3.calculatePosMatrix(i3.toUnwrapped()));
           }
-          function $11(t3, e3, i3, s2, a3, o2) {
+          function $12(t3, e3, i3, s2, a3, o2) {
             const r2 = function(t4, e4, i4) {
               if (t4)
                 for (const s3 of t4) {
@@ -19174,7 +19174,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               i3.availableImages = this._availableImages;
               const r2 = this._serializedAllLayers();
               for (const t3 in this.sourceCaches)
-                i3.layers && !a3[t3] || o2.push($11(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
+                i3.layers && !a3[t3] || o2.push($12(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
               return this.placement && o2.push(function(t3, e4, i4, s3, a4, o3, r3) {
                 const n3 = {}, l2 = o3.queryRenderedSymbols(s3), c5 = [];
                 for (const t4 of Object.keys(l2).map(Number))
@@ -27390,8 +27390,8 @@ ${markup.join("\n")}`);
     </div>
   `;
   });
-  function attributes(node, $11) {
-    const root = node.closest($11.selector);
+  function attributes(node, $12) {
+    const root = node.closest($12.selector);
     return { root };
   }
   function toggleActive(event) {
@@ -31988,14 +31988,14 @@ ${markup.join("\n")}`);
     }
   };
   var scrollIntoView = /* @__PURE__ */ StateEffect.define({ map: (t2, ch) => t2.map(ch) });
-  function logException(state3, exception, context2) {
+  function logException(state3, exception, context3) {
     let handler = state3.facet(exceptionSink);
     if (handler.length)
       handler[0](exception);
     else if (window.onerror)
-      window.onerror(String(exception), context2, void 0, void 0, exception);
-    else if (context2)
-      console.error(context2 + ":", exception);
+      window.onerror(String(exception), context3, void 0, void 0, exception);
+    else if (context3)
+      console.error(context3 + ":", exception);
     else
       console.error(exception);
   }
@@ -32267,7 +32267,7 @@ ${markup.join("\n")}`);
       if (type2 & 7)
         prevStrong = type2;
     }
-    for (let i2 = 0, sI = 0, context2 = 0, ch, br, type2; i2 < len; i2++) {
+    for (let i2 = 0, sI = 0, context3 = 0, ch, br, type2; i2 < len; i2++) {
       if (br = Brackets[ch = line.charCodeAt(i2)]) {
         if (br < 0) {
           for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
@@ -32285,11 +32285,11 @@ ${markup.join("\n")}`);
         } else {
           BracketStack[sI++] = i2;
           BracketStack[sI++] = ch;
-          BracketStack[sI++] = context2;
+          BracketStack[sI++] = context3;
         }
       } else if ((type2 = types[i2]) == 2 || type2 == 1) {
         let embed = type2 == outerType;
-        context2 = embed ? 0 : 1;
+        context3 = embed ? 0 : 1;
         for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
           let cur2 = BracketStack[sJ + 2];
           if (cur2 & 2)
@@ -35278,8 +35278,8 @@ ${markup.join("\n")}`);
       let { view } = this, sel = this.selectionRange;
       if (view.state.facet(editable) ? view.root.activeElement != this.dom : !hasSelection(view.dom, sel))
         return;
-      let context2 = sel.anchorNode && view.docView.nearest(sel.anchorNode);
-      if (context2 && context2.ignoreEvent(event))
+      let context3 = sel.anchorNode && view.docView.nearest(sel.anchorNode);
+      if (context3 && context3.ignoreEvent(event))
         return;
       if ((browser.ie && browser.ie_version <= 11 || browser.android && browser.chrome) && !view.state.selection.main.empty && sel.focusNode && isEquivalentPosition(sel.focusNode, sel.focusOffset, sel.anchorNode, sel.anchorOffset))
         this.flushSoon();
@@ -38437,8 +38437,8 @@ ${markup.join("\n")}`);
     get node() {
       return this;
     }
-    matchContext(context2) {
-      return matchNodeContext(this, context2);
+    matchContext(context3) {
+      return matchNodeContext(this, context3);
     }
   };
   function getChildren(node, type2, before, after) {
@@ -38459,12 +38459,12 @@ ${markup.join("\n")}`);
         return after == null ? result : [];
     }
   }
-  function matchNodeContext(node, context2, i2 = context2.length - 1) {
+  function matchNodeContext(node, context3, i2 = context3.length - 1) {
     for (let p2 = node.parent; i2 >= 0; p2 = p2.parent) {
       if (!p2)
         return false;
       if (!p2.type.isAnonymous) {
-        if (context2[i2] && context2[i2] != p2.name)
+        if (context3[i2] && context3[i2] != p2.name)
           return false;
         i2--;
       }
@@ -38480,11 +38480,11 @@ ${markup.join("\n")}`);
     }
   };
   var BufferNode = class {
-    constructor(context2, _parent, index) {
-      this.context = context2;
+    constructor(context3, _parent, index) {
+      this.context = context3;
       this._parent = _parent;
       this.index = index;
-      this.type = context2.buffer.set.types[context2.buffer.buffer[index]];
+      this.type = context3.buffer.set.types[context3.buffer.buffer[index]];
     }
     get name() {
       return this.type.name;
@@ -38578,8 +38578,8 @@ ${markup.join("\n")}`);
     get node() {
       return this;
     }
-    matchContext(context2) {
-      return matchNodeContext(this, context2);
+    matchContext(context3) {
+      return matchNodeContext(this, context3);
     }
   };
   var TreeCursor = class {
@@ -38789,16 +38789,16 @@ ${markup.join("\n")}`);
         }
       }
     }
-    matchContext(context2) {
+    matchContext(context3) {
       if (!this.buffer)
-        return matchNodeContext(this.node, context2);
+        return matchNodeContext(this.node, context3);
       let { buffer } = this.buffer, { types: types2 } = buffer.set;
-      for (let i2 = context2.length - 1, d2 = this.stack.length - 1; i2 >= 0; d2--) {
+      for (let i2 = context3.length - 1, d2 = this.stack.length - 1; i2 >= 0; d2--) {
         if (d2 < 0)
-          return matchNodeContext(this.node, context2, i2);
+          return matchNodeContext(this.node, context3, i2);
         let type2 = types2[buffer.buffer[this.stack[d2]]];
         if (!type2.isAnonymous) {
-          if (context2[i2] && context2[i2] != type2.name)
+          if (context3[i2] && context3[i2] != type2.name)
             return false;
           i2--;
         }
@@ -39217,10 +39217,10 @@ ${markup.join("\n")}`);
   }
   var ruleNodeProp = new NodeProp();
   var Rule = class {
-    constructor(tags2, mode, context2, next) {
+    constructor(tags2, mode, context3, next) {
       this.tags = tags2;
       this.mode = mode;
-      this.context = context2;
+      this.context = context3;
       this.next = next;
     }
     sort(other) {
@@ -39768,9 +39768,9 @@ ${markup.join("\n")}`);
     return TreeFragment.applyChanges(fragments, [{ fromA: from, toA: to2, fromB: from, toB: to2 }]);
   }
   var LanguageState = class {
-    constructor(context2) {
-      this.context = context2;
-      this.tree = context2.tree;
+    constructor(context3) {
+      this.context = context3;
+      this.tree = context3.tree;
     }
     apply(tr) {
       if (!tr.docChanged && this.tree == this.context.tree)
@@ -39916,16 +39916,16 @@ ${markup.join("\n")}`);
       result += " ";
     return result;
   }
-  function getIndentation(context2, pos) {
-    if (context2 instanceof EditorState)
-      context2 = new IndentContext(context2);
-    for (let service of context2.state.facet(indentService)) {
-      let result = service(context2, pos);
+  function getIndentation(context3, pos) {
+    if (context3 instanceof EditorState)
+      context3 = new IndentContext(context3);
+    for (let service of context3.state.facet(indentService)) {
+      let result = service(context3, pos);
       if (result != null)
         return result;
     }
-    let tree = syntaxTree(context2.state);
-    return tree ? syntaxIndentation(context2, tree, pos) : null;
+    let tree = syntaxTree(context3.state);
+    return tree ? syntaxIndentation(context3, tree, pos) : null;
   }
   var IndentContext = class {
     constructor(state3, options2 = {}) {
@@ -40042,13 +40042,13 @@ ${markup.join("\n")}`);
         return true;
     return false;
   }
-  function bracketedAligned(context2) {
-    let tree = context2.node;
+  function bracketedAligned(context3) {
+    let tree = context3.node;
     let openToken = tree.childAfter(tree.from), last2 = tree.lastChild;
     if (!openToken)
       return null;
-    let sim = context2.options.simulateBreak;
-    let openLine = context2.state.doc.lineAt(openToken.from);
+    let sim = context3.options.simulateBreak;
+    let openLine = context3.state.doc.lineAt(openToken.from);
     let lineEnd = sim == null || sim <= openLine.from ? openLine.to : Math.min(openLine.to, sim);
     for (let pos = openToken.to; ; ) {
       let next = tree.childAfter(pos);
@@ -40059,13 +40059,13 @@ ${markup.join("\n")}`);
       pos = next.to;
     }
   }
-  function delimitedStrategy(context2, align, units, closing2, closedAt) {
-    let after = context2.textAfter, space = after.match(/^\s*/)[0].length;
-    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context2.pos + space;
-    let aligned = align ? bracketedAligned(context2) : null;
+  function delimitedStrategy(context3, align, units, closing2, closedAt) {
+    let after = context3.textAfter, space = after.match(/^\s*/)[0].length;
+    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context3.pos + space;
+    let aligned = align ? bracketedAligned(context3) : null;
     if (aligned)
-      return closed ? context2.column(aligned.from) : context2.column(aligned.to);
-    return context2.baseIndent + (closed ? 0 : context2.unit * units);
+      return closed ? context3.column(aligned.from) : context3.column(aligned.to);
+    return context3.baseIndent + (closed ? 0 : context3.unit * units);
   }
   var DontIndentBeyond = 200;
   function indentOnInput() {
@@ -41305,10 +41305,10 @@ ${markup.join("\n")}`);
   var selectParentSyntax = ({ state: state3, dispatch: dispatch2 }) => {
     let selection = updateSel(state3.selection, (range2) => {
       var _a2;
-      let context2 = syntaxTree(state3).resolveInner(range2.head, 1);
-      while (!(context2.from < range2.from && context2.to >= range2.to || context2.to > range2.to && context2.from <= range2.from || !((_a2 = context2.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
-        context2 = context2.parent;
-      return EditorSelection.range(context2.to, context2.from);
+      let context3 = syntaxTree(state3).resolveInner(range2.head, 1);
+      while (!(context3.from < range2.from && context3.to >= range2.to || context3.to > range2.to && context3.from <= range2.from || !((_a2 = context3.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
+        context3 = context3.parent;
+      return EditorSelection.range(context3.to, context3.from);
     });
     dispatch2(setSel(state3, selection));
     return true;
@@ -41514,8 +41514,8 @@ ${markup.join("\n")}`);
   function isBetweenBrackets(state3, pos) {
     if (/\(\)|\[\]|\{\}/.test(state3.sliceDoc(pos - 1, pos + 1)))
       return { from: pos, to: pos };
-    let context2 = syntaxTree(state3).resolveInner(pos);
-    let before = context2.childBefore(pos), after = context2.childAfter(pos), closedBy;
+    let context3 = syntaxTree(state3).resolveInner(pos);
+    let before = context3.childBefore(pos), after = context3.childAfter(pos), closedBy;
     if (before && after && before.to <= pos && after.from >= pos && (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 && state3.doc.lineAt(before.to).from == state3.doc.lineAt(after.from).from)
       return { from: before.to, to: after.from };
     return null;
@@ -41576,12 +41576,12 @@ ${markup.join("\n")}`);
     if (state3.readOnly)
       return false;
     let updated = /* @__PURE__ */ Object.create(null);
-    let context2 = new IndentContext(state3, { overrideIndentation: (start2) => {
+    let context3 = new IndentContext(state3, { overrideIndentation: (start2) => {
       let found = updated[start2];
       return found == null ? -1 : found;
     } });
     let changes = changeBySelectedLine(state3, (line, changes2, range2) => {
-      let indent = getIndentation(context2, line.from);
+      let indent = getIndentation(context3, line.from);
       if (indent == null)
         return;
       if (!/\S/.test(line.text))
@@ -42706,9 +42706,9 @@ ${markup.join("\n")}`);
   function completeFromList(list) {
     let options2 = list.map((o) => typeof o == "string" ? { label: o } : o);
     let [validFor, match] = options2.every((o) => /^\w+$/.test(o.label)) ? [/\w*$/, /\w+$/] : prefixMatch(options2);
-    return (context2) => {
-      let token = context2.matchBefore(match);
-      return token || context2.explicit ? { from: token ? token.from : context2.pos, options: options2, validFor } : null;
+    return (context3) => {
+      let token = context3.matchBefore(match);
+      return token || context3.explicit ? { from: token ? token.from : context3.pos, options: options2, validFor } : null;
     };
   }
   var Option = class {
@@ -43380,9 +43380,9 @@ ${markup.join("\n")}`);
     return true;
   };
   var RunningQuery = class {
-    constructor(active, context2) {
+    constructor(active, context3) {
       this.active = active;
-      this.context = context2;
+      this.context = context3;
       this.time = Date.now();
       this.updates = [];
       this.done = void 0;
@@ -43446,10 +43446,10 @@ ${markup.join("\n")}`);
     }
     startQuery(active) {
       let { state: state3 } = this.view, pos = cur(state3);
-      let context2 = new CompletionContext(state3, pos, active.explicitPos == pos);
-      let pending = new RunningQuery(active, context2);
+      let context3 = new CompletionContext(state3, pos, active.explicitPos == pos);
+      let pending = new RunningQuery(active, context3);
       this.running.push(pending);
-      Promise.resolve(active.source(context2)).then((result) => {
+      Promise.resolve(active.source(context3)).then((result) => {
         if (!pending.context.aborted) {
           pending.done = result || null;
           this.scheduleAccept();
@@ -44456,12 +44456,12 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(_target, $11, _flags) {
+  function persist(_target, $12, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
-      $11.teach({ file });
+      $12.teach({ file });
     };
   }
   $3.flair(`
@@ -44469,6 +44469,147 @@ ${markup.join("\n")}`);
 		display: block;
     max-height: 60vh;
     overflow: scroll;
+  }
+`);
+
+  // public/packages/modal-module.js
+  var $4 = module2("ctx-modal", {
+    label: null,
+    children: null,
+    isOpen: null
+  });
+  $4.draw(() => {
+    const {
+      body,
+      isOpen
+    } = $4.learn();
+    if (!isOpen)
+      return " ";
+    const modalClose = `
+    <button class="close">
+      Close
+    </button>
+  `;
+    return `
+    <div class="modal">
+      ${modalClose}
+      ${body}
+    </div>
+  `;
+  });
+  var context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`;
+  document.body.insertAdjacentHTML("beforeend", context);
+  function showModal(body) {
+    document.body.classList.add("overlay");
+    $4.teach({
+      body,
+      isOpen: true
+    });
+  }
+  window.showModal = showModal;
+  function hideModal() {
+    document.body.classList.remove("overlay");
+    $4.teach({
+      isOpen: false
+    });
+  }
+  window.hideModal = showModal;
+  $4.when("click", ".close", hideModal);
+  $4.flair(`
+  body.overlay {
+    overflow: hidden;
+  }
+
+  .overlay ctx-overlay:before {
+    animation: fadein 250ms ease-in-out forwards;
+    content: '';
+    background: rgba(0,0,0, .5);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    backdrop-filter: blur(10px);
+    z-index: 900;
+  }
+
+  @keyframes fadein {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  & {
+    position: fixed;
+    display: none;
+    place-items: center;
+    padding: 1rem;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    z-index: 1100;
+  }
+
+  body.overlay & {
+    display: grid;
+  }
+
+  & .modal {
+    animation: modal-in 250ms ease-in-out forwards;
+    background: white;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.1),
+      0 6px 8px rgba(0,0,0,.04)
+    ;
+    box-sizing: border-box;
+    position: relative;
+    padding: 1rem;
+    min-height: 100px;
+    max-width: 80ch;
+    width: 100%;
+    z-index: -1;
+    opacity: 0;
+    max-height: 80vh;
+    overflow: scroll;
+  }
+
+  @keyframes modal-in {
+    0% {
+      opacity: 0;
+      z-index: -1;
+    }
+
+    100% {
+      opacity: 1;
+      z-index: 1100;
+    }
+  }
+
+  & .close {
+    background: none;
+    border: none;
+    padding: none;
+    opacity: .8;
+    transition: opacity: 200ms;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  & .close:hover,
+  & .close:focus {
+    cursor: pointer;
+    opacity: 1;
+  }
+
+  & .close * {
+    pointer-events: none;
   }
 `);
 
@@ -47384,8 +47525,8 @@ ${markup.join("\n")}`);
     return ids.map((x) => controllers[x]).map(gatherInputs);
   }
   var initialState = {};
-  var $4 = module2("gamepad-debug", initialState);
-  $4.draw((target) => renderGamepads(target, $4));
+  var $5 = module2("gamepad-debug", initialState);
+  $5.draw((target) => renderGamepads(target, $5));
   function connecthandler(e2) {
     const { index } = e2.gamepad;
     controllers[index] = e2.gamepad;
@@ -47414,11 +47555,11 @@ ${markup.join("\n")}`);
     </ul>
   `;
   }
-  function renderGamepads(_target, $11) {
+  function renderGamepads(_target, $12) {
     const list = gamepads().map((gamepad, index) => `
       <li class="gamepad" id="${gamepad.id}">
         <label>${index + 1}: ${gamepad.id}</label>
-        ${renderInputs($11, { gamepad })}
+        ${renderInputs($12, { gamepad })}
       </li>
     `).join("");
     return `<ul class="gamepads">${list}</ul>`;
@@ -47439,7 +47580,7 @@ ${markup.join("\n")}`);
   }
   globalThis.addEventListener("gamepadconnected", connecthandler);
   globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
-  $4.flair(`
+  $5.flair(`
   & .gamepads {
     background: rgba(0,0,0,.04);
     border: 1px solid rgba(0,0,0,.1);
@@ -47482,7 +47623,7 @@ ${markup.join("\n")}`);
     activeMotions: [],
     frames: {}
   };
-  var $5 = module2("guitar-debug", initialState2);
+  var $6 = module2("guitar-debug", initialState2);
   var fretMap = [0, 1, 3, 2, 4];
   var registers = [
     "     ",
@@ -47503,10 +47644,10 @@ ${markup.join("\n")}`);
   ];
   requestAnimationFrame(loop);
   function loop(time) {
-    const activeFrets = gamepads().map((x) => toFrets($5, x));
-    const activeRegisters = activeFrets.map((x) => toRegisters($5, x));
-    const activeMotions = gamepads().map((x) => toMotion($5, x));
-    $5.teach({
+    const activeFrets = gamepads().map((x) => toFrets($6, x));
+    const activeRegisters = activeFrets.map((x) => toRegisters($6, x));
+    const activeMotions = gamepads().map((x) => toMotion($6, x));
+    $6.teach({
       time,
       activeFrets,
       activeRegisters,
@@ -47514,11 +47655,11 @@ ${markup.join("\n")}`);
     });
     requestAnimationFrame(loop);
   }
-  $5.draw(() => {
+  $6.draw(() => {
     const {
       activeRegisters,
       activeMotions
-    } = $5.learn();
+    } = $6.learn();
     const classes = (i2) => {
       return ["up", "down", "left", "right"].map((x) => activeMotions[i2][x] ? x : "").join(" ");
     };
@@ -47546,7 +47687,7 @@ ${markup.join("\n")}`);
       right: horizontal === 1
     };
   }
-  $5.flair(`
+  $6.flair(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -47563,19 +47704,19 @@ ${markup.join("\n")}`);
     transform: scale(2);
   }
 `);
-  var guitar_default = $5;
+  var guitar_default = $6;
 
   // public/packages/synth-module.js
-  var context = new AudioContext();
+  var context2 = new AudioContext();
   async function loadSample(url) {
-    const sample = await fetch(url).then((response) => response.arrayBuffer()).then((buffer) => context.decodeAudioData(buffer));
+    const sample = await fetch(url).then((response) => response.arrayBuffer()).then((buffer) => context2.decodeAudioData(buffer));
     return sample;
   }
   function playSample(sample, sampleNote, noteToPlay) {
-    const source = context.createBufferSource();
+    const source = context2.createBufferSource();
     source.buffer = sample;
     source.playbackRate.value = 2 ** ((noteToPlay - sampleNote) / 12);
-    source.connect(context.destination);
+    source.connect(context2.destination);
     source.start(0);
   }
   var synths = [];
@@ -47589,7 +47730,7 @@ ${markup.join("\n")}`);
     loadSample("/samples/7.mp3"),
     loadSample("/samples/8.mp3")
   ]).then((s) => synths = s);
-  var $6 = module2("synth-module", {
+  var $7 = module2("synth-module", {
     colors: [],
     start: 120,
     length: 360,
@@ -47639,30 +47780,30 @@ ${markup.join("\n")}`);
     [95, 120]
   ];
   var octaveUp = () => {
-    const octave = $6.learn().octave + 1;
+    const octave = $7.learn().octave + 1;
     if (octave > 6) {
       return;
     }
-    $6.teach({ octave });
+    $7.teach({ octave });
   };
   var octaveDown = () => {
-    const octave = $6.learn().octave - 1;
+    const octave = $7.learn().octave - 1;
     if (octave < 0) {
       return;
     }
-    $6.teach({ octave });
+    $7.teach({ octave });
   };
   var pitchUp = () => {
-    const pitch = $6.learn().pitch + 1;
-    $6.teach({ pitch });
+    const pitch = $7.learn().pitch + 1;
+    $7.teach({ pitch });
   };
   var pitchDown = () => {
-    const pitch = $6.learn().pitch - 1;
-    $6.teach({ pitch });
+    const pitch = $7.learn().pitch - 1;
+    $7.teach({ pitch });
   };
   function attack(event) {
     event.preventDefault();
-    const { colors, synth } = $6.learn();
+    const { colors, synth } = $7.learn();
     const { octave, note, hue } = event.target.dataset;
     playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
     event.target.classList.add("active");
@@ -47723,11 +47864,11 @@ ${markup.join("\n")}`);
     requestAnimationFrame(loop2);
   }
   function throttle({ key: key2, time, feature }) {
-    const { frames = {} } = $6.learn();
+    const { frames = {} } = $7.learn();
     const frame = frames[key2] || {};
     if (time - 1e3 / actionableFPS > (frame.time || 0)) {
       feature();
-      $6.teach({ time }, (state3, payload) => {
+      $7.teach({ time }, (state3, payload) => {
         return {
           ...state3,
           frames: {
@@ -47751,9 +47892,9 @@ ${markup.join("\n")}`);
       queueRelease(node);
     }, i2 * strumVelocity);
   }
-  $6.teach({ colors: recalculate() });
-  $6.draw(() => {
-    const { start: start2, length, reverse, colors, octave, pitch, debug } = $6.learn();
+  $7.teach({ colors: recalculate() });
+  $7.draw(() => {
+    const { start: start2, length, reverse, colors, octave, pitch, debug } = $7.learn();
     const wheel = majorScale.map((majorNote, index) => {
       const majorScaleIndex = mod(index - pitch * 7, majorScale.length);
       const minorNote = minorScale[mod(majorScaleIndex + pitch * 7, minorScale.length)];
@@ -47816,11 +47957,11 @@ ${markup.join("\n")}`);
 		</div>
 	`;
   }
-  $6.when("click", ".octave-up", octaveUp);
-  $6.when("click", ".octave-down", octaveDown);
-  $6.when("click", ".pitch-up", pitchUp);
-  $6.when("click", ".pitch-down", pitchDown);
-  $6.flair(`
+  $7.when("click", ".octave-up", octaveUp);
+  $7.when("click", ".octave-down", octaveDown);
+  $7.when("click", ".pitch-up", pitchUp);
+  $7.when("click", ".pitch-down", pitchDown);
+  $7.flair(`
   & {
     height: 100%;
     display: grid;
@@ -47934,7 +48075,7 @@ ${markup.join("\n")}`);
   `;
   }
   function recalculate() {
-    const { start: start2, length, reverse } = $6.learn();
+    const { start: start2, length, reverse } = $7.learn();
     const colors = [...Array(12)].map((_, hueIndex) => {
       const step = length / 12 * hueIndex;
       const hue = reverse ? start2 - step : start2 + step;
@@ -47952,20 +48093,20 @@ ${markup.join("\n")}`);
     upload(colors);
     return colors;
   }
-  $6.when("mousedown", ".step", attack);
-  $6.when("mouseup", ".step", release2);
-  $6.when("touchstart", ".step", attack);
-  $6.when("touchend", ".step", release2);
+  $7.when("mousedown", ".step", attack);
+  $7.when("mouseup", ".step", release2);
+  $7.when("touchstart", ".step", attack);
+  $7.when("touchend", ".step", release2);
   function mod(x, n2) {
     return (x % n2 + n2) % n2;
   }
 
   // public/packages/design-system.js
-  var $7 = module2("design-system");
-  $7.draw(() => {
-    const { palette } = $7.learn();
+  var $8 = module2("design-system");
+  $8.draw(() => {
+    const { palette } = $8.learn();
     if (!palette) {
-      fetch("/design-system").then((res) => res.json()).then(({ palette: palette2 }) => $7.teach({ palette: palette2 }));
+      fetch("/design-system").then((res) => res.json()).then(({ palette: palette2 }) => $8.teach({ palette: palette2 }));
       return;
     }
     return `
@@ -47978,24 +48119,24 @@ ${markup.join("\n")}`);
   });
 
   // public/packages/smug-mug.js
-  var $8 = module2("smug-mug");
-  $8.draw(() => {
+  var $9 = module2("smug-mug");
+  $9.draw(() => {
     return `
     smug mug
   `;
   });
-  $8.flair(`
+  $9.flair(`
   & { display: block }
 `);
 
   // public/packages/google-maps.js
-  var $9 = module2("google-maps");
-  $9.draw(() => {
+  var $10 = module2("google-maps");
+  $10.draw(() => {
     return `
     google map
   `;
   });
-  $9.flair(`
+  $10.flair(`
   & { display: block }
 `);
 
@@ -48140,10 +48281,10 @@ ${markup.join("\n")}`);
     function noop() {
     }
   };
-  var $10 = module2("script-type");
+  var $11 = module2("script-type");
   var $editor = module2("script-editor");
   var $viewer = module2("script-viewer");
-  $10.draw((target) => {
+  $11.draw((target) => {
     return `
     <div name="transport">
       <button class="print">print</button>
@@ -48152,7 +48293,7 @@ ${markup.join("\n")}`);
     <script-viewer><\/script-viewer>
   `;
   });
-  $10.flair(`
+  $11.flair(`
   * {
     box-sizing: border-box;
     padding: 0;
@@ -48221,9 +48362,9 @@ ${markup.join("\n")}`);
   }
 
 `);
-  $10.when("click", ".print", print);
+  $11.when("click", ".print", print);
   $viewer.draw((target) => {
-    const source = target.closest($10.link).getAttribute("source");
+    const source = target.closest($11.link).getAttribute("source");
     const { formatted } = state[source] || {};
     return `
     <div class="shadowbox">
@@ -48232,7 +48373,7 @@ ${markup.join("\n")}`);
   `;
   });
   $editor.draw((target) => {
-    const source = target.closest($10.link).getAttribute("source");
+    const source = target.closest($11.link).getAttribute("source");
     const { file } = state[source] || {};
     if (file && !target.view) {
       const config2 = {
@@ -48240,7 +48381,7 @@ ${markup.join("\n")}`);
           basicSetup,
           EditorView.lineWrapping,
           EditorView.updateListener.of(
-            persist2(target, $10, {})
+            persist2(target, $11, {})
           )
         ]
       };
@@ -48254,13 +48395,13 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist2(target, $11, _flags) {
+  function persist2(target, $12, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
       const formatted = compile(file);
-      const source = target.closest($11.link).getAttribute("source");
+      const source = target.closest($12.link).getAttribute("source");
       state[source] = { file, formatted };
     };
   }

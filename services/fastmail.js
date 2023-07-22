@@ -69,8 +69,8 @@ const mailboxQuery = async (api_url, account_id, inbox_id) => {
           "Email/get",
           {
             accountId: account_id,
-            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'textBody'],
-            fetchTextBodyValues: true,
+            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'htmlBody', 'textBody'],
+            fetchAllBodyValues: true,
             "#ids": {
               resultOf: "a",
               name: "Email/query",
@@ -105,8 +105,12 @@ async function fetchTen(){
           const from = email.from[0].email
           const subject = email.subject
           const timestamp = email.receivedAt
-          const parts = email.textBody.map(x => x.partId)
-          const textBody = parts.map(id => email.bodyValues[id].value).join('')
+
+          console.log(email)
+          const textParts = email.textBody.map(x => x.partId)
+          const htmlParts = email.htmlBody.map(x => x.partId)
+          const textBody = textParts.map(id => email.bodyValues[id].value).join('')
+          const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
           messages.push({
             author: {
               email: from,
@@ -116,6 +120,7 @@ async function fetchTen(){
             subject,
             timestamp,
             textBody,
+            htmlBody,
             content: subject,
             updated: timestamp
           })

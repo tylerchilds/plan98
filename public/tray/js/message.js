@@ -9,7 +9,6 @@
 
     this.parent = parent;
     this.message = m;
-    console.log(parent)
 
     var message = this.create('div', {
       className: "card"
@@ -103,7 +102,23 @@
   }
 
   Message.prototype.click = function(e){
-    alert(this.message.textBody)
+    const m = this.message
+    var message = this.create('div');
+
+    var photo = m.author.photoUrl;
+    var meta = new Meta(photo, m.author.name, m.updated);
+
+    message.appendChild(meta.getElem())
+    message.appendChild(this.create('p', {
+      textContent: m.content
+    }));
+
+    message.appendChild(this.create('p', {
+      textContent: m.textBody
+    }));
+
+
+    showModal(message.outerHTML)
   },
 
   Message.prototype.recover = function(){
