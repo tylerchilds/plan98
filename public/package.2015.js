@@ -48140,7 +48140,7 @@ ${markup.join("\n")}`);
     function noop() {
     }
   };
-  var $10 = module2("script-type", { file: hello() });
+  var $10 = module2("script-type");
   var $editor = module2("script-editor");
   var $viewer = module2("script-viewer");
   $10.draw((target) => {
@@ -48194,6 +48194,12 @@ ${markup.join("\n")}`);
 
   & [name="transport"] {
     grid-area: transport;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 2;
   }
 
   & script-editor {
@@ -48226,7 +48232,8 @@ ${markup.join("\n")}`);
   `;
   });
   $editor.draw((target) => {
-    const { file } = $10.learn();
+    const source = target.closest($10.link).getAttribute("source");
+    const { file } = state[source] || {};
     if (file && !target.view) {
       const config2 = {
         extensions: [
@@ -48366,55 +48373,6 @@ ${markup.join("\n")}`);
   }
 
 `);
-  function hello() {
-    return `#!/bin/sh sillonious
-
-{ typewriter
-title: The Journal of the War on Clowns
-author: Tyler Childs
-
-^ fade in
-# The Studio - Day
-
-NOTORIOUS SILLONIOUS, a puppet made of a blue sweatshirt, a red beanie, but mostly a pair of glasses.
-
-@ Notorious Sillonious (V.O.)
-" Welcome.
-
-The puppet does not move while it speaks.
-
-ORIGIN WILDCLOAK, is a pile of hawaiian and flannel shirts in a lump.
-
-@ Origin Wildcloak (V.O.)
-" We've, been waiting for you.
-
-TY enters wearing black on black crew uniform.
-
-@ Ty
-" Don't everyone spring up at once.
-
-Ty points finger guns at both his alternative personas.
-
-@ Origin Wildcloak (V.O.)
-" Funny.
-
-@ Notorious Sillonious (V.O.)
-" Lazy.
-
-@ Ty
-" You're calling me lazy?
-
-Ty high fives himself with the sleeve of Sillonious.
-
-@ Origin Wildcloak
-" You set yourself up for that.
-
-@ Ty
-" Alright, enough joking around, what's the latest?
-
-^ Cut to black
-`;
-  }
 })();
 /*!
 * focus-trap 7.0.0

@@ -179,7 +179,7 @@ export const compile = (script) => {
   function noop() {}
 }
 
-const $ = module('script-type', { file: hello() } )
+const $ = module('script-type')
 const $editor = module('script-editor')
 const $viewer = module('script-viewer')
 
@@ -235,6 +235,12 @@ $.flair(`
 
   & [name="transport"] {
     grid-area: transport;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 2;
   }
 
   & script-editor {
@@ -270,7 +276,8 @@ $viewer.draw(target => {
 })
 
 $editor.draw(target => {
-  const { file } = $.learn()
+  const source = target.closest($.link).getAttribute('source')
+  const { file } = state[source] || {}
 
   if(file && !target.view) {
     const config = {
@@ -418,7 +425,7 @@ $viewer.flair(`
 
 `)
 
-function hello() {
+function template() {
   return `#!/bin/sh sillonious
 
 { typewriter
