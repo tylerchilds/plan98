@@ -47,31 +47,31 @@ $.when('click', '[data-goto]', goTo)
 const actionHandlers = {
 	[modes.welcome]: (id) => [
 		`
-			<button data-id="${id}" data-goto="username">
+			<button class="button" data-id="${id}" data-goto="username">
 				Start
 			</button>
 		`
 	],
 	[modes.username]: (id) => [
 		`
-			<button data-id="${id}" data-goto="apikey">
+			<button class="button" data-id="${id}" data-goto="apikey">
         Continue
 			</button>
 		`,
 		`
-			<button data-id="${id}" data-action="back">
+			<button class="button -secondary" data-id="${id}" data-action="back">
 				Go Back
 			</button>
 		`
 	],
 	[modes.apikey]: (id) => [
 		`
-      <button data-id="${id}" data-action="${actions.authenticate}">
+      <button class="button" data-id="${id}" data-action="${actions.authenticate}">
         Continue
 			</button>
 		`,
 		`
-			<button data-id="${id}" data-action="back">
+			<button class="button -secondary" data-id="${id}" data-action="back">
 				Go Back
 			</button>
 		`
@@ -80,19 +80,19 @@ const actionHandlers = {
 		`
 			<a href="/tray/index.html" class="button" data-id="${id}">
 				Launch
-			</button>
+			</a>
 		`,
   ],
 	[modes.misconfigured]: (id) => [
 		`
-      <button data-id="${id}" data-action="${actions.authenticate}">
+      <button class="button" data-id="${id}" data-action="${actions.authenticate}">
 				Try Again
 			</button>
 		`,
 	],
 	'default': (id) => [
 		`
-			<button data-id="${id}" data-goto="welcome">
+			<button class="button" data-id="${id}" data-goto="welcome">
 				Restart
 			</button>
 		`
@@ -143,7 +143,7 @@ $.draw(target => {
     [modes.ready]: () => `
       <div class="card">
         <h2>You're Connected</h2>
-        <p>Access to your friends and google is here.</p>
+        <p>Access to your friends is here.</p>
         ${actionItems(id, modes.ready)}
       </div>
     `,
@@ -205,6 +205,8 @@ $.when('animationend', 'transition', transition)
 
 $.flair(`
 		& {
+      --color-primary: dodgerblue;
+      --color-primary-shade1: navy;
 			background: white;
 			display: block;
 			position: absolute;
@@ -213,6 +215,12 @@ $.flair(`
 			width: 100%;
 			inset: 0;
 		}
+
+    & h2 {
+      font-size: 2rem;
+      line-height: 1.2;
+      font-weight: bold;
+    }
 
 		& .switcher {
       border-radius: 0 0 0 100%;
@@ -231,7 +239,6 @@ $.flair(`
 
 		& actions {
       display: block;
-			border: 1px solid orange;
 			border-radius: 2px;
 		}
 
@@ -256,25 +263,16 @@ $.flair(`
 			display: none;
 		}
 
-		& companion button {
+		& companion .button {
 			animation: &-fade-in ease-in-out 1000ms;
-			background: white;
-			color: blue;
-			text-decoration: underline;
 			border: none;
-			border-bottom: 1px solid cyan;
+      display: block;
 			width: 100%;
-			padding: .5rem;
-			text-align: left;
+			margin-bottom: 1rem;	
 		}
 
-		& companion button:last-child {
-			border-bottom: none;	
-		}
-
-		& button {
-			display: block;
-			margin: 0;
+		& companion .button:last-child {
+			margin-bottom: 0;	
 		}
 
 		& transition {
