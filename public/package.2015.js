@@ -6681,7 +6681,7 @@ ${patch.content}\r
             const e3 = new URL(t3), r2 = window.location;
             return e3.protocol === r2.protocol && e3.host === r2.host;
           }
-          function $12(t3, e3, r2) {
+          function $13(t3, e3, r2) {
             r2[t3] && -1 !== r2[t3].indexOf(e3) || (r2[t3] = r2[t3] || [], r2[t3].push(e3));
           }
           function D(t3, e3, r2) {
@@ -6702,13 +6702,13 @@ ${patch.content}\r
           }
           class R {
             on(t3, e3) {
-              return this._listeners = this._listeners || {}, $12(t3, e3, this._listeners), this;
+              return this._listeners = this._listeners || {}, $13(t3, e3, this._listeners), this;
             }
             off(t3, e3) {
               return D(t3, e3, this._listeners), D(t3, e3, this._oneTimeListeners), this;
             }
             once(t3, e3) {
-              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $12(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
+              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $13(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
             }
             fire(t3, e3) {
               "string" == typeof t3 && (t3 = new O(t3, e3 || {}));
@@ -13899,8 +13899,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 const t4 = Math.sin(L2), e4 = Math.cos(L2), r3 = [e4, -t4, t4, e4];
                 B2._matMult(r3), C3._matMult(r3), E2._matMult(r3), V2._matMult(r3);
               }
-              const $13 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
-              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $13, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $13, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
+              const $14 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
+              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $14, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $14, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
             };
             if (n3 && (s2.stretchX || s2.stretchY)) {
               const t4 = bc(p3, g3, y2), e4 = bc(f2, x2, m4);
@@ -14131,7 +14131,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const C3 = (l3, p4) => {
               p4.x < 0 || p4.x >= ja || p4.y < 0 || p4.y >= ja || function(e4, r3, n4, i4, a4, s3, o3, l4, u3, c6, h3, p5, f3, d4, y3, m5, g4, v3, b4, w3, _3, A3, k3, S3, I3) {
                 const z3 = e4.addToLineVertexArray(r3, n4);
-                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $13 = -1;
+                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $14 = -1;
                 const D2 = {};
                 let O2 = Aa(""), U2 = 0, R2 = 0;
                 if (void 0 === l4._unevaluatedLayout.getValue("text-radial-offset") ? [U2, R2] = l4.layout.get("text-offset").evaluate(_3, {}, S3).map((t3) => t3 * vl) : (U2 = l4.layout.get("text-radial-offset").evaluate(_3, {}, S3) * vl, R2 = Pc), e4.allowVerticalPlacement && i4.vertical) {
@@ -14143,7 +14143,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   P4 = new Ac(u3, r3, c6, h3, p5, a4, g4, v3, false, n5), V2 = 4 * s4.length;
                   const d5 = e4.iconSizeData;
                   let y4 = null;
-                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $13 = e4.icon.placedSymbolArray.length - 1);
+                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $14 = e4.icon.placedSymbolArray.length - 1);
                 }
                 const q2 = Object.keys(i4.horizontal);
                 for (const n5 of q2) {
@@ -14157,13 +14157,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   if (F2 += Ec(e4, r3, a5, s3, l4, y3, _3, m5, z3, i4.vertical ? t2.WritingMode.horizontal : t2.WritingMode.horizontalOnly, o4 ? q2 : [n5], D2, L2, A3, S3), o4)
                     break;
                 }
-                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $13, A3, S3));
+                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $14, A3, S3));
                 const j2 = M3 ? M3.boxStartIndex : e4.collisionBoxArray.length, N2 = M3 ? M3.boxEndIndex : e4.collisionBoxArray.length, Z2 = B3 ? B3.boxStartIndex : e4.collisionBoxArray.length, K2 = B3 ? B3.boxEndIndex : e4.collisionBoxArray.length, G2 = P4 ? P4.boxStartIndex : e4.collisionBoxArray.length, J2 = P4 ? P4.boxEndIndex : e4.collisionBoxArray.length, X2 = C4 ? C4.boxStartIndex : e4.collisionBoxArray.length, Y2 = C4 ? C4.boxEndIndex : e4.collisionBoxArray.length;
                 let H2 = -1;
                 const W2 = (t3, e5) => t3 && t3.circleDiameter ? Math.max(t3.circleDiameter, e5) : e5;
                 H2 = W2(M3, H2), H2 = W2(B3, H2), H2 = W2(P4, H2), H2 = W2(C4, H2);
                 const Q2 = H2 > -1 ? 1 : 0;
-                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $13, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
+                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $14, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
               }(e3, p4, l3, n3, i3, a3, B2, e3.layers[0], e3.collisionBoxArray, r2.index, r2.sourceLayerIndex, e3.index, g3, [_2, _2, _2, _2], S2, u2, b3, A2, I2, d3, r2, s2, c5, h2, o2);
             };
             if ("line" === z2)
@@ -15352,11 +15352,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           }
           function X(e3, t3) {
-            t3.push($12(e3[0])), t3.push(U(e3[1])), t3.push(0);
+            t3.push($13(e3[0])), t3.push(U(e3[1])), t3.push(0);
           }
           function W(e3, t3, o2, i3) {
             for (var r2, s2, n3 = 0, a3 = 0; a3 < e3.length; a3++) {
-              var l2 = $12(e3[a3][0]), c5 = U(e3[a3][1]);
+              var l2 = $13(e3[a3][0]), c5 = U(e3[a3][1]);
               t3.push(l2), t3.push(c5), t3.push(0), a3 > 0 && (n3 += i3 ? (r2 * c5 - l2 * s2) / 2 : Math.sqrt(Math.pow(l2 - r2, 2) + Math.pow(c5 - s2, 2))), r2 = l2, s2 = c5;
             }
             var u2 = t3.length - 3;
@@ -15368,7 +15368,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               W(e3[r2], s2, o2, i3), t3.push(s2);
             }
           }
-          function $12(e3) {
+          function $13(e3) {
             return e3 / 360 + 0.5;
           }
           function U(e3) {
@@ -17021,7 +17021,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const s2 = t2.create();
             return t2.translate(s2, s2, [1, 1, 0]), t2.scale(s2, s2, [0.5 * e3.width, 0.5 * e3.height, 1]), t2.multiply(s2, s2, e3.calculatePosMatrix(i3.toUnwrapped()));
           }
-          function $12(t3, e3, i3, s2, a3, o2) {
+          function $13(t3, e3, i3, s2, a3, o2) {
             const r2 = function(t4, e4, i4) {
               if (t4)
                 for (const s3 of t4) {
@@ -19174,7 +19174,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               i3.availableImages = this._availableImages;
               const r2 = this._serializedAllLayers();
               for (const t3 in this.sourceCaches)
-                i3.layers && !a3[t3] || o2.push($12(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
+                i3.layers && !a3[t3] || o2.push($13(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
               return this.placement && o2.push(function(t3, e4, i4, s3, a4, o3, r3) {
                 const n3 = {}, l2 = o3.queryRenderedSymbols(s3), c5 = [];
                 for (const t4 of Object.keys(l2).map(Number))
@@ -27390,8 +27390,8 @@ ${markup.join("\n")}`);
     </div>
   `;
   });
-  function attributes(node, $12) {
-    const root = node.closest($12.selector);
+  function attributes(node, $13) {
+    const root = node.closest($13.selector);
     return { root };
   }
   function toggleActive(event) {
@@ -44456,12 +44456,12 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(_target, $12, _flags) {
+  function persist(_target, $13, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
-      $12.teach({ file });
+      $13.teach({ file });
     };
   }
   $3.flair(`
@@ -47555,11 +47555,11 @@ ${markup.join("\n")}`);
     </ul>
   `;
   }
-  function renderGamepads(_target, $12) {
+  function renderGamepads(_target, $13) {
     const list = gamepads().map((gamepad, index) => `
       <li class="gamepad" id="${gamepad.id}">
         <label>${index + 1}: ${gamepad.id}</label>
-        ${renderInputs($12, { gamepad })}
+        ${renderInputs($13, { gamepad })}
       </li>
     `).join("");
     return `<ul class="gamepads">${list}</ul>`;
@@ -48395,13 +48395,13 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist2(target, $12, _flags) {
+  function persist2(target, $13, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
       const formatted = compile(file);
-      const source = target.closest($12.link).getAttribute("source");
+      const source = target.closest($13.link).getAttribute("source");
       state[source] = { file, formatted };
     };
   }
@@ -48514,6 +48514,25 @@ ${markup.join("\n")}`);
   }
 
 `);
+
+  // public/packages/field-text.js
+  var $12 = module2("field-text");
+  $12.draw((target) => {
+    const label = target.getAttribute("label");
+    const key2 = target.getAttribute("key");
+    const value = state[key2] || "";
+    return `
+    <label class="field">
+      <input type="text" name="${key2}" value="${value}" />
+      <span class="label">${label}</span>
+    </label>
+  `;
+  });
+  $12.when("keyup", "input", (event) => {
+    const value = event.target.value;
+    const key2 = event.target.name;
+    state[key2] = value;
+  });
 })();
 /*!
 * focus-trap 7.0.0

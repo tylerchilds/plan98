@@ -1,26 +1,25 @@
 require('dotenv').config()
 
-const hostname = process.env.JMAP_HOSTNAME || "api.fastmail.com";
-const username = process.env.JMAP_USERNAME;
+const hostname = "api.fastmail.com";
 
 const authUrl = `https://${hostname}/.well-known/jmap`;
-const headers = {
+const headers = (apikey) => ({
   "Content-Type": "application/json",
-  Authorization: `Bearer ${process.env.JMAP_TOKEN}`,
-};
+  Authorization: `Bearer ${apikey}`,
+});
 
-const getSession = async () => {
+const getSession = async (apikey) => {
   const response = await fetch(authUrl, {
     method: "GET",
-    headers,
+    headers: headers(apikey),
   });
   return response.json();
 };
 
-const inboxIdQuery = async (api_url, account_id) => {
+const inboxIdQuery = async (apikey, api_url, account_id) => {
   const response = await fetch(api_url, {
     method: "POST",
-    headers,
+    headers: headers(apikey),
     body: JSON.stringify({
       using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
       methodCalls: [
@@ -48,10 +47,10 @@ const inboxIdQuery = async (api_url, account_id) => {
   return await inbox_id;
 };
 
-const mailboxQuery = async (api_url, account_id, inbox_id) => {
+const mailboxQuery = async (apikey, api_url, account_id, inbox_id) => {
   const response = await fetch(api_url, {
     method: "POST",
-    headers,
+    headers: headers(apikey),
     body: JSON.stringify({
       using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
       methodCalls: [
@@ -87,20 +86,19 @@ const mailboxQuery = async (api_url, account_id, inbox_id) => {
 
   return await data;
 };
-async function fetchTen(){
+async function fetchTen(username, apikey){
   const messages = [];
 
   // bail if we don't have our ENV set:
-  if (!process.env.JMAP_USERNAME || !process.env.JMAP_TOKEN) {
-    console.log("Please set your JMAP_USERNAME and JMAP_TOKEN");
-    console.log("JMAP_USERNAME=username JMAP_TOKEN=token node hello-world.js");
+  if (!username || !apikey) {
+    console.log("Please set the username and apikey");
   }
 
-  return await getSession().then(async(session) => {
+  return await getSession(apikey).then(async(session) => {
     const api_url = session.apiUrl;
     const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
-    await inboxIdQuery(api_url, account_id).then(async (inbox_id) => {
-      await mailboxQuery(api_url, account_id, inbox_id).then((emails) => {
+    await inboxIdQuery(apikey, api_url, account_id).then(async (inbox_id) => {
+      await mailboxQuery(apikey, api_url, account_id, inbox_id).then((emails) => {
         emails["methodResponses"][1][1]["list"].forEach((email) => {
           const from = email.from[0].email
           const subject = email.subject

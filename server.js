@@ -4,6 +4,7 @@ const request = require("request");
 const OAuth = require("oauth-1.0a");
 const crypto = require("crypto");
 const session = require('express-session')
+const bodyParser = require('body-parser')
 const grant = require('grant').express()
 const { fetchTen } = require('./services/fastmail.js')
 require('dotenv').config()
@@ -71,14 +72,19 @@ const bus = require('statebus')({
 
 app = express()
 app.use(express.static('public'))
+app.use(bodyParser.urlencoded({extended: true}))
+app.use(bodyParser.json())
+app.use(bodyParser.raw())
 
 app.use(session({secret: 'grant', saveUninitialized: true, resave: false}))
 app.use(grant(oauthConfig))
 app.get('/api/smugmug/callback', (req, res) => {
   res.end(JSON.stringify(req.session.grant.response, null, 2))
 })
-app.get('/api/fastmail/fetchTen', async (req, res) => {
-  const messages = await fetchTen()
+app.post('/api/fastmail/fetchTen', async (req, res) => {
+  const {username, apikey } = req.body
+  console.log(req.body)
+  const messages = await fetchTen(username, apikey)
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ messages }, null, 2))
 })

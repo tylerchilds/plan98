@@ -23,6 +23,7 @@ const modes = {
 
 const actions = {
 	goto: 'goto',
+	authenticate: 'authenticate',
 	next: 'next',
 	back: 'back'
 }
@@ -65,7 +66,7 @@ const actionHandlers = {
 	],
 	[modes.apikey]: (id) => [
 		`
-			<button data-id="${id}" data-goto="ready">
+      <button data-id="${id}" data-action="${actions.authenticate}">
         Continue
 			</button>
 		`,
@@ -77,14 +78,14 @@ const actionHandlers = {
   ],
 	[modes.ready]: (id) => [
 		`
-			<button data-id="${id}" data-goto="welcome">
+			<a href="/tray/index.html" class="button" data-id="${id}">
 				Launch
 			</button>
 		`,
   ],
 	[modes.misconfigured]: (id) => [
 		`
-			<button data-id="${id}" data-goto="welcome">
+      <button data-id="${id}" data-action="${actions.authenticate}">
 				Try Again
 			</button>
 		`,
@@ -124,6 +125,7 @@ $.draw(target => {
       <div class="card">
         <h2>What's your username</h2>
         <p>I am email@tychi.me, who are you?</p>
+        <field-text label="Username" key="ls/fastmail/username"></field-text>
         ${actionItems(id, modes.username)}
       </div>
     `,
@@ -131,8 +133,9 @@ $.draw(target => {
       <div class="card">
         <h2>Access Configuration</h2>
         <p>An API Key is used to securely access your account without leaking your password.</p>
+        <field-text label="API Key" key="ls/fastmail/apikey"></field-text>
         <p>
-    <small>Fastmail API Keys information <a href="https://www.fastmail.help/hc/en-us/articles/5254602856719-API-tokens">can be found here</a>.
+          <small>Fastmail API Keys information <a href="https://www.fastmail.help/hc/en-us/articles/5254602856719-API-tokens">can be found here</a>.</small>
         </p>
         ${actionItems(id, modes.apikey)}
       </div>
@@ -148,6 +151,8 @@ $.draw(target => {
       <div class="card">
         <h2>Whoops</h2>
         <p>Something went super wrong so, yeah, maybe tweak these.</p>
+        <field-text label="Username" key="ls/fastmail/username"></field-text>
+        <field-text label="API Key" key="ls/fastmail/apikey"></field-text>
         ${actionItems(id, modes.misconfigured)}
       </div>
     `,
@@ -165,7 +170,7 @@ $.draw(target => {
 
 	const companionClass = companionActive ? `mode-${mode} active` : `mode-${mode}`
 
-	return `
+	target.innerHTML = `
 		<button aria-label="Companion" class="switcher" data-id="${id}"></button>
 		<companion class="${companionClass}">
 			<transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
@@ -186,6 +191,8 @@ function switcher({target}) {
 function transition({target}) {
 	const { id } = target.dataset
 	const { mode, nextMode, backMode } = launcherById(id)
+
+  console.log(backMode)
 
 	const currentMode = nextMode ? nextMode : mode
 	const previousMode = mode !== backMode ? backMode : mode
@@ -368,7 +375,7 @@ function dispatch(target, type, mode) {
 	}
 }
 
-function messageStateMachine(target, message) {
+async function messageStateMachine(target, message) {
 	const { id } = target.dataset
 	const { mode, backMode } = launcherById(id)
 	const { action } = message
@@ -382,6 +389,27 @@ function messageStateMachine(target, message) {
 	if(action === actions.goto) {
 		setMode(message.mode)
 		return
+	}
+
+  if(action === actions.authenticate) {
+    try {
+      const authenticated = (await fetch('/api/fastmail/fetchTen', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: state['ls/fastmail/username'],
+          apikey: state['ls/fastmail/apikey'],
+        })
+      }).then(res => res.status)) === 200
+      setMode(authenticated ? modes.ready : modes.misconfigured)
+      return
+    } catch(e) {
+      console.log(e)
+      setMode(modes.misconfigured)
+    }
 	}
 
 	if(action === actions.back && backMode) {
