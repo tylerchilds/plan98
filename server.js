@@ -120,6 +120,7 @@ app.get('/client',             send_file('client.html'))
 
 // Serve libraries
 app.get('/statebus.js',  send_file('node_modules/statebus/statebus.js'))
+app.get('/cutestrap.css',  send_file('node_modules/cutestrap/dist/css/cutestrap.css'))
 app.get('/statebus-client-library.js',
                          send_file('node_modules/statebus/client-library.js'))
 app.get('/braidify.js',  send_file('node_modules/braidify/braidify-client.js'))
