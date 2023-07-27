@@ -5,6 +5,11 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Script Type</title>
+    <style>
+      html,body {
+        height: 100%;
+      }
+    </style>
     <link href="/cutestrap.css" rel="stylesheet">
   </head>
   <body>
@@ -25,7 +30,8 @@ const actions = {
 	goto: 'goto',
 	authenticate: 'authenticate',
 	next: 'next',
-	back: 'back'
+	back: 'back',
+	close: 'close',
 }
 
 const emptyLauncher = {
@@ -78,9 +84,9 @@ const actionHandlers = {
   ],
 	[modes.ready]: (id) => [
 		`
-			<a href="/tray/index.html" class="button" data-id="${id}">
-				Launch
-			</a>
+      <button class="button" data-id="${id}" data-action="${actions.close}">
+      Close
+			</button>
 		`,
   ],
 	[modes.misconfigured]: (id) => [
@@ -123,8 +129,8 @@ $.draw(target => {
 			`,
 		[modes.username]: () => `
       <div class="card">
-        <h2>What's your username</h2>
-        <p>I am email@tychi.me, who are you?</p>
+        <h2>Enter your username</h2>
+        <p>This should be your email.</p>
         <field-text label="Username" key="ls/fastmail/username"></field-text>
         ${actionItems(id, modes.username)}
       </div>
@@ -171,6 +177,9 @@ $.draw(target => {
 	const companionClass = companionActive ? `mode-${mode} active` : `mode-${mode}`
 
 	target.innerHTML = `
+    <div class="application">
+      <card-list key="ls/fastmail/fetchTen"></card-list>
+    </div>
 		<button aria-label="Companion" class="switcher" data-id="${id}"></button>
 		<companion class="${companionClass}">
 			<transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
@@ -205,16 +214,23 @@ $.when('animationend', 'transition', transition)
 
 $.flair(`
 		& {
-      --color-primary: dodgerblue;
-      --color-primary-shade1: navy;
-			background: white;
+      --color-primary: darkgoldenrod;
+      --color-primary-shade1: goldenrod;
 			display: block;
 			position: absolute;
 			overflow: hidden;
 			height: 100%;
 			width: 100%;
 			inset: 0;
+      margin: auto;
+      display: grid;
 		}
+
+    & .application {
+      overflow: auto;
+      position: relative;
+      z-index: 1;
+    }
 
     & h2 {
       font-size: 2rem;
@@ -243,19 +259,36 @@ $.flair(`
 		}
 
 		& companion {
-			position: fixed;
-      inset: 0;
 			min-height: 1rem;
-      max-width: 320px;
 			z-index: 5;
 			transition: opacity 100ms ease-in-out;
       opacity: 0;
-			border-bottom: 1px solid orange;
       margin: auto;
+      display: grid;
+      height: 100%;
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      backdrop-filter: blur(3px) grayscale(.5) contrast(.5);
 		}
+
+    & companion .card {
+      max-width: 320px;
+      background: rgba(0,0,0,.5);
+      color: rgba(255,255,255,1);
+      backdrop-filter: blur(3px);
+      border-radius: var(--border-radius);
+      box-shadow:
+        0 -10px 30px 15px rgba(255,255,255,.25),
+        0 -6px 18px 9px rgba(255,255,255,.5),
+        0 -2px 6px 3px rgba(255,255,255,.85);
+      border: 1px solid rgba(0,0,0,.85);
+
+    }
 
 		& companion.active {
       opacity: 1;
+      z-index: 1;
 		}
 
 		& companion:not(.active) button {
@@ -304,6 +337,7 @@ $.flair(`
 		& .card {
       overflow: auto;
 			padding: 1rem;
+      max-height: 100vh;
 		}
 
 		@keyframes &-fade-in {
@@ -389,20 +423,17 @@ async function messageStateMachine(target, message) {
 		return
 	}
 
+	if(action === actions.close) {
+		setMode(message.welcome)
+    $.teach({ companionActive: false }, merge(id))
+		return
+	}
+
   if(action === actions.authenticate) {
     try {
-      const authenticated = (await fetch('/api/fastmail/fetchTen', {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: state['ls/fastmail/username'],
-          apikey: state['ls/fastmail/apikey'],
-        })
-      }).then(res => res.status)) === 200
-      setMode(authenticated ? modes.ready : modes.misconfigured)
+      const { status, data } = await fetchTen(state['ls/fastmail/username'], state['ls/fastmail/apikey'])
+      state['ls/fastmail/fetchTen'] = data || []
+      setMode(status === 'ok' ? modes.ready : modes.misconfigured)
       return
     } catch(e) {
       console.log(e)
@@ -440,6 +471,135 @@ function merge(id) {
 		}
 	}
 }
+
+const hostname = "api.fastmail.com";
+
+const authUrl = `https://${hostname}/.well-known/jmap`;
+const headers = (apikey) => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${apikey}`,
+});
+
+const getSession = async (apikey) => {
+  const response = await fetch(authUrl, {
+    method: "GET",
+    headers: headers(apikey),
+  });
+  return response.json();
+};
+
+const inboxIdQuery = async (apikey, api_url, account_id) => {
+  const response = await fetch(api_url, {
+    method: "POST",
+    headers: headers(apikey),
+    body: JSON.stringify({
+      using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
+      methodCalls: [
+        [
+          "Mailbox/query",
+          {
+            accountId: account_id,
+            filter: { role: "inbox", hasAnyRole: true },
+          },
+          "a",
+        ],
+      ],
+    }),
+  });
+
+  const data = await response.json();
+
+  inbox_id = data["methodResponses"][0][1]["ids"][0];
+
+  if (!inbox_id.length) {
+    console.error("Could not get an inbox.");
+    process.exit(1);
+  }
+
+  return await inbox_id;
+};
+
+const mailboxQuery = async (apikey, api_url, account_id, inbox_id) => {
+  const response = await fetch(api_url, {
+    method: "POST",
+    headers: headers(apikey),
+    body: JSON.stringify({
+      using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
+      methodCalls: [
+        [
+          "Email/query",
+          {
+            accountId: account_id,
+            filter: { inMailbox: inbox_id },
+            sort: [{ property: "receivedAt", isAscending: false }],
+            limit: 10,
+          },
+          "a",
+        ],
+        [
+          "Email/get",
+          {
+            accountId: account_id,
+            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'htmlBody', 'textBody'],
+            fetchAllBodyValues: true,
+            "#ids": {
+              resultOf: "a",
+              name: "Email/query",
+              path: "/ids/*",
+            },
+          },
+          "b",
+        ],
+      ],
+    }),
+  });
+
+  const data = await response.json();
+
+  return await data;
+};
+async function fetchTen(username, apikey){
+  const messages = [];
+
+  // bail if we don't have our ENV set:
+  if (!username || !apikey) {
+    console.log("Please set the username and apikey");
+  }
+
+  return await getSession(apikey).then(async(session) => {
+    const api_url = session.apiUrl;
+    const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
+    await inboxIdQuery(apikey, api_url, account_id).then(async (inbox_id) => {
+      await mailboxQuery(apikey, api_url, account_id, inbox_id).then((emails) => {
+        emails["methodResponses"][1][1]["list"].forEach((email) => {
+          const from = email.from[0].email
+          const subject = email.subject
+          const timestamp = email.receivedAt
+
+          console.log(email)
+          const textParts = email.textBody.map(x => x.partId)
+          const htmlParts = email.htmlBody.map(x => x.partId)
+          const textBody = textParts.map(id => email.bodyValues[id].value).join('')
+          const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
+          messages.push({
+            post_hint: 'email',
+            meta: {
+              author: from,
+              authorPhotoUrl: 'https://tychi.me/professional-headshot.jpg',
+              timestamp,
+            },
+            subject,
+            textBody,
+            htmlBody,
+          })
+        });
+      });
+    });
+    return { data: messages, status: 'ok' }
+  });
+}
+
+
     </script>
   </body>
 </html>
