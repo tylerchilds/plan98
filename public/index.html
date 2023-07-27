@@ -13,15 +13,32 @@
     <link href="/cutestrap.css" rel="stylesheet">
   </head>
   <body>
-    <fastmail-wizard></fastmail-wizard>
+    <login-wizard></login-wizard>
     <script src="../package.2015.js"></script>
     <script>
-const $ = module('fastmail-wizard')
+const searchParams = new URLSearchParams(window.location.search);
+
+const callbacks = {
+  'callback': params => {
+    const provider = params.get('provider')
+    const access_token = params.get('access_secret')
+    const access_secret = params.get('access_token')
+    bus.state[`ls/${provider}/tokens`] = {
+      provider,
+      access_token,
+      access_secret
+    }
+  }
+}
+
+resolveCallbacks(searchParams)
+
+const $ = module('login-wizard')
 
 const modes = {
 	welcome: 'welcome',
-	username: 'username',
-	apikey: 'apikey',
+	callforward: 'callforward',
+	callback: 'callback',
 	ready: 'ready',
 	misconfigured: 'misconfigured',
 }
@@ -29,13 +46,14 @@ const modes = {
 const actions = {
 	goto: 'goto',
 	authenticate: 'authenticate',
+	connect: 'connect',
 	next: 'next',
 	back: 'back',
 	close: 'close',
 }
 
 const emptyLauncher = {
-	mode: 'welcome',
+	mode: searchParams.get('mode') || 'welcome',
 	nextMode: null,
 	backMode: null,
 	companionActive: true,
@@ -53,15 +71,15 @@ $.when('click', '[data-goto]', goTo)
 const actionHandlers = {
 	[modes.welcome]: (id) => [
 		`
-			<button class="button" data-id="${id}" data-goto="username">
+			<button class="button" data-id="${id}" data-goto="callforward">
 				Start
 			</button>
 		`
 	],
-	[modes.username]: (id) => [
+	[modes.callforward]: (id) => [
 		`
-			<button class="button" data-id="${id}" data-goto="apikey">
-        Continue
+			<button class="button" data-id="${id}" data-action="connect">
+				Connect
 			</button>
 		`,
 		`
@@ -70,9 +88,9 @@ const actionHandlers = {
 			</button>
 		`
 	],
-	[modes.apikey]: (id) => [
+	[modes.callback]: (id) => [
 		`
-      <button class="button" data-id="${id}" data-action="${actions.authenticate}">
+      <button class="button" data-id="${id}" data-goto="ready">
         Continue
 			</button>
 		`,
@@ -122,28 +140,23 @@ $.draw(target => {
 	const renderers = {
 		[modes.welcome]: () => `
 				<div class="card">
-					<h2>Welcome to JMAP OS</h2>
-					<p>Connect to a JMAP provider</p>
+					<h2>Smuggle</h2>
+					<p>Bridge your physical and digital operations</p>
 					${actionItems(id, modes.welcome)}
 				</div>
 			`,
-		[modes.username]: () => `
+		[modes.callforward]: () => `
       <div class="card">
-        <h2>Enter your username</h2>
-        <p>This should be your email.</p>
-        <field-text label="Username" key="ls/fastmail/username"></field-text>
-        ${actionItems(id, modes.username)}
+        <h2>Connect a service</h2>
+        <p>First, log in to smugmug</p>
+        ${actionItems(id, modes.callforward)}
       </div>
     `,
-		[modes.apikey]: () => `
+		[modes.callback]: () => `
       <div class="card">
-        <h2>Access Configuration</h2>
-        <p>An API Key is used to securely access your account without leaking your password.</p>
-        <field-text label="API Key" key="ls/fastmail/apikey"></field-text>
-        <p>
-          <small>Fastmail API Keys information <a href="https://www.fastmail.help/hc/en-us/articles/5254602856719-API-tokens">can be found here</a>.</small>
-        </p>
-        ${actionItems(id, modes.apikey)}
+        <h2>Service Connection Successful</h2>
+          <connected-service key='ls/smugmug/tokens'></connected-service>
+        ${actionItems(id, modes.callback)}
       </div>
     `,
     [modes.ready]: () => `
@@ -157,8 +170,6 @@ $.draw(target => {
       <div class="card">
         <h2>Whoops</h2>
         <p>Something went super wrong so, yeah, maybe tweak these.</p>
-        <field-text label="Username" key="ls/fastmail/username"></field-text>
-        <field-text label="API Key" key="ls/fastmail/apikey"></field-text>
         ${actionItems(id, modes.misconfigured)}
       </div>
     `,
@@ -178,7 +189,7 @@ $.draw(target => {
 
 	target.innerHTML = `
     <div class="application">
-      <card-list key="ls/fastmail/fetchTen"></card-list>
+      <tree-view key="ls/smugmug/folders"></tree-view>
     </div>
 		<button aria-label="Companion" class="switcher" data-id="${id}"></button>
 		<companion class="${companionClass}">
@@ -441,6 +452,16 @@ async function messageStateMachine(target, message) {
     }
 	}
 
+  if(action === actions.connect) {
+    try {
+      window.location.href="/connect/smugmug"
+      return
+    } catch(e) {
+      console.log(e)
+      setMode(modes.misconfigured)
+    }
+	}
+
 	if(action === actions.back && backMode) {
 		setMode(backMode)
 		return
@@ -599,6 +620,14 @@ async function fetchTen(username, apikey){
   });
 }
 
+function resolveCallbacks(params) {
+  const mode = params.get('mode')
+  const provider = params.get('provider')
+  const callback = callbacks[mode]
+  if(typeof callback === 'function') {
+    callback(params)
+  }
+}
 
     </script>
   </body>

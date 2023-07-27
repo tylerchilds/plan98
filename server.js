@@ -77,8 +77,10 @@ app.use(bodyParser.raw())
 
 app.use(session({secret: 'grant', saveUninitialized: true, resave: false}))
 app.use(grant(oauthConfig))
-app.get('/api/smugmug/callback', (req, res) => {
-  res.end(JSON.stringify(req.session.grant.response, null, 2))
+app.get('/api/:provider/callback', (req, res) => {
+  const { provider } = req.params
+  const { access_token, access_secret } = req.session.grant.response
+  res.redirect(`/?mode=callback&provider=${provider}&access_token=${access_token}&access_secret=${access_secret}`)
 })
 
 app.get('/exec/*', async (req, res) => {

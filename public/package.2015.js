@@ -6681,7 +6681,7 @@ ${patch.content}\r
             const e3 = new URL(t3), r2 = window.location;
             return e3.protocol === r2.protocol && e3.host === r2.host;
           }
-          function $14(t3, e3, r2) {
+          function $17(t3, e3, r2) {
             r2[t3] && -1 !== r2[t3].indexOf(e3) || (r2[t3] = r2[t3] || [], r2[t3].push(e3));
           }
           function D(t3, e3, r2) {
@@ -6702,13 +6702,13 @@ ${patch.content}\r
           }
           class R {
             on(t3, e3) {
-              return this._listeners = this._listeners || {}, $14(t3, e3, this._listeners), this;
+              return this._listeners = this._listeners || {}, $17(t3, e3, this._listeners), this;
             }
             off(t3, e3) {
               return D(t3, e3, this._listeners), D(t3, e3, this._oneTimeListeners), this;
             }
             once(t3, e3) {
-              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $14(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
+              return e3 ? (this._oneTimeListeners = this._oneTimeListeners || {}, $17(t3, e3, this._oneTimeListeners), this) : new Promise((e4) => this.once(t3, e4));
             }
             fire(t3, e3) {
               "string" == typeof t3 && (t3 = new O(t3, e3 || {}));
@@ -13899,8 +13899,8 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                 const t4 = Math.sin(L2), e4 = Math.cos(L2), r3 = [e4, -t4, t4, e4];
                 B2._matMult(r3), C3._matMult(r3), E2._matMult(r3), V2._matMult(r3);
               }
-              const $15 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
-              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $15, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $15, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
+              const $18 = n4.stretch + n4.fixed, D2 = a4.stretch + a4.fixed;
+              return { tl: B2, tr: C3, bl: E2, br: V2, tex: { x: s2.paddedRect.x + gc2 + $18, y: s2.paddedRect.y + gc2 + D2, w: l3.stretch + l3.fixed - $18, h: u3.stretch + u3.fixed - D2 }, writingMode: void 0, glyphOffset: [0, 0], sectionIndex: 0, pixelOffsetTL: F2, pixelOffsetBR: T2, minFontScaleX: k2 / o2 / c5, minFontScaleY: I2 / o2 / h2, isSDF: r2 };
             };
             if (n3 && (s2.stretchX || s2.stretchY)) {
               const t4 = bc(p3, g3, y2), e4 = bc(f2, x2, m4);
@@ -14131,7 +14131,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const C3 = (l3, p4) => {
               p4.x < 0 || p4.x >= ja || p4.y < 0 || p4.y >= ja || function(e4, r3, n4, i4, a4, s3, o3, l4, u3, c6, h3, p5, f3, d4, y3, m5, g4, v3, b4, w3, _3, A3, k3, S3, I3) {
                 const z3 = e4.addToLineVertexArray(r3, n4);
-                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $15 = -1;
+                let M3, P4, B3, C4, V2 = 0, E2 = 0, F2 = 0, T2 = 0, L2 = -1, $18 = -1;
                 const D2 = {};
                 let O2 = Aa(""), U2 = 0, R2 = 0;
                 if (void 0 === l4._unevaluatedLayout.getValue("text-radial-offset") ? [U2, R2] = l4.layout.get("text-offset").evaluate(_3, {}, S3).map((t3) => t3 * vl) : (U2 = l4.layout.get("text-radial-offset").evaluate(_3, {}, S3) * vl, R2 = Pc), e4.allowVerticalPlacement && i4.vertical) {
@@ -14143,7 +14143,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   P4 = new Ac(u3, r3, c6, h3, p5, a4, g4, v3, false, n5), V2 = 4 * s4.length;
                   const d5 = e4.iconSizeData;
                   let y4 = null;
-                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $15 = e4.icon.placedSymbolArray.length - 1);
+                  "source" === d5.kind ? (y4 = [mu * l4.layout.get("icon-size").evaluate(_3, {})], y4[0] > gu && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)) : "composite" === d5.kind && (y4 = [mu * A3.compositeIconSizes[0].evaluate(_3, {}, S3), mu * A3.compositeIconSizes[1].evaluate(_3, {}, S3)], (y4[0] > gu || y4[1] > gu) && x(`${e4.layerIds[0]}: Value for "icon-size" is >= ${yu}. Reduce your "icon-size".`)), e4.addSymbols(e4.icon, s4, y4, w3, b4, _3, t2.WritingMode.none, r3, z3.lineStartIndex, z3.lineLength, -1, S3), L2 = e4.icon.placedSymbolArray.length - 1, f4 && (E2 = 4 * f4.length, e4.addSymbols(e4.icon, f4, y4, w3, b4, _3, t2.WritingMode.vertical, r3, z3.lineStartIndex, z3.lineLength, -1, S3), $18 = e4.icon.placedSymbolArray.length - 1);
                 }
                 const q2 = Object.keys(i4.horizontal);
                 for (const n5 of q2) {
@@ -14157,13 +14157,13 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
                   if (F2 += Ec(e4, r3, a5, s3, l4, y3, _3, m5, z3, i4.vertical ? t2.WritingMode.horizontal : t2.WritingMode.horizontalOnly, o4 ? q2 : [n5], D2, L2, A3, S3), o4)
                     break;
                 }
-                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $15, A3, S3));
+                i4.vertical && (T2 += Ec(e4, r3, i4.vertical, s3, l4, y3, _3, m5, z3, t2.WritingMode.vertical, ["vertical"], D2, $18, A3, S3));
                 const j2 = M3 ? M3.boxStartIndex : e4.collisionBoxArray.length, N2 = M3 ? M3.boxEndIndex : e4.collisionBoxArray.length, Z2 = B3 ? B3.boxStartIndex : e4.collisionBoxArray.length, K2 = B3 ? B3.boxEndIndex : e4.collisionBoxArray.length, G2 = P4 ? P4.boxStartIndex : e4.collisionBoxArray.length, J2 = P4 ? P4.boxEndIndex : e4.collisionBoxArray.length, X2 = C4 ? C4.boxStartIndex : e4.collisionBoxArray.length, Y2 = C4 ? C4.boxEndIndex : e4.collisionBoxArray.length;
                 let H2 = -1;
                 const W2 = (t3, e5) => t3 && t3.circleDiameter ? Math.max(t3.circleDiameter, e5) : e5;
                 H2 = W2(M3, H2), H2 = W2(B3, H2), H2 = W2(P4, H2), H2 = W2(C4, H2);
                 const Q2 = H2 > -1 ? 1 : 0;
-                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $15, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
+                Q2 && (H2 *= I3 / vl), e4.glyphOffsetArray.length >= zu.MAX_GLYPHS && x("Too many glyphs being rendered in a tile. See https://github.com/mapbox/mapbox-gl-js/issues/2907"), void 0 !== _3.sortKey && e4.addToSortKeyRanges(e4.symbolInstances.length, _3.sortKey), e4.symbolInstances.emplaceBack(r3.x, r3.y, D2.right >= 0 ? D2.right : -1, D2.center >= 0 ? D2.center : -1, D2.left >= 0 ? D2.left : -1, D2.vertical || -1, L2, $18, O2, j2, N2, Z2, K2, G2, J2, X2, Y2, c6, F2, T2, V2, E2, Q2, 0, f3, U2, R2, H2);
               }(e3, p4, l3, n3, i3, a3, B2, e3.layers[0], e3.collisionBoxArray, r2.index, r2.sourceLayerIndex, e3.index, g3, [_2, _2, _2, _2], S2, u2, b3, A2, I2, d3, r2, s2, c5, h2, o2);
             };
             if ("line" === z2)
@@ -15352,11 +15352,11 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             }
           }
           function X(e3, t3) {
-            t3.push($14(e3[0])), t3.push(U(e3[1])), t3.push(0);
+            t3.push($17(e3[0])), t3.push(U(e3[1])), t3.push(0);
           }
           function W(e3, t3, o2, i3) {
             for (var r2, s2, n3 = 0, a3 = 0; a3 < e3.length; a3++) {
-              var l2 = $14(e3[a3][0]), c5 = U(e3[a3][1]);
+              var l2 = $17(e3[a3][0]), c5 = U(e3[a3][1]);
               t3.push(l2), t3.push(c5), t3.push(0), a3 > 0 && (n3 += i3 ? (r2 * c5 - l2 * s2) / 2 : Math.sqrt(Math.pow(l2 - r2, 2) + Math.pow(c5 - s2, 2))), r2 = l2, s2 = c5;
             }
             var u2 = t3.length - 3;
@@ -15368,7 +15368,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               W(e3[r2], s2, o2, i3), t3.push(s2);
             }
           }
-          function $14(e3) {
+          function $17(e3) {
             return e3 / 360 + 0.5;
           }
           function U(e3) {
@@ -17021,7 +17021,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
             const s2 = t2.create();
             return t2.translate(s2, s2, [1, 1, 0]), t2.scale(s2, s2, [0.5 * e3.width, 0.5 * e3.height, 1]), t2.multiply(s2, s2, e3.calculatePosMatrix(i3.toUnwrapped()));
           }
-          function $14(t3, e3, i3, s2, a3, o2) {
+          function $17(t3, e3, i3, s2, a3, o2) {
             const r2 = function(t4, e4, i4) {
               if (t4)
                 for (const s3 of t4) {
@@ -19174,7 +19174,7 @@ Use an identity property function instead: \`{ "type": "identity", "property": $
               i3.availableImages = this._availableImages;
               const r2 = this._serializedAllLayers();
               for (const t3 in this.sourceCaches)
-                i3.layers && !a3[t3] || o2.push($14(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
+                i3.layers && !a3[t3] || o2.push($17(this.sourceCaches[t3], this._layers, r2, e3, i3, s2));
               return this.placement && o2.push(function(t3, e4, i4, s3, a4, o3, r3) {
                 const n3 = {}, l2 = o3.queryRenderedSymbols(s3), c5 = [];
                 for (const t4 of Object.keys(l2).map(Number))
@@ -27390,8 +27390,8 @@ ${markup.join("\n")}`);
     </div>
   `;
   });
-  function attributes(node, $14) {
-    const root = node.closest($14.selector);
+  function attributes(node, $17) {
+    const root = node.closest($17.selector);
     return { root };
   }
   function toggleActive(event) {
@@ -44456,12 +44456,12 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(_target, $14, _flags) {
+  function persist(_target, $17, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
-      $14.teach({ file });
+      $17.teach({ file });
     };
   }
   $3.flair(`
@@ -44698,17 +44698,30 @@ u
   }
 `);
 
+  // public/packages/tree-view.js
+  var $5 = module2("tree-view");
+  $5.draw((target) => {
+    const key2 = target.getAttribute("key");
+    const list = state[key2] || [];
+    return `
+    <details>
+      <summary>Cool</summary>
+       Uncool
+    </details>
+  `;
+  });
+
   // public/packages/modal-module.js
-  var $5 = module2("ctx-modal", {
+  var $6 = module2("ctx-modal", {
     label: null,
     children: null,
     isOpen: null
   });
-  $5.draw(() => {
+  $6.draw(() => {
     const {
       body,
       isOpen
-    } = $5.learn();
+    } = $6.learn();
     if (!isOpen)
       return " ";
     const modalClose = `
@@ -44727,7 +44740,7 @@ u
   document.body.insertAdjacentHTML("beforeend", context);
   function showModal2(body) {
     document.body.classList.add("overlay");
-    $5.teach({
+    $6.teach({
       body,
       isOpen: true
     });
@@ -44735,13 +44748,13 @@ u
   window.showModal = showModal2;
   function hideModal() {
     document.body.classList.remove("overlay");
-    $5.teach({
+    $6.teach({
       isOpen: false
     });
   }
   window.hideModal = showModal2;
-  $5.when("click", ".close", hideModal);
-  $5.flair(`
+  $6.when("click", ".close", hideModal);
+  $6.flair(`
   body.overlay {
     overflow: hidden;
   }
@@ -47751,8 +47764,8 @@ u
     return ids.map((x) => controllers[x]).map(gatherInputs);
   }
   var initialState = {};
-  var $6 = module2("gamepad-debug", initialState);
-  $6.draw((target) => renderGamepads(target, $6));
+  var $7 = module2("gamepad-debug", initialState);
+  $7.draw((target) => renderGamepads(target, $7));
   function connecthandler(e2) {
     const { index } = e2.gamepad;
     controllers[index] = e2.gamepad;
@@ -47781,11 +47794,11 @@ u
     </ul>
   `;
   }
-  function renderGamepads(_target, $14) {
+  function renderGamepads(_target, $17) {
     const list = gamepads().map((gamepad, index) => `
       <li class="gamepad" id="${gamepad.id}">
         <label>${index + 1}: ${gamepad.id}</label>
-        ${renderInputs($14, { gamepad })}
+        ${renderInputs($17, { gamepad })}
       </li>
     `).join("");
     return `<ul class="gamepads">${list}</ul>`;
@@ -47806,7 +47819,7 @@ u
   }
   globalThis.addEventListener("gamepadconnected", connecthandler);
   globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
-  $6.flair(`
+  $7.flair(`
   & .gamepads {
     background: rgba(0,0,0,.04);
     border: 1px solid rgba(0,0,0,.1);
@@ -47849,7 +47862,7 @@ u
     activeMotions: [],
     frames: {}
   };
-  var $7 = module2("guitar-debug", initialState2);
+  var $8 = module2("guitar-debug", initialState2);
   var fretMap = [0, 1, 3, 2, 4];
   var registers = [
     "     ",
@@ -47870,10 +47883,10 @@ u
   ];
   requestAnimationFrame(loop);
   function loop(time) {
-    const activeFrets = gamepads().map((x) => toFrets($7, x));
-    const activeRegisters = activeFrets.map((x) => toRegisters($7, x));
-    const activeMotions = gamepads().map((x) => toMotion($7, x));
-    $7.teach({
+    const activeFrets = gamepads().map((x) => toFrets($8, x));
+    const activeRegisters = activeFrets.map((x) => toRegisters($8, x));
+    const activeMotions = gamepads().map((x) => toMotion($8, x));
+    $8.teach({
       time,
       activeFrets,
       activeRegisters,
@@ -47881,11 +47894,11 @@ u
     });
     requestAnimationFrame(loop);
   }
-  $7.draw(() => {
+  $8.draw(() => {
     const {
       activeRegisters,
       activeMotions
-    } = $7.learn();
+    } = $8.learn();
     const classes = (i2) => {
       return ["up", "down", "left", "right"].map((x) => activeMotions[i2][x] ? x : "").join(" ");
     };
@@ -47913,7 +47926,7 @@ u
       right: horizontal === 1
     };
   }
-  $7.flair(`
+  $8.flair(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -47930,7 +47943,7 @@ u
     transform: scale(2);
   }
 `);
-  var guitar_default = $7;
+  var guitar_default = $8;
 
   // public/packages/synth-module.js
   var context2 = new AudioContext();
@@ -47956,7 +47969,7 @@ u
     loadSample("/samples/7.mp3"),
     loadSample("/samples/8.mp3")
   ]).then((s) => synths = s);
-  var $8 = module2("synth-module", {
+  var $9 = module2("synth-module", {
     colors: [],
     start: 120,
     length: 360,
@@ -48006,30 +48019,30 @@ u
     [95, 120]
   ];
   var octaveUp = () => {
-    const octave = $8.learn().octave + 1;
+    const octave = $9.learn().octave + 1;
     if (octave > 6) {
       return;
     }
-    $8.teach({ octave });
+    $9.teach({ octave });
   };
   var octaveDown = () => {
-    const octave = $8.learn().octave - 1;
+    const octave = $9.learn().octave - 1;
     if (octave < 0) {
       return;
     }
-    $8.teach({ octave });
+    $9.teach({ octave });
   };
   var pitchUp = () => {
-    const pitch = $8.learn().pitch + 1;
-    $8.teach({ pitch });
+    const pitch = $9.learn().pitch + 1;
+    $9.teach({ pitch });
   };
   var pitchDown = () => {
-    const pitch = $8.learn().pitch - 1;
-    $8.teach({ pitch });
+    const pitch = $9.learn().pitch - 1;
+    $9.teach({ pitch });
   };
   function attack(event) {
     event.preventDefault();
-    const { colors, synth } = $8.learn();
+    const { colors, synth } = $9.learn();
     const { octave, note, hue } = event.target.dataset;
     playSample(synths[synth], 60, parseInt(octave) * 12 + (12 + parseInt(note)));
     event.target.classList.add("active");
@@ -48090,11 +48103,11 @@ u
     requestAnimationFrame(loop2);
   }
   function throttle({ key: key2, time, feature }) {
-    const { frames = {} } = $8.learn();
+    const { frames = {} } = $9.learn();
     const frame = frames[key2] || {};
     if (time - 1e3 / actionableFPS > (frame.time || 0)) {
       feature();
-      $8.teach({ time }, (state3, payload) => {
+      $9.teach({ time }, (state3, payload) => {
         return {
           ...state3,
           frames: {
@@ -48118,9 +48131,9 @@ u
       queueRelease(node);
     }, i2 * strumVelocity);
   }
-  $8.teach({ colors: recalculate() });
-  $8.draw(() => {
-    const { start: start2, length, reverse, colors, octave, pitch, debug } = $8.learn();
+  $9.teach({ colors: recalculate() });
+  $9.draw(() => {
+    const { start: start2, length, reverse, colors, octave, pitch, debug } = $9.learn();
     const wheel = majorScale.map((majorNote, index) => {
       const majorScaleIndex = mod(index - pitch * 7, majorScale.length);
       const minorNote = minorScale[mod(majorScaleIndex + pitch * 7, minorScale.length)];
@@ -48183,11 +48196,11 @@ u
 		</div>
 	`;
   }
-  $8.when("click", ".octave-up", octaveUp);
-  $8.when("click", ".octave-down", octaveDown);
-  $8.when("click", ".pitch-up", pitchUp);
-  $8.when("click", ".pitch-down", pitchDown);
-  $8.flair(`
+  $9.when("click", ".octave-up", octaveUp);
+  $9.when("click", ".octave-down", octaveDown);
+  $9.when("click", ".pitch-up", pitchUp);
+  $9.when("click", ".pitch-down", pitchDown);
+  $9.flair(`
   & {
     height: 100%;
     display: grid;
@@ -48301,7 +48314,7 @@ u
   `;
   }
   function recalculate() {
-    const { start: start2, length, reverse } = $8.learn();
+    const { start: start2, length, reverse } = $9.learn();
     const colors = [...Array(12)].map((_, hueIndex) => {
       const step = length / 12 * hueIndex;
       const hue = reverse ? start2 - step : start2 + step;
@@ -48319,20 +48332,20 @@ u
     upload(colors);
     return colors;
   }
-  $8.when("mousedown", ".step", attack);
-  $8.when("mouseup", ".step", release2);
-  $8.when("touchstart", ".step", attack);
-  $8.when("touchend", ".step", release2);
+  $9.when("mousedown", ".step", attack);
+  $9.when("mouseup", ".step", release2);
+  $9.when("touchstart", ".step", attack);
+  $9.when("touchend", ".step", release2);
   function mod(x, n2) {
     return (x % n2 + n2) % n2;
   }
 
   // public/packages/design-system.js
-  var $9 = module2("design-system");
-  $9.draw(() => {
-    const { palette } = $9.learn();
+  var $10 = module2("design-system");
+  $10.draw(() => {
+    const { palette } = $10.learn();
     if (!palette) {
-      fetch("/design-system").then((res) => res.json()).then(({ palette: palette2 }) => $9.teach({ palette: palette2 }));
+      fetch("/design-system").then((res) => res.json()).then(({ palette: palette2 }) => $10.teach({ palette: palette2 }));
       return;
     }
     return `
@@ -48345,24 +48358,24 @@ u
   });
 
   // public/packages/smug-mug.js
-  var $10 = module2("smug-mug");
-  $10.draw(() => {
+  var $11 = module2("smug-mug");
+  $11.draw(() => {
     return `
     smug mug
   `;
   });
-  $10.flair(`
+  $11.flair(`
   & { display: block }
 `);
 
   // public/packages/google-maps.js
-  var $11 = module2("google-maps");
-  $11.draw(() => {
+  var $12 = module2("google-maps");
+  $12.draw(() => {
     return `
     google map
   `;
   });
-  $11.flair(`
+  $12.flair(`
   & { display: block }
 `);
 
@@ -48507,10 +48520,10 @@ u
     function noop() {
     }
   };
-  var $12 = module2("script-type");
+  var $13 = module2("script-type");
   var $editor = module2("script-editor");
   var $viewer = module2("script-viewer");
-  $12.draw((target) => {
+  $13.draw((target) => {
     return `
     <div name="transport">
       <button class="print">print</button>
@@ -48519,7 +48532,7 @@ u
     <script-viewer><\/script-viewer>
   `;
   });
-  $12.flair(`
+  $13.flair(`
   * {
     box-sizing: border-box;
     padding: 0;
@@ -48588,9 +48601,9 @@ u
   }
 
 `);
-  $12.when("click", ".print", print);
+  $13.when("click", ".print", print);
   $viewer.draw((target) => {
-    const source = target.closest($12.link).getAttribute("source");
+    const source = target.closest($13.link).getAttribute("source");
     const { formatted } = state[source] || {};
     return `
     <div class="shadowbox">
@@ -48599,7 +48612,7 @@ u
   `;
   });
   $editor.draw((target) => {
-    const source = target.closest($12.link).getAttribute("source");
+    const source = target.closest($13.link).getAttribute("source");
     const { file } = state[source] || {};
     if (file && !target.view) {
       const config2 = {
@@ -48607,7 +48620,7 @@ u
           basicSetup,
           EditorView.lineWrapping,
           EditorView.updateListener.of(
-            persist2(target, $12, {})
+            persist2(target, $13, {})
           )
         ]
       };
@@ -48621,13 +48634,13 @@ u
       });
     }
   });
-  function persist2(target, $14, _flags) {
+  function persist2(target, $17, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
       const file = update3.view.state.doc.toString();
       const formatted = compile(file);
-      const source = target.closest($14.link).getAttribute("source");
+      const source = target.closest($17.link).getAttribute("source");
       state[source] = { file, formatted };
     };
   }
@@ -48742,8 +48755,8 @@ u
 `);
 
   // public/packages/field-text.js
-  var $13 = module2("field-text");
-  $13.draw((target) => {
+  var $14 = module2("field-text");
+  $14.draw((target) => {
     const label = target.getAttribute("label");
     const key2 = target.getAttribute("key");
     const value = state[key2] || "";
@@ -48754,7 +48767,46 @@ u
     </label>
   `;
   });
-  $13.when("keyup", "input", (event) => {
+  $14.when("keyup", "input", (event) => {
+    const value = event.target.value;
+    const key2 = event.target.name;
+    state[key2] = value;
+  });
+
+  // public/packages/field-select.js
+  var $15 = module2("field-select");
+  $15.draw((target) => {
+    const label = target.getAttribute("label");
+    const key2 = target.getAttribute("key");
+    const value = state[key2] || "";
+    return `
+    <label class="field">
+			<select name="${key2}" value="${value}" >
+				<option disabled="disabled">
+					Flavors
+				</option>
+				<option>Chocolate</option>
+				<option>Vanilla</option>
+			</select>
+      <span class="label">${label}</span>
+    </label>
+  `;
+  });
+  $15.when("keyup", "input", (event) => {
+    const value = event.target.value;
+    const key2 = event.target.name;
+    state[key2] = value;
+  });
+
+  // public/packages/connected-service.js
+  var $16 = module2("connected-service");
+  $16.draw((target) => {
+    const label = target.getAttribute("label");
+    const key2 = target.getAttribute("key");
+    const value = state[key2] || {};
+    return Object.keys(value).map((key3) => `${key3}: ${value[key3]}`).join("<br/>");
+  });
+  $16.when("keyup", "input", (event) => {
     const value = event.target.value;
     const key2 = event.target.name;
     state[key2] = value;
