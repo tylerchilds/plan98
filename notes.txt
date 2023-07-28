@@ -35,6 +35,8 @@ Hours:
 7/12: 1 - Smugmug Authentication planning
 7/18: 1 - SmugMug Authentication research
 7/19: 4 - SmugMug authentication implementation
+7/27: 4 - Oauth wizard smugmug integration
+7/28: 3 - SmugMug api integration
 - todo: abstract oauth request for data, store api keys, render user albums
 
 

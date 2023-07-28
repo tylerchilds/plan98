@@ -44701,8 +44701,9 @@ u
   // public/packages/tree-view.js
   var $5 = module2("tree-view");
   $5.draw((target) => {
-    const key2 = target.getAttribute("key");
-    const list = state[key2] || [];
+    const tokens = target.getAttribute("tokens");
+    const config2 = state[tokens] || {};
+    readTree(config2);
     return `
     <details>
       <summary>Cool</summary>
@@ -44710,6 +44711,52 @@ u
     </details>
   `;
   });
+  function authenticationToken(config2) {
+    return {
+      key: config2.token,
+      secret: config2.secret
+    };
+  }
+  async function fetchUser(config2) {
+    const { Response, Code } = await fetch("/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        url: "https://api.smugmug.com/api/v2!authuser",
+        provider: config2.provider,
+        token: authenticationToken(config2)
+      })
+    }).then((res) => res.json());
+    if (Code === 200) {
+      bus.state["smugmug/user"] = Response.User;
+    }
+  }
+  async function fetchTree(config2) {
+    const { NickName } = bus.state["smugmug/user"];
+    console.log(NickName);
+    const url = `https://api.smugmug.com/api/v2/user/${NickName}?_expand=Node.ChildNodes`;
+    const { Response, Code } = await fetch("/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        url,
+        provider: config2.provider,
+        token: authenticationToken(config2)
+      })
+    }).then((res) => res.json());
+    if (Code === 200) {
+      debugger;
+    }
+  }
+  async function readTree(config2) {
+    await fetchUser(config2);
+    console.log(bus.state["smugmug/user"]);
+    await fetchTree(config2);
+  }
 
   // public/packages/modal-module.js
   var $6 = module2("ctx-modal", {

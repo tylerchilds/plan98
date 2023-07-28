@@ -125,61 +125,60 @@ app.get('/statebus-client-library.js',
                          send_file('node_modules/statebus/client-library.js'))
 app.get('/braidify.js',  send_file('node_modules/braidify/braidify-client.js'))
 
-app.get("/api/smugmug/current-user", (req, res) => {
-  const url = `https://api.smugmug.com/api/v2!authuser`;
-  smugmug({ url }, req, res)
-})
+const proxies = {
+	smugmug: function smugmug(req, res) {
+		const { url } = req.body
 
-function smugmug(options, req, res) {
-  const { url, method="GET", key, secret } = options
+		try {
+			// Set up the OAuth 1.0a parameters
+			const requestData = {
+				url,
+				method: "GET",
+			};
 
-  try {
-    // Set up the OAuth 1.0a parameters
-    const requestData = {
-      url,
-      method,
-    };
-    const token = {
-      key: process.env.HARDCODED_ACCESS_TOKEN,
-      secret: process.env.HARDCODED_ACCESS_SECRET,
-    };
-    const headers = oauth.toHeader(oauth.authorize(requestData, token));
+			const headers = oauth.toHeader(oauth.authorize(requestData, req.body.token));
+			// Make the HTTP GET request using the 'request' package
+			request.get(
+				{
+					url,
+					headers,
+					json: true,
+				},
+				(error, response, body) => {
+					if (error) {
+						return res.status(500).json({ error: "Internal server error" });
+					}
 
-    // Make the HTTP GET request using the 'request' package
-    request.get(
-      {
-        url,
-        headers,
-        json: true,
-      },
-      (error, response, body) => {
-        if (error) {
-          return res.status(500).json({ error: "Internal server error" });
-        }
-
-        console.log(response, body)
-        // Check if the request was successful (status code 200)
-        if (response.statusCode === 200) {
-          // Respond with the albums data
-          res.json(body);
-        } else {
-          // Respond with an error message if the request failed
-          res.status(response.statusCode).json({ error: "Request failed" });
-        }
-      }
-    );
-  } catch (error) {
-    console.error(error)
-    // Handle any errors that occurred during the request
-    res.status(500).json({ error: 'whoops' });
-  }
-
+					// Check if the request was successful (status code 200)
+					if (response.statusCode === 200) {
+						// Respond with the albums data
+						res.json(body);
+					} else {
+						// Respond with an error message if the request failed
+						res.status(response.statusCode).json({ error: "Request failed" });
+					}
+				}
+			);
+		} catch (error) {
+			console.error(error)
+			// Handle any errors that occurred during the request
+			res.status(500).json({ error: 'whoops' });
+		}
+	}
 }
 
-app.get("/api/smugmug/node", (req, res) => {
-  const url = `https://api.smugmug.com/api/v2/user/${process.env.HARDCODED_USER_ID}?_expand=Node.ChildNodes`;
-  smugmug({ url }, req, res)
-});
+app.post("/proxy", (req, res) => {
+	const provider = req.body.provider
+
+	if(proxies[provider]) {
+		proxies[provider](req, res)
+		return
+	}
+
+	res.status(500).json({
+		error: `no configured provider for ${provider}`
+	});
+})
 
 // Setup the statebus!
 bus.honk = 1                // Print handy debugging output

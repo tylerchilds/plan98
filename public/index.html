@@ -21,12 +21,12 @@ const searchParams = new URLSearchParams(window.location.search);
 const callbacks = {
   'callback': params => {
     const provider = params.get('provider')
-    const access_token = params.get('access_secret')
-    const access_secret = params.get('access_token')
+    const token = params.get('access_token')
+    const secret = params.get('access_secret')
     bus.state[`ls/${provider}/tokens`] = {
       provider,
-      access_token,
-      access_secret
+      token,
+      secret
     }
   }
 }
@@ -95,8 +95,8 @@ const actionHandlers = {
 			</button>
 		`,
 		`
-			<button class="button -secondary" data-id="${id}" data-action="back">
-				Go Back
+			<button class="button -secondary" data-id="${id}" data-goto="callforward">
+				Connect Another
 			</button>
 		`
   ],
@@ -189,7 +189,7 @@ $.draw(target => {
 
 	target.innerHTML = `
     <div class="application">
-      <tree-view key="ls/smugmug/folders"></tree-view>
+      <tree-view tokens="ls/smugmug/tokens"></tree-view>
     </div>
 		<button aria-label="Companion" class="switcher" data-id="${id}"></button>
 		<companion class="${companionClass}">
