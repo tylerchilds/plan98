@@ -10,7 +10,7 @@ require('dotenv').config()
 
 const oauthConfig = {
   "defaults": {
-    "origin": "http://localhost:1989",
+    "origin": "http://localhost:3000",
     "transport": "session"
   },
   "smugmug": {
@@ -88,7 +88,7 @@ app.get('/exec/*', async (req, res) => {
   const defaultHandler = (req, res) => res.send('default handler')
   const {
     handler = defaultHandler
-  } = await fetch(`http://localhost:1989/edge/${pathname}.js`)
+  } = await fetch(`http://localhost:3000/edge/${pathname}.js`)
     .then((response) => response.json())
     .then(async (data) => {
       console.log(data)
@@ -111,7 +111,7 @@ function uriByType(user) {
 // Create the HTTP server
 require('http')
     .createServer(app)
-    .listen(1989, () => console.log('listening on 1989'))
+    .listen(3000, () => console.log('listening on 3000'))
 
 
 // Serve files from disk
