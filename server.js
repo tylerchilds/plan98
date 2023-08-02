@@ -10,7 +10,7 @@ require('dotenv').config()
 
 const oauthConfig = {
   "defaults": {
-    "origin": process.env.ORIGIN,
+    "origin": process.env.ORIGIN || "http://localhost:3000",
     "transport": "session"
   },
   "smugmug": {

@@ -35,6 +35,8 @@ function modulate(config) {
 (function(config) {
   modulate(config)
   new MutationObserver((mutationsList) => {
+    debugger
+    console.log(mutationsList)
     modulate(config)
   }).observe(document.body, { childList: true, subtree: true });
 })({ moduleProxy: './cool-modules' })

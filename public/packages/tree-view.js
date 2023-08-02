@@ -57,7 +57,6 @@ async function fetchTree(config) {
   }).then(res => res.json());
 
   if(Code === 200) {
-    debugger
   }
 }
 
