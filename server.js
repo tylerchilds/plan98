@@ -181,19 +181,24 @@ app.post("/proxy", (req, res) => {
 })
 
 // Setup the statebus!
-bus.honk = 1                // Print handy debugging output
-bus.libs.file_store()       // Persist state onto disk
-
+if(process.env.STATEBUS_HONK === 'enabled')
+  bus.honk = 1                // Print handy debugging output
+if(process.env.STATEBUS_FILE_STORE === 'enabled')
+  bus.libs.file_store()       // Persist state onto disk
 
 // Serve other state from statebus
 app.use(bus.libs.http_in)
 
 // Other libs you might like:
-// bus.libs.sqlite_store()
-// bus.libs.pg_store()
-// bus.libs.firebase_store()
-// bus.libs.sqlite_query_server()
-// bus.libs.sqlite_table_server()
-// bus.libs.serve_email()
-
-
+if(process.env.STATEBUS_SQLITE_STORE === 'enabled')
+  bus.libs.sqlite_store()
+if(process.env.STATEBUS_PG_STORE === 'enabled')
+  bus.libs.pg_store()
+if(process.env.STATEBUS_FIREBASE_STORE === 'enabled')
+  bus.libs.firebase_store()
+if(process.env.STATEBUS_SQLITE_QUERY_SERVER === 'enabled')
+  bus.libs.sqlite_query_server()
+if(process.env.STATEBUS_SQLITE_TABLE_SERVER === 'enabled')
+  bus.libs.sqlite_table_server()
+if(process.env.STATEBUS_SERVE_EMAIL === 'enabled')
+  bus.libs.serve_email()
