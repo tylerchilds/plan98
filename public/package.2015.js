@@ -48858,6 +48858,31 @@ u
     const key2 = event.target.name;
     state[key2] = value;
   });
+
+  // public/main.js
+  function modulate(config2) {
+    [...document.querySelectorAll(":not(:defined)")].forEach(async (target) => {
+      class WebComponent extends HTMLElement {
+        constructor() {
+          super();
+        }
+      }
+      const module3 = target.nodeName.toLowerCase();
+      await import(`${config2.moduleProxy || "."}/${module3}.js`).catch(() => null);
+      if (target.matches(":not(:defined)")) {
+        customElements.define(
+          module3,
+          WebComponent
+        );
+      }
+    });
+  }
+  (function(config2) {
+    modulate(config2);
+    new MutationObserver((mutationsList) => {
+      modulate(config2);
+    }).observe(document.body, { childList: true, subtree: true });
+  })({ moduleProxy: "./cool-modules" });
 })();
 /*!
 * focus-trap 7.0.0
