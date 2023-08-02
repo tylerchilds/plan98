@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npm run build && node server.js",
-    "build": "esbuild --bundle public/main.js --outfile=public/package.2015.js",
+    "build": "npm i && esbuild --bundle public/main.js --outfile=public/package.2015.js",
     "to1996": "npm run build && java -jar bin/closure-compiler-v20221004.jar --js public/package.2015.js --js_output_file public/package.1996.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
