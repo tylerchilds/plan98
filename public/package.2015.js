@@ -44475,9 +44475,10 @@ ${markup.join("\n")}`);
   // public/packages/card-list.js
   var $4 = module2("card-list");
   $4.draw((target) => {
+    infiniteObservation(target);
     const key2 = target.getAttribute("key");
     const list = state[key2] || [];
-    return list.map((item, index) => {
+    const cards = list.map((item, index) => {
       const { touchInformation = {} } = item;
       let c4 = touchInformation.active ? "active" : "";
       c4 += touchInformation.leaving ? ` remove ${touchInformation.leaving}` : ``;
@@ -44487,6 +44488,12 @@ ${markup.join("\n")}`);
       </div>
     `;
     }).join("");
+    return `
+    <div role="infinite">
+      ${cards}
+    </div>
+    <button role="observable">More</button>
+  `;
   });
   function drawCard(data) {
     const renderers = {
@@ -44697,6 +44704,36 @@ u
     line-height: 18px;
   }
 `);
+  function infiniteObservation(target) {
+    if (target.dataset.observed)
+      return;
+    const intersectionObserver = new IntersectionObserver(function(entries) {
+      console.log(entries);
+      if (entries[0].isIntersecting) {
+        loadItems(20);
+        console.log("Loaded new items");
+      }
+    });
+    new MutationObserver(function infiniteMutationCallback(mutations) {
+      for (const mutation of mutations) {
+        if (mutation.type === "childList") {
+          intersectionObserver.observe(
+            target.querySelector("[role='observable']")
+          );
+        }
+      }
+    }).observe(target, { childList: true });
+    function loadItems(number2) {
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(Array(number2).fill("A List Item"));
+        }, 500);
+      }).then((data) => {
+        console.log(data);
+      });
+    }
+    target.dataset.observed = true;
+  }
 
   // public/packages/tree-view.js
   var $5 = module2("tree-view");

@@ -3,11 +3,11 @@ import module from '../module.js'
 const $ = module('card-list')
 
 $.draw(target => {
+  infiniteObservation(target)
   const key = target.getAttribute('key')
   const list = state[key] || []
 
-
-  return list.map((item, index) => {
+  const cards = list.map((item, index) => {
     const { touchInformation={} } = item
     let c = touchInformation.active ? 'active' : ''
     c += touchInformation.leaving
@@ -19,6 +19,13 @@ $.draw(target => {
       </div>
     `
   }).join('')
+
+  return `
+    <div role="infinite">
+      ${cards}
+    </div>
+    <button role="observable">More</button>
+  `
 })
 
 function drawCard(data) {
@@ -247,3 +254,40 @@ u
     line-height: 18px;
   }
 `)
+
+function infiniteObservation(target) {
+  if(target.dataset.observed) return
+
+  const intersectionObserver = new IntersectionObserver(function (entries) {
+    // If intersectionRatio is 0, the target is out of view
+    // and we do not need to do anything.
+    console.log(entries);
+    if (entries[0].isIntersecting) {
+      loadItems(20);
+      console.log("Loaded new items");
+    }
+  });
+
+  new MutationObserver(function infiniteMutationCallback(mutations) {
+    for (const mutation of mutations) {
+      if (mutation.type === "childList") {
+        intersectionObserver.observe(
+          target.querySelector("[role='observable']")
+        );
+      }
+    }
+  }).observe(target, { childList: true });
+
+  // Simulate a request to load data and render it to the list element;
+  function loadItems(number) {
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(Array(number).fill("A List Item"));
+      }, 500);
+    }).then((data) => {
+      console.log(data)
+    });
+  }
+
+  target.dataset.observed = true
+}

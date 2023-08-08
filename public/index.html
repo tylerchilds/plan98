@@ -598,10 +598,13 @@ async function fetchTen(username, apikey){
           const timestamp = email.receivedAt
 
           console.log(email)
+          if(!email)return
+
           const textParts = email.textBody.map(x => x.partId)
           const htmlParts = email.htmlBody.map(x => x.partId)
-          const textBody = textParts.map(id => email.bodyValues[id].value).join('')
-          const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
+          const textBody = textParts.filter(onlyPresent(email)).map(bodyValues(email)).join('')
+          const htmlBody = htmlParts.filter(onlyPresent(email)).map(bodyValues(email)).join('')
+
           messages.push({
             post_hint: 'email',
             meta: {
@@ -629,6 +632,13 @@ function resolveCallbacks(params) {
   }
 }
 
+function onlyPresent(email){
+  return (id) => email.bodyValues[id]
+}
+
+function bodyValues(email){ 
+  return (id) => email.bodyValues[id].value
+}
     </script>
   </body>
 </html>
