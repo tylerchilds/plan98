@@ -6,7 +6,7 @@ import { innerHTML } from 'diffhtml'
 
 // optimally, we'll import just bus from statebus and everything else will be implemented under the hood. stubbing for now to unblock development using tag
 const bus = window.bus
-const state = bus.state
+export const state = bus.state
 bus.libs.localstorage('ls/*')
 bus.libs.http_out('/*', '/')
 window.braid_fetch = window.fetch

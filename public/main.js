@@ -2,8 +2,9 @@ import './packages/smugoogle.js'
 import './packages/console-module.js'
 import './packages/code-module.js'
 import './packages/card-list.js'
-import './packages/tree-view.js'
 import './packages/modal-module.js'
+import './packages/tree-view.js'
+import './packages/file-system.js'
 import './packages/synth-module.js'
 import './packages/design-system.js'
 import './packages/smug-mug.js'
@@ -13,7 +14,7 @@ import './packages/field-text.js'
 import './packages/field-select.js'
 import './packages/connected-service.js'
 
-function modulate(config) {
+function tag(config) {
   [...document.querySelectorAll(':not(:defined)')].forEach(async (target) => {
     class WebComponent extends HTMLElement {
       constructor() {
@@ -21,11 +22,15 @@ function modulate(config) {
       }
     }
 
-    const module = target.nodeName.toLowerCase()
-    await import(`${config.moduleProxy || '.'}/${module}.js`).catch(() => null)
+    const customElement = target.tagName.toLowerCase()
+    const url = `${config.proxy || '.'}/${customElement}.js`
+    console.log('right')
+    const exists = (await fetch(url, {method: 'HEAD'})).ok
+    console.log({ exists })
+    await import(url).catch(() => null)
     if(target.matches(':not(:defined)')) {
       customElements.define(
-        module,
+        customElement,
         WebComponent
       );
     }
@@ -33,10 +38,9 @@ function modulate(config) {
 }
 
 (function(config) {
-  modulate(config)
+  tag(config)
   new MutationObserver((mutationsList) => {
-    debugger
     console.log(mutationsList)
-    modulate(config)
+    tag(config)
   }).observe(document.body, { childList: true, subtree: true });
-})({ moduleProxy: './cool-modules' })
+})({ proxy: './tag' })
