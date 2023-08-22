@@ -11,7 +11,7 @@ $.draw((target) => {
 
   if(!target.css) {
     target.css = `
-      &[color="${color}"]::before {
+      &::before {
         background: ${color};
         border-radius: ${n(4, 0, 100, 'px')};
         content: '';

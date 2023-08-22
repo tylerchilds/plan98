@@ -24,9 +24,8 @@ function tag(config) {
 
     const customElement = target.tagName.toLowerCase()
     const url = `${config.proxy || '.'}/${customElement}.js`
-    console.log('right')
     const exists = (await fetch(url, {method: 'HEAD'})).ok
-    console.log({ exists })
+    if(!exists) return
     await import(url).catch(() => null)
     if(target.matches(':not(:defined)')) {
       customElements.define(

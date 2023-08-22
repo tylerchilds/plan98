@@ -45001,33 +45001,54 @@ u
       }]
     }]
   };
+  var Types = {
+    File: {
+      icon: "/cdn/plan98/plan9.png"
+    },
+    Directory: {
+      icon: "/cdn/plan98/firefox.png"
+    }
+  };
   var urlParams = new URLSearchParams(window.location.search);
   var cwd = urlParams.get("cwd");
   var iSbIoS = cwd === null;
-  var $7 = module2("file-system", { cwd: cwd || "/" });
+  var $7 = module2("file-system", { cwd });
   $7.draw(iSbIoS ? system : floppy);
+  function currentWorkingComputer(target) {
+    const cwc = target.closest("[cwc]").getAttribute("cwc");
+    return state2[cwc] || {};
+  }
   function system(target) {
-    const cwc = target.getAttribute("cwc");
-    const tree = state2[cwc] || {};
     const { cwd: cwd2 } = $7.learn();
+    const tree = currentWorkingComputer(target);
     return `
     <div class="treeview">
       ${nest([], tree)}
     </div>
     <div class="preview">
-      <input type="text" name="cwd" value="${cwd2}" />
+      <input type="text" name="cwd" value="${cwd2 || "/"}" />
       <iframe src="${window.location.href}?cwd=${cwd2}"></iframe>
     </div>
   `;
   }
   function floppy(target) {
-    const cwc = target.getAttribute("cwc");
-    const tree = state2[cwc] || {};
+    const tree = currentWorkingComputer(target);
     const { cwd: cwd2 } = $7.learn();
-    const contents = getDirectoryContents(tree, cwd2.split("/"));
-    return `${contents.map((x) => `${x.name}${x.type}`)}`;
+    const contents = getContents(tree, cwd2.split("/"));
+    if (!contents)
+      return;
+    return `
+    <div class="listing">
+      ${contents.map((x) => `
+        <button type="${x.type}" data-context="${cwd2}/${x.name}">
+          <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
+          ${x.name}
+        </button>
+      `).join("")}
+    </div>
+  `;
   }
-  function getDirectoryContents(tree, path) {
+  function getContents(tree, path) {
     return [...path].reduce((subtree, name3, i2, og) => {
       const result = subtree.find((x) => x.name === name3);
       if (!result) {
@@ -45061,8 +45082,8 @@ u
       const { name: name3, type: type2 } = child;
       const currentPath = [...path, name3];
       if (type2 === "File") {
-        return `<button>
-        <plan98-highlighter color="orange">
+        return `<button data-context="${currentPath.join("/")}">
+        <plan98-highlighter>
           ${name3}
         </plan98-highlighter>
       </button>`;
@@ -45070,7 +45091,7 @@ u
       if (type2 === "Directory") {
         return `
         <details>
-          <summary data-cwd="${currentPath.join("/")}">
+          <summary data-context="${currentPath.join("/")}">
             ${name3 || "/"}
           </summary>
           ${nest(currentPath, child)}
@@ -45079,9 +45100,13 @@ u
       }
     }).join("");
   }
-  $7.when("click", "[data-cwd]", ({ target }) => {
-    const { cwd: cwd2 } = target.dataset;
-    $7.teach({ cwd: cwd2 });
+  $7.when("click", "[data-context]", ({ target }) => {
+    const { context: context3 } = target.dataset;
+    console.log({ context: context3 });
+    const tree = currentWorkingComputer(target);
+    const information = getContents(tree, context3);
+    console.log({ information });
+    $7.teach({ cwd: context3 });
   });
   $7.flair(`
   & {
@@ -45120,7 +45145,23 @@ u
     text-decoration: underline;
     color: blue;
     display: block;
+    cursor: pointer;
   }
+
+  & .listing {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    text-align: center;
+    grid-area: 1 / 1 / -1 / -1;
+    place-content: baseline;
+  }
+
+  & .listing > * {
+    display: grid;
+    grid-template-rows: auto 1rem;
+    aspect-ratio: 1;
+  }
+
 `);
 
   // node_modules/colorjs.io/dist/color.js
@@ -49093,9 +49134,9 @@ u
       }
       const customElement = target.tagName.toLowerCase();
       const url = `${config2.proxy || "."}/${customElement}.js`;
-      console.log("right");
       const exists = (await fetch(url, { method: "HEAD" })).ok;
-      console.log({ exists });
+      if (!exists)
+        return;
       await import(url).catch(() => null);
       if (target.matches(":not(:defined)")) {
         customElements.define(

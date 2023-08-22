@@ -66,39 +66,61 @@ state['ls/demo'] = {
   }]
 }
 
+const Types = {
+  File: {
+    icon: '/cdn/plan98/plan9.png'
+  },
+  Directory: {
+    icon: '/cdn/plan98/firefox.png'
+  }
+}
+
 const urlParams = new URLSearchParams(window.location.search)
 const cwd = urlParams.get('cwd')
 const iSbIoS = cwd === null
 
-const $ = module('file-system', { cwd: cwd || '/' })
+const $ = module('file-system', { cwd: cwd })
 $.draw(iSbIoS ? system : floppy)
 
+function currentWorkingComputer(target) {
+  const cwc = target.closest('[cwc]').getAttribute('cwc')
+  return state[cwc] || {}
+}
+
 function system(target) {
-  const cwc = target.getAttribute('cwc')
-  const tree = state[cwc] || {}
   const { cwd } = $.learn()
+  const tree = currentWorkingComputer(target)
 
   return `
     <div class="treeview">
       ${nest([], tree)}
     </div>
     <div class="preview">
-      <input type="text" name="cwd" value="${cwd}" />
+      <input type="text" name="cwd" value="${cwd || '/'}" />
       <iframe src="${window.location.href}?cwd=${cwd}"></iframe>
     </div>
   `
 }
 
 function floppy(target) {
-  const cwc = target.getAttribute('cwc')
-  const tree = state[cwc] || {}
+  const tree = currentWorkingComputer(target)
   const { cwd } = $.learn()
 
-  const contents = getDirectoryContents(tree, cwd.split('/'))
-  return `${contents.map(x => `${x.name}${x.type}`)}`
+  const contents = getContents(tree, cwd.split('/'))
+  if(!contents) return
+  return `
+    <div class="listing">
+      ${contents.map(x => `
+        <button type="${x.type}" data-context="${cwd}/${x.name}">
+          <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
+          ${x.name}
+        </button>
+      `).join('')}
+    </div>
+  `
 }
 
-function getDirectoryContents(tree, path) {
+function getContents(tree, path) {
   // spread before so we can mutate to bail early
   return [...path].reduce((subtree, name, i, og) => {
     const result = subtree.find(x => x.name === name)
@@ -143,8 +165,8 @@ function nest(path, tree) {
     const currentPath = [...path, name]
 
     if(type === 'File') {
-      return `<button>
-        <plan98-highlighter color="orange">
+      return `<button data-context="${currentPath.join('/')}">
+        <plan98-highlighter>
           ${name}
         </plan98-highlighter>
       </button>`
@@ -153,7 +175,7 @@ function nest(path, tree) {
     if(type === 'Directory') {
       return `
         <details>
-          <summary data-cwd="${currentPath.join('/')}">
+          <summary data-context="${currentPath.join('/')}">
             ${name || "/"}
           </summary>
           ${nest(currentPath, child)}
@@ -163,9 +185,13 @@ function nest(path, tree) {
   }).join('')
 }
 
-$.when('click', '[data-cwd]', ({ target }) => {
-  const { cwd } = target.dataset
-  $.teach({ cwd })
+$.when('click', '[data-context]', ({ target }) => {
+  const { context } = target.dataset
+  console.log({ context })
+  const tree = currentWorkingComputer(target)
+  const information = getContents(tree, context)
+  console.log({ information })
+  $.teach({ cwd: context })
 })
 
 $.flair(`
@@ -205,5 +231,21 @@ $.flair(`
     text-decoration: underline;
     color: blue;
     display: block;
+    cursor: pointer;
   }
+
+  & .listing {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    text-align: center;
+    grid-area: 1 / 1 / -1 / -1;
+    place-content: baseline;
+  }
+
+  & .listing > * {
+    display: grid;
+    grid-template-rows: auto 1rem;
+    aspect-ratio: 1;
+  }
+
 `)
