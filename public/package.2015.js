@@ -44936,73 +44936,82 @@ u
   }
 
   // public/packages/file-system.js
-  function factoryReset() {
-    state2["ls/demo"] = {
-      path: "/",
-      type: "FileSystem",
-      children: [{
-        name: "",
-        type: "Directory",
+  function factoryReset(cwc) {
+    try {
+      console.log("cwc", cwc);
+      state2[cwc] = {
+        path: "/",
+        type: "FileSystem",
         children: [{
-          name: "home",
+          name: "",
           type: "Directory",
           children: [{
-            name: "tychi",
+            name: "home",
             type: "Directory",
-            children: [
-              {
-                name: "pretend.script",
-                type: "File"
-              },
-              {
-                name: "paper.script",
-                type: "File"
-              },
-              {
-                name: "books.script",
-                type: "File"
-              },
-              {
-                name: "bicycles.script",
-                type: "File"
-              },
-              {
-                name: "typewriters.script",
-                type: "File"
-              },
-              {
-                name: "teleplays.script",
-                type: "File"
-              },
-              {
-                name: "cameras.script",
-                type: "File"
-              },
-              {
-                name: "computers.script",
-                type: "File"
-              },
-              {
-                name: "synthesizers.script",
-                type: "File"
-              },
-              {
-                name: "slideshows.script",
-                type: "File"
-              },
-              {
-                name: "gamepads.script",
-                type: "File"
-              },
-              {
-                name: "generations.script",
-                type: "File"
-              }
-            ]
+            children: [{
+              name: "tychi",
+              type: "Directory",
+              children: [
+                {
+                  name: "pretend.script",
+                  type: "File"
+                },
+                {
+                  name: "paper.script",
+                  type: "File"
+                },
+                {
+                  name: "books.script",
+                  type: "File"
+                },
+                {
+                  name: "bicycles.script",
+                  type: "File"
+                },
+                {
+                  name: "typewriters.script",
+                  type: "File"
+                },
+                {
+                  name: "teleplays.script",
+                  type: "File"
+                },
+                {
+                  name: "cameras.script",
+                  type: "File"
+                },
+                {
+                  name: "computers.script",
+                  type: "File"
+                },
+                {
+                  name: "synthesizers.script",
+                  type: "File"
+                },
+                {
+                  name: "slideshows.script",
+                  type: "File"
+                },
+                {
+                  name: "gamepads.script",
+                  type: "File"
+                },
+                {
+                  name: "generations.script",
+                  type: "File"
+                }
+              ]
+            }]
           }]
         }]
-      }]
-    };
+      };
+    } catch (e2) {
+      console.info("Factory Reset: Failed");
+      console.error(e2);
+      return false;
+    }
+    console.info("Factory Reset: Success");
+    return true;
   }
   var Types = {
     File: {
@@ -45019,50 +45028,59 @@ u
   $7.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
-    return state2[cwc] || {};
+    return state2[cwc] ? state2[cwc] : function initialize2(target2) {
+      return factoryReset(cwc);
+    }(target);
   }
   function system(target) {
     const tree = currentWorkingComputer(target);
     const { path: path2 } = tree;
     return `
-    <div class="treeview">
-      ${nest([], tree)}
-      <button data-reset>Factory Reset</button>
-    </div>
-    <div class="preview">
-      <input type="text" name="path" value="${path2 || "/"}" />
-      <iframe src="${window.location.href}?path=${path2}"></iframe>
+    <div class="visual">
+      <div class="treeview">
+        ${nest([], tree)}
+        <button data-reset>Factory Reset</button>
+      </div>
+      <div class="preview">
+        <input type="text" name="path" value="${path2 || "/"}" />
+        <iframe src="${window.location.href}?path=${path2}"></iframe>
+      </div>
     </div>
   `;
   }
   function floppy(target) {
     const tree = currentWorkingComputer(target);
     const { path: path2 } = tree;
-    const contents = getContents(tree, path2.split("/"));
-    console.log({ contents });
-    if (!contents)
-      return;
-    return `
-    <div class="listing">
-      ${contents.map((x) => `
-        <button type="${x.type}" data-path="${path2 !== "/" ? `${path2}/${x.name}` : `/${x.name}`}">
-          <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
-          ${x.name || "Sillonious"}
-        </button>
-      `).join("")}
-    </div>
-  `;
+    const content2 = getContent(tree, path2.split("/"));
+    console.log({ content: content2 });
+    if (!content2)
+      return `Nothing yet... if only... we had... a 404 page.`;
+    if (content2.type === "File") {
+      return `what: ${path2}`;
+    }
+    if (content2.type === "Directory") {
+      return `
+      <div class="listing">
+        ${content2.children.map((x) => `
+          <button type="${x.type}" data-path="${path2 !== "/" ? `${path2}/${x.name}` : `/${x.name}`}">
+            <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
+            ${x.name || "Sillonious"}
+          </button>
+        `).join("")}
+      </div>
+    `;
+    }
   }
-  function getContents(tree, pathParts) {
+  function getContent(tree, pathParts) {
     return [...pathParts].reduce((subtree, name3, i2, og) => {
-      const result = subtree.find((x) => x.name === name3);
+      const result = subtree.children.find((x) => x.name === name3);
       if (!result) {
         console.log({ result, name: name3, subtree, tree, pathParts });
         og.splice(1);
         return subtree;
       }
-      return result.children;
-    }, tree.children);
+      return result;
+    }, tree);
   }
   $7.when("click", "[data-uri]", async function(event) {
     const tokens = event.target.closest($7.link).getAttribute("tokens");
@@ -45107,17 +45125,20 @@ u
       }
     }).join("");
   }
-  $7.when("click", "[data-reset]", factoryReset);
+  $7.when("click", "[data-reset]", ({ target }) => {
+    const cwc = currentWorkingComputer(target);
+    factoryReset(cwc);
+  });
   $7.when("click", "[data-path]", ({ target }) => {
     const { path: path2 } = target.dataset;
     console.log({ path: path2 });
     const tree = currentWorkingComputer(target);
-    const information = getContents(tree, path2);
+    const information = getContent(tree, path2);
     console.log({ information });
     tree.path = path2;
   });
   $7.flair(`
-  & {
+  & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
     height: 100%;

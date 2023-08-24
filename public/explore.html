@@ -22,8 +22,11 @@
     </style>
   </head>
   <body>
-    <file-system cwc="ls/demo"></file-system>
     <script src="../package.2015.js"></script>
+    <script>
+      document.body.insertAdjacentHTML('beforeend', `
+        <file-system cwc="${'ls' || window.location.origin}/plan98"></file-system>
+     `)
     </script>
   </body>
 </html>

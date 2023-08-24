@@ -183,8 +183,12 @@ app.post("/proxy", (req, res) => {
 // Setup the statebus!
 if(process.env.STATEBUS_HONK === 'enabled')
   bus.honk = 1                // Print handy debugging output
-if(process.env.STATEBUS_FILE_STORE === 'enabled')
+if(process.env.STATEBUS_FILE_STORE === 'enabled') {
   bus.libs.file_store()       // Persist state onto disk
+  console.log('file store enabled')
+}
+
+  console.log(process.env.STATEBUS_FILE_STORE)
 
 // Serve other state from statebus
 app.use(bus.libs.http_in)
