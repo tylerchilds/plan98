@@ -1,73 +1,73 @@
 import module, { state } from '../module.js'
 /* uncomment to seed filesystem */
-/*
-state['ls/demo'] = {
-  cwd: '/',
-  type: 'FileSystem',
-  children: [{
-    name: '',
-    type: 'Directory',
+function factoryReset() {
+  state['ls/demo'] = {
+    path: '/',
+    type: 'FileSystem',
     children: [{
-      name: 'home',
+      name: '',
       type: 'Directory',
       children: [{
-        name: 'tychi',
+        name: 'home',
         type: 'Directory',
-        children: [
-          {
-            name: 'pretend.script',
-            type: 'File'
-          },
-          {
-            name: 'paper.script',
-            type: 'File'
-          },
-          {
-            name: 'books.script',
-            type: 'File'
-          },
-          {
-            name: 'bicycles.script',
-            type: 'File'
-          },
-          {
-            name: 'typewriters.script',
-            type: 'File'
-          },
-          {
-            name: 'teleplays.script',
-            type: 'File'
-          },
-          {
-            name: 'cameras.script',
-            type: 'File'
-          },
-          {
-            name: 'computers.script',
-            type: 'File'
-          },
-          {
-            name: 'synthesizers.script',
-            type: 'File'
-          },
-          {
-            name: 'slideshows.script',
-            type: 'File'
-          },
-          {
-            name: 'gamepads.script',
-            type: 'File'
-          },
-          {
-            name: 'generations.script',
-            type: 'File'
-          }
-        ]
+        children: [{
+          name: 'tychi',
+          type: 'Directory',
+          children: [
+            {
+              name: 'pretend.script',
+              type: 'File'
+            },
+            {
+              name: 'paper.script',
+              type: 'File'
+            },
+            {
+              name: 'books.script',
+              type: 'File'
+            },
+            {
+              name: 'bicycles.script',
+              type: 'File'
+            },
+            {
+              name: 'typewriters.script',
+              type: 'File'
+            },
+            {
+              name: 'teleplays.script',
+              type: 'File'
+            },
+            {
+              name: 'cameras.script',
+              type: 'File'
+            },
+            {
+              name: 'computers.script',
+              type: 'File'
+            },
+            {
+              name: 'synthesizers.script',
+              type: 'File'
+            },
+            {
+              name: 'slideshows.script',
+              type: 'File'
+            },
+            {
+              name: 'gamepads.script',
+              type: 'File'
+            },
+            {
+              name: 'generations.script',
+              type: 'File'
+            }
+          ]
+        }]
       }]
     }]
-  }]
+  }
 }
-*/
 
 const Types = {
   File: {
@@ -79,8 +79,8 @@ const Types = {
 }
 
 const urlParams = new URLSearchParams(window.location.search)
-const cwd = urlParams.get('cwd')
-const iSbIoS = cwd === null
+const path = urlParams.get('path')
+const iSbIoS = path === null
 
 const $ = module('file-system')
 $.draw(iSbIoS ? system : floppy)
@@ -92,29 +92,31 @@ function currentWorkingComputer(target) {
 
 function system(target) {
   const tree = currentWorkingComputer(target)
-  const { cwd } = tree
+  const { path } = tree
 
   return `
     <div class="treeview">
       ${nest([], tree)}
+      <button data-reset>Factory Reset</button>
     </div>
     <div class="preview">
-      <input type="text" name="cwd" value="${cwd || '/'}" />
-      <iframe src="${window.location.href}?cwd=${cwd}"></iframe>
+      <input type="text" name="path" value="${path || '/'}" />
+      <iframe src="${window.location.href}?path=${path}"></iframe>
     </div>
   `
 }
 
 function floppy(target) {
   const tree = currentWorkingComputer(target)
-  const { cwd } = tree
-  const contents = getContents(tree, cwd.split('/'))
+  const { path } = tree
+  const contents = getContents(tree, path.split('/'))
+  console.log({ contents })
   if(!contents) return
   return `
     <div class="listing">
       ${contents.map(x => `
-        <button type="${x.type}" data-context="${
-          cwd !== '/' ? `${cwd}/${x.name}` : `/${x.name}`
+        <button type="${x.type}" data-path="${
+          path !== '/' ? `${path}/${x.name}` : `/${x.name}`
         }">
           <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
           ${x.name || "Sillonious"}
@@ -124,13 +126,13 @@ function floppy(target) {
   `
 }
 
-function getContents(tree, path) {
+function getContents(tree, pathParts) {
   // spread before so we can mutate to bail early
-  return [...path].reduce((subtree, name, i, og) => {
+  return [...pathParts].reduce((subtree, name, i, og) => {
     const result = subtree.find(x => x.name === name)
 
     if(!result) {
-      console.log({ result, name, subtree, tree, path })
+      console.log({ result, name, subtree, tree, pathParts })
       // mutating the array causes an early exit
       og.splice(1)
       return subtree
@@ -164,13 +166,14 @@ $.when('click', '[data-uri]', async function(event) {
   `)
 })
 
-function nest(path, tree) {
+function nest(pathParts, tree) {
   return tree.children.map(child => {
     const { name, type } = child
-    const currentPath = [...path, name]
+    const currentPathParts = [...pathParts, name]
+    const currentPath = currentPathParts.join('/')
 
     if(type === 'File') {
-      return `<button data-context="${currentPath.join('/')}">
+      return `<button data-path="${currentPath}">
         <plan98-highlighter>
           ${name}
         </plan98-highlighter>
@@ -180,24 +183,26 @@ function nest(path, tree) {
     if(type === 'Directory') {
       return `
         <details>
-          <summary data-context="${currentPath.join('/')}">
+          <summary data-path="${currentPath}">
             ${name || "/"}
           </summary>
-          ${nest(currentPath, child)}
+          ${nest(currentPathParts, child)}
         </details>
       `
     }
   }).join('')
 }
 
-$.when('click', '[data-context]', ({ target }) => {
-  const { context } = target.dataset
-  console.log({ context })
+$.when('click', '[data-reset]', factoryReset)
+
+$.when('click', '[data-path]', ({ target }) => {
+  const { path } = target.dataset
+  console.log({ path })
   const tree = currentWorkingComputer(target)
-  const information = getContents(tree, context)
+  const information = getContents(tree, path)
   console.log({ information })
 
-  tree.cwd = context
+  tree.path = path
 })
 
 $.flair(`
@@ -208,11 +213,17 @@ $.flair(`
   }
 
   & .treeview {
+    position: relative;
     overflow: auto;
     white-space: nowrap;
   }
 
-  & [name="cwd"] {
+  & [data-reset] {
+    position: absolute;
+    bottom: 1rem;
+  }
+
+  & [name="path"] {
     display: block;
     width: 100%;
   }

@@ -3012,17 +3012,17 @@
           }
           function apply_patch(obj, patch) {
             obj = bus.clone(obj);
-            var x = patch.match(/(.*) = (.*)/), path = x[1], new_stuff = JSON.parse(x[2]);
+            var x = patch.match(/(.*) = (.*)/), path2 = x[1], new_stuff = JSON.parse(x[2]);
             var path_segment = /^(\.([^\.\[]+))|(\[((-?\d+):)?(-?\d+)\])/;
             var curr_obj = obj, last_obj = null;
             function de_neg(x2) {
               return x2[0] === "-" ? curr_obj.length - parseInt(x2.substr(1)) : parseInt(x2);
             }
             while (true) {
-              var match = path_segment.exec(path), subpath = match[0], field = match[2], slice_start = match[5], slice_end = match[6];
+              var match = path_segment.exec(path2), subpath = match[0], field = match[2], slice_start = match[5], slice_end = match[6];
               slice_start = slice_start && de_neg(slice_start);
               slice_end = slice_end && de_neg(slice_end);
-              if (path.length == subpath.length) {
+              if (path2.length == subpath.length) {
                 if (field)
                   curr_obj[field] = new_stuff;
                 else if (typeof curr_obj == "string") {
@@ -3052,7 +3052,7 @@
               last_obj = curr_obj;
               last_field = field;
               curr_obj = curr_obj[field || slice_end];
-              path = path.substr(subpath.length);
+              path2 = path2.substr(subpath.length);
             }
           }
           function parse(s) {
@@ -44936,6 +44936,74 @@ u
   }
 
   // public/packages/file-system.js
+  function factoryReset() {
+    state2["ls/demo"] = {
+      path: "/",
+      type: "FileSystem",
+      children: [{
+        name: "",
+        type: "Directory",
+        children: [{
+          name: "home",
+          type: "Directory",
+          children: [{
+            name: "tychi",
+            type: "Directory",
+            children: [
+              {
+                name: "pretend.script",
+                type: "File"
+              },
+              {
+                name: "paper.script",
+                type: "File"
+              },
+              {
+                name: "books.script",
+                type: "File"
+              },
+              {
+                name: "bicycles.script",
+                type: "File"
+              },
+              {
+                name: "typewriters.script",
+                type: "File"
+              },
+              {
+                name: "teleplays.script",
+                type: "File"
+              },
+              {
+                name: "cameras.script",
+                type: "File"
+              },
+              {
+                name: "computers.script",
+                type: "File"
+              },
+              {
+                name: "synthesizers.script",
+                type: "File"
+              },
+              {
+                name: "slideshows.script",
+                type: "File"
+              },
+              {
+                name: "gamepads.script",
+                type: "File"
+              },
+              {
+                name: "generations.script",
+                type: "File"
+              }
+            ]
+          }]
+        }]
+      }]
+    };
+  }
   var Types = {
     File: {
       icon: "/cdn/plan98/plan9.png"
@@ -44945,8 +45013,8 @@ u
     }
   };
   var urlParams = new URLSearchParams(window.location.search);
-  var cwd = urlParams.get("cwd");
-  var iSbIoS = cwd === null;
+  var path = urlParams.get("path");
+  var iSbIoS = path === null;
   var $7 = module2("file-system");
   $7.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
@@ -44955,27 +45023,29 @@ u
   }
   function system(target) {
     const tree = currentWorkingComputer(target);
-    const { cwd: cwd2 } = tree;
+    const { path: path2 } = tree;
     return `
     <div class="treeview">
       ${nest([], tree)}
+      <button data-reset>Factory Reset</button>
     </div>
     <div class="preview">
-      <input type="text" name="cwd" value="${cwd2 || "/"}" />
-      <iframe src="${window.location.href}?cwd=${cwd2}"></iframe>
+      <input type="text" name="path" value="${path2 || "/"}" />
+      <iframe src="${window.location.href}?path=${path2}"></iframe>
     </div>
   `;
   }
   function floppy(target) {
     const tree = currentWorkingComputer(target);
-    const { cwd: cwd2 } = tree;
-    const contents = getContents(tree, cwd2.split("/"));
+    const { path: path2 } = tree;
+    const contents = getContents(tree, path2.split("/"));
+    console.log({ contents });
     if (!contents)
       return;
     return `
     <div class="listing">
       ${contents.map((x) => `
-        <button type="${x.type}" data-context="${cwd2 !== "/" ? `${cwd2}/${x.name}` : `/${x.name}`}">
+        <button type="${x.type}" data-path="${path2 !== "/" ? `${path2}/${x.name}` : `/${x.name}`}">
           <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
           ${x.name || "Sillonious"}
         </button>
@@ -44983,11 +45053,11 @@ u
     </div>
   `;
   }
-  function getContents(tree, path) {
-    return [...path].reduce((subtree, name3, i2, og) => {
+  function getContents(tree, pathParts) {
+    return [...pathParts].reduce((subtree, name3, i2, og) => {
       const result = subtree.find((x) => x.name === name3);
       if (!result) {
-        console.log({ result, name: name3, subtree, tree, path });
+        console.log({ result, name: name3, subtree, tree, pathParts });
         og.splice(1);
         return subtree;
       }
@@ -45013,12 +45083,13 @@ u
     </image-gallery>
   `);
   });
-  function nest(path, tree) {
+  function nest(pathParts, tree) {
     return tree.children.map((child) => {
       const { name: name3, type: type2 } = child;
-      const currentPath = [...path, name3];
+      const currentPathParts = [...pathParts, name3];
+      const currentPath = currentPathParts.join("/");
       if (type2 === "File") {
-        return `<button data-context="${currentPath.join("/")}">
+        return `<button data-path="${currentPath}">
         <plan98-highlighter>
           ${name3}
         </plan98-highlighter>
@@ -45027,22 +45098,23 @@ u
       if (type2 === "Directory") {
         return `
         <details>
-          <summary data-context="${currentPath.join("/")}">
+          <summary data-path="${currentPath}">
             ${name3 || "/"}
           </summary>
-          ${nest(currentPath, child)}
+          ${nest(currentPathParts, child)}
         </details>
       `;
       }
     }).join("");
   }
-  $7.when("click", "[data-context]", ({ target }) => {
-    const { context: context3 } = target.dataset;
-    console.log({ context: context3 });
+  $7.when("click", "[data-reset]", factoryReset);
+  $7.when("click", "[data-path]", ({ target }) => {
+    const { path: path2 } = target.dataset;
+    console.log({ path: path2 });
     const tree = currentWorkingComputer(target);
-    const information = getContents(tree, context3);
+    const information = getContents(tree, path2);
     console.log({ information });
-    tree.cwd = context3;
+    tree.path = path2;
   });
   $7.flair(`
   & {
@@ -45052,11 +45124,17 @@ u
   }
 
   & .treeview {
+    position: relative;
     overflow: auto;
     white-space: nowrap;
   }
 
-  & [name="cwd"] {
+  & [data-reset] {
+    position: absolute;
+    bottom: 1rem;
+  }
+
+  & [name="path"] {
     display: block;
     width: 100%;
   }
