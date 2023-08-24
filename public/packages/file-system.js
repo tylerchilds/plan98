@@ -1,6 +1,8 @@
 import module, { state } from '../module.js'
-
+/* uncomment to seed filesystem */
+/*
 state['ls/demo'] = {
+  cwd: '/',
   type: 'FileSystem',
   children: [{
     name: '',
@@ -65,6 +67,7 @@ state['ls/demo'] = {
     }]
   }]
 }
+*/
 
 const Types = {
   File: {
@@ -79,7 +82,7 @@ const urlParams = new URLSearchParams(window.location.search)
 const cwd = urlParams.get('cwd')
 const iSbIoS = cwd === null
 
-const $ = module('file-system', { cwd: cwd })
+const $ = module('file-system')
 $.draw(iSbIoS ? system : floppy)
 
 function currentWorkingComputer(target) {
@@ -88,8 +91,8 @@ function currentWorkingComputer(target) {
 }
 
 function system(target) {
-  const { cwd } = $.learn()
   const tree = currentWorkingComputer(target)
+  const { cwd } = tree
 
   return `
     <div class="treeview">
@@ -104,16 +107,17 @@ function system(target) {
 
 function floppy(target) {
   const tree = currentWorkingComputer(target)
-  const { cwd } = $.learn()
-
+  const { cwd } = tree
   const contents = getContents(tree, cwd.split('/'))
   if(!contents) return
   return `
     <div class="listing">
       ${contents.map(x => `
-        <button type="${x.type}" data-context="${cwd}/${x.name}">
+        <button type="${x.type}" data-context="${
+          cwd !== '/' ? `${cwd}/${x.name}` : `/${x.name}`
+        }">
           <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
-          ${x.name}
+          ${x.name || "Sillonious"}
         </button>
       `).join('')}
     </div>
@@ -126,6 +130,7 @@ function getContents(tree, path) {
     const result = subtree.find(x => x.name === name)
 
     if(!result) {
+      console.log({ result, name, subtree, tree, path })
       // mutating the array causes an early exit
       og.splice(1)
       return subtree
@@ -191,7 +196,8 @@ $.when('click', '[data-context]', ({ target }) => {
   const tree = currentWorkingComputer(target)
   const information = getContents(tree, context)
   console.log({ information })
-  $.teach({ cwd: context })
+
+  tree.cwd = context
 })
 
 $.flair(`

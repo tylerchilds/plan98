@@ -44936,71 +44936,6 @@ u
   }
 
   // public/packages/file-system.js
-  state2["ls/demo"] = {
-    type: "FileSystem",
-    children: [{
-      name: "",
-      type: "Directory",
-      children: [{
-        name: "home",
-        type: "Directory",
-        children: [{
-          name: "tychi",
-          type: "Directory",
-          children: [
-            {
-              name: "pretend.script",
-              type: "File"
-            },
-            {
-              name: "paper.script",
-              type: "File"
-            },
-            {
-              name: "books.script",
-              type: "File"
-            },
-            {
-              name: "bicycles.script",
-              type: "File"
-            },
-            {
-              name: "typewriters.script",
-              type: "File"
-            },
-            {
-              name: "teleplays.script",
-              type: "File"
-            },
-            {
-              name: "cameras.script",
-              type: "File"
-            },
-            {
-              name: "computers.script",
-              type: "File"
-            },
-            {
-              name: "synthesizers.script",
-              type: "File"
-            },
-            {
-              name: "slideshows.script",
-              type: "File"
-            },
-            {
-              name: "gamepads.script",
-              type: "File"
-            },
-            {
-              name: "generations.script",
-              type: "File"
-            }
-          ]
-        }]
-      }]
-    }]
-  };
   var Types = {
     File: {
       icon: "/cdn/plan98/plan9.png"
@@ -45012,15 +44947,15 @@ u
   var urlParams = new URLSearchParams(window.location.search);
   var cwd = urlParams.get("cwd");
   var iSbIoS = cwd === null;
-  var $7 = module2("file-system", { cwd });
+  var $7 = module2("file-system");
   $7.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
     return state2[cwc] || {};
   }
   function system(target) {
-    const { cwd: cwd2 } = $7.learn();
     const tree = currentWorkingComputer(target);
+    const { cwd: cwd2 } = tree;
     return `
     <div class="treeview">
       ${nest([], tree)}
@@ -45033,16 +44968,16 @@ u
   }
   function floppy(target) {
     const tree = currentWorkingComputer(target);
-    const { cwd: cwd2 } = $7.learn();
+    const { cwd: cwd2 } = tree;
     const contents = getContents(tree, cwd2.split("/"));
     if (!contents)
       return;
     return `
     <div class="listing">
       ${contents.map((x) => `
-        <button type="${x.type}" data-context="${cwd2}/${x.name}">
+        <button type="${x.type}" data-context="${cwd2 !== "/" ? `${cwd2}/${x.name}` : `/${x.name}`}">
           <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
-          ${x.name}
+          ${x.name || "Sillonious"}
         </button>
       `).join("")}
     </div>
@@ -45052,6 +44987,7 @@ u
     return [...path].reduce((subtree, name3, i2, og) => {
       const result = subtree.find((x) => x.name === name3);
       if (!result) {
+        console.log({ result, name: name3, subtree, tree, path });
         og.splice(1);
         return subtree;
       }
@@ -45106,7 +45042,7 @@ u
     const tree = currentWorkingComputer(target);
     const information = getContents(tree, context3);
     console.log({ information });
-    $7.teach({ cwd: context3 });
+    tree.cwd = context3;
   });
   $7.flair(`
   & {
