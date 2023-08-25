@@ -8,30 +8,32 @@ import {
 
 const $ = module('code-module')
 
+function source(target) {
+  return target.closest('[src]').getAttribute('src')
+}
+
+function sourceFile(target) {
+  const src = source(target)
+  return state[src]
+    ? state[src]
+    : (function initialize() {
+      state[src] = { file: 'hello... what is your name?' }
+      return state[src]
+    })()
+}
+
 $.when('click', '.publish', (event) => {
-  const link = event.target.closest($.link).getAttribute('src')
-  const { file } = $.learn()
-  fetch(link, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ file })
-  }).then(() => {
-    window.location.href = window.location.href
-  })
+  const src = source(event.target)
+  const { file } = sourceFile(event.target)
+  state[src].file = file
 })
 
 $.draw(target => {
-  const link = target.getAttribute('src')
-  console.log(link)
-  const { file } = $.learn()
+  const src = source(target)
+  const { file } = sourceFile(target)
 
   if(!file) {
-    fetch(link)
-      .then(res => res.json())
-      .then(({ file }) => $.teach({ file }))
-    return
+    return 'loading'
   }
 
   if(!target.view) {
@@ -60,12 +62,13 @@ $.draw(target => {
   }
 })
 
-function persist(_target, $, _flags) {
+function persist(target, $, _flags) {
 	return (update) => {
     if(update.changes.inserted.length < 0) return
 
+    const src = source(target)
 		const file = update.view.state.doc.toString()
-    $.teach({ file })
+    state[src].file = file
 	}
 }
 

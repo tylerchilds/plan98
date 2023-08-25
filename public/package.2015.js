@@ -4280,24 +4280,24 @@
       module3.exports = Stream;
       Stream.Stream = Stream;
       Stream.prototype.pipe = function(dest, options2) {
-        var source = this;
+        var source2 = this;
         function ondata(chunk) {
           if (dest.writable) {
-            if (false === dest.write(chunk) && source.pause) {
-              source.pause();
+            if (false === dest.write(chunk) && source2.pause) {
+              source2.pause();
             }
           }
         }
-        source.on("data", ondata);
+        source2.on("data", ondata);
         function ondrain() {
-          if (source.readable && source.resume) {
-            source.resume();
+          if (source2.readable && source2.resume) {
+            source2.resume();
           }
         }
         dest.on("drain", ondrain);
         if (!dest._isStdio && (!options2 || options2.end !== false)) {
-          source.on("end", onend);
-          source.on("close", onclose);
+          source2.on("end", onend);
+          source2.on("close", onclose);
         }
         var didOnEnd = false;
         function onend() {
@@ -4319,25 +4319,25 @@
             throw er;
           }
         }
-        source.on("error", onerror);
+        source2.on("error", onerror);
         dest.on("error", onerror);
         function cleanup() {
-          source.off("data", ondata);
+          source2.off("data", ondata);
           dest.off("drain", ondrain);
-          source.off("end", onend);
-          source.off("close", onclose);
-          source.off("error", onerror);
+          source2.off("end", onend);
+          source2.off("close", onclose);
+          source2.off("error", onerror);
           dest.off("error", onerror);
-          source.off("end", cleanup);
-          source.off("close", cleanup);
+          source2.off("end", cleanup);
+          source2.off("close", cleanup);
           dest.off("end", cleanup);
           dest.off("close", cleanup);
         }
-        source.on("end", cleanup);
-        source.on("close", cleanup);
+        source2.on("end", cleanup);
+        source2.on("close", cleanup);
         dest.on("end", cleanup);
         dest.on("close", cleanup);
-        dest.emit("pipe", source);
+        dest.emit("pipe", source2);
         return dest;
       };
     }
@@ -5507,9 +5507,9 @@
               }
               var _ref4 = arguments.length <= 1 || void 0 === arguments[1] ? {} : arguments[1], preventClose = _ref4.preventClose, preventAbort = _ref4.preventAbort, preventCancel = _ref4.preventCancel;
               preventClose = Boolean(preventClose), preventAbort = Boolean(preventAbort), preventCancel = Boolean(preventCancel);
-              var source = this, reader = void 0, lastRead = void 0, lastWrite = void 0, closedPurposefully = false, resolvePipeToPromise = void 0, rejectPipeToPromise = void 0;
+              var source2 = this, reader = void 0, lastRead = void 0, lastWrite = void 0, closedPurposefully = false, resolvePipeToPromise = void 0, rejectPipeToPromise = void 0;
               return new Promise(function(resolve, reject) {
-                resolvePipeToPromise = resolve, rejectPipeToPromise = reject, reader = source.getReader(), reader.closed.catch(abortDest), dest.closed.then(function() {
+                resolvePipeToPromise = resolve, rejectPipeToPromise = reject, reader = source2.getReader(), reader.closed.catch(abortDest), dest.closed.then(function() {
                   closedPurposefully || cancelSource(new TypeError("destination is closing or closed and cannot be piped to anymore"));
                 }, cancelSource), doPipe();
               });
@@ -24335,11 +24335,11 @@ uniform ${i4} ${s3} u_${a4};
   }
   function _objectSpread(target) {
     for (var i2 = 1; i2 < arguments.length; i2++) {
-      var source = null != arguments[i2] ? arguments[i2] : {};
-      i2 % 2 ? ownKeys(Object(source), true).forEach(function(key2) {
-        _defineProperty(target, key2, source[key2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function(key2) {
-        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source, key2));
+      var source2 = null != arguments[i2] ? arguments[i2] : {};
+      i2 % 2 ? ownKeys(Object(source2), true).forEach(function(key2) {
+        _defineProperty(target, key2, source2[key2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source2)) : ownKeys(Object(source2)).forEach(function(key2) {
+        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source2, key2));
       });
     }
     return target;
@@ -25773,11 +25773,11 @@ ${markup.join("\n")}`);
   }
   function _objectSpread2(target) {
     for (var i2 = 1; i2 < arguments.length; i2++) {
-      var source = null != arguments[i2] ? arguments[i2] : {};
-      i2 % 2 ? ownKeys2(Object(source), true).forEach(function(key2) {
-        _defineProperty3(target, key2, source[key2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys2(Object(source)).forEach(function(key2) {
-        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source, key2));
+      var source2 = null != arguments[i2] ? arguments[i2] : {};
+      i2 % 2 ? ownKeys2(Object(source2), true).forEach(function(key2) {
+        _defineProperty3(target, key2, source2[key2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source2)) : ownKeys2(Object(source2)).forEach(function(key2) {
+        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source2, key2));
       });
     }
     return target;
@@ -26868,11 +26868,11 @@ ${markup.join("\n")}`);
   }
   function _objectSpread22(target) {
     for (var i2 = 1; i2 < arguments.length; i2++) {
-      var source = null != arguments[i2] ? arguments[i2] : {};
-      i2 % 2 ? ownKeys3(Object(source), true).forEach(function(key2) {
-        _defineProperty4(target, key2, source[key2]);
-      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys3(Object(source)).forEach(function(key2) {
-        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source, key2));
+      var source2 = null != arguments[i2] ? arguments[i2] : {};
+      i2 % 2 ? ownKeys3(Object(source2), true).forEach(function(key2) {
+        _defineProperty4(target, key2, source2[key2]);
+      }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source2)) : ownKeys3(Object(source2)).forEach(function(key2) {
+        Object.defineProperty(target, key2, Object.getOwnPropertyDescriptor(source2, key2));
       });
     }
     return target;
@@ -30854,7 +30854,7 @@ ${markup.join("\n")}`);
     get isEditable() {
       return true;
     }
-    merge(from, to2, source, hasStart, openStart, openEnd) {
+    merge(from, to2, source2, hasStart, openStart, openEnd) {
       return false;
     }
     become(other) {
@@ -31012,10 +31012,10 @@ ${markup.join("\n")}`);
       if (dom2.nodeType == 3)
         this.createDOM(dom2);
     }
-    merge(from, to2, source) {
-      if (source && (!(source instanceof TextView) || this.length - (to2 - from) + source.length > MaxJoinLen))
+    merge(from, to2, source2) {
+      if (source2 && (!(source2 instanceof TextView) || this.length - (to2 - from) + source2.length > MaxJoinLen))
         return false;
-      this.text = this.text.slice(0, from) + (source ? source.text : "") + this.text.slice(to2);
+      this.text = this.text.slice(0, from) + (source2 ? source2.text : "") + this.text.slice(to2);
       this.markDirty();
       return true;
     }
@@ -31069,10 +31069,10 @@ ${markup.join("\n")}`);
         this.setAttrs(this.dom);
       super.sync(track);
     }
-    merge(from, to2, source, _hasStart, openStart, openEnd) {
-      if (source && (!(source instanceof MarkView && source.mark.eq(this.mark)) || from && openStart <= 0 || to2 < this.length && openEnd <= 0))
+    merge(from, to2, source2, _hasStart, openStart, openEnd) {
+      if (source2 && (!(source2 instanceof MarkView && source2.mark.eq(this.mark)) || from && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      mergeChildrenInto(this, from, to2, source ? source.children : [], openStart - 1, openEnd - 1);
+      mergeChildrenInto(this, from, to2, source2 ? source2.children : [], openStart - 1, openEnd - 1);
       this.markDirty();
       return true;
     }
@@ -31159,10 +31159,10 @@ ${markup.join("\n")}`);
     getSide() {
       return this.side;
     }
-    merge(from, to2, source, hasStart, openStart, openEnd) {
-      if (source && (!(source instanceof WidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
+    merge(from, to2, source2, hasStart, openStart, openEnd) {
+      if (source2 && (!(source2 instanceof WidgetView) || !this.widget.compare(source2.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      this.length = from + (source ? source.length : 0) + (this.length - to2);
+      this.length = from + (source2 ? source2.length : 0) + (this.length - to2);
       return true;
     }
     become(other) {
@@ -31405,14 +31405,14 @@ ${markup.join("\n")}`);
     let rects = clientRectsFor(last2);
     return rects[rects.length - 1] || null;
   }
-  function combineAttrs(source, target) {
-    for (let name3 in source) {
+  function combineAttrs(source2, target) {
+    for (let name3 in source2) {
       if (name3 == "class" && target.class)
-        target.class += " " + source.class;
+        target.class += " " + source2.class;
       else if (name3 == "style" && target.style)
-        target.style += ";" + source.style;
+        target.style += ";" + source2.style;
       else
-        target[name3] = source[name3];
+        target[name3] = source2[name3];
     }
     return target;
   }
@@ -31600,16 +31600,16 @@ ${markup.join("\n")}`);
       this.attrs = null;
       this.breakAfter = 0;
     }
-    merge(from, to2, source, hasStart, openStart, openEnd) {
-      if (source) {
-        if (!(source instanceof LineView))
+    merge(from, to2, source2, hasStart, openStart, openEnd) {
+      if (source2) {
+        if (!(source2 instanceof LineView))
           return false;
         if (!this.dom)
-          source.transferDOM(this);
+          source2.transferDOM(this);
       }
       if (hasStart)
-        this.setDeco(source ? source.attrs : null);
-      mergeChildrenInto(this, from, to2, source ? source.children : [], openStart, openEnd);
+        this.setDeco(source2 ? source2.attrs : null);
+      mergeChildrenInto(this, from, to2, source2 ? source2.children : [], openStart, openEnd);
       return true;
     }
     split(at) {
@@ -31744,10 +31744,10 @@ ${markup.join("\n")}`);
       this.breakAfter = 0;
       this.prevWidget = null;
     }
-    merge(from, to2, source, _takeDeco, openStart, openEnd) {
-      if (source && (!(source instanceof BlockWidgetView) || !this.widget.compare(source.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
+    merge(from, to2, source2, _takeDeco, openStart, openEnd) {
+      if (source2 && (!(source2 instanceof BlockWidgetView) || !this.widget.compare(source2.widget) || from > 0 && openStart <= 0 || to2 < this.length && openEnd <= 0))
         return false;
-      this.length = from + (source ? source.length : 0) + (this.length - to2);
+      this.length = from + (source2 ? source2.length : 0) + (this.length - to2);
       return true;
     }
     domAtPos(pos) {
@@ -36133,7 +36133,7 @@ ${markup.join("\n")}`);
   };
   function attrsFromFacet(view, facet, base2) {
     for (let sources = view.state.facet(facet), i2 = sources.length - 1; i2 >= 0; i2--) {
-      let source = sources[i2], value = typeof source == "function" ? source(view) : source;
+      let source2 = sources[i2], value = typeof source2 == "function" ? source2(view) : source2;
       if (value)
         combineAttrs(value, base2);
     }
@@ -37301,9 +37301,9 @@ ${markup.join("\n")}`);
     };
   });
   var HoverPlugin = class {
-    constructor(view, source, field, setHover, hoverTime) {
+    constructor(view, source2, field, setHover, hoverTime) {
       this.view = view;
-      this.source = source;
+      this.source = source2;
       this.field = field;
       this.setHover = setHover;
       this.hoverTime = hoverTime;
@@ -37407,7 +37407,7 @@ ${markup.join("\n")}`);
     }
     return false;
   }
-  function hoverTooltip(source, options2 = {}) {
+  function hoverTooltip(source2, options2 = {}) {
     let setHover = StateEffect.define();
     let hoverState = StateField.define({
       create() {
@@ -37438,7 +37438,7 @@ ${markup.join("\n")}`);
     });
     return [
       hoverState,
-      ViewPlugin.define((view) => new HoverPlugin(view, source, hoverState, setHover, options2.hoverTime || 300)),
+      ViewPlugin.define((view) => new HoverPlugin(view, source2, hoverState, setHover, options2.hoverTime || 300)),
       showHoverTooltipHost
     ];
   }
@@ -41933,9 +41933,9 @@ ${markup.join("\n")}`);
       return this;
     };
   }
-  function validRegExp(source) {
+  function validRegExp(source2) {
     try {
-      new RegExp(source, baseFlags);
+      new RegExp(source2, baseFlags);
       return true;
     } catch (_a2) {
       return false;
@@ -42700,8 +42700,8 @@ ${markup.join("\n")}`);
       for (let i2 = 1; i2 < label.length; i2++)
         rest[label[i2]] = true;
     }
-    let source = toSet(first) + toSet(rest) + "*$";
-    return [new RegExp("^" + source), new RegExp(source)];
+    let source2 = toSet(first) + toSet(rest) + "*$";
+    return [new RegExp("^" + source2), new RegExp(source2)];
   }
   function completeFromList(list) {
     let options2 = list.map((o) => typeof o == "string" ? { label: o } : o);
@@ -42712,9 +42712,9 @@ ${markup.join("\n")}`);
     };
   }
   var Option = class {
-    constructor(completion, source, match) {
+    constructor(completion, source2, match) {
       this.completion = completion;
-      this.source = source;
+      this.source = source2;
       this.match = match;
     }
   };
@@ -42723,11 +42723,11 @@ ${markup.join("\n")}`);
   }
   function ensureAnchor(expr, start2) {
     var _a2;
-    let { source } = expr;
-    let addStart = start2 && source[0] != "^", addEnd = source[source.length - 1] != "$";
+    let { source: source2 } = expr;
+    let addStart = start2 && source2[0] != "^", addEnd = source2[source2.length - 1] != "$";
     if (!addStart && !addEnd)
       return expr;
-    return new RegExp(`${addStart ? "^" : ""}(?:${source})${addEnd ? "$" : ""}`, (_a2 = expr.flags) !== null && _a2 !== void 0 ? _a2 : expr.ignoreCase ? "i" : "");
+    return new RegExp(`${addStart ? "^" : ""}(?:${source2})${addEnd ? "$" : ""}`, (_a2 = expr.flags) !== null && _a2 !== void 0 ? _a2 : expr.ignoreCase ? "i" : "");
   }
   function insertCompletionText(state3, text, from, to2) {
     return Object.assign(Object.assign({}, state3.changeByRange((range2) => {
@@ -42754,12 +42754,12 @@ ${markup.join("\n")}`);
       apply(view, option.completion, result.from, result.to);
   }
   var SourceCache = /* @__PURE__ */ new WeakMap();
-  function asSource(source) {
-    if (!Array.isArray(source))
-      return source;
-    let known = SourceCache.get(source);
+  function asSource(source2) {
+    if (!Array.isArray(source2))
+      return source2;
+    let known = SourceCache.get(source2);
     if (!known)
-      SourceCache.set(source, known = completeFromList(source));
+      SourceCache.set(source2, known = completeFromList(source2));
     return known;
   }
   var FuzzyMatcher = class {
@@ -43081,8 +43081,8 @@ ${markup.join("\n")}`);
         let cls = this.optionClass(completion);
         if (cls)
           li.className = cls;
-        for (let source of this.optionContent) {
-          let node = source(completion, this.view.state, match);
+        for (let source2 of this.optionContent) {
+          let node = source2(completion, this.view.state, match);
           if (node)
             li.appendChild(node);
         }
@@ -43187,8 +43187,8 @@ ${markup.join("\n")}`);
     update(tr) {
       let { state: state3 } = tr, conf = state3.facet(completionConfig);
       let sources = conf.override || state3.languageDataAt("autocomplete", cur(state3)).map(asSource);
-      let active = sources.map((source) => {
-        let value = this.active.find((s) => s.source == source) || new ActiveSource(source, this.active.some((a2) => a2.state != 0) ? 1 : 0);
+      let active = sources.map((source2) => {
+        let value = this.active.find((s) => s.source == source2) || new ActiveSource(source2, this.active.some((a2) => a2.state != 0) ? 1 : 0);
         return value.update(tr, conf);
       });
       if (active.length == this.active.length && active.every((a2, i2) => a2 == this.active[i2]))
@@ -43245,8 +43245,8 @@ ${markup.join("\n")}`);
     return tr.isUserEvent("input.type") ? "input" : tr.isUserEvent("delete.backward") ? "delete" : null;
   }
   var ActiveSource = class {
-    constructor(source, state3, explicitPos = -1) {
-      this.source = source;
+    constructor(source2, state3, explicitPos = -1) {
+      this.source = source2;
       this.state = state3;
       this.explicitPos = explicitPos;
     }
@@ -43285,8 +43285,8 @@ ${markup.join("\n")}`);
     }
   };
   var ActiveResult = class extends ActiveSource {
-    constructor(source, explicitPos, result, from, to2) {
-      super(source, 2, explicitPos);
+    constructor(source2, explicitPos, result, from, to2) {
+      super(source2, 2, explicitPos);
       this.result = result;
       this.from = from;
       this.to = to2;
@@ -44029,7 +44029,7 @@ ${markup.join("\n")}`);
       } else {
         this.set = false;
         let { state: state3 } = this.view, { sources } = state3.facet(lintConfig);
-        Promise.all(sources.map((source) => Promise.resolve(source(this.view)))).then((annotations) => {
+        Promise.all(sources.map((source2) => Promise.resolve(source2(this.view)))).then((annotations) => {
           let all = annotations.reduce((a2, b2) => a2.concat(b2));
           if (this.view.state.doc == state3.doc)
             this.view.dispatch(setDiagnostics(this.view.state, all));
@@ -44413,26 +44413,26 @@ ${markup.join("\n")}`);
 
   // public/packages/code-module.js
   var $3 = module2("code-module");
+  function source(target) {
+    return target.closest("[src]").getAttribute("src");
+  }
+  function sourceFile(target) {
+    const src = source(target);
+    return state[src] ? state[src] : function initialize2() {
+      state[src] = { file: "hello... what is your name?" };
+      return state[src];
+    }();
+  }
   $3.when("click", ".publish", (event) => {
-    const link2 = event.target.closest($3.link).getAttribute("src");
-    const { file } = $3.learn();
-    fetch(link2, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ file })
-    }).then(() => {
-      window.location.href = window.location.href;
-    });
+    const src = source(event.target);
+    const { file } = sourceFile(event.target);
+    state[src].file = file;
   });
   $3.draw((target) => {
-    const link2 = target.getAttribute("src");
-    console.log(link2);
-    const { file } = $3.learn();
+    const src = source(target);
+    const { file } = sourceFile(target);
     if (!file) {
-      fetch(link2).then((res) => res.json()).then(({ file: file2 }) => $3.teach({ file: file2 }));
-      return;
+      return "loading";
     }
     if (!target.view) {
       target.innerHTML = `
@@ -44456,12 +44456,13 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(_target, $18, _flags) {
+  function persist(target, $18, _flags) {
     return (update3) => {
       if (update3.changes.inserted.length < 0)
         return;
+      const src = source(target);
       const file = update3.view.state.doc.toString();
-      $18.teach({ file });
+      state[src].file = file;
     };
   }
   $3.flair(`
@@ -44938,7 +44939,6 @@ u
   // public/packages/file-system.js
   function factoryReset(cwc) {
     try {
-      console.log("cwc", cwc);
       state2[cwc] = {
         path: "/",
         type: "FileSystem",
@@ -45028,9 +45028,9 @@ u
   $7.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
-    return state2[cwc] ? state2[cwc] : function initialize2(target2) {
+    return state2[cwc] ? state2[cwc] : function initialize2() {
       return factoryReset(cwc);
-    }(target);
+    }();
   }
   function system(target) {
     const tree = currentWorkingComputer(target);
@@ -45056,7 +45056,9 @@ u
     if (!content2)
       return `Nothing yet... if only... we had... a 404 page.`;
     if (content2.type === "File") {
-      return `what: ${path2}`;
+      return `
+      <code-module src="ls${path2}"></code-module>
+    `;
     }
     if (content2.type === "Directory") {
       return `
@@ -48299,11 +48301,11 @@ u
     return sample;
   }
   function playSample(sample, sampleNote, noteToPlay) {
-    const source = context2.createBufferSource();
-    source.buffer = sample;
-    source.playbackRate.value = 2 ** ((noteToPlay - sampleNote) / 12);
-    source.connect(context2.destination);
-    source.start(0);
+    const source2 = context2.createBufferSource();
+    source2.buffer = sample;
+    source2.playbackRate.value = 2 ** ((noteToPlay - sampleNote) / 12);
+    source2.connect(context2.destination);
+    source2.start(0);
   }
   var synths = [];
   Promise.all([
@@ -48950,8 +48952,8 @@ u
 `);
   $14.when("click", ".print", print);
   $viewer.draw((target) => {
-    const source = target.closest($14.link).getAttribute("source");
-    const { formatted } = state[source] || {};
+    const source2 = target.closest($14.link).getAttribute("source");
+    const { formatted } = state[source2] || {};
     return `
     <div class="shadowbox">
       ${formatted}
@@ -48959,8 +48961,8 @@ u
   `;
   });
   $editor.draw((target) => {
-    const source = target.closest($14.link).getAttribute("source");
-    const { file } = state[source] || {};
+    const source2 = target.closest($14.link).getAttribute("source");
+    const { file } = state[source2] || {};
     if (file && !target.view) {
       const config2 = {
         extensions: [
@@ -48987,8 +48989,8 @@ u
         return;
       const file = update3.view.state.doc.toString();
       const formatted = compile(file);
-      const source = target.closest($18.link).getAttribute("source");
-      state[source] = { file, formatted };
+      const source2 = target.closest($18.link).getAttribute("source");
+      state[source2] = { file, formatted };
     };
   }
   $editor.flair(`

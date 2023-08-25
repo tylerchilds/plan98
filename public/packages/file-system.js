@@ -2,7 +2,6 @@ import module, { state } from '../module.js'
 /* uncomment to seed filesystem */
 function factoryReset(cwc) {
   try {
-    console.log('cwc', cwc)
     state[cwc] = {
       path: '/',
       type: 'FileSystem',
@@ -99,9 +98,9 @@ function currentWorkingComputer(target) {
   const cwc = target.closest('[cwc]').getAttribute('cwc')
   return state[cwc]
     ? state[cwc] 
-    : (function initialize(target) {
+    : (function initialize() {
       return factoryReset(cwc)
-    })(target)
+    })()
 }
 
 function system(target) {
@@ -130,7 +129,9 @@ function floppy(target) {
   if(!content) return `Nothing yet... if only... we had... a 404 page.`
 
   if(content.type === 'File') {
-    return `what: ${path}`
+    return `
+      <code-module src="ls${path}"></code-module>
+    `
   }
 
   if(content.type === 'Directory') {
