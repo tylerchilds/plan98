@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Script Type</title>
+    <title>Explore</title>
     <style>
       html,body {
         height: 100%;
@@ -27,6 +27,41 @@
       document.body.insertAdjacentHTML('beforeend', `
         <file-system cwc="${'ls' || window.location.origin}/plan98"></file-system>
      `)
+
+      class WebComponent extends HTMLElement {
+        constructor() {
+          super();
+        }
+      }
+
+      function tag({ proxy }) {
+        const customElements = new Set(
+          [...document.querySelectorAll(':not(:defined)')]
+            .map(({ tagName }) => tagName.toLowerCase())
+        )
+
+        customElements.forEach(async (customElement) => {
+          const url = `${proxy || '.'}/${customElement}.js`
+          const exists = (await fetch(url, {method: 'HEAD'})).ok
+          if(!exists) return
+          let definable = true
+          await import(url).catch(() => { definable = false })
+          if(definable && target.matches(':not(:defined)')) {
+            customElements.define(
+              customElement,
+              WebComponent
+            );
+          }
+        })
+      }
+
+      (function({ proxy }) {
+        tag({ proxy })
+        new MutationObserver((mutationsList) => {
+          console.log(mutationsList)
+          tag({ proxy })
+        }).observe(document.body, { childList: true, subtree: true });
+      })({ proxy: './braid/tag' })
     </script>
   </body>
 </html>
