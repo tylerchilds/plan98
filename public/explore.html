@@ -26,44 +26,39 @@
   <body>
     <script src="../package.2015.js"></script>
     <script>
-      document.body.insertAdjacentHTML('beforeend', `
-        <file-system cwc="${'ls' || window.location.origin}/plan98"></file-system>
-     `)
-
-      class WebComponent extends HTMLElement {
-        constructor() {
-          super();
-        }
-      }
-
-      function tag({ proxy }) {
-        const customElements = new Set(
+      function markup({ folder }) {
+        const elements = new Set(
           [...document.querySelectorAll(':not(:defined)')]
             .map(({ tagName }) => tagName.toLowerCase())
         )
 
-        customElements.forEach(async (customElement) => {
-          const url = `${proxy || '.'}/${customElement}.js`
+        elements.forEach(async (element) => {
+          const url = `${folder || '.'}/${element}.js`
           const exists = (await fetch(url, {method: 'HEAD'})).ok
           if(!exists) return
           let definable = true
           await import(url).catch(() => { definable = false })
-          if(definable && target.matches(':not(:defined)')) {
-            customElements.define(
-              customElement,
-              WebComponent
-            );
+          definable = definable && document.querySelector(element).matches(':not(:defined)')
+          if(definable) {
+            customElements.define(element, class WebComponent extends HTMLElement {
+              constructor() {
+                super();
+              }
+            });
           }
         })
       }
 
-      (function({ proxy }) {
-        tag({ proxy })
+      (function({ folder }) {
+        markup({ folder })
         new MutationObserver((mutationsList) => {
-          console.log(mutationsList)
-          tag({ proxy })
+          markup({ folder })
         }).observe(document.body, { childList: true, subtree: true });
-      })({ proxy: './braid/tag' })
+      })({ folder: './markup' })
+
+      document.body.insertAdjacentHTML('beforeend', `
+        <plan98-filesystem cwc="${'ls' || window.location.origin}/plan98"></plan98-filesystem>
+     `)
     </script>
   </body>
 </html>
