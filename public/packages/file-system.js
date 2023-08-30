@@ -1,6 +1,8 @@
 import module, { state } from '../module.js'
 /* uncomment to seed filesystem */
+//factoryReset(`${window.location.origin}/plan98`)
 function factoryReset(cwc) {
+  // todo: braidify highlighter and file system code
   try {
     state[cwc] = {
       path: '/',
@@ -14,56 +16,80 @@ function factoryReset(cwc) {
           children: [{
             name: 'tychi',
             type: 'Directory',
-            children: [
-              {
-                name: 'pretend.script',
-                type: 'File'
-              },
-              {
-                name: 'paper.script',
-                type: 'File'
-              },
-              {
-                name: 'books.script',
-                type: 'File'
-              },
-              {
-                name: 'bicycles.script',
-                type: 'File'
-              },
-              {
-                name: 'typewriters.script',
-                type: 'File'
-              },
-              {
-                name: 'teleplays.script',
-                type: 'File'
-              },
-              {
-                name: 'cameras.script',
-                type: 'File'
-              },
-              {
-                name: 'computers.script',
-                type: 'File'
-              },
-              {
-                name: 'synthesizers.script',
-                type: 'File'
-              },
-              {
-                name: 'slideshows.script',
-                type: 'File'
-              },
-              {
-                name: 'gamepads.script',
-                type: 'File'
-              },
-              {
-                name: 'generations.script',
-                type: 'File'
-              }
-            ]
+            children: [{
+              name: 'braid',
+              type: 'Directory',
+              children: [
+                {
+                  name: 'tag',
+                  type: 'Directory',
+                  children: [
+                    {
+                      name: 'plan98-highlighter.js',
+                      type: 'File'
+                    },
+                    {
+                      name: 'plan98-system.js',
+                      type: 'File'
+                    }
+                  ]
+                },
+                {
+                  name: 'sillonious',
+                  type: 'Directory',
+                  children: [
+                    {
+                      name: 'pretend.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'paper.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'books.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'bicycles.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'typewriters.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'teleplays.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'cameras.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'computers.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'synthesizers.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'slideshows.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'gamepads.script',
+                      type: 'File'
+                    },
+                    {
+                      name: 'generations.script',
+                      type: 'File'
+                    }
+                  ]
+                }
+              ]
+            }]
           }]
         }]
       }]
@@ -71,11 +97,12 @@ function factoryReset(cwc) {
   } catch (e) {
     console.info('Factory Reset: Failed')
     console.error(e)
-    return false
+    return
   }
 
+  console.log({ cwc, system: state[cwc] })
   console.info('Factory Reset: Success')
-  return true
+  return state[cwc]
 }
 
 const Types = {
@@ -96,11 +123,7 @@ $.draw(iSbIoS ? system : floppy)
 
 function currentWorkingComputer(target) {
   const cwc = target.closest('[cwc]').getAttribute('cwc')
-  return state[cwc]
-    ? state[cwc] 
-    : (function initialize() {
-      return factoryReset(cwc)
-    })()
+  return state[cwc] || {}
 }
 
 function system(target) {
@@ -123,9 +146,8 @@ function system(target) {
 
 function floppy(target) {
   const tree = currentWorkingComputer(target)
-  const { path } = tree
+  const { path = '' } = tree
   const content = getContent(tree, path.split('/'))
-  console.log({ content })
   if(!content) return `Nothing yet... if only... we had... a 404 page.`
 
   if(content.type === 'File') {
@@ -181,31 +203,32 @@ $.when('click', '[data-uri]', async function(event) {
         const { ArchivedUri, Uri, ThumbnailUrl } = image
         return `
           <img
-            src="${ThumbnailUrl}"
-            data-uri="${Uri}"
+        src="${ThumbnailUrl}"
+        data-uri="${Uri}"
           />
-        `
+          `
       }).join('')}
     </image-gallery>
   `)
-})
+      })
 
-function nest(pathParts, tree) {
-  return tree.children.map(child => {
-    const { name, type } = child
-    const currentPathParts = [...pathParts, name]
-    const currentPath = currentPathParts.join('/')
+  function nest(pathParts, tree = {}) {
+    if(!tree.children) return ''
+    return tree.children.map(child => {
+      const { name, type } = child
+      const currentPathParts = [...pathParts, name]
+      const currentPath = currentPathParts.join('/')
 
-    if(type === 'File') {
-      return `<button data-path="${currentPath}">
+      if(type === 'File') {
+        return `<button data-path="${currentPath}">
         <plan98-highlighter>
           ${name}
         </plan98-highlighter>
       </button>`
-    }
+      }
 
-    if(type === 'Directory') {
-      return `
+      if(type === 'Directory') {
+        return `
         <details>
           <summary data-path="${currentPath}">
             ${name || "/"}
@@ -213,26 +236,26 @@ function nest(pathParts, tree) {
           ${nest(currentPathParts, child)}
         </details>
       `
-    }
-  }).join('')
-}
+      }
+    }).join('')
+  }
 
-$.when('click', '[data-reset]', ({target}) => {
-  const cwc = currentWorkingComputer(target)
-  factoryReset(cwc)
-})
+  $.when('click', '[data-reset]', ({target}) => {
+    const cwc = target.closest('[cwc]').getAttribute('cwc')
+    factoryReset(cwc)
+  })
 
-$.when('click', '[data-path]', ({ target }) => {
-  const { path } = target.dataset
-  console.log({ path })
-  const tree = currentWorkingComputer(target)
-  const information = getContent(tree, path)
-  console.log({ information })
+  $.when('click', '[data-path]', ({ target }) => {
+    const { path } = target.dataset
+    console.log({ path })
+    const tree = currentWorkingComputer(target)
+    const information = getContent(tree, path)
+    console.log({ information })
 
-  tree.path = path
-})
+    tree.path = path
+  })
 
-$.flair(`
+  $.flair(`
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;

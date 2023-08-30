@@ -893,8 +893,8 @@
           return false;
         }
         if (!hasToStringTag || !(Symbol.toStringTag in value)) {
-          var tag2 = $slice($toString(value), 8, -1);
-          return $indexOf(typedArrays, tag2) > -1;
+          var tag = $slice($toString(value), 8, -1);
+          return $indexOf(typedArrays, tag) > -1;
         }
         if (!gOPD) {
           return false;
@@ -3907,7 +3907,7 @@
               return true;
             }
           });
-          var function_for_tag = (tag2) => (...args) => {
+          var function_for_tag = (tag) => (...args) => {
             var children = [];
             var attrs = { style: {} };
             for (var i2 = 0; i2 < args.length; i2++) {
@@ -3918,7 +3918,7 @@
                 children.push(arg);
               else if (arg instanceof Object)
                 for (var k in arg)
-                  if (is_css_prop(k) && !(k in { width: 1, height: 1, size: 1 } && tag2 in { canvas: 1, input: 1, embed: 1, object: 1 }))
+                  if (is_css_prop(k) && !(k in { width: 1, height: 1, size: 1 } && tag in { canvas: 1, input: 1, embed: 1, object: 1 }))
                     attrs.style[k] = arg[k];
                   else if (k === "style")
                     for (var k2 in arg[k])
@@ -3928,7 +3928,7 @@
             }
             return React.createElement.apply(
               null,
-              [tag2, attrs].concat(children)
+              [tag, attrs].concat(children)
             );
           };
           var all_tags = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,svg,table,tbody,td,template,tfoot,th,thead,title,tr,u,ul,video,input,circle,ellipse,g,image,line,path,polygon,polyline,rect,switch,symbol,text,textPath,tspan,use".split(",");
@@ -24759,9 +24759,9 @@ ${markup.join("\n")}`);
             currentParent = stack[stack.length - 1];
             break;
           } else {
-            const tag2 = kElementsClosedByClosing[currentParent.rawNodeName];
-            if (tag2) {
-              if (tag2[name3]) {
+            const tag = kElementsClosedByClosing[currentParent.rawNodeName];
+            if (tag) {
+              if (tag[name3]) {
                 stack.pop();
                 currentParent = stack[stack.length - 1];
                 continue;
@@ -25862,18 +25862,18 @@ ${markup.join("\n")}`);
     if (!vTree) {
       return output;
     }
-    const { childNodes, nodeType, nodeName: tag2, nodeValue, attributes: attributes2 } = vTree;
+    const { childNodes, nodeType, nodeName: tag, nodeValue, attributes: attributes2 } = vTree;
     if (nodeType === 11) {
       for (let i2 = 0; i2 < childNodes.length; i2++) {
         output += serializeVTree(childNodes[i2]);
       }
     } else if (!childNodes.length && nodeType === 1) {
-      output += `<${tag2}${serializeAttributes(attributes2)}></${tag2}>`;
+      output += `<${tag}${serializeAttributes(attributes2)}></${tag}>`;
     } else if (nodeType === 3) {
       output += nodeValue;
     } else if (childNodes.length) {
       const children = childNodes.map((childNode) => `${serializeVTree(childNode)}`).join("");
-      output += `<${tag2}${serializeAttributes(attributes2)}>${children}</${tag2}>`;
+      output += `<${tag}${serializeAttributes(attributes2)}>${children}</${tag}>`;
     }
     return output;
   }
@@ -31952,9 +31952,9 @@ ${markup.join("\n")}`);
     return view;
   }
   var NullWidget = class extends WidgetType {
-    constructor(tag2) {
+    constructor(tag) {
       super();
-      this.tag = tag2;
+      this.tag = tag;
     }
     eq(other) {
       return other.tag == this.tag;
@@ -39127,19 +39127,19 @@ ${markup.join("\n")}`);
     static define(parent) {
       if (parent === null || parent === void 0 ? void 0 : parent.base)
         throw new Error("Can not derive from a modified tag");
-      let tag2 = new Tag([], null, []);
-      tag2.set.push(tag2);
+      let tag = new Tag([], null, []);
+      tag.set.push(tag);
       if (parent)
         for (let t2 of parent.set)
-          tag2.set.push(t2);
-      return tag2;
+          tag.set.push(t2);
+      return tag;
     }
     static defineModifier() {
       let mod2 = new Modifier();
-      return (tag2) => {
-        if (tag2.modified.indexOf(mod2) > -1)
-          return tag2;
-        return Modifier.get(tag2.base || tag2, tag2.modified.concat(mod2).sort((a2, b2) => a2.id - b2.id));
+      return (tag) => {
+        if (tag.modified.indexOf(mod2) > -1)
+          return tag;
+        return Modifier.get(tag.base || tag, tag.modified.concat(mod2).sort((a2, b2) => a2.id - b2.id));
       };
     }
   };
@@ -39155,14 +39155,14 @@ ${markup.join("\n")}`);
       let exists = mods[0].instances.find((t2) => t2.base == base2 && sameArray2(mods, t2.modified));
       if (exists)
         return exists;
-      let set3 = [], tag2 = new Tag(set3, base2, mods);
+      let set3 = [], tag = new Tag(set3, base2, mods);
       for (let m3 of mods)
-        m3.instances.push(tag2);
+        m3.instances.push(tag);
       let configs = permute(mods);
       for (let parent of base2.set)
         for (let config2 of configs)
           set3.push(Modifier.get(parent, config2));
-      return tag2;
+      return tag;
     }
   };
   function sameArray2(a2, b2) {
@@ -39241,15 +39241,15 @@ ${markup.join("\n")}`);
       if (!Array.isArray(style.tag))
         map[style.tag.id] = style.class;
       else
-        for (let tag2 of style.tag)
-          map[tag2.id] = style.class;
+        for (let tag of style.tag)
+          map[tag.id] = style.class;
     }
     let { scope, all = null } = options2 || {};
     return {
       style: (tags3) => {
         let cls = all;
-        for (let tag2 of tags3) {
-          for (let sub of tag2.set) {
+        for (let tag of tags3) {
+          for (let sub of tag.set) {
             let tagClass = map[sub.id];
             if (tagClass) {
               cls = cls ? cls + " " + tagClass : tagClass;
@@ -40697,29 +40697,29 @@ ${markup.join("\n")}`);
     console.warn(msg2);
   }
   function createTokenType(extra, tagStr) {
-    let tag2 = null;
+    let tag = null;
     for (let part of tagStr.split(".")) {
       let value = extra[part] || tags[part];
       if (!value) {
         warnForPart(part, `Unknown highlighting tag ${part}`);
       } else if (typeof value == "function") {
-        if (!tag2)
+        if (!tag)
           warnForPart(part, `Modifier ${part} used at start of tag`);
         else
-          tag2 = value(tag2);
+          tag = value(tag);
       } else {
-        if (tag2)
+        if (tag)
           warnForPart(part, `Tag ${part} used as modifier`);
         else
-          tag2 = value;
+          tag = value;
       }
     }
-    if (!tag2)
+    if (!tag)
       return 0;
     let name3 = tagStr.replace(/ /g, "_"), type2 = NodeType.define({
       id: typeArray.length,
       name: name3,
-      props: [styleTags({ [name3]: tag2 })]
+      props: [styleTags({ [name3]: tag })]
     });
     typeArray.push(type2);
     return type2.id;
@@ -44951,56 +44951,80 @@ u
             children: [{
               name: "tychi",
               type: "Directory",
-              children: [
-                {
-                  name: "pretend.script",
-                  type: "File"
-                },
-                {
-                  name: "paper.script",
-                  type: "File"
-                },
-                {
-                  name: "books.script",
-                  type: "File"
-                },
-                {
-                  name: "bicycles.script",
-                  type: "File"
-                },
-                {
-                  name: "typewriters.script",
-                  type: "File"
-                },
-                {
-                  name: "teleplays.script",
-                  type: "File"
-                },
-                {
-                  name: "cameras.script",
-                  type: "File"
-                },
-                {
-                  name: "computers.script",
-                  type: "File"
-                },
-                {
-                  name: "synthesizers.script",
-                  type: "File"
-                },
-                {
-                  name: "slideshows.script",
-                  type: "File"
-                },
-                {
-                  name: "gamepads.script",
-                  type: "File"
-                },
-                {
-                  name: "generations.script",
-                  type: "File"
-                }
-              ]
+              children: [{
+                name: "braid",
+                type: "Directory",
+                children: [
+                  {
+                    name: "tag",
+                    type: "Directory",
+                    children: [
+                      {
+                        name: "plan98-highlighter.js",
+                        type: "File"
+                      },
+                      {
+                        name: "plan98-system.js",
+                        type: "File"
+                      }
+                    ]
+                  },
+                  {
+                    name: "sillonious",
+                    type: "Directory",
+                    children: [
+                      {
+                        name: "pretend.script",
+                        type: "File"
+                      },
+                      {
+                        name: "paper.script",
+                        type: "File"
+                      },
+                      {
+                        name: "books.script",
+                        type: "File"
+                      },
+                      {
+                        name: "bicycles.script",
+                        type: "File"
+                      },
+                      {
+                        name: "typewriters.script",
+                        type: "File"
+                      },
+                      {
+                        name: "teleplays.script",
+                        type: "File"
+                      },
+                      {
+                        name: "cameras.script",
+                        type: "File"
+                      },
+                      {
+                        name: "computers.script",
+                        type: "File"
+                      },
+                      {
+                        name: "synthesizers.script",
+                        type: "File"
+                      },
+                      {
+                        name: "slideshows.script",
+                        type: "File"
+                      },
+                      {
+                        name: "gamepads.script",
+                        type: "File"
+                      },
+                      {
+                        name: "generations.script",
+                        type: "File"
+                      }
+                    ]
+                  }
+                ]
+              }]
             }]
           }]
         }]
@@ -45008,10 +45032,11 @@ u
     } catch (e2) {
       console.info("Factory Reset: Failed");
       console.error(e2);
-      return false;
+      return;
     }
+    console.log({ cwc, system: state2[cwc] });
     console.info("Factory Reset: Success");
-    return true;
+    return state2[cwc];
   }
   var Types = {
     File: {
@@ -45028,9 +45053,7 @@ u
   $7.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
-    return state2[cwc] ? state2[cwc] : function initialize2() {
-      return factoryReset(cwc);
-    }();
+    return state2[cwc] || {};
   }
   function system(target) {
     const tree = currentWorkingComputer(target);
@@ -45050,9 +45073,8 @@ u
   }
   function floppy(target) {
     const tree = currentWorkingComputer(target);
-    const { path: path2 } = tree;
+    const { path: path2 = "" } = tree;
     const content2 = getContent(tree, path2.split("/"));
-    console.log({ content: content2 });
     if (!content2)
       return `Nothing yet... if only... we had... a 404 page.`;
     if (content2.type === "File") {
@@ -45095,15 +45117,17 @@ u
       const { ArchivedUri, Uri, ThumbnailUrl } = image;
       return `
           <img
-            src="${ThumbnailUrl}"
-            data-uri="${Uri}"
+        src="${ThumbnailUrl}"
+        data-uri="${Uri}"
           />
-        `;
+          `;
     }).join("")}
     </image-gallery>
   `);
   });
-  function nest(pathParts, tree) {
+  function nest(pathParts, tree = {}) {
+    if (!tree.children)
+      return "";
     return tree.children.map((child) => {
       const { name: name3, type: type2 } = child;
       const currentPathParts = [...pathParts, name3];
@@ -45128,7 +45152,7 @@ u
     }).join("");
   }
   $7.when("click", "[data-reset]", ({ target }) => {
-    const cwc = currentWorkingComputer(target);
+    const cwc = target.closest("[cwc]").getAttribute("cwc");
     factoryReset(cwc);
   });
   $7.when("click", "[data-path]", ({ target }) => {
@@ -48858,11 +48882,11 @@ u
     function blank() {
       append("script-type-blankline", "");
     }
-    function append(tag2, content2) {
+    function append(tag, content2) {
       const html = `
-      <${tag2}>
+      <${tag}>
         ${content2}
-      </${tag2}>
+      </${tag}>
     `;
       isolate.result += html;
     }
@@ -49160,36 +49184,6 @@ u
     const key2 = event.target.name;
     state[key2] = value;
   });
-
-  // public/main.js
-  function tag(config2) {
-    [...document.querySelectorAll(":not(:defined)")].forEach(async (target) => {
-      class WebComponent extends HTMLElement {
-        constructor() {
-          super();
-        }
-      }
-      const customElement = target.tagName.toLowerCase();
-      const url = `${config2.proxy || "."}/${customElement}.js`;
-      const exists = (await fetch(url, { method: "HEAD" })).ok;
-      if (!exists)
-        return;
-      await import(url).catch(() => null);
-      if (target.matches(":not(:defined)")) {
-        customElements.define(
-          customElement,
-          WebComponent
-        );
-      }
-    });
-  }
-  (function(config2) {
-    tag(config2);
-    new MutationObserver((mutationsList) => {
-      console.log(mutationsList);
-      tag(config2);
-    }).observe(document.body, { childList: true, subtree: true });
-  })({ proxy: "./tag" });
 })();
 /*!
 * focus-trap 7.0.0
