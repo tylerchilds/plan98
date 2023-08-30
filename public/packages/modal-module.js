@@ -52,7 +52,7 @@ window.hideModal = showModal
 
 $.when('click', '.close', hideModal)
 
-$.flair(`
+$.style(`
   body.overlay {
     overflow: hidden;
   }

@@ -117,7 +117,7 @@ const $ = module('hyper-piano')
 
 const synaesthesia = Object.keys(metadata).map(midi => metadata[midi])
 
-$.flair(midiToColor(synaesthesia))
+$.style(midiToColor(synaesthesia))
 
 function midiToColor(specimens) {
   return specimens.map(metadata => {
@@ -322,7 +322,7 @@ $.when('click', '.octave-down', octaveDown)
 $.when('click', '.pitch-up', pitchUp)
 $.when('click', '.pitch-down', pitchDown)
 
-$.flair(`
+$.style(`
   & {
     height: 100%;
     display: grid;

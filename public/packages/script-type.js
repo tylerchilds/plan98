@@ -193,7 +193,7 @@ $.draw(target => {
   `
 })
 
-$.flair(`
+$.style(`
   * {
     box-sizing: border-box;
     padding: 0;
@@ -314,13 +314,13 @@ function persist(target, $, _flags) {
 	}
 }
 
-$editor.flair(`
+$editor.style(`
   & {
     display: block;
   }
 `)
 
-$viewer.flair(`
+$viewer.style(`
   & {
     display: block;
     font-size: 12pt;

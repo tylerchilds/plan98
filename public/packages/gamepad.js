@@ -84,7 +84,7 @@ function gatherInputs(gamepad, _index) {
 globalThis.addEventListener("gamepadconnected", connecthandler);
 globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
 
-$.flair(`
+$.style(`
   & .gamepads {
     background: rgba(0,0,0,.04);
     border: 1px solid rgba(0,0,0,.1);

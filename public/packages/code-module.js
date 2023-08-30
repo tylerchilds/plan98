@@ -72,7 +72,7 @@ function persist(target, $, _flags) {
 	}
 }
 
-$.flair(`
+$.style(`
   & {
 		display: block;
     max-height: 60vh;

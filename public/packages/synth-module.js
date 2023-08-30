@@ -299,7 +299,7 @@ $.when('click', '.octave-down', octaveDown)
 $.when('click', '.pitch-up', pitchUp)
 $.when('click', '.pitch-down', pitchDown)
 
-$.flair(`
+$.style(`
   & {
     height: 100%;
     display: grid;

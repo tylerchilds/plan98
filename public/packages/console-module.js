@@ -112,7 +112,7 @@ function isActive(target) {
   return target.matches('.is-active')
 }
 
-$.flair(`
+$.style(`
 	& {
 		display: block;
 		position: relative;

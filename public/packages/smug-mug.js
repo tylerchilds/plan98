@@ -8,6 +8,6 @@ $.draw(() => {
   `
 })
 
-$.flair(`
+$.style(`
   & { display: block }
 `)

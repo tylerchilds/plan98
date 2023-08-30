@@ -21,14 +21,14 @@ $.draw((target) => {
         transform: rotate(${n(1, -7, 7, 'deg')}) scale(${n(1, .95, 1.1)});
       }
     `
-    $.flair(target.css)
+    $.style(target.css)
     target.html = `<span>${target.innerHTML}</span>`
   }
 
   return target.html
 })
 
-$.flair(`
+$.style(`
   & {
     display: inline-block;
     position: relative;

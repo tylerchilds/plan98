@@ -176,7 +176,7 @@ function format(timestamp){
   return MONTHS[date.getMonth()] +' '+ date.getDate() +', '+ date.getFullYear();
 }
 
-$.flair(`
+$.style(`
   & .card{
     background-color: #fff;
     border-radius: 1px;

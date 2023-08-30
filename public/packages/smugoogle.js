@@ -155,7 +155,7 @@ function transition({target}) {
 
 $.when('animationend', 'transition', transition)
 
-$.flair(`
+$.style(`
 		& {
 			background: white;
 			display: block;
@@ -500,7 +500,7 @@ $earth.draw(function drawPlanet(target) {
 	}
 })
 
-$earth.flair(`
+$earth.style(`
 	& {
 		display: block;
 	}

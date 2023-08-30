@@ -1388,9 +1388,9 @@
         "regexp": "red"
       };
       function stylizeWithColor(str, styleType) {
-        var style = inspect.styles[styleType];
-        if (style) {
-          return "\x1B[" + inspect.colors[style][0] + "m" + str + "\x1B[" + inspect.colors[style][1] + "m";
+        var style2 = inspect.styles[styleType];
+        if (style2) {
+          return "\x1B[" + inspect.colors[style2][0] + "m" + str + "\x1B[" + inspect.colors[style2][1] + "m";
         } else {
           return str;
         }
@@ -4596,8 +4596,8 @@
               return arguments.length >= 3 && (ctx.depth = arguments[2]), arguments.length >= 4 && (ctx.colors = arguments[3]), isBoolean(opts) ? ctx.showHidden = opts : opts && exports3._extend(ctx, opts), isUndefined(ctx.showHidden) && (ctx.showHidden = false), isUndefined(ctx.depth) && (ctx.depth = 2), isUndefined(ctx.colors) && (ctx.colors = false), isUndefined(ctx.customInspect) && (ctx.customInspect = true), ctx.colors && (ctx.stylize = stylizeWithColor), formatValue2(ctx, obj, ctx.depth);
             }
             function stylizeWithColor(str, styleType) {
-              var style = inspect.styles[styleType];
-              return style ? "\x1B[" + inspect.colors[style][0] + "m" + str + "\x1B[" + inspect.colors[style][1] + "m" : str;
+              var style2 = inspect.styles[styleType];
+              return style2 ? "\x1B[" + inspect.colors[style2][0] + "m" + str + "\x1B[" + inspect.colors[style2][1] + "m" : str;
             }
             function stylizeNoColor(str, styleType) {
               return str;
@@ -26024,7 +26024,7 @@ ${markup.join("\n")}`);
       )();
     });
   }
-  function flair(link2, stylesheet) {
+  function style(link2, stylesheet) {
     const styles = `
     <style type="text/css" data-tag=${link2}>
       ${stylesheet.replaceAll("&", link2)}
@@ -26048,7 +26048,7 @@ ${markup.join("\n")}`);
       link: link2,
       learn: learn.bind(null, link2),
       draw: draw.bind(null, link2),
-      flair: flair.bind(null, link2),
+      style: style.bind(null, link2),
       when: when.bind(null, link2),
       teach: teach.bind(null, link2)
     };
@@ -26245,7 +26245,7 @@ ${markup.join("\n")}`);
     document.activeElement.blur();
   }
   $.when("animationend", "transition", transition);
-  $.flair(`
+  $.style(`
 		& {
 			background: white;
 			display: block;
@@ -26549,7 +26549,7 @@ ${markup.join("\n")}`);
       });
     }
   });
-  $earth.flair(`
+  $earth.style(`
 	& {
 		display: block;
 	}
@@ -27421,7 +27421,7 @@ ${markup.join("\n")}`);
   function isActive(target) {
     return target.matches(".is-active");
   }
-  $2.flair(`
+  $2.style(`
 	& {
 		display: block;
 		position: relative;
@@ -33415,9 +33415,9 @@ ${markup.join("\n")}`);
   ];
   var modifierCodes = [16, 17, 18, 20, 91, 92, 224, 225];
   var MouseSelection = class {
-    constructor(view, startEvent, style, mustSelect) {
+    constructor(view, startEvent, style2, mustSelect) {
       this.view = view;
-      this.style = style;
+      this.style = style2;
       this.mustSelect = mustSelect;
       this.lastEvent = startEvent;
       let doc2 = view.contentDOM.ownerDocument;
@@ -33569,19 +33569,19 @@ ${markup.join("\n")}`);
     view.observer.flush();
     if (lastTouch > Date.now() - 2e3 && getClickType(event) == 1)
       return;
-    let style = null;
+    let style2 = null;
     for (let makeStyle of view.state.facet(mouseSelectionStyle)) {
-      style = makeStyle(view, event);
-      if (style)
+      style2 = makeStyle(view, event);
+      if (style2)
         break;
     }
-    if (!style && event.button == 0)
-      style = basicMouseSelection(view, event);
-    if (style) {
+    if (!style2 && event.button == 0)
+      style2 = basicMouseSelection(view, event);
+    if (style2) {
       let mustFocus = view.root.activeElement != view.contentDOM;
       if (mustFocus)
         view.observer.ignore(() => focusPreventScroll(view.contentDOM));
-      view.inputState.startMouseSelection(new MouseSelection(view, event, style, mustFocus));
+      view.inputState.startMouseSelection(new MouseSelection(view, event, style2, mustFocus));
     }
   };
   function rangeForClick(view, pos, bias, type2) {
@@ -34465,15 +34465,15 @@ ${markup.join("\n")}`);
     for (let parent = dom2.parentNode; parent && parent != body; ) {
       if (parent.nodeType == 1) {
         let elt = parent;
-        let style = window.getComputedStyle(elt);
-        if ((elt.scrollHeight > elt.clientHeight || elt.scrollWidth > elt.clientWidth) && style.overflow != "visible") {
+        let style2 = window.getComputedStyle(elt);
+        if ((elt.scrollHeight > elt.clientHeight || elt.scrollWidth > elt.clientWidth) && style2.overflow != "visible") {
           let parentRect = elt.getBoundingClientRect();
           left = Math.max(left, parentRect.left);
           right = Math.min(right, parentRect.right);
           top2 = Math.max(top2, parentRect.top);
           bottom = Math.min(bottom, parentRect.bottom);
         }
-        parent = style.position == "absolute" || style.position == "fixed" ? elt.offsetParent : elt.parentNode;
+        parent = style2.position == "absolute" || style2.position == "fixed" ? elt.offsetParent : elt.parentNode;
       } else if (parent.nodeType == 11) {
         parent = parent.host;
       } else {
@@ -34613,16 +34613,16 @@ ${markup.join("\n")}`);
         this.mustEnforceCursorAssoc = true;
     }
     measure(view) {
-      let dom2 = view.contentDOM, style = window.getComputedStyle(dom2);
+      let dom2 = view.contentDOM, style2 = window.getComputedStyle(dom2);
       let oracle = this.heightOracle;
-      let whiteSpace = style.whiteSpace;
-      this.defaultTextDirection = style.direction == "rtl" ? Direction.RTL : Direction.LTR;
+      let whiteSpace = style2.whiteSpace;
+      this.defaultTextDirection = style2.direction == "rtl" ? Direction.RTL : Direction.LTR;
       let refresh = this.heightOracle.mustRefreshForWrapping(whiteSpace);
       let measureContent = refresh || this.mustMeasureContent || this.contentDOMHeight != dom2.clientHeight;
       this.contentDOMHeight = dom2.clientHeight;
       this.mustMeasureContent = false;
       let result = 0, bias = 0;
-      let paddingTop = parseInt(style.paddingTop) || 0, paddingBottom = parseInt(style.paddingBottom) || 0;
+      let paddingTop = parseInt(style2.paddingTop) || 0, paddingBottom = parseInt(style2.paddingBottom) || 0;
       if (this.paddingTop != paddingTop || this.paddingBottom != paddingBottom) {
         this.paddingTop = paddingTop;
         this.paddingBottom = paddingBottom;
@@ -39237,12 +39237,12 @@ ${markup.join("\n")}`);
   };
   function tagHighlighter(tags2, options2) {
     let map = /* @__PURE__ */ Object.create(null);
-    for (let style of tags2) {
-      if (!Array.isArray(style.tag))
-        map[style.tag.id] = style.class;
+    for (let style2 of tags2) {
+      if (!Array.isArray(style2.tag))
+        map[style2.tag.id] = style2.class;
       else
-        for (let tag of style.tag)
-          map[tag.id] = style.class;
+        for (let tag of style2.tag)
+          map[tag.id] = style2.class;
     }
     let { scope, all = null } = options2 || {};
     return {
@@ -40395,9 +40395,9 @@ ${markup.join("\n")}`);
       const all = typeof options2.all == "string" ? options2.all : options2.all ? def(options2.all) : void 0;
       const scopeOpt = options2.scope;
       this.scope = scopeOpt instanceof Language ? (type2) => type2.prop(languageDataProp) == scopeOpt.data : scopeOpt ? (type2) => type2 == scopeOpt : void 0;
-      this.style = tagHighlighter(spec.map((style) => ({
-        tag: style.tag,
-        class: style.class || def(Object.assign({}, style, { tag: null }))
+      this.style = tagHighlighter(spec.map((style2) => ({
+        tag: style2.tag,
+        class: style2.class || def(Object.assign({}, style2, { tag: null }))
       })), {
         all
       }).style;
@@ -40456,8 +40456,8 @@ ${markup.join("\n")}`);
         return Decoration.none;
       let builder = new RangeSetBuilder();
       for (let { from, to: to2 } of view.visibleRanges) {
-        highlightTree(this.tree, highlighters, (from2, to3, style) => {
-          builder.add(from2, to3, this.markCache[style] || (this.markCache[style] = Decoration.mark({ class: style })));
+        highlightTree(this.tree, highlighters, (from2, to3, style2) => {
+          builder.add(from2, to3, this.markCache[style2] || (this.markCache[style2] = Decoration.mark({ class: style2 })));
         }, from, to2);
       }
       return builder.finish();
@@ -44465,7 +44465,7 @@ ${markup.join("\n")}`);
       state[src].file = file;
     };
   }
-  $3.flair(`
+  $3.style(`
   & {
 		display: block;
     max-height: 60vh;
@@ -44627,7 +44627,7 @@ ${markup.join("\n")}`);
     const date = new Date(timestamp);
     return MONTHS[date.getMonth()] + " " + date.getDate() + ", " + date.getFullYear();
   }
-  $4.flair(`
+  $4.style(`
   & .card{
     background-color: #fff;
     border-radius: 1px;
@@ -44779,7 +44779,7 @@ u
   }
   window.hideModal = showModal2;
   $5.when("click", ".close", hideModal);
-  $5.flair(`
+  $5.style(`
   body.overlay {
     overflow: hidden;
   }
@@ -45163,7 +45163,7 @@ u
     console.log({ information });
     tree.path = path2;
   });
-  $7.flair(`
+  $7.style(`
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -48192,7 +48192,7 @@ u
   }
   globalThis.addEventListener("gamepadconnected", connecthandler);
   globalThis.addEventListener("gamepaddisconnected", disconnecthandler);
-  $8.flair(`
+  $8.style(`
   & .gamepads {
     background: rgba(0,0,0,.04);
     border: 1px solid rgba(0,0,0,.1);
@@ -48299,7 +48299,7 @@ u
       right: horizontal === 1
     };
   }
-  $9.flair(`
+  $9.style(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -48573,7 +48573,7 @@ u
   $10.when("click", ".octave-down", octaveDown);
   $10.when("click", ".pitch-up", pitchUp);
   $10.when("click", ".pitch-down", pitchDown);
-  $10.flair(`
+  $10.style(`
   & {
     height: 100%;
     display: grid;
@@ -48737,7 +48737,7 @@ u
     smug mug
   `;
   });
-  $12.flair(`
+  $12.style(`
   & { display: block }
 `);
 
@@ -48748,7 +48748,7 @@ u
     google map
   `;
   });
-  $13.flair(`
+  $13.style(`
   & { display: block }
 `);
 
@@ -48905,7 +48905,7 @@ u
     <script-viewer><\/script-viewer>
   `;
   });
-  $14.flair(`
+  $14.style(`
   * {
     box-sizing: border-box;
     padding: 0;
@@ -49017,12 +49017,12 @@ u
       state[source2] = { file, formatted };
     };
   }
-  $editor.flair(`
+  $editor.style(`
   & {
     display: block;
   }
 `);
-  $viewer.flair(`
+  $viewer.style(`
   & {
     display: block;
     font-size: 12pt;

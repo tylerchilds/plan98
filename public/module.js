@@ -30,7 +30,7 @@ function draw(link, compositor) {
   })
 }
 
-function flair(link, stylesheet) {
+function style(link, stylesheet) {
   const styles = `
     <style type="text/css" data-tag=${link}>
       ${stylesheet.replaceAll('&', link)}
@@ -60,7 +60,7 @@ export default function module(link, initialState = {}) {
     link,
     learn: learn.bind(null, link),
     draw: draw.bind(null, link),
-    flair: flair.bind(null, link),
+    style: style.bind(null, link),
     when: when.bind(null, link),
     teach: teach.bind(null, link),
   }

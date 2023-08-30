@@ -112,7 +112,7 @@ function throttle($, flags) {
   }
 }
 
-$.flair(`
+$.style(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;

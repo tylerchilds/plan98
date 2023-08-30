@@ -255,7 +255,7 @@ $.when('click', '[data-uri]', async function(event) {
     tree.path = path
   })
 
-  $.flair(`
+  $.style(`
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
