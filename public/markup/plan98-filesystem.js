@@ -102,6 +102,7 @@ function factoryReset(cwc) {
   return state[cwc]
 }
 
+let i = 0
 const Types = {
   File: {
     icon: '/cdn/plan98/plan9.png',
@@ -133,7 +134,7 @@ function system(target) {
     </div>
     <div class="visual">
       <div class="treeview">
-        ${nest([], tree)}
+        ${nest(tree, [], tree)}
       </div>
       <div class="preview">
         <input type="text" name="path" value="${path || '/'}" />
@@ -211,32 +212,32 @@ $.when('click', '[data-uri]', async function(event) {
   `)
 })
 
-function nest(pathParts, tree = {}) {
-  if(!tree.children) return ''
-  return tree.children.map(child => {
+function nest(tree, pathParts, subtree = {}) {
+  if(!subtree.children) return ''
+  return subtree.children.map(child => {
     const { name, type } = child
     const currentPathParts = [...pathParts, name]
     const currentPath = currentPathParts.join('/')
 
-    console.log(Types.File, type)
     if(type === Types.File.type) {
-      return `<button data-path="${currentPath}">
-      <plan98-context data-menu="${menuFor(tree, currentPath)}">
-        ${name}
-      </plan98-context>
-    </button>`
+      return `
+        <plan98-context data-menu="${menuFor(tree, currentPath)}">
+          <button data-path="${currentPath}">
+              ${name}
+          </button>
+        </plan98-context>
+      `
     }
 
-    console.log(Types.Directory, type)
     if(type === Types.Directory.type) {
       return `
       <details>
         <summary data-path="${currentPath}">
           <plan98-context data-menu="${menuFor(tree, currentPath)}">
             ${name || "/"}
-        </plan98-context>
+          </plan98-context>
         </summary>
-        ${nest(currentPathParts, child)}
+        ${nest(tree, currentPathParts, child)}
       </details>
     `
     }
@@ -244,13 +245,12 @@ function nest(pathParts, tree = {}) {
     return '-'
   }).join('')
 }
-
-function menuFor(subTree, path) {
-  const [slash, ...subPathParts] = path.split(subTree.name)
-  const resource = getContent(subTree, subPathParts)
+function menuFor(tree, path) {
+  const resource = getContent(tree, path.split('/'))
 
   const { type } = resource
 
+  console.log({ resource })
   if(type === Types.File.type) {
     return "<button>Move File</button><button>Remove File</button>"
   }
@@ -267,11 +267,7 @@ $.when('click', '[data-reset]', ({target}) => {
 
 $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
-  console.log({ path })
   const tree = closestWorkingComputer(target)
-  const information = getContent(tree, path)
-  console.log({ information })
-
   tree.path = path
 })
 
@@ -280,6 +276,10 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
+  }
+
+  & summary {
+    display: grid;
   }
   & .menubar {
   }

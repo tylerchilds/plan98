@@ -2,34 +2,32 @@ const $ = module('plan98-context')
 
 $.draw((target) => {
   return `
-    <button>...</button>
-    ${target.innerHTML}
+    <div>
+      ${target.innerHTML}
+    </div>
+    <button data-context>...</button>
   `
 })
 
-$.when('mouseenter', 'button', (event) => {
-  tooltip(event, closestMenu(event.target));
+$.when('click', '[data-context]', (event) => {
+  const closestMenu = event.target.closest($.link).dataset.menu
+  tooltip(event, closestMenu);
 });
 
-function closestMenu(node) {
-  return node.closest($.link).dataset.menu
-}
-
-$.when('mousemove', 'button', (event) => {
-  tooltip(event);
-});
-
-$.when('mouseleave', 'button', (event) => {
-  tooltip();
-});
+document.body.addEventListener('click', (event) => {
+  const tooltipChild = !!event.target.closest('.tooltip')
+  const contextChild = !!event.target.closest($.link)
+  const allowed = tooltipChild || contextChild
+  console.log(tooltipChild, contextChild)
+  if(!allowed) {
+    tooltip()
+  }
+})
 
 $.style(`
   & {
-    clear: both;
-  }
-
-  & button {
-    float: right;
+    display: inline-grid;
+    grid-template-columns: 1fr auto;
   }
 `)
 
@@ -105,12 +103,7 @@ const tooltipStyles = `
       top: 0;
       white-space: break-work;
       max-width: 200px;
-      pointer-events: none;
       z-index: -1;
-    }
-
-    .tooltip * {
-      pointer-events: auto;
     }
 
     .tooltip.active {
@@ -118,8 +111,12 @@ const tooltipStyles = `
       opacity: 1;
       z-index: 3;
     }
-    [data-tooltip] * {
-      pointer-events: none;
+
+    .tooltip button {
+      display: block;
+      border: none;
+      background: transparent;
+      border-bottom: 1px solid rgba(0,0,0,.25);
     }
   </style>
 `;
