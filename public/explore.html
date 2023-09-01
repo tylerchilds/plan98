@@ -27,20 +27,20 @@
     <script src="../package.2015.js"></script>
     <script>
       function markup({ folder }) {
-        const elements = new Set(
+        const tags = new Set(
           [...document.querySelectorAll(':not(:defined)')]
             .map(({ tagName }) => tagName.toLowerCase())
         )
 
-        elements.forEach(async (element) => {
-          const url = `${folder || '.'}/${element}.js`
+        tags.forEach(async (tag) => {
+          const url = `${folder || '.'}/${tag}.js`
           const exists = (await fetch(url, {method: 'HEAD'})).ok
           if(!exists) return
           let definable = true
           await import(url).catch(() => { definable = false })
-          definable = definable && document.querySelector(element).matches(':not(:defined)')
+          definable = definable && document.querySelector(tag).matches(':not(:defined)')
           if(definable) {
-            customElements.define(element, class WebComponent extends HTMLElement {
+            customElements.define(tag, class WebComponent extends HTMLElement {
               constructor() {
                 super();
               }
