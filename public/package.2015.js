@@ -25289,206 +25289,6 @@ ${markup.join("\n")}`);
   }
 `);
 
-  // public/packages/modal-module.js
-  var $2 = module2("ctx-modal", {
-    label: null,
-    children: null,
-    isOpen: null
-  });
-  $2.draw(() => {
-    const {
-      body,
-      isOpen
-    } = $2.learn();
-    if (!isOpen)
-      return " ";
-    const modalClose = `
-    <button class="close">
-      Close
-    </button>
-  `;
-    return `
-    <div class="modal">
-      ${modalClose}
-      ${body}
-    </div>
-  `;
-  });
-  var context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`;
-  document.body.insertAdjacentHTML("beforeend", context);
-  function showModal2(body) {
-    document.body.classList.add("overlay");
-    $2.teach({
-      body,
-      isOpen: true
-    });
-  }
-  window.showModal = showModal2;
-  function hideModal() {
-    document.body.classList.remove("overlay");
-    $2.teach({
-      isOpen: false
-    });
-  }
-  window.hideModal = showModal2;
-  $2.when("click", ".close", hideModal);
-  $2.style(`
-  body.overlay {
-    overflow: hidden;
-  }
-
-  .overlay ctx-overlay:before {
-    animation: fadein 250ms ease-in-out forwards;
-    content: '';
-    background: rgba(0,0,0, .5);
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    backdrop-filter: blur(10px);
-    z-index: 900;
-  }
-
-  @keyframes fadein {
-    0% {
-      opacity: 0;
-    }
-
-    100% {
-      opacity: 1;
-    }
-  }
-
-  & {
-    position: fixed;
-    display: none;
-    place-items: center;
-    padding: 1rem;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: auto;
-    z-index: 1100;
-  }
-
-  body.overlay & {
-    display: grid;
-  }
-
-  & .modal {
-    animation: modal-in 250ms ease-in-out forwards;
-    background: white;
-    box-shadow:
-      0 2px 4px rgba(0,0,0,.1),
-      0 6px 8px rgba(0,0,0,.04)
-    ;
-    box-sizing: border-box;
-    position: relative;
-    padding: 1rem;
-    min-height: 100px;
-    max-width: 80ch;
-    width: 100%;
-    z-index: -1;
-    opacity: 0;
-    max-height: 80vh;
-    overflow: scroll;
-  }
-
-  @keyframes modal-in {
-    0% {
-      opacity: 0;
-      z-index: -1;
-    }
-
-    100% {
-      opacity: 1;
-      z-index: 1100;
-    }
-  }
-
-  & .close {
-    background: none;
-    border: none;
-    padding: none;
-    opacity: .8;
-    transition: opacity: 200ms;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-
-  & .close:hover,
-  & .close:focus {
-    cursor: pointer;
-    opacity: 1;
-  }
-
-  & .close * {
-    pointer-events: none;
-  }
-`);
-
-  // public/packages/tree-view.js
-  var $3 = module2("tree-view");
-  $3.draw((target) => {
-    const tokens = target.getAttribute("tokens");
-    const config2 = state[tokens] || {};
-    readTree(config2);
-    return `
-    <details>
-      <summary>Cool</summary>
-       Uncool
-    </details>
-  `;
-  });
-  function authenticationToken(config2) {
-    return {
-      key: config2.token,
-      secret: config2.secret
-    };
-  }
-  async function fetchUser(config2) {
-    const { Response, Code } = await fetch("/proxy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        url: "https://api.smugmug.com/api/v2!authuser",
-        provider: config2.provider,
-        token: authenticationToken(config2)
-      })
-    }).then((res) => res.json());
-    if (Code === 200) {
-      bus.state["smugmug/user"] = Response.User;
-    }
-  }
-  async function fetchTree(config2) {
-    const { NickName } = bus.state["smugmug/user"];
-    console.log(NickName);
-    const url = `https://api.smugmug.com/api/v2/user/${NickName}?_expand=Node.ChildNodes`;
-    const { Response, Code } = await fetch("/proxy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        url,
-        provider: config2.provider,
-        token: authenticationToken(config2)
-      })
-    }).then((res) => res.json());
-    if (Code === 200) {
-    }
-  }
-  async function readTree(config2) {
-    await fetchUser(config2);
-    console.log(bus.state["smugmug/user"]);
-    await fetchTree(config2);
-  }
-
   // public/packages/file-system.js
   function factoryReset(cwc) {
     try {
@@ -25602,8 +25402,8 @@ ${markup.join("\n")}`);
   var urlParams = new URLSearchParams(window.location.search);
   var path = urlParams.get("path");
   var iSbIoS = path === null;
-  var $4 = module2("file-system");
-  $4.draw(iSbIoS ? system : floppy);
+  var $2 = module2("file-system");
+  $2.draw(iSbIoS ? system : floppy);
   function currentWorkingComputer(target) {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
     return state2[cwc] || {};
@@ -25659,8 +25459,8 @@ ${markup.join("\n")}`);
       return result;
     }, tree);
   }
-  $4.when("click", "[data-uri]", async function(event) {
-    const tokens = event.target.closest($4.link).getAttribute("tokens");
+  $2.when("click", "[data-uri]", async function(event) {
+    const tokens = event.target.closest($2.link).getAttribute("tokens");
     const config2 = state2[tokens] || {};
     const { uri } = event.target.dataset;
     const data = await fetchAlbum(config2, uri);
@@ -25704,11 +25504,11 @@ ${markup.join("\n")}`);
       }
     }).join("");
   }
-  $4.when("click", "[data-reset]", ({ target }) => {
+  $2.when("click", "[data-reset]", ({ target }) => {
     const cwc = target.closest("[cwc]").getAttribute("cwc");
     factoryReset(cwc);
   });
-  $4.when("click", "[data-path]", ({ target }) => {
+  $2.when("click", "[data-path]", ({ target }) => {
     const { path: path2 } = target.dataset;
     console.log({ path: path2 });
     const tree = currentWorkingComputer(target);
@@ -25716,7 +25516,7 @@ ${markup.join("\n")}`);
     console.log({ information });
     tree.path = path2;
   });
-  $4.style(`
+  $2.style(`
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -25776,6 +25576,147 @@ ${markup.join("\n")}`);
     aspect-ratio: 1;
   }
 
+`);
+
+  // public/packages/modal-module.js
+  var $3 = module2("ctx-modal", {
+    label: null,
+    children: null,
+    isOpen: null
+  });
+  $3.draw(() => {
+    const {
+      body,
+      isOpen
+    } = $3.learn();
+    if (!isOpen)
+      return " ";
+    const modalClose = `
+    <button class="close">
+      Close
+    </button>
+  `;
+    return `
+    <div class="modal">
+      ${modalClose}
+      ${body}
+    </div>
+  `;
+  });
+  var context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`;
+  document.body.insertAdjacentHTML("beforeend", context);
+  function showModal2(body) {
+    document.body.classList.add("overlay");
+    $3.teach({
+      body,
+      isOpen: true
+    });
+  }
+  window.showModal = showModal2;
+  function hideModal() {
+    document.body.classList.remove("overlay");
+    $3.teach({
+      isOpen: false
+    });
+  }
+  window.hideModal = showModal2;
+  $3.when("click", ".close", hideModal);
+  $3.style(`
+  body.overlay {
+    overflow: hidden;
+  }
+
+  .overlay ctx-overlay:before {
+    animation: fadein 250ms ease-in-out forwards;
+    content: '';
+    background: rgba(0,0,0, .5);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    backdrop-filter: blur(10px);
+    z-index: 900;
+  }
+
+  @keyframes fadein {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  & {
+    position: fixed;
+    display: none;
+    place-items: center;
+    padding: 1rem;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow-y: auto;
+    z-index: 1100;
+  }
+
+  body.overlay & {
+    display: grid;
+  }
+
+  & .modal {
+    animation: modal-in 250ms ease-in-out forwards;
+    background: white;
+    box-shadow:
+      0 2px 4px rgba(0,0,0,.1),
+      0 6px 8px rgba(0,0,0,.04)
+    ;
+    box-sizing: border-box;
+    position: relative;
+    padding: 1rem;
+    min-height: 100px;
+    max-width: 80ch;
+    width: 100%;
+    z-index: -1;
+    opacity: 0;
+    max-height: 80vh;
+    overflow: scroll;
+  }
+
+  @keyframes modal-in {
+    0% {
+      opacity: 0;
+      z-index: -1;
+    }
+
+    100% {
+      opacity: 1;
+      z-index: 1100;
+    }
+  }
+
+  & .close {
+    background: none;
+    border: none;
+    padding: none;
+    opacity: .8;
+    transition: opacity: 200ms;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+  }
+
+  & .close:hover,
+  & .close:focus {
+    cursor: pointer;
+    opacity: 1;
+  }
+
+  & .close * {
+    pointer-events: none;
+  }
 `);
 
   // public/packages/script-type.js
@@ -25919,10 +25860,10 @@ ${markup.join("\n")}`);
     function noop() {
     }
   };
-  var $5 = module2("script-type");
+  var $4 = module2("script-type");
   var $editor = module2("script-editor");
   var $viewer = module2("script-viewer");
-  $5.draw((target) => {
+  $4.draw((target) => {
     return `
     <div name="transport">
       <button class="print">print</button>
@@ -25931,7 +25872,7 @@ ${markup.join("\n")}`);
     <script-viewer><\/script-viewer>
   `;
   });
-  $5.style(`
+  $4.style(`
   * {
     box-sizing: border-box;
     padding: 0;
@@ -26000,9 +25941,9 @@ ${markup.join("\n")}`);
   }
 
 `);
-  $5.when("click", ".print", print);
+  $4.when("click", ".print", print);
   $viewer.draw((target) => {
-    const source2 = target.closest($5.link).getAttribute("source");
+    const source2 = target.closest($4.link).getAttribute("source");
     const { formatted } = state[source2] || {};
     return `
     <div class="shadowbox">
@@ -26011,7 +25952,7 @@ ${markup.join("\n")}`);
   `;
   });
   $editor.draw((target) => {
-    const source2 = target.closest($5.link).getAttribute("source");
+    const source2 = target.closest($4.link).getAttribute("source");
     const { file } = state[source2] || {};
     if (file && !target.view) {
       const config2 = {
@@ -26019,7 +25960,7 @@ ${markup.join("\n")}`);
           basicSetup,
           EditorView.lineWrapping,
           EditorView.updateListener.of(
-            persist2(target, $5, {})
+            persist2(target, $4, {})
           )
         ]
       };
@@ -26152,4 +26093,63 @@ ${markup.join("\n")}`);
   }
 
 `);
+
+  // public/packages/tree-view.js
+  var $5 = module2("tree-view");
+  $5.draw((target) => {
+    const tokens = target.getAttribute("tokens");
+    const config2 = state[tokens] || {};
+    readTree(config2);
+    return `
+    <details>
+      <summary>Cool</summary>
+       Uncool
+    </details>
+  `;
+  });
+  function authenticationToken(config2) {
+    return {
+      key: config2.token,
+      secret: config2.secret
+    };
+  }
+  async function fetchUser(config2) {
+    const { Response, Code } = await fetch("/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        url: "https://api.smugmug.com/api/v2!authuser",
+        provider: config2.provider,
+        token: authenticationToken(config2)
+      })
+    }).then((res) => res.json());
+    if (Code === 200) {
+      bus.state["smugmug/user"] = Response.User;
+    }
+  }
+  async function fetchTree(config2) {
+    const { NickName } = bus.state["smugmug/user"];
+    console.log(NickName);
+    const url = `https://api.smugmug.com/api/v2/user/${NickName}?_expand=Node.ChildNodes`;
+    const { Response, Code } = await fetch("/proxy", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        url,
+        provider: config2.provider,
+        token: authenticationToken(config2)
+      })
+    }).then((res) => res.json());
+    if (Code === 200) {
+    }
+  }
+  async function readTree(config2) {
+    await fetchUser(config2);
+    console.log(bus.state["smugmug/user"]);
+    await fetchTree(config2);
+  }
 })();
