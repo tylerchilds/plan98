@@ -223,7 +223,7 @@ function nest(tree, pathParts, subtree = {}) {
       return `
         <plan98-context data-menu="${menuFor(tree, currentPath)}">
           <button data-path="${currentPath}">
-              ${name}
+            ${name}
           </button>
         </plan98-context>
       `

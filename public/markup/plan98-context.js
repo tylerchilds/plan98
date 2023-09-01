@@ -28,6 +28,16 @@ $.style(`
   & {
     display: inline-grid;
     grid-template-columns: 1fr auto;
+    pointer-events: none;
+  }
+
+  & button,
+  & a {
+    pointer-events: auto;
+  }
+
+  & [data-context] {
+    pointer-events: auto;
   }
 `)
 
