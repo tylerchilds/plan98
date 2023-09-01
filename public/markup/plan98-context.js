@@ -92,18 +92,13 @@ const tooltipStyles = `
   <style>
     .tooltip {
       background: white;
-      color: rgba(0, 0, 0, .9);
       border-radius: 2px;
-      box-shadow:
-        0 1px 2px 0 rgba(0, 0 , 0, .1),
-        0 2px 4px 0 rgba(0, 0 , 0, .1);
       display: none;
-      font-size: 13px;
       left: 0;
-      line-height: 1.25;
-      padding: 8px;
+      padding: .5rem;
       position: fixed;
       opacity: 0;
+      border: 1px solid rgba(0,0,0,.85);
       transform-origin: right bottom;
       transform: translate(
         max(0px, calc(-100% + var(--x) - 3px)),

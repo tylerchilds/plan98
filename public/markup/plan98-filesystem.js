@@ -335,6 +335,8 @@ $.style(`
     display: grid;
   }
   & .menubar {
+    background: rgba(0,0,0,.15);
+    padding: 4px;
   }
   & .visual {
     display: grid;
@@ -346,17 +348,21 @@ $.style(`
     position: relative;
     overflow: auto;
     white-space: nowrap;
+    background: rgba(0,0,0,.10);
   }
 
 
   & [name="path"] {
     display: block;
     width: 100%;
+    border: none;
+    padding: .5rem;
   }
 
   & .preview {
     display: grid;
     grid-template-rows: auto 1fr;
+    background: rgba(0,0,0,.05);
   }
 
   & iframe {
@@ -383,6 +389,8 @@ $.style(`
     text-align: center;
     grid-area: 1 / 1 / -1 / -1;
     place-content: baseline;
+    padding: .5rem;
+    gap: 1rem;
   }
 
   & .listing > * {
