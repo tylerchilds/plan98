@@ -230,8 +230,9 @@ function nest(tree, pathParts, subtree = {}) {
     }
 
     if(type === Types.Directory.type) {
+      console.log({ currentPath, name })
       return `
-      <details>
+      <details ${tree.path.indexOf(`/${name}`) >= 0 ? 'open': ''}>
         <summary data-path="${currentPath}">
           <plan98-context data-menu="${menuFor(tree, currentPath)}">
             ${name || "/"}

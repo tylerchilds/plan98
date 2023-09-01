@@ -26,7 +26,7 @@ document.body.addEventListener('click', (event) => {
 
 $.style(`
   & {
-    display: inline-grid;
+    display: grid;
     grid-template-columns: 1fr auto;
     pointer-events: none;
   }
