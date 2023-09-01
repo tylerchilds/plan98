@@ -104,10 +104,12 @@ function factoryReset(cwc) {
 
 const Types = {
   File: {
-    icon: '/cdn/plan98/plan9.png'
+    icon: '/cdn/plan98/plan9.png',
+    type: 'File'
   },
   Directory: {
-    icon: '/cdn/plan98/firefox.png'
+    icon: '/cdn/plan98/firefox.png',
+    type: 'Directory'
   }
 }
 
@@ -126,10 +128,12 @@ function system(target) {
   const { path } = tree
 
   return `
+    <div class="menubar">
+      <button data-reset>Factory Reset</button>
+    </div>
     <div class="visual">
       <div class="treeview">
         ${nest([], tree)}
-        <button data-reset>Factory Reset</button>
       </div>
       <div class="preview">
         <input type="text" name="path" value="${path || '/'}" />
@@ -145,7 +149,7 @@ function floppy(target) {
   const content = getContent(tree, path.split('/'))
   if(!content) return `Nothing yet... if only... we had... a 404 page.`
 
-  if(content.type === 'File') {
+  if(content.type === Types.File.type) {
     return `
       <code-module src="ls${path}"></code-module>
     `
@@ -205,52 +209,80 @@ $.when('click', '[data-uri]', async function(event) {
       }).join('')}
     </image-gallery>
   `)
-      })
+})
 
-  function nest(pathParts, tree = {}) {
-    if(!tree.children) return ''
-    return tree.children.map(child => {
-      const { name, type } = child
-      const currentPathParts = [...pathParts, name]
-      const currentPath = currentPathParts.join('/')
+function nest(pathParts, tree = {}) {
+  if(!tree.children) return ''
+  return tree.children.map(child => {
+    const { name, type } = child
+    const currentPathParts = [...pathParts, name]
+    const currentPath = currentPathParts.join('/')
 
-      if(type === 'File') {
-        return `<button data-path="${currentPath}">
-        <plan98-highlighter>
-          ${name}
-        </plan98-highlighter>
-      </button>`
-      }
+    console.log(Types.File, type)
+    if(type === Types.File.type) {
+      return `<button data-path="${currentPath}">
+      <plan98-context data-menu="${menuFor(tree, currentPath)}">
+        ${name}
+      </plan98-context>
+    </button>`
+    }
 
-      if(type === 'Directory') {
-        return `
-        <details>
-          <summary data-path="${currentPath}">
+    console.log(Types.Directory, type)
+    if(type === Types.Directory.type) {
+      return `
+      <details>
+        <summary data-path="${currentPath}">
+          <plan98-context data-menu="${menuFor(tree, currentPath)}">
             ${name || "/"}
-          </summary>
-          ${nest(currentPathParts, child)}
-        </details>
-      `
-      }
-    }).join('')
+        </plan98-context>
+        </summary>
+        ${nest(currentPathParts, child)}
+      </details>
+    `
+    }
+
+    return '-'
+  }).join('')
+}
+
+function menuFor(subTree, path) {
+  const [slash, ...subPathParts] = path.split(subTree.name)
+  const resource = getContent(subTree, subPathParts)
+
+  const { type } = resource
+
+  if(type === Types.File.type) {
+    return "<button>Move File</button><button>Remove File</button>"
   }
 
-  $.when('click', '[data-reset]', ({target}) => {
-    const cwc = target.closest('[cwc]').getAttribute('cwc')
-    factoryReset(cwc)
-  })
+  if(type === Types.Directory.type) {
+    return "<button>Create Directory</button><button>Create File</button><button>Move Directory</button><button>Remove Directory</button>"
+  }
+}
 
-  $.when('click', '[data-path]', ({ target }) => {
-    const { path } = target.dataset
-    console.log({ path })
-    const tree = closestWorkingComputer(target)
-    const information = getContent(tree, path)
-    console.log({ information })
+$.when('click', '[data-reset]', ({target}) => {
+  const cwc = target.closest('[cwc]').getAttribute('cwc')
+  factoryReset(cwc)
+})
 
-    tree.path = path
-  })
+$.when('click', '[data-path]', ({ target }) => {
+  const { path } = target.dataset
+  console.log({ path })
+  const tree = closestWorkingComputer(target)
+  const information = getContent(tree, path)
+  console.log({ information })
 
-  $.style(`
+  tree.path = path
+})
+
+$.style(`
+  & {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+  }
+  & .menubar {
+  }
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -263,10 +295,6 @@ $.when('click', '[data-uri]', async function(event) {
     white-space: nowrap;
   }
 
-  & [data-reset] {
-    position: absolute;
-    bottom: 1rem;
-  }
 
   & [name="path"] {
     display: block;
