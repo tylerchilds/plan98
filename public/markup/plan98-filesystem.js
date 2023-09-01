@@ -102,15 +102,24 @@ function factoryReset(cwc) {
   return state[cwc]
 }
 
-let i = 0
 const Types = {
   File: {
     icon: '/cdn/plan98/plan9.png',
-    type: 'File'
+    type: 'File',
+    actions: [
+      ['data-move', 'Move'],
+      ['data-remove', 'Remove']
+    ]
   },
   Directory: {
     icon: '/cdn/plan98/firefox.png',
-    type: 'Directory'
+    type: 'Directory',
+    actions: [
+      ['data-nest', 'Create Nest'],
+      ['data-egg', 'Create Egg'],
+      ['data-move', 'Move'],
+      ['data-remove', 'Remove']
+    ]
   }
 }
 
@@ -120,11 +129,19 @@ const parameters = new URLSearchParams(window.location.search)
 $.draw(parameters.get('path') === null ? system : floppy)
 
 function closestWorkingComputer(target) {
-  const cwc = target.closest('[cwc]').getAttribute('cwc')
-  return state[cwc] || {}
+  const cwc = target.closest('[cwc]')
+
+  if(cwc) {
+    return state[cwc.getAttribute('cwc')]
+  }
+
+  return {}
 }
 
 function system(target) {
+  if(checkPreservationStatus(target)) {
+    return
+  }
   const tree = closestWorkingComputer(target)
   const { path } = tree
 
@@ -145,6 +162,9 @@ function system(target) {
 }
 
 function floppy(target) {
+  if(checkPreservationStatus(target)) {
+    return
+  }
   const tree = closestWorkingComputer(target)
   const { path = '' } = tree
   const content = getContent(tree, path.split('/'))
@@ -170,6 +190,11 @@ function floppy(target) {
       </div>
     `
   }
+}
+
+function checkPreservationStatus(target) {
+  if(target.childNodes.length === 0) return false
+  return [...target.childNodes].every(x => x.tagName === 'BUTTON')
 }
 
 function getContent(tree, pathParts) {
@@ -251,14 +276,21 @@ function menuFor(tree, path) {
 
   const { type } = resource
 
-  console.log({ resource })
+  let actions
+
   if(type === Types.File.type) {
-    return "<button>Move File</button><button>Remove File</button>"
+    actions = Types.File.actions.map(([action, label]) => {
+      return "<button "+action+" data-for-path="+path+">"+label+"</button>"
+    }).join('')
   }
 
   if(type === Types.Directory.type) {
-    return "<button>Create Directory</button><button>Create File</button><button>Move Directory</button><button>Remove Directory</button>"
+    actions = Types.Directory.actions.map(([action, label]) => {
+      return "<button "+action+" data-for-path="+path+">"+label+"</button>"
+    }).join('')
   }
+
+  return "<plan98-filesystem>"+actions+"</plan98-filesystem>"
 }
 
 $.when('click', '[data-reset]', ({target}) => {
@@ -270,6 +302,26 @@ $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
   const tree = closestWorkingComputer(target)
   tree.path = path
+})
+
+$.when('click', '[data-move]', ({ target }) => {
+  const { forPath } = target.dataset
+  alert('move')
+})
+
+$.when('click', '[data-remove]', ({ target }) => {
+  const { forPath } = target.dataset
+  alert('remove')
+})
+
+$.when('click', '[data-nest]', ({ target }) => {
+  const { forPath } = target.dataset
+  alert('nest')
+})
+
+$.when('click', '[data-egg]', ({ target }) => {
+  const { forPath } = target.dataset
+  alert('egg')
 })
 
 $.style(`
