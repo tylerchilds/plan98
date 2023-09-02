@@ -132,7 +132,7 @@ function closestWorkingComputer(target) {
   const cwc = target.closest('[cwc]')
 
   if(cwc) {
-    return state[cwc.getAttribute('cwc')]
+    return state[cwc.getAttribute('cwc')] || {}
   }
 
   return {}
@@ -200,7 +200,9 @@ function checkPreservationStatus(target) {
 function getContent(tree, pathParts) {
   // spread before so we can mutate to bail early
   return [...pathParts].reduce((subtree, name, i, og) => {
-    const result = subtree.children.find(x => x.name === name)
+    const result = subtree.children
+      ? subtree.children.find(x => x.name === name)
+      : null
 
     if(!result) {
       console.log({ result, name, subtree, tree, pathParts })

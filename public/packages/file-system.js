@@ -128,6 +128,11 @@ function currentWorkingComputer(target) {
 
 function system(target) {
   const tree = currentWorkingComputer(target)
+
+  if(!tree) { 
+    return `<button data-reset>Factory Reset</button>`
+  }
+
   const { path } = tree
 
   return `
