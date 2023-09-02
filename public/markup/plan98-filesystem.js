@@ -148,6 +148,7 @@ function system(target) {
   return `
     <div class="menubar">
       <button data-reset>Factory Reset</button>
+      <a href="https://archive.org/details/plan98" target="_blank">Download</a>
     </div>
     <div class="visual">
       <div class="treeview">
@@ -339,6 +340,8 @@ $.style(`
   & .menubar {
     background: rgba(0,0,0,.15);
     padding: 4px;
+    display: flex;
+    gap: 1rem;
   }
   & .visual {
     display: grid;
