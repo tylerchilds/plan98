@@ -173,7 +173,7 @@ function floppy(target) {
 
   if(content.type === Types.File.type) {
     return `
-      <code-module src="ls${path}"></code-module>
+      <hyper-script src="ls${path}"></hyper-script>
     `
   }
 
@@ -332,6 +332,7 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
+    overflow: hidden;
   }
 
   & summary {
@@ -376,7 +377,32 @@ $.style(`
     border: 0;
   }
 
-  & details { padding-left: 1rem; }
+
+  & ::marker,
+  & ::-webkit-details-marker{
+    display:none;
+  }
+  & summary {
+    list-style: none
+  }
+  & details {
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  & details::before,
+  & details[open]::before {
+    position: absolute;
+    left: -.5rem;
+    line-height: 1.25;
+  }
+  & details::before {
+    content: '◉';
+  }
+  & details[open]::before {
+    content: '○';
+  }
+
   & [target="_blank"] {
     float: right;
   }
