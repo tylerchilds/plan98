@@ -62,8 +62,10 @@ export const compile = (script) => {
     return freetext(line)
   }
 
-  function kvMode(line) {
-    const [key, value] = line.split(':')
+  function kvMode(line, separator=':') {
+    const index = line.indexOf(separator)
+    const key = line.substring(0, index)
+    const value = line.substring(index+1)
 
     if(!value) {
       if(isolate.scope === 'typewriter') {
@@ -76,8 +78,10 @@ export const compile = (script) => {
     state[isolate.scope][key.trim()] = value.trim()
   }
 
-  function dynamicMode(line) {
-    const [key, value] = line.split(':')
+  function dynamicMode(line, separator=':') {
+    const index = line.indexOf(separator)
+    const key = line.substring(0, index)
+    const value = line.substring(index+1)
 
     if(!value) {
       embed()

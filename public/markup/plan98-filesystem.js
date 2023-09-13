@@ -147,8 +147,9 @@ function system(target) {
 
   return `
     <div class="menubar">
-      <button data-reset>Factory Reset</button>
       <a href="https://archive.org/details/plan98" target="_blank">Download</a>
+      <button data-debugger>Debugger</button>
+      <button data-reset>Factory Reset</button>
     </div>
     <div class="visual">
       <div class="treeview">
@@ -300,6 +301,13 @@ function menuFor(tree, path) {
 $.when('click', '[data-reset]', ({target}) => {
   const cwc = target.closest('[cwc]').getAttribute('cwc')
   factoryReset(cwc)
+})
+
+$.when('click', '[data-debugger]', ({target}) => {
+  const s = document.createElement("script");
+  s.type = "text/javascript";
+  s.src = "//cdn.jsdelivr.net/npm/eruda";
+  document.body.appendChild(s)
 })
 
 $.when('click', '[data-path]', ({ target }) => {
