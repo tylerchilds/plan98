@@ -304,10 +304,9 @@ $.when('click', '[data-reset]', ({target}) => {
 })
 
 $.when('click', '[data-debugger]', ({target}) => {
-  const s = document.createElement("script");
-  s.type = "text/javascript";
-  s.src = "//cdn.jsdelivr.net/npm/eruda";
-  document.body.appendChild(s)
+  document.body.insertAdjacentHTML('beforeend', `
+    <plan98-console></plan98-console>
+  `)
 })
 
 $.when('click', '[data-path]', ({ target }) => {

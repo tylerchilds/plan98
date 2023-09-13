@@ -68,7 +68,7 @@ export const compile = (script) => {
     const value = line.substring(index+1)
 
     if(!value) {
-      if(isolate.scope === 'typewriter') {
+      if(isolate.scope === 'screenplay') {
         headers()
         title()
       }
