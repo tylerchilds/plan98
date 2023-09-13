@@ -172,8 +172,9 @@ function floppy(target) {
   if(!content) return `Nothing yet... if only... we had... a 404 page.`
 
   if(content.type === Types.File.type) {
+		const readonly = parameters.get('readonly')
     return `
-      <hyper-script src="ls${path}"></hyper-script>
+      <hyper-script src="ls${path}" ${readonly ? 'readonly="true"' : ''}></hyper-script>
     `
   }
 
@@ -332,7 +333,6 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
-    overflow: hidden;
   }
 
   & summary {

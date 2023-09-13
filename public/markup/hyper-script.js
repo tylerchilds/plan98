@@ -184,7 +184,7 @@ title-agent {
 
   hypertext-title {
     display: block;
-    height: 100%;
+    height: 100vh;
     width: 100%;
   }
 
@@ -288,41 +288,46 @@ $.when('input', 'textarea', (event) => {
   const src = source(event.target)
   const { value } = event.target
   state[src].file = value
-  console.log(src, value)
   const html = compile(value)
-  state[src].html = html
-	const viewable = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-  state[src].embed = `<iframe src="${viewable}" title="embed"></iframe>`
+	state[src].html = html
+  state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
 })
 
 $.when('click', '.print', (event) => {
   const node = event.target.closest($.link)
   const preview = node.querySelector('[name="preview"] iframe').contentWindow
   preview.focus()
-	setTimeout(preview.print, 5000)
+	preview.print()
 })
 
 $.draw(target => {
   const { file, html, embed } = sourceFile(target)
+	const readonly = target.getAttribute('readonly')
+
+	if(readonly) {
+		return html
+	}
 
   return `
-    <div name="transport">
-      <button class="print">print</button>
-    </div>
-    <div name="view">
-      <div name="card">
-				${html}
-      </div>
-    </div>
-    <textarea>${file}</textarea>
-		<div name="preview">
-			${embed}
+		<div class="grid">
+			<div name="transport">
+				<button class="print">print</button>
+			</div>
+			<div name="view">
+				<div name="card">
+					${html}
+				</div>
+			</div>
+			<textarea>${file}</textarea>
+			<div name="preview">
+				${embed}
+			</div>
 		</div>
   `
 })
 
 $.style(`
-  & {
+  & .grid {
     display: grid;
     grid-template-rows: auto 1fr 10rem;
     height: 100vh;
@@ -346,7 +351,7 @@ $.style(`
     overflow: auto;
   }
 
-	& [name="preview"] {
+  & [name="preview"] {
 		display: none;
   }
 
