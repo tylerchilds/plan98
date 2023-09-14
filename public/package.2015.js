@@ -26155,4 +26155,88 @@ ${markup.join("\n")}`);
     console.log(bus.state["smugmug/user"]);
     await fetchTree(config2);
   }
+
+  // public/packages/greet-friend.js
+  var timeOfDayGreetings = {
+    en_US: {
+      key: "en_US",
+      name: "greet-friend",
+      morning: "Good morning",
+      afternoon: "Good afternoon",
+      evening: "Good evening",
+      flagEmoji: "\u{1F1FA}\u{1F1F8}"
+    },
+    en_CA: {
+      key: "en_CA",
+      name: "greet-friend",
+      morning: "Good morning",
+      afternoon: "Good afternoon",
+      evening: "Good evening",
+      flagEmoji: "\u{1F1E8}\u{1F1E6}"
+    },
+    es_ES: {
+      key: "es_ES",
+      name: "saludo-amigo",
+      morning: "Buenos d\xEDas",
+      afternoon: "Buenas tardes",
+      evening: "Buenas noches",
+      flagEmoji: "\u{1F1EA}\u{1F1F8}"
+    },
+    fr_FR: {
+      key: "fr_FR",
+      name: "salut-ami",
+      morning: "Bonjour",
+      afternoon: "Bonne apr\xE8s-midi",
+      evening: "Bonsoir",
+      flagEmoji: "\u{1F1EB}\u{1F1F7}"
+    },
+    en_GB: {
+      key: "en_GB",
+      name: "greet-friend",
+      morning: "Good morning",
+      afternoon: "Good afternoon",
+      evening: "Good evening",
+      flagEmoji: "\u{1F1EC}\u{1F1E7}"
+    },
+    es_MX: {
+      key: "es_MX",
+      name: "saludo-amigo",
+      morning: "Buenos d\xEDas",
+      afternoon: "Buenas tardes",
+      evening: "Buenas noches",
+      flagEmoji: "\u{1F1F2}\u{1F1FD}"
+    }
+  };
+  var translatedTags = [
+    { locale: "en_GB", name: "greet-friend" },
+    { locale: "es_ES", name: "saludo-amigo" },
+    { locale: "fr_FR", name: "salut-ami" }
+  ];
+  function createGreetingTag(tagInfo) {
+    const { name: name3, locale } = tagInfo;
+    const $6 = module2(name3);
+    $6.draw((target) => {
+      const friendName = target.getAttribute("x");
+      const language2 = target.getAttribute("language") || locale;
+      const now = new Date();
+      const hour = now.getHours();
+      const greeting = timeOfDayGreetings[language2];
+      const friendLanguage = timeOfDayGreetings[timeOfDayGreetings[language2].key];
+      let timeOfDay = "morning";
+      if (hour >= 5 && hour < 12) {
+        timeOfDay = "morning";
+      } else if (hour >= 12 && hour < 18) {
+        timeOfDay = "afternoon";
+      } else {
+        timeOfDay = "evening";
+      }
+      const startAdornment = timeOfDayGreetings[locale].flagEmoji;
+      const endAdornment = friendLanguage.flagEmoji;
+      const message = greeting[timeOfDay];
+      return `${startAdornment} ${message}, ${friendName} ${endAdornment}`;
+    });
+    return $6;
+  }
+  var greetingTags = translatedTags.map((tagInfo) => createGreetingTag(tagInfo));
+  var englishUSGreetFriend = greetingTags.find((tag) => tag.name === "greet-friend" && tag.locale === "en_GB");
 })();
