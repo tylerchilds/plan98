@@ -26237,6 +26237,5 @@ ${markup.join("\n")}`);
     });
     return $6;
   }
-  var greetingTags = translatedTags.map((tagInfo) => createGreetingTag(tagInfo));
-  var englishUSGreetFriend = greetingTags.find((tag) => tag.name === "greet-friend" && tag.locale === "en_GB");
+  translatedTags.map((tagInfo) => createGreetingTag(tagInfo));
 })();

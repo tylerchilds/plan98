@@ -122,15 +122,15 @@ export const compile = (script) => {
 }
 
 body {
-	font-size: 12pt;
-	font-family: courier;
-	margin: 0 auto;
+  font-size: 12pt;
+  font-family: courier;
+  margin: 0 auto;
 }
 
 @media print {
   html, body {
     height: 100%;
-		padding: 0;
+    padding: 0;
   }
 }
 
@@ -281,7 +281,7 @@ function sourceFile(target) {
     : (function initialize() {
       state[src] = {
         file: hello(),
-				html: '&hearts;',
+        html: '&hearts;',
         embed: ';)'
       }
       return state[src]
@@ -293,7 +293,7 @@ $.when('input', 'textarea', (event) => {
   const { value } = event.target
   state[src].file = value
   const html = compile(value)
-	state[src].html = html
+  state[src].html = html
   state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
 })
 
@@ -301,32 +301,35 @@ $.when('click', '.print', (event) => {
   const node = event.target.closest($.link)
   const preview = node.querySelector('[name="preview"] iframe').contentWindow
   preview.focus()
-	preview.print()
+  preview.print()
 })
 
 $.draw(target => {
   const { file, html, embed } = sourceFile(target)
-	const readonly = target.getAttribute('readonly')
 
-	if(readonly) {
-		return html
-	}
+  const readonly = target.getAttribute('readonly')
+
+  if(readonly) {
+    return html
+  }
+
+  const escapedFile = escapeHyperText(file)
 
   return `
-		<div class="grid">
-			<div name="transport">
-				<button class="print">print</button>
-			</div>
-			<div name="view">
-				<div name="card">
-					${html}
-				</div>
-			</div>
-			<textarea>${file}</textarea>
-			<div name="preview">
-				${embed}
-			</div>
-		</div>
+    <div class="grid">
+      <div name="transport">
+        <button class="print">print</button>
+      </div>
+      <div name="view">
+        <div name="card">
+          ${html}
+        </div>
+      </div>
+      <textarea>${escapedFile}</textarea>
+      <div name="preview">
+        ${embed}
+      </div>
+    </div>
   `
 })
 
@@ -343,34 +346,34 @@ $.style(`
   }
 
   & [name="card"] {
-		background: white;
-		height: 100%;
-		max-width: 8.5in;
-		margin: 0 auto;
-		padding: 0 1in;
-		overflow: auto;
-	}
+    background: white;
+    height: 100%;
+    max-width: 8.5in;
+    margin: 0 auto;
+    padding: 0 1in;
+    overflow: auto;
+  }
 
   & [name="view"] {
     overflow: auto;
   }
 
   & [name="preview"] {
-		display: none;
+    display: none;
   }
 
-	& iframe {
-		display: block;
-		border: none;
-		width: 100%;
-		height: 100%;
-	}
+  & iframe {
+    display: block;
+    border: none;
+    width: 100%;
+    height: 100%;
+  }
 
   & textarea {
     width: 100%;
     height: 100%;
-		z-index: 1;
-		position: relative;
+    z-index: 1;
+    position: relative;
   }
 
   @media print {
@@ -409,4 +412,16 @@ In the computer. Like Zoolander. Like Owen Wilson's character's understanding of
 " Whatever, I can sell it.
 
 <hello-world`
+}
+
+function escapeHyperText(text) {
+  return text.replace(/[&<>'"]/g, 
+    tag => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[tag])
+  )
 }
