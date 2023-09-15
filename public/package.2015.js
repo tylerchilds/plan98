@@ -3007,17 +3007,17 @@
           }
           function apply_patch(obj, patch) {
             obj = bus.clone(obj);
-            var x = patch.match(/(.*) = (.*)/), path2 = x[1], new_stuff = JSON.parse(x[2]);
+            var x = patch.match(/(.*) = (.*)/), path = x[1], new_stuff = JSON.parse(x[2]);
             var path_segment = /^(\.([^\.\[]+))|(\[((-?\d+):)?(-?\d+)\])/;
             var curr_obj = obj, last_obj = null;
             function de_neg(x2) {
               return x2[0] === "-" ? curr_obj.length - parseInt(x2.substr(1)) : parseInt(x2);
             }
             while (true) {
-              var match = path_segment.exec(path2), subpath = match[0], field = match[2], slice_start = match[5], slice_end = match[6];
+              var match = path_segment.exec(path), subpath = match[0], field = match[2], slice_start = match[5], slice_end = match[6];
               slice_start = slice_start && de_neg(slice_start);
               slice_end = slice_end && de_neg(slice_end);
-              if (path2.length == subpath.length) {
+              if (path.length == subpath.length) {
                 if (field)
                   curr_obj[field] = new_stuff;
                 else if (typeof curr_obj == "string") {
@@ -3047,7 +3047,7 @@
               last_obj = curr_obj;
               last_field = field;
               curr_obj = curr_obj[field || slice_end];
-              path2 = path2.substr(subpath.length);
+              path = path.substr(subpath.length);
             }
           }
           function parse(s) {
@@ -6455,8 +6455,8 @@ ${patch.content}\r
     }
   }
   function getConfig(name3, defaultValue, type = typeof defaultValue, overrides) {
-    const { location: location2, URLSearchParams: URLSearchParams2 } = global_default;
-    const hasSearchParams = typeof URLSearchParams2 !== "undefined";
+    const { location: location2, URLSearchParams } = global_default;
+    const hasSearchParams = typeof URLSearchParams !== "undefined";
     const hasLocation = typeof location2 !== "undefined";
     const useSearchParams = hasSearchParams && hasLocation;
     const useEnv = process_default.env;
@@ -6465,7 +6465,7 @@ ${patch.content}\r
     }
     const keyName2 = `DIFF_${name3.replace(/[^a-zA-Z0-9]/, "")}`;
     if (useSearchParams) {
-      const searchParams = new URLSearchParams2(location2.search);
+      const searchParams = new URLSearchParams(location2.search);
       const lowerKey = keyName2.toLowerCase();
       if (searchParams.has(lowerKey)) {
         return formatValue(decodeURIComponent(String(searchParams.get(lowerKey))), type);
@@ -25272,7 +25272,7 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(target, $6, _flags) {
+  function persist(target, $3, _flags) {
     return (update2) => {
       if (update2.changes.inserted.length < 0)
         return;
@@ -25289,309 +25289,17 @@ ${markup.join("\n")}`);
   }
 `);
 
-  // public/packages/file-system.js
-  function factoryReset(cwc) {
-    try {
-      state2[cwc] = {
-        path: "/",
-        type: "FileSystem",
-        children: [{
-          name: "",
-          type: "Directory",
-          children: [{
-            name: "home",
-            type: "Directory",
-            children: [{
-              name: "tychi",
-              type: "Directory",
-              children: [{
-                name: "braid",
-                type: "Directory",
-                children: [
-                  {
-                    name: "tag",
-                    type: "Directory",
-                    children: [
-                      {
-                        name: "plan98-highlighter.js",
-                        type: "File"
-                      },
-                      {
-                        name: "plan98-system.js",
-                        type: "File"
-                      }
-                    ]
-                  },
-                  {
-                    name: "sillonious",
-                    type: "Directory",
-                    children: [
-                      {
-                        name: "pretend.script",
-                        type: "File"
-                      },
-                      {
-                        name: "paper.script",
-                        type: "File"
-                      },
-                      {
-                        name: "books.script",
-                        type: "File"
-                      },
-                      {
-                        name: "bicycles.script",
-                        type: "File"
-                      },
-                      {
-                        name: "typewriters.script",
-                        type: "File"
-                      },
-                      {
-                        name: "teleplays.script",
-                        type: "File"
-                      },
-                      {
-                        name: "cameras.script",
-                        type: "File"
-                      },
-                      {
-                        name: "computers.script",
-                        type: "File"
-                      },
-                      {
-                        name: "synthesizers.script",
-                        type: "File"
-                      },
-                      {
-                        name: "slideshows.script",
-                        type: "File"
-                      },
-                      {
-                        name: "gamepads.script",
-                        type: "File"
-                      },
-                      {
-                        name: "generations.script",
-                        type: "File"
-                      }
-                    ]
-                  }
-                ]
-              }]
-            }]
-          }]
-        }]
-      };
-    } catch (e2) {
-      console.info("Factory Reset: Failed");
-      console.error(e2);
-      return;
-    }
-    console.log({ cwc, system: state2[cwc] });
-    console.info("Factory Reset: Success");
-    return state2[cwc];
-  }
-  var Types = {
-    File: {
-      icon: "/cdn/plan98/plan9.png"
-    },
-    Directory: {
-      icon: "/cdn/plan98/firefox.png"
-    }
-  };
-  var urlParams = new URLSearchParams(window.location.search);
-  var path = urlParams.get("path");
-  var iSbIoS = path === null;
-  var $2 = module2("file-system");
-  $2.draw(iSbIoS ? system : floppy);
-  function currentWorkingComputer(target) {
-    const cwc = target.closest("[cwc]").getAttribute("cwc");
-    return state2[cwc] || {};
-  }
-  function system(target) {
-    const tree = currentWorkingComputer(target);
-    if (!tree) {
-      return `<button data-reset>Factory Reset</button>`;
-    }
-    const { path: path2 } = tree;
-    return `
-    <div class="visual">
-      <div class="treeview">
-        ${nest([], tree)}
-        <button data-reset>Factory Reset</button>
-      </div>
-      <div class="preview">
-        <input type="text" name="path" value="${path2 || "/"}" />
-        <iframe src="${window.location.href}?path=${path2}"></iframe>
-      </div>
-    </div>
-  `;
-  }
-  function floppy(target) {
-    const tree = currentWorkingComputer(target);
-    const { path: path2 = "" } = tree;
-    const content2 = getContent(tree, path2.split("/"));
-    if (!content2)
-      return `Nothing yet... if only... we had... a 404 page.`;
-    if (content2.type === "File") {
-      return `
-      <code-module src="ls${path2}"></code-module>
-    `;
-    }
-    if (content2.type === "Directory") {
-      return `
-      <div class="listing">
-        ${content2.children.map((x) => `
-          <button type="${x.type}" data-path="${path2 !== "/" ? `${path2}/${x.name}` : `/${x.name}`}">
-            <img src="${Types[x.type].icon}" alt="Icon for ${x.type}" />
-            ${x.name || "Sillonious"}
-          </button>
-        `).join("")}
-      </div>
-    `;
-    }
-  }
-  function getContent(tree, pathParts) {
-    return [...pathParts].reduce((subtree, name3, i2, og) => {
-      const result = subtree.children.find((x) => x.name === name3);
-      if (!result) {
-        console.log({ result, name: name3, subtree, tree, pathParts });
-        og.splice(1);
-        return subtree;
-      }
-      return result;
-    }, tree);
-  }
-  $2.when("click", "[data-uri]", async function(event) {
-    const tokens = event.target.closest($2.link).getAttribute("tokens");
-    const config2 = state2[tokens] || {};
-    const { uri } = event.target.dataset;
-    const data = await fetchAlbum(config2, uri);
-    showModal(`
-    <image-gallery>
-      ${data.AlbumImage.map((image) => {
-      const { ArchivedUri, Uri, ThumbnailUrl } = image;
-      return `
-          <img
-        src="${ThumbnailUrl}"
-        data-uri="${Uri}"
-          />
-          `;
-    }).join("")}
-    </image-gallery>
-  `);
-  });
-  function nest(pathParts, tree = {}) {
-    if (!tree.children)
-      return "";
-    return tree.children.map((child) => {
-      const { name: name3, type } = child;
-      const currentPathParts = [...pathParts, name3];
-      const currentPath = currentPathParts.join("/");
-      if (type === "File") {
-        return `<button data-path="${currentPath}">
-        <plan98-highlighter>
-          ${name3}
-        </plan98-highlighter>
-      </button>`;
-      }
-      if (type === "Directory") {
-        return `
-        <details>
-          <summary data-path="${currentPath}">
-            ${name3 || "/"}
-          </summary>
-          ${nest(currentPathParts, child)}
-        </details>
-      `;
-      }
-    }).join("");
-  }
-  $2.when("click", "[data-reset]", ({ target }) => {
-    const cwc = target.closest("[cwc]").getAttribute("cwc");
-    factoryReset(cwc);
-  });
-  $2.when("click", "[data-path]", ({ target }) => {
-    const { path: path2 } = target.dataset;
-    console.log({ path: path2 });
-    const tree = currentWorkingComputer(target);
-    const information = getContent(tree, path2);
-    console.log({ information });
-    tree.path = path2;
-  });
-  $2.style(`
-  & .visual {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    height: 100%;
-  }
-
-  & .treeview {
-    position: relative;
-    overflow: auto;
-    white-space: nowrap;
-  }
-
-  & [data-reset] {
-    position: absolute;
-    bottom: 1rem;
-  }
-
-  & [name="path"] {
-    display: block;
-    width: 100%;
-  }
-
-  & .preview {
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
-  & iframe {
-    height: 100%;
-    width: 100%;
-    border: 0;
-  }
-
-  & details { padding-left: 1rem; }
-  & [target="_blank"] {
-    float: right;
-  }
-  & button {
-    all: unset;
-    text-decoration: underline;
-    color: blue;
-    display: block;
-    cursor: pointer;
-  }
-
-  & .listing {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-    text-align: center;
-    grid-area: 1 / 1 / -1 / -1;
-    place-content: baseline;
-  }
-
-  & .listing > * {
-    display: grid;
-    grid-template-rows: auto 1rem;
-    aspect-ratio: 1;
-  }
-
-`);
-
   // public/packages/modal-module.js
-  var $3 = module2("ctx-modal", {
+  var $2 = module2("ctx-modal", {
     label: null,
     children: null,
     isOpen: null
   });
-  $3.draw(() => {
+  $2.draw(() => {
     const {
       body,
       isOpen
-    } = $3.learn();
+    } = $2.learn();
     if (!isOpen)
       return " ";
     const modalClose = `
@@ -25608,23 +25316,23 @@ ${markup.join("\n")}`);
   });
   var context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`;
   document.body.insertAdjacentHTML("beforeend", context);
-  function showModal2(body) {
+  function showModal(body) {
     document.body.classList.add("overlay");
-    $3.teach({
+    $2.teach({
       body,
       isOpen: true
     });
   }
-  window.showModal = showModal2;
+  window.showModal = showModal;
   function hideModal() {
     document.body.classList.remove("overlay");
-    $3.teach({
+    $2.teach({
       isOpen: false
     });
   }
-  window.hideModal = showModal2;
-  $3.when("click", ".close", hideModal);
-  $3.style(`
+  window.hideModal = showModal;
+  $2.when("click", ".close", hideModal);
+  $2.style(`
   body.overlay {
     overflow: hidden;
   }
@@ -25722,440 +25430,6 @@ ${markup.join("\n")}`);
   }
 `);
 
-  // public/packages/script-type.js
-  var BIOS_MODE = Symbol("bios");
-  var NORMAL_MODE = Symbol("normal");
-  var KEY_VALUE_MODE = Symbol("key-value");
-  var DYNAMIC_MODE = Symbol("dynamic");
-  var compile = (script) => {
-    const ScriptType = {
-      "#": append.bind({}, "scripttype-address"),
-      "@": append.bind({}, "scripttype-character"),
-      '"': append.bind({}, "scripttype-quote"),
-      "(": append.bind({}, "scripttype-parenthetical"),
-      "!": append.bind({}, "scripttype-information"),
-      "^": append.bind({}, "scripttype-effect"),
-      "<": plugin,
-      "{": scope
-    };
-    function scope(type) {
-      setScope(type);
-      resetAttributes(type);
-      setMode(KEY_VALUE_MODE);
-    }
-    function plugin(x) {
-      setPlugin(x);
-      resetAttributes(x);
-      setMode(DYNAMIC_MODE);
-    }
-    const symbols2 = Object.keys(ScriptType);
-    const modes = {
-      [BIOS_MODE]: biosMode,
-      [NORMAL_MODE]: normalMode,
-      [KEY_VALUE_MODE]: kvMode,
-      [DYNAMIC_MODE]: dynamicMode
-    };
-    const isolate = {
-      scope: "global",
-      plugin: "",
-      mode: BIOS_MODE,
-      result: ``
-    };
-    const lines = script.split("\n");
-    for (const line of lines) {
-      (modes[isolate.mode] || noop)(line);
-    }
-    return isolate.result;
-    function biosMode(line) {
-      console.log("todo: implement");
-      console.log(line);
-      return setMode(NORMAL_MODE);
-    }
-    function normalMode(line) {
-      if (!line)
-        return blank();
-      const symbol = line[0];
-      if (symbols2.includes(symbol)) {
-        const [_, text] = line.split(symbol);
-        return ScriptType[symbol](text.trim());
-      }
-      return freetext(line);
-    }
-    function kvMode(line) {
-      const [key2, value] = line.split(":");
-      if (!value) {
-        if (isolate.scope === "typewriter") {
-          title();
-        }
-        return setMode(NORMAL_MODE);
-      }
-      state[isolate.scope][key2.trim()] = value.trim();
-    }
-    function dynamicMode(line) {
-      const [key2, value] = line.split(":");
-      if (!value) {
-        embed();
-        return setMode(NORMAL_MODE);
-      }
-      state[isolate.plugin][key2.trim()] = value.trim();
-    }
-    function setMode(m) {
-      isolate.mode = m;
-    }
-    function setScope(s) {
-      isolate.scope = s;
-    }
-    function setPlugin(d) {
-      isolate.plugin = d;
-    }
-    function resetAttributes(x) {
-      state[x] = {};
-    }
-    function title() {
-      const {
-        title: title2,
-        author,
-        contact,
-        agent
-      } = state[isolate.scope];
-      append("scripttype-title", `
-      <title-cover>
-        <title-main>
-          <title-title>
-            ${title2}
-          </title-title>
-          by
-          <title-author>
-            ${author}
-          </title-author>
-        </title-main>
-        <title-contact>
-          ${markup(contact) || ""}
-        </title-contact>
-        <title-agent>
-          ${markup(agent) || ""}
-        </title-agent>
-      </title-cover>
-    `);
-    }
-    function embed() {
-      const properties = state[isolate.plugin];
-      const attributes = Object.keys(properties).map((x) => `${x}="${properties[x]}"`).join("");
-      isolate.result += `<${isolate.plugin} ${attributes}></${isolate.plugin}>`;
-    }
-    function markup(string2) {
-      return string2 && string2.replaceAll("\\", "<br>");
-    }
-    function freetext(line) {
-      append("scripttype-freetext", line);
-    }
-    function blank() {
-      append("script-type-blankline", "");
-    }
-    function append(tag, content2) {
-      const html = `
-      <${tag}>
-        ${content2}
-      </${tag}>
-    `;
-      isolate.result += html;
-    }
-    function noop() {
-    }
-  };
-  var $4 = module2("script-type");
-  var $editor = module2("script-editor");
-  var $viewer = module2("script-viewer");
-  $4.draw((target) => {
-    return `
-    <div name="transport">
-      <button class="print">print</button>
-    </div>
-    <script-editor><\/script-editor>
-    <script-viewer><\/script-viewer>
-  `;
-  });
-  $4.style(`
-  * {
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
-  }
-
-  @media print {
-    html, body {
-      height: 100%;
-    }
-  }
-
-  @page {
-    size: 8.5in 11in;
-    margin: 1in 1in 1in 1.5in;
-  }
-
-  @page {
-    @top-right {
-      content: counter(page) '.';
-    }
-  }
-
-  @page:first {
-    @top-right {
-      content: '';
-    }
-  }
-
-
-  & {
-    display: grid;
-    grid-template-areas:
-    "transport transport"
-    "editor viewer";
-    grid-auto-columns: 1fr 1fr;
-    grid-auto-rows: 2rem calc(100vh - 2rem);
-  }
-
-  & [name="transport"] {
-    grid-area: transport;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: white;
-    z-index: 2;
-  }
-
-  & script-editor {
-    grid-area: editor;
-  }
-
-  & script-viewer {
-    grid-area: viewer;
-  }
-
-  @media print {
-    & [name="transport"],
-    & script-editor {
-      display: none;
-    }
-
-    & { display: block }
-    & script-viewer { display: block }
-  }
-
-`);
-  $4.when("click", ".print", print);
-  $viewer.draw((target) => {
-    const source2 = target.closest($4.link).getAttribute("source");
-    const { formatted } = state[source2] || {};
-    return `
-    <div class="shadowbox">
-      ${formatted}
-    </div>
-  `;
-  });
-  $editor.draw((target) => {
-    const source2 = target.closest($4.link).getAttribute("source");
-    const { file } = state[source2] || {};
-    if (file && !target.view) {
-      const config2 = {
-        extensions: [
-          basicSetup,
-          EditorView.lineWrapping,
-          EditorView.updateListener.of(
-            persist2(target, $4, {})
-          )
-        ]
-      };
-      const state3 = EditorState.create({
-        ...config2,
-        doc: file
-      });
-      target.view = new EditorView({
-        parent: target,
-        state: state3
-      });
-    }
-  });
-  function persist2(target, $6, _flags) {
-    return (update2) => {
-      if (update2.changes.inserted.length < 0)
-        return;
-      const file = update2.view.state.doc.toString();
-      const formatted = compile(file);
-      const source2 = target.closest($6.link).getAttribute("source");
-      state[source2] = { file, formatted };
-    };
-  }
-  $editor.style(`
-  & {
-    display: block;
-  }
-`);
-  $viewer.style(`
-  & {
-    display: block;
-    font-size: 12pt;
-    font-family: courier;
-    margin: 0 auto;
-    max-width: 6in;
-  }
-  & scripttype-title {
-    display: block;
-    height: 100%;
-    width: 100%;
-  }
-
-  & title-cover {
-    display: grid;
-    grid-template-areas:
-      "main main"
-      "contact agent";
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr auto;
-    width: 100%;
-    height: 100%;
-  }
-
-  & title-main {
-    place-self: center;
-    grid-area: main;
-    text-align: center;
-  }
-
-  & title-title {
-    margin-bottom: 1rem;
-  }
-
-  & title-title,
-  & title-author {
-    display: block;
-  }
-
-  & title-contact {
-    grid-area: contact;
-  }
-
-  & title-agent {
-    grid-area: agent;
-  }
-
-  & scripttype-address,
-  & scripttype-character,
-  & scripttype-quote,
-  & scripttype-parenthetical,
-  & scripttype-information,
-  & scripttype-effect,
-  & scripttype-freetext,
-  & scripttype-blank {
-    display: block;
-  }
-
-  & scripttype-address,
-  & scripttype-information {
-    text-transform: uppercase;
-    margin: 1rem 0;
-  }
-
-  & scripttype-character,
-  & scripttype-parenthetical {
-    text-align: center;
-  }
-
-  & scripttype-character {
-    text-align: center;
-    text-transform: uppercase;
-    margin: 1rem 0 0;
-  }
-
-  & scripttype-effect {
-    margin: 1rem 0;
-    text-align: right;
-  }
-
-  & scripttype-quote {
-    margin: 0 1in;
-  }
-
-  & scripttype-quote:first-child::before {
-    content: "(CONT'D)" !important;
-    display: block;
-    text-align: center;
-  }
-
-  & scripttype-parenthetical::before {
-    content: '(';
-  }
-
-  & scripttype-parenthetical::after {
-    content: ')';
-  }
-
-  & scripttype-freetext {
-    margin: 1rem 0;
-  }
-
-`);
-
-  // public/packages/tree-view.js
-  var $5 = module2("tree-view");
-  $5.draw((target) => {
-    const tokens = target.getAttribute("tokens");
-    const config2 = state[tokens] || {};
-    readTree(config2);
-    return `
-    <details>
-      <summary>Cool</summary>
-       Uncool
-    </details>
-  `;
-  });
-  function authenticationToken(config2) {
-    return {
-      key: config2.token,
-      secret: config2.secret
-    };
-  }
-  async function fetchUser(config2) {
-    const { Response, Code } = await fetch("/proxy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        url: "https://api.smugmug.com/api/v2!authuser",
-        provider: config2.provider,
-        token: authenticationToken(config2)
-      })
-    }).then((res) => res.json());
-    if (Code === 200) {
-      bus.state["smugmug/user"] = Response.User;
-    }
-  }
-  async function fetchTree(config2) {
-    const { NickName } = bus.state["smugmug/user"];
-    console.log(NickName);
-    const url = `https://api.smugmug.com/api/v2/user/${NickName}?_expand=Node.ChildNodes`;
-    const { Response, Code } = await fetch("/proxy", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        url,
-        provider: config2.provider,
-        token: authenticationToken(config2)
-      })
-    }).then((res) => res.json());
-    if (Code === 200) {
-    }
-  }
-  async function readTree(config2) {
-    await fetchUser(config2);
-    console.log(bus.state["smugmug/user"]);
-    await fetchTree(config2);
-  }
-
   // public/packages/greet-friend.js
   var timeOfDayGreetings = {
     en_US: {
@@ -26214,8 +25488,8 @@ ${markup.join("\n")}`);
   ];
   function createGreetingTag(tagInfo) {
     const { name: name3, locale } = tagInfo;
-    const $6 = module2(name3);
-    $6.draw((target) => {
+    const $3 = module2(name3);
+    $3.draw((target) => {
       const friendName = target.getAttribute("x");
       const language2 = target.getAttribute("language") || locale;
       const now = new Date();
@@ -26235,7 +25509,7 @@ ${markup.join("\n")}`);
       const message = greeting[timeOfDay];
       return `${startAdornment} ${message}, ${friendName} ${endAdornment}`;
     });
-    return $6;
+    return $3;
   }
   translatedTags.map((tagInfo) => createGreetingTag(tagInfo));
 })();
