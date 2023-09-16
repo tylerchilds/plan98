@@ -413,7 +413,8 @@ $.style(`
   & [target="_blank"] {
     float: right;
   }
-  & button {
+  & .treeview button,
+  & .listing button {
     all: unset;
     text-decoration: underline;
     color: blue;
