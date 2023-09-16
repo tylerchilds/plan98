@@ -396,6 +396,7 @@ author: Ty
 ! This feels like a fuzzy dream sequence with everything over exposed except the colors red, blue, and green.
 
 ^ fade in
+
 # Int. Computer
 In the computer. Like Zoolander. Like Owen Wilson's character's understanding of in the computer. Ty wears three shirts and three hats. Left wears a blue shirt and hat. Right wears a red shirt and hat. Front wears a green shirt and hat.
 
@@ -411,7 +412,42 @@ In the computer. Like Zoolander. Like Owen Wilson's character's understanding of
 @ Front
 " Whatever, I can sell it.
 
-<hello-world`
+<hyper-link
+src: /home
+label: ok
+
+aww
+
+<greet-friend
+x: Victoria
+language: es_ES
+
+ok
+
+<hello-world
+
+<hello-nickname
+
+<hello-universe
+
+<hyper-piano
+
+<hypertext-variable
+text: hello world
+weight: 800
+size: 2rem
+height: 6
+
+<rainbow-action
+text: sup
+prefix: <button>
+suffix: </button>
+
+<hypertext-highlighter
+text: this is yellow
+color: yellow
+
+`
 }
 
 function escapeHyperText(text) {
