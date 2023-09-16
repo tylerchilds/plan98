@@ -420,6 +420,7 @@ $.style(`
     color: blue;
     display: block;
     cursor: pointer;
+    pointer-events: all;
   }
 
   & .listing {
