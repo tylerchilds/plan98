@@ -11,7 +11,6 @@ async function loadSample(url) {
 }
 
 function playSample(sample, sampleNote, noteToPlay) {
-  debugger
   const source = context.createBufferSource();
   source.buffer = sample;
   source.playbackRate.value = 2 ** ((noteToPlay - sampleNote) / 12);
@@ -95,7 +94,6 @@ const synthDown =() => {
 	$.teach({ synth })
 }
 function attack(event) {
-  debugger
 	event.preventDefault()
 	const { colors, synth } = $.learn()
   const { octave, note, hue } = event.target.dataset

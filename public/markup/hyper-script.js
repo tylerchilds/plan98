@@ -390,7 +390,7 @@ $.style(`
 
 function hello() {
   return `{ screenplay
-title: In the Computer
+title: Sillonious
 author: Ty
 
 ! This feels like a fuzzy dream sequence with everything over exposed except the colors red, blue, and green.
@@ -430,7 +430,6 @@ ok
 
 <hello-universe
 
-<hyper-piano
 
 <hypertext-variable
 text: hello world
@@ -447,6 +446,16 @@ suffix: </button>
 text: this is yellow
 color: yellow
 
+<sillyz-gamepad
+
+<sillyz-guitar
+
+<sillyz-synth
+
+
+<sillyz-piano
+
+# the end.
 `
 }
 

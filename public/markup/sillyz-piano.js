@@ -1,5 +1,5 @@
-//import Color from "colorjs.io"
-//import $guitar from "./guitar.js"
+import Color from "https://esm.sh/colorjs.io@0.4.5"
+import $guitar from "./sillyz-guitar.js"
 
 const biomes = [
   'underwater',
@@ -112,7 +112,10 @@ function stopSample(note) {
   }
 }
 
-const $ = module('hyper-piano')
+const $ = module('sillyz-piano', {
+	pitch: 0,
+  octave: 4,
+})
 
 const synaesthesia = Object.keys(metadata).map(midi => metadata[midi])
 
@@ -209,7 +212,7 @@ let activeRegister = 0
 
 requestAnimationFrame(loop)
 function loop(time) {
-  /*
+  const { pitch, octave } = $.learn()
   const { activeRegisters, activeFrets, activeMotions } = $guitar.learn()
   activeRegisters.map((register, i) => {
     const { up, down } = activeMotions[i]
@@ -231,7 +234,8 @@ function loop(time) {
         activeSynths = chords[register]
         activeSynths.map((x, i) => {
           const index = down ? x : activeSynths[activeSynths.length - 1 - i]
-          const node = document.querySelector(`[data-index='${index}']`)
+          const note = index + 12 + (octave * 12) + pitch
+          const node = document.querySelector(`[data-note='${note}']`)
           node && queueAttack(node, i)
         })
       }
@@ -239,7 +243,6 @@ function loop(time) {
 
     feature()
   })
-  */
   requestAnimationFrame(loop)
 }
 
