@@ -1,5 +1,7 @@
 const $ = module('sillyz-gamepad')
 
+const controllers = {}
+
 export default function gamepads() {
   scangamepads()
   const ids = Object.keys(controllers) || []
