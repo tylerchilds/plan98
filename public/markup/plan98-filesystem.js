@@ -139,24 +139,37 @@ function closestWorkingComputer(target) {
 }
 
 function system(target) {
+  const { rootActive } = $.learn()
   if(checkPreservationStatus(target)) {
     return
   }
   const tree = closestWorkingComputer(target)
   const { path } = tree
 
+  const rootClass = rootActive ? 'active' : ''
+
   return `
-    <div class="menubar">
-      <a href="https://archive.org/details/plan98" target="_blank">Download</a>
-      <button data-debugger>Debugger</button>
-      <button data-reset>Factory Reset</button>
-    </div>
-    <div class="visual">
-      <div class="treeview">
-        ${nest(tree, [], tree)}
+    <div class="${rootClass}">
+      <div class="root">
+        <div class="help">
+          <a href="https://archive.org/details/plan98" target="_blank">Download</a>
+          <button data-debugger>Debugger</button>
+          <button data-reset>Factory Reset</button>
+        </div>
+        <div class="menubar">
+          <input type="text" name="path" value="${path || '/'}" />
+        </div>
+        <div class="treeview">
+          ${nest(tree, [], tree)}
+        </div>
+        <form id="command-line">
+          <input type="text" placeholder=":" name="command" />
+        </form>
       </div>
-      <div class="preview">
-        <input type="text" name="path" value="${path || '/'}" />
+      <button aria-label="Switcher" class="switcher">
+        Z.
+      </button>
+      <div class="leaf">
         <iframe src="${window.location.href}?path=${path}"></iframe>
       </div>
     </div>
@@ -199,7 +212,6 @@ function checkPreservationStatus(target) {
   if(target.childNodes.length === 0) return false
   return [...target.childNodes].every(x => x.tagName === 'BUTTON')
 }
-
 function getContent(tree, pathParts) {
   // spread before so we can mutate to bail early
   return [...pathParts].reduce((subtree, name, i, og) => {
@@ -220,6 +232,11 @@ function getContent(tree, pathParts) {
   // normally, mutation in functional programming is a red flag
   // however, to the invoking function, we're still pure by definition
 }
+
+$.when('click', 'button.switcher', function switcher({ target }) {
+  const rootActive = !$.learn().rootActive
+  $.teach({ rootActive })
+})
 
 $.when('click', '[data-uri]', async function(event) {
   const tokens = event.target.closest($.link).getAttribute('tokens')
@@ -361,7 +378,7 @@ $.style(`
     position: relative;
     overflow: auto;
     white-space: nowrap;
-    background: rgba(0,0,0,.10);
+    background: rgba(255,255,255,.85);
   }
 
 
@@ -400,14 +417,15 @@ $.style(`
   & details::before,
   & details[open]::before {
     position: absolute;
-    left: -.5rem;
+    left: 0;
     line-height: 1.25;
+    font-size: .5rem;
   }
   & details::before {
-    content: '◉';
+    content: '○';
   }
   & details[open]::before {
-    content: '○';
+    content: '◉';
   }
 
   & [target="_blank"] {
@@ -438,4 +456,103 @@ $.style(`
     grid-template-rows: auto 1rem;
     aspect-ratio: 1;
   }
+
+  & .root {
+    display: none;
+    background: white;
+    position: fixed;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    width: 320px;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto;
+    z-index: 5;
+  }
+
+  & .root::before {
+    content: '';
+    border-left: 1px solid red;
+    box-shadow: 0px 0 2px 0 yellow, 2px 0 2px 0 orange, 4px 0 2px 0 red;
+    position: fixed;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+  }
+
+  & .list-item {
+    padding-left: 1rem;
+    border-bottom: 1px solid cyan;
+  }
+
+  & #command-line input {
+    display: block;
+    line-height: 2rem;
+    font-size: 1rem;
+    border: 0;
+    box-shadow: -72px -16px 72px 16px rgba(0,0,0,.25);
+    max-width: 100%;
+    width: 100%;
+  }
+
+  & .switcher {
+    display: block;
+    position: fixed;
+    height: 2rem;
+    width: 2rem;
+    background: orange;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    border: 0;
+    border-radius: 100%;
+  }
+
+  & .active .switcher {
+  }
+
+  & .leaf {
+    background: white;
+    position: fixed;
+    inset: 0;
+    transform: translateY(0);
+    transition: transform 200ms ease-in-out;
+  }
+
+  & .leaf iframe {
+    border: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  & .active .root {
+    display: grid;
+    grid-template-rows: 2rem 2rem 1fr 2rem;
+  }
+
+  & .active .leaf {
+    filter: grayscale(1) brightness(0.5) contrast(0.5);
+  }
+
+  & .launch {
+    background: transparent;
+    border: 0;
+    text-decoration: underline;
+    color: blue;
+    padding: .5rem;
+    margin: .5rem;
+  }
 `)
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    //if esc key was not pressed in combination with ctrl or alt or shift
+    const isNotCombinedKey = !(event.ctrlKey || event.altKey || event.shiftKey);
+    if (isNotCombinedKey) {
+      document.querySelector(`${$.link} .switcher`).click()
+    }
+  }
+});

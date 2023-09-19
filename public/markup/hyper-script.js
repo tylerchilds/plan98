@@ -297,11 +297,15 @@ $.when('input', 'textarea', (event) => {
   state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
 })
 
-$.when('click', '.print', (event) => {
+$.when('click', '[data-print]', (event) => {
   const node = event.target.closest($.link)
   const preview = node.querySelector('[name="preview"] iframe').contentWindow
   preview.focus()
   preview.print()
+})
+
+$.when('click', '[data-pitch]', (event) => {
+  alert('slideshow')
 })
 
 $.draw(target => {
@@ -318,7 +322,8 @@ $.draw(target => {
   return `
     <div class="grid">
       <div name="transport">
-        <button class="print">print</button>
+        <button data-print>print</button>
+        <button data-pitch>pitch</button>
       </div>
       <div name="view">
         <div name="card">
@@ -342,7 +347,6 @@ $.style(`
 
   & [name="transport"] {
     display: flex;
-    justify-content: flex-end;
   }
 
   & [name="card"] {
