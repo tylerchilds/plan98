@@ -401,6 +401,7 @@ function upload(colors) {
     ${name}: ${value};
   `).join('')
 
+  /*
   fetch('/design-system', {
     method: 'PUT',
     headers: {
@@ -408,6 +409,7 @@ function upload(colors) {
     },
     body: JSON.stringify({ palette })
   })
+  */
 }
 
 function gradient(scale, stops) {

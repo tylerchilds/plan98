@@ -256,6 +256,11 @@ $.when('click', 'button.switcher', function switcher({ target }) {
   $.teach({ rootActive })
 })
 
+$.when('click', '.leaf', function leafer({ target }) {
+  $.teach({ rootActive: false })
+})
+
+
 $.when('click', '[data-uri]', async function(event) {
   const tokens = event.target.closest($.link).getAttribute('tokens')
   const config = state[tokens] || {}
@@ -406,18 +411,11 @@ $.style(`
     padding: .5rem;
   }
 
-  & .preview {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    background: rgba(0,0,0,.05);
-  }
-
   & iframe {
     height: 100%;
     width: 100%;
     border: 0;
   }
-
 
   & ::marker,
   & ::-webkit-details-marker{
@@ -552,6 +550,10 @@ $.style(`
 
   & .active .leaf {
     filter: grayscale(1) brightness(0.5) contrast(0.5);
+  }
+
+  & .active .leaf iframe {
+    pointer-events: none;
   }
 
   & .launch {

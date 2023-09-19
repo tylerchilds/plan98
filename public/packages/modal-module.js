@@ -1,6 +1,6 @@
 import module from '../module.js'
 
-const $ = module('ctx-modal', {
+const $ = module('.modal', {
   label: null,
   children: null,
   isOpen: null
@@ -30,7 +30,7 @@ $.draw(() => {
   `
 })
 
-const context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`
+const context = `<div class="overlay"><div class="modal"></div></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
 export function showModal(body) {
@@ -57,7 +57,7 @@ $.style(`
     overflow: hidden;
   }
 
-  .overlay ctx-overlay:before {
+  .overlay .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
     background: rgba(0,0,0, .5);

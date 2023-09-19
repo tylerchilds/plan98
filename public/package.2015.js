@@ -25290,7 +25290,7 @@ ${markup.join("\n")}`);
 `);
 
   // public/packages/modal-module.js
-  var $2 = module2("ctx-modal", {
+  var $2 = module2(".modal", {
     label: null,
     children: null,
     isOpen: null
@@ -25314,7 +25314,7 @@ ${markup.join("\n")}`);
     </div>
   `;
   });
-  var context = `<ctx-overlay><ctx-modal></ctx-modal></ctx-overlay>`;
+  var context = `<div class="overlay"><div class="modal"></div></div>`;
   document.body.insertAdjacentHTML("beforeend", context);
   function showModal(body) {
     document.body.classList.add("overlay");
@@ -25337,7 +25337,7 @@ ${markup.join("\n")}`);
     overflow: hidden;
   }
 
-  .overlay ctx-overlay:before {
+  .overlay .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
     background: rgba(0,0,0, .5);
