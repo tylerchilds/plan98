@@ -120,7 +120,24 @@ const Types = {
       ['data-move', 'Move'],
       ['data-remove', 'Remove']
     ]
+  },
+  Help: {
+    type: 'Help',
+    actions: [
+      ['data-debugger', 'Debugger'],
+      ['data-forum', 'Forum'],
+      ['data-live', 'Live'],
+      ['data-reset', 'Reset'],
+    ]
   }
+}
+
+function helpActions(currentWorkingComputer) {
+  const actions = Types.Help.actions.map(([action, label]) => {
+    return "<button "+action+">"+label+"</button>"
+  }).join('')
+
+  return `<plan98-filesystem data-cwc=${currentWorkingComputer}>${actions}</plan98-filesystem>`
 }
 
 const $ = module('plan98-filesystem')
@@ -129,10 +146,10 @@ const parameters = new URLSearchParams(window.location.search)
 $.draw(parameters.get('path') === null ? system : floppy)
 
 function closestWorkingComputer(target) {
-  const cwc = target.closest('[cwc]')
+  const cwc = target.closest('[data-cwc]')
 
   if(cwc) {
-    return state[cwc.getAttribute('cwc')] || {}
+    return state[cwc.dataset.cwc] || {}
   }
 
   return {}
@@ -143,7 +160,8 @@ function system(target) {
   if(checkPreservationStatus(target)) {
     return
   }
-  const tree = closestWorkingComputer(target)
+  const { cwc } = target.dataset
+  const tree = state[cwc] || {}
   const { path } = tree
 
   const rootClass = rootActive ? 'active' : ''
@@ -152,9 +170,9 @@ function system(target) {
     <div class="${rootClass}">
       <div class="root">
         <div class="help">
-          <a href="https://archive.org/details/plan98" target="_blank">Download</a>
-          <button data-debugger>Debugger</button>
-          <button data-reset>Factory Reset</button>
+          <plan98-context data-inline data-label="?" data-menu="${helpActions(cwc)}">
+            Help
+          </plan98-context>
         </div>
         <div class="menubar">
           <input type="text" name="path" value="${path || '/'}" />
@@ -277,7 +295,6 @@ function nest(tree, pathParts, subtree = {}) {
     }
 
     if(type === Types.Directory.type) {
-      console.log({ currentPath, name })
       return `
       <details ${tree.path.indexOf(`/${name}`) >= 0 ? 'open': ''}>
         <summary data-path="${currentPath}">
@@ -302,13 +319,13 @@ function menuFor(tree, path) {
 
   if(type === Types.File.type) {
     actions = Types.File.actions.map(([action, label]) => {
-      return "<button "+action+" data-for-path="+path+">"+label+"</button>"
+      return "<button "+action+" data-path="+path+">"+label+"</button>"
     }).join('')
   }
 
   if(type === Types.Directory.type) {
     actions = Types.Directory.actions.map(([action, label]) => {
-      return "<button "+action+" data-for-path="+path+">"+label+"</button>"
+      return "<button "+action+" data-path="+path+">"+label+"</button>"
     }).join('')
   }
 
@@ -316,7 +333,7 @@ function menuFor(tree, path) {
 }
 
 $.when('click', '[data-reset]', ({target}) => {
-  const cwc = target.closest('[cwc]').getAttribute('cwc')
+  const { cwc } = target.closest('[data-cwc]').dataset
   factoryReset(cwc)
 })
 
@@ -333,22 +350,22 @@ $.when('click', '[data-path]', ({ target }) => {
 })
 
 $.when('click', '[data-move]', ({ target }) => {
-  const { forPath } = target.dataset
+  const { path } = target.dataset
   alert('move')
 })
 
 $.when('click', '[data-remove]', ({ target }) => {
-  const { forPath } = target.dataset
+  const { path } = target.dataset
   alert('remove')
 })
 
 $.when('click', '[data-nest]', ({ target }) => {
-  const { forPath } = target.dataset
+  const { path } = target.dataset
   alert('nest')
 })
 
 $.when('click', '[data-egg]', ({ target }) => {
-  const { forPath } = target.dataset
+  const { path } = target.dataset
   alert('egg')
 })
 

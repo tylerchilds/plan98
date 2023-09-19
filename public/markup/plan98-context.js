@@ -1,11 +1,12 @@
 const $ = module('plan98-context')
 
 $.draw((target) => {
+  const label = target.dataset.label || '...'
   return `
     <div>
       ${target.innerHTML}
     </div>
-    <button data-context>...</button>
+    <button data-context>${label}</button>
   `
 })
 
@@ -29,6 +30,10 @@ $.style(`
     display: grid;
     grid-template-columns: 1fr auto;
     pointer-events: none;
+  }
+
+  &[data-inline] {
+    display: inline-grid;
   }
 
   & button,
@@ -114,7 +119,7 @@ const tooltipStyles = `
     .tooltip.active {
       display: block;
       opacity: 1;
-      z-index: 3;
+      z-index: 10;
     }
 
     .tooltip button {
