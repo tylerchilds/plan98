@@ -270,7 +270,7 @@ title-agent {
 
 const $ = module('hyper-script', {
   file: 'booting...',
-  activePanel: 'preview'
+  activePanel: 'write'
 })
 
 function source(target) {
@@ -300,23 +300,23 @@ $.when('input', 'textarea', (event) => {
   state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
 })
 
-$.when('click', '[data-preview]', (event) => {
-  $.teach({ activePanel: 'preview' })
+$.when('click', '[data-read]', (event) => {
+  $.teach({ activePanel: 'read' })
 })
 
 $.when('click', '[data-print]', (event) => {
   const node = event.target.closest($.link)
-  const preview = node.querySelector('[name="print"] iframe').contentWindow
-  preview.focus()
-  preview.print()
+  const read = node.querySelector('[name="print"] iframe').contentWindow
+  read.focus()
+  read.print()
 })
 
-$.when('click', '[data-pitch]', (event) => {
-  $.teach({ activePanel: 'pitch' })
+$.when('click', '[data-perform]', (event) => {
+  $.teach({ activePanel: 'perform' })
 })
 
-$.when('click', '[data-program]', (event) => {
-  $.teach({ activePanel: 'program' })
+$.when('click', '[data-write]', (event) => {
+  $.teach({ activePanel: 'write' })
 })
 
 $.draw(target => {
@@ -332,20 +332,11 @@ $.draw(target => {
   const escapedFile = escapeHyperText(file)
 
   const panels = {
-    preview: `
-      <div name="preview">
-        ${html}
-      </div>
+    read: `
     `,
-    pitch: `
-      <div name="pitch">
-        ${html}
-      </div>
+    perform: `
     `,
-    program: `
-      <div name="program">
-        <textarea>${escapedFile}</textarea>
-      </div>
+    write: `
     `,
     print: `
     `
@@ -361,13 +352,21 @@ $.draw(target => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
-          <button data-preview>Preview</button>
-          <button data-pitch>Pitch</button>
-          <button data-program>Program</button>
+          <button data-write>Write</button>
+          <button data-read>Read</button>
           <button data-print>Print</button>
+          <button data-perform>Perform</button>
         </div>
       </div>
-      ${panels[activePanel]}
+      <div name="write">
+        <textarea>${escapedFile}</textarea>
+      </div>
+      <div name="read">
+        ${html}
+      </div>
+      <div name="perform">
+        ${html}
+      </div>
       <div name="print">
         ${embed}
       </div>
@@ -396,30 +395,25 @@ $.style(`
     justify-content: end;
   }
 
-  & [name="preview"],
+  & [name="read"],
   & [name="print"],
-  & [name="pitch"],
-  & [name="program"] {
+  & [name="perform"],
+  & [name="write"] {
     display: none;
   }
 
-  & [data-panel="preview"] [name="preview"],
-  & [data-panel="pitch"] [name="pitch"],
-  & [data-panel="program"] [name="program"] {
+  & [data-panel="read"] [name="read"],
+  & [data-panel="perform"] [name="perform"],
+  & [data-panel="write"] [name="write"] {
     display: block;
   }
 
-  & [name="preview"] {
+  & [name="read"] {
     background: white;
     height: 100%;
     max-width: 8.5in;
     margin: 0 auto;
     padding: 0 1in;
-    overflow: auto;
-  }
-
-  & [name="view"] {
-    overflow: auto;
   }
 
   & [name="print"] {
@@ -438,16 +432,28 @@ $.style(`
     height: 100%;
     z-index: 1;
     position: relative;
+    border: none;
+    display: block;
   }
 
   @media print {
-    & [name="view"] {
+    & {
+       width: auto;
+      height: auto;
+      overflow: visible;
+    }
+    & [name="read"] {
       display: block;
     }
 
     & [name="transport"],
     & textarea {
       display: none;
+    }
+    & .grid {
+      display: block;
+      height: auto;
+      overflow: auto;
     }
   }
 `)
