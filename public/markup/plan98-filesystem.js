@@ -156,10 +156,14 @@ function closestWorkingComputer(target) {
 }
 
 function system(target) {
+  if(target.parentElement.closest('plan98-filesystem')) {
+    return floppy(target)
+  }
   const { rootActive } = $.learn()
   if(checkPreservationStatus(target)) {
     return
   }
+
   const { cwc } = target.dataset
   const tree = state[cwc] || {}
   const { path } = tree
@@ -201,7 +205,6 @@ function floppy(target) {
   const tree = closestWorkingComputer(target)
   const { path = '' } = tree
   const content = getContent(tree, path.split('/'))
-  if(!content) return `Nothing yet... if only... we had... a 404 page.`
 
   if(content.type === Types.File.type) {
 		const readonly = parameters.get('readonly')
@@ -224,6 +227,10 @@ function floppy(target) {
       </div>
     `
   }
+
+  return `
+    <plan98-welcome></plan98-welcome>
+  `
 }
 
 function checkPreservationStatus(target) {
