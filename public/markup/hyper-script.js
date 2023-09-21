@@ -271,7 +271,8 @@ title-agent {
 const $ = module('hyper-script', {
   file: 'booting...',
   activePanel: 'write',
-  activeShot: 0
+  activeShot: 0,
+  shotCount: 0
 })
 
 function source(target) {
@@ -313,24 +314,26 @@ $.when('click', '[data-print]', (event) => {
 })
 
 $.when('click', '[data-perform]', (event) => {
-  $.teach({ activePanel: 'perform' })
-  const shotList = event.target
-.closest($.link)
-  .querySelector('[name="read"]')
-    .children
+  const shotList = Array.from(
+    event.target.closest($.link).querySelector('[name="read"]').children
+  ).map(x => x.matches(':not(style,script)'))
 
   $.teach({
     shotCount: shotList.length,
-    activeShot: 0
+    activeShot: 0,
+    activePanel: 'perform'
   })
 })
 
 function getAction(html, { active = 0, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
-  wrapper.children[active].classList.add('active')
-  return Array.from(wrapper.children).slice(start, end)
-    .map(x => x.outerHTML).join('')
+  const children = Array.from(wrapper.children)
+    .filter(x => x.matches(':not(style,script)'))
+
+  children[active].classList.add('active')
+
+  return children.slice(start, end).map(x => x.outerHTML).join('')
 }
 
 $.when('click', '[data-write]', (event) => {
@@ -350,22 +353,15 @@ $.draw(target => {
 
   const escapedFile = escapeHyperText(file)
 
-  const panels = {
-    read: `
-    `,
-    perform: `
-    `,
-    write: `
-    `,
-    print: `
-    `
-  }
-
   if(target.lastPanel !== activePanel) {
     // flush outdated
     target.innerHTML = ''
     target.lastPanel = activePanel
   }
+
+  const start = Math.max(activeShot - 1, 0)
+  const end = Math.min(activeShot + 2, shotCount)
+  const action = getAction(html, { active: activeShot, start, end })
 
   return `
     <div class="grid" data-panel="${activePanel}">
@@ -373,8 +369,8 @@ $.draw(target => {
         <div name="actions">
           <button data-write>Write</button>
           <button data-read>Read</button>
-          <button data-print>Print</button>
           <button data-perform>Perform</button>
+          <button data-print>Print</button>
         </div>
       </div>
       <div name="write">
@@ -384,7 +380,19 @@ $.draw(target => {
         ${html}
       </div>
       <div name="perform">
-        ${html}
+        <!--
+        <div name="navi">
+          <button data-back>
+            Back
+          </button>
+          <button data-next>
+            Next
+          </button>
+        </div>
+        -->
+        <div name="stage">
+          ${action}
+        </div>
       </div>
       <div name="print">
         ${embed}
@@ -441,7 +449,7 @@ $.style(`
     padding: .5rem;
   }
 
-  & [name="read"] > * {
+  & [name="read"] > *:not(style,script) {
     display: block;
   }
 
@@ -484,6 +492,7 @@ $.style(`
     margin: 0 auto;
     padding: 0 1in;
   }
+
 
   & [name="print"] {
     display: none;
