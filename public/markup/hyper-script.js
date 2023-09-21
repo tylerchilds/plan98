@@ -270,7 +270,8 @@ title-agent {
 
 const $ = module('hyper-script', {
   file: 'booting...',
-  activePanel: 'write'
+  activePanel: 'write',
+  activeShot: 0
 })
 
 function source(target) {
@@ -313,15 +314,33 @@ $.when('click', '[data-print]', (event) => {
 
 $.when('click', '[data-perform]', (event) => {
   $.teach({ activePanel: 'perform' })
+  const shotList = event.target
+.closest($.link)
+  .querySelector('[name="read"]')
+    .children
+
+  $.teach({
+    shotCount: shotList.length,
+    activeShot: 0
+  })
 })
+
+function getAction(html, { active = 0, start, end }) {
+  const wrapper= document.createElement('div');
+  wrapper.innerHTML = html;
+  wrapper.children[active].classList.add('active')
+  return Array.from(wrapper.children).slice(start, end)
+    .map(x => x.outerHTML).join('')
+}
 
 $.when('click', '[data-write]', (event) => {
   $.teach({ activePanel: 'write' })
 })
 
 $.draw(target => {
-  const { activePanel } = $.learn()
+  const { activePanel, shotCount, activeShot } = $.learn()
   const { file, html, embed } = sourceFile(target)
+
 
   const readonly = target.getAttribute('readonly')
 
@@ -380,19 +399,69 @@ $.style(`
   }
   & .grid {
     display: grid;
-    grid-template-rows: 2rem 1fr;
+    grid-template-rows: 1fr;
     height: 100vh;
   }
 
   & [name="transport"] {
-    padding-right: 3rem;
     overflow-x: auto;
     max-width: 100%;
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 2;
+    display: flex;
+    justify-content: end;
   }
-  
+
+  & [name="transport"] button {
+    background: transparent;
+    border-radius: 0;
+    border: none;
+    color: dodgerblue;
+    cursor: pointer;
+    height: 3rem;
+    padding: .5rem;
+    transition: color 100ms;
+  }
+
+  & [name="transport"] button:hover,
+  & [name="transport"] button:focus {
+    color: white;
+  }
+
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;
+    background: rgba(0,0,0,.85);
+    border: 1px solid rgba(255,255,255,.85);
+    gap: .25rem;
+    border-radius: 1.5rem;
+    padding: .5rem;
+  }
+
+  & [name="read"] > * {
+    display: block;
+  }
+
+  & [name="stage"] {
+    display: grid;
+    grid-template-areas: 'stage';
+    width: 100%;
+    height: 100%;
+  }
+
+  & [name="stage"] > * {
+    display: block;
+    grid-area: stage;
+    opacity: 0;
+    transition: opacity 100ms;
+  }
+
+
+  & [name="stage"] > *.active {
+    opacity: 1;
   }
 
   & [name="read"],
@@ -434,6 +503,8 @@ $.style(`
     position: relative;
     border: none;
     display: block;
+    resize: none;
+    padding: .5rem;
   }
 
   @media print {
