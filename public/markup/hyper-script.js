@@ -331,6 +331,8 @@ function getAction(html, { active = 0, start, end }) {
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(':not(style,script)'))
 
+  if(children.length === 0) return ''
+
   children[active].classList.add('active')
 
   return children.slice(start, end).map(x => x.outerHTML).join('')
