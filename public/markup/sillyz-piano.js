@@ -327,6 +327,7 @@ $.when('click', '.pitch-down', pitchDown)
 
 $.style(`
   & {
+    max-height: 100vh;
     height: 100%;
     display: grid;
     place-content: end;
