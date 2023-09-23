@@ -25491,7 +25491,7 @@ ${markup.join("\n")}`);
     const $3 = module2(name3);
     $3.draw((target) => {
       const friendName = target.getAttribute("x");
-      const language2 = target.getAttribute("language") || locale;
+      const language2 = target.getAttribute("y") || locale;
       const now = new Date();
       const hour = now.getHours();
       const greeting = timeOfDayGreetings[language2];

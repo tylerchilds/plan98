@@ -2,13 +2,15 @@ const NORMAL_MODE = Symbol('normal')
 const KEY_VALUE_MODE = Symbol('key-value')
 const DYNAMIC_MODE = Symbol('dynamic')
 
+const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
+
 export const compile = (script) => {
   const HyperText = {
     '#': append.bind({}, 'hypertext-address'),
     '@': append.bind({}, 'hypertext-character'),
     '"': append.bind({}, 'hypertext-quote'),
     '(': append.bind({}, 'hypertext-parenthetical'),
-    '!': append.bind({}, 'hypertext-information'),
+    '!': append.bind({}, 'hypertext-comment'),
     '^': append.bind({}, 'hypertext-effect'),
     '<': plugin,
     '{': scope,
@@ -188,12 +190,12 @@ title-agent {
 
   hypertext-title {
     display: block;
-    height: 100vh;
+    height: 100%;
     width: 100%;
   }
 
   hypertext-freetext,
-  hypertext-blank {
+  hypertext-blankline {
     display: block;
   }
 
@@ -316,7 +318,7 @@ $.when('click', '[data-print]', (event) => {
 $.when('click', '[data-perform]', (event) => {
   const shotList = Array.from(
     event.target.closest($.link).querySelector('[name="read"]').children
-  ).map(x => x.matches(':not(style,script)'))
+  ).map(x => x.matches(notHiddenChildren))
 
   $.teach({
     shotCount: shotList.length,
@@ -325,11 +327,23 @@ $.when('click', '[data-perform]', (event) => {
   })
 })
 
+$.when('click', '[data-back]', (event) => {
+  const { activeShot } = $.learn()
+  if(activeShot === 0) return
+  $.teach({ activeShot: activeShot - 1 })
+})
+
+$.when('click', '[data-next]', (event) => {
+  const { shotCount, activeShot } = $.learn()
+  if(activeShot === shotCount.length - 1) return
+  $.teach({ activeShot: activeShot + 1 })
+})
+
 function getAction(html, { active = 0, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const children = Array.from(wrapper.children)
-    .filter(x => x.matches(':not(style,script)'))
+    .filter(x => x.matches(notHiddenChildren))
 
   if(children.length === 0) return ''
 
@@ -365,6 +379,21 @@ $.draw(target => {
   const end = Math.min(activeShot + 2, shotCount)
   const action = getAction(html, { active: activeShot, start, end })
 
+  const performanceActions = `
+    <div name="navi"
+      ${activeShot === 0 ? 'data-first' : ''}
+      ${activeShot === shotCount.length - 1 ? 'data-last' : ''}
+    >
+      <button data-back>
+        Back
+      </button>
+      <input type="text" value="${activeShot}"/>
+      <button data-next>
+        Next
+      </button>
+    </div>
+  `
+
   return `
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
@@ -382,19 +411,14 @@ $.draw(target => {
         ${html}
       </div>
       <div name="perform">
-        <!--
-        <div name="navi">
-          <button data-back>
-            Back
-          </button>
-          <button data-next>
-            Next
-          </button>
+        <div name="theater">
+          <div name="screen">
+            <div name="stage">
+              ${action}
+            </div>
+          </div>
         </div>
-        -->
-        <div name="stage">
-          ${action}
-        </div>
+        ${performanceActions}
       </div>
       <div name="print">
         ${embed}
@@ -425,42 +449,68 @@ $.style(`
     justify-content: end;
   }
 
-  & [name="transport"] button {
-    background: transparent;
+  & button {
+    background: rgba(0,0,0,.85);
     border-radius: 0;
     border: none;
     color: dodgerblue;
     cursor: pointer;
-    height: 3rem;
-    padding: .5rem;
+    height: 2rem;
+    border-radius: 1rem;
     transition: color 100ms;
+    padding: .25rem 1rem;
   }
 
-  & [name="transport"] button:hover,
-  & [name="transport"] button:focus {
+  & button:hover,
+  & button:focus {
     color: white;
   }
 
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;
-    background: rgba(0,0,0,.85);
-    border: 1px solid rgba(255,255,255,.85);
+    background: rgba(0,0,0,.15);
+    border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
     border-radius: 1.5rem;
     padding: .5rem;
   }
 
-  & [name="read"] > *:not(style,script) {
+  & [name="read"] > *${notHiddenChildren} {
     display: block;
+  }
+
+  & [name="navi"] {
+    position: fixed;
+    right: 3rem;
+    top: 0;
+    height: 2rem;
+    display: flex;
+    gap: .5rem;
+    z-index: 1;
+  }
+
+  & [name="theater"] {
+    width: 100%;
+    height: 100%;
+    background: black;
+    display: flex;
+    place-items: center;
+  }
+
+  & [name="screen"] {
+    aspect-ratio: 16/9;
+    background: white;
+    padding: 0 1rem;
   }
 
   & [name="stage"] {
     display: grid;
+    align-items: center;
+    justify-content: center;
     grid-template-areas: 'stage';
     width: 100%;
     height: 100%;
-    background: white;
   }
 
   & [name="stage"] > * {
@@ -468,6 +518,7 @@ $.style(`
     grid-area: stage;
     opacity: 0;
     transition: opacity 100ms;
+    place-self: center;
   }
 
 
@@ -495,8 +546,9 @@ $.style(`
     margin: 0 auto;
     padding: 0 1in;
   }
-
-
+  & [name="perform"] {
+    background: black;
+  }
   & [name="print"] {
     display: none;
   }
@@ -519,9 +571,15 @@ $.style(`
     padding: .5rem;
   }
 
+  & [data-first] [data-back],
+  & [data-last] [data-next] {
+    pointer-events: none;
+    opacity: .5;
+  }
+
   @media print {
     & {
-       width: auto;
+      width: auto;
       height: auto;
       overflow: visible;
     }
@@ -573,7 +631,7 @@ aww
 
 <greet-friend
 x: Victoria
-language: es_ES
+y: es_ES
 
 ok
 
@@ -582,7 +640,6 @@ ok
 <hello-nickname
 
 <hello-universe
-
 
 <hypertext-variable
 text: hello world
@@ -604,7 +661,6 @@ color: yellow
 <sillyz-guitar
 
 <sillyz-synth
-
 
 <sillyz-piano
 

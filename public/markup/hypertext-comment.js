@@ -1,4 +1,4 @@
-const $ = module('hypertext-information')
+const $ = module('hypertext-comment')
 
 $.style(`
   & {

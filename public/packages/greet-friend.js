@@ -68,7 +68,7 @@ function createGreetingTag(tagInfo) {
 
   $.draw((target) => {
     const friendName = target.getAttribute('x');
-    const language = target.getAttribute('language') || locale;
+    const language = target.getAttribute('y') || locale;
     const now = new Date();
     const hour = now.getHours();
 
