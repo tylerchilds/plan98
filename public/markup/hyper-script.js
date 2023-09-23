@@ -333,6 +333,15 @@ $.when('click', '[data-back]', (event) => {
   $.teach({ activeShot: activeShot - 1 })
 })
 
+
+$.when('change', '[data-shot]', (event) => {
+  const { shotCount } = $.learn()
+  const { value } = event.target
+  const activeShot = parseInt(value)
+  if(value < 0 || activeShot > shotCount.length - 1) return
+  $.teach({ activeShot })
+})
+
 $.when('click', '[data-next]', (event) => {
   const { shotCount, activeShot } = $.learn()
   if(activeShot === shotCount.length - 1) return
@@ -387,7 +396,7 @@ $.draw(target => {
       <button data-back>
         Back
       </button>
-      <input type="text" value="${activeShot}"/>
+      <input data-shot type="text" value="${activeShot}"/>
       <button data-next>
         Next
       </button>
@@ -494,23 +503,32 @@ $.style(`
     width: 100%;
     height: 100%;
     background: black;
-    display: flex;
-    place-items: center;
   }
 
   & [name="screen"] {
-    aspect-ratio: 16/9;
+    position:relative;
+    overflow: hidden;
     background: white;
-    padding: 0 1rem;
+    width: 56.25%;
+    aspect-ratio: 16/9;
+    transform: translateY(-50%);
+    top: 50%;
+    max-height: 100vh;
+    margin: auto;
   }
 
   & [name="stage"] {
+    position: absolute;
+    top: 0;
+    left: 0;
     display: grid;
     align-items: center;
     justify-content: center;
     grid-template-areas: 'stage';
     width: 100%;
     height: 100%;
+    overflow: auto;
+    padding: 0 1rem;
   }
 
   & [name="stage"] > * {
@@ -545,6 +563,7 @@ $.style(`
     max-width: 8.5in;
     margin: 0 auto;
     padding: 0 1in;
+    max-height: 100vh;
   }
   & [name="perform"] {
     background: black;
@@ -569,6 +588,16 @@ $.style(`
     display: block;
     resize: none;
     padding: .5rem;
+  }
+
+  & [data-shot] {
+    width: 6ch;
+    border: none;
+    background: rgba(33,33,33,.85);
+    color: white;
+    text-align: center;
+    border-radius: 1rem;
+    padding: 0 .5rem;
   }
 
   & [data-first] [data-back],
