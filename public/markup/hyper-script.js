@@ -349,7 +349,10 @@ function getMotion(html, { active = 0, forwards, start, end }) {
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
 
-  const slice = children.slice(start, end)
+  const slice = children.slice(start, end).map(x => {
+    x.setAttribute('name','beat')
+    return x
+  })
   if(slice.length === 0) return ''
   children[active].dataset.active = true
 
@@ -358,7 +361,7 @@ function getMotion(html, { active = 0, forwards, start, end }) {
 }
 
 function toVfx(slice, options) {
-  const beats = options.forwards ? slice : reverse(slice.reverse())
+  let beats = options.forwards ? slice : reverse(slice.reverse())
   if(beats[0].matches(':not([data-active])')) {
     beats[0].dataset.animateOut = true
   }
@@ -368,7 +371,7 @@ function toVfx(slice, options) {
   }
 
   return (options.forwards ? beats : slice.reverse())
-            .map(x => x.outerHTML).join('')
+            .map(x => {;return x.outerHTML}).join('')
 }
 
 function reverse(beats) {
@@ -566,6 +569,7 @@ $.style(`
 
   & [name="stage"] > *[data-active] {
     opacity: 1;
+    z-index: 2;
   }
 
   & [name="read"],
@@ -629,6 +633,76 @@ $.style(`
   & [data-last] [data-next] {
     pointer-events: none;
     opacity: .5;
+  }
+
+
+  & [name="beat"] {
+    --size-small: scale(.9);
+    --size-normal: scale(1);
+    --offset-direction: translate(0, -1rem);
+    --offset-none: translate(0, 0);
+    transform:
+        var(--size-normal)
+        var(--offset-none);
+    transition: all 250ms ease-in-out;
+  }
+
+  & [data-animate-in] {
+    animation: animate 500ms ease-in-out forwards;
+    background: rgba(255,255,255,.15);
+    color: rgba(0,0,0,.15);
+  }
+
+  & [data-animate-out] {
+    --offset-direction: var(--offset-left);
+    animation: animate 500ms ease-in-out reverse;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+  }
+
+  & [data-animate-in][data-reverse] {
+    --offset-direction: var(--offset-left);
+    animation: animate 500ms ease-in-out forwards;
+    background: rgba(255,255,255,.15);
+    color: rgba(0,0,0,.15);
+  }
+
+  & [data-animate-out][data-reverse] {
+    --offset-direction: var(--offset-right);
+    animation: animate 500ms ease-in-out reverse;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+  }
+
+  @keyframes animate {
+    0% {
+      transform:
+        var(--size-small)
+        var(--offset-direction);
+      opacity: 0;
+      filter: blur(3px);
+    }
+
+    33% {
+      transform:
+        var(--size-small)
+        var(--offset-direction);
+    }
+
+    66% {
+      transform:
+        var(--size-small)
+        var(--offset-none);
+    }
+
+    100% {
+      transform:
+        var(--size-normal)
+        var(--offset-none);
+      opacity: 1;
+      pointer-events: initial;
+      filter: blur(0);
+    }
   }
 
   @media print {
