@@ -330,7 +330,7 @@ $.when('click', '[data-perform]', (event) => {
 $.when('click', '[data-back]', (event) => {
   const { activeShot } = $.learn()
   if(activeShot === 0) return
-  $.teach({ activeShot: activeShot - 1 })
+  $.teach({ activeShot: activeShot - 1, lastAction: 'back' })
 })
 
 
@@ -345,10 +345,10 @@ $.when('change', '[data-shot]', (event) => {
 $.when('click', '[data-next]', (event) => {
   const { shotCount, activeShot } = $.learn()
   if(activeShot === shotCount.length - 1) return
-  $.teach({ activeShot: activeShot + 1 })
+  $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
 })
 
-function getAction(html, { active = 0, start, end }) {
+function getAction(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const children = Array.from(wrapper.children)
@@ -358,7 +358,14 @@ function getAction(html, { active = 0, start, end }) {
 
   children[active].classList.add('active')
 
-  return children.slice(start, end).map(x => x.outerHTML).join('')
+  const slice = children.slice(start, end)
+  toVfx(slice, { width: 1920, height: 1080, forwards })
+  return slice.map(x => x.outerHTML).join('')
+}
+
+function toVfx(slice, options) {
+  console.log(slice)
+  console.log(options)
 }
 
 $.when('click', '[data-write]', (event) => {
@@ -366,9 +373,8 @@ $.when('click', '[data-write]', (event) => {
 })
 
 $.draw(target => {
-  const { activePanel, shotCount, activeShot } = $.learn()
+  const { activePanel, shotCount, activeShot, lastAction } = $.learn()
   const { file, html, embed } = sourceFile(target)
-
 
   const readonly = target.getAttribute('readonly')
 
@@ -386,7 +392,8 @@ $.draw(target => {
 
   const start = Math.max(activeShot - 1, 0)
   const end = Math.min(activeShot + 2, shotCount)
-  const action = getAction(html, { active: activeShot, start, end })
+  const forwards = lastAction !== 'back'
+  const action = getAction(html, { active: activeShot, forwards, start, end })
 
   const performanceActions = `
     <div name="navi"
@@ -564,6 +571,7 @@ $.style(`
     margin: 0 auto;
     padding: 0 1in;
     max-height: 100vh;
+    overflow: auto;
   }
   & [name="perform"] {
     background: black;
