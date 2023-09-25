@@ -402,6 +402,11 @@ $.draw(target => {
   const forwards = lastAction !== 'back'
   const motion = getMotion(html, { active: activeShot, forwards, start, end })
 
+  const readActions = `
+    <div name="navi">
+      <button data-print>Print</button>
+    </div>
+  `
   const performanceActions = `
     <div name="navi"
       ${activeShot === 0 ? 'data-first' : ''}
@@ -424,7 +429,6 @@ $.draw(target => {
           <button data-write>Write</button>
           <button data-read>Read</button>
           <button data-perform>Perform</button>
-          <button data-print>Print</button>
         </div>
       </div>
       <div name="write">
@@ -432,6 +436,7 @@ $.draw(target => {
       </div>
       <div name="read">
         ${html}
+        ${readActions}
       </div>
       <div name="perform">
         <div name="theater">
@@ -465,10 +470,9 @@ $.style(`
     max-width: 100%;
     position: absolute;
     bottom: 0;
-    left: 0;
     right: 0;
     z-index: 2;
-    display: flex;
+    display: inline-flex;
     justify-content: end;
   }
 
@@ -555,6 +559,7 @@ $.style(`
     transition: opacity 100ms;
     border-radius: 1rem;
     padding: 1rem;
+    margin: 0;
     background: white;
   }
 
