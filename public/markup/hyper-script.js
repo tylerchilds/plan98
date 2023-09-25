@@ -464,9 +464,9 @@ $.style(`
     overflow-x: auto;
     max-width: 100%;
     position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
+    bottom: 0;
+    left: 0;
+    right: 0;
     z-index: 2;
     display: flex;
     justify-content: end;
@@ -523,11 +523,10 @@ $.style(`
     position:relative;
     overflow: hidden;
     background: white;
-    width: 56.25%;
     aspect-ratio: 16/9;
     transform: translateY(-50%);
     top: 50%;
-    max-height: 100vh;
+    max-height: calc(100vh - 6rem);
     margin: auto;
   }
 
