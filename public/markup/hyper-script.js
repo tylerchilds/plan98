@@ -1,10 +1,16 @@
-const NORMAL_MODE = Symbol('normal')
-const KEY_VALUE_MODE = Symbol('key-value')
-const DYNAMIC_MODE = Symbol('dynamic')
+const panels = {
+	write: 'write',
+	read: 'read',
+	perform: 'perform',
+}
 
 const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
 
 export const compile = (script) => {
+	const NORMAL_MODE = Symbol('normal')
+	const KEY_VALUE_MODE = Symbol('key-value')
+	const DYNAMIC_MODE = Symbol('dynamic')
+
   const HyperText = {
     '#': append.bind({}, 'hypertext-address'),
     '@': append.bind({}, 'hypertext-character'),
@@ -300,7 +306,7 @@ $.when('input', 'textarea', (event) => {
 })
 
 $.when('click', '[data-read]', (event) => {
-  $.teach({ activePanel: 'read' })
+  $.teach({ nextPanel: panels.read })
 })
 
 $.when('click', '[data-print]', (event) => {
@@ -311,14 +317,16 @@ $.when('click', '[data-print]', (event) => {
 })
 
 $.when('click', '[data-perform]', (event) => {
-  const shotList = Array.from(
-    event.target.closest($.link).querySelector('[name="read"]').children
-  ).map(x => x.matches(notHiddenChildren))
+  const { html } = sourceFile(event.target)
+	const wrapper= document.createElement('div');
+  wrapper.innerHTML = html;
+  const shotList = Array.from(wrapper.children)
+    .filter(x => x.matches(notHiddenChildren))
 
   $.teach({
     shotCount: shotList.length,
     activeShot: 0,
-    activePanel: 'perform'
+    nextPanel: panels.perform
   })
 })
 
@@ -379,11 +387,12 @@ function reverse(beats) {
 }
 
 $.when('click', '[data-write]', (event) => {
-  $.teach({ activePanel: 'write' })
+  $.teach({ nextPanel: panels.write })
 })
 
 $.draw(target => {
-  const { activePanel, shotCount, activeShot, lastAction } = $.learn()
+	const { id } = target
+  const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file, html, embed } = sourceFile(target)
 
   const readonly = target.getAttribute('readonly')
@@ -405,43 +414,25 @@ $.draw(target => {
   const forwards = lastAction !== 'back'
   const motion = getMotion(html, { active: activeShot, forwards, start, end })
 
-  const readActions = `
-    <div name="navi">
-      <button data-print>Print</button>
-    </div>
-  `
-  const performanceActions = `
-    <div name="navi"
-      ${activeShot === 0 ? 'data-first' : ''}
-      ${activeShot === shotCount.length - 1 ? 'data-last' : ''}
-    >
-      <button data-back>
-        Back
-      </button>
-      <input data-shot type="text" value="${activeShot}"/>
-      <button data-next>
-        Next
-      </button>
-    </div>
-  `
-
-  return `
-    <div class="grid" data-panel="${activePanel}">
-      <div name="transport">
-        <div name="actions">
-          <button data-write>Write</button>
-          <button data-read>Read</button>
-          <button data-perform>Perform</button>
-        </div>
-      </div>
-      <div name="write">
+	const views = {
+		[panels.write]: () => `
+			<div name="write">
         <textarea>${escapedFile}</textarea>
       </div>
-      <div name="read">
+		`,
+		[panels.read]: () => `
+			<div name="read">
         ${html}
-        ${readActions}
+				<div name="navi">
+					<button data-print>Print</button>
+					<div name="print">
+						${embed}
+					</div>
+				</div>
       </div>
-      <div name="perform">
+    `,
+		[panels.perform]: () => `
+			<div name="perform">
         <div name="theater">
           <div name="screen">
             <div name="stage">
@@ -449,13 +440,53 @@ $.draw(target => {
             </div>
           </div>
         </div>
-        ${performanceActions}
+				<div name="navi"
+					${activeShot === 0 ? 'data-first' : ''}
+					${activeShot === shotCount.length - 1 ? 'data-last' : ''}
+				>
+					<button data-back>
+						Back
+					</button>
+					<input data-shot type="text" value="${activeShot}"/>
+					<button data-next>
+						Next
+					</button>
+				</div>
       </div>
-      <div name="print">
-        ${embed}
+    `,
+		'default': () => `
+			Nothing for ya. Head back to camp.
+    `
+	}
+
+	const view = (views[activePanel] || views['default'])()
+	const fadeOut = nextPanel && activePanel !== nextPanel
+
+	const perspective = `
+		<div class="grid" data-panel="${activePanel}">
+      <div name="transport">
+        <div name="actions">
+          <button data-write>Write</button>
+          <button data-read>Read</button>
+          <button data-perform>Perform</button>
+        </div>
       </div>
-    </div>
-  `
+			<transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
+				${view}
+			</transition>
+		</div>
+	`
+
+	target.innerHTML = perspective
+})
+
+$.when('animationend', 'transition', function transition({target}) {
+  const { activePanel, nextPanel, backPanel } = $.learn()
+	const current = nextPanel ? nextPanel : activePanel
+	const previous = activePanel !== backPanel ? backPanel : activePanel
+	$.teach({ activePanel: current, backPanel: previous })
+	target.scrollTop = '0'
+	document.activeElement.blur()
 })
 
 $.style(`
@@ -725,6 +756,38 @@ $.style(`
       overflow: auto;
     }
   }
+
+	& transition {
+		animation: &-fade-in ease-in-out 250ms;
+		display: grid;
+		height: 100%;
+		place-items: center;
+		width: 100%;
+	}
+
+
+	& transition > * {
+		width: 100%;
+		height: 100%;
+	}
+
+	& transition.out {
+		animation: &-fade-out ease-in-out 100ms;
+	}
+
+	@keyframes &-fade-in {
+		0% {
+		}
+		100% {
+		}
+	}
+
+	@keyframes &-fade-out {
+		0% {
+		}
+		100% {
+		}
+	}
 `)
 
 function hello() {
