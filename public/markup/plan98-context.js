@@ -1,6 +1,8 @@
 const $ = module('plan98-context')
 
 $.draw((target) => {
+  if(target.dataset.drawn) return
+  target.dataset.drawn = true
   const label = target.dataset.label || '...'
   return `
     <div>

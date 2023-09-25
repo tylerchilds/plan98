@@ -349,9 +349,9 @@ function getMotion(html, { active = 0, forwards, start, end }) {
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
 
-  children[active].dataset.active = true
   const slice = children.slice(start, end)
   if(slice.length === 0) return ''
+  children[active].dataset.active = true
 
   const options = { width: 1920, height: 1080, forwards }
   return toVfx(slice, options)
