@@ -189,7 +189,7 @@ function system(target) {
         </form>
       </div>
       <button aria-label="Switcher" class="switcher">
-        Z.
+        ℤ.
       </button>
       <div class="leaf">
         <iframe src="${window.location.href}?path=${path}"></iframe>
