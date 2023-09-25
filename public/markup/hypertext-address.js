@@ -5,5 +5,6 @@ $.style(`
     display: block;
     text-transform: uppercase;
     margin: 1rem 0;
+    place-self: start end;
   }
 `)

@@ -61,7 +61,7 @@ export const compile = (script) => {
       return HyperText[symbol](text.trim())
     }
 
-    return freetext(line)
+    return action(line)
   }
 
   function kvMode(line, separator=':') {
@@ -194,13 +194,8 @@ title-agent {
     width: 100%;
   }
 
-  hypertext-freetext,
   hypertext-blankline {
     display: block;
-  }
-
-  hypertext-freetext {
-    margin: 1rem 0;
   }
 
       </style>
@@ -250,8 +245,8 @@ title-agent {
     return string && string.replaceAll('\\', '<br>')
   }
 
-  function freetext(line) {
-    append('hypertext-freetext', line)
+  function action(line) {
+    append('hypertext-action', line)
   }
 
   function blank() {
@@ -348,24 +343,36 @@ $.when('click', '[data-next]', (event) => {
   $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
 })
 
-function getAction(html, { active = 0, forwards, start, end }) {
+function getMotion(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
 
-  if(children.length === 0) return ''
-
-  children[active].classList.add('active')
-
+  children[active].dataset.active = true
   const slice = children.slice(start, end)
-  toVfx(slice, { width: 1920, height: 1080, forwards })
-  return slice.map(x => x.outerHTML).join('')
+  if(slice.length === 0) return ''
+
+  const options = { width: 1920, height: 1080, forwards }
+  return toVfx(slice, options)
 }
 
 function toVfx(slice, options) {
-  console.log(slice)
-  console.log(options)
+  const beats = options.forwards ? slice : reverse(slice.reverse())
+  if(beats[0].matches(':not([data-active])')) {
+    beats[0].dataset.animateOut = true
+  }
+
+  if(beats[beats.length-1].matches(':not([data-active])')) {
+    beats[beats.length-1].dataset.animateIn = true
+  }
+
+  return (options.forwards ? beats : slice.reverse())
+            .map(x => x.outerHTML).join('')
+}
+
+function reverse(beats) {
+  return beats.map(x => {x.dataset.reverse = true; return x;})
 }
 
 $.when('click', '[data-write]', (event) => {
@@ -393,7 +400,7 @@ $.draw(target => {
   const start = Math.max(activeShot - 1, 0)
   const end = Math.min(activeShot + 2, shotCount)
   const forwards = lastAction !== 'back'
-  const action = getAction(html, { active: activeShot, forwards, start, end })
+  const motion = getMotion(html, { active: activeShot, forwards, start, end })
 
   const performanceActions = `
     <div name="navi"
@@ -430,7 +437,7 @@ $.draw(target => {
         <div name="theater">
           <div name="screen">
             <div name="stage">
-              ${action}
+              ${motion}
             </div>
           </div>
         </div>
@@ -535,7 +542,11 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: 0 1rem;
+    padding: 1rem;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    place-content: center;
+    background: #54796d;
   }
 
   & [name="stage"] > * {
@@ -543,11 +554,13 @@ $.style(`
     grid-area: stage;
     opacity: 0;
     transition: opacity 100ms;
-    place-self: center;
+    border-radius: 1rem;
+    padding: 1rem;
+    background: white;
   }
 
 
-  & [name="stage"] > *.active {
+  & [name="stage"] > *[data-active] {
     opacity: 1;
   }
 

@@ -4,5 +4,6 @@ $.style(`
   & {
     display: block;
     margin: 0 1in;
+    place-self: end center;
   }
 `)

@@ -4,6 +4,7 @@ $.style(`
   & {
     display: block;
     text-align: center;
+    place-self: center;
   }
 
   &::before {
