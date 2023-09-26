@@ -177,7 +177,7 @@ export const compile = (script) => {
 
 const $ = module('hyper-script', {
   file: 'booting...',
-  activePanel: 'write',
+  activePanel: panels.write,
   activeShot: 0,
   shotCount: 0
 })
@@ -565,6 +565,14 @@ $.style(`
   & [data-panel="perform"] [name="perform"],
   & [data-panel="write"] [name="write"] {
     display: block;
+  }
+
+  & [data-panel="read"] [data-read],
+  & [data-panel="perform"] [data-perform],
+  & [data-panel="write"] [data-write] {
+    background: dodgerblue;
+    color: black;
+    cursor: default;
   }
 
   & [name="read"] {

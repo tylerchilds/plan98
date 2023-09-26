@@ -115,8 +115,8 @@ const Types = {
     icon: '/cdn/plan98/firefox.png',
     type: 'Directory',
     actions: [
-      ['data-nest', 'Create Nest'],
-      ['data-egg', 'Create Egg'],
+      ['data-bag', 'Create Bag'],
+      ['data-trifle', 'Create Trifle'],
       ['data-move', 'Move'],
       ['data-remove', 'Remove']
     ]
@@ -376,9 +376,9 @@ $.when('click', '[data-remove]', ({ target }) => {
   alert('remove')
 })
 
-$.when('click', '[data-nest]', ({ target }) => {
+$.when('click', '[data-bag]', ({ target }) => {
   const { path } = target.dataset
-  alert('nest')
+  alert('bag')
 })
 
 $.when('click', '[data-egg]', ({ target }) => {
