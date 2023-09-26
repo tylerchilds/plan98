@@ -350,7 +350,7 @@ function menuFor(tree, path) {
 }
 
 $.when('click', '[data-reset]', ({target}) => {
-  const { cwc } = target.closest('[data-cwc]').dataset
+  const { cwc } = target.closest('plan98-filesystem').dataset
   factoryReset(cwc)
 })
 
