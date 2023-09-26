@@ -403,7 +403,12 @@ $.draw(target => {
 		</div>
 	`
 
-	target.innerHTML = perspective
+  if(activePanel === panels.perform) {
+    target.innerHTML = perspective
+    return
+  }
+
+  return perspective
 })
 
 $.when('animationend', 'transition', function transition({target}) {
