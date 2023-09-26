@@ -208,8 +208,13 @@ function floppy(target) {
 
   if(content.type === Types.File.type) {
 		const readonly = parameters.get('readonly')
+		const presentation = parameters.get('presentation')
     return `
-      <hyper-script src="ls${path}" ${readonly ? 'readonly="true"' : ''}></hyper-script>
+      <hyper-script
+        src="ls${path}"
+        ${readonly ? 'readonly="true"' : ''}
+        ${presentation ? 'presentation="true"' : ''}
+      ></hyper-script>
     `
   }
 

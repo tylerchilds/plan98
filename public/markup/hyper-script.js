@@ -307,10 +307,11 @@ $.when('click', '[data-write]', (event) => {
 
 $.draw(target => {
 	const { id } = target
-  const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
+  let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file, html, embed } = sourceFile(target)
 
   const readonly = target.getAttribute('readonly')
+  const presentation = target.getAttribute('presentation')
 
   if(readonly) {
     return `
@@ -318,6 +319,10 @@ $.draw(target => {
 				${html}
 			</div>
 		`
+  }
+
+  if(presentation) {
+    activePanel = panels.perform
   }
 
   const escapedFile = escapeHyperText(file)
