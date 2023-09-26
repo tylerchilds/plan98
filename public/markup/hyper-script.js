@@ -77,7 +77,6 @@ export const compile = (script) => {
 
     if(!value) {
       if(isolate.scope === 'screenplay') {
-        headers()
         title()
       }
       return setMode(NORMAL_MODE)
@@ -113,101 +112,6 @@ export const compile = (script) => {
 
   function resetAttributes(x) {
     state[x] = {}
-  }
-
-  function headers() {
-    const {
-      title,
-      author,
-    } = state[isolate.scope]
-
-    const html = `
-      <style>
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-body {
-  font-size: 12pt;
-  font-family: courier;
-  margin: 0 auto;
-}
-
-@media print {
-  html, body {
-    height: 100%;
-    padding: 0;
-  }
-}
-
-
-@page {
-  size: 8.5in 11in;
-  margin: 1in 1in 1in 1.5in;
-}
-
-@page {
-  @top-right {
-    content: counter(page) '.';
-  }
-}
-
-@page:first {
-  @top-right {
-    content: '';
-  }
-}
-
-title-cover {
-  display: grid;
-  grid-template-areas:
-    "main main"
-    "contact agent";
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr auto;
-  width: 100%;
-  height: 100%;
-}
-
-title-main {
-  place-self: center;
-  grid-area: main;
-  text-align: center;
-}
-
-title-title {
-  margin-bottom: 1rem;
-}
-
-title-title,
-title-author {
-  display: block;
-}
-
-title-contact {
-  grid-area: contact;
-}
-
-title-agent {
-  grid-area: agent;
-}
-
-  hypertext-title {
-    display: block;
-    height: 100%;
-    width: 100%;
-  }
-
-  hypertext-blankline {
-    display: block;
-  }
-
-      </style>
-    `
-
-    isolate.result += html
   }
 
   function title() {
@@ -324,7 +228,7 @@ $.when('click', '[data-perform]', (event) => {
     .filter(x => x.matches(notHiddenChildren))
 
   $.teach({
-    shotCount: shotList.length,
+    shotCount: shotList.length - 1,
     activeShot: 0,
     nextPanel: panels.perform
   })
@@ -338,16 +242,20 @@ $.when('click', '[data-back]', (event) => {
 
 
 $.when('change', '[data-shot]', (event) => {
-  const { shotCount } = $.learn()
+  const { activeShot, shotCount } = $.learn()
   const { value } = event.target
-  const activeShot = parseInt(value)
-  if(value < 0 || activeShot > shotCount.length - 1) return
-  $.teach({ activeShot })
+  const nextShot = parseInt(value)
+  if(value < 0 || activeShot > shotCount){ 
+		// keep existing
+		$.teach({ activeShot })
+		return
+	}
+  $.teach({ activeShot: nextShot })
 })
 
 $.when('click', '[data-next]', (event) => {
   const { shotCount, activeShot } = $.learn()
-  if(activeShot === shotCount.length - 1) return
+  if(activeShot > shotCount) return
   $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
 })
 
@@ -357,12 +265,14 @@ function getMotion(html, { active = 0, forwards, start, end }) {
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
 
+	if(children[active]) {
+		children[active].dataset.active = true
+	}
   const slice = children.slice(start, end).map(x => {
     x.setAttribute('name','beat')
     return x
   })
   if(slice.length === 0) return ''
-  children[active].dataset.active = true
 
   const options = { width: 1920, height: 1080, forwards }
   return toVfx(slice, options)
@@ -398,7 +308,11 @@ $.draw(target => {
   const readonly = target.getAttribute('readonly')
 
   if(readonly) {
-    return html
+    return `
+			<div name="page">
+				${html}
+			</div>
+		`
   }
 
   const escapedFile = escapeHyperText(file)
@@ -422,7 +336,9 @@ $.draw(target => {
 		`,
 		[panels.read]: () => `
 			<div name="read">
-        ${html}
+				<div name="page">
+					${html}
+				</div>
 				<div name="navi">
 					<button data-print>Print</button>
 					<div name="print">
@@ -442,12 +358,12 @@ $.draw(target => {
         </div>
 				<div name="navi"
 					${activeShot === 0 ? 'data-first' : ''}
-					${activeShot === shotCount.length - 1 ? 'data-last' : ''}
+					${activeShot === shotCount ? 'data-last' : ''}
 				>
 					<button data-back>
 						Back
 					</button>
-					<input data-shot type="text" value="${activeShot}"/>
+					<input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
 					<button data-next>
 						Next
 					</button>
@@ -490,6 +406,31 @@ $.when('animationend', 'transition', function transition({target}) {
 })
 
 $.style(`
+	@media print {
+		html, body {
+			height: 100%;
+			padding: 0;
+		}
+	}
+
+
+	@page {
+		size: 8.5in 11in;
+		margin: 1in 1in 1in 1.5in;
+	}
+
+	@page {
+		@top-right {
+			content: counter(page) '.';
+		}
+	}
+
+	@page:first {
+		@top-right {
+			content: '';
+		}
+	}
+
   & {
     overflow: auto;
   }
@@ -618,12 +559,16 @@ $.style(`
 
   & [name="read"] {
     background: white;
-    height: 100%;
-    max-width: 8.5in;
-    margin: 0 auto;
+		margin: 0 auto;
     padding: 0 1in;
-    max-height: 100vh;
+    max-width: 8.5in;
     overflow: auto;
+	}
+  & [name="page"] {
+		font-size: 12pt;
+		font-family: courier;
+    height: 100%;
+    max-height: 100vh;
   }
   & [name="perform"] {
     background: black;
@@ -758,7 +703,7 @@ $.style(`
   }
 
 	& transition {
-		animation: &-fade-in ease-in-out 250ms;
+		animation: &-fade-in ease-in-out 1ms;
 		display: grid;
 		height: 100%;
 		place-items: center;
@@ -772,7 +717,7 @@ $.style(`
 	}
 
 	& transition.out {
-		animation: &-fade-out ease-in-out 100ms;
+		animation: &-fade-out ease-in-out 1ms;
 	}
 
 	@keyframes &-fade-in {
@@ -788,6 +733,52 @@ $.style(`
 		100% {
 		}
 	}
+
+
+
+	& title-cover {
+		display: grid;
+		grid-template-areas:
+			"main main"
+			"contact agent";
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: 1fr auto;
+		width: 100%;
+		height: 100%;
+	}
+
+	& title-main {
+		place-self: center;
+		grid-area: main;
+		text-align: center;
+	}
+
+	& title-title {
+		margin-bottom: 1rem;
+	}
+
+	& title-title,
+	& title-author {
+		display: block;
+	}
+
+	& title-contact {
+		grid-area: contact;
+	}
+
+	& title-agent {
+		grid-area: agent;
+	}
+
+	&	hypertext-title {
+			display: block;
+			height: 100%;
+			width: 100%;
+		}
+
+	&	hypertext-blankline {
+			display: block;
+		}
 `)
 
 function hello() {
