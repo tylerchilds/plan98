@@ -245,9 +245,14 @@ $.when('change', '[data-shot]', (event) => {
   const { activeShot, shotCount } = $.learn()
   const { value } = event.target
   const nextShot = parseInt(value)
-  if(value < 0 || activeShot > shotCount){ 
+  if(nextShot < 0) {
+		$.teach({ activeShot: 0 })
+		return
+	}
+
+	if(nextShot >= shotCount){ 
 		// keep existing
-		$.teach({ activeShot })
+		$.teach({ activeShot: shotCount })
 		return
 	}
   $.teach({ activeShot: nextShot })
@@ -583,6 +588,16 @@ $.style(`
     width: 100%;
     height: 100%;
   }
+
+	& input[type="number"]::-webkit-outer-spin-button,
+	& input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+	}
+
+	& input[type="number"] {
+		-moz-appearance: textfield;
+	}
 
   & textarea {
     width: 100%;
