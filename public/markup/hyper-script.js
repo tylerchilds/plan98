@@ -1,50 +1,60 @@
+// panels are the names of views or screens displayed in the user interface
+// people complete three primary actions in the utility
 const panels = {
+  // write to compose hype
 	write: 'write',
+  // read to remember your lines
 	read: 'read',
+  // perform to have a guide in real-time
 	perform: 'perform',
 }
 
+// define source code related artifacts that should not be displayed
 const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
 
+// the compile function takes a Hype script and converts it to hypertext
 export const compile = (script) => {
+  // normal mode converts lines 1:1 from hype to hypertext
 	const NORMAL_MODE = Symbol('normal')
-	const KEY_VALUE_MODE = Symbol('key-value')
-	const DYNAMIC_MODE = Symbol('dynamic')
+  // variables are able to be stored
+	const VARIABLES_MODE = Symbol('variables')
+  // tag embeds rich hyper media content
+	const TAG_MODE = Symbol('tag')
 
-  const HyperText = {
+  const RuneTable = {
+    '!': append.bind({}, 'hypertext-comment'),
     '#': append.bind({}, 'hypertext-address'),
     '@': append.bind({}, 'hypertext-character'),
-    '"': append.bind({}, 'hypertext-quote'),
+    '>': append.bind({}, 'hypertext-quote'),
     '(': append.bind({}, 'hypertext-parenthetical'),
-    '!': append.bind({}, 'hypertext-comment'),
     '^': append.bind({}, 'hypertext-effect'),
-    '<': plugin,
-    '{': scope,
+    '<': markup,
+    '{': variables,
   }
 
-  function scope(type) {
+  function variables(type) {
     setScope(type)
     resetAttributes(type)
-    setMode(KEY_VALUE_MODE)
+    setMode(VARIABLES_MODE)
   }
 
-  function plugin(x) {
-    setPlugin(x)
+  function markup(x) {
+    setTag(x)
     resetAttributes(x)
-    setMode(DYNAMIC_MODE)
+    setMode(TAG_MODE)
   }
 
-  const symbols = Object.keys(HyperText)
+  const runes = Object.keys(RuneTable)
 
   const modes = {
     [NORMAL_MODE]: normalMode,
-    [KEY_VALUE_MODE]: kvMode,
-    [DYNAMIC_MODE]: dynamicMode,
+    [VARIABLES_MODE]: variablesMode,
+    [TAG_MODE]: tagMode,
   }
 
   const isolate = {
-    scope: 'global',
-    plugin: '',
+    variables: 'global',
+    tag: '',
     mode: NORMAL_MODE,
     result: ``
   }
@@ -60,32 +70,29 @@ export const compile = (script) => {
   function normalMode(line) {
     if(!line) return blank()
 
-    const symbol = line[0]
+    const rune = line[0]
 
-    if(symbols.includes(symbol)) {
-      const [_, text] = line.split(symbol)
-      return HyperText[symbol](text.trim())
+    if(runes.includes(rune)) {
+      const [_, text] = line.split(rune)
+      return RuneTable[rune](text.trim())
     }
 
     return action(line)
   }
 
-  function kvMode(line, separator=':') {
+  function variablesMode(line, separator=':') {
     const index = line.indexOf(separator)
     const key = line.substring(0, index)
     const value = line.substring(index+1)
 
     if(!value) {
-      if(isolate.scope === 'screenplay') {
-        title()
-      }
       return setMode(NORMAL_MODE)
     }
 
-    state[isolate.scope][key.trim()] = value.trim()
+    state[isolate.variables][key.trim()] = value.trim()
   }
 
-  function dynamicMode(line, separator=':') {
+  function tagMode(line, separator=':') {
     const index = line.indexOf(separator)
     const key = line.substring(0, index)
     const value = line.substring(index+1)
@@ -95,7 +102,7 @@ export const compile = (script) => {
       return setMode(NORMAL_MODE)
     }
 
-    state[isolate.plugin][key.trim()] = value.trim()
+    state[isolate.tag][key.trim()] = value.trim()
   }
 
   function setMode(m) {
@@ -103,56 +110,23 @@ export const compile = (script) => {
   }
 
   function setScope(s) {
-    isolate.scope = s
+    isolate.variables = s
   }
 
-  function setPlugin(d) {
-    isolate.plugin = d
+  function setTag(d) {
+    isolate.tag = d
   }
 
   function resetAttributes(x) {
     state[x] = {}
   }
-
-  function title() {
-    const {
-      title,
-      author,
-      contact,
-      agent
-    } = state[isolate.scope]
-
-    append('hypertext-title', `
-      <title-cover>
-        <title-main>
-          <title-title>
-            ${title}
-          </title-title>
-          by
-          <title-author>
-            ${author}
-          </title-author>
-        </title-main>
-        <title-contact>
-          ${markup(contact) || '' }
-        </title-contact>
-        <title-agent>
-          ${markup(agent) || '' }
-        </title-agent>
-      </title-cover>
-    `)
-  }
   function embed() {
-    const properties = state[isolate.plugin]
+    const properties = state[isolate.tag]
 
     const attributes = Object.keys(properties)
       .map(x => `${x}="${properties[x]}"`).join('')
 
-    isolate.result += `<${isolate.plugin} ${attributes}></${isolate.plugin}>`
-  }
-
-  function markup(string) {
-    return string && string.replaceAll('\\', '<br>')
+    isolate.result += `<${isolate.tag} ${attributes}></${isolate.tag}>`
   }
 
   function action(line) {
@@ -768,41 +742,6 @@ $.style(`
 	}
 
 
-
-	& title-cover {
-		display: grid;
-		grid-template-areas:
-			"main main"
-			"contact agent";
-		grid-template-columns: 1fr 1fr;
-		grid-template-rows: 1fr auto;
-		width: 100%;
-		height: 100%;
-	}
-
-	& title-main {
-		place-self: center;
-		grid-area: main;
-		text-align: center;
-	}
-
-	& title-title {
-		margin-bottom: 1rem;
-	}
-
-	& title-title,
-	& title-author {
-		display: block;
-	}
-
-	& title-contact {
-		grid-area: contact;
-	}
-
-	& title-agent {
-		grid-area: agent;
-	}
-
 	&	hypertext-title {
 			display: block;
 			height: 100%;
@@ -815,7 +754,7 @@ $.style(`
 `)
 
 function hello() {
-  return `{ screenplay
+  return `<title-page
 title: Sillonious
 author: Ty
 
@@ -827,16 +766,16 @@ author: Ty
 In the computer. Like Zoolander. Like Owen Wilson's character's understanding of in the computer. Ty wears three shirts and three hats. Left wears a blue shirt and hat. Right wears a red shirt and hat. Front wears a green shirt and hat.
 
 @ Ty
-" Welcome.
+> Welcome.
 
 @ Left
-" See. I said it could.
+> See. I said it could.
 
 @ Right
-" It wasn't easy.
+> It wasn't easy.
 
 @ Front
-" Whatever, I can sell it.
+> Whatever, I can sell it.
 
 <hyper-link
 src: /home
