@@ -1,5 +1,6 @@
 const emptyReddit = {
   children: [],
+  choices: [],
   position: 0,
   after: "",
   before: ""
@@ -18,15 +19,37 @@ $.when('click', '.back', step(-1))
 $.when('click', '.next', step(+1))
 $.when('change', '[name="subs"]', function() {
   const { value } = event.target
-  $.teach({ choices: value.split(',') })
+  $.teach({ choices: value.split('+') })
 })
 
-$.draw(target => {
-  const { children = [], loading, position } = query(target)
+$.when('click', '.full', function() {
+  const { id } = event.target.dataset
+  fullscreen(document.getElementById(id).querySelector('figure'))
+})
 
-  return `
-      <input type="text" name="subs">
+function fullscreen(target) {
+  if (!document.fullscreenElement &&    // alternative standard method
+    !document.mozFullScreenElement && !document.webkitFullscreenElement) {  // current working methods
+    if (target.requestFullscreen) {
+      target.requestFullscreen();
+    } else if (target.mozRequestFullScreen) {
+      target.mozRequestFullScreen();
+    } else if (target.webkitRequestFullscreen) {
+      target.webkitRequestFullscreen(true);
+    }
+  }
+}
+
+$.draw(target => {
+  const r = target.getAttribute('r') || ''
+  const { choices=[r] } = $.learn()
+  const { children = [], loading, position } = query(target, choices)
+  const value = choices.join('+')
+
+  return children.length > 0 ? `
+    <div class="frame">
       <div class="controls">
+        <input type="text" name="subs" value="${value}">
         <button class="reset" data-id="${target.id}">Reset</button>
         <button class="more" data-id="${target.id}">Go Deeper</button>
         <button class="back" data-id="${target.id}">
@@ -35,11 +58,20 @@ $.draw(target => {
         <button class="next" data-id="${target.id}">
           Next
         </button>
+        <button class="full" data-id="${target.id}">
+          Full
+        </button>
       </div>
       <figure class="${loading ? 'loading' : ''}">
         ${renderPost(children[position].data)}
       </figure>
-    `
+    </div>
+  ` : `
+    <div>
+      <input type="text" name="subs" value="${value}">
+      ... nothing... yet?
+    </div>
+  `
 })
 
 function renderPost(data) {
@@ -98,6 +130,12 @@ $.style(`
       max-height: 100%;
     }
 
+    & .frame {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      height: 100%;
+    }
+
     & .loading {
       opacity: .5;
       pointer-events: none;
@@ -139,11 +177,9 @@ $.style(`
     }
   `)
 
-function query(target) {
+function query(target, choices) {
   const state = redditById(target.id)
 
-  const r = target.getAttribute('r') || ''
-  const { choices=[r] } = $.learn()
   const sort = target.getAttribute('sort') || ''
   const { paginate } = state
 

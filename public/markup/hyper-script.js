@@ -525,6 +525,7 @@ $.style(`
     padding: 1rem;
     margin: 0;
     background: white;
+    overflow: auto;
   }
 
 
