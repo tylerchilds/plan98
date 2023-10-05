@@ -1,5 +1,17 @@
+/*
+    !
+  #
+    ^
+   <@>
+    &{
+
+  https://sillyz.computer/markup/hyper-script.js
+
+  - notorious sillonious
+  mit license. <email@tychi.me> 1989-current
+*/
+
 // panels are the names of views or screens displayed in the user interface
-// people complete three primary actions in the utility
 const panels = {
   // write to compose hype
 	write: 'write',
@@ -10,140 +22,171 @@ const panels = {
 }
 
 // define source code related artifacts that should not be displayed
+// todo: cross browser, eliminate the :not selector cause .matches in js throws
 const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
+
+// normal time converts lines 1:1 from hype to hypertext
+const NORMAL_TIME = Symbol('n-time')
+// prop are able to be stored
+const PROP_TIME = Symbol('p-time')
+// costume embeds rich hyper media content
+const COSTUME_TIME = Symbol('c-time')
 
 // the compile function takes a Hype script and converts it to hypertext
 export const compile = (script) => {
-  // normal mode converts lines 1:1 from hype to hypertext
-	const NORMAL_MODE = Symbol('normal')
-  // variables are able to be stored
-	const VARIABLES_MODE = Symbol('variables')
-  // tag embeds rich hyper media content
-	const TAG_MODE = Symbol('tag')
+  // as costumes are worn their attributes may become modified
+  const costumes = {}
+  // as props are used their attributes may become modified
+  const props = {}
+  // state changes cause time dilations, like customizing costumes and props
+  let time = NORMAL_TIME
+  // what model
+  let prop = ''
+  // what perspective
+  let costume = ''
+  // what display
+  let exhibit = ''
 
+  // advanced-technology something magic whatever runes are a metaphor
   const RuneTable = {
+    // comments, like this one you're reading now, are not for the audience
     '!': append.bind({}, 'hypertext-comment'),
+    // addresses are space time locations where events and discussions happen
     '#': append.bind({}, 'hypertext-address'),
-    '@': append.bind({}, 'hypertext-character'),
-    '>': append.bind({}, 'hypertext-quote'),
-    '(': append.bind({}, 'hypertext-parenthetical'),
+    // effects are the post production manipulations for aesthetic
     '^': append.bind({}, 'hypertext-effect'),
-    '<': markup,
-    '{': variables,
+    // puppets are the performers of parenthetical prose
+    '@': append.bind({}, 'hypertext-puppet'),
+    // quotes are verbatim messages from puppets or the mind of sillonious
+    '>': append.bind({}, 'hypertext-quote'),
+    // parentheticals are subtext of expression
+    '&': append.bind({}, 'hypertext-parenthetical'),
+    // props are able to change truths about the very facet of reality
+    '{': (x) => {
+      // clear whichever prop from the stash
+      props[x] = {}
+      // use whatever prop
+      prop = x
+      // what time is it? prop time!
+      time = PROP_TIME
+    },
+    // costumes are able to display projections beyond black and white text
+    '<': (x) => {
+      // clear whichever costume from the stash
+      costumes[x] = {}
+      // use whatever costume
+      costume = x
+      // what time is it? costume time!
+      time = COSTUME_TIME
+    }
   }
 
-  function variables(type) {
-    setScope(type)
-    resetAttributes(type)
-    setMode(VARIABLES_MODE)
+  // mapping our concept of time to the atomic execution units underneath
+  const times = {
+    // line by line until finished
+    [NORMAL_TIME]: normalTime,
+    // accesses prop and stores key value pairs after sequence break
+    [PROP_TIME]: propTime,
+    // accesses costume and embeds key value pairs after sequence break
+    [COSTUME_TIME]: costumeTime,
   }
 
-  function markup(x) {
-    setTag(x)
-    resetAttributes(x)
-    setMode(TAG_MODE)
-  }
-
-  const runes = Object.keys(RuneTable)
-
-  const modes = {
-    [NORMAL_MODE]: normalMode,
-    [VARIABLES_MODE]: variablesMode,
-    [TAG_MODE]: tagMode,
-  }
-
-  const isolate = {
-    variables: 'global',
-    tag: '',
-    mode: NORMAL_MODE,
-    result: ``
-  }
-
+  // collect the lines of our script
   const lines = script.split('\n')
 
+  // loop over our lines one at a time
   for (const line of lines) {
-    (modes[isolate.mode] || noop)(line)
+    // and evaluating now and the times, process our line in the now time
+    (times[time] || noop)(line)
   }
 
-  return isolate.result
+  // return our compiled hyper media exhibit
+  return exhibit
 
-  function normalMode(line) {
-    if(!line) return blank()
+  // just process our runes, yes magic, just straight forward level 1 magic
+  function normalTime(line) {
+    // anything here?
+    if(!line) {
+      // drop some invisible hype
+      append("hypertext-blankline", "")
+      // normal time is over
+      return
+    }
 
+    // the rune will always be the first glyph
     const rune = line[0]
 
-    if(runes.includes(rune)) {
+    // however, the first glyph won't always be a rune.
+    if(Object.keys(RuneTable).includes(rune)) {
+      // decouple the incantation from the rune
       const [_, text] = line.split(rune)
+      // apply the rune from the table with the spell
       return RuneTable[rune](text.trim())
     }
 
-    return action(line)
-  }
-
-  function variablesMode(line, separator=':') {
-    const index = line.indexOf(separator)
-    const key = line.substring(0, index)
-    const value = line.substring(index+1)
-
-    if(!value) {
-      return setMode(NORMAL_MODE)
-    }
-
-    state[isolate.variables][key.trim()] = value.trim()
-  }
-
-  function tagMode(line, separator=':') {
-    const index = line.indexOf(separator)
-    const key = line.substring(0, index)
-    const value = line.substring(index+1)
-
-    if(!value) {
-      embed()
-      return setMode(NORMAL_MODE)
-    }
-
-    state[isolate.tag][key.trim()] = value.trim()
-  }
-
-  function setMode(m) {
-    isolate.mode = m
-  }
-
-  function setScope(s) {
-    isolate.variables = s
-  }
-
-  function setTag(d) {
-    isolate.tag = d
-  }
-
-  function resetAttributes(x) {
-    state[x] = {}
-  }
-  function embed() {
-    const properties = state[isolate.tag]
-
-    const attributes = Object.keys(properties)
-      .map(x => `${x}="${properties[x]}"`).join('')
-
-    isolate.result += `<${isolate.tag} ${attributes}></${isolate.tag}>`
-  }
-
-  function action(line) {
+    // drop some actionable hype
     append('hypertext-action', line)
+    // normal time is over
+    return
   }
 
-  function blank() {
-    append("hypertext-blankline", "")
+  // process the sequence to understand our prop's, well, props.
+  function propTime(line, separator=':') {
+    // where in the line is our break
+    const index = line.indexOf(separator)
+    // before then is the attribute
+    const key = line.substring(0, index)
+    // after then is the data
+    const value = line.substring(index+1)
+
+    // no data?
+    if(!value) {
+      // back to normal time
+      time = NORMAL_TIME
+      return
+    }
+
+    // update our prop of prop of props
+    props[prop][key.trim()] = value.trim()
   }
 
-  function append(tag, content) {
-    const html = `
-      <${tag}>
-        ${content}
-      </${tag}>
+  // process the sequence to understand our costume's props.
+  function costumeTime(line, separator=':') {
+    // where in the line is our break
+    const index = line.indexOf(separator)
+    // before then is the attribute
+    const key = line.substring(0, index)
+    // after then is the data
+    const value = line.substring(index+1)
+
+    // no data?
+    if(!value) {
+      // collect the properties from our costume
+      const properties = costumes[costume]
+
+      // convert them into hype attributes
+      const attributes = Object.keys(properties)
+        .map(x => `${x}="${properties[x]}"`).join('')
+
+      // add some hype to our exhibit
+      exhibit += `<${costume} ${attributes}></${costume}>`
+
+      // back to normal time
+      time = NORMAL_TIME
+      return
+    }
+
+    // set the 
+    costumes[costume][key.trim()] = value.trim()
+  }
+
+  function append(costume, body) {
+    const hype = `
+      <${costume}>
+        ${body}
+      </${costume}>
     `
-    isolate.result += html
+    exhibit += hype
   }
 
   function noop() {}
@@ -166,7 +209,7 @@ function sourceFile(target) {
     ? state[src]
     : (function initialize() {
       state[src] = {
-        file: hello(),
+        file: script404(),
         html: '&hearts;',
         embed: ';)'
       }
@@ -385,6 +428,18 @@ $.draw(target => {
   return perspective
 })
 
+function escapeHyperText(text) {
+  return text.replace(/[&<>'"]/g, 
+    costume => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[costume])
+  )
+}
+
 $.when('animationend', 'transition', function transition({target}) {
   const { activePanel, nextPanel, backPanel } = $.learn()
 	const current = nextPanel ? nextPanel : activePanel
@@ -393,6 +448,75 @@ $.when('animationend', 'transition', function transition({target}) {
 	target.scrollTop = '0'
 	document.activeElement.blur()
 })
+
+function script404() {
+  return `<title-page
+title: Sillonious
+author: Ty
+
+! This feels like a fuzzy dream sequence with everything over exposed except the colors red, blue, and green.
+
+^ fade in
+
+# Int. Computer
+In the computer. Like Zoolander. Like Owen Wilson's character's understanding of in the computer. Ty wears three shirts and three hats. Left wears a blue shirt and hat. Right wears a red shirt and hat. Front wears a green shirt and hat.
+
+@ Ty
+> Welcome.
+
+@ Left
+> See. I said it could.
+
+@ Right
+> It wasn't easy.
+
+@ Front
+> Whatever, I can sell it.
+
+<hyper-link
+src: /home
+label: ok
+
+aww
+
+<greet-friend
+x: Victoria
+y: es_ES
+
+ok
+
+<hello-world
+
+<hello-nickname
+
+<hello-universe
+
+<hypertext-variable
+text: hello world
+weight: 800
+size: 2rem
+height: 6
+
+<rainbow-action
+text: sup
+prefix: <button>
+suffix: </button>
+
+<hypertext-highlighter
+text: this is yellow
+color: yellow
+
+<sillyz-gamepad
+
+<sillyz-guitar
+
+<sillyz-synth
+
+<sillyz-piano
+
+# the end.
+`
+}
 
 $.style(`
 	@media print {
@@ -754,83 +878,3 @@ $.style(`
 		}
 `)
 
-function hello() {
-  return `<title-page
-title: Sillonious
-author: Ty
-
-! This feels like a fuzzy dream sequence with everything over exposed except the colors red, blue, and green.
-
-^ fade in
-
-# Int. Computer
-In the computer. Like Zoolander. Like Owen Wilson's character's understanding of in the computer. Ty wears three shirts and three hats. Left wears a blue shirt and hat. Right wears a red shirt and hat. Front wears a green shirt and hat.
-
-@ Ty
-> Welcome.
-
-@ Left
-> See. I said it could.
-
-@ Right
-> It wasn't easy.
-
-@ Front
-> Whatever, I can sell it.
-
-<hyper-link
-src: /home
-label: ok
-
-aww
-
-<greet-friend
-x: Victoria
-y: es_ES
-
-ok
-
-<hello-world
-
-<hello-nickname
-
-<hello-universe
-
-<hypertext-variable
-text: hello world
-weight: 800
-size: 2rem
-height: 6
-
-<rainbow-action
-text: sup
-prefix: <button>
-suffix: </button>
-
-<hypertext-highlighter
-text: this is yellow
-color: yellow
-
-<sillyz-gamepad
-
-<sillyz-guitar
-
-<sillyz-synth
-
-<sillyz-piano
-
-# the end.
-`
-}
-
-function escapeHyperText(text) {
-  return text.replace(/[&<>'"]/g, 
-    tag => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[tag])
-  )
-}

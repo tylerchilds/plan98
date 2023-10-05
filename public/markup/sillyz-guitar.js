@@ -14,22 +14,20 @@ const registers = [
   "     ",
 
   "x    ",
-  "x   x",
-
   " x   ",
-  " x  x",
-
   "  x  ",
-  "  x x",
-
   "   x ",
-  "   xx",
+  "    x",
 
   "xx   ",
-  "xx  x",
-
   " xx  ",
-  " xx x",
+  "  xx ",
+  "   xx",
+
+  "xxx  ",
+  " xxx ",
+  "  xxx",
+
   "x x x",
   "xxxxx"
 ]

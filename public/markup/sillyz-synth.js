@@ -40,7 +40,7 @@ const $ = module('sillyz-synth', {
 	synth: 0
 })
 
-const strumVelocity = 75
+const strumVelocity = 15
 const sustainedDuration = 100
 const actionableFPS = 4 
 
@@ -123,28 +123,45 @@ function release (event) {
 
 const chords = [
   [],
+  // C Major Blues Scale: C, D, D#, E, G, A
+  [0, 7, 8, 9, 1, 3],
 
-  [0, 4, 1], // c major: c - e - g
-  [0, 9, 1], // c minor: c - eb - g
+  // G Major Blues Scale: G, A, A#, B, D, E
+  [1, 8, 9, 10, 2, 4],
 
-  [1, 5, 2], // g major: g - b - d
-  [1, 10, 2], // g minor: g - bb - d
+  // D Major Blues Scale: D, E, F, F#, A, B
+  [2, 9, 10, 11, 3, 5],
 
-  [2, 6, 3], // d major: d - f# - a
-  [2, 11, 3], // d minor: d - f - a
+  // A Major Blues Scale: A, B, C, C#, E, F#
+  [3, 10, 11, 0, 4, 6],
 
-  [4, 8, 5], // e major: e - g# - b
-  [4, 2, 5], // e minor: e - g - b
+  // E Major Blues Scale: E, F#, G, G#, B, C#
+  [4, 11, 0, 1, 5, 7],
 
-  [3, 9, 4], // a major: a - c# - e
-  [3, 0, 4], // a minor: a - c - e
+  // B Major Blues Scale: B, C#, D, D#, F#, G#
+  [5, 0, 1, 2, 6, 8],
 
-  [11, 3, 0], // f major: f - a - c
-  [11, 8, 0], // f minor: f - ab - c
-  
+  // F# Major Blues Scale: F#, G#, A, A#, C#, D#
+  [6, 1, 2, 3, 7, 9],
+
+  // Db Major Blues Scale: Db, E, F, Gb, Ab, Bb
+  [7, 2, 3, 4, 8, 10],
+
+  // Ab Major Blues Scale: Ab, Bb, C, Db, Eb, Gb
+  [8, 3, 4, 5, 9, 11],
+
+  // Eb Major Blues Scale: Eb, F, Gb, G, Bb, C
+  [9, 4, 5, 6, 10, 0],
+
+  // Bb Major Blues Scale: Bb, C, Db, D, F, G
+  [10, 5, 6, 7, 11, 1],
+
+  // F Major Blues Scale: F, G, Ab, A, C, D
+  [11, 6, 7, 8, 0, 2],
+
   [],// octave picker
   [] // pitch picker
-]
+];
 
 let activeSynths = []
 let activeRegister = 0

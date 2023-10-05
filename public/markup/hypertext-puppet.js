@@ -1,4 +1,4 @@
-const $ = module('hypertext-character')
+const $ = module('hypertext-puppet')
 
 $.style(`
   & {
