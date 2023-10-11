@@ -7,6 +7,12 @@
 </p>
 */
 
+import { showModal, types as modalTypes } from './plan98-modal.js'
+
+const strings = {
+  'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain user generated experiences.'
+}
+
 const $ = module('plan98-welcome')
 
 $.when('click', '.remix', async () => {
@@ -79,13 +85,27 @@ $.draw(() => {
                 COMPUTER
               </hypertext-variable>
             </div>
-            <rainbow-action prefix="<button data-reset>" suffix="</button>" text="Start">
+            <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
             </rainbow-action>
           </div>
         </div>
       </div>
     </div>
   `
+})
+
+$.when('click', '[data-tutorial]', () => {
+  showModal(`
+    <p>
+      ${strings['plan98-welcome.warning']}
+    </p>
+    <p>
+      <a href="https://github.com/tylerchilds/plan98/LICENSE" target="top">MIT License &copy; Tyler Childs &lt;email@tychi.me&gt; 2023</a>
+    </p>
+    <button data-reset>
+      Continue
+    </button>
+  `, { bannerType: modalTypes.news })
 })
 
 $.style(`

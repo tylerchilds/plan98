@@ -12804,14 +12804,14 @@ ${markup.join("\n")}`);
     }
   };
   var scrollIntoView = /* @__PURE__ */ StateEffect.define({ map: (t2, ch) => t2.map(ch) });
-  function logException(state3, exception, context2) {
+  function logException(state3, exception, context) {
     let handler = state3.facet(exceptionSink);
     if (handler.length)
       handler[0](exception);
     else if (window.onerror)
-      window.onerror(String(exception), context2, void 0, void 0, exception);
-    else if (context2)
-      console.error(context2 + ":", exception);
+      window.onerror(String(exception), context, void 0, void 0, exception);
+    else if (context)
+      console.error(context + ":", exception);
     else
       console.error(exception);
   }
@@ -13083,7 +13083,7 @@ ${markup.join("\n")}`);
       if (type & 7)
         prevStrong = type;
     }
-    for (let i2 = 0, sI = 0, context2 = 0, ch, br, type; i2 < len; i2++) {
+    for (let i2 = 0, sI = 0, context = 0, ch, br, type; i2 < len; i2++) {
       if (br = Brackets[ch = line.charCodeAt(i2)]) {
         if (br < 0) {
           for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
@@ -13101,11 +13101,11 @@ ${markup.join("\n")}`);
         } else {
           BracketStack[sI++] = i2;
           BracketStack[sI++] = ch;
-          BracketStack[sI++] = context2;
+          BracketStack[sI++] = context;
         }
       } else if ((type = types[i2]) == 2 || type == 1) {
         let embed = type == outerType;
-        context2 = embed ? 0 : 1;
+        context = embed ? 0 : 1;
         for (let sJ = sI - 3; sJ >= 0; sJ -= 3) {
           let cur2 = BracketStack[sJ + 2];
           if (cur2 & 2)
@@ -16094,8 +16094,8 @@ ${markup.join("\n")}`);
       let { view } = this, sel = this.selectionRange;
       if (view.state.facet(editable) ? view.root.activeElement != this.dom : !hasSelection(view.dom, sel))
         return;
-      let context2 = sel.anchorNode && view.docView.nearest(sel.anchorNode);
-      if (context2 && context2.ignoreEvent(event))
+      let context = sel.anchorNode && view.docView.nearest(sel.anchorNode);
+      if (context && context.ignoreEvent(event))
         return;
       if ((browser.ie && browser.ie_version <= 11 || browser.android && browser.chrome) && !view.state.selection.main.empty && sel.focusNode && isEquivalentPosition(sel.focusNode, sel.focusOffset, sel.anchorNode, sel.anchorOffset))
         this.flushSoon();
@@ -19253,8 +19253,8 @@ ${markup.join("\n")}`);
     get node() {
       return this;
     }
-    matchContext(context2) {
-      return matchNodeContext(this, context2);
+    matchContext(context) {
+      return matchNodeContext(this, context);
     }
   };
   function getChildren(node, type, before, after) {
@@ -19275,12 +19275,12 @@ ${markup.join("\n")}`);
         return after == null ? result : [];
     }
   }
-  function matchNodeContext(node, context2, i2 = context2.length - 1) {
+  function matchNodeContext(node, context, i2 = context.length - 1) {
     for (let p = node.parent; i2 >= 0; p = p.parent) {
       if (!p)
         return false;
       if (!p.type.isAnonymous) {
-        if (context2[i2] && context2[i2] != p.name)
+        if (context[i2] && context[i2] != p.name)
           return false;
         i2--;
       }
@@ -19296,11 +19296,11 @@ ${markup.join("\n")}`);
     }
   };
   var BufferNode = class {
-    constructor(context2, _parent, index) {
-      this.context = context2;
+    constructor(context, _parent, index) {
+      this.context = context;
       this._parent = _parent;
       this.index = index;
-      this.type = context2.buffer.set.types[context2.buffer.buffer[index]];
+      this.type = context.buffer.set.types[context.buffer.buffer[index]];
     }
     get name() {
       return this.type.name;
@@ -19394,8 +19394,8 @@ ${markup.join("\n")}`);
     get node() {
       return this;
     }
-    matchContext(context2) {
-      return matchNodeContext(this, context2);
+    matchContext(context) {
+      return matchNodeContext(this, context);
     }
   };
   var TreeCursor = class {
@@ -19605,16 +19605,16 @@ ${markup.join("\n")}`);
         }
       }
     }
-    matchContext(context2) {
+    matchContext(context) {
       if (!this.buffer)
-        return matchNodeContext(this.node, context2);
+        return matchNodeContext(this.node, context);
       let { buffer } = this.buffer, { types: types2 } = buffer.set;
-      for (let i2 = context2.length - 1, d = this.stack.length - 1; i2 >= 0; d--) {
+      for (let i2 = context.length - 1, d = this.stack.length - 1; i2 >= 0; d--) {
         if (d < 0)
-          return matchNodeContext(this.node, context2, i2);
+          return matchNodeContext(this.node, context, i2);
         let type = types2[buffer.buffer[this.stack[d]]];
         if (!type.isAnonymous) {
-          if (context2[i2] && context2[i2] != type.name)
+          if (context[i2] && context[i2] != type.name)
             return false;
           i2--;
         }
@@ -20033,10 +20033,10 @@ ${markup.join("\n")}`);
   }
   var ruleNodeProp = new NodeProp();
   var Rule = class {
-    constructor(tags2, mode, context2, next) {
+    constructor(tags2, mode, context, next) {
       this.tags = tags2;
       this.mode = mode;
-      this.context = context2;
+      this.context = context;
       this.next = next;
     }
     sort(other) {
@@ -20584,9 +20584,9 @@ ${markup.join("\n")}`);
     return TreeFragment.applyChanges(fragments, [{ fromA: from, toA: to, fromB: from, toB: to }]);
   }
   var LanguageState = class {
-    constructor(context2) {
-      this.context = context2;
-      this.tree = context2.tree;
+    constructor(context) {
+      this.context = context;
+      this.tree = context.tree;
     }
     apply(tr) {
       if (!tr.docChanged && this.tree == this.context.tree)
@@ -20732,16 +20732,16 @@ ${markup.join("\n")}`);
       result += " ";
     return result;
   }
-  function getIndentation(context2, pos) {
-    if (context2 instanceof EditorState)
-      context2 = new IndentContext(context2);
-    for (let service of context2.state.facet(indentService)) {
-      let result = service(context2, pos);
+  function getIndentation(context, pos) {
+    if (context instanceof EditorState)
+      context = new IndentContext(context);
+    for (let service of context.state.facet(indentService)) {
+      let result = service(context, pos);
       if (result != null)
         return result;
     }
-    let tree = syntaxTree(context2.state);
-    return tree ? syntaxIndentation(context2, tree, pos) : null;
+    let tree = syntaxTree(context.state);
+    return tree ? syntaxIndentation(context, tree, pos) : null;
   }
   var IndentContext = class {
     constructor(state3, options2 = {}) {
@@ -20858,13 +20858,13 @@ ${markup.join("\n")}`);
         return true;
     return false;
   }
-  function bracketedAligned(context2) {
-    let tree = context2.node;
+  function bracketedAligned(context) {
+    let tree = context.node;
     let openToken = tree.childAfter(tree.from), last = tree.lastChild;
     if (!openToken)
       return null;
-    let sim = context2.options.simulateBreak;
-    let openLine = context2.state.doc.lineAt(openToken.from);
+    let sim = context.options.simulateBreak;
+    let openLine = context.state.doc.lineAt(openToken.from);
     let lineEnd = sim == null || sim <= openLine.from ? openLine.to : Math.min(openLine.to, sim);
     for (let pos = openToken.to; ; ) {
       let next = tree.childAfter(pos);
@@ -20875,13 +20875,13 @@ ${markup.join("\n")}`);
       pos = next.to;
     }
   }
-  function delimitedStrategy(context2, align, units, closing2, closedAt) {
-    let after = context2.textAfter, space = after.match(/^\s*/)[0].length;
-    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context2.pos + space;
-    let aligned = align ? bracketedAligned(context2) : null;
+  function delimitedStrategy(context, align, units, closing2, closedAt) {
+    let after = context.textAfter, space = after.match(/^\s*/)[0].length;
+    let closed = closing2 && after.slice(space, space + closing2.length) == closing2 || closedAt == context.pos + space;
+    let aligned = align ? bracketedAligned(context) : null;
     if (aligned)
-      return closed ? context2.column(aligned.from) : context2.column(aligned.to);
-    return context2.baseIndent + (closed ? 0 : context2.unit * units);
+      return closed ? context.column(aligned.from) : context.column(aligned.to);
+    return context.baseIndent + (closed ? 0 : context.unit * units);
   }
   var DontIndentBeyond = 200;
   function indentOnInput() {
@@ -22121,10 +22121,10 @@ ${markup.join("\n")}`);
   var selectParentSyntax = ({ state: state3, dispatch }) => {
     let selection = updateSel(state3.selection, (range) => {
       var _a2;
-      let context2 = syntaxTree(state3).resolveInner(range.head, 1);
-      while (!(context2.from < range.from && context2.to >= range.to || context2.to > range.to && context2.from <= range.from || !((_a2 = context2.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
-        context2 = context2.parent;
-      return EditorSelection.range(context2.to, context2.from);
+      let context = syntaxTree(state3).resolveInner(range.head, 1);
+      while (!(context.from < range.from && context.to >= range.to || context.to > range.to && context.from <= range.from || !((_a2 = context.parent) === null || _a2 === void 0 ? void 0 : _a2.parent)))
+        context = context.parent;
+      return EditorSelection.range(context.to, context.from);
     });
     dispatch(setSel(state3, selection));
     return true;
@@ -22330,8 +22330,8 @@ ${markup.join("\n")}`);
   function isBetweenBrackets(state3, pos) {
     if (/\(\)|\[\]|\{\}/.test(state3.sliceDoc(pos - 1, pos + 1)))
       return { from: pos, to: pos };
-    let context2 = syntaxTree(state3).resolveInner(pos);
-    let before = context2.childBefore(pos), after = context2.childAfter(pos), closedBy;
+    let context = syntaxTree(state3).resolveInner(pos);
+    let before = context.childBefore(pos), after = context.childAfter(pos), closedBy;
     if (before && after && before.to <= pos && after.from >= pos && (closedBy = before.type.prop(NodeProp.closedBy)) && closedBy.indexOf(after.name) > -1 && state3.doc.lineAt(before.to).from == state3.doc.lineAt(after.from).from)
       return { from: before.to, to: after.from };
     return null;
@@ -22392,12 +22392,12 @@ ${markup.join("\n")}`);
     if (state3.readOnly)
       return false;
     let updated = /* @__PURE__ */ Object.create(null);
-    let context2 = new IndentContext(state3, { overrideIndentation: (start) => {
+    let context = new IndentContext(state3, { overrideIndentation: (start) => {
       let found = updated[start];
       return found == null ? -1 : found;
     } });
     let changes = changeBySelectedLine(state3, (line, changes2, range) => {
-      let indent = getIndentation(context2, line.from);
+      let indent = getIndentation(context, line.from);
       if (indent == null)
         return;
       if (!/\S/.test(line.text))
@@ -23522,9 +23522,9 @@ ${markup.join("\n")}`);
   function completeFromList(list) {
     let options2 = list.map((o) => typeof o == "string" ? { label: o } : o);
     let [validFor, match] = options2.every((o) => /^\w+$/.test(o.label)) ? [/\w*$/, /\w+$/] : prefixMatch(options2);
-    return (context2) => {
-      let token = context2.matchBefore(match);
-      return token || context2.explicit ? { from: token ? token.from : context2.pos, options: options2, validFor } : null;
+    return (context) => {
+      let token = context.matchBefore(match);
+      return token || context.explicit ? { from: token ? token.from : context.pos, options: options2, validFor } : null;
     };
   }
   var Option = class {
@@ -24196,9 +24196,9 @@ ${markup.join("\n")}`);
     return true;
   };
   var RunningQuery = class {
-    constructor(active, context2) {
+    constructor(active, context) {
       this.active = active;
-      this.context = context2;
+      this.context = context;
       this.time = Date.now();
       this.updates = [];
       this.done = void 0;
@@ -24262,10 +24262,10 @@ ${markup.join("\n")}`);
     }
     startQuery(active) {
       let { state: state3 } = this.view, pos = cur(state3);
-      let context2 = new CompletionContext(state3, pos, active.explicitPos == pos);
-      let pending = new RunningQuery(active, context2);
+      let context = new CompletionContext(state3, pos, active.explicitPos == pos);
+      let pending = new RunningQuery(active, context);
       this.running.push(pending);
-      Promise.resolve(active.source(context2)).then((result) => {
+      Promise.resolve(active.source(context)).then((result) => {
         if (!pending.context.aborted) {
           pending.done = result || null;
           this.scheduleAccept();
@@ -25272,7 +25272,7 @@ ${markup.join("\n")}`);
       });
     }
   });
-  function persist(target, $3, _flags) {
+  function persist(target, $2, _flags) {
     return (update2) => {
       if (update2.changes.inserted.length < 0)
         return;
@@ -25286,147 +25286,6 @@ ${markup.join("\n")}`);
 		display: block;
     max-height: 60vh;
     overflow: scroll;
-  }
-`);
-
-  // public/packages/modal-module.js
-  var $2 = module2(".modal", {
-    label: null,
-    children: null,
-    isOpen: null
-  });
-  $2.draw(() => {
-    const {
-      body,
-      isOpen
-    } = $2.learn();
-    if (!isOpen)
-      return " ";
-    const modalClose = `
-    <button class="close">
-      Close
-    </button>
-  `;
-    return `
-    <div class="modal">
-      ${modalClose}
-      ${body}
-    </div>
-  `;
-  });
-  var context = `<div class="overlay"><div class="modal"></div></div>`;
-  document.body.insertAdjacentHTML("beforeend", context);
-  function showModal(body) {
-    document.body.classList.add("overlay");
-    $2.teach({
-      body,
-      isOpen: true
-    });
-  }
-  window.showModal = showModal;
-  function hideModal() {
-    document.body.classList.remove("overlay");
-    $2.teach({
-      isOpen: false
-    });
-  }
-  window.hideModal = showModal;
-  $2.when("click", ".close", hideModal);
-  $2.style(`
-  body.overlay {
-    overflow: hidden;
-  }
-
-  .overlay .overlay:before {
-    animation: fadein 250ms ease-in-out forwards;
-    content: '';
-    background: rgba(0,0,0, .5);
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    backdrop-filter: blur(10px);
-    z-index: 900;
-  }
-
-  @keyframes fadein {
-    0% {
-      opacity: 0;
-    }
-
-    100% {
-      opacity: 1;
-    }
-  }
-
-  & {
-    position: fixed;
-    display: none;
-    place-items: center;
-    padding: 1rem;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow-y: auto;
-    z-index: 1100;
-  }
-
-  body.overlay & {
-    display: grid;
-  }
-
-  & .modal {
-    animation: modal-in 250ms ease-in-out forwards;
-    background: white;
-    box-shadow:
-      0 2px 4px rgba(0,0,0,.1),
-      0 6px 8px rgba(0,0,0,.04)
-    ;
-    box-sizing: border-box;
-    position: relative;
-    padding: 1rem;
-    min-height: 100px;
-    max-width: 80ch;
-    width: 100%;
-    z-index: -1;
-    opacity: 0;
-    max-height: 80vh;
-    overflow: scroll;
-  }
-
-  @keyframes modal-in {
-    0% {
-      opacity: 0;
-      z-index: -1;
-    }
-
-    100% {
-      opacity: 1;
-      z-index: 1100;
-    }
-  }
-
-  & .close {
-    background: none;
-    border: none;
-    padding: none;
-    opacity: .8;
-    transition: opacity: 200ms;
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-  }
-
-  & .close:hover,
-  & .close:focus {
-    cursor: pointer;
-    opacity: 1;
-  }
-
-  & .close * {
-    pointer-events: none;
   }
 `);
 
@@ -25488,8 +25347,8 @@ ${markup.join("\n")}`);
   ];
   function createGreetingTag(tagInfo) {
     const { name: name3, locale } = tagInfo;
-    const $3 = module2(name3);
-    $3.draw((target) => {
+    const $2 = module2(name3);
+    $2.draw((target) => {
       const friendName = target.getAttribute("x");
       const language2 = target.getAttribute("y") || locale;
       const now = new Date();
@@ -25509,7 +25368,7 @@ ${markup.join("\n")}`);
       const message = greeting[timeOfDay];
       return `${startAdornment} ${message}, ${friendName} ${endAdornment}`;
     });
-    return $3;
+    return $2;
   }
   translatedTags.map((tagInfo) => createGreetingTag(tagInfo));
 })();

@@ -1,4 +1,18 @@
-import module from '../module.js'
+export const types = {
+  news: 'news'
+}
+
+const configs = {
+  [types.news]: {
+    color: 'white',
+    backgroundColor: 'dodgerblue',
+    label: 'plan98-modal.configs.news.label'
+  }
+}
+
+const strings = {
+  'plan98-modal.configs.news.label': 'New Informational'
+}
 
 const $ = module('plan98-modal', {
   label: null,
@@ -11,7 +25,8 @@ export default $
 $.draw(() => {
   const {
     body,
-    isOpen
+    isOpen,
+    bannerType
   } = $.learn()
 
   if(!isOpen) return ' '
@@ -22,24 +37,45 @@ $.draw(() => {
     </button>
   `
 
+  const modalHeader = types[bannerType] ? banner(modalClose) : modalClose
+
   return `
     <div class="modal">
-      ${modalClose}
-      ${body}
+      ${modalHeader}
+      <div class="body">
+        ${body}
+      </div>
     </div>
   `
 })
 
+function banner(close) {
+  const {
+    bannerType
+  } = $.learn()
+
+  const { backgroundColor, color, label } = configs[bannerType]
+
+  return `
+    <div class="banner" style="background: ${backgroundColor}; color: ${color};">
+      ${strings[label]}
+      ${close}
+    </div>
+  `
+}
+
 const context = `<div class="overlay"><plan98-modal></plan98-modal></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
-export function showModal(body) {
+export function showModal(body, options) {
   document.body.classList.add('trap')
   $.teach({
     body,
     isOpen: true,
+    ...options
   })
 }
+
 window.showModal = showModal
 
 export function hideModal() {
@@ -106,7 +142,6 @@ $.style(`
     ;
     box-sizing: border-box;
     position: relative;
-    padding: 1rem;
     min-height: 100px;
     max-width: 80ch;
     width: 100%;
@@ -114,6 +149,16 @@ $.style(`
     opacity: 0;
     max-height: 80vh;
     overflow: scroll;
+    border-radius: 2rem;
+  }
+
+  & .banner {
+    padding: .5rem;
+    text-align: center;
+  }
+
+  & .body {
+    margin: 1rem;
   }
 
   @keyframes modal-in {
