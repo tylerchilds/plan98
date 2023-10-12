@@ -466,23 +466,164 @@ function script404() {
 title: Script
 author: You
 
-! Comments won't display during production, but are helpful during pre-production.
+<title-page
+title: Pretend
+author: Ty aka Notorious Sillonious
 
-^ Effects tip post-production
+# Best Buy Parking Lot - San Carlos, October 9th, 2023 - After Wrap
 
-# Space and Time
+^ Cold Open
 
-Pretty much ANYTHING can happen as an action. 
+TY wears an orange hat and gloves while talking to an iPhone.
 
-@ Person
-> Dialogue are things people say.
-& smirks
+@ Ty
+> I wasn't going to show anybody else this, but because that Tesla drove through my shot-- enjoy!
+
+# Best Buy Parking Lot - Before Shoot - Intercut
+
+Ty wears a sweatshirt and is amping himself up with jokes at the iPhone.
+
+A white Tesla creeps in the back, like Jaws.
+
+@ Ty
+> Like yo, I don't care if all your cars over there.
+
+Ty gestures in the general direction of the super chargers.
+
+@ Ty
+> Wherever. Have Dog mode. My car over here, was voted 2005 dog car of the year.
+
+The tesla parades itself in for a close up.
+
+^ Hard cut
+
+# Best Buy Parking Lot - Act 3 - Bark Barking
+
+Ty speaks directly with the audience, with the 2005 dog car of the year behind him.
+
+@ Ty
+> Alright. How's everybody doing? We feeling good still? Thank you!
+& Smirks
+> Alright, so clown town is over, thank you all for coming out.
+
+@ Ty
+> As we're transitioning from clown town, a kid friendly, family appropriate show here, we're going to bring on DJ Wally.
+
+@ Ty
+> And after DJ Wally, we have a series of headliners for you in a series tonight, all of them headliners in their own time and space.
+
+Ty points at the camera.
+
+@ Ty
+> But they're all new to you tonight. And!
+
+Ty climbs up onto the tailgate.
+
+@ Ty
+> I'm very excited to announce the premier of "Oops, Yeah", no. Nope, that wasn't it, hang on.
+
+Ty waves his hands and clears the air.
+
+@ Ty
+> I always get these words mixed up. We need a better back-ronym for these. We don't even have an acronym going forwards.
+
+@ Ty
+> Anyways. but I'm Ty, your producer, aka the Notorious Sillonious.
+
+Ty jims the camera.
+
+@ Ty
+> I am both a clown and whatever else I am. Who is to say?
+
+Ty raises his hand with a Queanswer.
+
+@ Ty
+> Well, there is a lot to say. So Actually, I am the Principal Engineer of Sillyz.Computer
 
 <hyper-link
-src: /home
-label: ok
+src: https://Sillyz.Computer
+label: blow your mind
 
-aww
+@ Ty
+> It is a state of being with a technical implementation.
+
+A deep breath.
+
+@ Ty
+> And I'm excited to share all of that with you. And didn't want to waste your time.
+
+Goes off the cuff.
+
+@ Ty
+> Wasting everybody's time and money. Accomplishing nothing. So.
+
+Continues to improvise.
+
+@ Ty
+> So, instead of giving you this broad timeline of seven, to ten, to thirty years, it is ready for you now.
+
+Hand flip.
+
+@ Ty
+> So, look under your seats. You'll find a post-it note that has a Rune on it.
+
+Jim for the camera once more.
+
+@ Ty
+> And on that magic rune, you will be transported into Sillyz.Computer! Now!
+
+CHECKERED VANS kick the BACK DOOR of the HONDA ELEMENT.
+
+@ Ty
+> I don't know if anyone can hear that, see that, click that!
+
+So many kicks against the car, pure excitement.
+
+@ Ty
+> This, right here, is Sillyz.Computer.
+
+@ Ty
+> Couldn't buy that in a Best Buy now could you? I didn't think so.
+
+Points at the big blue box across the lot.
+
+Ty tampers down the flames of the audience with his hands.
+
+@ Ty
+> Alright, alright. Roast time is over Clown Town. We've got DJ Wally coming on now!
+
+Ty jumps in rhythm with the momentum he is building lyrically.
+
+@ Ty
+> I am so excited for you to hear the beats that he has to drop! But!
+
+Jumping stops.
+
+@ Ty
+> In the meantime, to get Wally's setup going, we're going to need to pop this top.
+
+Liberal amounts of thumbs up, jumping pointing in excitement.
+
+@ Ty
+> Now! Are you ready for the drop?
+
+# Best Buy Parking Lot - Act 1 - No Barking
+
+Ty struggles to set up tripods and cameras, but overcomes physical and digital difficulties.
+
+# Best Buy Parking Lot - Act 2 - Silent Barking
+
+Ty drives home the point that this project could have gone so much further if he didn't have to busk for independence, but like a true american, will hit the streets with art.
+
+# Best Buy Parking Lot - Act 4 - Pack Barking
+
+Without funding, Ty has managed to stay entirely independent and open. In a rare glimpse behind the curtain in the high tower, Ty reveals the truth of time travel.
+
+# Best Buy Parking Lot - Act 5 - Done Barking
+
+Ty unwinds after a breath-taking 35 minute performance and managed to transmit the entire log through the Stargate before disconnecting and sealing the gate for good.
+
+! <sillyz-synth
 
 <greet-friend
 x: Meduz
@@ -500,8 +641,6 @@ y: es_MX
 x: Ty
 y: en_US
 
-ok
-
 <hello-world
 
 <hello-nickname
@@ -515,9 +654,9 @@ size: 2rem
 height: 6
 
 <rainbow-action
-text: sup
-prefix: <button>
-suffix: </button>
+text: Pop
+prefix: <a href="https://sillyz.computer">
+suffix: </a>
 
 <hypertext-highlighter
 text: this is yellow
@@ -526,8 +665,6 @@ color: yellow
 ! <sillyz-gamepad
 
 ! <sillyz-guitar
-
-! <sillyz-synth
 
 ! <sillyz-piano
 
