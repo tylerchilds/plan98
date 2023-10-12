@@ -3,7 +3,7 @@ export function factoryReset(cwc) {
   // todo: braidify highlighter and file system code
   try {
     state[cwc] = {
-      path: '/',
+      path: '/home/sillonious/pretend.script',
       type: 'FileSystem',
       children: [{
         name: '',
