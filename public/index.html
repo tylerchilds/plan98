@@ -39,13 +39,17 @@
           if(!exists) return
           let definable = true
           await import(url).catch(() => { definable = false })
-          definable = definable && document.querySelector(tag).matches(':not(:defined)')
-          if(definable) {
-            customElements.define(tag, class WebComponent extends HTMLElement {
-              constructor() {
-                super();
-              }
-            });
+          try {
+            definable = definable && document.querySelector(tag).matches(':not(:defined)')
+            if(definable) {
+              customElements.define(tag, class WebComponent extends HTMLElement {
+                constructor() {
+                  super();
+                }
+              });
+            }
+          } catch(e) {
+            console.log('Lazy Hype Problem:', tag, e)
           }
         })
       }

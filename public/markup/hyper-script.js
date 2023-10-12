@@ -9,17 +9,17 @@
 
   - notorious sillonious
   mit license. <email@tychi.me> 1989-current
-*/
+  */
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {
   // write to compose hype
-	write: 'write',
+  write: 'write',
   // read to remember your lines
-	read: 'read',
+  read: 'read',
   // perform to have a guide in real-time
-	perform: 'perform',
-	play: 'play',
+  perform: 'perform',
+  play: 'play',
 }
 
 // define source code related artifacts that should not be displayed
@@ -238,7 +238,7 @@ $.when('click', '[data-print]', (event) => {
 
 $.when('click', '[data-perform]', (event) => {
   const { html } = sourceFile(event.target)
-	const wrapper= document.createElement('div');
+  const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const shotList = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
@@ -262,15 +262,15 @@ $.when('change', '[data-shot]', (event) => {
   const { value } = event.target
   const nextShot = parseInt(value)
   if(nextShot < 0) {
-		$.teach({ activeShot: 0 })
-		return
-	}
+    $.teach({ activeShot: 0 })
+    return
+  }
 
-	if(nextShot >= shotCount){ 
-		// keep existing
-		$.teach({ activeShot: shotCount })
-		return
-	}
+  if(nextShot >= shotCount){ 
+    // keep existing
+    $.teach({ activeShot: shotCount })
+    return
+  }
   $.teach({ activeShot: nextShot })
 })
 
@@ -286,9 +286,9 @@ function getMotion(html, { active = 0, forwards, start, end }) {
   const children = Array.from(wrapper.children)
     .filter(x => x.matches(notHiddenChildren))
 
-	if(children[active]) {
-		children[active].dataset.active = true
-	}
+  if(children[active]) {
+    children[active].dataset.active = true
+  }
   const slice = children.slice(start, end).map(x => {
     x.setAttribute('name','beat')
     return x
@@ -310,7 +310,7 @@ function toVfx(slice, options) {
   }
 
   return (options.forwards ? beats : slice.reverse())
-            .map(x => {;return x.outerHTML}).join('')
+    .map(x => {;return x.outerHTML}).join('')
 }
 
 function reverse(beats) {
@@ -326,7 +326,8 @@ $.when('click', '[data-play]', (event) => {
 })
 
 $.draw(target => {
-	const { id } = target
+  const bars = getRhythm(true)
+  const { id } = target
   let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file, html, embed } = sourceFile(target)
 
@@ -335,10 +336,10 @@ $.draw(target => {
 
   if(readonly) {
     return `
-			<div name="page">
-				${html}
-			</div>
-		`
+      <div name="page">
+        ${html}
+      </div>
+    `
   }
 
   if(presentation) {
@@ -359,27 +360,27 @@ $.draw(target => {
   const motion = getMotion(html, { active: activeShot, forwards, start, end })
   const play = (state.play || {}).embed
 
-	const views = {
-		[panels.write]: () => `
-			<div name="write">
-        <textarea>${escapedFile}</textarea>
-      </div>
-		`,
-		[panels.read]: () => `
-			<div name="read">
-				<div name="page">
-					${html}
-				</div>
-				<div name="navi">
-					<button data-print>Print</button>
-					<div name="print">
-						${embed}
-					</div>
-				</div>
+  const views = {
+    [panels.write]: () => `
+      <div name="write">
+        <textarea style="background: ${bars}">${escapedFile}</textarea>
       </div>
     `,
-		[panels.perform]: () => `
-			<div name="perform">
+    [panels.read]: () => `
+      <div name="read">
+        <div name="page">
+          ${html}
+        </div>
+        <div name="navi">
+          <button data-print>Print</button>
+          <div name="print">
+            ${embed}
+          </div>
+        </div>
+      </div>
+    `,
+    [panels.perform]: () => `
+      <div name="perform">
         <div name="theater">
           <div name="screen">
             <div name="stage">
@@ -387,37 +388,37 @@ $.draw(target => {
             </div>
           </div>
         </div>
-				<div name="navi"
-					${activeShot === 0 ? 'data-first' : ''}
-					${activeShot === shotCount ? 'data-last' : ''}
-				>
-					<button data-back>
-						Back
-					</button>
-					<input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
-					<button data-next>
-						Next
-					</button>
-				</div>
+        <div name="navi"
+          ${activeShot === 0 ? 'data-first' : ''}
+          ${activeShot === shotCount ? 'data-last' : ''}
+        >
+          <button data-back>
+            Back
+          </button>
+          <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
+          <button data-next>
+            Next
+          </button>
+        </div>
       </div>
     `,
     [panels.play]: () => `
-			<div name="play">
+      <div name="play">
         ${play}
       </div>
-		`,
+    `,
 
-		'default': () => `
-			Nothing for ya. Head back to camp.
+    'default': () => `
+      Nothing for ya. Head back to camp.
     `
-	}
+  }
 
-	const view = (views[activePanel] || views['default'])()
-	const fadeOut = nextPanel && activePanel !== nextPanel
+  const view = (views[activePanel] || views['default'])()
+  const fadeOut = nextPanel && activePanel !== nextPanel
 
 
-	const perspective = `
-		<div class="grid" data-panel="${activePanel}">
+  const perspective = `
+    <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
           <button data-write>Write</button>
@@ -426,11 +427,11 @@ $.draw(target => {
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
-			<transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
-				${view}
-			</transition>
-		</div>
-	`
+      <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
+        ${view}
+      </transition>
+    </div>
+  `
 
   if(activePanel === panels.perform) {
     target.innerHTML = perspective
@@ -454,11 +455,11 @@ function escapeHyperText(text) {
 
 $.when('animationend', 'transition', function transition({target}) {
   const { activePanel, nextPanel, backPanel } = $.learn()
-	const current = nextPanel ? nextPanel : activePanel
-	const previous = activePanel !== backPanel ? backPanel : activePanel
-	$.teach({ activePanel: current, backPanel: previous })
-	target.scrollTop = '0'
-	document.activeElement.blur()
+  const current = nextPanel ? nextPanel : activePanel
+  const previous = activePanel !== backPanel ? backPanel : activePanel
+  $.teach({ activePanel: current, backPanel: previous })
+  target.scrollTop = '0'
+  document.activeElement.blur()
 })
 
 function script404() {
@@ -658,12 +659,6 @@ suffix: </a>
 text: this is yellow
 color: yellow
 
-! <sillyz-gamepad
-
-! <sillyz-guitar
-
-! <sillyz-piano
-
 # the end.
 
 { play
@@ -672,30 +667,30 @@ embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/KcUAa
 }
 
 $.style(`
-	@media print {
-		html, body {
-			height: 100%;
-			padding: 0;
-		}
-	}
+  @media print {
+    html, body {
+      height: 100%;
+      padding: 0;
+    }
+  }
 
 
-	@page {
-		size: 8.5in 11in;
-		margin: 1in 1in 1in 1.5in;
-	}
+  @page {
+    size: 8.5in 11in;
+    margin: 1in 1in 1in 1.5in;
+  }
 
-	@page {
-		@top-right {
-			content: counter(page) '.';
-		}
-	}
+  @page {
+    @top-right {
+      content: counter(page) '.';
+    }
+  }
 
-	@page:first {
-		@top-right {
-			content: '';
-		}
-	}
+  @page:first {
+    @top-right {
+      content: '';
+    }
+  }
 
   & {
     overflow: auto;
@@ -818,6 +813,22 @@ $.style(`
     display: none;
   }
 
+  & [name="write"] {
+    position: relative;
+    background: white;
+    color: black;
+  }
+
+
+  & [name="write"]::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 1.5rem;
+    border-left: 1px solid orange;
+  }
+
   & [data-panel="read"] [name="read"],
   & [data-panel="perform"] [name="perform"],
   & [data-panel="write"] [name="write"] {
@@ -834,14 +845,14 @@ $.style(`
 
   & [name="read"] {
     background: white;
-		margin: 0 auto;
+    margin: 0 auto;
     padding: 0 1in;
     max-width: 8.5in;
     overflow: auto;
-	}
+  }
   & [name="page"] {
-		font-size: 12pt;
-		font-family: courier;
+    font-size: 12pt;
+    font-family: courier;
     height: 100%;
     max-height: 100vh;
   }
@@ -859,15 +870,15 @@ $.style(`
     height: 100%;
   }
 
-	& input[type="number"]::-webkit-outer-spin-button,
-	& input[type="number"]::-webkit-inner-spin-button {
+  & input[type="number"]::-webkit-outer-spin-button,
+  & input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-	}
+  }
 
-	& input[type="number"] {
-		-moz-appearance: textfield;
-	}
+  & input[type="number"] {
+    -moz-appearance: textfield;
+  }
 
   & textarea {
     width: 100%;
@@ -878,6 +889,9 @@ $.style(`
     display: block;
     resize: none;
     padding: .5rem;
+    line-height: 2rem;
+    padding-left: 2rem;
+
   }
 
   & [data-shot] {
@@ -987,47 +1001,65 @@ $.style(`
     }
   }
 
-	& transition {
-		animation: &-fade-in ease-in-out 1ms;
-		display: grid;
-		height: 100%;
-		place-items: center;
-		width: 100%;
-	}
+  & transition {
+    animation: &-fade-in ease-in-out 1ms;
+    display: grid;
+    height: 100%;
+    place-items: center;
+    width: 100%;
+  }
 
 
-	& transition > * {
-		width: 100%;
-		height: 100%;
-	}
+  & transition > * {
+    width: 100%;
+    height: 100%;
+  }
 
-	& transition.out {
-		animation: &-fade-out ease-in-out 1ms;
-	}
+  & transition.out {
+    animation: &-fade-out ease-in-out 1ms;
+  }
 
-	@keyframes &-fade-in {
-		0% {
-		}
-		100% {
-		}
-	}
+  @keyframes &-fade-in {
+    0% {
+    }
+    100% {
+    }
+  }
 
-	@keyframes &-fade-out {
-		0% {
-		}
-		100% {
-		}
-	}
+  @keyframes &-fade-out {
+    0% {
+    }
+    100% {
+    }
+  }
 
 
-	&	hypertext-title {
-			display: block;
-			height: 100%;
-			width: 100%;
-		}
+  &	hypertext-title {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
 
-	&	hypertext-blankline {
-			display: block;
-		}
+  &	hypertext-blankline {
+      display: block;
+    }
 `)
 
+function getRhythm(disabled) {
+  if(disabled) return 'transparent'
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  canvas.height = rhythm * 2;
+  console.log(rhythm)
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - 1, rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
