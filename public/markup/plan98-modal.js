@@ -33,7 +33,7 @@ $.draw(() => {
 
   const modalClose = `
     <button class="close">
-      Close
+      𝕏.
     </button>
   `
 
@@ -143,7 +143,8 @@ $.style(`
     box-sizing: border-box;
     position: relative;
     min-height: 100px;
-    max-width: 80ch;
+    min-width: 12ch;
+    max-width: 55ch;
     width: 100%;
     z-index: -1;
     opacity: 0;
@@ -153,6 +154,7 @@ $.style(`
   }
 
   & .banner {
+    font-weight: 800;
     padding: .5rem;
     text-align: center;
   }
@@ -174,14 +176,19 @@ $.style(`
   }
 
   & .close {
-    background: none;
+    background: black;
     border: none;
+    border-radius: 100%;
+    color: white;
     padding: none;
+    line-height: 1;
+    height: 2rem;
+    width: 2rem;
     opacity: .8;
     transition: opacity: 200ms;
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: .5rem;
+    right: .5rem;
   }
 
   & .close:hover,

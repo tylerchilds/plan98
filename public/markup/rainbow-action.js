@@ -13,28 +13,17 @@ $.draw(target => {
 $.style(`
   @keyframes rainbow-background {
     0% {
-      background: firebrick;
+      background: dodgerblue;
     }
-    17% {
-      background: darkorange;
+    33% {
+      background: orange;
     }
-    34% {
-      background: gold;
-    }
-    51% {
-      background: lime;
-    }
-
-    68% {
-      background: deepskyblue;
-    }
-
-    85% {
-      background: slateblue;
+    66% {
+      background: rebeccapurple;
     }
 
     100% {
-      background: rebeccapurple;
+      background: lime;
     }
   }
 
@@ -51,7 +40,7 @@ $.style(`
     0 8px 8px rgba(0, 0, 0, .05);
 
     border: none;
-    border-radius: 2px;
+    border-radius: 2rem;
     color: white;
     cursor: pointer;
     display: inline-block;

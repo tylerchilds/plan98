@@ -8,6 +8,7 @@
 */
 
 import { showModal, types as modalTypes } from './plan98-modal.js'
+import { factoryReset } from './plan98-filesystem.js'
 
 const strings = {
   'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain user generated experiences.'
@@ -102,9 +103,10 @@ $.when('click', '[data-tutorial]', () => {
     <p>
       <a href="https://github.com/tylerchilds/plan98/LICENSE" target="top">MIT License &copy; Tyler Childs &lt;email@tychi.me&gt; 2023</a>
     </p>
-    <button data-reset>
-      Continue
-    </button>
+    <plan98-filesystem data-cwc="ls/plan98" data-preserve="all" style="text-align: right;">
+      <rainbow-action prefix="<button data-reset>" suffix="</button>" text="Cool">
+      </rainbow-action>
+    </plan98-filesystem>
   `, { bannerType: modalTypes.news })
 })
 

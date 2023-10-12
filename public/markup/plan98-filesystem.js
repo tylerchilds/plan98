@@ -1,4 +1,5 @@
-function factoryReset(cwc) {
+export function factoryReset(cwc) {
+  debugger
   // todo: braidify highlighter and file system code
   try {
     state[cwc] = {
@@ -11,82 +12,58 @@ function factoryReset(cwc) {
           name: 'home',
           type: 'Directory',
           children: [{
-            name: 'tychi',
+            name: 'sillonious',
             type: 'Directory',
-            children: [{
-              name: 'braid',
-              type: 'Directory',
-              children: [
-                {
-                  name: 'markup',
-                  type: 'Directory',
-                  children: [
-                    {
-                      name: 'plan98-highlighter.js',
-                      type: 'File'
-                    },
-                    {
-                      name: 'plan98-system.js',
-                      type: 'File'
-                    }
-                  ]
-                },
-                {
-                  name: 'sillonious',
-                  type: 'Directory',
-                  children: [
-                    {
-                      name: 'pretend.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'paper.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'books.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'bicycles.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'typewriters.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'teleplays.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'cameras.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'computers.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'synthesizers.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'slideshows.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'gamepads.script',
-                      type: 'File'
-                    },
-                    {
-                      name: 'generations.script',
-                      type: 'File'
-                    }
-                  ]
-                }
-              ]
-            }]
+            children: [
+              {
+                name: 'pretend.script',
+                type: 'File'
+              },
+              {
+                name: 'paper.script',
+                type: 'File'
+              },
+              {
+                name: 'books.script',
+                type: 'File'
+              },
+              {
+                name: 'bicycles.script',
+                type: 'File'
+              },
+              {
+                name: 'typewriters.script',
+                type: 'File'
+              },
+              {
+                name: 'teleplays.script',
+                type: 'File'
+              },
+              {
+                name: 'cameras.script',
+                type: 'File'
+              },
+              {
+                name: 'computers.script',
+                type: 'File'
+              },
+              {
+                name: 'synthesizers.script',
+                type: 'File'
+              },
+              {
+                name: 'slideshows.script',
+                type: 'File'
+              },
+              {
+                name: 'gamepads.script',
+                type: 'File'
+              },
+              {
+                name: 'generations.script',
+                type: 'File'
+              }
+            ]
           }]
         }]
       }]
@@ -174,8 +151,8 @@ function system(target) {
     <div class="${rootClass}">
       <div class="root">
         <div class="help">
-          <plan98-context data-inline data-label="?" data-menu="${helpActions(cwc)}">
-            Help
+          <plan98-context data-inline data-label="?." data-menu="${helpActions(cwc)}">
+            Get Help: 
           </plan98-context>
         </div>
         <div class="menubar">
@@ -239,6 +216,7 @@ function floppy(target) {
 }
 
 function checkPreservationStatus(target) {
+  if(target.dataset.preserve === 'all') return true
   if(target.childNodes.length === 0) return false
   return [...target.childNodes].every(x => x.tagName === 'BUTTON')
 }
@@ -402,6 +380,11 @@ $.style(`
     display: flex;
     gap: 1rem;
   }
+
+  & .help {
+    box-sizing: content-box;
+  }
+
   & .visual {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -486,9 +469,9 @@ $.style(`
 
   & .root {
     display: none;
-    background: white;
+    background: linear-gradient(34deg, white 50%, rebeccapurple);
     position: fixed;
-    right: 8px;
+    right: 0;
     top: 0;
     bottom: 0;
     width: 100%;
@@ -531,8 +514,9 @@ $.style(`
     height: 2rem;
     width: 2rem;
     background: orange;
-    top: 0;
-    right: 0;
+    top: 3px;
+    right: 3px;
+    line-height: 1;
     z-index: 10;
     border: 0;
     border-radius: 100%;
@@ -558,6 +542,8 @@ $.style(`
   & .active .root {
     display: grid;
     grid-template-rows: 2rem 2rem 1fr 2rem;
+    gap: 3px;
+    padding: 3px 0;
   }
 
   & .active .leaf {

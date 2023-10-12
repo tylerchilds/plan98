@@ -31,7 +31,9 @@ $.style(`
   & {
     display: grid;
     grid-template-columns: 1fr auto;
+    gap: .5rem;
     pointer-events: none;
+    padding-bottom: 3px;
   }
 
   &[data-inline] {
@@ -41,10 +43,19 @@ $.style(`
   & button,
   & a {
     pointer-events: auto;
+    background: dodgerblue;
+    border-radius: 100%;
+    border: none;
+    color: white;
+    padding: none;
+    line-height: 1;
+    height: 2rem;
+    width: 2rem;
   }
 
   & [data-context] {
     pointer-events: auto;
+    color: white;
   }
 `)
 
@@ -98,14 +109,14 @@ function draw() {
 const tooltipStyles = `
   <style>
     .tooltip {
-      background: white;
-      border-radius: 2px;
+      background: rgba(255, 255, 255, .85);
+      border-radius: 2rem;
       display: none;
       left: 0;
       padding: .5rem;
       position: fixed;
       opacity: 0;
-      border: 1px solid rgba(0,0,0,.85);
+      border: 2px solid dodgerblue;
       transform-origin: right bottom;
       transform: translate(
         max(0px, calc(-100% + var(--x) - 3px)),
@@ -128,6 +139,16 @@ const tooltipStyles = `
       display: block;
       border: none;
       background: transparent;
+      text-align: left;
+      transition: all 100ms;
+      border-radius: 2rem;
+      padding: .25rem .5rem;
+      border: 3px solid transparent;
+    }
+
+    .tooltip button:hover,
+    .tooltip button:focus {
+      border-color: lime;
     }
   </style>
 `;
