@@ -1,5 +1,4 @@
 export function factoryReset(cwc) {
-  debugger
   // todo: braidify highlighter and file system code
   try {
     state[cwc] = {

@@ -19,6 +19,7 @@ const panels = {
 	read: 'read',
   // perform to have a guide in real-time
 	perform: 'perform',
+	play: 'play',
 }
 
 // define source code related artifacts that should not be displayed
@@ -320,6 +321,10 @@ $.when('click', '[data-write]', (event) => {
   $.teach({ nextPanel: panels.write })
 })
 
+$.when('click', '[data-play]', (event) => {
+  $.teach({ nextPanel: panels.play })
+})
+
 $.draw(target => {
 	const { id } = target
   let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
@@ -352,6 +357,7 @@ $.draw(target => {
   const end = Math.min(activeShot + 2, shotCount)
   const forwards = lastAction !== 'back'
   const motion = getMotion(html, { active: activeShot, forwards, start, end })
+  const play = (state.play || {}).embed
 
 	const views = {
 		[panels.write]: () => `
@@ -395,6 +401,12 @@ $.draw(target => {
 				</div>
       </div>
     `,
+    [panels.play]: () => `
+			<div name="play">
+        ${play}
+      </div>
+		`,
+
 		'default': () => `
 			Nothing for ya. Head back to camp.
     `
@@ -403,6 +415,7 @@ $.draw(target => {
 	const view = (views[activePanel] || views['default'])()
 	const fadeOut = nextPanel && activePanel !== nextPanel
 
+
 	const perspective = `
 		<div class="grid" data-panel="${activePanel}">
       <div name="transport">
@@ -410,6 +423,7 @@ $.draw(target => {
           <button data-write>Write</button>
           <button data-read>Read</button>
           <button data-perform>Perform</button>
+          ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
 			<transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
