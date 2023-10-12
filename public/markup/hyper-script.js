@@ -463,10 +463,6 @@ $.when('animationend', 'transition', function transition({target}) {
 
 function script404() {
   return `<title-page
-title: Script
-author: You
-
-<title-page
 title: Pretend
 author: Ty aka Notorious Sillonious
 
@@ -669,6 +665,9 @@ color: yellow
 ! <sillyz-piano
 
 # the end.
+
+{ play
+embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/KcUAa0eT4Tc?si=NCkkTBArSKMYj7Vt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 `
 }
 

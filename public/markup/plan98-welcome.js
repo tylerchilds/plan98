@@ -101,7 +101,7 @@ $.when('click', '[data-tutorial]', () => {
       ${strings['plan98-welcome.warning']}
     </p>
     <p>
-      <a href="https://github.com/tylerchilds/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
+      <a href="https://raw.githubusercontent.com/tylerchilds/plan98/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
     </p>
     <plan98-filesystem data-cwc="ls/plan98" data-preserve="all" style="text-align: right;">
       <rainbow-action prefix="<button data-reset>" suffix="</button>" text="Cool">
