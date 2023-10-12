@@ -35,10 +35,8 @@ const COSTUME_TIME = Symbol('c-time')
 // the compile function takes a Hype script and converts it to hypertext
 export const compile = (script) => {
   // as costumes are worn their attributes may become modified
-  const costumes = {}
-  // as props are used their attributes may become modified
-  const props = {}
-  // state changes cause time dilations, like customizing costumes and props
+  const costumes = state.costumes = {}
+  // state changes cause time dilations
   let time = NORMAL_TIME
   // what model
   let prop = ''
@@ -64,7 +62,7 @@ export const compile = (script) => {
     // props are able to change truths about the very facet of reality
     '{': (x) => {
       // clear whichever prop from the stash
-      props[x] = {}
+      state[x] = {}
       // use whatever prop
       prop = x
       // what time is it? prop time!
@@ -147,7 +145,7 @@ export const compile = (script) => {
     }
 
     // update our prop of prop of props
-    props[prop][key.trim()] = value.trim()
+    state[prop][key.trim()] = value.trim()
   }
 
   // process the sequence to understand our costume's props.
@@ -451,27 +449,20 @@ $.when('animationend', 'transition', function transition({target}) {
 
 function script404() {
   return `<title-page
-title: Sillonious
-author: Ty
+title: Script
+author: You
 
-! This feels like a fuzzy dream sequence with everything over exposed except the colors red, blue, and green.
+! Comments won't display during production, but are helpful during pre-production.
 
-^ fade in
+^ Effects tip post-production
 
-# Int. Computer
-In the computer. Like Zoolander. Like Owen Wilson's character's understanding of in the computer. Ty wears three shirts and three hats. Left wears a blue shirt and hat. Right wears a red shirt and hat. Front wears a green shirt and hat.
+# Space and Time
 
-@ Ty
-> Welcome.
+Pretty much ANYTHING can happen as an action. 
 
-@ Left
-> See. I said it could.
-
-@ Right
-> It wasn't easy.
-
-@ Front
-> Whatever, I can sell it.
+@ Person
+> Dialogue are things people say.
+& smirks
 
 <hyper-link
 src: /home
@@ -480,8 +471,20 @@ label: ok
 aww
 
 <greet-friend
+x: Meduz
+y: fr_FR
+
+<salut-ami
+x: Ty
+y: en_US
+
+<greet-friend
 x: Victoria
-y: es_ES
+y: es_MX
+
+<saludo-amigo
+x: Ty
+y: en_US
 
 ok
 
