@@ -104,7 +104,7 @@ export const compile = (script) => {
   // just process our runes, yes magic, just straight forward level 1 magic
   function normalTime(line) {
     // anything here?
-    if(!line) {
+    if(!line.trim()) {
       // drop some invisible hype
       append("hypertext-blankline", "")
       // normal time is over
@@ -509,13 +509,13 @@ suffix: </button>
 text: this is yellow
 color: yellow
 
-<sillyz-gamepad
+! <sillyz-gamepad
 
-<sillyz-guitar
+! <sillyz-guitar
 
-<sillyz-synth
+! <sillyz-synth
 
-<sillyz-piano
+! <sillyz-piano
 
 # the end.
 `
