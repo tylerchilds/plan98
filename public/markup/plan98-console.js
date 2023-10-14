@@ -5,16 +5,13 @@ document.body.appendChild(s)
 
 const $ = module('plan98-console')
 
-$.draw(target => {
+$.draw(container => {
   function loop() {
     if(! window.eruda) {
       requestAnimationFrame(loop)
       return
     }
-    eruda.init({
-      container: target,
-      tool: ['console', 'elements']
-    });
+    eruda.init({ container });
 
     eruda.show()
   }

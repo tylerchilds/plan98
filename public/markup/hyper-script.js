@@ -494,7 +494,7 @@ If you missed me at launch, this is an edit of my dress rehearsal barking and bu
 src: https://youtu.be/KcUAa0eT4Tc?si=cZ5mQvoNgxBl6mlF
 label: October 9th, 2023
 
-Let's see what we cook up together this holiday season-- I know I'll be working on my feature length immersive experience for Sillyz Computer-- The War on Elves. If I'm lucky, I might even exchange knowledge with them while I'm on their island. One of the perks of being Player Number One.
+Let's see what we cook up together this holiday season-- I know I'll be working on my feature length immersive experience for Sillyz.Computer-- The War on Elves. If I'm lucky, I might even exchange knowledge with them while I'm on their island. One of the perks of being Player Number One.
 
 Will you be next? Anyone can become Sillonious.
 
@@ -507,12 +507,24 @@ And run the command 'npm run build && npm start'
 With &hearts;
 - Uncle Sillonious
 
+<hyper-link
+src: https://merveilles.town/@tychi
+label: hit me up
+
 # the end.
 
 P.S. Mila, will you help me learn Chinese?
 
 { play
-embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/KcUAa0eT4Tc?si=NCkkTBArSKMYj7Vt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/UnwLtBRLOUg?si=LudRVaPHI1lH9vwh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+
+do you have anything you'd like to add?
+
+.
+.
+.
+.
+?
 `
 }
 

@@ -4,6 +4,6 @@ $.draw(( target ) => {
   const src = target.getAttribute('src')
   const label = target.getAttribute('label')
   return `
-    <a href="${src}">${label}</a>
+    <a href="${src}" target="_top">${label}</a>
   `
 })
