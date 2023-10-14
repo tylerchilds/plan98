@@ -33,6 +33,132 @@ const PROP_TIME = Symbol('p-time')
 // costume embeds rich hyper media content
 const COSTUME_TIME = Symbol('c-time')
 
+// create a hyper text module
+const $ = module('hyper-script', {
+  // raw text of the file
+  file: '',
+  activePanel: panels.read,
+  activeShot: 0,
+  shotCount: 0
+})
+
+$.draw(target => {
+  const stars = getStars(true)
+  const { id } = target
+  let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
+  const { file, html, embed } = sourceFile(target)
+
+  const readonly = target.getAttribute('readonly')
+  const presentation = target.getAttribute('presentation')
+
+  if(readonly) {
+    return `
+      <div name="page">
+        ${html}
+      </div>
+    `
+  }
+
+  if(presentation) {
+    activePanel = panels.perform
+  }
+
+  const escapedFile = escapeHyperText(file)
+
+  if(target.lastPanel !== activePanel) {
+    // flush outdated
+    target.innerHTML = ''
+    target.lastPanel = activePanel
+  }
+
+  const start = Math.max(activeShot - 1, 0)
+  const end = Math.min(activeShot + 2, shotCount)
+  const forwards = lastAction !== 'back'
+  const motion = getMotion(html, { active: activeShot, forwards, start, end })
+  const play = (state.play || {}).embed
+
+  const views = {
+    [panels.write]: () => `
+      <div name="write">
+        <textarea style="background: ${stars}">${escapedFile}</textarea>
+      </div>
+    `,
+    [panels.read]: () => `
+      <div name="read">
+        <div name="page">
+          ${html}
+        </div>
+        <div name="navi">
+          ${embed ? '<button data-print>Print</button>' : ''}
+          <div name="print">
+            ${embed}
+          </div>
+        </div>
+      </div>
+    `,
+    [panels.perform]: () => `
+      <div name="perform">
+        <div name="theater">
+          <div name="screen">
+            <div name="stage">
+              ${motion}
+            </div>
+          </div>
+        </div>
+        <div name="navi"
+          ${activeShot === 0 ? 'data-first' : ''}
+          ${activeShot === shotCount ? 'data-last' : ''}
+        >
+          <button data-back>
+            Back
+          </button>
+          <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
+          <button data-next>
+            Next
+          </button>
+        </div>
+      </div>
+    `,
+    [panels.play]: () => `
+      <div name="play">
+        ${play}
+      </div>
+    `,
+
+    'default': () => `
+      Nothing for ya. Head back to camp.
+    `
+  }
+
+  const view = (views[activePanel] || views['default'])()
+  const fadeOut = nextPanel && activePanel !== nextPanel
+
+
+  const perspective = `
+    <div class="grid" data-panel="${activePanel}">
+      <div name="transport">
+        <div name="actions">
+          <button data-read>Read</button>
+          <button data-write>Write</button>
+          <button data-perform>Perform</button>
+          ${play ? `<button data-play>Play</button>` : ''}
+        </div>
+      </div>
+      <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
+        ${view}
+      </transition>
+    </div>
+  `
+
+  if(activePanel === panels.perform) {
+    target.innerHTML = perspective
+    return
+  }
+
+  return perspective
+})
+
+
 // the compile function takes a Hype script and converts it to hypertext
 export const compile = (script) => {
   // as costumes are worn their attributes may become modified
@@ -191,13 +317,6 @@ export const compile = (script) => {
   function noop() {}
 }
 
-const $ = module('hyper-script', {
-  file: 'booting...',
-  activePanel: panels.write,
-  activeShot: 0,
-  shotCount: 0
-})
-
 function source(target) {
   return target.closest('[src]').getAttribute('src')
 }
@@ -209,8 +328,8 @@ function sourceFile(target) {
     : (function initialize() {
       state[src] = {
         file: script404(),
-        html: '&hearts;',
-        embed: ';)'
+        html: 'Change the way you see the world.',
+        embed: ''
       }
       return state[src]
     })()
@@ -325,122 +444,6 @@ $.when('click', '[data-play]', (event) => {
   $.teach({ nextPanel: panels.play })
 })
 
-$.draw(target => {
-  const bars = getRhythm(true)
-  const { id } = target
-  let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
-  const { file, html, embed } = sourceFile(target)
-
-  const readonly = target.getAttribute('readonly')
-  const presentation = target.getAttribute('presentation')
-
-  if(readonly) {
-    return `
-      <div name="page">
-        ${html}
-      </div>
-    `
-  }
-
-  if(presentation) {
-    activePanel = panels.perform
-  }
-
-  const escapedFile = escapeHyperText(file)
-
-  if(target.lastPanel !== activePanel) {
-    // flush outdated
-    target.innerHTML = ''
-    target.lastPanel = activePanel
-  }
-
-  const start = Math.max(activeShot - 1, 0)
-  const end = Math.min(activeShot + 2, shotCount)
-  const forwards = lastAction !== 'back'
-  const motion = getMotion(html, { active: activeShot, forwards, start, end })
-  const play = (state.play || {}).embed
-
-  const views = {
-    [panels.write]: () => `
-      <div name="write">
-        <textarea style="background: ${bars}">${escapedFile}</textarea>
-      </div>
-    `,
-    [panels.read]: () => `
-      <div name="read">
-        <div name="page">
-          ${html}
-        </div>
-        <div name="navi">
-          <button data-print>Print</button>
-          <div name="print">
-            ${embed}
-          </div>
-        </div>
-      </div>
-    `,
-    [panels.perform]: () => `
-      <div name="perform">
-        <div name="theater">
-          <div name="screen">
-            <div name="stage">
-              ${motion}
-            </div>
-          </div>
-        </div>
-        <div name="navi"
-          ${activeShot === 0 ? 'data-first' : ''}
-          ${activeShot === shotCount ? 'data-last' : ''}
-        >
-          <button data-back>
-            Back
-          </button>
-          <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
-          <button data-next>
-            Next
-          </button>
-        </div>
-      </div>
-    `,
-    [panels.play]: () => `
-      <div name="play">
-        ${play}
-      </div>
-    `,
-
-    'default': () => `
-      Nothing for ya. Head back to camp.
-    `
-  }
-
-  const view = (views[activePanel] || views['default'])()
-  const fadeOut = nextPanel && activePanel !== nextPanel
-
-
-  const perspective = `
-    <div class="grid" data-panel="${activePanel}">
-      <div name="transport">
-        <div name="actions">
-          <button data-write>Write</button>
-          <button data-read>Read</button>
-          <button data-perform>Perform</button>
-          ${play ? `<button data-play>Play</button>` : ''}
-        </div>
-      </div>
-      <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
-        ${view}
-      </transition>
-    </div>
-  `
-
-  if(activePanel === panels.perform) {
-    target.innerHTML = perspective
-    return
-  }
-
-  return perspective
-})
-
 function escapeHyperText(text) {
   return text.replace(/[&<>'"]/g, 
     costume => ({
@@ -463,164 +466,7 @@ $.when('animationend', 'transition', function transition({target}) {
 })
 
 function script404() {
-  return `<title-page
-title: Pretend
-author: Ty aka Notorious Sillonious
-
-# Best Buy Parking Lot - San Carlos, October 9th, 2023 - After Wrap
-
-^ Cold Open
-
-TY wears an orange hat and gloves while talking to an iPhone.
-
-@ Ty
-> I wasn't going to show anybody else this, but because that Tesla drove through my shot-- enjoy!
-
-# Best Buy Parking Lot - Before Shoot - Intercut
-
-Ty wears a sweatshirt and is amping himself up with jokes at the iPhone.
-
-A white Tesla creeps in the back, like Jaws.
-
-@ Ty
-> Like yo, I don't care if all your cars over there.
-
-Ty gestures in the general direction of the super chargers.
-
-@ Ty
-> Wherever. Have Dog mode. My car over here, was voted 2005 dog car of the year.
-
-The tesla parades itself in for a close up.
-
-^ Hard cut
-
-# Best Buy Parking Lot - Act 3 - Bark Barking
-
-Ty speaks directly with the audience, with the 2005 dog car of the year behind him.
-
-@ Ty
-> Alright. How's everybody doing? We feeling good still? Thank you!
-& Smirks
-> Alright, so clown town is over, thank you all for coming out.
-
-@ Ty
-> As we're transitioning from clown town, a kid friendly, family appropriate show here, we're going to bring on DJ Wally.
-
-@ Ty
-> And after DJ Wally, we have a series of headliners for you in a series tonight, all of them headliners in their own time and space.
-
-Ty points at the camera.
-
-@ Ty
-> But they're all new to you tonight. And!
-
-Ty climbs up onto the tailgate.
-
-@ Ty
-> I'm very excited to announce the premier of "Oops, Yeah", no. Nope, that wasn't it, hang on.
-
-Ty waves his hands and clears the air.
-
-@ Ty
-> I always get these words mixed up. We need a better back-ronym for these. We don't even have an acronym going forwards.
-
-@ Ty
-> Anyways. but I'm Ty, your producer, aka the Notorious Sillonious.
-
-Ty jims the camera.
-
-@ Ty
-> I am both a clown and whatever else I am. Who is to say?
-
-Ty raises his hand with a Queanswer.
-
-@ Ty
-> Well, there is a lot to say. So Actually, I am the Principal Engineer of Sillyz.Computer
-
-<hyper-link
-src: https://Sillyz.Computer
-label: blow your mind
-
-@ Ty
-> It is a state of being with a technical implementation.
-
-A deep breath.
-
-@ Ty
-> And I'm excited to share all of that with you. And didn't want to waste your time.
-
-Goes off the cuff.
-
-@ Ty
-> Wasting everybody's time and money. Accomplishing nothing. So.
-
-Continues to improvise.
-
-@ Ty
-> So, instead of giving you this broad timeline of seven, to ten, to thirty years, it is ready for you now.
-
-Hand flip.
-
-@ Ty
-> So, look under your seats. You'll find a post-it note that has a Rune on it.
-
-Jim for the camera once more.
-
-@ Ty
-> And on that magic rune, you will be transported into Sillyz.Computer! Now!
-
-CHECKERED VANS kick the BACK DOOR of the HONDA ELEMENT.
-
-@ Ty
-> I don't know if anyone can hear that, see that, click that!
-
-So many kicks against the car, pure excitement.
-
-@ Ty
-> This, right here, is Sillyz.Computer.
-
-@ Ty
-> Couldn't buy that in a Best Buy now could you? I didn't think so.
-
-Points at the big blue box across the lot.
-
-Ty tampers down the flames of the audience with his hands.
-
-@ Ty
-> Alright, alright. Roast time is over Clown Town. We've got DJ Wally coming on now!
-
-Ty jumps in rhythm with the momentum he is building lyrically.
-
-@ Ty
-> I am so excited for you to hear the beats that he has to drop! But!
-
-Jumping stops.
-
-@ Ty
-> In the meantime, to get Wally's setup going, we're going to need to pop this top.
-
-Liberal amounts of thumbs up, jumping pointing in excitement.
-
-@ Ty
-> Now! Are you ready for the drop?
-
-# Best Buy Parking Lot - Act 1 - No Barking
-
-Ty struggles to set up tripods and cameras, but overcomes physical and digital difficulties.
-
-# Best Buy Parking Lot - Act 2 - Silent Barking
-
-Ty drives home the point that this project could have gone so much further if he didn't have to busk for independence, but like a true american, will hit the streets with art.
-
-# Best Buy Parking Lot - Act 4 - Pack Barking
-
-Without funding, Ty has managed to stay entirely independent and open. In a rare glimpse behind the curtain in the high tower, Ty reveals the truth of time travel.
-
-# Best Buy Parking Lot - Act 5 - Done Barking
-
-Ty unwinds after a breath-taking 35 minute performance and managed to transmit the entire log through the Stargate before disconnecting and sealing the gate for good.
-
-! <sillyz-synth
+  return `Change the way you see the world.
 
 <greet-friend
 x: Meduz
@@ -638,28 +484,32 @@ y: es_MX
 x: Ty
 y: en_US
 
-<hello-world
+https://sillyz.computer is a straight to DVD release of the universal access to my knowledge. My Internet Archive, if you will. That's why I debuted there as a vendor on October 12th and not at Cobb's October 15th. Pre-orders become available November 15th.
 
-<hello-nickname
+Multiplayer, 2024. Re: the business model, the computers are free, but you pay for the content, just like any other streaming service, but you also get the source code to launch your own competitor.
 
-<hello-universe
+If you missed me at launch, this is an edit of my dress rehearsal barking and busking from October 9th:
 
-<hypertext-variable
-text: hello world
-weight: 800
-size: 2rem
-height: 6
+<hyper-link
+src: https://youtu.be/KcUAa0eT4Tc?si=cZ5mQvoNgxBl6mlF
+label: October 9th, 2023
 
-<rainbow-action
-text: Pop
-prefix: <a href="https://sillyz.computer">
-suffix: </a>
+Let's see what we cook up together this holiday season-- I know I'll be working on my feature length immersive experience for Sillyz Computer-- The War on Elves. If I'm lucky, I might even exchange knowledge with them while I'm on their island. One of the perks of being Player Number One.
 
-<hypertext-highlighter
-text: this is yellow
-color: yellow
+Will you be next? Anyone can become Sillonious.
+
+<hyper-link
+src: https://github.com/tylerchilds/plan98
+label: Download the Source Code
+
+And run the command 'npm run build && npm start'
+
+With &hearts;
+- Uncle Sillonious
 
 # the end.
+
+P.S. Mila, will you help me learn Chinese?
 
 { play
 embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/KcUAa0eT4Tc?si=NCkkTBArSKMYj7Vt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
@@ -703,13 +553,12 @@ $.style(`
 
   & [name="transport"] {
     overflow-x: auto;
-    max-width: 100%;
+    max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
     bottom: 0;
     right: 0;
     z-index: 2;
-    display: inline-flex;
-    justify-content: end;
+    overflow: auto;
   }
 
   & button {
@@ -732,11 +581,10 @@ $.style(`
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;
-    background: rgba(0,0,0,.15);
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
     border-radius: 1.5rem;
-    padding: .5rem;
+    margin: .5rem;
   }
 
   & [name="read"] > *${notHiddenChildren} {
@@ -816,10 +664,12 @@ $.style(`
 
   & [name="write"] {
     position: relative;
-    background: white;
-    color: black;
+    background: black;
   }
 
+  & [name="write"] textarea {
+    color: white;
+  }
 
   & [name="write"]::before {
     content: '';
@@ -910,7 +760,6 @@ $.style(`
     pointer-events: none;
     opacity: .5;
   }
-
 
   & [name="beat"] {
     --size-small: scale(.9);
@@ -1034,33 +883,49 @@ $.style(`
     }
   }
 
-
   &	hypertext-title {
-      display: block;
-      height: 100%;
-      width: 100%;
-    }
+    display: block;
+    height: 100%;
+    width: 100%;
+  }
 
   &	hypertext-blankline {
       display: block;
     }
 `)
 
-function getRhythm(disabled) {
-  if(disabled) return 'transparent'
+function getStars() {
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext('2d');
 
   const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
-  canvas.height = rhythm * 2;
-  console.log(rhythm)
-  canvas.width = rhythm;
 
-  ctx.fillStyle = 'transparent';
-  ctx.fillRect(0, 0, rhythm, rhythm);
+  // landscape tabloid? 11x17
+  canvas.height = rhythm * 11;
+  canvas.width = rhythm * 17;
 
   ctx.fillStyle = 'dodgerblue';
-  ctx.fillRect(0, rhythm - 1, rhythm, 1);
+  for(let i = 0; i < rhythm; i++) {
+    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
+  }
+  ctx.fillStyle = 'lime';
+  for(let i = 0; i < rhythm; i++) {
+    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
+  }
+  ctx.fillStyle = 'orange';
+  for(let i = 0; i < rhythm; i++) {
+    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
+  }
+  ctx.fillStyle = 'rebeccapurple';
+  for(let i = 0; i < rhythm; i++) {
+    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
+  }
+  ctx.fillRect(0, rhythm - 1, 1, 1);
 
   return `url(${canvas.toDataURL()}`;
+}
+
+
+function random(max) {
+  return Math.floor(Math.random() * max);
 }

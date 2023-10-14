@@ -25355,7 +25355,7 @@ ${markup.join("\n")}`);
       const hour = now.getHours();
       const greeting = timeOfDayGreetings[language2];
       const friendLanguage = timeOfDayGreetings[timeOfDayGreetings[language2].key];
-      let timeOfDay = "morning";
+      let timeOfDay;
       if (hour >= 5 && hour < 12) {
         timeOfDay = "morning";
       } else if (hour >= 12 && hour < 18) {
@@ -25368,6 +25368,7 @@ ${markup.join("\n")}`);
       const message = greeting[timeOfDay];
       return `${startAdornment} ${message}, ${friendName} ${endAdornment}`;
     });
+    $2.style(`& { display: block }`);
     return $2;
   }
   translatedTags.map((tagInfo) => createGreetingTag(tagInfo));

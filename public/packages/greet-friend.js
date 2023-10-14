@@ -76,7 +76,7 @@ function createGreetingTag(tagInfo) {
     const friendLanguage = timeOfDayGreetings[timeOfDayGreetings[language].key];
 
     // Find the correct time of day
-    let timeOfDay = 'morning';
+    let timeOfDay;
     if (hour >= 5 && hour < 12) {
       timeOfDay = 'morning';
     } else if (hour >= 12 && hour < 18) {
@@ -92,6 +92,8 @@ function createGreetingTag(tagInfo) {
 
     return `${startAdornment} ${message}, ${friendName} ${endAdornment}`;
   });
+
+  $.style(`& { display: block }`)
 
   return $;
 }
