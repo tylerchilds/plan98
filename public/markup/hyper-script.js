@@ -755,6 +755,7 @@ $.style(`
 
   & [name="theater"] {
     width: 100%;
+    min-width: 8.5in;
     height: 100%;
     background: black;
   }
@@ -847,7 +848,7 @@ $.style(`
     background: white;
     margin: 0 auto;
     padding: 0 1in;
-    max-width: 8.5in;
+    width: 8.5in;
     overflow: auto;
   }
   & [name="page"] {
