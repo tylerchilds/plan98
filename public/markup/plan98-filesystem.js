@@ -382,6 +382,7 @@ $.style(`
 
   & .help {
     box-sizing: content-box;
+    padding: 0 .5rem;
   }
 
   & .visual {
