@@ -468,6 +468,8 @@ $.when('animationend', 'transition', function transition({target}) {
 function script404() {
   return `Change the way you see the world.
 
+A paper computer could be a 1,000 line toy that behaves as a single celled organism, akin to one cell in a excel sheet that produces google docs for netflix to run apple keynotes for saturday night live as paradigm shift that encapsulates them all.
+
 <greet-friend
 x: Meduz
 y: fr_FR
