@@ -752,9 +752,8 @@ $.style(`
     border: none;
     display: block;
     resize: none;
-    padding: 1in .5rem;
+    padding: 1rem .5rem 1rem 2rem;
     line-height: 2rem;
-    padding-left: 2rem;
 
   }
 
