@@ -502,7 +502,7 @@ Will you be next? Anyone can become Sillonious.
 src: https://github.com/tylerchilds/plan98
 label: Download the Source Code
 
-And run the command 'npm run build && npm start'
+And run the command 'npm start'
 
 With &hearts;
 - Uncle Sillonious
@@ -709,15 +709,14 @@ $.style(`
   & [name="read"] {
     background: white;
     margin: 0 auto;
-    padding: 0 1in;
-    width: 8.5in;
+    padding: 0 1rem;
+    width: calc(6.5in + 2rem);
     overflow: auto;
   }
   & [name="page"] {
+    padding: 1in 0;
     font-size: 12pt;
     font-family: courier;
-    height: 100%;
-    max-height: 100vh;
   }
   & [name="perform"] {
     background: black;
@@ -751,7 +750,7 @@ $.style(`
     border: none;
     display: block;
     resize: none;
-    padding: .5rem;
+    padding: 1in .5rem;
     line-height: 2rem;
     padding-left: 2rem;
 
@@ -850,6 +849,11 @@ $.style(`
     }
     & [name="read"] {
       display: block;
+    }
+
+    & [name="page"] {
+      height: 100%;
+      padding: 0;
     }
 
     & [name="transport"],

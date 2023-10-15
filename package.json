@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "npm run build && node server.js",
     "build": "npm i && esbuild --bundle public/main.js --outfile=public/package.2015.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
