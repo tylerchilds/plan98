@@ -158,9 +158,8 @@ $.draw(target => {
   return perspective
 })
 
-
-// the compile function takes a Hype script and converts it to hypertext
-export const compile = (script) => {
+// the hyperSanitizer function turns fiction stories into non-fiction
+export const hyperSanitizer = (script) => {
   // as costumes are worn their attributes may become modified
   const costumes = state.costumes = {}
   // state changes cause time dilations
