@@ -28,10 +28,10 @@ const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comme
 
 // normal time converts lines 1:1 from hype to hypertext
 const NORMAL_TIME = Symbol('n-time')
-// prop are able to be stored
+// property are able to be stored
 const PROP_TIME = Symbol('p-time')
-// costume embeds rich hyper media content
-const COSTUME_TIME = Symbol('c-time')
+// actor embeds rich hyper media content
+const ACTOR_TIME = Symbol('a-time')
 
 // create a hyper text module
 const $ = module('hyper-script', {
@@ -160,16 +160,16 @@ $.draw(target => {
 
 // the hyperSanitizer function turns fiction stories into non-fiction
 export const hyperSanitizer = (script) => {
-  // as costumes are worn their attributes may become modified
-  const costumes = state.costumes = {}
+  // as actors are worn their attributes may become modified
+  const actors = state.actors = {}
   // state changes cause time dilations
   let time = NORMAL_TIME
   // what model
-  let prop = ''
+  let property = ''
   // what perspective
-  let costume = ''
+  let actor = ''
   // what display
-  let exhibit = ''
+  let scene = ''
 
   // advanced-technology something magic whatever runes are a metaphor
   const RuneTable = {
@@ -185,23 +185,23 @@ export const hyperSanitizer = (script) => {
     '>': append.bind({}, 'hypertext-quote'),
     // parentheticals are subtext of expression
     '&': append.bind({}, 'hypertext-parenthetical'),
-    // props are able to change truths about the very facet of reality
+    // properties are able to change truths about the very facet of reality
     '{': (x) => {
-      // clear whichever prop from the stash
+      // clear whichever property from the stash
       state[x] = {}
-      // use whatever prop
-      prop = x
-      // what time is it? prop time!
+      // use whatever property
+      property = x
+      // what time is it? property time!
       time = PROP_TIME
     },
-    // costumes are able to display projections beyond black and white text
+    // actors are able to display projections beyond black and white text
     '<': (x) => {
-      // clear whichever costume from the stash
-      costumes[x] = {}
-      // use whatever costume
-      costume = x
-      // what time is it? costume time!
-      time = COSTUME_TIME
+      // clear whichever actor from the stash
+      actors[x] = {}
+      // use whatever actor
+      actor = x
+      // what time is it? actor time!
+      time = ACTOR_TIME
     }
   }
 
@@ -209,10 +209,10 @@ export const hyperSanitizer = (script) => {
   const times = {
     // line by line until finished
     [NORMAL_TIME]: normalTime,
-    // accesses prop and stores key value pairs after sequence break
-    [PROP_TIME]: propTime,
-    // accesses costume and embeds key value pairs after sequence break
-    [COSTUME_TIME]: costumeTime,
+    // accesses property and stores key value pairs after sequence break
+    [PROP_TIME]: propertyTime,
+    // accesses actor and embeds key value pairs after sequence break
+    [ACTOR_TIME]: actorTime,
   }
 
   // collect the lines of our script
@@ -224,8 +224,8 @@ export const hyperSanitizer = (script) => {
     (times[time] || noop)(line)
   }
 
-  // return our compiled hyper media exhibit
-  return exhibit
+  // return our compiled hyper media scene
+  return scene
 
   // just process our runes, yes magic, just straight forward level 1 magic
   function normalTime(line) {
@@ -254,8 +254,8 @@ export const hyperSanitizer = (script) => {
     return
   }
 
-  // process the sequence to understand our prop's, well, props.
-  function propTime(line, separator=':') {
+  // process the sequence to understand our property's, well, properties.
+  function propertyTime(line, separator=':') {
     // where in the line is our break
     const index = line.indexOf(separator)
     // before then is the attribute
@@ -270,12 +270,12 @@ export const hyperSanitizer = (script) => {
       return
     }
 
-    // update our prop of prop of props
-    state[prop][key.trim()] = value.trim()
+    // update our property of property of properties
+    state[property][key.trim()] = value.trim()
   }
 
-  // process the sequence to understand our costume's props.
-  function costumeTime(line, separator=':') {
+  // process the sequence to understand our actor's properties.
+  function actorTime(line, separator=':') {
     // where in the line is our break
     const index = line.indexOf(separator)
     // before then is the attribute
@@ -285,15 +285,15 @@ export const hyperSanitizer = (script) => {
 
     // no data?
     if(!value) {
-      // collect the properties from our costume
-      const properties = costumes[costume]
+      // collect the properties from our actor
+      const properties = actors[actor]
 
       // convert them into hype attributes
       const attributes = Object.keys(properties)
         .map(x => `${x}="${properties[x]}"`).join('')
 
-      // add some hype to our exhibit
-      exhibit += `<${costume} ${attributes}></${costume}>`
+      // add some hype to our scene
+      scene += `<${actor} ${attributes}></${actor}>`
 
       // back to normal time
       time = NORMAL_TIME
@@ -301,16 +301,16 @@ export const hyperSanitizer = (script) => {
     }
 
     // set the 
-    costumes[costume][key.trim()] = value.trim()
+    actors[actor][key.trim()] = value.trim()
   }
 
-  function append(costume, body) {
+  function append(actor, body) {
     const hype = `
-      <${costume}>
+      <${actor}>
         ${body}
-      </${costume}>
+      </${actor}>
     `
-    exhibit += hype
+    scene += hype
   }
 
   function noop() {}
@@ -338,7 +338,7 @@ $.when('input', 'textarea', (event) => {
   const src = source(event.target)
   const { value } = event.target
   state[src].file = value
-  const html = compile(value)
+  const html = hyperSanitizer(value)
   state[src].html = html
   state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
 })
@@ -445,13 +445,13 @@ $.when('click', '[data-play]', (event) => {
 
 function escapeHyperText(text) {
   return text.replace(/[&<>'"]/g, 
-    costume => ({
+    actor => ({
       '&': '&amp;',
       '<': '&lt;',
       '>': '&gt;',
       "'": '&#39;',
       '"': '&quot;'
-    }[costume])
+    }[actor])
   )
 }
 
