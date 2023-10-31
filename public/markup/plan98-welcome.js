@@ -11,7 +11,7 @@ import { showModal, types as modalTypes } from './plan98-modal.js'
 import { factoryReset } from './plan98-filesystem.js'
 
 const strings = {
-  'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain user generated experiences.'
+  'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain player-character generated experiences.'
 }
 
 const $ = module('plan98-welcome')
