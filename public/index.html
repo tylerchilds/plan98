@@ -62,7 +62,7 @@
       })({ folder: './markup' })
 
       document.body.insertAdjacentHTML('beforeend', `
-        <saga-genesis host="1998.social"></saga-genesis>
+        <saga-genesis host="${window.location.host}"></saga-genesis>
       `)
     </script>
   </body>
