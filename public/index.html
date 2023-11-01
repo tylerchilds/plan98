@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Explore</title>
+    <title>:)</title>
     <style>
       html,body {
         height: 100%;
@@ -23,6 +23,9 @@
       }
     </style>
     <link href="/styles/system.css" rel="stylesheet">
+    <script>
+      document.write(`<link href="/cdn/${window.location.host}/default.css" rel="stylesheet">`)
+    </script>
   </head>
   <body>
     <script src="../package.2015.js"></script>
@@ -35,7 +38,7 @@
 
         tags.forEach(async (tag) => {
           const url = `${folder || '.'}/${tag}.js`
-          const exists = (await fetch(url, {method: 'HEAD'})).ok
+          const exists = (await fetch(url, { method: 'HEAD' })).ok
           if(!exists) return
           let definable = true
           await import(url).catch(() => { definable = false })
@@ -62,6 +65,7 @@
       })({ folder: './markup' })
 
       document.body.insertAdjacentHTML('beforeend', `
+        <sillonious-brand host="${window.location.host}"></sillonious-brand>
         <saga-genesis host="${window.location.host}"></saga-genesis>
       `)
     </script>

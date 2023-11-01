@@ -66,6 +66,12 @@ function createGreetingTag(tagInfo) {
 
   const $ = module(name);
 
+  customElements.define(name, class WebComponent extends HTMLElement {
+    constructor() {
+      super();
+    }
+  });
+
   $.draw((target) => {
     const friendName = target.getAttribute('x');
     const language = target.getAttribute('y') || locale;
