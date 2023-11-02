@@ -1,3 +1,5 @@
+import { showModal, types as modalTypes } from './plan98-modal.js'
+
 export function factoryReset(cwc) {
   // todo: braidify highlighter and file system code
   try {
@@ -91,7 +93,7 @@ const Types = {
     icon: '/cdn/plan98/firefox.png',
     type: 'Directory',
     actions: [
-      ['data-bag', 'Create Bag'],
+      ['data-', 'Create Bag'],
       ['data-trifle', 'Create Trifle'],
       ['data-move', 'Move'],
       ['data-remove', 'Remove']
@@ -100,6 +102,7 @@ const Types = {
   Help: {
     type: 'Help',
     actions: [
+      ['data-about', 'About'],
       ['data-debugger', 'Debugger'],
       ['data-forum', 'Forum'],
       ['data-live', 'Live'],
@@ -336,6 +339,25 @@ $.when('click', '[data-debugger]', ({target}) => {
     <plan98-console></plan98-console>
   `)
 })
+
+$.when('click', '[data-about]', ({target}) => {
+  showModal(`
+    <sillonious-brand host="${window.location.host}"></sillonious-brand>
+  `)
+})
+
+$.when('click', '[data-live]', ({target}) => {
+  showModal(`
+    <live-help></live-help>
+  `)
+})
+
+$.when('click', '[data-forum]', ({target}) => {
+  showModal(`
+    yeah, would be nice.
+  `)
+})
+
 
 $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
