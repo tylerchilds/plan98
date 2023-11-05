@@ -28,7 +28,7 @@
     </script>
   </head>
   <body>
-    <script src="../package.2015.js"></script>
+    <script src="/package.2015.js"></script>
     <script>
       function markup({ folder }) {
         const tags = new Set(
@@ -62,7 +62,7 @@
         new MutationObserver((mutationsList) => {
           markup({ folder })
         }).observe(document.body, { childList: true, subtree: true });
-      })({ folder: './markup' })
+      })({ folder: '/markup' })
 
       document.body.insertAdjacentHTML('beforeend', `
         <saga-genesis host="${window.location.host}"></saga-genesis>

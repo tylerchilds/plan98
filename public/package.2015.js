@@ -8229,7 +8229,7 @@ ${markup.join("\n")}`);
   }
   function style(link2, stylesheet) {
     const styles = `
-    <style type="text/css" data-tag=${link2}>
+    <style type="text/css" data-link="${link2}">
       ${stylesheet.replaceAll("&", link2)}
     </style>
   `;

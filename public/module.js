@@ -32,7 +32,7 @@ function draw(link, compositor) {
 
 function style(link, stylesheet) {
   const styles = `
-    <style type="text/css" data-tag=${link}>
+    <style type="text/css" data-link="${link}">
       ${stylesheet.replaceAll('&', link)}
     </style>
   `;

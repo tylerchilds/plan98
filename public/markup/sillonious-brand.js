@@ -84,16 +84,23 @@ $.draw((target) => {
     contact
   } = doingBusinessAs[character] || doingBusinessAs['sillyz.computer']
 
+  const stars = getStars(true)
+
   return `
-    <qr-code secret="https://${character}"></qr-code>
-    ${character}<br/>
-    ${contact}<br/>
-    ${tagline}<br/>
-    <button data-sticky>get sticky</button>
+    <div>
+      ${character}<br/>
+      ${contact}<br/>
+      ${tagline}<br/>
+    </div>
+    <div>
+      <qr-code secret="https://${character}"></qr-code>
+      <button data-download>Get</button>
+    </div>
+    <div class="canvas" style="background-image: ${stars}"></div>
   `
 })
 
-$.when('click', '[data-sticky]', (event) => {
+$.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).innerHTML
   sticky(brand)
 })
@@ -106,7 +113,26 @@ $.when('input', 'textarea', (event) => {
   state[src].html = html
 })
 
+$.style(`
+  & {
+    display: grid;
+    grid-template-columns: auto 1in;
+    grid-template-rows: auto 1fr;
+    gap: 1rem;
+    max-width: 3.12in;
+    margin: 0 auto;
+  }
+
+  & .canvas {
+    grid-column: -1 / 1;
+    background-color: black;
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+`)
+
 function sticky(brand) {
+  const style = document.querySelector('style[data-link="sillonious-brand"]').innerHTML
   const preview = window.open('', 'PRINT');
   preview.document.write(`
     <html>
@@ -121,10 +147,6 @@ function sticky(brand) {
             }
 
             button { display: none; }
-            qr-code {
-              float: right;
-              max-width: 1in;
-            }
             img {
               max-width: 100%;
             }
@@ -134,10 +156,13 @@ function sticky(brand) {
             size: 3.25in 3.12in;
             margin: 6mm 7mm;
           }
+          ${style}
         </style>
       </head>
       <body>
-      ${brand}
+        <sillonious-brand>
+          ${brand}
+        </sillonious-brand>
       </body>
     </html>
   `)
@@ -148,6 +173,25 @@ function sticky(brand) {
   preview.close();
 
   return true;
+}
+
+function getStars() {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(rhythm - 1, rhythm - 1, 1, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+function random(max) {
+  return Math.floor(Math.random() * max);
 }
 
 /*
