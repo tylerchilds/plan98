@@ -75,20 +75,80 @@ export const doingBusinessAs = {
   //'wherespodcast.org': emeraldOfTime
 }
 
-module('sillonious-brand').draw((target) => {
-  const character = target.getAttribute('host')
+const $ = module('sillonious-brand')
+
+$.draw((target) => {
+  const character = target.getAttribute('host') || window.location.host
   const {
     tagline,
     contact
   } = doingBusinessAs[character] || doingBusinessAs['sillyz.computer']
 
   return `
+    <qr-code secret="https://${character}"></qr-code>
     ${character}<br/>
     ${contact}<br/>
     ${tagline}<br/>
-    <qr-code secret="https://${character}"></qr-code>
+    <button data-sticky>get sticky</button>
   `
 })
+
+$.when('click', '[data-sticky]', (event) => {
+  const brand = event.target.closest($.link).innerHTML
+  sticky(brand)
+})
+
+$.when('input', 'textarea', (event) => {
+  const src = source(event.target)
+  const { value } = event.target
+  state[src].file = value
+  const html = hyperSanitizer(value)
+  state[src].html = html
+})
+
+function sticky(brand) {
+  const preview = window.open('', 'PRINT');
+  preview.document.write(`
+    <html>
+      <head>
+        <title>${document.title}</title>
+        <style type="text/css">
+          @media print {
+            html, body {
+              margin: 0;
+              padding: 0;
+              font-size: 6pt;
+            }
+
+            button { display: none; }
+            qr-code {
+              float: right;
+              max-width: 1in;
+            }
+            img {
+              max-width: 100%;
+            }
+          }
+
+          @page {
+            size: 3.25in 3.12in;
+            margin: 6mm 7mm;
+          }
+        </style>
+      </head>
+      <body>
+      ${brand}
+      </body>
+    </html>
+  `)
+  preview.document.close(); // necessary for IE >= 10
+  preview.focus(); // necessary for IE >= 10*/
+
+  preview.print();
+  preview.close();
+
+  return true;
+}
 
 /*
 

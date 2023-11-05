@@ -4,7 +4,7 @@ import "./statebus/braidify-client.js"
 
 import { innerHTML } from 'diffhtml'
 
-// optimally, we'll import just bus from statebus and everything else will be implemented under the hood. stubbing for now to unblock development using tag
+// window pollution will end with typed dsl reactive state proxy
 const bus = window.bus
 export const state = bus.state
 bus.libs.localstorage('ls/*')

@@ -6751,11 +6751,11 @@ ${patch.content}\r
     }
     currentParent.childNodes.push(...childNodes);
   };
-  var HTMLElement = (nodeName, rawAttrs, supplemental, options2) => {
+  var HTMLElement2 = (nodeName, rawAttrs, supplemental, options2) => {
     let match = null;
     const attrEx = /([_@$#a-z][^\s\x00-\x1F"'>\/=\uFDD0-\uFDEF\uFFFE\uFFFF]*)\s*(=\s*("([^"]+)"|'([^']+)'|(\S+)))?/ig;
     if (match = tokenEx.exec(nodeName)) {
-      return HTMLElement(supplemental.tags[match[1]], rawAttrs, supplemental, options2);
+      return HTMLElement2(supplemental.tags[match[1]], rawAttrs, supplemental, options2);
     }
     const attributes = {};
     for (let match2; match2 = attrEx.exec(rawAttrs || EMPTY.STR); ) {
@@ -6887,7 +6887,7 @@ ${markup.join("\n")}`);
           }
         }
         const attrs = attributeMatch + (extraMatch || "");
-        currentParent = currentParent.childNodes[currentParent.childNodes.push(HTMLElement(tagMatch, attrs, supplemental, options2)) - 1];
+        currentParent = currentParent.childNodes[currentParent.childNodes.push(HTMLElement2(tagMatch, attrs, supplemental, options2)) - 1];
         stack.push(currentParent);
         if (options2.parser.strict || blockText.has(name3)) {
           const closeMarkup = `</${name3}>`;
@@ -25348,6 +25348,11 @@ ${markup.join("\n")}`);
   function createGreetingTag(tagInfo) {
     const { name: name3, locale } = tagInfo;
     const $2 = module2(name3);
+    customElements.define(name3, class WebComponent extends HTMLElement {
+      constructor() {
+        super();
+      }
+    });
     $2.draw((target) => {
       const friendName = target.getAttribute("x");
       const language2 = target.getAttribute("y") || locale;
