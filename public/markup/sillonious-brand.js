@@ -1,3 +1,5 @@
+import Color from "https://esm.sh/colorjs.io@0.4.0";
+
 const reverseProxyLookup = `
   c/o notorious@sillyz.computer<br/>
   969 G Edgewater Blvd<br/>
@@ -24,37 +26,51 @@ export const doingBusinessAs = {
   'sillyz.computer': {
     tagline: 'The Notorious One Will See You Now',
     saga: emeraldOfTime,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 55,
+    brandRange: 45,
   },
   '1998.social': {
     tagline: '1998 (ice-cream) social',
     saga: emeraldOfSpace,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 110,
+    brandRange: 45,
   },
   'yourlovedones.online': {
     tagline: 'Your Loved Ones are On the Line',
     saga: emeraldOfTrust,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 220,
+    brandRange: 45,
   },
   'ncity.executiontime.pub': {
     tagline: 'Pleasures of Night City',
     saga: emeraldOfTruth,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 15,
+    brandRange: 45,
   },
   'css.ceo': {
     tagline: 'Custom Handmade Skins, Chainsaw Free',
     saga: emeraldOfSelf,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 165,
+    brandRange: 45,
   },
   'y2k38.info': {
     tagline: 'Break the Time Loop',
     saga: emeraldOfSecurity,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 300,
+    brandRange: 45,
   },
   'thelanding.page': {
     tagline: 'Computer Scientific Journal',
     saga: emeraldOfNow,
-    contact: reverseProxyLookup
+    contact: reverseProxyLookup,
+    brandHue: 350,
+    brandRange: 45,
   },
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
@@ -77,28 +93,113 @@ export const doingBusinessAs = {
 
 const $ = module('sillonious-brand')
 
-$.draw((target) => {
-  const character = target.getAttribute('host') || window.location.host
-  const {
-    tagline,
-    contact
-  } = doingBusinessAs[character] || doingBusinessAs['sillyz.computer']
+function currentBusiness(host) {
+  return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
+}
 
-  const stars = getStars(true)
+$.draw((target) => {
+  const host = target.getAttribute('host') || window.location.host
+
+  const stars = getStars(target)
+  const {
+    contact,
+    tagline,
+  } = currentBusiness(host)
+  const { colors, fg, bg } = generateTheme(target, host)
+
+  const wheel = colors.map((lightness, i) => {
+    const steps = lightness.map((x) => `
+      <button
+        class="step"
+        data-block="${x.block}"
+        data-inline="${x.inline}"
+        style="background: var(${x.name})">
+      </button>
+    `).join('')
+    return `
+      <div class="group" style="transform: rotate(${i * 45}deg)">
+        ${steps}
+      </div>
+    `
+  }).join('')
 
   return `
+    <div class="wheel">${wheel}</div>
     <div>
-      ${character}<br/>
-      ${contact}<br/>
-      ${tagline}<br/>
+      <qr-code
+        text="https://${host}"
+        ${fg ? `data-fg="${fg}"`: ''}
+        ${bg ? `data-bg="${bg}"`: ''}
+      ></qr-code>
+      <button data-download>Get</button>
     </div>
     <div>
-      <qr-code secret="https://${character}"></qr-code>
-      <button data-download>Get</button>
+      ${host}<br/>
+      ${contact}<br/>
+      ${tagline}<br/>
     </div>
     <div class="canvas" style="background-image: ${stars}"></div>
   `
 })
+
+function generateTheme(target, host, {reverse} = {}) {
+  if(target.dataset.themed === 'true') {
+    return $.learn()[host]
+  }
+
+  const {
+    brandHue,
+    brandRange,
+  } = currentBusiness(host)
+
+  const lightnessStops = [
+    [5, 30],
+    [20, 45],
+    [35, 60],
+    [50, 75],
+    [65, 90],
+    [80, 105],
+    [95, 120]
+  ]
+
+  const colors = [...Array(8)].map((_, hueIndex) => {
+    const step = ((brandRange / 8) * hueIndex)
+    const hue = reverse
+      ? brandHue - step
+      : brandHue + step
+
+    return lightnessStops.map(([l, c], i) => {
+      const name = `--wheel-${hueIndex}-${i}`
+      const value = new Color('lch', [l, c, hue])
+        .display()
+        .toString()
+
+      return {
+        name,
+        value,
+        block: hueIndex,
+        inline: i
+      }
+    })
+  })
+
+  target.style = print(colors)
+  target.dataset.themed = 'true'
+
+  const fg = colors[0][2].value
+  const bg = colors[0][6].value
+
+  const data = { colors, bg, fg }
+
+  $.teach({ [host]: data })
+  return data
+}
+
+function print(colors) {
+  return colors.flatMap(x => x).map(({ name, value }) => `
+    ${name}: ${value};
+  `).join('')
+}
 
 $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).innerHTML
@@ -116,18 +217,48 @@ $.when('input', 'textarea', (event) => {
 $.style(`
   & {
     display: grid;
-    grid-template-columns: auto 1in;
+    grid-template-columns: 1in auto;
     grid-template-rows: auto 1fr;
     gap: 1rem;
-    max-width: 3.12in;
+    width: 50ch;
+    max-width: 100%;
     margin: 0 auto;
+    background: var(--wheel-0-6);
+    padding: 3mm;
+    box-sizing: border-box;
+    overflow-x: auto;
   }
 
   & .canvas {
     grid-column: -1 / 1;
-    background-color: black;
+    background: white;
     max-width: 100%;
     aspect-ratio: 16 / 9;
+  }
+
+  & .wheel {
+    z-index: 1;
+    display: grid;
+    grid-template-areas: "slot";
+    grid-template-rows: 50%;
+    grid-template-columns: 79%;
+    place-content: start center;
+    position: absolute;
+  }
+  & .group {
+    grid-area: slot;
+    transform-origin: bottom;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(7, 1fr);
+    clip-path: polygon(10% 0%, 50% 100%, 90% 0%);
+    gap: 5px;
+  }
+
+  & .step {
+    border: none;
+    width: 100%;
+    height: auto;
   }
 `)
 
@@ -139,6 +270,7 @@ function sticky(brand) {
       <head>
         <title>${document.title}</title>
         <style type="text/css">
+          * { box-sizing: border-box; }
           @media print {
             html, body {
               margin: 0;
@@ -149,6 +281,10 @@ function sticky(brand) {
             button { display: none; }
             img {
               max-width: 100%;
+            }
+            sillonious-brand {
+              background: orange;
+              padding: 0!important;
             }
           }
 
@@ -175,7 +311,8 @@ function sticky(brand) {
   return true;
 }
 
-function getStars() {
+function getStars(target) {
+  const color = target.style.getPropertyValue("--wheel-0-4");
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext('2d');
 
@@ -184,14 +321,10 @@ function getStars() {
   canvas.height = rhythm;
   canvas.width = rhythm;
 
-  ctx.fillStyle = 'dodgerblue';
+  ctx.fillStyle = color;
   ctx.fillRect(rhythm - 1, rhythm - 1, 1, 1);
 
   return `url(${canvas.toDataURL()}`;
-}
-
-function random(max) {
-  return Math.floor(Math.random() * max);
 }
 
 /*

@@ -600,5 +600,6 @@ QRCode.CorrectLevel = QRErrorCorrectLevel;
 const $ = module('qr-code')
 
 $.draw(target => {
-  new QRCode(target, { text: target.getAttribute('secret') })
+  const { fg='black', bg='white' } = target.dataset
+  new QRCode(target, { text: target.getAttribute('text'), colorLight: fg, colorDark: bg })
 })
