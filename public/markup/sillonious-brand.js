@@ -1,7 +1,6 @@
 import Color from "https://esm.sh/colorjs.io@0.4.0";
 
 const reverseProxyLookup = `
-  c/o notorious@sillyz.computer<br/>
   969 G Edgewater Blvd<br/>
   #123<br/>
   Foster City, CA 94404
@@ -25,6 +24,7 @@ const emeraldOfNow
 export const doingBusinessAs = {
   'sillyz.computer': {
     tagline: 'The Notorious One Will See You Now',
+    mascot: 'Silly Sillonious',
     saga: emeraldOfTime,
     contact: reverseProxyLookup,
     brandHue: 55,
@@ -32,6 +32,7 @@ export const doingBusinessAs = {
   },
   '1998.social': {
     tagline: '1998 (ice-cream) social',
+    mascot: 'Wally the Incredible Hype',
     saga: emeraldOfSpace,
     contact: reverseProxyLookup,
     brandHue: 110,
@@ -39,6 +40,7 @@ export const doingBusinessAs = {
   },
   'yourlovedones.online': {
     tagline: 'Your Loved Ones are On the Line',
+    mascot: 'Sally Sillonious',
     saga: emeraldOfTrust,
     contact: reverseProxyLookup,
     brandHue: 220,
@@ -46,6 +48,7 @@ export const doingBusinessAs = {
   },
   'ncity.executiontime.pub': {
     tagline: 'Pleasures of Night City',
+    mascot: 'Sully Sillonious',
     saga: emeraldOfTruth,
     contact: reverseProxyLookup,
     brandHue: 15,
@@ -53,6 +56,7 @@ export const doingBusinessAs = {
   },
   'css.ceo': {
     tagline: 'Custom Handmade Skins, Chainsaw Free',
+    mascot: 'Sol Sillonious',
     saga: emeraldOfSelf,
     contact: reverseProxyLookup,
     brandHue: 165,
@@ -60,6 +64,7 @@ export const doingBusinessAs = {
   },
   'y2k38.info': {
     tagline: 'Break the Time Loop',
+    mascot: 'Shelly Sillonious',
     saga: emeraldOfSecurity,
     contact: reverseProxyLookup,
     brandHue: 300,
@@ -67,6 +72,7 @@ export const doingBusinessAs = {
   },
   'thelanding.page': {
     tagline: 'Computer Scientific Journal',
+    mascot: 'Greggory McGreggory',
     saga: emeraldOfNow,
     contact: reverseProxyLookup,
     brandHue: 350,
@@ -102,6 +108,7 @@ $.draw((target) => {
 
   const stars = getStars(target)
   const {
+    mascot,
     contact,
     tagline,
   } = currentBusiness(host)
@@ -124,21 +131,24 @@ $.draw((target) => {
   }).join('')
 
   return `
-    <div class="wheel">${wheel}</div>
-    <div>
+    <main class="canvas" style="background-image: ${stars}"></main>
+    <header class="logo">
       <qr-code
         text="https://${host}"
         ${fg ? `data-fg="${fg}"`: ''}
         ${bg ? `data-bg="${bg}"`: ''}
       ></qr-code>
       <button data-download>Get</button>
-    </div>
-    <div>
-      ${host}<br/>
-      ${contact}<br/>
-      ${tagline}<br/>
-    </div>
-    <div class="canvas" style="background-image: ${stars}"></div>
+    </header>
+    <nav>
+      <div class="address">
+        ${mascot}<br/>
+        ${contact}
+      </div>
+    </nav>
+    <footer class="invite">
+      ${host}: ${tagline}
+    </footer>
   `
 })
 
@@ -202,7 +212,7 @@ function print(colors) {
 }
 
 $.when('click', '[data-download]', (event) => {
-  const brand = event.target.closest($.link).innerHTML
+  const brand = event.target.closest($.link).outerHTML
   sticky(brand)
 })
 
@@ -218,15 +228,37 @@ $.style(`
   & {
     display: grid;
     grid-template-columns: 1in auto;
-    grid-template-rows: auto 1fr;
-    gap: 1rem;
+    grid-template-rows: 1fr auto auto;
     width: 50ch;
     max-width: 100%;
     margin: 0 auto;
-    background: var(--wheel-0-6);
-    padding: 3mm;
     box-sizing: border-box;
     overflow-x: auto;
+  }
+  & .logo {
+    padding: 2mm 2mm 0;
+    background: var(--wheel-0-6);
+    border-radius: 4px 4px 0 0;
+  }
+  & nav {
+    align-self: end;
+  }
+  & .address {
+    padding: 2mm;
+    border: 1mm solid var(--wheel-4-6);
+    border-left: 0;
+    border-bottom: 0;
+    color: var(--wheel-4-0);
+    display: inline-grid;
+    border-radius: 0 4px 0 0;
+  }
+
+  & .invite {
+    grid-column: 1 / -1;
+    padding: 1mm 2mm;
+    background: var(--wheel-0-6);
+    border-radius: 0 4px 4px 4px;
+    color: var(--wheel-0-2);
   }
 
   & .canvas {
@@ -234,6 +266,7 @@ $.style(`
     background: white;
     max-width: 100%;
     aspect-ratio: 16 / 9;
+    margin-bottom: 2mm;
   }
 
   & .wheel {
@@ -269,8 +302,8 @@ function sticky(brand) {
     <html>
       <head>
         <title>${document.title}</title>
+        <link href="/styles/system.css" rel="stylesheet">
         <style type="text/css">
-          * { box-sizing: border-box; }
           @media print {
             html, body {
               margin: 0;
@@ -282,10 +315,6 @@ function sticky(brand) {
             img {
               max-width: 100%;
             }
-            sillonious-brand {
-              background: orange;
-              padding: 0!important;
-            }
           }
 
           @page {
@@ -296,19 +325,17 @@ function sticky(brand) {
         </style>
       </head>
       <body>
-        <sillonious-brand>
-          ${brand}
-        </sillonious-brand>
+        ${brand}
       </body>
     </html>
   `)
   preview.document.close(); // necessary for IE >= 10
   preview.focus(); // necessary for IE >= 10*/
 
-  preview.print();
-  preview.close();
-
-  return true;
+  setTimeout(() => {
+    preview.print();
+    preview.close();
+  }, 1000)
 }
 
 function getStars(target) {
