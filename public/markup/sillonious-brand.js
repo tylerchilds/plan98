@@ -130,25 +130,29 @@ $.draw((target) => {
     `
   }).join('')
 
+  if(target.innerHTML) return
+
   return `
-    <main class="canvas" style="background-image: ${stars}"></main>
-    <header class="logo">
-      <qr-code
-        text="https://${host}"
-        ${fg ? `data-fg="${fg}"`: ''}
-        ${bg ? `data-bg="${bg}"`: ''}
-      ></qr-code>
-      <button data-download>Get</button>
-    </header>
-    <nav>
-      <div class="address">
-        ${mascot}<br/>
-        ${contact}
-      </div>
-    </nav>
-    <footer class="invite">
-      ${host}: ${tagline}
-    </footer>
+    <div class="grid">
+      <main class="canvas" style="background-image: ${stars}"></main>
+      <header class="logo">
+        <qr-code
+          text="https://${host}"
+          ${fg ? `data-fg="${fg}"`: ''}
+          ${bg ? `data-bg="${bg}"`: ''}
+        ></qr-code>
+        <button data-download>Get</button>
+      </header>
+      <nav>
+        <div class="address">
+          ${mascot}<br/>
+          ${contact}
+        </div>
+      </nav>
+      <footer class="invite">
+        ${host}: ${tagline}
+      </footer>
+    </div>
   `
 })
 
@@ -226,6 +230,9 @@ $.when('input', 'textarea', (event) => {
 
 $.style(`
   & {
+    display: block;
+  }
+  & .grid {
     display: grid;
     grid-template-columns: 1in auto;
     grid-template-rows: 1fr auto auto;

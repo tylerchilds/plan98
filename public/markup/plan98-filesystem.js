@@ -4,7 +4,6 @@ export function factoryReset(cwc) {
   // todo: braidify highlighter and file system code
   try {
     state[cwc] = {
-      path: '/home/sillonious/pretend.script',
       type: 'FileSystem',
       children: [{
         name: '',
@@ -122,7 +121,7 @@ function helpActions(currentWorkingComputer) {
 const $ = module('plan98-filesystem')
 const parameters = new URLSearchParams(window.location.search)
 
-$.draw(parameters.get('path') === null ? system : floppy)
+$.draw(self.self === self.top ? system : floppy)
 
 function closestWorkingComputer(target) {
   const cwc = target.closest('[data-cwc]')
@@ -145,7 +144,7 @@ function system(target) {
 
   const { cwc } = target.dataset
   const tree = state[cwc] || {}
-  const { path } = tree
+  const path = window.location.pathname
 
   const rootClass = rootActive ? 'active' : ''
 
@@ -171,7 +170,7 @@ function system(target) {
         ℤ.
       </button>
       <div class="leaf">
-        <iframe src="${window.location.href}?path=${path}"></iframe>
+        <iframe src="${window.location.origin + path + window.location.search}"></iframe>
       </div>
     </div>
   `
@@ -182,9 +181,8 @@ function floppy(target) {
     return
   }
   const tree = closestWorkingComputer(target)
-  const { path = '' } = tree
+  const path = window.location.pathname
   const content = getContent(tree, path.split('/'))
-
   if(content.type === Types.File.type) {
 		const readonly = parameters.get('readonly')
 		const presentation = parameters.get('presentation')
@@ -293,7 +291,7 @@ function nest(tree, pathParts, subtree = {}) {
 
     if(type === Types.Directory.type) {
       return `
-      <details ${tree.path.indexOf(`/${name}`) >= 0 ? 'open': ''}>
+      <details ${currentPath.indexOf(`/${name}`) >= 0 ? 'open': ''}>
         <summary data-path="${currentPath}">
           <plan98-context data-menu="${menuFor(tree, currentPath)}">
             ${name || "/"}
@@ -328,11 +326,6 @@ function menuFor(tree, path) {
 
   return "<plan98-filesystem>"+actions+"</plan98-filesystem>"
 }
-
-$.when('click', '[data-reset]', ({target}) => {
-  const { cwc } = target.closest('plan98-filesystem').dataset
-  factoryReset(cwc)
-})
 
 $.when('click', '[data-debugger]', ({target}) => {
   document.body.insertAdjacentHTML('beforeend', `

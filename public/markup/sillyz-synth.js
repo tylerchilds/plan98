@@ -320,7 +320,8 @@ $.style(`
     max-height: 100vh;
     height: 100%;
     display: grid;
-    place-content: center;
+    place-items: start center;
+    grid-template-rows: 100vmin;
   }
   & .wheel {
     display: grid;

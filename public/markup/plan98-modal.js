@@ -32,7 +32,7 @@ $.draw(() => {
   if(!isOpen) return ' '
 
   const modalClose = `
-    <button class="close">
+    <button data-close>
       𝕏.
     </button>
   `
@@ -86,7 +86,7 @@ export function hideModal() {
 }
 window.hideModal = showModal
 
-$.when('click', '.close', hideModal)
+$.when('click', '[data-close]', hideModal)
 
 $.style(`
   body.trap {
@@ -159,10 +159,6 @@ $.style(`
     text-align: center;
   }
 
-  & .body {
-    margin: 1rem;
-  }
-
   @keyframes modal-in {
     0% {
       opacity: 0;
@@ -175,7 +171,7 @@ $.style(`
     }
   }
 
-  & .close {
+  & [data-close] {
     background: black;
     border: none;
     border-radius: 100%;
@@ -191,13 +187,13 @@ $.style(`
     right: .5rem;
   }
 
-  & .close:hover,
-  & .close:focus {
+  & [data-close]:hover,
+  & [data-close]:focus {
     cursor: pointer;
     opacity: 1;
   }
 
-  & .close * {
+  & [data-close] * {
     pointer-events: none;
   }
 `)

@@ -64,8 +64,14 @@
         }).observe(document.body, { childList: true, subtree: true });
       })({ folder: '/markup' })
 
+      const parameters = new URLSearchParams(window.location.search)
+      const world = parameters.get('world')
+      const host = world ? world : window.location.host
+
       document.body.insertAdjacentHTML('beforeend', `
-        <saga-genesis host="${window.location.host}"></saga-genesis>
+        <sillonious-brand host="${host}">
+          <saga-genesis></saga-genesis>
+        </sillonious-brand>
       `)
     </script>
   </body>

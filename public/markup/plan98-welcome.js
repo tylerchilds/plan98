@@ -9,11 +9,6 @@
 
 import { showModal, types as modalTypes } from './plan98-modal.js'
 import { factoryReset } from './plan98-filesystem.js'
-
-const strings = {
-  'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain player-character generated experiences.'
-}
-
 const $ = module('plan98-welcome')
 
 $.when('click', '.remix', async () => {
@@ -96,18 +91,12 @@ $.draw(() => {
 })
 
 $.when('click', '[data-tutorial]', () => {
-  showModal(`
-    <p>
-      ${strings['plan98-welcome.warning']}
-    </p>
-    <p>
-      <a href="https://raw.githubusercontent.com/tylerchilds/plan98/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
-    </p>
-    <plan98-filesystem data-cwc="ls/plan98" data-preserve="all" style="text-align: right;">
-      <rainbow-action prefix="<button data-reset>" suffix="</button>" text="Cool">
-      </rainbow-action>
-    </plan98-filesystem>
-  `, { bannerType: modalTypes.news })
+  showModal(`<plan98-onboarding host="${window.location.host}"></plan98-onboarding>`, { bannerType: modalTypes.news })
+})
+
+$.when('click', '[data-reset]', ({target}) => {
+  const { cwc } = target.closest('plan98-filesystem').dataset
+  factoryReset(cwc)
 })
 
 $.style(`

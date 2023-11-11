@@ -868,7 +868,7 @@ $.style(`
   }
 
   & transition {
-    animation: &-fade-in ease-in-out 1ms;
+    animation: &-fade-in ease-in-out 200ms;
     display: grid;
     height: 100%;
     place-items: center;
@@ -887,15 +887,23 @@ $.style(`
 
   @keyframes &-fade-in {
     0% {
+      opacity: .5;
+      filter: blur(10px);
     }
     100% {
+      opacity: 1;
+      filter: blur(0px);
     }
   }
 
   @keyframes &-fade-out {
     0% {
+      opacity: 1;
+      filter: blur(0px);
     }
     100% {
+      opacity: .5;
+      filter: blur(10px);
     }
   }
 

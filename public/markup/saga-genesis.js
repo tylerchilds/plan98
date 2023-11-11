@@ -36,8 +36,12 @@ function useMacGuffin(macGuffin) {
   return previousReality
 }
 
+function getHost(target) {
+  return target.closest('[host]').getAttribute('host') || window.location.host
+}
+
 $.draw((target) => {
-  const host = target.getAttribute('host')
+  const host = getHost(target)
   const chaosEmerald = doingBusinessAs[host] || emeraldOfTime
   return useMacGuffin(chaosEmerald.saga)
 })
