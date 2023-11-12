@@ -30,35 +30,52 @@ const $ = module('plan98-onboarding', {
 $.draw(target => {
   const host = getHost(target)
   const stars = getStars(host)
-  const { shotCount, activeShot, lastAction } = $.learn()
-  const { conversation } = dialogue(target)
+  const { activeShot, lastAction } = $.learn()
+  const { script, shotCount } = dialogue(target)
 
   const start = Math.max(activeShot - 1, 0)
   const end = Math.min(activeShot + 2, shotCount)
   const forwards = lastAction !== 'back'
-  const motion = getMotion(conversation, { active: activeShot, forwards, start, end })
+  const motion = getMotion(script, { active: activeShot, forwards, start, end })
 
+  const isFirst = activeShot === 0
+  const isLast = activeShot === shotCount - 1
+
+  const reverseAction = isFirst ? `
+    <button data-exit>
+      Exit
+    </button>
+  ` : `
+    <button data-back>
+      Back
+    </button>
+  `
+
+  const forwardAction = isLast ? `
+    <button data-continue>
+      Continue
+    </button>
+  ` : `
+    <button data-next>
+      Next
+    </button>
+  `
   return `
     <div name="flow" >
       <div name="stars" style="background: black ${stars};">
         ${motion}
       </div>
-      <div name="navi"
-        ${activeShot === 0 ? 'data-first' : ''}
-        ${activeShot === shotCount ? 'data-last' : ''}
-      >
+      <div name="navi">
         <div>
-          <button data-back>
-            Back
-          </button>
+          ${reverseAction}
         </div>
+        <!--
         <div>
           <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
         </div>
+        -->
         <div>
-          <button data-next>
-            Next
-          </button>
+          ${forwardAction}
         </div>
       </div>
     </div>
@@ -75,7 +92,8 @@ function dialogue(target) {
     ? state[host]
     : (function initialize() {
       state[host] = {
-        conversation: `
+        shotCount: 1,
+        script: `
         <div>
           <div>
             ${strings['plan98-welcome.warning']}
@@ -89,6 +107,17 @@ function dialogue(target) {
       return state[host]
     })()
 }
+
+$.when('click', '[data-exit]', (event) => {
+  const close = event.target.closest($.link).getAttribute('close')
+  window[close] ? window[close]() : null
+})
+
+$.when('click', '[data-continue]', (event) => {
+
+  const close = event.target.closest($.link).getAttribute('close')
+  window[close] ? window[close]() : null
+})
 
 $.when('click', '[data-back]', (event) => {
   const { activeShot } = $.learn()
@@ -176,10 +205,9 @@ $.style(`
     border: none;
     color: dodgerblue;
     cursor: pointer;
-    height: 2rem;
     border-radius: 1rem;
     transition: color 100ms;
-    padding: .25rem 1rem;
+    padding: 1rem;
   }
 
   & button:hover,
@@ -188,7 +216,6 @@ $.style(`
   }
 
   & [name="navi"] {
-    height: 2rem;
     display: grid;
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;

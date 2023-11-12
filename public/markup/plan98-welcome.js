@@ -7,7 +7,7 @@
 </p>
 */
 
-import { showModal, types as modalTypes } from './plan98-modal.js'
+import { hideModal, showModal, types as modalTypes } from './plan98-modal.js'
 import { factoryReset } from './plan98-filesystem.js'
 const $ = module('plan98-welcome')
 
@@ -91,7 +91,14 @@ $.draw(() => {
 })
 
 $.when('click', '[data-tutorial]', () => {
-  showModal(`<plan98-onboarding host="${window.location.host}"></plan98-onboarding>`, { bannerType: modalTypes.news })
+  const close = 'plan98-welcome.close'
+  window[close] = hideModal;
+  showModal(`
+    <plan98-onboarding
+      host="${window.location.host}"
+      close="${close}"
+    ></plan98-onboarding>
+  `, { bannerType: modalTypes.news })
 })
 
 $.when('click', '[data-reset]', ({target}) => {

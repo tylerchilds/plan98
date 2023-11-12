@@ -31,13 +31,7 @@ $.draw(() => {
 
   if(!isOpen) return ' '
 
-  const modalClose = `
-    <button data-close>
-      𝕏.
-    </button>
-  `
-
-  const modalHeader = types[bannerType] ? banner(modalClose) : modalClose
+  const modalHeader = types[bannerType] ? banner() : ''
 
   return `
     <div class="modal">
@@ -49,7 +43,7 @@ $.draw(() => {
   `
 })
 
-function banner(close) {
+function banner() {
   const {
     bannerType
   } = $.learn()
@@ -59,7 +53,6 @@ function banner(close) {
   return `
     <div class="banner" style="background: ${backgroundColor}; color: ${color};">
       ${strings[label]}
-      ${close}
     </div>
   `
 }
