@@ -75,7 +75,7 @@ async function about() {
 }
 
 function kids(paths) {
-  const root = { name: 'root', type: 'Directory', children: [] };
+  const root = { name: '', type: 'Directory', children: [] };
 
   for (const system of paths) {
     const [_, ...pathComponents] = system.path.split('/');

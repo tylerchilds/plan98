@@ -213,7 +213,7 @@ function nest(tree, pathParts, subtree = {}) {
   return subtree.children.map(child => {
     const { name, type } = child
     const currentPathParts = [...pathParts, name]
-    const currentPath = currentPathParts.join('/')
+    const currentPath = currentPathParts.join('/') || '/'
 
     if(type === Types.File.type) {
       return `
