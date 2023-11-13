@@ -1,7 +1,6 @@
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
 export async function factoryReset(host) {
-  // todo: braidify highlighter and file system code
   try {
     state[host] = await fetch(`/plan98/about`).then(res => res.json())
   } catch (e) {
@@ -79,8 +78,8 @@ function system(target) {
   }
 
   const { cwc } = target.dataset
-  const { plan98 } = state[cwc] || {}
-  const path = window.location.pathname
+  const tree = closestWorkingComputer(target)
+  const path = tree.path || window.location.pathname
 
   const rootClass = rootActive ? 'active' : ''
 
@@ -96,7 +95,7 @@ function system(target) {
           <input type="text" name="path" value="${path || '/'}" />
         </div>
         <div class="treeview">
-          ${nest(plan98, [], plan98)}
+          ${nest(tree.plan98, [], tree.plan98)}
         </div>
         <form id="command-line">
           <input type="text" placeholder=":" name="command" />
