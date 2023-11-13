@@ -19,7 +19,7 @@ const emeraldOfSelf
 const emeraldOfSecurity
   = `/sagas/security.saga`
 const emeraldOfNow
-  = `/sagas/now.saga`
+  = `/sagas/index.saga`
 
 export const doingBusinessAs = {
   'sillyz.computer': {
@@ -131,6 +131,10 @@ $.draw((target) => {
   }).join('')
 
   if(target.innerHTML) return
+
+  if(target.getAttribute('innerHTML')) {
+    return target.getAttribute('innerHTML')
+  }
 
   return `
     <div class="grid">

@@ -287,13 +287,20 @@ export const hyperSanitizer = (script) => {
     if(!value) {
       // collect the properties from our actor
       const properties = actors[actor]
+      let innerHTML = ''
 
       // convert them into hype attributes
       const attributes = Object.keys(properties)
-        .map(x => `${x}="${properties[x]}"`).join('')
+        .map(x => {
+          if(x === 'innerHTML') {
+            innerHTML = x
+            return ''
+          }
+          return `${x}="${properties[x]}"`
+        }).join('')
 
       // add some hype to our scene
-      scene += `<${actor} ${attributes}></${actor}>`
+      scene += `<${actor} ${attributes}>${innerHTML}</${actor}>`
 
       // back to normal time
       time = NORMAL_TIME

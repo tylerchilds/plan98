@@ -1,82 +1,18 @@
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
-export function factoryReset(cwc) {
+export async function factoryReset(host) {
   // todo: braidify highlighter and file system code
   try {
-    state[cwc] = {
-      type: 'FileSystem',
-      children: [{
-        name: '',
-        type: 'Directory',
-        children: [{
-          name: 'home',
-          type: 'Directory',
-          children: [{
-            name: 'sillonious',
-            type: 'Directory',
-            children: [
-              {
-                name: 'pretend.script',
-                type: 'File'
-              },
-              {
-                name: 'paper.script',
-                type: 'File'
-              },
-              {
-                name: 'books.script',
-                type: 'File'
-              },
-              {
-                name: 'bicycles.script',
-                type: 'File'
-              },
-              {
-                name: 'typewriters.script',
-                type: 'File'
-              },
-              {
-                name: 'teleplays.script',
-                type: 'File'
-              },
-              {
-                name: 'cameras.script',
-                type: 'File'
-              },
-              {
-                name: 'computers.script',
-                type: 'File'
-              },
-              {
-                name: 'synthesizers.script',
-                type: 'File'
-              },
-              {
-                name: 'slideshows.script',
-                type: 'File'
-              },
-              {
-                name: 'gamepads.script',
-                type: 'File'
-              },
-              {
-                name: 'generations.script',
-                type: 'File'
-              }
-            ]
-          }]
-        }]
-      }]
-    }
+    state[host] = await fetch(`/plan98/about`).then(res => res.json())
   } catch (e) {
     console.info('Factory Reset: Failed')
     console.error(e)
     return
   }
 
-  console.log({ cwc, system: state[cwc] })
+  console.log({ host, system: state[host] })
   console.info('Factory Reset: Success')
-  return state[cwc]
+  return state[host]
 }
 
 const Types = {
@@ -143,7 +79,7 @@ function system(target) {
   }
 
   const { cwc } = target.dataset
-  const tree = state[cwc] || {}
+  const { plan98 } = state[cwc] || {}
   const path = window.location.pathname
 
   const rootClass = rootActive ? 'active' : ''
@@ -160,7 +96,7 @@ function system(target) {
           <input type="text" name="path" value="${path || '/'}" />
         </div>
         <div class="treeview">
-          ${nest(tree, [], tree)}
+          ${nest(plan98, [], plan98)}
         </div>
         <form id="command-line">
           <input type="text" placeholder=":" name="command" />
@@ -343,6 +279,11 @@ $.when('click', '[data-live]', ({target}) => {
   showModal(`
     <live-help></live-help>
   `)
+})
+
+$.when('click', '[data-reset]', async ({target}) => {
+  const { cwc } = target.closest('[data-cwc]').dataset
+  await factoryReset(cwc)
 })
 
 $.when('click', '[data-forum]', ({target}) => {
