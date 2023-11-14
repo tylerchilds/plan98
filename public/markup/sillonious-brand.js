@@ -137,7 +137,7 @@ $.draw((target) => {
   }
 
   return `
-    <div class="grid">
+    <div class="post-it">
       <main class="canvas" style="background-image: ${stars}"></main>
       <header class="logo">
         <qr-code
@@ -224,19 +224,11 @@ $.when('click', '[data-download]', (event) => {
   sticky(brand)
 })
 
-$.when('input', 'textarea', (event) => {
-  const src = source(event.target)
-  const { value } = event.target
-  state[src].file = value
-  const html = hyperSanitizer(value)
-  state[src].html = html
-})
-
 $.style(`
   & {
     display: block;
   }
-  & .grid {
+  & .post-it {
     display: grid;
     grid-template-columns: 1in auto;
     grid-template-rows: 1fr auto auto;

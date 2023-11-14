@@ -117,7 +117,8 @@ function floppy(target) {
   }
   const tree = closestWorkingComputer(target)
   const path = window.location.pathname
-  const content = getContent(tree, path.split('/'))
+  const content = getContent(tree.plan98, path.split('/'))
+
   if(content.type === Types.File.type) {
 		const readonly = parameters.get('readonly')
 		const presentation = parameters.get('presentation')
@@ -130,7 +131,7 @@ function floppy(target) {
     `
   }
 
-  if(content.type === 'Directory') {
+  if(content.type === 'Directory' && content.name !== "") {
     return `
       <div class="listing">
         ${content.children.map(x => `
