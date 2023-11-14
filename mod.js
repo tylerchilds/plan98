@@ -5,7 +5,7 @@ import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
 
-const memex = []
+const plan98 = about()
 
 async function router(request, context) {
   let { pathname } = new URL(request.url);
@@ -89,7 +89,8 @@ function kids(paths) {
       let childNode = currentNode.children.find(node => node.name === component);
 
       if (!childNode) {
-        childNode = { name: component, type: 'Directory', children: [] };
+        const extension = path.extname(system.path);
+        childNode = { extension, path: system.path, name: component, type: 'Directory', children: [] };
         currentNode.children.push(childNode);
       }
 

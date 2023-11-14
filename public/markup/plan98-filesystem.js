@@ -1,5 +1,25 @@
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
+const parameters = new URLSearchParams(window.location.search)
+
+function iframeRenderer(content) {
+  return `<iframe src="${content.path}" title="${content.name}"></iframe>"`
+}
+
+const renderers = {
+  '.saga': (content) => {
+    const readonly = parameters.get('readonly')
+		const presentation = parameters.get('presentation')
+    return `
+      <hyper-script
+        src="ls${content.path}"
+        ${readonly ? 'readonly="true"' : ''}
+        ${presentation ? 'presentation="true"' : ''}
+      ></hyper-script>
+    `
+  }
+}
+
 export async function factoryReset(host) {
   try {
     state[host] = await fetch(`/plan98/about`).then(res => res.json())
@@ -28,7 +48,7 @@ const Types = {
     type: 'Directory',
     actions: [
       ['data-', 'Create Bag'],
-      ['data-trifle', 'Create Trifle'],
+      ['data-trinket', 'Create trinket'],
       ['data-move', 'Move'],
       ['data-remove', 'Remove']
     ]
@@ -54,7 +74,6 @@ function helpActions(currentWorkingComputer) {
 }
 
 const $ = module('plan98-filesystem')
-const parameters = new URLSearchParams(window.location.search)
 
 $.draw(self.self === self.top ? system : floppy)
 
@@ -115,20 +134,14 @@ function floppy(target) {
   if(checkPreservationStatus(target)) {
     return
   }
+
   const tree = closestWorkingComputer(target)
   const path = window.location.pathname
   const content = getContent(tree.plan98, path.split('/'))
 
   if(content.type === Types.File.type) {
-		const readonly = parameters.get('readonly')
-		const presentation = parameters.get('presentation')
-    return `
-      <hyper-script
-        src="ls${path}"
-        ${readonly ? 'readonly="true"' : ''}
-        ${presentation ? 'presentation="true"' : ''}
-      ></hyper-script>
-    `
+    const renderer = renderers[content.extension] || iframeRenderer
+    return renderer(content)
   }
 
   if(content.type === 'Directory' && content.name !== "") {
