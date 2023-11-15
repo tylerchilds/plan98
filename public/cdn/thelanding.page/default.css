@@ -1,0 +1,14 @@
+body {
+  margin: 0 auto;
+  background: cornsilk;
+  max-width: 6in;
+  padding: 1in 1rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+img,
+video {
+  max-width: 100%;
+  max-height: 50vh;
+}

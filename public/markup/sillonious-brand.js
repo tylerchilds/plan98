@@ -105,6 +105,7 @@ function currentBusiness(host) {
 
 $.draw((target) => {
   const host = target.getAttribute('host') || window.location.host
+  const preview = target.getAttribute('preview')
 
   const stars = getStars(target)
   const {
@@ -138,7 +139,9 @@ $.draw((target) => {
 
   return `
     <div class="post-it">
-      <main class="canvas" style="background-image: ${stars}"></main>
+      <main class="canvas" style="background-image: ${stars}">
+        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : ''}
+      </main>
       <header class="logo">
         <qr-code
           text="https://${host}"
@@ -228,12 +231,21 @@ $.style(`
   & {
     display: block;
   }
+
+  & iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
   & .post-it {
+    background: white;
     display: grid;
     grid-template-columns: 1in auto;
     grid-template-rows: 1fr auto auto;
     width: 50ch;
     max-width: 100%;
+    padding: 1rem;
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: auto;
@@ -318,6 +330,14 @@ function sticky(brand) {
             img {
               max-width: 100%;
             }
+
+            iframe {
+              display: none !important;
+            }
+
+            .post-it {
+              padding: 0 !important;
+            }
           }
 
           @page {
@@ -352,7 +372,7 @@ function getStars(target) {
   canvas.width = rhythm;
 
   ctx.fillStyle = color;
-  ctx.fillRect(rhythm - 1, rhythm - 1, 1, 1);
+  ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
 
   return `url(${canvas.toDataURL()}`;
 }

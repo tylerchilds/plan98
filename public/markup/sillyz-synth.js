@@ -113,7 +113,7 @@ function attack(event) {
   })
   */
 
-  document.querySelector('body').style.setProperty("background", body)
+  document.querySelector('html').style.setProperty("background", body)
 }
 
 function release (event) {

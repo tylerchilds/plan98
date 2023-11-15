@@ -1,64 +1,32 @@
-Six Characters. Six Domains. 0ne index of y0ur memex.
+# TheLanding.Page
 
-# sillyz.computer
+A STONE stands on an island in an astral plane of cosmic clouds.
 
-<sillonious-brand
-host: sillyz.computer
+@ Bifrost Geysir Guy (V.O.)
+> Hey there. Welcome to the bifrost Bifrost geysir Geysir!
 
-A toy factory that is safe enough for kids to pretend to play work in.
+In your second pocket is a COMPASS.
 
-@ Silly
-> We can be careful and still have fun!
+@ Bifrost Geysir Guy (V.O.)
+> This is where I break the fourth wall.
 
-# 1998.social
+The compass points HOME towards the stone from all angles.
 
-<sillonious-brand
-host: 1998.social
+@ Bifrost Geysir Guy (V.O.)
+> The stone is our destiny.
 
-A safe place for my friends to hang out and disrupt the meta!
+The colors of the cosmos are mirrored in the soil around the stone.
 
-@ Wally
-> After land for baseball diamonds became expensive, I pivoted to e-sports!
+@ Bifrost Geysir Guy (V.O.)
+> Remember: Six Characters. Six Domains. 0ne m3mex. This is it.
 
-# yourlovedones.online
+Your compass and the stone flash the six colors in sync.
 
-<sillonious-brand
-host: yourlovedones.online
+@ Bifrost Geysier Guy (V.O.)
+> Who will you be? Where will You go?
 
-Family friends that want to share life with their friend's families.
-
-@ Sally
-> I don't like how it feels to be cyber bullied and I work to keep you safe!
-
-# ncity.executiontime.pub
-
-<sillonious-brand
-host: ncity.executiontime.pub
-
-Transparent source code for even footing amongst peer to peer competitors.
-
-@ Sully
-> Any sufficiently advanced game engine is merely a proxy for actuality.
-
-# css.ceo
-
-<sillonious-brand
-host: css.ceo
-
-Custom skins for any immersive experience.
-
-@ Sol
-> Theology and marketing bridge psychology and physics with technology.
-
-# y2k38.info
-
-<sillonious-brand
-host: y2k38.info
-
-Civilization-grade computer consulting consortiums.
-
-@ Shelly
-> Access your full computer from any computer!
+<sillonious-memex
+hosts: sillyz.computer+1998.social+yourlovedones.online+ncity.executiontime.pub+css.ceo+y2k38.info
 
 <sillyz-synth
 
