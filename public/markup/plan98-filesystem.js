@@ -20,18 +20,22 @@ const renderers = {
   }
 }
 
-export async function factoryReset(host) {
+export function factoryReset(host) {
   try {
-    state[host] = await fetch(`/plan98/about`).then(res => res.json())
+    fetch(`/plan98/about`)
+      .then(res => res.json())
+      .then(data => state[host] = data)
+      .then(() => {
+        console.info('Factory Reset: Success')
+        setTimeout(() => {
+        window.location.href = window.location.href
+      }, 250)
+      })
   } catch (e) {
     console.info('Factory Reset: Failed')
     console.error(e)
     return
   }
-
-  console.log({ host, system: state[host] })
-  console.info('Factory Reset: Success')
-  return state[host]
 }
 
 const Types = {
@@ -114,7 +118,7 @@ function system(target) {
           <input type="text" name="path" value="${path || '/'}" />
         </div>
         <div class="treeview">
-          ${nest(tree.plan98, [], tree.plan98)}
+          ${nest({ tree: tree.plan98, pathParts: [], subtree: tree.plan98 })}
         </div>
         <form id="command-line">
           <input type="text" placeholder=":" name="command" />
@@ -135,9 +139,10 @@ function floppy(target) {
     return
   }
 
+  const computer = target.closest('[data-cwc]').dataset.cwc
   const tree = closestWorkingComputer(target)
   const path = window.location.pathname
-  const content = getContent(tree.plan98, path.split('/'))
+  const content = getContent(computer, tree.plan98, path.split('/'))
 
   if(content.type === Types.File.type) {
     const renderer = renderers[content.extension] || iframeRenderer
@@ -169,21 +174,30 @@ function checkPreservationStatus(target) {
   if(target.childNodes.length === 0) return false
   return [...target.childNodes].every(x => x.tagName === 'BUTTON')
 }
-function getContent(tree, pathParts) {
+function getContent(computer, tree, pathParts) {
   // spread before so we can mutate to bail early
   return [...pathParts].reduce((subtree, name, i, og) => {
-    const result = subtree.children
-      ? subtree.children.find(x => x.name === name)
-      : null
+    try {
+      const result = subtree.children
+        ? subtree.children.find(x => x.name === name)
+        : null
 
-    if(!result) {
-      console.log({ result, name, subtree, tree, pathParts })
-      // mutating the array causes an early exit
-      og.splice(1)
-      return subtree
+      if(!result) {
+        console.log({ result, name, subtree, tree, pathParts })
+        // mutating the array causes an early exit
+        og.splice(1)
+        return subtree
+      }
+
+      return result
+    } catch(e) {
+      showModal(`
+        Hey, error, do over, eh?
+        <plan98-filesystem data-cwc=${computer}>
+          <button data-reset>Factory Reset</button>
+        </plan98-filesystem>
+      `)
     }
-
-    return result
   }, tree)
   // footnote:
   // normally, mutation in functional programming is a red flag
@@ -221,7 +235,7 @@ $.when('click', '[data-uri]', async function(event) {
   `)
 })
 
-function nest(tree, pathParts, subtree = {}) {
+function nest(computer, { tree, pathParts, subtree = {} }) {
   if(!subtree.children) return ''
   return subtree.children.map(child => {
     const { name, type } = child
@@ -230,7 +244,7 @@ function nest(tree, pathParts, subtree = {}) {
 
     if(type === Types.File.type) {
       return `
-        <plan98-context data-menu="${menuFor(tree, currentPath)}">
+        <plan98-context data-menu="${menuFor(computer, tree, currentPath)}">
           <button data-path="${currentPath}">
             ${name}
           </button>
@@ -242,11 +256,11 @@ function nest(tree, pathParts, subtree = {}) {
       return `
       <details ${currentPath.indexOf(`/${name}`) >= 0 ? 'open': ''}>
         <summary data-path="${currentPath}">
-          <plan98-context data-menu="${menuFor(tree, currentPath)}">
+          <plan98-context data-menu="${menuFor(computer, tree, currentPath)}">
             ${name || "/"}
           </plan98-context>
         </summary>
-        ${nest(tree, currentPathParts, child)}
+        ${nest(computer, { tree, pathParts: currentPathParts, subtree: child})}
       </details>
     `
     }
@@ -254,8 +268,8 @@ function nest(tree, pathParts, subtree = {}) {
     return '-'
   }).join('')
 }
-function menuFor(tree, path) {
-  const resource = getContent(tree, path.split('/'))
+function menuFor(computer, tree, path) {
+  const resource = getContent(computer, tree, path.split('/'))
 
   const { type } = resource
 
