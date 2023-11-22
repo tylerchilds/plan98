@@ -1,3 +1,7 @@
+// i channel my runic knowledge to commune with the ancestors and establish contact with the animals
+import { doingBusinessAs } from './sillonious-brand.js'
+
+const protocol = 'https://'
 const locale = 'en_US'
 
 const $ = module('sillonious-memex', {
@@ -9,6 +13,7 @@ const tiles = [
     name: 'enter',
     label: '/sillonious-memex/tiles/enter/label.txt',
     styles: {
+      'grid-area': 'enter',
       'place-self': 'start'
     }
   },
@@ -16,6 +21,7 @@ const tiles = [
     name: 'escape',
     label: '/sillonious-memex/tiles/escape/label.txt',
     styles: {
+      'grid-area': 'escape',
       'place-self': 'end'
     }
   },
@@ -27,6 +33,7 @@ const tiles = [
     name: 'shift',
     label: '/sillonious-memex/tiles/shift/label.txt',
     styles: {
+      'grid-area': 'shift',
       'place-self': 'end'
     }
   },
@@ -34,6 +41,7 @@ const tiles = [
     name: 'tab',
     label: '/sillonious-memex/tiles/tab/label.txt',
     styles: {
+      'grid-area': 'tab',
       'place-self': 'start'
     }
   }
@@ -51,23 +59,28 @@ const tileMap = tiles.reduce((map, tile) => {
 
 $.draw((target) => {
   const { diskette } = $.learn()
-  const hosts = diskettes(target)
-  const game = hosts[diskette]
+  const bin = diskettes(target)
+  const game = bin[diskette]
+
+  const screen = doingBusinessAs[game]
+    ? `<sillonious-brand host="${game}" preview="true"></sillonious-brand>`
+    : `<iframe src="${protocol}${game}" title="${game}"></iframe>`
+
   target.innerHTML =`
+    <button name="${tileMap.shift.name}">
+      ${t(tileMap.shift.label)}
     <button name="${tileMap.enter.name}">
       ${t(tileMap.enter.label)}
-    </button>
-    <button name="${tileMap.escape.name}">
-      ${t(tileMap.escape.label)}
     </button>
     <button name="${tileMap.tab.name}">
       ${t(tileMap.tab.label)}
     </button>
-    <button name="${tileMap.shift.name}">
-      ${t(tileMap.shift.label)}
+    <button name="${tileMap.escape.name}">
+      ${t(tileMap.escape.label)}
+    </button>
     </button>
     <div name="carousel">
-      <sillonious-brand host="${game}" preview="true"></sillonious-brand>
+      ${screen}
     </div>
   `
 })
@@ -101,9 +114,9 @@ $.style(`
     max-height: 100vh;
     overflow: hidden;
     grid-template-areas:
-      "${tileMap.enter.name} ${tileMap.escape.name}"
+      "${tileMap.shift.name} ${tileMap.enter.name}"
       "${tileMap.carousel.name} ${tileMap.carousel.name}"
-      "${tileMap.tab.name} ${tileMap.shift.name}";
+      "${tileMap.tab.name} ${tileMap.escape.name}";
   }
 
   ${layout(tiles)}
@@ -128,7 +141,7 @@ function bonusStyles(tile) {
 }
 
 function diskettes(target) {
-  return target.closest($.link).getAttribute('hosts').split('+')
+  return target.closest($.link).getAttribute('bin').split('+')
 }
 
 function t(key) {
