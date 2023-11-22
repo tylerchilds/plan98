@@ -114,7 +114,6 @@ $.when('click', '[data-exit]', (event) => {
 })
 
 $.when('click', '[data-continue]', (event) => {
-
   const close = event.target.closest($.link).getAttribute('close')
   window[close] ? window[close]() : null
 })
@@ -169,7 +168,7 @@ function getMotion(html, { active = 0, forwards, start, end }) {
 }
 
 function toVfx(slice, options) {
-  let beats = options.forwards ? slice : reverse(slice.reverse())
+  const beats = options.forwards ? slice : reverse(slice.reverse())
   if(beats[0].matches(':not([data-active])')) {
     beats[0].dataset.animateOut = true
   }
