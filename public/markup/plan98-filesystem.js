@@ -101,6 +101,7 @@ function system(target) {
   }
 
   const { cwc } = target.dataset
+
   const tree = closestWorkingComputer(target)
   const path = tree.path || window.location.pathname
 
@@ -118,7 +119,7 @@ function system(target) {
           <input type="text" name="path" value="${path || '/'}" />
         </div>
         <div class="treeview">
-          ${nest({ tree: tree.plan98, pathParts: [], subtree: tree.plan98 })}
+          ${nest(cwc, { tree: tree.plan98, pathParts: [], subtree: tree.plan98 })}
         </div>
         <form id="command-line">
           <input type="text" placeholder=":" name="command" />
@@ -235,7 +236,7 @@ $.when('click', '[data-uri]', async function(event) {
   `)
 })
 
-function nest(computer, { tree, pathParts, subtree = {} }) {
+function nest(computer, { tree = {}, pathParts = [], subtree = {} }) {
   if(!subtree.children) return ''
   return subtree.children.map(child => {
     const { name, type } = child
