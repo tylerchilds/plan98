@@ -36,7 +36,7 @@
   <body>
     <script src="/package.2015.js"></script>
     <script>
-      function markup({ folder }) {
+      function formulas({ folder }) {
         const tags = new Set(
           [...document.querySelectorAll(':not(:defined)')]
             .map(({ tagName }) => tagName.toLowerCase())
@@ -58,17 +58,17 @@
               });
             }
           } catch(e) {
-            console.log('Lazy Hype Problem:', tag, e)
+            console.log('Error caught establishing formula for:', tag, e)
           }
         })
       }
 
       (function({ folder }) {
-        markup({ folder })
+        formulas({ folder })
         new MutationObserver((mutationsList) => {
-          markup({ folder })
+          formulas({ folder })
         }).observe(document.body, { childList: true, subtree: true });
-      })({ folder: '/markup' })
+      })({ folder: '/formulas' })
 
       document.body.insertAdjacentHTML('beforeend', `
         <sillonious-brand host="${window.plan98.host}">
