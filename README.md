@@ -1,38 +1,21 @@
 # plan98
 
-[Valerie Landau asked Douglas Engelbart](https://www.smithsonianmag.com/innovation/douglas-engelbart-invented-future-180967498 ) in 2006 how much of his vision had been achieved, Engelbart answered, “About 2.8 percent.”
+plan98 is a client for [9p](https://medium.com/@hdswick/poor-mans-virtual-filesystem-with-9p-rust-and-a-raspberry-pi-95ea1d4703ea)-inspired computing methods, like the entity-component architecture described in the production of Alan Wake 2 and the beef-inspired ingredients at Taco Bell. Swap out the bits as you prefer as needed.
 
-plan98 is an operating system to hit the other 97.2%, rounded up.
+[https://www.remedygames.com/article/how-northlight-makes-alan-wake-2-shine](Video Game Development Breakdown)
 
-## roadmap
-
-The perspective of my solution is geared towards user experience. The utiliities used are from the research group https://braid.org I participate in. The 'module' library is primarily my focus in particular. This solution highlights the ability to collapse complexity across the application stack by orienting complexity into the hyper text layers, namely the markup language and the transfer protocol.
-
-Primary Prompt Objectives
-
-* implemented
-  * change the current working directory
-  * current working directory
-  * get directory contents
-  * get file contents
-  * write file contents
-* partially implemented
-  * move a file/directory
-  * create a new file/directory
-* not implemented
-  * file a file
-
-Extension Objectives
-
-* implemented
-  * braid local storage
-* partially implemented
-  * braid remote storage
+To understand the architecture further, plan98 is best thought of as a virtual machine, reminiscent of [Erlang's BEAM](https://www.erlang.org/blog/a-brief-beam-primer/) for building [the vision that inspired Steve Jobs](https://www.youtube.com/watch?v=2nm47PFALc8), while holding itself to potentially biblical engineering standards in an attempt to persue a syntax where one that is divinely inspired may speak life into existence in [https://medium.com/@hdswick/poor-mans-virtual-filesystem-with-9p-rust-and-a-raspberry-pi-95ea1d4703ea](real-time).
 
 ## development
 
 ```
 npm run build && npm start
+```
+
+## deployment
+
+```
+deno run -A mod.js
 ```
 
 [http://localhost:3000](http://localhost:3000)
