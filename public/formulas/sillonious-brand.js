@@ -71,7 +71,7 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'thelanding.page': {
-    tagline: 'Computer Scientific Journal',
+    tagline: 'Ship your next idea from a full stop',
     mascot: 'Greggory McGreggory',
     saga: emeraldOfNow,
     contact: reverseProxyLookup,
