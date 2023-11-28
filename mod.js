@@ -4,15 +4,14 @@ import * as path from "https://deno.land/std@0.184.0/path/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
-
-const plan98 = about()
+import cors from 'https://deno.land/x/edge_cors/src/cors.ts'
 
 async function router(request, context) {
   let { pathname } = new URL(request.url);
   let extension = path.extname(pathname);
 
   if(pathname === '/plan98/about') {
-    return about()
+    return about(request)
   }
 
   let file
@@ -28,17 +27,17 @@ async function router(request, context) {
   }
 
 
-  return new Response(file, {
+  return cors(request, new Response(file, {
     headers: {
       'content-type': typeByExtension(extension),
     },
     status: statusCode
-  })
+  }))
 }
 
 const byPath = (x) => x.path
 const byName = (x) => x.name
-async function about() {
+async function about(request) {
   let paths = []
   const files = walk(Deno.cwd(), {
     skip: [
@@ -69,9 +68,9 @@ async function about() {
 
   console.log( { plan98 } )
 
-  return new Response(JSON.stringify({ plan98 }, null, 2), {
+  return cors(request, new Response(JSON.stringify({ plan98 }, null, 2), {
     headers: { "content-type": "application/json; charset=utf-8" },
-  });
+  }));
 }
 
 function kids(paths) {
