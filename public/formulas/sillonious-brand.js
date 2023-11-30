@@ -78,6 +78,14 @@ export const doingBusinessAs = {
     brandHue: 350,
     brandRange: 45,
   },
+  'tychi.me': {
+    tagline: 'Join the Circus',
+    mascot: 'AN0051610',
+    saga: '/sagas/1998.social/tychi.saga',
+    contact: 'Golden Gate Bifrost',
+    brandHue: 55,
+    brandRange: 360,
+  },
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
   //'tychi.me': emeraldOfTime
