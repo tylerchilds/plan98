@@ -193,9 +193,15 @@ function getContent(computer, tree, pathParts) {
       return result
     } catch(e) {
       showModal(`
-        Hey, error, do over, eh?
+        <h1>
+          Welcome!
+        </h1>
+        <p>
+          You're invited to join a wonderful world of... well.
+          What wonderful world would you want to be invited to join?
+        </p>
         <plan98-filesystem data-cwc=${computer}>
-          <button data-reset>Factory Reset</button>
+          <button data-reset>Create Your Character</button>
         </plan98-filesystem>
       `)
     }
@@ -310,6 +316,7 @@ $.when('click', '[data-live]', ({target}) => {
 })
 
 $.when('click', '[data-reset]', async ({target}) => {
+debugger
   const { cwc } = target.closest('[data-cwc]').dataset
   await factoryReset(cwc)
 })
