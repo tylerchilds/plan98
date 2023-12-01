@@ -4,9 +4,7 @@ html {
 }
 body {
   margin: 0 auto;
-  background: cornsilk;
-  max-width: 6in;
-  padding: 1in 1rem;
+  background: linear-gradient(135deg, transparent, rebeccapurple), black;
 }
 
 img,
