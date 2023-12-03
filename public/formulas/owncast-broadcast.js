@@ -18,12 +18,12 @@ function subscribe(target) {
   }
 
   setInterval(async () => {
-    state['ls/brother'] = await fetch('/plan98/about').then(r => r.json())
+    state['ls/plan98/owncast'] = await fetch('/plan98/owncast').then(r => r.json())
   }, 1000) 
 
   target.dataset.subscribed = true
 }
 
 function latest() {
-  return (state['ls/brother'] || {}).broadcast || {}
+  return (state['ls/plan98/owncast'] || {}).broadcast || {}
 }

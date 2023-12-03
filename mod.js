@@ -13,6 +13,10 @@ async function router(request, context) {
     return about(request)
   }
 
+  if(pathname === '/plan98/owncast') {
+    return owncast(request)
+  }
+
   let file
   let statusCode = Status.Success
   try {
@@ -66,10 +70,16 @@ async function about(request) {
     plan98: {
       type: 'FileSystem',
       children: [kids(paths)]
-    },
-    broadcast: await onlinePromise
+    }
   }
 
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
+}
+
+async function owncast(request) {
+  const data = { broadcast: await onlinePromise }
   return new Response(JSON.stringify(data, null, 2), {
     headers: { "content-type": "application/json; charset=utf-8" },
   });

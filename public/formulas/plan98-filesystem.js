@@ -145,6 +145,8 @@ function floppy(target) {
   const path = window.location.pathname
   const content = getContent(computer, tree.plan98, path.split('/'))
 
+  if(content.error === '404') return
+
   if(content.type === Types.File.type) {
     const renderer = renderers[content.extension] || iframeRenderer
     return renderer(content)
@@ -201,9 +203,10 @@ function getContent(computer, tree, pathParts) {
           What wonderful world would you want to be invited to join?
         </p>
         <plan98-filesystem data-cwc=${computer}>
-          <button data-reset>Create Your Character</button>
+          <button data-reset>Choose Your Character</button>
         </plan98-filesystem>
       `)
+      return { error: '404' }
     }
   }, tree)
   // footnote:
@@ -316,7 +319,6 @@ $.when('click', '[data-live]', ({target}) => {
 })
 
 $.when('click', '[data-reset]', async ({target}) => {
-debugger
   const { cwc } = target.closest('[data-cwc]').dataset
   await factoryReset(cwc)
 })
