@@ -17,7 +17,11 @@ const renderers = {
         ${presentation ? 'presentation="true"' : ''}
       ></hyper-script>
     `
+  },
+  '.js': (content) => {
+    return `<code-module src="${content.path}"></code-module>`
   }
+
 }
 
 export function factoryReset(host) {
