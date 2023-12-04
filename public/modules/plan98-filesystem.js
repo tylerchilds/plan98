@@ -2,28 +2,6 @@ import { showModal, types as modalTypes } from './plan98-modal.js'
 
 const parameters = new URLSearchParams(window.location.search)
 
-function iframeRenderer(content) {
-  return `<iframe src="${content.path}" title="${content.name}"></iframe>"`
-}
-
-const renderers = {
-  '.saga': (content) => {
-    const readonly = parameters.get('readonly')
-		const presentation = parameters.get('presentation')
-    return `
-      <hyper-script
-        src="ls${content.path}"
-        ${readonly ? 'readonly="true"' : ''}
-        ${presentation ? 'presentation="true"' : ''}
-      ></hyper-script>
-    `
-  },
-  '.js': (content) => {
-    return `<code-module src="${content.path}"></code-module>`
-  }
-
-}
-
 export function factoryReset(host) {
   try {
     fetch(`/plan98/about`)
@@ -133,7 +111,7 @@ function system(target) {
         ℤ.
       </button>
       <div class="leaf">
-        <iframe src="${window.location.origin + path + window.location.search}"></iframe>
+        <media-plexer src="${window.location.origin + path + window.location.search}"></media-plexer>
       </div>
     </div>
   `
@@ -152,8 +130,7 @@ function floppy(target) {
   if(content.error === '404') return
 
   if(content.type === Types.File.type) {
-    const renderer = renderers[content.extension] || iframeRenderer
-    return renderer(content)
+    return `<media-plexer src="${path}"></media-plexer>`
   }
 
   if(content.type === 'Directory' && content.name !== "") {

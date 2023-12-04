@@ -17,7 +17,10 @@ function sourceFile(target) {
   return state[src]
     ? state[src]
     : (function initialize() {
-      state[src] = { file: 'hello... what is your name?' }
+      fetch(src).then(res => res.text()).then((x) => {
+        state[src] = { file: x }
+      })
+      state[src] = { file: 'loading...' }
       return state[src]
     })()
 }
