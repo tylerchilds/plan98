@@ -1,4 +1,4 @@
-import formula from '@sillonious/formula'
+import module from '@sillonious/module'
 
 const linkElement = document.createElement("link");
 linkElement.rel = "stylesheet";
@@ -6,7 +6,7 @@ linkElement.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
 linkElement.integrity = "sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=";
 linkElement.crossOrigin = "";
 
-// Create a script element for the Leaflet JavaScript
+// Create a script element fmr the Leaflet JavaScript
 const scriptElement = document.createElement("script");
 scriptElement.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
 scriptElement.integrity = "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=";
@@ -52,7 +52,7 @@ function mount(target) {
 
 	map.on('click', onMapClick);
 }
-const $ = formula('middle-earth')
+const $ = module('middle-earth')
 
 $.draw((target) => {
 	mount(target)

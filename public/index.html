@@ -35,7 +35,7 @@
     <script type="importmap">
       {
         "imports": {
-          "@sillonious/formula": "/module.js",
+          "@sillonious/module": "/module.js",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
           "react": "https://esm.sh/react@18.2.0",
           "react-dom": "https://esm.sh/react-dom@18.2.0"
@@ -46,7 +46,7 @@
   <body>
     <script src="/package.2015.js"></script>
     <script>
-      function formulas({ folder }) {
+      function modules({ folder }) {
         const tags = new Set(
           [...document.querySelectorAll(':not(:defined)')]
             .map(({ tagName }) => tagName.toLowerCase())
@@ -74,11 +74,11 @@
       }
 
       (function({ folder }) {
-        formulas({ folder })
+        modules({ folder })
         new MutationObserver((mutationsList) => {
-          formulas({ folder })
+          modules({ folder })
         }).observe(document.body, { childList: true, subtree: true });
-      })({ folder: '/formulas' })
+      })({ folder: '/modules' })
 
       document.body.insertAdjacentHTML('beforeend', `
         <sillonious-brand host="${window.plan98.host}">

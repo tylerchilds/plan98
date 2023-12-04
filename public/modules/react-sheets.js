@@ -1,4 +1,4 @@
-import formula from '@sillonious/formula'
+import module from '@sillonious/module'
 import React from 'react'
 import ReactDOM from 'react-dom'
 
@@ -7,7 +7,7 @@ function App() {
 	return e('a', { href: "https://www.rowsncolumns.app/", }, 'buy sheets')
 }
 
-formula('react-sheets').draw(target => {
+module('react-sheets').draw(target => {
 	ReactDOM.render(
 		App(),
 		target

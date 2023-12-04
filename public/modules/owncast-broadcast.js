@@ -1,6 +1,6 @@
-import formula, { state } from '@sillonious/formula'
+import module, { state } from '@sillonious/module'
 
-const $ = formula('owncast-broadcast')
+const $ = module('owncast-broadcast')
 
 $.draw(target => {
   subscribe(target)
