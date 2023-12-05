@@ -4,7 +4,7 @@ import * as Tone from "tone@next"
 //import $user from "/packages/widgets/menu-user.js"
 //import $guitar from "/packages/streams/guitar.js"
 
-bus.state['https://1998.social/last-color.json']
+bus.state['https://braid.1998.social/last-color.json']
 
 const synths = [...new Array(24)].map(() =>
   new Tone.FMSynth().toMaster()
@@ -78,7 +78,7 @@ function attack(event) {
 		`${lastColor}`
 	)
 
-  bus.state['https://1998.social/last-color.json'].color = lastColor
+  bus.state['https://braid.1998.social/last-color.json'].color = lastColor
 }
 
 function release (event) {
@@ -289,10 +289,10 @@ function controls() {
 	`
 }
 
-$.on('click', '.octave-up', octaveUp)
-$.on('click', '.octave-down', octaveDown)
-$.on('click', '.pitch-up', pitchUp)
-$.on('click', '.pitch-down', pitchDown)
+$.when('click', '.octave-up', octaveUp)
+$.when('click', '.octave-down', octaveDown)
+$.when('click', '.pitch-up', pitchUp)
+$.when('click', '.pitch-down', pitchDown)
 
 $.style(`
   & {
@@ -520,23 +520,23 @@ document.body.addEventListener('mousedown', (event) => {
 });
 
 
-$.on('change', '[type="range"]', (event) => {
+$.when('change', '[type="range"]', (event) => {
   const { value, name } = event.target
 
   $.teach({ [name]: parseInt(value), colors: recalculate() })
 })
 
-$.on('change', '[type="checkbox"]', (event) => {
+$.when('change', '[type="checkbox"]', (event) => {
   const { checked, name } = event.target
 
   $.teach({ [name]: checked, colors: recalculate() })
 })
 
-$.on('mousedown', '.step', attack)
-$.on('mouseup', '.step', release)
+$.when('mousedown', '.step', attack)
+$.when('mouseup', '.step', release)
 
-$.on('touchstart', '.step', attack)
-$.on('touchend', '.step', release)
+$.when('touchstart', '.step', attack)
+$.when('touchend', '.step', release)
 
 function mod(x, n) {
   return ((x % n) + n) % n;
