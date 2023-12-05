@@ -1,0 +1,8 @@
+{
+  "tasks": {
+    "build": "echo 'todo: eliminate npm dep' && npm run build",
+    "start": "deno run -A mod.js"
+  },
+  "compilerOptions": {
+  }
+}

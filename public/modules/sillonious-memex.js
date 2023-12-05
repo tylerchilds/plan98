@@ -4,8 +4,16 @@ import { doingBusinessAs } from './sillonious-brand.js'
 const protocol = 'https://'
 const locale = 'en_US'
 
+const drives = [
+  `<middle-earth></middle-earth>`,
+  `<personal-people></personal-people>`,
+  `<interest-groups></interest-groups>`,
+  `<public-domain></public-domain>`,
+]
+
 const $ = module('sillonious-memex', {
-  diskette: 0
+  diskette: 0,
+  drive: 0
 })
 
 const tiles = [
@@ -58,7 +66,7 @@ const tileMap = tiles.reduce((map, tile) => {
 }, {})
 
 $.draw((target) => {
-  const { diskette, paused } = $.learn()
+  const { diskette, drive, paused } = $.learn()
   const bin = diskettes(target)
   const game = bin[diskette]
 
@@ -73,7 +81,7 @@ $.draw((target) => {
       <button name="${tileMap.enter.name}">
         ${t(tileMap.enter.label)}
       </button>
-      <middle-earth></middle-earth>
+      ${drives[drive]}
       <hr style="display: none;"/>
       <div name="carousel">
         ${screen}
@@ -99,11 +107,17 @@ $.when('click', '[name="enter"]', () => {
 
 $.when('click', '[name="tab"]', (event) => {
   const { paused } = $.learn()
-  if(!paused) return
-  let { diskette } = $.learn()
-  const count = diskettes(event.target).length
-  diskette = (diskette + 1) % count
-  $.teach({ diskette })
+  if(!paused) {
+    let { drive } = $.learn()
+    const count = drives.length
+    drive = (drive + 1) % count
+    $.teach({ drive })
+  } else {
+    let { diskette } = $.learn()
+    const count = diskettes(event.target).length
+    diskette = (diskette + 1) % count
+    $.teach({ diskette })
+  }
 })
 
 $.when('click', '[name="shift"]', () => {
@@ -112,6 +126,12 @@ $.when('click', '[name="shift"]', () => {
 })
 
 $.style(`
+	& button {
+		border-radius: 0;
+		border: none;
+		background: black;
+		color: dodgerblue;
+	}
   & [name="the-time-machine"] {
     z-index: 1001;
     position: fixed;
@@ -154,8 +174,13 @@ $.style(`
   }
 
   & .circus-enabled [name="carousel"] {
-    display: block;
+    display: grid;
+		grid-template-columns: 1fr;
+		grid-auto-rows: 1fr;
     z-index: 1001;
+    width: 100%;
+    height: 100%;
+    place-content: center;
   }
 
   ${layout(tiles)}

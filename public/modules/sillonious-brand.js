@@ -237,7 +237,8 @@ $.when('click', '[data-download]', (event) => {
 
 $.style(`
   & {
-    display: block;
+    display: grid;
+    place-content: center;
   }
 
   & iframe {
