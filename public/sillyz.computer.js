@@ -31,3 +31,9 @@ function modules({ folder }) {
     modules({ folder })
   }).observe(document.body, { childList: true, subtree: true });
 })({ folder: '/modules' })
+
+document.body.insertAdjacentHTML('beforeend', `
+  <sillonious-brand host="${window.plan98.host}">
+    <saga-genesis></saga-genesis>
+  </sillonious-brand>
+`)

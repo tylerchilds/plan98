@@ -173,7 +173,6 @@ function layout(tiles) {
 function bonusStyles(tile) {
   return tiles.styles
     ? Object.keys(tile.styles).map(key => {
-      debugger
       return `${key}: ${tile.styles[key]};`
     }).join('\n')
     : ''
