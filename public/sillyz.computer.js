@@ -9,8 +9,9 @@ function modules({ folder }) {
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true
-    await import(url).catch(() => {
+    await import(url).catch((e) => {
       definable = false
+      console.error(e)
     })
     try {
       definable = definable && document.querySelector(tag).matches(':not(:defined)')
