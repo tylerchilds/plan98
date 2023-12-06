@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 const $ = module('sillyz-gamepad')
 
 const controllers = {}

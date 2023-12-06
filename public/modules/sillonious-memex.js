@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 // i channel my runic knowledge to commune with the ancestors and establish contact with the animals
 import { doingBusinessAs } from './sillonious-brand.js'
 

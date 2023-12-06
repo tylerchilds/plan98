@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 /**
  * @fileoverview
  * - Using the 'QRCode for Javascript library'

@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const $ = module('hyper-link')
 
 $.draw(( target ) => {

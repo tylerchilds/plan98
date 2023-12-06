@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 export const types = {
   news: 'news'
 }

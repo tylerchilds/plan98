@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 // previously on:
 // netflixstudios.com
 // netflix.com

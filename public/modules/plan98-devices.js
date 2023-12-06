@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 // just a random four digit code
 const device = Math.floor(1000 + Math.random() * 9000);
 

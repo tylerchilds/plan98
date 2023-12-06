@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const script = document.createElement('script');
 script.onload = function () {
 	const $ = module('live-help')

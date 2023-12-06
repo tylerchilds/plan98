@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 import gamepads from "./sillyz-gamepad.js"
 
 const initialState = {

@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
 const parameters = new URLSearchParams(window.location.search)
@@ -89,7 +91,7 @@ function system(target) {
 
   const rootClass = rootActive ? 'active' : ''
 
-  return `
+  target.innerHTML = `
     <div class="${rootClass}">
       <div class="root">
         <div class="help">
@@ -315,6 +317,7 @@ $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
   const tree = closestWorkingComputer(target)
   tree.path = path
+  $.teach({ rootActive: false })
 })
 
 $.when('click', '[data-move]', ({ target }) => {
@@ -505,6 +508,7 @@ $.style(`
     inset: 0;
     transform: translateY(0);
     transition: transform 200ms ease-in-out;
+    overflow: auto;
   }
 
   & .leaf iframe {
@@ -524,7 +528,7 @@ $.style(`
     filter: grayscale(1) brightness(0.5) contrast(0.5);
   }
 
-  & .active .leaf iframe {
+  & .active .leaf > * {
     pointer-events: none;
   }
 

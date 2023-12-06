@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 const { draw, style } = module('sillyz-avatar')
 const transportation = `
 <path style="display:inline;opacity:1;fill:var(--wheel-7-3);stroke:var(--wheel-0-4);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" d="M171.04 333.789s-23.713 47.426-24.264 54.044c-.551 6.618 91.544 18.75 93.75 17.096 2.206-1.655-9.375-67.28-9.375-67.28s-45.22-7.169-60.11-3.86z" transform="translate(-61.285 -131.304)"/>

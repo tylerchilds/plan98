@@ -1,10 +1,10 @@
-import module from '../module.js'
+import module from '@sillonious/module'
 
 import {
   EditorState,
   EditorView,
   basicSetup
-} from "@codemirror/basic-setup"
+} from "https://esm.sh/@codemirror/basic-setup"
 
 const $ = module('code-module')
 
@@ -78,7 +78,6 @@ function persist(target, $, _flags) {
 $.style(`
   & {
 		display: block;
-    max-height: 60vh;
     overflow: scroll;
   }
 `)

@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const $ = module('actionable-quests')
 
 async function query(target, key) {

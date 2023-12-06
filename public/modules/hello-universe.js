@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const $ = module('hello-universe', {
   // set an initial array of planets
   'planets': [

@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+
 import 'aframe'
 
 const $ = module('side-quest')

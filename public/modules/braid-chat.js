@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const $ = module('braid-chat', { name: "Braid User" })
 
 function initialize(target) {

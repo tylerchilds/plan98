@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const $ = module('email-list')
 function query(target, key) {
   if(target.lastKey === key) return

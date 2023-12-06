@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 const $ = module('title-page')
 
 $.draw((target) => {

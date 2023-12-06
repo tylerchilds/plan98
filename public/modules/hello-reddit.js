@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const emptyReddit = {
   children: [],
   choices: [],

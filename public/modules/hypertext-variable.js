@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const defaults = {
   monospace: '0',
   casual: '.5',

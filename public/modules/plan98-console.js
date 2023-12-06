@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 const s = document.createElement("script");
 s.type = "text/javascript";
 s.src = "//cdn.jsdelivr.net/npm/eruda";

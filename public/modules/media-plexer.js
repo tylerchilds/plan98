@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+
 const $ = module('media-plexer')
 
 const renderers = {

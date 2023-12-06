@@ -1,3 +1,4 @@
+import module from '@sillonious/module'
 //import { //showModal } from '../modal-module.js'
 
 const $ = module('quick-start')

@@ -1,3 +1,5 @@
+import module from '@sillonious/module'
+
 /*
  <blockquote>
     I adore my computer and have had a big-time relationship with it for thirteen years now. I would never have been able to write my memoirs (and enjoy doing so—a lot!) were it not for my PC, its files, cutting and pasting. Ooooh it was so much better than how I used to do it…taking scissors and cutting and taping paragraphs in new places
