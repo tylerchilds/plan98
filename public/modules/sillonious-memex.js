@@ -6,7 +6,8 @@ const locale = 'en_US'
 
 const drives = [
   `<middle-earth></middle-earth>`,
-  `<personal-people></personal-people>`,
+  `<actionable-quests></actionable-quests>`,
+  `<favorite-people></favorite-people>`,
   `<interest-groups></interest-groups>`,
   `<public-domain></public-domain>`,
 ]
@@ -81,10 +82,14 @@ $.draw((target) => {
       <button name="${tileMap.enter.name}">
         ${t(tileMap.enter.label)}
       </button>
-      ${drives[drive]}
+      <div name="drive">
+        ${drives[drive]}
+      </div>
       <hr style="display: none;"/>
       <div name="carousel">
-        ${screen}
+        <div name="screen">
+          ${screen}
+        </div>
       </div>
       <button name="${tileMap.tab.name}">
         ${t(tileMap.tab.label)}
@@ -126,6 +131,9 @@ $.when('click', '[name="shift"]', () => {
 })
 
 $.style(`
+  & {
+    display: block;
+  }
 	& button {
 		border-radius: 0;
 		border: none;
@@ -133,14 +141,10 @@ $.style(`
 		color: dodgerblue;
 	}
   & [name="the-time-machine"] {
+    position: relative;
     z-index: 1001;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
     display: grid;
-    grid-template-rows: 2rem auto 2rem;
+    grid-template-rows: 2rem calc(100vh - 4rem) 2rem;
     grid-template-columns: 1fr 1fr;
     max-height: 100vh;
     overflow: hidden;
@@ -150,14 +154,19 @@ $.style(`
       "${tileMap.tab.name} ${tileMap.escape.name}";
   }
 
-  & middle-earth {
+  & [name="drive"] {
     grid-area: ${tileMap.carousel.name};
+  }
+
+  & [name="drive"] > * {
     height: 100%;
   }
 
   & [name="carousel"] {
     display: none;
     place-self: center;
+    overflow: hidden;
+    position: relative;
   }
 
   & .circus-enabled hr {
@@ -175,12 +184,25 @@ $.style(`
 
   & .circus-enabled [name="carousel"] {
     display: grid;
-		grid-template-columns: 1fr;
-		grid-auto-rows: 1fr;
+    overflow: auto;
     z-index: 1001;
     width: 100%;
     height: 100%;
+  }
+
+  & [name="screen"] {
+    display: grid;
+		grid-template-columns: 1fr;
+		grid-auto-rows: 1fr;
     place-content: center;
+    place-self: center;
+    height: 100%;
+    width: 100%;
+  }
+
+
+  & [name="screen"] > * {
+    margin: auto;
   }
 
   ${layout(tiles)}

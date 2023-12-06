@@ -1,34 +1,51 @@
-const $ = module('email-list')
-function query(target, key) {
+const $ = module('actionable-quests')
+
+async function query(target, key) {
   if(target.lastKey === key) return
-  fetchTen(key)
   target.lastKey = key
+  const messages = await fetchTen(key)
+  $.teach({ key, messages })
 }
 
+const form = (key) => {
+  return `
+    <form>
+      <input name="key" value="${key}" />
+    </form>
+  `
+}
 
 $.draw(target => {
   const { key, messages } = $.learn()
   query(target, key)
 
   if(!messages) {
-    return `
-      <form>
-        <input name="key" value="${key}" />
-      </form>
-    `
-
+    return form(key)
   }
 
-  const log = messages.map(({ from, body }) => `
-      <div>${from}: ${body}</div>
-    `).join('')
+  const list = messages.map((message) => {
+    const { author, timestamp, subject, textBody } = message
+    console.log(author, timestamp, subject, textBody)
+    return `
+      <div name="message">
+        ${author.email}
+        ${timestamp}
+        ${subject}
+      </div>
+    `
+  }).join('')
 
   return `
-    ${log}
-    <form>
-      <input name="key" value="${key}" />
-    </form>
+    ${form(key)}
+    <div name="message-list">
+      ${list}
+    </div>
   `
+})
+
+$.when('change', '[name="key"]', (event) => {
+  const { value } = event.target
+  $.teach({ key: value })
 })
 
 const hostname = "api.fastmail.com";
@@ -68,7 +85,7 @@ const inboxIdQuery = async (apikey, api_url, account_id) => {
 
   const data = await response.json();
 
-  inbox_id = data["methodResponses"][0][1]["ids"][0];
+  const inbox_id = data["methodResponses"][0][1]["ids"][0];
 
   if (!inbox_id.length) {
     console.error("Could not get an inbox.");
@@ -156,6 +173,23 @@ async function fetchTen(apikey){
       });
     });
 
-    $.write({ messages })
+    return messages
   });
 }
+
+
+$.style(`
+  & [name="message-list"] {
+    background: rgba(0,0,0,.85);
+    border-radius: 3px;
+    border: 1px solid rgba(255,255,255,.1);
+    padding: 3px;
+  }
+
+  & [name="message"] {
+    background: black;
+    color: white;
+    margin: 1rem;
+    padding: 8px;
+  }
+`)
