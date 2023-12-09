@@ -145,9 +145,9 @@ $.style(`
     position: relative;
     z-index: 1001;
     display: grid;
-    grid-template-rows: 2rem calc(100vh - 4rem) 2rem;
+    grid-template-rows: 2rem 1fr 2rem;
     grid-template-columns: 1fr 1fr;
-    max-height: 100vh;
+    height: 100%;
     overflow: hidden;
     grid-template-areas:
       "${tileMap.shift.name} ${tileMap.enter.name}"

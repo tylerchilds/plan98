@@ -12,3 +12,9 @@ video {
   max-width: 100%;
   max-height: 50vh;
 }
+
+body > sillonious-brand,
+sillinous-brand > saga-genesis,
+saga-genesis > sillonious-memex {
+  height: 100%;
+}
