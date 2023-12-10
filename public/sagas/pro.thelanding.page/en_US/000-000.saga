@@ -1,0 +1,10 @@
+@ Ty
+> Hey... I'm Ty. I run a pro shp where I use computers to answer questions about art and science.
+
+<sillonious-party
+action: Tell Me More
+when: hostPressesStartStop
+
+<sillonious-party
+action: Skip the Lore
+when: hostPressesReset

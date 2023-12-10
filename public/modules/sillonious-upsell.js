@@ -1,6 +1,16 @@
 import module from '@sillonious/module'
-import players from '@sillonious/players'
+import party, {
+  hostPressesStartStop,
+  hostPressesReset,
+  hostPressesLight,
+  hostPressesMode,
+  anybodyPressesStartStop,
+  anybodyPressesReset,
+  anybodyPressesLight,
+  anybodyPressesMode,
+} from '@sillonious/party'
 import * as focusTrap from 'focus-trap'
+
 const $ = module('sillonious-upsell', { visible: true })
 
 $.draw((target) => {
@@ -17,8 +27,7 @@ $.draw((target) => {
   if(!target.trap) {
     target.trap = focusTrap.createFocusTrap(target, {
       onActivate: onActivate($, target),
-      onDeactivate: onDeactivate($, target),
-      clickOutsideDeactivates: true
+      onDeactivate: onDeactivate($, target)
     });
     schedule(() => {
       target.trap.activate()
@@ -26,12 +35,12 @@ $.draw((target) => {
   }
 
   return `
-    <sillonious-players></sillonious-players>
-    <button>one</button>
-    <button>two</button>
-    <button>three</button>
-    <button>four</button>
+    <sillonious-party></sillonious-party>
   `
+})
+
+$.when('click', '', () => {
+
 })
 
 $.style(`
@@ -50,7 +59,7 @@ function trapUntil($, target, terminator) {
   function loop(time) {
     let { trapped } = $.learn()
     try {
-      if(terminator()) {
+      if(terminator(party)) {
         trapped = false
         target.trap.deactivate()
       }
@@ -68,11 +77,7 @@ function trapUntil($, target, terminator) {
 function onActivate($, target){
   return () => {
     target.classList.add('active')
-    trapUntil(
-      $,
-      target,
-      () => players().some(p => p['/button/1/pushed'])
-    )
+    trapUntil($, target, anybodyPressesMode)
   }
 }
 

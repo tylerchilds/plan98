@@ -1,22 +1,85 @@
 import module from '@sillonious/module'
-const $ = module('sillonious-players')
+
+const fantasyController = {
+  osc: {
+    '/button/0/pressed': false,
+    '/button/1/pressed': false,
+    '/button/2/pressed': false,
+    '/button/3/pressed': false,
+  },
+  gamepad: {
+    id: 'fantasy-stock',
+    buttons: [0,0,0,0],
+    axes: []
+  }
+}
+
+export function hostPressesStartStop(party) { 
+  const host = party()[0]
+  return host.osc['/button/0/pushed']
+}
+
+export function hostPressesReset(party) { 
+  const host = party()[0]
+  return host.osc['/button/1/pushed']
+}
+
+export function hostPressesLight(party) { 
+  const host = party()[0]
+  return host.osc['/button/2/pushed']
+}
+
+export function hostPressesMode(party) { 
+  const host = party()[0]
+  return host.osc['/button/3/pushed']
+}
+
+
+export function anybodyPressesStartStop(party) { 
+  return party().some(ip => ip.osc['/button/0/pushed'])
+}
+
+export function anybodyPressesReset(party) { 
+  return party().some(ip => ip.osc['/button/1/pushed'])
+}
+
+export function anybodyPressesLight(party) { 
+  return party().some(ip => ip.osc['/button/2/pushed'])
+}
+
+export function anybodyPressesMode(party) { 
+  return party().some(ip => ip.osc['/button/3/pushed'])
+}
+
+const $ = module('sillonious-party', { fantasyController })
 
 const UPPER_THRESHOLD = 1
 const LOWER_THRESHOLD = -1
 const EMPTY_REMAP = { buttonOrder: [], axesOrder: [] }
 
 const controllers = {}
-const remaps = {}
+const remaps = {
+  0: {
+    buttonOrder: [],
+    axesOrder: []
+  }
+}
 
-export default function players() {
+export default function party() {
   scangamepads()
   const ids = Object.keys(controllers) || []
 
-	return ids
+	let group = ids
     .map(x => controllers[x])
     .map(gatherInputs)
     .map(exposeUserRemaps)
-    .map(flattenPlayer)
+    .map(addOSC)
+
+  if(group.length === 0) {
+    group = [$.learn().fantasyController]
+  }
+
+  return group
 }
 
 (function tick(timestamp) {
@@ -24,7 +87,33 @@ export default function players() {
   requestAnimationFrame(tick)
 })(performance.timeOrigin)
 
-$.draw((target) => renderGamepads(target, $))
+$.draw((target) => {
+  const { timestamp } = $.learn()
+
+  const list = party()
+    .map((service, index) => {
+      const keys = Object.keys(service.osc)
+      const buttonKeys = keys.filter(x => x.startsWith('/button/'))
+      const axesKeys = keys.filter(x => x.startsWith('/axis/'))
+      return `
+        <li class="gamepad" id="${service.gamepad.id}">
+          <label>${index+1}: ${service.gamepad.id}</label>
+          <div class="buttons">
+            ${buttonKeys.map((key, i) => renderButton(service.osc, key, i)).join('')}
+          </div>
+          <div class="axes">
+            ${axesKeys.map((key, i) => renderAxis(service.osc, key, i)).join('')}
+          </div>
+        </li>
+      `
+    }).join('')
+
+  return `
+    <ul class="gamepads" data-timestamp="${timestamp}">
+      ${list}
+    </ul>
+  `
+})
 
 function connecthandler(e) {
   const { index } = e.gamepad
@@ -38,45 +127,38 @@ function disconnecthandler(e) {
   delete remaps[index];
 }
 
-function renderValue(value, index) {
-  const offset = parseFloat(value) - 2 + 'rem'
+function renderButton(osc, key, index) {
+  const pushed = osc[key]
+  const offset = (pushed ? -1 : -2) + 'rem'
   return `
-    <li
+    <button
+      data-type="button"
+      data-key="${key}"
       class="input"
       style="--value: ${offset};"
-    >${index}</li>
+    >${index}</button>
   `
 }
+
+function renderAxis(osc, key, index) {
+  const pushed = osc[key]
+  const offset = (pushed ? -1 : -2) + 'rem'
+  return `
+    <button
+      data-type="axis"
+      data-key="${key}"
+      class="input"
+      style="--value: ${offset};"
+    >${index}</button>
+  `
+}
+
 
 function renderInputs(_$, flags) {
   const { gamepad } = flags
 
   return `
-    <ul class="buttons">
-      ${gamepad.buttons.map(renderValue).join('')}
-    </ul>
-    <ul class="axes">
-      ${gamepad.axes.map(renderValue).join('')}
-    </ul>
-  `
-}
-
-function renderGamepads(_target, $) {
-  const { timestamp } = $.learn()
-
-  const list = players()
-    .map(({gamepad}, index) => `
-      <li class="gamepad" id="${gamepad.id}">
-        <label>${index+1}: ${gamepad.id}</label>
-        ${renderInputs($, { gamepad })}
-      </li>
-    `).join('')
-
-  return `
-    <ul class="gamepads" data-timestamp="${timestamp}">
-      ${list}
-    </ul>
-  `
+      `
 }
 
 function scangamepads() {
@@ -142,22 +224,22 @@ function exposeUserRemaps(gamepad, slot) {
   }
 }
 
-function flattenPlayer(remappedGamepad, slot) {
+function addOSC(remappedGamepad, slot) {
   return {
-    ...remappedGamepad.buttons.reduce((accumulator, current, i) => {
-      const pushed = current === 1
-      const pulled = false
-      accumulator[`/button/${i}/pushed`] = pushed
-      accumulator[`/button/${i}/pulled`] = pulled
-      return accumulator
-    }, {}),
-    ...remappedGamepad.axes.reduce((accumulator, current, i) => {
-      const pushed = current === 1
-      const pulled = current === -1
-      accumulator[`/axis/${i}/pushed`] = pushed
-      accumulator[`/axis/${i}/pulled`] = pulled
-      return accumulator
-    }, {}),
+    osc: {
+      ...remappedGamepad.buttons.reduce((accumulator, current, i) => {
+        const pushed = current === 1
+        accumulator[`/button/${i}/pushed`] = pushed
+        return accumulator
+      }, {}),
+      ...remappedGamepad.axes.reduce((accumulator, current, i) => {
+        const pushed = current === 1
+        const pulled = current === -1
+        accumulator[`/axis/${i}/pushed`] = pushed
+        accumulator[`/axis/${i}/pulled`] = pulled
+        return accumulator
+      }, {})
+    },
     gamepad: remappedGamepad
   }
 }
