@@ -1,4 +1,6 @@
 import module from '@sillonious/module'
+import { hyperSanitizer } from './hyper-script.js'
+
 import party, {
   hostPressesStartStop,
   hostPressesReset,
@@ -11,10 +13,37 @@ import party, {
 } from '@sillonious/party'
 import * as focusTrap from 'focus-trap'
 
-const $ = module('sillonious-upsell', { visible: true })
+const $ = module('sillonious-upsell', {
+  visible: true,
+  activeDialect: '/sagas/pro.thelanding.page/en_US/',
+  activeSaga: '000-000.saga',
+  cache: {}
+})
 
 $.draw((target) => {
-  const { visible } = $.learn()
+  const { visible, activeDialect, activeSaga, cache } = $.learn()
+
+  let content = cache[activeSaga]
+
+  if(!content) {
+    fetch(activeDialect + activeSaga)
+      .then(x => x.text())
+      .then((saga) => {
+        $.teach(
+          { [activeSaga]: hyperSanitizer(saga) },
+          (state, payload) => {
+            return {
+              ...state,
+              cache: {
+                ...state.cache,
+                ...payload
+              }
+            }
+          }
+        )
+      })
+    content = 'loading...'
+  }
 
   if(!visible) {
     if(target.trap) {
@@ -34,7 +63,8 @@ $.draw((target) => {
     })
   }
 
-  return `
+  target.innerHTML = `
+    ${content}
     <sillonious-party></sillonious-party>
   `
 })
