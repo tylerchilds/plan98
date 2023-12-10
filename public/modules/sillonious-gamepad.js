@@ -28,7 +28,7 @@ $.draw((target) => renderGamepads(target, $))
 function connecthandler(e) {
   const { index } = e.gamepad
   controllers[index] = e.gamepad;
-  remaps[index] = EMPTY_REMAP
+  remaps[index] = { ...EMPTY_REMAP }
 }
 
 function disconnecthandler(e) {
@@ -111,15 +111,17 @@ function gatherInputs(gamepad, slot) {
 }
 
 function remappableButton(slot, button, value) {
+  const { buttonOrder } = remaps[slot]
+  if(buttonOrder.includes(button)) return
   if(value !== UPPER_THRESHOLD) return
-  if(remaps[slot].buttonOrder.includes(button)) return
-  remaps[slot].buttonOrder.push(button)
+  remaps[slot].buttonOrder = [...buttonOrder, button]
 }
 
 function remappableAxes(slot, axis, value) {
+  const { axesOrder } = remaps[slot]
+  if(axesOrder.includes(axis)) return
   if(value !== LOWER_THRESHOLD && value !== UPPER_THRESHOLD) return
-  if(remaps[slot].axesOrder.includes(axis)) return
-  remaps[slot].axesOrder.push(axis)
+  remaps[slot].axesOrder = [...axesOrder, axis]
 }
 
 function exposeUserRemaps(gamepad, slot) {
