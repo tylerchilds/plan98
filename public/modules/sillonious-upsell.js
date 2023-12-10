@@ -1,5 +1,5 @@
 import module from '@sillonious/module'
-import gamepads from '@sillonious/gamepads'
+import players from '@sillonious/players'
 import * as focusTrap from 'focus-trap'
 const $ = module('sillonious-upsell', { visible: true })
 
@@ -20,11 +20,13 @@ $.draw((target) => {
       onDeactivate: onDeactivate($, target),
       clickOutsideDeactivates: true
     });
-    schedule(target.trap.activate)
+    schedule(() => {
+      target.trap.activate()
+    })
   }
 
   return `
-    <sillonious-gamepad data-locked="0"></sillonious-gamepad>
+    <sillonious-players></sillonious-players>
     <button>one</button>
     <button>two</button>
     <button>three</button>
@@ -50,7 +52,7 @@ function onActivate($, target){
     function loop() {
       let { trapped } = $.learn()
       try {
-        if(gamepads()[0].buttons[1] === 1) {
+        if(players().some(p => p['button[1]pushed'])) {
           trapped = false
           target.trap.deactivate()
         }
