@@ -34,7 +34,7 @@ function modules({ path }) {
         });
       }
     } catch(e) {
-      console.log('Error caught establishing formula for:', tag, e)
+      console.log('Error defining module:', tag, e)
     }
   })
 }

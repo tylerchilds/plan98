@@ -42,19 +42,21 @@
         `)
       }
       function upsell() {
-        if(window.location.host !== window.plan98.provider) {
+        const isFirst = self.self === self.top
+        const notPrime = window.location.host !== window.plan98.provider
+        if(isFirst && notPrime) {
           document.body.insertAdjacentHTML('beforeend', `
             <sillonious-upsell host="${window.plan98.provider}"></sillonious-upsell>
           `)
         }
       }
-
     </script>
     <script type="importmap">
       {
         "imports": {
           "@sillonious/module": "/module.js",
           "@sillonious/computer": "/sillyz.computer.js",
+          "@sillonious/gamepads": "/modules/sillonious-gamepad.js",
           "aframe": "https://esm.sh/aframe@1.5.0",
           "codemirror": "https://esm.sh/codemirror@6.0.1",
           "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
