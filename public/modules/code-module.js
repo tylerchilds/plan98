@@ -79,5 +79,6 @@ $.style(`
   & {
 		display: block;
     overflow: scroll;
+    max-height: 100%;
   }
 `)

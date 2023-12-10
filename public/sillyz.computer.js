@@ -1,11 +1,22 @@
-function modules({ folder }) {
+export default class SillyzComputer {
+  constructor({ path, ready, upsell }) {
+    modules({ path })
+    new MutationObserver(() => {
+      modules({ path })
+    }).observe(document.body, { childList: true, subtree: true });
+    ready()
+    upsell()
+  }
+}
+
+function modules({ path }) {
   const tags = new Set(
     [...document.querySelectorAll(':not(:defined)')]
     .map(({ tagName }) => tagName.toLowerCase())
   )
 
   tags.forEach(async (tag) => {
-    const url = `${folder || '.'}/${tag}.js`
+    const url = `${path || '.'}/${tag}.js`
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true
@@ -27,16 +38,3 @@ function modules({ folder }) {
     }
   })
 }
-
-(function({ folder }) {
-  modules({ folder })
-  new MutationObserver((mutationsList) => {
-    modules({ folder })
-  }).observe(document.body, { childList: true, subtree: true });
-})({ folder: '/modules' })
-
-document.body.insertAdjacentHTML('beforeend', `
-  <sillonious-brand host="${window.plan98.host}">
-    <saga-genesis></saga-genesis>
-  </sillonious-brand>
-`)

@@ -32,7 +32,6 @@ $.draw(() => {
   } = $.learn()
 
   if(!isOpen) return ' '
-
   const modalHeader = types[bannerType] ? banner() : ''
 
   return `
@@ -79,7 +78,7 @@ export function hideModal() {
     isOpen: false
   })
 }
-window.hideModal = showModal
+window.hideModal = hideModal
 
 $.when('click', '[data-close]', hideModal)
 

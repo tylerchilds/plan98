@@ -177,18 +177,7 @@ function getContent(computer, tree, pathParts) {
 
       return result
     } catch(e) {
-      showModal(`
-        <h1>
-          Welcome!
-        </h1>
-        <p>
-          You're invited to join a wonderful world of... well.
-          What wonderful world would you want to be invited to join?
-        </p>
-        <plan98-filesystem data-cwc=${computer}>
-          <button data-reset>Choose Your Character</button>
-        </plan98-filesystem>
-      `)
+      factoryReset(computer)
       return { error: '404' }
     }
   }, tree)
@@ -508,7 +497,7 @@ $.style(`
     inset: 0;
     transform: translateY(0);
     transition: transform 200ms ease-in-out;
-    overflow: auto;
+    overflow: hidden;
   }
 
   & .leaf iframe {

@@ -33,12 +33,12 @@ $.draw(target => {
   const host = getHost(target)
   const stars = getStars(host)
   const { activeShot, lastAction } = $.learn()
-  const { script, shotCount } = dialogue(target)
+  const { sequence, shotCount } = dialogue(target)
 
   const start = Math.max(activeShot - 1, 0)
   const end = Math.min(activeShot + 2, shotCount)
   const forwards = lastAction !== 'back'
-  const motion = getMotion(script, { active: activeShot, forwards, start, end })
+  const motion = getMotion(sequence, { active: activeShot, forwards, start, end })
 
   const isFirst = activeShot === 0
   const isLast = activeShot === shotCount - 1
@@ -95,16 +95,16 @@ function dialogue(target) {
     : (function initialize() {
       state[host] = {
         shotCount: 1,
-        script: `
-        <div>
-          <div>
-            ${strings['plan98-welcome.warning']}
-          </div>
-          <div>
-            <a href="https://raw.githubusercontent.com/tylerchilds/plan98/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
-          </div>
-        </div>
-  `
+        sequence: [
+          `
+            <div>
+              ${strings['plan98-welcome.warning']}
+            </div>
+            <div>
+              <a href="https://raw.githubusercontent.com/tylerchilds/plan98/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
+            </div>
+          `
+        ]
       }
       return state[host]
     })()
@@ -150,12 +150,12 @@ $.when('click', '[data-next]', (event) => {
   $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
 })
 
-function getMotion(html, { active = 0, forwards, start, end }) {
-  const wrapper= document.createElement('div');
-  wrapper.innerHTML = html;
-  const children = Array.from(wrapper.children)
-    .filter(x => x.matches(notHiddenChildren))
-
+function getMotion(sequence, { active = 0, forwards, start, end }) {
+  const children = sequence.map(html =>  {
+    const node = document.createElement('div')
+    node.innerHTML = html
+    return node
+  })
   if(children[active]) {
     children[active].dataset.active = true
   }

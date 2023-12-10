@@ -2,9 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!--
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>:)</title>
     <style>
@@ -24,18 +22,39 @@
     </style>
     <link href="/styles/system.css" rel="stylesheet">
     <script>
+      document.title = window.location.pathname
       const parameters = new URLSearchParams(window.location.search)
       const world = parameters.get('world')
       window.plan98 = {
-        host: world ? world : window.location.host
+        parameters,
+        provider: 'pro.thelanding.page',
+        host: world ? world : window.location.host,
+        ready,
+        upsell
       }
 
       document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
+      function ready() {
+        document.body.insertAdjacentHTML('beforeend', `
+          <sillonious-brand host="${window.plan98.host}">
+            <saga-genesis></saga-genesis>
+          </sillonious-brand>
+        `)
+      }
+      function upsell() {
+        if(window.location.host !== window.plan98.provider) {
+          document.body.insertAdjacentHTML('beforeend', `
+            <sillonious-upsell host="${window.plan98.provider}"></sillonious-upsell>
+          `)
+        }
+      }
+
     </script>
     <script type="importmap">
       {
         "imports": {
           "@sillonious/module": "/module.js",
+          "@sillonious/computer": "/sillyz.computer.js",
           "aframe": "https://esm.sh/aframe@1.5.0",
           "codemirror": "https://esm.sh/codemirror@6.0.1",
           "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
@@ -50,6 +69,13 @@
     </script>
   </head>
   <body>
-    <script src="/sillyz.computer.js"></script>
+    <script type="module">
+      import Computer from '@sillonious/computer'
+      new Computer({
+        path: '/modules',
+        ready: window.plan98.ready,
+        upsell: window.plan98.upsell
+      })
+    </script>
   </body>
 </html>
