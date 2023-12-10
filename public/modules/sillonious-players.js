@@ -147,15 +147,15 @@ function flattenPlayer(remappedGamepad, slot) {
     ...remappedGamepad.buttons.reduce((accumulator, current, i) => {
       const pushed = current === 1
       const pulled = false
-      accumulator[`button[${i}]pushed`] = pushed
-      accumulator[`button[${i}]pulled`] = pulled
+      accumulator[`/button/${i}/pushed`] = pushed
+      accumulator[`/button/${i}/pulled`] = pulled
       return accumulator
     }, {}),
     ...remappedGamepad.axes.reduce((accumulator, current, i) => {
       const pushed = current === 1
       const pulled = current === -1
-      accumulator[`axis[${i}]pushed`] = pushed
-      accumulator[`axis[${i}]pulled`] = pulled
+      accumulator[`/axis/${i}/pushed`] = pushed
+      accumulator[`/axis/${i}/pulled`] = pulled
       return accumulator
     }, {}),
     gamepad: remappedGamepad

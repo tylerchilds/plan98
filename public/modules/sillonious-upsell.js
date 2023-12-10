@@ -45,23 +45,34 @@ $.style(`
   }
 `)
 
+function trapUntil($, target, terminator) {
+  $.teach({ trapped: true })
+  function loop(time) {
+    let { trapped } = $.learn()
+    try {
+      if(terminator()) {
+        trapped = false
+        target.trap.deactivate()
+      }
+    } catch(reason) {
+      const flavor = `the ${time} terminator failed`
+      const source = `for ${terminator.toString()}`
+
+      console.error(`${flavor} ${source} because`, reason)
+    }
+    if(trapped) requestAnimationFrame(loop)
+  }
+  requestAnimationFrame(loop)
+}
+
 function onActivate($, target){
   return () => {
     target.classList.add('active')
-    $.teach({ trapped: true })
-    function loop() {
-      let { trapped } = $.learn()
-      try {
-        if(players().some(p => p['button[1]pushed'])) {
-          trapped = false
-          target.trap.deactivate()
-        }
-      } catch(e) {
-        console.error('not quite ready for a b button you f feel me?')
-      }
-      if(trapped) requestAnimationFrame(loop)
-    }
-    requestAnimationFrame(loop)
+    trapUntil(
+      $,
+      target,
+      () => players().some(p => p['/button/1/pushed'])
+    )
   }
 }
 
