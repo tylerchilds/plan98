@@ -63,7 +63,8 @@ function helpActions(currentWorkingComputer) {
 
 const $ = module('plan98-filesystem')
 
-$.draw(self.self === self.top ? system : floppy)
+const shouldBoot = self.self === self.top && !parameters.get('path')
+$.draw(shouldBoot ? system : floppy)
 
 function closestWorkingComputer(target) {
   const cwc = target.closest('[data-cwc]')
@@ -122,6 +123,10 @@ function system(target) {
 function floppy(target) {
   if(checkPreservationStatus(target)) {
     return
+  }
+
+  if(parameters.get('path')) {
+    return `<media-plexer src="${parameters.get('path')}"></media-plexer>`
   }
 
   const computer = target.closest('[data-cwc]').dataset.cwc

@@ -3,20 +3,12 @@ import module from '@sillonious/module'
 const $ = module('media-plexer')
 
 const renderers = {
-  'saga': (path) => {
-    const readonly = parameters.get('readonly')
-		const presentation = parameters.get('presentation')
-    return `
-      <hyper-script
-        src="ls${path}"
-        ${readonly ? 'readonly="true"' : ''}
-        ${presentation ? 'presentation="true"' : ''}
-      ></hyper-script>
-    `
-  },
-  'js': (path) => {
-    return `<code-module src="${path}"></code-module>`
-  }
+  'saga': sagaRenderer,
+  'jpg': iframeRenderer,
+  'svg': iframeRenderer,
+  'css': codeRenderer,
+  'js': codeRenderer,
+  'html': codeRenderer
 }
 
 function source(target) {
@@ -32,4 +24,20 @@ $.draw((target) => {
 
 function iframeRenderer(path) {
   return `<iframe src="${path}" title="${path}"></iframe>"`
+}
+
+function codeRenderer(path) {
+  return `<code-module src="${path}"></code-module>`
+}
+
+function sagaRenderer(path) {
+  const readonly = parameters.get('readonly')
+  const presentation = parameters.get('presentation')
+  return `
+    <hyper-script
+      src="${path}"
+      ${readonly ? 'readonly="true"' : ''}
+      ${presentation ? 'presentation="true"' : ''}
+    ></hyper-script>
+  `
 }

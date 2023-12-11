@@ -334,11 +334,22 @@ function sourceFile(target) {
   return state[src]
     ? state[src]
     : (function initialize() {
-      state[src] = {
-        file: script404(),
-        html: 'Change the way you see the world.',
-        embed: ''
-      }
+      fetch(src).then(res => res.text()).then((x) => {
+        state[src] = {
+          file: x,
+          html: hyperSanitizer(x),
+          embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+        }
+      }).catch(e => {
+        console.error(e)
+        const x = script404()
+        state[src] = {
+          file: x,
+          html: hyperSanitizer(x),
+          embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+        }
+      })
+      state[src] = { file: 'loading...' }
       return state[src]
     })()
 }
@@ -349,7 +360,7 @@ $.when('input', 'textarea', (event) => {
   state[src].file = value
   const html = hyperSanitizer(value)
   state[src].html = html
-  state[src].embed = `<iframe src="${window.location.href}&readonly=true" title="embed"></iframe>`
+  state[src].embed = `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
 })
 
 $.when('click', '[data-read]', (event) => {

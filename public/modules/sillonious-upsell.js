@@ -65,7 +65,6 @@ $.draw((target) => {
 
   target.innerHTML = `
     ${content}
-    <sillonious-party></sillonious-party>
   `
 })
 
@@ -77,7 +76,6 @@ $.style(`
   & {
     display: block;
     position: absolute;
-    z-index: 1;
   }
 
   &.active {
