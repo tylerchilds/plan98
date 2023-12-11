@@ -576,6 +576,8 @@ $.style(`
   }
 
   & {
+    height: 100%;
+    display: block;
     overflow: auto;
   }
   & .grid {

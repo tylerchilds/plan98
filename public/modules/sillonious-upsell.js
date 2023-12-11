@@ -53,7 +53,7 @@ $.draw((target) => {
     return ''
   }
 
-  if(!target.trap) {
+  if(target.innerHTML && !target.trap) {
     target.trap = focusTrap.createFocusTrap(target, {
       onActivate: onActivate($, target),
       onDeactivate: onDeactivate($, target)
@@ -64,7 +64,9 @@ $.draw((target) => {
   }
 
   target.innerHTML = `
+    <button>hi</button>
     ${content}
+    <sillonious-host></sillonious-host>
   `
 })
 

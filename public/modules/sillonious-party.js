@@ -1,54 +1,73 @@
 import module from '@sillonious/module'
 
+const DEFAULT_ACTUATION = .75
+
+function gamepadButton(index) {
+  return {
+    index: index,
+    key: `/button/${index}`,
+    actuated: false,
+    pushed: false,
+    value: 0
+  }
+}
+
 const fantasyController = {
   osc: {
-    '/button/0/pressed': false,
-    '/button/1/pressed': false,
-    '/button/2/pressed': false,
-    '/button/3/pressed': false,
+    '/button/0': gamepadButton(0),
+    '/button/1': gamepadButton(1),
+    '/button/2': gamepadButton(2),
+    '/button/3': gamepadButton(3),
   },
   gamepad: {
     id: 'fantasy-stock',
-    buttons: [0,0,0,0],
+    buttons: [
+      gamepadButton(0),
+      gamepadButton(1),
+      gamepadButton(2),
+      gamepadButton(3),
+    ],
     axes: []
   }
 }
 
+const check = (player, button) => {
+  const { value } = player.osc[button] || {}
+  if(!value) return false
+  return value >= DEFAULT_ACTUATION
+}
+
 export function hostPressesStartStop(party) { 
-  const host = party()[0]
-  return host.osc['/button/0/pushed']
+  return check(party(0), '/button/0')
 }
 
 export function hostPressesReset(party) { 
-  const host = party()[0]
-  return host.osc['/button/1/pushed']
+  return check(party(0), '/button/1')
 }
 
 export function hostPressesLight(party) { 
-  const host = party()[0]
-  return host.osc['/button/2/pushed']
+  return check(party(0), '/button/2')
 }
 
 export function hostPressesMode(party) { 
-  const host = party()[0]
-  return host.osc['/button/3/pushed']
+  return check(party(0), '/button/3')
 }
 
 
 export function anybodyPressesStartStop(party) { 
-  return party().some(ip => ip.osc['/button/0/pushed'])
+  return party().some(p => check(p,'/button/0'))
 }
 
 export function anybodyPressesReset(party) { 
-  return party().some(ip => ip.osc['/button/1/pushed'])
+  return party().some(p => check(p,'/button/1'))
 }
 
 export function anybodyPressesLight(party) { 
-  return party().some(ip => ip.osc['/button/2/pushed'])
+  return party().some(p => check(p,'/button/2'))
 }
 
 export function anybodyPressesMode(party) { 
-  return party().some(ip => ip.osc['/button/3/pushed'])
+  return party().some(p => check(p,'/button/3'))
 }
 
 const $ = module('sillonious-party', { fantasyController })
@@ -65,21 +84,20 @@ const remaps = {
   }
 }
 
-export default function party() {
+export default function party(slot) {
   scangamepads()
   const ids = Object.keys(controllers) || []
 
 	let group = ids
     .map(x => controllers[x])
     .map(gatherInputs)
-    .map(exposeUserRemaps)
     .map(addOSC)
 
   if(group.length === 0) {
     group = [$.learn().fantasyController]
   }
 
-  return group
+  return slot ? group[slot] : group
 }
 
 (function tick(timestamp) {
@@ -179,7 +197,6 @@ function gatherInputs(gamepad, slot) {
     }
 
     remappableButton(slot, i, value)
-
     return value
   })
 
@@ -207,41 +224,51 @@ function remappableAxes(slot, axis, value) {
   remaps[slot].axesOrder = [...axesOrder, axis]
 }
 
-function exposeUserRemaps(gamepad, slot) {
+function addOSC(gamepad, slot) {
   const { buttonOrder, axesOrder } = remaps[slot]
   const buttons = buttonOrder.map(i => {
-    return gamepad.buttons[i]
+    const value = gamepad.buttons[i]
+    return {
+      index: i,
+      key: `/button/${i}`,
+      actuated: value >= DEFAULT_ACTUATION,
+      pushed: value === UPPER_THRESHOLD,
+      value
+    }
   })
   const axes = axesOrder.map(i => {
-    return gamepad.axes[i]
+    const value = gamepad.axes[i]
+    return {
+      index: i,
+      key: `/axis/${i}`,
+      actuated: Math.abs(value) >= DEFAULT_ACTUATION,
+      pushed: value === UPPER_THRESHOLD,
+      pulled: value === LOWER_THRESHOLD,
+      value
+    }
   })
 
   return {
-    buttons,
-    axes,
-    id: gamepad.id,
-    index: gamepad.index
+    osc: {
+      ...fantasyController.osc,
+      ...buttons.reduce(toPath, {}),
+      ...axes.reduce(toPath, {})
+    },
+    gamepad: {
+      buttons: buttons.reduce((all, real, index) => {
+        all[index] = real
+        return all
+      }, [...fantasyController.gamepad.buttons]),
+      axes,
+      id: gamepad.id,
+      index: gamepad.index
+    }
   }
 }
 
-function addOSC(remappedGamepad, slot) {
-  return {
-    osc: {
-      ...remappedGamepad.buttons.reduce((accumulator, current, i) => {
-        const pushed = current === 1
-        accumulator[`/button/${i}/pushed`] = pushed
-        return accumulator
-      }, {}),
-      ...remappedGamepad.axes.reduce((accumulator, current, i) => {
-        const pushed = current === 1
-        const pulled = current === -1
-        accumulator[`/axis/${i}/pushed`] = pushed
-        accumulator[`/axis/${i}/pulled`] = pulled
-        return accumulator
-      }, {})
-    },
-    gamepad: remappedGamepad
-  }
+function toPath (accumulator, current){
+  accumulator[current.key] = current.value
+  return accumulator
 }
 
 globalThis.addEventListener("gamepadconnected", connecthandler);
