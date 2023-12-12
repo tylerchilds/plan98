@@ -52,8 +52,8 @@ $.draw((target) => {
     }
     return ''
   }
-
-  if(target.innerHTML && !target.trap) {
+  if(!target.trap) {
+		target.innerHTML = `<button style="width: 1px; height: 1px; position: absolute;">(blip)</button>`
     target.trap = focusTrap.createFocusTrap(target, {
       onActivate: onActivate($, target),
       onDeactivate: onDeactivate($, target)
@@ -63,8 +63,7 @@ $.draw((target) => {
     })
   }
 
-  target.innerHTML = `
-    <button>hi</button>
+  return `
     ${content}
     <sillonious-host></sillonious-host>
   `
@@ -78,6 +77,12 @@ $.style(`
   & {
     display: block;
     position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    background: rgba(255,255,255,.85);
+    border-top: 5px solid dodgerblue;
   }
 
   &.active {

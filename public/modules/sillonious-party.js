@@ -2,13 +2,13 @@ import module from '@sillonious/module'
 
 const DEFAULT_ACTUATION = .75
 
-function gamepadButton(index) {
+function gamepadButton(index, value=0) {
   return {
-    index: index,
-    key: `/button/${index}`,
+    index,
+    value,
+    osc: `/button/${index}`,
     actuated: false,
     pushed: false,
-    value: 0
   }
 }
 
@@ -31,58 +31,80 @@ const fantasyController = {
   }
 }
 
-const check = (player, button) => {
-  const { value } = player.osc[button] || {}
+const check = (player, osc) => {
+  const { value } = player.osc[osc] || {}
   if(!value) return false
-  return value >= DEFAULT_ACTUATION
+  return Math.abs(value) >= DEFAULT_ACTUATION
 }
 
-export function hostPressesStartStop(party) { 
+export function hostPressesStartStop(party) {
   return check(party(0), '/button/0')
 }
 
-export function hostPressesReset(party) { 
+export function hostPressesReset(party) {
   return check(party(0), '/button/1')
 }
 
-export function hostPressesLight(party) { 
+export function hostPressesLight(party) {
   return check(party(0), '/button/2')
 }
 
-export function hostPressesMode(party) { 
+export function hostPressesMode(party) {
   return check(party(0), '/button/3')
 }
 
 
-export function anybodyPressesStartStop(party) { 
+export function anybodyPressesStartStop(party) {
   return party().some(p => check(p,'/button/0'))
 }
 
-export function anybodyPressesReset(party) { 
+export function anybodyPressesReset(party) {
   return party().some(p => check(p,'/button/1'))
 }
 
-export function anybodyPressesLight(party) { 
+export function anybodyPressesLight(party) {
   return party().some(p => check(p,'/button/2'))
 }
 
-export function anybodyPressesMode(party) { 
+export function anybodyPressesMode(party) {
   return party().some(p => check(p,'/button/3'))
 }
 
-const $ = module('sillonious-party', { fantasyController })
+const $ = module('sillonious-party', {
+	fantasyController,
+	remaps: {
+		0: {
+			buttonOrder: [],
+			axesOrder: [],
+			osc: {}
+		}
+	}
+})
+
+export function fantasyGamepadEvent(slot, osc, value) {
+	$.teach({ [osc]: value }, (state, payload) => {
+		return {
+			...state,
+			remaps: {
+				...state.remaps,
+				[slot]: {
+					...state.remaps[slot],
+					osc: {
+						...state.remaps[slot].osc,
+						...payload
+					}
+				}
+			}
+		}
+	})
+}
+
 
 const UPPER_THRESHOLD = 1
 const LOWER_THRESHOLD = -1
-const EMPTY_REMAP = { buttonOrder: [], axesOrder: [] }
+const EMPTY_REMAP = { buttonOrder: [], axesOrder: [], osc: {} }
 
 const controllers = {}
-const remaps = {
-  0: {
-    buttonOrder: [],
-    axesOrder: []
-  }
-}
 
 export default function party(slot) {
   scangamepads()
@@ -109,7 +131,7 @@ $.draw((target) => {
   const { timestamp } = $.learn()
 
   const list = party()
-    .map((service, index) => {
+    .map((p, index) => {
       const keys = Object.keys(service.osc)
       const buttonKeys = keys.filter(x => x.startsWith('/button/'))
       const axesKeys = keys.filter(x => x.startsWith('/axis/'))
@@ -117,10 +139,10 @@ $.draw((target) => {
         <li class="gamepad" id="${service.gamepad.id}">
           <label>${index+1}: ${service.gamepad.id}</label>
           <div class="buttons">
-            ${buttonKeys.map((key, i) => renderButton(service.osc, key, i)).join('')}
+            ${buttonKeys.map((osc, i) => renderButton(p, osc, i)).join('')}
           </div>
           <div class="axes">
-            ${axesKeys.map((key, i) => renderAxis(service.osc, key, i)).join('')}
+            ${axesKeys.map((osc, i) => renderAxis(p, osc, i)).join('')}
           </div>
         </li>
       `
@@ -136,35 +158,55 @@ $.draw((target) => {
 function connecthandler(e) {
   const { index } = e.gamepad
   controllers[index] = e.gamepad;
-  remaps[index] = { ...EMPTY_REMAP }
+	$.teach(EMPTY_REMAP, (state, payload) => {
+		return {
+			...state,
+			remaps: {
+				...state.remaps,
+				[index]: payload
+			}
+		}
+	})
 }
 
 function disconnecthandler(e) {
   const { index } = e.gamepad
   delete controllers[index];
-  delete remaps[index];
+	$.teach(null, (state) => {
+		const remaps = Object
+			.keys(state.remaps)
+			.filter(x => x !== index)
+			.reduce((all, key) => {
+				all[key] = state[remaps][key]
+				return all
+			}, {})
+		return {
+			...state,
+			remaps
+		}
+	})
 }
 
-function renderButton(osc, key, index) {
-  const pushed = osc[key]
+function renderButton(player, osc, index) {
+  const pushed = player[osc]
   const offset = (pushed ? -1 : -2) + 'rem'
   return `
     <button
       data-type="button"
-      data-key="${key}"
+      data-osc="${osc}"
       class="input"
       style="--value: ${offset};"
     >${index}</button>
   `
 }
 
-function renderAxis(osc, key, index) {
-  const pushed = osc[key]
+function renderAxis(player, osc, index) {
+  const pushed = player[osc]
   const offset = (pushed ? -1 : -2) + 'rem'
   return `
     <button
       data-type="axis"
-      data-key="${key}"
+      data-osc="${osc}"
       class="input"
       style="--value: ${offset};"
     >${index}</button>
@@ -211,37 +253,70 @@ function gatherInputs(gamepad, slot) {
 }
 
 function remappableButton(slot, button, value) {
+  const { remaps } = $.learn()
   const { buttonOrder } = remaps[slot]
   if(buttonOrder.includes(button)) return
   if(value !== UPPER_THRESHOLD) return
-  remaps[slot].buttonOrder = [...buttonOrder, button]
+	$.teach(button, (state, payload) => {
+		return {
+			...state,
+			remaps: {
+				...state.remaps,
+				[slot]: {
+					...state.remaps[slot],
+					buttonOrder: [...state.remaps[slot].buttonOrder, payload]
+					}
+				}
+			}
+	})
 }
 
 function remappableAxes(slot, axis, value) {
+  const { remaps } = $.learn()
   const { axesOrder } = remaps[slot]
   if(axesOrder.includes(axis)) return
   if(value !== LOWER_THRESHOLD && value !== UPPER_THRESHOLD) return
-  remaps[slot].axesOrder = [...axesOrder, axis]
+	$.teach(axis, (state, payload) => {
+		return {
+			...state,
+			remaps: {
+				...state.remaps,
+				[slot]: {
+					...state.remaps[slot],
+					axesOrder: [...state.remaps[slot].axesOrder, payload]
+					}
+				}
+			}
+	})
+
 }
 
 function addOSC(gamepad, slot) {
+  const { remaps } = $.learn()
   const { buttonOrder, axesOrder } = remaps[slot]
   const buttons = buttonOrder.map(i => {
-    const value = gamepad.buttons[i]
+    const osc = `/button/${i}`
+    let value = gamepad.buttons[i]
+    const actuated = value >= DEFAULT_ACTUATION
+    value = !actuated && remaps[slot].osc[osc]
+      ? remaps[slot].osc[osc].value
+      : value
     return {
       index: i,
-      key: `/button/${i}`,
-      actuated: value >= DEFAULT_ACTUATION,
+      osc,
+      actuated,
       pushed: value === UPPER_THRESHOLD,
       value
     }
   })
   const axes = axesOrder.map(i => {
-    const value = gamepad.axes[i]
+    const osc = `/axis/${i}`
+    let value = gamepad.axes[i]
+    const actuated = Math.abs(value) >= DEFAULT_ACTUATION
     return {
       index: i,
-      key: `/axis/${i}`,
-      actuated: Math.abs(value) >= DEFAULT_ACTUATION,
+      osc,
+      actuated,
       pushed: value === UPPER_THRESHOLD,
       pulled: value === LOWER_THRESHOLD,
       value
@@ -267,7 +342,7 @@ function addOSC(gamepad, slot) {
 }
 
 function toPath (accumulator, current){
-  accumulator[current.key] = current.value
+  accumulator[current.osc] = current.value
   return accumulator
 }
 
