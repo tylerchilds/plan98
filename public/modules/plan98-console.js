@@ -16,6 +16,21 @@ $.draw(container => {
     eruda.init({ container });
 
     eruda.show()
+    eruda.add({
+    name: 'Braid',
+      init($el) {
+        this._$el = $el;
+      },
+      show() {
+        this._$el.show()
+        this._$el.html('<iframe title="braid-debugger" src="/cdn/braid.org/debugger.html" style="width: 100%; height: 100%; border: none;"></iframe>');
+      },
+      hide() {
+        this._$el.hide()
+        this._$el.html('');
+      },
+      destroy() {}
+    })
   }
 
   requestAnimationFrame(loop)

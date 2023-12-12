@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Braid Debugger</title>
+    <style>
+      html,body {
+        height: 100%;
+        background: #242424;
+        color: white;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+      }
+
+      button * {
+        pointer-events: none;
+      }
+    </style>
+    <link href="/styles/system.css" rel="stylesheet">
+    <script>
+      document.title = window.location.pathname
+      const parameters = new URLSearchParams(window.location.search)
+      const world = parameters.get('world')
+      window.plan98 = {
+        parameters,
+        provider: 'braid.org',
+        host: world ? world : window.location.host,
+        ready,
+        upsell
+      }
+
+      document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
+      function ready() {
+        document.body.insertAdjacentHTML('beforeend', `
+          <braid-debugger></braid-debugger>
+        `)
+      }
+      function upsell() {
+      }
+    </script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@sillonious/module": "/module.js",
+          "@sillonious/computer": "/sillyz.computer.js",
+          "@sillonious/party": "/modules/sillonious-party.js",
+          "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+          "focus-trap" : "https://esm.sh/focus-trap"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    braid-chrome debug info here
+    <script type="module">
+      import Computer from '@sillonious/computer'
+      new Computer({
+        path: '/modules',
+        ready: window.plan98.ready,
+        upsell: window.plan98.upsell
+      })
+    </script>
+  </body>
+</html>
