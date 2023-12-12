@@ -24,47 +24,62 @@
     </style>
     <link href="/styles/system.css" rel="stylesheet">
     <script>
-      document.title = window.location.pathname
       const parameters = new URLSearchParams(window.location.search)
       const world = parameters.get('world')
       window.plan98 = {
         parameters,
         provider: 'braid.org',
         host: world ? world : window.location.host,
-        ready,
-        upsell
       }
 
       document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
-      function ready() {
-        document.body.insertAdjacentHTML('beforeend', `
-          <braid-debugger></braid-debugger>
-        `)
-      }
-      function upsell() {
-      }
     </script>
     <script type="importmap">
       {
         "imports": {
           "@sillonious/module": "/module.js",
-          "@sillonious/computer": "/sillyz.computer.js",
-          "@sillonious/party": "/modules/sillonious-party.js",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
-          "focus-trap" : "https://esm.sh/focus-trap"
+          "eruda": "https://esm.sh/eruda@3.0.1"
         }
       }
     </script>
   </head>
   <body>
-    braid-chrome debug info here
+    <braid-debugger></braid-debugger>
     <script type="module">
-      import Computer from '@sillonious/computer'
-      new Computer({
-        path: '/modules',
-        ready: window.plan98.ready,
-        upsell: window.plan98.upsell
-      })
+      import module from '@sillonious/module'
+      import eruda from 'eruda'
+
+      voltron('braid-debugger', module, eruda)
+
+      function voltron(tag, module, eruda) {
+        customElements.define(tag, class WebComponent extends HTMLElement {
+          constructor() {
+            super();
+            this.$ = module(tag)
+            this.$.draw(container => {
+              eruda.init({ container });
+              eruda.show()
+              eruda.add({
+              name: 'Braid',
+                init($el) {
+                  this._$el = $el;
+                },
+                show() {
+                  this._$el.show()
+                  this._$el.html('<iframe title="braid-debugger" src="https://braid.org?world=braid.org" style="width: 100%; height: 100%; border: none;"></iframe>');
+                },
+                hide() {
+                  this._$el.hide()
+                  this._$el.html('');
+                },
+                destroy() {}
+              })
+            })
+
+          }
+        });
+      }
     </script>
   </body>
 </html>
