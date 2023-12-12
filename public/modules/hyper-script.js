@@ -82,7 +82,7 @@ $.draw(target => {
   const views = {
     [panels.write]: () => `
       <div name="write">
-        <textarea style="background: ${stars}">${escapedFile}</textarea>
+        <textarea name="typewriter" style="background: ${stars}">${escapedFile}</textarea>
       </div>
     `,
     [panels.read]: () => `
@@ -354,7 +354,7 @@ function sourceFile(target) {
     })()
 }
 
-$.when('input', 'textarea', (event) => {
+$.when('input', '[name="typewriter"]', (event) => {
   const src = source(event.target)
   const { value } = event.target
   state[src].file = value
