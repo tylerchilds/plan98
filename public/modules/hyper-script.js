@@ -7,7 +7,7 @@ import module from '@sillonious/module'
    <@>
     &{
 
-  https://sillyz.computer/markup/hyper-script.js
+  https://sillyz.computer/modules/hyper-script.js
 
   - notorious sillonious
   mit license. <email@tychi.me> 1989-current
