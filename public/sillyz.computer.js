@@ -5,7 +5,7 @@ export default class SillyzComputer {
       modules({ path })
     }).observe(document.body, { childList: true, subtree: true });
     ready()
-    upsell()
+    //upsell()
   }
 }
 
