@@ -56,11 +56,13 @@ $.draw((target) => {
 		target.innerHTML = `<button style="width: 1px; height: 1px; position: absolute;">(blip)</button>`
     target.trap = focusTrap.createFocusTrap(target, {
       onActivate: onActivate($, target),
-      onDeactivate: onDeactivate($, target)
+      onDeactivate: onDeactivate($, target),
+      clickOutsideDeactivates: true
     });
     schedule(() => {
       target.trap.activate()
     })
+    return
   }
 
   return `
@@ -120,6 +122,7 @@ function onDeactivate($, target) {
   return () => {
     $.teach({ trapped: false })
     target.classList.remove('active')
+    target.remove()
   }
 }
 

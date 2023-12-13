@@ -177,7 +177,7 @@ function disconnecthandler(e) {
 			.keys(state.remaps)
 			.filter(x => x !== index)
 			.reduce((all, key) => {
-				all[key] = state[remaps][key]
+				all[key] = state.remaps[key]
 				return all
 			}, {})
 		return {

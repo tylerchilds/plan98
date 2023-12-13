@@ -30,27 +30,9 @@
         parameters,
         provider: 'pro.thelanding.page',
         host: world ? world : window.location.host,
-        ready,
-        upsell
       }
 
       document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
-      function ready() {
-        document.body.insertAdjacentHTML('beforeend', `
-          <sillonious-brand host="${window.plan98.host}">
-            <saga-genesis></saga-genesis>
-          </sillonious-brand>
-        `)
-      }
-      function upsell() {
-        const isFirst = self.self === self.top
-        const notPrime = window.location.host !== window.plan98.provider
-        if(isFirst && notPrime) {
-          document.body.insertAdjacentHTML('beforeend', `
-            <sillonious-upsell host="${window.plan98.provider}"></sillonious-upsell>
-          `)
-        }
-      }
     </script>
     <script type="importmap">
       {
@@ -77,11 +59,7 @@
   <body>
     <script type="module">
       import Computer from '@sillonious/computer'
-      new Computer({
-        path: '/modules',
-        ready: window.plan98.ready,
-        upsell: window.plan98.upsell
-      })
+      const sillyz = new Computer(window.plan98, { path: '/modules' })
     </script>
   </body>
 </html>

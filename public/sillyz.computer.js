@@ -1,11 +1,32 @@
+import module from "@sillonious/module"
+
+function ready(plan98) {
+  document.body.insertAdjacentHTML('beforeend', `
+    <sillonious-brand host="${plan98.host}">
+      <saga-genesis></saga-genesis>
+    </sillonious-brand>
+  `)
+}
+
+
+function upsell(plan98) {
+  const isFirst = self.self === self.top
+  const notPrime = window.location.host !== plan98.provider
+  if(isFirst && notPrime) {
+    document.body.insertAdjacentHTML('beforeend', `
+      <sillonious-upsell host="${plan98.provider}"></sillonious-upsell>
+    `)
+  }
+}
+
 export default class SillyzComputer {
-  constructor({ path, ready, upsell }) {
-    modules({ path })
+  constructor(plan98, x) {
+    modules({ path: x.path })
     new MutationObserver(() => {
-      modules({ path })
+      modules({ path: x.path })
     }).observe(document.body, { childList: true, subtree: true });
-    ready()
-    //upsell()
+    ready(plan98)
+    upsell(plan98)
   }
 }
 

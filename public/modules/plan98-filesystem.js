@@ -191,7 +191,7 @@ function getContent(computer, tree, pathParts) {
   // however, to the invoking function, we're still pure by definition
 }
 
-$.when('click', 'button.switcher', function switcher({ target }) {
+$.when('click', '.switcher', function switcher({ target }) {
   const rootActive = !$.learn().rootActive
   $.teach({ rootActive })
 })

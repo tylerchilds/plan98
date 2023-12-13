@@ -26,7 +26,8 @@ const panels = {
 
 // define source code related artifacts that should not be displayed
 // todo: cross browser, eliminate the :not selector cause .matches in js throws
-const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
+const hiddenChildren = ['style','script','hypertext-blankline','hypertext-comment']
+const notHiddenChildren = `:not(${hiddenChildren})`
 
 // normal time converts lines 1:1 from hype to hypertext
 const NORMAL_TIME = Symbol('n-time')
@@ -379,7 +380,7 @@ $.when('click', '[data-perform]', (event) => {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const shotList = Array.from(wrapper.children)
-    .filter(x => x.matches(notHiddenChildren))
+    .filter(x => x.matches(hiddenChildren))
 
   $.teach({
     shotCount: shotList.length - 1,
@@ -422,7 +423,7 @@ function getMotion(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const children = Array.from(wrapper.children)
-    .filter(x => x.matches(notHiddenChildren))
+    .filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   if(children[active]) {
     children[active].dataset.active = true
