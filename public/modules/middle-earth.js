@@ -58,7 +58,7 @@ function mount(target) {
 const $ = module('middle-earth')
 
 $.draw((target) => {
-  const { art } = state['ls/sillonious-memex']
+  const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
 	if(!mount(target)) return
   const metadata = doingBusinessAs[art] || doingBusinessAs['sillyz.computer']
