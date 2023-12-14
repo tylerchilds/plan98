@@ -1,17 +1,5 @@
-import "./statebus/statebus.js"
-import "./statebus/client-library.js"
-import "./statebus/braidify-client.js"
-
+import statebus, { state } from 'statebus'
 import { innerHTML } from 'diffhtml'
-
-// window pollution will end with typed dsl reactive state proxy
-const bus = window.bus
-export const state = bus.state
-bus.libs.localstorage('ls/*')
-bus.libs.http_out('/*', '/')
-window.braid_fetch = window.fetch
-window.module = module
-window.state = state
 
 const CREATE_EVENT = 'create'
 
@@ -24,7 +12,7 @@ function update(target, compositor) {
 
 function draw(link, compositor) {
   listen(CREATE_EVENT, link, (event) => {
-    bus.reactive(
+    statebus.reactive(
       update.bind(null, event.target, compositor)
     )()
   })
@@ -45,7 +33,7 @@ export function learn(link) {
 }
 
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
-  const current = bus.cache[link] || {}
+  const current = statebus.cache[link] || {}
   state[link] = nuance(current.val || {}, knowledge);
 }
 
