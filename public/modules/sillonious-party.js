@@ -131,12 +131,12 @@ $.draw((target) => {
 
   const list = party()
     .map((p, index) => {
-      const keys = Object.keys(service.osc)
+      const keys = Object.keys(p.osc)
       const buttonKeys = keys.filter(x => x.startsWith('/button/'))
       const axesKeys = keys.filter(x => x.startsWith('/axis/'))
       return `
-        <li class="gamepad" id="${service.gamepad.id}">
-          <label>${index+1}: ${service.gamepad.id}</label>
+        <li class="gamepad" id="${p.gamepad.id}">
+          <label>${index+1}: ${p.gamepad.id}</label>
           <div class="buttons">
             ${buttonKeys.map((osc, i) => renderButton(p, osc, i)).join('')}
           </div>
