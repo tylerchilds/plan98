@@ -5,17 +5,8 @@ import { doingBusinessAs } from './sillonious-brand.js'
 const protocol = 'https://'
 const locale = 'en_US'
 
-const drives = [
-  `<middle-earth></middle-earth>`,
-  `<actionable-quests></actionable-quests>`,
-  `<favorite-people></favorite-people>`,
-  `<interest-groups></interest-groups>`,
-  `<public-domain></public-domain>`,
-]
-
 const $ = module('sillonious-memex', {
   diskette: 0,
-  drive: 0
 })
 
 const tiles = [
@@ -68,13 +59,12 @@ const tileMap = tiles.reduce((map, tile) => {
 }, {})
 
 $.draw((target) => {
-  const { diskette, drive, paused } = $.learn()
-  const bin = diskettes(target)
-  const game = bin[diskette]
+  const { paused } = $.learn()
+  const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
-  const screen = doingBusinessAs[game]
-    ? `<sillonious-brand host="${game}" preview="true"></sillonious-brand>`
-    : `<iframe src="${protocol}${game}" title="${game}"></iframe>`
+  const screen = doingBusinessAs[art]
+    ? `<sillonious-brand host="${art}" preview="true"></sillonious-brand>`
+    : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
 
   target.innerHTML =`
     <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
@@ -83,8 +73,8 @@ $.draw((target) => {
       <button name="${tileMap.enter.name}">
         ${t(tileMap.enter.label)}
       </button>
-      <div name="drive">
-        ${drives[drive]}
+      <div name="world">
+        <middle-earth></middle-earth>
       </div>
       <hr style="display: none;"/>
       <div name="carousel">
@@ -112,18 +102,13 @@ $.when('click', '[name="enter"]', () => {
 })
 
 $.when('click', '[name="tab"]', (event) => {
-  const { paused } = $.learn()
-  if(!paused) {
-    let { drive } = $.learn()
-    const count = drives.length
-    drive = (drive + 1) % count
-    $.teach({ drive })
-  } else {
-    let { diskette } = $.learn()
-    const count = diskettes(event.target).length
-    diskette = (diskette + 1) % count
-    $.teach({ diskette })
-  }
+  let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes(event.target)
+  const count = bin.length
+  diskette = (diskette + 1) % count
+  const art = bin[diskette]
+  console.log(diskette)
+  state['ls/sillonious-memex'] = { art, diskette }
 })
 
 $.when('click', '[name="shift"]', () => {
@@ -155,11 +140,11 @@ $.style(`
       "${tileMap.tab.name} ${tileMap.escape.name}";
   }
 
-  & [name="drive"] {
+  & [name="world"] {
     grid-area: ${tileMap.carousel.name};
   }
 
-  & [name="drive"] > * {
+  & [name="world"] > * {
     height: 100%;
   }
 

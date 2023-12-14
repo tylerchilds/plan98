@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { doingBusinessAs } from './sillonious-brand.js'
 
 const linkElement = document.createElement("link");
 linkElement.rel = "stylesheet";
@@ -22,10 +23,10 @@ function mount(target) {
 		target.mounted = true
 	} else {
 		requestAnimationFrame(() => mount(target))
-		return
+		return false
 	}
 
-	const map = L.map(target).setView([37.7691, -122.4580], 13);
+	const map = target.map = L.map(target).setView([37.7691, -122.4580], 13);
 
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
@@ -37,11 +38,12 @@ function mount(target) {
 		[51.503, -0.06],
 		[51.51, -0.047]
 	]).addTo(map).bindPopup('I am a polygon.');
-
+/*
 	const popup = L.popup()
 		.setLatLng([37.7691, -122.4580])
 		.setContent('<sillonious-brand host="tychi.me"></sillonious-brand>')
 		.openOn(map);
+    */
 
 	function onMapClick(e) {
 		popup
@@ -51,11 +53,22 @@ function mount(target) {
 	}
 
 	map.on('click', onMapClick);
+  return true
 }
 const $ = module('middle-earth')
 
 $.draw((target) => {
-	mount(target)
+  const { art } = state['ls/sillonious-memex']
+
+	if(!mount(target)) return
+  const metadata = doingBusinessAs[art] || doingBusinessAs['sillyz.computer']
+  console.log(metadata)
+
+  const gps = [metadata.latitude, metadata.longitude]
+  L.marker(gps).addTo(target.map)
+    .bindPopup(`<qr-code text="https://${art}"></qr-code>`)
+    .openPopup();
+  target.map.setView(gps, metadata.zoom);
 })
 
 $.style(`

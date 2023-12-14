@@ -24,6 +24,9 @@ const emeraldOfNow
 
 export const doingBusinessAs = {
   'sillyz.computer': {
+    latitude: '37.769100',
+    longitude: '-122.454583',
+    zoom: 10,
     tagline: 'The Notorious One Will See You Now',
     mascot: 'Silly Sillonious',
     saga: emeraldOfTime,
@@ -32,6 +35,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   '1998.social': {
+    latitude: '37.771336',
+    longitude: '-122.460065',
+    zoom: 11,
     tagline: '1998 (ice-cream) social',
     mascot: 'Wally the Incredible Hype',
     saga: emeraldOfSpace,
@@ -40,6 +46,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'yourlovedones.online': {
+    latitude: '37.772006',
+    longitude: '-122.462220',
+    zoom: 12,
     tagline: 'Your Loved Ones are On the Line',
     mascot: 'Sally Sillonious',
     saga: emeraldOfTrust,
@@ -48,6 +57,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'ncity.executiontime.pub': {
+    latitude: '37.772322',
+    longitude:  '-122.465443',
+    zoom: 14,
     tagline: 'Pleasures of Night City',
     mascot: 'Sully Sillonious',
     saga: emeraldOfTruth,
@@ -56,6 +68,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'css.ceo': {
+    latitude: '37.772366',
+    longitude: '-122.467315',
+    zoom: 15,
     tagline: 'Custom Handmade Skins, Chainsaw Free',
     mascot: 'Sol Sillonious',
     saga: emeraldOfSelf,
@@ -64,6 +79,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'y2k38.info': {
+    latitude: '37.771326',
+    longitude: '-122.470304',
+    zoom: 16,
     tagline: 'Break the Time Loop',
     mascot: 'Shelly Sillonious',
     saga: emeraldOfSecurity,
@@ -72,6 +90,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'thelanding.page': {
+    latitude: '37.770613',
+    longitude: '-122.479310',
+    zoom: 17,
     tagline: 'Ship your next idea from a full stop',
     mascot: 'Greggory McGreggory',
     saga: emeraldOfNow,
@@ -80,6 +101,9 @@ export const doingBusinessAs = {
     brandRange: 45,
   },
   'tychi.me': {
+    latitude: '37.782562',
+    longitude: '-122.471554',
+    zoom: 13,
     tagline: 'Join the Circus',
     mascot: 'AN0051610',
     saga: '/sagas/1998.social/tychi.saga',

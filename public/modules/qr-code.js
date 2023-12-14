@@ -602,6 +602,12 @@ QRCode.CorrectLevel = QRErrorCorrectLevel;
 const $ = module('qr-code')
 
 $.draw(target => {
+  target.innerHTML = ''
+  const code = target.getAttribute('text')
+  const link = document.createElement('a')
+  link.style = "display: block;"
+  link.href = code
+  target.appendChild(link)
   const { fg='black', bg='white' } = target.dataset
-  new QRCode(target, { text: target.getAttribute('text'), colorLight: fg, colorDark: bg })
+  new QRCode(link, { text: code, colorLight: fg, colorDark: bg })
 })
