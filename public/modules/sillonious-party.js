@@ -341,7 +341,7 @@ function addOSC(gamepad, slot) {
 }
 
 function toPath (accumulator, current){
-  accumulator[current.osc] = current.value
+  accumulator[current.osc] = current
   return accumulator
 }
 

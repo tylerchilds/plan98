@@ -105,7 +105,7 @@ function trapUntil($, target, terminator) {
 function onActivate($, target){
   return () => {
     target.classList.add('active')
-    trapUntil($, target, anybodyPressesMode)
+    trapUntil($, target, anybodyPressesReset)
   }
 }
 
