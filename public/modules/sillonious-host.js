@@ -10,19 +10,26 @@ $.draw(target => {
   const { compass } = $.learn()
   if(!compass) return
 
-  const timeControls = compass.map((button) => {
-		console.log({ button })
+  const [startStop,reset,light,mode,...theRest] = compass.map((button) => {
     return `
 			<button
 				class="nav-item"
-				${button.actuated ? 'data-actuated="true"' : ''}
+				${button.pushed ? 'data-pushed="true"' : ''}
 				data-index="${button.index}"
 			>
 				${button.value}
 			</button>`
-  }).join('')
+  })
   return `
-    ${timeControls}
+    <div class="the-grid">
+      ${startStop}
+      ${reset}
+      ${light}
+      ${mode}
+    </div>
+    <div class="the-row">
+      ${theRest.join('')}
+    </div>
   `
 })
 
@@ -32,14 +39,19 @@ function loop() {
   const { gamepad, osc } = player1
   const compass = gamepad.buttons
     .sort((a, b) => a.index - b.index)
-    .slice(0, 4)
 
   $.teach({ compass })
   requestAnimationFrame(loop)
 }
 requestAnimationFrame(loop)
 
-$.when('mousedown', '.nav-item', (event) => {
+
+$.when('touchstart', '.step', attack)
+$.when('touchend', '.step', release)
+$.when('mouseup', '.nav-item', release)
+$.when('mousedown', '.nav-item', attack)
+
+function attack(event) {
   const { compass } = $.learn()
   const { index } = event.target.dataset
 	const button = compass[index]
@@ -47,9 +59,9 @@ $.when('mousedown', '.nav-item', (event) => {
 		...button,
 		value: 1
 	})
-})
+}
 
-$.when('mouseup', '.nav-item', (event) => {
+function release(event) {
   const { compass } = $.learn()
   const { index } = event.target.dataset
 	const button = compass[index]
@@ -57,11 +69,10 @@ $.when('mouseup', '.nav-item', (event) => {
 		...button,
 		value: 0
 	})
-})
-
+}
 
 $.style(`
-  & {
+  & .the-grid {
     display: grid;
     grid-template-areas:
       "play play play"
@@ -69,68 +80,45 @@ $.style(`
     grid-template-colums: 1fr 1fr 1fr;
   }
 
-  & > :first-child {
+  & .the-grid > :first-child {
     grid-area: play;
   }
 
 
 	& .nav-item {
-		--nav-background-start: var(--blue4);
-		--nav-background-end: var(--blue3);
 		background: linear-gradient(var(--nav-background-start) 0%, var(--nav-background-end) 100%);
 		background-size: 1px 14.4rem;
 		background-repeat: repeat-x;
 		font-weight: bold;
-		padding: 3.6rem 2.4rem 1.2rem;
+		padding: .5rem;
+    height: 3rem;
 		text-shadow: 0px 2px 0px var(--text-shadow-color);
 		transition: all 200ms ease;
 		white-space: nowrap;
-		border-bottom: .4rem solid;
+		border: 2px solid;
+    border-radius: 1rem;
 	}
 
+  ${[...Array(16)].map((_,i) => `
+    & [data-index="${i}"] {
+      --nav-link-color: var(--wheel-${i}-6);
+      --text-shadow-color: var(--wheel-${i}-1);
+      --nav-background-start: var(--wheel-${i}-3);
+      --nav-background-end: var(--wheel-${i}-3);
+      border: var(--wheel-${i}-2);
+    }
 
-	& .nav-item:nth-child(1n) {
-		--nav-link-color: var(--orange7);
-		--text-shadow-color: var(--orange1);
-		--nav-background-start: var(--orange4);
-		--nav-background-end: var(--orange3);
-		border-bottom-color: var(--orange2);
-	}
+    & [data-index="${i}"][data-pushed="true"],
+    & [data-index="${i}"]:hover,
+    & [data-index="${i}"]:focus {
+      --text-shadow-color: var(--wheel-${i}-2);
+    }
+  `).join('')}
 
-	& .nav-item:nth-child(1n):hover,
-	.nav-item:nth-child(1n):focus {
-		--text-shadow-color: var(--orange2);
-	}
-
-	& .nav-item:nth-child(2n) {
-		--nav-link-color: var(--flame7);
-		--text-shadow-color: var(--flame1);
-		--nav-background-start: var(--flame4);
-		--nav-background-end: var(--flame3);
-		border-bottom-color: var(--flame2);
-	}
-
-	& .nav-item:nth-child(2n):hover,
-	.nav-item:nth-child(2n):focus {
-		--text-shadow-color: var(--flame2);
-	}
-
-	& .nav-item:nth-child(3n) {
-		--nav-link-color: var(--red7);
-		--text-shadow-color: var(--red1);
-		--nav-background-start: var(--red4);
-		--nav-background-end: var(--red3);
-		border-bottom-color: var(--red2);
-	}
-
-	& .nav-item:nth-child(3n):hover,
-	& .nav-item:nth-child(3n):focus {
-		--text-shadow-color: var(--red2);
-	}
-
+  & .nav-item[data-pushed="true"],
 	& .nav-item:hover,
 	& .nav-item:focus {
-		--nav-link-color: var(--white);
+		--nav-link-color: white;
 		background-position-y: -7.2rem;
 	}
 `)

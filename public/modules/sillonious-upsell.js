@@ -14,16 +14,15 @@ import party, {
 import * as focusTrap from 'focus-trap'
 
 const $ = module('sillonious-upsell', {
-  visible: true,
   activeDialect: '/sagas/pro.thelanding.page/en_US/',
   activeSaga: '000-000.saga',
   cache: {}
 })
 
 $.draw((target) => {
-  const { visible, activeDialect, activeSaga, cache } = $.learn()
+  const { activeDialect, activeSaga, cache } = $.learn()
 
-  let content = cache[activeSaga]
+  const content = cache[activeSaga]
 
   if(!content) {
     fetch(activeDialect + activeSaga)
@@ -42,16 +41,8 @@ $.draw((target) => {
           }
         )
       })
-    content = 'loading...'
   }
 
-  if(!visible) {
-    if(target.trap) {
-      target.trap.deactivate()
-      target.trap = null
-    }
-    return ''
-  }
   if(!target.trap) {
 		target.innerHTML = `<button style="width: 1px; height: 1px; position: absolute;">(blip)</button>`
     target.trap = focusTrap.createFocusTrap(target, {

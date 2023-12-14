@@ -192,8 +192,8 @@ function generateTheme(target, host, {reverse} = {}) {
     [95, 120]
   ]
 
-  const colors = [...Array(8)].map((_, hueIndex) => {
-    const step = ((brandRange / 8) * hueIndex)
+  const colors = [...Array(16)].map((_, hueIndex) => {
+    const step = ((brandRange / 16) * hueIndex)
     const hue = reverse
       ? brandHue - step
       : brandHue + step

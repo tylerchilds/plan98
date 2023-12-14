@@ -53,7 +53,6 @@ export function hostPressesMode(party) {
   return check(party(0), '/button/3')
 }
 
-
 export function anybodyPressesStartStop(party) {
   return party().some(p => check(p,'/button/0'))
 }
