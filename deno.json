@@ -1,6 +1,7 @@
 {
   "tasks": {
-    "start": "deno run -A mod.js"
+    "start": "deno run -A mod.js",
+    "tunnel": "ssh -N -R 1998:localhost:8000 local.tychi.me"
   },
   "compilerOptions": {
   }
