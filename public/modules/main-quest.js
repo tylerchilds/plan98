@@ -4,6 +4,21 @@ import BABYLON from 'babylonjs'
 
 const $ = module('main-quest')
 
+$.style(`
+  & {
+		display: block;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+  }
+	& canvas {
+		width: 100%;
+		height: 100%;
+	}
+`)
+
 const canvas = document.createElement('canvas')
 const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false });
 const createScene = async function () {
@@ -59,6 +74,7 @@ createScene(canvas).then((scene) => {
 
 	engine.runRenderLoop(function () {
 		if (scene) {
+			engine.resize();
 			scene.render();
 		}
 	});
@@ -68,3 +84,4 @@ createScene(canvas).then((scene) => {
 window.addEventListener("resize", function () {
 	engine.resize();
 });
+
