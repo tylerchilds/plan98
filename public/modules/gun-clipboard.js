@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import Gun from 'gun'
 
-const gun = Gun(['gun.1998.social']);
+const gun = Gun(['https://gun.1998.social/gun']);
 
 const $ = module('gun-clipboard')
 
