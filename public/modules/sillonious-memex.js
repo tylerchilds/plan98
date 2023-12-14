@@ -119,6 +119,8 @@ $.when('click', '[name="shift"]', () => {
 $.style(`
   & {
     display: block;
+		position: fixed;
+		inset: 0;
   }
 	& button {
 		border-radius: 0;
