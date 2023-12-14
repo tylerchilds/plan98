@@ -37,7 +37,7 @@ async function router(request, context) {
   try {
     file = await Deno.readFile(`./public${pathname}`)
   } catch (e) {
-    pathname = './public/index.xml'
+    pathname = './public/index.html'
     extension = path.extname(pathname);
     file = await Deno.readFile(pathname)
     statusCode = Status.NotFound
