@@ -1,7 +1,12 @@
 {
   "tasks": {
     "start": "deno run -A mod.js",
-    "tunnel": "ssh -N -R 1998:localhost:8000 local.tychi.me"
+    "tunnel": "ssh -N -R 1998:localhost:8000 local.tychi.me",
+
+    "download-9p": "wget https://github.com/pfpacket/rust-9p/archive/refs/heads/master.tar.gz -O - | tar -xz && cd rust-9p-master/example/unpfs && cargo build --verbose --release",
+    "start-9p": "current_dir=$(pwd); cd rust-9p-master/example/unpfs && cargo run --release 'unix!/tmp/unpfs-socket!8888' $current_dir",
+    "mount-9p": "sudo mount -t 9p -o version=9p2000.L,trans=unix,uname=$USER local.tychi.me /tmp/unpfs-socket:8888 $(pwd)",
+    "unmount-9p": "sudo umount $(pwd)"
   },
   "compilerOptions": {
   }
