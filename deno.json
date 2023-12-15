@@ -5,7 +5,7 @@
 
     "download-9p": "wget https://github.com/pfpacket/rust-9p/archive/refs/heads/master.tar.gz -O - | tar -xz && cd rust-9p-master/example/unpfs && cargo build --verbose --release && mkdir -p /home/tychi/thumb-drive",
     "start-9p": "current_dir=$(pwd); cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $current_dir",
-    "mount-9p": "sudo mount -t 9p -o version=9p2000.L,trans=tcp,port=8888,uname=$USER,dir=/home/tychi/plan98 drive.tychi.me /home/tychi/thumb-drive",
+    "mount-9p": "sudo mount -t 9p -o version=9p2000.L,trans=tcp,port=8888,uname=$USER,dir=/home/tychi/plan98 local.tychi.me /home/tychi/thumb-drive",
     "unmount-9p": "sudo umount $(pwd)"
   },
   "compilerOptions": {
