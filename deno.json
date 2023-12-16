@@ -1,12 +1,17 @@
 {
   "tasks": {
-    "start-http": "deno run -A mod.js",
-    "tunnel-http": "ssh -N -R 1998:localhost:8000 local.$USER.me",
-    "download-9p": "wget https://github.com/pfpacket/rust-9p/archive/refs/heads/master.tar.gz -O - | tar -xz && cd rust-9p-master/example/unpfs && cargo build --verbose --release && mkdir -p /home/$USER/thumb-drive",
-    "start-9p": "current_dir=$(pwd); cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $current_dir",
-    "tunnel-9p": "ssh -N -R 8888:localhost:8888 drive.$USER.me",
-    "mount-9p": "sudo mount -t 9p -o trans=tcp,port=8888,uname=$USER,dir=/home/$USER/plan98 drive.$USER.me /home/$USER/thumb-drive",
-    "unmount-9p": "sudo umount $(pwd)"
+    "provision": "wget https://github.com/pfpacket/rust-9p/archive/refs/heads/master.tar.gz -O - | tar -xz && cd rust-9p-master/example/unpfs && cargo build --verbose --release && mkdir -p /home/$USER/thumb-drive",
+
+    "start": "deno run -A --unstable mod.js",
+
+    "start-client": "cd client && deno task start-http",
+    "reverse-client": "ssh -N -R 1998:localhost:8000 local.$USER.me",
+
+    "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
+    "reverse-server": "ssh -N -R 8888:localhost:8888 drive.$USER.me",
+
+    "plug-drive": "sudo mount -t 9p -o trans=tcp,port=8888,uname=$USER 127.0.0.1 $(pwd)/tmp",
+    "unplug-drive": "sudo umount /home/$USER/thumb-drive"
   },
   "compilerOptions": {
   }
