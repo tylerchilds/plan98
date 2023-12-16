@@ -1,6 +1,11 @@
 # plan98
 
-A hard-web-based library.
+A future proof retro computing fantasy research operating sytem, for today's hardware.
+
+Gaming? Check.
+Office? Check.
+Creativity? Check.
+Multiplayer? Only if you want it.
 
 # From Scratch
 
@@ -20,18 +25,17 @@ That's it.
 
 ## There is more though
 
-Check out deno.json to see under the hood or maybe mod.js to be in the driver seat for climate control.
+Check out deno.json to modify under the hood or maybe mod.js to be in the driver seat for climate control.
 
 These internals do assume there are corresponding ssh user keys for the reverse services to bind correctly.
+
+### Default Boot Services
 
 These are the default services at boot:
 
 ```
 start-client
-reverse-client
 start-server
-reverse-server
-plug-drive
 ```
 
 To start the web server, sandboxed by deno, run:
@@ -39,31 +43,38 @@ To start the web server, sandboxed by deno, run:
 deno task start-client
 ```
 
-To serve public dns traffic on the newly started web server, run:
-```
-deno task reverse-client
-```
-
 To start a private 9p server for the source code of the web server, run:
 ```
 deno task start-server
 ```
 
+### Optional Boot Services
+
+```
+reverse-client
+reverse-server
+```
+To serve public dns traffic on the newly started web server, run:
+```
+deno task reverse-client
+```
+
 To serve the private 9p server over public dns, run:
 ```
-deno task start-server
+deno task reverse-server
 ```
 
-To serve a folder named thumb-drive with the raw source in the user's current directory, run:
+### You mentioned hardware?
+
+To serve a metaphorical thumb drive named literal thumb-drive that should virtually mount where your physical thumb drives mount in your digital file system module, run:
 
 ```
-deno task plug-drive
+deno task thumb-drive
 ```
 
-To unplug the drive, run `deno task unplug-drive`. 
+Any hardware capable of running the light-weight 9p utilities will be able to access the onboard 9p system or any 9p compliant peer in the network.
 
-(todo: fix next line)
-learn how to disengage the unpfs rust-9p cargo command
+To unplug the drive, run `deno task unthumb-drive`.
 
 ## Unified Prototyping, Development and Deployment
 

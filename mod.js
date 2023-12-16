@@ -3,10 +3,9 @@ import { Pup } from "https://deno.land/x/pup/mod.ts"
 const processConfiguration = {
   notorious: 'sillonious',
   client: true,
-  reverseClient: true,
+  reverseClient: false,
   server: true,
-  reverseServer: true,
-  plugDrive: true,
+  reverseServer: false,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -26,11 +25,6 @@ const processConfiguration = {
     reverseServer: {
       "id": "plan98-reverse-server",
       "cmd": "deno task reverse-server",
-      "autostart": true
-    },
-    plugDrive: {
-      "id": "plan98-plug-drive",
-      "cmd": "deno task plug-drive",
       "autostart": true
     },
   }
