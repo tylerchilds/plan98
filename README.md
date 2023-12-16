@@ -11,6 +11,8 @@ Multiplayer? Only if you want it.
 
 First, we need to create a new computer with a literal and metaphorical thumb drive.
 
+Unless you already have a folder named `thumb-drive` in your home directory, rust+cargo, and deno installed, run:
+
 ```
 deno task provision
 ```

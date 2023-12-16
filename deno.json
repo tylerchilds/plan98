@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "provision": "wget https://github.com/pfpacket/rust-9p/archive/refs/heads/master.tar.gz -O - | tar -xz && cd rust-9p-master/example/unpfs && cargo build --verbose --release && mkdir -p /home/$USER/thumb-drive",
+    "provision": "./provision.sh",
 
     "start": "deno run -A --unstable mod.js",
 
