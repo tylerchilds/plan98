@@ -4,8 +4,9 @@ const processConfiguration = {
   notorious: 'sillonious',
   client: true,
   reverseClient: true,
-  server: false,
-  reverseServer: false,
+  server: true,
+  reverseServer: true,
+  plugDrive: true,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -25,6 +26,11 @@ const processConfiguration = {
     reverseServer: {
       "id": "plan98-reverse-server",
       "cmd": "deno task reverse-server",
+      "autostart": true
+    },
+    plugDrive: {
+      "id": "plan98-plug-drive",
+      "cmd": "deno task plug-drive",
       "autostart": true
     },
   }
