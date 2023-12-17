@@ -4,7 +4,8 @@
 
     "start": "deno run -A --unstable mod.js",
 
-    "start-client": "cd client && deno task start-http",
+    "start-client": "deno run -A client.js",
+    "debug-client": "deno run -A --inspect-brk client.js",
     "reverse-client": "ssh -N -R 1998:localhost:8000 local.$USER.me",
 
     "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",

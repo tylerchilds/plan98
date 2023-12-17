@@ -9,8 +9,7 @@ import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 async function router(request, context) {
   let { pathname } = new URL(request.url);
   let extension = path.extname(pathname);
-
-  console.log(pathname)
+debugger
   if(pathname === '/plan98/about') {
     return about(request)
   }
@@ -22,8 +21,8 @@ async function router(request, context) {
   let file
   let statusCode = Status.Success
   try {
-		if(existsSync(`.${pathname}`, { isFile: true })) {
-			file = await Deno.readFile(`.${pathname}`)
+		if(existsSync(`./client/${pathname}`, { isFile: true })) {
+			file = await Deno.readFile(`./client/${pathname}`)
 			return new Response(file, {
 				headers: {
 					'content-type': typeByExtension(extension),
