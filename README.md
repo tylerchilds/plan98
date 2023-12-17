@@ -86,6 +86,14 @@ Run:
 deno task start
 ```
 
+And if that sounds like a problem waiting to happen when it comes to debugging, you're right.
+
+In that scenario, [https://docs.deno.com/runtime/manual/basics/debugging_your_code](learn a little about debugging), then run run:
+
+```
+deno task debug-client
+```
+
 ### examples in the wild, (add yours!!!)
 [https://thelanding.page](https://thelanding.page)
 [https://y2k38.info](https://y2k38.info)
@@ -96,3 +104,6 @@ deno task start
 [https://sillyz.computer](https://sillyz.computer)
 [https://local.tychi.me](https://local.tychi.me)
 [http://localhost:8000](http://localhost:8000)
+
+Sincerely yours,
+The Notorious Sillonious.
