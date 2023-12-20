@@ -12,12 +12,25 @@ function gamepadButton(index, value=0) {
   }
 }
 
+function gamepadAxis(index, value=0) {
+  return {
+    index,
+    value,
+    osc: `/axis/${index}`,
+    actuated: false,
+    pushed: false,
+    pulled: false,
+  }
+}
+
 const fantasyController = {
   osc: {
     '/button/0': gamepadButton(0),
     '/button/1': gamepadButton(1),
     '/button/2': gamepadButton(2),
     '/button/3': gamepadButton(3),
+    '/axis/0': gamepadAxis(0),
+    '/axis/1': gamepadAxis(1),
   },
   gamepad: {
     id: 'fantasy-stock',
@@ -27,7 +40,10 @@ const fantasyController = {
       gamepadButton(2),
       gamepadButton(3),
     ],
-    axes: []
+    axes: [
+      gamepadAxis(0),
+      gamepadAxis(1),
+    ]
   }
 }
 
@@ -121,37 +137,8 @@ export default function party(slot) {
   return slot ? group[slot] : group
 }
 
-(function tick(timestamp) {
-  $.teach({ timestamp })
-  requestAnimationFrame(tick)
-})(performance.timeOrigin)
-
 $.draw((target) => {
-  const { timestamp } = $.learn()
-
-  const list = party()
-    .map((p, index) => {
-      const keys = Object.keys(p.osc)
-      const buttonKeys = keys.filter(x => x.startsWith('/button/'))
-      const axesKeys = keys.filter(x => x.startsWith('/axis/'))
-      return `
-        <li class="gamepad" id="${p.gamepad.id}">
-          <label>${index+1}: ${p.gamepad.id}</label>
-          <div class="buttons">
-            ${buttonKeys.map((osc, i) => renderButton(p, osc, i)).join('')}
-          </div>
-          <div class="axes">
-            ${axesKeys.map((osc, i) => renderAxis(p, osc, i)).join('')}
-          </div>
-        </li>
-      `
-    }).join('')
-
-  return `
-    <ul class="gamepads" data-timestamp="${timestamp}">
-      ${list}
-    </ul>
-  `
+  return `<sillonious-joypro></sillonious-joypro>`
 })
 
 function connecthandler(e) {
@@ -184,40 +171,6 @@ function disconnecthandler(e) {
 			remaps
 		}
 	})
-}
-
-function renderButton(player, osc, index) {
-  const pushed = player[osc]
-  const offset = (pushed ? -1 : -2) + 'rem'
-  return `
-    <button
-      data-type="button"
-      data-osc="${osc}"
-      class="input"
-      style="--value: ${offset};"
-    >${index}</button>
-  `
-}
-
-function renderAxis(player, osc, index) {
-  const pushed = player[osc]
-  const offset = (pushed ? -1 : -2) + 'rem'
-  return `
-    <button
-      data-type="axis"
-      data-osc="${osc}"
-      class="input"
-      style="--value: ${offset};"
-    >${index}</button>
-  `
-}
-
-
-function renderInputs(_$, flags) {
-  const { gamepad } = flags
-
-  return `
-      `
 }
 
 function scangamepads() {

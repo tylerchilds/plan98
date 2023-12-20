@@ -58,7 +58,7 @@ $.draw((target) => {
 
   return `
     ${content}
-    <sillonious-host></sillonious-host>
+    <sillonious-joypro></sillonious-joypro>
   `
 })
 
@@ -105,7 +105,7 @@ function trapUntil($, target, terminator) {
 function onActivate($, target){
   return () => {
     target.classList.add('active')
-    trapUntil($, target, anybodyPressesReset)
+    //trapUntil($, target, anybodyPressesReset)
   }
 }
 
