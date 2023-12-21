@@ -35,6 +35,7 @@ $.draw(() => {
   const modalHeader = types[bannerType] ? banner() : ''
 
   return `
+    <button data-close>X</button>
     <div class="modal">
       ${modalHeader}
       <div class="body">

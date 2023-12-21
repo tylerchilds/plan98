@@ -2,7 +2,17 @@ import module from "@sillonious/module"
 import Color from "colorjs.io"
 import * as Tone from "tone@next"
 //import $user from "/packages/widgets/menu-user.js"
-//import $guitar from "/packages/streams/guitar.js"
+
+import party, {
+  hostPressesStartStop,
+  hostPressesReset,
+  hostPressesLight,
+  hostPressesMode,
+  anybodyPressesStartStop,
+  anybodyPressesReset,
+  anybodyPressesLight,
+  anybodyPressesMode,
+} from '@sillonious/party'
 
 bus.state['https://braid.1998.social/last-color.json']
 
@@ -16,7 +26,11 @@ const $ = module('sillyz-ocarina', {
   length: 360,
   octave: 4,
   reverse: false,
-	pitch: 0
+	pitch: 0,
+  activeFrets: [],
+  activeRegisters: [],
+  activeMotions: [],
+  frames: {},
 })
 
 const strumVelocity = 75
@@ -114,23 +128,81 @@ const chords = [
 ]
 
 let activeSynths = []
-let activeRegister = 0
+const fretMap = [0, 1, 3, 2, 4]
+
+const registers = [
+  "     ",
+
+  "x    ",
+  "x   x",
+
+  " x   ",
+  " x  x",
+
+  "  x  ",
+  "  x x",
+
+  "   x ",
+  "   xx",
+
+  "xx   ",
+  "xx  x",
+
+  " xx  ",
+  " xx x",
+  "x x x",
+  "xxxxx"
+]
+
+function toPattern(_$, buttons) {
+  const pressed = value => value === 1 ? "x" : " "
+  const frets = buttons.map(pressed).slice(0, 5)
+  return fretMap.map(i => frets[i]).join('')
+}
+
+function toMotion(_$, axes) {
+  const [vertical] = [...axes].splice(-1)
+  const [horizontal] = [...axes].splice(-2)
+
+  return {
+    up: vertical === -1,
+    down: vertical === 1,
+    left: horizontal === -1,
+    right: horizontal === 1
+  }
+}
 
 requestAnimationFrame(loop)
 function loop(time) {
-  return // for now...
-  /*
-  const { activeRegisters, activeFrets, activeMotions } = $guitar.learn()
-  activeRegisters.map((register, i) => {
-    const { up, down } = activeMotions[i]
-    if(activeFrets[i] === 'x x x') {
+  const gamepads = party()
+
+  const activity = gamepads.reduce((activity, { osc, gamepad }) => {
+    const { button, axis } = Object.keys(osc).reduce((pad, path) => {
+      const [_, type, index] = path.split('/')
+      pad[type][index] = osc[path].value
+      return pad
+    }, { button: [], axis: [] })
+    const pattern =  toPattern($, button)
+    activity.patterns.push(pattern)
+    activity.registers.push(registers.indexOf(pattern))
+    activity.motions.push(toMotion($, axis))
+    return activity
+  }, {
+    patterns: [],
+    registers: [],
+    motions: []
+  })
+
+  activity.registers.map((register, i) => {
+    const { up, down } = activity.motions[i]
+    if(activity.patterns[i] === 'x x x') {
       [[up, octaveUp], [down, octaveDown]].map(([flag, feature]) => {
-        flag && throttle({ key: 'octave-shift', time, feature })
+        flag && throttle($, { key: 'octave-shift', time, feature })
       })
     }
-    if(activeFrets[i] === 'xxxxx') {
+    if(activity.patterns[i] === 'xxxxx') {
       [[up, pitchUp], [down, pitchDown]].map(([flag, feature]) => {
-        flag && throttle({ key: 'pitch-shift', time, feature })
+        flag && throttle($, { key: 'pitch-shift', time, feature })
       })
     }
     if(!chords[register]) return
@@ -151,21 +223,20 @@ function loop(time) {
   })
 
   requestAnimationFrame(loop)
-  */
 }
 
-function throttle({ key, time, feature }) {
-  const { frames = {}} = $.learn()
-  const frame = frames[key] || {}
+function throttle($, flags) {
+  const { frames = {}} = $.read()
+  const frame = frames[flags.key] || {}
 
-  if((time - 1000 / actionableFPS) > (frame.time || 0)) {
-    feature()
-    $.teach({ time }, (state, payload) => {
+  if((flags.time - flags.fps) > (frame.time || 0)) {
+    flags.activate()
+    $.teach({ time: flags.time }, (state, payload) => {
       return {
         ...state,
         frames: {
           ...frames,
-          [key]: {
+          [flags.key]: {
             time: payload.time
           }
         }
