@@ -70,7 +70,7 @@ $.style(`
   & {
     display: block;
     position: absolute;
-    bottom: 0;
+    bottom: 2rem;
     left: 0;
     right: 0;
     margin: auto;

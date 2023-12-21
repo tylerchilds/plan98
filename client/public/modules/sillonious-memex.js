@@ -7,6 +7,8 @@ const locale = 'en_US'
 
 const $ = module('sillonious-memex', {
   diskette: 0,
+  paused: false,
+  online: true
 })
 
 const tiles = [
@@ -14,16 +16,14 @@ const tiles = [
     name: 'enter',
     label: '/sillonious-memex/tiles/enter/label.txt',
     styles: {
-      'grid-area': 'enter',
-      'place-self': 'start'
+      'text-align': 'left'
     }
   },
   {
     name: 'escape',
     label: '/sillonious-memex/tiles/escape/label.txt',
     styles: {
-      'grid-area': 'escape',
-      'place-self': 'end'
+      'text-align': 'left'
     }
   },
   {
@@ -34,16 +34,14 @@ const tiles = [
     name: 'shift',
     label: '/sillonious-memex/tiles/shift/label.txt',
     styles: {
-      'grid-area': 'shift',
-      'place-self': 'end'
+      'text-align': 'left'
     }
   },
   {
     name: 'tab',
     label: '/sillonious-memex/tiles/tab/label.txt',
     styles: {
-      'grid-area': 'tab',
-      'place-self': 'start'
+      'text-align': 'left'
     }
   }
 ]
@@ -59,46 +57,67 @@ const tileMap = tiles.reduce((map, tile) => {
 }, {})
 
 $.draw((target) => {
-  const { paused } = $.learn()
+  const { paused, online } = $.learn()
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
   const screen = doingBusinessAs[art]
     ? `<sillonious-brand host="${art}" preview="true"></sillonious-brand>`
     : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
 
+  const content = online ? `
+    <button name="${tileMap.shift.name}">
+      ${t(tileMap.shift.label)}
+    </button>
+    <div name="world">
+      <middle-earth></middle-earth>
+    </div>
+    <hr style="display: none;"/>
+    <div name="carousel">
+      <div name="screen">
+        ${screen}
+      </div>
+    </div>
+    <button name="${tileMap.tab.name}">
+      ${t(tileMap.tab.label)}
+    </button>
+    <button name="${tileMap.escape.name}">
+      ${t(tileMap.escape.label)}
+    </button>
+  ` : ''
+
+
   target.innerHTML =`
     <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
-      <button name="${tileMap.shift.name}">
-        ${t(tileMap.shift.label)}
       <button name="${tileMap.enter.name}">
         ${t(tileMap.enter.label)}
       </button>
-      <div name="world">
-        <middle-earth></middle-earth>
-      </div>
-      <hr style="display: none;"/>
-      <div name="carousel">
-        <div name="screen">
-          ${screen}
-        </div>
-      </div>
-      <button name="${tileMap.tab.name}">
-        ${t(tileMap.tab.label)}
-      </button>
-      <button name="${tileMap.escape.name}">
-        ${t(tileMap.escape.label)}
-      </button>
-      </button>
+      ${content}
     </div>
   `
 })
 
 $.when('click', '[name="escape"]', () => {
-  alert('minimize')
+  const { paused } = $.learn()
+  if(paused) {
+    window.location.href = window.location.href
+  }
+
+  alert('new quest coming soon!')
 })
 
 $.when('click', '[name="enter"]', () => {
-  alert('maximize')
+  const { paused, online } = $.learn()
+  if(paused) {
+    const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+    const bin = diskettes(event.target)
+    const art = bin[diskette]
+
+    window.location.href = doingBusinessAs[art]
+      ? '?world=' + art
+      : `${protocol}${art}`
+  }
+
+  $.teach({ online: !online })
 })
 
 $.when('click', '[name="tab"]', (event) => {
@@ -108,7 +127,8 @@ $.when('click', '[name="tab"]', (event) => {
   diskette = (diskette + 1) % count
   const art = bin[diskette]
   console.log(diskette)
-  state['ls/sillonious-memex'] = { art, diskette }
+  state['ls/sillonious-memex'].art = art
+  state['ls/sillonious-memex'].diskette = diskette
 })
 
 $.when('click', '[name="shift"]', () => {
@@ -132,14 +152,13 @@ $.style(`
     position: relative;
     z-index: 1001;
     display: grid;
-    grid-template-rows: 2rem 1fr 2rem;
-    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 2rem;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     height: 100%;
     overflow: hidden;
     grid-template-areas:
-      "${tileMap.shift.name} ${tileMap.enter.name}"
-      "${tileMap.carousel.name} ${tileMap.carousel.name}"
-      "${tileMap.tab.name} ${tileMap.escape.name}";
+      "${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name}"
+      "${tileMap.enter.name} ${tileMap.shift.name} ${tileMap.tab.name} ${tileMap.escape.name}";
   }
 
   & [name="world"] {
@@ -206,7 +225,7 @@ function layout(tiles) {
 }
 
 function bonusStyles(tile) {
-  return tiles.styles
+  return tile.styles
     ? Object.keys(tile.styles).map(key => {
       return `${key}: ${tile.styles[key]};`
     }).join('\n')
