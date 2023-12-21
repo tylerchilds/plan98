@@ -9,7 +9,7 @@ import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 async function router(request, context) {
   let { pathname } = new URL(request.url);
   let extension = path.extname(pathname);
-debugger
+
   if(pathname === '/plan98/about') {
     return about(request)
   }
@@ -58,7 +58,8 @@ const byName = (x) => x.name
 async function about(request) {
   let paths = []
 
-  const files = walk(Deno.cwd(), {
+  const currentPath = Deno.cwd() + '/client'
+  const files = walk(currentPath, {
     skip: [
       /\.git/,
       /\.autosave/,
@@ -72,9 +73,11 @@ async function about(request) {
     includeDirs: false
   })
 
+
   for await(const file of files) {
     const { name } = file
-    const [_, path] = file.path.split(Deno.cwd())
+    const [_, path] = file.path.split(currentPath)
+  console.log(path)
     paths.push({ path, name })
   }
 
