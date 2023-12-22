@@ -14,7 +14,7 @@ import party, {
   anybodyPressesMode,
 } from '@sillonious/party'
 
-bus.state['https://braid.1998.social/last-color.json']
+//bus.state['https://braid.1998.social/last-color.json']
 
 const synths = [...new Array(24)].map(() =>
   new Tone.FMSynth().toMaster()
@@ -92,7 +92,7 @@ function attack(event) {
 		`${lastColor}`
 	)
 
-  bus.state['https://braid.1998.social/last-color.json'].color = lastColor
+  //bus.state['https://braid.1998.social/last-color.json'].color = lastColor
 }
 
 function release (event) {
