@@ -6,9 +6,18 @@ import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
 import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 
+function buildHeaders(extension) {
+  return {
+    'Cross-Origin-Embedder-Policy': 'require-corp',
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'content-type': typeByExtension(extension)
+  }
+}
+
 async function router(request, context) {
   let { pathname } = new URL(request.url);
   let extension = path.extname(pathname);
+  const headers = buildHeaders(extension);
 
   if(pathname === '/plan98/about') {
     return about(request)
@@ -24,9 +33,7 @@ async function router(request, context) {
 		if(existsSync(`./client/${pathname}`, { isFile: true })) {
 			file = await Deno.readFile(`./client/${pathname}`)
 			return new Response(file, {
-				headers: {
-					'content-type': typeByExtension(extension),
-				},
+				headers,
 				status: statusCode
 			})
 		}
@@ -46,9 +53,7 @@ async function router(request, context) {
 
 
   return new Response(file, {
-    headers: {
-      'content-type': typeByExtension(extension),
-    },
+    headers,
     status: statusCode
   })
 }
