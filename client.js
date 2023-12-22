@@ -8,7 +8,7 @@ import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 
 function buildHeaders(extension) {
   return {
-    'Cross-Origin-Embedder-Policy': 'require-corp',
+    'Cross-Origin-Embedder-Policy': 'credentialless',
     'Cross-Origin-Opener-Policy': 'same-origin',
     'content-type': typeByExtension(extension)
   }
