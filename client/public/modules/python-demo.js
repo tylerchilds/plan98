@@ -40,7 +40,7 @@ async function start() {
   const instance = await python.entrypoint.run({
     args: ["/src/main.py"],
     mount: {
-      "/out": out,
+      "out": out,
       "/src": {
         "main.py": pythonSource,
       }
