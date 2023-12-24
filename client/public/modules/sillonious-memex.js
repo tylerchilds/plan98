@@ -124,11 +124,10 @@ $.when('click', '[name="tab"]', (event) => {
   let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
   const bin = diskettes(event.target)
   const count = bin.length
-  diskette = (diskette + 1) % count
+  diskette = ((diskette || 0) + 1) % count
   const art = bin[diskette]
   console.log(diskette)
-  state['ls/sillonious-memex'].art = art
-  state['ls/sillonious-memex'].diskette = diskette
+  state['ls/sillonious-memex'] = { art, diskette }
 })
 
 $.when('click', '[name="shift"]', () => {
