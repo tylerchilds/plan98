@@ -1,5 +1,7 @@
 import module from "@sillonious/module";
+
 import { Terminal } from "xterm";
+import { FitAddon } from "xterm-addon-fit";
 
 const link = document.createElement('link')
 link.setAttribute('rel', 'stylesheet')
@@ -21,9 +23,14 @@ async function start(target) {
   const { Wasmer, init } = await import("@wasmer/sdk");
   await init();
   const term = new Terminal();
+  const fit = new FitAddon();
+  term.loadAddon(fit);
   term.open(target);
+  fit.fit();
 
+  term.writeln("Silly...");
   const pkg = await Wasmer.fromRegistry("sharrattj/bash");
+  term.reset();
   const instance = await pkg.entrypoint.run();
 	
   connectStreams(instance, term);
