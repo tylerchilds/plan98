@@ -19,7 +19,7 @@
       #bootloader {
         max-width: 100%;
         margin: auto;
-        position: fixed;
+        position: absolute;
         inset: 0;
         margin: auto;
       }
@@ -74,51 +74,52 @@
     </script>
   </head>
   <body>
-    <?xml version="1.0" encoding="utf-8"?>
-    <svg id="bootloader" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
-      <ellipse style="fill: var(--wheel-0-4, dodgerblue);" cx="900" cy="180" rx="60" ry="60" class="slot" id="slot-0" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="2s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-1-4, dodgerblue);" cx="900" cy="900" rx="60" ry="60" id="slot-6" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" dur="8s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-2-4, dodgerblue);" cx="1020" cy="780" rx="60" ry="60" id="slot-5" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" dur="7s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-3-4, dodgerblue);" cx="1140" cy="660" rx="60" ry="60" id="slot-4" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" dur="6.05s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-4-4, dodgerblue);" cx="1020" cy="300" rx="60" ry="60" class="slot" id="slot-1" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" dur="3s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-5-4, dodgerblue);" cx="1140" cy="420" rx="60" ry="60" class="slot" id="slot-2" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="4.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-6-4, dodgerblue);" cx="1260" cy="540" rx="60" ry="60" id="slot-3" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
-        <animate attributeName="fill-opacity" values="0;1" dur="5.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-7-4, dodgerblue);" cx="-779.785" cy="-298.069" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-11" class="slot">
-        <animate attributeName="fill-opacity" values="0;1" dur="13s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-8-4, dodgerblue);" cx="-659.355" cy="-418.498" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-10" class="slot">
-        <animate attributeName="fill-opacity" values="0;1" dur="12.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-9-4, dodgerblue);" cx="-779.785" cy="-779.785" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-7" class="slot">
-        <animate attributeName="fill-opacity" values="0;1" dur="9s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-10-4, dodgerblue);" cx="-659.355" cy="-659.356" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-8" class="slot">
-        <animate attributeName="fill-opacity" values="0;1" dur="10.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-      <ellipse style="fill: var(--wheel-11-4, dodgerblue);" cx="-538.926" cy="-538.927" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-9" class="slot">
-        <animate attributeName="fill-opacity" values="0;1" dur="10.99s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
-      </ellipse>
-    </svg>
+    <boot-loader>
+      <svg id="bootloader" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+        <ellipse style="fill: var(--wheel-0-4, dodgerblue);" cx="900" cy="180" rx="60" ry="60" class="slot" id="slot-0" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="2s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-1-4, dodgerblue);" cx="900" cy="900" rx="60" ry="60" id="slot-6" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" dur="8s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-2-4, dodgerblue);" cx="1020" cy="780" rx="60" ry="60" id="slot-5" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" dur="7s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-3-4, dodgerblue);" cx="1140" cy="660" rx="60" ry="60" id="slot-4" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" dur="6.05s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-4-4, dodgerblue);" cx="1020" cy="300" rx="60" ry="60" class="slot" id="slot-1" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" dur="3s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-5-4, dodgerblue);" cx="1140" cy="420" rx="60" ry="60" class="slot" id="slot-2" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="4.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-6-4, dodgerblue);" cx="1260" cy="540" rx="60" ry="60" id="slot-3" class="slot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -1.4210854715202004e-14)">
+          <animate attributeName="fill-opacity" values="0;1" dur="5.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-7-4, dodgerblue);" cx="-779.785" cy="-298.069" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-11" class="slot">
+          <animate attributeName="fill-opacity" values="0;1" dur="13s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-8-4, dodgerblue);" cx="-659.355" cy="-418.498" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-10" class="slot">
+          <animate attributeName="fill-opacity" values="0;1" dur="12.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-9-4, dodgerblue);" cx="-779.785" cy="-779.785" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-7" class="slot">
+          <animate attributeName="fill-opacity" values="0;1" dur="9s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-10-4, dodgerblue);" cx="-659.355" cy="-659.356" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-8" class="slot">
+          <animate attributeName="fill-opacity" values="0;1" dur="10.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+        <ellipse style="fill: var(--wheel-11-4, dodgerblue);" cx="-538.926" cy="-538.927" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -1.4210854715202004e-14)" id="slot-9" class="slot">
+          <animate attributeName="fill-opacity" values="0;1" dur="10.99s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+        </ellipse>
+      </svg>
+    </boot-loader>
     <script type="module">
       import '/modules/solid-todolist.js'
     </script>
     <script type="module">
       import Computer from '@sillonious/computer'
-      const sillyz = new Computer(window.plan98, { path: '/modules' })
+      const sillyz = new Computer(window.plan98, { registry: '/modules' })
     </script>
   </body>
 </html>

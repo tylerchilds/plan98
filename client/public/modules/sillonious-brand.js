@@ -263,6 +263,7 @@ $.when('click', '[data-download]', (event) => {
 $.style(`
   & {
     display: block;
+    overflow: hidden;
   }
 
   & iframe {

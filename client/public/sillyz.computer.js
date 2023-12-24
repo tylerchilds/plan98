@@ -21,23 +21,23 @@ function upsell(plan98) {
 
 export default class SillyzComputer {
   constructor(plan98, x) {
-    modules({ path: x.path })
+    modules({ registry: x.registry })
     new MutationObserver(() => {
-      modules({ path: x.path })
+      modules({ registry: x.registry })
     }).observe(document.body, { childList: true, subtree: true });
     ready(plan98)
     upsell(plan98)
   }
 }
 
-function modules({ path }) {
+function modules({ registry }) {
   const tags = new Set(
     [...document.querySelectorAll(':not(:defined)')]
     .map(({ tagName }) => tagName.toLowerCase())
   )
 
   tags.forEach(async (tag) => {
-    const url = `${path || '.'}/${tag}.js`
+    const url = `${registry || '.'}/${tag}.js`
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true
