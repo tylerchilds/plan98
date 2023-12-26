@@ -26,7 +26,7 @@ export default class SillyzComputer {
       modules({ registry: x.registry })
     }).observe(document.body, { childList: true, subtree: true });
     ready(plan98)
-    upsell(plan98)
+    //upsell(plan98)
   }
 }
 
