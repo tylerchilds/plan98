@@ -29,12 +29,20 @@ x-ish packages
 
 For the free version, see below!
 
-Try typing: echo $0
-
 <iframe
 src: ?world=sillyz.computer
 title: Sillyz Computer - Sillyz.Computer - sc
 style: height: 500px; max-height: 90vh;
+
+Now, if you're curious how the free version works, you're in luck. Underneath the layers of code is my digital twin in a shell.
+
+Think Teenage Mutant Ninja Turtles, but Donatello specifically.
+
+Meet Shelly.
+
+<terminal-demo
+
+Try typing: echo $0
 
 This invoked a command in the path of the computer named "echo", like an Amazon Echo Dot (not affiliated).
 
