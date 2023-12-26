@@ -94,11 +94,14 @@ $.draw(() => {
 
 $.when('click', '[data-tutorial]', () => {
   const close = 'plan98-welcome.close'
+  const start = 'plan98-welcome.start'
   window[close] = hideModal;
+  window[start] = (html) => $.teach({ html });
   showModal(`
     <plan98-onboarding
       host="${window.location.host}"
       close="${close}"
+      start="${start}"
     ></plan98-onboarding>
   `, { bannerType: modalTypes.news })
 })

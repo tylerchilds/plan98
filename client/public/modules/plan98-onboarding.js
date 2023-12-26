@@ -116,9 +116,15 @@ $.when('click', '[data-exit]', (event) => {
 })
 
 $.when('click', '[data-continue]', (event) => {
+  const html = `
+    <media-plexer
+      src="/public/sagas/pro.thelanding.page/en_US/index.saga"
+    ></media-plexer>
+  `
+  const start = event.target.closest($.link).getAttribute('start')
+  window[start] ? window[start](html) : null
   const close = event.target.closest($.link).getAttribute('close')
   window[close] ? window[close]() : null
-  document.body.innerHTML = `<terminal-demo></terminal-demo>`
 })
 
 $.when('click', '[data-back]', (event) => {
