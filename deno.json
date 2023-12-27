@@ -14,6 +14,11 @@
     "thumb-drive": "sudo mount -t 9p -o trans=tcp,port=8888,uname=$USER 127.0.0.1 /home/$USER/thumb-drive",
     "unthumb-drive": "sudo umount /home/$USER/thumb-drive"
   },
+  "imports": {
+    "@sillonious/module": "./client/public/module.js",
+    "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+    "statebus": "./client/public/_statebus.js"
+  },
   "compilerOptions": {
   }
 }

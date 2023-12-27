@@ -333,7 +333,9 @@
     "https://deno.land/x/zod@v3.21.4/locales/en.ts": "a7a25cd23563ccb5e0eed214d9b31846305ddbcdb9c5c8f508b108943366ab4c",
     "https://deno.land/x/zod@v3.21.4/mod.ts": "64e55237cb4410e17d968cd08975566059f27638ebb0b86048031b987ba251c4",
     "https://deno.land/x/zod@v3.21.4/types.ts": "b5d061babea250de14fc63764df5b3afa24f2b088a1d797fc060ba49a0ddff28",
+    "https://esm.sh/diffhtml@1.0.0-beta.30": "0c27d8ed1fa605c1e6be5e66dac49c47da828db8d795d41273e8c5ea1a2b1a5f",
     "https://esm.sh/sort-paths@1.1.1": "9206f5c3387657bbb67fa969f4a41258af4151dd22a1c5e41794c2bcf9638f28",
+    "https://esm.sh/v135/diffhtml@1.0.0-beta.30/denonext/diffhtml.mjs": "1064325dc2308b6ba33690b0a57b898223149b713b73f62d550e90e4d48b2844",
     "https://esm.sh/v86/sort-paths@1.1.1/deno/sort-paths.js": "4461b09ec753da199f3f260af3dd9716437b1280105fd657799c4afbfb5f739a",
     "https://esm.sh/v86/split-retain@1.0.1/deno/split-retain.js": "da683224fa5e548faa46f658cec4f7403f5dbe4c26e055eb2cfb9152f5be5ad8"
   }
