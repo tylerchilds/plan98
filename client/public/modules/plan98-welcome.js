@@ -59,32 +59,34 @@ $.draw(() => {
   const { html } = $.learn()
   if(html) return html
   return `
-    <section class="layout">
-      <div class="horizon"></div>
-      <div class="land">
-        <div class="grid-3d"></div>
-      </div>
-    </section>
+    <div name="square">
+      <section class="layout">
+        <div class="horizon"></div>
+        <div class="land">
+          <div class="grid-3d"></div>
+        </div>
+      </section>
 
-    <div class="skybox ${html ? '' : 'active'}">
-      <div class="a"></div>
-      <div class="b"></div>
-      <div class="c"></div>
-      <div class="d"></div>
-      <div class="e"></div>
-      <div class="f">
-        <sillyz-avatar></sillyz-avatar>
-        <div id="foreground">
-          <div id="logo">
-              <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                Sillyz.
-              </hypertext-variable>
-              <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                COMPUTER
-              </hypertext-variable>
+      <div class="skybox ${html ? '' : 'active'}">
+        <div class="a"></div>
+        <div class="b"></div>
+        <div class="c"></div>
+        <div class="d"></div>
+        <div class="e"></div>
+        <div class="f">
+          <sillyz-avatar></sillyz-avatar>
+          <div id="foreground">
+            <div id="logo">
+                <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
+                  Sillyz.
+                </hypertext-variable>
+                <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
+                  COMPUTER
+                </hypertext-variable>
+              </div>
+              <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
+              </rainbow-action>
             </div>
-            <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
-            </rainbow-action>
           </div>
         </div>
       </div>
@@ -118,6 +120,10 @@ $.style(`
     position: absolute;
     height: 100vmin;
     inset: 0;
+  }
+  & [name="square"]{
+    margin: auto;
+    height: 100vmin;
     transform-style: preserve-3d;
     width: 100vmin;
   }
