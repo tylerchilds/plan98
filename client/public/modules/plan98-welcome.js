@@ -118,7 +118,6 @@ $.style(`
     display: block;
     margin: auto;
     position: absolute;
-    height: 100vmin;
     inset: 0;
   }
   & [name="square"]{
@@ -126,6 +125,8 @@ $.style(`
     height: 100vmin;
     transform-style: preserve-3d;
     width: 100vmin;
+    position: absolute;
+    inset: 0;
   }
 
   & .remix {
