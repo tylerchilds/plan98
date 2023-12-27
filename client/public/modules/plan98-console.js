@@ -23,7 +23,7 @@ $.draw(container => {
       },
       show() {
         this._$el.show()
-        this._$el.html('<iframe title="braid-debugger" src="/cdn/braid.org/debugger.html" style="width: 100%; height: 100%; border: none;"></iframe>');
+        this._$el.html('<iframe id="braid-panel" title="braid-debugger" src="/cdn/braid.org/braid_panel.html" style="width: 100%; height: 100%; border: none;"></iframe>');
       },
       hide() {
         this._$el.hide()

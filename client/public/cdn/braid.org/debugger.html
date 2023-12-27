@@ -33,53 +33,110 @@
       }
 
       document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
-    </script>
+		</script>
     <script type="importmap">
       {
         "imports": {
           "@sillonious/module": "/module.js",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
-          "eruda": "https://esm.sh/eruda@3.0.1"
+          "eruda": "https://esm.sh/eruda@3.0.1",
+          "statebus": "/_statebus.js"
         }
       }
     </script>
   </head>
   <body>
-    <braid-debugger></braid-debugger>
+		<braid-child></braid-child>
+    <braid-parent></braid-parent>
     <script type="module">
       import module from '@sillonious/module'
       import eruda from 'eruda'
 
-      voltron('braid-debugger', module, eruda)
+      const $parent = module('braid-parent')
+			const $child = module('braid-child', { messages: [] })
 
-      function voltron(tag, module, eruda) {
-        customElements.define(tag, class WebComponent extends HTMLElement {
-          constructor() {
-            super();
-            this.$ = module(tag)
-            this.$.draw(container => {
-              eruda.init({ container });
-              eruda.show()
-              eruda.add({
-              name: 'Braid',
-                init($el) {
-                  this._$el = $el;
-                },
-                show() {
-                  this._$el.show()
-                  this._$el.html('<iframe title="braid-debugger" src="https://braid.org?world=braid.org" style="width: 100%; height: 100%; border: none;"></iframe>');
-                },
-                hide() {
-                  this._$el.hide()
-                  this._$el.html('');
-                },
-                destroy() {}
-              })
-            })
+			$parent.draw(target => {
+				eruda.init({ container: target });
+				eruda.show()
+				eruda.add({
+				name: 'Braid',
+					init($el) {
+						this._$el = $el;
+					},
+					show() {
+						this._$el.show()
+						this._$el.html('<iframe id="braid-panel" title="braid-debugger" src="/cdn/braid.org/braid_panel.html" style="width: 100%; height: 100%; border: none;"></iframe>');
+					},
+					hide() {
+						this._$el.hide()
+						this._$el.html('');
+					},
+					destroy() {}
+				})
+			})
 
-          }
-        });
-      }
-    </script>
+			$child.draw((target) => {
+				const { messages } = $child.learn()
+				
+				return messages.map(({ type, data }) => {
+					return `
+						<div data-type="${type}">
+							<label>${type}</label>
+							<pre>${JSON.stringify(data,null,4)}</pre>
+						</div>
+					`
+				}).join('')
+			})
+
+			$child.style(`
+				& [data-type="SEND"] label {
+					color: red;	
+				}
+
+				& [data-type="RECV"] label {
+					color: blue;	
+				}
+			`)
+
+			window.addEventListener("message", function (event) {
+				$child.teach({ type: 'RECV', data: event.data }, mergeMessage)
+
+				if (event.data.cmd == "loaded") {
+					let msg = {
+						cmd: "set",
+						versions: [
+							{
+								version: "ho-1",
+								parents: [],
+								patches: [{ unit: "json", range: "[1:2]", content: "hum" }],
+							},
+							{
+								version: "hi-2",
+								parents: ["ho-1"],
+								patches: [{ unit: "json", range: "[1:2]", content: "hum" }],
+							},
+						],
+						raw_messages: ["version: ho-1, json[1:2] = hum", "version: hi-2, parents: ho-1, json[1:2] = hum"],
+						headers: { "content-type": "text/plain", "merge-type": "dtt" },
+					};
+
+					$child.teach({ type: 'SEND', data: msg }, mergeMessage)
+
+					setTimeout(() => {	
+						[...document.querySelectorAll($parent.link)].map(target => {
+							const braidPanel = target.shadowRoot.getElementById("braid-panel");
+							braidPanel.contentWindow.postMessage(msg, "*");
+						})
+					}, 1)
+				}
+			});
+
+			function mergeMessage(state, payload) {
+				return {
+					...state,
+					messages: [...state.messages, payload]
+				}
+			}
+		</script>
   </body>
 </html>
