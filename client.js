@@ -9,37 +9,58 @@ import { DOMParser } from "https://esm.sh/linkedom";
 import { render } from "@sillonious/saga"
 import { marked } from "marked"
 
-async function sagaSanitizer(saga) {
+async function sanitizer() {
   const index = await Deno.readTextFile(`./client/public/index.html`)
-  const doc = new DOMParser().parseFromString(index, "text/html");
-  doc.body.insertAdjacentHTML('afterbegin', `
+  return new DOMParser().parseFromString(index, "text/html");
+}
+
+async function markdownSanitizer(md) {
+  const clean = await sanitizer()
+  clean.getElementById('main').remove()
+  clean.body.insertAdjacentHTML('afterbegin', `
+    ${marked(md)}
+  `)
+  return `<!DOCTYPE html>${clean.documentElement}`
+}
+
+async function sagaSanitizer(saga) {
+  const clean = await sanitizer()
+  clean.body.insertAdjacentHTML('afterbegin', `
     ${render(saga)}
   `)
   // remove the lazy-bootstrap to lock the document
-  //doc.getElementById('lazy-bootstrap').remove()
-  doc.getElementById('main').remove()
-  return `
-    <!DOCTYPE html>
-    ${doc.documentElement}
-  `
-}
-
-function buildHeaders(extension) {
-  return {
-    'Cross-Origin-Embedder-Policy': 'credentialless',
-    'Cross-Origin-Opener-Policy': 'same-origin',
-    'content-type': typeByExtension(extension)
-  }
+  //clean.getElementById('lazy-bootstrap').remove()
+  clean.getElementById('main').remove()
+  return `<!DOCTYPE html>${clean.documentElement}`
 }
 
 const sanitizers = {
-  '.saga': sagaSanitizer
+  '.saga': sagaSanitizer,
+  '.md': markdownSanitizer,
+}
+
+const extensions = {
+  '.md': {
+    raw: 'text/plain',
+    rich: 'text/html',
+  },
+}
+
+function buildHeaders(pathname, extension) {
+  const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
+  return {
+    'Cross-Origin-Embedder-Policy': 'credentialless',
+    'Cross-Origin-Opener-Policy': 'same-origin',
+    'content-type': extensions[extension]
+      ? extensions[extension][type]
+      : typeByExtension(extension)
+  }
 }
 
 async function router(request, context) {
   let { pathname } = new URL(request.url);
   let extension = path.extname(pathname);
-  const headers = buildHeaders(extension);
+  const headers = buildHeaders(pathname, extension);
 
   if(pathname === '/plan98/about') {
     return about(request)
