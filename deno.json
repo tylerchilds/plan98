@@ -16,8 +16,10 @@
   },
   "imports": {
     "@sillonious/module": "./client/public/module.js",
+    "@sillonious/saga": "./client/public/saga.js",
     "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
-    "statebus": "./client/public/_statebus.js"
+    "statebus": "./client/public/_statebus.js",
+    "marked": "https://esm.sh/marked@11.1.0"
   },
   "compilerOptions": {
   }

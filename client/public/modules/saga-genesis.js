@@ -12,7 +12,7 @@ import { doingBusinessAs } from './sillonious-brand.js'
 
 const $ = module('saga-genesis')
 
-const emeraldOfTime = { saga: '/sagas/time.saga' }
+const emeraldOfTime = { saga: '/public/sagas/time.saga' }
 
 function useMacGuffin(macGuffin) {
   const {

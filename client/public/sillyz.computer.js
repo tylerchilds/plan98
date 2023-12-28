@@ -1,13 +1,8 @@
 import module from "@sillonious/module"
 
 function ready(plan98) {
-  document.body.insertAdjacentHTML('beforeend', `
-    <sillonious-brand host="${plan98.host}">
-      <saga-genesis></saga-genesis>
-    </sillonious-brand>
-  `)
+  console.log(plan98, ' is ready')
 }
-
 
 function upsell(plan98) {
   const isFirst = self.self === self.top

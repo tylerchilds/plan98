@@ -5,6 +5,24 @@ import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
 import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
+import { DOMParser } from "https://esm.sh/linkedom";
+import { render } from "@sillonious/saga"
+import { marked } from "marked"
+
+async function sagaSanitizer(saga) {
+  const index = await Deno.readTextFile(`./client/public/index.html`)
+  const doc = new DOMParser().parseFromString(index, "text/html");
+  doc.body.insertAdjacentHTML('afterbegin', `
+    ${render(saga)}
+  `)
+  // remove the lazy-bootstrap to lock the document
+  //doc.getElementById('lazy-bootstrap').remove()
+  doc.getElementById('main').remove()
+  return `
+    <!DOCTYPE html>
+    ${doc.documentElement}
+  `
+}
 
 function buildHeaders(extension) {
   return {
@@ -12,6 +30,10 @@ function buildHeaders(extension) {
     'Cross-Origin-Opener-Policy': 'same-origin',
     'content-type': typeByExtension(extension)
   }
+}
+
+const sanitizers = {
+  '.saga': sagaSanitizer
 }
 
 async function router(request, context) {
@@ -42,13 +64,18 @@ async function router(request, context) {
   }
 
   try {
-    file = await Deno.readFile(`./client/public${pathname}`)
+    if(sanitizers[extension]) {
+      file = await Deno.readTextFile(`./client/public${pathname}`)
+      file = await sanitizers[extension](file)
+    } else {
+      file = await Deno.readFile(`./client/public${pathname}`)
+    }
   } catch (e) {
     pathname = './client/public/index.html'
     extension = path.extname(pathname);
     file = await Deno.readFile(pathname)
     statusCode = Status.NotFound
-    console.error(pathname + '\n' + e)
+    console.error(e + '\n' + pathname + '\n' + e)
   }
 
 

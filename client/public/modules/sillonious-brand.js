@@ -8,19 +8,19 @@ const reverseProxyLookup = `
 `
 
 const emeraldOfTime
-  = `/sagas/time.saga`
+  = `/public/sagas/time.saga`
 const emeraldOfSpace
-  = `/sagas/space.saga`
+  = `/public/sagas/space.saga`
 const emeraldOfTrust
-  = `/sagas/trust.saga`
+  = `/public/sagas/trust.saga`
 const emeraldOfTruth
-  = `/sagas/truth.saga`
+  = `/public/sagas/truth.saga`
 const emeraldOfSelf
-  = `/sagas/self.saga`
+  = `/public/sagas/self.saga`
 const emeraldOfSecurity
-  = `/sagas/security.saga`
+  = `/public/sagas/security.saga`
 const emeraldOfNow
-  = `/sagas/index.saga`
+  = `/public/sagas/index.saga`
 
 export const doingBusinessAs = {
   'sillyz.computer': {
