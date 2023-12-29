@@ -84,10 +84,6 @@ window.hideModal = hideModal
 $.when('click', '[data-close]', hideModal)
 
 $.style(`
-  body.trap {
-    overflow: hidden;
-  }
-
   .trap .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';

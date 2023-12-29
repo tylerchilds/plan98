@@ -604,10 +604,8 @@ const $ = module('qr-code')
 $.draw(target => {
   target.innerHTML = ''
   const code = target.getAttribute('text')
-  const link = document.createElement('a')
-  link.style = "display: block;"
-  link.href = code
-  target.appendChild(link)
+  const slot = document.createElement('div')
+  target.appendChild(slot)
   const { fg='black', bg='white' } = target.dataset
-  new QRCode(link, { text: code, colorLight: fg, colorDark: bg })
+  new QRCode(slot, { text: code, colorLight: fg, colorDark: bg })
 })

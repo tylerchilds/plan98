@@ -6,32 +6,33 @@ import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
 import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 import { DOMParser } from "https://esm.sh/linkedom";
+
 import { render } from "@sillonious/saga"
 import { marked } from "marked"
 
-async function sanitizer() {
+async function page() {
   const index = await Deno.readTextFile(`./client/public/index.html`)
   return new DOMParser().parseFromString(index, "text/html");
 }
 
 async function markdownSanitizer(md) {
-  const clean = await sanitizer()
-  clean.getElementById('main').remove()
-  clean.body.insertAdjacentHTML('afterbegin', `
+  const dom = await page()
+  dom.getElementById('main').remove()
+  dom.body.insertAdjacentHTML('afterbegin', `
     ${marked(md)}
   `)
-  return `<!DOCTYPE html>${clean.documentElement}`
+  return `<!DOCTYPE html>${dom.documentElement}`
 }
 
 async function sagaSanitizer(saga) {
-  const clean = await sanitizer()
-  clean.body.insertAdjacentHTML('afterbegin', `
+  const dom = await page()
+  dom.body.insertAdjacentHTML('afterbegin', `
     ${render(saga)}
   `)
   // remove the lazy-bootstrap to lock the document
-  //clean.getElementById('lazy-bootstrap').remove()
-  clean.getElementById('main').remove()
-  return `<!DOCTYPE html>${clean.documentElement}`
+  //dom.getElementById('lazy-bootstrap').remove()
+  dom.getElementById('main').remove()
+  return `<!DOCTYPE html>${dom.documentElement}`
 }
 
 const sanitizers = {
