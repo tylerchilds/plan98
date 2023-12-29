@@ -87,10 +87,12 @@ $.style(`
     grid-auto-flow: column;
     position: relative;
     pointer-events: none;
-    position: fixed;
+    position: absolute;
+    padding-bottom: 2rem;
     inset: 0;
     z-index: 1;
     place-content: end center;
+    z-index: 1002;
   }
 
   & .box {
@@ -98,7 +100,7 @@ $.style(`
     border-radius: 0;
     aspect-ratio: 1;
     position: absolute;
-    top: 0;
+    top: 2rem;
     width: 2rem;
     animation: &-pulse ease-in-out 5000ms alternate infinite;
     box-shadow:
@@ -106,6 +108,7 @@ $.style(`
       0 0 30px 0 var(--expression),
       0 0 50px 25px var(--expression);
     pointer-events: all;
+    z-index: 1;
   }
 
    @keyframes &-pulse {
