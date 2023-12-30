@@ -50,8 +50,8 @@ const elves = [
   const expression = emoticons[emotion]
   return `
     <div class="elve" style="--expression: ${expression.color}">
-      <button class="box">
-        <qr-code text="${window.location.href}?roomcode=456123&&slot=${i}"></qr-code>
+      <button class="box" data-theme="${expression.color}">
+        <qr-code data-fg="indigo" text="${window.location.href}?roomcode=456123&&slot=${i}"></qr-code>
       </button>
       <div class="hat">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
@@ -76,7 +76,7 @@ $.draw(() => $.learn().elves.join(''))
 $.when('click', '.box', (event) => {
   event.stopPropagation()
   event.preventDefault()
-  showModal(event.target.innerHTML, { bannerType: modalTypes.news })
+  showModal(event.target.innerHTML, { maximized: true, theme: event.target.dataset.theme })
 })
 
 $.style(`

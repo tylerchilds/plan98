@@ -28,20 +28,24 @@ $.draw(() => {
   const {
     body,
     isOpen,
-    bannerType
+    bannerType,
+    maximized,
+    theme
   } = $.learn()
 
   if(!isOpen) return ' '
   const modalHeader = types[bannerType] ? banner() : ''
 
   return `
-    <button data-close>X</button>
-    <div class="modal">
-      ${modalHeader}
-      <div class="body">
-        ${body}
+    <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}">
+      <button data-close>X</button>
+      <div class="modal">
+        ${modalHeader}
+        <div class="body">
+          ${body}
+        </div>
       </div>
-    </div>
+    </shell>
   `
 })
 
@@ -84,6 +88,9 @@ window.hideModal = hideModal
 $.when('click', '[data-close]', hideModal)
 
 $.style(`
+  & {
+    display: none;
+  }
   .trap .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
@@ -107,11 +114,11 @@ $.style(`
     }
   }
 
-  & {
+  & .shell {
     position: fixed;
-    display: none;
+    background: var(--theme, transparent);
     place-items: center;
-    padding: 1rem;
+    display: grid;
     top: 0;
     bottom: 0;
     left: 0;
@@ -124,9 +131,14 @@ $.style(`
     display: grid;
   }
 
+  & .maximized {
+    width: 100%;
+  }
+
   & .modal {
     animation: modal-in 250ms ease-in-out forwards;
     background: white;
+    margin: auto;
     box-shadow:
       0 2px 4px rgba(0,0,0,.1),
       0 6px 8px rgba(0,0,0,.04)

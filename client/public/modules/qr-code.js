@@ -9,8 +9,8 @@ const $ = module('qr-code')
 $.draw(target => {
   const { image } = $.learn()
   const code = target.getAttribute('text')
-  const { fg='black', bg='white' } = target.dataset
-  generate(target, code)
+  const { fg='black', bg='transparent' } = target.dataset
+  generate(target, code, {fg, bg})
   return image ? `
     <div class="portal" style="--fg: ${fg}; --bg: ${bg}">
       ${image}
@@ -18,7 +18,7 @@ $.draw(target => {
   ` : 'loading...'
 })
 
-async function generate(target, code) {
+async function generate(target, code, {fg, bg}) {
   await sleep(1)
   if(target.code === code) return
   target.code = code
@@ -27,9 +27,9 @@ async function generate(target, code) {
   QrCreator.render({
     text: code,
     radius: 0.5, // 0.0 to 0.5
-    ecLevel: 'H', // L, M, Q, H
-    fill: '#536DFE', // foreground color
-    background: null, // color or null for transparent
+    ecLevel: 'L', // L, M, Q, H
+    fill: '#000000', // foreground color
+    background: 'transparent', // color or null for transparent
     size: 1080 // in pixels
   }, node);
 
