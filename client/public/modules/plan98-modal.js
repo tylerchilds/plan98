@@ -139,7 +139,6 @@ $.style(`
     width: 100%;
     z-index: -1;
     opacity: 0;
-    max-height: 80vh;
     overflow: auto;
     border-radius: 2rem;
   }
