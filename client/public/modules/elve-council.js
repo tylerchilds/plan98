@@ -73,6 +73,7 @@ $.style(`
     position: absolute;
     top: 2rem;
     width: 2rem;
+    height: 2rem;
     animation: &-pulse ease-in-out 5000ms alternate infinite;
     box-shadow:
       0 0 10px 10px var(--expression),
