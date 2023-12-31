@@ -9,57 +9,65 @@ const $ = module('sillonious-joypro', {joypros: []})
 $.draw(target => {
   const { joypros } = $.learn()
   if(joypros.length === 0) return
+  const seat = target.getAttribute('seat')
 
-  return joypros.map(({ quantums, quadrants }, playerIndex) => {
-    const [play,reset,light,mode,...buttons] = quadrants.map((button) => {
-      return `
-        <button
-          class="nav-item"
-          ${button.pushed ? 'data-pushed="true"' : ''}
-          data-index="${button.index}"
-          data-player="${playerIndex}"
-        >
-        </button>
-      `
-    })
-    const [upDown,leftRight,...axes] = quantums.map((axis) => {
-      return `
-        <button
-          class="nav-item"
-          ${axis.pushed ? 'data-pushed="true"' : ''}
-          data-index="${axis.index}"
-          data-player="${playerIndex}"
-        >
-        </button>
-        <button
-          class="nav-item"
-          ${axis.pulled ? 'data-pulled="true"' : ''}
-          data-index="${axis.index}"
-          data-player="${playerIndex}"
-        >
-        </button>
+  if(seat) {
+    return joypros[seat] ? renderJoyPro(joypros[seat], seat) : 'todo: virtual'
+  }
 
-      `
-    })
-
-    return `
-      <div class="the-cardinal">
-        ${upDown}
-        ${leftRight}
-      </div>
-      <div class="the-compass">
-        ${play}
-        ${reset}
-        ${light}
-        ${mode}
-      </div>
-      <div class="the-overflow">
-        ${buttons.join('')}
-        ${axes.join('')}
-      </div>
-    `
-  }).join('')
+  return joypros.map((joypro, seat) => renderJoyPro(joypro, seat)).join('')
 })
+
+function renderJoyPro(joypro, seat) {
+  const { quantums, quadrants } = joypro
+  const [play,reset,light,mode,...buttons] = quadrants.map((button) => {
+    return `
+      <button
+        class="nav-item"
+        ${button.pushed ? 'data-pushed="true"' : ''}
+        data-index="${button.index}"
+        data-seat="${seat}"
+      >
+      </button>
+    `
+  })
+  const [upDown,leftRight,...axes] = quantums.map((axis) => {
+    return `
+      <button
+        class="nav-item"
+        ${axis.pushed ? 'data-pushed="true"' : ''}
+        data-index="${axis.index}"
+        data-seat="${seat}"
+      >
+      </button>
+      <button
+        class="nav-item"
+        ${axis.pulled ? 'data-pulled="true"' : ''}
+        data-index="${axis.index}"
+        data-seat="${seat}"
+      >
+      </button>
+
+    `
+  })
+
+  return `
+    <div class="the-cardinal">
+      ${upDown}
+      ${leftRight}
+    </div>
+    <div class="the-compass">
+      ${play}
+      ${reset}
+      ${light}
+      ${mode}
+    </div>
+    <div class="the-overflow">
+      ${buttons.join('')}
+      ${axes.join('')}
+    </div>
+  `
+}
 
 function loop() {
   const players = party()
@@ -84,22 +92,22 @@ $.when('mouseup', '.nav-item', release)
 $.when('mousedown', '.nav-item', attack)
 
 function attack(event) {
-  const { index, player } = event.target.dataset
+  const { index, seat } = event.target.dataset
   const { joypros } = $.learn()
-  const { quadrants } = joypros[player]
+  const { quadrants } = joypros[seat]
 	const button = quadrants[index]
-  fantasyGamepadEvent(player, button.osc, {
+  fantasyGamepadEvent(seat, button.osc, {
 		...button,
 		value: 1
 	})
 }
 
 function release(event) {
-const { index, player } = event.target.dataset
+const { index, seat } = event.target.dataset
   const { joypros } = $.learn()
-  const { quadrants } = joypros[player]
+  const { quadrants } = joypros[seat]
 	const button = quadrants[index]
-  fantasyGamepadEvent(player, button.osc, {
+  fantasyGamepadEvent(seat, button.osc, {
 		...button,
 		value: 0
 	})
@@ -109,12 +117,14 @@ $.style(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    padding: 1rem;
   }
   & .the-cardinal,
   & .the-compass {
     display: grid;
     grid-template-columns: repeat(4, 20px);
-    grid-template-rows: repeat(4, 20px);
+    grid-template-rows: repeat(2, 20px);
+    gap: 30px 5px;
   }
 
   & .the-cardinal {

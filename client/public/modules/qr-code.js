@@ -1,8 +1,8 @@
 import module from '@sillonious/module'
 import QrCreator from 'qr-creator'
 
-const getBase64StringFromDataURL = (dataURL) =>
-    dataURL.replace('data:', '').replace(/^.+,/, '');
+// utilize this to hop off the bifrost
+function sleep(D) { return new Promise(x => setTimeout(x,D))}
 
 const $ = module('qr-code')
 
@@ -19,9 +19,9 @@ $.draw(target => {
 })
 
 async function generate(target, code, {fg, bg}) {
-  await sleep(1)
   if(target.code === code) return
   target.code = code
+  await sleep(1) // get this off the bifrost
   const node = document.createElement('div')
 
   QrCreator.render({
@@ -34,19 +34,27 @@ async function generate(target, code, {fg, bg}) {
   }, node);
 
   const dataURL = node.querySelector('canvas').toDataURL()
-  const base64 = getBase64StringFromDataURL(dataURL);
 
   $.teach({ image: `<img src="${dataURL}" alt="code" />`})
 }
 
-function sleep(duration) {
-  return new Promise(x => setTimeout(x,duration))
-}
 
 $.style(`
+  & {
+    display: block;
+    height: 100%;
+    position: relative;
+  }
   & .portal {
     display: grid;
     height: 100%;
     place-content: center;
+  }
+  & img {
+    position: absolute;
+    inset: 10px;
+    max-height: 100%;
+    max-height: 50%;
+    margin: auto;
   }
 `)

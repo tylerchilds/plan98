@@ -1,58 +1,23 @@
 import module from '@sillonious/module'
+import Color from "colorjs.io"
 import { hideModal, showModal, types as modalTypes } from './plan98-modal.js'
-
-const emoticons = {
-  happy: {
-    emote: ':)',
-    color: 'chocolate',
-    nick: 'sol'
-  },
-  smirk: {
-    emote: ';)',
-    color: 'pink',
-    nick: 'sully'
-  },
-  laugh: {
-    emote: ':D',
-    color: 'orange',
-    nick: 'silly'
-  },
-  sad: {
-    emote: ':(',
-    color: 'dodgerblue',
-    nick: 'sally'
-  },
-  surprise: {
-    emote: ':o',
-    color: 'indigo',
-    nick: 'shelly'
-  },
-  cheeky: {
-    emote: ':p',
-    color: 'green',
-    nick: 'wally'
-  },
-  kiss: {
-    emote: ':*',
-    color: 'crimson',
-    nick: 'sol'
-  },
-}
+import { doingBusinessAs } from './sillonious-brand.js'
 
 const elves = [
-  'smirk',
-  'laugh',
-  'sad',
-  'surprise',
-  'cheeky',
-  'kiss'
-].map((emotion, i) => {
-  const expression = emoticons[emotion]
+  'sillyz.computer',
+  '1998.social',
+  'yourlovedones.online',
+  'ncity.executiontime.pub',
+  'css.ceo',
+  'y2k38.info'
+].map((elve, i) => {
+  const expression = doingBusinessAs[elve]
+  const council = "42"
   return `
     <div class="elve" style="--expression: ${expression.color}">
       <button class="box" data-theme="${expression.color}">
-        <qr-code data-fg="indigo" text="${window.location.href}?roomcode=456123&&slot=${i}"></qr-code>
-      </button>
+        <sillonious-brand host="${elve}" council="${council}" seat="${i}"></sillonious-brand>
+      </kutton>
       <div class="hat">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
           <!-- Hat Band (Smooth Curve at the bottom) -->
@@ -96,6 +61,8 @@ $.style(`
   }
 
   & .box {
+    transform: translateX(100%);
+    overflow: hidden;
     border: 5px solid black;
     border-radius: 0;
     aspect-ratio: 1;
@@ -122,7 +89,7 @@ $.style(`
 
 
   & .face {
-    background: ${emoticons.happy.color};
+    background: chocolate;
     max-width: 25vh;
     aspect-ratio: 1;
     border-radius: 100%;

@@ -137,12 +137,7 @@ $.style(`
 
   & .modal {
     animation: modal-in 250ms ease-in-out forwards;
-    background: white;
     margin: auto;
-    box-shadow:
-      0 2px 4px rgba(0,0,0,.1),
-      0 6px 8px rgba(0,0,0,.04)
-    ;
     box-sizing: border-box;
     position: relative;
     min-height: 100px;
@@ -152,7 +147,6 @@ $.style(`
     z-index: -1;
     opacity: 0;
     overflow: auto;
-    border-radius: 2rem;
   }
 
   & .banner {

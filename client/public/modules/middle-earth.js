@@ -85,7 +85,16 @@ $.style(`
 
 	& .leaflet-popup-content {
 		min-width: 240px;
+    min-height: 240px;
+    display: grid;
 	}
+
+  & .leaflet-popup-content-wrapper,
+  & .leaflet-popup-tip {
+    border-radius: 0;
+    border: 10px solid black;
+    background: rgba(255,255,255,.85);
+  }
 `)
 
 

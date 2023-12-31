@@ -24,39 +24,52 @@ const emeraldOfNow
 
 export const doingBusinessAs = {
   'sillyz.computer': {
+    emote: ';)',
     latitude: '37.769100',
     longitude: '-122.454583',
     zoom: 10,
-    tagline: 'The Notorious One Will See You Now',
+    tagline: 'A top half video, bottom half game to',
     mascot: 'Silly Sillonious',
     saga: emeraldOfTime,
     contact: reverseProxyLookup,
     brandHue: 55,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
   },
   '1998.social': {
+    emote: ':D',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,
-    tagline: '1998 (ice-cream) social',
+    tagline: 'go Back To 1998 and',
     mascot: 'Wally the Incredible Hype',
     saga: emeraldOfSpace,
     contact: reverseProxyLookup,
     brandHue: 110,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 110])
+      .display()
+      .toString({format: 'hex'}),
   },
   'yourlovedones.online': {
+    emote: ':(',
     latitude: '37.772006',
     longitude: '-122.462220',
     zoom: 12,
-    tagline: 'Your Loved Ones are On the Line',
+    tagline: 'remember forever all the',
     mascot: 'Sally Sillonious',
     saga: emeraldOfTrust,
     contact: reverseProxyLookup,
     brandHue: 220,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 220])
+      .display()
+      .toString({format: 'hex'}),
   },
   'ncity.executiontime.pub': {
+    emote: ':o',
     latitude: '37.772322',
     longitude:  '-122.465443',
     zoom: 14,
@@ -66,39 +79,54 @@ export const doingBusinessAs = {
     contact: reverseProxyLookup,
     brandHue: 15,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 15])
+      .display()
+      .toString({format: 'hex'}),
   },
   'css.ceo': {
+    emote: ':p',
     latitude: '37.772366',
     longitude: '-122.467315',
     zoom: 15,
-    tagline: 'Custom Handmade Skins, Chainsaw Free',
+    tagline: 'as anyone, anywhere once you',
     mascot: 'Sol Sillonious',
     saga: emeraldOfSelf,
     contact: reverseProxyLookup,
     brandHue: 165,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 165])
+      .display()
+      .toString({format: 'hex'}),
   },
   'y2k38.info': {
+    emote: ':*',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
-    tagline: 'Break the Time Loop',
+    tagline: 'break the time loop.',
     mascot: 'Shelly Sillonious',
     saga: emeraldOfSecurity,
     contact: reverseProxyLookup,
     brandHue: 300,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 300])
+      .display()
+      .toString({format: 'hex'}),
   },
   'thelanding.page': {
+    emote: ':)',
     latitude: '37.770613',
     longitude: '-122.479310',
     zoom: 17,
-    tagline: 'Ship your next idea from a full stop',
+    tagline: 'The Master Sword Awaits!',
     mascot: 'Greggory McGreggory',
     saga: emeraldOfNow,
     contact: reverseProxyLookup,
     brandHue: 350,
     brandRange: 45,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
   },
   'tychi.me': {
     latitude: '37.782562',
@@ -110,6 +138,9 @@ export const doingBusinessAs = {
     contact: 'Golden Gate Bifrost',
     brandHue: 55,
     brandRange: 360,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
   },
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
@@ -138,6 +169,8 @@ function currentBusiness(host) {
 
 $.draw((target) => {
   const host = target.getAttribute('host') || window.location.host
+  const council = target.getAttribute('council') || '42'
+  const seat = target.getAttribute('seat') || '0'
   const preview = target.getAttribute('preview')
 
   const stars = getStars(target)
@@ -170,24 +203,21 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
+  const joinCode = `<qr-code
+      text="https://${host}&council=${council}&seat=${seat}"
+      ${fg ? `data-fg="${fg}"`: ''}
+      ${bg ? `data-bg="${bg}"`: ''}
+    ></qr-code>`
   return `
     <div class="post-it">
       <main class="canvas" style="background-image: ${stars}">
-        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : ''}
+        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : joinCode}
       </main>
       <header class="logo">
-        <qr-code
-          text="https://${host}"
-          ${fg ? `data-fg="${fg}"`: ''}
-          ${bg ? `data-bg="${bg}"`: ''}
-        ></qr-code>
-        <button data-download>Get</button>
+        <button data-download>PaperPocket: ${mascot}</button>
       </header>
       <nav>
-        <div class="address">
-          ${mascot}<br/>
-          ${contact}
-        </div>
+        <sillonious-joypro seat="${seat}"></sillonious-joypro>
       </nav>
       <footer class="invite">
         ${host}: ${tagline}
@@ -266,6 +296,17 @@ $.style(`
     overflow: hidden;
   }
 
+  & [data-download] {
+    border: none;
+    background: transparent;
+    color: var(--wheel-0-4);
+    text-shadow: 0 0 5px var(--wheel-0-6);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    padding-left: .5rem;
+    line-height: 2rem;
+  }
+
   & iframe {
     width: 100%;
     height: 100%;
@@ -273,22 +314,52 @@ $.style(`
     display: block;
   }
   & .post-it {
-    background: white;
+    border: 1rem solid var(--wheel-0-0);
+    background: var(--wheel-0-1);
     display: grid;
-    grid-template-columns: 1in auto;
-    grid-template-rows: 1fr auto auto;
-    width: 50ch;
+    grid-template-rows: 1fr 2rem auto 2rem;
     max-width: 100%;
-    padding: 1rem;
+    padding: 0;
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: auto;
   }
   & .logo {
-    padding: 2mm 2mm 0;
-    background: var(--wheel-0-6);
+    background: var(--wheel-0-0);
     border-radius: 4px 4px 0 0;
+    position: relative;
   }
+
+  & .logo::after {
+    animation: &-pulse ease-in-out 2500ms alternate infinite;
+    content: '';
+    width: 2px;
+    height: 2px;
+    background: var(--wheel-0-6);
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-100%);
+    border-radius: 100%;
+    box-shadow:
+      0 0 1px 1px var(--wheel-0-6),
+      0 0 2px 2px var(--wheel-0-5),
+      0 0 3px 3px var(--wheel-0-4),
+      0 0 5px 5px var(--wheel-0-3),
+      0 0 8px 8px var(--wheel-0-2),
+      0 0 12px 12px var(--wheel-0-1);
+  }
+
+   @keyframes &-pulse {
+     0% {
+       opacity: .95;
+     }
+     100% {
+       opacity: .75;
+     }
+   }
+
+
   & nav {
     align-self: end;
   }
@@ -305,9 +376,11 @@ $.style(`
   & .invite {
     grid-column: 1 / -1;
     padding: 1mm 2mm;
-    background: var(--wheel-0-6);
-    border-radius: 0 4px 4px 4px;
+    background: var(--wheel-0-0);
     color: var(--wheel-0-2);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   & .canvas {
@@ -371,6 +444,8 @@ function sticky(brand) {
 
             .post-it {
               padding: 0 !important;
+              
+              border: none !important;
             }
           }
 

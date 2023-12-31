@@ -3,6 +3,7 @@
     "provision": "./provision.sh",
 
     "start": "deno run -A --unstable mod.js",
+    "compile-client": "deno compile -A --output cloud.exe client.js",
 
     "start-client": "deno run -A client.js",
     "debug-client": "deno run -A --inspect-brk client.js",

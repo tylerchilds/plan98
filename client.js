@@ -10,6 +10,33 @@ import { DOMParser } from "https://esm.sh/linkedom";
 import { render } from "@sillonious/saga"
 import { marked } from "marked"
 
+const command = Deno.args[0];
+const commands = {
+  link,
+  unlink
+}
+
+async function link(pkg) {
+  const dom = await page()
+  console.log('should install to the importmap of index.html')
+  const list = dom.querySelector('[type="importmap"]').innerHTML
+  console.log(pkg, list)
+}
+
+async function unlink(pkg) {
+  const dom = await page()
+  console.log('should uninstall from the importmap of index.html')
+  const list = dom.querySelector('[type="importmap"]').innerHTML
+  console.log(pkg, list)
+}
+
+if(commands[command]) {
+  const food = Deno.args[1];
+  await commands[command](Deno.args[1])
+  console.log(`Running as ${command}, I like ${food}!`);
+  Deno.exit();
+}
+
 async function page() {
   const index = await Deno.readTextFile(`./client/public/index.html`)
   return new DOMParser().parseFromString(index, "text/html");
