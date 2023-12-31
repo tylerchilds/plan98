@@ -14,8 +14,8 @@ const elves = [
   const expression = doingBusinessAs[elve]
   const council = "42"
   return `
-    <div class="elve" style="--expression: ${expression.color}">
-      <button class="box" data-theme="${expression.color}">
+    <div class="elve" style="--expression: ${expression.color};">
+      <button class="box" data-theme="${expression.color}" data-image="url('${expression.image}')">
         <sillonious-brand host="${elve}" council="${council}" seat="${i}"></sillonious-brand>
       </kutton>
       <div class="hat">
@@ -41,7 +41,11 @@ $.draw(() => $.learn().elves.join(''))
 $.when('click', '.box', (event) => {
   event.stopPropagation()
   event.preventDefault()
-  showModal(event.target.innerHTML, { maximized: true, theme: event.target.dataset.theme })
+  showModal(event.target.innerHTML, {
+    maximized: true,
+    theme: event.target.dataset.theme,
+    image: event.target.dataset.image,
+  })
 })
 
 $.style(`

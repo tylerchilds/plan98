@@ -30,14 +30,15 @@ $.draw(() => {
     isOpen,
     bannerType,
     maximized,
-    theme
+    theme,
+    image,
   } = $.learn()
 
   if(!isOpen) return ' '
   const modalHeader = types[bannerType] ? banner() : ''
 
   return `
-    <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}">
+    <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
       <button data-close>X</button>
       <div class="modal">
         ${modalHeader}
@@ -116,7 +117,11 @@ $.style(`
 
   & .shell {
     position: fixed;
-    background: var(--theme, transparent);
+    background: var(--image), var(--theme, transparent);
+    background-blend-mode: multiply;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
     place-items: center;
     display: grid;
     top: 0;
