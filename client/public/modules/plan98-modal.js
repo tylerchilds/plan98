@@ -39,7 +39,7 @@ $.draw(() => {
 
   return `
     <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
-      <button data-close>X</button>
+      <button data-close>Close</button>
       <div class="modal">
         ${modalHeader}
         <div class="body">
@@ -175,17 +175,17 @@ $.style(`
   & [data-close] {
     background: black;
     border: none;
-    border-radius: 100%;
+    border-radius: 0 0 0 1rem;
     color: white;
-    padding: none;
+    padding-left: .5rem;
     line-height: 1;
     height: 2rem;
-    width: 2rem;
     opacity: .8;
     transition: opacity: 200ms;
     position: absolute;
-    top: .5rem;
-    right: .5rem;
+    top: 0;
+    right: 0;
+    z-index: 1101;
   }
 
   & [data-close]:hover,
