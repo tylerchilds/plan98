@@ -107,3 +107,17 @@ deno task debug-client
 
 Sincerely yours,
 The Notorious Sillonious.
+
+## Reverse Engineer's Reverse Roadmap
+
+[] Don't write a game.
+
+[x] If you do, don't write a game engine.
+
+[x] If you do, don't write a platform.
+
+[x] If you do, don't write a computer.
+
+[] If you do, don't commercialize it.
+
+[] If you do, don't teach it to kids.
