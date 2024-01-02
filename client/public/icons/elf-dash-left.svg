@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <ellipse style="fill: rgb(216, 216, 216);" cx="960.696" cy="180" rx="60" ry="60" class="slot" id="slot-0"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="960.696" cy="900" rx="60" ry="60" id="slot-6" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-840.481" cy="-298.069" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="slot-11" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-720.051" cy="-418.498" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="slot-10" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-840.481" cy="-779.785" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="slot-7" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-720.051" cy="-659.356" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="slot-8" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-599.622" cy="-538.927" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="slot-9" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1380" cy="240.623" rx="60" ry="60" class="slot" id="ellipse-1"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1380" cy="960.623" rx="60" ry="60" id="ellipse-2" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1259.785" cy="-358.692" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-3" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1139.355" cy="-479.121" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-4" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1259.785" cy="-840.408" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-5" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1139.355" cy="-719.979" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-6" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1018.926" cy="-599.55" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-7" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1380" cy="120.623" rx="60" ry="60" class="slot" id="ellipse-8"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1380" cy="840.623" rx="60" ry="60" id="ellipse-9" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1259.785" cy="-238.692" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-10" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1139.355" cy="-359.121" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-11" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1259.785" cy="-720.408" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-12" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1139.355" cy="-599.979" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-13" class="slot"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1018.926" cy="-479.55" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 0, 0)" id="ellipse-14" class="slot"/>
+</svg>
