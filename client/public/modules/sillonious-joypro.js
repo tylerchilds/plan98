@@ -127,6 +127,7 @@ $.style(`
     display: grid;
     grid-template-columns: 1fr 1fr;
     padding: 1rem;
+    touch-action: manipulation;
   }
   & .the-cardinal,
   & .the-compass {
