@@ -43,7 +43,6 @@ function mount(target) {
 		.setLatLng([37.7691, -122.4580])
 		.setContent('<sillonious-brand host="tychi.me"></sillonious-brand>')
 		.openOn(map);
-    */
 
 	function onMapClick(e) {
 		popup
@@ -53,6 +52,7 @@ function mount(target) {
 	}
 
 	map.on('click', onMapClick);
+    */
   return true
 }
 const $ = module('middle-earth')

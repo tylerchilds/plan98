@@ -4,6 +4,8 @@ import party, {
   fantasyGamepadEvent
 } from '@sillonious/party'
 
+const synthia = '/public/icons/sprite.svg'
+
 const $ = module('sillonious-joypro', {joypros: []})
 
 $.draw(target => {
@@ -19,8 +21,8 @@ $.draw(target => {
 })
 
 function renderJoyPro(joypro, seat) {
-  const { quantums, quadrants } = joypro
-  const [play,reset,light,mode,...buttons] = quadrants.map((button) => {
+  const { throttles, buttons } = joypro
+  const [play,reset,light,mode,...remainingButtons] = buttons.map((button) => {
     return `
       <button
         class="nav-item"
@@ -28,30 +30,41 @@ function renderJoyPro(joypro, seat) {
         data-index="${button.index}"
         data-seat="${seat}"
       >
+        <img src="${button.icon || synthia}" alt="button for osc button.icon"/>
       </button>
     `
   })
-  const [upDown,leftRight,...axes] = quantums.map((axis) => {
+  const [upDown,leftRight,...remainingThrottles] = throttles.map((throttle) => {
     return `
       <button
         class="nav-item"
-        ${axis.pushed ? 'data-pushed="true"' : ''}
-        data-index="${axis.index}"
+        ${throttle.pushed ? 'data-pushed="true"' : ''}
+        data-index="${throttle.index}"
         data-seat="${seat}"
       >
+        <img src="${throttle.iconAbove || synthia}" alt="button for osc button.icon"/>
       </button>
       <button
         class="nav-item"
-        ${axis.pulled ? 'data-pulled="true"' : ''}
-        data-index="${axis.index}"
+        ${throttle.pulled ? 'data-pulled="true"' : ''}
+        data-index="${throttle.index}"
         data-seat="${seat}"
       >
+        <img src="${throttle.iconBelow || synthia}" alt="button for osc button.icon"/>
       </button>
 
     `
   })
 
   return `
+    <div class="the-overflow">
+      <div class="reality-reality">
+        ${remainingThrottles.join('')}
+      </div>
+      <div class="animated-reality">
+        ${remainingButtons.join('')}
+      </div>
+    </div>
     <div class="the-cardinal">
       ${upDown}
       ${leftRight}
@@ -62,10 +75,6 @@ function renderJoyPro(joypro, seat) {
       ${light}
       ${mode}
     </div>
-    <div class="the-overflow">
-      ${buttons.join('')}
-      ${axes.join('')}
-    </div>
   `
 }
 
@@ -73,11 +82,11 @@ function loop() {
   const players = party()
   if(players.length === 0) return
   const joypros = players.map(({ gamepad, osc } ) => {
-    const quadrants = gamepad.buttons
+    const buttons = gamepad.buttons
       .sort((a, b) => a.index - b.index)
-    const quantums = gamepad.axes
+    const throttles = gamepad.axes
       .sort((a, b) => a.index - b.index)
-    return { quadrants, quantums }
+    return { buttons, throttles }
   })
 
   $.teach({ joypros })
@@ -94,8 +103,8 @@ $.when('mousedown', '.nav-item', attack)
 function attack(event) {
   const { index, seat } = event.target.dataset
   const { joypros } = $.learn()
-  const { quadrants } = joypros[seat]
-	const button = quadrants[index]
+  const { buttons } = joypros[seat]
+	const button = buttons[index]
   fantasyGamepadEvent(seat, button.osc, {
 		...button,
 		value: 1
@@ -105,8 +114,8 @@ function attack(event) {
 function release(event) {
 const { index, seat } = event.target.dataset
   const { joypros } = $.learn()
-  const { quadrants } = joypros[seat]
-	const button = quadrants[index]
+  const { buttons } = joypros[seat]
+	const button = buttons[index]
   fantasyGamepadEvent(seat, button.osc, {
 		...button,
 		value: 0
@@ -136,29 +145,64 @@ $.style(`
 
   & .the-overflow {
     grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
-  & .nav-item:nth-child(1) {
+  & .the-overflow button {
+    width: 2rem;
+    height: 1rem;
+  }
+
+  & .animated-reality {
+    place-self: end;
+  }
+
+  & .reality-reality {
+    place-self: start;
+  }
+
+  & .the-compass .nav-item:nth-child(1) {
     grid-row: 3 / 4;
     grid-column: 2 / 4;
   }
 
-  & .nav-item:nth-child(2) {
+  & .the-compass .nav-item:nth-child(2) {
     grid-row: 2 / 3;
     grid-column: 3 / 5;
   }
 
-  & .nav-item:nth-child(3) {
+  & .the-compass .nav-item:nth-child(3) {
     grid-row: 2 / 4;
     grid-column: 1 / 3;
   }
 
-  & .nav-item:nth-child(4) {
+  & .the-compass .nav-item:nth-child(4) {
     grid-row: 1 / 3;
     grid-column: 2 / 4;
   }
 
-  & .the-cardinal {
+  & .the-cardinal .nav-item:nth-child(1) {
+    grid-row: 1 / 3;
+    grid-column: 2 / 4;
+  }
+
+  & .the-cardinal .nav-item:nth-child(2) {
+    grid-row: 3 / 4;
+    grid-column: 2 / 4;
+  }
+
+  & .the-cardinal .nav-item:nth-child(3) {
+    grid-row: 2 / 3;
+    grid-column: 3 / 5;
+  }
+
+  & .the-cardinal .nav-item:nth-child(4) {
+    grid-row: 2 / 4;
+    grid-column: 1 / 3;
+  }
+
+  & .the-cardinal .the-cardinal {
     filter: grayscale(1);
   }
 
@@ -167,7 +211,7 @@ $.style(`
 		background-size: 1px 14.4rem;
 		background-repeat: repeat-x;
 		font-weight: bold;
-		padding: .5rem;
+		padding: 0;
     height: 3rem;
 		text-shadow: 0px 2px 0px var(--text-shadow-color);
 		transition: all 200ms ease;
@@ -180,12 +224,13 @@ $.style(`
     & [data-index="${i}"] {
       --nav-link-color: var(--wheel-${i}-6);
       --text-shadow-color: var(--wheel-${i}-1);
-      --nav-background-start: var(--wheel-${i}-6);
-      --nav-background-end: var(--wheel-${i}-3);
+      --nav-background-start: var(--wheel-${i}-0);
+      --nav-background-end: var(--wheel-${i}-2);
       border: var(--wheel-${i}-2);
     }
 
     & [data-index="${i}"][data-pushed="true"],
+    & [data-index="${i}"][data-pulled="true"],
     & [data-index="${i}"]:hover,
     & [data-index="${i}"]:focus {
       --text-shadow-color: var(--wheel-${i}-2);
@@ -193,6 +238,7 @@ $.style(`
   `).join('')}
 
   & .nav-item[data-pushed="true"],
+  & .nav-item[data-pulled="true"],
 	& .nav-item:hover,
 	& .nav-item:focus {
 		--nav-link-color: white;

@@ -11,32 +11,48 @@ const elves = [
   'css.ceo',
   'y2k38.info'
 ].map((elve, i) => {
-  const expression = doingBusinessAs[elve]
+  const { color, image, emote } = doingBusinessAs[elve]
   const council = "42"
-  return `
-    <div class="elve" style="--expression: ${expression.color};">
-      <button class="box" data-theme="${expression.color}" data-image="url('${expression.image}')">
+  const portal = `
+    <div class="portal">
+      <button class="box" data-theme="${color}" data-image="url('${image}')">
         <sillonious-brand host="${elve}" council="${council}" seat="${i}"></sillonious-brand>
-      </kutton>
+      </button>
+    </div>
+  `
+  const profile = `
+    <div class="profile">
       <div class="hat">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000">
           <!-- Hat Band (Smooth Curve at the bottom) -->
-          <path d="M0,1000 Q500,-500 1000,1000" fill="${expression.color}" />
+          <path d="M0,1000 Q500,-500 1000,1000" fill="${color}" />
         </svg>
       </div>
-      <div class="face" style="border: 8px solid ${expression.color};">
+      <div class="face" style="border: 8px solid ${color};">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
           <text class="resting-face" x="70%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="50" fill="yellow">:)</text>
-          <text class="emoting-face" x="70%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="50" fill="yellow">${expression.emote}</text>
+          <text class="emoting-face" x="70%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="50" fill="yellow">${emote}</text>
         </svg>
       </div>
     </elv>
   `
+
+  return { profile, portal, color, image, emote }
 })
 
 const $ = module('elve-council', { elves })
 
-$.draw(() => $.learn().elves.join(''))
+$.draw(() => {
+  const { elves } = $.learn()
+  return elves.map(({profile, portal, color}) => {
+    return `
+      <div class="elve" style="--expression: ${color};">
+        ${portal}
+        ${profile}
+      </div>
+    `
+  }).join('')
+})
 
 $.when('click', '.box', (event) => {
   event.stopPropagation()
@@ -65,12 +81,11 @@ $.style(`
   }
 
   & .box {
-    transform: translateX(100%);
     overflow: hidden;
+    position: absolute;
     border: 5px solid black;
     border-radius: 0;
     aspect-ratio: 1;
-    position: absolute;
     top: 2rem;
     width: 2rem;
     height: 2rem;
@@ -92,6 +107,18 @@ $.style(`
      }
    }
 
+  & .elve {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  & .portal {
+    place-self: start;
+  }
+
+  & .profile {
+    place-self: end;
+  }
 
   & .face {
     background: chocolate;

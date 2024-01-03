@@ -136,16 +136,33 @@ export const doingBusinessAs = {
       .toString({format: 'hex'}),
   },
   'tychi.me': {
+    emote: ':)',
     latitude: '37.782562',
     longitude: '-122.471554',
     zoom: 13,
     tagline: 'Join the Circus',
     mascot: 'AN0051610',
-    saga: '/sagas/1998.social/tychi.saga',
+    saga: '/public/sagas/1998.social/tychi.saga',
     contact: 'Golden Gate Bifrost',
     brandHue: 55,
     brandRange: 360,
     color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
+  },
+  'abc.xyz': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '64.1478144',
+    longitude: '-21.943671',
+    zoom: 17,
+    tagline: 'Alphabet Soup',
+    saga: '/public/sagas/abc.xyz/lmnop.saga',
+    mascot: 'Crayons',
+    contact: 'Letterer',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
       .display()
       .toString({format: 'hex'}),
   },

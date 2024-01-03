@@ -2,10 +2,30 @@ import module from '@sillonious/module'
 
 const DEFAULT_ACTUATION = .75
 
+
+const buttonIcons = [
+  '/public/icons/elf-dash-down.svg',
+  '/public/icons/elf-dash-right.svg',
+  '/public/icons/elf-dash-left.svg',
+  '/public/icons/elf-dash-up.svg',
+]
+
+const axesIcons = [
+  {
+    iconAbove: '/public/icons/dash-up.svg',
+    iconBelow: '/public/icons/dash-down.svg',
+  },
+  {
+    iconAbove: '/public/icons/dash-right.svg',
+    iconBelow: '/public/icons/dash-left.svg',
+  },
+]
+
 function gamepadButton(index, value=0) {
   return {
     index,
     value,
+    icon: buttonIcons[index],
     osc: `/button/${index}`,
     actuated: false,
     pushed: false,
@@ -13,9 +33,12 @@ function gamepadButton(index, value=0) {
 }
 
 function gamepadAxis(index, value=0) {
+  const { iconAbove, iconBelow } = axesIcons[index];
   return {
     index,
     value,
+    iconAbove,
+    iconBelow,
     osc: `/axis/${index}`,
     actuated: false,
     pushed: false,
@@ -240,35 +263,39 @@ function remappableAxes(slot, axis, value) {
 				}
 			}
 	})
-
 }
 
 function addOSC(gamepad, slot) {
   const { remaps } = $.learn()
   const { buttonOrder, axesOrder } = remaps[slot]
-  const buttons = buttonOrder.map(i => {
-    const osc = `/button/${i}`
-    let value = gamepad.buttons[i]
+  const buttons = buttonOrder.map((position, i) => {
+    const icon = buttonIcons[i];
+    const osc = `/button/${position}`
+    let value = gamepad.buttons[position]
     const actuated = value >= DEFAULT_ACTUATION
     value = !actuated && remaps[slot].osc[osc]
       ? remaps[slot].osc[osc].value
       : value
     return {
-      index: i,
+      index: position,
       osc,
       actuated,
+      icon,
       pushed: value === UPPER_THRESHOLD,
       value
     }
   })
-  const axes = axesOrder.map(i => {
-    const osc = `/axis/${i}`
-    let value = gamepad.axes[i]
+  const axes = axesOrder.map((position, i) => {
+    const { iconAbove, iconBelow } = axesIcons[i % axesIcons.length];
+    const osc = `/axis/${position}`
+    let value = gamepad.axes[position]
     const actuated = Math.abs(value) >= DEFAULT_ACTUATION
     return {
-      index: i,
+      index: position,
       osc,
       actuated,
+      iconAbove,
+      iconBelow,
       pushed: value === UPPER_THRESHOLD,
       pulled: value === LOWER_THRESHOLD,
       value
