@@ -14,7 +14,7 @@ $.draw(target => {
   const seat = target.getAttribute('seat')
 
   if(seat) {
-    return joypros[seat] ? renderJoyPro(joypros[seat], seat) : 'todo: virtual'
+    return joypros[seat] ? renderJoyPro(joypros[seat], seat) : renderJoyPro(joypros[0], 0)
   }
 
   return joypros.map((joypro, seat) => renderJoyPro(joypro, seat)).join('')
