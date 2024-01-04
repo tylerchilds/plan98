@@ -192,7 +192,8 @@ function currentBusiness(host) {
 }
 
 $.draw((target) => {
-  const host = target.getAttribute('host') || window.location.host
+  let { host } = $.learn()
+  host = host || target.getAttribute('host') || window.location.host
   const council = target.getAttribute('council') || '42'
   const seat = target.getAttribute('seat') || '0'
   const preview = target.getAttribute('preview')
@@ -227,11 +228,15 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  const joinCode = `<qr-code
-      text="https://${host}&council=${council}&seat=${seat}"
-      ${fg ? `data-fg="${fg}"`: ''}
-      ${bg ? `data-bg="${bg}"`: ''}
-    ></qr-code>`
+  const joinCode = `
+    <button name="join-code">
+      <qr-code
+        text="https://${host}&council=${council}&seat=${seat}"
+        ${fg ? `data-fg="${fg}"`: ''}
+        ${bg ? `data-bg="${bg}"`: ''}
+      ></qr-code>
+    </button>
+  `
   return `
     <div class="post-it">
       <main class="canvas" style="background-image: ${stars}">
@@ -309,6 +314,9 @@ function print(colors) {
   `).join('')
 }
 
+$.when('click', '[name="join-code"]', (event) => {
+  $.teach({ host: 'abc.xyz' })
+})
 $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).outerHTML
   sticky(brand)
@@ -318,6 +326,16 @@ $.style(`
   & {
     display: block;
     overflow: hidden;
+  }
+
+  & [name="join-code"] {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: white;
+    border: none;
+    border-radius: 0;
+    padding: 0;
   }
 
   & [data-download] {

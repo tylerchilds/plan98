@@ -12,7 +12,6 @@ $.draw((target) => {
 $.style(`
   &{
     display:block;
-    position: relative;
     margin: auto;
     height: 100%;
   }
