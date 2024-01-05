@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
-import { Status } from "https://deno.land/std/http/http_status.ts";
+import { Status } from "https://deno.land/std@0.210.0/http/http_status.ts";
 import * as path from "https://deno.land/std@0.184.0/path/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
 import { walk } from "https://deno.land/std/fs/mod.ts";
