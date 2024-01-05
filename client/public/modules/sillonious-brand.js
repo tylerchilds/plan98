@@ -182,7 +182,22 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
-
+  'myspace.com': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '32.8246976',
+    longitude: '-117.4386328',
+    zoom: 17,
+    tagline: 'Recompose Yourself',
+    saga: '/public/cdn/myspace.com/index.saga',
+    mascot: 'Tom',
+    contact: 'OnHere',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
+  },
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
   //'tychi.me': emeraldOfTime
