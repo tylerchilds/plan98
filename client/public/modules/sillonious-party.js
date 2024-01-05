@@ -2,7 +2,6 @@ import module from '@sillonious/module'
 
 const DEFAULT_ACTUATION = .75
 
-
 const buttonIcons = [
   '/public/icons/elf-dash-down.svg',
   '/public/icons/elf-dash-right.svg',

@@ -166,6 +166,23 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
+  'w3c.org': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '47.6422547',
+    longitude: '-21.943671',
+    zoom: 17,
+    tagline: 'World Wide Web Consortium',
+    saga: '/public/cdn/w3c.org/index.saga',
+    mascot: 'Chairman',
+    contact: 'Email',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
+  },
+
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
   //'tychi.me': emeraldOfTime

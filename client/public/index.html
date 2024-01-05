@@ -10,6 +10,11 @@
         height: 100%;
       }
 
+      main {
+        position: relative;
+        z-index: 1;
+      }
+
       img {
         max-width: 100%;
         max-height: 100%;
@@ -54,6 +59,8 @@
           "@sillonious/solid/user": "/modules/solid-user.js",
           "@pyscript/core": "https://pyscript.net/snapshots/2023.11.1.RC3/core.js",
           "@wasmer/sdk": "https://esm.sh/@wasmer/sdk@0.6.0",
+          "activitypub-testing": "https://esm.sh/activitypub-testing@0.9.2",
+          "activitypub-actor-tester": "https://cdn.jsdelivr.net/npm/activitypub-actor-tester@0.1.1/dist/activitypub-actor-tester.js",
           "aframe": "https://esm.sh/aframe@1.5.0",
           "babylonjs": "https://esm.sh/babylonjs@6.33.1",
           "codemirror": "https://esm.sh/codemirror@6.0.1",
