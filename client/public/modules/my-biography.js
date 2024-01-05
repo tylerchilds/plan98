@@ -23,7 +23,13 @@ $.draw(target => {
 
 $.style(`
   & {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: block;
+  }
+
+  @media screen and (min-width: 768px) {
+    & {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
   }
 `)

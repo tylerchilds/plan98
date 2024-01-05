@@ -87,7 +87,6 @@ $.draw((target) => {
 
 
   target.innerHTML =`
-    <elve-council></elve-council>
     <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
       <button name="${tileMap.enter.name}">
         ${t(tileMap.enter.label)}
