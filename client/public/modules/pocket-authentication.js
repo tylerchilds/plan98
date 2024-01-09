@@ -3,21 +3,34 @@ import PocketBase from "pocketbase"
 
 const bases = {}
 
+export function getBase(target) {
+  const { base } = target.closest('[data-base]').dataset
+  return bases[base]
+}
+
+export function connect(target) {
+  if(target.dataset.base) return
+  const src = target.getAttribute('src') || "http://localhost:8090"
+  target.dataset.base = src
+  bases[src] = new PocketBase(src)
+}
+
 const $ = module('pocket-authentication')
 
 $.draw((target) => {
-  initialize(target)
-  const { account, email="", password="" } = $.learn()
+  connect(target)
+  const { email="", password="" } = $.learn()
+  const account = state['ls/~']
 
   return account ? `
-      Logged in as:
-      ${account.admin ? account.admin.email : ''}
-      ${account.record ? account.record.email : ''}
-      (${bases[target.id].authStore.model.id})
-      <button name="logout">
-        Logout
-      </button>
-    ` : `
+    Logged in as:
+    ${account.admin ? account.admin.email : ''}
+    ${account.record ? account.record.email : ''}
+    (${getBase(target).authStore.model.id})
+    <button name="logout">
+      Logout
+    </button>
+  ` : `
     Who are you?
     <form>
       <input name="email" type="text" value="${email}"/>
@@ -29,30 +42,24 @@ $.draw((target) => {
   `
 })
 
-function initialize(target) {
-  if(target.dataset.base) return
-  const { id } = target
-  target.dataset.base = id
-  const src = target.getAttribute('src') || "http://localhost:8090"
-  bases[id] = new PocketBase(src)
-}
 
 $.when('click', '[name="logout"]', (event) => {
-  const pb = bases[event.target.closest($.link).id]
-  pb.authStore.clear();
-  $.teach({ account: null })
+  const base = getBase(event.target)
+  base.authStore.clear();
+  state['ls/~'] = null
 })
 
 $.when('submit', 'form', async (event) => {
   event.preventDefault()
-  const pb = bases[event.target.closest($.link).id]
+  const base = getBase(event.target)
+  base.authStore.clear();
   const email = event.target.email.value
   const password = event.target.password.value
 
   try {
-    const admin = await authAsAdmin(pb, {email, password})
+    const admin = await authAsAdmin(base, {email, password})
     if(admin) {
-      $.teach({ account: admin })
+      state['ls/~'] = admin
       return
     }
   } catch(e) {
@@ -60,9 +67,9 @@ $.when('submit', 'form', async (event) => {
   }
 
   try {
-    const record = await authAsUser(pb, {email, password})
+    const record = await authAsUser(base, {email, password})
     if(record) {
-      $.teach({ account: record })
+      state['ls/~'] = record
       return
     }
   } catch(e) {
@@ -73,10 +80,10 @@ $.when('submit', 'form', async (event) => {
   // finally, error out
 })
 
-async function authAsAdmin(pb, { email,password }) {
-  return await pb.admins.authWithPassword(email,password);
+async function authAsAdmin(base, { email,password }) {
+  return await base.admins.authWithPassword(email,password);
 }
 
-async function authAsUser(pb, { email,password }) {
-  return await pb.collection('users').authWithPassword(email,password);
+async function authAsUser(base, { email,password }) {
+  return await base.collection('users').authWithPassword(email,password);
 }
