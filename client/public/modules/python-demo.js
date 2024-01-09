@@ -13,7 +13,7 @@ $.draw(target => {
     return `<input value="${script}" /><button>run</button>`
   }
   target.innerHTML = `
-    ${!output ? '<boot-loader></boot-loader>' : ''}
+    ${!output ? '<boot-loader style="max-height: 100px"></boot-loader>' : ''}
     ${output && output.ok ? 'Successful' : '' }
     ${statusLine}<br />
     ${pythonVersion}
