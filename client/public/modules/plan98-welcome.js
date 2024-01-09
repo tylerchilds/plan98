@@ -61,6 +61,7 @@ $.draw(() => {
   return `
     <div name="square">
       <section class="layout">
+        <twgl-demo></twgl-demo>
         <div class="horizon"></div>
         <div class="land">
           <div class="grid-3d"></div>
@@ -253,6 +254,9 @@ $.style(`
    grid-area: 1 / 1 / -1 / -1;
  }
 
+ & twgl-demo {
+   grid-area: 1 / 1 / -1 / -1;
+ }
  & .horizon {
    grid-area: 1 / 1 / -1 / -1;
    background: url('/cdn/boxart.svg');

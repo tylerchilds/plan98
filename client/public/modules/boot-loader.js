@@ -6,7 +6,7 @@ $.draw((target) => {
   if(target.innerHTML) return
   const loader = document.getElementById('bootloader').cloneNode(true)
   loader.id =''
-  return loader.outerHTML
+  return loader.innerHTML
 })
 
 $.style(`
@@ -14,9 +14,15 @@ $.style(`
     display:block;
     margin: auto;
     height: 100%;
+    position: relative;
   }
 
-   & > * {
+  @media print {
+    & {
+      display: none;
+    }
+  }
+   & svg {
     position: absolute;
     max-height: 100%;
     width: 100%;

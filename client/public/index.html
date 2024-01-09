@@ -10,6 +10,10 @@
         height: 100%;
       }
 
+      body {
+        background: linear-gradient(135deg, transparent, var(--wheel-0-0, rebeccapurple)), black;
+      }
+
       main {
         position: relative;
         z-index: 1;
@@ -24,6 +28,10 @@
       boot-loader {
         max-width: 100%;
         margin: auto;
+        pointer-events: none;
+      }
+
+      #bootloader {
         position: absolute;
         inset: 0;
         margin: auto;
@@ -82,6 +90,7 @@
           "solid-file-client": "https://esm.sh/solid-file-client@2.1.3?bundle-deps",
           "statebus": "/_statebus.js",
           "tone@next": "https://esm.sh/tone@next",
+          "twgl.js": "https://esm.sh/twgl.js@5.5.3",
           "uxn.wasm": "https://esm.sh/uxn.wasm@0.8.0",
           "uxn.wasm/util": "https://esm.sh/uxn.wasm@0.8.0/util",
           "xterm": "https://esm.sh/xterm@5.3.0",
@@ -91,8 +100,8 @@
     </script>
   </head>
   <body>
-    <boot-loader>
-      <svg id="bootloader" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+    <boot-loader id="bootloader">
+      <svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
         <ellipse style="fill: rgb(216, 216, 216);" cx="781.289" cy="180" rx="60" ry="60" class="slot" id="slot-0" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
           <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="2s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
         </ellipse>
@@ -167,15 +176,17 @@
         </ellipse>
       </svg>
     </boot-loader>
-    <main id="main">
-      <script>document.write(`
+    <main id="main"></main>
+    <script type="module" id="lazy-bootstrap">
+      import module from '@sillonious/module'
+      import Computer from '@sillonious/computer'
+
+      module('#main').draw(target => `
         <sillonious-brand host="${window.plan98.host}">
           <saga-genesis></saga-genesis>
         </sillonious-brand>
-      `)</script>
-    </main>
-    <script type="module" id="lazy-bootstrap">
-      import Computer from '@sillonious/computer'
+      `)
+
       const sillyz = new Computer(window.plan98, { registry: '/modules' })
     </script>
   </body>
