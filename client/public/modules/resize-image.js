@@ -1,32 +1,29 @@
 import module from '@sillonious/module'
 const CACHE = {}
 
+
+const UPLOADED = 'uploadedSrc'
+const RESIZED = 'resizedSrc'
+
 const $ = module('resize-image')
+export default $
 
 $.draw((target) => {
   cache(target)
-  const { uploadedKey, resizedKey } = $.learn()
+  const { updated } = $.learn()
 
   const { get } = cache(target)
-
-  const uploadedSrc = get(uploadedKey)
-  const resizedSrc = get(resizedKey)
+  const src = get(RESIZED)
 
   target.innerHTML = `
-    <input type="file" name="input" accept="image/*">
-    <section style="display: grid; grid-template-columns: 1f 1fr;">
-      <div>
-        <h3>Original</h3>
-        <img name="uploaded" src="${uploadedSrc}">
-      </div>
-      <div>
-        <h3>Resized</h3>
-        <img name="resized" src="${resizedSrc}">
-      </div>
-    </section>
+    <input type="file" style="display: none;" name="input" accept="image/*">
+    <img name="image" alt="picture resized at ${updated}" src="${src}">
   `
 })
 
+$.when('click', '[name="image"]', () => {
+  event.target.closest($.link).querySelector('[name="input"]').click()
+})
 $.when('change', '[name="input"]', onImageSelection)
 
 async function onImageSelection({ target }) {
@@ -37,11 +34,12 @@ async function onImageSelection({ target }) {
   const resizedImage = await getResizedImageFromFile(file, 480).catch(console.error);
 
   const { set } = cache(target)
-  set('uploadedSrc', originalImage)
-  set('resizedSrc', resizedImage.dataURL)
+
+  set(UPLOADED, originalImage)
+  set(RESIZED, resizedImage.dataURL)
+
   $.teach({
-    uploadedKey: 'uploadedSrc',
-    resizedKey: 'resizedSrc'
+    updated: Date.now(),
   })
 }
 
@@ -143,6 +141,6 @@ function cache(target) {
   }
 }
 
-export default function resizedImageById(id) {
+export function resizedImageById(id) {
   return CACHE && CACHE[id] && CACHE[id].resizedSrc
 }

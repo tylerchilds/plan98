@@ -4,7 +4,7 @@ const $ = module('my-profile')
 
 $.draw(() => {
   return `
-    photo
+    <resize-image id="profile-picture"></resize-image>
     flags
     age
     region
