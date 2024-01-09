@@ -198,6 +198,23 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
+  'braid.org': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '64.1478144',
+    longitude: '-21.943671',
+    zoom: 17,
+    tagline: 'Braid',
+    saga: '/public/cdn/braid.org/index.saga',
+    mascot: 'Mike',
+    contact: 'Braid',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
+  },
+
   //'bustblocker.com': emeraldOfTime
   //'fantasysports.social': emeraldOfTime
   //'tychi.me': emeraldOfTime

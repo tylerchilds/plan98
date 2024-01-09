@@ -181,4 +181,10 @@ $.style(`
     padding: 1rem;
     border-radius: 1rem;
   }
+
+  & textarea {
+    width: 100%;
+    resize: none;
+    height:  10rem;
+  }
 `)
