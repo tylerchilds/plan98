@@ -37,6 +37,7 @@
     <script type="importmap">
       {
         "imports": {
+          "@sillonious/computer": "/sillyz.computer.js",
           "@sillonious/module": "/module.js",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
           "eruda": "https://esm.sh/eruda@3.0.1",
@@ -46,11 +47,20 @@
     </script>
   </head>
   <body>
+    <simpleton-client></simpleton-client>
 		<braid-child></braid-child>
     <braid-parent></braid-parent>
+
+    <script src="https://unpkg.com/braid-http/braid-http-client.js"></script>
+    <script src="https://invisible-college.github.io/universal-sync/diffsync.js"></script>
+
     <script type="module">
+      import Computer from '@sillonious/computer'
       import module from '@sillonious/module'
       import eruda from 'eruda'
+
+      // initialize lazy components
+      new Computer(window.plan98, { registry: '/modules' })
 
       const $parent = module('braid-parent')
 			const $child = module('braid-child', { messages: [] })
