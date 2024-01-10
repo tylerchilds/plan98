@@ -9,9 +9,12 @@ document.head.appendChild(linkElement);
 
 const $ = module('my-admin')
 
-function table(id, results) {
+function table({ table, results}) {
   // big moment for me using this operator in this context.
   if(results?.items.length > 0) {
+    const id = `admin-${table}`
+    const getNode = (target) => target.querySelector(`[id="${id}"]`)
+    const render = (target) => grid.render(getNode(target));
     const columns = Object.keys(results.items[0])
     const data = results.items.map(item => columns.map(x => item[x]))
 
@@ -21,12 +24,12 @@ function table(id, results) {
     })
 
     return {
+      id,
       slot: `<div id="${id}"></div>`,
-      grid
+      grid,
+      render
     }
   }
-
-  return {}
 }
 
 
@@ -34,15 +37,17 @@ $.draw(target => {
   const account = state['ls/~']
   connect(target)
   query(target, account)
-  const { results } = $.learn()
+  const { space, users } = $.learn()
 
-  const tableId = `${target.id}-table`
-  const { slot, grid } = table(tableId, results)
+  const tableSpace = table(space)
+  const tableUsers = table(users)
 
-  const app = results ? `
-    ${slot}
+  const app = account ? `
+    <h2>Everybody!</h2>
+    ${tableSpace?.slot}
+    <h2>Humans!</h2>
+    ${tableUsers?.slot}
   ` : `
-    and when one is clicked show the biography below
     <my-biography player=""></my-biography>
   `
 
@@ -50,18 +55,32 @@ $.draw(target => {
     <pocket-authentication></pocket-authentication>
     ${app}
   `
-  slot && grid.render(target.querySelector(`[id="${tableId}"]`));
+
+  // the seal
+  tableSpace?.render(target)
+  // is broken
+  tableUsers?.render(target)
 })
 
 async function query(target, account) {
   if(target.dataset.account === account) return
   target.dataset.account = account
   const base = getBase(target)
-  const results = await base.collection('my_namespace').getList(1, 30, {});
+  const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
+  const resultUsers = await base.collection('users').getList(1, 30, {});
 
-  $.teach({ results })
+  $.teach({
+    space: {
+      results: resultSpace,
+      table: 'my_namespace'
+    },
+    users: {
+      results: resultUsers,
+      table: 'users'
+    }
+  })
 }
 
 whenLogout(() => {
-  $.teach({ results: null })
+  $.teach({ users: null, space: null })
 })
