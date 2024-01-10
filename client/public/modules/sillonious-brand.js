@@ -236,7 +236,8 @@ export const doingBusinessAs = {
 
 const $ = module('sillonious-brand')
 
-function currentBusiness(host) {
+const standard = window.plan98 || { host: window.location.host }
+export function currentBusiness(host = standard) {
   return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
 }
 

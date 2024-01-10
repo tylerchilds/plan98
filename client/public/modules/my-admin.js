@@ -1,6 +1,8 @@
 import module from '@sillonious/module'
 import { Grid } from 'gridjs'
 import { connect, getBase, whenLogout } from "./pocket-authentication.js"
+import { currentBusiness } from './sillonious-brand.js'
+
 
 const linkElement = document.createElement("link");
 linkElement.rel = "stylesheet";
@@ -51,9 +53,15 @@ $.draw(target => {
     <my-biography player=""></my-biography>
   `
 
+  const { image, color } = currentBusiness()
+  target.style.setProperty("--image", `url(${image})`);
+  target.style.setProperty("--color", color);
+
   target.innerHTML = `
-    <pocket-authentication></pocket-authentication>
-    ${app}
+    <div class="inner">
+      <pocket-authentication></pocket-authentication>
+      ${app}
+    </div>
   `
 
   // the seal
@@ -84,3 +92,31 @@ async function query(target, account) {
 whenLogout(() => {
   $.teach({ users: null, space: null })
 })
+
+$.style(`
+  &::before {
+    content: '';
+    position: fixed;
+    background: var(--image), var(--color, transparent);
+    background-blend-mode: multiply;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    inset: 0;
+  }
+
+  & {
+    display: grid;
+    place-items: center;
+    padding: 9px;
+    height: 100%;
+  }
+
+  & .inner {
+    z-index: 1;
+    position: relative;
+    background: rgba(255,255,255,.85);
+    border-radius: 9px;
+    padding: 16px 9px;
+  }
+`)
