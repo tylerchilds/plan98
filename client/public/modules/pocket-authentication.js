@@ -2,6 +2,7 @@ import module from "@sillonious/module"
 import PocketBase from "pocketbase"
 
 const bases = {}
+const logoutCallbacks = []
 
 export function getBase(target) {
   const { base } = target.closest('[data-base]').dataset
@@ -13,6 +14,10 @@ export function connect(target) {
   const src = target.getAttribute('src') || "http://localhost:8090"
   target.dataset.base = src
   bases[src] = new PocketBase(src)
+}
+
+export function whenLogout(callback) {
+  logoutCallbacks.push(callback)
 }
 
 const $ = module('pocket-authentication')
@@ -47,6 +52,7 @@ $.when('click', '[name="logout"]', (event) => {
   const base = getBase(event.target)
   base.authStore.clear();
   state['ls/~'] = null
+  logoutCallbacks.map(notify => notify())
 })
 
 $.when('submit', 'form', async (event) => {
