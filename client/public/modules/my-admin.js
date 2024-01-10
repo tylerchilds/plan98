@@ -9,10 +9,11 @@ document.head.appendChild(linkElement);
 
 const $ = module('my-admin')
 
-function table({ table, results}) {
+function table(parameters = {}) {
+  const { name, results } = parameters
   // big moment for me using this operator in this context.
   if(results?.items.length > 0) {
-    const id = `admin-${table}`
+    const id = `admin-${name}`
     const getNode = (target) => target.querySelector(`[id="${id}"]`)
     const render = (target) => grid.render(getNode(target));
     const columns = Object.keys(results.items[0])
@@ -31,7 +32,6 @@ function table({ table, results}) {
     }
   }
 }
-
 
 $.draw(target => {
   const account = state['ls/~']
@@ -72,11 +72,11 @@ async function query(target, account) {
   $.teach({
     space: {
       results: resultSpace,
-      table: 'my_namespace'
+      name: 'my_namespace'
     },
     users: {
       results: resultUsers,
-      table: 'users'
+      name: 'users'
     }
   })
 }

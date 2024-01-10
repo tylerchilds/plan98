@@ -1,12 +1,14 @@
 import module from '@sillonious/module'
-import { getBase } from './pocket-authentication.js'
+import { connect, getBase, whenLogout } from "./pocket-authentication.js"
 
 const $ = module('my-biography')
 
 $.draw(target => {
-  const playerId = target.getAttribute('player')
-  // do not use the implcit return virtual dom
-  target.innerHTML =  `
+  connect(target)
+  query(target, account)
+
+  // convert this all to one internal large file
+  return `
     <div class="column">
       <my-name player="${playerId}"></my-name>
       <my-profile player="${playerId}"></my-profile>
@@ -22,6 +24,25 @@ $.draw(target => {
     </div>
   `
 })
+
+async function query(target, account) {
+  if(target.dataset.account === account) return
+  target.dataset.account = account
+  const base = getBase(target)
+  const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
+  const resultUsers = await base.collection('users').getList(1, 30, {});
+
+  $.teach({
+    space: {
+      results: resultSpace,
+      table: 'my_namespace'
+    },
+    users: {
+      results: resultUsers,
+      table: 'users'
+    }
+  })
+}
 
 $.style(`
   & {

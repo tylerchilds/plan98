@@ -415,6 +415,7 @@ $.style(`
     display: block;
     overflow: auto;
     background: white;
+    color: black;
   }
   & .grid {
     display: grid;

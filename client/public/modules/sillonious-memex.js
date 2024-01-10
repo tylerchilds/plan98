@@ -83,8 +83,11 @@ $.draw((target) => {
     <button name="${tileMap.escape.name}">
       ${t(tileMap.escape.label)}
     </button>
-  ` : ''
-
+  ` : `
+    <div name="desktop">
+      <my-admin></my-admin>
+    </div>
+  `
 
   target.innerHTML =`
     <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
@@ -141,11 +144,19 @@ $.style(`
 		position: fixed;
 		inset: 0;
   }
+  & [name="desktop"] {
+    position: fixed;
+    inset: 0;
+    overflow: auto;
+    padding: 4rem 0;
+  }
+
 	& button {
 		border-radius: 0;
 		border: none;
 		background: black;
 		color: dodgerblue;
+    z-index: 1;
 	}
   & [name="the-time-machine"] {
     position: relative;
