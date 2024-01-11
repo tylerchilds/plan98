@@ -1,5 +1,3 @@
-import module from "@sillonious/module"
-
 function ready(plan98) {
   console.log(plan98, ' is ready')
 }
