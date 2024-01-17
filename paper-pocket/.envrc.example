@@ -1,0 +1,10 @@
+APPLE_SIGNING_IDENTITY=
+APPLE_CERTIFICATE='
+'
+
+export APPLE_CERTIFICATE_PASSWORD=''
+
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+
+export ANDROID_HOME="$HOME/Library/Android/sdk"
+export NDK_HOME="$ANDROID_HOME/ndk/26.1.10909125"

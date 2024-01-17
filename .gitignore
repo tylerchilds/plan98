@@ -1,5 +1,6 @@
 backups/
 .env
+paper-pocket/.envrc
 dist
 rust-9p-master/
 cloud.exe
