@@ -126,7 +126,6 @@ $.style(`
   & {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: 1rem;
     touch-action: manipulation;
   }
   & .the-cardinal,
@@ -148,6 +147,10 @@ $.style(`
     grid-column: 1 / -1;
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  & button {
+    pointer-events: all;
   }
 
   & .the-overflow button {

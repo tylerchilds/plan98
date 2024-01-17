@@ -289,17 +289,19 @@ $.draw((target) => {
   `
   return `
     <div class="post-it">
-      <main class="canvas" style="background-image: ${stars}">
+      <main class="output" style="background-image: ${stars}">
         ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : joinCode}
       </main>
-      <header class="logo">
-        <button data-download>PaperPocket: ${mascot}</button>
-      </header>
-      <nav>
+      <nav class="input">
         <sillonious-joypro seat="${seat}"></sillonious-joypro>
       </nav>
-      <footer class="invite">
-        ${host}: ${tagline}
+      <header class="from">
+        <carousel-billboard>
+          <slot>${joinCode}</slot>
+        </carousel-billboard>
+      </header>
+      <footer class="to">
+        <button data-download>PaperPocket</button>
       </footer>
     </div>
   `
@@ -376,23 +378,30 @@ $.style(`
   & {
     display: block;
     overflow: hidden;
+    height: 100%;
+    background: black;
+    width: 100%;
   }
 
   & [name="join-code"] {
-    display: block;
-    width: 100%;
+    display: inline-block;
+    min-width: 120px;
     height: 100%;
     background: white;
     border: none;
     border-radius: 0;
     padding: 0;
+    max-height: 120px;
   }
 
   & [data-download] {
     border: none;
     background: transparent;
-    color: var(--wheel-0-4);
-    text-shadow: 0 0 5px var(--wheel-0-6);
+    color: rgba(255,255,255,.85);
+    text-shadow:
+      0 0px 3px var(--wheel-0-0),
+      -2px -2px 3px var(--wheel-0-2),
+      2px -2px 3px var(--wheel-0-3);
     text-overflow: ellipsis;
     overflow: hidden;
     padding-left: .5rem;
@@ -406,16 +415,51 @@ $.style(`
     display: block;
   }
   & .post-it {
-    border: 1rem solid var(--wheel-0-0);
+    border: 9px solid var(--wheel-0-6);
     background: var(--wheel-0-1);
-    display: grid;
-    grid-template-rows: 1fr 2rem auto 2rem;
+    height: 100%;
+    position: relative;
     max-width: 100%;
-    padding: 0;
+    padding: 7px;
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: auto;
   }
+
+  & .input {
+    pointer-events: none;
+    position: absolute;
+    padding: 8px;
+    bottom: 0;
+    z-index: 2;
+    left: 0;
+    right: 0;
+  }
+
+  & .output {
+    position: absolute;
+    background: white;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+  }
+
+  & .to {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 4;
+  }
+
+  & .from {
+    position: absolute;
+    z-index: 3;
+    bottom: calc(16px + 1rem);
+  }
+
   & .logo {
     background: var(--wheel-0-0);
     border-radius: 4px 4px 0 0;
@@ -442,14 +486,14 @@ $.style(`
       0 0 12px 12px var(--wheel-0-1);
   }
 
-   @keyframes &-pulse {
-     0% {
-       opacity: .95;
-     }
-     100% {
-       opacity: .75;
-     }
-   }
+  @keyframes &-pulse {
+    0% {
+      opacity: .95;
+    }
+    100% {
+      opacity: .75;
+    }
+  }
 
 
   & nav {

@@ -42,7 +42,9 @@ async function generate(target, code, {fg, bg}) {
 $.style(`
   & {
     display: block;
-    height: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    aspect-ratio: 1;
     position: relative;
   }
   & .portal {
@@ -52,9 +54,8 @@ $.style(`
   }
   & img {
     position: absolute;
-    inset: 10px;
+    inset: 0;
     max-height: 100%;
-    max-height: 50%;
     margin: auto;
   }
 `)

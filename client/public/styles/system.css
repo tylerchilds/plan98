@@ -2,19 +2,19 @@
 
 @font-face {
 	font-family: 'BerkeleyMono';
-	src: url('/fonts/BerkeleyMonoVariable-Regular.ttf') format("truetype-variations");
+	src: url('/public/fonts/BerkeleyMonoVariable-Regular.ttf') format("truetype-variations");
 	font-weight: 100 700;
 }
 
 @font-face {
 	font-family: 'BerkeleyMono';
-	src: url('/fonts/BerkeleyMonoVariable-Italic.ttf') format("truetype-variations");
+	src: url('/public/fonts/BerkeleyMonoVariable-Italic.ttf') format("truetype-variations");
 	font-style: italic;
 }
 
 @font-face {
 	font-family: 'Sono';
-	src: url('/fonts/sono.ttf') format("truetype-variations");
+	src: url('/public/fonts/sono.ttf') format("truetype-variations");
 	font-weight: 200 800;
 }
 
@@ -23,7 +23,7 @@
   font-style: oblique 0deg 15deg;
   font-weight: 300 1000;
   font-display: swap;
-  src: url('/fonts/Recursive_VF_1.085--subset-GF_latin_basic.woff2') format('woff2');
+  src: url('/public/fonts/Recursive_VF_1.085--subset-GF_latin_basic.woff2') format('woff2');
 }
 
 /* focus-party.css - public domain <email@tychi.me> */

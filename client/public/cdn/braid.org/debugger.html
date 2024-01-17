@@ -22,18 +22,7 @@
         pointer-events: none;
       }
     </style>
-    <link href="/styles/system.css" rel="stylesheet">
-    <script>
-      const parameters = new URLSearchParams(window.location.search)
-      const world = parameters.get('world')
-      window.plan98 = {
-        parameters,
-        provider: 'braid.org',
-        host: world ? world : window.location.host,
-      }
-
-      document.write(`<link href="/cdn/${window.plan98.host}/default.css" rel="stylesheet">`)
-		</script>
+    <link href="/public/styles/system.css" rel="stylesheet">
     <script type="importmap">
       {
         "imports": {
