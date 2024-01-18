@@ -44,6 +44,7 @@ $.style(`
     display: block;
     max-height: 100%;
     max-width: 100%;
+    min-width: 120px;
     aspect-ratio: 1;
     position: relative;
   }

@@ -1,3 +1,60 @@
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    ^
+   <@>
+   {&!
+    #
+
+  Elve
+
+
+
+
+    ^      ^      ^      ^      ^      ^      ^
+   <@>    <@>    <@>    <@>    <@>    <@>    <@>
+   {&!    {&!    {&!    {&!    {&!    {&!    {&!
+    #      #      #      #      #      #      #
+
+  Silly  Sally  Sully  Shelly  Sol   Wally   Ty
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  mit license. <email@tychi.me> 1989-current
+
+*/
+
 self.state ||= {}
 
 // normal time converts lines 1:1 from hype to hypertext

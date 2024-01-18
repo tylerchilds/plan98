@@ -16,7 +16,7 @@ function source(target) {
 }
 
 $.draw((target) => {
-  const path = source(target)
+  const [path, _args] = source(target).split('?')
   const extension = path.split('.').pop()
   const renderer = renderers[extension] || iframeRenderer
   return renderer(path)
@@ -31,6 +31,7 @@ function codeRenderer(path) {
 }
 
 function sagaRenderer(path) {
+  const parameters = new URLSearchParams(window.location.search)
   const readonly = parameters.get('readonly')
   const presentation = parameters.get('presentation')
   return `

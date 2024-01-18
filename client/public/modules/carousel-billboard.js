@@ -41,18 +41,23 @@ $.when('animationend', 'transition', function transition({target}) {
 })
 
 $.style(`
+  & {
+    pointer-events: none;
+  }
   & transition {
     animation: &-fade-in ease-in-out 200ms;
     display: grid;
     height: 100%;
     place-items: center;
     width: 100%;
+    pointer-events: none;
   }
 
 
   & transition > * {
     width: 100%;
     height: 100%;
+    pointer-events: all;
   }
 
   & transition.out {

@@ -1,19 +1,6 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-/*
-    !
-  #
-    ^
-   <@>
-    &{
-
-  https://sillyz.computer/modules/hyper-script.js
-
-  - notorious sillonious
-  mit license. <email@tychi.me> 1989-current
-  */
-
 // panels are the names of views or screens displayed in the user interface
 const panels = {
   // write to compose hype
@@ -412,6 +399,7 @@ $.style(`
 
   & {
     height: 100%;
+    width: 100%;
     display: block;
     overflow: auto;
     background: white;

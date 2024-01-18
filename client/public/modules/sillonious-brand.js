@@ -287,21 +287,29 @@ $.draw((target) => {
       ></qr-code>
     </button>
   `
+
   return `
     <div class="post-it">
       <main class="output" style="background-image: ${stars}">
-        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : joinCode}
+        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
+          <hyper-script src="/public/sagas/pro.thelanding.page/en_US/index.saga"></hyper-script>
+        `}
       </main>
       <nav class="input">
         <sillonious-joypro seat="${seat}"></sillonious-joypro>
       </nav>
       <header class="from">
         <carousel-billboard>
+          <slot>${mascot}</slot>
           <slot>${joinCode}</slot>
         </carousel-billboard>
       </header>
       <footer class="to">
-        <button data-download>PaperPocket</button>
+        <button data-download>
+          <hypertext-variable id="vt1" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
+            PaperPocket
+          </hypertext-variable>
+        </button>
       </footer>
     </div>
   `
@@ -377,15 +385,13 @@ $.when('click', '[data-download]', (event) => {
 $.style(`
   & {
     display: block;
-    overflow: hidden;
     height: 100%;
-    background: black;
     width: 100%;
   }
 
   & [name="join-code"] {
     display: inline-block;
-    min-width: 120px;
+    max-width: 120px;
     height: 100%;
     background: white;
     border: none;
@@ -401,9 +407,11 @@ $.style(`
     text-shadow:
       0 0px 3px var(--wheel-0-0),
       -2px -2px 3px var(--wheel-0-2),
-      2px -2px 3px var(--wheel-0-3);
+      2px -2px 3px var(--wheel-0-3),
+      4px 4px 5px var(--wheel-0-4),
+      -4px 4px 5px var(--wheel-0-5),
+      0 9px 15px var(--wheel-0-6);
     text-overflow: ellipsis;
-    overflow: hidden;
     padding-left: .5rem;
     line-height: 2rem;
   }
@@ -429,7 +437,7 @@ $.style(`
   & .input {
     pointer-events: none;
     position: absolute;
-    padding: 8px;
+    padding: 7px;
     bottom: 0;
     z-index: 2;
     left: 0;
@@ -447,17 +455,19 @@ $.style(`
 
   & .to {
     position: absolute;
-    bottom: 0;
-    left: 0;
+    top: 0;
     right: 0;
-    text-align: center;
+    padding: 7px;
     z-index: 4;
   }
 
   & .from {
     position: absolute;
+    top: 3rem;
+    right: 0;
+    padding: 7px;
     z-index: 3;
-    bottom: calc(16px + 1rem);
+    height: 3rem;
   }
 
   & .logo {

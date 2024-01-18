@@ -41,8 +41,8 @@ $.draw(() => {
     <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
       <button data-close>Close</button>
       <div class="modal">
-        ${modalHeader}
         <div class="body">
+          ${modalHeader}
           ${body}
         </div>
       </div>
@@ -146,12 +146,17 @@ $.style(`
     box-sizing: border-box;
     position: relative;
     min-height: 100px;
+    height: 100%;
     min-width: 12ch;
     max-width: 55ch;
     width: 100%;
     z-index: -1;
     opacity: 0;
     overflow: auto;
+  }
+
+  & .body {
+    height: 100%;
   }
 
   & .banner {
@@ -175,16 +180,16 @@ $.style(`
   & [data-close] {
     background: black;
     border: none;
-    border-radius: 0 0 0 1rem;
+    border-radius: 0 0 1rem 0;
     color: white;
-    padding-left: .5rem;
+    padding: 0 1rem 0 .5rem;
     line-height: 1;
     height: 2rem;
     opacity: .8;
     transition: opacity: 200ms;
     position: absolute;
     top: 0;
-    right: 0;
+    left: 0;
     z-index: 1101;
   }
 
