@@ -292,7 +292,7 @@ $.draw((target) => {
     <div class="post-it">
       <main class="output" style="background-image: ${stars}">
         ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
-          <hyper-script src="/public/sagas/pro.thelanding.page/en_US/index.saga"></hyper-script>
+          <hyper-script src="/public/cdn/tychi.me/the-prestige.saga"></hyper-script>
         `}
       </main>
       <nav class="input">
