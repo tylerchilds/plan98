@@ -40,8 +40,6 @@ $.when('animationend', 'transition', function transition({target}) {
   const previous = activePanel !== backPanel ? backPanel : activePanel
 
   updateInstance(id, { id, activePanel: current, backPanel: previous })
-  target.scrollTop = '0'
-  document.activeElement.blur()
 })
 
 $.style(`

@@ -374,9 +374,6 @@ function print(colors) {
   `).join('')
 }
 
-$.when('click', '[name="join-code"]', (event) => {
-  $.teach({ host: 'abc.xyz' })
-})
 $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).outerHTML
   sticky(brand)

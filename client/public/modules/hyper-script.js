@@ -135,7 +135,8 @@ $.draw(target => {
   `
 
   if(activePanel === panels.perform) {
-    return perspective
+    target.innerHTML = perspective
+    return
   }
 
   return perspective
@@ -434,7 +435,7 @@ $.style(`
 
   & button:hover,
   & button:focus {
-    color: white;
+    box-shadow: 0 0 25px 25px rgba(0,0,0,.15) inset;
   }
 
   & [name="actions"] {
