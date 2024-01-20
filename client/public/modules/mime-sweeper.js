@@ -234,7 +234,6 @@ function life($, id) {
 
     count = alive ? count : count - 1
 
-    console.log(count)
     if((count >= 2 && count <= 3)) {
       all[box].alive = true
     } else if(alive) {

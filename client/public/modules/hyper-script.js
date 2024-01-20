@@ -415,8 +415,8 @@ $.style(`
     overflow-x: auto;
     max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
-    bottom: 0;
-    right: 0;
+    left: 0;
+    top: 0;
     z-index: 2;
     overflow: auto;
   }
@@ -471,7 +471,6 @@ $.style(`
   & [name="screen"] {
     position:relative;
     overflow: hidden;
-    background: white;
     aspect-ratio: 16/9;
     transform: translateY(-50%);
     top: 50%;
@@ -494,7 +493,6 @@ $.style(`
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     place-content: center;
-    background: #54796d;
   }
 
   & [name="stage"] > * {

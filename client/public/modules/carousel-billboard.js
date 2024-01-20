@@ -1,13 +1,20 @@
 import module from '@sillonious/module'
 
-const $ = module('carousel-billboard', { activePanel: 0, nextPanel: 0 })
+const $ = module('carousel-billboard', {
+  activePanel: 0,
+  nextPanel: 0,
+  instances: {}
+})
+
 
 $.draw((target) => {
   const { id } = target
-  const views = slots(target)
-  const { activePanel, nextPanel } = $.learn()
+  const { instances } = $.learn()
+  mount(target)
+  if(!instances[target.id]) return
+  const { activePanel, nextPanel } = instances[target.id]
 
-  const view = (views[activePanel] || views[0]).innerHTML
+  const view = (target.views[activePanel] || target.views[0])
   const fadeOut = activePanel !== nextPanel
 
   return `
@@ -17,25 +24,22 @@ $.draw((target) => {
   `
 })
 
-function slots(target) {
-  const root = target.closest($.link)
-  if(root.slots) return root.slots
-  root.slots = root.querySelectorAll('slot')
-  setInterval(() => increment(root.slots.length), 5000)
-  return root.slots
-}
-
-function increment(max) {
-  const { activePanel } = $.learn()
-  const nextPanel = (activePanel + 1) % max
-  $.teach({ nextPanel })
+function mount(target) {
+  if(target.views) return
+  target.views = [...target.querySelectorAll('slot')].map(x => x.innerHTML)
+  const { activePanel, nextPanel } = $.learn() || {}
+  schedule(() => {
+    const id = target.id
+    updateInstance(id, { id, activePanel, nextPanel, max: target.views.length })
+  })
 }
 
 $.when('animationend', 'transition', function transition({target}) {
-  const { activePanel, nextPanel, backPanel } = $.learn()
+  const { id, activePanel, nextPanel, backPanel } = instance(target)
   const current = nextPanel !== activePanel ? nextPanel : activePanel
   const previous = activePanel !== backPanel ? backPanel : activePanel
-  $.teach({ activePanel: current, backPanel: previous })
+
+  updateInstance(id, { id, activePanel: current, backPanel: previous })
   target.scrollTop = '0'
   document.activeElement.blur()
 })
@@ -88,3 +92,40 @@ $.style(`
 
 
 `)
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
+
+function instance(target) {
+  const root = target.closest($.link)
+  return $.learn().instances[root.id]
+}
+
+setInterval(() => {
+  const { tick, instances } = $.learn()
+
+  $.teach({ tick: tick+1 })
+
+  Object.keys(instances).map(id => {
+    const { activePanel, max } = instances[id]
+    const nextPanel = (activePanel + 1) % max
+    updateInstance(id, { nextPanel })
+  })
+
+}, 5000)
+
+function updateInstance(id, payload) {
+  $.teach({...payload}, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          ...p
+        }
+      }
+    }
+  })
+}
+
+
