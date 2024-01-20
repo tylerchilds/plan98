@@ -135,8 +135,7 @@ $.draw(target => {
   `
 
   if(activePanel === panels.perform) {
-    target.innerHTML = perspective
-    return
+    return perspective
   }
 
   return perspective
@@ -415,7 +414,7 @@ $.style(`
     overflow-x: auto;
     max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
-    left: 0;
+    left: 2rem;
     top: 0;
     z-index: 2;
     overflow: auto;
@@ -444,7 +443,6 @@ $.style(`
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
     border-radius: 1.5rem;
-    margin: .5rem;
   }
 
   & [name="read"] > *${notHiddenChildren} {
@@ -453,10 +451,13 @@ $.style(`
 
   & [name="navi"] {
     position: fixed;
-    right: 3rem;
-    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    bottom: 1rem;
     height: 2rem;
-    display: flex;
+    display: block;
+    text-align: center;
     gap: .5rem;
     z-index: 1;
   }

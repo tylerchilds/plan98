@@ -367,24 +367,27 @@ $.when('click', '.pitch-down', pitchDown)
 
 $.style(`
   & {
-    height: 100%;
+    height: 100vh;
     display: grid;
-    place-content: center;
+    place-items: center;
+    position: relative;
+    transform: scale(.85);
   }
   & .wheel {
     display: grid;
     grid-template-areas: "slot";
     grid-template-rows: 45vmin;
     grid-template-columns: 40vmin;
-    place-content: start center;
+    place-content: center;
     padding: 0 1rem;
-    height: 90vmin;
+    height: 100vh;
 		user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     touch-action: manipulation;
+    transform: translateY(-25%);
   }
   & .group {
     grid-area: slot;

@@ -457,7 +457,7 @@ $.style(`
     position: absolute;
     top: 0;
     right: 0;
-    padding: 7px;
+    padding: 0 7px;
     z-index: 4;
   }
 
