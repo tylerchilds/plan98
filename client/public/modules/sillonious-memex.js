@@ -61,7 +61,7 @@ $.draw((target) => {
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
   const screen = doingBusinessAs[art]
-    ? `<sillonious-brand host="${art}" preview="true"></sillonious-brand>`
+    ? `<sillonious-brand host="${art}"></sillonious-brand>`
     : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
 
   const content = online ? `

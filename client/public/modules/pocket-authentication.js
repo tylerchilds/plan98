@@ -36,10 +36,9 @@ $.draw((target) => {
       Logout
     </button>
   ` : `
-
     <div class="title">
       <hypertext-variable id="vt-you" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
-        You
+        ${ account ? 'Me' : 'You' }
       </hypertext-variable>
     </div>
     <form>
@@ -106,6 +105,12 @@ async function authAsUser(base, { email,password }) {
 }
 
 $.style(`
+  & {
+    display: block;
+    margin: auto;
+    max-width: 320px;
+  }
+
   & .title {
     font-size: 72px;
     text-align: center;

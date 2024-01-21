@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 
 const $ = module('carousel-billboard', {
-  activePanel: 0,
+  activePanel: -1,
   nextPanel: 0,
   instances: {}
 })
@@ -39,6 +39,9 @@ $.when('animationend', 'transition', function transition({target}) {
   const current = nextPanel !== activePanel ? nextPanel : activePanel
   const previous = activePanel !== backPanel ? backPanel : activePanel
 
+  if(current !== activePanel) {
+    target.innerHTML = ''
+  }
   updateInstance(id, { id, activePanel: current, backPanel: previous })
 })
 

@@ -234,7 +234,13 @@ export const doingBusinessAs = {
   //'wherespodcast.org': emeraldOfTime
 }
 
-const $ = module('sillonious-brand')
+const $ = module('sillonious-brand', {
+  instances: {},
+  host: window.location.host,
+  council: '6174',
+  seat: '0',
+  rootActive: false
+})
 
 const standard = window.plan98 || { host: window.location.host }
 export function currentBusiness(host = standard) {
@@ -242,11 +248,10 @@ export function currentBusiness(host = standard) {
 }
 
 $.draw((target) => {
-  let { host } = $.learn()
-  host = host || target.getAttribute('host') || window.location.host
-  const council = target.getAttribute('council') || '42'
-  const seat = target.getAttribute('seat') || '0'
-  const preview = target.getAttribute('preview')
+  const { instances } = $.learn()
+  seed(target)
+  if(!instances[target.id]) return
+  const { host, council, seat, rootActive } = instances[target.id]
 
   const stars = getStars(target)
   const {
@@ -272,14 +277,17 @@ $.draw((target) => {
     `
   }).join('')
 
-  if(target.innerHTML) return
+  if(target.innerHTML) {
+    rootActive ? target.classList.add('flip') : target.classList.remove('flip')
+    return
+  }
 
   if(target.getAttribute('innerHTML')) {
     return target.getAttribute('innerHTML')
   }
 
-  const businessLines = Object.keys(doingBusinessAs).slice(0,7).map(world => {
-    const { mascot } = doingBusinessAs[world]
+  const friends = Object.keys(doingBusinessAs).slice(0,7).reduce((all, world)=> {
+    const current = doingBusinessAs[world]
     const joinCode = `
       <button name="join-code">
         <qr-code
@@ -290,43 +298,72 @@ $.draw((target) => {
       </button>
     `
 
-    return `
-      <slot>
-        <sillonious-brand host="${world}">
-          <div class="sillonious-brand">
-            ${mascot}
-          </div>
-          ${joinCode}
-        </sillonious-brand>
-      </slot>
-    `
-  }).join('')
+    if(current.mascot !== mascot) {
+      all.push(`
+        <slot>
+          <sillonious-brand host="${world}">
+            <div class="sillonious-brand">
+              ${current.mascot}
+            </div>
+            ${joinCode}
+          </sillonious-brand>
+        </slot>
+      `)
+    }
+
+    return all
+  }, []).join('')
 
   return `
-    <div class="post-it">
-      <main class="output" style="background-image: ${stars}">
-        ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
+    <main class="output" style="background-image: ${stars}">
+      <div class="frontside-paper">
+        ${window.location.host !== host ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
           <my-admin></my-admin>
         `}
-      </main>
-      <nav class="input">
-        <sillonious-joypro seat="${seat}"></sillonious-joypro>
-      </nav>
-      <header class="from">
-        <carousel-billboard>
-          ${businessLines}
-        </carousel-billboard>
-      </header>
-      <footer class="to">
-        <button data-download>
-          <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
-            PaperPocket
-          </hypertext-variable>
-        </button>
-      </footer>
-    </div>
+      </div>
+      <div class="backside-paper">
+        <div class="sticky">
+          ${menuFor(host)}
+        </div>
+      </div>
+    </main>
+    <nav class="input">
+      <sillonious-joypro seat="${seat}"></sillonious-joypro>
+    </nav>
+    <header class="from">
+      <div class="sillonious-brand">
+        ${mascot}
+      </div>
+      <button data-download></button>
+      <carousel-billboard>
+        ${friends}
+      </carousel-billboard>
+    </header>
+    <footer class="to">
+      <button class="sillonious-brand" data-switcher>
+        <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
+          PaperPocket
+        </hypertext-variable>
+      </button>
+    </footer>
   `
 })
+
+function seed(target) {
+  if(target.seeded) return
+  target.seeded = true
+  let { host, council, seat, rootActive } = $.learn() || {}
+
+  council = target.getAttribute('council') || council
+  seat = target.getAttribute('seat') || seat
+  host = target.getAttribute('host') || host
+
+  schedule(() => {
+    const id = target.id
+    updateInstance({ id }, { id, host, council, seat, rootActive })
+  })
+}
+
 
 function generateTheme(target, host, {reverse} = {}) {
   if(target.dataset.themed === 'true') {
@@ -392,11 +429,29 @@ $.when('click', '[data-download]', (event) => {
   sticky(brand)
 })
 
+$.when('click', '[data-switcher]', function switcher({ target }) {
+  const { rootActive, id } = instance(target)
+  updateInstance({ id }, { rootActive: !rootActive })
+})
+
 $.style(`
   & {
-    display: block;
+    position: relative;
     height: 100%;
     width: 100%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    display: block;
+
+    cursor: url('/public/icons/gh057.svg') 0 0, auto;
+  }
+
+  & .sticky {
+    width: 3.25in;
+    height: 3.12in;
+    max-height: 100%;
+    max-width: 100%;
+    background: lemonchiffon;
   }
 
   .sillonious-brand {
@@ -428,6 +483,11 @@ $.style(`
     max-height: 120px;
   }
 
+  & [data-switcher] {
+    background: transparent;
+    border: none;
+  }
+
   & [data-download] {
     border: none;
     background: transparent;
@@ -450,16 +510,39 @@ $.style(`
     border: 0;
     display: block;
   }
-  & .post-it {
-    border-top: 3px solid var(--wheel-0-3);
-    background: var(--wheel-0-1);
+
+  & .frontside-paper,
+  & .backside-paper {
     height: 100%;
+    width: 100%;
     position: relative;
     max-width: 100%;
-    padding: 7px 16px 16px;
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: auto;
+    backface-visibility: hidden;
+  }
+
+  & .frontside-paper {
+    border-top: 3px solid var(--wheel-0-3);
+    background: var(--wheel-0-1);
+  }
+
+  & .backside-paper {
+    border-top: 3px solid var(--wheel-0-6);
+    transform: rotateX(180deg);
+    display: grid;
+    place-items: center;
+    position: absolute;
+    inset: 0;
+  }
+
+  &.flip > .output > .frontside-paper {
+    transform: rotateX(180deg);
+  }
+
+  &.flip > .output > .backside-paper {
+    transform: rotateX(0deg);
   }
 
   & .input {
@@ -659,6 +742,40 @@ function getStars(target) {
 
   return `url(${canvas.toDataURL()}`;
 }
+
+function menuFor(host) {
+  // use host later
+  return `
+    <form name="search">
+      <input type="text" name="query" />
+    </form>
+
+    <button class="sillonious-brand">PaperPocket</button>
+    <button>Me</button>
+  `
+}
+
+function instance(target) {
+  const root = target.closest($.link)
+  return $.learn().instances[root.id]
+}
+
+function updateInstance({ id }, payload) {
+  $.teach({...payload}, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          ...p
+        }
+      }
+    }
+  })
+}
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
 
 /*
 
