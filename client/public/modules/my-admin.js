@@ -45,12 +45,13 @@ $.draw(target => {
   const tableUsers = table(users)
 
   const app = account ? `
+    <pocket-authentication class="authenticated"></pocket-authentication>
     <h2>Everybody!</h2>
     ${tableSpace?.slot}
     <h2>Humans!</h2>
     ${tableUsers?.slot}
   ` : `
-    <my-biography player=""></my-biography>
+    <pocket-authentication></pocket-authentication>
   `
 
   const { image, color } = currentBusiness()
@@ -59,7 +60,6 @@ $.draw(target => {
 
   target.innerHTML = `
     <div class="inner">
-      <pocket-authentication></pocket-authentication>
       ${app}
     </div>
   `
@@ -74,14 +74,15 @@ async function query(target, account) {
   if(target.dataset.account === account) return
   target.dataset.account = account
   const base = getBase(target)
-  const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
+  //const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
   const resultUsers = await base.collection('users').getList(1, 30, {});
-
   $.teach({
+    /*
     space: {
       results: resultSpace,
       name: 'my_namespace'
     },
+    */
     users: {
       results: resultUsers,
       name: 'users'
@@ -96,13 +97,14 @@ whenLogout(() => {
 $.style(`
   &::before {
     content: '';
-    position: fixed;
+    position: absolute;
     background: var(--image), var(--color, transparent);
     background-blend-mode: multiply;
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
     inset: 0;
+    overflow: hidden;
   }
 
   & {
@@ -110,13 +112,14 @@ $.style(`
     place-items: center;
     padding: 9px;
     height: 100%;
+    width: 100%;
+    position: relative;
   }
 
   & .inner {
     z-index: 1;
     position: relative;
-    background: rgba(255,255,255,.85);
-    border-radius: 9px;
-    padding: 16px 9px;
+    overflow: auto;
+    width: 100%;
   }
 `)

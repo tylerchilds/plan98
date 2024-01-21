@@ -29,6 +29,8 @@
 /* focus-party.css - public domain <email@tychi.me> */
 :focus {
     position: relative;
+    border-color: var(--wheel-0-6);
+    outline: 2px solid var(--wheel-0-6);
 }
 
 :focus::before {
@@ -272,11 +274,10 @@ button {
 .button {
 	--border-color: transparent;
 	--border-color-hover: transparent;
-	--border-thickness: 4rem;
-	--background-color: var(--color-primary);
-	--background-color-hover: var(--color-primary-shade1);
-	--text-color: var(--color-neutral-tint4);
-	--text-color-hover: var(--color-neutral-tint4);
+	--background-color: var(--wheel-0-5);
+	--background-color-hover: var(--wheel-0-6);
+	--text-color: var(--wheel-0-0);
+	--text-color-hover: var(--wheel-0-1);
 
 	align-items: center;
 	align-content: center;
@@ -388,7 +389,9 @@ button {
 
 .field {
 	display: grid;
-  background: rgba(0, 0, 0, .85);
+  border-left: 2px solid var(--wheel-0-6);
+  border-bottom: 2px solid var(--wheel-0-6);
+  backdrop-filter: blur(8px);
   color: rgba(255, 255, 255, .85);
 	margin-bottom: 1rem;
 	position: relative;
@@ -398,6 +401,8 @@ button {
 
 .field .label {
 	z-index: 2;
+  padding: 0 7px 7px;
+  font-size: .9rem;
 }
 
 .field [type=checkbox] + .label,
@@ -421,7 +426,7 @@ button {
 	border-radius: var(--border-radius);
 	box-sizing: border-box;
   color: rgba(255, 255, 255, .85);
-  font-size: 2rem;
+  font-size: 1.1rem;
 	margin-top: -2px;
 	padding: .5rem;
 	position: relative;

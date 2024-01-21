@@ -148,7 +148,7 @@ $.style(`
     position: fixed;
     inset: 0;
     overflow: auto;
-    padding: 4rem 0;
+    padding: 0;
   }
 
 	& button {

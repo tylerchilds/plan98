@@ -36,12 +36,23 @@ $.draw((target) => {
       Logout
     </button>
   ` : `
-    Who are you?
+
+    <div class="title">
+      <hypertext-variable id="vt-you" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
+        You
+      </hypertext-variable>
+    </div>
     <form>
-      <input name="email" type="text" value="${email}"/>
-      <input name="password" type="password" value="${password}" />
-      <button type="submit">
-        Login
+      <label class="field">
+        <span class="label">Player</span>
+        <input name="email" type="text" value="${email}"/>
+      </label>
+      <label class="field">
+        <span class="label">Password</span>
+        <input name="password" type="password" value="${password}"/>
+      </label>
+      <button class="button" type="submit">
+        Connect
       </button>
     </form>
   `
@@ -93,3 +104,36 @@ async function authAsAdmin(base, { email,password }) {
 async function authAsUser(base, { email,password }) {
   return await base.collection('users').authWithPassword(email,password);
 }
+
+$.style(`
+  & .title {
+    font-size: 72px;
+    text-align: center;
+    color: rgba(255,255,255,1);
+    text-shadow:
+      0 0px 3px var(--wheel-0-0),
+      -2px -2px 3px var(--wheel-0-2),
+      2px -2px 3px var(--wheel-0-3),
+      4px 4px 5px var(--wheel-0-4),
+      -4px 4px 5px var(--wheel-0-5),
+      0 9px 15px var(--wheel-0-6);
+    animation: &-pulse ease-in-out 2000ms alternate-reverse infinite;
+  }
+
+  @keyframes &-pulse {
+    0% {
+      opacity: .5;
+    }
+
+    100% {
+      opacity: .85;
+    }
+  }
+  & form {
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(2px);
+    border-radius: 9px;
+    padding: 16px 9px;
+    display: grid;
+  }
+`)

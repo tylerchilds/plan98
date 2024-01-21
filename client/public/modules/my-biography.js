@@ -5,7 +5,9 @@ const $ = module('my-biography')
 
 $.draw(target => {
   connect(target)
-  query(target, account)
+  query(target)
+
+  const playerId = 'hi'
 
   // convert this all to one internal large file
   return `
@@ -31,7 +33,7 @@ async function query(target, account) {
   const base = getBase(target)
   const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
   const resultUsers = await base.collection('users').getList(1, 30, {});
-
+debugger
   $.teach({
     space: {
       results: resultSpace,

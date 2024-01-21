@@ -278,21 +278,35 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  const joinCode = `
-    <button name="join-code">
-      <qr-code
-        text="https://${host}&council=${council}&seat=${seat}"
-        ${fg ? `data-fg="${fg}"`: ''}
-        ${bg ? `data-bg="${bg}"`: ''}
-      ></qr-code>
-    </button>
-  `
+  const businessLines = Object.keys(doingBusinessAs).slice(0,7).map(world => {
+    const { mascot } = doingBusinessAs[world]
+    const joinCode = `
+      <button name="join-code">
+        <qr-code
+          text="https://${host}?world=${world}&council=${council}&seat=${seat}"
+          ${fg ? `data-fg="${fg}"`: ''}
+          ${bg ? `data-bg="${bg}"`: ''}
+        ></qr-code>
+      </button>
+    `
+
+    return `
+      <slot>
+        <sillonious-brand host="${world}">
+          <div class="sillonious-brand">
+            ${mascot}
+          </div>
+          ${joinCode}
+        </sillonious-brand>
+      </slot>
+    `
+  }).join('')
 
   return `
     <div class="post-it">
       <main class="output" style="background-image: ${stars}">
         ${preview ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
-          <hyper-script src="/public/cdn/tychi.me/the-prestige.saga"></hyper-script>
+          <my-admin></my-admin>
         `}
       </main>
       <nav class="input">
@@ -300,13 +314,12 @@ $.draw((target) => {
       </nav>
       <header class="from">
         <carousel-billboard>
-          <slot>${mascot}</slot>
-          <slot>${joinCode}</slot>
+          ${businessLines}
         </carousel-billboard>
       </header>
       <footer class="to">
         <button data-download>
-          <hypertext-variable id="vt1" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
+          <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
             PaperPocket
           </hypertext-variable>
         </button>
@@ -386,6 +399,24 @@ $.style(`
     width: 100%;
   }
 
+  .sillonious-brand {
+    --v-font-mono: 1;
+    --v-font-casl: 1;
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    color: rgba(255,255,255,.85);
+    text-shadow:
+      0 0px 3px var(--wheel-0-0),
+      -2px -2px 3px var(--wheel-0-2),
+      2px -2px 3px var(--wheel-0-3),
+      4px 4px 5px var(--wheel-0-4),
+      -4px 4px 5px var(--wheel-0-5),
+      0 9px 15px var(--wheel-0-6);
+  }
+
   & [name="join-code"] {
     display: inline-block;
     max-width: 120px;
@@ -420,12 +451,12 @@ $.style(`
     display: block;
   }
   & .post-it {
-    border: 9px solid var(--wheel-0-6);
+    border-top: 3px solid var(--wheel-0-3);
     background: var(--wheel-0-1);
     height: 100%;
     position: relative;
     max-width: 100%;
-    padding: 7px;
+    padding: 7px 16px 16px;
     margin: 0 auto;
     box-sizing: border-box;
     overflow-x: auto;
@@ -460,9 +491,9 @@ $.style(`
 
   & .from {
     position: absolute;
-    top: 3rem;
-    right: 0;
-    padding: 7px;
+    top: 0;
+    left: 0;
+    padding: 0 7px;
     z-index: 3;
     height: 3rem;
   }
