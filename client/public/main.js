@@ -15,14 +15,14 @@ style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)
 document.head.appendChild(style)
 
-const overworld = world && window.location.pathname === '/'
+const root = window.location.pathname === '/'
 
-module('#main').draw(target => overworld ? `
+module('#main').draw(target => root ? `
+  <sillonious-brand host="${plan98.host}"></sillonious-brand>
+`:`
   <sillonious-brand host="${plan98.host}">
     <saga-genesis></saga-genesis>
   </sillonious-brand>
-`:`
-  <sillonious-brand></sillonious-brand>
 `)
 
 export default new Computer(window.plan98, { registry: '/public/modules' })

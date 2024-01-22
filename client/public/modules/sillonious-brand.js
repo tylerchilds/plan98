@@ -324,12 +324,10 @@ $.draw((target) => {
   return `
     <main class="output" style="background-image: ${stars}">
       <div class="frontside-paper">
-        ${window.location.host !== host
-        ? `<iframe src="?world=${host}" name="${host}"></iframe>`
-        : pocket || '<saga-genesis></saga-genesis>'
-        }
+        ${pocket || '<saga-genesis></saga-genesis>'}
       </div>
       <div class="backside-paper">
+        <canvas class="canvas"></canvas>
         <div class="sticky">
           ${menuFor(host)}
         </div>
@@ -442,6 +440,34 @@ $.when('click', '[data-switcher]', function switcher({ target }) {
   updateInstance({ id }, { rootActive: !rootActive })
 })
 
+$.when('click', '.sticky .sillonious-brand', function switcher({ target }) {
+  const host = target.closest('[host]').getAttribute('host')
+
+  if(host) {
+    window.location.href = `/?world=${host}`
+  }
+})
+
+$.when('mousemove', '.canvas', function gh057(event){
+  const root = event.target.closest($.link)
+  const box = root.getBoundingClientRect()
+  const [x, y] = [event.clientX, event.clientY]
+  const limit = 20;
+  const calcX = -(y - box.y - (box.height / 2)) / limit;
+  const calcY = (x - box.x - (box.width / 2)) / limit;
+
+  const shadow = `
+  `
+
+  root.style.setProperty('--rotate-x',`${calcX}deg`)
+  root.style.setProperty('--rotate-y',`${calcY}deg`)
+  root.style.setProperty('--shadow',`
+    ${-1 * calcY - 2}px ${1 * calcX - 2}px 4px 4px rgba(0,0,0,.10),
+    ${-1 * calcY - 6}px ${1 * calcX - 6}px 12px 12px rgba(0,0,0,.5),
+    ${-1 * calcY - 18}px ${1 * calcX - 18}px 36px 36px rgba(0,0,0,.25)
+  `)
+})
+
 $.style(`
   & {
     position: relative;
@@ -459,6 +485,23 @@ $.style(`
     max-height: 100%;
     max-width: 100%;
     background: lemonchiffon;
+    transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
+    box-shadow: var(--shadow);
+    position: relative;
+    z-index: 4;
+    pointer-events: none;
+  }
+
+  & .sticky sillonious-brand {
+    height: 2rem;
+    white-space: nowrap;
+    background: lemonchiffon;
+  }
+
+  & .sticky button {
+    background: transparent;
+    border: none;
+    pointer-events: all;
   }
 
   .sillonious-brand {
@@ -572,6 +615,8 @@ $.style(`
   }
 
   & .to {
+    background: lemonchiffon;
+    padding: 9px 16px;
     position: absolute;
     top: 0;
     right: 0;
@@ -648,11 +693,11 @@ $.style(`
   }
 
   & .canvas {
-    grid-column: -1 / 1;
-    background: white;
-    max-width: 100%;
-    aspect-ratio: 16 / 9;
-    margin-bottom: 2mm;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
   }
 
   & .wheel {
@@ -708,7 +753,6 @@ function sticky(brand) {
 
             .post-it {
               padding: 0 !important;
-              
               border: none !important;
             }
           }
@@ -758,12 +802,24 @@ function menuFor(who, when, where) {
       <input type="text" name="query" />
     </form>
 
-    <button class="sillonious-brand">PaperPocket</button>
-    <button class="sillonious-brand">MyBase</button>
-    <button class="sillonious-brand">ElectricMail</button>
-    <button class="sillonious-brand">GameStudio</button>
-    <button class="sillonious-brand">MusicStudio</button>
-    <button class="sillonious-brand">SystemShell</button>
+    <sillonious-brand host="sillyz.computer">
+      <button class="sillonious-brand">PaperPocket</button>
+    </sillonious-brand>
+    <sillonious-brand host="1998.social">
+      <button class="sillonious-brand">MyBase</button>
+    </sillonious-brand>
+    <sillonious-brand host="yourlovedones.online">
+      <button class="sillonious-brand">ElectricMail</button>
+    </sillonious-brand>
+    <sillonious-brand host="ncity.executiontime.pub">
+      <button class="sillonious-brand">GameStudio</button>
+    </sillonious-brand>
+    <sillonious-brand host="css.ceo">
+      <button class="sillonious-brand">MusicStudio</button>
+    </sillonious-brand>
+    <sillonious-brand host="y2k38.info">
+      <button class="sillonious-brand">SystemShell</button>
+    </sillonious-brand>
   `
 }
 
