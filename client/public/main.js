@@ -15,7 +15,9 @@ style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)
 document.head.appendChild(style)
 
-module('#main').draw(target => world ? `
+const overworld = world && window.location.pathname === '/'
+
+module('#main').draw(target => overworld ? `
   <sillonious-brand host="${plan98.host}">
     <saga-genesis></saga-genesis>
   </sillonious-brand>

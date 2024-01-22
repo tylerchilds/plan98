@@ -60,6 +60,7 @@ export const doingBusinessAs = {
   'yourlovedones.online': {
     emote: ':(',
     image: '/cdn/tychi.me/photos/banyan.JPG',
+    pocket: '<electric-mail></electric-mail>',
     latitude: '37.772006',
     longitude: '-122.462220',
     zoom: 12,
@@ -76,6 +77,7 @@ export const doingBusinessAs = {
   'ncity.executiontime.pub': {
     emote: ':o',
     image: '/cdn/tychi.me/photos/denali.JPG',
+    pocket: '<game-studio></game-studio>',
     latitude: '37.772322',
     longitude:  '-122.465443',
     zoom: 14,
@@ -92,6 +94,7 @@ export const doingBusinessAs = {
   'css.ceo': {
     emote: ':p',
     image: '/cdn/tychi.me/photos/pacifica.JPG',
+    pocket: '<music-studio></music-studio>',
     latitude: '37.772366',
     longitude: '-122.467315',
     zoom: 15,
@@ -108,6 +111,7 @@ export const doingBusinessAs = {
   'y2k38.info': {
     emote: ':*',
     image: '/cdn/tychi.me/photos/giza.JPG',
+    pocket: '<system-shell></sytem-shell>',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
@@ -322,7 +326,7 @@ $.draw((target) => {
       <div class="frontside-paper">
         ${window.location.host !== host
         ? `<iframe src="?world=${host}" name="${host}"></iframe>`
-        : pocket || '<my-admin></my-admin>'
+        : pocket || '<saga-genesis></saga-genesis>'
         }
       </div>
       <div class="backside-paper">
@@ -746,7 +750,8 @@ function getStars(target) {
   return `url(${canvas.toDataURL()}`;
 }
 
-function menuFor(host) {
+function menuFor(who, when, where) {
+  let what = []
   // use host later
   return `
     <form name="search">
@@ -754,7 +759,11 @@ function menuFor(host) {
     </form>
 
     <button class="sillonious-brand">PaperPocket</button>
-    <button>Me</button>
+    <button class="sillonious-brand">MyBase</button>
+    <button class="sillonious-brand">ElectricMail</button>
+    <button class="sillonious-brand">GameStudio</button>
+    <button class="sillonious-brand">MusicStudio</button>
+    <button class="sillonious-brand">SystemShell</button>
   `
 }
 
