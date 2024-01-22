@@ -26,6 +26,7 @@ export const doingBusinessAs = {
   'sillyz.computer': {
     emote: ';)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
+    pocket: '<plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>',
     latitude: '37.769100',
     longitude: '-122.454583',
     zoom: 10,
@@ -42,6 +43,7 @@ export const doingBusinessAs = {
   '1998.social': {
     emote: ':D',
     image: '/cdn/tychi.me/photos/aurora.JPG',
+    pocket: '<my-admin></my-admin>',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,
@@ -258,6 +260,7 @@ $.draw((target) => {
     mascot,
     contact,
     tagline,
+    pocket
   } = currentBusiness(host)
   const { colors, fg, bg } = generateTheme(target, host)
 
@@ -317,9 +320,10 @@ $.draw((target) => {
   return `
     <main class="output" style="background-image: ${stars}">
       <div class="frontside-paper">
-        ${window.location.host !== host ? `<iframe src="?world=${host}" name="${host}"></iframe>` : `
-          <my-admin></my-admin>
-        `}
+        ${window.location.host !== host
+        ? `<iframe src="?world=${host}" name="${host}"></iframe>`
+        : pocket || '<my-admin></my-admin>'
+        }
       </div>
       <div class="backside-paper">
         <div class="sticky">
@@ -442,7 +446,6 @@ $.style(`
     transform-style: preserve-3d;
     backface-visibility: hidden;
     display: block;
-
     cursor: url('/public/icons/gh057.svg') 0 0, auto;
   }
 
