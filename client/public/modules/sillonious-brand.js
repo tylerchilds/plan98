@@ -571,6 +571,7 @@ $.style(`
     box-sizing: border-box;
     overflow-x: auto;
     backface-visibility: hidden;
+    transition: transform 200ms ease-in-out;
   }
 
   & .frontside-paper {
@@ -798,10 +799,6 @@ function menuFor(who, when, where) {
   let what = []
   // use host later
   return `
-    <form name="search">
-      <input type="text" name="query" />
-    </form>
-
     <sillonious-brand host="sillyz.computer">
       <button class="sillonious-brand">PaperPocket</button>
     </sillonious-brand>
