@@ -18,11 +18,11 @@ document.head.appendChild(style)
 const root = window.location.pathname === '/'
 
 module('#main').draw(target => root ? `
-  <sillonious-brand host="${plan98.host}"></sillonious-brand>
-`:`
   <sillonious-brand host="${plan98.host}">
     <saga-genesis></saga-genesis>
   </sillonious-brand>
+`:`
+  <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `)
 
 export default new Computer(window.plan98, { registry: '/public/modules' })

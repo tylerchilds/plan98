@@ -111,7 +111,7 @@ export const doingBusinessAs = {
   'y2k38.info': {
     emote: ':*',
     image: '/cdn/tychi.me/photos/giza.JPG',
-    pocket: '<system-shell></sytem-shell>',
+    pocket: '<terminal-demo></terminal-demo>',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
@@ -327,7 +327,6 @@ $.draw((target) => {
         ${pocket || '<saga-genesis></saga-genesis>'}
       </div>
       <div class="backside-paper">
-        <canvas class="canvas"></canvas>
         <div class="sticky">
           ${menuFor(host)}
         </div>
@@ -448,16 +447,16 @@ $.when('click', '.sticky .sillonious-brand', function switcher({ target }) {
   }
 })
 
-$.when('mousemove', '.canvas', function gh057(event){
+$.when('mousemove', '.backside-paper', gh057)
+$.when('mousemove', '.frontside-paper', gh057)
+
+function gh057(event){
   const root = event.target.closest($.link)
   const box = root.getBoundingClientRect()
   const [x, y] = [event.clientX, event.clientY]
   const limit = 20;
   const calcX = -(y - box.y - (box.height / 2)) / limit;
   const calcY = (x - box.x - (box.width / 2)) / limit;
-
-  const shadow = `
-  `
 
   root.style.setProperty('--rotate-x',`${calcX}deg`)
   root.style.setProperty('--rotate-y',`${calcY}deg`)
@@ -466,7 +465,7 @@ $.when('mousemove', '.canvas', function gh057(event){
     ${-1 * calcY - 6}px ${1 * calcX - 6}px 12px 12px rgba(0,0,0,.5),
     ${-1 * calcY - 18}px ${1 * calcX - 18}px 36px 36px rgba(0,0,0,.25)
   `)
-})
+}
 
 $.style(`
   & {

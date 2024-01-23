@@ -18,6 +18,13 @@ $.draw(target => {
   if(!target.booting) start(target)
 })
 
+$.style(`
+  & {
+    display: block;
+    height: 100%;
+  }
+`)
+
 async function start(target) {
   target.booting = true
   const { Wasmer, init } = await import("@wasmer/sdk");
