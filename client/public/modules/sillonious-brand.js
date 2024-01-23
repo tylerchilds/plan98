@@ -480,6 +480,7 @@ $.style(`
   }
 
   & .sticky {
+    padding: 16px 9px;
     width: 3.25in;
     height: 3.12in;
     max-height: 100%;
@@ -571,6 +572,8 @@ $.style(`
     box-sizing: border-box;
     overflow-x: auto;
     backface-visibility: hidden;
+    transform: rotateX(0deg);
+    opacity: .9999;
     transition: transform 200ms ease-in-out;
   }
 
