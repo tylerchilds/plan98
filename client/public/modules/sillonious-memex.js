@@ -162,7 +162,7 @@ $.style(`
     position: absolute;
     right: 0;
     top: 2rem;
-    z-index: 2;
+    z-index: 1100;
     overflow: auto;
   }
 

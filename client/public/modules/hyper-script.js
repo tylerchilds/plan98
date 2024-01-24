@@ -402,7 +402,6 @@ $.style(`
     width: 100%;
     display: block;
     overflow: auto;
-    background: white;
     color: black;
   }
   & .grid {
@@ -423,7 +422,6 @@ $.style(`
 
   & button {
     background: rgba(0,0,0,.85);
-    border-radius: 0;
     border: none;
     color: dodgerblue;
     cursor: pointer;
@@ -454,9 +452,8 @@ $.style(`
   & [name="navi"] {
     position: fixed;
     left: 0;
-    right: 0;
     margin: auto;
-    bottom: 1rem;
+    top: 0;
     height: 2rem;
     display: block;
     text-align: center;
@@ -735,22 +732,18 @@ $.style(`
 
   @keyframes &-fade-in {
     0% {
-      opacity: .5;
       filter: blur(10px);
     }
     100% {
-      opacity: 1;
       filter: blur(0px);
     }
   }
 
   @keyframes &-fade-out {
     0% {
-      opacity: 1;
       filter: blur(0px);
     }
     100% {
-      opacity: .5;
       filter: blur(10px);
     }
   }
