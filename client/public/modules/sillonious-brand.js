@@ -77,7 +77,7 @@ export const doingBusinessAs = {
   'ncity.executiontime.pub': {
     emote: ':o',
     image: '/cdn/tychi.me/photos/denali.JPG',
-    pocket: '<game-studio></game-studio>',
+    pocket: '<main-quest></main-quest>',
     latitude: '37.772322',
     longitude:  '-122.465443',
     zoom: 14,
@@ -128,6 +128,7 @@ export const doingBusinessAs = {
   'thelanding.page': {
     emote: ':)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
+    pocket: '<sillonious-memex></sillonious-memex>',
     latitude: '37.770613',
     longitude: '-122.479310',
     zoom: 17,
@@ -308,12 +309,10 @@ $.draw((target) => {
     if(current.mascot !== mascot) {
       all.push(`
         <slot>
-          <sillonious-brand host="${world}">
-            <div class="sillonious-brand">
-              ${current.mascot}
-            </div>
-            ${joinCode}
-          </sillonious-brand>
+          <div class="sillonious-brand">
+            ${current.mascot}
+          </div>
+          ${joinCode}
         </slot>
       `)
     }
@@ -336,13 +335,12 @@ $.draw((target) => {
       <sillonious-joypro seat="${seat}"></sillonious-joypro>
     </nav>
     <header class="from">
-      <div class="sillonious-brand">
-        ${mascot}
-      </div>
-      <button data-download></button>
       <carousel-billboard>
         ${friends}
       </carousel-billboard>
+      <button data-download>
+        Print
+      </button>
     </header>
     <footer class="to">
       <button class="sillonious-brand" data-switcher>
@@ -443,7 +441,7 @@ $.when('click', '.sticky .sillonious-brand', function switcher({ target }) {
   const host = target.closest('[host]').getAttribute('host')
 
   if(host) {
-    window.location.href = `/?world=${host}`
+    window.location.href = `/thelanding.page?world=${host}`
   }
 })
 
@@ -622,18 +620,18 @@ $.style(`
     padding: 9px 16px;
     position: absolute;
     top: 0;
-    right: 0;
+    right: 3rem;
     padding: 0 7px;
     z-index: 4;
   }
 
   & .from {
+    text-align: right;
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 5rem;
+    right: 0;
     padding: 0 7px;
     z-index: 3;
-    height: 3rem;
   }
 
   & .logo {

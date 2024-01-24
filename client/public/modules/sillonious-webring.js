@@ -5,7 +5,7 @@ import { doingBusinessAs } from './sillonious-brand.js'
 const protocol = 'https://'
 const locale = 'en_US'
 
-const $ = module('sillonious-memex', {
+const $ = module('sillonious-webring', {
   diskette: 0,
   paused: false,
   online: true
@@ -65,22 +65,9 @@ $.draw((target) => {
     : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
 
   const content = online ? `
-    <div name="transport">
-      <div name="actions">
-        <button name="${tileMap.enter.name}">
-          ${t(tileMap.enter.label)}
-        </button>
-        <button name="${tileMap.shift.name}">
-          ${t(tileMap.shift.label)}
-        </button>
-        <button name="${tileMap.tab.name}">
-          ${t(tileMap.tab.label)}
-        </button>
-        <button name="${tileMap.escape.name}">
-          ${t(tileMap.escape.label)}
-        </button>
-      </div>
-    </div>
+    <button name="${tileMap.shift.name}">
+      ${t(tileMap.shift.label)}
+    </button>
     <div name="world">
       <middle-earth></middle-earth>
     </div>
@@ -90,6 +77,12 @@ $.draw((target) => {
         ${screen}
       </div>
     </div>
+    <button name="${tileMap.tab.name}">
+      ${t(tileMap.tab.label)}
+    </button>
+    <button name="${tileMap.escape.name}">
+      ${t(tileMap.escape.label)}
+    </button>
   ` : `
     <div name="desktop">
       <my-admin></my-admin>
@@ -98,6 +91,9 @@ $.draw((target) => {
 
   target.innerHTML =`
     <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
+      <button name="${tileMap.enter.name}">
+        ${t(tileMap.enter.label)}
+      </button>
       ${content}
     </div>
   `
@@ -156,47 +152,24 @@ $.style(`
     padding: 0;
   }
 
-  & [name="transport"] {
-    overflow-x: auto;
-    max-width: calc(100vw - 1.5rem - 1px);
-    position: absolute;
-    right: 0;
-    top: 2rem;
-    z-index: 2;
-    overflow: auto;
-  }
-
-  & [name="actions"] {
-    display: inline-flex;
-    justify-content: end;
-    border: 1px solid rgba(255,255,255,.15);
-    gap: .25rem;
-		padding-right: 1rem;
-    border-radius: 1.5rem 0 0 1.5rem;
-  }
-
 	& button {
-    background: rgba(0,0,0,.85);
-    border: none;
-    color: dodgerblue;
-    cursor: pointer;
-    height: 2rem;
-    border-radius: 1rem;
-    transition: color 100ms;
-    padding: .25rem 1rem;
+		border-radius: 0;
+		border: none;
+		background: black;
+		color: dodgerblue;
     z-index: 1;
 	}
-
   & [name="the-time-machine"] {
     position: relative;
     z-index: 1001;
     display: grid;
-    grid-template-rows: 1fr;
-    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 2rem;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     height: 100%;
     overflow: hidden;
     grid-template-areas:
-      "${tileMap.carousel.name}"
+      "${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name}"
+      "${tileMap.enter.name} ${tileMap.shift.name} ${tileMap.tab.name} ${tileMap.escape.name}";
   }
 
   & [name="world"] {

@@ -6,7 +6,7 @@ Hello and welcome!
 TheLanding.Page is a board for surfing the digital airwaves.
 
 <iframe
-src: ?world=thelanding.page
+src: /thelanding.page?world=thelanding.page
 title: The Landing Page - TheLanding.Page - tlp
 style: height: 500px; max-height: 90vh;
 

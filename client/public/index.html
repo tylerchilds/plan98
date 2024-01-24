@@ -86,8 +86,18 @@
         }
       }
     </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/public/gh057.js').then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+      }
+    </script>
   </head>
-  <body>
+  <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
     <boot-loader id="bootloader">
       <svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
         <ellipse style="fill: rgb(216, 216, 216);" cx="781.289" cy="180" rx="60" ry="60" class="slot" id="slot-0" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">

@@ -111,7 +111,7 @@ function system(target) {
         </form>
       </div>
       <button aria-label="Switcher" class="switcher">
-        ℤ.
+        ¿i?
       </button>
       <div class="leaf">
         <media-plexer src="${window.location.origin + path + window.location.search}"></media-plexer>

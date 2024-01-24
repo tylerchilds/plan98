@@ -53,7 +53,8 @@ $.style(`
     animation: &-fade-in ease-in-out 200ms;
     display: grid;
     height: 100%;
-    place-items: center;
+    place-items: end;
+    text-align: right;
     width: 100%;
     pointer-events: none;
   }

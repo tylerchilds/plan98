@@ -9,7 +9,7 @@ window.plan98 = {
   host: world ? world : window.location.host,
 }
 
-const style = document.createElement('style')
+const style = document.createElement('link')
 
 style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)

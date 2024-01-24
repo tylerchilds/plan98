@@ -330,8 +330,6 @@ $.style(`
   & {
     max-height: 100vh;
     height: 100%;
-    display: grid;
-    place-content: end;
     pointer-events: none;
     transform: translateY(-72px);
   }
@@ -341,6 +339,7 @@ $.style(`
     position: relative;
     transform-style: preserve-3d;
     width: 100%;
+    height: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     pointer-events: auto;

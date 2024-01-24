@@ -55,8 +55,8 @@ $.draw(target => {
     target.lastPanel = activePanel
   }
 
-  const start = Math.max(activeShot - 1, 0)
-  const end = Math.min(activeShot + 2, shotCount)
+  const start = activeShot
+  const end = activeShot + 1
   const forwards = lastAction !== 'back'
   const motion = getMotion(html, { active: activeShot, forwards, start, end })
   const play = (state.play || {}).embed
@@ -415,8 +415,8 @@ $.style(`
     overflow-x: auto;
     max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
-    left: 2rem;
-    top: 0;
+    right: 0;
+    top: 2rem;
     z-index: 2;
     overflow: auto;
   }
@@ -443,10 +443,11 @@ $.style(`
     justify-content: end;
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
-    border-radius: 1.5rem;
+		padding-right: 1rem;
+    border-radius: 1.5rem 0 0 1.5rem;
   }
 
-  & [name="read"] > *${notHiddenChildren} {
+  & [name="page"] > *${notHiddenChildren} {
     display: block;
   }
 

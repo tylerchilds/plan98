@@ -7,6 +7,10 @@ body {
   background: linear-gradient(135deg, transparent, rebeccapurple), black;
 }
 
+[pathname="/"] #main {
+  padding-top: 25vh;
+}
+
 img,
 video {
   max-width: 100%;
