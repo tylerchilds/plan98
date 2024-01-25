@@ -124,7 +124,7 @@ $.draw(target => {
         <div name="actions">
           <button data-read>Read</button>
           <button data-write>Write</button>
-          <button data-perform>Perform</button>
+          <button data-perform>Execute</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
@@ -148,7 +148,10 @@ export const hyperSanitizer = (script) => {
 }
 
 function source(target) {
-  return target.closest('[src]').getAttribute('src')
+  const hardcoded = target.closest($.link).getAttribute('src')
+  const today = new Date().toJSON().slice(0, 10)
+  const dynamic = `/public/journal/a${today}.saga`
+  return hardcoded || dynamic
 }
 
 function sourceFile(target) {
@@ -156,18 +159,26 @@ function sourceFile(target) {
   return state[src]
     ? state[src]
     : (function initialize() {
-      fetch(src).then(res => res.text()).then((x) => {
-        state[src] = {
-          file: x,
-          html: hyperSanitizer(x),
-          embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+      fetch(src).then(async (res) => {
+        if(res.status === 200) {
+          const x = await res.text()
+          state[src] = {
+            file: x,
+            html: hyperSanitizer(x),
+            embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+          }
+        } else {
+          state[src] = {
+            file: '',
+            html: '',
+            embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+          }
         }
       }).catch(e => {
         console.error(e)
-        const x = script404()
         state[src] = {
-          file: x,
-          html: hyperSanitizer(x),
+          file: '',
+          html: '',
           embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
         }
       })
@@ -306,71 +317,6 @@ $.when('animationend', 'transition', function transition({target}) {
   document.activeElement.blur()
 })
 
-function script404() {
-  return `Change the way you see the world.
-
-A paper computer could be a 1,000 line toy that behaves as a single celled organism, akin to one cell in a excel sheet that produces google docs for netflix to run apple keynotes for saturday night live as a paradigm shift that encapsulates them all.
-
-<greet-friend
-x: Meduz
-y: fr_FR
-
-<salut-ami
-x: Ty
-y: en_US
-
-<greet-friend
-x: Victoria
-y: es_MX
-
-<saludo-amigo
-x: Ty
-y: en_US
-
-https://sillyz.computer is a straight to DVD release of the universal access to my knowledge. My Internet Archive, if you will. That's why I debuted there as a vendor on October 12th and not at Cobb's October 15th. Pre-orders become available November 15th.
-
-Multiplayer, 2024. Re: the business model, the computers are free, but you pay for the content, just like any other streaming service, but you also get the source code to launch your own competitor.
-
-If you missed me at launch, this is an edit of my dress rehearsal barking and busking from October 9th:
-
-<hyper-link
-src: https://youtu.be/KcUAa0eT4Tc?si=cZ5mQvoNgxBl6mlF
-label: October 9th, 2023
-
-Let's see what we cook up together this holiday season-- I know I'll be working on my feature length immersive experience for Sillyz.Computer-- The War on Elves. If I'm lucky, I might even exchange knowledge with them while I'm on their island. One of the perks of being Player Number One.
-
-Will you be next? Anyone can become Sillonious.
-
-<hyper-link
-src: https://github.com/tylerchilds/plan98
-label: Download the Source Code
-
-And run the command 'npm start'
-
-With &hearts;
-- Uncle Sillonious
-
-<hyper-link
-src: https://merveilles.town/@tychi
-label: hit me up
-
-# the end.
-
-P.S. Mila, will you help me learn Chinese?
-
-{ play
-embed: <iframe width="560" height="315" src="https://www.youtube.com/embed/UnwLtBRLOUg?si=LudRVaPHI1lH9vwh" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-
-do you have anything you'd like to add?
-
-.
-.
-.
-.
-?
-`
-}
-
 $.style(`
   @media print {
     html, body {
@@ -403,6 +349,7 @@ $.style(`
     display: block;
     overflow: auto;
     color: black;
+    background: black;
   }
   & .grid {
     display: grid;

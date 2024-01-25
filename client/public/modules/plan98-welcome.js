@@ -99,7 +99,9 @@ $.when('click', '[data-tutorial]', () => {
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
-  window[start] = (html) => $.teach({ html });
+  window[start] = () => {
+    window.location.href = '/paper.pocket'
+  }
   showModal(`
     <plan98-onboarding
       host="${window.location.host}"

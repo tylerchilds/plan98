@@ -8,135 +8,68 @@ const locale = 'en_US'
 const $ = module('sillonious-webring', {
   diskette: 0,
   paused: false,
-  online: true
+  nextDisk: 0,
+  instances: {}
 })
-
-const tiles = [
-  {
-    name: 'enter',
-    label: '/sillonious-memex/tiles/enter/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'escape',
-    label: '/sillonious-memex/tiles/escape/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'carousel',
-    label: '/sillonious-memex/tiles/carousel/label.txt',
-  },
-  {
-    name: 'shift',
-    label: '/sillonious-memex/tiles/shift/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'tab',
-    label: '/sillonious-memex/tiles/tab/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  }
-]
-
-const tileMap = tiles.reduce((map, tile) => {
-  map[tile.name] = tile
-  fetch(`/strings/${locale}/${tile.label}`)
-    .then(res => res.text())
-    .then(label => {
-      $.teach({ [tile.label]: label })
-    })
-  return map
-}, {})
 
 $.draw((target) => {
-  const { paused, online } = $.learn()
-  const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
-
-  const screen = doingBusinessAs[art]
-    ? `<iframe src="/?world=${art}" title="${art}"></iframe>`
-    : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
-
-  const content = online ? `
-    <button name="${tileMap.shift.name}">
-      ${t(tileMap.shift.label)}
-    </button>
-    <div name="world">
-      <middle-earth></middle-earth>
-    </div>
-    <hr style="display: none;"/>
-    <div name="carousel">
-      <div name="screen">
-        ${screen}
-      </div>
-    </div>
-    <button name="${tileMap.tab.name}">
-      ${t(tileMap.tab.label)}
-    </button>
-    <button name="${tileMap.escape.name}">
-      ${t(tileMap.escape.label)}
-    </button>
-  ` : `
-    <div name="desktop">
-      <my-admin></my-admin>
-    </div>
-  `
-
-  target.innerHTML =`
-    <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
-      <button name="${tileMap.enter.name}">
-        ${t(tileMap.enter.label)}
-      </button>
-      ${content}
-    </div>
+  const { id } = target
+  const { instances } = $.learn()
+  mount(target)
+  if(!instances[target.id]) return
+  const { diskette, nextDisk } = instances[target.id]
+  const [sill,on,ious] = triforce(diskette)
+  const fadeOut = diskette !== nextDisk
+  return `
+    <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
+      <iframe src="/?world=${sill}" title="${sill}"></iframe>
+      <iframe src="/?world=${on}" title="${on}"></iframe>
+      <iframe src="/?world=${ious}" title="${ious}"></iframe>
+    </transition>
   `
 })
 
-$.when('click', '[name="escape"]', () => {
-  const { paused } = $.learn()
-  if(paused) {
-    window.location.href = window.location.href
-  }
+function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  const { diskette, nextDisk } = $.learn() || {}
+  schedule(() => {
+    const id = target.id
+    updateInstance(id, { id, diskette, nextDisk, max: diskettes() })
+  })
+}
 
-  alert('new quest coming soon!')
-})
+function diskettes() {
+  return Object.keys(doingBusinessAs)
+}
 
-$.when('click', '[name="enter"]', () => {
-  const { paused, online } = $.learn()
-  if(paused) {
-    const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
-    const bin = diskettes(event.target)
-    const art = bin[diskette]
+function updateInstance(id, payload) {
+  $.teach({...payload}, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          ...p
+        }
+      }
+    }
+  })
+}
 
-    window.location.href = doingBusinessAs[art]
-      ? '?world=' + art
-      : `${protocol}${art}`
-  }
+function schedule(x, delay=1) { setTimeout(x, delay) }
 
-  $.teach({ online: !online })
-})
+function triforce(index) {
+  const dba = diskettes()
+  const alpha = dba[mod(index-1, dba.length)]
+  const omega = dba[mod(index+1, dba.length)]
+  return [alpha, dba[index], omega]
+}
 
-$.when('click', '[name="tab"]', (event) => {
-  let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
-  const bin = diskettes()
-  const count = bin.length
-  diskette = ((diskette || 0) + 1) % count
-  const art = bin[diskette]
-  console.log(diskette)
-  state['ls/sillonious-memex'] = { art, diskette }
-})
-
-$.when('click', '[name="shift"]', () => {
-  const { paused } = $.learn()
-  $.teach({ paused: !paused })
-})
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
 
 $.style(`
   & {
@@ -144,12 +77,6 @@ $.style(`
 		position: relative;
     height: 100%;
     max-height: 100%;
-  }
-  & [name="desktop"] {
-    position: fixed;
-    inset: 0;
-    overflow: auto;
-    padding: 0;
   }
 
 	& button {
@@ -159,94 +86,4 @@ $.style(`
 		color: dodgerblue;
     z-index: 1;
 	}
-  & [name="the-time-machine"] {
-    position: relative;
-    z-index: 1001;
-    display: grid;
-    grid-template-rows: 1fr 2rem;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    height: 100%;
-    overflow: hidden;
-    grid-template-areas:
-      "${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name} ${tileMap.carousel.name}"
-      "${tileMap.enter.name} ${tileMap.shift.name} ${tileMap.tab.name} ${tileMap.escape.name}";
-  }
-
-  & [name="world"] {
-    grid-area: ${tileMap.carousel.name};
-  }
-
-  & [name="world"] > * {
-    height: 100%;
-  }
-
-  & [name="carousel"] {
-    display: none;
-    place-self: center;
-    overflow: hidden;
-    position: relative;
-  }
-
-  & .circus-enabled hr {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    height: 100%;
-    z-index: 1000;
-    background: rgba(0,0,0,.85);
-    grid-area: ${tileMap.carousel.name};
-  }
-
-  & .circus-enabled [name="carousel"] {
-    display: grid;
-    overflow: auto;
-    z-index: 1001;
-    width: 100%;
-    height: 100%;
-  }
-
-  & [name="screen"] {
-    display: grid;
-		grid-template-columns: 1fr;
-		grid-auto-rows: 1fr;
-    place-content: center;
-    place-self: center;
-    height: 100%;
-    width: 100%;
-  }
-
-
-  & [name="screen"] > * {
-    margin: auto;
-  }
-
-  ${layout(tiles)}
 `)
-
-function layout(tiles) {
-  return tiles.map((tile) => `
-    & [name="${tile.name}"] {
-      grid-area: ${tile.name};
-      ${bonusStyles(tile)}
-    }
-  `).join('')
-}
-
-function bonusStyles(tile) {
-  return tile.styles
-    ? Object.keys(tile.styles).map(key => {
-      return `${key}: ${tile.styles[key]};`
-    }).join('\n')
-    : ''
-}
-
-function diskettes() {
-  return Object.keys(doingBusinessAs)
-}
-
-function t(key) {
-  return $.learn()[key]
-}

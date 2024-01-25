@@ -156,7 +156,7 @@ function floppy(target) {
   }
 
   return `
-    <plan98-welcome></plan98-welcome>
+    <terminal-demo></terminal-demo>
   `
 }
 

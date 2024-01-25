@@ -26,7 +26,7 @@ export const doingBusinessAs = {
   'sillyz.computer': {
     emote: ';)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
-    pocket: '<plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>',
+    pocket: '<hyper-script></hyper-script>',
     latitude: '37.769100',
     longitude: '-122.454583',
     zoom: 10,
@@ -111,7 +111,7 @@ export const doingBusinessAs = {
   'y2k38.info': {
     emote: ':*',
     image: '/cdn/tychi.me/photos/giza.JPG',
-    pocket: '<terminal-demo></terminal-demo>',
+    pocket: '<plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
