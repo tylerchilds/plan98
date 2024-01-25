@@ -329,26 +329,26 @@ $.draw((target) => {
         <div class="sticky">
           ${menuFor(host)}
         </div>
+        <carousel-billboard>
+          ${friends}
+        </carousel-billboard>
       </div>
     </main>
     <nav class="input">
       <sillonious-joypro seat="${seat}"></sillonious-joypro>
     </nav>
-    <header class="from">
-      <carousel-billboard>
-        ${friends}
-      </carousel-billboard>
+    <footer class="from">
       <button data-download>
-        Print
+        More
       </button>
-    </header>
-    <footer class="to">
+    </footer>
+    <header class="to">
       <button class="sillonious-brand" data-switcher>
         <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
           PaperPocket
         </hypertext-variable>
       </button>
-    </footer>
+    </header>
   `
 })
 
@@ -429,6 +429,7 @@ function print(colors) {
 
 $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).outerHTML
+  alert('sorry, come back later!')
   sticky(brand)
 })
 
@@ -500,6 +501,13 @@ $.style(`
     background: transparent;
     border: none;
     pointer-events: all;
+  }
+
+  & carousel-billboard {
+    position: absolute;
+    padding: 0 7px;
+    right: 0;
+    top: 5rem;
   }
 
   .sillonious-brand {
@@ -601,7 +609,7 @@ $.style(`
     position: absolute;
     padding: 7px;
     bottom: 0;
-    z-index: 2;
+    z-index: 4;
     left: 0;
     right: 0;
   }
@@ -617,20 +625,20 @@ $.style(`
 
   & .to {
     background: lemonchiffon;
-    padding: 9px 16px;
+    padding: 0 7px;
     position: absolute;
     top: 0;
     right: 3rem;
-    padding: 0 7px;
-    z-index: 4;
+    z-index: 2;
   }
 
   & .from {
-    text-align: right;
+    text-align: center;
     position: absolute;
-    top: 5rem;
+    bottom: 0;
+    left: 0;
+    margin: auto;
     right: 0;
-    padding: 0 7px;
     z-index: 3;
   }
 
