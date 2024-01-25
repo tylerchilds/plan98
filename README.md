@@ -1,13 +1,52 @@
-# plan98
+# JavaScript Operating System - os.js.org
 
-A future proof retro computing fantasy research operating sytem, for today's hardware.
+For write once run on any thing. [Try it now.](https://sillyz.computer)
 
-Gaming? Check.
-Office? Check.
-Creativity? Check.
-Multiplayer? Only if you want it.
+## Why a JavaScript Operating System
 
-# From Scratch
+Building for distributed-systems historically has relied on cross-platform architectures and compilation.
+
+People that build and buy digital goods do not like or care about any of those words, but pay to save time and money.
+
+Whether you're dabbling with technology for the first time or shipping international enterprise products, same, same.
+
+### Portable.
+
+Whether you're flash drive hopping, dual booting, or embedding, the architecture is flexible.
+
+Start from scratch
+
+### Consistent.
+
+Leveraging modern approaches, all existing web content is backwards compatible.
+
+Start right now
+
+### Customizable.
+
+Match your phone with your slides every costume change, for every performance and pitch.
+
+Change theme
+
+### Innovative.
+
+Five action words connect script to screen, pitch to play in a module: learn to draw in style when you teach.
+
+Create a scene
+
+### Compatible.
+
+Populate windows with any networked data source or be offline and local only.
+
+Go Enterprise or Community
+
+### Collapsible.
+
+In the event of computing collapse, the source code serves as a contract with our new overlords, should we be able to negotiate.
+
+Print Source Code Now
+
+## From Scratch
 
 First, we need to create a new computer with a literal and metaphorical thumb drive.
 
