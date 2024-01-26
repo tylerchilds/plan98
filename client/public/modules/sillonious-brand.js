@@ -43,7 +43,7 @@ export const doingBusinessAs = {
   '1998.social': {
     emote: ':D',
     image: '/cdn/tychi.me/photos/aurora.JPG',
-    pocket: '<my-admin></my-admin>',
+    pocket: '<my-journal></my-journal>',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,

@@ -1,4 +1,4 @@
-# JavaScript Operating System - os.js.org
+# JavaScript Operating System
 
 For write once run on any thing. [Try it now.](https://sillyz.computer)
 
