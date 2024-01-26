@@ -14,9 +14,7 @@ const $ = module('my-journal', {
 })
 
 gun.on('auth', () => {
-  $.teach({
-    authenticated: true
-  })
+  $.teach({ authenticated: true })
   user.get('journal').map().on(showPost)
 })
 
@@ -39,15 +37,29 @@ $.draw(target => {
   const {posts, authenticated, alias, pass, post} = data
 
   const nonMemberExperience = `
-    <form id="sign">
-      <input class="keyable" name="alias" value="${alias}" placeholder="username">
-      <input class="keyable" name="pass" value="${pass}" type="password" placeholder="passphrase">
-      <input id="signup" type="button" value="sign up">
-      <input id="signin" type="button" value="sign in">
+    <form>
+      <label class="field">
+        <span class="label">Player</span>
+        <input class="keyable" name="alias" value="${alias}" placeholder="username">
+      </label>
+      <label class="field">
+        <span class="label">Password</span>
+        <input class="keyable" name="pass" value="${pass}" type="password" placeholder="passphrase">
+      </label>
+      <button class="button" id="signup" type="submit">
+        Sign Up
+      </button>
+      <button class="button" id="signin" type="submit">
+        Sign In
+      </button>
     </form>
+
   `
 
   const memberExperience = `
+    <button class="button" id="signout" type="submit">
+      Sign Out
+    </button>
     <ul id="list">${posts.map(x => `<li>${data[x]}</li>`).join('')}</ul>
     <form id="post">
       <input class="keyable" name="post" value="${post}">
@@ -58,25 +70,46 @@ $.draw(target => {
 })
 
 $.when('change', '.keyable', (event) => {
+  event.preventDefault()
   const { name, value } = event.target
   $.teach({[name]: value})
 })
 
-$.when('click', '#signup', () => {
+$.when('click', '#signout', (event) => {
+  event.preventDefault()
+  user.leave()
+  $.teach({ authenticated: false })
+})
+
+$.when('click', '#signup', (event) => {
+  event.preventDefault()
   const { alias, pass } = $.learn()
   user.create(alias, pass)
   user.auth(alias, pass)
+  $.teach({ pass: '' })
 })
 
-$.when('click', '#signin', () => {
+$.when('click', '#signin', (event) => {
+  event.preventDefault()
   const { alias, pass } = $.learn()
   user.auth(alias, pass)
+  $.teach({ pass: '' })
 })
 
-$.when('submit', '#post', (e) => {
-  e.preventDefault()
+$.when('submit', '#post', (event) => {
+  event.preventDefault()
   const { post } = $.learn()
   user.get('journal').set(post, (a, b,c) => {
     $.teach({ post: '' })
   })
 })
+
+$.style(`
+  & form {
+    background: rgba(0,0,0,.5);
+    backdrop-filter: blur(2px);
+    border-radius: 9px;
+    padding: 16px 9px;
+    display: grid;
+  }
+`)
