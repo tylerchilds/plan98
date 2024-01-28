@@ -398,7 +398,7 @@ $.style(`
 
   & [name="navi"] {
     position: fixed;
-    left: 0;
+    right: 0;
     margin: auto;
     top: 0;
     height: 2rem;

@@ -294,32 +294,6 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  const friends = Object.keys(doingBusinessAs).slice(0,7).reduce((all, world)=> {
-    const current = doingBusinessAs[world]
-    const joinCode = `
-      <button name="join-code">
-        <qr-code
-          text="https://${host}?world=${world}&council=${council}&seat=${seat}"
-          ${fg ? `data-fg="${fg}"`: ''}
-          ${bg ? `data-bg="${bg}"`: ''}
-        ></qr-code>
-      </button>
-    `
-
-    if(current.mascot !== mascot) {
-      all.push(`
-        <slot>
-          <div class="sillonious-brand">
-            ${current.mascot}
-          </div>
-          ${joinCode}
-        </slot>
-      `)
-    }
-
-    return all
-  }, []).join('')
-
   return `
     <main class="output" style="background-image: ${stars}">
       <div class="frontside-paper">
@@ -329,9 +303,6 @@ $.draw((target) => {
         <div class="sticky">
           ${menuFor(host)}
         </div>
-        <carousel-billboard>
-          ${friends}
-        </carousel-billboard>
       </div>
     </main>
     <nav class="input">
@@ -368,7 +339,7 @@ function seed(target) {
 }
 
 
-function generateTheme(target, host, {reverse} = {}) {
+export function generateTheme(target, host, {reverse} = {}) {
   if(target.dataset.themed === 'true') {
     return $.learn()[host]
   }
@@ -503,13 +474,6 @@ $.style(`
     pointer-events: all;
   }
 
-  & carousel-billboard {
-    position: absolute;
-    padding: 0 7px;
-    right: 0;
-    top: 5rem;
-  }
-
   .sillonious-brand {
     --v-font-mono: 1;
     --v-font-casl: 1;
@@ -607,7 +571,7 @@ $.style(`
   & .input {
     pointer-events: none;
     position: absolute;
-    padding: 7px;
+    padding: 1rem;
     bottom: 0;
     z-index: 4;
     left: 0;
@@ -628,7 +592,7 @@ $.style(`
     padding: 0 7px;
     position: absolute;
     top: 0;
-    right: 3rem;
+    left: 0;
     z-index: 2;
   }
 

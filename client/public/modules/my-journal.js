@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { currentBusiness } from './sillonious-brand.js'
 import Gun from 'gun'
 import 'gun/sea'
 
@@ -36,7 +37,7 @@ $.draw(target => {
   const data = $.learn()
   const {posts, authenticated, alias, pass, post} = data
 
-  const nonMemberExperience = `
+  const fakie = `
     <form>
       <label class="field">
         <span class="label">Player</span>
@@ -53,20 +54,29 @@ $.draw(target => {
         Sign In
       </button>
     </form>
-
   `
 
-  const memberExperience = `
+  const regular = `
     <button class="button" id="signout" type="submit">
       Sign Out
     </button>
     <ul id="list">${posts.map(x => `<li>${data[x]}</li>`).join('')}</ul>
+    <my-biography></my-biography>
     <form id="post">
       <input class="keyable" name="post" value="${post}">
       <input type="submit" value="post">
     </form>
   `
-  return authenticated ? memberExperience : nonMemberExperience
+
+  const { image, color } = currentBusiness(plan98.host)
+  target.style.setProperty("--image", `url(${image})`);
+  target.style.setProperty("--color", color);
+
+  target.innerHTML = `
+    <div class="inner">
+      ${authenticated ? regular : fakie}
+    </div>
+  `
 })
 
 $.when('change', '.keyable', (event) => {
@@ -100,16 +110,52 @@ $.when('submit', '#post', (event) => {
   event.preventDefault()
   const { post } = $.learn()
   user.get('journal').set(post, (a, b,c) => {
-    $.teach({ post: '' })
-  })
+    $.teach({ post: '' }) })
 })
 
 $.style(`
+  &::before {
+    content: '';
+    position: absolute;
+    background: var(--image), var(--color, transparent);
+    background-blend-mode: multiply;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  & {
+    display: grid;
+    place-items: center;
+    padding: 9px;
+    height: 100%;
+    width: 100%;
+    position: relative;
+  }
+
+  & .inner {
+    z-index: 1;
+    position: relative;
+    overflow: auto;
+    width: 100%;
+  }
+
   & form {
     background: rgba(0,0,0,.5);
     backdrop-filter: blur(2px);
     border-radius: 9px;
     padding: 16px 9px;
     display: grid;
+    max-width: 320px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  & .field {
+    margin-bottom: .5rem;
   }
 `)
