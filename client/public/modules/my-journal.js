@@ -128,11 +128,11 @@ $.style(`
 
   & {
     display: grid;
-    place-items: center;
-    padding: 9px;
+    place-items: start;
     height: 100%;
     width: 100%;
     position: relative;
+    overflow: hidden;
   }
 
   & .inner {
@@ -140,6 +140,8 @@ $.style(`
     position: relative;
     overflow: auto;
     width: 100%;
+    max-height: 100%;
+    padding: 4rem 7px 6rem;
   }
 
   & form {
