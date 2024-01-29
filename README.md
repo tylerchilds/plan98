@@ -1,8 +1,8 @@
-# JavaScript Operating System
+# PaperPocket (plan98)
 
 For write once run on any thing. [Try it now.](https://sillyz.computer)
 
-## Why a JavaScript Operating System
+## Why a built as a JavaScript Operating System?
 
 Building for distributed-systems historically has relied on cross-platform architectures and compilation.
 
@@ -160,3 +160,7 @@ The Notorious Sillonious.
 [] If you do, don't commercialize it.
 
 [] If you do, don't teach it to kids.
+
+free to play, fits in your pocket, runs on everything, cognitively simplified, performable on stage, secure enough for your business, and your family
+
+paper pocket product process platform pipeline prospects
