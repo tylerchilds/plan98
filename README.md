@@ -161,6 +161,5 @@ The Notorious Sillonious.
 
 [] If you do, don't teach it to kids.
 
-free to play, fits in your pocket, runs on everything, cognitively simplified, performable on stage, secure enough for your business, and your family
-
 paper pocket product process platform pipeline prospects
+

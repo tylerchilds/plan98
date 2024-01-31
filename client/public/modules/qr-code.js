@@ -7,8 +7,9 @@ function sleep(D) { return new Promise(x => setTimeout(x,D))}
 const $ = module('qr-code')
 
 $.draw(target => {
-  const { image } = $.learn()
+  const codes = $.learn()
   const code = target.getAttribute('text')
+  const image = codes[code]
   const { fg='black', bg='transparent' } = target.dataset
   generate(target, code, {fg, bg})
   return image ? `
@@ -35,7 +36,7 @@ async function generate(target, code, {fg, bg}) {
 
   const dataURL = node.querySelector('canvas').toDataURL()
 
-  $.teach({ image: `<img src="${dataURL}" alt="code" />`})
+  $.teach({ [code]: `<img src="${dataURL}" alt="code" />`})
 }
 
 
