@@ -354,7 +354,7 @@ $.style(`
   & .grid {
     display: grid;
     grid-template-rows: 1fr;
-    height: 100vh;
+    height: 100%;
   }
 
   & [name="transport"] {

@@ -311,7 +311,8 @@ $.style(`
 
   & .frontside-paper {
     border-top: 3px solid var(--wheel-0-3);
-    background: var(--wheel-0-1);
+    background: black;
+    padding: 2rem 5px;
   }
 
   & .backside-paper {
