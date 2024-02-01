@@ -183,19 +183,16 @@
       }
     </script>
     <script>
-      const $ = window.module('hello-native', { src: 'sillyz.computer' })
+      const $ = window.module('hello-native', { src: 'resume.html' })
       $.draw(() => {
-        const { src, helperActive } = $.learn()
+        const { src } = $.learn()
         return `
-          <div class="browser-chrome ${helperActive ? 'helper' : ''}">
-            <div>
-              <button class="help" aria-label="help">¿i?</button>
-            </div>
+          <div class="browser-chrome">
             <div class="transport">
               <input type="text" value="${src}" />
             </div>
           </div>
-          <iframe src="https://${src}" title=":)"></iframe>
+          <iframe src="${src}" title=":)"></iframe>
         `
       })
       $.when('change', 'input', (event) => {
@@ -203,13 +200,10 @@
         $.teach({ src })
       })
 
-      $.when('click', '.help', (event) => {
-        $.teach({ helperActive: !$.learn().helperActive })
-      })
       $.style(`
         & {
           display: block;
-          height: 100%;
+          height: calc(100% - 1rem);
         }
 
         & button {
@@ -220,16 +214,18 @@
         }
         & .browser-chrome {
           position: fixed;
-          top: 0;
+          bottom: 0;
           left: 0;
+          right: 0;
         }
 
-        & .transport {
-          display: none;
-        }
-
-        & .helper .transport {
+        & .browser-chrome input {
+          border: none;
+          border-radius: none;
           display: block;
+          width: 100%;
+          background: black;
+          color: white;
         }
       `)
     </script>
