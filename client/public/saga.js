@@ -65,7 +65,6 @@ const PROP_TIME = Symbol('p-time')
 const ACTOR_TIME = Symbol('a-time')
 
 export function render(script) {
-  console.log({ script })
   // what do we embed
   // as actors are worn their attributes may become modified
   const actors = state.actors = {}

@@ -8,6 +8,7 @@ import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 import { DOMParser } from "https://esm.sh/linkedom";
 
 import { render } from "@sillonious/saga"
+import { doingBusinessAs } from "@sillonious/brand"
 import { marked } from "marked"
 
 const command = Deno.args[0];
@@ -86,9 +87,26 @@ function buildHeaders(pathname, extension) {
 }
 
 async function router(request, context) {
-  let { pathname } = new URL(request.url);
+  let { pathname, host, search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const world = parameters.get('world')
   let extension = path.extname(pathname);
   const headers = buildHeaders(pathname, extension);
+
+  let file
+  let statusCode = Status.Success
+
+  console.log(pathname)
+  if(pathname === '/' && doingBusinessAs[world || host]) {
+    console.log(pathname)
+    const file = await home(request)
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
 
   if(pathname === '/plan98/about') {
     return about(request)
@@ -98,8 +116,6 @@ async function router(request, context) {
     return owncast(request)
   }
 
-  let file
-  let statusCode = Status.Success
   try {
 		if(existsSync(`./client/${pathname}`, { isFile: true })) {
 			file = await Deno.readFile(`./client/${pathname}`)
@@ -136,6 +152,25 @@ async function router(request, context) {
 
 const byPath = (x) => x.path
 const byName = (x) => x.name
+
+async function home(request) {
+  let file
+  try {
+    const { pathname, host, search } = new URL(request.url);
+    const parameters = new URLSearchParams(search)
+    const world = parameters.get('world')
+    const { saga } = doingBusinessAs[world || host]
+    console.log(saga)
+
+    file = await Deno.readTextFile(`./client/${saga}`)
+    file = await sanitizers['.saga'](file)
+    } catch (e) {
+    console.error(e + '\n' + pathname + '\n' + e)
+  }
+  return file
+}
+
+
 async function about(request) {
   let paths = []
 
@@ -158,7 +193,6 @@ async function about(request) {
   for await(const file of files) {
     const { name } = file
     const [_, path] = file.path.split(currentPath)
-  console.log(path)
     paths.push({ path, name })
   }
 

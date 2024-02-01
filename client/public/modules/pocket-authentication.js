@@ -9,11 +9,15 @@ export function getBase(target) {
   return bases[base]
 }
 
-export function connect(target) {
+export async function connect(target) {
   if(target.dataset.base) return
-  const src = target.getAttribute('src') || "http://localhost:8090"
+  const src = target.getAttribute('src') || plan98.provider || "http://localhost:8090"
   target.dataset.base = src
   bases[src] = new PocketBase(src)
+  const records = await bases[src].collection('posts').getFullList({
+    sort: '-created',
+  });
+debugger
 }
 
 export function whenLogout(callback) {

@@ -5,7 +5,7 @@ const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
 window.plan98 = {
   parameters,
-  provider: 'braid.org',
+  provider: 'https://sillonious.pockethost.io/',
   host: world ? world : window.location.host,
 }
 
