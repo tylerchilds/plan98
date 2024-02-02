@@ -32,7 +32,6 @@ $.style(`
     display: inline-block;
     position: relative;
     z-index: 1;
-    white-space: nowrap;
   }
 
   & span {
