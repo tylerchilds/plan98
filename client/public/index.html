@@ -10,6 +10,11 @@
         height: 100%;
       }
 
+      body > *{
+        position: relative;
+        z-index: 2;
+      }
+
       main {
         position: relative;
         z-index: 1;
@@ -31,6 +36,7 @@
         position: absolute;
         inset: 0;
         margin: auto;
+        z-index: 1;
       }
 
       button * {

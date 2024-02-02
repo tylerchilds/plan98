@@ -1,12 +1,3 @@
-
-The Landing Page is everything.
-
-What are you?
-Who are you?
-Where are you?
-
-When is the party?
-
-Sign me up, I'm in.
-
-<sillonious-webring
+<iframe
+src: /cdn/tylerchilds.com/index.html
+style: width: 100%;height: 100%; border: none;
