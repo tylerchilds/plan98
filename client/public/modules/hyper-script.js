@@ -1,6 +1,15 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
+import 'gun'
+import 'gun/sea'
+import 'gun/rad'
+
+const Gun = window.Gun
+const book = window.setTimeout.RAD()
+
+const gun = Gun(['https://gun.1998.social/gun']);
+
 // panels are the names of views or screens displayed in the user interface
 const panels = {
   // write to compose hype
@@ -26,12 +35,14 @@ const $ = module('hyper-script', {
   shotCount: 0
 })
 
-$.draw(target => {
+$.draw((target) => {
   const stars = getStars(true)
   const { id } = target
+  const sauce = source(target)
   let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
-  const { file, html, embed } = sourceFile(target)
+  const { file } = sourceFile(target)
 
+  const html = hyperSanitizer(file)
   const readonly = target.getAttribute('readonly')
   const presentation = target.getAttribute('presentation')
 
@@ -73,9 +84,9 @@ $.draw(target => {
           ${html}
         </div>
         <div name="navi">
-          ${embed ? '<button data-print>Print</button>' : ''}
+          <button data-print>Print</button>
           <div name="print">
-            ${embed}
+            <iframe src="${window.location.href}?path=${sauce}&readonly=true" title="embed"></iframe>
           </div>
         </div>
       </div>
@@ -143,57 +154,49 @@ $.draw(target => {
 })
 
 // the hyperSanitizer function turns fiction stories into non-fiction
-export const hyperSanitizer = (script) => {
+export function hyperSanitizer(script) {
   return render(script)
 }
 
 function source(target) {
   const hardcoded = target.closest($.link).getAttribute('src')
   const today = new Date().toJSON().slice(0, 10)
-  const dynamic = `/public/journal/a${today}.saga`
+  const dynamic = `/public/journal/${today}.saga`
   return hardcoded || dynamic
 }
 
 function sourceFile(target) {
-  const src = source(target)
-  return state[src]
-    ? state[src]
+  const sauce = source(target)
+  const entry = gun.get($.link).get(sauce)
+	entry.once((data) => { $.teach({[sauce]: data})});
+
+  const data = $.learn()[sauce] || { file: '' }
+
+  return data
+    ? data
     : (function initialize() {
-      fetch(src).then(async (res) => {
+      let file = ''
+      fetch(sauce).then(async (res) => {
         if(res.status === 200) {
-          const x = await res.text()
-          state[src] = {
-            file: x,
-            html: hyperSanitizer(x),
-            embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
-          }
-        } else {
-          state[src] = {
-            file: '',
-            html: '',
-            embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
-          }
+          file = await res.text()
         }
       }).catch(e => {
         console.error(e)
-        state[src] = {
-          file: '',
-          html: '',
-          embed: `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
-        }
+      }).finally(() => {
+        entry.put({ file })
       })
-      state[src] = { file: 'loading...' }
-      return state[src]
+
+      return data
     })()
 }
 
+
 $.when('input', '[name="typewriter"]', (event) => {
-  const src = source(event.target)
+  const sauce = source(event.target)
   const { value } = event.target
-  state[src].file = value
-  const html = hyperSanitizer(value)
-  state[src].html = html
-  state[src].embed = `<iframe src="${window.location.href}?path=${src}&readonly=true" title="embed"></iframe>`
+
+  const entry = gun.get($.link).get(sauce)
+  entry.put({ file: value })
 })
 
 $.when('click', '[data-read]', (event) => {
