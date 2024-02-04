@@ -77,13 +77,23 @@ const extensions = {
 
 function buildHeaders(pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
-  return {
-    'Cross-Origin-Embedder-Policy': 'credentialless',
-    'Cross-Origin-Opener-Policy': 'same-origin',
+  const wasmerEmbedEnabled = false
+
+  let headers = {
     'content-type': extensions[extension]
       ? extensions[extension][type]
       : typeByExtension(extension)
   }
+
+  if(wasmerEmbedEnabled) {
+    headers = {
+      ...headers,
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    }
+  }
+
+  return headers
 }
 
 async function router(request, context) {
