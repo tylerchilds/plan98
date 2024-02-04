@@ -144,7 +144,7 @@ $.style(`
    animation: pulse ease-in-out 5000ms alternate infinite;
    background: var(--wheel-5-5);
    transform-origin: top;
-   transform: rotateX(-90deg) translate(0, 0);
+   transform: rotateX(-60deg) translate(0, 0);
  }
 
  & .skybox.active .b {
@@ -152,14 +152,14 @@ $.style(`
    background: var(--wheel-5-4);
    box-shadow: 0 0 10px 1px rgba(0,0,0,.25) inset;
    transform-origin: right;
-   transform: rotateY(-90deg) translate(0, 0);
+   transform: rotateY(-60deg) translate(0, 0);
  }
 
  & .skybox.active .c {
    animation: pulse ease-in-out 5000ms alternate infinite;
    background: var(--wheel-5-3);
    transform-origin: bottom;
-   transform: rotateX(90deg) translate(0, 0);
+   transform: rotateX(60deg) translate(0, 0);
  }
 
  & .skybox.active .d {
@@ -167,7 +167,7 @@ $.style(`
    background: var(--wheel-5-4);
    box-shadow: 0 0 10px 1px rgba(0,0,0,.25) inset;
    transform-origin: left;
-   transform: rotateY(90deg) translate(0, 0);
+   transform: rotateY(60deg) translate(0, 0);
  }
 
  & .skybox.active .e {
