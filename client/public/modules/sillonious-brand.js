@@ -222,7 +222,7 @@ $.style(`
     box-shadow: var(--shadow);
     position: relative;
     z-index: 4;
-    pointer-events: none;
+    overflow: auto;
   }
 
   & .sticky sillonious-brand {
@@ -234,7 +234,6 @@ $.style(`
   & .sticky button {
     background: transparent;
     border: none;
-    pointer-events: all;
   }
 
   .sillonious-brand {
@@ -537,6 +536,12 @@ function menuFor(who, when, where) {
   return `
     <sillonious-brand host="sillyz.computer">
       <button class="sillonious-brand">PaperPocket</button>
+    </sillonious-brand>
+    <sillonious-brand host="thelanding.page">
+      <button class="sillonious-brand">LandingPage</button>
+    </sillonious-brand>
+    <sillonious-brand host="archive.org">
+      <button class="sillonious-brand">InternetArchive</button>
     </sillonious-brand>
     <sillonious-brand host="1998.social">
       <button class="sillonious-brand">MyBase</button>
