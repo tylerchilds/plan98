@@ -1,7 +1,9 @@
 import module from '@sillonious/module'
 import { currentBusiness } from './sillonious-brand.js'
-import Gun from 'gun'
+import 'gun'
 import 'gun/sea'
+
+const Gun = window.Gun
 
 const gun = Gun(['https://gun.1998.social/gun']);
 const user = gun.user().recall({ sessionStorage: true })
