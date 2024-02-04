@@ -176,7 +176,7 @@ $.when('click', '.sticky .sillonious-brand', function switcher({ target }) {
   const host = target.closest('[host]').getAttribute('host')
 
   if(host) {
-    window.location.href = `/thelanding.page?world=${host}`
+    window.location.href = `/paper.pocket?world=${host}`
   }
 })
 

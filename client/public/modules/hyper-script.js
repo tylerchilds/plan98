@@ -2,11 +2,8 @@ import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
 import 'gun'
-import 'gun/sea'
-import 'gun/rad'
 
 const Gun = window.Gun
-const book = window.setTimeout.RAD()
 
 const gun = Gun(['https://gun.1998.social/gun']);
 
