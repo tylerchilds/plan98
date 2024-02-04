@@ -98,16 +98,6 @@
         }
       }
     </script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/public/gh057.js').then((registration) => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
-      }
-    </script>
   </head>
   <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
     <boot-loader id="bootloader">

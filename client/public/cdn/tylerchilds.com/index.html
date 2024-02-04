@@ -11,11 +11,12 @@
       body {
         max-width: 55rem;
         margin: 4rem auto;
+        padding: 1rem;
       }
 
       footer {
         display: grid;
-        grid-template-columns: repeat(7, minmax(0, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(.75in, 1fr));
         gap: 2rem;
       }
 
@@ -39,6 +40,7 @@
         body {
           max-width: auto;
           margin: 0;
+          padding: 0;
           -webkit-print-color-adjust:exact !important;
           print-color-adjust:exact !important;
         }
