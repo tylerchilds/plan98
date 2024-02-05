@@ -59,13 +59,13 @@ $.draw((target) => {
 
   return `
     <main class="output" style="background-image: ${stars}">
-      <div class="frontside-paper">
-        ${pocket || '<saga-genesis></saga-genesis>'}
-      </div>
       <div class="backside-paper">
         <div class="sticky">
           ${menuFor(host)}
         </div>
+      </div>
+      <div class="frontside-paper">
+        ${pocket || '<saga-genesis></saga-genesis>'}
       </div>
     </main>
     <nav class="input">
