@@ -325,6 +325,7 @@ $.style(`
 
   &.flip > .output > .frontside-paper {
     transform: rotateX(180deg);
+    pointer-events: none;
   }
 
   &.flip > .output > .backside-paper {
