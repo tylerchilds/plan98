@@ -11,6 +11,7 @@ async function query(target, key) {
 
 const form = (key) => {
   return `
+    <live-help room="sup"></live-help>
     <form>
       <input name="key" value="${key}" />
     </form>

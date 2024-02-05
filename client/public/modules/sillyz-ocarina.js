@@ -367,7 +367,7 @@ $.when('click', '.pitch-down', pitchDown)
 
 $.style(`
   & {
-    height: 100vh;
+    height: 100%;
     display: grid;
     place-items: center;
     position: relative;
@@ -380,7 +380,7 @@ $.style(`
     grid-template-columns: 40vmin;
     place-content: center;
     padding: 0 1rem;
-    height: 100vh;
+    height: 100%;
 		user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
