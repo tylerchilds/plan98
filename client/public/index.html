@@ -65,6 +65,7 @@
           "codemirror": "https://esm.sh/codemirror@6.0.1",
           "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+          "eruda": "https://esm.sh/eruda@3.0.1",
           "fantasydata-node-client": "https://esm.sh/fantasydata-node-client@1.6.0",
           "focus-trap" : "https://esm.sh/focus-trap",
           "gridjs": "https://esm.sh/gridjs@6.0.6",
@@ -97,6 +98,10 @@
           "xterm-addon-fit": "https://esm.sh/xterm-addon-fit@0.8.0"
         }
       }
+    </script>
+    <script type="module" async>
+      import eruda from 'eruda'
+      eruda.init();
     </script>
   </head>
   <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
