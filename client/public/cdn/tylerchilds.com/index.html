@@ -14,12 +14,31 @@
         padding: 1rem;
       }
 
+      .deus-ex-machina {
+        border: 0;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      .tagline button {
+        background: none;
+        border: 0;
+        padding: 1rem;
+        margin: -1rem;
+      }
+
+      button > *{
+        pointer-events: none
+      }
+
       footer {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(.75in, 1fr));
         gap: 2rem;
       }
-
 
       footer > * {
         aspect-ratio: 1;
@@ -170,6 +189,7 @@
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@sillonious/module": "/public/module.js",
           "@sillonious/saga": "/public/saga.js",
+          "@sillonious/brand": "/public/brand.js",
           "@sillonious/party": "/public/modules/sillonious-party.js",
           "@sillonious/solid-utils": "/public/modules/illonious-party.js",
           "@sillonious/solid/user": "/public/modules/solid-user.js",
@@ -214,198 +234,263 @@
     </script>
   </head>
   <body>
-		<h1 class="logo">
-      Tyler Childs
-    </h1>
-    <p class="contact">
-      network@tychi.me
-      <br/>
-      (Jack of Web Trades)
-    </p>
-    <div class="tagline">
-      <hypertext-highlighter color="lemonchiffon">
-        paper
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="darkorange">
-        pocket
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="dodgerblue">
-        product
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="lime">
-        process
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="rebeccapurple">
-        platform
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="firebrick">
-        pipeline
-      </hypertext-highlighter>
-      |
-      <hypertext-highlighter color="gold">
-        prospects
-      </hypertext-highlighter>
-    </div>
-    <hr />
-
-    <section>
-      <h2 class="headline">
+    <my-resume>
+      <h1 class="logo">
+        Tyler Childs
+      </h1>
+      <p class="contact">
+        network@tychi.me
+        <br/>
+        (Jack of Web Trades)
+      </p>
+      <div class="tagline">
         <hypertext-highlighter color="lemonchiffon">
-          Founder - Software Architect (Sillonious) 2022 - Current
+          <button data-toggle="paper">
+            paper
+          </button>
         </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Explored the pragmatic relationship between the computer arts and sciences
-        </li>
-        <li>
-           Innovated free to play technology- in your palm- or around you- in parallel- and performable- for your business- or family
-        </li>
-        <li>
-          Re-tailored mind bicycles
-        </li>
-      </ul>
-    </section>
-    <section>
-      <h2 class="headline">
+        |
         <hypertext-highlighter color="darkorange">
-          Senior Software Engineer (Netflix) 2018 - 2022
+          <button data-toggle="pocket">
+            pocket
+          </button>
         </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Premiered prepaid direct carrier billing in global markets as technical lead
-        </li>
-        <li>
-          Prototyped and productized experiments for payment and partner flows
-        </li>
-        <li>
-          Placed first in the Studio Hackday 2019 event, slinging code and polishing the facade
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2 class="headline">
+        |
         <hypertext-highlighter color="dodgerblue">
-          Design Technologist (Inflection) 2014 - 2018
+          <button data-toggle="product">
+            product
+          </button>
         </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Productized a white-label-able NIST LOA3 and SOC2 compliant identity verification wizard
-        </li>
-        <li>
-          Partnered with a security company to authorize and authenticate online prescriptions
-        </li>
-        <li>
-          Pioneerered a design system for product consistency, flexibility, and velocity
-        </li>
-      </ul>
-    </section>
-
-    <section>
-      <h2 class="headline">
+        |
         <hypertext-highlighter color="lime">
-          Web Developer (Liberty University) 2012 - 2014
+          <button data-toggle="process">
+            process
+          </button>
         </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Tutored programming for introductory courses through data structures and algorithms
-        </li>
-        <li>
-          Developed and maintained various microsites and applications, including student accounts
-        </li>
-      </ul>
-    </section>
+        |
+        <hypertext-highlighter color="rebeccapurple">
+          <button data-toggle="platform">
+            platform
+          </button>
+        </hypertext-highlighter>
+        |
+        <hypertext-highlighter color="firebrick">
+          <button data-toggle="pipeline">
+            pipeline
+          </button>
+        </hypertext-highlighter>
+        |
+        <hypertext-highlighter color="gold">
+          <button data-toggle="prospects">
+            prospects
+          </button>
+        </hypertext-highlighter>
+      </div>
+      <hr />
 
-    <section>
-      <h2 class="headline">
-        <hypertext-highlighter color="rebeccapurple">
-          Technical Solutions (Marketing Advocate) 2008 - 2012
-        </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Designed white label experiences from pre-sale through deployment in partner channels
-        </li>
-      </ul>
-    </section>
-	
-    <section>
-      <h2 class="headline">
-        <hypertext-highlighter color="firebrick">
-          Freelance est. 2006
-        </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          Ghost produced jokes, blogs, sites, apps, systems, networks, promotionals
-        </li>
-      </ul>
-    </section>
-	
-    <section>
-      <h2 class="headline">
-        <hypertext-highlighter color="gold">
-          Education
-        </hypertext-highlighter>
-      </h2>
-      <ul>
-        <li>
-          B.S. Web Design and Development (Liberty University) 2013
-        </li>
-        <li>
-          A.A. Web Design (Cape Cod Community College) 2009
-        </li>
-        <li>
-          Skills: SEO, Graphic Design, Linux, Rust, JavaScript, React, Photo/Videography, Comedy
-        </li>
-      </ul>
-    </section>
-    <footer>
-      <div>
-        <hypertext-highlighter color="lemonchiffon">
-          <qr-code text="https://sillyz.computer"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="darkorange">
-          <qr-code text="https://1998.social"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="dodgerblue">
-          <qr-code text="https://yourlovedones.online"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="lime">
-          <qr-code text="https://ncity.executiontime.pub"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="rebeccapurple">
-          <qr-code text="https://css.ceo"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="firebrick">
-          <qr-code text="https://y2k38.info"></qr-code>
-        </hypertext-highlighter>
-      </div>
-      <div>
-        <hypertext-highlighter color="gold">
-          <qr-code text="https://thelanding.page"></qr-code>
-        </hypertext-highlighter>
-      </div>
-    </footer>
+      <section data-view="paper">
+        <h2 class="headline">
+          <hypertext-highlighter color="lemonchiffon">
+            Founder - Software Architect (Sillonious) 2022 - Current
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Explored the pragmatic relationship between the computer arts and sciences
+          </li>
+          <li>
+             Innovated free to play technology- in your palm- or around you- in parallel- and performable- for your business- or family
+          </li>
+          <li>
+            Re-tailored mind bicycles
+          </li>
+        </ul>
+      </section>
+      <section data-view="pocket">
+        <h2 class="headline">
+          <hypertext-highlighter color="darkorange">
+            Senior Software Engineer (Netflix) 2018 - 2022
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Premiered prepaid direct carrier billing in global markets as technical lead
+          </li>
+          <li>
+            Prototyped and productized experiments for payment and partner flows
+          </li>
+          <li>
+            Placed first in the Studio Hackday 2019 event, slinging code and polishing the facade
+          </li>
+        </ul>
+      </section>
+
+      <section data-view="product">
+        <h2 class="headline">
+          <hypertext-highlighter color="dodgerblue">
+            Design Technologist (Inflection) 2014 - 2018
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Productized a white-label-able NIST LOA3 and SOC2 compliant identity verification wizard
+          </li>
+          <li>
+            Partnered with a security company to authorize and authenticate online prescriptions
+          </li>
+          <li>
+            Pioneerered a design system for product consistency, flexibility, and velocity
+          </li>
+        </ul>
+      </section>
+
+      <section data-view="process">
+        <h2 class="headline">
+          <hypertext-highlighter color="lime">
+            Web Developer (Liberty University) 2012 - 2014
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Tutored programming for introductory courses through data structures and algorithms
+          </li>
+          <li>
+            Developed and maintained various microsites and applications, including student accounts
+          </li>
+        </ul>
+      </section>
+
+      <section data-view="platform">
+        <h2 class="headline">
+          <hypertext-highlighter color="rebeccapurple">
+            Technical Solutions (Marketing Advocate) 2008 - 2012
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Designed white label experiences from pre-sale through deployment in partner channels
+          </li>
+        </ul>
+      </section>
+    
+      <section data-view="pipeline">
+        <h2 class="headline">
+          <hypertext-highlighter color="firebrick">
+            Freelance est. 2006
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            Ghost produced jokes, blogs, sites, apps, systems, networks, promotionals
+          </li>
+        </ul>
+      </section>
+
+      <section data-view="prospects">
+        <h2 class="headline">
+          <hypertext-highlighter color="gold">
+            Education
+          </hypertext-highlighter>
+        </h2>
+        <ul>
+          <li>
+            B.S. Web Design and Development (Liberty University) 2013
+          </li>
+          <li>
+            A.A. Web Design (Cape Cod Community College) 2009
+          </li>
+          <li>
+            Skills: SEO, Graphic Design, Linux, Rust, JavaScript, React, Photo/Videography, Comedy
+          </li>
+        </ul>
+      </section>
+      <footer>
+        <div data-view="paper">
+          <hypertext-highlighter color="lemonchiffon">
+            <qr-code text="https://sillyz.computer"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="pocket">
+          <hypertext-highlighter color="darkorange">
+            <qr-code text="https://1998.social"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="product">
+          <hypertext-highlighter color="dodgerblue">
+            <qr-code text="https://yourlovedones.online"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="process">
+          <hypertext-highlighter color="lime">
+            <qr-code text="https://ncity.executiontime.pub"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="platform">
+          <hypertext-highlighter color="rebeccapurple">
+            <qr-code text="https://css.ceo"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="pipeline">
+          <hypertext-highlighter color="firebrick">
+            <qr-code text="https://y2k38.info"></qr-code>
+          </hypertext-highlighter>
+        </div>
+        <div data-view="prospects">
+          <hypertext-highlighter color="gold">
+            <qr-code text="https://thelanding.page"></qr-code>
+          </hypertext-highlighter>
+        </div>
+      </footer>
+    </my-resume>
     <script type="module" id="lazy-bootstrap" src="/public/main.js"></script>
+    <script type="module">
+      import module from "@sillonious/module"
+
+      const $ = module('my-resume', {
+        paper: false,
+        pocket: false,
+        product: false,
+        process: false,
+        platform: false,
+        pipeline: false,
+        prospects: false,
+      })
+
+      $.when('click', '[data-toggle]', (event) => {
+        const { toggle } = event.target.dataset
+        const root = event.target.closest($.link)
+        const disabled = !$.learn()[toggle]
+
+        $.teach({ [toggle]: disabled })
+
+        const views = root.querySelectorAll(`[data-view="${toggle}"]`)
+
+        if(views.length > 0) {
+          [...views].map(target => {
+            disabled
+            ? target.classList.add('disabled')
+            : target.classList.remove('disabled')
+          })
+        }
+      })
+
+      $.style(`
+        & .disabled {
+          opacity: .25;
+        }
+      `)
+
+      $.draw(target => {
+        const data = $.learn()
+        const fields = Object.keys(data)
+        const zeroState = fields.every(x => data[x])
+
+        if(zeroState) {
+          document.body.insertAdjacentHTML("beforeend", `
+            <iframe class="deus-ex-machina" src="/"></iframe>
+          `)
+        }
+      })
+    </script>
   </body>
 </html>
