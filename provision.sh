@@ -17,3 +17,4 @@ cargo build --verbose --release
 
 # ensure a mount point for the thumb drive
 mkdir -p /home/$USER/thumb-drive
+mkdir -p /home/$USER/.pocketbase/bin
