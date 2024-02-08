@@ -3,9 +3,11 @@ import Computer from '@sillonious/computer'
 
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
+const database = localStorage.getItem("plan98.database") || 'http://localhost:8090';
+
 window.plan98 = {
   parameters,
-  provider: 'https://sillonious.pockethost.io/',
+  database,
   host: world ? world : window.location.host,
 }
 
@@ -27,3 +29,6 @@ module('#main').draw(target => root ? `
 
 export default new Computer(window.plan98, { registry: '/public/modules' })
 
+export function setDatabase(url) {
+  localStorage.setItem("plan98.database", 'https://sillonious.pockethost.io')
+}

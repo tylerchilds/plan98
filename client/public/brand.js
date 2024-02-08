@@ -41,7 +41,7 @@ export const doingBusinessAs = {
   '1998.social': {
     emote: ':D',
     image: '/cdn/tychi.me/photos/aurora.JPG',
-    pocket: '<my-journal></my-journal>',
+    pocket: '<my-admin></my-admin>',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,
@@ -155,6 +155,22 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
+  'cutestrap.com': {
+    emote: ':)',
+    latitude: '37.782562',
+    longitude: '-122.471554',
+    zoom: 13,
+    tagline: 'Pull your page, site, app, or system up by your Cutestraps.',
+    mascot: '',
+    saga: '/public/cdn/cutestrap.com/index.saga',
+    contact: 'Golden Gate Bifrost',
+    brandHue: 55,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
+  },
+
   'abc.xyz': {
     emote: ':)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',

@@ -4,10 +4,10 @@ function ready(plan98) {
 
 function upsell(plan98) {
   const isFirst = self.self === self.top
-  const notPrime = window.location.host !== plan98.provider
+  const notPrime = window.location.host !== plan98.database
   if(isFirst && notPrime) {
     document.body.insertAdjacentHTML('beforeend', `
-      <sillonious-upsell host="${plan98.provider}"></sillonious-upsell>
+      <sillonious-upsell host="${plan98.database}"></sillonious-upsell>
     `)
   }
 }

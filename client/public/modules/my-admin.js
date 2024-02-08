@@ -3,7 +3,6 @@ import { Grid } from 'gridjs'
 import { connect, getBase, whenLogout } from "./pocket-authentication.js"
 import { currentBusiness } from './sillonious-brand.js'
 
-
 const linkElement = document.createElement("link");
 linkElement.rel = "stylesheet";
 linkElement.href = "https://unpkg.com/gridjs/dist/theme/mermaid.min.css";
