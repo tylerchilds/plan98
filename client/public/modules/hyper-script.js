@@ -39,7 +39,6 @@ $.draw((target) => {
   let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file } = sourceFile(target)
 
-  const html = hyperSanitizer(file)
   const readonly = target.getAttribute('readonly')
   const presentation = target.getAttribute('presentation')
 
@@ -55,62 +54,69 @@ $.draw((target) => {
     activePanel = panels.perform
   }
 
-  const escapedFile = escapeHyperText(file)
-
   if(target.lastPanel !== activePanel) {
     // flush outdated
     target.innerHTML = ''
     target.lastPanel = activePanel
   }
 
-  const start = activeShot
-  const end = activeShot + 1
-  const forwards = lastAction !== 'back'
-  const motion = getMotion(html, { active: activeShot, forwards, start, end })
   const play = (state.play || {}).embed
 
   const views = {
-    [panels.write]: () => `
-      <div name="write">
-        <textarea name="typewriter" style="background: ${stars}">${escapedFile}</textarea>
-      </div>
-    `,
-    [panels.read]: () => `
-      <div name="read">
-        <div name="page">
-          ${html}
+    [panels.write]: () => {
+      const escapedFile = escapeHyperText(file)
+      return `
+        <div name="write">
+          <textarea name="typewriter" style="background: ${stars}">${escapedFile}</textarea>
         </div>
-        <div name="navi">
-          <button data-print>Print</button>
-          <div name="print">
-            <iframe src="${window.location.href}?path=${sauce}&readonly=true" title="embed"></iframe>
+      `
+    },
+    [panels.read]: () => {
+      const html = hyperSanitizer(file)
+      return `
+        <div name="read">
+          <div name="page">
+            ${html}
           </div>
-        </div>
-      </div>
-    `,
-    [panels.perform]: () => `
-      <div name="perform">
-        <div name="theater">
-          <div name="screen">
-            <div name="stage">
-              ${motion}
+          <div name="navi">
+            <button data-print>Print</button>
+            <div name="print">
+              <iframe src="${window.location.href}?path=${sauce}&readonly=true" title="embed"></iframe>
             </div>
           </div>
         </div>
-        <div name="navi"
-          ${activeShot === 0 ? 'data-first' : ''}
-          ${activeShot === shotCount ? 'data-last' : ''}
-        >
-          <button data-back>
-            Back
-          </button>
-          <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
-          <button data-next>
-            Next
-          </button>
+      `
+    },
+    [panels.perform]: () => {
+      const start = activeShot
+      const end = activeShot + 1
+      const forwards = lastAction !== 'back'
+      const html = hyperSanitizer(file)
+      const motion = getMotion(html, { active: activeShot, forwards, start, end })
+      return `
+        <div name="perform">
+          <div name="theater">
+            <div name="screen">
+              <div name="stage">
+                ${motion}
+              </div>
+            </div>
+          </div>
+          <div name="navi"
+            ${activeShot === 0 ? 'data-first' : ''}
+            ${activeShot === shotCount ? 'data-last' : ''}
+          >
+            <button data-back>
+              Back
+            </button>
+            <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
+            <button data-next>
+              Next
+            </button>
+          </div>
         </div>
-      </div>
-    `,
+      `
+    },
     [panels.play]: () => `
       <div name="play">
         ${play}
@@ -124,7 +130,6 @@ $.draw((target) => {
 
   const view = (views[activePanel] || views['default'])()
   const fadeOut = nextPanel && activePanel !== nextPanel
-
 
   const perspective = `
     <div class="grid" data-panel="${activePanel}">
@@ -141,11 +146,6 @@ $.draw((target) => {
       </transition>
     </div>
   `
-
-  if(activePanel === panels.perform) {
-    target.innerHTML = perspective
-    return
-  }
 
   return perspective
 })
@@ -208,11 +208,12 @@ $.when('click', '[data-print]', (event) => {
 })
 
 $.when('click', '[data-perform]', (event) => {
-  const { html } = sourceFile(event.target)
+  const { file } = sourceFile(event.target)
+  const html = hyperSanitizer(file)
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
   const shotList = Array.from(wrapper.children)
-    .filter(x => x.matches(hiddenChildren))
+    .filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   $.teach({
     shotCount: shotList.length - 1,

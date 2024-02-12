@@ -45,7 +45,7 @@ $.draw(target => {
 
   const reverseAction = isFirst ? `
     <button data-exit>
-      Exit
+      Learn More
     </button>
   ` : `
     <button data-back>
@@ -113,6 +113,7 @@ function dialogue(target) {
 $.when('click', '[data-exit]', (event) => {
   const close = event.target.closest($.link).getAttribute('close')
   window[close] ? window[close]() : null
+  window.location.href = `/?world=thelanding.page`
 })
 
 $.when('click', '[data-continue]', (event) => {
