@@ -109,7 +109,7 @@ $.draw((target) => {
             <button data-back>
               Back
             </button>
-            <input data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
+            <input id="shot-slot" data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
             <button data-next>
               Next
             </button>
@@ -146,6 +146,13 @@ $.draw((target) => {
       </transition>
     </div>
   `
+
+  if(activePanel === panels.perform) {
+    const id = document.activeElement.id
+    target.innerHTML = perspective
+    document.getElementById(id).focus()
+    return
+  }
 
   return perspective
 })
@@ -200,6 +207,7 @@ $.when('click', '[data-read]', (event) => {
   $.teach({ nextPanel: panels.read })
 })
 
+
 $.when('click', '[data-print]', (event) => {
   const node = event.target.closest($.link)
   const read = node.querySelector('[name="print"] iframe').contentWindow
@@ -244,6 +252,16 @@ $.when('change', '[data-shot]', (event) => {
     return
   }
   $.teach({ activeShot: nextShot })
+})
+
+$.when('keydown', '[data-shot]', (event) => {
+  console.log(event.keyCode)
+  if (event.keyCode==37) {
+    event.target.closest($.link).querySelector('[data-back]').click()
+  }
+  if (event.keyCode==39) {
+    event.target.closest($.link).querySelector('[data-next]').click()
+  }
 })
 
 $.when('click', '[data-next]', (event) => {
@@ -315,7 +333,6 @@ $.when('animationend', 'transition', function transition({target}) {
   const previous = activePanel !== backPanel ? backPanel : activePanel
   $.teach({ activePanel: current, backPanel: previous })
   target.scrollTop = '0'
-  document.activeElement.blur()
 })
 
 $.style(`
@@ -680,19 +697,19 @@ $.style(`
 
   @keyframes &-fade-in {
     0% {
-      filter: blur(10px);
+      opacity: .5;
     }
     100% {
-      filter: blur(0px);
+      opacity: 1;
     }
   }
 
   @keyframes &-fade-out {
     0% {
-      filter: blur(0px);
+      opacity: 1;
     }
     100% {
-      filter: blur(10px);
+      opacity: .5;
     }
   }
 
@@ -742,3 +759,5 @@ function getStars() {
 function random(max) {
   return Math.floor(Math.random() * max);
 }
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
