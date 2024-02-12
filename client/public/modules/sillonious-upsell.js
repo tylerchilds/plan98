@@ -14,7 +14,7 @@ import party, {
 import * as focusTrap from 'focus-trap'
 
 const $ = module('sillonious-upsell', {
-  activeDialect: '/sagas/pro.thelanding.page/en_US/',
+  activeDialect: '/public/sagas/pro.thelanding.page/en_US/',
   activeSaga: '000-000.saga',
   cache: {}
 })
@@ -24,12 +24,15 @@ $.draw((target) => {
 
   const content = cache[activeSaga]
 
-  if(!content) {
+  if(!content && !target.mounted) {
+    target.mounted = true
     fetch(activeDialect + activeSaga)
-      .then(x => x.text())
+      .then(x => {
+        return x.text()
+      })
       .then((saga) => {
         $.teach(
-          { [activeSaga]: hyperSanitizer(saga) },
+          { [activeSaga]: saga },
           (state, payload) => {
             return {
               ...state,
@@ -56,9 +59,9 @@ $.draw((target) => {
     return
   }
 
+  debugger
   return `
-    ${content}
-    <sillonious-joypro></sillonious-joypro>
+    ${hyperSanitizer(content)}
   `
 })
 
