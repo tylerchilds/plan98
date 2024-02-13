@@ -35,7 +35,7 @@ const $ = module('hyper-script', {
 $.draw((target) => {
   const stars = getStars(true)
   const { id } = target
-  const sauce = source(target)
+  const path = source(target)
   let { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file } = sourceFile(target)
 
@@ -81,7 +81,7 @@ $.draw((target) => {
           <div name="navi">
             <button data-print>Print</button>
             <div name="print">
-              <iframe src="${sauce}?readonly=true" title="embed"></iframe>
+              <iframe src="${path}?readonly=true" title="embed"></iframe>
             </div>
           </div>
         </div>
@@ -170,17 +170,17 @@ function source(target) {
 }
 
 function sourceFile(target) {
-  const sauce = source(target)
-  const entry = gun.get($.link).get(sauce)
-	entry.once((data) => { $.teach({[sauce]: data})});
+  const path = source(target)
+  const entry = gun.get($.link).get(path)
+	entry.once((data) => { $.teach({[path]: data})});
 
-  const data = $.learn()[sauce] || { file: '' }
+  const data = $.learn()[path] || { file: '' }
 
   return data
     ? data
     : (function initialize() {
       let file = ''
-      fetch(sauce).then(async (res) => {
+      fetch(path).then(async (res) => {
         if(res.status === 200) {
           file = await res.text()
         }
@@ -196,10 +196,10 @@ function sourceFile(target) {
 
 
 $.when('input', '[name="typewriter"]', (event) => {
-  const sauce = source(event.target)
+  const path = source(event.target)
   const { value } = event.target
 
-  const entry = gun.get($.link).get(sauce)
+  const entry = gun.get($.link).get(path)
   entry.put({ file: value })
 })
 

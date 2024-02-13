@@ -11,7 +11,7 @@ document.head.appendChild(link);
 const $ = module('terminal-demo', {
   statusLine: 'Nothing.',
   pythonVersion: '...',
-  script: '/python/main.py'
+  script: '/public/python/main.py'
 })
 
 $.draw(target => {

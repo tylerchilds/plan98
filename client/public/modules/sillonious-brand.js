@@ -1,6 +1,7 @@
 import module from '@sillonious/module'
 import Color from "colorjs.io";
 import { doingBusinessAs as dba } from '@sillonious/brand'
+import { hideModal, showModal, types as modalTypes } from './plan98-modal.js'
 
 export const doingBusinessAs = dba
 
@@ -73,7 +74,7 @@ $.draw((target) => {
     </nav>
     <footer class="from">
       <button data-download>
-        More
+        Me
       </button>
     </footer>
     <header class="to">
@@ -163,8 +164,10 @@ function print(colors) {
 
 $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).outerHTML
-  alert('sorry, come back later!')
-  sticky(brand)
+  showModal(`
+    <solid-user></solid-user>
+  `)
+  //sticky(brand)
 })
 
 $.when('click', '[data-switcher]', function switcher({ target }) {

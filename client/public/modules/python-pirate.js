@@ -14,6 +14,6 @@ $.draw((target) => {
 
   const s = document.createElement("script");
   s.type = "py";
-  s.src = "/python/pirate.py";
+  s.src = "/public/python/pirate.py";
   document.body.appendChild(s)
 })

@@ -51,7 +51,7 @@ async function restoreSession() {
 async function fetchUserProfile(webId) {
   const [nameQuad] = await readSolidDocument(webId, null, { foaf: 'name' });
   const [storageQuad] = await readSolidDocument(webId, null, { space: 'storage' });
-debugger
+
   return {
     url: webId,
     name: nameQuad?.object.value || 'Anonymous',

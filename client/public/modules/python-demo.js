@@ -4,7 +4,7 @@ import { init, Wasmer, Directory } from "@wasmer/sdk";
 const $ = module('python-demo', {
   statusLine: 'Nothing.',
   pythonVersion: '...',
-  script: '/python/main.py'
+  script: '/public/python/main.py'
 })
 
 $.draw(target => {
