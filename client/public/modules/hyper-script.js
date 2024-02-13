@@ -81,7 +81,7 @@ $.draw((target) => {
           <div name="navi">
             <button data-print>Print</button>
             <div name="print">
-              <iframe src="${window.location.href}?path=${sauce}&readonly=true" title="embed"></iframe>
+              <iframe src="${sauce}?readonly=true" title="embed"></iframe>
             </div>
           </div>
         </div>
@@ -150,7 +150,7 @@ $.draw((target) => {
   if(activePanel === panels.perform) {
     const id = document.activeElement.id
     target.innerHTML = perspective
-    document.getElementById(id).focus()
+    if(id) document.getElementById(id).focus()
     return
   }
 

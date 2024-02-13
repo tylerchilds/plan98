@@ -2,11 +2,11 @@
 > Hey... I'm Ty. I run a pro shop where I use computers to answer questions about art and science.
 
 <sillonious-action
-when: hostPressesStartStop
+action: hostPressesStartStop
 label: Tell Me More
-goto: 001-000.saga
+saga: 001-000.saga
 
 <sillonious-action
-action: Skip the Lore
-label: hostPressesReset
-goto: 999-000.saga
+action: hostPressesReset
+label: Skip the Lore
+saga: 999-000.saga

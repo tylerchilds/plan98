@@ -13,37 +13,48 @@ import party, {
 } from '@sillonious/party'
 import * as focusTrap from 'focus-trap'
 
+
+const currentWorkingDirectory = '/public/sagas/'
+const genesisSaga = '000-000.saga'
+
 const $ = module('sillonious-upsell', {
-  activeDialect: '/public/sagas/pro.thelanding.page/en_US/',
-  activeSaga: '000-000.saga',
+  activeWorld: 'actuality.network',
+  activeDialect: '/en_US/',
   cache: {}
 })
 
-$.draw((target) => {
-  const { activeDialect, activeSaga, cache } = $.learn()
+export function setupSaga(nextSaga) {
+  const { activeDialect, activeWorld } = $.learn()
+  const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
+  fetch(key)
+    .then(x => {
+      return x.text()
+    })
+    .then((saga) => {
+      $.teach(
+        { [key]: saga },
+        (state, payload) => {
+          return {
+            ...state,
+            key,
+            cache: {
+              ...state.cache,
+              ...payload
+            }
+          }
+        }
+      )
+    })
+}
 
-  const content = cache[activeSaga]
+$.draw((target) => {
+  const { key, cache } = $.learn()
+
+  const content = cache[key]
 
   if(!content && !target.mounted) {
     target.mounted = true
-    fetch(activeDialect + activeSaga)
-      .then(x => {
-        return x.text()
-      })
-      .then((saga) => {
-        $.teach(
-          { [activeSaga]: saga },
-          (state, payload) => {
-            return {
-              ...state,
-              cache: {
-                ...state.cache,
-                ...payload
-              }
-            }
-          }
-        )
-      })
+    setupSaga(genesisSaga)
   }
 
   if(!target.trap) {
@@ -59,10 +70,7 @@ $.draw((target) => {
     return
   }
 
-  debugger
-  return `
-    ${hyperSanitizer(content)}
-  `
+  target.innerHTML = hyperSanitizer(content)
 })
 
 $.when('click', '', () => {
@@ -70,6 +78,10 @@ $.when('click', '', () => {
 })
 
 $.style(`
+  @media print {
+    & { display: none !important; }
+  }
+
   & {
     display: block;
     position: absolute;

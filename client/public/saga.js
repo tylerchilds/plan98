@@ -122,6 +122,7 @@ export function render(script) {
   }
 
   // collect the lines of our script
+  if(!script) return
   const lines = script.split('\n')
 
   // loop over our lines one at a time
