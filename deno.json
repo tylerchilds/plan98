@@ -12,24 +12,24 @@
     "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
     "reverse-server": "ssh -N -R 8888:localhost:8888 drive.$USER.me",
 
-    "start-database": "pocketbase serve",
+    "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 
     "thumb-drive": "sudo mount -t 9p -o trans=tcp,port=8888,uname=$USER 127.0.0.1 /home/$USER/thumb-drive",
     "unthumb-drive": "sudo umount /home/$USER/thumb-drive",
 
-    "package-assets": "cp -r client/public paper-pocket/src",
+    "package-assets": "cp -r client/public app/src",
 
-    "native-dev": "deno task package-assets && cd paper-pocket && npm run tauri dev",
-    "native-build": "deno task package-assets && cd paper-pocket && npm run tauri build",
+    "native-dev": "deno task package-assets && cd app && npm run tauri dev",
+    "native-build": "deno task package-assets && cd app && npm run tauri build",
 
-    "ios-init": "deno task package-assets && cd paper-pocket && npm run tauri ios init",
-    "ios-dev": "deno task package-assets && cd paper-pocket && npm run tauri ios dev",
-    "ios-build": "deno task package-assets && cd paper-pocket && npm run tauri ios build",
+    "ios-init": "deno task package-assets && cd app && npm run tauri ios init",
+    "ios-dev": "deno task package-assets && cd app && npm run tauri ios dev",
+    "ios-build": "deno task package-assets && cd app && npm run tauri ios build",
 
-    "android-init": "deno task package-assets && cd paper-pocket && npm run tauri android init",
-    "android-dev": "deno task package-assets && cd paper-pocket && npm run tauri android dev",
-    "android-build": "deno task package-assets && cd paper-pocket && npm run tauri android dev"
+    "android-init": "deno task package-assets && cd app && npm run tauri android init",
+    "android-dev": "deno task package-assets && cd app && npm run tauri android dev",
+    "android-build": "deno task package-assets && cd app && npm run tauri android dev"
   },
   "imports": {
     "@sillonious/module": "./client/public/module.js",

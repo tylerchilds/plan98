@@ -166,6 +166,7 @@ $.when('click', '[data-download]', (event) => {
   const brand = event.target.closest($.link).outerHTML
   showModal(`
     <solid-user></solid-user>
+    <solid-todolist></solid-todolist>
   `)
   //sticky(brand)
 })

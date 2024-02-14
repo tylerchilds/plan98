@@ -12,6 +12,7 @@ const $ = module('solid-user', {
   user: null,
 })
 
+localStorage.setItem("/callback.html", window.location.href)
 restoreSession().then(user => {
   state['ls/current/solid-user'] = { user, loading: false }
 })
@@ -101,9 +102,10 @@ function getLoginUrl() {
 }
 
 function performLogin(loginUrl) {
+  localStorage.setItem("/callback.html", window.location.href)
   solidClientAuthentication.login({
     oidcIssuer: loginUrl,
-    redirectUrl: window.location.href,
+    redirectUrl: window.location.origin + '/callback.html',
     clientName: 'Hello World',
   });
 }
@@ -199,7 +201,7 @@ $.draw(() => {
     `
     : `
       <button id="login-button" type="button">
-        Log in with Solid
+        Log in
       </button>
     `
 
@@ -207,3 +209,17 @@ $.draw(() => {
     ${button}
   `
 })
+
+$.style(`
+  & button {
+    background: rgba(0,0,0,.85);
+    border: none;
+    color: dodgerblue;
+    cursor: pointer;
+    height: 2rem;
+    border-radius: 1rem;
+    transition: color 100ms;
+    padding: .25rem 1rem;
+    z-index: 1;
+  }
+`)
