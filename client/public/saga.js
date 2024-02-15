@@ -195,25 +195,32 @@ export function render(script) {
       // collect the properties from our actor
       const properties = actors[actor]
       let innerHTML = ''
+      let innerText = ''
 
       // convert them into hype attributes
       const attributes = Object.keys(properties)
         .map(x => {
-          if(x === 'innerHTML') {
-            innerHTML = x
+          if(x === 'html') {
+            innerHTML = properties[x]
             return ''
           }
+          if(x === 'text') {
+            innerText = properties[x]
+            return ''
+          }
+
           return `${x}="${properties[x]}"`
         }).join('')
 
       // add some hype to our scene
-      scene += `<${actor} ${attributes}>${innerHTML}</${actor}>`
+      scene += `<${actor} ${attributes}>${innerHTML || innerText}</${actor}>`
 
       // back to normal time
       time = NORMAL_TIME
       return
     }
 
+    console.log(actor, key)
     // set the 
     actors[actor][key.trim()] = value.trim()
   }
