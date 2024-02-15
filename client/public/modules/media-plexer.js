@@ -31,14 +31,7 @@ function codeRenderer(path) {
 }
 
 function sagaRenderer(path) {
-  const parameters = new URLSearchParams(window.location.search)
-  const readonly = parameters.get('readonly')
-  const presentation = parameters.get('presentation')
   return `
-    <hyper-script
-      src="${path}"
-      ${readonly ? 'readonly="true"' : ''}
-      ${presentation ? 'presentation="true"' : ''}
-    ></hyper-script>
+    <hyper-script src="${path}"></hyper-script>
   `
 }

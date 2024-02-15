@@ -1,6 +1,12 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
+import 'gun'
+
+const Gun = window.Gun
+
+const gun = Gun(['https://gun.1998.social/gun']);
+
 // panels are the names of views or screens displayed in the user interface
 const panels = {
   // write to compose hype
@@ -18,7 +24,7 @@ const hiddenChildren = ['style','script','hypertext-blankline','hypertext-commen
 const notHiddenChildren = `:not(${hiddenChildren})`
 
 // create a hyper text module
-const $ = module('hyper-script', {
+const $ = module('gun-script', {
   // raw text of the file
   file: '',
   activePanel: panels.read,
@@ -29,6 +35,7 @@ const $ = module('hyper-script', {
 $.draw((target) => {
   const stars = getStars(true)
   const { id } = target
+  const path = source(target)
   const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file } = sourceFile(target)
 
@@ -58,6 +65,9 @@ $.draw((target) => {
           </div>
           <div name="navi">
             <button data-print>Print</button>
+            <div name="print">
+              <iframe src="${path}?readonly=true" title="embed"></iframe>
+            </div>
           </div>
         </div>
       `
@@ -134,55 +144,61 @@ $.draw((target) => {
 
 // the hyperSanitizer function turns fiction stories into non-fiction
 export function hyperSanitizer(script) {
-  return render(script) || ''
+  return render(script)
 }
 
 function source(target) {
-  const head = target.closest($.link)
+  const hardcoded = target.closest($.link).getAttribute('src')
   const today = new Date().toJSON().slice(0, 10)
-  const explicit = head.getAttribute('src')
-  const remote = head.getAttribute('remote') || ''
-  const implicit = `/public/journal/${today}.saga`
-
-  return `${remote}${explicit || implicit}`
+  const dynamic = `/public/journal/${today}.saga`
+  return hardcoded || dynamic
 }
 
 function sourceFile(target) {
-  const src = source(target)
-  const data = state[$.link][src] || {}
+  const path = source(target)
+  const entry = gun.get($.link).get(path)
+	entry.once((data) => { $.teach({[path]: data})});
 
-  if(target.initialized) return data
-  target.initialized = true
+  const data = $.learn()[path] || { file: '' }
 
-  return data.file
+  return data
     ? data
     : (function initialize() {
-      schedule(() => {
-        let file = ''
-        fetch(src).then(async res => {
-          if(res.status === 200) {
-            file = await res.text()
-          }
-        }).catch((error) => {
-          console.error(error)
-        }).finally(() => {
-          state[$.link][src] = { file }
-        })
+      let file = ''
+      fetch(path).then(async (res) => {
+        if(res.status === 200) {
+          file = await res.text()
+        }
+      }).catch(e => {
+        console.error(e)
+      }).finally(() => {
+        entry.put({ file })
       })
+
       return data
     })()
 }
 
+
 $.when('input', '[name="typewriter"]', (event) => {
-  const src = source(event.target)
-  state[$.link][src] = { file: event.target.value }
+  const path = source(event.target)
+  const { value } = event.target
+
+  const entry = gun.get($.link).get(path)
+  entry.put({ file: value })
 })
 
 $.when('click', '[data-read]', (event) => {
   $.teach({ nextPanel: panels.read })
 })
 
-$.when('click', '[data-print]', self.print)
+
+$.when('click', '[data-print]', (event) => {
+  const node = event.target.closest($.link)
+  const read = node.querySelector('[name="print"] iframe').contentWindow
+  read.focus()
+  read.print()
+})
 
 $.when('click', '[data-perform]', (event) => {
   const { file } = sourceFile(event.target)
@@ -284,7 +300,7 @@ $.when('click', '[data-play]', (event) => {
   $.teach({ nextPanel: panels.play })
 })
 
-function escapeHyperText(text = '') {
+function escapeHyperText(text) {
   return text.replace(/[&<>'"]/g, 
     actor => ({
       '&': '&amp;',
@@ -310,9 +326,6 @@ $.style(`
       height: 100%;
       padding: 0;
     }
-    [data-print] {
-      display: none;
-    }
   }
 
 
@@ -333,13 +346,9 @@ $.style(`
     }
   }
 
-  @media screen {
-    & {
-      height: 100%;
-      width: 100%;
-    }
-  }
   & {
+    height: 100%;
+    width: 100%;
     display: block;
     overflow: auto;
     color: black;
@@ -508,6 +517,9 @@ $.style(`
   & [name="perform"] {
     background: black;
   }
+  & [name="print"] {
+    display: none;
+  }
 
   & iframe {
     display: block;
@@ -625,13 +637,28 @@ $.style(`
   }
 
   @media print {
+    & {
+      width: auto;
+      height: auto;
+      overflow: visible;
+    }
     & [name="read"] {
       display: block;
+    }
+
+    & [name="page"] {
+      height: 100%;
+      padding: 0;
     }
 
     & [name="transport"],
     & textarea {
       display: none;
+    }
+    & .grid {
+      display: block;
+      height: auto;
+      overflow: auto;
     }
   }
 

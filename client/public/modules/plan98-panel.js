@@ -68,7 +68,7 @@ const context = `<div class="panel-overlay"><plan98-panel></plan98-panel></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
 export function showPanel(body, options) {
-  document.body.classList.add('trap')
+  document.body.classList.add('trap-panel')
   $.teach({
     body,
     isOpen: true,
@@ -79,7 +79,7 @@ export function showPanel(body, options) {
 window.showPanel = showPanel
 
 export function hidePanel() {
-  document.body.classList.remove('trap')
+  document.body.classList.remove('trap-panel')
   $.teach({
     isOpen: false
   })
@@ -132,7 +132,7 @@ $.style(`
     z-index: 1100;
   }
 
-  body.trap & {
+  body.trap-panel & {
     display: grid;
   }
 

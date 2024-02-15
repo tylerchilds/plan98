@@ -114,7 +114,7 @@ function system(target) {
         ¿i?
       </button>
       <div class="leaf">
-        <media-plexer src="${window.location.origin + path + window.location.search}"></media-plexer>
+        <media-plexer src="${path + window.location.search}"></media-plexer>
       </div>
     </div>
   `
@@ -137,6 +137,7 @@ function floppy(target) {
   if(content.error === '404') return
 
   if(content.type === Types.File.type) {
+    debugger
     return `<media-plexer src="${path}"></media-plexer>`
   }
 
