@@ -6,6 +6,7 @@ import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths"
 import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
 import { DOMParser } from "https://esm.sh/linkedom";
+import { Podcast } from 'npm:podcast';
 
 import { render } from "@sillonious/saga"
 import { doingBusinessAs } from "@sillonious/brand"
@@ -106,9 +107,7 @@ async function router(request, context) {
   let file
   let statusCode = Status.Success
 
-  console.log(pathname)
   if(pathname === '/' && doingBusinessAs[world || host]) {
-    console.log(pathname)
     const file = await home(request)
     if(file) {
       return new Response(file, {
@@ -116,6 +115,71 @@ async function router(request, context) {
         status: statusCode
       })
     }
+  }
+
+  if(pathname === '/news.xml') {
+    const feed = new Podcast({
+        title: 'title',
+        description: 'description',
+        feedUrl: 'http://example.com/rss.xml',
+        siteUrl: 'http://example.com',
+        imageUrl: 'http://example.com/icon.png',
+        docs: 'http://example.com/rss/docs.html',
+        author: 'Dylan Greene',
+        managingEditor: 'Dylan Greene',
+        webMaster: 'Dylan Greene',
+        copyright: '2013 Dylan Greene',
+        language: 'en',
+        categories: ['Category 1','Category 2','Category 3'],
+        pubDate: 'May 20, 2012 04:00:00 GMT',
+        ttl: 60,
+        itunesAuthor: 'Max Nowack',
+        itunesSubtitle: 'I am a sub title',
+        itunesSummary: 'I am a summary',
+        itunesOwner: { name: 'Max Nowack', email: 'max@unsou.de' },
+        itunesExplicit: false,
+        itunesCategory: [{
+            text: 'Entertainment',
+            subcats: [{
+              text: 'Television'
+            }]
+        }],
+        itunesImage: 'http://example.com/image.png'
+    });
+
+    /* loop over data and add to feed */
+    feed.addItem({
+        title:  'item title',
+        description: '<ul><li>aw, yiss</li><li>aw, yiss</li><li>yee haw</li></ul>',
+        url: 'http://example.com/article4?this&that', // link to the item
+        guid: '1123', // optional - defaults to url
+        categories: ['Category 1','Category 2','Category 3','Category 4'], // optional - array of item categories
+        author: 'Guest Author', // optional - defaults to feed author property
+        date: 'May 27, 2012', // any format that js Date can parse.
+        lat: 33.417974, //optional latitude field for GeoRSS
+        long: -111.933231, //optional longitude field for GeoRSS
+        itunesAuthor: 'Max Nowack',
+        itunesExplicit: false,
+        itunesSubtitle: 'I am a sub title',
+        itunesSummary: 'I am a summary',
+        itunesDuration: 12345,
+        itunesNewFeedUrl: 'https://newlocation.com/example.rss',
+    });
+
+    let xml
+    try {
+      xml = feed.buildXml();
+      const stylesheetPI = '<?xml-stylesheet type="text/xsl" href="news.xsl"?>';
+xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetPI}`);
+    } catch(e) {
+      console.log(e)
+    }
+        // Set content type as XML
+    const headers = new Headers();
+    headers.set("Content-Type", "text/xml");
+
+    console.log(xml)
+    return new Response(xml, { headers });
   }
 
   if(pathname === '/plan98/about') {
