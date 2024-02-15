@@ -26,41 +26,11 @@
   src: url('/public/fonts/Recursive_VF_1.085--subset-GF_latin_basic.woff2') format('woff2');
 }
 
-/* focus-party.css - public domain <email@tychi.me> */
 :focus {
     position: relative;
     border-color: var(--wheel-0-6);
     outline: 2px solid var(--wheel-0-6);
 }
-
-:focus::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background:
-        linear-gradient(180deg, hsla(180,0%,100%,1) 50%, hsla(180,0%,100%,1) 50%, hsla(180,0%,100%,0) 100%);
-    background-size: 1px 2000px;
-    background-repeat: repeat-x;
-    mix-blend-mode: overlay;
-    animation: focus-party-loop 1000ms infinite;
-}
-
-@keyframes focus-party-loop {
-    0% {
-        background-position-y: 4000px;
-    }
-
-    50% {
-        background-position-y: 1000px;
-    }
-    100% {
-        background-position-y: -2000px;
-    }
-}
-/* focus-party.css - public domain <email@tychi.me> */
 
 :root {
 	--bg: var(--white);

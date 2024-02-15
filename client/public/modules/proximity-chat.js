@@ -10,7 +10,8 @@ navigator.mediaDevices.getUserMedia({
 }).then(gotMedia).catch(() => {})
 
 function gotMedia (stream) {
-  const peer1 = new Peer({ initiator: true, stream: stream })
+  const initiator = target.getAttribute('initiator')
+  const peer1 = new Peer({ initiator, stream: stream })
   const peer2 = new Peer()
 
   peer1.on('signal', data => {

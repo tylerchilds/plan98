@@ -8,38 +8,34 @@ import {
 
 const $ = module('code-module')
 
-function source(target) {
-  return target.closest('[src]').getAttribute('src')
-}
-
 function sourceFile(target) {
-  const src = source(target)
-  return state[src]
-    ? state[src]
+  const src = target.closest('[src]').getAttribute('src')
+  const data = $.learn()[src] || {}
+
+  if(target.initialized) return data
+  target.initialized = true
+
+  return data.file
+    ? data
     : (function initialize() {
-      fetch(src).then(res => res.text()).then((x) => {
-        state[src] = { file: x }
+      schedule(() => {
+        fetch(src).then(res => res.text()).then(file => {
+          $.teach({ [src]: { file }})
+        })
       })
-      state[src] = { file: 'loading...' }
-      return state[src]
+      return data
     })()
 }
 
 $.when('click', '.publish', (event) => {
-  const src = source(event.target)
   const { file } = sourceFile(event.target)
-  state[src].file = file
+  alert(file)
 })
 
 $.draw(target => {
-  const src = source(target)
   const { file } = sourceFile(target)
 
-  if(!file) {
-    return 'loading'
-  }
-
-  if(!target.view) {
+  if(file && !target.view) {
     target.innerHTML = `
       <button class="publish">Publish</button>
     `
@@ -53,14 +49,14 @@ $.draw(target => {
       ]
     }
 
-    const state = EditorState.create({
+    const editorState = EditorState.create({
       ...config,
       doc: file
     })
 
     target.view = new EditorView({
       parent: target,
-      state
+      state: editorState
     })
   }
 })
@@ -69,11 +65,12 @@ function persist(target, $, _flags) {
 	return (update) => {
     if(update.changes.inserted.length < 0) return
 
-    const src = source(target)
+    const src = target.closest('[src]').getAttribute('src')
 		const file = update.view.state.doc.toString()
-    state[src].file = file
+    $.teach({ [src]: { file }})
 	}
 }
+
 
 $.style(`
   & {
@@ -82,3 +79,5 @@ $.style(`
     max-height: 100%;
   }
 `)
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
