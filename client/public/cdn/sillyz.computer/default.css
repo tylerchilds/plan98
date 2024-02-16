@@ -1,8 +1,5 @@
 body {
   margin: 0 auto;
-
-  background: linear-gradient(135deg, transparent, var(--wheel-0-0, rebeccapurple)), black;
-  color: white;
 }
 
 img,

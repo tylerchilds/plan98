@@ -583,6 +583,12 @@ function sticky(content) {
             size: 3.25in 3.12in;
             margin: 6mm 7mm;
           }
+          @media screen {
+            body {
+              display: grid;
+              place-content: center;
+            }
+          }
           ${style}
         </style>
       </head>

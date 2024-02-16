@@ -85,12 +85,16 @@ $.style(`
   & {
     display: block;
     position: absolute;
-    bottom: 2rem;
-    left: 0;
-    right: 0;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
     margin: auto;
     background: rgba(255,255,255,.85);
-    border-top: 5px solid dodgerblue;
+    background: lemonchiffon;
+    box-shadow:
+      2px 2px 4px 4px rgba(0,0,0,.10),
+      6px 6px 12px 12px rgba(0,0,0,.5),
+      18px 18px 36px 36px rgba(0,0,0,.25);
   }
 
   &.active {

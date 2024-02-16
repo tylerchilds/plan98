@@ -152,7 +152,6 @@ $.style(`
     width: 100%;
     z-index: -1;
     opacity: 0;
-    overflow: auto;
   }
 
   & .body {
@@ -163,6 +162,7 @@ $.style(`
     font-weight: 800;
     padding: .5rem;
     text-align: center;
+    text-shadow: 2px 2px 2px rgba(0,0,0,.85);
   }
 
   @keyframes modal-in {

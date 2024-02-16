@@ -31,7 +31,6 @@ const $ = module('plan98-onboarding', {
 
 $.draw(target => {
   const host = getHost(target)
-  const stars = getStars(host)
   const { activeShot, lastAction } = $.learn()
   const { sequence, shotCount } = dialogue(target)
 
@@ -63,8 +62,8 @@ $.draw(target => {
     </button>
   `
   return `
-    <div name="flow" >
-      <div name="stars" style="background: black ${stars};">
+    <div name="flow">
+      <div name="stars">
         ${motion}
       </div>
       <div name="navi">
@@ -195,18 +194,19 @@ $.style(`
     overflow: auto;
   }
 
-  & [name="stars"] {
-    color: white;
-  }
-  & [name="stars"] {
-    color: white;
+  & [name="flow"] {
+    background: lemonchiffon;
+    box-shadow:
+      2px 2px 4px 4px rgba(0,0,0,.10),
+      6px 6px 12px 12px rgba(0,0,0,.5),
+      18px 18px 36px 36px rgba(0,0,0,.25);
     padding: 1rem
   }
 
   & button {
-    background: rgba(0,0,0,.85);
-    border-radius: 0;
-    border: none;
+    border: 2px solid dodgerblue;
+    background: transparent;
+    border-radius: 1rem;
     color: dodgerblue;
     cursor: pointer;
     border-radius: 1rem;
@@ -217,6 +217,7 @@ $.style(`
   & button:hover,
   & button:focus {
     color: white;
+    background: dodgerblue;
   }
 
   & [name="navi"] {
@@ -224,9 +225,9 @@ $.style(`
     grid-auto-columns: minmax(0, 1fr);
     grid-auto-flow: column;
     place-items: center;
-    background: black;
     gap: .5rem;
     z-index: 1;
+    margin-top: 1rem;
   }
 
   & iframe {
@@ -354,39 +355,3 @@ $.style(`
       display: block;
     }
 `)
-
-function getStars() {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext('2d');
-
-  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
-  // landscape tabloid? 11x17
-  canvas.height = rhythm * 11;
-  canvas.width = rhythm * 17;
-
-  ctx.fillStyle = 'dodgerblue';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'lime';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'orange';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'rebeccapurple';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillRect(0, rhythm - 1, 1, 1);
-
-  return `url(${canvas.toDataURL()}`;
-}
-
-
-function random(max) {
-  return Math.floor(Math.random() * max);
-}
