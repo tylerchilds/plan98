@@ -35,3 +35,11 @@ $.draw(container => {
 
   requestAnimationFrame(loop)
 })
+
+$.style(`
+  @media print {
+    #eruda {
+      display: none;
+    }
+  }
+`)

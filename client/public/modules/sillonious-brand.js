@@ -61,8 +61,16 @@ $.draw((target) => {
   return `
     <main class="output" style="background-image: ${stars}">
       <div class="backside-paper">
+        <button data-share>
+          Share
+        </button>
         <div class="sticky">
-          ${menuFor(host)}
+          <div class="virtual-paper">
+            <qr-code text="${location}" data-fg="saddlebrown"></qr-code>
+          </div>
+          <div class="actual-paper">
+            ${menuFor(host)}
+          </div>
         </div>
       </div>
       <div class="frontside-paper">
@@ -73,7 +81,7 @@ $.draw((target) => {
       <sillonious-joypro seat="${seat}"></sillonious-joypro>
     </nav>
     <footer class="from">
-      <button data-download>
+      <button data-me>
         Me
       </button>
     </footer>
@@ -164,13 +172,18 @@ function print(colors) {
   `).join('')
 }
 
-$.when('click', '[data-download]', (event) => {
+$.when('click', '[data-share]', (event) => {
   const brand = event.target.closest($.link).outerHTML
+  const doc = new DOMParser().parseFromString(brand, "text/html");
+  const content = doc.querySelector('.sticky').outerHTML
+  sticky(content)
+})
+
+$.when('click', '[data-me]', (event) => {
   showPanel(`
     <solid-user></solid-user>
     <solid-todolist></solid-todolist>
   `)
-  //sticky(brand)
 })
 
 $.when('click', '[data-switcher]', function switcher({ target }) {
@@ -223,6 +236,11 @@ $.style(`
     width: 100%;
   }
 
+  & .sticky .virtual-paper {
+    display: grid;
+    place-content: center;
+  }
+
   @media screen {
     & .sticky {
       padding: 16px 9px;
@@ -236,6 +254,27 @@ $.style(`
       position: relative;
       z-index: 4;
       overflow: auto;
+    }
+
+    & .sticky:hover {
+    }
+
+    & .sticky:hover .virtual-paper {
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    & .sticky .virtual-paper {
+      display: block;
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      padding: 2rem;
+      width: 100%;
+      height: 100%;
+      background: lemonchiffon;
+      opacity: 1;
+      transition: opacity 100ms ease-in-out;
     }
 
     & .sticky sillonious-brand {
@@ -283,7 +322,26 @@ $.style(`
       border: none;
     }
 
-    & [data-download] {
+    & [data-share] {
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,.85);
+      text-shadow:
+        0 0px 3px var(--wheel-0-0),
+        -2px -2px 3px var(--wheel-0-2),
+        2px -2px 3px var(--wheel-0-3),
+        4px 4px 5px var(--wheel-0-4),
+        -4px 4px 5px var(--wheel-0-5),
+        0 9px 15px var(--wheel-0-6);
+      text-overflow: ellipsis;
+      padding-left: .5rem;
+      line-height: 2rem;
+      position: fixed;
+      top: 0;
+      right: 0;
+    }
+
+    & [data-me] {
       border: none;
       background: transparent;
       color: rgba(255,255,255,.85);
@@ -486,10 +544,14 @@ $.style(`
     .backside-paper {
       display: none;
     }
+
+    & .sticky .actual-paper {
+      display: none;
+    }
   }
 `)
 
-function sticky(brand) {
+function sticky(content) {
   const style = document.querySelector('style[data-link="sillonious-brand"]').innerHTML
   const preview = window.open('', 'PRINT');
   preview.document.write(`
@@ -503,6 +565,8 @@ function sticky(brand) {
               margin: 0;
               padding: 0;
               font-size: 6pt;
+              background: lemonchiffon;
+              -webkit-print-color-adjust: exact !important;
             }
 
             button { display: none; }
@@ -512,11 +576,6 @@ function sticky(brand) {
 
             iframe {
               display: none !important;
-            }
-
-            .post-it {
-              padding: 0 !important;
-              border: none !important;
             }
           }
 
@@ -528,17 +587,14 @@ function sticky(brand) {
         </style>
       </head>
       <body>
-        ${brand}
+        <sillonious-brand>
+          ${content}
+        </sillonious-brand>
       </body>
     </html>
   `)
   preview.document.close(); // necessary for IE >= 10
   preview.focus(); // necessary for IE >= 10*/
-
-  setTimeout(() => {
-    preview.print();
-    preview.close();
-  }, 1000)
 }
 
 function getStars(target) {

@@ -10,7 +10,7 @@ $.draw(target => {
   const codes = $.learn()
   const code = target.getAttribute('text')
   const image = codes[code]
-  const { fg='black', bg='transparent' } = target.dataset
+  const { fg='saddlebrown', bg='lemonchiffon' } = target.dataset
   generate(target, code, {fg, bg})
   return image ? `
     <div class="portal" style="--fg: ${fg}; --bg: ${bg}">
@@ -29,8 +29,8 @@ async function generate(target, code, {fg, bg}) {
     text: code,
     radius: 0.5, // 0.0 to 0.5
     ecLevel: 'L', // L, M, Q, H
-    fill: '#000000', // foreground color
-    background: 'transparent', // color or null for transparent
+    fill: fg, // foreground color
+    background: bg, // color or null for transparent
     size: 1080 // in pixels
   }, node);
 
