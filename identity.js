@@ -1,6 +1,8 @@
 import express from "npm:express@4.18.2"
 import request from "npm:request"
 
+import Gun from 'https://esm.sh/gun@0.2020.1237'
+
 import OAuth from "npm:oauth-1.0a"
 import session from 'npm:express-session'
 import bodyParser from 'npm:body-parser'
@@ -10,6 +12,14 @@ import { config } from "https://deno.land/x/dotenv/mod.ts";
 
 const ENVIRONMENT = config()
 
+const gun = Gun();
+
+const timeMachine = gun.get('time')
+const zero = timeMachine.get(0)
+zero.put('second')
+
+zero.on(value => console.log(value))
+console.log('first')
 
 const oauthConfig = {
   "defaults": {
@@ -54,6 +64,8 @@ app.use(grant(oauthConfig))
 app.get('/api/:provider/callback', (req, res) => {
   const { provider } = req.params
   const { access_token, access_secret } = req.session.grant.response
+
+  timeMachine.get(provider).put({ access_token, access_secret })
 
   res.redirect(`/?mode=callback&provider=${provider}&access_token=${access_token}&access_secret=${access_secret}`)
 })
