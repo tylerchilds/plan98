@@ -17,7 +17,6 @@ export async function connect(target) {
   const records = await bases[src].collection('posts').getFullList({
     sort: '-created',
   });
-debugger
 }
 
 export function whenLogout(callback) {

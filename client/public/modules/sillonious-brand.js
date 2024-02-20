@@ -181,8 +181,7 @@ $.when('click', '[data-share]', (event) => {
 
 $.when('click', '[data-me]', (event) => {
   showPanel(`
-    <solid-user></solid-user>
-    <solid-todolist></solid-todolist>
+    <identity-dotcom></identity-dotcom>
   `)
 })
 

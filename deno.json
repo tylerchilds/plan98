@@ -12,6 +12,9 @@
     "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
     "reverse-server": "ssh -N -R 8888:localhost:8888 drive.$USER.me",
 
+    "start-identity": "deno run --allow-read --allow-env --allow-net identity.js",
+    "reverse-identity": "ssh -N -R 3000:localhost:3000 wallet.$USER.me",
+
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 
