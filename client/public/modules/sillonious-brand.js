@@ -181,7 +181,7 @@ $.when('click', '[data-share]', (event) => {
 
 $.when('click', '[data-me]', (event) => {
   showPanel(`
-    <identity-dotcom></identity-dotcom>
+    <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
   `)
 })
 

@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
-import Gun from 'gun'
+import 'gun'
 
-const gun = Gun(['https://gun.1998.social/gun']);
+const gun = window.Gun(['https://gun.1998.social/gun']);
 
 const $ = module('gun-clipboard')
 
@@ -24,3 +24,21 @@ function subscribe(target) {
   target.gun = gun.get(target.id).get(safeword)
   target.gun.on(value => $.teach({ value }))
 }
+
+$.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: 0;
+    background: transparent;
+  }
+`)
