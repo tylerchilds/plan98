@@ -1,6 +1,8 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
+const instructions = 'Hey, can you read?\nPress the write button to edit this.\nPractice moving next and back in execute mode.'
+
 // panels are the names of views or screens displayed in the user interface
 const panels = {
   // write to compose hype
@@ -20,7 +22,7 @@ const notHiddenChildren = `:not(${hiddenChildren})`
 // create a hyper text module
 const $ = module('hyper-script', {
   // raw text of the file
-  file: '',
+  file: instructions,
   activePanel: panels.read,
   activeShot: 0,
   shotCount: 0
@@ -158,7 +160,7 @@ function sourceFile(target) {
     ? data
     : (function initialize() {
       schedule(() => {
-        let file = ''
+        let file = instructions
         fetch(src).then(async res => {
           if(res.status === 200) {
             file = await res.text()
@@ -309,9 +311,13 @@ $.style(`
     html, body {
       height: 100%;
       padding: 0;
+      margin: 0;
     }
     [data-print] {
       display: none;
+    }
+    #eruda{
+      display: none !important;
     }
   }
 
@@ -384,6 +390,11 @@ $.style(`
     gap: .25rem;
 		padding-right: 1rem;
     border-radius: 1.5rem 0 0 1.5rem;
+  }
+
+  & [name="page"] {
+    margin: 0;
+    padding: 0;
   }
 
   & [name="page"] > *${notHiddenChildren} {
@@ -497,7 +508,7 @@ $.style(`
     background: white;
     margin: 0 auto;
     padding: 0 1rem;
-    width: calc(6.5in + 2rem);
+    max-width: calc(6.5in + 2rem);
     overflow: auto;
   }
   & [name="page"] {
@@ -627,6 +638,10 @@ $.style(`
   @media print {
     & [name="read"] {
       display: block;
+    }
+
+    & [name="page"] {
+      padding: 0 !important;
     }
 
     & [name="transport"],

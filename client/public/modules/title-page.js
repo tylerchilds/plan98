@@ -33,6 +33,9 @@ function markup(string) {
 }
 
 $.style(`
+  & {
+    height: 9in;
+  }
 	& [name="cover"] {
 		display: grid;
 		grid-template-areas:
