@@ -349,7 +349,7 @@ $.style(`
     display: block;
     overflow: auto;
     color: black;
-    background: black;
+    background: rgba(255,255,255,.85);
   }
   & .grid {
     display: grid;
@@ -506,6 +506,7 @@ $.style(`
 
   & [name="read"] {
     background: white;
+    box-shadow: 2px 2px 4px 4px rgba(0,0,0,.10);
     margin: 0 auto;
     padding: 0 1rem;
     max-width: calc(6.5in + 2rem);
