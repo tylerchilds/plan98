@@ -159,7 +159,7 @@ $.style(`
     height: 100%;
     max-width: 320px;
     background: lemonchiffon;
-    padding-top: 2rem;
+    padding: 2rem .5rem .5rem;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),
       6px 6px 12px 12px rgba(0,0,0,.5),
