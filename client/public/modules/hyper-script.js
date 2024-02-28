@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const instructions = '\n<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\nHey, can you read?\nPress the write button to edit this.\nPractice moving next and back in execute mode.'
+const instructions = '<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Int. Paper Pocket Reality\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n> Press the WRITE button to re-word the narrative.\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world'
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {

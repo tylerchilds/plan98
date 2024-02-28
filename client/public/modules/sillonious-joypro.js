@@ -128,6 +128,7 @@ $.style(`
       display: grid;
       grid-template-columns: 1fr 1fr;
       touch-action: manipulation;
+      opacity: .25;
     }
     & .the-cardinal,
     & .the-compass {

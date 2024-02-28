@@ -67,6 +67,7 @@ $.draw((target) => {
         <div class="sticky">
           <div class="virtual-paper">
             <qr-code text="${location}" data-fg="saddlebrown"></qr-code>
+            <div class="tagline">the rest is up to you</div>
           </div>
           <div class="actual-paper">
             ${menuFor(host)}
@@ -238,6 +239,15 @@ $.style(`
   & .sticky .virtual-paper {
     display: grid;
     place-content: center;
+  }
+
+  & .tagline {
+    position: absolute;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: dodgerblue;
   }
 
   @media screen {

@@ -31,8 +31,8 @@
    {&!    {&!    {&!    {&!    {&!    {&!    {&!
     #      #      #      #      #      #      #
 
-  Silly  Sally  Sully  Shelly  Sol   Wally   Ty
-
+  Silly  Sally  Sully  Shelly  Sol   Wally   Thesillonious Caramera
+  1998   1970   2077   2038    2012  1888    now
 
 
 
@@ -130,6 +130,9 @@ export function render(script) {
     // and evaluating now and the times, process our line in the now time
     (times[time] || noop)(line)
   }
+
+  // edge case to clean up when stepping outside of normal time
+  if(time !== NORMAL_TIME) times[time]('')
 
   // return our compiled hyper media scene
   return scene
