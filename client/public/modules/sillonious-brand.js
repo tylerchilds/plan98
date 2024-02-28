@@ -259,8 +259,7 @@ $.style(`
     }
 
     & .sticky:hover .virtual-paper {
-      pointer-events: none;
-      opacity: 0;
+      opacity: 0 !important;
     }
 
     & .sticky .virtual-paper {
@@ -268,12 +267,25 @@ $.style(`
       position: absolute;
       inset: 0;
       z-index: 100;
-      padding: 2rem;
+      padding: 30%;
       width: 100%;
       height: 100%;
       background: lemonchiffon;
       opacity: 1;
-      transition: opacity 100ms ease-in-out;
+      pointer-events: none;
+    }
+
+    &.flip .virtual-paper {
+      animation: &-sticky-fade 250ms ease-in-out 1000ms forwards;
+    }
+
+    @keyframes &-sticky-fade {
+      0% {
+        opacity: 1;
+      }
+      100% {
+        opacity: 0;
+      }
     }
 
     & .sticky sillonious-brand {

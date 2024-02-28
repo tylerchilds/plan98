@@ -17,6 +17,10 @@ import * as focusTrap from 'focus-trap'
 const currentWorkingDirectory = '/public/sagas/'
 const genesisSaga = '000-000.saga'
 
+const overworld = {
+  '/': genesisSaga
+}
+
 const $ = module('sillonious-upsell', {
   activeWorld: 'actuality.network',
   activeDialect: '/en_US/',
@@ -48,13 +52,15 @@ export function setupSaga(nextSaga) {
 }
 
 $.draw((target) => {
+  const tutorial = overworld[window.location.pathname]
+  if(!tutorial) return
   const { key, cache } = $.learn()
 
   const content = cache[key]
 
   if(!content && !target.mounted) {
     target.mounted = true
-    setupSaga(genesisSaga)
+    setupSaga(tutorial)
   }
 
   if(!target.trap) {

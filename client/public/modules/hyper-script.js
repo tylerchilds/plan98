@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const instructions = '\n<title-page\ntitle: The Murphicarious Picassofication of Myself\nauthor: Thesillonious Caramera\n\nHey, can you read?\nPress the write button to edit this.\nPractice moving next and back in execute mode.'
+const instructions = '\n<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\nHey, can you read?\nPress the write button to edit this.\nPractice moving next and back in execute mode.'
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {
@@ -463,6 +463,7 @@ $.style(`
   & [name="stage"] > *[data-active] {
     opacity: 1;
     z-index: 2;
+    height: auto;
   }
 
   & [name="read"],
