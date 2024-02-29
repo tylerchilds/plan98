@@ -8,7 +8,7 @@ const $ = module('mlb-teams', { teams: [] })
 $.draw(() => {
   const { teams } = $.learn()
 
-  return teams.map((team) => `
+  return teams.length === 0 ? 'Loading Database...' : teams.map((team) => `
     <div class="team" style="--team-color: ${team.color}">
       ${team.name}
     </div>

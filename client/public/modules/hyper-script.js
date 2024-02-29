@@ -464,6 +464,7 @@ $.style(`
     opacity: 1;
     z-index: 2;
     height: auto;
+    max-height: 100%;
   }
 
   & [name="read"],
