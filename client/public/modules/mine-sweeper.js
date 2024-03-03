@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { v4 as uuidv4 } from 'uuid';
 
-const $ = module('mime-sweeper', {
+const $ = module('mine-sweeper', {
   keys: ['rows', 'columns', 'ratio', 'room'],
   rows: 9,
   columns: 12,
@@ -43,6 +43,17 @@ $.draw((target) => {
     <div class="grid ${finished ? (won?'won':'lost') : ''}" style="--rows: ${rows}; --columns: ${columns};">
       ${grid}
     </div>
+    ${finished ? (won?`
+      <div class="mini-overlay">
+        You win! Play again?<br>
+        <button data-restart>New Game</button>
+      </div>
+    `:`
+      <div class="mini-overlay">
+        Game over... Try again?<br>
+        <button data-restart>New Game</button>
+      </div>
+    `) : ''}
   `
 })
 
@@ -62,6 +73,12 @@ $.when('click', '.cell', (event) => {
   } else {
     updateBox({ id, x: column, y: row }, { revealed: true })
   }
+})
+
+$.when('click', '[data-restart]', (event) => {
+  event.target.closest($.link).seeded = false
+  const { id } = instance(event.target)
+  updateInstance({ id }, { finished: false, won: null })
 })
 
 function seed(target) {
@@ -272,6 +289,9 @@ function instance(target) {
 function schedule(x, delay=1) { setTimeout(x, delay) }
 
 $.style(`
+  & {
+    position: relative;
+  }
   & .grid {
     display: grid;
     grid-template-columns: repeat(var(--columns), 1fr);
@@ -290,19 +310,31 @@ $.style(`
   }
 
   & .cell {
-    border: .25rem solid var(--wheel-0-0);
-    border-left-color: var(--wheel-0-1);
-    border-top-color: var(--wheel-0-1);
-    background: var(--wheel-0-2);
-    color: var(--wheel-0-6);
-    filter: grayscale(1);
+    border: 2px solid rgba(0,0,0,.85);
+    border-left-color: rgba(255,255,255,.85);
+    border-top-color: rgba(255,255,255,.85);
+    background: rgba(128,128,128,.5);
+    color: rgba(0,0,0,1);
+    border-radius: 0;
+  }
+
+  & .mini-overlay {
+    position: absolute;
+    background: rgba(255,255,255,.85);
+    padding: 1rem;
+    border-radius: 1rem;
+    margin: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
   }
 
   & .revealed {
+    background: rgba(128,128,128,.85);
     border: none;
   }
 
   & .alive {
-    filter: grayscale(0);
+    background: rgba(128,128,128,.65);
   }
 `)
