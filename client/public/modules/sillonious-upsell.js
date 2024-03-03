@@ -88,7 +88,7 @@ $.style(`
     & { display: none !important; }
   }
 
-  & {
+  &:not(:empty) {
     display: block;
     position: absolute;
     bottom: 1rem;
