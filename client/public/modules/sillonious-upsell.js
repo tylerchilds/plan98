@@ -13,6 +13,7 @@ import party, {
 } from '@sillonious/party'
 import * as focusTrap from 'focus-trap'
 
+const inactiveWorlds = ['fantasysports.social']
 
 const currentWorkingDirectory = '/public/sagas/'
 const genesisSaga = '000-000.saga'
@@ -52,8 +53,10 @@ export function setupSaga(nextSaga) {
 }
 
 $.draw((target) => {
+  const { activeWorld } = $.learn()
   const tutorial = overworld[window.location.pathname]
   if(!tutorial) return
+  if(!inactiveWorlds.includes(activeWorld)) return
   const { key, cache } = $.learn()
 
   const content = cache[key]
