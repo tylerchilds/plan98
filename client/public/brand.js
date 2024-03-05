@@ -269,9 +269,22 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
-
-
-  //'tychi.me': emeraldOfTime
+  'docs.flipper.net': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '64.1478144',
+    longitude: '-21.943671',
+    zoom: 17,
+    tagline: 'Fantasy Sports Online',
+    saga: '/public/cdn/docs.flipper.net/index.saga',
+    mascot: 'Shawn Childs',
+    contact: 'Shawn Childs',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
+  },
   //'executiontime.pub': emeraldOfTime
   //'tylerchilds.com': emeraldOfTime
   //'webdesigninfinity.com': emeraldOfTime
