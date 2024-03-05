@@ -23,7 +23,7 @@ const notHiddenChildren = `:not(${hiddenChildren})`
 const $ = module('hyper-script', {
   // raw text of the file
   file: instructions,
-  activePanel: panels.read,
+  activePanel: panels.perform,
   activeShot: 0,
   shotCount: 0
 })
@@ -112,9 +112,9 @@ $.draw((target) => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
+          <button data-perform>Emulate</button>
           <button data-read>Read</button>
           <button data-write>Write</button>
-          <button data-perform>Execute</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
