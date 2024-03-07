@@ -78,7 +78,7 @@ $.draw(() => {
         <div id="foreground">
           <div id="logo">
               <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                Young's
+                Sillyz.
               </hypertext-variable>
               <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
                 COMPUTER
