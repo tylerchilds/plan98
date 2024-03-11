@@ -17,7 +17,7 @@ $.draw((target) => {
         inset: ${n(4, -.75, .1, 'rem')};
         position: absolute;
         opacity: ${n(1, .2, .35)};
-        transform: rotate(${n(1, -7, 7, 'deg')}) scale(${n(1, .95, 1.1)});
+        transform: rotate(${n(1, -7, 7, 'deg')}) scale(${n(1, .95, 1)});
       }
     `
     $.style(target.css)

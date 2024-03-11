@@ -4,7 +4,7 @@ import 'gun'
 
 const gun = window.Gun(['https://gun.1998.social/gun']);
 
-const $ = module('mine-sweeper', {
+const $ = module('mind-chaos3d', {
   keys: ['rows', 'columns', 'ratio', 'room'],
   rows: 9,
   columns: 12,
@@ -326,6 +326,10 @@ $.style(`
     grid-template-columns: repeat(var(--columns), 1fr);
     grid-template-rows: repeat(var(--rows), 1fr);
     height: 100%;
+    transform:
+      rotateX(60deg)
+      rotateZ(0deg)
+      scale(3);
     transform-origin: bottom;
   }
 
