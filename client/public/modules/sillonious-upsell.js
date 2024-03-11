@@ -23,7 +23,7 @@ const overworld = {
 }
 
 const $ = module('sillonious-upsell', {
-  activeWorld: 'actuality.network',
+  activeWorld: plan98.host || 'actuality.network',
   activeDialect: '/en_US/',
   cache: {}
 })
@@ -32,23 +32,14 @@ export function setupSaga(nextSaga) {
   const { activeDialect, activeWorld } = $.learn()
   const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
   fetch(key)
-    .then(x => {
-      return x.text()
+    .then(async response => {
+      if(response.status === 404) {
+        return
+      }
+      const saga = await response.text()
     })
-    .then((saga) => {
-      $.teach(
-        { [key]: saga },
-        (state, payload) => {
-          return {
-            ...state,
-            key,
-            cache: {
-              ...state.cache,
-              ...payload
-            }
-          }
-        }
-      )
+    .catch(e => {
+      console.error(e)
     })
 }
 
@@ -56,7 +47,7 @@ $.draw((target) => {
   const { activeWorld } = $.learn()
   const tutorial = overworld[window.location.pathname]
   if(!tutorial) return
-  if(!inactiveWorlds.includes(activeWorld)) return
+  if(inactiveWorlds.includes(activeWorld)) return
   const { key, cache } = $.learn()
 
   const content = cache[key]

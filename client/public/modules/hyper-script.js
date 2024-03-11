@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const instructions = '<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Int. Paper Pocket Reality\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n> Press the WRITE button to re-word the narrative.\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world'
+const instructions = '<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Int. Paper Pocket Reality\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n& winking\n\n> Press the WRITE button to re-word the narrative.\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world'
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {
@@ -23,7 +23,7 @@ const notHiddenChildren = `:not(${hiddenChildren})`
 const $ = module('hyper-script', {
   // raw text of the file
   file: instructions,
-  activePanel: panels.perform,
+  activePanel: panels.write,
   activeShot: 0,
   shotCount: 0
 })
@@ -112,9 +112,9 @@ $.draw((target) => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
-          <button data-perform>Emulate</button>
-          <button data-read>Read</button>
-          <button data-write>Write</button>
+          <button data-read>Show</button>
+          <button data-write>Tell</button>
+          <button data-perform>Rehearse</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
@@ -476,7 +476,7 @@ $.style(`
 
   & [name="write"] {
     position: relative;
-    background: black;
+    background: rgba(0,0,0,.85);
   }
 
   & [name="write"] textarea {
