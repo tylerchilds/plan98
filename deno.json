@@ -15,6 +15,9 @@
     "start-identity": "deno run -A identity.js",
     "reverse-identity": "ssh -N -R 3000:localhost:3000 wallet.$USER.me",
 
+    "start-repository": "cd ../SourceCode/esm.sh && go run main.go --config=config.json --dev",
+    "reverse-repository": "ssh -N -R 8080:localhost:8090 esm.$USER.me",
+
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 

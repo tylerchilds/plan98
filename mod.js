@@ -8,8 +8,10 @@ const processConfiguration = {
   reverseServer: false,
   identity: true,
   reverseIdentity: false,
-  database: true,
-  reverseDatabase: true,
+  repository: true,
+  reverseRespository: false,
+  database: false,
+  reverseDatabase: false,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -39,6 +41,16 @@ const processConfiguration = {
     reverseIdentity: {
       "id": "plan98-reverse-identity",
       "cmd": "deno task reverse-identity",
+      "autostart": true
+    },
+    repository: {
+      "id": "plan98-start-repository",
+      "cmd": "deno task start-repository",
+      "autostart": true
+    },
+    reverseRepository: {
+      "id": "plan98-reverse-repository",
+      "cmd": "deno task reverse-repository",
       "autostart": true
     },
     database: {
