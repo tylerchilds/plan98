@@ -4,8 +4,9 @@ const $ = module('story-board')
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')
+  const rectangle = canvas.getBoundingClientRect()
 
-  return { canvas }
+  return { canvas, rectangle }
 }
 
 $.draw(target => {
@@ -83,7 +84,7 @@ $.when('touchstart', 'canvas', start)
 $.when('mousedown', 'canvas', start)
 
 function start(e) {
-  const { canvas } = engine(e.target)
+  const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let x, y;
@@ -91,12 +92,12 @@ function start(e) {
     if (e.touches[0]["force"] > 0) {
       pressure = e.touches[0]["force"]
     }
-    x = e.touches[0].clientX - canvas.offsetLeft
-    y = e.touches[0].clientY - canvas.offsetTop
+    x = e.touches[0].clientX - rectangle.left
+    y = e.touches[0].clientY - rectangle.top
   } else {
     pressure = 1.0
-    x = e.clientX - canvas.offsetLeft
-    y = e.clientY - canvas.offsetTop
+    x = e.clientX - rectangle.left
+    y = e.clientY - rectangle.top
   }
 
   isMousedown = true
@@ -112,7 +113,7 @@ $.when('touchmove', 'canvas', move)
 $.when('mousemove', 'canvas', move)
 
 function move (e) {
-  const { canvas } = engine(e.target)
+  const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMousedown) return
   e.preventDefault()
@@ -123,12 +124,12 @@ function move (e) {
     if (e.touches[0]["force"] > 0) {
       pressure = e.touches[0]["force"]
     }
-    x = e.touches[0].clientX - canvas.offsetLeft
-    y = e.touches[0].clientY - canvas.offsetTop
+    x = e.touches[0].clientX - rectangle.left
+    y = e.touches[0].clientY - rectangle.top
   } else {
     pressure = 1.0
-    x = e.clientX - canvas.offsetLeft
-    y = e.clientY - canvas.offsetTop
+    x = e.clientX - rectangle.left
+    y = e.clientY - rectangle.top
   }
 
   // smoothen line width
@@ -160,7 +161,7 @@ $.when('touchend', 'canvas', end)
 $.when('touchleave', 'canvas', end)
 $.when('mouseup', 'canvas', end)
 function end (e) {
-  const { canvas } = engine(e.target)
+  const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let x, y;
@@ -169,12 +170,12 @@ function end (e) {
     if (e.touches[0]["force"] > 0) {
       pressure = e.touches[0]["force"]
     }
-    x = e.touches[0].clientX - canvas.offsetLeft
-    y = e.touches[0].clientY - canvas.offsetTop
+    x = e.touches[0].clientX - rectangle.left
+    y = e.touches[0].clientY - rectangle.top
   } else {
     pressure = 1.0
-    x = e.clientX - canvas.offsetLeft
-    y = e.clientY - canvas.offsetTop
+    x = e.clientX - rectangle.left
+    y = e.clientY - rectangle.top
   }
 
   isMousedown = false
