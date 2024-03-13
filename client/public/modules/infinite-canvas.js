@@ -121,7 +121,7 @@ $.draw((target) => {
 
   const edgesSVG = drawEdges(target, edges)
   const nodesHTML = drawNodes(target, nodes)
-
+console.log(nodesHTML)
   return template(edgesSVG, nodesHTML)
 })
 
@@ -174,6 +174,12 @@ function template(edgesSVG, nodesHTML) {
 $.style(`
   & {
     display: block;
+  }
+
+  & [name="node"] {
+    transform: translate3d(var(--ic-x,0), var(--ic-y,0), 0);
+    background: lemonchiffon;
+    padding: 1rem;
   }
 `)
 function adjustCanvasToViewport(event) {
@@ -419,7 +425,52 @@ function drawEdges(target, edges=[]) {
   }).join('')
 }
 
-function drawNodes(nodes=[]) {
+function drawNodes(target, nodes=[]) {
+  function generic(node, content) {
+    const style = `
+      --ic-x: ${node.x}px;
+      --ic-y: ${node.y}px;
+      width: ${node.width}px;
+      height: ${node.height}px;
+    `
+    return `
+      <div id="${node.id}" name="node" style="${style}">
+        ${content}
+      </div>
+    `
+  }
+  const renderers = {
+    text: function renderText(node) {
+      debugger
+      return generic(node, `
+        ${htmlToMarkdown(node.text)}
+      `)
+    },
+    file: function renderFile(node) {
+      return generic(node, `
+        <iframe src="${node.file}${node.subpath?node.subpath:''}"></iframe>
+      `)
+    },
+    link: function renderLink(node) {
+      return generic(node, `
+        <a href="${node.link}">
+          ${node.link}
+        </a>
+      `)
+    },
+    group: function renderGroup(node) {
+      return generic(node, `
+        ${node.text}
+      `)
+    }
+  }
+
+  return nodes.map(node => {
+    const renderer = renderers[node.type]
+    if(typeof renderer === 'function') {
+      return renderer(node)
+    }
+  }).join('')
   return `
     <node id="logo" class="node node-file" data-node-type="file" data-node-file="logo.svg" style="left: 36px; top: 48px;">
         <div class="node-name">logo.svg</div>
@@ -453,33 +504,7 @@ function drawNodes(nodes=[]) {
     </node>
   `
 
-  return node.map(node => {
-    const fromNode = document.getElementById(edge.fromNode);
-    const toNode = document.getElementById(edge.toNode);
 
-    if (fromNode && toNode) {
-      const fromPoint = getAnchorPoint(fromNode, edge.fromSide);
-      const toPoint = getAnchorPoint(toNode, edge.toSide);
-
-      const curveTightness = 0.75;
-      const controlPointX1 = fromPoint.x + (toPoint.x - fromPoint.x) * curveTightness;
-      const controlPointX2 = fromPoint.x + (toPoint.x - fromPoint.x) * (1 - curveTightness);
-      const controlPointY1 = fromPoint.y;
-      const controlPointY2 = toPoint.y;
-
-      const d = `M ${fromPoint.x} ${fromPoint.y} C ${controlPointX1} ${controlPointY1}, ${controlPointX2} ${controlPointY2}, ${toPoint.x} ${toPoint.y}`;
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', d);
-      path.setAttribute('stroke', 'black');
-      path.setAttribute('fill', 'none');
-      if (edge.toEnd === 'arrow') {
-        path.setAttribute('marker-end', 'url(#arrowhead)');
-      }
-
-      svgContainer.appendChild(path);
-    }
-  }).join('')
 }
 
 
