@@ -386,7 +386,7 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
-    touch-action: manipulation;
+    touch-action: none;
     transform: translateY(-25%);
   }
   & .group {
@@ -606,6 +606,9 @@ $.when('change', '[type="checkbox"]', (event) => {
 
   $.teach({ [name]: checked, colors: recalculate() })
 })
+
+$.when('mouseenter', '.step', attack)
+$.when('mouseleave', '.step', release)
 
 $.when('mousedown', '.step', attack)
 $.when('mouseup', '.step', release)
