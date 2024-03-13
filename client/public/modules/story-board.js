@@ -84,7 +84,6 @@ $.when('touchstart', 'canvas', start)
 $.when('mousedown', 'canvas', start)
 
 function start(e) {
-  e.preventDefault()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -118,7 +117,6 @@ function move (e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMousedown) return
-  e.preventDefault()
 
   let pressure = 0.1
   let x, y
@@ -163,7 +161,6 @@ $.when('touchend', 'canvas', end)
 $.when('touchleave', 'canvas', end)
 $.when('mouseup', 'canvas', end)
 function end (e) {
-  e.preventDefault()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -189,5 +186,8 @@ function end (e) {
 };
 
 $.style(`
-  & canvas { background: lemonchiffon; }
+  & canvas {
+    background: lemonchiffon;
+    touch-action: none;
+  }
 `)
