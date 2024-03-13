@@ -1,7 +1,7 @@
 import statebus, { state } from 'statebus'
 import module from '@sillonious/module'
 
-const $ = module('infinite-canvas', { instances: [] })
+const $ = module('infinite-canvas')
 
 // Initial state of the canvas
 const ZOOM_SPEED = 0.1;
@@ -10,24 +10,21 @@ const maxScale = 1.25;
 
 function instance(target) {
   const root = target.closest($.link) || document.querySelector($.link)
-  return state[$.link].instances[root.id]
+  return state[$.link][root.id] || {}
 }
 
 function updateInstance({ id }, payload) {
-  const s = statebus.cache[$.link] || {}
+  const s = statebus.cache[$.link].val || {}
 
-  if(!s.instances[id]) {
-    s.instances[id] = {}
+  if(!s[id]) {
+    s[id] = {}
   }
 
   return {
     ...s,
-    instances: {
-      ...s.instances,
-      [id]: {
-        ...s.instances[id],
-        ...payload
-      }
+    [id]: {
+      ...s[id],
+      ...payload
     }
   }
 }
@@ -43,10 +40,11 @@ function source(target) {
 
 function sourceCanvas(target) {
   const src = source(target)
-  const data = state[$.link][src] || {}
+  const data = state[$.link][target.id] || {}
 
   if(target.initialized) return data
   target.initialized = true
+  const root = target.closest($.link)
 
   return data.canvas
     ? data
@@ -60,7 +58,7 @@ function sourceCanvas(target) {
         }).catch((error) => {
           console.error(error)
         }).finally(() => {
-          state[$.link][src] = { canvas }
+          state[$.link][root.id] = canvas
         })
       })
       return data
@@ -69,32 +67,17 @@ function sourceCanvas(target) {
 
 function schedule(x, delay=1) { setTimeout(x, delay) }
 
-function seed(target) {
-
-
+function seed(target, {nodes, edges}) {
   if(target.seeded) return
   target.seeded = true
 
-  const {
-    id,
-  } = target
-
-  const {
-    edges,
-    nodes,
-  } = target
-
-
-
-  //target.innerHTML = template(edgesSVG, nodesHTML)
-  /*
   schedule(() => {
     const id = target.id
     updateInstance({ id }, {
       id,
-      scale,
-      panOffsetX,
-      panOffsetY,
+      scale: 0,
+      panOffsetX: 0,
+      panOffsetY: 0,
       isDragging: false,
       isSpacePressed: false,
       isPanning: false,
@@ -104,20 +87,19 @@ function seed(target) {
       lastTouchY: 0,
       touchStartPanX: 0,
       touchStartPanY: 0,
-      nodes: [],
-      edges: []
+      nodes,
+      edges
     })
   })
-  */
 }
 
 
 $.draw((target) => {
-  const { canvas } = sourceCanvas(target)
-  debugger
-  seed(target)
-  const { instances } = $.learn()
-  if(!instances[target.id]) return
+  const canvas = sourceCanvas(target)
+
+  if(!canvas.nodes) return
+
+  seed(target, canvas)
 
   const {
     id,
@@ -134,11 +116,11 @@ $.draw((target) => {
     touchStartPanX,
     touchStartPanY,
     edges,
-    nodes,
+    nodes
   } = instance(target)
 
-  const edgesSVG = drawEdges(edges)
-  const nodesHTML = drawNodes(nodes)
+  const edgesSVG = drawEdges(target, edges)
+  const nodesHTML = drawNodes(target, nodes)
 
   return template(edgesSVG, nodesHTML)
 })
@@ -407,8 +389,7 @@ function nodeById(target, id) {
   return nodes.find(x => x.id === id)
 }
 
-function drawEdges(target) {
-  const { edges } = instance(target)
+function drawEdges(target, edges=[]) {
   return edges.map(edge => {
     const fromNode = nodeById(target, edge.fromNode);
     const toNode = nodeById(target, edge.toNode);
@@ -438,8 +419,7 @@ function drawEdges(target) {
   }).join('')
 }
 
-function drawNodes(target) {
-  const { nodes } = instance(target)
+function drawNodes(nodes=[]) {
   return `
     <node id="logo" class="node node-file" data-node-type="file" data-node-file="logo.svg" style="left: 36px; top: 48px;">
         <div class="node-name">logo.svg</div>

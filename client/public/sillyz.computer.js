@@ -39,7 +39,7 @@ function modules({ registry }) {
       console.error(e)
     })
     try {
-      definable = definable && document.querySelector(tag).matches(':not(:defined)')
+      definable = definable && document.querySelector(tag) && document.querySelector(tag).matches(':not(:defined)')
       if(definable) {
         customElements.define(tag, class WebComponent extends HTMLElement {
           constructor() {
