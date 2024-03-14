@@ -31,7 +31,7 @@ function countShots(instructions) {
 const $ = module('hyper-script', {
   // raw text of the file
   file: instructions,
-  activePanel: panels.read,
+  activePanel: panels.write,
   activeShot: 0,
   shotCount: countShots(instructions)
 })
@@ -400,7 +400,7 @@ $.style(`
     padding: 0;
   }
 
-  & [name="page"] > *${notHiddenChildren} {
+  & [name="page"] xml-html > *${notHiddenChildren} {
     display: block;
   }
 

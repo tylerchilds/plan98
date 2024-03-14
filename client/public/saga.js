@@ -135,7 +135,7 @@ export function render(script) {
   if(time !== NORMAL_TIME) times[time]('')
 
   // return our compiled hyper media scene
-  return scene
+  return validated(scene)
 
   // just process our runes, yes magic, just straight forward level 1 magic
   function normalTime(line) {
@@ -186,15 +186,17 @@ export function render(script) {
 
   // process the sequence to understand our actor's properties.
   function actorTime(line, separator=':') {
+      console.log({ line })
     // where in the line is our break
     const index = line.indexOf(separator)
     // before then is the attribute
     const key = line.substring(0, index)
     // after then is the data
     const value = line.substring(index+1)
+      console.log({ line, key, value })
 
     // no data?
-    if(!value) {
+    if(!key) {
       // collect the properties from our actor
       const properties = actors[actor]
       let innerHTML = ''
@@ -212,7 +214,7 @@ export function render(script) {
             return ''
           }
 
-          return `${x}="${properties[x]}"`
+          return `${x}="${properties[x]}" `
         }).join('')
 
       // add some hype to our scene
@@ -220,22 +222,27 @@ export function render(script) {
 
       // back to normal time
       time = NORMAL_TIME
+      if(value) normalTime(line)
       return
     }
 
     console.log(actor, key)
-    // set the 
     actors[actor][key.trim()] = value.trim()
   }
 
   function append(actor, body) {
-    const hype = `
-      <${actor}>
-        ${body}
-      </${actor}>
-    `
+    const hype = `<${actor}>${body}</${actor}>`
     scene += hype
   }
 
   function noop() {}
+}
+
+function validated(htmlString){
+  const root = `<xml-html>${htmlString}</xml-html>`
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(root, "application/xml");
+  const errorNode = doc.querySelector('parsererror');
+  console.log(errorNode)
+  return errorNode ? errorNode.innerHTML : root
 }

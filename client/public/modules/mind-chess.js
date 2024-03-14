@@ -7,11 +7,12 @@ $.draw((target) => {
   init(target)
   const { board, notatedMoves, isCheck, isCheckmate } = target.chess.getStatus();
   const { lastMove } = $.learn()
+   const turn = notatedMoves[Object.keys(notatedMoves)[0]].src.piece.side.name
 
   const moves = Object.keys(notatedMoves).map(key => {
     const {src, dest} = notatedMoves[key]
     return `
-      <button data-move="${key}">${key}</button>
+      <option value="${key}">${key}</option>
     `
   }).join('')
 
@@ -19,15 +20,26 @@ $.draw((target) => {
   console.log({ lastMove })
 
   return `
-    <div class="board">
-      ${board.squares.map(x => `
-        <div class="square" data-file="${x.file}" data-rank="${x.rank}">
-          ${renderPiece(x.piece)}
-        </div>
-      `).join('')}
+    <div class="skybox turn-${turn}">
+      <div class="board">
+        ${board.squares.map(x => `
+          <div class="square" data-file="${x.file}" data-rank="${x.rank}">
+            ${renderPiece(x.piece)}
+          </div>
+        `).join('')}
+      </div>
+      <form class="actions">
+        <select name="move">
+          <option disabled>Choose a move</option>
+          ${moves}
+        </select>
+        <button data-move type="submit">
+          Move
+        </button>
+        <hr/>
+        ${lastMove ? show(lastMove) : ''}
+      </form>
     </div>
-    ${moves}
-    ${lastMove ? show(lastMove) : ''}
   `
 })
 
@@ -54,11 +66,17 @@ function renderPiece(piece) {
   `
 }
 
-$.when('click', '[data-move]', (event) => {
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
   const { chess } = event.target.closest($.link)
-  const { move } = event.target.dataset
-  const lastMove = chess.move(move)
-  $.teach({ lastMove })
+  const { value } = event.target.move
+  try {
+    const lastMove = chess.move(value)
+    $.teach({ lastMove })
+    event.target.move.selectedIndex = 0
+  } catch(e) {
+    console.log('Make a legal move')
+  }
 })
 
 function init(target) {
@@ -67,6 +85,16 @@ function init(target) {
 }
 
 $.style(`
+  & .skybox {
+    display: grid;
+    grid-template-columns: 1fr 180px;
+  }
+  & select {
+    padding: 1rem;
+    border-radius: 1rem;
+    max-width: 100%;
+    margin-bottom: 1rem;
+  }
   & .board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -106,6 +134,36 @@ $.style(`
   }
 
   & .black {
+    background: black;
+    color: white;
+  }
+
+  & [data-move] {
+    width: 3rem;
+    height: 3rem;
+    line-height: 3rem;
+    padding: 0;
+    width: 100%;
+  }
+
+  & .actions {
+    padding: .5rem;
+  }
+
+  & .turn-white,
+  & .turn-white [data-undo],
+  & .turn-white [data-move],
+  & .turn-white select {
+    border: 1px solid black;
+    background: white;
+    color: black;
+  }
+
+  & .turn-black,
+  & .turn-black [data-undo],
+  & .turn-black [data-move],
+  & .turn-black select {
+    border: 1px solid white;
     background: black;
     color: white;
   }

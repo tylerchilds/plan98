@@ -176,6 +176,14 @@ $.style(`
     display: block;
   }
 
+  & #canvas-nodes {
+    pointer-events: none;
+  }
+
+  & #canvas-nodes > * {
+    pointer-events: all;
+  }
+
   & [name="node"] {
     transform: translate3d(var(--ic-x,0), var(--ic-y,0), 0);
     background: lemonchiffon;
@@ -253,7 +261,7 @@ window.addEventListener('wheel', (e) => {
         document.body.style.setProperty('--scale', scale);
         e.preventDefault();
     }
-}, {passive: false});
+});
 
 $.when('click', '[name="zoom-in"]', () => {
   scale = Math.min(scale + ZOOM_SPEED, maxScale);
@@ -441,7 +449,6 @@ function drawNodes(target, nodes=[]) {
   }
   const renderers = {
     text: function renderText(node) {
-      debugger
       return generic(node, `
         ${htmlToMarkdown(node.text)}
       `)
@@ -471,44 +478,18 @@ function drawNodes(target, nodes=[]) {
       return renderer(node)
     }
   }).join('')
-  return `
-    <node id="logo" class="node node-file" data-node-type="file" data-node-file="logo.svg" style="left: 36px; top: 48px;">
-        <div class="node-name">logo.svg</div>
-        <img width="160" height="60" src="logo.svg" alt="JSON Feed" />
-    </node>
-
-    <node id="readme" class="node node-link" data-node-type="file" data-node-file="readme.md" style="left: 36px; top: 240px;">
-      <div class="node-name">readme</div>
-      {{ content }}
-    </node>
-
-    <node id="spec" class="node node-link" data-node-type="file" data-node-file="spec/1.0.md" style="left: 600px; top: 140px;">
-      <div class="node-name">spec/1.0</div>
-      <iframe
-        width="100%"
-        height="100%"
-        src="/spec/1.0">
-      </iframe>
-    </node>
-
-    <node id="nav" class="node node-text" data-node-type="text" style="left: 336px; top: 36px;">
-      <div class="node-name"></div>
-      <div class="node-text-content">
-        <p>Learn more:</p>
-        <ul>
-          <li><a href="/">Readme</a></li>
-          <li><a href="/spec/1.0">Spec</a></li>
-          <li><a href="https://github.com/obsidianmd/jsoncanvas">GitHub</a></li>
-        </ul>
-      </div>
-    </node>
-  `
-
-
 }
 
 
 $.when('mousedown', '.node .node-name', function(e) {
+  let {
+    id,
+    isDragging,
+    isSpacePressed,
+    startX,
+    startY,
+  } = instance(event.target)
+
   if (isSpacePressed) return;
 
   isDragging = true;
@@ -516,10 +497,25 @@ $.when('mousedown', '.node .node-name', function(e) {
   startY = e.clientY;
   selectedElement = this.parentElement;
   selectedElement.classList.add('is-dragging');
+
+  console.log({ isDragging })
+  updateInstance({ id }, {
+    isDragging,
+    startX,
+    startY,
+  })
 });
 
 $.when('mousemove', '[name="canvas-container"]', function(e) {
+  let {
+    id,
+    isDragging,
+    startX,
+    startY,
+  } = instance(event.target)
+
   if (!isDragging || !selectedElement) return;
+  console.log(isDragging, selectedElement)
   
   const dx = (e.clientX - startX) / scale;
   const dy = (e.clientY - startY) / scale;
@@ -530,14 +526,28 @@ $.when('mousemove', '[name="canvas-container"]', function(e) {
   startX = e.clientX;
   startY = e.clientY;
 
+  updateInstance({ id }, {
+    startX,
+    startY,
+  })
+
+  console.log({ startX, startY })
   drawEdges();
 });
 
 $.when('mouseup', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isDragging,
+  } = instance(event.target)
+
   if (isDragging && selectedElement) {
     selectedElement.classList.remove('is-dragging');
-    isDragging = false;
     selectedElement = null;
+    updateInstance({ id }, {
+      isDragging: false
+    })
+
     updateCanvasData(target);
     drawEdges();
   }
@@ -547,40 +557,69 @@ $.when('mouseup', '[name="canvas-container"]', function(e) {
 $.when('keydown', '[name="canvas-container"]', function(e) {
   if (e.code === 'Space') {
     e.preventDefault();
-    isSpacePressed = true;
+    const { id } = instance(event.target)
+    updateInstance({ id }, { isSpacePressed: true })
+
     document.body.classList.add('will-pan');
   }
 });
 
 $.when('keyup', '[name="canvas-container"]', function(e) {
   if (e.code === 'Space') {
-    isSpacePressed = false;
+    const { id } = instance(event.target)
+    updateInstance({ id }, { isSpacePressed: false })
     document.body.classList.remove('will-pan');
   }
 });
 
 $.when('mousedown', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isDragging,
+    isSpacePressed
+  } = instance(event.target)
   if (isSpacePressed && !isDragging) {
-    isPanning = true;
     document.body.style.cursor = 'grabbing';
-    panStartX = e.clientX - panOffsetX;
-    panStartY = e.clientY - panOffsetY;
+    const panStartX = e.clientX - panOffsetX;
+    const panStartY = e.clientY - panOffsetY;
+
+    updateInstance({ id }, {
+      isPanning,
+      panStartX,
+      panStartY
+    })
   }
 });
 
 $.when('mousemove', '[name="canvas-container"]', function(e) {
-  if (isPanning) {
-    panOffsetX = e.clientX - panStartX;
-    panOffsetY = e.clientY - panStartY;
+  const {
+    id,
+    panStartX,
+    panStartY,
+    isPanning
+  } = instance(event.target)
 
+  if (isPanning) {
+    const panOffsetX = e.clientX - panStartX;
+    const panOffsetY = e.clientY - panStartY;
+
+    updateInstance({ id }, {
+      panOffsetX,
+      panOffsetY
+    })
     document.body.style.setProperty('--pan-x', `${panOffsetX}px`);
     document.body.style.setProperty('--pan-y', `${panOffsetY}px`);
   }
 });
 
 $.when('mouseup', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isPanning
+  } = instance(event.target)
+
   if (isPanning) {
-    isPanning = false;
+    updateInstance({ id }, { isSpacePressed: false })
     document.body.style.cursor = '';
   }
 });
@@ -591,6 +630,16 @@ let initialDistance = null;
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
 
 $.when('touchstart', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isPanning,
+    panOffsetX,
+    panOffsetY,
+    touchStartPanX,
+    touchStartPanY,
+    lastTouchX,
+    lastTouchY
+  } = instance(event.target)
   if (e.touches.length === 1) { // Single touch for panning
     isPanning = true;
     const touch = e.touches[0];
@@ -598,16 +647,33 @@ $.when('touchstart', '[name="canvas-container"]', function(e) {
     touchStartPanY = touch.pageY - panOffsetY;
     lastTouchX = touch.pageX;
     lastTouchY = touch.pageY;
+    updateInstance({ id }, {
+      isPanning,
+      touchStartPanX,
+      touchStartPanY,
+      lastTouchX,
+      lastTouchY
+    })
   } else if (e.touches.length === 2) { // Two-finger touch for zooming
     e.preventDefault(); // Prevent page zoom
     const touch1 = e.touches[0];
     const touch2 = e.touches[1];
     initialDistance = Math.sqrt((touch2.pageX - touch1.pageX) ** 2 + (touch2.pageY - touch1.pageY) ** 2);
+
   }
-}, { passive: false });
+});
 
 // Touch move for panning and zooming
 $.when('touchmove', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isPanning,
+    panOffsetX,
+    panOffsetY,
+    lastTouchX,
+    lastTouchY
+  } = instance(event.target)
+
   if (e.touches.length === 1 && isPanning) {
     const touch = e.touches[0];
     const dx = touch.pageX - lastTouchX;
@@ -616,6 +682,12 @@ $.when('touchmove', '[name="canvas-container"]', function(e) {
     panOffsetY += dy;
     lastTouchX = touch.pageX;
     lastTouchY = touch.pageY;
+    updateInstance({ id }, {
+      touchStartPanX,
+      touchStartPanY,
+      lastTouchX,
+      lastTouchY
+    })
     applyPanAndZoom();
     drawEdges();
   } else if (e.touches.length === 2) { // Adjust for zooming
@@ -629,11 +701,17 @@ $.when('touchmove', '[name="canvas-container"]', function(e) {
     initialDistance = distance;
     applyPanAndZoom();
   }
-}, { passive: false });
+});
 
 $.when('touchend', '[name="canvas-container"]', function(e) {
+  const {
+    id,
+    isPanning,
+  } = instance(event.target)
   if (isPanning) {
-    isPanning = false;
+    updateInstance({ id }, {
+      isPanning: false
+    })
   }
   if (e.touches.length < 2) {
     initialDistance = null; // Reset zoom tracking on lifting one finger
@@ -642,15 +720,22 @@ $.when('touchend', '[name="canvas-container"]', function(e) {
 
 // Activate node on touch
 $.when('touchstart', '.node .node-name', function(e) {
+    const { id } = instance(event.target)
     // Prevent activating multiple nodes simultaneously
     deactivateAllNodes();
     const node = this.parentElement;
     node.classList.add('is-active');
     // Prepare for potential drag
-    isDragging = false;
+    const isDragging = false;
     const touch = e.touches[0];
     startX = touch.pageX;
     startY = touch.pageY;
+
+    updateInstance({ id }, {
+      startX,
+      startY,
+      isDragging
+    })
     selectedElement = node;
     e.stopPropagation();
 });
@@ -670,6 +755,7 @@ function deactivateAllNodes() {
 
 // Handling dragging for an activated node
 $.when('touchmove', '[name="canvas-container"]', function(e) {
+  const { id, isDragging } = instance(event.target)
   if (isDragging && selectedElement && selectedElement.classList.contains('is-active')) {
     const touch = e.touches[0];
     const dx = (touch.pageX - startX) / scale;
@@ -678,8 +764,14 @@ $.when('touchmove', '[name="canvas-container"]', function(e) {
     selectedElement.style.top = `${parseInt(selectedElement.style.top, 10) + dy}px`;
 
     // Update startX and startY for the next move event
-    startX = touch.pageX;
-    startY = touch.pageY;
+    const startX = touch.pageX;
+    const startY = touch.pageY;
+
+    updateInstance({ id }, {
+      startX,
+      startY,
+      isDragging
+    })
 
     // Call drawEdges to update edge positions based on the new node positions
     drawEdges();
@@ -690,19 +782,25 @@ $.when('touchmove', '[name="canvas-container"]', function(e) {
 
 // Determine if dragging should start
 $.when('touchmove', '[name="canvas-container"]', function(e) {
+  const { id, isDragging } = instance(event.target)
   if (selectedElement && !isDragging) {
     const touch = e.touches[0];
     if (Math.abs(touch.pageX - startX) > 10 || Math.abs(touch.pageY - startY) > 10) {
-      isDragging = true; // Start dragging if moved beyond threshold
+      updateInstance({ id }, {
+        isDragging: true
+      })
     }
   }
 });
 
 // End dragging
 $.when('touchend', '[name="canvas-container"]', function(e) {
+  const { id, isDragging } = instance(event.target)
   if (isDragging && selectedElement) {
     selectedElement.classList.remove('is-dragging');
-    isDragging = false;
+    updateInstance({ id }, {
+      isDragging: false
+    })
     selectedElement = null;
   }
 });
