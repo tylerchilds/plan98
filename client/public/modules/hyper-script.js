@@ -22,7 +22,7 @@ const notHiddenChildren = `:not(${hiddenChildren})`
 function countShots(instructions) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = hyperSanitizer(instructions)
-  const shotList = Array.from(wrapper.children).filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
+  const shotList = Array.from(wrapper.children[0].children).filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   return shotList.length - 1
 }
@@ -247,7 +247,7 @@ $.when('click', '[data-next]', (event) => {
 function getMotion(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
-  const children = Array.from(wrapper.children)
+  const children = Array.from(wrapper.children[0].children)
     .filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   if(children[active]) {
