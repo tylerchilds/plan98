@@ -11,6 +11,9 @@ import { render } from "@sillonious/saga"
 import { doingBusinessAs } from "@sillonious/brand"
 import { marked } from "marked"
 
+// polyfill window with DOMParser for deno;
+self.DOMParser = DOMParser
+
 const command = Deno.args[0];
 const commands = {
   link,

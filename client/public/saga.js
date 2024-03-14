@@ -186,14 +186,12 @@ export function render(script) {
 
   // process the sequence to understand our actor's properties.
   function actorTime(line, separator=':') {
-      console.log({ line })
     // where in the line is our break
     const index = line.indexOf(separator)
     // before then is the attribute
     const key = line.substring(0, index)
     // after then is the data
     const value = line.substring(index+1)
-      console.log({ line, key, value })
 
     // no data?
     if(!key) {
@@ -226,7 +224,6 @@ export function render(script) {
       return
     }
 
-    console.log(actor, key)
     actors[actor][key.trim()] = value.trim()
   }
 
@@ -243,6 +240,5 @@ function validated(htmlString){
   const parser = new DOMParser();
   const doc = parser.parseFromString(root, "application/xml");
   const errorNode = doc.querySelector('parsererror');
-  console.log(errorNode)
   return errorNode ? errorNode.innerHTML : root
 }
