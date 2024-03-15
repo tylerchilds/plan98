@@ -123,12 +123,23 @@ const { index, seat } = event.target.dataset
 }
 
 $.style(`
+  @keyframes &-fade-out {
+    0% {
+      opacity: .25;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
   @media screen {
     & {
       display: grid;
       grid-template-columns: 1fr 1fr;
       touch-action: manipulation;
       opacity: .25;
+      animation: &-fade-out ease-in-out 1000ms forwards 1000ms;
+      visibility: hidden;
     }
     & .the-cardinal,
     & .the-compass {

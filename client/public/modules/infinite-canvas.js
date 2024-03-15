@@ -174,6 +174,7 @@ function template(edgesSVG, nodesHTML) {
 $.style(`
   & {
     display: block;
+    overflow: auto;
   }
 
   & #canvas-nodes {

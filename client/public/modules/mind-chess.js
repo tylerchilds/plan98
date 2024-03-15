@@ -29,14 +29,15 @@ $.draw((target) => {
         `).join('')}
       </div>
       <form class="actions">
-        <select name="move">
-          <option disabled>Choose a move</option>
-          ${moves}
-        </select>
-        <button data-move type="submit">
-          Move
-        </button>
-        <hr/>
+        <div class="columns">
+          <select name="move">
+            <option disabled>Select move</option>
+            ${moves}
+          </select>
+          <button data-move type="submit">
+            Commit Move
+          </button>
+        </div>
         ${lastMove ? show(lastMove) : ''}
       </form>
     </div>
@@ -45,10 +46,14 @@ $.draw((target) => {
 
 function show({ move, undo }) {
   return `
-    ${move.algebraic}
-    <button data-undo>
-      undo
-    </button>
+    <div class="columns reverse">
+      <div class="algebraic-move">
+        ${move.algebraic}
+      </div>
+      <button data-undo>
+        Undo Move
+      </button>
+    </div>
   `
 }
 
@@ -85,15 +90,15 @@ function init(target) {
 }
 
 $.style(`
-  & .skybox {
-    display: grid;
-    grid-template-columns: 1fr 180px;
+  & {
+    display: block;
+    overflow: auto;
   }
   & select {
-    padding: 1rem;
     border-radius: 1rem;
     max-width: 100%;
-    margin-bottom: 1rem;
+    padding: 0 1rem;
+    text-align: center;
   }
   & .board {
     display: grid;
@@ -146,14 +151,21 @@ $.style(`
     width: 100%;
   }
 
-  & .actions {
+  & .columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
     padding: .5rem;
   }
 
   & .turn-white,
   & .turn-white [data-undo],
   & .turn-white [data-move],
-  & .turn-white select {
+  & .turn-white select,
+  & .turn-black .reverse,
+  & .turn-black .reverse [data-undo],
+  & .turn-black .reverse [data-move],
+  & .turn-black .reverse select {
     border: 1px solid black;
     background: white;
     color: black;
@@ -162,9 +174,18 @@ $.style(`
   & .turn-black,
   & .turn-black [data-undo],
   & .turn-black [data-move],
-  & .turn-black select {
+  & .turn-black select,
+  & .turn-white .reverse,
+  & .turn-white .reverse [data-undo],
+  & .turn-white.reverse [data-move],
+  & .turn-white .reverse select {
     border: 1px solid white;
     background: black;
     color: white;
+  }
+
+  & .algebraic-move {
+    text-align: center;
+    line-height: 2rem;
   }
 `)

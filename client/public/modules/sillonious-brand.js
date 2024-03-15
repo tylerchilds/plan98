@@ -82,8 +82,8 @@ $.draw((target) => {
       <sillonious-joypro seat="${seat}"></sillonious-joypro>
     </nav>
     <footer class="from">
-      <button data-me>
-        Me
+      <button data-help>
+        Help
       </button>
     </footer>
     <header class="to">
@@ -180,7 +180,7 @@ $.when('click', '[data-share]', (event) => {
   sticky(content)
 })
 
-$.when('click', '[data-me]', (event) => {
+$.when('click', '[data-help]', (event) => {
   showPanel(`
     <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
   `)
@@ -362,7 +362,7 @@ $.style(`
       right: 0;
     }
 
-    & [data-me] {
+    & [data-help] {
       border: none;
       background: transparent;
       color: rgba(255,255,255,.85);
@@ -447,7 +447,7 @@ $.style(`
       left: 0;
       right: 0;
       display: grid;
-      place-content: center;
+      place-content: start;
       z-index: 2;
       pointer-events: none;
     }
@@ -461,7 +461,7 @@ $.style(`
     & .from {
       text-align: center;
       position: absolute;
-      top: 0;
+      top: 2rem;
       left: 0;
       margin: auto;
       z-index: 3;
