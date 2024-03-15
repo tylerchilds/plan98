@@ -1,7 +1,9 @@
 import module from '@sillonious/module'
+import eruda from 'eruda'
 import Color from "colorjs.io";
 import { doingBusinessAs as dba } from '@sillonious/brand'
 import { showPanel } from './plan98-panel.js'
+import { showModal } from './plan98-modal.js'
 
 export const doingBusinessAs = dba
 
@@ -29,7 +31,6 @@ $.draw((target) => {
     mascot,
     contact,
     tagline,
-    pocket
   } = currentBusiness(host)
   const { colors, fg, bg } = generateTheme(target, host)
 
@@ -75,7 +76,7 @@ $.draw((target) => {
         </div>
       </div>
       <div class="frontside-paper">
-        ${pocket || '<saga-genesis></saga-genesis>'}
+        <hyper-script></hyper-script>
       </div>
     </main>
     <nav class="input">
@@ -174,13 +175,19 @@ function print(colors) {
 }
 
 $.when('click', '[data-share]', (event) => {
-  const brand = event.target.closest($.link).outerHTML
-  const doc = new DOMParser().parseFromString(brand, "text/html");
-  const content = doc.querySelector('.sticky').outerHTML
-  sticky(content)
+  showModal(`
+    <sillonious-brand>
+      <div class="sticky">
+        <div class="virtual-paper">
+          <qr-code text="${window.location.href}" data-fg="saddlebrown"></qr-code>
+        </div>
+      </div>
+    </sillonious-brand>
+  `)
 })
 
 $.when('click', '[data-help]', (event) => {
+  eruda.init();
   showPanel(`
     <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
   `)
@@ -195,7 +202,7 @@ $.when('click', '.sticky .sillonious-brand', function switcher({ target }) {
   const host = target.closest('[host]').getAttribute('host')
 
   if(host) {
-    window.location.href = `/paper.pocket?world=${host}`
+    window.location.href = `/?world=${host}`
   }
 })
 
@@ -265,13 +272,6 @@ $.style(`
       overflow: auto;
     }
 
-    & .sticky:hover {
-    }
-
-    & .sticky:hover .virtual-paper {
-      opacity: 0 !important;
-    }
-
     & .sticky .virtual-paper {
       display: block;
       position: absolute;
@@ -300,7 +300,6 @@ $.style(`
 
     & .sticky sillonious-brand {
       height: 2rem;
-      white-space: nowrap;
       background: lemonchiffon;
     }
 
@@ -640,33 +639,11 @@ function getStars(target) {
   return `url(${canvas.toDataURL()}`;
 }
 
-function menuFor(who, when, where) {
-  let what = []
+function menuFor(host) {
   // use host later
   return `
-    <sillonious-brand host="sillyz.computer">
-      <button class="sillonious-brand">PaperPocket</button>
-    </sillonious-brand>
-    <sillonious-brand host="thelanding.page">
-      <button class="sillonious-brand">LandingPage</button>
-    </sillonious-brand>
-    <sillonious-brand host="archive.org">
-      <button class="sillonious-brand">InternetArchive</button>
-    </sillonious-brand>
-    <sillonious-brand host="1998.social">
-      <button class="sillonious-brand">MyBase</button>
-    </sillonious-brand>
-    <sillonious-brand host="yourlovedones.online">
-      <button class="sillonious-brand">ElectricMail</button>
-    </sillonious-brand>
-    <sillonious-brand host="ncity.executiontime.pub">
-      <button class="sillonious-brand">GameStudio</button>
-    </sillonious-brand>
-    <sillonious-brand host="css.ceo">
-      <button class="sillonious-brand">MusicStudio</button>
-    </sillonious-brand>
-    <sillonious-brand host="y2k38.info">
-      <button class="sillonious-brand">SystemShell</button>
+    <sillonious-brand host="${host}">
+      <sillonious-about host="${host}"></sillonious-about>
     </sillonious-brand>
   `
 }

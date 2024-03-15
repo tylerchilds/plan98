@@ -179,12 +179,14 @@ $.style(`
       opacity: 0;
       z-index: -1;
       transform: translateX(-1rem);
+      background: rgba(0,0,0,0);
     }
 
     100% {
       opacity: 1;
       z-index: 1100;
       transform: translateX(0);
+      background: rgba(0,0,0,.25);
     }
   }
 

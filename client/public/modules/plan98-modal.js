@@ -156,6 +156,8 @@ $.style(`
 
   & .body {
     height: 100%;
+    display: grid;
+    place-content: center;
   }
 
   & .banner {

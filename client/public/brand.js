@@ -24,7 +24,6 @@ export const doingBusinessAs = {
   'sillyz.computer': {
     emote: ';)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
-    pocket: '<hyper-script></hyper-script>',
     latitude: '37.769100',
     longitude: '-122.454583',
     zoom: 10,
@@ -41,7 +40,6 @@ export const doingBusinessAs = {
   '1998.social': {
     emote: ':D',
     image: '/cdn/tychi.me/photos/aurora.JPG',
-    pocket: '<my-admin></my-admin>',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,
@@ -58,7 +56,6 @@ export const doingBusinessAs = {
   'yourlovedones.online': {
     emote: ':(',
     image: '/cdn/tychi.me/photos/banyan.JPG',
-    pocket: '<electric-mail></electric-mail>',
     latitude: '37.772006',
     longitude: '-122.462220',
     zoom: 12,
@@ -75,7 +72,6 @@ export const doingBusinessAs = {
   'ncity.executiontime.pub': {
     emote: ':o',
     image: '/cdn/tychi.me/photos/denali.JPG',
-    pocket: '<main-quest></main-quest>',
     latitude: '37.772322',
     longitude:  '-122.465443',
     zoom: 14,
@@ -92,7 +88,6 @@ export const doingBusinessAs = {
   'css.ceo': {
     emote: ':p',
     image: '/cdn/tychi.me/photos/pacifica.JPG',
-    pocket: '<music-studio></music-studio>',
     latitude: '37.772366',
     longitude: '-122.467315',
     zoom: 15,
@@ -109,7 +104,6 @@ export const doingBusinessAs = {
   'y2k38.info': {
     emote: ':*',
     image: '/cdn/tychi.me/photos/giza.JPG',
-    pocket: '<plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
@@ -126,7 +120,6 @@ export const doingBusinessAs = {
   'thelanding.page': {
     emote: ':)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
-    pocket: '<sillonious-memex></sillonious-memex>',
     latitude: '37.770613',
     longitude: '-122.479310',
     zoom: 17,
