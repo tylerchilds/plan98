@@ -192,6 +192,7 @@ function reverse(beats) {
 $.style(`
   & {
     overflow: auto;
+    max-width: 55ch;
   }
 
   & [name="flow"] {

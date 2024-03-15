@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { showModal } from './plan98-modal.js'
 
 const emptyReddit = {
   children: [],
@@ -26,7 +27,11 @@ $.when('change', '[name="subs"]', function() {
 
 $.when('click', '.full', function() {
   const { id } = event.target.dataset
-  fullscreen(document.getElementById(id).querySelector('figure'))
+  showModal(`
+    <div style="width: 100%; height: 100%;">
+      ${document.getElementById(id).querySelector('figure').innerHTML}
+    </div>
+  `, { centered: true })
 })
 
 function fullscreen(target) {
@@ -79,35 +84,45 @@ $.draw(target => {
 function renderPost(data) {
   const renderers = {
     'image': (data) => `
-        <a href="${data.url}">${data.title}</a>
-        (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        <div style="position: absolute;">
+          <a href="${data.url}">${data.title}</a>
+          (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        </div>
         <img src="${data.url}" />
       `,
     'hosted:video': (data) => `
-        <a href="${data.url}">${data.title}</a>
-        (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        <div style="position: absolute;">
+          <a href="${data.url}">${data.title}</a>
+          (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        </div>
         <video controls muted="false" autoplay>
           <source src="${data.secure_media.reddit_video.fallback_url}" type="video/mp4">
           Sorry, your browser doesn't support embedded videos.
         </video>
       `,
     'rich:video': (data) => `
-        <a href="${data.url}">${data.title}</a>
-        (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        <div style="position: absolute;">
+          <a href="${data.url}">${data.title}</a>
+          (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        </div>
         ${htmlDecode(data.secure_media.oembed.html)}
       `,
     'link': (data) => `
-        <a href="${data.url}">${data.title}</a>
-        (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
-          <video controls muted="false" autoplay>
-            <source src="${data.preview.reddit_video_preview.fallback_url}" type="video/mp4">
-            Sorry, your browser doesn't support embedded videos.
-          </video>
+        <div style="position: absolute;">
+          <a href="${data.url}">${data.title}</a>
+          (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        </div>
+        <video controls muted="false" autoplay>
+          <source src="${data.preview.reddit_video_preview.fallback_url}" type="video/mp4">
+          Sorry, your browser doesn't support embedded videos.
+        </video>
       `,
 
     'default': (data) => `
-        <a href="${data.url}">${data.title}</a>
-        (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        <div style="position: absolute;">
+          <a href="${data.url}">${data.title}</a>
+          (<a href="https://old.reddit.com${data.permalink}">Permalink</a>)
+        </div>
       `
   }
 

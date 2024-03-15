@@ -30,6 +30,7 @@ $.draw(() => {
     isOpen,
     bannerType,
     maximized,
+    centered,
     theme,
     image,
   } = $.learn()
@@ -38,10 +39,12 @@ $.draw(() => {
   const modalHeader = types[bannerType] ? banner() : ''
 
   return `
-    <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
+    <div
+      class=" shell ${maximized ? 'maximized': ''}"
+      style="--theme: ${theme}; --image: ${image}">
       <button data-close>Close</button>
       <div class="modal">
-        <div class="body">
+        <div class="body ${centered ? 'centered': ''}">
           ${modalHeader}
           ${body}
         </div>
@@ -148,7 +151,6 @@ $.style(`
     min-height: 100px;
     height: 100%;
     min-width: 12ch;
-    max-width: 55ch;
     width: 100%;
     z-index: -1;
     opacity: 0;
@@ -160,11 +162,17 @@ $.style(`
     place-content: center;
   }
 
+  & .body.centered {
+    place-items: center;
+    place-content: initial;
+  }
+
   & .banner {
     font-weight: 800;
     padding: .5rem;
     text-align: center;
     text-shadow: 2px 2px 2px rgba(0,0,0,.85);
+    width: 100%;
   }
 
   @keyframes modal-in {

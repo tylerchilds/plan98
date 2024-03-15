@@ -283,20 +283,41 @@ $.style(`
       background: lemonchiffon;
       opacity: 1;
       pointer-events: none;
+      overflow-x: hidden;
+    }
+
+    & .sticky .actual-paper {
+      opacity: 0;
     }
 
     &.flip .virtual-paper {
-      animation: &-sticky-fade 250ms ease-in-out 1000ms forwards;
+      animation: &-sticky-fade-out 250ms ease-in-out 100ms forwards;
     }
 
-    @keyframes &-sticky-fade {
+    &.flip .actual-paper {
+      animation: &-sticky-fade-in 250ms ease-in-out 250ms forwards;
+    }
+
+    @keyframes &-sticky-fade-out {
       0% {
         opacity: 1;
+        transform: scale(1);
       }
       100% {
         opacity: 0;
+        transform: scale(.5);
       }
     }
+
+    @keyframes &-sticky-fade-in {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+
 
     & .sticky sillonious-brand {
       height: 2rem;
