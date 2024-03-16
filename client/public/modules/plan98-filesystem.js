@@ -60,7 +60,7 @@ function helpActions(currentWorkingComputer) {
   return `<plan98-filesystem data-cwc=${currentWorkingComputer}>${actions}</plan98-filesystem>`
 }
 
-const $ = module('plan98-filesystem', { rootActive: true })
+const $ = module('plan98-filesystem')
 
 const shouldBoot = self.self === self.top && !parameters.get('path')
 $.draw(shouldBoot ? system : floppy)
@@ -96,14 +96,6 @@ function system(target) {
       <div class="menubar">
         <input type="text" name="path" value="${path || '/'}" />
       </div>
-      <div class="root">
-        <div class="treeview">
-          ${nest(cwc, { target, tree, pathParts: [], subtree: tree.plan98 })}
-        </div>
-        <form id="command-line">
-          <input type="text" placeholder=":" name="command" />
-        </form>
-      </div>
       <div name="transport">
         <div name="actions">
           <button class="switcher">
@@ -112,10 +104,19 @@ function system(target) {
           <plan98-context data-inline data-label="Help" data-menu="${helpActions(cwc)}"></plan98-context>
         </div>
       </div>
-
-      <div class="leaf">
-        <media-plexer src="${path + window.location.search}"></media-plexer>
-      </div>
+      <div class="flex-column">
+        <div class="root">
+          <div class="treeview">
+            ${nest(cwc, { target, tree, pathParts: [], subtree: tree.plan98 })}
+          </div>
+          <form id="command-line">
+            <input type="text" placeholder=":" name="command" />
+          </form>
+        </div>
+        <div class="leaf">
+          <div data-resizer></div>
+          <media-plexer src="${path + window.location.search}"></media-plexer>
+        </div>
     </div>
   `
 }
@@ -197,6 +198,32 @@ $.when('click', '.switcher', function switcher({ target }) {
   $.teach({ rootActive })
 })
 
+$.when('mousedown', '[data-resizer]', event => {
+  document.addEventListener("mousemove", resize, false);
+  document.addEventListener("mouseup", () => {
+    document.removeEventListener("mousemove", resize, false);
+  }, false);
+})
+
+$.when('touchstart', '[data-resizer]', event => {
+  document.addEventListener("touchmove", touchresize, false);
+  document.addEventListener("touchend", () => {
+    document.removeEventListener("touchmove", touchresize, false);
+  }, false);
+})
+
+function resize(event) {
+  const size = `${event.x}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--sidebar-width", size);
+}
+
+function touchresize(event) {
+  const touch = event.touches[0]
+  const size = `${touch.pageX}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--sidebar-width", size);
+}
 
 $.when('click', '[data-uri]', async function(event) {
   const tokens = event.target.closest($.link).getAttribute('tokens')
@@ -331,6 +358,7 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
+    --sidebar-width: 180px;
   }
   & .menubar {
     background: rgba(0,0,0,.85);
@@ -412,18 +440,29 @@ $.style(`
     aspect-ratio: 1;
   }
 
+  & .flex-column {
+    display: flex;
+    gap: 10px;
+  }
+
   & .root {
-    display: none;
-    position: fixed;
-    left: 0;
-    top: 2rem;
-    bottom: 0;
     width: 100%;
-    width: 320px;
     max-width: 100%;
     max-height: 100%;
-    overflow: auto;
     z-index: 5;
+    position: relative;
+    overflow: auto;
+    flex-basis: var(--sidebar-width);
+  }
+
+  & [data-resizer] {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0px;
+    width: 10px;
+    background: linear-gradient(90deg, black, white);
+    z-index: 10;
   }
 
   & .list-item {
@@ -447,7 +486,7 @@ $.style(`
     position: absolute;
     right: 0;
     top: 2rem;
-    z-index: 2;
+    z-index: 10;
     overflow: auto;
   }
 
@@ -485,11 +524,11 @@ $.style(`
 
   & .leaf {
     background: white;
-    position: fixed;
     inset: 2rem 0 0;
     transform: translateY(0);
     transition: transform 200ms ease-in-out;
     overflow: hidden;
+    position: relative;
   }
 
   & .leaf iframe {
@@ -501,10 +540,10 @@ $.style(`
   & .active .root {
     display: grid;
     grid-template-rows: 1fr 2rem;
+    --sidebar-width: 0;
   }
 
   & .active .leaf {
-    margin-left: 320px;
   }
 
   & .launch {
