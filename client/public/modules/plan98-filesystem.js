@@ -93,12 +93,10 @@ function system(target) {
 
   target.innerHTML = `
     <div class="${rootClass}">
+      <div class="menubar">
+        <input type="text" name="path" value="${path || '/'}" />
+      </div>
       <div class="root">
-        <div class="help">
-        </div>
-        <div class="menubar">
-          <input type="text" name="path" value="${path || '/'}" />
-        </div>
         <div class="treeview">
           ${nest(cwc, { target, tree, pathParts: [], subtree: tree.plan98 })}
         </div>
@@ -335,9 +333,9 @@ $.style(`
     height: 100%;
   }
   & .menubar {
-    background: rgba(0,0,0,.15);
-    padding: 4px;
+    background: rgba(0,0,0,.85);
     display: flex;
+    justify-content: center;
     gap: 1rem;
   }
 
@@ -364,7 +362,7 @@ $.style(`
     display: block;
     width: 100%;
     border: none;
-    padding: .5rem;
+    padding: .25rem;
   }
 
   & iframe {
@@ -416,13 +414,11 @@ $.style(`
 
   & .root {
     display: none;
-    background: linear-gradient(34deg, white 50%, rebeccapurple);
     position: fixed;
     left: 0;
-    top: 0;
+    top: 2rem;
     bottom: 0;
     width: 100%;
-    height: 100%;
     width: 320px;
     max-width: 100%;
     max-height: 100%;
@@ -490,7 +486,7 @@ $.style(`
   & .leaf {
     background: white;
     position: fixed;
-    inset: 0;
+    inset: 2rem 0 0;
     transform: translateY(0);
     transition: transform 200ms ease-in-out;
     overflow: hidden;
@@ -504,9 +500,7 @@ $.style(`
 
   & .active .root {
     display: grid;
-    grid-template-rows: 2rem 2rem 1fr 2rem;
-    gap: 3px;
-    padding: 3px 0;
+    grid-template-rows: 1fr 2rem;
   }
 
   & .active .leaf {
