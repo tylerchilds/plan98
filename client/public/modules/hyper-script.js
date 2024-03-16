@@ -83,7 +83,9 @@ $.draw((target) => {
           <div name="theater">
             <div name="screen">
               <div name="stage">
-                ${motion}
+                <div>
+                  ${motion}
+                </div>
               </div>
             </div>
           </div>
@@ -452,21 +454,21 @@ $.style(`
   & [name="stage"] > * {
     display: block;
     grid-area: stage;
-    opacity: 0;
     transition: opacity 100ms;
     border-radius: 1rem;
     padding: 1rem;
     margin: 0;
     background: white;
     overflow: auto;
+    opacity: 1;
+    z-index: 2;
+    height: auto;
+    max-height: 100%;
   }
 
 
   & [name="stage"] > *[data-active] {
     opacity: 1;
-    z-index: 2;
-    height: auto;
-    max-height: 100%;
   }
 
   & [name="read"],

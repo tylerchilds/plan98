@@ -1,5 +1,11 @@
 import RAPIER from '@dimforge/rapier3d';
-(async function run_simulation() {
+import module from '@sillonious/module';
+
+const $ = module('rapier-3d', { instances: [] })
+
+async function run_simulation(target) {
+  if(target.started) return
+  target.started = true
   await RAPIER.init();
   // Run the simulation.
   // Use the RAPIER module here.
@@ -11,25 +17,85 @@ import RAPIER from '@dimforge/rapier3d';
   world.createCollider(groundColliderDesc);
 
   // Create a dynamic rigid-body.
-  let rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
+  const rigidBodyDesc = RAPIER.RigidBodyDesc.dynamic()
           .setTranslation(0.0, 1.0, 0.0);
-  let rigidBody = world.createRigidBody(rigidBodyDesc);
+  const rigidBody = world.createRigidBody(rigidBodyDesc);
 
   // Create a cuboid collider attached to the dynamic rigidBody.
-  let colliderDesc = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5);
-  let collider = world.createCollider(colliderDesc, rigidBody);
+  const colliderDesc = RAPIER.ColliderDesc.cuboid(0.5, 0.5, 0.5);
+  const collider = world.createCollider(colliderDesc, rigidBody);
 
   // Game loop. Replace by your own game loop system.
-  let gameLoop = () => {
+  const gameLoop = () => {
     // Ste the simulation forward.
     world.step();
 
     // Get and print the rigid-body's position.
-    let position = rigidBody.translation();
-    console.log("Rigid-body position: ", position.x, position.y, position.z);
+    const position = rigidBody.translation();
 
+    const { id } = target
+    updateInstance({ id }, { id, position })
     setTimeout(gameLoop, 16);
   };
 
   gameLoop();
-})()
+}
+
+$.draw((target) => {
+  run_simulation(target)
+  const { position } = instance(target)
+
+  if(position) {
+    target.style.setProperty('--local-x', `${position.x*100}px`)
+    target.style.setProperty('--local-y', `${position.y*100}px`)
+    target.style.setProperty('--local-z', `${position.z*100}px`)
+  }
+
+  return `
+    <div class="box"></div>
+  `
+})
+
+
+$.style(`
+  & {
+    background: linear-gradient(dodgerblue,green);
+    height: 200px;
+    display: block;
+    perspective: 1000px;
+    transform-origin: center;
+    transform-style: preserve-3d;
+  }
+
+  & .box {
+    transform: translate3d(
+      var(--local-x,0),
+      var(--local-y,0),
+      var(--local-z,0)
+    );
+    width: 100px;
+    height: 100px;
+    background: orange;
+  }
+`)
+
+function instance(target) {
+  const root = target.closest($.link)
+  return $.learn().instances[root.id] || {}
+}
+
+function updateInstance({ id }, payload) {
+  $.teach({...payload}, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          ...p
+        }
+      }
+    }
+  })
+}
+
