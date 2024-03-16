@@ -15,6 +15,11 @@ script.onload = function () {
 	})
 
   $.style(`
+    & {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
     & iframe {
       position: fixed;
       top: 0;

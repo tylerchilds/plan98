@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { tooltip as closeTooltip } from './plan98-context.js'
 
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
@@ -44,11 +45,9 @@ const Types = {
   Help: {
     type: 'Help',
     actions: [
-      ['data-about', 'About'],
       ['data-debugger', 'Debugger'],
-      ['data-forum', 'Forum'],
       ['data-live', 'Live'],
-      ['data-reset', 'Reset'],
+      ['data-reset', 'Factory Reset'],
     ]
   }
 }
@@ -61,7 +60,7 @@ function helpActions(currentWorkingComputer) {
   return `<plan98-filesystem data-cwc=${currentWorkingComputer}>${actions}</plan98-filesystem>`
 }
 
-const $ = module('plan98-filesystem')
+const $ = module('plan98-filesystem', { rootActive: true })
 
 const shouldBoot = self.self === self.top && !parameters.get('path')
 $.draw(shouldBoot ? system : floppy)
@@ -96,23 +95,26 @@ function system(target) {
     <div class="${rootClass}">
       <div class="root">
         <div class="help">
-          <plan98-context data-inline data-label="?." data-menu="${helpActions(cwc)}">
-            Get Help: 
-          </plan98-context>
         </div>
         <div class="menubar">
           <input type="text" name="path" value="${path || '/'}" />
         </div>
         <div class="treeview">
-          ${nest(cwc, { tree: tree.plan98, pathParts: [], subtree: tree.plan98 })}
+          ${nest(cwc, { target, tree, pathParts: [], subtree: tree.plan98 })}
         </div>
         <form id="command-line">
           <input type="text" placeholder=":" name="command" />
         </form>
       </div>
-      <button aria-label="Switcher" class="switcher">
-        ¿i?
-      </button>
+      <div name="transport">
+        <div name="actions">
+          <button class="switcher">
+            Sidebar
+          </button>
+          <plan98-context data-inline data-label="Help" data-menu="${helpActions(cwc)}"></plan98-context>
+        </div>
+      </div>
+
       <div class="leaf">
         <media-plexer src="${path + window.location.search}"></media-plexer>
       </div>
@@ -197,10 +199,6 @@ $.when('click', '.switcher', function switcher({ target }) {
   $.teach({ rootActive })
 })
 
-$.when('click', '.leaf', function leafer({ target }) {
-  $.teach({ rootActive: false })
-})
-
 
 $.when('click', '[data-uri]', async function(event) {
   const tokens = event.target.closest($.link).getAttribute('tokens')
@@ -223,16 +221,17 @@ $.when('click', '[data-uri]', async function(event) {
   `)
 })
 
-function nest(computer, { tree = {}, pathParts = [], subtree = {} }) {
+function nest(computer, { target, tree = {}, pathParts = [], subtree = {} }) {
   if(!subtree.children) return ''
-  return subtree.children.map(child => {
+  return subtree.children.map((child, index) => {
+    console.log({ index })
     const { name, type } = child
     const currentPathParts = [...pathParts, name]
     const currentPath = currentPathParts.join('/') || '/'
 
     if(type === Types.File.type) {
       return `
-        <plan98-context data-menu="${menuFor(computer, tree, currentPath)}">
+        <plan98-context data-menu="${menuFor(computer, tree.plan98, currentPath)}">
           <button data-path="${currentPath}">
             ${name}
           </button>
@@ -241,14 +240,19 @@ function nest(computer, { tree = {}, pathParts = [], subtree = {} }) {
     }
 
     if(type === Types.Directory.type) {
+      const tree = closestWorkingComputer(target)
+      const activePathParts = (tree.path || window.location.pathname).split('/')
+      const directoryActive = currentPathParts[index] === activePathParts[index]
       return `
-      <details ${currentPath.indexOf(`/${name}`) >= 0 ? 'open': ''}>
-        <summary data-path="${currentPath}">
-          <plan98-context data-menu="${menuFor(computer, tree, currentPath)}">
+      <details ${directoryActive ? 'open': ''}>
+        <summary>
+          <plan98-context data-menu="${menuFor(computer, tree.plan98, currentPath)}">
             ${name || "/"}
           </plan98-context>
         </summary>
-        ${nest(computer, { tree, pathParts: currentPathParts, subtree: child})}
+        <div class="subtree">
+          ${nest(computer, { target, tree, pathParts: currentPathParts, subtree: child})}
+        </div>
       </details>
     `
     }
@@ -279,40 +283,29 @@ function menuFor(computer, tree, path) {
 }
 
 $.when('click', '[data-debugger]', ({target}) => {
+  closeTooltip()
   document.body.insertAdjacentHTML('beforeend', `
     <plan98-console></plan98-console>
   `)
 })
 
-$.when('click', '[data-about]', ({target}) => {
-  showModal(`
-    <sillonious-brand host="${window.location.host}"></sillonious-brand>
-  `)
-})
-
 $.when('click', '[data-live]', ({target}) => {
+  closeTooltip()
   showModal(`
     <live-help></live-help>
-  `)
+  `, { centered: true })
 })
 
 $.when('click', '[data-reset]', async ({target}) => {
+  closeTooltip()
   const { cwc } = target.closest('[data-cwc]').dataset
   await factoryReset(cwc)
 })
-
-$.when('click', '[data-forum]', ({target}) => {
-  showModal(`
-    yeah, would be nice.
-  `)
-})
-
 
 $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
   const tree = closestWorkingComputer(target)
   tree.path = path
-  $.teach({ rootActive: false })
 })
 
 $.when('click', '[data-move]', ({ target }) => {
@@ -340,10 +333,6 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
-  }
-
-  & summary {
-    display: grid;
   }
   & .menubar {
     background: rgba(0,0,0,.15);
@@ -384,30 +373,16 @@ $.style(`
     border: 0;
   }
 
-  & ::marker,
-  & ::-webkit-details-marker{
-    display:none;
+  & details plan98-context [data-context] {
+    display: none;
   }
-  & summary {
-    list-style: none
-  }
+
   & details {
-    padding-left: 1rem;
     position: relative;
   }
 
-  & details::before,
-  & details[open]::before {
-    position: absolute;
-    left: 0;
-    line-height: 1.25;
-    font-size: .5rem;
-  }
-  & details::before {
-    content: '○';
-  }
-  & details[open]::before {
-    content: '◉';
+  & summary plan98-context {
+    display: inline-grid;
   }
 
   & [target="_blank"] {
@@ -443,7 +418,7 @@ $.style(`
     display: none;
     background: linear-gradient(34deg, white 50%, rebeccapurple);
     position: fixed;
-    right: 0;
+    left: 0;
     top: 0;
     bottom: 0;
     width: 100%;
@@ -453,16 +428,6 @@ $.style(`
     max-height: 100%;
     overflow: auto;
     z-index: 5;
-  }
-
-  & .root::before {
-    content: '';
-    border-left: 1px solid red;
-    box-shadow: 0px 0 2px 0 yellow, 2px 0 2px 0 orange, 4px 0 2px 0 red;
-    position: fixed;
-    left: 1rem;
-    top: 0;
-    bottom: 0;
   }
 
   & .list-item {
@@ -480,21 +445,46 @@ $.style(`
     width: 100%;
   }
 
-  & .switcher {
-    display: block;
-    position: fixed;
+  & [name="transport"] {
+    overflow-x: auto;
+    max-width: calc(100vw - 1.5rem - 1px);
+    position: absolute;
+    right: 0;
+    top: 2rem;
+    z-index: 2;
+    overflow: auto;
+  }
+
+  & [name="actions"] {
+    display: inline-flex;
+    justify-content: end;
+    border: 1px solid rgba(255,255,255,.15);
+    gap: .25rem;
+		padding-right: 1rem;
+    border-radius: 1.5rem 0 0 1.5rem;
+  }
+
+  & button {
+    background: rgba(0,0,0,.85);
+    border: none;
+    color: dodgerblue;
+    cursor: pointer;
     height: 2rem;
-    width: 2rem;
-    background: orange;
-    top: 3px;
-    right: 3px;
-    line-height: 1;
-    z-index: 10;
-    border: 0;
-    border-radius: 100%;
+    border-radius: 1rem;
+    transition: color 100ms;
+    padding: .25rem 1rem;
+  }
+
+  & button:hover,
+  & button:focus {
+    box-shadow: 0 0 25px 25px rgba(0,0,0,.15) inset;
   }
 
   & .active .switcher {
+  }
+
+  & .subtree {
+    padding-left: 1rem;
   }
 
   & .leaf {
@@ -520,11 +510,7 @@ $.style(`
   }
 
   & .active .leaf {
-    filter: grayscale(1) brightness(0.5) contrast(0.5);
-  }
-
-  & .active .leaf > * {
-    pointer-events: none;
+    margin-left: 320px;
   }
 
   & .launch {

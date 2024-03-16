@@ -7,9 +7,7 @@ $.draw((target) => {
   target.dataset.drawn = true
   const label = target.dataset.label || '...'
   return `
-    <div>
-      ${target.innerHTML}
-    </div>
+    ${target.innerHTML}
     <button data-context>${label}</button>
   `
 })
@@ -18,6 +16,10 @@ $.when('click', '[data-context]', (event) => {
   const closestMenu = event.target.closest($.link).dataset.menu
   tooltip(event, closestMenu);
 });
+
+$.when('click', '.items', (event) => {
+  tooltip()
+})
 
 document.body.addEventListener('click', (event) => {
   const tooltipChild = !!event.target.closest('.tooltip')
@@ -51,8 +53,7 @@ $.style(`
     color: white;
     padding: none;
     line-height: 1;
-    height: 2rem;
-    width: 2rem;
+    padding: 0;
   }
 
   & [data-context] {
@@ -66,7 +67,7 @@ const node = document.createElement('div');
 node.classList.add('tooltip')
 document.body.appendChild(node);
 
-function tooltip(event, content) {
+export function tooltip(event, content) {
   switch(arguments.length) {
     case 2:
       show(event, content);
