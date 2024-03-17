@@ -13,7 +13,7 @@ function onAnnouncement(event) {
   $.teach(event.detail.info, (state, info) => {
     return {
       ...state,
-      providers: [info]
+      providers: [...state.providers, info]
     }
   })
 
