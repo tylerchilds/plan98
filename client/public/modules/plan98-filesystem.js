@@ -138,7 +138,6 @@ function floppy(target) {
   if(content.error === '404') return
 
   if(content.type === Types.File.type) {
-    debugger
     return `<media-plexer src="${path}"></media-plexer>`
   }
 
@@ -158,7 +157,7 @@ function floppy(target) {
   }
 
   return `
-    <terminal-demo></terminal-demo>
+    <sonic-knuckles></sonic-knuckles>
   `
 }
 

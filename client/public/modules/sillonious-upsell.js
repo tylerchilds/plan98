@@ -37,6 +37,19 @@ export function setupSaga(nextSaga) {
         return
       }
       const saga = await response.text()
+      $.teach(
+        { [key]: saga },
+        (state, payload) => {
+          return {
+            ...state,
+            key,
+            cache: {
+              ...state.cache,
+              ...payload
+            }
+          }
+        }
+      )
     })
     .catch(e => {
       console.error(e)
@@ -57,8 +70,7 @@ $.draw((target) => {
     setupSaga(tutorial)
   }
 
-  if(!target.trap) {
-		target.innerHTML = `<button style="width: 1px; height: 1px; position: absolute;">(blip)</button>`
+  if(!target.trap && target.innerHTML) {
     target.trap = focusTrap.createFocusTrap(target, {
       onActivate: onActivate($, target),
       onDeactivate: onDeactivate($, target),
