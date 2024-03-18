@@ -16,7 +16,7 @@ $.draw((target) => {
     tagline,
   } = currentBusiness(host)
 
-  const plans = Object.keys(doingBusinessAs).map(host => {
+  const counselors = Object.keys(doingBusinessAs).map(host => {
     const {
       mascot,
     } = currentBusiness(host)
@@ -29,9 +29,9 @@ $.draw((target) => {
   })
 
   return `
-    <h2>Plans</h2>
+    <h2>Counselors</h2>
     <div>
-      ${plans}
+      ${counselors}
     </div>
     ${mascot}
     ${contact}
