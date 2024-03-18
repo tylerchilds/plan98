@@ -319,6 +319,7 @@ $.style(`
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    display: block;
   }
 
   & .grid {

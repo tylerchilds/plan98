@@ -16,7 +16,17 @@ $.draw((target) => {
     tagline,
   } = currentBusiness(host)
 
-  const counselors = Object.keys(doingBusinessAs).map(host => {
+  const businesses = Object.keys(doingBusinessAs)
+  const realms = businesses.map(host => {
+    return `
+      <a href="/?world=${host}">
+        ${host}
+      </a>
+    `
+  })
+
+
+  const counselors = businesses.map(host => {
     const {
       mascot,
     } = currentBusiness(host)
@@ -33,9 +43,12 @@ $.draw((target) => {
     <div>
       ${counselors}
     </div>
+    <h2>Realms</h2>
+    <div>
+      ${realms}
+    </div>
+    <hr>
     ${mascot}
-    ${contact}
-    ${tagline}
     <a href="/?world=${host}">Play</a>
   `
 })

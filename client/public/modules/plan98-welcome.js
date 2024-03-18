@@ -100,7 +100,7 @@ $.when('click', '[data-tutorial]', () => {
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
   window[start] = () => {
-    window.location.href = '/404'
+    window.location.href = '/?world=ncity.executiontime.pub'
   }
   showModal(`
     <plan98-onboarding

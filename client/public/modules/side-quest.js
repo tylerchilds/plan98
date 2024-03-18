@@ -11,7 +11,7 @@ const $ = module('side-quest', {
 	sally: aSphere({y: '1.25', z: '-5'}, { color: '#EF2D5E', radius: '1.25' }),
 	sully: aCylinder({x: '1', y: '.75', z: '-3', }, { color: '#FFC65D', radius: '.5', height: '1.5' }),
 	shelly: aPlane({z: '-4', yaw: '-90'}, { color: '#7BC8A4',  width: '10', height: '10' }),
-	sol: aSky({}, { color: '#ECECEC' }),
+	sol: aSky({}, { color: 'lemonchiffon' }),
 })
 
 function position(priority) {
@@ -77,7 +77,7 @@ function aSky(priority, conflicts) {
 
 // you'd rather use request animation frame but lets go 24fps
 setInterval(() => {
-	celestials().map(randomOrientation)
+	//celestials().map(randomOrientation)
 }, 1000/24)
 
 function randomOrientation(avatar) {
@@ -113,6 +113,7 @@ $.draw((target) => {
 		<a-scene>
 			${scene.join('')}
 		</a-scene>
+    <story-chat></story-chat>
 	`
 })
 
@@ -138,3 +139,17 @@ function increment(target) {
 		target.querySelector(`[id="${name}"]`).outerHTML = component(name)
 	})
 }
+
+$.style(`
+  & {
+    position: fixed;
+    inset: 0;
+  }
+
+  & story-chat {
+    position: absolute;
+    inset: 0;
+    max-width: 6in;
+    margin: 0 auto;
+  }
+`)

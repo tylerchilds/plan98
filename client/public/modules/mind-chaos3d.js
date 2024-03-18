@@ -319,6 +319,7 @@ $.style(`
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    display: block;
     --local-x: 0;
     --local-y: 100px;
   }
