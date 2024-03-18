@@ -100,7 +100,8 @@ $.when('click', '[data-tutorial]', () => {
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
   window[start] = () => {
-    window.location.href = '/?world=ncity.executiontime.pub'
+    const random = self.crypto.randomUUID() 
+    window.location.href = `/?world=ncity.executiontime.pub&story-chat=${random}`
   }
   showModal(`
     <plan98-onboarding

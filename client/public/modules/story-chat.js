@@ -11,7 +11,7 @@ const gun = Gun(['https://gun.1998.social/gun']);
    #
 */
 
-const $ = module('story-chat', {script: 'hi'})
+const $ = module('story-chat')
 
 const commands = {
   comment: '!',
@@ -90,12 +90,12 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  const data = $.learn()[path] || { file: '' }
+  let file = 'Welcome to Sillyz.Computer!'
+  const data = $.learn()[path] || { file }
 
   return data
     ? data
     : (function initialize() {
-      let file = ''
       fetch(path).then(async (res) => {
         if(res.status === 200) {
           file = await res.text()
@@ -118,11 +118,12 @@ $.when('submit', 'form', (event) => {
 })
 function send(event) {
   let { file } = sourceFile(event.target)
+  const { input } = $.learn()
   const path = source(event.target)
   const { command } = event.target.dataset
-  const input = event.target.closest($.link).querySelector('input')
+  if(!commands[command]) return
   const symbol = commands[command]
-  file = file+'\n'+symbol+input.value
+  file = file+'\n'+symbol+input
   gun.get($.link).get(path).put({ file }, () => {
     $.teach({ input: '' })
   })
@@ -208,8 +209,12 @@ $.style(`
   & .story-chat-row > * {
     flex: 1;
   }
-  
+
   & .communicator input {
+    border: 1px solid orange;
+    background: rgba(255,255,255,.15);
+    color: white;
+    border-radius: .25rem;
     width: 100%;
   }
 
