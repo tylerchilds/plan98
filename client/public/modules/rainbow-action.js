@@ -33,6 +33,11 @@ $.style(`
     display: block;
   }
 
+  & button {
+    color: white;
+  }
+
+
   & > * {
     animation: rainbow-background
       10000ms linear infinite alternate-reverse;

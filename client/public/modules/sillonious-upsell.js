@@ -24,7 +24,7 @@ const overworld = {
 
 const $ = module('sillonious-upsell', {
   activeWorld: plan98.host || 'actuality.network',
-  activeDialect: '/en_US/',
+  activeDialect: '/en-us/',
   cache: {}
 })
 
@@ -103,6 +103,8 @@ $.style(`
     margin: auto;
     background: rgba(255,255,255,.85);
     background: lemonchiffon;
+    max-height: 100%;
+    overflow: auto;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),
       6px 6px 12px 12px rgba(0,0,0,.5),
