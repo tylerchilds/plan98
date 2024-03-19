@@ -103,7 +103,12 @@ function celestials(name) {
 	return name ? $.learn()[name] : $.learn().celestials
 }
 
+function nested(target) {
+  return target.parentNode.closest($.link)
+}
+
 $.draw((target) => {
+  if(nested(target)) return 'Please, no side quests on your side quest'
 	if(target.mounted) return increment(target)
 	target.mounted = true
 

@@ -1,4 +1,6 @@
 import module from '@sillonious/module'
+import { doingBusinessAs } from "@sillonious/brand"
+import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import 'gun'
 const Gun = window.Gun
@@ -31,6 +33,8 @@ $.draw(target => {
   const log = render(file) || ''
   return `
     <button data-restart>Restart</button>
+    <button data-remix>Remix</button>
+    <button data-share>Share</button>
     <button data-logout>Logout</button>
     <div class="captains-log">
       ${log}
@@ -134,6 +138,23 @@ $.when('click', '[data-restart]', () => {
   gun.get($.link).get(path).put({file: ''})
 })
 
+$.when('click', '[data-remix]', () => {
+  const { saga } = doingBusinessAs[plan98.parameters.get('world')]
+  showModal(`
+    <sticky-note class="maximized">
+      <hyper-script src="${saga}"></hyper-script>
+    </sticky-note>
+  `)
+})
+
+$.when('click', '[data-share]', () => {
+  const path = source(event.target)
+  showModal(`
+    <sticky-note style="padding: 30%;">
+      <qr-code text="${window.location.href}"></qr-code>
+    </sticky-note>
+  `)
+})
 $.when('click', '[data-logout]', () => {
   window.location.href = '/404'
 })
@@ -151,6 +172,8 @@ $.style(`
   }
 
   & button {
+    position: relative;
+    z-index: 2;
     border: 1px solid dodgerblue;
     border-radius: .5rem;
     background: rgba(0,0,0,.85);

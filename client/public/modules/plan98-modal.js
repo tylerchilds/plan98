@@ -53,6 +53,26 @@ $.draw(() => {
   `
 })
 
+$.when('mousemove', '.body', gh057)
+function gh057(event){
+  const root = event.target.closest($.link)
+  const box = root.getBoundingClientRect()
+  const [x, y] = [event.clientX, event.clientY]
+  const limit = 20;
+  const calcX = -(y - box.y - (box.height / 2)) / limit;
+  const calcY = (x - box.x - (box.width / 2)) / limit;
+
+  root.style.setProperty('--rotate-x',`${calcX}deg`)
+  root.style.setProperty('--rotate-y',`${calcY}deg`)
+  root.style.setProperty('--shadow',`
+    ${-1 * calcY - 2}px ${1 * calcX - 2}px 4px 4px rgba(0,0,0,.10),
+    ${-1 * calcY - 6}px ${1 * calcX - 6}px 12px 12px rgba(0,0,0,.5),
+    ${-1 * calcY - 18}px ${1 * calcX - 18}px 36px 36px rgba(0,0,0,.25)
+  `)
+}
+
+
+
 function banner() {
   const {
     bannerType
@@ -94,6 +114,9 @@ $.when('click', '[data-close]', hideModal)
 $.style(`
   & {
     display: none;
+  }
+  & .body {
+
   }
   .trap .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
