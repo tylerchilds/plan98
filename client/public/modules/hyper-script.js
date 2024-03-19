@@ -551,7 +551,7 @@ $.style(`
     border: none;
     display: block;
     resize: none;
-    padding: 1rem .5rem 1rem 2rem;
+    padding: 6rem .5rem 1rem 2rem;
     line-height: 2rem;
 
   }

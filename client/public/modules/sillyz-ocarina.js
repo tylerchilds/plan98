@@ -371,7 +371,7 @@ $.style(`
     display: grid;
     place-items: center;
     position: relative;
-    transform: scale(.75);
+    transform: scale(.95);
   }
   & .wheel {
     display: grid;
@@ -387,7 +387,7 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     touch-action: none;
-    transform: translateY(-25%);
+    transform: translateY(-25%) scale(.75);
   }
   & .group {
     grid-area: slot;

@@ -15,7 +15,6 @@ $.draw(container => {
     }
     eruda.init({ container });
 
-    eruda.show()
     eruda.add({
     name: 'Braid',
       init($el) {

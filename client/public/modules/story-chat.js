@@ -34,9 +34,9 @@ $.draw(target => {
   target.innerHTML = `
     <div name="transport">
       <div name="actions">
-        <button data-reboot>Reboot</button>
+        <button data-restart>Restart</button>
         <button data-remix>Remix</button>
-        <button data-share>Share</button>
+        <button data-collaborate>Collab</button>
         <button data-logout>Logout</button>
       </div>
     </div>
@@ -72,7 +72,7 @@ $.draw(target => {
         <form class="story-chat-form" data-command="enter">
           <input value=${input}>
           <button type="submit" data-command="enter">
-            &nbsp;
+            put
           </button>
         </form>
       </div>
@@ -137,7 +137,7 @@ function send(event) {
   })
 }
 
-$.when('click', '[data-reboot]', () => {
+$.when('click', '[data-restart]', () => {
   const path = source(event.target)
   gun.get($.link).get(path).put({file: ''})
 })
@@ -146,7 +146,13 @@ $.when('click', '[data-remix]', () => {
   const { saga } = doingBusinessAs[plan98.parameters.get('world')]
   showModal(`
     <sticky-note class="maximized">
+      <div style="position: fixed; margin: auto; display: grid; place-items: center; bottom: 1rem; left: 1rem; right: 1rem; z-index: 2;">
+        <div style="background: rgba(0,0,0,.85); color: #fff; padding: 1rem; border-radius: 1rem;">
+          Find the debugger and see
+        </div>
+      </div>
       <hyper-script src="${saga}"></hyper-script>
+      <plan98-console></plan98-console>
     </sticky-note>
   `)
 })
@@ -208,7 +214,7 @@ $.style(`
     width: 100%;
     height: 100%;
     max-height: calc(100% - 6rem);
-    padding: 2rem 0;
+    padding: 6rem 0;
     overflow: auto;
   }
 
