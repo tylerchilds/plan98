@@ -28,10 +28,11 @@ const commands = {
 }
 
 $.draw(target => {
-  const { input='' } = $.learn()
+  const { input='', dom } = $.learn()
   const { file } = sourceFile(target)
   const log = render(file) || ''
-  target.innerHTML = `
+
+  const view = `
     <div name="transport">
       <div name="actions">
         <button data-restart>Restart</button>
@@ -70,7 +71,8 @@ $.draw(target => {
           </button>
         </div>
         <form class="story-chat-form" data-command="enter">
-          <input value=${input}>
+          <input type="checkbox" name="dom" checked="${dom}" />
+          <input type="text" name="input" value=${input}>
           <button type="submit" data-command="enter">
             put
           </button>
@@ -78,6 +80,12 @@ $.draw(target => {
       </div>
     </div>
   `
+
+  if(dom) {
+    target.innerHTML = view
+  }
+
+  return view
 })
 
 function source(target) {
@@ -117,6 +125,12 @@ function sourceFile(target) {
       return data
     })()
 }
+
+$.when('change', '[type="checkbox"]', (event) => {
+  const { checked, name } = event.target
+
+  $.teach({ [name]: checked })
+})
 
 $.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
@@ -169,9 +183,9 @@ $.when('click', '[data-logout]', () => {
   window.location.href = '/404'
 })
 
-$.when('change', 'input', (event) => {
-  const { value } = event.target
-  $.teach({ input: value })
+$.when('change', '[type="text"]', (event) => {
+  const { value, name } = event.target
+  $.teach({ [name]: value })
 })
 
 
@@ -240,8 +254,8 @@ $.style(`
     margin-bottom: .5rem;
   }
 
-  & .story-chat-form input {
-    grid-column: 1/8;
+  & .story-chat-form [type="text"] {
+    grid-column: 2/8;
   }
 
   & .story-chat-row > * {
