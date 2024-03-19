@@ -28,7 +28,6 @@ const commands = {
 }
 
 $.draw(target => {
-  const { input='', virtual } = $.learn()
   const { file } = sourceFile(target)
   const log = render(file) || ''
 
@@ -74,7 +73,7 @@ $.draw(target => {
           <a href="${window.location.href}">
             F5
           </a>
-          <input type="text" name="input" value=${input}>
+          <input type="text" name="message">
           <button type="submit" data-command="enter">
             add
           </button>
@@ -138,15 +137,13 @@ $.when('submit', 'form', (event) => {
 })
 function send(event) {
   let { file } = sourceFile(event.target)
-  const { input } = $.learn()
+  const message = event.target.closest($.link).querySelector('[name="message"]')
   const path = source(event.target)
   const { command } = event.target.dataset
   if(!commands[command]) return
   const symbol = commands[command]
-  file = file+'\n'+symbol+input
-  gun.get($.link).get(path).put({ file }, () => {
-    $.teach({ input: '' })
-  })
+  file = file+'\n'+symbol+message.value
+  gun.get($.link).get(path).put({ file })
 }
 
 $.when('click', '[data-zero]', () => {
@@ -179,12 +176,6 @@ $.when('click', '[data-party]', () => {
 $.when('click', '[data-logout]', () => {
   window.location.href = '/404'
 })
-
-$.when('change', '[type="text"]', (event) => {
-  const { value, name } = event.target
-  $.teach({ [name]: value })
-})
-
 
 $.style(`
   & {
