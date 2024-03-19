@@ -31,11 +31,15 @@ $.draw(target => {
   const { input='' } = $.learn()
   const { file } = sourceFile(target)
   const log = render(file) || ''
-  return `
-    <button data-restart>Restart</button>
-    <button data-remix>Remix</button>
-    <button data-share>Share</button>
-    <button data-logout>Logout</button>
+  target.innerHTML = `
+    <div name="transport">
+      <div name="actions">
+        <button data-reboot>Reboot</button>
+        <button data-remix>Remix</button>
+        <button data-share>Share</button>
+        <button data-logout>Logout</button>
+      </div>
+    </div>
     <div class="captains-log">
       ${log}
       <div class="communicator">
@@ -68,7 +72,7 @@ $.draw(target => {
         <form class="story-chat-form" data-command="enter">
           <input value=${input}>
           <button type="submit" data-command="enter">
-            :)
+            &nbsp;
           </button>
         </form>
       </div>
@@ -133,7 +137,7 @@ function send(event) {
   })
 }
 
-$.when('click', '[data-restart]', () => {
+$.when('click', '[data-reboot]', () => {
   const path = source(event.target)
   gun.get($.link).get(path).put({file: ''})
 })
@@ -174,11 +178,14 @@ $.style(`
   & button {
     position: relative;
     z-index: 2;
-    border: 1px solid dodgerblue;
-    border-radius: .5rem;
     background: rgba(0,0,0,.85);
-    color: white;
-    padding: .25rem;
+    border: none;
+    color: dodgerblue;
+    cursor: pointer;
+    height: 2rem;
+    border-radius: 1rem;
+    transition: all 100ms;
+    padding: .25rem 1rem;
   }
 
   & button[disabled] {
@@ -188,7 +195,8 @@ $.style(`
 
   & button:hover,
   & button:focus {
-    background: dodgerblue;
+    background: linear-gradient(rgba(0,0,0,.85) 80%, dodgerblue);
+    color: white;
   }
 
   & .story-chat-form {
@@ -210,7 +218,7 @@ $.style(`
     bottom: 0;
     width: 100%;
     padding: .5rem;
-    border-radius: .25rem;
+    border-radius: 1rem;
     background: rgba(0,0,0,.85);
     z-index: 2;
   }
@@ -237,8 +245,9 @@ $.style(`
   & .communicator input {
     border: 1px solid orange;
     background: rgba(255,255,255,.15);
+    padding: 0 1rem;
     color: white;
-    border-radius: .25rem;
+    border-radius: 1rem;
     width: 100%;
   }
 
@@ -254,4 +263,24 @@ $.style(`
       overflow: visible !important;
     }
   }
+
+  & [name="transport"] {
+    overflow-x: auto;
+    max-width: calc(100vw - 1.5rem - 1px);
+    position: absolute;
+    right: 0;
+    top: 2rem;
+    z-index: 2;
+    overflow: auto;
+  }
+
+  & [name="actions"] {
+    display: inline-flex;
+    justify-content: end;
+    border: 1px solid rgba(255,255,255,.15);
+    gap: .25rem;
+		padding-right: 1rem;
+    border-radius: 1.5rem 0 0 1.5rem;
+  }
+
 `)
