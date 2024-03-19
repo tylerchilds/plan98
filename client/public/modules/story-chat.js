@@ -94,7 +94,7 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = 'Welcome to Sillyz.Computer!'
+  let file = 'Welcome to Sillyz.Computer!\n<sillyz-ocarina'
   const data = $.learn()[path] || { file }
 
   return data
@@ -198,6 +198,7 @@ $.style(`
 
   & .captains-log {
     width: 100%;
+    height: 100%;
     max-height: calc(100% - 6rem);
     padding: 2rem 0;
     overflow: auto;

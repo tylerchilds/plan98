@@ -371,7 +371,7 @@ $.style(`
     display: grid;
     place-items: center;
     position: relative;
-    transform: scale(.85);
+    transform: scale(.75);
   }
   & .wheel {
     display: grid;
