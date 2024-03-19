@@ -43,6 +43,15 @@ $.draw(target => {
     <div class="captains-log">
       ${log}
       <div class="communicator">
+        <form class="story-chat-form" data-command="enter">
+          <a href="${window.location.href}">
+            F5
+          </a>
+          <input type="text" name="message">
+          <button type="submit" data-command="enter">
+            add
+          </button>
+        </form>
         <div class="story-chat-row">
           <button data-command="comment">
             !
@@ -69,15 +78,6 @@ $.draw(target => {
             ^
           </button>
         </div>
-        <form class="story-chat-form" data-command="enter">
-          <a href="${window.location.href}">
-            F5
-          </a>
-          <input type="text" name="message">
-          <button type="submit" data-command="enter">
-            add
-          </button>
-        </form>
       </div>
     </div>
   `
@@ -210,6 +210,7 @@ $.style(`
   & .story-chat-form {
     display: grid;
     grid-template-columns: 1fr auto;
+    margin-bottom: .5rem;
   }
 
   & .captains-log {
@@ -241,7 +242,6 @@ $.style(`
   }
 
   & .story-chat-row {
-    margin-bottom: .5rem;
   }
 
   & .story-chat-form [type="text"] {
