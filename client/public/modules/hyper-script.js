@@ -121,9 +121,9 @@ $.draw((target) => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
-          <button data-read>Show</button>
-          <button data-write>Tell</button>
-          <button data-perform>Show &amp; Tell</button>
+          <button data-read>Read</button>
+          <button data-write>Code</button>
+          <button data-perform>Demo</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>

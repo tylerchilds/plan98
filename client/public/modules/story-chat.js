@@ -13,7 +13,7 @@ const gun = Gun(['https://gun.1998.social/gun']);
    #
 */
 
-const $ = module('story-chat')
+const $ = module('story-chat', { virtual: true })
 
 const commands = {
   comment: '!',
@@ -28,16 +28,16 @@ const commands = {
 }
 
 $.draw(target => {
-  const { input='', dom } = $.learn()
+  const { input='', virtual } = $.learn()
   const { file } = sourceFile(target)
   const log = render(file) || ''
 
   const view = `
     <div name="transport">
       <div name="actions">
-        <button data-restart>Restart</button>
-        <button data-remix>Remix</button>
-        <button data-collaborate>Collab</button>
+        <button data-zero>Zero</button>
+        <button data-infinity>Infinity</button>
+        <button data-party>Party</button>
         <button data-logout>Logout</button>
       </div>
     </div>
@@ -71,21 +71,19 @@ $.draw(target => {
           </button>
         </div>
         <form class="story-chat-form" data-command="enter">
-          <input type="checkbox" name="dom" checked="${dom}" />
+          <a href="${window.location.href}">
+            F5
+          </a>
           <input type="text" name="input" value=${input}>
           <button type="submit" data-command="enter">
-            put
+            add
           </button>
         </form>
       </div>
     </div>
   `
 
-  if(dom) {
-    target.innerHTML = view
-  }
-
-  return view
+  target.innerHTML = view
 })
 
 function source(target) {
@@ -106,7 +104,7 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = 'Welcome to Sillyz.Computer!\n<sillyz-ocarina'
+  let file = 'The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<sillyz-ocarina'
   const data = $.learn()[path] || { file }
 
   return data
@@ -126,10 +124,10 @@ function sourceFile(target) {
     })()
 }
 
-$.when('change', '[type="checkbox"]', (event) => {
-  const { checked, name } = event.target
-
-  $.teach({ [name]: checked })
+$.when('click', 'button[data-reload]', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  window.location.href = window.location.href
 })
 
 $.when('click', 'button[data-command]', send)
@@ -151,12 +149,12 @@ function send(event) {
   })
 }
 
-$.when('click', '[data-restart]', () => {
+$.when('click', '[data-zero]', () => {
   const path = source(event.target)
   gun.get($.link).get(path).put({file: ''})
 })
 
-$.when('click', '[data-remix]', () => {
+$.when('click', '[data-infinity]', () => {
   const { saga } = doingBusinessAs[plan98.parameters.get('world')]
   showModal(`
     <sticky-note class="maximized">
@@ -171,8 +169,7 @@ $.when('click', '[data-remix]', () => {
   `)
 })
 
-$.when('click', '[data-share]', () => {
-  const path = source(event.target)
+$.when('click', '[data-party]', () => {
   showModal(`
     <sticky-note style="padding: 30%;">
       <qr-code text="${window.location.href}"></qr-code>
@@ -228,7 +225,7 @@ $.style(`
     width: 100%;
     height: 100%;
     max-height: calc(100% - 6rem);
-    padding: 6rem 0;
+    padding: 6rem 1rem;
     overflow: auto;
   }
 
@@ -236,6 +233,8 @@ $.style(`
     position: absolute;
     height: 6rem;
     bottom: 0;
+    left: 0;
+    right: 0;
     width: 100%;
     padding: .5rem;
     border-radius: 1rem;

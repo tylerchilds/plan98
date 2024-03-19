@@ -1,4 +1,9 @@
-Press "Start" to start or  double press "Contact" to get in touch with the narrator.
+Press "Start" to start or  double press "Contact" to get in touch with the narrator. For DIY questions, consult the code.
+
+<a
+text: Consult the Code
+href: https://github.com/tylerchilds/plan98/tree/plan98/client/public/modules
+target: _blank
 
 <sillonious-action
 action: hostPressesStartStop
