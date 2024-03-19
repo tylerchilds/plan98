@@ -1,6 +1,8 @@
+Press "Start" to start or  double press "Contact" to get in touch
+
 <sillonious-action
 action: hostPressesStartStop
-label: Tell Me More
-saga: 001-000.saga
+label: Contact
+saga: 000-001.saga
 
 

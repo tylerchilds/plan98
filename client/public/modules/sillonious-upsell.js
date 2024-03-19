@@ -103,7 +103,9 @@ $.style(`
     margin: auto;
     background: rgba(255,255,255,.85);
     background: lemonchiffon;
-    max-height: 100%;
+    max-height: 80%;
+    padding: .5rem;
+    max-width: 80%;
     overflow: auto;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),
