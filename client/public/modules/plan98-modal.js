@@ -95,6 +95,8 @@ export function showModal(body, options) {
   $.teach({
     body,
     isOpen: true,
+    centered: false,
+    bannerType: null,
     ...options
   })
 }

@@ -99,7 +99,7 @@ $.draw(() => {
 $.when('click', '[data-about]', (event) => {
   showModal(`
     <lets-connect url="https://alhvsudxbwemectbuqro.supabase.co" key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsaHZzdWR4YndlbWVjdGJ1cXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjU3MTc5OTksImV4cCI6MTk4MTI5Mzk5OX0.fvfrU2TACETuv21wt0VAfYVeUAuO0MIaV1-CmVcMmGw"></lets-connect>
-  `)
+  `, { centered: true })
 })
 
 $.when('click', '[data-tutorial]', () => {
@@ -130,6 +130,19 @@ $.style(`
     margin: auto;
     position: absolute;
     inset: 0;
+  }
+  & [data-about] {
+    position: fixed;
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+    margin: auto;
+    background: rgba(0,0,0,.5);
+    color: white;
+    border: none;
+    border-radius: 1rem;
+    padding: 1rem;
+
   }
   & [name="square"]{
     margin: auto;
