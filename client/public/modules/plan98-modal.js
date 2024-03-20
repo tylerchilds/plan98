@@ -183,6 +183,7 @@ $.style(`
     height: 100%;
     display: grid;
     place-content: center;
+    overflow: auto;
   }
 
   & .body.centered {

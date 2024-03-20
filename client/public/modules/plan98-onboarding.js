@@ -44,7 +44,7 @@ $.draw(target => {
 
   const reverseAction = isFirst ? `
     <button data-exit>
-      Learn More
+      Work with Ty
     </button>
   ` : `
     <button data-back>

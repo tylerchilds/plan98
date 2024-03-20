@@ -89,10 +89,17 @@ $.draw(() => {
               </rainbow-action>
             </div>
           </div>
+          <button data-about>About</button>
         </div>
       </div>
     </div>
   `
+})
+
+$.when('click', '[data-about]', (event) => {
+  showModal(`
+    <lets-connect url="https://alhvsudxbwemectbuqro.supabase.co" key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsaHZzdWR4YndlbWVjdGJ1cXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjU3MTc5OTksImV4cCI6MTk4MTI5Mzk5OX0.fvfrU2TACETuv21wt0VAfYVeUAuO0MIaV1-CmVcMmGw"></lets-connect>
+  `)
 })
 
 $.when('click', '[data-tutorial]', () => {
