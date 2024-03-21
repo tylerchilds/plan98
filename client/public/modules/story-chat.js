@@ -44,9 +44,6 @@ $.draw(target => {
       ${log}
       <div class="communicator">
         <form class="story-chat-form" data-command="enter">
-          <a href="${window.location.href}">
-            F5
-          </a>
           <input type="text" name="message">
           <button type="submit" data-command="enter">
             add
@@ -122,12 +119,6 @@ function sourceFile(target) {
       return data
     })()
 }
-
-$.when('click', 'button[data-reload]', (event) => {
-  event.preventDefault()
-  event.stopPropagation()
-  window.location.href = window.location.href
-})
 
 $.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
@@ -245,7 +236,7 @@ $.style(`
   }
 
   & .story-chat-form [type="text"] {
-    grid-column: 2/8;
+    grid-column: 1/8;
   }
 
   & .story-chat-row > * {
