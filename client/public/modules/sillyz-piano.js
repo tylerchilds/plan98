@@ -1,13 +1,14 @@
 import module from '@sillonious/module'
 import Color from "https://esm.sh/colorjs.io@0.4.5"
+import Wad from 'web-audio-daw';
 import $guitar from "./sillyz-guitar.js"
 
 const biomes = [
-  'underwater',
-  'island',
-  'oasis',
+  'ocean',
   'beach',
-  'meadow',
+  'city',
+  'suburbs',
+  'desert',
   'forest',
   'mountain',
   'orbit',
@@ -91,6 +92,8 @@ const metadata = notes.reduce((meta, midi) => {
 const context = new AudioContext();
 const oscillators = {}
 
+const bell = 
+
 async function loadSample(url) {
   const sample = await fetch(url)
     .then(response => response.arrayBuffer())
@@ -100,11 +103,8 @@ async function loadSample(url) {
 
 function playSample(note, frequency) {
   stopSample(note)
-  oscillators[note] = context.createOscillator();
-  oscillators[note].type = 'square';
-  oscillators[note].frequency.value = parseFloat(frequency); // value in hertz
-  oscillators[note].connect(context.destination);
-  oscillators[note].start()
+  oscillators[note] = new Wad({source : '/public/samples/4.mp3'});
+  oscillators[note].play()
 }
 
 function stopSample(note) {

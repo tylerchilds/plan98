@@ -103,7 +103,7 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = 'The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<sillyz-ocarina'
+  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<iframe\nsrc: ${window.location.href}&amp;world=ncity.executiontime.pub\ntitle: the OG\n<sillyz-ocarina`
   const data = $.learn()[path] || { file }
 
   return data
@@ -152,7 +152,7 @@ $.when('click', '[data-zero]', () => {
 })
 
 $.when('click', '[data-infinity]', () => {
-  const { saga } = doingBusinessAs[plan98.parameters.get('world')]
+  const { saga } = doingBusinessAs[plan98.parameters.get('world') || 'sillyz.computer']
   showModal(`
     <sticky-note class="maximized">
       <div style="position: fixed; margin: auto; display: grid; place-items: center; bottom: 1rem; left: 1rem; right: 1rem; z-index: 2;">
