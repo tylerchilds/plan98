@@ -100,7 +100,7 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<iframe\nsrc: ${window.location.href}&amp;world=ncity.executiontime.pub\ntitle: the OG\n<sillyz-ocarina`
+  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<iframe\nsrc: ${window.location.href}&amp;world=ncity.executiontime.pub\ntitle: the OG\n<sillyz-ocarina\n<rainbow-action\nhtml: <a href="https://github.com/tylerchilds/plan98/archive/refs/heads/plan98.zip">Download Code</a>`
   const data = $.learn()[path] || { file }
 
   return data
