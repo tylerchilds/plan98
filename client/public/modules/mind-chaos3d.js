@@ -34,7 +34,9 @@ $.draw((target) => {
           data-row="${row}"
           data-column="${column}"
         >
-          ${box.revealed ? (box.mimed ? 'x' : box.count ? box.count : ''):'' }
+          <div class="info">
+            ${box.revealed ? (box.mimed ? 'x' : box.count ? box.count : ''):'' }
+          </div>
         </button>
       `
     }).join('')
@@ -380,5 +382,16 @@ $.style(`
 
   & .alive {
     background: rgba(128,128,128,.65);
+  }
+
+  & button {
+    perspective-origin: center;
+    perspective: 1000px;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+
+  & button .field {
+    transform: rotateZ(45deg);
   }
 `)

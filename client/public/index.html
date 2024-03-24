@@ -15,6 +15,29 @@
         height: 100%;
       }
 
+      :not(:defined) {
+        position: relative;
+      }
+      :not(:defined)::before {
+        content: '';
+        position: absolute;
+        animation: loader 1000ms alternate infinite;
+        width: 2rem;
+        height: 4rem;
+        opacity: .5;
+        mix-blend-mode: multiply;
+      }
+
+      @keyframes loader {
+        0% {
+          background: transparent;
+        }
+
+        100% {
+          background: orange;
+        }
+      }
+
       @media screen {
         body{ overflow: auto; }
       }

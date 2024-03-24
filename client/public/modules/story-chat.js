@@ -34,10 +34,9 @@ $.draw(target => {
   const view = `
     <div name="transport">
       <div name="actions">
-        <button data-zero>Zero</button>
-        <button data-infinity>Infinity</button>
-        <button data-party>Party</button>
-        <button data-logout>Logout</button>
+        <button data-zero>Clear</button>
+        <button data-party>Invite</button>
+        <button data-logout>Disconnect</button>
       </div>
     </div>
     <div class="captains-log">
@@ -79,7 +78,7 @@ $.draw(target => {
     </div>
   `
 
-  target.innerHTML = view
+  return view
 })
 
 function source(target) {
@@ -100,7 +99,7 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<iframe\nsrc: ${window.location.href}&amp;world=ncity.executiontime.pub\ntitle: the OG\n<sillyz-ocarina\n<rainbow-action\nhtml: <a href="https://github.com/tylerchilds/plan98/archive/refs/heads/plan98.zip">Download Code</a>`
+  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<rainbow-action\nhtml: <a href="https://github.com/tylerchilds/plan98/archive/refs/heads/plan98.zip">Download Code</a>`
   const data = $.learn()[path] || { file }
 
   return data
@@ -134,7 +133,9 @@ function send(event) {
   if(!commands[command]) return
   const symbol = commands[command]
   file = file+'\n'+symbol+message.value
-  gun.get($.link).get(path).put({ file })
+  gun.get($.link).get(path).put({ file }, () => {
+    message.value = ''
+  })
 }
 
 $.when('click', '[data-zero]', () => {
@@ -165,12 +166,13 @@ $.when('click', '[data-party]', () => {
   `)
 })
 $.when('click', '[data-logout]', () => {
-  window.location.href = '/404'
+  window.location.href = '/'
 })
 
 $.style(`
   & {
     display: block;
+    position: relative;
     height: 100%;
   }
 
@@ -230,6 +232,7 @@ $.style(`
     grid-template-columns: repeat(8, 1fr);
     gap: .5rem;
     width: 100%;
+    overflow: auto;
   }
 
   & .story-chat-row {

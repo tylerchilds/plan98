@@ -22,9 +22,9 @@ $.draw((target) => {
 
   return `
     <div class="wrapper">
-      <h1>Human Connection</h1>
+      <h1>Paper Nautilus</h1>
       <p>
-        Sillyz.Computer is an interactive art piece and medium (and LLC!), created and curated by <hypertext-highlighter color="yellow">just one whiz</hypertext-highlighter>. Staying in touch would be super appreciated.
+        An interactive art piece and medium created by one <hypertext-highlighter color="yellow">random guy on the internet</hypertext-highlighter>. Staying in touch would be super appreciated.
       </p>
       <p>
         If any of your experience was fun, I'd love to hear about it. Please leave your email and I will be in touch with updates!

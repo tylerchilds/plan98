@@ -91,7 +91,7 @@ $.draw((target) => {
       <div>
         <button class="sillonious-brand" data-switcher>
           <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
-            PaperPocket
+            PaperNautilus
           </hypertext-variable>
         </button>
       </div>

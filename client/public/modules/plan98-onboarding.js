@@ -20,7 +20,7 @@ import module from '@sillonious/module'
 const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
 
 const strings = {
-  'plan98-welcome.warning': 'Sillyz.Computer is not rated by the Entertainment Software Rating Board and may contain player-character generated experiences.'
+  'plan98-welcome.warning': 'Paper Nautilus is not rated by the Entertainment Software Rating Board and may contain player-character generated experiences.'
 }
 
 // create a hyper text module

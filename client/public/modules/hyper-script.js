@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const instructions = "go down or next\n\n<story-board\n<mine-sweeper\n<mind-chaos3d\n<mind-chess\n<hello-metamask\n\n<infinite-canvas\nsrc: /cdn/sillyz.computer/index.canvas\n\n<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Exterior Home\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n& winking\n\n> I didn't break the windows if you didn't\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world\n\n<story-board"
+const instructions = `Hello there. You're in the computer now.\n\n<story-board\n<mine-sweeper\n<mind-chaos3d\n<mind-chess\n\n<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Exterior Home\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n& winking\n\n> I didn't break the windows if you didn't\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world\n<hello-metamask\n\n<infinite-canvas\nsrc: /cdn/sillyz.computer/index.canvas\n\n<story-board\n<story-chat\nsrc: ${window.location.href}`
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {
