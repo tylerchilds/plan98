@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const pitch = `
+const pitch = `<hello-world
 
 # Write once, run globally.
 
@@ -51,8 +51,6 @@ THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message
 
 ^ Fade Out
 
-<hello-world
-<hello-metamask
 <infinite-canvas
 src: /cdn/sillyz.computer/index.canvas
 
