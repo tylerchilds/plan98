@@ -5,7 +5,7 @@ const $ = module('hypertext-quote')
 $.style(`
   & {
     display: block;
-    margin: 0 1in;
+    margin: 1rem 1in;
     place-self: end center;
   }
 `)

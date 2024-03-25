@@ -324,6 +324,7 @@ $.style(`
     display: block;
     --local-x: 0;
     --local-y: 100px;
+    overflow: auto;
   }
 
   & .grid {
@@ -335,7 +336,7 @@ $.style(`
       rotateX(60deg)
       rotateZ(0deg)
       scale(3);
-    transform-origin: bottom;
+    transform-origin: center left;
   }
 
   & .won {

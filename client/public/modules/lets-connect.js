@@ -22,7 +22,7 @@ $.draw((target) => {
 
   return `
     <div class="wrapper">
-      <h1>Paper Nautilus</h1>
+      <h1>Paper Nautiloids</h1>
       <p>
         An interactive art piece and medium created by one <hypertext-highlighter color="yellow">random guy on the internet</hypertext-highlighter>. Staying in touch would be super appreciated.
       </p>

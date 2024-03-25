@@ -177,7 +177,7 @@ $.style(`
     height: 100%;
     min-width: 12ch;
     width: 100%;
-    z-index: -1;
+    z-index: 1000;
     opacity: 0;
   }
 
@@ -204,12 +204,10 @@ $.style(`
   @keyframes modal-in {
     0% {
       opacity: 0;
-      z-index: -1;
     }
 
     100% {
       opacity: 1;
-      z-index: 1100;
     }
   }
 

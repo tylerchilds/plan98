@@ -1,7 +1,68 @@
 import module from '@sillonious/module'
 import { render } from '@sillonious/saga'
 
-const instructions = `Hello there. You're in the computer now.\n\n<story-board\n<mine-sweeper\n<mind-chaos3d\n<mind-chess\n\n<title-page\ntitle: Hello World\nauthor: Thesillonious Caramera\n\n# Exterior Home\n\nCarrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA\n\n@ Thesillonious Caramera\n\n& winking\n\n> I didn't break the windows if you didn't\n\nTHESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL\n\n@ NOTE\n\n> the rest is up to you\n\n^ Fade Out\n\n<hello-world\n<hello-metamask\n\n<infinite-canvas\nsrc: /cdn/sillyz.computer/index.canvas\n\n<story-board\n<story-chat\nsrc: ${window.location.href}`
+const pitch = `
+
+# Write once, run globally.
+
+The world runs on computers that fit under our desks, on our laps, in our pockets, around our bodies, and throughout our homes and businesses.
+
+@ Presenter
+> Have you wondered how these all work?
+
+> Have you ever felt your computers are actively designed against you?
+
+> Have you ever wished you could control them yourself?
+
+> Have you ever tried to build your own?
+
+While most people given the time and space can achieve personal agency over their computing paradigms and practices, they would rather buy that agency, if they can afford it.
+
+What does this look like in practice?
+
+# Trustworthy Computers.
+
+A trustworthy computer is a good friend that doesn't hide secrets from you or lie.
+
+You can dig as far deep into a trustworthy computer without hitting an invisible wall, like in a video game.
+
+A trustworthy computer will guide you away from making mistakes, but will also allow you to make them to grow and learn.
+
+<mine-sweeper
+<mind-chaos3d
+<mind-chess
+
+<title-page
+title: Hello World
+author: Thesillonious Caramera
+
+# Exterior Home
+
+Carrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA
+
+@ Thesillonious Caramera
+& winking
+> I didn't break the windows if you didn't
+
+THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL
+
+@ NOTE
+> the rest is up to you
+
+^ Fade Out
+
+<hello-world
+<hello-metamask
+<infinite-canvas
+src: /cdn/sillyz.computer/index.canvas
+
+<story-board
+<story-chat
+src: ${window.location.href}
+
+<mlb-teams
+`
+
 
 // panels are the names of views or screens displayed in the user interface
 const panels = {
@@ -30,10 +91,10 @@ function countShots(instructions) {
 // create a hyper text module
 const $ = module('hyper-script', {
   // raw text of the file
-  file: instructions,
+  file: pitch,
   activePanel: panels.write,
   activeShot: 0,
-  shotCount: countShots(instructions)
+  shotCount: countShots(pitch)
 })
 
 $.draw((target) => {
@@ -120,9 +181,9 @@ $.draw((target) => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
-          <button data-read>Read</button>
-          <button data-write>Code</button>
-          <button data-perform>Demo</button>
+          <button data-read>Play</button>
+          <button data-write>Program</button>
+          <button data-perform>Pitch</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
       </div>
@@ -168,7 +229,7 @@ function sourceFile(target) {
     ? data
     : (function initialize() {
       schedule(() => {
-        let file = instructions
+        let file = pitch
         fetch(src).then(async res => {
           if(res.status === 200) {
             file = await res.text()
