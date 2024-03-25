@@ -82,7 +82,7 @@ $.draw(() => {
                   Paper
                 </hypertext-variable>
                 <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                  NAUTILUS
+                  NAUTILOIDS
                 </hypertext-variable>
               </div>
               <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">

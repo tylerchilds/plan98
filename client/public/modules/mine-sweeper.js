@@ -68,6 +68,7 @@ $.when('contextmenu', '.cell', (event) => {
   const { boxes, id, rows, columns } = instance(event.target)
   const { flagged } = boxes[`${row}-${column}`]
   updateBox({ id, x: column, y: row }, { flagged: !flagged })
+  victoryCondition(event.target)
 })
 
 $.when('click', '.cell', (event) => {
@@ -87,6 +88,7 @@ $.when('click', '.cell', (event) => {
   } else {
     updateBox({ id, x: column, y: row }, { revealed: true })
   }
+  victoryCondition(event.target)
 })
 
 $.when('click', '[data-restart]', (event) => {
@@ -95,6 +97,9 @@ $.when('click', '[data-restart]', (event) => {
   updateInstance({ id }, { finished: false, won: null })
 })
 
+function victoryCondition(target) {
+  const { boxes, id, rows, columns } = instance(target)
+}
 
 function seed(target) {
   if(target.seeded) return
