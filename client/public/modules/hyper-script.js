@@ -59,8 +59,6 @@ src: /cdn/sillyz.computer/index.canvas
 <story-board
 <story-chat
 src: ${window.location.href}
-
-<mlb-teams
 `
 
 
