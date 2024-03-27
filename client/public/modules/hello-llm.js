@@ -15,8 +15,8 @@ const $ = module('hello-llm', {
 })
 
 function init(target) {
-  if(target.initted) { return }
-  target.inited = true
+  if(target.initialized) { return }
+  target.initialized = true
   const { messages } = $.learn()
   const url = "http://localhost:8080/v1/chat/completions";
   const headers = {
