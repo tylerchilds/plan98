@@ -177,8 +177,8 @@ $.draw((target) => {
     <div class="grid" data-panel="${activePanel}">
       <div name="transport">
         <div name="actions">
-          <button data-read>Play</button>
           <button data-write>Program</button>
+          <button data-read>Play</button>
           <button data-perform>Pitch</button>
           ${play ? `<button data-play>Play</button>` : ''}
         </div>
