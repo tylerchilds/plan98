@@ -25,21 +25,22 @@
         content: '';
         position: absolute;
         inset: 0;
-        animation: loader 1000ms alternate infinite;
+        animation: loader 3000ms ease-in-out alternate infinite;
         width: 3.25in;
         height: 3.12in;
         opacity: .5;
         mix-blend-mode: multiply;
         margin: auto;
+        background: lemonchiffon;
       }
 
       @keyframes loader {
         0% {
-          background: transparent;
+          transform: rotate(0deg);
         }
 
         100% {
-          background: lemonchiffon;
+          transform: rotate(360deg);
         }
       }
 
