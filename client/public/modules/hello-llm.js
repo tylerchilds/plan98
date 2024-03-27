@@ -47,14 +47,14 @@ $.draw((target) => {
   init(target)
   const { messages, thinking } = $.learn()
   const log = messages.map((message) => `
-    <div class="message message-${message.role}">
+    <div class="message -${message.role}">
       ${marked(message.content)}
     </div>
   `).join('')
 
   return `
-    ${thinking}
     ${log}
+    ${thinking ? '<div class="loading"></div>' : ''}
   `
 })
 
@@ -64,5 +64,45 @@ $.style(`
   }
   & .message {
     overflow: auto;
+    border-bottom: 2px solid orange;
+    border-radius: 1rem;
+    padding: 0 1rem;
+    position: relative;
   }
+
+  & .message.-system {
+    margin: 0 3rem;
+  }
+
+  & .message.-user {
+    margin-left: 3rem;
+    border-bottom-color: dodgerblue;
+  }
+
+  & .message.-assistant {
+    margin-right: 3rem;
+    border-bottom-color: rebeccapurple;
+  }
+
+  & .loading::before {
+    content: '';
+    position: absolute;
+    animation: loader 1000ms alternate infinite;
+    width: 3.25in;
+    height: 3.12in;
+    opacity: .5;
+    mix-blend-mode multiply;
+  }
+
+  @keyframes &-loader {
+    0% {
+      background: transparent;
+    }
+
+    100% {
+      background: lemonchiffon;
+    }
+  }
+
+
 `)
