@@ -91,7 +91,7 @@ const context = `<div class="overlay"><plan98-modal></plan98-modal></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
 export function showModal(body, options) {
-  document.body.classList.add('trap')
+  document.body.classList.add('trap-modal')
   $.teach({
     body,
     isOpen: true,
@@ -104,7 +104,7 @@ export function showModal(body, options) {
 window.showModal = showModal
 
 export function hideModal() {
-  document.body.classList.remove('trap')
+  document.body.classList.remove('trap-modal')
   $.teach({
     isOpen: false
   })
@@ -120,7 +120,7 @@ $.style(`
   & .body {
 
   }
-  .trap .overlay:before {
+  .trap-modal .overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
     background: rgba(0,0,0, .5);
@@ -160,7 +160,7 @@ $.style(`
     z-index: 1100;
   }
 
-  body.trap & {
+  body.trap-modal & {
     display: grid;
   }
 

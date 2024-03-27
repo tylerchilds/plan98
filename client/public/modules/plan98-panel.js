@@ -92,7 +92,7 @@ $.style(`
   & {
     display: none;
   }
-  .trap .panel-overlay:before {
+  .trap-panel .panel-overlay:before {
     animation: &-fadein 250ms ease-in-out forwards;
     content: '';
     background: linear-gradient(rgba(0,0,0, .5), transparent);
