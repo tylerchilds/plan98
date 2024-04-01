@@ -1,4 +1,4 @@
-# PaperPocket (plan98)
+# Paper Nautiloids (argonauts)
 
 For write once run on any thing. [Try it now.](https://sillyz.computer)
 
