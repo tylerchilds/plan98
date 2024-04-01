@@ -90,8 +90,16 @@ function banner() {
 const context = `<div class="overlay"><plan98-modal></plan98-modal></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
+let hideListener = (event) => {
+  if (event.key === 'Escape') {
+    hideModal()
+  }
+}
+
 export function showModal(body, options) {
   document.body.classList.add('trap-modal')
+  self.addEventListener('keydown', hideListener);
+
   $.teach({
     body,
     isOpen: true,
@@ -105,6 +113,7 @@ window.showModal = showModal
 
 export function hideModal() {
   document.body.classList.remove('trap-modal')
+  self.removeEventListener('keydown', hideListener);
   $.teach({
     isOpen: false
   })

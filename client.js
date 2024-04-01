@@ -59,7 +59,9 @@ async function sagaSanitizer(saga) {
   const dom = await page()
   dom.body.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>
-      ${render(saga)}
+      <saga-genesis>
+        ${render(saga)}
+      </saga-genesis>
     </sillonious-brand>
   `)
   // remove the lazy-bootstrap to lock the document

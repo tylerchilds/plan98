@@ -127,8 +127,7 @@ $.style(`
   & {
     display: block;
     margin: auto;
-    position: absolute;
-    inset: 0;
+    height: 100%;
   }
   & [data-about] {
     position: fixed;

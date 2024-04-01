@@ -37,7 +37,9 @@ $.draw(target => {
 
   if(file && !target.view) {
     target.innerHTML = `
+      <!--
       <button class="publish">Publish</button>
+      -->
     `
 
     const config = {
@@ -76,7 +78,12 @@ $.style(`
   & {
 		display: block;
     overflow: scroll;
+    height: 100%;
     max-height: 100%;
+  }
+
+  & .cm-content {
+    background: rgba(255,255,255,.85);
   }
 `)
 

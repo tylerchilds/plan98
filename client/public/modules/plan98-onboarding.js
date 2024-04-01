@@ -20,7 +20,7 @@ import module from '@sillonious/module'
 const notHiddenChildren = ':not(style,script,hypertext-blankline,hypertext-comment)'
 
 const strings = {
-  'plan98-welcome.warning': 'Paper Nautiloids are not rated by the Entertainment Software Rating Board and may contain player-character generated experiences.'
+  'plan98-welcome.warning': 'It is dangerous to go alone. Take this.'
 }
 
 // create a hyper text module
@@ -84,7 +84,7 @@ $.draw(target => {
 })
 
 function getHost(target) {
-  return target.closest('[host]').getAttribute('host') || window.location.host
+  return (target.closest('[host]') && target.closest('[host]').getAttribute('host')) || plan98.host
 }
 
 function dialogue(target) {
@@ -96,11 +96,10 @@ function dialogue(target) {
         shotCount: 1,
         sequence: [
           `
+            <qr-code text="${window.location.href}"></qr-code>
+            <br><br>
             <div>
               ${strings['plan98-welcome.warning']}
-            </div>
-            <div>
-              <a href="https://raw.githubusercontent.com/tylerchilds/plan98/plan98/LICENSE" target="top">MIT License &copy; 2023 - Tyler Childs &lt;email@tychi.me&gt;</a> 
             </div>
           `
         ]
