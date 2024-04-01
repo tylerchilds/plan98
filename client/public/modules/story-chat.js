@@ -174,6 +174,8 @@ $.style(`
     display: block;
     position: relative;
     height: 100%;
+    background: rgba(0,0,0,.85);
+    color: white;
   }
 
   & button {
