@@ -32,11 +32,30 @@ $.when('click', '.publish', (event) => {
   alert(file)
 })
 
+$.when('change', 'select', (event) => {
+  const { value } = event.target
+  const root = event.target.closest($.link)
+  root.setAttribute('src', value)
+  $.teach({ src: value })
+  root.initialized = false
+  root.view = null
+})
+
+
+
 $.draw(target => {
+  const { src } = $.learn()
   const { file } = sourceFile(target)
+  const paper = target.getAttribute('paper')
 
   if(file && !target.view) {
-    target.innerHTML = `
+    target.innerHTML = paper ? `
+      <select>
+        ${paper.split(',').map((filename) => {
+          return `<option value="${filename}">${filename}</option>`
+        })}
+      </select>
+    `: `
       <!--
       <button class="publish">Publish</button>
       -->

@@ -48,6 +48,8 @@ $.draw((target) => {
     <button data-escape>Esc</button>
   `
 
+  target.innerHTML = ''
+
   return `
     ${escapeButton}
     ${quest}
@@ -66,6 +68,11 @@ $.style(`
     inset: 0;
     overflow: auto;
   }
+
+  & xml-html {
+    max-width: 6in;
+    margin: auto;
+  }
 `)
 
 $.when('click', '[data-escape]', revealTruth)
@@ -76,10 +83,18 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
-function revealTruth() {
+function revealTruth(event) {
+  const entries = performance.getEntriesByType('resource');
+
+  const nautiloids = entries.filter(function(entry) {
+    return entry.initiatorType === 'script'
+  }).map((entry) => {
+    return entry.name;
+  });
+
   showModal(`
     <div style="overflow: auto; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; padding: 4rem .25rem;">
-      <code-module src="${$.learn().quest}"></code-module>
+      <code-module src="${$.learn().quest}" paper="${nautiloids}"></code-module>
     </div>
   `, { centered: true })
 }
@@ -111,3 +126,4 @@ $.style(`
     pointer-events: none;
   }
 `)
+

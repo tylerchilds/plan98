@@ -18,7 +18,7 @@ const emeraldOfSelf
 const emeraldOfSecurity
   = `/public/sagas/security.saga`
 const emeraldOfNow
-  = `/public/sagas/index.saga`
+  = `/public/cdn/sillyz.computer/index.saga`
 
 export const doingBusinessAs = {
   'sillyz.computer': {
