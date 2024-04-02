@@ -40,8 +40,9 @@ function getHost(target) {
 
 $.draw((target) => {
   const host = getHost(target)
-  const chaosEmerald = doingBusinessAs[host] || emeraldOfTime
-  const macGuffin = useMacGuffin(chaosEmerald.saga)
+  const route = window.location.pathname
+  const macGuffin = route === '/' ? (doingBusinessAs[host] || emeraldOfTime).saga : '/public' + route
+  const quest = useMacGuffin(macGuffin)
 
   const escapeButton = `
     <button data-escape>Esc</button>
@@ -49,7 +50,7 @@ $.draw((target) => {
 
   return `
     ${escapeButton}
-    ${macGuffin}
+    ${quest}
   `
 })
 
@@ -109,5 +110,4 @@ $.style(`
   & [data-escape] * {
     pointer-events: none;
   }
-
 `)
