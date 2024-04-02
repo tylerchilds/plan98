@@ -60,7 +60,9 @@ async function sagaSanitizer(saga) {
   dom.body.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>
       <saga-genesis>
-        ${render(saga)}
+        <noscript>
+          ${render(saga)}
+        </noscript>
       </saga-genesis>
     </sillonious-brand>
   `)
