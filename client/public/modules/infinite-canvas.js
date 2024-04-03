@@ -120,12 +120,32 @@ $.draw((target) => {
   } = instance(target)
 
   const edgesSVG = drawEdges(target, edges)
+
   const nodesHTML = drawNodes(target, nodes)
 console.log(nodesHTML)
-  return template(edgesSVG, nodesHTML)
+  return template(target, edgesSVG, nodesHTML)
 })
 
-function template(edgesSVG, nodesHTML) {
+function getStars(target) {
+  const color = 'rgba(0,0,0,.85)';
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = color;
+  ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+function template(target, edgesSVG, nodesHTML) {
+  const stars = getStars(target)
+  target.style = `background-image: ${stars}`
+  debugger
   return `
     <div name="canvas-container">
         <svg id="canvas-edges">
@@ -189,6 +209,8 @@ $.style(`
     transform: translate3d(var(--ic-x,0), var(--ic-y,0), 0);
     background: lemonchiffon;
     padding: 1rem;
+    box-shadow:
+      2px 2px 4px 4px rgba(0,0,0,.10);
   }
 `)
 function adjustCanvasToViewport(event) {
@@ -265,12 +287,32 @@ window.addEventListener('wheel', (e) => {
 });
 
 $.when('click', '[name="zoom-in"]', () => {
+  let {
+    id,
+    scale
+  } = instance(event.target)
+
   scale = Math.min(scale + ZOOM_SPEED, maxScale);
+
+  updateInstance({ id }, {
+    scale
+  })
+
   document.body.style.setProperty('--scale', scale);
 });
 
 $.when('click', '[name="zoom-out"]', () => {
+  let {
+    id,
+    scale
+  } = instance(event.target)
+
   scale = Math.max(scale - ZOOM_SPEED, minScale);
+
+  updateInstance({ id }, {
+    scale
+  })
+
   document.body.style.setProperty('--scale', scale);
 });
 
@@ -323,7 +365,7 @@ function htmlToMarkdown(html) {
 }
 
 // Serialize canvas data
-function updateCanvasData() {
+function updateCanvasData(target) {
   const {
     id,
     nodes,
@@ -339,7 +381,7 @@ function updateCanvasData() {
     lastTouchY,
     touchStartPanX,
     touchStartPanY
-  } = instance(event.target)
+  } = instance(target)
 
   /*
   const nodes = Array.from(document.querySelectorAll('.node')).map(node => {
@@ -381,8 +423,8 @@ function updateCanvasData() {
 function getAnchorPoint(node, side) {
   const x = parseInt(node.x, 10);
   const y = parseInt(node.y, 10);
-  const width = node.offsetWidth;
-  const height = node.offsetHeight;
+  const width = node.width;
+  const height = node.height;
 
   switch (side) {
     case 'top':
@@ -431,7 +473,7 @@ function drawEdges(target, edges=[]) {
 
       return path;
     }
-  }).join('')
+  }).map(x => x.outerHTML).join('')
 }
 
 function drawNodes(target, nodes=[]) {
@@ -513,6 +555,7 @@ $.when('mousemove', '[name="canvas-container"]', function(e) {
     isDragging,
     startX,
     startY,
+    scale
   } = instance(event.target)
 
   if (!isDragging || !selectedElement) return;
@@ -666,13 +709,14 @@ $.when('touchstart', '[name="canvas-container"]', function(e) {
 
 // Touch move for panning and zooming
 $.when('touchmove', '[name="canvas-container"]', function(e) {
-  const {
+  let {
     id,
     isPanning,
     panOffsetX,
     panOffsetY,
     lastTouchX,
-    lastTouchY
+    lastTouchY,
+    scale
   } = instance(event.target)
 
   if (e.touches.length === 1 && isPanning) {
@@ -698,6 +742,9 @@ $.when('touchmove', '[name="canvas-container"]', function(e) {
     const distance = Math.sqrt((touch2.pageX - touch1.pageX) ** 2 + (touch2.pageY - touch1.pageY) ** 2);
     const scaleChange = distance / initialDistance;
     scale = Math.min(Math.max(minScale, scale * scaleChange), maxScale); // Apply and limit scale
+    updateInstance({ id }, {
+      scale
+    })
     document.body.style.setProperty('--scale', scale);
     initialDistance = distance;
     applyPanAndZoom();

@@ -101,6 +101,11 @@ $.style(`
     max-height: 100%;
   }
 
+  & select {
+    max-width: 100%;
+    text-overflow: ellipsis;
+  }
+
   & .cm-content {
     background: rgba(255,255,255,.85);
   }
