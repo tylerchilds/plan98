@@ -68,12 +68,14 @@ function revealTruth(event) {
   const entries = performance.getEntriesByType('resource');
 
   const nautiloids = entries.map((entry) => {
-    return entry.name;
+    const local = entry.name.includes(window.location.origin)
+    return local ? entry.name.split(window.location.origin)[1] : entry.name;
   });
+  const { quest } = $.learn()
 
   showModal(`
-    <div style="overflow: auto; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; padding: 4rem .25rem;">
-      <code-module src="${$.learn().quest}" paper="${nautiloids}"></code-module>
+    <div style="overflow: auto; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; padding: 2rem .25rem;">
+      <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
     </div>
   `, { centered: true })
 }

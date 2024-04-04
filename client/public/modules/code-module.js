@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import eruda from 'eruda'
 
 import {
   EditorState,
@@ -7,6 +8,9 @@ import {
 } from "https://esm.sh/@codemirror/basic-setup"
 
 const $ = module('code-module')
+
+// be honest; we want a debugger whenever we code
+eruda.init();
 
 function sourceFile(target) {
   const src = target.closest('[src]').getAttribute('src')
@@ -46,13 +50,13 @@ $.when('change', 'select', (event) => {
 $.draw(target => {
   const { src } = $.learn()
   const { file } = sourceFile(target)
-  const paper = target.getAttribute('paper')
+  const stack = target.getAttribute('stack')
 
   if(file && !target.view) {
-    target.innerHTML = paper ? `
+    target.innerHTML = stack ? `
       <select>
-        ${paper.split(',').map((filename) => {
-          return `<option value="${filename}">${filename}</option>`
+        ${stack.split(',').map((filename) => {
+          return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
         })}
       </select>
     `: `
@@ -99,9 +103,11 @@ $.style(`
     overflow: scroll;
     height: 100%;
     max-height: 100%;
+    position: relative;
   }
 
   & select {
+    width: 100%;
     max-width: 100%;
     text-overflow: ellipsis;
   }

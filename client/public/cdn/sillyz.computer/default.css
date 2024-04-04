@@ -10,6 +10,7 @@ saga-genesis {
 saga-genesis xml-html {
   max-width: 6in;
   margin: auto;
+  padding: .5rem;
 }
 
 img,
