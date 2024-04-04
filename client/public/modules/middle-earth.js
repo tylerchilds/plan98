@@ -66,7 +66,7 @@ $.draw((target) => {
 
   const gps = [metadata.latitude, metadata.longitude]
   L.marker(gps).addTo(target.map)
-    .bindPopup(`<qr-code text="https://${art}"></qr-code>`)
+    .bindPopup(`<sticky-note><qr-code text="https://${art}"></qr-code></sticky-note>`)
     .openPopup();
   target.map.setView(gps, metadata.zoom);
 })
@@ -86,14 +86,16 @@ $.style(`
 	& .leaflet-popup-content {
 		min-width: 240px;
     min-height: 240px;
-    display: grid;
 	}
+
+  & .leaflet-popup-content {
+    margin: 0;
+  }
 
   & .leaflet-popup-content-wrapper,
   & .leaflet-popup-tip {
     border-radius: 0;
-    border: 10px solid black;
-    background: rgba(255,255,255,.85);
+    background: transparent;
   }
 `)
 

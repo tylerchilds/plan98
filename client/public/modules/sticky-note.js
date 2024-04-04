@@ -15,6 +15,7 @@ $.style(`
     position: relative;
     z-index: 4;
     overflow: auto;
+    display: block;
   }
 
   &.maximized {

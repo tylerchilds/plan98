@@ -145,7 +145,6 @@ function getStars(target) {
 function template(target, edgesSVG, nodesHTML) {
   const stars = getStars(target)
   target.style = `background-image: ${stars}`
-  debugger
   return `
     <div name="canvas-container">
         <svg id="canvas-edges">

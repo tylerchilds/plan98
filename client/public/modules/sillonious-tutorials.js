@@ -7,7 +7,7 @@ const $ = module('sillonious-tutorials', {
   activeDialect: '/en-us/',
 })
 
-const tutorials = [
+const examples = [
   {
     name: 'Hello Saga',
     content: 'ARCHITECTURE.saga'
@@ -32,8 +32,17 @@ $.draw((target) => {
   const base = currentWorkingDirectory + activeWorld + activeDialect
 
   return `
+    Experiences:
+    <div>
+      <a href="/?world=thelanding.page">Browser</a>
+    </div>
+
+    <div>
+      <a href="/404">Playground</a>
+    </div>
+    Examples:
     ${
-      tutorials.map(x => `
+      examples.map(x => `
         <div>
           <a href="${base}${x.content}?world=sillyz.computer">${x.name}</a>
         </div>

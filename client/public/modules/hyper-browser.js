@@ -7,54 +7,9 @@ const locale = 'en_US'
 
 const $ = module('hyper-browser', {
   diskette: 0,
-  paused: false,
+  paused: true,
   online: true
 })
-
-const tiles = [
-  {
-    name: 'enter',
-    label: '/sillonious-memex/tiles/enter/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'escape',
-    label: '/sillonious-memex/tiles/escape/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'carousel',
-    label: '/sillonious-memex/tiles/carousel/label.txt',
-  },
-  {
-    name: 'shift',
-    label: '/sillonious-memex/tiles/shift/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  },
-  {
-    name: 'tab',
-    label: '/sillonious-memex/tiles/tab/label.txt',
-    styles: {
-      'text-align': 'left'
-    }
-  }
-]
-
-const tileMap = tiles.reduce((map, tile) => {
-  map[tile.name] = tile
-  fetch(`/strings/${locale}/${tile.label}`)
-    .then(res => res.text())
-    .then(label => {
-      $.teach({ [tile.label]: label })
-    })
-  return map
-}, {})
 
 $.draw((target) => {
   const { paused, online } = $.learn()
@@ -73,6 +28,7 @@ $.draw((target) => {
         <button name="out">
           Up
         </button>
+        <input value="${art}">
         <button name="in">
           Down
         </button>
@@ -92,7 +48,9 @@ $.draw((target) => {
     </div>
   ` : `
     <div name="desktop">
-      <my-admin></my-admin>
+      <sticky-note>
+        <sillonious-tutorials></sillonious-tutorials>
+      </sticky-note>
     </div>
   `
 
@@ -103,17 +61,40 @@ $.draw((target) => {
   `
 })
 
-$.when('click', '[name="escape"]', () => {
-  const { paused } = $.learn()
-  if(paused) {
-    window.location.href = window.location.href
-  }
-
-  alert('new quest coming soon!')
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
+$.when('click', '[name="back"]', () => {
+  let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes()
+  const count = bin.length
+  diskette = mod(((diskette || 0) - 1), count)
+  const art = bin[diskette]
+  console.log(diskette)
+  state['ls/sillonious-memex'] = { art, diskette }
 })
 
-$.when('click', '[name="enter"]', () => {
+$.when('click', '[name="out"]', () => {
   const { paused, online } = $.learn()
+  if(paused) {
+    $.teach({ paused: false })
+  } else {
+    $.teach({ online: false })
+  }
+})
+
+$.when('click', '[name="next"]', (event) => {
+  let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes()
+  const count = bin.length
+  diskette = mod(((diskette || 0) + 1), count)
+  const art = bin[diskette]
+  console.log(diskette)
+  state['ls/sillonious-memex'] = { art, diskette }
+})
+
+$.when('click', '[name="in"]', () => {
+  const { paused } = $.learn()
   if(paused) {
     const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
     const bin = diskettes(event.target)
@@ -122,24 +103,9 @@ $.when('click', '[name="enter"]', () => {
     window.location.href = doingBusinessAs[art]
       ? '?world=' + art
       : `${protocol}${art}`
+  } else {
+    $.teach({ paused: true })
   }
-
-  $.teach({ online: !online })
-})
-
-$.when('click', '[name="tab"]', (event) => {
-  let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
-  const bin = diskettes()
-  const count = bin.length
-  diskette = ((diskette || 0) + 1) % count
-  const art = bin[diskette]
-  console.log(diskette)
-  state['ls/sillonious-memex'] = { art, diskette }
-})
-
-$.when('click', '[name="shift"]', () => {
-  const { paused } = $.learn()
-  $.teach({ paused: !paused })
 })
 
 $.style(`
@@ -149,19 +115,32 @@ $.style(`
     height: 100%;
     max-height: 100%;
   }
+  & input {
+    border: none;
+    background: rgba(0,0,0,.85);
+    border-radius: 1rem;
+    padding: 0 1rem;
+    color: white;
+  }
   & [name="desktop"] {
+    background: rgba(0,0,0,.85);
     position: fixed;
     inset: 0;
     overflow: auto;
     padding: 0;
+    display: grid;
+    grid-template-columns: 3.25in 3.25in 3.25in;
+    gap: 1rem;
+    padding: 2rem;
   }
 
   & [name="transport"] {
     overflow-x: auto;
-    max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
+    display: grid;
+    left: 0;
     right: 0;
-    top: 2rem;
+    bottom: 0;
     z-index: 1100;
     overflow: auto;
   }
@@ -169,9 +148,9 @@ $.style(`
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;
+    margin: 0 auto .25rem;
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
-		padding-right: 1rem;
     border-radius: 1.5rem 0 0 1.5rem;
   }
 
@@ -195,12 +174,11 @@ $.style(`
     grid-template-columns: 1fr;
     height: 100%;
     overflow: hidden;
-    grid-template-areas:
-      "${tileMap.carousel.name}"
+    grid-template-areas: 'carousel';
   }
 
   & [name="world"] {
-    grid-area: ${tileMap.carousel.name};
+    grid-area: carousel;
   }
 
   & [name="world"] > * {
@@ -212,6 +190,7 @@ $.style(`
     place-self: center;
     overflow: hidden;
     position: relative;
+    grid-area: carousel;
   }
 
   & .circus-enabled hr {
@@ -224,7 +203,6 @@ $.style(`
     height: 100%;
     z-index: 1000;
     background: rgba(0,0,0,.85);
-    grid-area: ${tileMap.carousel.name};
   }
 
   & .circus-enabled [name="carousel"] {
@@ -249,26 +227,8 @@ $.style(`
   & [name="screen"] > * {
     margin: auto;
   }
-
-  ${layout(tiles)}
 `)
 
-function layout(tiles) {
-  return tiles.map((tile) => `
-    & [name="${tile.name}"] {
-      grid-area: ${tile.name};
-      ${bonusStyles(tile)}
-    }
-  `).join('')
-}
-
-function bonusStyles(tile) {
-  return tile.styles
-    ? Object.keys(tile.styles).map(key => {
-      return `${key}: ${tile.styles[key]};`
-    }).join('\n')
-    : ''
-}
 
 function diskettes() {
   return Object.keys(doingBusinessAs)

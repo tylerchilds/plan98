@@ -124,8 +124,8 @@ function subscribe(target) {
   if(target.subscribed) return
   target.subscribed = true
 
-  const safeword = target.getAttribute('safeword') || 'paste'
-  target.gun = gun.get(target.id).get(safeword)
+  const key = target.getAttribute('key') || 'paste'
+  target.gun = gun.get(target.id).get(key)
   target.gun.on(media => {
     $.teach({ media })
   })

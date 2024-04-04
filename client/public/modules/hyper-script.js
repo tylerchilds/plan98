@@ -18,6 +18,12 @@ The world runs on computers that fit under our desks, on our laps, in our pocket
 
 > What was the hardest part?
 
+<div
+html: <sillyz-ocarina></sillyz-ocarina>
+style: height: 100vh;
+
+<story-board
+
 <mine-sweeper
 <mind-chaos3d
 <mind-chess
@@ -44,7 +50,10 @@ THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message
 <infinite-canvas
 src: /cdn/sillyz.computer/index.canvas
 
-<story-board
+<quick-media
+id: quick-media-demo
+
+
 <story-chat
 src: ${window.location.href}
 `
