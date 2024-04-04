@@ -16,17 +16,7 @@ The world runs on computers that fit under our desks, on our laps, in our pocket
 
 > Have you ever tried to build your own?
 
-While most people given the time and space can achieve personal agency over their computing paradigms and practices, they would rather buy that agency, if they can afford it.
-
-What does this look like in practice?
-
-# Trustworthy Computers.
-
-A trustworthy computer is a good friend that doesn't hide secrets from you or lie.
-
-You can dig as far deep into a trustworthy computer without hitting an invisible wall, like in a video game.
-
-A trustworthy computer will guide you away from making mistakes, but will also allow you to make them to grow and learn.
+> What was the hardest part?
 
 <mine-sweeper
 <mind-chaos3d

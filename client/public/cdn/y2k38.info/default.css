@@ -3,6 +3,10 @@ body {
   background: rgba(0,255,255,.1);
 }
 
+body saga-genesis xml-html {
+  max-width: 100%;
+}
+
 img,
 video {
   max-width: 100%;

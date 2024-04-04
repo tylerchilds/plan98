@@ -65,6 +65,7 @@ $.draw(() => {
         <div class="horizon"></div>
         <div class="land">
           <div class="grid-3d"></div>
+          <div class="elements"></div>
         </div>
       </section>
 
@@ -110,11 +111,9 @@ $.when('click', '[data-tutorial]', () => {
     window.location.href = `/404`
   }
   showModal(`
-    <plan98-onboarding
-      host="${window.location.host}"
-      close="${close}"
-      start="${start}"
-    ></plan98-onboarding>
+    <sticky-note>
+      <sillonious-tutorials></sillonious-tutorials>
+    </sticky-note>
   `, { bannerType: modalTypes.news })
 })
 
@@ -285,6 +284,20 @@ $.style(`
    position: relative;
    z-index: 1;
  }
+
+  & .elements {
+    background: url('/cdn/tychi.me/photos/james-franklin-hyde.png');
+    background-size: contain;
+    width: 100%;
+    height: 100%;
+    transform: rotateX(60deg) scale(3);
+    transform-origin: center;
+    position: absolute;
+    opacity: .5;
+    inset: 0;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
 
  & .land {
    grid-area: 30 / 1 / -1 / -1;

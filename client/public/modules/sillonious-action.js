@@ -15,7 +15,7 @@ $.draw((target) => {
 
 $.when('click', 'button', (event) => {
   const saga = event.target.dataset.saga
-  setupSaga(saga)
+  setupSaga(saga, event.target)
 })
 
 $.style(`

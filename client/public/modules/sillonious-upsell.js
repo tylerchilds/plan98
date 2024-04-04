@@ -28,12 +28,16 @@ const $ = module('sillonious-upsell', {
   cache: {}
 })
 
-export function setupSaga(nextSaga) {
+export function setupSaga(nextSaga, target) {
+  const root = target.closest($.link)
   const { activeDialect, activeWorld } = $.learn()
   const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
+  
+  target.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(key)
     .then(async response => {
       if(response.status === 404) {
+        target.innerHTML = ``
         return
       }
       const saga = await response.text()
@@ -50,6 +54,17 @@ export function setupSaga(nextSaga) {
           }
         }
       )
+      schedule(() => {
+        if(!target.trap) {
+          target.trap = focusTrap.createFocusTrap(target, {
+            onActivate: onActivate($, target),
+            onDeactivate: onDeactivate($, target),
+            clickOutsideDeactivates: true
+          });
+        }
+        root.trap.activate()
+        root.innerHTML = hyperSanitizer(saga)
+      })
     })
     .catch(e => {
       console.error(e)
@@ -67,22 +82,8 @@ $.draw((target) => {
 
   if(!content && !target.mounted) {
     target.mounted = true
-    setupSaga(tutorial)
+    setupSaga(tutorial, target)
   }
-
-  if(!target.trap && target.innerHTML) {
-    target.trap = focusTrap.createFocusTrap(target, {
-      onActivate: onActivate($, target),
-      onDeactivate: onDeactivate($, target),
-      clickOutsideDeactivates: true
-    });
-    schedule(() => {
-      target.trap.activate()
-    })
-    return
-  }
-
-  target.innerHTML = hyperSanitizer(content)
 })
 
 $.when('click', '', () => {
@@ -107,10 +108,21 @@ $.style(`
     padding: .5rem;
     max-width: 80%;
     overflow: auto;
+    opacity: 0;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),
       6px 6px 12px 12px rgba(0,0,0,.5),
       18px 18px 36px 36px rgba(0,0,0,.25);
+    animation: &-fade-in 1000ms 1000ms forwards;
+  }
+
+  @keyframes &-fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
   &.active {

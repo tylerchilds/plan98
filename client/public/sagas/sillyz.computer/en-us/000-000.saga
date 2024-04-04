@@ -1,13 +1,11 @@
-Press "Start" to start or  double press "Contact" to get in touch with the narrator. For DIY questions, consult the code.
-
-<a
-text: Consult the Code
-href: https://github.com/tylerchilds/plan98/tree/plan98/client/public/modules
-target: _blank
+Welcome to The Landing Page. Single players get in free; Multi players need to sign a waiver to start.
 
 <sillonious-action
 action: hostPressesStartStop
-label: Contact
+label: Single Player
 saga: 000-001.saga
 
-
+<sillonious-action
+action: hostPressesStartStop
+label: Multi Player
+saga: 001-001.saga

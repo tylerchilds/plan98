@@ -1,5 +1,6 @@
 import module from '@sillonious/module'
 import Computer from '@sillonious/computer'
+import { doingBusinessAs } from "@sillonious/brand"
 
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
@@ -8,7 +9,7 @@ const database = localStorage.getItem("plan98.database") || 'http://localhost:80
 window.plan98 = {
   parameters,
   database,
-  host: world ? world : window.location.host,
+  host: world ? world : doingBusinessAs[window.location.host] ? window.location.host : 'sillyz.computer',
 }
 
 const style = document.createElement('link')

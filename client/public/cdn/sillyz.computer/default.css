@@ -2,6 +2,16 @@ body {
   margin: 0 auto;
 }
 
+saga-genesis {
+  background: black;
+  color: white;
+}
+
+saga-genesis xml-html {
+  max-width: 6in;
+  margin: auto;
+}
+
 img,
 video {
   max-width: 100%;

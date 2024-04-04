@@ -56,25 +56,6 @@ $.draw((target) => {
   `
 })
 
-$.style(`
-  /* video games are best enjoyed 1:1 in a dark room */
-  & {
-    display: block;
-    background: black;
-    color: white;
-    width: 100%;
-    height: 100%;
-    position: fixed;
-    inset: 0;
-    overflow: auto;
-  }
-
-  & xml-html {
-    max-width: 6in;
-    margin: auto;
-  }
-`)
-
 $.when('click', '[data-escape]', revealTruth)
 
 window.addEventListener('keydown', (event) => {
@@ -86,9 +67,7 @@ window.addEventListener('keydown', (event) => {
 function revealTruth(event) {
   const entries = performance.getEntriesByType('resource');
 
-  const nautiloids = entries.filter(function(entry) {
-    return entry.initiatorType === 'script'
-  }).map((entry) => {
+  const nautiloids = entries.map((entry) => {
     return entry.name;
   });
 
@@ -100,6 +79,15 @@ function revealTruth(event) {
 }
 
 $.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    inset: 0;
+    overflow: auto;
+  }
+
   & [data-escape] {
     background: black;
     border: none;

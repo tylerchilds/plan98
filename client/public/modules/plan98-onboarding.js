@@ -96,8 +96,7 @@ function dialogue(target) {
         shotCount: 1,
         sequence: [
           `
-            <qr-code text="${window.location.href}"></qr-code>
-            <br><br>
+            <qr-code style="max-height: 120px; margin: auto;" text="${window.location.href}"></qr-code>
             <div>
               ${strings['plan98-welcome.warning']}
             </div>
@@ -195,12 +194,6 @@ $.style(`
   }
 
   & [name="flow"] {
-    background: lemonchiffon;
-    box-shadow:
-      2px 2px 4px 4px rgba(0,0,0,.10),
-      6px 6px 12px 12px rgba(0,0,0,.5),
-      18px 18px 36px 36px rgba(0,0,0,.25);
-    padding: 1rem
   }
 
   & button {
