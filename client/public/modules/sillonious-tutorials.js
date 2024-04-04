@@ -9,15 +9,20 @@ const $ = module('sillonious-tutorials', {
 
 const tutorials = [
   {
-    name: 'Hello World',
+    name: 'Hello Saga',
     content: 'ARCHITECTURE.saga'
   },
   {
-    name: 'Hello Reality',
+    name: 'Hello Markdown',
     content: 'README.md'
   },
   {
-    name: 'Hello Technology',
+    name: 'Hello Error',
+    content: '404.saga'
+  },
+
+  {
+    name: 'Hello HyperText',
     content: 'index.html'
   },
 ]
