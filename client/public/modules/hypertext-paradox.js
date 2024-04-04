@@ -7,11 +7,13 @@ $.draw((target) => {
   init(target)
   const { a, b } = $.learn()
   return `
-    <div class="reality-a">
-      ${ hyperSanitizer(a) }
-    </div>
-    <div class="reality-b">
-      ${ hyperSanitizer(b) }
+    <div class="paradox">
+      <div class="reality-a">
+        ${ hyperSanitizer(a) }
+      </div>
+      <div class="reality-b">
+        ${ hyperSanitizer(b) }
+      </div>
     </div>
   `
 })
@@ -25,7 +27,7 @@ function init(target) {
 }
 
 $.style(`
-  & {
+  & .paradox {
     display: grid;
     grid-template-columns: 1fr 1fr;
   }
