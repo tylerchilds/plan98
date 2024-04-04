@@ -48,6 +48,11 @@ $.draw((target) => {
     <div>
       <a href="/404">Playground</a>
     </div>
+
+    <div>
+      <a href="/sagas/sillyz.computer/en-us/000-000.saga">Tutorial</a>
+    </div>
+
     Examples:
     ${
       examples.map(x => `

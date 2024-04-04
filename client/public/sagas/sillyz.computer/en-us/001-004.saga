@@ -1,1 +1,6 @@
 Cool, we're about to go on a little journey.
+
+<action-script
+text: ok.
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

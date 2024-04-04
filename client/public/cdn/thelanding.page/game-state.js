@@ -3,5 +3,11 @@ export function takeButton() {
 }
 
 export function ok() {
-  document.querySelector('sillonious-upsell').trap.deactivate()
+  const upsell = document.querySelector('sillonious-upsell')
+
+  if(upsell.trap) {
+    upsell.trap.deactivate()
+  } else {
+    window.location.href = "/?world=sillyz.computer"
+  }
 }

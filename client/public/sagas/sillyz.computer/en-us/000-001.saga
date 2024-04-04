@@ -1,1 +1,6 @@
-Single Player it is!
+Single Player it is, have at it!
+
+<action-script
+text: ok.
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

@@ -15,7 +15,8 @@ import * as focusTrap from 'focus-trap'
 
 const inactiveWorlds = ['fantasysports.social']
 
-const currentWorkingDirectory = '/public/sagas/'
+const raw = '/public'
+const currentWorkingDirectory = '/sagas/'
 const genesisSaga = '000-000.saga'
 
 const overworld = {
@@ -31,8 +32,12 @@ const $ = module('sillonious-upsell', {
 export function setupSaga(nextSaga, target) {
   const root = target.closest($.link)
   const { activeDialect, activeWorld } = $.learn()
-  const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
-  
+  let key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
+
+  if(!root) window.location.href = key
+
+  key = raw+key
+
   target.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(key)
     .then(async response => {
@@ -55,15 +60,17 @@ export function setupSaga(nextSaga, target) {
         }
       )
       schedule(() => {
-        if(!target.trap) {
-          target.trap = focusTrap.createFocusTrap(target, {
+        if(!root.trap) {
+          root.trap = focusTrap.createFocusTrap(target, {
             onActivate: onActivate($, target),
             onDeactivate: onDeactivate($, target),
             clickOutsideDeactivates: true
           });
         }
-        root.trap.activate()
-        root.innerHTML = hyperSanitizer(saga)
+        if(root.trap) {
+          root.trap.activate()
+          root.innerHTML = hyperSanitizer(saga)
+        }
       })
     })
     .catch(e => {

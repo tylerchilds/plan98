@@ -13,7 +13,7 @@ const configs = {
 }
 
 const strings = {
-  'plan98-panel.configs.news.label': 'New Informational'
+  'plan98-panel.configs.news.label': 'Information Station!'
 }
 
 const $ = module('plan98-panel', {
