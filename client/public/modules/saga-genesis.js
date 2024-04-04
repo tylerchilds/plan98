@@ -75,6 +75,7 @@ function revealTruth(event) {
 
   showModal(`
     <div style="overflow: auto; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; padding: 2rem .25rem;">
+      <media-plexer src="${quest}"></media-plexer>
       <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
     </div>
   `, { centered: true })
