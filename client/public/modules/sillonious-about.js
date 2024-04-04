@@ -19,42 +19,29 @@ $.draw((target) => {
   const businesses = Object.keys(doingBusinessAs)
   const realms = businesses.map(host => {
     return `
-      <a href="/?world=${host}">
-        ${host}
-      </a>
+      <div>
+        <a href="/?world=${host}">
+          ${host}
+        </a>
+      </div>
     `
-  })
-
-
-  const counselors = businesses.map(host => {
-    const {
-      mascot,
-    } = currentBusiness(host)
-
-    return `
-      <a href="/?world=${host}">
-        ${mascot}
-      </a>
-    `
-  })
+  }).join('')
 
   return `
-    <h2>Counselors</h2>
-    <div>
-      ${counselors}
-    </div>
+    ${mascot}
+    <a href="/?world=${host}">Play</a>
+    <hr>
     <h2>Realms</h2>
     <div>
       ${realms}
     </div>
-    <hr>
-    ${mascot}
-    <a href="/?world=${host}">Play</a>
   `
 })
 
 $.style(`
   & {
     max-width: 100%;
+    display: block;
+    padding-bottom: 10px;
   }
 `)

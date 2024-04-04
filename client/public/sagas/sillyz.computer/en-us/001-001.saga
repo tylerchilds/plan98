@@ -1,1 +1,11 @@
-<plan98-onboarding
+Excellent choice. Before we can begin, a little cheddar is required.
+
+<sillonious-action
+action: hostPressesStartStop
+label: Is Cheddar Money?
+saga: 001-002.saga
+
+<sillonious-action
+action: hostPressesStartStop
+label: How much?
+saga: 001-003.saga

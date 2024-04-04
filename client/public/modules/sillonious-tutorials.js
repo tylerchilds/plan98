@@ -38,6 +38,14 @@ $.draw((target) => {
     </div>
 
     <div>
+      <a href="/?world=ncity.executiontime.pub">Story Chat</a>
+    </div>
+
+    <div>
+      <a href="/?world=css.ceo">Music Hall</a>
+    </div>
+
+    <div>
       <a href="/404">Playground</a>
     </div>
     Examples:
