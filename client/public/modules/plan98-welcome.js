@@ -229,8 +229,7 @@ $.style(`
 
  & .skybox.active .e {
    animation: e-scale-out-in ease-in-out 5000ms alternate 1, pulse ease-in-out 5000ms alternate infinite;
-   background: var(--wheel-5-4);
-   box-shadow: 0 0 10px 1px rgba(0,0,0,.25) inset;
+   background: transparent;
    transform: translateZ(-100vmin) scale(1);
    opacity: 1;
  }
