@@ -71,8 +71,8 @@ $.draw(() => {
 
       <div class="skybox ${html ? '' : 'active'}">
         <div class="a"></div>
-        <div class="b"><mind-chess></mind-chess></div>
         <div class="c"><sillyz-piano></sillyz-piano></div>
+        <div class="b"><mind-chess></mind-chess></div>
         <div class="d"><mlb-teams></mlb-teams></div>
         <div class="e">
           <div style="display: grid;place-content: center;">
@@ -195,6 +195,7 @@ $.style(`
    opacity: 0;
    transform: translate(0, 0) rotateX(0) rotateY(0) scale(1);
    transition: opacity 200ms;
+   overflow: auto;
  }
 
  & .skybox.active .a {
@@ -263,10 +264,13 @@ $.style(`
 
  @keyframes pulse {
    0% {
-     opacity: .75;
+     opacity: 1;
+     filter: blur(0px);
    }
    100% {
-     opacity: .25;
+     opacity: 0;
+     filter: blur(10px);
+
    }
  }
 
