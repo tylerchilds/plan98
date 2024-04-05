@@ -3,12 +3,12 @@ import { PGlite } from "@electric-sql/pglite";
 
 init()
 
-const $ = module('mlb-teams', { teams: [] })
+const $ = module('mlb-teams', { teams: {rows:[]} })
 
 $.draw(() => {
   const { teams } = $.learn()
 
-  return teams.length === 0 ? 'Loading Database...' : teams.map((team) => `
+  return teams.rows.length === 0 ? 'Loading Database...' : teams.rows.map((team) => `
     <div class="team" style="--team-color: ${team.color}">
       ${team.name}
     </div>

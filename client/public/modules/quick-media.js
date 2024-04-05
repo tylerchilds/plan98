@@ -14,7 +14,10 @@ $.draw((target) => {
   const input = `<input type="file" name="input" accept="image/*">`
   const image = `<img name="image" alt="picture resized at ${media.updatedAt}" src="${media.value}">`
 
-  return !media.value ? `${input}` : `${input}${image}`
+  return `
+    ${input}
+    ${image}
+  `
 })
 
 $.when('click', '[name="image"]', () => {
@@ -131,3 +134,20 @@ function subscribe(target) {
   })
 }
 
+$.style(`
+  & {
+    display: block;
+    position: relative;
+  }
+
+  & img {
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  & input {
+    position: absolute;
+    z-index: 1;
+  }
+`)

@@ -71,10 +71,14 @@ $.draw(() => {
 
       <div class="skybox ${html ? '' : 'active'}">
         <div class="a"></div>
-        <div class="b"></div>
-        <div class="c"></div>
-        <div class="d"></div>
-        <div class="e"></div>
+        <div class="b"><mind-chess></mind-chess></div>
+        <div class="c"><sillyz-piano></sillyz-piano></div>
+        <div class="d"><mlb-teams></mlb-teams></div>
+        <div class="e">
+          <div style="display: grid;place-content: center;">
+            <sticky-note></sticky-note>
+          </div>
+        </div>
         <div class="f">
           <sillyz-avatar></sillyz-avatar>
           <div id="foreground">
@@ -161,6 +165,16 @@ $.style(`
   & .skybox.active .e {
    opacity: 1;
   }
+
+  & .skybox.active .a > *,
+  & .skybox.active .b > *,
+  & .skybox.active .c > *,
+  & .skybox.active .d > *,
+  & .skybox.active .e > * {
+    position: absolute;
+    inset: 0;
+  }
+
  & .skybox {
    display: grid;
    grid-area: letterbox;
