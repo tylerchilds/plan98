@@ -13,7 +13,8 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { marked } from "marked"
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 
-console.log(config())
+config()
+console.log(Deno.env.get('ADYEN_API_KEY'))
 
 // polyfill window with DOMParser for deno;
 self.DOMParser = DOMParser
@@ -354,7 +355,7 @@ async function newPayment() {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-API-key': config().ADYEN_API_KEY,
+      'x-API-key': Deno.env.get('ADYEN_API_KEY'),
     },
     body: JSON.stringify({
       "reference": "HELLLO",
@@ -365,7 +366,7 @@ async function newPayment() {
       "shopperReference": "YOUR_SHOPPER_REFERENCE",
       "description": "Blue Bag - ModelM671",
       "countryCode": "NL",
-      "merchantAccount": config().ADYEN_MERCHANT_ACCOUNT,
+      "merchantAccount": Deno.env.get('ADYEN_MERCHANT_ACCOUNT'),
       "shopperLocale": "nl-NL"
     })
   }).then( response => response.text())
@@ -379,12 +380,10 @@ async function newPayment() {
 
 async function getPaymentStatus(request) {
   const data = await request.json()
-
-  console.log(`\n\n${data.id}\n\n`)
   const response = await fetch(`https://checkout-test.adyen.com/v68/paymentLinks/${data.id}`, {
     headers: {
       'Content-Type': 'application/json',
-      'x-API-key': config().ADYEN_API_KEY,
+      'x-API-key': Deno.env.get('ADYEN_API_KEY'),
     }
   }).then(res => res.text())
 
