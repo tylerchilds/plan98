@@ -70,13 +70,18 @@ $.draw(() => {
       </section>
 
       <div class="skybox ${html ? '' : 'active'}">
-        <div class="a"></div>
-        <div class="c"><sillyz-piano></sillyz-piano></div>
+        <div class="a">
+          <sillyz-ocarina></sillyz-ocarina>
+        </div>
+        <div class="c">
+          <sillyz-ocarina></sillyz-ocarina>
+        </div>
         <div class="b"><mind-chess></mind-chess></div>
         <div class="d"><mlb-teams></mlb-teams></div>
         <div class="e">
           <div style="display: grid;place-content: center;">
-            <sticky-note></sticky-note>
+            <sticky-note>
+            </sticky-note>
           </div>
         </div>
         <div class="f">
