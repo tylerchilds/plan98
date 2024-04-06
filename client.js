@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
+import { readAll } from "https://deno.land/std@0.221.0/io/read_all.ts";
 import { Status } from "https://deno.land/std@0.210.0/http/http_status.ts";
 import * as path from "https://deno.land/std@0.184.0/path/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
@@ -10,6 +11,9 @@ import { Podcast } from 'npm:podcast';
 import { render } from "@sillonious/saga"
 import { doingBusinessAs } from "@sillonious/brand"
 import { marked } from "marked"
+import { config } from "https://deno.land/x/dotenv/mod.ts";
+
+console.log(config())
 
 // polyfill window with DOMParser for deno;
 self.DOMParser = DOMParser
@@ -190,6 +194,12 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
     return new Response(xml, { headers });
   }
 
+  if(pathname === '/plan98/pay-by-link') {
+    return request.method === 'GET'
+      ? ResponseData({ payment: await newPayment() })
+      : ResponseData({ payment: await getPaymentStatus(request) })
+  }
+
   if(pathname === '/plan98/about') {
     return about(request)
   }
@@ -292,6 +302,12 @@ async function about(request) {
   });
 }
 
+function ResponseData(data) {
+  return new Response(JSON.stringify(data, null, 2), {
+    headers: { "content-type": "application/json; charset=utf-8" },
+  });
+}
+
 async function owncast(request) {
   const onlinePromise = fetch('https://94404-969-g-edgewater-blvd-123.thelanding.page/api/status').then(res => res.json())
   const data = { broadcast: await onlinePromise }
@@ -333,3 +349,48 @@ function kids(paths) {
 serve(router);
 console.log("Listening on http://localhost:8000");
 
+async function newPayment() {
+  const response = await fetch('https://checkout-test.adyen.com/v70/paymentLinks', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-API-key': config().ADYEN_API_KEY,
+    },
+    body: JSON.stringify({
+      "reference": "HELLLO",
+      "amount": {
+        "value": 4200,
+        "currency": "EUR"
+      },
+      "shopperReference": "YOUR_SHOPPER_REFERENCE",
+      "description": "Blue Bag - ModelM671",
+      "countryCode": "NL",
+      "merchantAccount": config().ADYEN_MERCHANT_ACCOUNT,
+      "shopperLocale": "nl-NL"
+    })
+  }).then( response => response.text())
+
+  try {
+    return JSON.parse(response)
+  } catch(e) {
+    return { error: e, note: 'Failed to parse response...' }
+  }
+}
+
+async function getPaymentStatus(request) {
+  const data = await request.json()
+
+  console.log(`\n\n${data.id}\n\n`)
+  const response = await fetch(`https://checkout-test.adyen.com/v68/paymentLinks/${data.id}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'x-API-key': config().ADYEN_API_KEY,
+    }
+  }).then(res => res.text())
+
+  try {
+    return JSON.parse(response)
+  } catch(e) {
+    return { error: e, note: 'Failed to parse response...' }
+  }
+}
