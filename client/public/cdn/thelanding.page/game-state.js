@@ -13,7 +13,7 @@ export function ok() {
 }
 
 export function upsold() {
-  window.location.href = "/?world=thelanding.page"
+  window.location.href = "https://thelanding.page"
 }
 
 export async function getPayByLink() {
