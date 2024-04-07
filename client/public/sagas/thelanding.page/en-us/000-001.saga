@@ -1,11 +1,14 @@
-Cool, we're about to go on a little journey.
+Excellect.
 
-<action-script
-text: Let's go!
-data-action: upsold
+<purchase-catalog
 data-script: /public/cdn/thelanding.page/game-state.js
 
+<sillonious-action
+action: hostPressesStartStop
+label: Check Out
+saga: 001-001.saga
+
 <action-script
-text: No thanks.
+text: Leave
 data-action: ok
 data-script: /public/cdn/thelanding.page/game-state.js

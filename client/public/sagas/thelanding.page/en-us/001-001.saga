@@ -1,11 +1,8 @@
-Cool, we're about to go on a little journey.
-
-<action-script
-text: Let's go!
-data-action: upsold
+<message-pay
 data-script: /public/cdn/thelanding.page/game-state.js
+data-action: getPayByLink
 
 <action-script
-text: No thanks.
+text: Leave
 data-action: ok
 data-script: /public/cdn/thelanding.page/game-state.js
