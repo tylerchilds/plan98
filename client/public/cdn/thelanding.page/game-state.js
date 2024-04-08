@@ -15,8 +15,3 @@ export function ok() {
 export function upsold() {
   window.location.href = "https://thelanding.page"
 }
-
-export async function getPayByLink() {
-  const { payment } = await fetch('/plan98/pay-by-link').then(res => res.json())
-  return payment
-}

@@ -1,6 +1,4 @@
 <message-pay
-data-script: /public/cdn/thelanding.page/game-state.js
-data-action: getPayByLink
 
 <action-script
 text: Leave
