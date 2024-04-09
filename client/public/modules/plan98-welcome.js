@@ -1,4 +1,6 @@
 import module from '@sillonious/module'
+import { currentSave } from '../cdn/thelanding.page/game-state.js'
+import { state } from 'statebus'
 
 /*
  <blockquote>
@@ -55,29 +57,43 @@ ${code}
   `)
 })
 
-$.draw(() => {
+function conditionalPlatform(has, show) {
+  return has ? show : ''
+}
+
+$.draw((target) => {
   const { html } = $.learn()
   if(html) return html
-  return `
+  const {chaosEmerald} = currentSave()
+  target.innerHTML = `
     <div name="square">
       <section class="layout">
-        <twgl-demo></twgl-demo>
+        ${conditionalPlatform(chaosEmerald[0], `<twgl-demo></twgl-demo>`)}
         <div class="horizon"></div>
         <div class="land">
-          <div class="grid-3d"></div>
-          <div class="elements"></div>
+          ${conditionalPlatform(chaosEmerald[1], `<div class="grid-3d"></div>`)}
+          ${conditionalPlatform(chaosEmerald[2], `<div class="elements"></div>`)}
         </div>
       </section>
 
       <div class="skybox ${html ? '' : 'active'}">
+        <div class="emeralds">
+          ${chaosEmerald.map((value, index) => `
+            <div class="emerald ${value ? '-in-bag' : ''}" data-index="${index}"></div>
+          `).join('')}
+        </div>
         <div class="a">
-          <sillyz-ocarina></sillyz-ocarina>
+          ${conditionalPlatform(chaosEmerald[3], `<sillyz-piano></sillyz-piano>`)}
         </div>
         <div class="c">
-          <sillyz-ocarina></sillyz-ocarina>
+          ${conditionalPlatform(chaosEmerald[4], `<sillyz-ocarina></sillyz-ocarina>`)}
         </div>
-        <div class="b"><mind-chess></mind-chess></div>
-        <div class="d"><mlb-teams></mlb-teams></div>
+        <div class="b">
+          ${conditionalPlatform(chaosEmerald[5], `<mind-chess></mind-chess>`)}
+        </div>
+        <div class="d">
+          ${conditionalPlatform(chaosEmerald[6], `<mlb-teams></mlb-teams>`)}
+        </div>
         <div class="e">
           <div style="display: grid;place-content: center;">
             <sticky-note>
@@ -163,6 +179,27 @@ $.style(`
     display: none;
   }
 
+  & .emeralds {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    margin: 0 auto;
+    display: flex;
+    place-content: center;
+    gap: 1rem;
+  }
+
+  & .emerald {
+    width: 1rem;
+    height: 2rem;
+    border: 3px solid blue;
+    border-radius: 1rem;
+  }
+
+  & .emerald.-in-bag {
+    background: blue
+  }
   & .skybox.active .a,
   & .skybox.active .b,
   & .skybox.active .c,

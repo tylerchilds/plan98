@@ -12,9 +12,10 @@ $.draw(target => {
 })
 
 $.when('click', 'button', async (event) => {
-  const { action, script } = event.target.closest($.link).dataset
+  const root = event.target.closest($.link)
+  const { action, script } = root.dataset
   const dispatch = (await import(script))[action]
-  dispatch(event, $)
+  dispatch(event, root)
 })
 
 $.style(`
