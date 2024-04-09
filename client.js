@@ -196,9 +196,11 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
   }
 
   if(pathname === '/plan98/pay-by-link') {
-    return request.method === 'GET'
-      ? ResponseData({ payment: await newPayment() })
-      : ResponseData({ payment: await getPaymentStatus(request) })
+    const data = await request.json()
+
+    return data.mode === 'CREATE'
+      ? ResponseData({ payment: await newPayment(data) })
+      : ResponseData({ payment: await getPaymentStatus(data) })
   }
 
   if(pathname === '/plan98/about') {
@@ -350,7 +352,8 @@ function kids(paths) {
 serve(router);
 console.log("Listening on http://localhost:8000");
 
-async function newPayment() {
+async function newPayment(data) {
+  console.log(data)
   const response = await fetch('https://checkout-test.adyen.com/v70/paymentLinks', {
     method: 'POST',
     headers: {
@@ -358,19 +361,17 @@ async function newPayment() {
       'x-API-key': Deno.env.get('ADYEN_API_KEY'),
     },
     body: JSON.stringify({
-      "reference": "HELLLO",
-      "amount": {
-        "value": 4200,
-        "currency": "EUR"
-      },
-      "shopperReference": "YOUR_SHOPPER_REFERENCE",
-      "description": "Blue Bag - ModelM671",
-      "countryCode": "NL",
+      "reference": data.reference,
+      "amount": data.amount,
+      "shopperReference": data.shopperReference,
+      "description": data.description,
+      "countryCode": data.countryCode,
       "merchantAccount": Deno.env.get('ADYEN_MERCHANT_ACCOUNT'),
-      "shopperLocale": "nl-NL"
+      "shopperLocale": data.shopperLocale
     })
   }).then( response => response.text())
 
+  console.log(response)
   try {
     return JSON.parse(response)
   } catch(e) {
@@ -378,8 +379,7 @@ async function newPayment() {
   }
 }
 
-async function getPaymentStatus(request) {
-  const data = await request.json()
+async function getPaymentStatus(data) {
   const response = await fetch(`https://checkout-test.adyen.com/v68/paymentLinks/${data.id}`, {
     headers: {
       'Content-Type': 'application/json',

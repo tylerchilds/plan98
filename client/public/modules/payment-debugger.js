@@ -23,7 +23,17 @@ $.draw(() => {
 })
 
 $.when('click', '[data-new]', async () => {
-  const payment = await newPayment()
+  const payment = await newPayment({
+    amount: {
+      value: 1000,
+      currency: 'USD'
+    },
+    country: 'US',
+    locale: 'en-US',
+    description: 'Blue Bag',
+    reference: 'Test New Payment'
+  })
+
   if(!payment.error) {
     $.teach({ payments: [...$.learn().payments.map(identity), payment] })
   }
@@ -54,8 +64,19 @@ $.when('click', '[data-more]', (event) => {
   `)
 })
 
-export async function newPayment() {
-  const { payment } = await fetch('/plan98/pay-by-link').then(res => res.json())
+export async function newPayment(data) {
+  const { payment } = await fetch('/plan98/pay-by-link', {
+    method: 'POST',
+    body: JSON.stringify({
+      mode: 'CREATE',
+      "reference": self.crypto.randomUUID(),
+      "amount": data.amount,
+      "shopperReference": data.reference,
+      "description": data.description,
+      "countryCode": data.country,
+      "shopperLocale": data.locale
+    })
+  }).then(res => res.json())
 
   if(payment) {
     return payment
@@ -68,6 +89,7 @@ export async function getPaymentStatus(id) {
   const { payment } = await fetch('/plan98/pay-by-link', {
     method: 'POST',
     body: JSON.stringify({
+      mode: 'READ',
       id
     })
   }).then(res => res.json())

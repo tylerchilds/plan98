@@ -1,5 +1,14 @@
 import module from '@sillonious/module'
 import { newPayment, getPaymentStatus } from '@sillonious/payments'
+import { getCart } from './purchase-catalog.js'
+
+function preference() {
+  return {
+    currency: 'EUR',
+    country: 'NL',
+    locale: 'nl-NL'
+  }
+}
 
 const $ = module('message-pay')
 
@@ -26,8 +35,17 @@ $.draw((target) => {
 async function initialize(target) {
   if(target.initialized) return
   target.initialized = true
-
-  const payment = await newPayment()
+  const cart = getCart()
+  const amount = cart.items.reduce((accumulator, current) => {
+    return accumulator
+  }, {value: 0, currency: preference().currency})
+  const payment = await newPayment({
+    amount,
+    country: preference().country,
+    locale: preference().locale,
+    description: 'Blue Bag',
+    reference: 'Test New Payment'
+  })
   $.teach({ payment, ready: true })
 }
 
