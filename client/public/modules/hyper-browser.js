@@ -2,6 +2,18 @@ import module from '@sillonious/module'
 // i channel my runic knowledge to commune with the ancestors and establish contact with the animals
 import { doingBusinessAs } from './sillonious-brand.js'
 
+import party, {
+  hostPressesStartStop,
+  hostPressesReset,
+  hostPressesLight,
+  hostPressesMode,
+  anybodyPressesStartStop,
+  anybodyPressesReset,
+  anybodyPressesLight,
+  anybodyPressesMode,
+} from '@sillonious/party'
+
+
 const protocol = 'https://'
 const locale = 'en_US'
 
@@ -236,4 +248,87 @@ function diskettes() {
 
 function t(key) {
   return $.learn()[key]
+}
+
+let activeSynths = []
+const fretMap = [0, 1, 3, 2, 4]
+
+const registers = {
+  "x    ": noop,
+  " x   ": noop,
+  "  x  ": noop,
+  "   x ": noop,
+  "    x": noop,
+}
+
+function toPattern(_$, buttons) {
+  const pressed = value => value === 1 ? "x" : " "
+  const frets = buttons.map(pressed).slice(0, 5)
+  return fretMap.map(i => frets[i]).join('')
+}
+
+function toMotion(_$, axes) {
+  const [vertical] = [...axes].splice(-1)
+  const [horizontal] = [...axes].splice(-2)
+
+  return {
+    up: vertical === -1,
+    down: vertical === 1,
+    left: horizontal === -1,
+    right: horizontal === 1
+  }
+}
+
+
+requestAnimationFrame(loop)
+function loop(time) {
+  const gamepads = party()
+
+  const activity = gamepads.reduce((activity, { osc, gamepad }) => {
+    const { button, axis } = Object.keys(osc).reduce((pad, path) => {
+      const [_, type, index] = path.split('/')
+      pad[type][index] = osc[path].value
+      return pad
+    }, { button: [], axis: [] })
+    const pattern =  toPattern($, button)
+    activity.patterns.push(pattern)
+    activity.commands.push(registers[pattern])
+    activity.motions.push(toMotion($, axis))
+    return activity
+  }, {
+    patterns: [],
+    registers: [],
+    motions: []
+  })
+
+  activity.registers.map((register, i) => {
+    const { up, down } = activity.motions[i]
+    if(activity.patterns[i] === 'x x x') {
+      [[up, octaveup], [down, octavedown]].map(([flag, feature]) => {
+        flag && throttle($, { key: 'octave-shift', time, feature })
+      })
+    }
+    if(activity.patterns[i] === 'xxxxx') {
+      [[up, pitchup], [down, pitchdown]].map(([flag, feature]) => {
+        flag && throttle($, { key: 'pitch-shift', time, feature })
+      })
+    }
+    if(!chords[register]) return
+
+    const feature = () => {
+      // if up/down start attack of chords
+      if(up || down && register > 0) {
+        activeSynths = chords[register]
+        activeSynths.map((x, i) => {
+          const index = down ? x : activeSynths[activesynths.length - 1 - i]
+          const synth = document.queryselector(`[data-synth='${index}']`)
+          synth && queueattack(synth, i)
+        })
+      }
+    }
+
+    feature()
+  })
+
+  requestAnimationFrame(loop)
 }

@@ -69,42 +69,68 @@ const fantasyController = {
   }
 }
 
-const check = (player, osc) => {
+const checkAxisPushed = (player, osc) => {
+  const { pushed } = player.osc[osc] || {}
+  return pushed
+}
+
+const checkAxisPulled = (player, osc) => {
+  const { pulled } = player.osc[osc] || {}
+  return pulled
+}
+
+const checkButton = (player, osc) => {
   const { value } = player.osc[osc] || {}
   if(!value) return false
   return Math.abs(value) >= DEFAULT_ACTUATION
 }
 
+export function hostPressesLeft(party) {
+  return checkAxisPushed(party(0), '/axis/0')
+}
+
+export function hostPressesRight(party) {
+  return checkAxisPulled(party(0), '/axis/0')
+}
+
+export function hostPressesUp(party) {
+  return checkAxisPushed(party(0), '/axis/1')
+}
+
+export function hostPressesDown(party) {
+  return checkAxisPulled(party(0), '/axis/1')
+}
+
 export function hostPressesStartStop(party) {
-  return check(party(0), '/button/0')
+  return checkButton(party(0), '/button/0')
 }
 
 export function hostPressesReset(party) {
-  return check(party(0), '/button/1')
+  return checkButton(party(0), '/button/1')
 }
 
 export function hostPressesLight(party) {
-  return check(party(0), '/button/2')
+  return checkButton(party(0), '/button/2')
 }
 
 export function hostPressesMode(party) {
-  return check(party(0), '/button/3')
+  return checkButton(party(0), '/button/3')
 }
 
 export function anybodyPressesStartStop(party) {
-  return party().some(p => check(p,'/button/0'))
+  return party().some(p => checkButton(p,'/button/0'))
 }
 
 export function anybodyPressesReset(party) {
-  return party().some(p => check(p,'/button/1'))
+  return party().some(p => checkButton(p,'/button/1'))
 }
 
 export function anybodyPressesLight(party) {
-  return party().some(p => check(p,'/button/2'))
+  return party().some(p => checkButton(p,'/button/2'))
 }
 
 export function anybodyPressesMode(party) {
-  return party().some(p => check(p,'/button/3'))
+  return party().some(p => checkButton(p,'/button/3'))
 }
 
 const $ = module('sillonious-party', {
@@ -119,6 +145,7 @@ const $ = module('sillonious-party', {
 })
 
 export function fantasyGamepadEvent(slot, osc, value) {
+  console.log(slot, osc, value)
 	$.teach({ [osc]: value }, (state, payload) => {
 		return {
 			...state,
