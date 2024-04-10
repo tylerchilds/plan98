@@ -101,6 +101,22 @@ export function hostPressesDown(party) {
   return checkAxisPulled(party(0), '/axis/1')
 }
 
+export function anybodyPressesLeft(party) {
+  return party().some(p => checkAxisPushed(p,'/axis/0'))
+}
+
+export function anybodyPressesRight(party) {
+  return party().some(p => checkAxisPulled(p,'/axis/0'))
+}
+
+export function anybodyPressesUp(party) {
+  return party().some(p => checkAxisPushed(p,'/axis/1'))
+}
+
+export function anybodyPressesDown(party) {
+  return party().some(p => checkAxisPulled(p,'/axis/1'))
+}
+
 export function hostPressesStartStop(party) {
   return checkButton(party(0), '/button/0')
 }
@@ -145,7 +161,6 @@ const $ = module('sillonious-party', {
 })
 
 export function fantasyGamepadEvent(slot, osc, value) {
-  console.log(slot, osc, value)
 	$.teach({ [osc]: value }, (state, payload) => {
 		return {
 			...state,
@@ -327,7 +342,7 @@ function addOSC(gamepad, slot) {
       value
     }
   })
-
+  console.log(fantasyController.osc)
   return {
     osc: {
       ...fantasyController.osc,

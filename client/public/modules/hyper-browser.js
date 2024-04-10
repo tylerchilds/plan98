@@ -251,19 +251,19 @@ function t(key) {
 }
 
 let activeSynths = []
+const noop = () => null
 const fretMap = [0, 1, 3, 2, 4]
 
 const registers = {
-  "x    ": noop,
-  " x   ": noop,
-  "  x  ": noop,
-  "   x ": noop,
-  "    x": noop,
+  "x   ": () => console.log('first'),
+  " x  ": () => console.log('second'),
+  "  x ": () => console.log('third'),
+  "   x": () => console.log('fourth'),
 }
 
 function toPattern(_$, buttons) {
   const pressed = value => value === 1 ? "x" : " "
-  const frets = buttons.map(pressed).slice(0, 5)
+  const frets = buttons.map(pressed).slice(0, 4)
   return fretMap.map(i => frets[i]).join('')
 }
 
@@ -297,37 +297,12 @@ function loop(time) {
     return activity
   }, {
     patterns: [],
-    registers: [],
+    commands: [],
     motions: []
   })
 
-  activity.registers.map((register, i) => {
-    const { up, down } = activity.motions[i]
-    if(activity.patterns[i] === 'x x x') {
-      [[up, octaveup], [down, octavedown]].map(([flag, feature]) => {
-        flag && throttle($, { key: 'octave-shift', time, feature })
-      })
-    }
-    if(activity.patterns[i] === 'xxxxx') {
-      [[up, pitchup], [down, pitchdown]].map(([flag, feature]) => {
-        flag && throttle($, { key: 'pitch-shift', time, feature })
-      })
-    }
-    if(!chords[register]) return
-
-    const feature = () => {
-      // if up/down start attack of chords
-      if(up || down && register > 0) {
-        activeSynths = chords[register]
-        activeSynths.map((x, i) => {
-          const index = down ? x : activeSynths[activesynths.length - 1 - i]
-          const synth = document.queryselector(`[data-synth='${index}']`)
-          synth && queueattack(synth, i)
-        })
-      }
-    }
-
-    feature()
+  activity.commands.filter(x => x).map((command) => {
+    command()
   })
 
   requestAnimationFrame(loop)

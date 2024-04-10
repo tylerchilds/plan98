@@ -128,7 +128,6 @@ $.style(`
       display: grid;
       grid-template-columns: 1fr 1fr;
       touch-action: manipulation;
-      opacity: .25;
     }
     & .the-cardinal,
     & .the-compass {
@@ -153,6 +152,12 @@ $.style(`
 
     & button {
       pointer-events: all;
+      opacity: .25;
+    }
+
+    & button:hover,
+    & button:focus {
+      opacity: .75;
     }
 
     & .the-overflow button {
