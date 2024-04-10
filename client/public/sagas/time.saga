@@ -1,4 +1,6 @@
-<plan98-welcome
+<div
+style: aspect-ratio: 1;
+html: <hyper-browser></hyper-browser>
 
 At the start, was it the Argonaut or the Egg? Either way, there were either eight eggs or eight legs.
 
@@ -14,7 +16,7 @@ data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-emerald: 0
 
-When the red egg to hatches, the shaders of the realms fade from black.
+When the red egg hatches, the shaders of the realms fade from black.
 
 <action-script
 text: Take the Orange One
@@ -30,7 +32,7 @@ data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-emerald: 2
 
-The yellow element, expanded as the radioactive uranium, however, in essence a glass, a silicon grain.
+The yellow element, expanded as the radioactive uranium, in essence, a glass shard, a silicon grain.
 
 <action-script
 text: Take the Green One
@@ -46,7 +48,7 @@ data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-emerald: 4
 
-The blue pad can dial directions and dimensions-- any one, any time, any space.
+The blue device can dial directions and dimensions-- any one, any time, any space.
 
 <action-script
 text: Take the Indigo One
@@ -62,7 +64,7 @@ data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-emerald: 6
 
-Violet is the beginning of the end-- folded and joined a database.
+Violet is the beginning of the end-- folded and joined-- a database.
 
 <action-script
 text: Take the Infinite One

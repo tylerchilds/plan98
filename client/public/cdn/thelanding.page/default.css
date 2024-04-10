@@ -38,3 +38,7 @@ body sillonious-upsell xml-html {
   padding: 2rem 1rem;
   height: auto;
 }
+
+saga-genesis xml-html {
+  height: 100%;
+}

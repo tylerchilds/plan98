@@ -2,6 +2,10 @@ body {
   margin: 0 auto;
 }
 
+xml-html {
+  height: 100%;
+}
+
 saga-genesis {
   background: black;
   color: white;
@@ -11,6 +15,7 @@ saga-genesis xml-html {
   max-width: 6in;
   margin: auto;
   padding: .5rem;
+  height: 100%;
 }
 
 img,

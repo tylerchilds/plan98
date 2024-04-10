@@ -59,7 +59,7 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  return `
+  return self.self === self.top ? `
     <main class="output" style="background-image: ${stars}">
       <div class="backside-paper">
         <button data-share>
@@ -96,7 +96,7 @@ $.draw((target) => {
         </button>
       </div>
     </header>
-  `
+  ` : '<plan98-welcome></plan98-welcome>'
 })
 
 function seed(target) {
@@ -231,6 +231,7 @@ $.style(`
     position: relative;
     height: 100%;
     width: 100%;
+    aspect-ratio: 1;
     transform-style: preserve-3d;
     backface-visibility: hidden;
     display: block;

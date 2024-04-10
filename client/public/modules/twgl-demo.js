@@ -103,8 +103,6 @@ function main(target) {
 }
 
 $.draw(target => {
-  // only do the magic for the highest order
-  if(self.self !== self.top) return
   target.innerHTML = `
     <canvas></canvas>
     <script id="vs" type="notjs">

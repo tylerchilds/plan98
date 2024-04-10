@@ -18,14 +18,43 @@ const protocol = 'https://'
 const locale = 'en_US'
 
 const $ = module('hyper-browser', {
-  diskette: 0,
+  diskette: 6,
   paused: true,
-  online: true
+  online: true,
+  joypros: []
 })
 
+function drawCompass(buttons) {
+  const names = ["in", "next", "back", "out"]
+
+  const [down,right,left,up,...remainingButtons] = buttons.map((button, index) => {
+    return `
+      <button
+        name="${names[index]}"
+        class="nav-item"
+        ${button.pushed ? 'data-pushed="true"' : ''}
+        data-index="${button.index}"
+      >
+        <img src="${button.icon || synthia}" alt="button for osc button.icon"/>
+      </button>
+    `
+  })
+
+  return `
+    ${down}
+    ${right}
+    ${left}
+    ${up}
+  `
+}
+
 $.draw((target) => {
-  const { paused, online } = $.learn()
+  if(self.self !== self.top) return '<plan98-welcome></plan98-welcome>'
+  const { paused, online, joypros } = $.learn()
+  if(joypros.length === 0) return
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
+
+  const compass = drawCompass(joypros[0].buttons)
 
   const screen = doingBusinessAs[art]
     ? `<iframe src="/?world=${art}" title="${art}"></iframe>`
@@ -34,19 +63,10 @@ $.draw((target) => {
   const content = online ? `
     <div name="transport">
       <div name="actions">
-        <button name="back">
-          Left
-        </button>
-        <button name="out">
-          Up
-        </button>
+        <div class="the-compass">
+          ${compass}
+        </div>
         <input value="${art}">
-        <button name="in">
-          Down
-        </button>
-        <button name="next">
-          Right
-        </button>
       </div>
     </div>
     <div name="world">
@@ -127,6 +147,37 @@ $.style(`
     height: 100%;
     max-height: 100%;
   }
+
+  & .the-compass {
+    display: grid;
+    grid-template-columns: repeat(4, 10px);
+    grid-template-rows: repeat(4, 10px);
+    gap: 20px;
+  }
+
+  & .the-compass button{
+    padding: 0;
+  }
+
+  & .the-compass button:nth-child(1) {
+    grid-row: 3 / 5;
+    grid-column: 2 / 4;
+  }
+
+  & .the-compass button:nth-child(2) {
+    grid-row: 2 / 4;
+    grid-column: 3 / 5;
+  }
+
+  & .the-compass button:nth-child(3) {
+    grid-row: 2 / 4;
+    grid-column: 1 / 3;
+  }
+
+  & .the-compass button:nth-child(4) {
+    grid-row: 1 / 3;
+    grid-column: 2 / 4;
+  }
   & input {
     border: none;
     background: rgba(0,0,0,.85);
@@ -166,13 +217,12 @@ $.style(`
     border-radius: 1.5rem 0 0 1.5rem;
   }
 
-	& button {
+	& .nav-item {
     background: rgba(0,0,0,.85);
     border: none;
     color: dodgerblue;
     cursor: pointer;
-    height: 2rem;
-    border-radius: 1rem;
+    border-radius: 100%;
     transition: color 100ms;
     padding: .25rem 1rem;
     z-index: 1;
@@ -282,9 +332,9 @@ function toMotion(_$, axes) {
 
 requestAnimationFrame(loop)
 function loop(time) {
-  const gamepads = party()
-
-  const activity = gamepads.reduce((activity, { osc, gamepad }) => {
+  const players = party()
+  if(players.length === 0) return
+  const activity = players.reduce((activity, { osc, gamepad }) => {
     const { button, axis } = Object.keys(osc).reduce((pad, path) => {
       const [_, type, index] = path.split('/')
       pad[type][index] = osc[path].value
@@ -300,6 +350,16 @@ function loop(time) {
     commands: [],
     motions: []
   })
+
+  const joypros = players.map(({ gamepad, osc } ) => {
+    const buttons = gamepad.buttons
+      .sort((a, b) => a.index - b.index)
+    const throttles = gamepad.axes
+      .sort((a, b) => a.index - b.index)
+    return { buttons, throttles }
+  })
+
+  $.teach({ joypros })
 
   activity.commands.filter(x => x).map((command) => {
     command()

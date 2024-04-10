@@ -149,7 +149,7 @@ $.when('click', '[data-reset]', ({target}) => {
 
 $.style(`
   & {
-    display: block;
+    display: grid;
     margin: auto;
     height: 100%;
   }
@@ -168,11 +168,12 @@ $.style(`
   }
   & [name="square"]{
     margin: auto;
-    height: 100vmin;
     transform-style: preserve-3d;
-    width: 100vmin;
-    position: absolute;
-    inset: 0;
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 100vmin;
+    max-height: 100vmin;
+    place-self: center;
   }
 
   & .remix {
