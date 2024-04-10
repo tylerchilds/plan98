@@ -1,7 +1,7 @@
 import { state } from 'statebus'
 
 export function currentSave() {
-  if(!state['ls/save-file']) newSave()
+  if(!state['ls/save-file']) blankSave()
   return state['ls/save-file']
 }
 
