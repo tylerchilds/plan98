@@ -223,7 +223,7 @@ $.style(`
   & [data-close] {
     background: black;
     border: none;
-    border-radius: 0 0 1rem 0;
+    border-radius: 0 0 0 1rem;
     color: white;
     padding: 0 1rem 0 .5rem;
     line-height: 1;
@@ -232,7 +232,7 @@ $.style(`
     transition: opacity: 200ms;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     z-index: 1101;
   }
 

@@ -39,9 +39,9 @@ $.draw(() => {
 
   return `
     <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
-      <button data-close>Close</button>
       <div class="panel">
         <div class="body">
+          <button data-close>Close</button>
           ${panelHeader}
           ${body}
         </div>
@@ -91,18 +91,7 @@ $.when('click', '[data-close]', hidePanel)
 $.style(`
   & {
     display: none;
-  }
-  .trap-panel .panel-overlay:before {
-    animation: &-fadein 250ms ease-in-out forwards;
-    content: '';
-    background: linear-gradient(rgba(0,0,0, .5), transparent);
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    backdrop-filter: blur(10px);
-    z-index: 900;
+    pointer-events: none;
   }
 
   @keyframes &-fadein {
@@ -160,6 +149,9 @@ $.style(`
     max-width: 320px;
     background: lemonchiffon;
     padding: 2rem .5rem .5rem;
+    position: absolute;
+    right: 0;
+    pointer-events: all;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),
       6px 6px 12px 12px rgba(0,0,0,.5),
@@ -193,7 +185,7 @@ $.style(`
   & [data-close] {
     background: black;
     border: none;
-    border-radius: 0 0 1rem 0;
+    border-radius: 0 0 0 1rem;
     color: white;
     padding: 0 1rem 0 .5rem;
     line-height: 1;
@@ -202,7 +194,7 @@ $.style(`
     transition: opacity: 200ms;
     position: absolute;
     top: 0;
-    left: 0;
+    right: 0;
     z-index: 1101;
   }
 

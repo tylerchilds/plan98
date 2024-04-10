@@ -123,30 +123,19 @@ const { index, seat } = event.target.dataset
 }
 
 $.style(`
-  @keyframes &-fade-out {
-    0% {
-      opacity: .25;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
   @media screen {
     & {
       display: grid;
       grid-template-columns: 1fr 1fr;
       touch-action: manipulation;
       opacity: .25;
-      animation: &-fade-out ease-in-out 1000ms forwards 1000ms;
-      visibility: hidden;
     }
     & .the-cardinal,
     & .the-compass {
       display: grid;
-      grid-template-columns: repeat(6, 20px);
-      grid-template-rows: repeat(2, 20px);
-      gap: 30px 5px;
+      grid-template-columns: repeat(4, 10px);
+      grid-template-rows: repeat(4, 10px);
+      gap: 20px;
     }
 
     & .the-cardinal {
@@ -180,42 +169,42 @@ $.style(`
     }
 
     & .the-compass .nav-item:nth-child(1) {
-      grid-row: 3 / 4;
-      grid-column: 3 / 5;
+      grid-row: 3 / 5;
+      grid-column: 2 / 4;
     }
 
     & .the-compass .nav-item:nth-child(2) {
-      grid-row: 3 / 4;
-      grid-column: 5 / 7;
-    }
-
-    & .the-compass .nav-item:nth-child(3) {
-      grid-row: 3 / 4;
-      grid-column: 1 / 3;
-    }
-
-    & .the-compass .nav-item:nth-child(4) {
-      grid-row: 2 / 3;
-      grid-column: 3 / 5;
-    }
-
-    & .the-cardinal .nav-item:nth-child(1) {
       grid-row: 2 / 4;
       grid-column: 3 / 5;
     }
 
+    & .the-compass .nav-item:nth-child(3) {
+      grid-row: 2 / 4;
+      grid-column: 1 / 3;
+    }
+
+    & .the-compass .nav-item:nth-child(4) {
+      grid-row: 1 / 3;
+      grid-column: 2 / 4;
+    }
+
+    & .the-cardinal .nav-item:nth-child(1) {
+      grid-row: 1 / 3;
+      grid-column: 2 / 4;
+    }
+
     & .the-cardinal .nav-item:nth-child(2) {
-      grid-row: 3 / 4;
-      grid-column: 3 / 5;
+      grid-row: 3 / 5;
+      grid-column: 2 / 4;
     }
 
     & .the-cardinal .nav-item:nth-child(3) {
-      grid-row: 3 / 4;
-      grid-column: 5 / 7;
+      grid-row: 2 / 4;
+      grid-column: 3 / 5;
     }
 
     & .the-cardinal .nav-item:nth-child(4) {
-      grid-row: 3 / 4;
+      grid-row: 2 / 4;
       grid-column: 1 / 3;
     }
 
@@ -229,12 +218,13 @@ $.style(`
       background-repeat: repeat-x;
       font-weight: bold;
       padding: 0;
-      height: 3rem;
+      height: 100%;
+      width: 100%;
       text-shadow: 0px 2px 0px var(--text-shadow-color);
       transition: all 200ms ease;
       white-space: nowrap;
       border: 2px solid;
-      border-radius: 1rem;
+      border-radius: 100%;
     }
 
     ${[...Array(16)].map((_,i) => `

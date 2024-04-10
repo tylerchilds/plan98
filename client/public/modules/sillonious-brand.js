@@ -76,7 +76,7 @@ $.draw((target) => {
         </div>
       </div>
       <div class="frontside-paper">
-        <hyper-script></hyper-script>
+        <hyper-browser></hyper-browser>
       </div>
     </main>
     <nav class="input">
@@ -421,7 +421,7 @@ $.style(`
     & .frontside-paper {
       border-top: 3px solid var(--wheel-0-3);
       background: black;
-      padding: 2rem 5px;
+      padding: 5px;
     }
 
     & .backside-paper {
@@ -445,7 +445,7 @@ $.style(`
     & .input {
       pointer-events: none;
       position: absolute;
-      padding: 1rem;
+      padding: .5rem;
       bottom: 0;
       z-index: 4;
       left: 0;
