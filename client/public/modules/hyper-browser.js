@@ -66,7 +66,9 @@ $.draw((target) => {
         <div class="the-compass">
           ${compass}
         </div>
-        <input value="${art}">
+        <div class="the-map">
+          <input value="${art}">
+        </div>
       </div>
     </div>
     <div name="world">
@@ -148,6 +150,12 @@ $.style(`
     max-height: 100%;
   }
 
+  & .the-map {
+    display: grid;
+    height: 100%;
+    align-content: end;
+    width: 100%;
+  }
   & .the-compass {
     display: grid;
     grid-template-columns: repeat(4, 10px);
@@ -182,7 +190,7 @@ $.style(`
     border: none;
     background: rgba(0,0,0,.85);
     border-radius: 1rem;
-    padding: 0 1rem;
+    padding: .5rem 1rem;
     color: white;
   }
   & [name="desktop"] {
@@ -203,7 +211,7 @@ $.style(`
     display: grid;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: .25rem;
     z-index: 1100;
     overflow: auto;
   }
@@ -211,10 +219,10 @@ $.style(`
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;
-    margin: 0 auto .25rem;
-    border: 1px solid rgba(255,255,255,.15);
+    margin: 0 .5rem .25rem;
     gap: .25rem;
-    border-radius: 1.5rem 0 0 1.5rem;
+    border-radius: 1.5rem;
+    padding: .5rem;
   }
 
 	& .nav-item {

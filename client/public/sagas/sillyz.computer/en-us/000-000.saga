@@ -1,11 +1,15 @@
-Paper Nautiloids is a Mixed Reality Experience. Single players toy around for free; Multi player is a premium feature.
+A red egg lays next to an orange chicken.
 
-<sillonious-action
-action: hostPressesStartStop
-label: Single Player
-saga: 000-001.saga
+<action-script
+text: Take the Red Egg
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-saga: 000-001.saga
+data-emerald: 0
 
-<sillonious-action
-action: hostPressesStartStop
-label: Multi Player
-saga: 001-001.saga
+<action-script
+text: Take the Orange Chicken
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-emerald: 1
+data-saga: 001-001.saga

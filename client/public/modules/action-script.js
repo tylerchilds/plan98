@@ -1,21 +1,27 @@
 import module from '@sillonious/module'
+import { setupSaga } from './sillonious-upsell.js'
 
 const $ = module('action-script')
 
 $.draw(target => {
-  if(target.querySelector('button')) return
+  if(!target.querySelector('button')) {
+    target.dataset.html = target.innerHTML
+  }
   return `
     <button>
-      ${target.innerHTML}
+      ${target.dataset.html}
     </button>
   `
 })
 
 $.when('click', 'button', async (event) => {
   const root = event.target.closest($.link)
-  const { action, script } = root.dataset
+  const { action, script, saga } = root.dataset
   const dispatch = (await import(script))[action]
   dispatch(event, root)
+  setTimeout(() => {
+    setupSaga(saga, event.target)
+  }, 100)
 })
 
 $.style(`

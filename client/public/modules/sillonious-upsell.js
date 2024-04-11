@@ -34,17 +34,15 @@ export function setupSaga(nextSaga, target) {
   const { activeDialect, activeWorld } = $.learn()
   let key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
 
-  if(!root) window.location.href = key
-
-  key = raw+key
-
+  target.dataset.lastHtml = target.innerHTML
   target.innerHTML = `<a href="${key}">Loading...</a>`
-  fetch(key)
+  fetch(raw+key)
     .then(async response => {
       if(response.status === 404) {
-        target.innerHTML = ``
+        target.innerHTML = target.dataset.lastHtml
         return
       }
+      if(!root) window.location.href = key
       const saga = await response.text()
       $.teach(
         { [key]: saga },
@@ -69,7 +67,11 @@ export function setupSaga(nextSaga, target) {
         }
         if(root.trap) {
           root.trap.activate()
-          root.innerHTML = hyperSanitizer(saga)
+          root.innerHTML = `
+            <data-tooltip>
+              ${hyperSanitizer(saga)}
+            </data-tooltip>
+          `
         }
       })
     })

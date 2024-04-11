@@ -1,11 +1,17 @@
-Excellent choice. Before we can begin, a little cheddar is required.
+The orange tentacle propels the future and the past, forwards and back.
 
-<sillonious-action
-action: hostPressesStartStop
-label: Is Cheddar Money?
-saga: 001-002.saga
+There's a blue instrument and an indigo umbrella.
 
-<sillonious-action
-action: hostPressesStartStop
-label: How much?
-saga: 001-003.saga
+<action-script
+text: Take the Blue One
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-saga: 004-001.saga
+data-emerald: 4
+
+<action-script
+text: Take the Indigo One
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-emerald: 5
+data-saga: 005-001.saga
