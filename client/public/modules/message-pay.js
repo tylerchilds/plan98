@@ -1,6 +1,7 @@
 import module from '@sillonious/module'
 import { newPayment, getPaymentStatus } from '@sillonious/payments'
 import { getCart } from './purchase-catalog.js'
+import { setupSaga } from './sillonious-upsell.js'
 
 function preference() {
   return {
@@ -14,21 +15,15 @@ const $ = module('message-pay')
 
 $.draw((target) => {
   initialize(target)
-  const { ready, buying, bought, payment } = $.learn()
-
-  if(bought) {
-    return `Transaction successful!`
-  }
-
-  if(buying) {
-    return `
-      Please <a href="${payment.url}">Complete the transaction</a> and this page will update with further instructions.
-    `
-  }
+  const { ready, payment } = $.learn()
 
   return ready ? `
-    By Selecting "Buy Now" you will be guided to our third party payment provider. After completing the transaction, return to this page for confirmation.
-    <button data-buy>Buy Now</button>
+    Scan or take the note to  <a href="${payment.url}" target="_blank">Complete the transaction</a>.
+    <button data-buy>
+      <sticky-note>
+        <qr-code text="${payment.url}" data-fg="saddlebrown"></qr-code>
+      </sticky-note>
+    </button>
   ` : 'loading...'
 })
 
@@ -46,31 +41,67 @@ async function initialize(target) {
     description: 'Blue Bag',
     reference: 'Test New Payment'
   })
-  $.teach({ payment, ready: true })
+  const timer = poll(target, checkPayment, payment, 1000, 15 * 60 * 1000)
+  $.teach({ payment, ready: true, timer })
 }
 
-async function checkPayment({id}) {
+async function checkPayment(target, {id}) {
   const payment = await getPaymentStatus(id)
   if(!payment.error) {
     if(payment.status === 'completed') {
       const { timer } = $.learn()
-      $.teach({ payment, bought: true })
+      $.teach({ payment })
       clearTimeout(timer)
+      once(target, () => {
+        setupSaga(target.getAttribute('saga'), target)
+      })
     } else {
       $.teach({ payment })
     }
   }
 }
 
+function once(target, callback) {
+  if(target.called) return
+  target.called = true
+  callback()
+}
+
 $.when('click', '[data-buy]', async (event) => {
   const { payment } = $.learn()
   window.open(payment.url, '_blank').focus();
-  const timer = poll(checkPayment, payment, 5 * 1000, 15 * 60 * 1000)
-  $.teach({ buying: true, timer })
 })
 
-function poll(callback, number, every, until) {
-  const loop = setInterval(() => callback(number), every)
+function poll(target, callback, options, every, until) {
+  const loop = setInterval(() => callback(target, options), every)
   const timer = setTimeout(() => clearInterval(loop), until)
   return timer
 }
+
+$.style(`
+
+  & [data-buy] {
+    display: block;
+    border: 0;
+    padding: 0;
+    margin: 2rem auto;
+    transition: box-shadow 100ms ease-in-out;
+  }
+
+  & [data-buy]:hover,
+  & [data-buy]:focus {
+    --shadow: 0px 0px 2px 2px rgba(0,0,0,.10),
+      0px 0px 6px 6px rgba(0,0,0,.5),
+      0px 0px 18px 18px rgba(0,0,0,.25);
+  }
+
+  & sticky-note {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-areas: "ss sc se" "cs cc ce" "es ec ee";
+  }
+  & qr-code {
+    grid-area: cc;
+  }
+`)

@@ -1,12 +1,11 @@
-Excellect.
+# Totals 
 
-<purchase-catalog
-data-script: /public/cdn/thelanding.page/game-state.js
+<shipping-details
 
 <sillonious-action
 action: hostPressesStartStop
-label: Check Out
-saga: 001-001.saga
+label: Ship Order
+saga: shipping.saga
 
 <action-script
 text: Leave

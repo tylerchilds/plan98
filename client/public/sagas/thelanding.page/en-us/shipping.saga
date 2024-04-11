@@ -1,13 +1,13 @@
-# Welcome!
+# Shipping
 
-Would you be interested in browsing the shops?
+<shipping-details
 
 <sillonious-action
 action: hostPressesStartStop
-label: Yes
-saga: browse.saga
+label: Purchase Order
+saga: billing.saga
 
 <action-script
-text: No
+text: Leave
 data-action: ok
 data-script: /public/cdn/thelanding.page/game-state.js

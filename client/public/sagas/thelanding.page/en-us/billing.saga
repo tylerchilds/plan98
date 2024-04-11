@@ -1,4 +1,5 @@
 <message-pay
+saga: confirmation.saga
 
 <action-script
 text: Leave

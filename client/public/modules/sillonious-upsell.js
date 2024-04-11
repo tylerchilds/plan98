@@ -104,6 +104,10 @@ $.style(`
     & { display: none !important; }
   }
 
+  & xml-html {
+    min-height: auto;
+  }
+
   &:not(:empty) {
     display: block;
     position: absolute;
