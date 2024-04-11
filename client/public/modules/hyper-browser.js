@@ -20,7 +20,6 @@ const locale = 'en_US'
 const $ = module('hyper-browser', {
   diskette: 6,
   paused: true,
-  online: true,
   joypros: []
 })
 
@@ -50,7 +49,7 @@ function drawCompass(buttons) {
 
 $.draw((target) => {
   if(self.self !== self.top) return '<plan98-welcome></plan98-welcome>'
-  const { paused, online, joypros } = $.learn()
+  const { paused, joypros } = $.learn()
   if(joypros.length === 0) return
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
@@ -60,7 +59,7 @@ $.draw((target) => {
     ? `<iframe src="/?world=${art}" title="${art}"></iframe>`
     : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
 
-  const content = online ? `
+  const content = `
     <div name="transport">
       <div name="actions">
         <div class="the-compass">
@@ -79,12 +78,6 @@ $.draw((target) => {
       <div name="screen">
         ${screen}
       </div>
-    </div>
-  ` : `
-    <div name="desktop">
-      <sticky-note>
-        <sillonious-tutorials></sillonious-tutorials>
-      </sticky-note>
     </div>
   `
 
@@ -109,11 +102,9 @@ $.when('click', '[name="back"]', () => {
 })
 
 $.when('click', '[name="out"]', () => {
-  const { paused, online } = $.learn()
+  const { paused } = $.learn()
   if(paused) {
     $.teach({ paused: false })
-  } else {
-    $.teach({ online: false })
   }
 })
 
@@ -135,7 +126,7 @@ $.when('click', '[name="in"]', () => {
     const art = bin[diskette]
 
     window.location.href = doingBusinessAs[art]
-      ? '?world=' + art
+      ? '/?world=' + art
       : `${protocol}${art}`
   } else {
     $.teach({ paused: true })

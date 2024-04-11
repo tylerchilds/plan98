@@ -7,7 +7,7 @@ action: hostPressesStartStop
 label: Yes
 saga: 000-001.saga
 
-<sillonious-action
-action: hostPressesStartStop
-label: No
-saga: 001-001.saga
+<action-script
+text: No
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js
