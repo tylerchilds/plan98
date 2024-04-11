@@ -440,12 +440,12 @@ $.style(`
 
 & #logo hypertext-variable:first-child {
   display: block;
-  font-size: 16vmin;
+  font-size: 15vmin;
 }
 
 & #logo hypertext-variable:last-child {
   display: block;
-  font-size: 7vmin;
+  font-size: 6.5vmin;
   letter-spacing: .25em;
   line-height: 1.5;
 }
