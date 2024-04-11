@@ -67,8 +67,15 @@ function banner() {
 const context = `<div class="panel-overlay"><plan98-panel></plan98-panel></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
+let hideListener = (event) => {
+  if (event.key === 'Escape') {
+    hidePanel()
+  }
+}
+
 export function showPanel(body, options) {
   document.body.classList.add('trap-panel')
+  self.addEventListener('keydown', hideListener);
   $.teach({
     body,
     isOpen: true,
@@ -80,6 +87,7 @@ window.showPanel = showPanel
 
 export function hidePanel() {
   document.body.classList.remove('trap-panel')
+  self.removeEventListener('keydown', hideListener);
   $.teach({
     isOpen: false
   })
@@ -169,15 +177,15 @@ $.style(`
   @keyframes &-in {
     0% {
       opacity: 0;
+      filter: blur(10px);
       z-index: -1;
-      transform: translateX(-1rem);
       background: rgba(0,0,0,0);
     }
 
     100% {
       opacity: 1;
+      filter: blur(0px);
       z-index: 1100;
-      transform: translateX(0);
       background: rgba(0,0,0,.25);
     }
   }

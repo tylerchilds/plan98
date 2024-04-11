@@ -115,7 +115,7 @@ $.draw((target) => {
               </rainbow-action>
             </div>
           </div>
-          <button data-about>About</button>
+          <button data-about data-tooltip="Learn about where here is.">About</button>
         </div>
       </div>
     </div>

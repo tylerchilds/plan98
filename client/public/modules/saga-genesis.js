@@ -1,5 +1,6 @@
 import module from '@sillonious/module'
 import { showModal, types as modalTypes } from './plan98-modal.js'
+import { showPanel } from './plan98-panel.js'
 
 import { doingBusinessAs } from './sillonious-brand.js'
 
@@ -42,21 +43,34 @@ $.draw((target) => {
   const host = getHost(target)
   const route = window.location.pathname
   const macGuffin = route === '/' ? (doingBusinessAs[host] || emeraldOfTime).saga : '/public' + route
-  const quest = useMacGuffin(macGuffin)
+  const quest = useMacGuffin(macGuffin) || ''
 
   const escapeButton = `
     <button data-escape>Esc</button>
+  `
+
+  const helpButton = `
+    <button data-aid data-tooltip="Ask a question or answer one...">
+      Help
+    </button>
   `
 
   target.innerHTML = ''
 
   return `
     ${escapeButton}
+    ${helpButton}
     ${quest}
   `
 })
 
 $.when('click', '[data-escape]', revealTruth)
+
+$.when('click', '[data-aid]', (event) => {
+  showPanel(`
+    <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
+  `)
+})
 
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
@@ -93,7 +107,8 @@ $.style(`
     overflow: auto;
   }
 
-  & [data-escape] {
+  & [data-escape],
+  & [data-aid] {
     background: black;
     border: none;
     border-radius: 0 0 1rem 0;
@@ -107,6 +122,13 @@ $.style(`
     top: 0;
     left: 0;
     z-index: 1101;
+  }
+
+  & [data-aid] {
+    border-radius: 0 0 0 1rem;
+    top: 0;
+    left: auto;
+    right: 0;
   }
 
   & [data-escape]:hover,
