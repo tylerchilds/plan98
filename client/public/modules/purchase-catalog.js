@@ -1,43 +1,37 @@
 import module from '@sillonious/module'
+import { currentCart } from '../cdn/thelanding.page/game-state.js'
 
-const computers = [
-  {
+export const skuTable = {
+  '000-000-000': {
     type: 'Computer',
     boxart: '/cdn/boxart.svg',
-    name: 'Funbox',
-    price: '10000',
+    name: 'Laptop',
     amount: {
-      value: 4200,
+      value: 2100,
       currency: "USD"
     },
-
-  }
-]
-
-const cards = [
-  {
+  },
+  '000-000-001': {
     type: 'Card',
     boxart: '/cdn/boxart.svg',
-    name: 'Funbox',
-    price: '10000',
+    name: 'Charizard',
     amount: {
       value: 4200,
       currency: "USD"
     },
-
   }
-]
+}
 
 const ListOfTypeListOfType = [
   {
     type: 'List',
     name: 'Sillyz.Computer',
-    list: computers
+    list: ['000-000-000']
   },
   {
     type: 'List',
     name: "Quan's Cards",
-    list: cards
+    list: ['000-000-001']
   }
 ]
 
@@ -57,19 +51,23 @@ function catalog(ListOfTypeListOfType) {
 }
 
 
-function page(List) {
-  return List.map(Type => {
-    const { type, name } = Type
+function page(list) {
+  return list.map(x => skuTable[x]).map((item, index) => {
+    const { type, name, boxart } = item
     return `
       <div class="${type}">
+        <img src="${boxart}" alt="Boxart for ${name}" />
         ${name}
+        <button class="add-to-cart" data-sku="${list[index]}">
+          Add to Cart
+        </button>
       </div>
     `
   }).join('')
 }
 
-export function getCart() {
-  return {
-    items: []
-  }
-}
+$.when('click', '.add-to-cart', (event) => {
+  const {sku} = event.target.dataset
+  const quantity = currentCart().items[sku] || 0
+  currentCart().items[sku] = quantity + 1
+})

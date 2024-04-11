@@ -1,7 +1,8 @@
 import module from '@sillonious/module'
 import { newPayment, getPaymentStatus } from '@sillonious/payments'
-import { getCart } from './purchase-catalog.js'
+import { skuTable } from './purchase-catalog.js'
 import { setupSaga } from './sillonious-upsell.js'
+import { currentCart } from '../cdn/thelanding.page/game-state.js'
 
 function preference() {
   return {
@@ -30,8 +31,11 @@ $.draw((target) => {
 async function initialize(target) {
   if(target.initialized) return
   target.initialized = true
-  const cart = getCart()
-  const amount = cart.items.reduce((accumulator, current) => {
+  const skus = Object.keys(currentCart().items)
+  const amount = skus.map(x => skuTable[x]).reduce((accumulator, item, index) => {
+    const quantity = currentCart().items[skus[index]]
+    const { value, currency } = item.amount
+    accumulator.value += convert(value * quantity, currency, accumulator.currency)
     return accumulator
   }, {value: 0, currency: preference().currency})
   const payment = await newPayment({
@@ -43,6 +47,11 @@ async function initialize(target) {
   })
   const timer = poll(target, checkPayment, payment, 1000, 15 * 60 * 1000)
   $.teach({ payment, ready: true, timer })
+}
+
+function convert(value, from, to) {
+  // todo: actually respect currencies
+  return value
 }
 
 async function checkPayment(target, {id}) {

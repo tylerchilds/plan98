@@ -1,9 +1,96 @@
 import module from '@sillonious/module'
 
-const $ = module('shipping-details')
+const $ = module('shipping-details', { address: '', suggestions: [] })
 
 $.draw(() => {
+  const { suggestions, address, focused } = $.learn()
+
   return `
-    hi
+    <form>
+      <input placeholder="969 Edgewater Blvd #123 Foster City, CA, 94404" value="${address}" type="text" />
+    </form>
+    <div class="suggestions ${focused ? 'focused' : ''}">
+      <div class="suggestion-box">
+        ${suggestions.map((x, i) => {
+          return `
+            <button data-suggestion="${i}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+      </div>
+    </div>
   `
 })
+
+
+$.when('click', '[data-suggestion]', event => {
+  const { suggestions } = $.learn()
+  const { suggestion } = event.target.dataset
+  $.teach({ address: suggestions[suggestion] })
+})
+
+$.when('focus', 'input', event => {
+  $.teach({ focused: true })
+})
+
+$.when('blur', 'input', event => {
+  setTimeout(() => {
+    $.teach({ focused: false })
+  }, 200)
+})
+
+$.when('keyup', 'input', event => {
+  const { value } = event.target;
+  $.teach({ address: value })
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${value}`)
+    .then(res => res.json())
+    .then(function (data) {
+        const suggestions = data.map(function (item) {
+          return item.display_name;
+        });
+        $.teach({ suggestions })
+    })
+    .catch(function (error) {
+        console.error(error);
+    })
+})
+
+$.style(`
+  & {
+    display: block;
+  }
+
+  & .suggestions {
+    display: none;
+    position: relative;
+    max-height: 300px;
+  }
+
+  & .suggestions.focused {
+    display: block;
+  }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 0;
+    height: 300px;
+    max-height: 80vh;
+    overflow: auto;
+  }
+
+  & [data-suggestion] {
+    display: block;
+  }
+
+  & input {
+    padding: .5rem;
+    borde-radius: 1rem;
+    width: 100%;
+    display: block;
+    margin: 1rem 0;
+  }
+
+  & form {
+  }
+`)

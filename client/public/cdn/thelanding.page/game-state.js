@@ -5,11 +5,24 @@ export function currentSave() {
   return state['ls/save-file']
 }
 
+export function currentCart() {
+  if(!state['ls/shopping-cart']) emptyCart()
+  return state['ls/shopping-cart']
+}
+
 export function blankSave() {
   state['ls/save-file'] = {
     chaosEmerald: []
   }
 }
+
+export function emptyCart() {
+  state['ls/shopping-cart'] = {
+    items: {}
+  }
+}
+
+
 
 export function takeButton() {
   alert('button took')
