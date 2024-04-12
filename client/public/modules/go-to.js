@@ -19,12 +19,14 @@ $.style(`
   }
 
   & [href] {
-    background: transparent;
     border: 2px solid dodgerblue;
     color: dodgerblue;
     border-radius: 2rem;
     transition: all 100ms ease-in-out;
+    background: rgba(255,255,255,.85);
     padding: .5rem;
+    text-decoration: none;
+    display: inline-block;
   }
 
   & [href]:focus,

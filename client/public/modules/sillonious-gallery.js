@@ -20,13 +20,15 @@ $.draw(() => {
   }
   const superSonic = chaosEmerald.every(x => x) && chaosEmerald.length > 6
   return superSonic ? `
-    <hyper-browser style="aspect-ratio: 1;"></hyper-browser>
     <hypertext-action>
       You win!
     </hypertext-action>
     <go-to link="/?world=sillyz.computer">Go Home</go-to>
+    <go-to link="/?world=thelanding.page">Go To Work</go-to>
+    <action-script data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
+      Go to Bed
+    </action-script>
   ` : `
-    <plan98-welcome></plan98-welcome>
     <hypertext-action>
       You're not strong enough yet...
     </hypertext-action>

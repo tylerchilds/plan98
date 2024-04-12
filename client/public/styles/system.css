@@ -497,3 +497,9 @@ button {
 	clip: rect(1px, 1px, 1px, 1px);
 	white-space: nowrap; /* added line */
 }
+
+.markdown {
+  max-width: 6in;
+  margin: 0 auto;
+  padding: 1in 1rem;
+}

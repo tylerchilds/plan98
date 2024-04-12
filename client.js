@@ -14,7 +14,11 @@ import { marked } from "marked"
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 
 config()
-console.log(Deno.env.get('ADYEN_API_KEY'))
+
+const terminalHeaders = {
+  'Cross-Origin-Embedder-Policy': 'require-corp',
+  'Cross-Origin-Opener-Policy': 'same-origin',
+}
 
 // polyfill window with DOMParser for deno;
 self.DOMParser = DOMParser
@@ -55,7 +59,9 @@ async function markdownSanitizer(md) {
   const dom = await page()
   dom.getElementById('main').remove()
   dom.body.insertAdjacentHTML('afterbegin', `
-    ${marked(md)}
+    <div class="markdown">
+      ${marked(md)}
+    </div>
   `)
   return `<!DOCTYPE html>${dom.documentElement}`
 }
@@ -89,21 +95,20 @@ const extensions = {
   },
 }
 
-function buildHeaders(pathname, extension) {
+function buildHeaders(parameters, pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
-  const wasmerEmbedEnabled = false
-
+  const debug = parameters.get('debug')
   let headers = {
+    'Cross-Origin-Resource-Policy': 'same-origin',
     'content-type': extensions[extension]
       ? extensions[extension][type]
       : typeByExtension(extension)
   }
 
-  if(wasmerEmbedEnabled) {
+  if(debug === 'true') {
     headers = {
       ...headers,
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-      'Cross-Origin-Opener-Policy': 'same-origin',
+      ...terminalHeaders
     }
   }
 
@@ -115,13 +120,13 @@ async function router(request, context) {
   const parameters = new URLSearchParams(search)
   const world = parameters.get('world')
   let extension = path.extname(pathname);
-  const headers = buildHeaders(pathname, extension);
+  const headers = buildHeaders(parameters, pathname, extension);
 
   let file
   let statusCode = Status.Success
 
-  if(pathname === '/' && doingBusinessAs[world || host]) {
-    const file = await home(request)
+  if(pathname === '/') {
+    const file = await home(request, doingBusinessAs[world || host || 'sillyz.computer'])
     if(file) {
       return new Response(file, {
         headers,
@@ -231,11 +236,16 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
       file = await Deno.readFile(`./client/public${pathname}`)
     }
   } catch (e) {
-    pathname = './client/public/index.html'
-    extension = path.extname(pathname);
-    file = await Deno.readFile(pathname)
+    const markdown = await Deno.readTextFile(`./client/public/404.md`)
+    console.log(markdown)
+    file = await markdownSanitizer(markdown)
     statusCode = Status.NotFound
     console.error(e + '\n' + pathname + '\n' + e)
+    return new Response(file, {
+      headers: { ...headers, ...terminalHeaders },
+      status: statusCode
+    })
+
   }
 
 
@@ -248,20 +258,21 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
 const byPath = (x) => x.path
 const byName = (x) => x.name
 
-async function home(request) {
+async function home(request, business) {
+  if(!business) {
+    return await Deno.readTextFile(`./client/public/index.html`)
+  }
+
   let file
   try {
-    const { pathname, host, search } = new URL(request.url);
-    const parameters = new URLSearchParams(search)
-    const world = parameters.get('world')
-    const { saga } = doingBusinessAs[world || host]
+    const { saga } = business
     console.log(saga)
 
     file = await Deno.readTextFile(`./client/${saga}`)
     file = await sanitizers['.saga'](file)
-    } catch (e) {
+  } catch (e) {
     console.error(e + '\n' + pathname + '\n' + e)
-  }
+  } 
   return file
 }
 

@@ -20,14 +20,12 @@ $.when('click', 'button', async (event) => {
   if(script) {
     const dispatch = (await import(script))[action]
     if(dispatch) {
-      dispatch(event, root)
+      await dispatch(event, root)
     }
 
   }
   if(saga) {
-    setTimeout(() => {
-      setupSaga(saga, event.target)
-    }, 100)
+    setupSaga(saga, event.target)
   }
 })
 
@@ -35,14 +33,14 @@ $.style(`
   & {
     display: block;
     text-align: right;
-    margin: 1rem 0;
+    margin: 1rem;
   }
 
   & button {
-    background: transparent;
+    background: rgba(255,255,255,.85);
     border: 2px solid dodgerblue;
-    color: dodgerblue;
     border-radius: 2rem;
+    color: dodgerblue;
     transition: all 100ms ease-in-out;
     padding: .5rem;
   }
@@ -50,6 +48,6 @@ $.style(`
   & button:focus,
   & button:hover {
     background: dodgerblue;
-    color: white
+    color: white;
   }
 `)

@@ -12,7 +12,7 @@ export function currentCart() {
 
 export function blankSave() {
   state['ls/save-file'] = {
-    chaosEmerald: []
+    chaosEmerald: [],
   }
 }
 
