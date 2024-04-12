@@ -1,5 +1,5 @@
 import module from '@sillonious/module'
-import { hyperSanitizer } from './hyper-script.js'
+import { render } from '@sillonious/saga'
 
 import party, {
   hostPressesStartStop,
@@ -69,7 +69,7 @@ export function setupSaga(nextSaga, target) {
           root.trap.activate()
           root.innerHTML = `
             <data-tooltip>
-              ${hyperSanitizer(saga)}
+              ${render(saga)}
             </data-tooltip>
           `
         }

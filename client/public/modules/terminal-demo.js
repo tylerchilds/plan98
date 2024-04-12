@@ -5,7 +5,7 @@ import { FitAddon } from "xterm-addon-fit";
 
 const link = document.createElement('link')
 link.setAttribute('rel', 'stylesheet')
-link.setAttribute('href', 'https://esm.sh/xterm@5.3.0/css/xterm.css')
+link.setAttribute('href', '/public/vendor/xterm.css')
 document.head.appendChild(link);
 
 const $ = module('terminal-demo', {
