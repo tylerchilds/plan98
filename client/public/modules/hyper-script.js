@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { toast } from './plan98-toast.js'
 import { render } from '@sillonious/saga'
 
 const pitch = `<hello-world
@@ -112,6 +113,9 @@ $.draw((target) => {
       return `
         <div name="write">
           <textarea name="typewriter" style="background: ${stars}">${escapedFile}</textarea>
+          <div name="navi">
+            <button data-publish>Publish</button>
+          </div>
         </div>
       `
     },
@@ -249,6 +253,31 @@ $.when('click', '[data-read]', (event) => {
 })
 
 $.when('click', '[data-print]', self.print)
+
+$.when('click', '[data-publish]', (event) => {
+  const src = source(event.target)
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer no-key"
+  }
+
+  $.teach({ thinking: true })
+
+  fetch(src, {
+    headers: headers,
+    method: 'POST',
+    body: JSON.stringify({
+      file: state[$.link][src].file,
+      src
+    })
+  }).then((response) => response.text()).then((result) => {
+    const data = JSON.parse(result)
+    toast(data.error ? 'bad' : 'good')
+  })
+})
+
+
 
 $.when('click', '[data-perform]', (event) => {
   const { file } = sourceFile(event.target)

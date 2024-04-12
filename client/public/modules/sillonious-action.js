@@ -22,11 +22,11 @@ $.style(`
   & {
     display: block;
     text-align: right;
-    margin: 1rem 0;
+    margin: 1rem;
   }
 
   & button {
-    background: transparent;
+    background: rgba(255,255,255,.85);
     border: 2px solid dodgerblue;
     color: dodgerblue;
     border-radius: 2rem;

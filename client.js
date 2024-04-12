@@ -116,14 +116,33 @@ function buildHeaders(parameters, pathname, extension) {
 }
 
 async function router(request, context) {
-  let { pathname, host, search } = new URL(request.url);
+  const { pathname, host, search } = new URL(request.url);
   const parameters = new URLSearchParams(search)
   const world = parameters.get('world')
-  let extension = path.extname(pathname);
+  const extension = path.extname(pathname);
   const headers = buildHeaders(parameters, pathname, extension);
 
   let file
   let statusCode = Status.Success
+
+  if(request.method === 'POST') {
+    const data = await request.json()
+    try {
+      console.log(data.src)
+      await Deno.writeTextFile(`./client${data.src}`, data.file)
+      return new Response(JSON.stringify({ ok: 'ok' }, null, 2), {
+        headers: { "content-type": "application/json; charset=utf-8" },
+        status: 200
+      });
+    } catch (error) {
+      console.error(error)
+      return new Response(JSON.stringify({ error }, null, 2), {
+        headers: { "content-type": "application/json; charset=utf-8" },
+        status: 400
+      });
+
+    }
+  }
 
   if(pathname === '/') {
     const file = await home(request, doingBusinessAs[world || host || 'sillyz.computer'])

@@ -1,4 +1,5 @@
 import module from '@sillonious/module'
+import { toast } from './plan98-toast.js'
 import eruda from 'eruda'
 
 import {
@@ -24,7 +25,7 @@ function sourceFile(target) {
     : (function initialize() {
       schedule(() => {
         fetch(src).then(res => res.text()).then(file => {
-          $.teach({ [src]: { file }})
+          $.teach({ [src]: { file, src }})
         })
       })
       return data
@@ -32,8 +33,26 @@ function sourceFile(target) {
 }
 
 $.when('click', '.publish', (event) => {
-  const { file } = sourceFile(event.target)
-  alert(file)
+  const { file, src } = sourceFile(event.target)
+
+  const headers = {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer no-key"
+  }
+
+  $.teach({ thinking: true })
+
+  fetch(src, {
+    headers: headers,
+    method: 'POST',
+    body: JSON.stringify({
+      file,
+      src
+    })
+  }).then((response) => response.text()).then((result) => {
+    const data = JSON.parse(result)
+    toast(data.error ? 'bad' : 'good')
+  })
 })
 
 $.when('change', 'select', (event) => {
@@ -54,15 +73,14 @@ $.draw(target => {
 
   if(file && !target.view) {
     target.innerHTML = stack ? `
+      <button class="publish">Publish</button>
       <select>
         ${stack.split(',').map((filename) => {
           return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
         })}
       </select>
     `: `
-      <!--
       <button class="publish">Publish</button>
-      -->
     `
 
     const config = {
@@ -92,7 +110,7 @@ function persist(target, $, _flags) {
 
     const src = target.closest('[src]').getAttribute('src')
 		const file = update.view.state.doc.toString()
-    $.teach({ [src]: { file }})
+    $.teach({ [src]: { file, src }})
 	}
 }
 
