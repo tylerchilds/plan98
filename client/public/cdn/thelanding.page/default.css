@@ -6,7 +6,7 @@ body {
   margin: 0 auto;
 }
 
-body > sillonious-brand > saga-genesis > xml-html {
+body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
   max-width: 6in;
   margin: auto;
   padding: 1in 1rem;
