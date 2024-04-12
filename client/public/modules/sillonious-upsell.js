@@ -42,7 +42,7 @@ export function setupSaga(nextSaga, target) {
         target.innerHTML = target.dataset.lastHtml
         return
       }
-      if(!root) window.location.href = key
+      if(!root) window.location.href = key + window.location.search
       const saga = await response.text()
       $.teach(
         { [key]: saga },

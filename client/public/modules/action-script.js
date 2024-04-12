@@ -17,11 +17,18 @@ $.draw(target => {
 $.when('click', 'button', async (event) => {
   const root = event.target.closest($.link)
   const { action, script, saga } = root.dataset
-  const dispatch = (await import(script))[action]
-  dispatch(event, root)
-  setTimeout(() => {
-    setupSaga(saga, event.target)
-  }, 100)
+  if(script) {
+    const dispatch = (await import(script))[action]
+    if(dispatch) {
+      dispatch(event, root)
+    }
+
+  }
+  if(saga) {
+    setTimeout(() => {
+      setupSaga(saga, event.target)
+    }, 100)
+  }
 })
 
 $.style(`

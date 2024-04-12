@@ -32,6 +32,17 @@ $.draw((target) => {
   const base = currentWorkingDirectory + activeWorld + activeDialect
 
   return `
+    Hey--<br><br>
+    Thanks for checking out Sillyz.Computer, an interactive, immersive tech demo that's part portfolio, part edutainment and part personal saga.<br><br>
+    If you find things a little confusing, that's okay. Nothing is self explanatory, but hopefully self-exploratory.<br/><br/>
+    If you're not feeling that way yet either, that's okay. Feel free to click around.<br/><br/>
+
+    Sample Customer Journey:
+    <div>
+      <a href="/sagas/thelanding.page/en-us/000-000.saga?world=thelanding.page">Tutorial</a>
+    </div>
+
+
     Experiences:
     <div>
       <a href="/?world=thelanding.page">Browser</a>

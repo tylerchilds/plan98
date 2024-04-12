@@ -6,6 +6,12 @@ body {
   margin: 0 auto;
 }
 
+body > sillonious-brand > saga-genesis > xml-html {
+  max-width: 6in;
+  margin: auto;
+  padding: 1in 1rem;
+}
+
 [pathname="/"] #main {
   padding-top: 25vh;
   background: white;
