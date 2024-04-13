@@ -161,9 +161,10 @@ $.style(`
     right: 0;
     pointer-events: all;
     box-shadow:
-      2px 2px 4px 4px rgba(0,0,0,.10),
-      6px 6px 12px 12px rgba(0,0,0,.5),
-      18px 18px 36px 36px rgba(0,0,0,.25);
+      0px 0px 4px 4px rgba(0,0,0,.10),
+      0px 0px 12px 12px rgba(0,0,0,.5),
+      0px 0px 36px 36px rgba(0,0,0,.25);
+    width: 100%
   }
 }
   }

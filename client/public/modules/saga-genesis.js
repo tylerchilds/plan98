@@ -88,11 +88,13 @@ function revealTruth(event) {
   const { quest } = $.learn()
 
   showModal(`
-    <div style="overflow: auto; width: 100%; height: 100%; max-width: 100vw; max-height: 100vh; padding: 2rem .25rem;">
-      <sillonious-brand>
-        <media-plexer src="${quest}"></media-plexer>
-        <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
-      </sillonious-brand>
+    <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
+      <div style="overflow: auto; padding: 2rem;">
+        <sillonious-brand>
+          <media-plexer src="${quest}"></media-plexer>
+          <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
+        </sillonious-brand>
+      </div>
     </div>
   `, { centered: true })
 }
