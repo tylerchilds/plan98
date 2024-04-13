@@ -127,6 +127,13 @@ async function router(request, context) {
 
   if(request.method === 'POST') {
     const data = await request.json()
+
+    if(pathname === '/plan98/pay-by-link') {
+      return data.mode === 'CREATE'
+        ? ResponseData({ payment: await newPayment(data) })
+        : ResponseData({ payment: await getPaymentStatus(data) })
+    }
+
     try {
       console.log(data.src)
       await Deno.writeTextFile(`./client${data.src}`, data.file)
@@ -217,14 +224,6 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
 
     console.log(xml)
     return new Response(xml, { headers });
-  }
-
-  if(pathname === '/plan98/pay-by-link') {
-    const data = await request.json()
-
-    return data.mode === 'CREATE'
-      ? ResponseData({ payment: await newPayment(data) })
-      : ResponseData({ payment: await getPaymentStatus(data) })
   }
 
   if(pathname === '/plan98/about') {
