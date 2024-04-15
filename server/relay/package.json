@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "start": "cd node_modules/gun && npm start"
+  },
+  "dependencies": {
+    "gun": "^0.2020.1240"
+  }
+}

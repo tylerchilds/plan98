@@ -21,6 +21,9 @@
     "start-repository": "cd ../SourceCode/esm.sh && go run main.go --config=config.json --dev",
     "reverse-repository": "ssh -N -R 8080:localhost:8090 esm.$USER.me",
 
+    "start-relay": "cd server/relay && npm start",
+    "reverse-relay": "ssh -N -R 8765:localhost:8765 relay.$USER.me",
+
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 
