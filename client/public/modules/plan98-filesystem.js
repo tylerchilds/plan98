@@ -89,13 +89,10 @@ function system(target) {
   const tree = closestWorkingComputer(target)
   const path = tree.path || window.location.pathname
 
-  const rootClass = rootActive ? 'active' : ''
+  const rootClass = rootActive ? 'root active' : 'root'
 
   target.innerHTML = `
     <div class="${rootClass}">
-      <div class="menubar">
-        <input type="text" name="path" value="${path || '/'}" />
-      </div>
       <div name="transport">
         <div name="actions">
           <button class="switcher">
@@ -105,18 +102,19 @@ function system(target) {
         </div>
       </div>
       <div class="flex-column">
-        <div class="root">
+        <div class="branch">
           <div class="treeview">
             ${nest(cwc, { target, tree, pathParts: [], subtree: tree.plan98 })}
           </div>
-          <form id="command-line">
-            <input type="text" placeholder=":" name="command" />
-          </form>
         </div>
         <div class="leaf">
           <div data-resizer></div>
           <media-plexer src="${path + window.location.search}"></media-plexer>
         </div>
+      </div>
+      <div class="menubar">
+        <input type="text" name="path" value="${path || '/'}" />
+      </div>
     </div>
   `
 }
@@ -265,10 +263,9 @@ function nest(computer, { target, tree = {}, pathParts = [], subtree = {} }) {
 
     if(type === Types.Directory.type) {
       const tree = closestWorkingComputer(target)
-      const activePathParts = (tree.path || window.location.pathname).split('/')
-      const directoryActive = currentPathParts[index] === activePathParts[index]
+      const directoryActive = (state['ls/fs/open'] || {})[currentPath]
       return `
-      <details ${directoryActive ? 'open': ''}>
+      <details ${directoryActive ? 'open': ''} data-path="${currentPath}">
         <summary>
           <plan98-context data-menu="${menuFor(computer, tree.plan98, currentPath)}">
             ${name || "/"}
@@ -326,6 +323,13 @@ $.when('click', '[data-reset]', async ({target}) => {
   await factoryReset(cwc)
 })
 
+// folders
+$.when('toggle', '[data-path]', ({ target }) => {
+  const { path } = target.dataset
+  state['ls/fs/open'][path] = target.open
+})
+
+// files
 $.when('click', '[data-path]', ({ target }) => {
   const { path } = target.dataset
   const tree = closestWorkingComputer(target)
@@ -358,6 +362,12 @@ $.style(`
     grid-template-rows: auto 1fr;
     height: 100%;
     --sidebar-width: 180px;
+    position: relative;
+  }
+
+  & .root {
+    position: absolute;
+    inset: 0;
   }
   & .menubar {
     background: rgba(0,0,0,.85);
@@ -440,11 +450,13 @@ $.style(`
   }
 
   & .flex-column {
-    display: flex;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    height: calc(100% - 2rem);
+    overflow: hidden;
   }
 
-  & .root {
+  & .branch {
     width: 100%;
     max-width: 100%;
     max-height: 100%;
@@ -460,23 +472,13 @@ $.style(`
     bottom: 0;
     left: 0px;
     width: 10px;
-    background: linear-gradient(90deg, black, white);
+    background: rgba(128,128,128,.5);
     z-index: 10;
   }
 
   & .list-item {
     padding-left: 1rem;
     border-bottom: 1px solid cyan;
-  }
-
-  & #command-line input {
-    display: block;
-    line-height: 2rem;
-    font-size: 1rem;
-    border: 0;
-    box-shadow: -72px -16px 72px 16px rgba(0,0,0,.25);
-    max-width: 100%;
-    width: 100%;
   }
 
   & [name="transport"] {

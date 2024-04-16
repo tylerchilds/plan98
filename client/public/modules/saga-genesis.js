@@ -83,7 +83,7 @@ function revealTruth(event) {
 
   showModal(`
     <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
-      <div style="overflow: auto; padding: 2rem 0 0;">
+      <div style="overflow: auto; height: 100%; padding: 2rem 0 0;">
         <sillonious-brand>
           <integrated-development src="${quest}"></integrated-development>
         </sillonious-brand>

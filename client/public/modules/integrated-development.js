@@ -16,7 +16,7 @@ $.draw((target) => {
     {
       icon: '<span>$</span>',
       label: 'Pay to Win',
-      content: `<hello-world></hello-world>`
+      content: `<iframe src="https://thelanding.page/sagas/thelanding.page/en-us/billing.saga?world=thelanding.page" style="background: white;"></iframe>`
     },
     {
       icon: '<span>#</span>',
@@ -70,6 +70,7 @@ $.style(`
     height: 100%;
     background: rgba(0,0,0,.85);
     color: white;
+    overflow: hidden;
   }
 
   & .example {
@@ -95,8 +96,14 @@ $.style(`
 
   & .example-view {
     padding: 1rem;
+    overflow: auto;
   }
 
+  & data-tooltip,
+  & data-tooltip .example {
+    height: 100%;
+  }
+  & plan98-filesystem,
   & code-module {
     color: black;
   }
