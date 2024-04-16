@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { newPayment, getPaymentStatus } from '@sillonious/payments'
 import { skuTable } from './purchase-catalog.js'
-import { setupSaga } from './sillonious-upsell.js'
+import { setupSaga } from './wizard-journey.js'
 import { currentCart } from '../cdn/thelanding.page/game-state.js'
 
 function preference() {

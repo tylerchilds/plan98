@@ -1,14 +1,18 @@
-A red egg lays next to an orange chicken.
+At the start, was it the Argonaut or the Egg? Either way, there were either eight eggs or eight legs.
+
+In time, these eight grew into many names-- stones, emeralds, rings, badges, cards--
+
+Will you chase them or will they chase you?
 
 <action-script
-text: Take the Red Egg
+text: Chase Eggs
 data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-saga: 000-001.saga
 data-emerald: 0
 
 <action-script
-text: Take the Orange Chicken
+text: Flee Tentacles
 data-action: takeEmerald
 data-script: /public/cdn/thelanding.page/game-state.js
 data-emerald: 1

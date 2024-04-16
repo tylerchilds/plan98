@@ -7,7 +7,7 @@ function upsell(plan98) {
   const notPrime = window.location.host !== plan98.database
   if(isFirst && notPrime) {
     document.body.insertAdjacentHTML('beforeend', `
-      <sillonious-upsell host="${plan98.database}"></sillonious-upsell>
+      <wizard-journey host="${plan98.database}"></wizard-journey>
     `)
   }
 }

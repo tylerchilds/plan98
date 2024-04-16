@@ -1,5 +1,5 @@
 import module from '@sillonious/module'
-import { setupSaga } from './sillonious-upsell.js'
+import { setupSaga } from './wizard-journey.js'
 
 const $ = module('sillonious-action')
 

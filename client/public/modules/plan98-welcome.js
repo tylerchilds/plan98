@@ -105,21 +105,21 @@ $.draw((target) => {
           <div id="foreground">
             <div id="logo">
                 <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                  Paper
+                  Wizard
                 </hypertext-variable>
                 <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                  NAUTILOIDS
+                  JOURNEY
                 </hypertext-variable>
               </div>
-              <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
-              </rainbow-action>
             </div>
           </div>
-          <button data-about data-tooltip="Learn about where here is.">About</button>
         </div>
       </div>
     </div>
-  `
+    <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
+    </rainbow-action>
+    <button data-about data-tooltip="Learn about where here is.">About</button>
+`
 })
 
 $.when('click', '[data-about]', (event) => {
@@ -155,14 +155,12 @@ $.style(`
   }
   & [data-about] {
     position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    right: 1rem;
-    margin: auto;
+    bottom: 0;
+    right: 0;
     background: rgba(0,0,0,.5);
     color: white;
     border: none;
-    border-radius: 1rem;
+    border-radius: 1rem 0 0 0;
     padding: 1rem;
 
   }
@@ -440,12 +438,12 @@ $.style(`
 
 & #logo hypertext-variable:first-child {
   display: block;
-  font-size: 15vmin;
+  font-size: clamp(1rem, 700%, 20vmin);
 }
 
 & #logo hypertext-variable:last-child {
   display: block;
-  font-size: 6.5vmin;
+  font-size: clamp(1rem, 300%, 10vmin);
   letter-spacing: .25em;
   line-height: 1.5;
 }
@@ -491,5 +489,20 @@ $.style(`
     top: 0;
     left: 0;
   }
+
+  & .start {
+    border-radius: 0;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+  }
+
+  & .start button {
+    border-radius: 0 1rem 0 0;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+  }
+
 `)
 

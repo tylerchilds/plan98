@@ -79,20 +79,13 @@ window.addEventListener('keydown', (event) => {
 });
 
 function revealTruth(event) {
-  const entries = performance.getEntriesByType('resource');
-
-  const nautiloids = entries.map((entry) => {
-    const local = entry.name.includes(window.location.origin)
-    return local ? entry.name.split(window.location.origin)[1] : entry.name;
-  });
   const { quest } = $.learn()
 
   showModal(`
     <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
-      <div style="overflow: auto; padding: 2rem;">
+      <div style="overflow: auto; padding: 2rem 0 0;">
         <sillonious-brand>
-          <media-plexer src="${quest}"></media-plexer>
-          <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
+          <integrated-development src="${quest}"></integrated-development>
         </sillonious-brand>
       </div>
     </div>

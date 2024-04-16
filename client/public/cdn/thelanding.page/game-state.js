@@ -29,10 +29,10 @@ export function takeButton() {
 }
 
 export function ok() {
-  const upsell = document.querySelector('sillonious-upsell')
+  const wizard = document.querySelector('wizard-journey')
 
-  if(upsell.trap) {
-    upsell.trap.deactivate()
+  if(wizard.trap) {
+    wizard.trap.deactivate()
   } else {
     window.location.href = "/?world=sillyz.computer"
   }

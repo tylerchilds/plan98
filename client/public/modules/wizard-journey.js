@@ -23,7 +23,7 @@ const overworld = {
   '/': genesisSaga
 }
 
-const $ = module('sillonious-upsell', {
+const $ = module('wizard-journey', {
   activeWorld: plan98.host || 'actuality.network',
   activeDialect: '/en-us/',
   cache: {}

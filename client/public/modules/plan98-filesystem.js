@@ -523,11 +523,12 @@ $.style(`
 
   & .leaf {
     background: white;
-    inset: 2rem 0 0;
+    inset: 0;
     transform: translateY(0);
     transition: transform 200ms ease-in-out;
     overflow: hidden;
     position: relative;
+    width: 100%;
   }
 
   & .leaf iframe {

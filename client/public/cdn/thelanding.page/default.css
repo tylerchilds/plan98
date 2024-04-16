@@ -29,14 +29,14 @@ saga-genesis > sillonious-memex {
   height: 100%;
 }
 
-body sillonious-upsell.active {
+body wizard-journey.active {
   inset: 0;
   background: rgba(128,128,128,.85);
   max-height: 100%;
   max-width: 100%;
 }
 
-body sillonious-upsell xml-html {
+body wizard-journey xml-html {
   background: #fff;
   border-radius: 1rem;
   max-width: 6in;
