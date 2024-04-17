@@ -136,10 +136,8 @@ $.when('click', '[data-tutorial]', () => {
     window.location.href = `/404`
   }
   showModal(`
-    <sticky-note>
-      <sillonious-tutorials></sillonious-tutorials>
-    </sticky-note>
-  `, { bannerType: modalTypes.news })
+    <sillyz-ocarina></sillyz-ocarina>
+  `)
 })
 
 $.when('click', '[data-reset]', ({target}) => {

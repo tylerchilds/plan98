@@ -43,7 +43,9 @@ $.draw((target) => {
       icon: '<span>&gt;</span>',
       label: 'Pretend',
       content: `
-        <video-feed></video-feed>
+        <video-feed>
+          <video></video>
+        </video-feed>
       `
     },
     {
