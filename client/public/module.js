@@ -1,24 +1,40 @@
 import statebus, { state } from 'statebus'
 import { innerHTML } from 'diffhtml'
 
+const logs = {}
+
+export function insights() {
+  return logs
+}
+
+function insight(name, link) {
+  if(!logs[`${name}:${link}`]) {
+    logs[`${name}:${link}`] = 0
+  }
+  logs[`${name}:${link}`] += 1
+}
+
 const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
 
-function update(target, compositor) {
+function update(link, target, compositor) {
+  insight('module:update', link)
   const html = compositor(target)
   if(html) innerHTML(target, html)
 }
 
 function draw(link, compositor) {
+  insight('module:draw', link)
   listen(CREATE_EVENT, link, (event) => {
     statebus.reactive(
-      update.bind(null, event.target, compositor)
+      update.bind(null, link, event.target, compositor)
     )()
   })
 }
 
 function style(link, stylesheet) {
+  insight('module:style', link)
   const styles = `
     <style type="text/css" data-link="${link}">
       ${stylesheet.replaceAll('&', link)}
@@ -29,19 +45,24 @@ function style(link, stylesheet) {
 }
 
 export function learn(link) {
+  insight('module:learn', link)
   return state[link] || {}
 }
 
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
+  insight('module:teach', link)
   const current = statebus.cache[link] || {}
   state[link] = nuance(current.val || {}, knowledge);
 }
 
-export function when(link1, eventName, link2, callback) {
-  listen(eventName, `${link1} ${link2}`, callback)
+export function when(link1, type, link2, callback) {
+  const link = `${link1} ${link2}`
+  insight('module:when:'+type, link)
+  listen(type, link, callback)
 }
 
 export default function module(link, initialState = {}) {
+  insight('module', link)
   teach(link, initialState)
 
   return {
@@ -71,6 +92,8 @@ export function listen(type, link, handler = () => null) {
       event.target.matches &&
       event.target.matches(link)
     ) {
+
+      insight('module:listen:'+type, link)
       handler.call(null, event);
     }
   };
@@ -121,6 +144,7 @@ function getSubscribers({ target }) {
 }
 
 function dispatchCreate(target) {
+  insight('module:create', target.localName)
   if(!target.id) target.id = sufficientlyUniqueId()
   target.dispatchEvent(new Event(CREATE_EVENT))
   target.reactive = true

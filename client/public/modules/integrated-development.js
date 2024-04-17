@@ -39,6 +39,20 @@ $.draw((target) => {
         <plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>
       `
     },
+    {
+      icon: '<span>&gt;</span>',
+      label: 'Pretend',
+      content: `
+        <video-feed></video-feed>
+      `
+    },
+    {
+      icon: '<span>&</span>',
+      label: 'Dashboard',
+      content: `
+        <module-dashboard></module-dashboard>
+      `
+    },
   ]
 
   target.innerHTML = `
