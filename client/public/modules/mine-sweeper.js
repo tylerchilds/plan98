@@ -355,11 +355,13 @@ $.style(`
     display: grid;
     place-content: center;
     padding: 0;
+    min-height: 2rem;
   }
 
   & .mini-overlay {
     position: absolute;
     background: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
     padding: 1rem;
     border-radius: 1rem;
     margin: 0;

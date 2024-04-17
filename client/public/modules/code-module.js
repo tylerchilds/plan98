@@ -1,12 +1,13 @@
 import module from '@sillonious/module'
 import { toast } from './plan98-toast.js'
 import eruda from 'eruda'
+import { vim } from "@replit/codemirror-vim"
 
 import {
   EditorState,
   EditorView,
   basicSetup
-} from "https://esm.sh/@codemirror/basic-setup"
+} from "@codemirror/basic-setup"
 
 const $ = module('code-module')
 
@@ -73,12 +74,12 @@ $.draw(target => {
 
   if(file && !target.view) {
     target.innerHTML = stack ? `
-      <button class="publish">Publish</button>
-      <select>
+      <select class="select">
         ${stack.split(',').map((filename) => {
           return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
         })}
       </select>
+      <button class="publish">Publish</button>
     `: `
       <button class="publish">Publish</button>
     `
@@ -92,14 +93,14 @@ $.draw(target => {
       ]
     }
 
-    const editorState = EditorState.create({
+    target.editorState = EditorState.create({
       ...config,
       doc: file
     })
 
     target.view = new EditorView({
       parent: target,
-      state: editorState
+      state: target.editorState
     })
   }
 })
@@ -122,6 +123,7 @@ $.style(`
     height: 100%;
     max-height: 100%;
     position: relative;
+    padding: 4rem 0 0;
   }
 
   & select {
@@ -132,6 +134,27 @@ $.style(`
 
   & .cm-content {
     background: rgba(255,255,255,.85);
+  }
+
+  & .publish {
+    background: rgba(0,0,0,.85);
+    border: none;
+    color: dodgerblue;
+    cursor: pointer;
+    height: 2rem;
+    border-radius: 1rem;
+    transition: color 100ms;
+    padding: .25rem 1rem;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
+  & .select {
+    position: absolute;
+    top: 2rem;
+    left: 0;
+    right: 0;
   }
 `)
 

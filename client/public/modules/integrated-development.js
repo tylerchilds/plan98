@@ -79,6 +79,7 @@ $.style(`
   }
 
   & .example-tab {
+    padding: 0;
     display: block;
     border: 0;
     border-radius: 1rem;
@@ -95,7 +96,6 @@ $.style(`
   }
 
   & .example-view {
-    padding: 1rem;
     overflow: auto;
   }
 

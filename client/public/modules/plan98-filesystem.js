@@ -1,6 +1,8 @@
 import module from '@sillonious/module'
 import { tooltip as closeTooltip } from './plan98-context.js'
 
+state['ls/fs/open'] ||= {}
+
 import { showModal, types as modalTypes } from './plan98-modal.js'
 
 const parameters = new URLSearchParams(window.location.search)
@@ -93,6 +95,9 @@ function system(target) {
 
   target.innerHTML = `
     <div class="${rootClass}">
+      <div class="menubar">
+        <input type="text" name="path" value="${path || '/'}" />
+      </div>
       <div name="transport">
         <div name="actions">
           <button class="switcher">
@@ -111,9 +116,6 @@ function system(target) {
           <div data-resizer></div>
           <media-plexer src="${path + window.location.search}"></media-plexer>
         </div>
-      </div>
-      <div class="menubar">
-        <input type="text" name="path" value="${path || '/'}" />
       </div>
     </div>
   `
@@ -246,7 +248,6 @@ $.when('click', '[data-uri]', async function(event) {
 function nest(computer, { target, tree = {}, pathParts = [], subtree = {} }) {
   if(!subtree.children) return ''
   return subtree.children.map((child, index) => {
-    console.log({ index })
     const { name, type } = child
     const currentPathParts = [...pathParts, name]
     const currentPath = currentPathParts.join('/') || '/'
@@ -263,7 +264,7 @@ function nest(computer, { target, tree = {}, pathParts = [], subtree = {} }) {
 
     if(type === Types.Directory.type) {
       const tree = closestWorkingComputer(target)
-      const directoryActive = (state['ls/fs/open'] || {})[currentPath]
+      const directoryActive = (state['ls/fs/open'])[currentPath]
       return `
       <details ${directoryActive ? 'open': ''} data-path="${currentPath}">
         <summary>
@@ -391,9 +392,10 @@ $.style(`
     position: relative;
     overflow: auto;
     white-space: nowrap;
-    background: rgba(255,255,255,.85);
+    background: rgba(66,66,66,.85);
+    color: rgba(255,255,255,.5);
+    user-select: none;
   }
-
 
   & [name="path"] {
     display: block;
@@ -426,11 +428,19 @@ $.style(`
   & .treeview button,
   & .listing button {
     all: unset;
-    text-decoration: underline;
-    color: blue;
+    color: rgba(255,255,255,.5);
     display: block;
     cursor: pointer;
     pointer-events: all;
+  }
+
+  & summary:hover,
+  & summary:focus,
+  & .treeview button:hover,
+  & .listing button:hover,
+  & .treeview button:focus,
+  & .listing button:focus {
+    color: rgba(255,255,255,1);
   }
 
   & .listing {
@@ -472,8 +482,9 @@ $.style(`
     bottom: 0;
     left: 0px;
     width: 10px;
-    background: rgba(128,128,128,.5);
+    background: rgba(0,0,0,.1);
     z-index: 10;
+    cursor: col-resize;
   }
 
   & .list-item {
@@ -486,7 +497,7 @@ $.style(`
     max-width: calc(100vw - 1.5rem - 1px);
     position: absolute;
     right: 0;
-    top: 2rem;
+    top: 4rem;
     z-index: 10;
     overflow: auto;
   }
@@ -496,7 +507,6 @@ $.style(`
     justify-content: end;
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
-		padding-right: 1rem;
     border-radius: 1.5rem 0 0 1.5rem;
   }
 
@@ -539,7 +549,7 @@ $.style(`
     height: 100%;
   }
 
-  & .active .root {
+  & .active.root {
     display: grid;
     grid-template-rows: 1fr 2rem;
     --sidebar-width: 0;
