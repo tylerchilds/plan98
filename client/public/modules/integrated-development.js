@@ -55,6 +55,14 @@ $.draw((target) => {
         <module-dashboard></module-dashboard>
       `
     },
+    {
+      icon: '<span>{</span>',
+      label: 'Dashboard',
+      content: `
+        <iframe src="https://app.radicle.xyz/nodes/seed.radicle.garden/rad:z34JbF5FKbhjHAJhTYyyguVwdhMGb/" title="argonauts"></iframe>
+      `
+    },
+
   ]
 
   target.innerHTML = `
