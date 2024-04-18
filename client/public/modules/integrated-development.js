@@ -16,7 +16,7 @@ $.draw((target) => {
     {
       icon: '<span>$</span>',
       label: 'Pay to Win',
-      content: `<iframe src="https://thelanding.page/sagas/thelanding.page/en-us/billing.saga?world=thelanding.page" style="background: white;"></iframe>`
+      content: `<iframe src="https://thelanding.page" style="background: white;"></iframe>`
     },
     {
       icon: '<span>#</span>',
