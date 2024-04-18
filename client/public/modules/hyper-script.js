@@ -256,24 +256,50 @@ $.when('click', '[data-print]', async (event) => {
   })
   const { file } = sourceFile(event.target)
   const html = hyperSanitizer(file)
-  const preview = window.open('', 'PRINT');
+  if(event.target.preview) event.target.preview.close()
+  event.target.preview = window.open('', 'PRINT');
+  const { preview } = event.target
 
   const page = new DOMParser().parseFromString(template, "text/html");
   page.body.innerHTML = ''
   page.body.insertAdjacentHTML('beforeend', `
+    <div class="print-banner">
+      Looks good! <button onclick="(()=>{window.print();window.close()})()">Print</button>
+    </div>
     ${html}
     <style type="text/css">
       body {overflow: auto; height: auto !important; }
       xml-html {height: 100%; overflow: auto; }
+      .print-banner {
+        background: rgba(0,0,0,.85);
+        padding: 1rem;
+        text-align: right;
+        color: white;
+      }
+
+      .print-banner button {
+        background: lemonchiffon;
+        color: saddlebrown;
+        border: none;
+        padding: 1rem;
+      }
+
+      .print-banner button:hover,
+      .print-banner button:focus {
+        background: dodgerblue;
+        color: white;
+      }
+      @media print {
+        .print-banner {
+          display: none;
+        }
+      }
     </style>
   `)
 
   preview.document.write(`<!DOCTYPE html>${page.documentElement.outerHTML}`)
   preview.document.close(); // necessary for IE >= 10
   preview.focus(); // necessary for IE >= 10*/
-  setTimeout(() => {
-    preview.print(); // necessary for IE >= 10*/
-  }, 1000)
 })
 
 $.when('click', '[data-publish]', (event) => {
