@@ -59,9 +59,9 @@ async function markdownSanitizer(md) {
   const dom = await page()
   dom.getElementById('main').remove()
   dom.body.insertAdjacentHTML('afterbegin', `
-    <div class="markdown">
+    <saga-genesis class="markdown">
       ${marked(md)}
-    </div>
+    </saga-genesis>
   `)
   return `<!DOCTYPE html>${dom.documentElement}`
 }
@@ -254,9 +254,14 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
       file = await Deno.readFile(`./client/public${pathname}`)
     }
   } catch (e) {
-    const markdown = await Deno.readTextFile(`./client/public/404.md`)
-    console.log(markdown)
-    file = await markdownSanitizer(markdown)
+
+    let file
+    if(pathname.startsWith('/public/')) {
+      file = await Deno.readTextFile(`./client/public/404.saga`)
+    } else {
+      const saga = await Deno.readTextFile(`./client/public/404.saga`)
+      file = await sagaSanitizer(saga)
+    }
     statusCode = Status.NotFound
     console.error(e + '\n' + pathname + '\n' + e)
     return new Response(file, {

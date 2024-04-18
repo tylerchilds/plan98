@@ -205,8 +205,14 @@ $.style(`
     bottom: .25rem;
     z-index: 1100;
     overflow: auto;
+    pointer-events: none;
   }
 
+  & [name="transport"] button,
+  & [name="transport"] input{
+    pointer-events: all;
+  }
+  
   & [name="actions"] {
     display: inline-flex;
     justify-content: end;

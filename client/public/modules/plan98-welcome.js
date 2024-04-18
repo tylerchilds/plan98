@@ -111,14 +111,14 @@ $.draw((target) => {
                   QUEST
                 </hypertext-variable>
               </div>
+              <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
+              </rainbow-action>
+              <button data-about data-tooltip="Learn about where here is.">About</button>
             </div>
           </div>
         </div>
       </div>
     </div>
-    <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
-    </rainbow-action>
-    <button data-about data-tooltip="Learn about where here is.">About</button>
 `
 })
 
@@ -152,15 +152,12 @@ $.style(`
     height: 100%;
   }
   & [data-about] {
-    position: fixed;
-    bottom: 0;
-    right: 0;
     background: rgba(0,0,0,.5);
     color: white;
     border: none;
-    border-radius: 1rem 0 0 0;
+    border-radius: 100%;
+    margin: 1rem;
     padding: 1rem;
-
   }
   & [name="square"]{
     margin: auto;
@@ -490,16 +487,12 @@ $.style(`
 
   & .start {
     border-radius: 0;
-    position: fixed;
     left: 0;
     bottom: 0;
   }
 
   & .start button {
-    border-radius: 0 1rem 0 0;
-    position: absolute;
-    left: 0;
-    bottom: 0;
+    border-radius: 100%;
   }
 
 `)

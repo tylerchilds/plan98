@@ -183,6 +183,7 @@ body {
 	line-height: 1.5;
 	font-family: var(--font-body);
   position: relative;
+  overflow: hidden;
 }
 
 a:link {

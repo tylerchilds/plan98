@@ -22,7 +22,9 @@ function useMacGuffin(macGuffin) {
   }
 
   fetch(macGuffin)
-    .then(origin => origin.text())
+    .then(origin => {
+      return origin.text()
+    })
     .then(async present => {
       const { hyperSanitizer } = await import('./hyper-script.js')
       const supervisedReality = hyperSanitizer(present)
@@ -39,7 +41,23 @@ function getHost(target) {
   return (target.closest('[host]') && target.closest('[host]').getAttribute('host')) || plan98.host
 }
 
+
+function checkFocus(target) {
+  return () => {
+    if(document.activeElement == document.getElementsByTagName("iframe")[0]) {
+
+      target.classList.add('focused')
+    } else {
+      target.classList.remove('focused')
+    }
+  }
+}
+
 $.draw((target) => {
+  if(!target.checkingFocusConstantly) {
+    target.checkingFocusConstantly = true
+    window.setInterval(checkFocus(target), 1000);
+  }
   const host = getHost(target)
   const route = window.location.pathname
   const macGuffin = route === '/' ? (doingBusinessAs[host] || emeraldOfTime).saga : '/public' + route
@@ -101,6 +119,14 @@ $.style(`
     position: fixed;
     inset: 0;
     overflow: auto;
+    opacity: 1;
+    transition: opacity 100ms ease-in-out;
+  }
+
+  &.focused [data-escape],
+  &.focused [data-aid] {
+    opacity: 0;
+    pointer-events: none;
   }
 
   & [data-escape],

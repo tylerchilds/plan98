@@ -22,6 +22,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
+    overflow: hidden;
   }
 `)
 

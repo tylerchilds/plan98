@@ -230,9 +230,7 @@ function sourceFile(target) {
       schedule(() => {
         let file = pitch
         fetch(src).then(async res => {
-          if(res.status === 200) {
             file = await res.text()
-          }
         }).catch((error) => {
           console.error(error)
         }).finally(() => {

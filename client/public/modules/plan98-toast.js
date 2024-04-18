@@ -46,10 +46,10 @@ $.style(`
     background: lemonchiffon;
     padding: 1rem;
     box-shadow: 0 0 2px 2px rgba(0,0,0,.85);
+    pointer-events: all;
   }
 
   &.flashed {
     opacity: 1;
-    pointer-events: all;
   }
 `)
