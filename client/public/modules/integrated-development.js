@@ -2,6 +2,8 @@ import module from '@sillonious/module'
 
 const $ = module('integrated-development', { activeTabIndex: 1 })
 
+const language = "en-us"
+
 $.draw((target) => {
   const { activeTabIndex } = $.learn()
   const quest = target.getAttribute('src')
@@ -16,7 +18,7 @@ $.draw((target) => {
     {
       icon: '<span>$</span>',
       label: 'Pay to Win',
-      content: `<iframe src="https://thelanding.page" style="background: white;"></iframe>`
+      content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`
     },
     {
       icon: '<span>#</span>',
