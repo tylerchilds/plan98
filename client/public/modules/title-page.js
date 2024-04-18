@@ -35,6 +35,7 @@ function markup(string) {
 $.style(`
   & {
     height: 9in;
+    display: block;
   }
 	& [name="cover"] {
 		display: grid;

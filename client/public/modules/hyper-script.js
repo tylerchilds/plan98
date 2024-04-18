@@ -230,7 +230,7 @@ function sourceFile(target) {
       schedule(() => {
         let file = pitch
         fetch(src).then(async res => {
-            file = await res.text()
+          file = await res.text()
         }).catch((error) => {
           console.error(error)
         }).finally(() => {
@@ -250,7 +250,31 @@ $.when('click', '[data-read]', (event) => {
   $.teach({ nextPanel: panels.read })
 })
 
-$.when('click', '[data-print]', self.print)
+$.when('click', '[data-print]', async (event) => {
+  const template = await fetch('/').then(async res => {
+    return await res.text()
+  })
+  const { file } = sourceFile(event.target)
+  const html = hyperSanitizer(file)
+  const preview = window.open('', 'PRINT');
+
+  const page = new DOMParser().parseFromString(template, "text/html");
+  page.body.innerHTML = ''
+  page.body.insertAdjacentHTML('beforeend', `
+    ${html}
+    <style type="text/css">
+      body {overflow: auto; height: auto !important; }
+      xml-html {height: 100%; overflow: auto; }
+    </style>
+  `)
+
+  preview.document.write(`<!DOCTYPE html>${page.documentElement.outerHTML}`)
+  preview.document.close(); // necessary for IE >= 10
+  preview.focus(); // necessary for IE >= 10*/
+  setTimeout(() => {
+    preview.print(); // necessary for IE >= 10*/
+  }, 1000)
+})
 
 $.when('click', '[data-publish]', (event) => {
   const src = source(event.target)
@@ -474,7 +498,7 @@ $.style(`
     justify-content: end;
     border: 1px solid rgba(255,255,255,.15);
     gap: .25rem;
-		padding-right: 1rem;
+    padding-right: 1rem;
     border-radius: 1.5rem 0 0 1.5rem;
   }
 

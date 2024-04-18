@@ -471,6 +471,10 @@ $.style(`
     pointer-events: none;
   }
 
+  &[mystery="true"] .label {
+    display: none;
+  }
+
 
   & .label:first-child label {
     place-self: end center;

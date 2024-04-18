@@ -136,7 +136,7 @@ $.when('click', '[data-tutorial]', () => {
     window.location.href = `/404`
   }
   showModal(`
-    <sillyz-ocarina></sillyz-ocarina>
+    <sillyz-ocarina mystery="true"></sillyz-ocarina>
   `)
 })
 
