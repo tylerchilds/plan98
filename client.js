@@ -95,19 +95,15 @@ const extensions = {
   },
 }
 
-const sites = Object.keys(doingBusinessAs).map(x => `https://${x}`)
-
 function buildHeaders(parameters, pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
   const debug = parameters.get('debug')
   let headers = {
-    'Access-Control-Allow-Origin': sites,
     'Cross-Origin-Resource-Policy': 'same-origin',
     'content-type': extensions[extension]
       ? extensions[extension][type]
       : typeByExtension(extension)
   }
-  console.log(headers)
 
   if(debug === 'true') {
     headers = {
@@ -305,45 +301,59 @@ async function home(request, business) {
 
 
 async function about(headers, request) {
-  let paths = []
+  const { search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const world = parameters.get('world')
+  if(world) {
+    const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        ...headers,
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+  } else {
+    let paths = []
 
-  const currentPath = Deno.cwd() + '/client'
-  const files = walk(currentPath, {
-    skip: [
-      /\.git/,
-      /\.autosave/,
-      /\.swp/,
-      /\.swo/,
-      /\.env/,
-      /node_modules/,
-      /backup/,
-      /db/
-    ],
-    includeDirs: false
-  })
+    const currentPath = Deno.cwd() + '/client'
+    const files = walk(currentPath, {
+      skip: [
+        /\.git/,
+        /\.autosave/,
+        /\.swp/,
+        /\.swo/,
+        /\.env/,
+        /node_modules/,
+        /backup/,
+        /db/
+      ],
+      includeDirs: false
+    })
 
 
-  for await(const file of files) {
-    const { name } = file
-    const [_, path] = file.path.split(currentPath)
-    paths.push({ path, name })
-  }
-
-  paths = sortPaths([...paths], byPath, '/')
-
-  const data = {
-    plan98: {
-      type: 'FileSystem',
-      children: [kids(paths)]
+    for await(const file of files) {
+      const { name } = file
+      const [_, path] = file.path.split(currentPath)
+      paths.push({ path, name })
     }
-  }
 
-  return new Response(JSON.stringify(data, null, 2), {
-    headers: {
-      ...headers,
-      "content-type": "application/json; charset=utf-8"
-    },
-  });
+    paths = sortPaths([...paths], byPath, '/')
+
+    const data = {
+      plan98: {
+        type: 'FileSystem',
+        children: [kids(paths)]
+      }
+    }
+
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        ...headers,
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+
+  }
 }
 
 function ResponseData(data) {
@@ -397,7 +407,6 @@ serve(router);
 console.log("Listening on http://localhost:8000");
 
 async function newPayment(data) {
-  console.log(data)
   const response = await fetch('https://checkout-test.adyen.com/v70/paymentLinks', {
     method: 'POST',
     headers: {
@@ -415,7 +424,6 @@ async function newPayment(data) {
     })
   }).then( response => response.text())
 
-  console.log(response)
   try {
     return JSON.parse(response)
   } catch(e) {

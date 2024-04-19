@@ -16,10 +16,12 @@ $.draw(() => {
     } = doingBusinessAs[domain]
 
     return `
-      <div data-tooltip="${latitude},${longitude}" style="background: linear-gradient(45deg, transparent, color)">
-        <a href="${saga}">${domain}</>
+      <details data-tooltip="${latitude},${longitude}" style="background: linear-gradient(45deg, transparent, color)">
+        <summary>
+          ${domain} (<a href="${saga.split('/public')[1]}">Edit</a>)
+        </summary>
         ${renderMemex(domain)}
-      </div>
+      </details>
     `
   }).join('');
   return `
@@ -32,13 +34,12 @@ function renderMemex(domain) {
   if(plan98) {
     return JSON.stringify(plan98)
   } else {
-    fetch(protocol + '//' + domain + endpoint)
+    fetch(window.location.origin + endpoint + '?world=' + domain)
       .then(res => res.json())
       .then(({plan98}) => {
-        debugger
         $.teach({ [domain]: plan98 })
       })
       .catch(e => console.error(e))
-    return ''
+    return 'No Data... is this world in the plan98 cinematic universe?'
   }
 }
