@@ -101,7 +101,7 @@ function buildHeaders(parameters, pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
   const debug = parameters.get('debug')
   let headers = {
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': sites,
     'Cross-Origin-Resource-Policy': 'same-origin',
     'content-type': extensions[extension]
       ? extensions[extension][type]
@@ -231,11 +231,11 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
   }
 
   if(pathname === '/plan98/about') {
-    return about(request)
+    return about(headers, request)
   }
 
   if(pathname === '/plan98/owncast') {
-    return owncast(request)
+    return owncast(headers, request)
   }
 
   try {
@@ -304,7 +304,7 @@ async function home(request, business) {
 }
 
 
-async function about(request) {
+async function about(headers, request) {
   let paths = []
 
   const currentPath = Deno.cwd() + '/client'
@@ -339,7 +339,10 @@ async function about(request) {
   }
 
   return new Response(JSON.stringify(data, null, 2), {
-    headers: { "content-type": "application/json; charset=utf-8" },
+    headers: {
+      ...headers,
+      "content-type": "application/json; charset=utf-8"
+    },
   });
 }
 
@@ -349,11 +352,14 @@ function ResponseData(data) {
   });
 }
 
-async function owncast(request) {
+async function owncast(headers, request) {
   const onlinePromise = fetch('https://94404-969-g-edgewater-blvd-123.thelanding.page/api/status').then(res => res.json())
   const data = { broadcast: await onlinePromise }
   return new Response(JSON.stringify(data, null, 2), {
-    headers: { "content-type": "application/json; charset=utf-8" },
+    headers: {
+      ...headers,
+      "content-type": "application/json; charset=utf-8"
+    },
   });
 }
 
