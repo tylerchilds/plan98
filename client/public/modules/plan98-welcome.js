@@ -1,6 +1,6 @@
 import module from '@sillonious/module'
 import { currentSave } from '../cdn/thelanding.page/game-state.js'
-import { state } from 'statebus'
+import { upsell } from '@sillonious/computer'
 
 /*
  <blockquote>
@@ -135,9 +135,7 @@ $.when('click', '[data-tutorial]', () => {
   window[start] = () => {
     window.location.href = `/404`
   }
-  showModal(`
-    <sillyz-ocarina mystery="true"></sillyz-ocarina>
-  `)
+  upsell(window.plan98)
 })
 
 $.when('click', '[data-reset]', ({target}) => {

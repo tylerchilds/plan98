@@ -1,6 +1,6 @@
 import module from '@sillonious/module'
 
-const $ = module('integrated-development', { activeTabIndex: 1 })
+const $ = module('integrated-development', { activeTabIndex: 0 })
 
 const language = "en-us"
 
@@ -71,7 +71,6 @@ $.draw((target) => {
         <site-map></site-map>
       `
     },
-
   ]
 
   target.innerHTML = `

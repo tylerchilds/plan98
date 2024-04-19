@@ -111,7 +111,7 @@ $.style(`
   &:not(:empty) {
     display: block;
     position: absolute;
-    bottom: 1rem;
+    bottom: 4rem;
     left: 1rem;
     right: 1rem;
     margin: auto;
@@ -126,7 +126,7 @@ $.style(`
       2px 2px 4px 4px rgba(0,0,0,.10),
       6px 6px 12px 12px rgba(0,0,0,.5),
       18px 18px 36px 36px rgba(0,0,0,.25);
-    animation: &-fade-in 1000ms 1000ms forwards;
+    animation: &-fade-in 1000ms forwards;
   }
 
   @keyframes &-fade-in {

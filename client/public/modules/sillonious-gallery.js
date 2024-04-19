@@ -1,5 +1,6 @@
 import module from '@sillonious/module'
 import { currentSave } from '../cdn/thelanding.page/game-state.js'
+import { showModal } from './plan98-modal.js'
 
 const $ = module('sillonious-gallery')
 
@@ -23,10 +24,11 @@ $.draw(() => {
     <hypertext-action>
       You win!
     </hypertext-action>
-    <go-to link="/?world=sillyz.computer">Go Home</go-to>
-    <go-to link="/?world=thelanding.page">Go To Work</go-to>
+    <action-script data-win data-action="ok" data-script="/public/cdn/thelanding.page/game-state.js">
+      Hyper Space
+    </action-script>
     <action-script data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
-      Go to Bed
+      Reset
     </action-script>
   ` : `
     <hypertext-action>
@@ -35,4 +37,10 @@ $.draw(() => {
     <sillonious-action saga="000-000.saga" label="Rewind Time"></sillonious-action>
   `
 
+})
+
+$.when('click', '[data-win] button', () => {
+  showModal(`
+    <sillyz-ocarina mystery="true"></sillyz-ocarina>
+  `)
 })

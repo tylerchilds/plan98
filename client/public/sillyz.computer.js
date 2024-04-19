@@ -2,14 +2,10 @@ function ready(plan98) {
   console.log(plan98, ' is ready')
 }
 
-function upsell(plan98) {
-  const isFirst = self.self === self.top
-  const notPrime = window.location.host !== plan98.database
-  if(isFirst && notPrime) {
-    document.body.insertAdjacentHTML('beforeend', `
-      <wizard-journey host="${plan98.database}"></wizard-journey>
-    `)
-  }
+export function upsell(plan98) {
+  document.body.insertAdjacentHTML('beforeend', `
+    <wizard-journey host="${plan98.database}"></wizard-journey>
+  `)
 }
 
 export default class SillyzComputer {
@@ -19,7 +15,6 @@ export default class SillyzComputer {
       modules({ registry: x.registry })
     }).observe(document.body, { childList: true, subtree: true });
     ready(plan98)
-    upsell(plan98)
   }
 }
 
