@@ -8,5 +8,4 @@ export default statebus
 
 statebus.libs.localstorage('ls/*')
 statebus.libs.http_out('/*', '/')
-window.braid_fetch = window.fetch
 window.state = state
