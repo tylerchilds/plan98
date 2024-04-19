@@ -16,7 +16,7 @@ $.draw(() => {
         data-action="takeEmerald"
         data-script="/public/cdn/thelanding.page/game-state.js"
         data-emerald="6"
-      >Take the Violet One</action-script>
+      >Violet Journal</action-script>
     `
   }
   const superSonic = chaosEmerald.every(x => x) && chaosEmerald.length > 6
