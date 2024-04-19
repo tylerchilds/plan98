@@ -31,18 +31,20 @@ saga-genesis > sillonious-memex {
 
 body wizard-journey.active {
   inset: 0;
-  background: rgba(128,128,128,.85);
+  background: rgba(0,0,0,1);
   max-height: 100%;
   max-width: 100%;
 }
 
+body data-tooltip {
+  height: 100%;
+}
+
 body wizard-journey xml-html {
   background: #fff;
-  border-radius: 1rem;
-  max-width: 6in;
-  margin: 4rem auto;
+  height: 100%;
+  margin: 0;
   padding: 2rem 1rem;
-  height: auto;
 }
 
 saga-genesis xml-html {

@@ -66,7 +66,7 @@ $.draw((target) => {
     },
     {
       icon: '<span>!</span>',
-      label: 'Source',
+      label: 'Map',
       content: `
         <site-map></site-map>
       `
@@ -120,6 +120,7 @@ $.style(`
     width: 100%;
     color: white;
     background: rgba(0,0,0,.85);
+    transition: background 200ms ease-in-out;
   }
 
   & .example-tab.-active,

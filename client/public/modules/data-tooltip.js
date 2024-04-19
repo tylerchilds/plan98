@@ -76,6 +76,7 @@ const tooltipStyles = `
   <style>
     .data-tooltip {
       background: lemonchiffon;
+      color: saddlebrown;
       box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
       display: none;
       left: 0;
@@ -88,7 +89,7 @@ const tooltipStyles = `
         max(0px, calc(-100% + var(--y) - 3px))
       );
       transition: opacity 100ms ease-in-out;
-      top: 0;
+      top: -1rem;
       white-space: break-work;
       max-width: 200px;
       z-index: -1;

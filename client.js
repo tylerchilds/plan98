@@ -95,10 +95,14 @@ const extensions = {
   },
 }
 
+const sites = Object.keys(doingBusinessAs).map(x => `https://${x}`)
+
+console.log(sites)
 function buildHeaders(parameters, pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
   const debug = parameters.get('debug')
   let headers = {
+    'Access-Control-Allow-Origin': sites,
     'Cross-Origin-Resource-Policy': 'same-origin',
     'content-type': extensions[extension]
       ? extensions[extension][type]
