@@ -14,6 +14,8 @@ const processConfiguration = {
   reverseRelay: false,
   database: false,
   reverseDatabase: false,
+  braidmail: true,
+  reverseBraidmail: false,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -65,7 +67,6 @@ const processConfiguration = {
       "cmd": "deno task reverse-relay",
       "autostart": true
     },
-
     database: {
       "id": "plan98-start-database",
       "cmd": "deno task start-database",
@@ -76,6 +77,17 @@ const processConfiguration = {
       "cmd": "deno task reverse-database",
       "autostart": true
     },
+    braidmail: {
+      "id": "plan98-start-braidmail",
+      "cmd": "deno task start-braidmail",
+      "autostart": true
+    },
+    reverseBraidmail: {
+      "id": "plan98-reverse-braidmail",
+      "cmd": "deno task reverse-braidmail",
+      "autostart": true
+    },
+
   }
 }
 

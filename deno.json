@@ -24,6 +24,9 @@
     "start-relay": "cd server/relay && npm start",
     "reverse-relay": "ssh -N -R 8765:localhost:8765 relay.$USER.me",
 
+    "start-braidmail": "cd server/braidmail/braidmail-main && deno task start-server",
+    "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
+
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 
