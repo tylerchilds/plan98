@@ -1,14 +1,9 @@
 import module, { insights } from "@sillonious/module"
 
-import * as Plot from "https://cdn.jsdelivr.net/npm/@observablehq/plot@0.6/+esm";
-
 const $ = module('module-dashboard', { buckets: {} })
 
 $.draw((target) => {
   const { buckets } = $.learn()
-  const plot = Plot.rectY({length: 10000}, Plot.binX({y: "count"}, {x: Math.random})).plot();
-  //target.append(plot);
-  //
   return JSON.stringify(buckets)
 })
 
@@ -53,6 +48,8 @@ function animate() {
     const bucket = types.reduce((accumulator, type) => {
       const total = logs[type]
       let known = 0
+
+
       if(!buckets[currentTime]) {
         buckets[currentTime] = {}
         $.teach({ buckets })
@@ -69,11 +66,9 @@ function animate() {
     // Your animation code here
     $.teach(bucket, mergeBucket(currentTime))
     // Request next animation frame
-    requestAnimationFrame(animate);
 }
 
-// Start animation
-animate();
+setInterval(animate, 100)
 
 function mergeBucket(timestamp) {
   return (state, bucket) => {
