@@ -8,7 +8,7 @@ const processConfiguration = {
   reverseServer: false,
   identity: true,
   reverseIdentity: false,
-  repository: true,
+  repository: false,
   reverseRespository: false,
   relay: true,
   reverseRelay: false,
