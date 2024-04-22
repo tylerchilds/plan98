@@ -113,7 +113,7 @@ $.draw((target) => {
               </div>
               <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
               </rainbow-action>
-              <button data-about data-tooltip="Learn about where here is.">About</button>
+              <button data-about data-tooltip="Learn about where here is.">Get Notified</button>
             </div>
           </div>
         </div>
@@ -124,7 +124,7 @@ $.draw((target) => {
 
 $.when('click', '[data-about]', (event) => {
   showModal(`
-    <lets-connect url="https://alhvsudxbwemectbuqro.supabase.co" key="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFsaHZzdWR4YndlbWVjdGJ1cXJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NjU3MTc5OTksImV4cCI6MTk4MTI5Mzk5OX0.fvfrU2TACETuv21wt0VAfYVeUAuO0MIaV1-CmVcMmGw"></lets-connect>
+    <get-notified></get-notified>
   `, { centered: true })
 })
 

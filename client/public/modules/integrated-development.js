@@ -16,11 +16,6 @@ $.draw((target) => {
 
   const modes = [
     {
-      icon: '<span>$</span>',
-      label: 'Pay to Win',
-      content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`
-    },
-    {
       icon: '<span>#</span>',
       label: 'Easy',
       content: `
@@ -70,6 +65,11 @@ $.draw((target) => {
       content: `
         <site-map></site-map>
       `
+    },
+    {
+      icon: '<span>$</span>',
+      label: 'Pay to Win',
+      content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`
     },
   ]
 

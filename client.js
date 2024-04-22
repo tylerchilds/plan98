@@ -128,6 +128,10 @@ async function router(request, context) {
   if(request.method === 'POST') {
     const data = await request.json()
 
+    if(pathname === '/plan98/subscribe') {
+      return ResponseData({ subscribe: await createEmailSubscriber(data) })
+    }
+
     if(pathname === '/plan98/pay-by-link') {
       return data.mode === 'CREATE'
         ? ResponseData({ payment: await newPayment(data) })
@@ -405,6 +409,25 @@ function kids(paths) {
 
 serve(router);
 console.log("Listening on http://localhost:8000");
+
+async function createEmailSubscriber(data) {
+  const response = await fetch('https://api.buttondown.email/v1/subscribers', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Token ' + Deno.env.get('BUTTONDOWN_TOKEN'),
+    },
+    body: JSON.stringify({
+      "email": data.email,
+    })
+  }).then( response => response.text())
+
+  try {
+    return JSON.parse(response)
+  } catch(e) {
+    return { error: e, note: 'Failed to parse response...' }
+  }
+}
 
 async function newPayment(data) {
   const response = await fetch('https://checkout-test.adyen.com/v70/paymentLinks', {
