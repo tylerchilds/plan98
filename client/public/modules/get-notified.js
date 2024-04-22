@@ -17,7 +17,6 @@ $.draw((target) => {
 
   if(success) return `
     <sticky-note>
-      <img src="/cdn/tychi.me/photos/professional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
       <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Consider yourself on the initiation path to wizardhood. Check your email and confirm your intentions.</hypertext-highlighter>
     </sticky-note>
   `
