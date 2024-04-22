@@ -1,7 +1,7 @@
 import module from '@sillonious/module'
 import { fetch as braid_fetch } from 'braid-http'
 
-const host = 'https://mail.braid.org'
+const defaultHost = 'https://mail.braid.org'
 
 const $ = module('braid-forum', {
   posts: []
@@ -10,6 +10,7 @@ const $ = module('braid-forum', {
 async function initialize(target) {
   if(target.initialized) return
   target.initialized = true
+  const host = target.getAttribute('host') || defaultHost
 
   (await braid_fetch(host + '/feed', { subscribe: true }))
   .subscribe((update) => {
