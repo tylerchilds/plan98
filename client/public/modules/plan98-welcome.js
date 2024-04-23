@@ -66,6 +66,9 @@ $.draw((target) => {
   if(html) return html
   const {chaosEmerald} = currentSave()
   target.innerHTML = `
+    <action-script class="reset" data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
+      Reset
+    </action-script>
     <div name="square">
       <section class="layout">
         ${conditionalPlatform(chaosEmerald[0], `
@@ -134,9 +137,6 @@ $.draw((target) => {
         </div>
       </div>
     </div>
-    <action-script class="reset" data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
-      Reset
-    </action-script>
 `
 })
 
@@ -180,6 +180,8 @@ $.style(`
     position: fixed;
     bottom: 0;
     left: 0;
+    animation: fade-in 1000ms ease-in-out;
+    z-index: 10;
   }
 
   & .reset button {
