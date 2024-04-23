@@ -67,6 +67,16 @@ $.draw((target) => {
       `
     },
     {
+      icon: '<span>^</span>',
+      label: 'Hyper Browser',
+      content: `<hyper-browser></hyper-browser>`
+    },
+    {
+      icon: '<span>*</span>',
+      label: 'Devices',
+      content: `<plan98-devices></plan98-devices>`
+    },
+    {
       icon: '<span>$</span>',
       label: 'Pay to Win',
       content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`

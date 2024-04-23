@@ -182,7 +182,7 @@ function mergeKeyChange(id) {
 
 $.draw((target) => renderDevices(target, $))
 
-$.flair(`
+$.style(`
   & .gamepads {
     list-style-type: none;
   }
