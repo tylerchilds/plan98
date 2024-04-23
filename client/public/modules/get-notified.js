@@ -34,7 +34,7 @@ $.draw((target) => {
         The Landing Page's Wizards' Quests Digest is a "News" letter from a "Fictional" realm. In this world, technology is magic even kids can do.
       </p>
       <p>
-        To avoid finding oneself on a Fools' Errand, consider subscribing today.
+        To avoid finding oneself on a Fools' Errand, consider subscribing today. For more information, visit <a href="https://thelanding.page" target="_blank">The Landing Page</a>.
       </p>
       <div>
         <div>
@@ -81,8 +81,8 @@ $.style(`
     max-width: 6in;
     padding: 1rem;
     margin: 0 auto;
-    color: white;
-    background: rgba(0,0,0,.85);
+    color: saddlebrown;
+    background: lemonchiffon;
     overflow: hidden;
   }
 

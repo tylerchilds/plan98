@@ -28,8 +28,8 @@
 
 :focus {
     position: relative;
-    border-color: var(--wheel-0-6);
-    outline: 2px solid var(--wheel-0-6);
+    border-color: saddlebrown;
+    outline: 2px solid saddlebrown;
 }
 
 :root {
@@ -360,10 +360,8 @@ button {
 
 .field {
 	display: grid;
-  border-left: 2px solid var(--wheel-0-6);
-  border-bottom: 2px solid var(--wheel-0-6);
+  background: linear-gradient(transparent, saddlebrown);
   backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, .85);
 	margin-bottom: 1rem;
 	position: relative;
 	text-align: left;
@@ -397,6 +395,7 @@ button {
 	border-radius: var(--border-radius);
 	box-sizing: border-box;
   color: rgba(255, 255, 255, .85);
+  text-shadow: 1px 1px saddlebrown;
   font-size: 1.1rem;
 	margin-top: -2px;
 	padding: .5rem;
