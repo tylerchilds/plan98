@@ -34,7 +34,7 @@ $.draw(() => {
     <hypertext-action>
       You're not strong enough yet...
     </hypertext-action>
-    <sillonious-action saga="000-000.saga" label="Rewind Time"></sillonious-action>
+    <action-script data-saga="000-000.saga">Rewind Time</action-script>
   `
 
 })

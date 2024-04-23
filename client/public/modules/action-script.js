@@ -31,8 +31,7 @@ $.when('click', 'button', async (event) => {
 
 $.style(`
   & {
-    display: block;
-    text-align: right;
+    display: inline-block;
     margin: 1rem;
   }
 

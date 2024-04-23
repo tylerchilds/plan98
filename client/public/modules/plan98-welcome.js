@@ -68,12 +68,17 @@ $.draw((target) => {
   target.innerHTML = `
     <div name="square">
       <section class="layout">
-        ${conditionalPlatform(chaosEmerald[0], `<twgl-demo></twgl-demo>`)}
-        <div class="horizon"></div>
-        <div class="land">
-          ${conditionalPlatform(chaosEmerald[1], `<div class="grid-3d"></div>`)}
-          ${conditionalPlatform(chaosEmerald[2], `<div class="elements"></div>`)}
-        </div>
+        ${conditionalPlatform(chaosEmerald[0], `
+          <twgl-demo></twgl-demo>
+          <div class="horizon"></div>
+        `)}
+        ${conditionalPlatform(chaosEmerald[1], `
+          <div class="land">
+            <div class="grid-3d"></div>
+            <div class="elements"></div>
+
+          </div>
+        `)}
       </section>
 
       <div class="skybox ${html ? '' : 'active'}">
@@ -82,18 +87,26 @@ $.draw((target) => {
             <div class="emerald ${value ? '-in-bag' : ''}" data-index="${index}"></div>
           `).join('')}
         </div>
-        <div class="a">
-          ${conditionalPlatform(chaosEmerald[3], `<sillyz-piano></sillyz-piano>`)}
-        </div>
-        <div class="c">
-          ${conditionalPlatform(chaosEmerald[4], `<sillyz-ocarina></sillyz-ocarina>`)}
-        </div>
-        <div class="b">
-          ${conditionalPlatform(chaosEmerald[5], `<mind-chess></mind-chess>`)}
-        </div>
-        <div class="d">
-          ${conditionalPlatform(chaosEmerald[6], `<mlb-teams></mlb-teams>`)}
-        </div>
+        ${conditionalPlatform(chaosEmerald[3], `
+          <div class="a">
+            <sillyz-piano></sillyz-piano>
+          </div>
+        `)}
+        ${conditionalPlatform(chaosEmerald[4], `
+          <div class="c">
+            <sillyz-ocarina></sillyz-ocarina>
+          </div>
+        `)}
+        ${conditionalPlatform(chaosEmerald[5], `
+          <div class="b">
+            <mind-chess></mind-chess>
+          </div>
+        `)}
+        ${conditionalPlatform(chaosEmerald[6], `
+          <div class="d">
+            <mlb-teams></mlb-teams>
+          </div>
+        `)}
         <div class="e">
           <div style="display: grid;place-content: center;">
             <sticky-note>
@@ -101,7 +114,9 @@ $.draw((target) => {
           </div>
         </div>
         <div class="f">
-          <sillyz-avatar></sillyz-avatar>
+          ${conditionalPlatform(chaosEmerald[2], `
+            <sillyz-avatar></sillyz-avatar>
+          `)}
           <div id="foreground">
             <div id="logo">
                 <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">

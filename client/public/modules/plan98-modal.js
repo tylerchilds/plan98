@@ -87,7 +87,7 @@ function banner() {
   `
 }
 
-const context = `<div class="overlay"><plan98-modal></plan98-modal></div>`
+const context = `<div class="modal-overlay"><plan98-modal></plan98-modal></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
 let hideListener = (event) => {
@@ -129,7 +129,7 @@ $.style(`
   & .body {
 
   }
-  .trap-modal .overlay:before {
+  .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
     background: rgba(0,0,0, .5);
@@ -140,6 +140,10 @@ $.style(`
     left: 0;
     backdrop-filter: blur(10px);
     z-index: 900;
+  }
+
+  .modal-overlay {
+    z-index: 3;
   }
 
   @keyframes fadein {
