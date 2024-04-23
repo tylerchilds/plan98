@@ -134,6 +134,9 @@ $.draw((target) => {
         </div>
       </div>
     </div>
+    <action-script class="reset" data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
+      Reset
+    </action-script>
 `
 })
 
@@ -171,6 +174,18 @@ $.style(`
     border-radius: 100%;
     margin: 1rem;
     padding: 1rem;
+  }
+
+  & .reset {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+  }
+
+  & .reset button {
+    background: black;
+    border: none;
+    color: dodgerblue;
   }
   & [name="square"]{
     margin: auto;
