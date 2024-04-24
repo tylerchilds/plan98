@@ -160,9 +160,9 @@ function toPattern(_$, buttons) {
   return fretMap.map(i => frets[i]).join('')
 }
 
-function toMotion(_$, axes) {
-  const [vertical] = [...axes].splice(-1)
-  const [horizontal] = [...axes].splice(-2)
+function toMotion(_$, buttons) {
+  const [vertical] = [...buttons].splice(-1)
+  const [horizontal] = [...buttons].splice(-2)
 
   return {
     up: vertical === -1,
@@ -185,7 +185,7 @@ function loop(time) {
     const pattern =  toPattern($, button)
     activity.patterns.push(pattern)
     activity.registers.push(registers.indexOf(pattern))
-    activity.motions.push(toMotion($, axis))
+    activity.motions.push(toMotion($, button))
     return activity
   }, {
     patterns: [],
@@ -226,7 +226,7 @@ function loop(time) {
 }
 
 function throttle($, flags) {
-  const { frames = {}} = $.read()
+  const { frames = {}} = $.learn()
   const frame = frames[flags.key] || {}
 
   if((flags.time - flags.fps) > (frame.time || 0)) {
