@@ -81,6 +81,11 @@ $.draw((target) => {
       label: 'Pay to Win',
       content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`
     },
+    {
+      icon: '<span>=</span>',
+      label: 'Chat',
+      content: `<story-chat></story-chat>`
+    },
   ]
 
   target.innerHTML = `
