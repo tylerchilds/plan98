@@ -24,6 +24,7 @@ async function init(target) {
 
     // Set the stream as the source for the video element
     videoElement.srcObject = stream;
+    videoElement.playsInline = true
 
     // Ensure autoplay
     videoElement.autoplay = true;
