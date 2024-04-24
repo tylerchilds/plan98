@@ -86,6 +86,11 @@ $.draw((target) => {
       label: 'Chat',
       content: `<story-chat></story-chat>`
     },
+    {
+      icon: '<span>+</span>',
+      label: 'Chat',
+      content: `<infinite-canvas></infinite-canvas>`
+    },
   ]
 
   target.innerHTML = `
@@ -122,9 +127,16 @@ $.style(`
 
   & .example {
     display: grid;
-    grid-template-columns: 40px 1fr;
+    grid-template-columns: 4rem 1fr;
   }
 
+  & .example-tab-list {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: .5rem;
+    overflow: auto;
+  }
   & .example-tab {
     padding: 0;
     display: block;

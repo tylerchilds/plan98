@@ -53,10 +53,6 @@ src: /cdn/sillyz.computer/index.canvas
 
 <quick-media
 id: quick-media-demo
-
-
-<story-chat
-src: ${window.location.href}
 `
 
 

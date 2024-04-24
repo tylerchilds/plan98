@@ -186,7 +186,8 @@ $.style(`
   & .gamepads {
     list-style-type: none;
   }
-  & .gamepad {
+  & .gamepads:empty::before {
+    content: 'Connect a gamepad...';
   }
   & .buttons,
   & .axes {

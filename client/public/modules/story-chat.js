@@ -82,7 +82,7 @@ $.draw(target => {
 })
 
 function source(target) {
-  const hardcoded = target.closest($.link).getAttribute('src')
+  const hardcoded = window.location.pathname
   const queried = plan98.parameters.get($.link)
   const today = new Date().toJSON().slice(0, 10)
   const dynamic = `/public/journal/${today}.saga`
@@ -99,7 +99,58 @@ function sourceFile(target) {
     target.subscribed = true
   }
 
-  let file = `The Paper Nautilus is a misnomer, as it is neither paper, nor a nautilus.\n<rainbow-action\nhtml: <a href="https://github.com/tylerchilds/plan98/archive/refs/heads/plan98.zip">Download Code</a>`
+  let file = `<hello-world
+
+# Write once, run globally.
+
+The world runs on computers that fit under our desks, on our laps, in our pockets, around our bodies, and throughout our homes and businesses.
+
+@ Presenter
+> Have you wondered how these all work?
+
+> Have you ever felt your computers are actively designed against you?
+
+> Have you ever wished you could control them yourself?
+
+> Have you ever tried to build your own?
+
+> What was the hardest part?
+
+<div
+html: <sillyz-ocarina></sillyz-ocarina>
+style: height: 100vh;
+
+<story-board
+
+<mine-sweeper
+<mind-chaos3d
+<mind-chess
+
+<title-page
+title: Hello World
+author: Thesillonious Caramera
+
+# Exterior Home
+
+Carrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA
+
+@ Thesillonious Caramera
+& winking
+> I didn't break the windows if you didn't
+
+THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL
+
+@ NOTE
+> the rest is up to you
+
+^ Fade Out
+
+<infinite-canvas
+src: /cdn/sillyz.computer/index.canvas
+
+<quick-media
+id: quick-media-demo
+`
   const data = $.learn()[path] || { file }
 
   return data

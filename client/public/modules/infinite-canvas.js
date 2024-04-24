@@ -139,12 +139,12 @@ function getStars(target) {
   ctx.fillStyle = color;
   ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
 
-  return `url(${canvas.toDataURL()}`;
+  return `url(${canvas.toDataURL()})`;
 }
 
 function template(target, edgesSVG, nodesHTML) {
   const stars = getStars(target)
-  target.style = `background-image: ${stars}`
+  target.style = `background: ${stars}, rgba(255,255,255,.85);`
   return `
     <div name="canvas-container">
         <svg id="canvas-edges">
