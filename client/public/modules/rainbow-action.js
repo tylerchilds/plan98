@@ -15,17 +15,17 @@ $.draw(target => {
 $.style(`
   @keyframes rainbow-background {
     0% {
-      background: dodgerblue;
+			background-position-y: 0%;
     }
     33% {
-      background: orange;
+			background-position-y: 33%;
     }
     66% {
-      background: rebeccapurple;
+			background-position-y: 66%;
     }
 
     100% {
-      background: lime;
+			background-position-y: 100%;
     }
   }
 
@@ -40,7 +40,11 @@ $.style(`
 
   & > * {
     animation: rainbow-background
-      10000ms linear infinite alternate-reverse;
+      10000ms ease-in-out infinite alternate-reverse;
+      background: linear-gradient(rgba(255,255,255,.5), dodgerblue, orange, rebeccapurple, lime, rgba(0,0,0,.5))
+    ;
+		background-size: 300% 300%;
+
     box-shadow:
       0 2px 2px rgba(0, 0, 0, .25),
     0 4px 4px rgba(0, 0, 0, .15),
@@ -58,6 +62,7 @@ $.style(`
       0 1px 2px rgba(0, 0, 0, .65);
     text-decoration: none;
     transition: all 100ms ease-in-out;
+    filter: grayscale(.5);
   }
 
   & > *:visited {
@@ -70,7 +75,8 @@ $.style(`
       0 4px 4px rgba(0, 0, 0, .15),
       0 8px 8px rgba(0, 0, 0, .10),
       0 16px 16px rgba(0, 0, 0, .05);
-    transform: scale(1.05)
+    transform: scale(1.05);
+    filter: grayscale(0);
   }
 
   & > *:active {

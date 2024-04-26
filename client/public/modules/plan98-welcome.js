@@ -155,7 +155,10 @@ $.when('click', '[data-tutorial]', () => {
   window[start] = () => {
     window.location.href = `/404`
   }
-  upsell(window.plan98)
+  showModal(`
+    <hyper-browser></hyper-browser>
+  `, { centered: true })
+
 })
 
 $.when('click', '[data-reset]', ({target}) => {

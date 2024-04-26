@@ -40,30 +40,28 @@ $.draw((target) => {
         <div>
           ${maybeError}
         </div>
-        <hypertext-highlighter color="orange" style="display: block;">
-          <form
-            action="
-              https://buttondown.email/api/emails/embed-subscribe/Sillyz.Computer
-            "
-            method="post"
-            target="popupwindow"
-            class="embeddable-buttondown-form"
-          >
-            <label class="field">
-              <span class="label">Email</span>
-              <input
-                type="email"
-                name="email"
-                required
-                placeholder="ty@sillyz.computer"
-              />
-            </label>
-            <input type="hidden" value="1" name="embed" />
-            <rainbow-action>
-            <input type="submit" value="Subscribe" />
-            </rainbow-action>
-          </form>
-        </hypertext-highlighter>
+        <form
+          action="
+            https://buttondown.email/api/emails/embed-subscribe/Sillyz.Computer
+          "
+          method="post"
+          target="popupwindow"
+          class="embeddable-buttondown-form"
+        >
+          <label class="field">
+            <span class="label">Email</span>
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="ty@sillyz.computer"
+            />
+          </label>
+          <input type="hidden" value="1" name="embed" />
+          <rainbow-action>
+          <input type="submit" value="Subscribe" />
+          </rainbow-action>
+        </form>
       </div>
     </div>
   `
@@ -75,14 +73,14 @@ $.style(`
     width: 100%;
     height: 100%;
     place-items: center;
+    background: rgba(255,255,255,.85);
   }
   & .wrapper{
     display: block;
     max-width: 6in;
     padding: 1rem;
     margin: 0 auto;
-    color: saddlebrown;
-    background: lemonchiffon;
+    color: rgba(0,0,0,.85);
     overflow: hidden;
   }
 
