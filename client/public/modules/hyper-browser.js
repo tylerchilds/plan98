@@ -19,7 +19,7 @@ const locale = 'en_US'
 
 const $ = module('hyper-browser', {
   diskette: 6,
-  paused: true,
+  suggestions: [],
   joypros: []
 })
 
@@ -47,33 +47,71 @@ function drawCompass(buttons) {
   `
 }
 
+function drawCardinal(buttons) {
+  const names = ["jump", "duck", "use", "switch"]
+
+  const [down,right,left,up,...remainingButtons] = buttons.map((button, index) => {
+    return `
+      <button
+        name="${names[index]}"
+        class="nav-item"
+        ${button.pushed ? 'data-pushed="true"' : ''}
+        data-index="${button.index}"
+      >
+        <img src="${button.icon || synthia}" alt="button for osc button.icon"/>
+      </button>
+    `
+  })
+
+  return `
+    ${down}
+    ${right}
+    ${left}
+    ${up}
+  `
+}
+
+
 $.draw((target) => {
   if(self.self !== self.top) return '<plan98-welcome></plan98-welcome>'
-  const { paused, joypros } = $.learn()
+  const { suggestions, suggestable, joypros } = $.learn()
   if(joypros.length === 0) return
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
   const compass = drawCompass(joypros[0].buttons)
+  const cardinal = drawCardinal(joypros[0].buttons)
 
   const screen = doingBusinessAs[art]
     ? `<iframe src="/?world=${art}" title="${art}"></iframe>`
-    : `<iframe src="${protocol}${art}" title="${art}"></iframe>`
+    : `<iframe src="${protocol}$uart}" title="${art}"></iframe>`
 
   const content = `
+    <div class="the-map">
+      <div class="suggestions ${suggestable ? 'suggestable' : ''}">
+        <div class="suggestion-box">
+          ${suggestions.map((x, i) => {
+            return `
+              <button data-suggestion="${x}">
+                ${x}
+              </button>
+            `
+          }).join('')}
+        </div>
+      </div>
+
+      <input value="${art}">
+    </div>
+
     <div name="transport">
       <div name="actions">
         <div class="the-compass">
           ${compass}
         </div>
-        <div class="the-map">
-          <input value="${art}">
+        <div class="the-cardinal">
+          ${cardinal}
         </div>
       </div>
     </div>
-    <div name="world">
-      <middle-earth></middle-earth>
-    </div>
-    <hr style="display: none;"/>
     <div name="carousel">
       <div name="screen">
         ${screen}
@@ -81,8 +119,8 @@ $.draw((target) => {
     </div>
   `
 
-  target.innerHTML =`
-    <div name="the-time-machine" class=${paused ? 'circus-enabled' : '' }>
+  return `
+    <div name="the-time-machine">
       ${content}
     </div>
   `
@@ -91,6 +129,42 @@ $.draw((target) => {
 function mod(x, n) {
   return ((x % n) + n) % n;
 }
+
+$.when('focus', 'input', event => {
+  $.teach({ suggestable: true })
+})
+
+$.when('change', 'input', event => {
+  event.target.value
+})
+
+$.when('blur', 'input', event => {
+  setTimeout(() => {
+    $.teach({ suggestable: false })
+  }, 200)
+})
+
+$.when('keyup', 'input', event => {
+  const { value } = event.target;
+  $.teach({ address: value })
+
+  const suggestions = diskettes().filter(x => {
+    return x.includes(value)
+  })
+
+  $.teach({ suggestions })
+})
+
+$.when('click', '[data-suggestion]', event => {
+  const { suggestion } = event.target.dataset
+  const bin = diskettes()
+  const diskette = bin.indexOf(suggestion)
+  const art = bin[diskette]
+  console.log(diskette)
+  state['ls/sillonious-memex'] = { art, diskette }
+
+})
+
 $.when('click', '[name="back"]', () => {
   let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
   const bin = diskettes()
@@ -140,6 +214,7 @@ $.style(`
     height: 100%;
     max-height: 100%;
     width: 100%;
+    pointer-events: none;
   }
 
   & .the-map {
@@ -148,11 +223,17 @@ $.style(`
     align-content: end;
     width: 100%;
   }
-  & .the-compass {
+  & .the-compass,
+  & .the-cardinal {
     display: grid;
     grid-template-columns: repeat(4, 10px);
     grid-template-rows: repeat(4, 10px);
-    gap: 20px;
+    gap: 30px;
+  }
+
+
+  & .the-cardinal {
+    place-content: end;
   }
 
   & .the-compass button{
@@ -178,12 +259,41 @@ $.style(`
     grid-row: 1 / 3;
     grid-column: 2 / 4;
   }
+
+  & .the-cardinal button{
+    padding: 0;
+  }
+
+  & .the-cardinal button:nth-child(1) {
+    grid-row: 3 / 5;
+    grid-column: 2 / 4;
+    background: green;
+  }
+
+  & .the-cardinal button:nth-child(2) {
+    grid-row: 2 / 4;
+    grid-column: 3 / 5;
+    background: orange;
+  }
+
+  & .the-cardinal button:nth-child(3) {
+    grid-row: 2 / 4;
+    grid-column: 1 / 3;
+    background: rebeccapurple;
+  }
+
+  & .the-cardinal button:nth-child(4) {
+    grid-row: 1 / 3;
+    grid-column: 2 / 4;
+    background: dodgerblue;
+  }
+
   & input {
     border: none;
     background: rgba(0,0,0,.85);
-    border-radius: 1rem;
     padding: .5rem 1rem;
     color: white;
+    width: 100%;
   }
   & [name="desktop"] {
     background: rgba(0,0,0,.85);
@@ -203,21 +313,63 @@ $.style(`
     display: grid;
     left: 0;
     right: 0;
-    bottom: .25rem;
+    bottom: 2rem;
     z-index: 1100;
-    overflow: auto;
-    pointer-events: none;
+    overflow: visible;
   }
 
-  & [name="transport"] button,
-  & [name="transport"] input{
+  & button,
+  & iframe,
+  & input{
     pointer-events: all;
   }
-  
+
+  & .suggestions {
+    display: none;
+    position: relative;
+  }
+
+  & .suggestions.suggestable {
+    display: block;
+  }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 0;
+    height: 200px;
+    max-height: 80vh;
+    overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    transform: translateY(-100%);
+    padding: 0 .5rem;
+    z-index: 1200;
+  }
+
+  & [data-suggestion] {
+    display: block;
+    text-align: left;
+    background: rgba(0,0,0,.65);
+    color: rgba(255,255,255,.85);
+    border: 0;
+    padding: .5rem .5rem;
+
+    border-top: 1px solid rgba(255,255,255,.15);
+    border-bottom: 1px solid rgba(0,0,0,.15);
+  }
+
+
+  & [data-suggestion]:hover,
+  & [data-suggestion]:focus {
+    background: dodgerblue;
+    color: rgba(255,255,255,1);
+  }
+
   & [name="actions"] {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     justify-content: end;
-    margin: 0 .5rem .25rem;
+    margin: 0;
     gap: .25rem;
     border-radius: 1.5rem;
     padding: .5rem;
@@ -245,14 +397,6 @@ $.style(`
     grid-template-areas: 'carousel';
   }
 
-  & [name="world"] {
-    grid-area: carousel;
-  }
-
-  & [name="world"] > * {
-    height: 100%;
-  }
-
   & [name="carousel"] {
     display: none;
     place-self: center;
@@ -261,34 +405,26 @@ $.style(`
     grid-area: carousel;
   }
 
-  & .circus-enabled hr {
-    display: block !important;
-    position: absolute;
-    inset: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
-    height: 100%;
-    z-index: 1000;
-    background: rgba(0,0,0,.85);
-  }
-
-  & .circus-enabled [name="carousel"] {
+  & [name="carousel"] {
     display: grid;
     overflow: auto;
     z-index: 1001;
     width: 100%;
     height: 100%;
+    padding: 1rem;
+    max-width: 6in;
   }
 
   & [name="screen"] {
     display: grid;
 		grid-template-columns: 1fr;
-		grid-auto-rows: 1fr;
+		grid-template-rows: 1fr;
     place-content: center;
-    place-self: center;
-    height: 100%;
+    place-self: start;
+    height: calc(100% - 6rem);
     width: 100%;
+    border-radius: 1rem;
+    overflow: auto;
   }
 
 

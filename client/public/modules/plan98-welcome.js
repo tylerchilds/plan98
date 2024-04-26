@@ -125,10 +125,10 @@ $.draw((target) => {
           <div id="foreground">
             <div id="logo">
                 <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                  Wizard
+                  Personal
                 </hypertext-variable>
                 <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                  QUEST
+                  COMPUTER
                 </hypertext-variable>
               </div>
               <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
@@ -157,6 +157,7 @@ $.when('click', '[data-tutorial]', () => {
   }
   upsell()
   showModal(`
+    <middle-earth style="position: absolute; inset: 0;"></middle-earth>
     <hyper-browser></hyper-browser>
   `, { centered: true })
 

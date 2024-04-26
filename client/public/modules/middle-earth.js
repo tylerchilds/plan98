@@ -18,26 +18,27 @@ document.head.appendChild(linkElement);
 document.head.appendChild(scriptElement);
 
 function mount(target) {
-	if(target.mounted) return
+	if(target.mounted) return true
 	if(window.L) {
 		target.mounted = true
+    $.teach({ [target.id]: true })
 	} else {
 		requestAnimationFrame(() => mount(target))
 		return false
 	}
 
-	const map = target.map = L.map(target).setView([37.7691, -122.4580], 13);
+	target.map = L.map(target).setView([37.7691, -122.4580], 13);
 
 	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 		maxZoom: 19,
 		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-	}).addTo(map);
+	}).addTo(target.map);
 
 	const polygon = L.polygon([
 		[51.509, -0.08],
 		[51.503, -0.06],
 		[51.51, -0.047]
-	]).addTo(map).bindPopup('I am a polygon.');
+	]).addTo(target.map).bindPopup('I am a polygon.');
 /*
 	const popup = L.popup()
 		.setLatLng([37.7691, -122.4580])
@@ -58,23 +59,32 @@ function mount(target) {
 const $ = module('middle-earth')
 
 $.draw((target) => {
+  $.learn()
   const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
-
 	if(!mount(target)) return
   const metadata = doingBusinessAs[art] || doingBusinessAs['sillyz.computer']
   console.log(metadata)
 
+  if(target.marker) {
+    target.map.removeLayer(target.marker)
+  }
+
   const gps = [metadata.latitude, metadata.longitude]
-  L.marker(gps).addTo(target.map)
+  target.marker = L.marker(gps).addTo(target.map)
+
+  target.map.setView(gps, metadata.zoom);
+    // Calculate the new center coordinates
+
+  target.marker
     .bindPopup(`<sticky-note><qr-code text="https://${art}"></qr-code></sticky-note>`)
     .openPopup();
-  target.map.setView(gps, metadata.zoom);
 })
 
 $.style(`
 	& {
 		display: block;
-		height: 100vmin;
+		height: 100%;
+    width: 100%;
 	}
 
 	& .leaflet-container {
@@ -90,6 +100,11 @@ $.style(`
 
   & .leaflet-popup-content {
     margin: 0;
+  }
+
+  & .leaflet-popup-content qr-code {
+    width: 33%;
+    place-self: center;
   }
 
   & .leaflet-popup-content-wrapper,

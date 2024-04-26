@@ -48,6 +48,7 @@ $.style(`
     min-width: 120px;
     aspect-ratio: 1;
     position: relative;
+    margin: auto;
   }
   & .portal {
     display: grid;

@@ -69,6 +69,7 @@ export function setupSaga(nextSaga, target) {
           root.trap.activate()
           root.innerHTML = `
             <data-tooltip>
+              <button data-close>x</button>
               ${render(saga)}
             </data-tooltip>
           `
@@ -95,8 +96,8 @@ $.draw((target) => {
   }
 })
 
-$.when('click', '', () => {
-
+$.when('click', '[data-close]', (event) => {
+  event.target.closest($.link).trap.deactivate()
 })
 
 $.style(`
@@ -107,6 +108,25 @@ $.style(`
   & xml-html {
     min-height: auto;
   }
+
+  & [data-close] {
+    background: rgba(0,0,0,.85);
+    color: white;
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 100%;
+    transition: background 100ms ease-in-out;
+  }
+
+  & [data-close]:focus,
+  & [data-close]:hover {
+    background: dodgerblue;
+  }
+
 
   &:not(:empty) {
     display: block;
@@ -120,7 +140,7 @@ $.style(`
     max-height: 80%;
     padding: .5rem;
     max-width: 80%;
-    overflow: auto;
+    overflow: visible;
     opacity: 0;
     box-shadow:
       2px 2px 4px 4px rgba(0,0,0,.10),

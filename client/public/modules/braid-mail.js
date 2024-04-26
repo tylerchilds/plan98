@@ -58,9 +58,9 @@ async function fetch_feed (target) {
   const update = update_feed.bind(target)
   const host = target.getAttribute('host') || 'https://mail.braid.org'
   let res
-  debugger
   try {
-    res = await braid.fetch(host + '/feed', {subscribe: true})
+    // res = await braid.fetch(host + '/feed', {subscribe: true})
+    res = await fetch(host + '/feed')
   } catch (e) {
     console.log('try catch error! retrying...')
     setTimeout(() => fetch_feed(target), 3000)
@@ -104,9 +104,9 @@ async function fetch_post (url) {
 }
 
 async function fetch_posts (target) {
-  const host = target.getAttribute('host')
+  const host = target.getAttribute('host') || 'https://mail.braid.org'
   const result = []
-  for (const i=0; i<feed.length; i++) {
+  for (let i=0; i<feed.length; i++) {
     const post = await fetch_post(host + feed[i].link)
     if (post)
       result.push({url: feed[i].link, ...JSON.parse(post)})
@@ -114,17 +114,26 @@ async function fetch_posts (target) {
   $.teach({ posts: result })
 }
 
-$.when('submit', 'form', function make_new_post (event) {
+$.when('submit', 'form', async function make_new_post (event) {
+  event.preventDefault()
+  const root = event.target.closest($.link)
+  const { title, body } = event.target
+  const host = root.getAttribute('host') || 'https://mail.braid.org'
   var id = Math.random().toString(36).substr(6)
-  braid.fetch('/post/' + id, {
+  await braid.fetch(host + '/post/' + id, {
     method: 'PUT',
     body: JSON.stringify({
       to:       ["rjaycarpenter@gmail.com","email@tychi.me"],
       cc:       ["toomim@gmail.com"],
       from:     ["email@tychi.me"],
       date:     Date.now(),
-      subject:  document.getElementById('subject').value,
-      body:     document.getElementById('body').value
+      subject: title.value,
+      body: body.value
     })
   })
+
+  title.value = ""
+  body.value = ""
+
+  fetch_feed(root)
 })
