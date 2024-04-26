@@ -155,6 +155,7 @@ $.when('click', '[data-tutorial]', () => {
   window[start] = () => {
     window.location.href = `/404`
   }
+  upsell()
   showModal(`
     <hyper-browser></hyper-browser>
   `, { centered: true })

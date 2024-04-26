@@ -1,10 +1,10 @@
-function ready(plan98) {
-  console.log(plan98, ' is ready')
+function ready() {
+  console.log(window.plan98, ' is ready')
 }
 
-export function upsell(plan98) {
+export function upsell() {
   document.body.insertAdjacentHTML('beforeend', `
-    <wizard-journey host="${plan98.database}"></wizard-journey>
+    <wizard-journey host="${window.plan98.database}"></wizard-journey>
   `)
 }
 

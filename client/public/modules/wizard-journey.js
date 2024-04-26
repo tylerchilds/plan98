@@ -127,6 +127,7 @@ $.style(`
       6px 6px 12px 12px rgba(0,0,0,.5),
       18px 18px 36px 36px rgba(0,0,0,.25);
     animation: &-fade-in 1000ms forwards;
+    z-index: 9000;
   }
 
   @keyframes &-fade-in {
