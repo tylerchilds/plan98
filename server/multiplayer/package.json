@@ -1,8 +1,0 @@
-{
-  "scripts": {
-    "start": "cd node_modules/gun && npm start"
-  },
-  "dependencies": {
-    "@geckos.io/server": "^3.0.0"
-  }
-}

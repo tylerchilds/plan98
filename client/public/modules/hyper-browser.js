@@ -236,6 +236,34 @@ $.style(`
     place-content: end;
   }
 
+  & .the-compass button,
+  & .the-cardinal button{
+    position: relative;
+    overflow: hidden;
+  }
+  & .the-compass button::before,
+  & .the-cardinal button::before{
+    content: '';
+    background: radial-gradient(rgba(0,0,0,.85), rgba(0,0,0,.25));
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 1;
+    position: absolute;
+    inset: 0;
+    transition: background 100ms ease-out;
+  }
+  & .the-compass button:hover::before,
+  & .the-cardinal button:hover::before {
+    background: radial-gradient(rgba(255,255,255,.35), rgba(0,0,0,.15));
+  }
+
+
+  & .the-compass img,
+  & .the-cardinal img{
+    position: relative;
+    z-index: 2;
+  }
   & .the-compass button{
     padding: 0;
   }

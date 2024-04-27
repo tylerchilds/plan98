@@ -148,7 +148,15 @@ $.when('click', '[data-about]', (event) => {
   `, { centered: true })
 })
 
-$.when('click', '[data-tutorial]', () => {
+$.when('click', '[data-tutorial]', start)
+
+self.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' || event.keyCode === 13) {
+    start()
+  }
+});
+
+function start() {
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
@@ -161,7 +169,7 @@ $.when('click', '[data-tutorial]', () => {
     <hyper-browser></hyper-browser>
   `, { centered: true })
 
-})
+}
 
 $.when('click', '[data-reset]', ({target}) => {
   const { cwc } = target.closest('plan98-filesystem').dataset
