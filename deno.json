@@ -27,6 +27,9 @@
     "start-braidmail": "cd server/braidmail/braidmail-main && deno task start-server",
     "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
 
+    "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
+    "reverse-multiplayer": "ssh -N -R 5675:localhost:5675 multiplayer.$USER.me",
+
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 

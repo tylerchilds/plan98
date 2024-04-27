@@ -16,6 +16,8 @@ const processConfiguration = {
   reverseDatabase: false,
   braidmail: true,
   reverseBraidmail: false,
+  multiplayer: true,
+  reverseMultiplayer: false,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -87,6 +89,17 @@ const processConfiguration = {
       "cmd": "deno task reverse-braidmail",
       "autostart": true
     },
+    multiplayer: {
+      "id": "plan98-start-multiplayer",
+      "cmd": "deno task start-multiplayer",
+      "autostart": true
+    },
+    reverseMultiplayer: {
+      "id": "plan98-reverse-multiplayer",
+      "cmd": "deno task reverse-multiplayer",
+      "autostart": true
+    },
+
 
   }
 }

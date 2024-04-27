@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@geckos.io/client": "^3.0.0",
+    "@geckos.io/server": "^3.0.0",
+    "ws": "^8.16.0"
+  }
+}
