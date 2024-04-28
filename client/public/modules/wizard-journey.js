@@ -69,7 +69,7 @@ export function setupSaga(nextSaga, target) {
           root.trap.activate()
           root.innerHTML = `
             <data-tooltip>
-              <button data-close>x</button>
+              <button data-close>Close</button>
               ${render(saga)}
             </data-tooltip>
           `
@@ -107,19 +107,22 @@ $.style(`
 
   & xml-html {
     min-height: auto;
+    position: absolute;
+    bottom: 0;
   }
 
   & [data-close] {
     background: rgba(0,0,0,.85);
     color: white;
     position: absolute;
-    top: -20px;
-    right: -20px;
-    width: 40px;
-    height: 40px;
+    top: 0;
+    right: 0;
     border: none;
-    border-radius: 100%;
+    padding: 0 1rem 0 .5rem;
+    border-radius: 0 0 0 1rem;
     transition: background 100ms ease-in-out;
+    line-height: 1;
+    height: 2rem;
   }
 
   & [data-close]:focus,
@@ -131,15 +134,11 @@ $.style(`
   &:not(:empty) {
     display: block;
     position: absolute;
-    bottom: 4rem;
-    left: 1rem;
-    right: 1rem;
+    inset: 0;
     margin: auto;
-    background: rgba(255,255,255,.85);
-    background: lemonchiffon;
-    max-height: 80%;
+    background: rgba(0,0,0,1);
+    color: white;
     padding: .5rem;
-    max-width: 80%;
     overflow: visible;
     opacity: 0;
     box-shadow:

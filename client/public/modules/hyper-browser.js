@@ -81,9 +81,7 @@ $.draw((target) => {
   const compass = drawCompass(joypros[0].buttons)
   const cardinal = drawCardinal(joypros[0].buttons)
 
-  const screen = doingBusinessAs[art]
-    ? `<iframe src="/?world=${art}" title="${art}"></iframe>`
-    : `<iframe src="${protocol}$uart}" title="${art}"></iframe>`
+  const deck = findDeck(art)
 
   const content = `
     <div class="the-map">
@@ -114,7 +112,7 @@ $.draw((target) => {
     </div>
     <div name="carousel">
       <div name="screen">
-        ${screen}
+        ${deck}
       </div>
     </div>
   `
@@ -125,6 +123,23 @@ $.draw((target) => {
     </div>
   `
 })
+
+function findDeck(art) {
+
+  const { mascot } = doingBusinessAs[art]
+
+  return `
+    <div class="deck">
+      <button class="card">
+        <div class="backside">
+        </div>
+        <div class="frontside">
+          ${mascot}
+        </div>
+      </button>
+    </div>
+  `
+}
 
 function mod(x, n) {
   return ((x % n) + n) % n;
@@ -452,7 +467,6 @@ $.style(`
     height: calc(100% - 6rem);
     width: 100%;
     border-radius: 1rem;
-    overflow: auto;
   }
 
 
@@ -462,8 +476,78 @@ $.style(`
     height: 100%;
     border: none;
   }
-`)
 
+  & .card {
+    pointer-events: all;
+    aspect-ratio: 1;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    display: block;
+    width: 2.5in;
+    height: 3.5in;
+    max-width: 100%;
+    border-radius: .25in;
+    background: white;
+    line-height: 1;
+    border: none;
+    box-shadow: 0 0 8px 1px rgba(0,0,0,.65);
+  }
+
+  & .frontside,
+  & .backside {
+    height: 100%;
+    width: 100%;
+  }
+
+  & .frontside,
+  & .backside {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+    overflow-x: auto;
+    backface-visibility: hidden;
+    transform: rotateX(0deg);
+    opacity: .9999;
+    transition: transform 200ms ease-in-out;
+  }
+
+  & .frontside {
+  }
+
+  & .backside {
+    transform: rotateX(180deg);
+    display: grid;
+    place-items: center;
+    position: absolute;
+    inset: 0;
+  }
+
+  & .card.flip > .frontside {
+    transform: rotateX(180deg);
+    pointer-events: none;
+  }
+
+  & .card.flip > .backside {
+    transform: rotateX(0deg);
+  }
+
+  & .deck {
+    display: grid;
+    place-content: end center;
+  }
+
+  & .deck .card {
+    transform: translateY(6rem);
+    transition: transform 250ms ease-in-out;
+  }
+
+  & .deck .card:hover,
+  & .deck .card.hover,
+  & .deck .card:focus {
+    transform: translateY(0);
+  }
+`)
 
 function diskettes() {
   return Object.keys(doingBusinessAs)
