@@ -150,12 +150,6 @@ $.when('click', '[data-about]', (event) => {
 
 $.when('click', '[data-tutorial]', start)
 
-self.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter' || event.keyCode === 13) {
-    start()
-  }
-});
-
 function start() {
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
