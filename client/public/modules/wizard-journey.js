@@ -126,6 +126,7 @@ $.style(`
     transition: background 100ms ease-in-out;
     line-height: 1;
     height: 2rem;
+    z-index: 2;
   }
 
   & [data-close]:focus,

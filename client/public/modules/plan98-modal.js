@@ -19,7 +19,8 @@ const strings = {
 const $ = module('plan98-modal', {
   label: null,
   children: null,
-  isOpen: null
+  isOpen: null,
+  layer: 0
 })
 
 export default $
@@ -96,12 +97,20 @@ let hideListener = (event) => {
   }
 }
 
-export function showModal(body, options) {
+export function showModal(nextBody, options = {}) {
   document.body.classList.add('trap-modal')
   self.addEventListener('keydown', hideListener);
 
+  const { isOpen, layer, body } = $.learn()
+  const nextLayer = layer + 1
+
+  if(isOpen) {
+    options[`layer-${nextLayer}`] = body
+  }
+
   $.teach({
-    body,
+    body: nextBody,
+    layer: nextLayer,
     isOpen: true,
     centered: false,
     bannerType: null,
@@ -112,12 +121,28 @@ export function showModal(body, options) {
 window.showModal = showModal
 
 export function hideModal() {
-  document.body.classList.remove('trap-modal')
-  self.removeEventListener('keydown', hideListener);
+  const { isOpen, layer } = $.learn()
+
+  const nextLayer = layer - 1
+
+  if(layer === 1) {
+    document.body.classList.remove('trap-modal')
+    self.removeEventListener('keydown', hideListener);
+    $.teach({
+      isOpen: false,
+      layer: nextLayer
+    })
+
+    return
+  }
+
+
   $.teach({
-    isOpen: false
+    body: $.learn()[`layer-${layer}`],
+    layer: nextLayer
   })
 }
+
 window.hideModal = hideModal
 
 $.when('click', '[data-close]', hideModal)
@@ -197,7 +222,7 @@ $.style(`
   & .body {
     height: 100%;
     display: grid;
-    place-content: center;
+    place-items: center;
     overflow: auto;
   }
 

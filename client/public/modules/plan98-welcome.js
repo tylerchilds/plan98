@@ -1,6 +1,5 @@
 import module from '@sillonious/module'
 import { currentSave } from '../cdn/thelanding.page/game-state.js'
-import { upsell } from '@sillonious/computer'
 
 /*
  <blockquote>
@@ -157,7 +156,6 @@ function start() {
   window[start] = () => {
     window.location.href = `/404`
   }
-  upsell()
   showModal(`
     <middle-earth style="position: absolute; inset: 0;"></middle-earth>
     <hyper-browser></hyper-browser>

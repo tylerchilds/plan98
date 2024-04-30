@@ -1,6 +1,7 @@
 import module from '@sillonious/module'
 // i channel my runic knowledge to commune with the ancestors and establish contact with the animals
 import { doingBusinessAs } from './sillonious-brand.js'
+import { showModal } from './plan98-modal.js'
 
 import party, {
   hostPressesStartStop,
@@ -245,9 +246,7 @@ $.when('click', '[name="jump"]', () => {
   const bin = diskettes(event.target)
   const art = bin[diskette]
 
-  window.location.href = doingBusinessAs[art]
-    ? '/?world=' + art
-    : `${protocol}${art}`
+  showModal(`<wizard-journey host="${art}"></wizard-journey>`)
 })
 
 $.when('click', '[name="duck"]', () => {
@@ -581,7 +580,8 @@ $.style(`
     transform: translateX(var(--hand-offset));
     transition: transform 100ms ease-in-out;
     position: relative;
-    left: 25%;
+    left: 25px;
+    bottom: -3rem;
   }
 
   & .deck .card {
