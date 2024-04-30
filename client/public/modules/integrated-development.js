@@ -95,6 +95,9 @@ $.draw((target) => {
 
   target.innerHTML = `
     <data-tooltip class="example" aria-live="assertive">
+      <div class="example-view">
+        ${modes[activeTabIndex].content}
+      </div>
       <div class="example-tab-list">
         ${modes.map((tab, index) => {
           return `
@@ -103,9 +106,6 @@ $.draw((target) => {
             </button>
           `
         }).join('')}
-      </div>
-      <div class="example-view">
-        ${modes[activeTabIndex].content}
       </div>
     </data-tooltip>
   `
@@ -127,14 +127,13 @@ $.style(`
 
   & .example {
     display: grid;
-    grid-template-columns: 4rem 1fr;
+    grid-template-rows: 1fr 5rem;
   }
 
   & .example-tab-list {
     display: flex;
-    flex-direction: column;
     gap: .5rem;
-    padding: .5rem;
+    padding: .5rem .5rem 1rem;
     overflow: auto;
   }
   & .example-tab {
@@ -143,10 +142,11 @@ $.style(`
     border: 0;
     border-radius: 1rem;
     aspect-ratio: 1;
-    width: 100%;
+    width: 4rem;
     color: white;
     background: rgba(0,0,0,.85);
     transition: background 200ms ease-in-out;
+    flex: none;
   }
 
   & .example-tab.-active,

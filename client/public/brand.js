@@ -24,6 +24,7 @@ export const doingBusinessAs = {
   'sillyz.computer': {
     emote: ';)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
+    imageDescription: 'A wired collection of silly musical equipment',
     latitude: '37.769100',
     longitude: '-122.454583',
     zoom: 10,
@@ -40,6 +41,7 @@ export const doingBusinessAs = {
   '1998.social': {
     emote: ':D',
     image: '/cdn/tychi.me/photos/aurora.JPG',
+    imageDescription: 'An aurora borealis in iceland',
     latitude: '37.771336',
     longitude: '-122.460065',
     zoom: 11,
@@ -56,6 +58,7 @@ export const doingBusinessAs = {
   'yourlovedones.online': {
     emote: ':(',
     image: '/cdn/tychi.me/photos/banyan.JPG',
+    imageDescription: 'The Banyan Tree in Lahaina',
     latitude: '37.772006',
     longitude: '-122.462220',
     zoom: 12,
@@ -72,6 +75,7 @@ export const doingBusinessAs = {
   'ncity.executiontime.pub': {
     emote: ':o',
     image: '/cdn/tychi.me/photos/denali.JPG',
+    imageDescription: 'Some mountain in Alaska',
     latitude: '37.772322',
     longitude:  '-122.465443',
     zoom: 14,
@@ -88,6 +92,7 @@ export const doingBusinessAs = {
   'css.ceo': {
     emote: ':p',
     image: '/cdn/tychi.me/photos/pacifica.JPG',
+    imageDescription: 'Where Taco Bell on the ocean serves frozen margaritas.',
     latitude: '37.772366',
     longitude: '-122.467315',
     zoom: 15,
@@ -104,6 +109,7 @@ export const doingBusinessAs = {
   'y2k38.info': {
     emote: ':*',
     image: '/cdn/tychi.me/photos/giza.JPG',
+    imageDescription: 'Where the Pyramids are the desert',
     latitude: '37.771326',
     longitude: '-122.470304',
     zoom: 16,
@@ -120,6 +126,7 @@ export const doingBusinessAs = {
   'thelanding.page': {
     emote: ':)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
+    imageDescription: 'The Master Sword',
     latitude: '37.770613',
     longitude: '-122.479310',
     zoom: 17,

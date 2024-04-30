@@ -76,12 +76,12 @@ $.draw((target) => {
   if(self.self !== self.top) return '<plan98-welcome></plan98-welcome>'
   const { suggestions, suggestable, joypros } = $.learn()
   if(joypros.length === 0) return
-  const { art } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
+  const { art, diskette } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }
 
   const compass = drawCompass(joypros[0].buttons)
   const cardinal = drawCardinal(joypros[0].buttons)
 
-  const deck = findDeck(art)
+  const deck = findDeck(art, diskette)
 
   const content = `
     <div class="the-map">
@@ -124,19 +124,28 @@ $.draw((target) => {
   `
 })
 
-function findDeck(art) {
-
-  const { mascot } = doingBusinessAs[art]
-
-  return `
-    <div class="deck">
-      <button class="card">
+function findDeck(art, diskette) {
+  const cards = Object.keys(doingBusinessAs).slice(0,12).map((world) => {
+    const { mascot, color, image, imageDescription } = doingBusinessAs[world]
+    const code = `${window.location.origin}?world=${world}`
+    return `
+      <button class="card ${art === world ? 'active': ''}" data-code="${code}" style="--color: ${color}; --image: url('${image}')">
         <div class="backside">
+          <qr-code data-fg="saddlebrown" style="max-height: 120px; margin: auto;" text="${code}"></qr-code>
         </div>
         <div class="frontside">
-          ${mascot}
+          <div class="title-bar">
+            ${mascot}
+          </div>
+          <img src="${image}" alt="${imageDescription}" />
         </div>
       </button>
+    `
+  }).join('')
+
+  return `
+    <div class="deck" style="--hand-offset: ${diskette * -.5}in">
+      ${cards}
     </div>
   `
 }
@@ -157,6 +166,11 @@ $.when('blur', 'input', event => {
   setTimeout(() => {
     $.teach({ suggestable: false })
   }, 200)
+})
+
+$.when('click', '.card', event => {
+  const { code } = event.target.dataset
+  window.location.href = code
 })
 
 $.when('keyup', 'input', event => {
@@ -450,12 +464,13 @@ $.style(`
 
   & [name="carousel"] {
     display: grid;
-    overflow: auto;
+    overflow: visible;
     z-index: 1001;
     width: 100%;
     height: 100%;
     padding: 1rem;
     max-width: 6in;
+    overflow: auto;
   }
 
   & [name="screen"] {
@@ -478,63 +493,72 @@ $.style(`
   }
 
   & .card {
+    padding: 0;
     pointer-events: all;
     aspect-ratio: 1;
     transform-style: preserve-3d;
-    backface-visibility: hidden;
     display: block;
     width: 2.5in;
     height: 3.5in;
-    max-width: 100%;
-    border-radius: .25in;
-    background: white;
     line-height: 1;
     border: none;
-    box-shadow: 0 0 8px 1px rgba(0,0,0,.65);
+    background: transparent;
   }
 
   & .frontside,
   & .backside {
     height: 100%;
     width: 100%;
-  }
-
-  & .frontside,
-  & .backside {
+    box-shadow: 0 0 4px 1px rgba(0,0,0,.85);
     position: relative;
     max-width: 100%;
     margin: 0 auto;
+    border-radius: .25in;
     box-sizing: border-box;
-    overflow-x: auto;
     backface-visibility: hidden;
-    transform: rotateX(0deg);
     opacity: .9999;
-    transition: transform 200ms ease-in-out;
+    transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
+    overflow: hidden;
   }
 
   & .frontside {
+    background: linear-gradient(165deg, black 70%, var(--color));
+    color: rgba(255,255,255,.85);
+    border: .05in solid var(--color);
+    padding: .05in;
+    transform: rotateY(180deg);
+    background-blend-mode: multiply;
+    opacity: 0;
   }
 
   & .backside {
-    transform: rotateX(180deg);
     display: grid;
     place-items: center;
     position: absolute;
     inset: 0;
+    background: lemonchiffon;
+    z-index: 1;
+    transform: rotateY(0deg);
   }
 
-  & .card.flip > .frontside {
-    transform: rotateX(180deg);
+  & .card.active > .frontside {
     pointer-events: none;
+    transform: rotateY(0deg);
+    opacity: 1;
   }
 
-  & .card.flip > .backside {
-    transform: rotateX(0deg);
+  & .card.active > .backside {
+    transform: rotateY(180deg);
   }
 
   & .deck {
     display: grid;
     place-content: end center;
+    grid-template-columns: repeat(13, .5in);
+    transform: translateX(var(--hand-offset));
+    transition: transform 100ms ease-in-out;
+    position: relative;
+    left: 25%;
   }
 
   & .deck .card {
@@ -542,10 +566,16 @@ $.style(`
     transition: transform 250ms ease-in-out;
   }
 
-  & .deck .card:hover,
-  & .deck .card.hover,
-  & .deck .card:focus {
+  & .deck .card.active {
     transform: translateY(0);
+    z-index: 2;
+  }
+
+  & .title-bar {
+    display: grid;
+    text-align: left;
+    padding: .05in 0;
+    font-size: 12pt;
   }
 `)
 
