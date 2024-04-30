@@ -1,38 +1,45 @@
 import module from '@sillonious/module';
 
-const $ = module('video-feed');
+const tag = 'video-feed'
 
-$.draw((target) => {
-  if (target.init) return;
-  target.init = true;
+const $ = module(tag)
 
-  init(target)
-});
-
-async function init(target) {
-  // Create a video element
-  const videoElement = target.querySelector('video');
-
-  const constraints = {
-    audio: true,
-    video: true
-  };
-
-  try {
-    // Get user media from the webcam
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
-
-    // Set the stream as the source for the video element
-    videoElement.srcObject = stream;
-    videoElement.playsInline = true
-
-    // Ensure autoplay
-    videoElement.autoplay = true;
-  } catch (err) {
-    console.error('Error accessing the webcam:', err);
+class VideoFeed extends HTMLElement {
+  constructor() {
+    super();
+    // Initialize your component here
+    $.draw(() => `<video></video>`)
+    const video = this.querySelector('video')
+    video.srcObject = null
   }
 
+  connectedCallback() {
+    const video = this.querySelector('video')
+    // Create and start video stream
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        video.srcObject = stream;
+        // Display video stream in a video element, etc.
+        video.playsInline = true
+        video.autoplay = true;
+      })
+      .catch(error => {
+        console.error('Error accessing video stream:', error);
+      });
+  }
+
+  disconnectedCallback() {
+    const video = this.querySelector('video')
+    // Cleanup resources when component is removed from DOM
+    if (video.srcObject) {
+      video.pause();
+      video.srcObject.getTracks().forEach(track => track.stop());
+      video.srcObject = null;
+    }
+  }
 }
+
+customElements.define(tag, VideoFeed);
 
 $.style(`
   & {
