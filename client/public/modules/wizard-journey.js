@@ -31,8 +31,9 @@ const $ = module('wizard-journey', {
 
 export function setupSaga(nextSaga, target) {
   const root = target.closest($.link)
-  const { activeDialect, activeWorld } = $.learn()
-  let key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
+  let { activeDialect, activeWorld } = $.learn()
+  activeWorld = root.getAttribute('host') || activeWorld
+  const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
 
   target.dataset.lastHtml = target.innerHTML
   target.innerHTML = `<a href="${key}">Loading...</a>`
@@ -82,7 +83,8 @@ export function setupSaga(nextSaga, target) {
 }
 
 $.draw((target) => {
-  const { activeWorld } = $.learn()
+  let { activeWorld } = $.learn()
+  activeWorld = target.getAttribute('host') || activeWorld
   const tutorial = overworld[window.location.pathname]
   if(!tutorial) return
   if(inactiveWorlds.includes(activeWorld)) return
@@ -108,6 +110,7 @@ $.style(`
   & xml-html {
     min-height: auto;
     position: absolute;
+    max-width: 100%;
     bottom: 0;
   }
 
