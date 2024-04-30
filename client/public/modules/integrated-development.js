@@ -132,7 +132,8 @@ $.style(`
     display: flex;
     gap: .5rem;
     padding: .5rem .5rem 1rem;
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
   }
   & .example-tab {
     padding: 0;
