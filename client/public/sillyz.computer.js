@@ -2,9 +2,9 @@ function ready() {
   console.log(window.plan98, ' is ready')
 }
 
-export function upsell(world = window.plan98.database) {
+export function upsell(host = window.plan98.host) {
   document.body.insertAdjacentHTML('beforeend', `
-    <wizard-journey host="${world}"></wizard-journey>
+    <wizard-journey host="${host}"></wizard-journey>
   `)
 }
 

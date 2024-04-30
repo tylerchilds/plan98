@@ -32,7 +32,7 @@ const $ = module('wizard-journey', {
 export function setupSaga(nextSaga, target) {
   const root = target.closest($.link)
   let { activeDialect, activeWorld } = $.learn()
-  activeWorld = root.getAttribute('host') || activeWorld
+  activeWorld = root ? root.getAttribute('host') : activeWorld
   const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
 
   target.dataset.lastHtml = target.innerHTML

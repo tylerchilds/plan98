@@ -13,14 +13,14 @@ import party, {
   anybodyPressesMode,
 } from '@sillonious/party'
 
-
 const protocol = 'https://'
 const locale = 'en_US'
 
 const $ = module('hyper-browser', {
   diskette: 6,
   suggestions: [],
-  joypros: []
+  joypros: [],
+  player: doingBusinessAs
 })
 
 function drawCompass(buttons) {
@@ -125,7 +125,8 @@ $.draw((target) => {
 })
 
 function findDeck(art, diskette) {
-  const cards = Object.keys(doingBusinessAs).slice(0,12).map((world) => {
+  const { player } = $.learn()
+  const cards = Object.keys(player).slice(0,12).map((world) => {
     const { mascot, color, image, imageDescription } = doingBusinessAs[world]
     const code = `${window.location.origin}?world=${world}`
     return `
@@ -205,11 +206,18 @@ $.when('click', '[name="back"]', () => {
 })
 
 $.when('click', '[name="out"]', () => {
-  const { paused } = $.learn()
-  if(paused) {
-    $.teach({ paused: false })
-  }
+  const hand = Object.keys(doingBusinessAs).filter(coinToss).reduce((business, key) => {
+    business[key] = doingBusinessAs[key]
+    return business
+  }, {})
+  $.teach({ player: hand })
+  const bin = diskettes()
+  const diskette = bin.length - 1
+  const art = bin[diskette]
+  state['ls/sillonious-memex'] = { art, diskette }
 })
+
+function coinToss() { return Math.random() >= 0.5 }
 
 $.when('click', '[name="next"]', (event) => {
   let { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
@@ -217,23 +225,38 @@ $.when('click', '[name="next"]', (event) => {
   const count = bin.length
   diskette = mod(((diskette || 0) + 1), count)
   const art = bin[diskette]
-  console.log(diskette)
   state['ls/sillonious-memex'] = { art, diskette }
 })
 
 $.when('click', '[name="in"]', () => {
-  const { paused } = $.learn()
-  if(paused) {
-    const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
-    const bin = diskettes(event.target)
-    const art = bin[diskette]
+  const hand = Object.keys(doingBusinessAs).filter(coinToss).reduce((business, key) => {
+    business[key] = doingBusinessAs[key]
+    return business
+  }, {})
+  $.teach({ player: hand })
+  const bin = diskettes()
+  const diskette = 0
+  const art = bin[diskette]
+  state['ls/sillonious-memex'] = { art, diskette }
+})
 
-    window.location.href = doingBusinessAs[art]
-      ? '/?world=' + art
-      : `${protocol}${art}`
-  } else {
-    $.teach({ paused: true })
-  }
+$.when('click', '[name="jump"]', () => {
+  const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes(event.target)
+  const art = bin[diskette]
+
+  window.location.href = doingBusinessAs[art]
+    ? '/?world=' + art
+    : `${protocol}${art}`
+})
+
+$.when('click', '[name="duck"]', () => {
+})
+
+$.when('click', '[name="use"]', () => {
+})
+
+$.when('click', '[name="switch"]', () => {
 })
 
 $.style(`
@@ -580,7 +603,8 @@ $.style(`
 `)
 
 function diskettes() {
-  return Object.keys(doingBusinessAs)
+  const { player } = $.learn()
+  return Object.keys(player)
 }
 
 function t(key) {
