@@ -211,7 +211,7 @@ $.when('click', '[data-infinity]', () => {
 
 $.when('click', '[data-party]', () => {
   showModal(`
-    <sticky-note style="padding: 30%;">
+    <sticky-note>
       <qr-code text="${window.location.href}"></qr-code>
     </sticky-note>
   `)

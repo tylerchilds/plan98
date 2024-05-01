@@ -31,7 +31,9 @@ $.draw((target) => {
     mascot,
     contact,
     tagline,
+    saga
   } = currentBusiness(host)
+  const sagaDemo = saga.split('/public')[1]
   const { colors, fg, bg } = generateTheme(target, host)
 
   const wheel = colors.map((lightness, i) => {
@@ -59,44 +61,12 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  return self.self === self.top ? `
+  return `
     <main class="output" style="background-image: ${stars}">
-      <div class="backside-paper">
-        <button data-share>
-          Share
-        </button>
-        <div class="sticky">
-          <div class="virtual-paper">
-            <qr-code text="${location}" data-fg="saddlebrown"></qr-code>
-            <div class="tagline">the rest is up to you</div>
-          </div>
-          <div class="actual-paper">
-            ${menuFor(host)}
-          </div>
-        </div>
-      </div>
-      <div class="frontside-paper">
-        <hyper-browser></hyper-browser>
-      </div>
+      <iframe src="${sagaDemo}"></iframe>
+      <iframe src="${saga}"></iframe>
     </main>
-    <nav class="input">
-      <sillonious-joypro seat="${seat}"></sillonious-joypro>
-    </nav>
-    <footer class="from">
-      <button data-help>
-        Help
-      </button>
-    </footer>
-    <header class="to">
-      <div>
-        <button class="sillonious-brand" data-switcher>
-          <hypertext-variable id="vt9" monospace="1" slant="-15" casual="1" cursive="1" weight="800">
-            PaperNautiloids
-          </hypertext-variable>
-        </button>
-      </div>
-    </header>
-  ` : '<plan98-welcome></plan98-welcome>'
+  `
 })
 
 function seed(target) {
@@ -460,6 +430,7 @@ $.style(`
       z-index: 1;
       display: grid;
       place-items: center;
+      padding-top: 2rem;
     }
 
     & .to {

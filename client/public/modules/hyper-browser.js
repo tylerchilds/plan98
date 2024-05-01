@@ -246,7 +246,9 @@ $.when('click', '[name="jump"]', () => {
   const bin = diskettes(event.target)
   const art = bin[diskette]
 
-  showModal(`<wizard-journey host="${art}"></wizard-journey>`)
+  showModal(`<wizard-journey host="${art}">
+    <sillonious-brand host="${art}"></sillonious-brand>
+  </wizard-journey>`)
 })
 
 $.when('click', '[name="duck"]', () => {
@@ -491,7 +493,6 @@ $.style(`
     width: 100%;
     height: 100%;
     padding: 1rem;
-    max-width: 6in;
     overflow: auto;
   }
 
