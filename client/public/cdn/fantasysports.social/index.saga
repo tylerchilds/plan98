@@ -1,9 +1,1 @@
 <dadmin-dashboard
-
-<a
-text: Baseball
-href: baseball.saga
-
-<a
-text: Football
-href: football.saga
