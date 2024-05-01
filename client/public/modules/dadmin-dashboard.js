@@ -1,6 +1,6 @@
 import module from '@sillonious/module'
 
-const $ = module('integrated-development', { activeTabIndex: 0 })
+const $ = module('dadmin-dashboard', { activeTabIndex: 0 })
 
 const language = "en-us"
 
@@ -16,42 +16,42 @@ $.draw((target) => {
 
   const modes = [
     {
-      icon: '<span>#</span>',
+      icon: '<span>A</span>',
       label: 'Easy',
       content: `
-        <media-plexer src="${quest}"></media-plexer>
+        <img src="/public/cdn/fantasysports.social/logo.png" alt="Shawn Childs CC's Desperados, a man throwing a football to a baseball player with a glove" style="position: absolute; bottom: 1rem; left: 1rem; max-width: 500px;" />
       `
     },
     {
-      icon: '<span>@</span>',
+      icon: '<span>B</span>',
       label: 'Medium',
       content: `
-        <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
+        <football-defensivelogs></football-defensivelogs>
       `
     },
     {
-      icon: '<span>&lt;</span>',
+      icon: '<span>C</span>',
       label: 'Hard',
       content: `
-        <plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>
+        <football-catches></football-catches>
       `
     },
     {
-      icon: '<span>&gt;</span>',
+      icon: '<span>D</span>',
       label: 'Pretend',
       content: `
-        <video-feed></video-feed>
+        <baseball-players></baseball-players>
       `
     },
     {
-      icon: '<span>&</span>',
+      icon: '<span>E</span>',
       label: 'Dashboard',
       content: `
         <module-dashboard></module-dashboard>
       `
     },
     {
-      icon: '<span>{</span>',
+      icon: '<span>F</span>',
       label: 'Source',
       content: `
         <iframe src="https://app.radicle.xyz/nodes/seed.radicle.garden/rad:z3PV9XW6J3uursLmrfWtu4XMUApQi" title="argonauts"></iframe>
