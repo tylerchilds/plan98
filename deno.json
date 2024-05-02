@@ -42,6 +42,8 @@
     "native-dev": "deno task package-assets && cd desktop && npm run tauri dev",
     "native-build": "deno task package-assets && cd desktop && npm run tauri build",
 
+    "unix-install": "sudo cp desktop/src-tauri/target/release/bundle/appimage/grapevine_0.1.1_aarch64.AppImage /usr/local/bin/plan98",
+
     "ios-init": "deno task package-assets && cd app && npm run tauri ios init",
     "ios-dev": "deno task package-assets && cd app && npm run tauri ios dev",
     "ios-build": "deno task package-assets && cd app && npm run tauri ios build",
