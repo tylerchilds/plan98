@@ -1,0 +1,76 @@
+<sillonious-action
+action: hostPressesStartStop
+saga: 000-000.saga
+label: Go Back
+
+<hr
+
+Go to the mountain with Sol to learn from the mice to teach the day
+
+<go-to
+link: mountain/index.saga
+text: Go to the mountain
+
+The earth spins in place forward and back, but just today.
+
+<hr
+
+Go to the city with Sally to learn from the crows to teach the weather
+
+<go-to
+link: city/index.saga
+text: Go to the city
+
+The city reverberates the winds of the wings altering the atmosphere.
+
+<hr
+
+Go to the beach with Shelly to learn from the turtles to teach the night
+
+<go-to
+link: beach/index.saga
+text: Go to the beach
+
+The moon phases wax and wane within the current moon.
+
+<hr
+
+Go to the woods with Wally to learn from the wolves to teach the seasons
+
+<go-to
+link: woods/index.saga
+text: Go to the woods
+
+The forest rapidly shifts as the moons pass through the current year.
+
+<hr
+
+Go to the desert with Silly to learn from the horses to teach the age
+
+<go-to
+link: desert/index.saga
+text: Go to the desert
+
+The desert is a reflection of the stars the sand the same constellations.
+
+<hr
+
+Go to the ocean with Sully to learn from the octopods to teach reality
+
+<go-to
+link: ocean/index.saga
+text: Go to the ocean
+
+The ocean waves and wobbles every moment fleeting and unique.
+
+<hr
+
+A cold dark day in winter is every cold dark day in winter.
+
+A brisk autumn morning is every brisk autumn morning.
+
+A hot summers day is every hot summers day.
+
+A humid spring evening is every humid spring evening.
+
+- paper nautiluses

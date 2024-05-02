@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Tag • TodoMVC</title>
+		<link rel="stylesheet" href="vendor/todomvc-app.css">
+		<link rel="stylesheet" href="vendor/todomvc-common-base.css">
+	</head>
+	<body>
+    <noscript>JavaScript is required to manage your todo list</noscript>
+    <solid-user></solid-user>
+    <section class="todoapp">
+      <todo-list></todo-list>
+    </section>
+		<footer class="info">
+			<p>Double-click to edit a todo</p>
+			<p>Written by <a href="https://tychi.me">~tychi</a></p>
+			<p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+		</footer>
+    <script type="module">
+      // tag is a tiny library for binding HTML fragments to JavaScript closures
+      import tag from '../../mod.js'
+      import $user, { web } from '../../src/tags/solid-user.js'
+
+      import initialTodoList from './data/initialTodoList.js'
+      import flags from './data/flags.js'
+
+      import showListItems from './features/showListItems.js'
+      import showNewItemForm from './features/showNewItemForm.js'
+      import showFilters from './features/showFilters.js'
+      import showIncompleteCount from './features/showIncompleteCount.js'
+      import showClearCompletedAction from './features/showClearCompletedAction.js'
+      import showCompletenessToggle from './features/showCompletenessToggle.js'
+
+      import performItemsRequest from './features/performItemsRequest.js'
+      const interactives = [
+        './features/onClearCompletedAction.js',
+        './features/onFilterChange.js',
+
+        './features/onNewItemInput.js',
+        './features/onItemEdit.js',
+        './features/onItemChange.js',
+        './features/onItemToggle.js',
+        './features/onItemDelete.js',
+
+        './features/onCompletenessToggle.js'
+      ];
+
+      // create a new tag: <todo-list>
+      // define the initial state and shape of the data
+      const $ = tag('todo-list', initialTodoList)
+
+
+      new Promise((resolve) => {
+        (function check(has) {
+          if(has().user) {
+            resolve(has().user) 
+          }
+          requestAnimationFrame(() => check(has))
+        })($user.learn)
+      }).then(async (user) => {
+        const { itemsContainerUrl } = $.learn();
+
+        if(!itemsContainerUrl) {
+          const url = await web.createContainer(
+            `${user.storageUrl}items/`
+          );
+
+          $.teach({ itemsContainerUrl: url });
+        }
+
+        const items = await performItemsRequest($);
+        $.teach({ items, loading: false });
+      })
+
+      // html is a render function; if a string is returned, it is rendered
+      // whenever state changes, the render function will be called on each target
+      $.draw((target) => {
+        const { loading } = $.learn();
+        const { user, loading: userLoading } = $user.learn()
+
+        if(loading || userLoading) {
+          return `Loading...`
+        }
+
+        if(!user) {
+          return `Please log in`
+        }
+
+        return `
+          <header class="header">
+            <h1>todos</h1>
+            ${showNewItemForm($)}
+          </header>
+          <section class="main">
+            ${showCompletenessToggle($)}
+            <ul class="todo-list">
+              ${showListItems($, flags)}
+            </ul>
+            <footer class="footer">
+              ${showIncompleteCount($)}
+              <ul class="filters">
+                ${showFilters($, flags)}
+              </ul>
+              ${showClearCompletedAction($)}
+            </footer>
+          </section>
+        `
+      })
+
+      interactives.forEach(async (url) => {
+        const { default: start } = await import(url)  
+        start($, flags)
+      })
+    </script>
+	</body>
+</html>

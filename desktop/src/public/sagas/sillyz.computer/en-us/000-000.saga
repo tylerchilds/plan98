@@ -1,0 +1,17 @@
+At the start, was it the Argonaut or the Egg? Either way, there were either eight eggs or eight legs.
+
+Will you chase them or will they chase you?
+
+<action-script
+text: Chase Eggs
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-saga: 000-001.saga
+data-emerald: 0
+
+<action-script
+text: Flee Tentacles
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-emerald: 1
+data-saga: 001-001.saga

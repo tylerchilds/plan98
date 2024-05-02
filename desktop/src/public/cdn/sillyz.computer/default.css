@@ -1,0 +1,17 @@
+body {
+  margin: 0 auto;
+}
+
+saga-genesis {
+  background: black;
+  color: white;
+}
+
+saga-genesis > xml-html {
+}
+
+img,
+video {
+  max-width: 100%;
+  max-height: 50vh;
+}

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <ellipse style="fill: rgb(216, 216, 216);" cx="960" cy="240" rx="120" ry="120" class="slot sprite-head" id="slot-0" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -5.684341886080802e-14)"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1080.697" cy="900.43" rx="60" ry="60" id="slot-5" class="slot sprite-foot" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -5.684341886080802e-14)"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1140" cy="420" rx="60" ry="60" class="slot sprite-off-hand" id="slot-1" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 0, -5.684341886080802e-14)"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-835.633" cy="-593.633" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -5.684341886080802e-14)" id="slot-11" class="slot sprite-hand"/>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-840.481" cy="-900.215" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, -5.684341886080802e-14)" id="slot-7" class="slot sprite-goofy-foot"/>
+</svg>

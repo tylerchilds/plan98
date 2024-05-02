@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+    <title>Babylon.js using Havok</title>
+
+    <!-- Babylon.js -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+
+    <style>
+      html,
+      body {
+        overflow: hidden;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #renderCanvas {
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      #canvasZone {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="canvasZone"><canvas id="renderCanvas"></canvas></div>
+    <script type="importmap">
+      {
+        "imports": {
+          "havok": "https://esm.sh/@babylonjs/havok@1.3.0",
+          "babylonjs": "https://esm.sh/babylonjs@6.33.1"
+        }
+      }
+    </script>
+
+    <script type="module">
+      import HavokPhysics from 'havok'
+      import BABYLON from 'babylonjs'
+      const canvas = document.getElementById("renderCanvas");
+      const engine = new BABYLON.Engine(canvas, true, { preserveDrawingBuffer: true, stencil: true, disableWebGL2Support: false });
+      const createScene = async function () {
+        // This creates a basic Babylon Scene object (non-mesh)
+        const scene = new BABYLON.Scene(engine);
+
+        // This creates and positions a free camera (non-mesh)
+        const camera = new BABYLON.FreeCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
+
+        // This targets the camera to scene origin
+        camera.setTarget(BABYLON.Vector3.Zero());
+
+        // This attaches the camera to the canvas
+        camera.attachControl(canvas, true);
+
+        // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
+
+        // Default intensity is 1. Let's dim the light a small amount
+        light.intensity = 0.7;
+
+        // Our built-in 'sphere' shape.
+        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
+
+        // Move the sphere upward at 4 units
+        sphere.position.y = 4;
+
+        // Our built-in 'ground' shape.
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 10, height: 10 }, scene);
+
+        // initialize plugin
+        const havokInstance = await HavokPhysics();
+        // pass the engine to the plugin
+        const hk = new BABYLON.HavokPlugin(true, havokInstance);
+        // enable physics in the scene with a gravity
+        scene.enablePhysics(new BABYLON.Vector3(0, -9.8, 0), hk);
+
+        // Create a sphere shape and the associated body. Size will be determined automatically.
+        const sphereAggregate = new BABYLON.PhysicsAggregate(sphere, BABYLON.PhysicsShapeType.SPHERE, { mass: 1, restitution: 0.75 }, scene);
+
+        // Create a static box shape.
+        const groundAggregate = new BABYLON.PhysicsAggregate(ground, BABYLON.PhysicsShapeType.BOX, { mass: 0 }, scene);
+
+        return scene;
+      };
+
+      createScene().then((scene) => {
+        engine.runRenderLoop(function () {
+          if (scene) {
+            scene.render();
+          }
+        });
+      });
+      // Resize
+      window.addEventListener("resize", function () {
+        engine.resize();
+      });
+    </script>
+  </body>
+</html>
