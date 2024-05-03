@@ -5,8 +5,9 @@ import { doingBusinessAs } from "@sillonious/brand"
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
 const database = localStorage.getItem("plan98.database") || 'http://localhost:8090';
-
-window.plan98 = {
+debugger
+self.plan98 = {
+  ...self.plan98 || {},
   parameters,
   database,
   host: world ? world : doingBusinessAs[window.location.host] ? window.location.host : 'sillyz.computer',

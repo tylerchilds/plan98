@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="./lib/bayun.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+
+    <!-- To test image lock. -->
+    <center>
+        <a><strong>Choose unlocked image</strong> to get it locked : </a><input type="file" id="file"
+            onchange="readFileAsText()" name="file" accept="file/*">
+
+        <br>
+        <br>
+
+        <a><strong>Choose locked image</strong> to get it unlocked : </a><input type="file" id="lockedFile"
+            onchange="unlockLockedImage()" name="lockedFile" accept="file/*">
+
+        <br>
+        <br>
+
+        <button id="down" onclick="downloadFile()">Download Locked/Unlocked File</button>
+
+        <script src="./test.js"></script>
+        <script src="./lib/vishwam-lib.js"></script>
+    </center>
+    
+</body>
+</html>

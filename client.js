@@ -52,7 +52,22 @@ if(commands[command]) {
 
 async function page() {
   const index = await Deno.readTextFile(`./client/public/index.html`)
-  return new DOMParser().parseFromString(index, "text/html");
+  const dom = new DOMParser().parseFromString(index, "text/html");
+
+  dom.head.insertAdjacentHTML('beforeend', `
+    <script>
+      self.plan98 = {
+        env: {
+          VAULT_APP_ID: "${Deno.env.get('VAULT_APP_ID')}",
+          VAULT_APP_SECRET: "${Deno.env.get('VAULT_APP_SECRET')}",
+          VAULT_APP_SALT: "${Deno.env.get('VAULT_APP_SALT')}",
+          VAULT_BASE_URL: "${Deno.env.get('VAULT_BASE_URL')}"
+        }
+      }
+    </script>
+  `)
+
+  return dom
 }
 
 async function markdownSanitizer(md) {
@@ -287,7 +302,8 @@ const byName = (x) => x.name
 
 async function home(request, business) {
   if(!business) {
-    return await Deno.readTextFile(`./client/public/index.html`)
+    const dom = await page()
+    return `<!DOCTYPE html>${dom.documentElement}`
   }
 
   let file
