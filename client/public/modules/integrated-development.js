@@ -16,76 +16,76 @@ $.draw((target) => {
 
   const modes = [
     {
-      icon: '<span>#</span>',
-      label: 'Easy',
+      icon: '<span>A</span>',
+      label: 'Editor',
       content: `
         <media-plexer src="${quest}"></media-plexer>
       `
     },
     {
-      icon: '<span>@</span>',
-      label: 'Medium',
+      icon: '<span>B</span>',
+      label: 'Tracer',
       content: `
         <code-module src="${quest}" stack="${quest},${[...new Set(nautiloids)]}"></code-module>
       `
     },
     {
-      icon: '<span>&lt;</span>',
-      label: 'Hard',
+      icon: '<span>C</span>',
+      label: 'System',
       content: `
         <plan98-filesystem data-cwc="ls/plan98"></plan98-filesystem>
       `
     },
     {
-      icon: '<span>&gt;</span>',
-      label: 'Pretend',
+      icon: '<span>D</span>',
+      label: 'CCTV',
       content: `
         <video-feed></video-feed>
       `
     },
     {
-      icon: '<span>&</span>',
+      icon: '<span>E</span>',
       label: 'Dashboard',
       content: `
         <module-dashboard></module-dashboard>
       `
     },
     {
-      icon: '<span>{</span>',
-      label: 'Source',
+      icon: '<span>F</span>',
+      label: 'Signatures',
       content: `
         <iframe src="https://app.radicle.xyz/nodes/seed.radicle.garden/rad:z3PV9XW6J3uursLmrfWtu4XMUApQi" title="argonauts"></iframe>
       `
     },
     {
-      icon: '<span>!</span>',
+      icon: '<span>G</span>',
       label: 'Map',
       content: `
         <site-map></site-map>
       `
     },
     {
-      icon: '<span>^</span>',
+      icon: '<span>H</span>',
       label: 'Hyper Browser',
       content: `<hyper-browser></hyper-browser>`
     },
     {
-      icon: '<span>*</span>',
+      icon: '<span>I</span>',
       label: 'Devices',
       content: `<plan98-devices></plan98-devices>`
     },
     {
-      icon: '<span>$</span>',
+      icon: '<span>J</span>',
       label: 'Pay to Win',
       content: `<iframe src="/sagas/thelanding.page/${language}/000-000.saga?world=thelanding.page" style="background: white;"></iframe>`
     },
     {
-      icon: '<span>=</span>',
+      icon: '<span>K</span>',
       label: 'Chat',
       content: `<story-chat></story-chat>`
     },
     {
-      icon: '<span>+</span>',
+      icon: '<span>L</span>',
       label: 'Chat',
       content: `<infinite-canvas></infinite-canvas>`
     },
@@ -157,7 +157,6 @@ $.style(`
   & .example-view {
     overflow: hidden;
     position: relative;
-    padding: 2rem 0 0;
   }
 
   & data-tooltip,
