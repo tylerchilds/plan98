@@ -157,6 +157,7 @@ $.style(`
   & .example-view {
     overflow: hidden;
     position: relative;
+    padding: 2rem 0 0;
   }
 
   & data-tooltip,

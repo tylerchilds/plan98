@@ -6,55 +6,48 @@ const language = "en-us"
 
 $.draw((target) => {
   const { activeTabIndex } = $.learn()
-  const quest = target.getAttribute('src')
-  const entries = performance.getEntriesByType('resource');
-
-  const nautiloids = entries.map((entry) => {
-    const local = entry.name.includes(window.location.origin)
-    return local ? entry.name.split(window.location.origin)[1] : entry.name;
-  });
 
   const modes = [
     {
       icon: '<span>A</span>',
-      label: 'Easy',
+      label: 'Home',
       content: `
         <img src="/public/cdn/fantasysports.social/logo.png" alt="Shawn Childs CC's Desperados, a man throwing a football to a baseball player with a glove" style="position: absolute; bottom: 1rem; left: 1rem; max-width: 500px;" />
       `
     },
     {
       icon: '<span>B</span>',
-      label: 'Medium',
+      label: 'Football Defensive Logs',
       content: `
         <football-defensivelogs></football-defensivelogs>
       `
     },
     {
       icon: '<span>C</span>',
-      label: 'Hard',
+      label: 'Football Catches',
       content: `
         <football-catches></football-catches>
       `
     },
     {
       icon: '<span>D</span>',
-      label: 'Pretend',
+      label: 'Baseball Players',
       content: `
         <baseball-players></baseball-players>
       `
     },
     {
       icon: '<span>E</span>',
-      label: 'Dashboard',
+      label: 'NFL Teams Defensive Stats',
       content: `
-        <module-dashboard></module-dashboard>
+        <football-defensivestats data-year="2023"></football-defensivestats>
       `
     },
     {
       icon: '<span>F</span>',
-      label: 'Source',
+      label: 'NFL Teams Offensive Stats',
       content: `
-        <iframe src="https://app.radicle.xyz/nodes/seed.radicle.garden/rad:z3PV9XW6J3uursLmrfWtu4XMUApQi" title="argonauts"></iframe>
+        <football-offensivestats data-year="2023"></football-defensivestats>
       `
     },
     {
@@ -157,6 +150,7 @@ $.style(`
   & .example-view {
     overflow: hidden;
     position: relative;
+    padding: 2rem 0 0;
   }
 
   & data-tooltip,
