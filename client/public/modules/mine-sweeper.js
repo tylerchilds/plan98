@@ -328,7 +328,7 @@ $.style(`
   }
 
   & .grid {
-    display: grid;
+    display: inline-grid;
     grid-template-columns: repeat(var(--columns), 1fr);
     grid-template-rows: repeat(var(--rows), 1fr);
     height: 100%;
@@ -356,6 +356,7 @@ $.style(`
     place-content: center;
     padding: 0;
     min-height: 2rem;
+    aspect-ratio: 1;
   }
 
   & .mini-overlay {
