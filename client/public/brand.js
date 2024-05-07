@@ -203,6 +203,22 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
+  'pathbuilder2e.com': {
+    emote: ':)',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '37.7826629',
+    longitude: '-122.4763459',
+    zoom: 17,
+    tagline: 'Universal access to all knowledge',
+    saga: '/public/cdn/pathbuilder2e.com/index.saga',
+    mascot: 'Origin Wildcloak',
+    contact: 'Origin Wildcloak',
+    brandHue: 280,
+    brandRange: 360,
+    color: new Color('lch', [0, 0, 280])
+      .display()
+      .toString({format: 'hex'}),
+  },
   'w3c.org': {
     emote: ':)',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
