@@ -124,6 +124,7 @@ export function hideModal() {
   const { isOpen, layer } = $.learn()
 
   const nextLayer = layer - 1
+  console.log(layer)
 
   if(layer === 1) {
     document.body.classList.remove('trap-modal')

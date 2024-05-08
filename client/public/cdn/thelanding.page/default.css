@@ -17,6 +17,10 @@ body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
   background: white;
 }
 
+main {
+  height: auto;
+}
+
 img,
 video {
   max-width: 100%;

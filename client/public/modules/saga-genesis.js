@@ -82,7 +82,7 @@ $.draw((target) => {
   `
 })
 
-$.when('click', '[data-escape]', revealTruth)
+$.when('click', '[data-escape]', debugMode)
 
 $.when('click', '[data-aid]', (event) => {
   showPanel(`
@@ -93,11 +93,17 @@ $.when('click', '[data-aid]', (event) => {
 
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
-    revealTruth()
+    const { debug } = $.learn()
+    const mode = !debug ? debugMode : normalMode
+    mode()
   }
 });
 
-function revealTruth(event) {
+function normalMode() {
+  $.teach({ debug: false })
+}
+
+function debugMode() {
   const { quest } = $.learn()
 
   showModal(`
@@ -109,6 +115,7 @@ function revealTruth(event) {
       </div>
     </div>
   `, { centered: true })
+  $.teach({ debug: true })
 }
 
 $.style(`

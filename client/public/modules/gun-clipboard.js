@@ -20,8 +20,7 @@ function subscribe(target) {
   if(target.subscribed) return
   target.subscribed = true
 
-  const safeword = target.getAttribute('safeword') || 'paste'
-  target.gun = gun.get(target.id).get(safeword)
+  target.gun = gun.get($.link).get(window.location.href)
   target.gun.on(value => $.teach({ value }))
 }
 
