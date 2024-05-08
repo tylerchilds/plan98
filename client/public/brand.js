@@ -146,6 +146,9 @@ export const doingBusinessAs = {
     color: new Color('lch', [50, 75, 350])
       .display()
       .toString({format: 'hex'}),
+    endOfHead: `
+      <script defer data-domain="thelanding.page" src="https://plausible.io/js/script.js"></script>
+    `
   },
   'tychi.me': {
     emote: ':)',

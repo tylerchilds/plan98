@@ -70,8 +70,12 @@ async function page() {
   return dom
 }
 
-async function markdownSanitizer(md) {
+async function markdownSanitizer(md, { endOfHead }) {
   const dom = await page()
+  console.log(endOfHead)
+  if(endOfHead) {
+    dom.head.insertAdjacentHTML('beforeend', endOfHead)
+  }
   dom.getElementById('main').remove()
   dom.body.insertAdjacentHTML('afterbegin', `
     <saga-genesis class="markdown">
@@ -81,8 +85,12 @@ async function markdownSanitizer(md) {
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 
-async function sagaSanitizer(saga) {
+async function sagaSanitizer(saga, { endOfHead }) {
   const dom = await page()
+  console.log(endOfHead)
+  if(endOfHead) {
+    dom.head.insertAdjacentHTML('beforeend', endOfHead)
+  }
   dom.body.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>
       <saga-genesis>
@@ -133,7 +141,8 @@ function buildHeaders(parameters, pathname, extension) {
 async function router(request, context) {
   const { pathname, host, search } = new URL(request.url);
   const parameters = new URLSearchParams(search)
-  const world = parameters.get('world')
+  const world = parameters.get('world') || host || 'sillyz.computer'
+  const business = doingBusinessAs[world]
   const extension = path.extname(pathname);
   const headers = buildHeaders(parameters, pathname, extension);
 
@@ -171,7 +180,7 @@ async function router(request, context) {
   }
 
   if(pathname === '/') {
-    const file = await home(request, doingBusinessAs[world || host || 'sillyz.computer'])
+    const file = await home(request, business)
     if(file) {
       return new Response(file, {
         headers,
@@ -268,7 +277,7 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
   try {
     if(sanitizers[extension]) {
       file = await Deno.readTextFile(`./client/public${pathname}`)
-      file = await sanitizers[extension](file)
+      file = await sanitizers[extension](file, business)
     } else {
       file = await Deno.readFile(`./client/public${pathname}`)
     }
@@ -279,7 +288,7 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
       file = await Deno.readTextFile(`./client/public/404.saga`)
     } else {
       const saga = await Deno.readTextFile(`./client/public/404.saga`)
-      file = await sagaSanitizer(saga)
+      file = await sagaSanitizer(saga, business)
     }
     statusCode = Status.NotFound
     console.error(e + '\n' + pathname + '\n' + e)
@@ -312,7 +321,7 @@ async function home(request, business) {
     console.log(saga)
 
     file = await Deno.readTextFile(`./client/${saga}`)
-    file = await sanitizers['.saga'](file)
+    file = await sanitizers['.saga'](file, business)
   } catch (e) {
     console.error(e + '\n' + pathname + '\n' + e)
   } 
