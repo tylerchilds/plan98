@@ -147,7 +147,15 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
     endOfHead: `
-      <script defer data-domain="thelanding.page" src="https://plausible.io/js/script.js"></script>
+      <script type="module">
+        import Plausible from 'plausible-tracker'
+        const plausible = Plausible({
+          domain: 'thelanding.page'
+        })
+        const { trackPageview } = Plausible()
+        // Track a page view
+        trackPageview()
+      </script>
     `
   },
   'tychi.me': {
