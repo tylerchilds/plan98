@@ -362,6 +362,7 @@ button {
 	display: grid;
   background: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,.85)), linear-gradient(transparent, dodgerblue);
   backdrop-filter: blur(8px);
+  color: rgba(0,0,0,.65);
 	margin-bottom: 1rem;
 	position: relative;
 	text-align: left;

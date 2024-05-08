@@ -22,12 +22,9 @@ $.draw((target) => {
 
   return `
     <div class="wrapper">
-      <h1>Paper Nautiloids</h1>
+      <h1>Stay Tuned!</h1>
       <p>
-        An interactive art piece and medium created by one <hypertext-highlighter color="yellow">random guy on the internet</hypertext-highlighter>. Staying in touch would be super appreciated.
-      </p>
-      <p>
-        If any of your experience was fun, I'd love to hear about it. Please leave your email and I will be in touch with updates!
+        Drop your email in the hat below to stay in the know on how things go!
       </p>
 
       <div>
@@ -37,20 +34,12 @@ $.draw((target) => {
         <highlighter color="orange" style="display: block;">
           <form method="POST" data-url="${url}" data-key="${key}">
             <label class="field">
-              <span class="label">Your Name</span>
-              <input type="text" name="name" required />
-            </label>
-            <label class="field">
               <span class="label">Your Email</span>
               <input type="email" name="email" required/>
             </label>
-            <label class="field">
-              <span class="label">Optional nice words!</span>
-              <textarea name="message"></textarea>
-            </label>
             <rainbow-action style="float: right;">
               <button type="submit">
-                Connect
+                Subscribe
               </button>
             </rainbow-action>
           </form>
@@ -66,6 +55,10 @@ $.draw((target) => {
       </div>
       <a href="https://tychi.me">
         <img src="/cdn/tychi.me/photos/professional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
+      </a>
+      Founder, Owner, Operator @ Sillyz Computer, LLC<br/>
+      <a href="https://sillyz.computer">
+        Sillyz.Computer
       </a>
     </div>
   `
