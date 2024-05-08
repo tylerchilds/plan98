@@ -1,5 +1,6 @@
 import module from '@sillonious/module'
 import { doingBusinessAs } from '@sillonious/brand'
+import { showModal } from './plan98-modal.js'
 
 const { host } = self.plan98 || { host: window.location.host }
 
@@ -11,20 +12,21 @@ export function currentBusiness() {
 
 $.draw((target) => {
   const {
-    logo
+    links
   } = currentBusiness()
 
-  return `
-    <a href="">
-      About
-    </a>
-    <a href="">
-      Subscribe
-    </a>
-    <a href="">
-      Purchase
-    </a>
-  `
+  return links ? links.map(({ title, tag }) => {
+    return `
+      <button data-tag="${tag}">
+        ${title}
+      </button>
+    `
+  }).join('') : ''
+})
+
+$.when('click', '[data-tag]', (event) => {
+  const { tag } = event.target.dataset
+  showModal(`<${tag}></${tag}>`)
 })
 
 $.style(`
@@ -37,17 +39,20 @@ $.style(`
     text-align: center;
   }
 
-  & a {
+  & button {
     display: inline-block;
     padding: 13px;
     font-size: 1.5rem;
     background: rgba(255,255,255,.5);
+    border: none;
     border-radius: 100%;
     text-decoration: none;
+    color: dodgerblue;
   }
 
-  & a:hover,
-  & a:focus {
+  & button:hover,
+  & button:focus {
     background: rgba(255,255,255,1);
+    color: rebeccapurple;
   }
 `)

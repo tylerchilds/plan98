@@ -146,6 +146,20 @@ export const doingBusinessAs = {
     color: new Color('lch', [50, 75, 350])
       .display()
       .toString({format: 'hex'}),
+    links: [
+      {
+        title: 'About',
+        tag: 'mission-statement'
+      },
+      {
+        title: 'Subscribe',
+        tag: 'stay-tuned'
+      },
+      {
+        title: 'Purchase',
+        tag: 'best-buy'
+      },
+    ],
     endOfHead: `
       <script type="module">
         import Plausible from 'plausible-tracker'

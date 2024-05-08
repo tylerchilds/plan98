@@ -46,10 +46,6 @@ body wizard-journey xml-html {
   padding: 2rem 1rem;
 }
 
-saga-genesis xml-html {
-  height: 100%;
-}
-
 mast-head img {
   max-width: 100vmin;
   max-height: 100vmin;
