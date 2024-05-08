@@ -34,7 +34,6 @@ $.when('submit', 'form', async (event) => {
     })
   }).then(res => res.json())
 
-  debugger
   if(payment) {
     return payment
   }

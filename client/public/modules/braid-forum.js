@@ -14,7 +14,6 @@ async function initialize(target) {
 
   (await braid_fetch(host + '/feed', { subscribe: true }))
   .subscribe((update) => {
-    debugger
   })
 }
 

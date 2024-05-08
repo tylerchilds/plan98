@@ -23,6 +23,7 @@ const emeraldOfNow
 export const doingBusinessAs = {
   'sillyz.computer': {
     emote: ';)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     imageDescription: 'A wired collection of silly musical equipment',
     latitude: '37.769100',
@@ -40,6 +41,7 @@ export const doingBusinessAs = {
   },
   '1998.social': {
     emote: ':D',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/aurora.JPG',
     imageDescription: 'An aurora borealis in iceland',
     latitude: '37.771336',
@@ -57,6 +59,7 @@ export const doingBusinessAs = {
   },
   'yourlovedones.online': {
     emote: ':(',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/banyan.JPG',
     imageDescription: 'The Banyan Tree in Lahaina',
     latitude: '37.772006',
@@ -74,6 +77,7 @@ export const doingBusinessAs = {
   },
   'ncity.executiontime.pub': {
     emote: ':o',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/denali.JPG',
     imageDescription: 'Some mountain in Alaska',
     latitude: '37.772322',
@@ -91,6 +95,7 @@ export const doingBusinessAs = {
   },
   'css.ceo': {
     emote: ':p',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/pacifica.JPG',
     imageDescription: 'Where Taco Bell on the ocean serves frozen margaritas.',
     latitude: '37.772366',
@@ -108,6 +113,7 @@ export const doingBusinessAs = {
   },
   'y2k38.info': {
     emote: ':*',
+    logo: '/cdn/boxart.svg',
     image: '/cdn/tychi.me/photos/giza.JPG',
     imageDescription: 'Where the Pyramids are the desert',
     latitude: '37.771326',
@@ -125,6 +131,7 @@ export const doingBusinessAs = {
   },
   'thelanding.page': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     imageDescription: 'The Master Sword',
     latitude: '37.770613',
@@ -142,6 +149,7 @@ export const doingBusinessAs = {
   },
   'tychi.me': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     latitude: '37.782562',
     longitude: '-122.471554',
     zoom: 13,
@@ -157,6 +165,7 @@ export const doingBusinessAs = {
   },
   'cutestrap.com': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     latitude: '37.782562',
     longitude: '-122.471554',
     zoom: 13,
@@ -173,6 +182,7 @@ export const doingBusinessAs = {
 
   'abc.xyz': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '64.1478144',
     longitude: '-21.943671',
@@ -189,6 +199,7 @@ export const doingBusinessAs = {
   },
   'archive.org': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '37.7826629',
     longitude: '-122.4763459',
@@ -205,6 +216,7 @@ export const doingBusinessAs = {
   },
   'pathbuilder2e.com': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '37.7826629',
     longitude: '-122.4763459',
@@ -221,6 +233,7 @@ export const doingBusinessAs = {
   },
   'w3c.org': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '47.6422547',
     longitude: '-21.943671',
@@ -237,6 +250,7 @@ export const doingBusinessAs = {
   },
   'myspace.com': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '32.8246976',
     longitude: '-117.4386328',
@@ -253,6 +267,7 @@ export const doingBusinessAs = {
   },
   'braid.org': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '64.1478144',
     longitude: '-21.943671',
@@ -271,6 +286,7 @@ export const doingBusinessAs = {
   //'bustblocker.com': emeraldOfTime
   'fantasysports.social': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '64.1478144',
     longitude: '-21.943671',
@@ -287,6 +303,7 @@ export const doingBusinessAs = {
   },
   'docs.flipper.net': {
     emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     latitude: '64.1478144',
     longitude: '-21.943671',

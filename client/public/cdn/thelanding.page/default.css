@@ -20,7 +20,6 @@ body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
 img,
 video {
   max-width: 100%;
-  max-height: 50vh;
 }
 
 body > sillonious-brand,
@@ -49,4 +48,10 @@ body wizard-journey xml-html {
 
 saga-genesis xml-html {
   height: 100%;
+}
+
+mast-head img {
+  max-width: 100vmin;
+  max-height: 100vmin;
+  display: block;
 }

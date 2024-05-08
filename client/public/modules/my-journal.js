@@ -110,7 +110,6 @@ $.when('click', '#signin', (event) => {
 $.when('submit', '#post', (event) => {
   event.preventDefault()
   const { post } = $.learn()
-  debugger
   user.get('journal').set(post, (a, b,c) => {
     $.teach({ post: '' }) })
 })

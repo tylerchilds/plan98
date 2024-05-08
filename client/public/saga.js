@@ -134,8 +134,10 @@ export function render(script) {
   // edge case to clean up when stepping outside of normal time
   if(time !== NORMAL_TIME) times[time]('')
 
-  // return our compiled hyper media scene
-  return validated(scene)
+  // clearn our compiled hyper media scene
+  const clean = validated(scene)
+
+  return template(clean)
 
   // just process our runes, yes magic, just straight forward level 1 magic
   function normalTime(line) {
@@ -172,7 +174,6 @@ export function render(script) {
     const key = line.substring(0, index)
     // after then is the data
     const value = line.substring(index+1)
-
     // no data?
     if(!value) {
       // back to normal time
@@ -241,4 +242,35 @@ function validated(htmlString){
   const doc = parser.parseFromString(root, "application/xml");
   const errorNode = doc.querySelector('parsererror');
   return errorNode ? errorNode.innerHTML : root
+}
+
+const templates = {
+  'thelanding.page': spa
+}
+
+function template(content){
+  if(!state.template) return content
+
+  const T = templates[state.template.engine]
+
+  if(!T) return content
+
+  return T(content)
+}
+
+function spa(content) {
+  return `
+    <header>
+      <mast-head></mast-head>
+    </header>
+    <nav>
+      <quick-links></quick-links>
+    </nav>
+    <main>
+      ${content}
+    </main>
+    <footer>
+      <mega-footer></mega-footer>
+    </footer>
+  `
 }

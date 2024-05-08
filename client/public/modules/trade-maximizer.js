@@ -19,7 +19,6 @@ var output;
 var worker = null;
 
 function processmessage(e) {
-  debugger
   let { outframe, output } = $.learn()
   switch( e.data[0] ) {
     case OUTPUT :

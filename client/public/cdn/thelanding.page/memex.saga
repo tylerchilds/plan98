@@ -1,4 +1,13 @@
+{ template
+engine: thelanding.page
+
 # Welcome
+
+<progress-carousel
+
+<stay-tuned
+
+<best-buy
 
 The Landing Page is a secret door to exclusive experiences.
 

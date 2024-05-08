@@ -429,6 +429,7 @@ $.style(`
       inset: 0;
       z-index: 1;
       display: grid;
+      grid-template-columns: 1fr 1fr;
       place-items: center;
       padding-top: 2rem;
     }

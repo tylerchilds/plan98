@@ -27,7 +27,6 @@ async function contract(target) {
   target.client.MLBv3StatsClient.getStandingsPromise('2018')
     .then((resp) => {
         // data here
-      debugger
     })
     .catch((err) => {
         // handle errors

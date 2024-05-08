@@ -1,12 +1,10 @@
 const cacheName = 'gh057-cache';
-debugger
 async function information() {
   try {
     return await fetch(`/plan98/about`)
       .then(res => res.json())
       .then((data) => {
         console.info('Factory Reset: Success')
-debugger
 				return data
       })
   } catch (e) {
@@ -17,8 +15,6 @@ debugger
 }
 
 self.addEventListener('install', async (event) => {
-	debugger
-	
 	const filesToCache = information().files
   event.waitUntil(
     caches.open(cacheName).then((cache) => {

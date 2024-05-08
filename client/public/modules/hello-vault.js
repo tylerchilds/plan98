@@ -8,7 +8,6 @@ const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
 const enableFaceRecognition = true;
 const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 
-debugger
 const bayunCore = BayunCore.init(appId, appSecret, appSalt,
                                 localStorageMode, enableFaceRecognition, baseURL);
 
