@@ -4,6 +4,8 @@
   "exports": "./mod.ts",
   "tasks": {
     "provision": "./provision.sh",
+    "package": "deno run -A .deno/to-npm.js",
+    "publish": "cd npm && npm publish",
 
     "start": "deno run -A --unstable mod.js",
     "compile-client": "deno compile -A --output cloud.exe client.js",
