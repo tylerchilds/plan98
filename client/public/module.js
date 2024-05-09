@@ -1,5 +1,5 @@
 import statebus, { state } from 'statebus'
-import { innerHTML } from 'npm:diffhtml@1.0.0-beta.30'
+import { innerHTML } from 'diffhtml'
 
 const logs = {}
 

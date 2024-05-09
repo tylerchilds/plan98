@@ -1,13 +1,15 @@
 { template
 engine: thelanding.page
 
-# Welcome
-
 <progress-carousel
+
+The Landing Page is a magical sheet of paper that when unfolded becomes a deeper mystery-- as something razor thin, shields an entire reality.
+
+<braid-mail
+host: http://braid.1998.social:7465
 
 <stay-tuned
 
 <best-buy
 
-The Landing Page is a secret door to exclusive experiences.
-
+<multiplayer-lobby

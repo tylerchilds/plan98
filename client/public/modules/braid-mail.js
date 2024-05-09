@@ -137,3 +137,9 @@ $.when('submit', 'form', async function make_new_post (event) {
 
   fetch_feed(root)
 })
+
+$.style(`
+  & {
+    display: block;
+  }
+`)

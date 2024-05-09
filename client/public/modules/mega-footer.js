@@ -21,9 +21,9 @@ $.draw((target) => {
   return `
     <div class="bleed" style="--bg: ${color};">
       <div class="wrapper">
-        ${contact}
         <latitude-longitude latitude="${latitude}" longitude="${longitude}"></latitude-longitude>
         <img src="${logo}" alt="logo for ${host}" />
+        ${contact}
       </div>
     </div>
   `

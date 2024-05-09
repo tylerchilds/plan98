@@ -55,8 +55,6 @@
 
 */
 
-self.state ||= {}
-
 // normal time converts lines 1:1 from hype to hypertext
 const NORMAL_TIME = Symbol('n-time')
 // property are able to be stored
@@ -65,6 +63,7 @@ const PROP_TIME = Symbol('p-time')
 const ACTOR_TIME = Symbol('a-time')
 
 export function render(script) {
+  const state = {}
   // what do we embed
   // as actors are worn their attributes may become modified
   const actors = state.actors = {}
@@ -137,7 +136,7 @@ export function render(script) {
   // clearn our compiled hyper media scene
   const clean = validated(scene)
 
-  return template(clean)
+  return template(state, clean)
 
   // just process our runes, yes magic, just straight forward level 1 magic
   function normalTime(line) {
@@ -248,7 +247,7 @@ const templates = {
   'thelanding.page': spa
 }
 
-function template(content){
+function template(state, content){
   if(!state.template) return content
 
   const T = templates[state.template.engine]

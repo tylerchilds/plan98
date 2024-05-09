@@ -17,8 +17,31 @@ body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
   background: white;
 }
 
+header {
+  margin: 5rem;
+}
+
 main {
   height: auto;
+}
+
+main xml-html > * {
+  max-width: 55ch;
+  margin: auto;
+}
+
+main xml-html > best-buy {
+  margin: 3rem auto;
+}
+
+main hypertext-action {
+  margin: 4rem auto;
+  font-size: 1.5rem;
+}
+
+main braid-mail {
+  max-width: 55ch;
+  margin: auto;
 }
 
 img,
@@ -34,7 +57,6 @@ saga-genesis > sillonious-memex {
 
 body wizard-journey.active {
   inset: 0;
-  background: rgba(0,0,0,1);
   max-height: 100%;
   max-width: 100%;
 }
@@ -44,9 +66,8 @@ body data-tooltip {
 }
 
 body wizard-journey xml-html {
-  background: #fff;
   height: 100%;
-  margin: 0;
+  margin: 0 auto;
   padding: 2rem 1rem;
 }
 
