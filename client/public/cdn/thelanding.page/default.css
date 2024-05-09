@@ -25,16 +25,12 @@ main {
   height: auto;
 }
 
-main xml-html > * {
-  max-width: 55ch;
-  margin: auto;
-}
-
 main xml-html > best-buy {
   margin: 3rem auto;
 }
 
 main hypertext-action {
+  max-width: 55ch;
   margin: 4rem auto;
   font-size: 1.5rem;
 }
@@ -42,6 +38,10 @@ main hypertext-action {
 main braid-mail {
   max-width: 55ch;
   margin: auto;
+}
+
+main stay-tuned {
+  padding: 3rem 0;
 }
 
 img,

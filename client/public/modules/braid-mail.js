@@ -9,13 +9,14 @@ $.draw(render)
 function render (target) {
   initialize(target)
   const { posts } = $.learn()
+  const publisher = target.getAttribute('publisher')
   const list = posts.map(p =>
     `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
 <b>${p.subject || ''}</b><br>
     ${p.body}</p>`
   ).join('\n')
 
-  return `
+  const form = `
     <form name="new-post">
       <label>Title</label>
       <input type="text" name="title">
@@ -24,6 +25,9 @@ function render (target) {
       <input type="text" name="body">
       <button type="Submit">Post</button>
     </form>
+  `
+  return `
+    ${publisher ? form : ''}
     ${list}
   `
 }

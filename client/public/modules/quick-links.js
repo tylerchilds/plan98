@@ -37,13 +37,14 @@ $.style(`
     right: 0;
     padding: .5rem;
     text-align: center;
+    z-index: 2;
   }
 
   & button {
     display: inline-block;
     padding: 13px;
     font-size: 1.5rem;
-    background: rgba(255,255,255,.5);
+    background: rgba(255,255,255,.85);
     border: none;
     border-radius: 100%;
     text-decoration: none;

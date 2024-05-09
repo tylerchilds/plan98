@@ -37,10 +37,12 @@ $.draw((target) => {
   const fadeOut = activePanel !== nextPanel
   console.log(tag)
   return `
-    <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
-      <${tag}>
-      </${tag}>
-    </transition>
+    <div class="canvas">
+      <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
+        <${tag}>
+        </${tag}>
+      </transition>
+    </div>
   `
 })
 
@@ -67,7 +69,16 @@ $.when('animationend', 'transition', function transition({target}) {
 
 $.style(`
   & {
-    pointer-events: none;
+    display: block;
+    background: rgba(0,0,0,.85);
+    height: 100vh;
+  }
+  & .canvas {
+    aspect-ratio: 16 / 9;
+    max-height: 100vh;
+    margin: 0 auto;
+    width: auto;
+}
   }
   & transition {
     animation: &-fade-in ease-in-out 200ms;

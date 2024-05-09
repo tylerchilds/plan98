@@ -69,6 +69,8 @@ $.when('animationend', 'transition', function transition({target}) {
 $.style(`
   & {
     pointer-events: none;
+    aspect-ratio: 16 / 9;
+    display: block;
   }
   & transition {
     animation: &-fade-in ease-in-out 200ms;
