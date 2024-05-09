@@ -8,15 +8,56 @@ const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
 const enableFaceRecognition = true;
 const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 
-const bayunCore = BayunCore.init(appId, appSecret, appSalt,
-                                localStorageMode, enableFaceRecognition, baseURL);
+const NEVER_MODE = 'never'
+const INACTIVE_MODE = 'inactive'
+const ACTIVE_MODE = 'active'
 
-const $ = module('hello-vault')
+const bayunCore = BayunCore.init(appId, appSecret, appSalt,
+  localStorageMode, enableFaceRecognition, baseURL);
+
+const $ = module('hello-vault', { mode: NEVER_MODE })
 
 $.draw((target) => {
-  return `
-    <button class="login">Hey...</button>
-  `
+  const { mode } = $.learn()
+
+  if(NEVER_MODE === mode) {
+    return `
+      Hey, you've never been here... totally cool! In fact, splendid! Welcome.
+
+      <form action="registerWithPassword">
+        <label class="field">
+          <span class="label">Email</span>
+          <input class="hotlink" type="email" name="companyEmployeeId" required/>
+        </label>
+
+        <label class="field">
+          <span class="label">password</span>
+          <input class="hotlink" type="password" name="password" required/>
+        </label>
+
+        <button type="submit">
+          Register
+        </button>
+      </form>
+    `
+  }
+
+  if(INACTIVE_MODE === mode) {
+    return `
+      <button class="login">Hey...</button>
+    `
+  }
+
+  if(ACTIVE_MODE.active) {
+    return `
+      <button class="login">Hey...</button>
+    `
+  }
+})
+
+$.when('keyup', '.hotlink', event => {
+  const { name, value } = event.target;
+  $.teach({ [name]: value })
 })
 
 const sessionId = "<sessionId>";
@@ -50,10 +91,10 @@ const securityQuestionsCallback = data => {
         }};
 
       const failureCallback = error => {
-          console.error(error);
-       };
+        console.error(error);
+      };
 
-       bayunCore.validateSecurityQuestions(data.sessionId, answers, null, successCallback, failureCallback);
+      bayunCore.validateSecurityQuestions(data.sessionId, answers, null, successCallback, failureCallback);
     }
   }
 };
@@ -62,16 +103,16 @@ const passphraseCallback = data => {
   if (data.sessionId) {
     if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_PASSPHRASE){
 
-     //Show custom UI to take user input for the passphrase.
-     //Call validatePassphrase function with the user provided passphrase.
+      //Show custom UI to take user input for the passphrase.
+      //Call validatePassphrase function with the user provided passphrase.
 
       const successCallback = data => {
         if (data.sessionId) {
           //Passphrase validated and LoggedIn Successfully
-      }};
+        }};
 
       const failureCallback = error => {
-          console.error(error);
+        console.error(error);
       };
 
       bayunCore.validatePassphrase(data.sessionId, "<passphrase>", null, successCallback, failureCallback);
@@ -89,14 +130,38 @@ const failureCallback = error => {
   console.error(error);
 };
 
+const authorizeEmployeeCallback = (data) => {
+  if (data.sessionId) {
+    if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
+      // You can get employeePublicKey in data.employeePublicKey for it's authorization
+    }
+  }
+};
+
+$.when('submit', '[action="registerWithPassword"]', (event) => {
+  event.preventDefault()
+  const { companyEmployeeId, password } = $.learn()
+  alert(`${companyEmployeeId}, ${password}`)
+  bayunCore.registerEmployeeWithPassword(
+    sessionId,
+    companyName,
+    companyEmployeeId,
+    password,
+    authorizeEmployeeCallback,
+    successCallback,
+    failureCallback
+  );
+})
+
 $.when('click', '.login', () => {
+  const { companyEmployeeId } = $.learn()
   bayunCore.loginWithoutPassword(
-        sessionId,
-        companyName,
-        companyEmployeeId,
-        securityQuestionsCallback,
-        passphraseCallback,
-        successCallback,
-        failureCallback
+    sessionId,
+    companyName,
+    companyEmployeeId,
+    securityQuestionsCallback,
+    passphraseCallback,
+    successCallback,
+    failureCallback
   );
 })

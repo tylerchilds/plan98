@@ -1,4 +1,5 @@
 import { state } from 'statebus'
+import { hideModal } from '@plan98/modal'
 
 export function currentSave() {
   if(!state['ls/save-file']) blankSave()
@@ -33,6 +34,7 @@ export function ok() {
 
   if(wizard.trap) {
     wizard.trap.deactivate()
+    hideModal()
   } else {
     window.location.href = "/?world=sillyz.computer"
   }
