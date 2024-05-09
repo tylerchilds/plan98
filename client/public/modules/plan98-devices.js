@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 // just a random four digit code
 const device = Math.floor(1000 + Math.random() * 9000);

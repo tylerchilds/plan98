@@ -1,5 +1,5 @@
 import * as THREE from 'three'
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 import core from '@theatre/core'
 import studio from '@theatre/studio'

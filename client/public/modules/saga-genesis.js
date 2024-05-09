@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { showModal, types as modalTypes } from './plan98-modal.js'
 import { showPanel } from './plan98-panel.js'
 

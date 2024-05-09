@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { tooltip as closeTooltip } from './plan98-context.js'
 
 state['ls/fs/open'] ||= {}

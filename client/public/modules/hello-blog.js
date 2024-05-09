@@ -1,4 +1,4 @@
-import module from "@sillonious/module";
+import module from "@silly/tag";
 import { PGlite } from "@electric-sql/pglite";
 
 const $ = module('hello-blog', { posts: [] })

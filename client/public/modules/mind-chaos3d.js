@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { v4 as uuidv4 } from 'uuid';
 import 'gun'
 

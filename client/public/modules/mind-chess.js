@@ -1,5 +1,5 @@
 import chess from 'chess'
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 const $ = module('mind-chess')
 

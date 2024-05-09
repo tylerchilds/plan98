@@ -55,7 +55,7 @@
     "android-build": "deno task package-assets && cd app && npm run tauri android dev"
   },
   "imports": {
-    "@sillonious/module": "./client/public/module.js",
+    "@silly/tag": "./client/public/module.js",
     "@sillonious/saga": "./client/public/saga.js",
     "@sillonious/brand": "./client/public/brand.js",
     "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",

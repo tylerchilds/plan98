@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import katex from 'katex'
 
 const $ = module('katex-demo')

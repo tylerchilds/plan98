@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { currentCart } from '../cdn/thelanding.page/game-state.js'
 import { skuTable } from './purchase-catalog.js'
 

@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 const $ = module('sillonious-gamepad')
 
 const UPPER_THRESHOLD = 1

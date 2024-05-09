@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { fetch as braid_fetch } from 'braid-http'
 
 const defaultHost = 'https://mail.braid.org'

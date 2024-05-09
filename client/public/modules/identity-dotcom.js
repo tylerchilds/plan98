@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 const searchParams = new URLSearchParams(window.location.search);
 
 const callbacks = {

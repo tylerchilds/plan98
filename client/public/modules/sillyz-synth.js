@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import Color from "https://esm.sh/colorjs.io@0.4.5"
 import $guitar from "./sillyz-guitar.js"
 

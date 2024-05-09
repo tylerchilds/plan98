@@ -1,5 +1,5 @@
 import { decks } from 'cards'
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 const suits = {
   hearts: '&#9829;',

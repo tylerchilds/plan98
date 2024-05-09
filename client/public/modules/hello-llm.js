@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { marked } from 'marked'
 
 const $ = module('hello-llm', {

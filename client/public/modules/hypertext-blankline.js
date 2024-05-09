@@ -1,3 +1,3 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 module('hypertext-blankline')

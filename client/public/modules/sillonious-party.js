@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 const DEFAULT_ACTUATION = .75
 

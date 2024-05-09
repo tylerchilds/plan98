@@ -1,4 +1,4 @@
-import module, { state } from '@sillonious/module'
+import module, { state } from '@silly/tag'
 
 const $ = module('owncast-broadcast')
 

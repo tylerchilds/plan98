@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { connect, getBase, whenLogout } from "./pocket-authentication.js"
 
 const $ = module('my-biography')

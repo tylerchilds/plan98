@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import Peer from 'simple-peer'
 
 const $ = module('proximity-chat')

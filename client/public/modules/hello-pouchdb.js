@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import PouchDB from 'pouchdb'
 
 const db = new PouchDB('my_database')

@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { showModal } from './plan98-modal.js'
 
 const emptyReddit = {

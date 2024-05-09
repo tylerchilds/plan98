@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { skuTable } from './purchase-catalog.js'
 
 const $ = module('product-details')

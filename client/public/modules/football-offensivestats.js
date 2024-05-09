@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { Grid } from 'ag-grid-community';
 import { createClient } from '@supabase/supabase-js'
 

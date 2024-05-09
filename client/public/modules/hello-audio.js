@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import Wad from 'web-audio-daw';
 
 const $ = module('hello-audio')

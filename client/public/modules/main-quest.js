@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import HavokPhysics from 'havok'
 import BABYLON from 'babylonjs'
 

@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 // probably some legacy internet explorer compatibility flex
 import './trade-maximizer/trademax-util.js'
 

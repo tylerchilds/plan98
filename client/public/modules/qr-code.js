@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import QrCreator from 'qr-creator'
 
 // utilize this to hop off the bifrost

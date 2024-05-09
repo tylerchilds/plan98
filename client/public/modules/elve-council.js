@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import Color from "colorjs.io"
 import { hideModal, showModal, types as modalTypes } from './plan98-modal.js'
 import { doingBusinessAs } from './sillonious-brand.js'

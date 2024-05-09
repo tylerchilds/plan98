@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { currentBusiness } from './sillonious-brand.js'
 import 'gun'
 import 'gun/sea'

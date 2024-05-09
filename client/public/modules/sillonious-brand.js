@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import eruda from 'eruda'
 import Color from "colorjs.io";
 import { doingBusinessAs as dba } from '@sillonious/brand'

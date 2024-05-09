@@ -1,4 +1,4 @@
-import module from "@sillonious/module";
+import module from "@silly/tag";
 import { init, Wasmer, Directory } from "@wasmer/sdk";
 
 const $ = module('python-demo', {

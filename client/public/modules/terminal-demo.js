@@ -1,4 +1,4 @@
-import module from "@sillonious/module";
+import module from "@silly/tag";
 
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";

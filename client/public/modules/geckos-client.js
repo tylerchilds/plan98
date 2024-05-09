@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import geckos from '@geckos.io/client'
 
 // or add a minified version to your index.html file

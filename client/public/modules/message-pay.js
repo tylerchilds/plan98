@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { newPayment, getPaymentStatus } from '@sillonious/payments'
 import { skuTable } from './purchase-catalog.js'
 import { setupSaga } from './wizard-journey.js'

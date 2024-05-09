@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { createClient } from '@supabase/supabase-js'
 
 const $ = module('lets-connect')

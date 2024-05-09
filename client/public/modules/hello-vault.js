@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { BayunCore } from '@sillonious/vault'
 
 const appId = plan98.env.VAULT_APP_ID; // provided on admin panel

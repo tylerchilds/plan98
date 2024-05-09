@@ -1,5 +1,5 @@
 import * as braid from 'braid-http'
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 let feed = []
 const $ = module('braid-mail', { posts: [] })

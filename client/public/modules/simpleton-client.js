@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 // Globals
 let url = "https://test.bloop.monster:61870/yo40";
 let seq = -1;

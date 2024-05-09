@@ -1,4 +1,4 @@
-import module from "@sillonious/module"
+import module from "@silly/tag"
 import Color from "colorjs.io"
 import * as Tone from "tone@next"
 //import $user from "/packages/widgets/menu-user.js"

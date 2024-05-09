@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { toast } from './plan98-toast.js'
 import eruda from 'eruda'
 import { vim } from "@replit/codemirror-vim"

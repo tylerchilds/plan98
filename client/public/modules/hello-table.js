@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { Grid } from 'https://esm.sh/ag-grid-community';
 
 // Dynamically load AG Grid CSS

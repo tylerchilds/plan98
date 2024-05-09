@@ -1,5 +1,5 @@
 import RAPIER from '@dimforge/rapier3d';
-import module from '@sillonious/module';
+import module from '@silly/tag';
 
 const $ = module('rapier-3d', { instances: [] })
 

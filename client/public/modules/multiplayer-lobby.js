@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 const PANEL_WELCOME = 'welcome'
 const PANEL_LIST = 'list'

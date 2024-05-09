@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import $user, { web, currentUser } from '@sillonious/solid/user'
 
 import initialTodoList from './todo-list/data/initialTodoList.js'

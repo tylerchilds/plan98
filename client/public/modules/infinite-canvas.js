@@ -1,5 +1,5 @@
 import statebus, { state } from 'statebus'
-import module from '@sillonious/module'
+import module from '@silly/tag'
 
 const $ = module('infinite-canvas')
 

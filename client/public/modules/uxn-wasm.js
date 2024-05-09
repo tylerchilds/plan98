@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { Uxn } from "uxn.wasm";
 import { asm, mux, LogConsole } from "uxn.wasm/util";
 

@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import React from 'react'
 import ReactDOM from 'react-dom'
 

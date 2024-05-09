@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { Grid } from 'gridjs'
 import { connect, getBase, whenLogout } from "./pocket-authentication.js"
 import { currentBusiness } from './sillonious-brand.js'

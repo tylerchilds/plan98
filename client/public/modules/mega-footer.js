@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import { doingBusinessAs } from '@sillonious/brand'
 
 const { host } = self.plan98 || { host: window.location.host }

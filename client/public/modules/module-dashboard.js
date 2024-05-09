@@ -1,4 +1,4 @@
-import module, { insights } from "@sillonious/module"
+import module, { insights } from "@silly/tag"
 
 const $ = module('module-dashboard', { buckets: {} })
 

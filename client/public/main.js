@@ -1,4 +1,4 @@
-import module from '@sillonious/module'
+import module from '@silly/tag'
 import Computer from '@sillonious/computer'
 import { doingBusinessAs } from "@sillonious/brand"
 
