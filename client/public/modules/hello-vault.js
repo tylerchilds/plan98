@@ -61,8 +61,7 @@ $.when('keyup', '.hotlink', event => {
 })
 
 const sessionId = "<sessionId>";
-const companyName = "bayunsystems.com"; // company portion from loginId
-const companyEmployeeId = "username";   // username portion from loginId
+const companyName = "sillyz.computer"; // company portion from loginId
 
 const securityQuestionsCallback = data => {
   if (data.sessionId) {
@@ -155,7 +154,7 @@ $.when('submit', '[action="registerWithPassword"]', (event) => {
 
 $.when('click', '.login', () => {
   const { companyEmployeeId } = $.learn()
-  bayunCore.loginWithoutPassword(
+  bayunCore.loginWithPassword(
     sessionId,
     companyName,
     companyEmployeeId,

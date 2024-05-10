@@ -1,9 +1,18 @@
 import module from '@silly/tag'
 
-const PANEL_WELCOME = 'welcome'
-const PANEL_LIST = 'list'
-const PANEL_CREATE = 'create'
-const PANEL_IMMERSIVE = 'immersive'
+export const PANEL_WELCOME = 'welcome'
+export const PANEL_LIST = 'list'
+export const PANEL_CREATE = 'create'
+export const PANEL_IMMERSIVE = 'immersive'
+
+const panel = Symbol('panel')
+
+export const types = {
+  [PANEL_WELCOME]: panel,
+  [PANEL_LIST]: panel,
+  [PANEL_CREATE]: panel,
+  [PANEL_IMMERSIVE]: panel,
+}
 
 const cards = {
   [PANEL_WELCOME]: {
@@ -36,10 +45,10 @@ $.draw((target) => {
 
   const { tag } = (cards[nextPanel] || cards[PANEL_WELCOME])
   const fadeOut = activePanel !== nextPanel
-  console.log(tag)
+
   return `
     <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
-      <${tag}>
+      <${tag} data-id="${target.id}">
       </${tag}>
     </transition>
   `
@@ -125,23 +134,7 @@ function instance(target) {
   return $.learn().instances[root.id]
 }
 
-setInterval(() => {
-  const { tick, instances } = $.learn()
-
-  $.teach({ tick: tick+1 })
-
-  Object.keys(instances).map(id => {
-    const { activePanel } = instances[id]
-    const keys = Object.keys(cards).filter(key => {
-      return key !== activePanel
-    })
-    const nextPanel = keys[Math.floor(Math.random()*keys.length)]
-    updateInstance(id, { nextPanel })
-  })
-
-}, 5000)
-
-function updateInstance(id, payload) {
+export function updateInstance(id, payload) {
   $.teach({...payload}, (s, p) => {
     return {
       ...s,

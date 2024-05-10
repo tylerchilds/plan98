@@ -193,7 +193,7 @@ $.style(`
 
   @media screen and (max-width: 768px) {
     .list {
-      height: 25vh;
+      max-height: 25vh;
     }
   }
   @media screen and (min-width: 768px) {
