@@ -2,19 +2,21 @@ import * as braid from 'braid-http'
 import module from '@silly/tag'
 
 let feed = []
-const $ = module('braid-mail', { posts: [] })
+const $ = module('braid-mail', { posts: [], activeIndex: 0 })
 
 $.draw(render)
 
 function render (target) {
   initialize(target)
-  const { posts } = $.learn()
+  const { posts, activeIndex } = $.learn()
   const publisher = target.getAttribute('publisher')
-  const list = posts.map(p =>
-    `<p><a href='${p.url}'><code style='font-size:10'>${p.url}</code></a><br>
-<b>${p.subject || ''}</b><br>
-    ${p.body}</p>`
-  ).join('\n')
+  const list = posts.map((p, index) => {
+    return `
+      <button data-index="${index}" class="${activeIndex === index ? 'active' : '' }">
+        ${p.subject || ''}
+      </button>
+    `
+  }).join('\n')
 
   const form = `
     <form name="new-post">
@@ -26,9 +28,21 @@ function render (target) {
       <button type="Submit">Post</button>
     </form>
   `
+
+  const activePost = posts[activeIndex]
+
   return `
     ${publisher ? form : ''}
-    ${list}
+    <div class="panes">
+      <div class="list">
+        ${list}
+      </div>
+      ${activePost ? `
+        <div class="preview">
+          ${activePost.body}
+        </div>
+      ` : ''}
+    </div>
   `
 }
 
@@ -94,8 +108,6 @@ async function fetch_feed (target) {
     console.log('Polling!  Waiting 30 seconds...')
     setTimeout(() => fetch_feed(target), 30000)
   }
-
-
 }
 
 async function fetch_post (url) {
@@ -142,8 +154,56 @@ $.when('submit', 'form', async function make_new_post (event) {
   fetch_feed(root)
 })
 
+$.when('click', '[data-index]', (event) => {
+  const { index } = event.target.dataset
+  $.teach({ activeIndex: parseInt(index, 10) })
+})
+
 $.style(`
   & {
     display: block;
+    max-height: 100vh;
+  }
+
+  & .list .active {
+    background: dodgerblue !important;
+    color: rgba(255,255,255,.85);
+  }
+
+  & .list button {
+    display: block;
+    padding: .5rem;
+    font-size: 1rem;
+    width: 100%;
+    text-align: left;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    border: none;
+  }
+
+  & .list button:hover,
+  & .list button:focus {
+    background: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
+  }
+
+  & .panes {
+    height: 100%;
+  }
+
+  @media screen and (max-width: 768px) {
+    .list {
+      height: 25vh;
+    }
+  }
+  @media screen and (min-width: 768px) {
+    & .panes {
+      display: grid;
+      grid-template-columns: 180px auto;
+    }
+  }
+
+  .preview {
+    padding: 1rem;
   }
 `)

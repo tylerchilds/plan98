@@ -499,7 +499,8 @@ $.style(`
     overflow: auto;
   }
 
-  & button {
+  & [name="navi"] button,
+  & [name="actions"] button {
     background: rgba(0,0,0,.85);
     border: none;
     color: dodgerblue;
@@ -510,8 +511,10 @@ $.style(`
     padding: .25rem 1rem;
   }
 
-  & button:hover,
-  & button:focus {
+  & [name="navi"] button:hover,
+  & [name="navi"] button:focus,
+  & [name="actions"] button:hover,
+  & [name="actions"] button:focus {
     box-shadow: 0 0 25px 25px rgba(0,0,0,.15) inset;
   }
 
