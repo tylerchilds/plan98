@@ -44,13 +44,13 @@ $.draw((target) => {
 
   if(INACTIVE_MODE === mode) {
     return `
-      <button class="login">Hey...</button>
+      <button class="login">Login</button>
     `
   }
 
-  if(ACTIVE_MODE.active) {
+  if(ACTIVE_MODE === mode) {
     return `
-      <button class="login">Hey...</button>
+      <button class="logout">Logout</button>
     `
   }
 })
