@@ -44,16 +44,18 @@ $.style(`
     display: inline-block;
     padding: 13px;
     font-size: 1.5rem;
-    background: rgba(255,255,255,.85);
+    background: lemonchiffon;
     border: none;
-    border-radius: 100%;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     text-decoration: none;
     color: dodgerblue;
   }
 
   & button:hover,
   & button:focus {
-    background: rgba(255,255,255,1);
-    color: rebeccapurple;
+    background: dodgerblue;
+    color: white;
+    box-shadow: 0px 0px 8px 8px rgba(0,0,0,.1);
+    transform: scale(1.2);
   }
 `)

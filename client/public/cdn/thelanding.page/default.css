@@ -18,7 +18,7 @@ body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
 }
 
 header {
-  margin: 5rem;
+  margin: 5rem 0;
 }
 
 main {
