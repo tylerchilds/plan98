@@ -1,5 +1,8 @@
-import statebus, { state } from 'statebus'
+import statebus from 'statebus'
 import { innerHTML } from 'diffhtml'
+
+export const state = statebus.state
+self.state = state
 
 const logs = {}
 
