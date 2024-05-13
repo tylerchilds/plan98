@@ -91,6 +91,8 @@ async function sagaSanitizer(saga, { endOfHead }) {
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
+  consol.log('wtf')
+  console.log(render(saga))
   dom.body.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>
       <saga-genesis>
@@ -276,6 +278,7 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
 
   try {
     if(sanitizers[extension]) {
+  consol.log('wtf')
       file = await Deno.readTextFile(`./client/public${pathname}`)
       file = await sanitizers[extension](file, business)
     } else {

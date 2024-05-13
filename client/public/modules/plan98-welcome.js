@@ -157,8 +157,7 @@ function start() {
     window.location.href = `/404`
   }
   showModal(`
-    <middle-earth style="position: absolute; inset: 0;"></middle-earth>
-    <hyper-browser></hyper-browser>
+    <hello-valut></hello-vault>
   `, { centered: true })
 
 }
