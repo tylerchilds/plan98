@@ -180,7 +180,10 @@ async function router(request, context) {
   }
 
   if(pathname === '/') {
+
     const file = await home(request, business)
+
+  console.log('tf', file)
     if(file) {
       return new Response(file, {
         headers,
@@ -277,7 +280,6 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
 
     if(sanitizers[extension]) {
       file = await Deno.readTextFile(`./client/public${pathname}`)
-      debugger
       file = await sanitizers[extension](file, business)
     } else {
       file = await Deno.readFile(`./client/public${pathname}`)
@@ -312,7 +314,7 @@ const byPath = (x) => x.path
 const byName = (x) => x.name
 
 async function home(request, business) {
-  if(!business) {
+  if(!business.saga) {
     const dom = await page()
     return `<!DOCTYPE html>${dom.documentElement}`
   }

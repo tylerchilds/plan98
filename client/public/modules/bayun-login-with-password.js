@@ -31,7 +31,7 @@ $.draw((target) => {
         </label>
 
         <label class="field">
-          <span class="label">password</span>
+          <span class="label">Password</span>
           <input class="hotlink" type="password" name="password" required/>
         </label>
 
