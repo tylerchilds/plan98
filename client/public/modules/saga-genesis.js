@@ -128,6 +128,7 @@ $.style(`
     overflow: auto;
     opacity: 1;
     transition: opacity 100ms ease-in-out;
+    padding-top: 2rem;
   }
 
   &.focused [data-escape],

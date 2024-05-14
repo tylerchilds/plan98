@@ -33,10 +33,14 @@ $.style(`
     display: block;
   }
 
-  & button {
+  & button,
+  & a:link,
+  & a:visited,
+  & a:hover,
+  & a:focus,
+  & a:active {
     color: white;
   }
-
 
   & > * {
     animation: rainbow-background

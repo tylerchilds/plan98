@@ -24,11 +24,11 @@ $.draw((target) => {
       <form action="ChangePassword">
         <label class="field">
           <span class="label">Current Password</span>
-          <input class="hotlink" type="email" name="currentPassword" required/>
+          <input class="hotlink" type="password" name="currentPassword" required/>
         </label>
         <label class="field">
           <span class="label">New Password</span>
-          <input class="hotlink" type="email" name="newPassword" required/>
+          <input class="hotlink" type="password" name="newPassword" required/>
         </label>
         <button type="submit">
           Change Password
