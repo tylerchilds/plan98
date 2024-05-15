@@ -2,9 +2,11 @@ import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
+import { BayunCore } from '@sillonious/vault'
 import 'gun'
 const Gun = window.Gun
 const gun = Gun(['https://gun.1998.social/gun']);
+import { getSession, clearSession } from './comedy-notebook.js'
 
 /*
    ^
@@ -13,7 +15,57 @@ const gun = Gun(['https://gun.1998.social/gun']);
    #
 */
 
-const $ = module('party-chat', { virtual: true })
+const appId = plan98.env.VAULT_APP_ID; // provided on admin panel
+const appSecret = plan98.env.VAULT_APP_SECRET; // provided on admin panel
+const appSalt = plan98.env.VAULT_APP_SALT; // provided on admin panel
+const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
+const enableFaceRecognition = false;
+const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
+
+const bayunCore = BayunCore.init(appId, appSecret, appSalt,
+  localStorageMode, enableFaceRecognition, baseURL);
+
+const $ = module('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
+
+function getMyGroups() {
+  const { sessionId } = getSession()
+  bayunCore.getMyGroups(sessionId)
+    .then(result => {
+      $.teach({ myGroups: result })
+  })
+  .catch(error => {
+        console.log("Error caught");
+        console.log(error);
+  });
+}
+
+function getOtherGroups() {
+  const { sessionId } = getSession()
+  bayunCore.getUnjoinedPublicGroups(sessionId)
+    .then(result => {
+      $.teach({ otherGroups: result })
+    })
+    .catch(error => {
+          console.log("Error caught");
+          console.log(error);
+    });
+}
+
+
+$.when('click', '[data-create]', () => {
+  const { sessionId } = getSession()
+  const groupType = BayunCore.GroupType.PUBLIC;
+  bayunCore.createGroup(sessionId, "General", groupType)
+    .then(result => {
+      console.log("Response received for createGroup.");
+      console.log(result);
+      getMyGroups()
+  })
+  .catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+})
 
 const commands = {
   comment: '!',
@@ -27,20 +79,45 @@ const commands = {
   enter: ' ',
 }
 
+function drawGroupButton(group) {
+  return `
+    <button class="select-group" data-id="${group.groupId}">
+      ${group.groupName}
+    </button>
+  `
+}
+
 $.draw(target => {
+  const { sessionId } = getSession()
+  if(!sessionId) return `
+    <sticky-note>
+      <comedy-notebook></comedy-notebook>
+    </sticky-note>
+  `
+  getMyGroups()
   const { file } = sourceFile(target)
   const log = render(file) || ''
+  const { myGroups, otherGroups } = $.learn()
 
   const view = `
     <div name="transport">
       <div name="actions">
         <button data-zero>Clear</button>
         <button data-party>Invite</button>
+        <button data-logout>Logout</button>
       </div>
     </div>
     <div class="grid">
       <div class="all-logs">
-        ${true}
+        MY GROUPS
+        ${myGroups.map(drawGroupButton).join('')}
+        <hr>
+        OTHER GROUPS
+        ${otherGroups.map(drawGroupButton).join('')}
+        <hr>
+        <button data-create>
+          Create
+        </button>
       </div>
       <div class="captains-log">
         ${log}
@@ -112,8 +189,6 @@ The world runs on computers that fit under our desks, on our laps, in our pocket
 @ Presenter
 > Have you wondered how these all work?
 
-> Have you ever felt your computers are actively designed against you?
-
 > Have you ever wished you could control them yourself?
 
 > Have you ever tried to build your own?
@@ -174,6 +249,9 @@ id: quick-media-demo
     })()
 }
 
+$.when('click', '.select-group', (event) => {
+  const { id } = event.target.dataset
+})
 $.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
   event.preventDefault()
@@ -221,19 +299,24 @@ $.when('click', '[data-party]', () => {
   `)
 })
 $.when('click', '[data-logout]', () => {
-  window.location.href = '/'
+  clearSession()
 })
 
 $.style(`
   & {
-    display: block;
+    display: grid;
     position: relative;
     height: 100%;
-    background: rgba(0,0,0,.85);
+    background: linear-gradient(135deg, var(--wheel-0-0), 60%, var(--wheel-0-4));
     color: white;
+
   }
 
-  & button {
+  & sticky-note {
+    place-self: center;
+  }
+
+  & .communicator button {
     position: relative;
     z-index: 2;
     background: rgba(0,0,0,.85);
@@ -246,13 +329,13 @@ $.style(`
     padding: .25rem 1rem;
   }
 
-  & button[disabled] {
+  & .communicator button[disabled] {
     opacity: .5;
     background: rgba(255,255,255,.5);
   }
 
-  & button:hover,
-  & button:focus {
+  & .communicator button:hover,
+  & .communicator button:focus {
     background: linear-gradient(rgba(0,0,0,.85) 80%, dodgerblue);
     color: white;
   }
@@ -269,6 +352,7 @@ $.style(`
     max-height: calc(100% - 6rem);
     padding: 6rem 1rem;
     overflow: auto;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
   }
 
   & .communicator {
@@ -279,7 +363,6 @@ $.style(`
     right: 0;
     width: 100%;
     padding: .5rem;
-    border-radius: 1rem;
     background: rgba(0,0,0,.85);
     z-index: 2;
   }
@@ -353,5 +436,22 @@ $.style(`
 
   & .all-logs {
     background: linear-gradient(var(--wheel-0-0), var(--wheel-0-4));
+  }
+
+  & .all-logs button {
+    display: block;
+    background: none;
+    color: white;
+    text-shadow: 0 0 1px 1px rgba(0,0,0,.85);
+    font-weight: 400;
+    padding: .5rem;
+    border: none;
+    width: 100%;
+    text-align: left;
+  }
+
+  & [data-create] {
+    background: dodgerblue;
+    color: white;
   }
 `)

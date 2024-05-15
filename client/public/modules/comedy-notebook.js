@@ -28,6 +28,9 @@ $.draw((target) => {
 
   if(!sessionId) {
     return `
+      <hypertext-variable monospace="0" casual="1" weight="400" slant="0" cursive="1">
+        Comedy Notebook
+      </hypertext-variable>
       <div class="error">
         ${error ? error : ''}
       </div>
@@ -257,6 +260,7 @@ $.style(`
     display: block;
     height: 100%;
     background: lemonchiffon;
+    color: saddlebrown;
   }
 
   & .actions button {
