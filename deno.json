@@ -27,7 +27,7 @@
     "reverse-relay": "ssh -N -R 8765:localhost:8765 relay.$USER.me",
 
     "provision-braidmail": "cd server/braidmail && ./provision.sh",
-    "start-braidmail": "cd server/braidmail/braidmail-main && deno task start-client",
+    "start-braidmail": "cd server/braidmail/braidmail-main && node server-demo.js",
     "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
 
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",

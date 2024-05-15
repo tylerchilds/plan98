@@ -1,7 +1,9 @@
-import statebus, { state } from 'statebus'
+import statebus, { state as s } from 'statebus'
 import { innerHTML } from 'diffhtml'
 
 const logs = {}
+
+export const state = s
 
 export function insights() {
   return logs

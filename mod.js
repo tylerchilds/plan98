@@ -6,7 +6,7 @@ const processConfiguration = {
   reverseClient: false,
   server: true,
   reverseServer: false,
-  identity: true,
+  identity: false,
   reverseIdentity: false,
   repository: false,
   reverseRespository: false,
@@ -21,7 +21,7 @@ const processConfiguration = {
   features: {
     client: {
       "id": "plan98-start-client",
-      "cmd": "deno task start-client",
+      "cmd": "deno run -A client.js",
       "autostart": true
     },
     reverseClient: {
@@ -31,7 +31,7 @@ const processConfiguration = {
     },
     server: {
       "id": "plan98-start-server",
-      "cmd": "deno task start-server",
+      "cmd": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
       "autostart": true
     },
     reverseServer: {
@@ -61,7 +61,7 @@ const processConfiguration = {
     },
     relay: {
       "id": "plan98-start-relay",
-      "cmd": "deno task start-relay",
+      "cmd": "cd server/relay && npm start",
       "autostart": true
     },
     reverseRelay: {
@@ -81,7 +81,7 @@ const processConfiguration = {
     },
     braidmail: {
       "id": "plan98-start-braidmail",
-      "cmd": "deno task start-braidmail",
+      "cmd": "cd server/braidmail/braidmail-master && node server-demo.js",
       "autostart": true
     },
     reverseBraidmail: {
@@ -91,7 +91,7 @@ const processConfiguration = {
     },
     multiplayer: {
       "id": "plan98-start-multiplayer",
-      "cmd": "deno task start-multiplayer",
+      "cmd": "cd server/multiplayer && npm i && node index.mjs",
       "autostart": true
     },
     reverseMultiplayer: {
