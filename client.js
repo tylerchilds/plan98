@@ -61,7 +61,8 @@ async function page() {
           VAULT_APP_ID: "${Deno.env.get('VAULT_APP_ID')}",
           VAULT_APP_SECRET: "${Deno.env.get('VAULT_APP_SECRET')}",
           VAULT_APP_SALT: "${Deno.env.get('VAULT_APP_SALT')}",
-          VAULT_BASE_URL: "${Deno.env.get('VAULT_BASE_URL')}"
+          VAULT_BASE_URL: "${Deno.env.get('VAULT_BASE_URL')}",
+          VAULT_PUBLIC_KEY: "${Deno.env.get('VAULT_PUBLIC_KEY')}",
         }
       }
     </script>

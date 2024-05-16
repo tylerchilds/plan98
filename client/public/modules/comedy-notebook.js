@@ -1,17 +1,7 @@
 import module, { state } from '@silly/tag'
 import 'gun'
-import { BayunCore } from '@sillonious/vault'
+import { bayunCore } from '@sillonious/vault'
 const gun = window.Gun(['https://gun.1998.social/gun']);
-
-const appId = plan98.env.VAULT_APP_ID; // provided on admin panel
-const appSecret = plan98.env.VAULT_APP_SECRET; // provided on admin panel
-const appSalt = plan98.env.VAULT_APP_SALT; // provided on admin panel
-const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
-const enableFaceRecognition = false;
-const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
-
-const bayunCore = BayunCore.init(appId, appSecret, appSalt,
-  localStorageMode, enableFaceRecognition, baseURL);
 
 const $ = module('comedy-notebook', {
   sessionId: '',
@@ -37,7 +27,7 @@ $.draw((target) => {
       <form method="POST" action="loginWithPassword">
         <label class="field">
           <span class="label">Identity</span>
-          <input data-bind type="email" name="companyEmployeeId" required/>
+          <input data-bind type="text" name="companyEmployeeId" required/>
         </label>
         <label class="field">
           <span class="label">Password</span>
@@ -142,6 +132,7 @@ $.when('click', '[data-clear]', async () => {
 
 $.when('keyup', '[data-bind]', event => {
   const { name, value } = event.target;
+  console.log(name, value)
   $.teach({ [name]: value })
 })
 
@@ -246,6 +237,7 @@ $.when('click', '[type="submit"]', (event) => {
       companyEmployeeId,
       password,
       autoCreateEmployee,
+      null, // TODO: @bayun, what is?
       noop.bind('securityQuestionsCallback'),
       noop.bind('passphraseCallback'),
       successCallback,
