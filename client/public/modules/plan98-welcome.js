@@ -199,8 +199,8 @@ $.style(`
     transform-style: preserve-3d;
     width: 100%;
     aspect-ratio: 1;
-    max-width: 100vmin;
-    max-height: 100vmin;
+    max-width: calc(100vmin - 2rem);
+    max-height: calc(100vmin - 2rem);
     place-self: center;
   }
 

@@ -62,6 +62,9 @@ $.draw((target) => {
   }
 
   return `
+    <button data-share>
+      Share
+    </button>
     <main class="output" style="background-image: ${stars}">
       <iframe src="${sagaDemo}"></iframe>
       <iframe src="${saga}"></iframe>
@@ -143,18 +146,6 @@ function print(colors) {
     ${name}: ${value};
   `).join('')
 }
-
-$.when('click', '[data-share]', (event) => {
-  showModal(`
-    <sillonious-brand>
-      <div class="sticky">
-        <div class="virtual-paper">
-          <qr-code text="${window.location.href}" data-fg="saddlebrown"></qr-code>
-        </div>
-      </div>
-    </sillonious-brand>
-  `)
-})
 
 $.when('click', '[data-help]', (event) => {
   eruda.init();
@@ -336,21 +327,18 @@ $.style(`
 
     & [data-share] {
       border: none;
-      background: transparent;
-      color: rgba(255,255,255,.85);
-      text-shadow:
-        0 0px 3px var(--wheel-0-0),
-        -2px -2px 3px var(--wheel-0-2),
-        2px -2px 3px var(--wheel-0-3),
-        4px 4px 5px var(--wheel-0-4),
-        -4px 4px 5px var(--wheel-0-5),
-        0 9px 15px var(--wheel-0-6);
-      text-overflow: ellipsis;
+      background: lemonchiffon;
+      color: dodgerblue;
       padding-left: .5rem;
       line-height: 2rem;
       position: fixed;
+      box-shadow:
+        0px 0px 4px 4px rgba(0,0,0,.10),
+        0px 0px 12px 12px rgba(0,0,0,.5),
+
       top: 0;
       right: 0;
+      z-index: 10;
     }
 
     & [data-help] {
@@ -429,9 +417,10 @@ $.style(`
       inset: 0;
       z-index: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr;
       place-items: center;
       padding-top: 2rem;
+      height: 100%;
     }
 
     & .to {
@@ -565,6 +554,30 @@ $.style(`
   }
 `)
 
+$.when('click', '[data-share]', (event) => {
+  const { host } = instance(event.target)
+  const {
+    mascot,
+    contact,
+    tagline,
+    image,
+    imageDescription,
+    color
+  } = currentBusiness(host)
+
+  const stars = getStars(event.target.closest($.link))
+
+  sticky(`
+    <main class="output" style="background-image: ${stars}">
+      <img src="${image}" alt="${imageDescription}" />
+      <div>
+        ty@TheLanding.Page<br>
+        ${host}
+      </div>
+    </main>
+  `)
+})
+
 function sticky(content) {
   const style = document.querySelector('style[data-link="sillonious-brand"]').innerHTML
   const preview = window.open('', 'PRINT');
@@ -579,7 +592,6 @@ function sticky(content) {
               margin: 0;
               padding: 0;
               font-size: 6pt;
-              background: lemonchiffon;
               -webkit-print-color-adjust: exact !important;
             }
 
@@ -603,10 +615,49 @@ function sticky(content) {
               place-content: center;
             }
           }
+          .print-banner {
+            background: rgba(0,0,0,.85);
+            padding: 1rem;
+            text-align: right;
+            color: white;
+            position: fixed;
+            left: 0;
+            right: 0;
+            z-index: 100;
+          }
+
+          .print-banner button {
+            background: lemonchiffon;
+            color: saddlebrown;
+            border: none;
+            padding: 1rem;
+          }
+
+          .print-banner button:hover,
+          .print-banner button:focus {
+            background: dodgerblue;
+            color: white;
+          }
+          @media print {
+            .print-banner {
+              display: none;
+            }
+          }
+
+          img {
+            max-width: 50%;
+          }
           ${style}
+          sillonious-brand {
+            width: 3.25in;
+            height: 3.12in;
+          }
         </style>
       </head>
       <body>
+        <div class="print-banner">
+          Looks good! <button onclick="(()=>{window.print();window.close()})()">Print</button>
+        </div>
         <sillonious-brand>
           ${content}
         </sillonious-brand>

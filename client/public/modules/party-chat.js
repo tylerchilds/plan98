@@ -57,15 +57,47 @@ $.when('click', '[data-create]', () => {
   const groupType = BayunCore.GroupType.PUBLIC;
   bayunCore.createGroup(sessionId, "General", groupType)
     .then(result => {
-      console.log("Response received for createGroup.");
-      console.log(result);
       getMyGroups()
-  })
-  .catch(error => {
-    console.log("Error caught");
-    console.log(error);
-  });
+      getOtherGroups()
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
 })
+
+$.when('click', '.other-groups button', (event) => {
+  const { sessionId } = getSession()
+  const { id } = event.target.dataset
+  bayunCore.joinPublicGroup(sessionId, id)
+    .then(result => {
+      getMyGroups()
+      activateGroup(sessionId, id)
+    })
+    .catch(error => {
+          console.log("Error caught");
+          console.log(error);
+    });
+})
+
+$.when('click', '.my-groups button', (event) => {
+  const { sessionId } = getSession()
+  const { id } = event.target.dataset
+
+  activateGroup(sessionId, id)
+})
+
+function activateGroup(sessionId, id) {
+  bayunCore.getGroupById(sessionId, id)
+    .then(result => {
+      debugger
+      $.teach({ activeGroup: result })
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
+}
 
 const commands = {
   comment: '!',
@@ -95,10 +127,12 @@ $.draw(target => {
     </sticky-note>
   `
   getMyGroups()
+  getOtherGroups()
   const { file } = sourceFile(target)
   const log = render(file) || ''
-  const { myGroups, otherGroups } = $.learn()
+  const { myGroups, otherGroups, getActiveGroup } = $.learn()
 
+  console.log({ getActiveGroup })
   const view = `
     <div name="transport">
       <div name="actions">
@@ -109,18 +143,20 @@ $.draw(target => {
     </div>
     <div class="grid">
       <div class="all-logs">
-        MY GROUPS
-        ${myGroups.map(drawGroupButton).join('')}
-        <hr>
-        OTHER GROUPS
-        ${otherGroups.map(drawGroupButton).join('')}
-        <hr>
+        <div class="my-groups">
+          MY GROUPS
+          ${myGroups.map(drawGroupButton).join('')}
+        </div>
+        <div class="other-groups">
+          OTHER GROUPS
+          ${otherGroups.map(drawGroupButton).join('')}
+        </div>
         <button data-create>
           Create
         </button>
       </div>
       <div class="captains-log">
-        ${log}
+        <braid-feed></braid-feed>
         <div class="communicator">
           <form class="story-chat-form" data-command="enter">
             <input type="text" name="message">
@@ -252,6 +288,7 @@ id: quick-media-demo
 $.when('click', '.select-group', (event) => {
   const { id } = event.target.dataset
 })
+
 $.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
   event.preventDefault()
