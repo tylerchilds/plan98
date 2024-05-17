@@ -1,9 +1,12 @@
 import tag from '@silly/tag'
 import * as client from '@braid/mail'
 
+const host = 'https://mail.braid.org'
+
 const $ = tag('braid-feed', { feed: [] })
 
-client.subscribe_to_feed('https://mail.braid.org/feed', feed => {
+  debugger
+client.subscribe_to_feed(host+'/feed', feed => {
   $.teach({ feed })
 })
 
@@ -30,7 +33,7 @@ $.when('submit', '#new-post', (event) => {
   event.preventDefault()
   const { subject, body } = event.target
 
-  client.make_new_post('', {
+  client.make_new_post(host, {
     subject: subject.value,
     body: body.value
   })

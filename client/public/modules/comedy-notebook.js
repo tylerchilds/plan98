@@ -1,7 +1,7 @@
 import module, { state } from '@silly/tag'
-import 'gun'
 import { bayunCore } from '@sillonious/vault'
-const gun = window.Gun(['https://gun.1998.social/gun']);
+import supabase from '@sillonious/database'
+import { render } from '@sillonious/saga'
 
 const $ = module('comedy-notebook', {
   sessionId: '',
@@ -13,7 +13,7 @@ const $ = module('comedy-notebook', {
 })
 
 $.draw((target) => {
-  const { error, activePunchline, jokes } = $.learn()
+  const { error, jokes } = $.learn()
   const { sessionId } = getSession()
 
   if(!sessionId) {
@@ -42,17 +42,6 @@ $.draw((target) => {
     `
   }
 
-  if(activePunchline) {
-    return `
-      <div class="">
-        ${activePunchline}
-      </div>
-      <button data-back>
-        Back to all jokes
-      </button>
-    `
-  }
-
   return `
     <div class="actions">
       <button data-new>
@@ -67,11 +56,11 @@ $.draw((target) => {
 
     </div>
     <div class="setlist">
-      ${Object.keys(jokes).map((setup) => {
+      ${Object.keys(jokes).map((id) => {
         return `
-          <button data-setup="${setup}">
+          <button data-id="${id}">
             <hypertext-variable monospace="0" slant="-15" casual="1" cursive="1" weight="200">
-              ${setup}
+              ${jokes[id].setup}
             </hypertext-variable>
           </button>
         `
@@ -84,11 +73,11 @@ $.when('click', '[data-back]', () => {
   $.teach({ activeSetup: null })
 })
 
-$.when('click', '[data-setup]', async (event) => {
-  const { setup } = event.target.dataset
+$.when('click', '[data-id]', (event) => {
+  const { id } = event.target.dataset
   const { jokes } = $.learn()
-  const joke = jokes[setup]
-  $.teach({ activePunchline: await getPunchline(joke) })
+  const { punchline } = jokes[id]
+  showModal(render(punchline))
 })
 
 $.when('click', '[data-logout]', async () => {
@@ -101,33 +90,33 @@ $.when('click', '[data-new]', async () => {
     companyName,
     companyEmployeeId
   } = getSession()
-  const setup = "have you ever been in line at self checkout?"
-  const punchline = "like what, i have to do all the work myself?"
 
-  const joke = await bayunCore.lockText(sessionId, punchline);
-  gun.get(companyName).get(companyEmployeeId).get('Comedy').get(setup).put(joke)
+  const setup = await bayunCore.lockText(sessionId, "have you ever been in line at self checkout?");
+  const punchline = await bayunCore.lockText(sessionId, "like what, i have to do all the work myself?");
+
+  const { data, error } = await supabase
+  .from('plan98_solo_text')
+  .insert([
+    { companyName, companyEmployeeId, setup, punchline },
+  ])
+  .select()
 })
 
 $.when('click', '[data-clear]', async () => {
   const {
-    sessionId,
     companyName,
     companyEmployeeId
   } = getSession()
 
-  const setup = "have you ever been in line at self checkout?"
-  const punchline = "like what, i have to do all the work myself?"
+  const { error } = await supabase
+  .from('plan98_solo_text')
+  .delete()
+  .eq('companyName', companyName)
+  .eq('companyEmployeeId', companyEmployeeId)
 
-  const joke = await bayunCore.lockText(sessionId, punchline);
-
-  const comedy = gun.get(companyName).get(companyEmployeeId).get('Comedy')
-  comedy.once((data) => {
-    Object.keys(data).forEach((itemKey) => {
-      // Delete each item from GunDB
-      comedy.get(itemKey).put(null);
-    });
-    console.log('List cleared.');
-  });
+  if(error) {
+    $.teach({ error })
+  }
 })
 
 $.when('keyup', '[data-bind]', event => {
@@ -152,15 +141,12 @@ function setSession({ sessionId, companyName, companyEmployeeId }) {
   }
 }
 
-async function getPunchline(setup) {
+async function laugh(premise) {
   const {
     sessionId,
-    companyName,
-    companyEmployeeId
   } = getSession()
 
-  const joke = gun.get(companyName).get(companyEmployeeId).get('Comedy').get(setup)
-  return await bayunCore.unlockText(sessionId, joke);
+  return await bayunCore.unlockText(sessionId, premise);
 }
 
 const successCallback = async data => {
@@ -187,7 +173,16 @@ const successCallback = async data => {
 
 connect()
 
-function connect() {
+function comedyPath() {
+  const {
+    companyName,
+    companyEmployeeId
+  } = getSession()
+
+  return ['', companyName, companyEmployeeId, 'Comedy'].join('/')
+}
+
+async function connect() {
   const {
     sessionId,
     companyName,
@@ -195,11 +190,44 @@ function connect() {
   } = getSession()
 
   if(!sessionId) return
+  
+  let { data: plan98_solo_text, error } = await supabase
+  .from('plan98_solo_text')
+  .select("*")
+  // Filters
+  .eq('companyName', companyName)
+  .eq('companyEmployeeId', companyEmployeeId)
+  .range(0, 25)
 
-  const comedy = gun.get(companyName).get(companyEmployeeId).get('Comedy')
-  comedy.map().on((joke, setup) => {
-    $.teach({ setup, joke }, mergeJoke)
+  plan98_solo_text.map(async (row) => {
+    const setup = await bayunCore.unlockText(sessionId, row.setup)
+    const punchline = await bayunCore.unlockText(sessionId, row.punchline)
+
+    $.teach({ id: row.id, setup, punchline }, mergeJoke)
   })
+
+  supabase.channel('custom-all-channel')
+  .on(
+    'postgres_changes',
+    { event: '*', schema: 'public', table: 'plan98_solo_text' },
+    async (payload) => {
+      if (
+        payload.new.companyName === companyName &&
+        payload.new.companyEmployeeId === companyEmployeeId
+      ) {
+        const setup = await bayunCore.unlockText(sessionId, payload.new.setup)
+        const punchline = await bayunCore.unlockText(sessionId, payload.new.punchline)
+        console.log('Change detected:', payload)
+
+        $.teach({ id: payload.new.id, setup, punchline }, mergeJoke)
+      }
+
+      if(payload.eventType === 'DELETE') {
+        $.teach({ id: payload.old.id }, deleteJoke)
+      }
+    }
+  )
+  .subscribe()
 }
 
 function mergeJoke(state, payload) {
@@ -207,10 +235,24 @@ function mergeJoke(state, payload) {
     ...state,
     jokes: {
       ...state.jokes,
-      [payload.setup]: payload.joke
+      [payload.id]: { 
+        punchline: payload.punchline,
+        setup: payload.setup
+      }
     }
   }
 }
+
+function deleteJoke(state, payload) {
+  const newState = {
+    ...state,
+  }
+
+  delete newState.jokes[payload.id]
+
+  return newState
+}
+
 
 const failureCallback = error => {
   $.teach({ error: `${error}` })
@@ -251,6 +293,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
+    width: 100%;
     background: lemonchiffon;
     color: saddlebrown;
   }
