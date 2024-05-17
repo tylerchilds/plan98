@@ -2,6 +2,7 @@ import module, { state } from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import supabase from '@sillonious/database'
 import { render } from '@sillonious/saga'
+import { showModal } from '@plan98/modal'
 
 const $ = module('comedy-notebook', {
   sessionId: '',
@@ -18,53 +19,58 @@ $.draw((target) => {
 
   if(!sessionId) {
     return `
-      <hypertext-variable monospace="0" casual="1" weight="400" slant="0" cursive="1">
-        Comedy Notebook
-      </hypertext-variable>
-      <div class="error">
-        ${error ? error : ''}
+      <div name="login">
+        <hypertext-variable monospace="0" casual="1" weight="400" slant="0" cursive="1">
+          Comedy Notebook
+        </hypertext-variable>
+        <div class="error">
+          ${error ? error : ''}
+        </div>
+        <form method="POST" action="loginWithPassword">
+          <label class="field">
+            <span class="label">Identity</span>
+            <input data-bind type="text" name="companyEmployeeId" required/>
+          </label>
+          <label class="field">
+            <span class="label">Password</span>
+            <input data-bind type="password" name="password" required/>
+          </label>
+          <rainbow-action>
+            <button type="submit">
+              Log In
+            </button>
+          </rainbow-action>
+        </form>
       </div>
-      <form method="POST" action="loginWithPassword">
-        <label class="field">
-          <span class="label">Identity</span>
-          <input data-bind type="text" name="companyEmployeeId" required/>
-        </label>
-        <label class="field">
-          <span class="label">Password</span>
-          <input data-bind type="password" name="password" required/>
-        </label>
-        <rainbow-action>
-          <button type="submit">
-            Log In
-          </button>
-        </rainbow-action>
-      </form>
     `
   }
 
+  const lines = getLines(target)
   return `
-    <div class="actions">
-      <button data-new>
-        New Joke
-      </button>
-      <button data-clear>
-        Clear Jokes
-      </button>
-      <button data-logout>
-        Logout
-      </button>
+    <div class="page" style="background-image: ${lines}">
+      <div class="actions">
+        <button data-new>
+          New Joke
+        </button>
+        <button data-clear>
+          Clear Jokes
+        </button>
+        <button data-logout>
+          Logout
+        </button>
 
-    </div>
-    <div class="setlist">
-      ${Object.keys(jokes).map((id) => {
-        return `
-          <button data-id="${id}">
-            <hypertext-variable monospace="0" slant="-15" casual="1" cursive="1" weight="200">
-              ${jokes[id].setup}
-            </hypertext-variable>
-          </button>
-        `
-      }).join('')}
+      </div>
+      <div class="setlist">
+        ${Object.keys(jokes).map((id) => {
+          return `
+            <button data-id="${id}">
+              <hypertext-variable monospace="0" slant="-15" casual="1" cursive="1" weight="200">
+                ${jokes[id].setup}
+              </hypertext-variable>
+            </button>
+          `
+        }).join('')}
+      </div>
     </div>
   `
 })
@@ -77,7 +83,11 @@ $.when('click', '[data-id]', (event) => {
   const { id } = event.target.dataset
   const { jokes } = $.learn()
   const { punchline } = jokes[id]
-  showModal(render(punchline))
+  showModal(`
+    <div style="height: 100%; background: rgba(255,255,255,.85); width: 6in; margin: 0 auto;">
+      ${render(punchline)}
+    </div>
+  `)
 })
 
 $.when('click', '[data-logout]', async () => {
@@ -85,21 +95,9 @@ $.when('click', '[data-logout]', async () => {
 })
 
 $.when('click', '[data-new]', async () => {
-  const {
-    sessionId,
-    companyName,
-    companyEmployeeId
-  } = getSession()
-
-  const setup = await bayunCore.lockText(sessionId, "have you ever been in line at self checkout?");
-  const punchline = await bayunCore.lockText(sessionId, "like what, i have to do all the work myself?");
-
-  const { data, error } = await supabase
-  .from('plan98_solo_text')
-  .insert([
-    { companyName, companyEmployeeId, setup, punchline },
-  ])
-  .select()
+  showModal(`
+    <comedy-blast></comedy-blast>
+  `)
 })
 
 $.when('click', '[data-clear]', async () => {
@@ -289,6 +287,23 @@ $.when('click', '[type="submit"]', (event) => {
 
 function noop(){}
 
+function getLines(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm * .1), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
 $.style(`
   & {
     display: block;
@@ -296,6 +311,12 @@ $.style(`
     width: 100%;
     background: lemonchiffon;
     color: saddlebrown;
+    line-height: 3rem;
+    position: relative;
+  }
+
+  & .page {
+    background: rgba(255,255,255,.85);
   }
 
   & .actions button {
@@ -312,7 +333,15 @@ $.style(`
     font-size: 2rem;
     color: saddlebrown;
     border: none;
-    padding: 1rem;
+    padding: 0 1rem;
     background: none;
+  }
+
+  & [name="login"] {
+    max-width: 320px;
+    margin: auto;
+    inset: 0;
+    position: absolute;
+    aspect-ratio: 1;
   }
 `)

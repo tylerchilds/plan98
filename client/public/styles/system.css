@@ -373,6 +373,7 @@ button {
 	z-index: 2;
   padding: 7px;
   font-size: .9rem;
+  line-height: 1rem;
 }
 
 .field [type=checkbox] + .label,
