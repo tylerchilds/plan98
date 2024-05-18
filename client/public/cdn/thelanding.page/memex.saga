@@ -2,6 +2,7 @@
 engine: thelanding.page
 
 <hyper-browser
+style: height: 100vh;
 
 The Landing Page is a magical sheet of paper that when unfolded becomes a deeper mystery-- as something razor thin, shields an entire reality.
 
