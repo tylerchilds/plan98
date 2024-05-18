@@ -106,11 +106,15 @@ $.draw((target) => {
 
     <div name="transport">
       <div name="actions">
-        <div class="the-compass">
-          ${compass}
+        <div>
+          <div class="the-compass">
+            ${compass}
+          </div>
         </div>
-        <div class="the-cardinal">
-          ${cardinal}
+        <div style="text-align: right;">
+          <div class="the-cardinal">
+            ${cardinal}
+          </div>
         </div>
       </div>
     </div>
@@ -302,21 +306,26 @@ $.style(`
   }
   & .the-compass,
   & .the-cardinal {
-    display: grid;
+    display: inline-grid;
     grid-template-columns: repeat(4, 10px);
     grid-template-rows: repeat(4, 10px);
     gap: 30px;
+    background: rgba(0,0,0,.85);
+    border-radius: 0 100% 0 0;
+    pointer-events: all;
   }
 
 
   & .the-cardinal {
     place-content: end;
+    border-radius: 100% 0 0 0;
   }
 
   & .the-compass button,
   & .the-cardinal button{
     position: relative;
     overflow: hidden;
+    touch-action: manipulation;
   }
   & .the-compass button::before,
   & .the-cardinal button::before{
@@ -479,7 +488,7 @@ $.style(`
     margin: 0;
     gap: .25rem;
     border-radius: 1.5rem;
-    padding: .5rem;
+    padding: 0;
   }
 
 	& .nav-item {
@@ -515,12 +524,11 @@ $.style(`
 
   & [name="carousel"] {
     display: grid;
-    overflow: visible;
     z-index: 1001;
     width: 100%;
     height: 100%;
     padding: 1rem;
-    overflow: auto;
+    overflow: hidden;
   }
 
   & [name="screen"] {
@@ -529,7 +537,7 @@ $.style(`
 		grid-template-rows: 1fr;
     place-content: center;
     place-self: start;
-    height: calc(100% - 6rem);
+    height: calc(100% - 3in);
     width: 100%;
     border-radius: 1rem;
   }
