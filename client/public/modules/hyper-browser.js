@@ -111,7 +111,7 @@ $.draw((target) => {
         </div>
       </div>
     </div>
-    <div name="carousel">
+    <div name="carousel" style="background-image: url(${doingBusinessAs[art].image})">
       <div name="screen">
         ${deck}
       </div>
@@ -127,21 +127,23 @@ $.draw((target) => {
 
 function findDeck(art, diskette) {
   const { player } = $.learn()
-  const cards = Object.keys(player).slice(0,12).map((world) => {
+  const cards = Object.keys(player).map((world) => {
     const { mascot, color, image, imageDescription } = doingBusinessAs[world]
     const code = `${window.location.origin}?world=${world}`
     return `
-      <button class="card ${art === world ? 'active': ''}" data-code="${code}" style="--color: ${color}; --image: url('${image}')">
-        <div class="backside">
-          <qr-code data-fg="saddlebrown" style="max-height: 120px; margin: auto;" text="${code}"></qr-code>
-        </div>
-        <div class="frontside">
-          <div class="title-bar">
-            ${mascot}
+      <div class="sleeve">
+        <button class="card ${art === world ? 'active': ''}" data-code="${code}" style="--color: ${color}; --image: url('${image}')">
+          <div class="backside">
+            <qr-code data-fg="saddlebrown" style="max-height: 120px; margin: auto;" text="${code}"></qr-code>
           </div>
-          <img src="${image}" alt="${imageDescription}" />
-        </div>
-      </button>
+          <div class="frontside">
+            <div class="title-bar">
+              ${mascot}
+            </div>
+            <img src="${image}" alt="${imageDescription}" />
+          </div>
+        </button>
+      </div>
     `
   }).join('')
 
@@ -486,6 +488,7 @@ $.style(`
     overflow: hidden;
     position: relative;
     grid-area: carousel;
+    background-size: cover;
   }
 
   & [name="carousel"] {
@@ -577,24 +580,27 @@ $.style(`
   }
 
   & .deck {
-    display: grid;
-    place-content: end center;
-    grid-template-columns: repeat(13, .5in);
+    white-space: nowrap;
     transform: translateX(var(--hand-offset));
     transition: transform 100ms ease-in-out;
-    position: relative;
-    left: 25px;
-    bottom: -3rem;
+    position: absolute;
+    left: calc(50% - 1.25in);
+    bottom: 0;
   }
 
+  & .deck .sleeve {
+    display: inline-block;
+    width: .5in;
+  }
   & .deck .card {
     transform: translateY(6rem);
-    transition: transform 250ms ease-in-out;
+    transition: transfokm 250ms ease-in-out;
   }
 
   & .deck .card.active {
     transform: translateY(0);
     z-index: 2;
+    position: relative;
   }
 
   & .title-bar {

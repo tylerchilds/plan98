@@ -7,18 +7,16 @@ $.draw((target) => {
 
   if(thinking) {
     return `
-      <sticky-not>
+      <sticky-note>
         <hypertext-highlighter color="dodgerblue">
-          Thinking.
+          The ELF Negotiator is Negotiating on your behalf...
         </hypertext-highlighter>
-      </sticky-not>
+      </sticky-note>
     `
   }
 
   if(success) return `
-    <sticky-note>
-      <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Consider yourself on the initiation path to wizardhood. Check your email and confirm your intentions.</hypertext-highlighter>
-    </sticky-note>
+    <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">You're on the list. Messages are sent weekly.</hypertext-highlighter>
   `
 
   const maybeError = !error?'':`
@@ -51,9 +49,7 @@ $.draw((target) => {
           <label class="field">
             <span class="label">Email</span>
             <input
-              type="email"
               name="email"
-              required
               placeholder="ty@sillyz.computer"
             />
           </label>
@@ -82,10 +78,6 @@ $.style(`
     margin: 0 auto;
     color: rgba(0,0,0,.85);
     overflow: hidden;
-  }
-
-  & sticky-not {
-    color: white;
   }
 `)
 
