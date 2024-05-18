@@ -5,10 +5,40 @@ const gun = window.Gun(['https://gun.1998.social/gun']);
 
 const $ = module('gun-clipboard')
 
+$.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    line-height: 2rem;
+  }
+
+  & textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: 2rem 1rem;
+    line-height: 2rem;
+    background: transparent;
+  }
+
+  & .page {
+    height: 100%;
+    line-height: 3rem;
+    background: rgba(255,255,255,.85);
+  }
+`)
+
 $.draw((target) => {
   subscribe(target)
   const { value } = $.learn()
-  return `<textarea style="background-image: ${getLines(target)}">${value?value:''}</textarea>`
+  return `
+    <div class="page">
+      <textarea style="background-image: ${getLines(target)}">${value?value:''}</textarea>
+    </div>
+  `
 })
 
 $.when('input', '>textarea', (event) => {
@@ -41,22 +71,8 @@ function getLines(target) {
   return `url(${canvas.toDataURL()}`;
 }
 
-
-
-$.style(`
-  & {
-    display: block;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  & textarea {
-    width: 100%;
-    height: 100%;
-    resize: none;
-    border: none;
-    padding: 0;
-    background: white;
-  }
-`)
+$.when('scroll', 'textarea', function({ target }) {
+    const scrollTop = target.scrollTop;
+console.log(scrollTop)
+    target.style.backgroundPosition = `0px ${-scrollTop}px`;
+});

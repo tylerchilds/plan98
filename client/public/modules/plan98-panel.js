@@ -154,8 +154,8 @@ $.style(`
   & .body {
     height: 100%;
     max-width: 320px;
-    background: lemonchiffon;
-    padding: 2rem .5rem .5rem;
+    background: white;
+    padding: 2rem 0 .5rem;
     position: absolute;
     right: 0;
     pointer-events: all;
