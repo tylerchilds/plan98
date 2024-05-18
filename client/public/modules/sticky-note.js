@@ -6,7 +6,7 @@ $.style(`
   & {
     padding: 16px 9px;
     width: 3.25in;
-    height: 3.12in;
+    aspect-ratio: 3.25 / 3.12;
     max-height: 100%;
     max-width: 100%;
     background: lemonchiffon;
