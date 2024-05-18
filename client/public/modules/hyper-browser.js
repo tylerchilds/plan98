@@ -83,6 +83,9 @@ $.draw((target) => {
   const cardinal = drawCardinal(joypros[0].buttons)
 
   const deck = findDeck(art, diskette)
+  const { saga } = doingBusinessAs[art]
+  const film = saga.split('/public')[1]
+  const frame = film ? `<iframe src="${film}"></iframe>` : ''
 
   const content = `
     <div class="the-map">
@@ -113,6 +116,9 @@ $.draw((target) => {
     </div>
     <div name="carousel" style="background-image: url(${doingBusinessAs[art].image})">
       <div name="screen">
+        <button data-open>
+          ${frame}
+        </button>
         ${deck}
       </div>
     </div>
@@ -158,6 +164,10 @@ function mod(x, n) {
   return ((x % n) + n) % n;
 }
 
+$.when('click', 'iframe', () => {
+  alert('wtf')
+})
+
 $.when('focus', 'input', event => {
   $.teach({ suggestable: true })
 })
@@ -173,8 +183,16 @@ $.when('blur', 'input', event => {
 })
 
 $.when('click', '.card', event => {
+  event.stopPropagation()
   const { code } = event.target.dataset
   window.location.href = code
+})
+
+$.when('click', '[data-open]', event => {
+  const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes(event.target)
+  const art = bin[diskette]
+  window.location.href = `${window.location.origin}?world=${art}`
 })
 
 $.when('keyup', 'input', event => {
@@ -247,13 +265,17 @@ $.when('click', '[name="jump"]', () => {
   const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
   const bin = diskettes(event.target)
   const art = bin[diskette]
+  window.location.href = `${window.location.origin}?world=${art}`
+})
+
+$.when('click', '[name="duck"]', () => {
+  const { diskette } = state['ls/sillonious-memex'] || { diskette: 0 }
+  const bin = diskettes(event.target)
+  const art = bin[diskette]
 
   showModal(`<wizard-journey host="${art}">
     <sillonious-brand host="${art}"></sillonious-brand>
   </wizard-journey>`)
-})
-
-$.when('click', '[name="duck"]', () => {
 })
 
 $.when('click', '[name="use"]', () => {
@@ -513,11 +535,24 @@ $.style(`
   }
 
 
-  & [name="screen"] > iframe {
+  & [name="screen"] iframe {
     margin: auto;
     width: 100%;
     height: 100%;
     border: none;
+  }
+
+  & [data-open] {
+    padding: 0;
+    border: 0;
+    position: relative;
+  }
+
+  & [data-open]::before {
+    content: '';
+    z-index: 2;
+    position: absolute;
+    inset: 0;
   }
 
   & .card {
@@ -586,6 +621,7 @@ $.style(`
     position: absolute;
     left: calc(50% - 1.25in);
     bottom: 0;
+    z-index: 3;
   }
 
   & .deck .sleeve {
