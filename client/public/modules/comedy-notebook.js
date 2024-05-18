@@ -84,7 +84,7 @@ $.when('click', '[data-id]', (event) => {
   const { jokes } = $.learn()
   const { punchline } = jokes[id]
   showModal(`
-    <div style="height: 100%; background: rgba(255,255,255,.85); width: 6in; margin: 0 auto;">
+    <div style="height: 100%; background: lemonchiffon; width: 8.5in; padding: 1in 1in 1in 1.5in; margin: 0 auto;">
       ${render(punchline)}
     </div>
   `)
@@ -317,6 +317,7 @@ $.style(`
 
   & .page {
     background: rgba(255,255,255,.85);
+    height: 100%;
   }
 
   & .actions button {
@@ -331,10 +332,14 @@ $.style(`
 
   & .setlist button {
     font-size: 2rem;
+    line-height: 3rem;
     color: saddlebrown;
     border: none;
     padding: 0 1rem;
     background: none;
+    display: block;
+    width: 100%;
+    text-align: left;
   }
 
   & [name="login"] {

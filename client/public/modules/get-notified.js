@@ -29,12 +29,12 @@ $.draw((target) => {
 
   return `
     <div class="wrapper">
-      <h1>Get Notified!</h1>
+      <h1>Subscribe Now?</h1>
       <p>
-        The Landing Page's Wizards' Quests Digest is a "News" letter from a "Fictional" realm. In this world, technology is magic even kids can do.
+        Curious to find out about who, what, where, or when you are here?
       </p>
       <p>
-        To avoid finding oneself on a Fools' Errand, consider subscribing today. For more information, visit <a href="https://thelanding.page" target="_blank">The Landing Page</a>.
+        Why Not?
       </p>
       <div>
         <div>

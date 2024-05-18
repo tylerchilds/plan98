@@ -149,7 +149,6 @@ $.style(`
     width: 100%;
     z-index: -1;
     opacity: 0;
-    overflow: auto;
   }
 
   & .body {
@@ -164,7 +163,8 @@ $.style(`
       0px 0px 4px 4px rgba(0,0,0,.10),
       0px 0px 12px 12px rgba(0,0,0,.5),
       0px 0px 36px 36px rgba(0,0,0,.25);
-    width: 100%
+    width: 100%;
+    overflow: auto;
   }
 }
   }
@@ -201,7 +201,7 @@ $.style(`
     height: 2rem;
     opacity: .8;
     transition: opacity: 200ms;
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     z-index: 1101;

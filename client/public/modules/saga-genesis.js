@@ -86,8 +86,8 @@ $.when('click', '[data-escape]', debugMode)
 
 $.when('click', '[data-aid]', (event) => {
   showPanel(`
-    <information-station></information-station>
     <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
+    <information-station></information-station>
   `)
 })
 

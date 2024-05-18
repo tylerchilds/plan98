@@ -1,5 +1,4 @@
 import module from '@silly/tag'
-import eruda from 'eruda'
 import Color from "colorjs.io";
 import { doingBusinessAs as dba } from '@sillonious/brand'
 import { showPanel } from './plan98-panel.js'
@@ -148,7 +147,6 @@ function print(colors) {
 }
 
 $.when('click', '[data-help]', (event) => {
-  eruda.init();
   showPanel(`
     <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
   `)

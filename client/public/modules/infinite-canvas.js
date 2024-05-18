@@ -144,7 +144,7 @@ function getStars(target) {
 
 function template(target, edgesSVG, nodesHTML) {
   const stars = getStars(target)
-  target.style = `background: ${stars}, rgba(255,255,255,.85);`
+  target.style = `background: ${stars}, rgba(255,255,255,1);`
   return `
     <div name="canvas-container">
         <svg id="canvas-edges">
@@ -194,6 +194,7 @@ $.style(`
   & {
     display: block;
     overflow: auto;
+    height: 100%;
   }
 
   & #canvas-nodes {

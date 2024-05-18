@@ -8,7 +8,7 @@ const $ = module('gun-clipboard')
 $.draw((target) => {
   subscribe(target)
   const { value } = $.learn()
-  return `<textarea>${value?value:''}</textarea>`
+  return `<textarea style="background-image: ${getLines(target)}">${value?value:''}</textarea>`
 })
 
 $.when('input', '>textarea', (event) => {
@@ -24,6 +24,25 @@ function subscribe(target) {
   target.gun.on(value => $.teach({ value }))
 }
 
+function getLines(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm * .1), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+
+
 $.style(`
   & {
     display: block;
@@ -38,6 +57,6 @@ $.style(`
     resize: none;
     border: none;
     padding: 0;
-    background: transparent;
+    background: white;
   }
 `)

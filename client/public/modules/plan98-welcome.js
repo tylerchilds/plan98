@@ -12,7 +12,7 @@ import { currentSave } from '../cdn/thelanding.page/game-state.js'
 
 import { hideModal, showModal, types as modalTypes } from './plan98-modal.js'
 import { factoryReset } from './plan98-filesystem.js'
-const $ = module('plan98-welcome')
+const $ = module('plan98-welcome', { lite: true })
 
 $.when('click', '.remix', async () => {
   const randomPath = self.crypto.randomUUID() + '.html'
@@ -61,8 +61,35 @@ function conditionalPlatform(has, show) {
 }
 
 $.draw((target) => {
-  const { html } = $.learn()
+  const { html, lite } = $.learn()
   if(html) return html
+
+  if(lite) {
+    return `
+    <div name="square">
+      <div class="skybox active">
+        <div class="f">
+          <div id="foreground">
+            <div id="logo">
+              <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
+                Sillyz
+              </hypertext-variable>
+              <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
+                COMPUTER
+              </hypertext-variable>
+            </div>
+            <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
+            </rainbow-action>
+            <button data-about class="cta" data-tooltip="Learn about where here is.">Subscribe</button>
+            <button data-upgrade class="cta">
+              Develop
+            </button>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
   const {chaosEmerald} = currentSave()
   target.innerHTML = `
     <!--
@@ -86,7 +113,7 @@ $.draw((target) => {
           </div>
       </section>
 
-      <div class="skybox ${html ? '' : 'active'}">
+      <div class="skybox active">
         <div class="emeralds">
           ${chaosEmerald.map((value, index) => `
             <div class="emerald ${value ? '-in-bag' : ''}" data-index="${index}"></div>
@@ -129,9 +156,9 @@ $.draw((target) => {
                 Nautilus
               </hypertext-variable>
             </div>
-              <rainbow-action class="start" prefix="<button data-tutorial>" suffix="</button>" text="Start">
+              <rainbow-action class="start" prefix="<button data-endgame>" suffix="</button>" text="Start">
               </rainbow-action>
-              <button data-about data-tooltip="Learn about where here is.">Get Notified</button>
+              <button data-about class="cta" data-tooltip="Learn about where here is.">Subscribe</button>
             </div>
           </div>
         </div>
@@ -146,9 +173,27 @@ $.when('click', '[data-about]', (event) => {
   `, { centered: true })
 })
 
+$.when('click', '[data-upgrade]', (event) => {
+  $.teach({ lite: false })
+})
+
 $.when('click', '[data-tutorial]', start)
+$.when('click', '[data-endgame]', finish)
 
 function start() {
+  const close = 'plan98-welcome.close'
+  const start = 'plan98-welcome.start'
+  window[close] = hideModal;
+  window[start] = () => {
+    window.location.href = `/404`
+  }
+  showModal(`
+    <hyper-browser></hyper-browser>
+  `, { centered: true })
+
+}
+
+function finish() {
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
@@ -171,8 +216,17 @@ $.style(`
     display: grid;
     margin: auto;
     height: 100%;
+    animation: &-rainbow-background 10000ms ease-in-out infinite alternate-reverse;
+    position: relative;
   }
-  & [data-about] {
+
+  &::before {
+    content: '';
+    background: linear-gradient(-45deg, rgba(0,0,0,.5), rgba(0,0,0,1));
+    position: absolute;
+    inset: 0;
+  }
+  & .cta {
     background: rgba(0,0,0,.5);
     color: white;
     border: none;
@@ -344,6 +398,22 @@ $.style(`
 
    }
  }
+  @keyframes &-rainbow-background {
+    0% {
+			background: orange;
+    }
+    33% {
+			background: dodgerblue;
+    }
+    66% {
+			background: lime;
+    }
+
+    100% {
+      background: purple;
+    }
+  }
+
 
       
  & .layout {
