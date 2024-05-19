@@ -1,6 +1,6 @@
 import module from "@silly/tag"
 import Color from "colorjs.io"
-import * as Tone from "tone@next"
+import Wad from 'web-audio-daw';
 //import $user from "/packages/widgets/menu-user.js"
 
 import party, {
@@ -17,7 +17,7 @@ import party, {
 //bus.state['https://braid.1998.social/last-color.json']
 
 const synths = [...new Array(24)].map(() =>
-  new Tone.FMSynth().toMaster()
+  new Wad({source : 'sine'})
 )
 
 const $ = module('sillyz-ocarina', {
@@ -38,11 +38,11 @@ const sustainedDuration = 100
 const actionableFPS = 4
 
 const majorScale = [
-  'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'
+  'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F#', 'D#', 'A#', 'F'
 ]
 
 const minorScale = [
-  'a', 'e', 'b', 'f#', 'c#', 'g#', 'd#', 'bb', 'f', 'c', 'g', 'd'
+  'a', 'e', 'b', 'f#', 'c#', 'g#', 'd#', 'a#', 'f', 'c', 'g', 'd'
 ]
 
 const lightnessStops = [
@@ -81,7 +81,9 @@ function attack(event) {
 	event.preventDefault()
 	const { colors } = $.learn()
   const { note, octave, synth, hue } = event.target.dataset
-  synths[synth].triggerAttack(`${note}${octave}`, "2n");
+  const pitch = `${note.toUpperCase()}${octave}`
+  console.log(pitch)
+  synths[synth].play({ pitch, label: pitch });
 	event.target.classList.add('active')
 
   const lastColor = new Color(
@@ -98,7 +100,7 @@ function attack(event) {
 function release (event) {
 	event.preventDefault()
   const { synth } = event.target.dataset
-  synths[synth].triggerRelease();
+  synths[synth].stop();
 	event.target.classList.remove('active')
 }
 
