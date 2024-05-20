@@ -553,9 +553,9 @@ $.style(`
   display: block;
   font-size: clamp(1rem, 300%, 10vmin);
   letter-spacing: .25em;
-  font-size: 2rem;
+  font-size: 1.5rem;
   line-height: 1.5;
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 
