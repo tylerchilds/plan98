@@ -29,12 +29,6 @@ main xml-html > best-buy {
   margin: 3rem auto;
 }
 
-main hypertext-action {
-  max-width: 55ch;
-  margin: 4rem auto;
-  font-size: 1.5rem;
-}
-
 main braid-mail {
   max-width: 55ch;
   margin: auto;
@@ -75,4 +69,26 @@ mast-head img {
   max-width: 100vmin;
   max-height: 100vmin;
   display: block;
+}
+
+main > xml-html {
+  font-size: 1.5rem;
+}
+
+main hypertext-action {
+  padding: 0 1rem;
+  max-width: 55ch;
+  margin: 1rem auto;
+}
+
+main hypertext-address {
+  max-width: 55ch;
+  padding: 0 1rem;
+  margin: 1rem auto;
+}
+
+main hypertext-quote {
+  max-width: 35ch;
+  margin: 1rem auto;
+  padding: 0 1rem;
 }

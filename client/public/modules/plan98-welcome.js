@@ -74,8 +74,8 @@ $.draw((target) => {
               <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
                 Sillyz
               </hypertext-variable>
-              <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                COMPUTER
+              <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
+                embody: knowledge
               </hypertext-variable>
             </div>
             <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
@@ -525,6 +525,7 @@ $.style(`
    animation: fade-in 500ms 500ms ease-in forwards, fly-in 1000ms 500ms ease-out forwards;
    color: white;
    text-shadow: 2px 2px black;
+   width: 100%;
 }
 
 & sillyz-avatar {
@@ -536,17 +537,27 @@ $.style(`
    place-self: center;
 }
 
-& #logo hypertext-variable:first-child {
+& #logo #vt1 {
   display: block;
   font-size: clamp(1rem, 700%, 20vmin);
 }
 
-& #logo hypertext-variable:last-child {
+& #logo #vt2 {
   display: block;
   font-size: clamp(1rem, 300%, 10vmin);
   letter-spacing: .25em;
   line-height: 1.5;
 }
+
+& #logo #vt3 {
+  display: block;
+  font-size: clamp(1rem, 300%, 10vmin);
+  letter-spacing: .25em;
+  font-size: 2rem;
+  line-height: 1.5;
+  margin: 2rem 0;
+}
+
 
 & rainbow-button {
   opacity: 0;

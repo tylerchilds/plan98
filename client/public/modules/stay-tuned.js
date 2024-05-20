@@ -56,7 +56,7 @@ $.draw((target) => {
       <a href="https://tychi.me">
         <img src="/cdn/tychi.me/photos/professional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
       </a>
-      Founder, Owner, Operator, Liason @ Sillyz Computer, LLC<br/>
+      Founder, Owner, Operator, Liason @ Sillyz<br/>
       <a href="https://sillyz.computer">
         Sillyz.Computer
       </a>

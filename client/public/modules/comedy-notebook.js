@@ -64,9 +64,7 @@ $.draw((target) => {
         ${Object.keys(jokes).map((id) => {
           return `
             <button data-id="${id}">
-              <hypertext-variable monospace="0" slant="-15" casual="1" cursive="1" weight="200">
-                ${jokes[id].setup}
-              </hypertext-variable>
+              ${jokes[id].setup}
             </button>
           `
         }).join('')}
@@ -340,6 +338,13 @@ $.style(`
     display: block;
     width: 100%;
     text-align: left;
+    --v-font-mono: 0;
+    --v-font-casl: 1;
+    --v-font-wght: 200;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
   }
 
   & [name="login"] {

@@ -3,13 +3,13 @@ import { showModal } from './plan98-modal.js'
 
 const $ = module('best-buy')
 
-$.draw(() => `
+$.draw(target => `
   <div class="pitch">
-    The Best Deals Are Only Available At The Source
+    ${target.getAttribute('pitch')}
   </div>
   <rainbow-action>
-    <button data-tag="wizard-journey">
-      Buy Here
+    <button data-tag="${target.getAttribute('tag')}">
+      ${target.getAttribute('action')}
     </button>
   </rainbow-action>
 `)
