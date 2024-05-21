@@ -358,7 +358,25 @@ export const doingBusinessAs = {
     color: new Color('lch', [50, 75, 350])
       .display()
       .toString({format: 'hex'}),
+  },
+  'owncast.online': {
+    emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    latitude: '64.1478144',
+    longitude: '-21.943671',
+    zoom: 17,
+    tagline: 'Owncast.Online',
+    saga: '/public/cdn/owncast.online/index.saga',
+    mascot: 'Web Synths Grooves',
+    contact: 'Web Synths Grooves',
+    brandHue: 350,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 350])
+      .display()
+      .toString({format: 'hex'}),
   }
+
   //'executiontime.pub': emeraldOfTime
   //'tylerchilds.com': emeraldOfTime
   //'webdesigninfinity.com': emeraldOfTime
