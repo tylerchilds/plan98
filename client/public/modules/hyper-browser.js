@@ -85,7 +85,7 @@ $.draw((target) => {
   const deck = findDeck(art, diskette)
   const { saga } = doingBusinessAs[art]
   const film = saga.split('/public')[1]
-  const frame = film ? `<iframe src="${film}"></iframe>` : ''
+  const frame = film ? `<iframe src="${film}?world=${plan98.parameters.get('world')}"></iframe>` : ''
 
   const content = `
     <div class="the-map">

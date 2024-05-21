@@ -1,6 +1,4 @@
 import module from '@silly/tag'
-// i channel my runic knowledge to commune with the ancestors and establish contact with the animals
-import { showModal } from './plan98-modal.js'
 
 const $ = module('owncast-surfer', {
   channel: 0,
