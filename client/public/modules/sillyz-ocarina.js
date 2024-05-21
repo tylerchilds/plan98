@@ -83,6 +83,7 @@ function attack(event) {
   const { note, octave, synth, hue } = event.target.dataset
   const pitch = `${note.toUpperCase()}${octave}`
   console.log(pitch)
+  synths[synth].stop();
   synths[synth].play({ pitch, label: pitch });
 	event.target.classList.add('active')
 

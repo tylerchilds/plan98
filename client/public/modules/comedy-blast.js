@@ -49,7 +49,7 @@ $.when('submit', 'form', async (event) => {
     companyEmployeeId
   } = getSession()
 
-  const setup = await bayunCore.lockText(sessionId, event.target.setup.value);
+  const setup = event.target.setup.value;
   const punchline = await bayunCore.lockText(sessionId, event.target.punchline.value);
 
   const { data, error } = await supabase

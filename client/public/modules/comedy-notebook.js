@@ -14,7 +14,7 @@ const $ = module('comedy-notebook', {
 })
 
 $.draw((target) => {
-  const { error, jokes } = $.learn()
+  const { error, jokes, active } = $.learn()
   const { sessionId } = getSession()
 
   if(!sessionId) {
@@ -46,7 +46,9 @@ $.draw((target) => {
   }
 
   const lines = getLines(target)
-  return `
+
+  const { punchline } = getJoke(active, jokes)
+  target.innerHTML = `
     <div class="page" style="background-image: ${lines}">
       <div class="actions">
         <button data-new>
@@ -69,8 +71,48 @@ $.draw((target) => {
           `
         }).join('')}
       </div>
+      <div class="joke">
+          <textarea data-key="${active}" class="paper" name="punchline">${punchline}</textarea>
+        <div class="joke-actions">
+          <button data-preview>
+            Preview
+          </button>
+          <button data-save>
+            Save
+          </button>
+        </div>
+      </div>
     </div>
   `
+})
+
+function getJoke(active, jokes) {
+  const joke = jokes[active] ? jokes[active] : { }
+  return joke
+}
+
+$.when('click', '[data-save]', async (event) => {
+  const text = event.target.closest($.link).querySelector('[name="punchline"]').value
+  const {
+    sessionId,
+    companyName,
+    companyEmployeeId
+  } = getSession()
+
+  const id = $.learn().active;
+  const punchline = await bayunCore.lockText(sessionId, text);
+
+  const { data, error } = await supabase
+  .from('plan98_solo_text')
+  .update(
+    { punchline }
+  )
+  .eq('id', id)
+
+  if(error) {
+    $.teach({ error })
+    return
+  }
 })
 
 $.when('click', '[data-back]', () => {
@@ -79,13 +121,8 @@ $.when('click', '[data-back]', () => {
 
 $.when('click', '[data-id]', (event) => {
   const { id } = event.target.dataset
-  const { jokes } = $.learn()
-  const { punchline } = jokes[id]
-  showModal(`
-    <div style="height: 100%; background: lemonchiffon; width: 8.5in; padding: 1in 1in 1in 1.5in; margin: 0 auto;">
-      ${render(punchline)}
-    </div>
-  `)
+
+  $.teach({ active: id })
 })
 
 $.when('click', '[data-logout]', async () => {
@@ -93,10 +130,39 @@ $.when('click', '[data-logout]', async () => {
 })
 
 $.when('click', '[data-new]', async () => {
+  const {
+    sessionId,
+    companyName,
+    companyEmployeeId
+  } = getSession()
+ 
+  const setup = 'untitled';
+  const punchline = await bayunCore.lockText(sessionId, 'hi');
+  const { data, error } = await supabase
+  .from('plan98_solo_text')
+  .insert([
+    { companyName, companyEmployeeId, setup, punchline },
+  ])
+  .select()
+
+  if(error) {
+    $.teach({ error })
+    return
+  }
+
+  $.teach({ active: data[0].id })
+})
+
+$.when('click', '[data-preview]', async (event) => {
+  const text = event.target.closest($.link).querySelector('[name="punchline"]').value
+
   showModal(`
-    <comedy-blast></comedy-blast>
+    <div style="background: white; margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem; background-image: ${getLines(event.target)}">
+      ${render(text)}
+    </div>
   `)
 })
+
 
 $.when('click', '[data-clear]', async () => {
   const {
@@ -112,7 +178,10 @@ $.when('click', '[data-clear]', async () => {
 
   if(error) {
     $.teach({ error })
+    return
   }
+
+  $.teach({ active: null })
 })
 
 $.when('keyup', '[data-bind]', event => {
@@ -196,7 +265,7 @@ async function connect() {
   .range(0, 25)
 
   plan98_solo_text.map(async (row) => {
-    const setup = await bayunCore.unlockText(sessionId, row.setup)
+    const setup = row.setup
     const punchline = await bayunCore.unlockText(sessionId, row.punchline)
 
     $.teach({ id: row.id, setup, punchline }, mergeJoke)
@@ -211,7 +280,7 @@ async function connect() {
         payload.new.companyName === companyName &&
         payload.new.companyEmployeeId === companyEmployeeId
       ) {
-        const setup = await bayunCore.unlockText(sessionId, payload.new.setup)
+        const setup = payload.new.setup
         const punchline = await bayunCore.unlockText(sessionId, payload.new.punchline)
         console.log('Change detected:', payload)
 
@@ -254,10 +323,6 @@ const failureCallback = error => {
   $.teach({ error: `${error}` })
 };
 
-$.when('submit', 'form', (event) => {
-  event.preventDefault()
-})
-
 $.when('click', '[type="submit"]', (event) => {
   $.teach({ error: null })
 
@@ -297,7 +362,7 @@ function getLines(target) {
   ctx.fillRect(0, 0, rhythm, rhythm);
 
   ctx.fillStyle = 'dodgerblue';
-  ctx.fillRect(0, rhythm - (rhythm * .1), rhythm, 1);
+  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
 
   return `url(${canvas.toDataURL()}`;
 }
@@ -309,15 +374,50 @@ $.style(`
     width: 100%;
     background: lemonchiffon;
     color: saddlebrown;
-    line-height: 3rem;
+    line-height: 2rem;
     position: relative;
+  }
+
+  & .joke-actions {
+    position: absolute;
+    right: 2rem;
+    bottom: 2rem;
   }
 
   & .page {
     background: rgba(255,255,255,.85);
     height: 100%;
+    display: grid;
+    grid-template-areas: 'actions actions' 'list active';
+    grid-template-columns: 20ch 1fr;
+    grid-template-rows: 2rem 1fr;
   }
 
+  & .actions {
+    grid-area: actions;
+  }
+
+  & .setlist {
+    grid-area: list;
+  }
+
+  & .joke {
+    grid-area: active;
+    background: rgba(200,200,200,1);
+  }
+
+  & .paper {
+    margin: 0 auto;
+    max-width: 55ch;
+    background: rgba(255,255,255,1);
+    height: 100%;
+    overflow: auto;
+    resize: none;
+    width: 100%;
+    border: none;
+  }
+
+  & .joke-actions button,
   & .actions button {
     background: saddlebrown;
     color: lemonchiffon;
@@ -329,8 +429,8 @@ $.style(`
   }
 
   & .setlist button {
-    font-size: 2rem;
-    line-height: 3rem;
+    font-size: 1.3rem;
+    line-height: 2rem;
     color: saddlebrown;
     border: none;
     padding: 0 1rem;
