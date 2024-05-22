@@ -161,6 +161,18 @@ export const doingBusinessAs = {
       },
     ],
     endOfHead: `
+      <script src="https://widget.clym-sdk.net/blocking.js"></script>
+      <script>
+      (function(d,s,i,w,o){
+      var js,cjs=d.getElementsByTagName(s)[0];
+      if(d.getElementById(i))return;
+      js=d.createElement('script');
+      js.id=i;
+      js.src="https://widget.clym-sdk.net/clym.js";
+      js.onload=function(){Clym&&Clym.load(i,w,o);};
+      cjs.parentNode.insertBefore(js, cjs);
+      }(document,'script','clym-privacy','a6ccc06b25bd4dc1abfa91e04btycg0p',{}));
+      </script>
       <script type="module">
         import Plausible from 'plausible-tracker'
         const plausible = Plausible({
