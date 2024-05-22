@@ -20,8 +20,7 @@ $.when('click', 'button', (event) => {
 
 $.style(`
   & {
-    display: inline-block;
-    text-align: right;
+    display: block;
     margin: 1rem;
   }
 

@@ -5,6 +5,17 @@ Do you want to play Elves?
 
 Hyper Text Marker Elves is a game where players summon toys using spell cards.
 
+
+<iframe
+width: 560
+height: 315
+src: https://www.youtube.com/embed/Bh7Ccm4vKd0?si=rbpuZHVLWV2wh0LX
+title: YouTube video player
+frameborder: 0
+allow: accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share
+referrerpolicy: strict-origin-when-cross-origin
+allowfullscreen: true
+
 <hyper-browser
 style: height: 100vh; margin: 6rem 0;
 
