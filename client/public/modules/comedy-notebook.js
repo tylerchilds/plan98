@@ -307,6 +307,9 @@ const failureCallback = error => {
   $.teach({ error: `${error}` })
 };
 
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+})
 $.when('click', '[type="submit"]', (event) => {
   $.teach({ error: null })
 
@@ -440,6 +443,7 @@ $.style(`
     background-color: white;
     position: relative;
     z-index: 3;
+    background-position-y: -1px;
   }
 
   & .joke {
