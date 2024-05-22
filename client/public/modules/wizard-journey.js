@@ -113,6 +113,12 @@ $.style(`
     position: absolute;
     max-width: 100%;
     bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    max-width: 320px;
+    max-height: 100%;
+    overflow: auto;
   }
 
   & [data-close] {

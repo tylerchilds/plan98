@@ -53,12 +53,6 @@ body data-tooltip {
   height: 100%;
 }
 
-body wizard-journey xml-html {
-  height: 100%;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-}
-
 mast-head img {
   max-width: 100vmin;
   max-height: 100vmin;

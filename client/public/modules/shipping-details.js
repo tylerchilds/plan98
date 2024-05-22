@@ -77,7 +77,27 @@ $.style(`
     height: 300px;
     max-height: 80vh;
     overflow: auto;
+    z-index: 10;
   }
+
+  & .suggestion-box button {
+    background: dodgerblue;
+    border: none;
+    border-radius: 2rem;
+    color: white;
+    transition: all 100ms ease-in-out;
+    padding: .5rem;
+    width: 100%;
+    filter: grayscale(1);
+  }
+
+  & .suggestion-box button:focus,
+  & .suggestion-box button:hover {
+    background: dodgerblue;
+    color: white;
+    filter: grayscale(0);
+  }
+
 
   & [data-suggestion] {
     display: block;

@@ -402,6 +402,7 @@ $.style(`
   }
 
   & .joke {
+    display: grid;
     grid-area: active;
     background: rgba(200,200,200,1);
   }
@@ -415,6 +416,7 @@ $.style(`
     resize: none;
     width: 100%;
     border: none;
+    margin: auto;
   }
 
   & .joke-actions button,

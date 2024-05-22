@@ -36,17 +36,20 @@ $.style(`
   }
 
   & button {
-    background: rgba(255,255,255,.85);
-    border: 2px solid dodgerblue;
+    background: dodgerblue;
+    border: none;
     border-radius: 2rem;
-    color: dodgerblue;
+    color: white;
     transition: all 100ms ease-in-out;
     padding: .5rem;
+    width: 100%;
+    filter: grayscale(1);
   }
 
   & button:focus,
   & button:hover {
     background: dodgerblue;
     color: white;
+    filter: grayscale(0);
   }
 `)

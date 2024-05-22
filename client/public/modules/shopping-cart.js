@@ -20,7 +20,9 @@ $.draw(() => {
         </div>
 
         <div class="quantity">
-          <button data-less data-sku="${sku}">less</button>${quantity}<button data-more data-sku="${sku}">more</button>
+          <button data-less data-sku="${sku}">less</button>
+          <div>quantity: ${quantity}</div>
+          <button data-more data-sku="${sku}">more</button>
         </div>
 
         <div class="price">
@@ -103,5 +105,17 @@ $.style(`
   & .add-to-cart:focus {
     border: 2px solid dodgerblue;
     background: rgba(0,0,0,.85);
+  }
+
+  & .quantity {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .quantity button {
+    background: rgba(0,0,0,.85);
+    color: dodgerblue;
+    border: none;
+    padding: .5rem;
   }
 `)
