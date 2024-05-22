@@ -47,9 +47,9 @@ $.draw((target) => {
 
   const lines = getLines(target)
 
-  const { punchline } = getJoke(active, jokes)
+  const focus = document.activeElement
   target.innerHTML = `
-    <div class="page" style="background-image: ${lines}">
+    <div class="page" >
       <div class="actions">
         <button data-new>
           New Joke
@@ -65,47 +65,41 @@ $.draw((target) => {
       <div class="setlist">
         ${Object.keys(jokes).map((id) => {
           return `
-            <button data-id="${id}">
-              ${jokes[id].setup}
-            </button>
+            <div name="joke" class="index-card">
+              <input name="setup" type="text" data-id="${id}" value="${jokes[id].setup}" />
+              <textarea name="punchline" data-id="${id}" style="background-image: ${lines}">${jokes[id].punchline}</textarea>
+              <div class="joke-actions">
+                <button data-preview data-id="${id}">
+                  Preview
+                </button>
+                <button data-save data-id="${id}">
+                  Save
+                </button>
+              </div>
+            </div>
           `
         }).join('')}
-      </div>
-      <div class="joke">
-          <textarea data-key="${active}" class="paper" name="punchline">${punchline}</textarea>
-        <div class="joke-actions">
-          <button data-preview>
-            Preview
-          </button>
-          <button data-save>
-            Save
-          </button>
-        </div>
       </div>
     </div>
   `
 })
 
-function getJoke(active, jokes) {
-  const joke = jokes[active] ? jokes[active] : { }
-  return joke
-}
-
 $.when('click', '[data-save]', async (event) => {
-  const text = event.target.closest($.link).querySelector('[name="punchline"]').value
+  const { id } = event.target.dataset
+  const setup = event.target.closest($.link).querySelector(`[data-id="${id}"][name="setup"]`).value
+  let punchline = event.target.closest($.link).querySelector(`[data-id="${id}"][name="punchline"]`).value
   const {
     sessionId,
     companyName,
     companyEmployeeId
   } = getSession()
 
-  const id = $.learn().active;
-  const punchline = await bayunCore.lockText(sessionId, text);
+  punchline = await bayunCore.lockText(sessionId, punchline);
 
   const { data, error } = await supabase
   .from('plan98_solo_text')
   .update(
-    { punchline }
+    { setup, punchline }
   )
   .eq('id', id)
 
@@ -117,12 +111,6 @@ $.when('click', '[data-save]', async (event) => {
 
 $.when('click', '[data-back]', () => {
   $.teach({ activeSetup: null })
-})
-
-$.when('click', '[data-id]', (event) => {
-  const { id } = event.target.dataset
-
-  $.teach({ active: id })
 })
 
 $.when('click', '[data-logout]', async () => {
@@ -149,16 +137,14 @@ $.when('click', '[data-new]', async () => {
     $.teach({ error })
     return
   }
-
-  $.teach({ active: data[0].id })
 })
 
 $.when('click', '[data-preview]', async (event) => {
-  const text = event.target.closest($.link).querySelector('[name="punchline"]').value
+  const { punchline } = $.learn().jokes[event.target.dataset.id]
 
   showModal(`
     <div style="background: white; margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem; background-image: ${getLines(event.target)}">
-      ${render(text)}
+      ${render(punchline)}
     </div>
   `)
 })
@@ -180,8 +166,6 @@ $.when('click', '[data-clear]', async () => {
     $.teach({ error })
     return
   }
-
-  $.teach({ active: null })
 })
 
 $.when('keyup', '[data-bind]', event => {
@@ -376,21 +360,46 @@ $.style(`
     color: saddlebrown;
     line-height: 2rem;
     position: relative;
+    background: linear-gradient(transparent, rgba(0,0,0,.85)), dodgerblue;
+  }
+
+  & *:focus {
+    border-color: orange;
+    outline-color: orange
+  }
+
+  & .actions {
+    margin: 0 1rem;
   }
 
   & .joke-actions {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1rem;
     position: absolute;
-    right: 2rem;
-    bottom: 2rem;
+    bottom: 0;
+    transform: translateY(100%);
+  }
+  & .actions button,
+  & .joke-actions button {
+    background: lemonchiffon;
+    color: saddlebrown;
+    border: none;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    padding: 13px;
+    font-size: 1rem;
+    --v-font-mono: 0;
+    --v-font-casl: 1;
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
   }
 
   & .page {
-    background: rgba(255,255,255,.85);
     height: 100%;
-    display: grid;
-    grid-template-areas: 'actions actions' 'list active';
-    grid-template-columns: 20ch 1fr;
-    grid-template-rows: 2rem 1fr;
+    padding: 0 0 5rem;
   }
 
   & .actions {
@@ -399,6 +408,38 @@ $.style(`
 
   & .setlist {
     grid-area: list;
+  }
+
+  & .index-card {
+    width: 5in;
+    height: 3in;
+    position: relative;
+    margin: 3rem auto 6rem;
+    z-index: 2;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    box-shadow:
+      0px 0px 4px 4px rgba(0,0,0,.10),
+      0px 0px 12px 12px rgba(0,0,0,.05);
+  }
+
+  & [name="setup"] {
+    font-size: 2rem;
+    border: none;
+    border-bottom: 3px solid orange;
+    padding: .5rem 1rem;
+  }
+
+  & [name="punchline"] {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: 0rem 1rem;
+    line-height: 2rem;
+    background-color: white;
+    position: relative;
+    z-index: 3;
   }
 
   & .joke {
@@ -417,36 +458,6 @@ $.style(`
     width: 100%;
     border: none;
     margin: auto;
-  }
-
-  & .joke-actions button,
-  & .actions button {
-    background: saddlebrown;
-    color: lemonchiffon;
-    border-radius: 1rem;
-    height: 2rem;
-    line-height: 2rem;
-    padding: 0 1rem;
-    border: none;
-  }
-
-  & .setlist button {
-    font-size: 1.3rem;
-    line-height: 2rem;
-    color: saddlebrown;
-    border: none;
-    padding: 0 1rem;
-    background: none;
-    display: block;
-    width: 100%;
-    text-align: left;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 200;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
   }
 
   & [name="login"] {
