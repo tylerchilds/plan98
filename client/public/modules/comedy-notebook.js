@@ -171,7 +171,7 @@ $.when('click', '[data-clear]', async () => {
   }
 })
 
-$.when('keyup', '[data-bind]', event => {
+$.when('input', '[data-bind]', event => {
   const { name, value } = event.target;
   $.teach({ [name]: value })
 })
