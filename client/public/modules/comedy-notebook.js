@@ -510,3 +510,5 @@ $.when('scroll', 'textarea', function({ target }) {
     const scrollTop = target.scrollTop;
     target.style.backgroundPosition = `0px ${-scrollTop}px`;
 });
+
+document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
