@@ -298,7 +298,9 @@ $.when('click', '[data-print]', async (event) => {
     <div class="print-banner">
       Looks good! <button onclick="(()=>{window.print();window.close()})()">Print</button>
     </div>
-    ${html}
+    <hyper-script data-print="true">
+      ${html}
+    </hyper-script>
     <style type="text/css">
       body {overflow: auto; height: auto !important; }
       xml-html {height: 100%; overflow: auto; }
