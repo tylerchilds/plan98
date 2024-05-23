@@ -20,7 +20,7 @@ $.draw((target) => {
   if(!sessionId) {
     return `
       <div name="login">
-        <hypertext-variable monospace="0" casual="1" weight="400" slant="0" cursive="1">
+        <hypertext-variable class="title" monospace="0" casual="1" weight="800" slant="0" cursive="1">
           Comedy Notebook
         </hypertext-variable>
         <div class="error">
@@ -125,7 +125,7 @@ $.when('click', '[data-new]', async () => {
   } = getSession()
  
   const setup = 'untitled';
-  const punchline = await bayunCore.lockText(sessionId, 'hi');
+  const punchline = await bayunCore.lockText(sessionId, '');
   const { data, error } = await supabase
   .from('plan98_solo_text')
   .insert([
@@ -144,7 +144,8 @@ $.when('click', '[data-preview]', async (event) => {
   const punchline = event.target.closest($.link).querySelector(`[data-id="${id}"][name="punchline"]`).value
 
   showModal(`
-    <div style="background: rgba(255,255,255,.85); margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem;}">
+    <div style="background: rgba(200,200,200,.65); width: 100%; height: 100%;">
+    <div style="background: rgba(255,255,255,.85); margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem;">
       ${render(punchline)}
     </div>
   `)
@@ -357,15 +358,15 @@ function getLines(target) {
 
 $.style(`
   & {
+    overflow: auto;
     min-height: 480px;
     display: block;
     height: 100%;
     width: 100%;
-    background: lemonchiffon;
-    color: saddlebrown;
     line-height: 2rem;
     position: relative;
     background: linear-gradient(transparent, rgba(0,0,0,.85)), dodgerblue;
+    padding: 6rem 0;
   }
 
   & *:focus {
@@ -375,6 +376,9 @@ $.style(`
 
   & .actions {
     margin: 0 1rem;
+    position: fixed;
+    top: 2rem;
+    z-index: 10;
   }
 
   & .joke-actions {
@@ -401,6 +405,15 @@ $.style(`
     --v-font-crsv: 1;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & .actions button:focus,
+  & .joke-actions button:focus,
+  & .actions button:hover,
+  & .joke-actions button:hover {
+    background: saddlebrown;
+    color: lemonchiffon;
   }
 
   & .page {
@@ -468,10 +481,28 @@ $.style(`
   }
 
   & [name="login"] {
+    background: lemonchiffon;
     max-width: 320px;
     margin: auto;
     inset: 0;
+    padding: 1rem;
     position: absolute;
     aspect-ratio: 1;
+    box-shadow:
+      0px 0px 4px 4px rgba(0,0,0,.10),
+      0px 0px 12px 12px rgba(0,0,0,.05);
+  }
+
+  & .label {
+    color: saddlebrown;
+  }
+  & .title {
+    margin-bottom: 1rem;
+    display: block;
+    color: saddlebrown;
+  }
+
+  & [type="submit"] {
+    width: 100%;
   }
 `)
