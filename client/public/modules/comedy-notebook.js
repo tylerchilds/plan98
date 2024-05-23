@@ -140,10 +140,11 @@ $.when('click', '[data-new]', async () => {
 })
 
 $.when('click', '[data-preview]', async (event) => {
-  const { punchline } = $.learn().jokes[event.target.dataset.id]
+  const { id } = event.target.dataset
+  const punchline = event.target.closest($.link).querySelector(`[data-id="${id}"][name="punchline"]`).value
 
   showModal(`
-    <div style="background: white; margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem; background-image: ${getLines(event.target)}">
+    <div style="background: rgba(255,255,255,.85); margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem;}">
       ${render(punchline)}
     </div>
   `)
@@ -389,6 +390,7 @@ $.style(`
     background: lemonchiffon;
     color: saddlebrown;
     border: none;
+    line-height: 2rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: 13px;
     font-size: 1rem;
