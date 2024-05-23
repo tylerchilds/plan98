@@ -506,3 +506,9 @@ $.style(`
     width: 100%;
   }
 `)
+
+$.when('scroll', 'textarea', function({ target }) {
+    const scrollTop = target.scrollTop;
+console.log(scrollTop)
+    target.style.backgroundPosition = `0px ${-scrollTop}px`;
+});
