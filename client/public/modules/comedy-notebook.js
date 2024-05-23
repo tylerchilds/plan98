@@ -115,6 +115,7 @@ $.when('click', '[data-back]', () => {
 
 $.when('click', '[data-logout]', async () => {
   clearSession()
+  $.teach({ jokes: {} })
 })
 
 $.when('click', '[data-new]', async () => {
@@ -172,7 +173,6 @@ $.when('click', '[data-clear]', async () => {
 
 $.when('keyup', '[data-bind]', event => {
   const { name, value } = event.target;
-  console.log(name, value)
   $.teach({ [name]: value })
 })
 
@@ -268,7 +268,6 @@ async function connect() {
       ) {
         const setup = payload.new.setup
         const punchline = await bayunCore.unlockText(sessionId, payload.new.punchline)
-        console.log('Change detected:', payload)
 
         $.teach({ id: payload.new.id, setup, punchline }, mergeJoke)
       }
@@ -509,6 +508,5 @@ $.style(`
 
 $.when('scroll', 'textarea', function({ target }) {
     const scrollTop = target.scrollTop;
-console.log(scrollTop)
     target.style.backgroundPosition = `0px ${-scrollTop}px`;
 });
