@@ -356,6 +356,7 @@ function getLines(target) {
 
 $.style(`
   & {
+    min-height: 480px;
     display: block;
     height: 100%;
     width: 100%;
