@@ -7,6 +7,7 @@ import 'gun'
 const Gun = window.Gun
 const gun = Gun(['https://gun.1998.social/gun']);
 import { getSession, clearSession } from './comedy-notebook.js'
+import { setRoom } from './chat-room.js'
 
 /*
    ^
@@ -90,8 +91,7 @@ $.when('click', '.my-groups button', (event) => {
 function activateGroup(sessionId, id) {
   bayunCore.getGroupById(sessionId, id)
     .then(result => {
-      debugger
-      $.teach({ activeGroup: result })
+      setRoom(result.groupId)
     })
     .catch(error => {
       console.log("Error caught");
@@ -130,9 +130,8 @@ $.draw(target => {
   getOtherGroups()
   const { file } = sourceFile(target)
   const log = render(file) || ''
-  const { myGroups, otherGroups, getActiveGroup } = $.learn()
+  const { myGroups, otherGroups } = $.learn()
 
-  console.log({ getActiveGroup })
   const view = `
     <div name="transport">
       <div name="actions">
@@ -156,41 +155,7 @@ $.draw(target => {
         </button>
       </div>
       <div class="captains-log">
-        <braid-feed></braid-feed>
-        <div class="communicator">
-          <form class="story-chat-form" data-command="enter">
-            <input type="text" name="message">
-            <button type="submit" data-command="enter">
-              add
-            </button>
-          </form>
-          <div class="story-chat-row">
-            <button data-command="comment">
-              !
-            </button>
-            <button data-command="address">
-              #
-            </button>
-            <button data-command="puppet">
-              @
-            </button>
-            <button data-command="parenthetical">
-              &
-            </button>
-            <button data-command="quote">
-              &gt;
-            </button>
-            <button data-command="module">
-              &lt;
-            </button>
-            <button disabled data-command="donottouch">
-              {
-            </button>
-            <button data-command="effect">
-              ^
-            </button>
-          </div>
-        </div>
+        <chat-room></chat-room>
       </div>
     </div>
   `
@@ -289,7 +254,6 @@ $.when('click', '.select-group', (event) => {
   const { id } = event.target.dataset
 })
 
-$.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
   event.preventDefault()
   const { command } = event.target.dataset
@@ -386,8 +350,8 @@ $.style(`
   & .captains-log {
     width: 100%;
     height: 100%;
-    max-height: calc(100% - 6rem);
-    padding: 6rem 1rem;
+    max-height: 100%;
+    padding: 2rem 1rem;
     overflow: auto;
     background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
   }
@@ -399,7 +363,6 @@ $.style(`
     left: 0;
     right: 0;
     width: 100%;
-    padding: .5rem;
     background: rgba(0,0,0,.85);
     z-index: 2;
   }

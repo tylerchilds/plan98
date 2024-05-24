@@ -5,7 +5,6 @@ const host = 'https://mail.braid.org'
 
 const $ = tag('braid-feed', { feed: [] })
 
-  debugger
 client.subscribe_to_feed(host+'/feed', feed => {
   $.teach({ feed })
 })
