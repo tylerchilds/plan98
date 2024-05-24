@@ -51,22 +51,37 @@ async function connect(target) {
 
   plan98_group_text.map(async (row) => {
     const text = await bayunCore.unlockText(sessionId, row.text)
-debugger
-    $.teach({ id: row.id, created_at: row.created_at, text }, mergeJoke)
+    const ceid = await bayunCore.unlockText(sessionId, row.companyEmployeeId)
+    const cn = await bayunCore.unlockText(sessionId, row.companyName)
+    $.teach({
+      id: row.id,
+      created_at: row.created_at,
+      text,
+      companyName: cn,
+      companyEmployeeId: ceid
+    }, mergeJoke)
   })
 
-  supabase.channel('custom-all-channel')
+  supabase.channel('custom-whatever-channel')
   .on(
     'postgres_changes',
-    { event: '*', schema: 'public', table: 'plan98_solo_text' },
+    { event: '*', schema: 'public', table: 'plan98_group_text' },
     async (payload) => {
       if (
         payload.new.room === room
       ) {
-        const setup = payload.new.setup
         const text = await bayunCore.unlockText(sessionId, payload.new.text)
+        const ceid = await bayunCore.unlockText(sessionId, payload.new.companyEmployeeId)
+        const cn = await bayunCore.unlockText(sessionId, payload.new.companyName)
 
-        $.teach({ id: payload.new.id, setup, text }, mergeJoke)
+        $.teach({
+          id: payload.new.id,
+          room: payload.new.room,
+          created_at: payload.new.created_at,
+          text,
+          companyName: cn,
+          companyEmployeeId: ceid
+        }, mergeJoke)
       }
 
       if(payload.eventType === 'DELETE') {
@@ -84,6 +99,10 @@ function mergeJoke(state, payload) {
       ...state.jokes,
       [payload.id]: { 
         text: payload.text,
+        room: payload.room,
+        created_at: payload.created_at,
+        companyName: payload.companyName,
+        companyEmployeeId: payload.companyEmployeeId,
       }
     }
   }
@@ -104,30 +123,6 @@ $.when('input', 'textarea', (event) => {
   state[`ls/drafts/${room}`] = event.target.value
 })
 
-$.when('click', '[data-create]', () => {
-  const { sessionId } = getSession()
-  const groupType = BayunCore.GroupType.PUBLIC;
-  bayunCore.createGroup(sessionId, "General", groupType)
-    .then(result => {
-      getMyGroups()
-      getOtherGroups()
-
-      state[`ls/drafts/${room}`] = event.target.value
-    })
-    .catch(error => {
-      console.log("Error caught");
-      console.log(error);
-    });
-})
-
-function drawGroupButton(group) {
-  return `
-    <button class="select-group" data-id="${group.groupId}">
-      ${group.groupName}
-    </button>
-  `
-}
-
 $.draw(target => {
   const { sessionId } = getSession()
   connect(target)
@@ -141,16 +136,24 @@ $.draw(target => {
   if(!room) {
     return 'Please select a room'
   }
-  const draft = state[`ls/drafts/${room}`]
+  const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
   const lines = getLines(target)
 
   const view = `
     <div class="log">
       ${Object.keys(jokes).map((id) => {
+        const { created_at, text, companyEmployeeId, companyName } = jokes[id]
         return `
-          <div class="message">
-            ${jokes[id].text}
+          <div class="message ${companyName}">
+            <div class="meta" data-tooltip="${created_at}">
+              <object class="avatar" data="/cdn/tychi.me/photos/unprofessional-headshot.jpg" type="image/png">
+                <img src="/cdn/${companyName}/${companyEmployeeId}/avatar.jpg" />
+              </object>
+            </div>
+            <div class="body">
+              ${text}
+            </div>
           </div>
         `
       }).join('')}
@@ -168,14 +171,20 @@ $.draw(target => {
   return view
 })
 
-$.when('click', '.select-group', (event) => {
-  const { id } = event.target.dataset
-})
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
 
-$.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
   event.preventDefault()
-  const { command } = event.target.dataset
   send(event)
 })
 
@@ -183,14 +192,18 @@ async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const {
     sessionId,
+    companyName,
+    companyEmployeeId
   } = getSession()
   const { room } = $.learn()
  
   const text = await bayunCore.lockText(sessionId, message.value);
+  const cn = await bayunCore.lockText(sessionId, companyName);
+  const ceid = await bayunCore.lockText(sessionId, companyEmployeeId);
   const { data, error } = await supabase
   .from('plan98_group_text')
   .insert([
-    { room, text },
+    { room, text, companyName: cn, companyEmployeeId: ceid },
   ])
   .select()
 
@@ -198,7 +211,6 @@ async function send(event) {
     $.teach({ error })
     return
   }
-
 }
 
 $.when('click', '[data-infinity]', () => {
@@ -398,6 +410,23 @@ $.style(`
     border-radius: 1rem;
     background: dodgerblue;
     color: white;
+    position: relative;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+  }
+
+  & .meta {
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    top: -1rem;
+  }
+
+  & .avatar {
+    max-width: 2rem;
+    max-height: 2rem;
+    float: left;
+    margin: 0 1rem;
   }
 `)
 
