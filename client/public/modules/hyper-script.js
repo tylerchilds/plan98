@@ -90,7 +90,7 @@ const $ = module('hyper-script', {
 })
 
 $.draw((target) => {
-  const stars = getStars(true)
+  const lines = getLines(target)
   const { id } = target
   const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file } = sourceFile(target)
@@ -108,7 +108,7 @@ $.draw((target) => {
       const escapedFile = escapeHyperText(file)
       return `
         <div name="write">
-          <textarea name="typewriter" style="background: ${stars}">${escapedFile}</textarea>
+          <textarea name="typewriter" style="background-image: ${lines}">${escapedFile}</textarea>
           <div name="navi">
             <button data-publish>Publish</button>
           </div>
@@ -481,7 +481,7 @@ $.style(`
     display: block;
     overflow: auto;
     color: black;
-    background: rgba(255,255,255,.85);
+    line-height: 2rem;
   }
   & .grid {
     display: grid;
@@ -610,14 +610,13 @@ $.style(`
 
   & [name="write"] {
     position: relative;
-    background: rgba(0,0,0,.85);
   }
 
   & [name="write"] textarea {
-    color: white;
-  }
+    color: rgba(0,0,0,.85);
+  }:
 
-  & [name="write"]::before {
+  & [name="write"]::after {
     content: '';
     position: absolute;
     top: 0;
@@ -863,6 +862,30 @@ function getStars() {
   ctx.fillRect(0, rhythm - 1, 1, 1);
 
   return `url(${canvas.toDataURL()}`;
+}
+
+function getLines(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+$.when('scroll', 'textarea', drawLines);
+
+function drawLines (event) {
+  const scrollTop = event.target.scrollTop;
+  event.target.style.backgroundPosition = `0px ${-scrollTop}px`;
 }
 
 

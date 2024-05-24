@@ -310,7 +310,7 @@ $.style(`
     height: 100%;
     background: linear-gradient(135deg, var(--wheel-0-0), 60%, var(--wheel-0-4));
     color: white;
-
+    overflow: hidden;
   }
 
   & sticky-note {
@@ -350,8 +350,8 @@ $.style(`
   & .captains-log {
     width: 100%;
     height: 100%;
-    max-height: 100%;
-    padding: 2rem 1rem;
+    max-height: calc(100% - 2rem);
+    padding: 0;
     overflow: auto;
     background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
   }
@@ -435,7 +435,7 @@ $.style(`
   }
 
   & .all-logs {
-    background: linear-gradient(var(--wheel-0-0), var(--wheel-0-4));
+    background: linear-gradient(transparent, rgba(0,0,0,.85)), linear-gradient(var(--wheel-0-0), var(--wheel-0-4));
   }
 
   & .all-logs button {

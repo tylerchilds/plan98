@@ -124,7 +124,7 @@ $.when('input', 'textarea', (event) => {
 })
 
 $.draw(target => {
-  const { sessionId } = getSession()
+  const { sessionId, companyEmployeeId, companyName } = getSession()
   connect(target)
   if(!sessionId) return `
     <sticky-note>
@@ -134,7 +134,7 @@ $.draw(target => {
   const { room, jokes } = $.learn()
 
   if(!room) {
-    return 'Please select a room'
+    return 'Pick a room!'
   }
   const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
@@ -143,9 +143,10 @@ $.draw(target => {
   const view = `
     <div class="log">
       ${Object.keys(jokes).map((id) => {
-        const { created_at, text, companyEmployeeId, companyName } = jokes[id]
+        const { created_at, text, companyEmployeeId: ceid, companyName: cn } = jokes[id]
+        console.log(cn)
         return `
-          <div class="message ${companyName}">
+          <div class="message ${companyName} ${companyEmployeeId === ceid && companyName === cn ? 'originator' : ''}">
             <div class="meta" data-tooltip="${created_at}">
               <object class="avatar" data="/cdn/tychi.me/photos/unprofessional-headshot.jpg" type="image/png">
                 <img src="/cdn/${companyName}/${companyEmployeeId}/avatar.jpg" />
@@ -158,14 +159,12 @@ $.draw(target => {
         `
       }).join('')}
     </div>
-    <div class="communicator">
-      <form class="new-message-form" data-command="enter">
-        <button class="send" type="submit" data-command="enter">
-          Send
-        </button>
-        <textarea name="message" style="background-image: ${lines}">${draft}</textarea>
-      </form>
-    </div>
+    <form class="new-message-form" data-command="enter">
+      <button class="send" type="submit" data-command="enter">
+        Send
+      </button>
+      <textarea name="message" style="background-image: ${lines}">${draft}</textarea>
+    </form>
   `
 
   return view
@@ -249,6 +248,7 @@ function getLines(target) {
 $.style(`
   & {
     display: grid;
+    grid-template-rows: 1fr 8rem;
     position: relative;
     height: 100%;
     background: linear-gradient(135deg, var(--wheel-0-0), 60%, var(--wheel-0-4));
@@ -261,7 +261,7 @@ $.style(`
     place-self: center;
   }
 
-  & .communicator button {
+  & .new-message-form button {
     position: relative;
     z-index: 2;
     background: rgba(0,0,0,.85);
@@ -274,13 +274,13 @@ $.style(`
     padding: .25rem 1rem;
   }
 
-  & .communicator button[disabled] {
+  & .new-message-form button[disabled] {
     opacity: .5;
     background: rgba(255,255,255,.5);
   }
 
-  & .communicator button:hover,
-  & .communicator button:focus {
+  & .new-message-form button:hover,
+  & .new-message-form button:focus {
     background: linear-gradient(rgba(0,0,0,.85) 80%, dodgerblue);
     color: white;
   }
@@ -292,13 +292,14 @@ $.style(`
     background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
   }
 
-  & .communicator {
-    position: absolute;
-    height: 6rem;
-    bottom: 0;
-    left: 0;
-    right: 0;
+  & .log {
+    overflow: auto;
+    padding: 6rem 0 1rem;
+  }
+
+  & .new-message-form {
     width: 100%;
+    position: relative;
     background: rgba(0,0,0,.85);
     z-index: 2;
   }
@@ -322,7 +323,7 @@ $.style(`
     flex: 1;
   }
 
-  & .communicator input {
+  & .new-message-form input {
     border: 1px solid orange;
     background: rgba(255,255,255,.15);
     padding: 0 1rem;
@@ -332,7 +333,7 @@ $.style(`
   }
 
   @media print {
-    & button, & .communicator {
+    & button, & .new-message-form {
       display: none;
 
     }
@@ -405,21 +406,23 @@ $.style(`
   }
 
   & .message {
-    margin: 1rem;
+    margin: 1rem 4rem 1rem 4rem;
     padding: .5rem;
     border-radius: 1rem;
     background: dodgerblue;
     color: white;
     position: relative;
-    display: grid;
-    grid-template-columns: 2rem 1fr;
+  }
+
+  & .message.originator {
+    margin: 1rem 1rem 1rem 7rem;
   }
 
   & .meta {
     position: absolute;
     display: grid;
     grid-template-columns: auto 1fr;
-    top: -1rem;
+    left: -4rem;
   }
 
   & .avatar {
@@ -427,6 +430,11 @@ $.style(`
     max-height: 2rem;
     float: left;
     margin: 0 1rem;
+    border-radius: 100%;
+  }
+
+  & .originator .avatar {
+    display: none;
   }
 `)
 
