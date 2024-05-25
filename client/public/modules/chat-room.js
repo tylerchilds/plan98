@@ -29,6 +29,11 @@ export function setRoom(room) {
   $.teach({ room })
 }
 
+export function getRoom() {
+  return $.learn().room
+}
+
+
 async function connect(target) {
   const {
     sessionId,
@@ -134,30 +139,38 @@ $.draw(target => {
   const { room, jokes } = $.learn()
 
   if(!room) {
-    return 'Pick a room!'
+    return 'Please Consider...'
   }
   const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
   const lines = getLines(target)
 
   const view = `
+    <div name="transport">
+      <div name="actions">
+        <button data-zero>Clear</button>
+      </div>
+    </div>
+
     <div class="log">
-      ${Object.keys(jokes).map((id) => {
-        const { created_at, text, companyEmployeeId: ceid, companyName: cn } = jokes[id]
-        console.log(cn)
-        return `
-          <div class="message ${companyName} ${companyEmployeeId === ceid && companyName === cn ? 'originator' : ''}">
-            <div class="meta" data-tooltip="${created_at}">
-              <object class="avatar" data="/cdn/tychi.me/photos/unprofessional-headshot.jpg" type="image/png">
-                <img src="/cdn/${companyName}/${companyEmployeeId}/avatar.jpg" />
-              </object>
+      <div class="content">
+        ${Object.keys(jokes).map((id) => {
+          const { created_at, text, companyEmployeeId: ceid, companyName: cn } = jokes[id]
+          const color = doingBusinessAs[cn] ? doingBusinessAs[cn].color : 'dodgerblue'
+          return `
+            <div aria-role="button" class="message ${companyName} ${companyEmployeeId === ceid && companyName === cn ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
+              <div class="meta" data-tooltip="${created_at}">
+                <object class="avatar" data="/cdn/tychi.me/photos/unprofessional-headshot.jpg" type="image/png">
+                  <img src="/cdn/${companyName}/${companyEmployeeId}/avatar.jpg" />
+                </object>
+              </div>
+              <div class="body">
+                ${escapeHyperText(text)}
+              </div>
             </div>
-            <div class="body">
-              ${text}
-            </div>
-          </div>
-        `
-      }).join('')}
+          `
+        }).join('')}
+      </div>
     </div>
     <form class="new-message-form" data-command="enter">
       <button class="send" type="submit" data-command="enter">
@@ -195,10 +208,14 @@ async function send(event) {
     companyEmployeeId
   } = getSession()
   const { room } = $.learn()
- 
+
   const text = await bayunCore.lockText(sessionId, message.value);
+  message.value = ''
   const cn = await bayunCore.lockText(sessionId, companyName);
   const ceid = await bayunCore.lockText(sessionId, companyEmployeeId);
+
+  state[`ls/drafts/${room}`] = ''
+
   const { data, error } = await supabase
   .from('plan98_group_text')
   .insert([
@@ -211,22 +228,6 @@ async function send(event) {
     return
   }
 }
-
-$.when('click', '[data-infinity]', () => {
-  showModal(`
-  `)
-})
-
-$.when('click', '[data-party]', () => {
-  showModal(`
-    <sticky-note>
-      <qr-code text="${window.location.href}"></qr-code>
-    </sticky-note>
-  `)
-})
-$.when('click', '[data-logout]', () => {
-  clearSession()
-})
 
 function getLines(target) {
   const canvas = document.createElement("canvas");
@@ -264,12 +265,11 @@ $.style(`
   & .new-message-form button {
     position: relative;
     z-index: 2;
-    background: rgba(0,0,0,.85);
+    background: lemonchiffon;
     border: none;
-    color: dodgerblue;
+    color: saddlebrown;
     cursor: pointer;
     height: 2rem;
-    border-radius: 1rem;
     transition: all 100ms;
     padding: .25rem 1rem;
   }
@@ -281,8 +281,8 @@ $.style(`
 
   & .new-message-form button:hover,
   & .new-message-form button:focus {
-    background: linear-gradient(rgba(0,0,0,.85) 80%, dodgerblue);
-    color: white;
+    background: saddlebrown;
+    color: lemonchiffon;
   }
 
   & .captains-log {
@@ -294,6 +294,9 @@ $.style(`
 
   & .log {
     overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-anchor: auto !important;
     padding: 6rem 0 1rem;
   }
 
@@ -409,13 +412,16 @@ $.style(`
     margin: 1rem 4rem 1rem 4rem;
     padding: .5rem;
     border-radius: 1rem;
-    background: dodgerblue;
+    background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--business-color, dodgerblue);
+    text-shadow: 1px 1px rgba(0,0,0,.65);
     color: white;
     position: relative;
+    border: none;
   }
 
   & .message.originator {
     margin: 1rem 1rem 1rem 7rem;
+    background: rgba(13,13,13,.85);
   }
 
   & .meta {
@@ -433,6 +439,10 @@ $.style(`
     border-radius: 100%;
   }
 
+  & .message > * {
+    pointer-events: none;
+  }
+
   & .originator .avatar {
     display: none;
   }
@@ -445,3 +455,13 @@ function drawLines (event) {
   event.target.style.backgroundPosition = `0px ${-scrollTop}px`;
 }
 
+$.when('click', '.message', (event) => {
+  const { id } = event.target.dataset
+
+  const { text } = $.learn().jokes[id]
+  showModal(`
+    <div style="border-radius: 1rem; padding: 1rem; background: rgba(0,0,0,.85); color: rgba(255,255,255,.85);">
+      ${render(text)}
+    </div>
+  `)
+})

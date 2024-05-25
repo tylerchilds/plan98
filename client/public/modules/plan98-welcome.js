@@ -200,10 +200,7 @@ function finish() {
   window[start] = () => {
     window.location.href = `/404`
   }
-  showModal(`
-    <comedy-notebook></comedy-notebook>
-  `, { centered: true })
-
+  window.location.href = '?world=tychi.me'
 }
 
 $.when('click', '[data-reset]', ({target}) => {

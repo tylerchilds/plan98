@@ -3,11 +3,8 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { BayunCore } from '@sillonious/vault'
-import 'gun'
-const Gun = window.Gun
-const gun = Gun(['https://gun.1998.social/gun']);
 import { getSession, clearSession } from './comedy-notebook.js'
-import { setRoom } from './chat-room.js'
+import { setRoom, getRoom } from './chat-room.js'
 
 /*
    ^
@@ -55,11 +52,13 @@ function getOtherGroups() {
 
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
+  const { group } = $.learn()
   const groupType = BayunCore.GroupType.PUBLIC;
-  bayunCore.createGroup(sessionId, "General", groupType)
+  bayunCore.createGroup(sessionId, group, groupType)
     .then(result => {
       getMyGroups()
       getOtherGroups()
+      $.teach({ group: '' })
     })
     .catch(error => {
       console.log("Error caught");
@@ -99,18 +98,6 @@ function activateGroup(sessionId, id) {
     });
 }
 
-const commands = {
-  comment: '!',
-  address: '#',
-  puppet: '@',
-  parenthetical: '&',
-  quote: '>',
-  module: '<',
-  donottouch: '{',
-  effect: '^',
-  enter: ' ',
-}
-
 function drawGroupButton(group) {
   return `
     <button class="select-group" data-id="${group.groupId}">
@@ -122,37 +109,32 @@ function drawGroupButton(group) {
 $.draw(target => {
   const { sessionId } = getSession()
   if(!sessionId) return `
-    <sticky-note>
-      <comedy-notebook></comedy-notebook>
-    </sticky-note>
+    <comedy-notebook></comedy-notebook>
   `
   getMyGroups()
   getOtherGroups()
-  const { file } = sourceFile(target)
-  const log = render(file) || ''
-  const { myGroups, otherGroups } = $.learn()
+  const { myGroups, otherGroups, group='' } = $.learn()
 
   const view = `
-    <div name="transport">
-      <div name="actions">
-        <button data-zero>Clear</button>
-        <button data-party>Invite</button>
-        <button data-logout>Logout</button>
-      </div>
-    </div>
     <div class="grid">
       <div class="all-logs">
         <div class="my-groups">
-          MY GROUPS
+          <div class="subtitle">MY GROUPS</div>
           ${myGroups.map(drawGroupButton).join('')}
         </div>
-        <div class="other-groups">
-          OTHER GROUPS
-          ${otherGroups.map(drawGroupButton).join('')}
-        </div>
+
+        <div class="subtitle">NEW GROUP</div>
+        <input data-bind placeholder="New Friends" type="text" name="group" value="${group}" />
         <button data-create>
           Create
         </button>
+
+        <div class="other-groups">
+          <div class="subtitle">OTHER GROUPS</div>
+          ${otherGroups.map(drawGroupButton).join('')}
+        </div>
+        <button data-party>Invite</button>
+        <button data-logout>Logout</button>
       </div>
       <div class="captains-log">
         <chat-room></chat-room>
@@ -163,133 +145,29 @@ $.draw(target => {
   return view
 })
 
-function source(target) {
-  const hardcoded = window.location.pathname
-  const queried = plan98.parameters.get($.link)
-  const today = new Date().toJSON().slice(0, 10)
-  const dynamic = `/public/journal/${today}.saga`
-  return hardcoded || queried || dynamic
-}
+$.when('input', '[data-bind]', event => {
+  const { name, value } = event.target;
+  $.teach({ [name]: value })
+})
 
-function sourceFile(target) {
-  const path = source(target)
-  const entry = gun.get($.link).get(path)
-  if(!target.subscribed) {
-    entry.on((data) => {
-      $.teach({[path]: data})
+
+
+$.when('click', '[data-zero]', () => {
+  const { room } = $.learn()
+  const { sessionId } = getSession()
+  bayunCore.leaveGroup(sessionId, room)
+    .then(result => {
+      getMyGroups()
+      setRoom(null)
+    })
+    .catch(error => {
+          console.log("Error caught");
+          console.log(error);
     });
-    target.subscribed = true
-  }
-
-  let file = `<hello-world
-
-# Write once, run globally.
-
-The world runs on computers that fit under our desks, on our laps, in our pockets, around our bodies, and throughout our homes and businesses.
-
-@ Presenter
-> Have you wondered how these all work?
-
-> Have you ever wished you could control them yourself?
-
-> Have you ever tried to build your own?
-
-> What was the hardest part?
-
-<div
-html: <sillyz-ocarina></sillyz-ocarina>
-style: height: 100vh;
-
-<story-board
-
-<mine-sweeper
-<mind-chaos3d
-<mind-chess
-
-<title-page
-title: Hello World
-author: Thesillonious Caramera
-
-# Exterior Home
-
-Carrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA
-
-@ Thesillonious Caramera
-& winking
-> I didn't break the windows if you didn't
-
-THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL
-
-@ NOTE
-> the rest is up to you
-
-^ Fade Out
-
-<infinite-canvas
-src: /cdn/sillyz.computer/index.canvas
-
-<quick-media
-id: quick-media-demo
-`
-  const data = $.learn()[path] || { file }
-
-  return data
-    ? data
-    : (function initialize() {
-      fetch(path).then(async (res) => {
-        if(res.status === 200) {
-          file = await res.text()
-        }
-      }).catch(e => {
-        console.error(e)
-      }).finally(() => {
-        entry.put({ file })
-      })
-
-      return data
-    })()
-}
+})
 
 $.when('click', '.select-group', (event) => {
   const { id } = event.target.dataset
-})
-
-$.when('submit', 'form', (event) => {
-  event.preventDefault()
-  const { command } = event.target.dataset
-  send(event)
-})
-function send(event) {
-  let { file } = sourceFile(event.target)
-  const message = event.target.closest($.link).querySelector('[name="message"]')
-  const path = source(event.target)
-  const { command } = event.target.dataset
-  if(!commands[command]) return
-  const symbol = commands[command]
-  file = file+'\n'+symbol+message.value
-  gun.get($.link).get(path).put({ file }, () => {
-    message.value = ''
-  })
-}
-
-$.when('click', '[data-zero]', () => {
-  const path = source(event.target)
-  gun.get($.link).get(path).put({file: ''})
-})
-
-$.when('click', '[data-infinity]', () => {
-  const { saga } = doingBusinessAs[plan98.parameters.get('world') || 'sillyz.computer']
-  showModal(`
-    <sticky-note class="maximized">
-      <div style="position: fixed; margin: auto; display: grid; place-items: center; bottom: 1rem; left: 1rem; right: 1rem; z-index: 2;">
-        <div style="background: rgba(0,0,0,.85); color: #fff; padding: 1rem; border-radius: 1rem;">
-          Find the debugger and see
-        </div>
-      </div>
-      <hyper-script src="${saga}"></hyper-script>
-      <plan98-console></plan98-console>
-    </sticky-note>
-  `)
 })
 
 $.when('click', '[data-party]', () => {
@@ -453,5 +331,16 @@ $.style(`
   & [data-create] {
     background: dodgerblue;
     color: white;
+  }
+
+  & .subtitle {
+    color: rgba(255,255,255,.65);
+    font-weight: 800;
+    font-size: .8rem;
+    margin: 2rem .5rem .5rem;
+  }
+
+  & [name="group"] {
+    padding: .5rem;
   }
 `)
