@@ -439,6 +439,7 @@ $.style(`
     box-shadow:
       0px 0px 4px 4px rgba(0,0,0,.10),
       0px 0px 12px 12px rgba(0,0,0,.05);
+    max-width: 100%;
   }
 
   & [name="setup"] {
@@ -446,6 +447,7 @@ $.style(`
     border: none;
     border-bottom: 3px solid orange;
     padding: .5rem 1rem;
+    width: 100%;
   }
 
   & [name="punchline"] {
