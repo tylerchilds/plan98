@@ -29,16 +29,20 @@ requestAnimationFrame(readyLoop)
 
 $.draw((target) => {
   const { ready } = $.learn()
+
+
   if(!ready) {
     return
   }
   if(!target.simpleton) {
+    const resource = (target.getAttribute('host')) + location.pathname
     target.innerHTML = `
-      <textarea style="width: 100%; height: 100%; box-sizing: border-box"></textarea>
+      <input type="text" value="${resource}" />
+      <textarea></textarea>
     `
     target.texty = target.querySelector('textarea')
 
-    target.simpleton = simpleton_client((target.getAttribute('host')) + location.pathname, {
+    target.simpleton = simpleton_client(resource, {
       apply_remote_update: ({ state, patches }) => {
         if (state !== undefined) target.texty.value = state;
         else apply_patches_and_update_selection(target.texty, patches);
@@ -51,7 +55,17 @@ $.draw((target) => {
       },
     });
   }
+
+  if(target.texty) {
+    const lines = getLines(target.texty)
+    target.texty.style.backgroundImage = lines
+  }
 })
+
+$.when('scroll', 'textarea', function({ target }) {
+  const scrollTop = target.scrollTop;
+  target.style.backgroundPosition = `0px ${-scrollTop}px`;
+});
 
 $.when('input', 'textarea', (event) => {
   const adult = event.target.closest($.link)
@@ -110,4 +124,60 @@ function apply_patches_and_update_selection(textarea, patches) {
   textarea.selectionStart = sel[0];
   textarea.selectionEnd = sel[1];
 }
+
+function getLines(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+$.style(`
+  & {
+    width: 5in;
+    height: 3in;
+    position: relative;
+    margin: 3rem auto 6rem;
+    z-index: 2;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    box-shadow:
+      0px 0px 4px 4px rgba(0,0,0,.10),
+      0px 0px 12px 12px rgba(0,0,0,.05);
+    max-width: 100%;
+    overflow: auto;
+  }
+
+  & input {
+    font-size: 2rem;
+    border: none;
+    border-bottom: 3px solid orange;
+    padding: .5rem 1rem;
+    width: 100%;
+  }
+
+  & textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: 0rem 1rem;
+    line-height: 2rem;
+    background-color: white;
+    position: relative;
+    z-index: 3;
+    background-position-y: -1px;
+  }
+
+`)
 
