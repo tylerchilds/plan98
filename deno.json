@@ -14,8 +14,8 @@
     "debug-client": "deno run -A --inspect-brk client.js",
     "reverse-client": "ssh -N -R 1998:localhost:8000 local.$USER.me",
 
-    "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
-    "reverse-server": "ssh -N -R 8888:localhost:8888 drive.$USER.me",
+    "start-server": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!7777' $plan98client",
+    "reverse-server": "ssh -N -R 7777:localhost:7777 drive.$USER.me",
 
     "start-identity": "deno run -A identity.js",
     "reverse-identity": "ssh -N -R 3000:localhost:3000 wallet.$USER.me",
@@ -30,13 +30,17 @@
     "start-braidmail": "cd server/braidmail/braidmail-main && node server-demo.js",
     "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
 
+    "provision-verison-control": "cd server/braidmail && ./provision.sh",
+    "start-version-control": "cd server/braidmail/braidmail-main && node server-demo.js",
+    "reverse-version-control": "ssh -N -R 8888:localhost:8888 braidmail.$USER.me",
+
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
     "reverse-multiplayer": "ssh -N -R 5675:localhost:5675 multiplayer.$USER.me",
 
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
 
-    "thumb-drive": "sudo mount -t 9p -o trans=tcp,port=8888,uname=$USER 127.0.0.1 /home/$USER/thumb-drive",
+    "thumb-drive": "sudo mount -t 9p -o trans=tcp,port=7777,uname=$USER 127.0.0.1 /home/$USER/thumb-drive",
     "unthumb-drive": "sudo umount /home/$USER/thumb-drive",
 
     "package-assets": "cp -r client/public app/src && cp -r client/public desktop/src",

@@ -16,6 +16,8 @@ const processConfiguration = {
   reverseDatabase: false,
   braidmail: true,
   reverseBraidmail: false,
+  versionControl: true,
+  reverseVersionControl: false,
   multiplayer: true,
   reverseMultiplayer: false,
   features: {
@@ -89,6 +91,17 @@ const processConfiguration = {
       "cmd": "deno task reverse-braidmail",
       "autostart": true
     },
+    versionControl: {
+      "id": "plan98-start-version-control",
+      "cmd": "cd server/braid-text/braid-text-master && node server-demo.js",
+      "autostart": true
+    },
+    reverseVersionControl: {
+      "id": "plan98-reverse-version-control",
+      "cmd": "deno task reverse-version-control",
+      "autostart": true
+    },
+
     multiplayer: {
       "id": "plan98-start-multiplayer",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",
