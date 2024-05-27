@@ -41,7 +41,7 @@ $.draw((target) => {
   `
 })
 
-$.when('input', '>textarea', (event) => {
+$.when('input', '.page textarea', (event) => {
   const { gun } = event.target.closest($.link)
   gun.put(event.target.value)
 })

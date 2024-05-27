@@ -366,7 +366,7 @@ button {
 	margin-bottom: 1rem;
 	position: relative;
 	text-align: left;
-  border-radius: var(--border-radius, 4px);
+  border-bottom: 1px solid dodgerblue;
 }
 
 .field .label {
