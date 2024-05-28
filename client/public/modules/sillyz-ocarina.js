@@ -1,7 +1,6 @@
 import module from "@silly/tag"
 import Color from "colorjs.io"
 import Wad from 'web-audio-daw';
-//import $user from "/packages/widgets/menu-user.js"
 
 import party, {
   hostPressesStartStop,
@@ -13,8 +12,6 @@ import party, {
   anybodyPressesLight,
   anybodyPressesMode,
 } from '@sillonious/party'
-
-//bus.state['https://braid.1998.social/last-color.json']
 
 const synths = [...new Array(24)].map(() =>
   new Wad({source : 'sine'})
@@ -94,8 +91,6 @@ function attack(event) {
 		"--theme",
 		`${lastColor}`
 	)
-
-  //bus.state['https://braid.1998.social/last-color.json'].color = lastColor
 }
 
 function release (event) {
@@ -587,11 +582,6 @@ function recalculate() {
       }
     })
   })
-
-  /*
-  if($user.learn()._link)
-		bus.state[$user.learn()._link].colorVariables = print(colors)
-  */
 
   return colors
 }

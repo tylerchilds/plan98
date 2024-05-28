@@ -17,6 +17,8 @@ $.draw((target) => {
   const { error, jokes, active } = $.learn()
   const { sessionId } = getSession()
 
+  target.style.backgroundImage = getStars(target)
+
   if(!sessionId) {
     return `
       <div name="login">
@@ -125,7 +127,7 @@ $.when('click', '[data-new]', async () => {
     companyEmployeeId
   } = getSession()
  
-  const setup = 'untitled';
+  const setup = '';
   const punchline = await bayunCore.lockText(sessionId, '');
   const { data, error } = await supabase
   .from('plan98_solo_text')
@@ -355,6 +357,22 @@ function getLines(target) {
   return `url(${canvas.toDataURL()}`;
 }
 
+function getStars(target) {
+  const color = 'rgba(0,0,0,.85)';
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = color;
+  ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
+
+  return `url(${canvas.toDataURL()})`;
+}
+
 $.style(`
   & {
     overflow: auto;
@@ -364,7 +382,6 @@ $.style(`
     width: 100%;
     line-height: 2rem;
     position: relative;
-    background: linear-gradient(transparent, rgba(0,0,0,.85)), dodgerblue;
     padding: 6rem 0;
   }
 
@@ -393,9 +410,9 @@ $.style(`
     background: lemonchiffon;
     color: saddlebrown;
     border: none;
-    line-height: 2rem;
+    line-height: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: 13px;
+    padding: .5rem;
     font-size: 1rem;
     --v-font-mono: 0;
     --v-font-casl: 1;

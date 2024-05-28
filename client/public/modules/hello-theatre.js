@@ -31,3 +31,10 @@ obj.onValuesChange((obj) => {
   const opacity = obj.opacity
   $.teach({ transform, opacity })
 })
+
+$.style(`
+  & {
+    background: orange;
+    min-height: 200px;
+  }
+`)

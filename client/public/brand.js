@@ -113,7 +113,7 @@ export const doingBusinessAs = {
   },
   'y2k38.info': {
     emote: ':*',
-    logo: '/cdn/boxart.svg',
+    logo: '/cdn/thelanding.page/logo.svg',
     image: '/cdn/tychi.me/photos/giza.JPG',
     imageDescription: 'Where the Pyramids are the desert',
     latitude: '37.771326',

@@ -501,21 +501,31 @@ $.style(`
 
   & [name="navi"] button,
   & [name="actions"] button {
-    background: rgba(0,0,0,.85);
+    background: lemonchiffon;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     border: none;
-    color: dodgerblue;
-    cursor: pointer;
+    color: saddlebrown;
     height: 2rem;
-    border-radius: 1rem;
     transition: color 100ms;
     padding: .25rem 1rem;
+    padding: .5rem;
+  font-size: 1rem;
+  --v-font-mono: 0;
+  --v-font-casl: 1;
+  --v-font-wght: 800;
+  --v-font-slnt: -15;
+  --v-font-crsv: 1;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  transition: background 200ms ease-in-out;
   }
 
   & [name="navi"] button:hover,
   & [name="navi"] button:focus,
   & [name="actions"] button:hover,
   & [name="actions"] button:focus {
-    box-shadow: 0 0 25px 25px rgba(0,0,0,.15) inset;
+    background: saddlebrown;
+    color: lemonchiffon;
   }
 
   & [name="actions"] {
@@ -538,7 +548,7 @@ $.style(`
 
   & [name="navi"] {
     position: fixed;
-    right: 0;
+    reft: 0;
     margin: auto;
     top: 0;
     height: 2rem;
@@ -634,8 +644,8 @@ $.style(`
   & [data-panel="read"] [data-read],
   & [data-panel="perform"] [data-perform],
   & [data-panel="write"] [data-write] {
-    background: dodgerblue;
-    color: black;
+    background: saddlebrown;
+    color: lemonchiffon;
     cursor: default;
   }
 

@@ -188,7 +188,7 @@ function start() {
     window.location.href = `/404`
   }
   showModal(`
-    <hyper-browser></hyper-browser>
+    <sillyz-ocarina></sillyz-ocarina>
   `, { centered: true })
 
 }
@@ -219,7 +219,7 @@ $.style(`
 
   &::before {
     content: '';
-    background: linear-gradient(-45deg, rgba(0,0,0,.5), rgba(0,0,0,1));
+    background: linear-gradient(-45deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
     position: absolute;
     inset: 0;
   }
@@ -397,17 +397,16 @@ $.style(`
  }
   @keyframes &-rainbow-background {
     0% {
-			background: orange;
+			background: var(--theme, orange);
     }
     33% {
-			background: dodgerblue;
+			background: var(--theme, dodgerblue);
     }
     66% {
-			background: lime;
+			background: var(--theme, lime);
     }
-
     100% {
-      background: purple;
+			background: var(--theme, purple);
     }
   }
 
