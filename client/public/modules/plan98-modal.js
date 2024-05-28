@@ -93,6 +93,8 @@ document.body.insertAdjacentHTML("beforeend", context)
 
 let hideListener = (event) => {
   if (event.key === 'Escape') {
+
+  const { isOpen, layer, body } = $.learn()
     hideModal()
   }
 }
@@ -124,14 +126,13 @@ export function hideModal() {
   const { isOpen, layer } = $.learn()
 
   const nextLayer = layer - 1
-  console.log(layer)
 
   if(nextLayer <= 1) {
     document.body.classList.remove('trap-modal')
     self.removeEventListener('keydown', hideListener);
     $.teach({
       isOpen: false,
-      layer: nextLayer
+      layer: 0
     })
 
     return

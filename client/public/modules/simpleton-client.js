@@ -35,7 +35,7 @@ $.draw((target) => {
     return
   }
   if(!target.simpleton) {
-    const resource = (target.getAttribute('host')) + location.pathname
+    const resource = (target.getAttribute('host') || '') + (target.getAttribute('path') || location.pathname)
     target.innerHTML = `
       <input type="text" value="${resource}" />
       <textarea></textarea>
@@ -147,13 +147,9 @@ $.style(`
     width: 5in;
     height: 3in;
     position: relative;
-    margin: 3rem auto 6rem;
     z-index: 2;
     display: grid;
     grid-template-rows: auto 1fr;
-    box-shadow:
-      0px 0px 4px 4px rgba(0,0,0,.10),
-      0px 0px 12px 12px rgba(0,0,0,.05);
     max-width: 100%;
     overflow: auto;
   }
@@ -179,5 +175,12 @@ $.style(`
     background-position-y: -1px;
   }
 
+  &[data-view="insert"] {
+    height: 100%;
+    display: block;
+  }
+  &[data-view="insert"] input {
+    display: none;
+  }
 `)
 

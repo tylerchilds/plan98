@@ -87,8 +87,7 @@ $.when('click', '[data-escape]', debugMode)
 $.when('click', '[data-aid]', (event) => {
   showPanel(`
     <giggle-search></giggle-search>
-    <gun-clipboard id="demo" safeword="demo"></gun-clipboard>
-    <information-station></information-station>
+    <simpleton-client host="http://localhost:8888" path="/help${location.pathname}" data-view="insert"></simpleton-client>
   `)
 })
 
