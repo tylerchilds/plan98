@@ -87,7 +87,7 @@ $.when('click', '[data-escape]', debugMode)
 $.when('click', '[data-aid]', (event) => {
   showPanel(`
     <giggle-search></giggle-search>
-    <simpleton-client host="https://braid-text.1998.social" path="/help${location.pathname}" data-view="insert"></simpleton-client>
+    <simpleton-client host="http://164.92.88.188:8888" path="/help${location.pathname}" data-view="insert"></simpleton-client>
   `)
 })
 
