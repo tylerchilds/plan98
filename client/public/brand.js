@@ -156,7 +156,7 @@ export const doingBusinessAs = {
         tag: 'stay-tuned'
       },
       {
-        title: 'Purchase',
+        title: 'Shop',
         tag: 'wizard-journey'
       },
     ],

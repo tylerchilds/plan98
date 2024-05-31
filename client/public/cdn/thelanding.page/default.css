@@ -80,3 +80,7 @@ main hypertext-quote {
   margin: 1rem auto;
   padding: 0 1rem;
 }
+
+main qr-pay {
+  padding: 1rem;
+}

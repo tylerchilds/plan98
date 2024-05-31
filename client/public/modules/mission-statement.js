@@ -4,6 +4,14 @@ const $ = module('mission-statement')
 
 $.draw(() => {
   return `
-    Things are beginning to take form...
+    Sillyz.Computer was created to bridge the gap between toy computers and luxury computers.
   `
 })
+
+$.style(`
+  & {
+    background: white;
+    padding: 1rem;
+    max-width: 55ch;
+  }
+`)
