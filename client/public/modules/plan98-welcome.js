@@ -180,15 +180,17 @@ $.when('click', '[data-upgrade]', (event) => {
 $.when('click', '[data-tutorial]', start)
 $.when('click', '[data-endgame]', finish)
 
-function start() {
+function start(event) {
+  const tag = event.target.closest($.link).getAttribute('tag') || 'mine-sweeper'
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
   window[start] = () => {
     window.location.href = `/404`
   }
+
   showModal(`
-    <sillyz-ocarina></sillyz-ocarina>
+    <${tag}></${tag}>
   `, { centered: true })
 
 }
