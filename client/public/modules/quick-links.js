@@ -38,6 +38,7 @@ $.style(`
     padding: .5rem;
     text-align: center;
     z-index: 2;
+    pointer-events: none;
   }
 
   & button {
@@ -49,6 +50,7 @@ $.style(`
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     text-decoration: none;
     color: dodgerblue;
+    pointer-events: all;
   }
 
   & button:hover,

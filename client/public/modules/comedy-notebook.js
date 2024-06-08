@@ -148,7 +148,7 @@ $.when('click', '[data-preview]', async (event) => {
 
   showModal(`
     <div style="background: rgba(200,200,200,.65); width: 100%; height: 100%;">
-    <div style="background: rgba(255,255,255,.85); margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem;">
+    <div style="overflow: auto; background: rgba(255,255,255,.85); margin: 0 auto; width: 8.5in; padding: 1in 1in 1in 1.5in; height: 100%; font-size: 1.5rem; line-height: 2rem;">
       ${render(punchline)}
     </div>
   `)
