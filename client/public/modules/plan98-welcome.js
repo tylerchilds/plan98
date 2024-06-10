@@ -177,7 +177,8 @@ $.when('click', '[data-about]', (event) => {
 })
 
 $.when('click', '[data-upgrade]', (event) => {
-  $.teach({ lite: false })
+  window.location.href = '?world=yourlovedones.online'
+  //$.teach({ lite: false })
 })
 
 $.when('click', '[data-tutorial]', start)
@@ -191,7 +192,10 @@ function start(event) {
   window[start] = () => {
     window.location.href = `/404`
   }
-  window.location.href = '?world=yourlovedones.online'
+
+  showModal(`
+    <${tag}></${tag}>
+  `, { centered: true })
 }
 
 function finish() {
