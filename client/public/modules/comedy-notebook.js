@@ -403,7 +403,8 @@ $.style(`
     padding: 0 1rem;
     position: absolute;
     bottom: 0;
-    transform: translateY(100%);
+    z-index: 100;
+    right: 0;
   }
   & .actions button,
   & .joke-actions button {
@@ -449,7 +450,7 @@ $.style(`
     width: 5in;
     height: 3in;
     position: relative;
-    margin: 3rem auto 6rem;
+    margin: 2rem auto;
     z-index: 2;
     display: grid;
     grid-template-rows: auto 1fr;
