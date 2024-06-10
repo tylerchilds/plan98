@@ -22,8 +22,16 @@ const observableEvents = [CREATE_EVENT]
 
 function update(link, target, compositor) {
   insight('module:update', link)
+  if(target.beforeUpdate) {
+    target.beforeUpdate()
+  }
+
   const html = compositor(target)
   if(html) innerHTML(target, html)
+
+  if(target.afterUpdate) {
+    target.afterUpdate()
+  }
 }
 
 function draw(link, compositor) {
