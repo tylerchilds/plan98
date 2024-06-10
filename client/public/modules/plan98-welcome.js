@@ -191,11 +191,7 @@ function start(event) {
   window[start] = () => {
     window.location.href = `/404`
   }
-
-  showModal(`
-    <${tag}></${tag}>
-  `, { centered: true })
-
+  window.location.href = '?world=yourlovedones.online'
 }
 
 function finish() {

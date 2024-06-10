@@ -5,7 +5,7 @@ const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
 const $ = module('parental-controls', {
-  content: '<plan98-welcome></plan98-welcome>',
+  content: '<comedy-notebook></comedy-notebook>',
   activeDialect: '/en-us/',
   activeWorld: 'sillyz.computer'
 })
