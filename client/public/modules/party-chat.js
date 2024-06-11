@@ -25,11 +25,12 @@ const bayunCore = BayunCore.init(appId, appSecret, appSalt,
 
 const $ = module('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
 
-function getMyGroups() {
+export async function getMyGroups() {
   const { sessionId } = getSession()
-  bayunCore.getMyGroups(sessionId)
+  return await bayunCore.getMyGroups(sessionId)
     .then(result => {
       $.teach({ myGroups: result })
+      return result
   })
   .catch(error => {
         console.log("Error caught");
@@ -37,18 +38,18 @@ function getMyGroups() {
   });
 }
 
-function getOtherGroups() {
+export async function getOtherGroups() {
   const { sessionId } = getSession()
-  bayunCore.getUnjoinedPublicGroups(sessionId)
+  return await bayunCore.getUnjoinedPublicGroups(sessionId)
     .then(result => {
       $.teach({ otherGroups: result })
+      return result
     })
     .catch(error => {
           console.log("Error caught");
           console.log(error);
     });
 }
-
 
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()

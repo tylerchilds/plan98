@@ -1,5 +1,8 @@
 import module from '@silly/tag'
+import { getSession, clearSession } from './comedy-notebook.js'
+import { getMyGroups, getOtherGroups } from './party-chat.js'
 import { render } from '@sillonious/saga'
+import { setRoom, getRoom } from './chat-room.js'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
@@ -7,8 +10,11 @@ const currentWorkingDirectory = '/sagas/'
 const $ = module('parental-controls', {
   content: '<comedy-notebook></comedy-notebook>',
   activeDialect: '/en-us/',
-  activeWorld: 'sillyz.computer'
+  activeWorld: 'sillyz.computer',
+  chatRooms: []
 })
+
+getMyGroups().then(chatRooms => $.teach({ chatRooms }))
 
 const lolol = [
   {
@@ -21,6 +27,10 @@ const lolol = [
       {
         label: 'Boards',
         laugh: 'boards.saga'
+      },
+      {
+        label: 'Browser',
+        laugh: 'browser.saga'
       },
     ]
   },
@@ -47,6 +57,10 @@ const lolol = [
       {
         label: 'Paint App',
         laugh: 'paint.saga'
+      },
+      {
+        label: 'Free Cell',
+        laugh: 'free-cell.saga'
       },
       {
         label: 'F-DOS',
@@ -92,22 +106,31 @@ const lolol = [
 ]
 
 $.draw((target) => {
-  const { content } = $.learn()
+  const { sessionId } = getSession()
+  if(!sessionId) return `
+    <comedy-notebook></comedy-notebook>
+  `
+
+  const { content, chatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
-  if(!content) {
-    target.innerHTML = ''
-  }
 
-  return `
+  target.innerHTML = `
     <data-tooltip class="control" aria-live="assertive">
       <div class="control-tab-list">
+        <div class="heading-label">Chat</div>
+        ${chatRooms.map(chat).join('')}
+
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
             ${lol(x.lol)}
           `
         }).join('')}
+        <button class="control-tab" data-disconnect>
+          Disconnect
+        </button>
+
       </div>
       <div class="control-view">
         ${content}
@@ -118,12 +141,22 @@ $.draw((target) => {
 
 function scrollSave() {
   const list = this.querySelector('.control-tab-list')
+  if(!list) return
   this.dataset.top = list.scrollTop
 }
 
 function scrollSidebar() {
   const list = this.querySelector('.control-tab-list')
+  if(!list) return
   list.scrollTop = this.dataset.top
+}
+
+function chat(group) {
+  return `
+    <button class="control-tab" data-group-id="${group.groupId}">
+      ${group.groupName}
+    </button>
+  `
 }
 
 function lol(laughs) {
@@ -138,6 +171,14 @@ $.when('click', '[data-laugh]', async (event) => {
   const { laugh } = event.target.dataset
   outLoud(laugh)
 })
+
+$.when('click', '[data-group-id]', async (event) => {
+  const { groupId } = event.target.dataset
+  setRoom(groupId)
+  $.teach({ content: '<chat-room></chat-room>' })
+})
+
+
 
 function outLoud(laugh) {
   const { activeDialect, activeWorld } = $.learn()
@@ -232,3 +273,8 @@ $.style(`
     font-weight: 600;
   }
 `)
+
+$.when('click', '[data-disconnect]', async () => {
+  clearSession()
+})
+

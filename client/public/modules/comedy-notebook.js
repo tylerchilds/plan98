@@ -444,6 +444,8 @@ $.style(`
 
   & .setlist {
     grid-area: list;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5in, 1fr));
   }
 
   & .index-card {
