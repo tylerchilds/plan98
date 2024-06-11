@@ -446,13 +446,14 @@ $.style(`
     grid-area: list;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(5in, 1fr));
+    gap: 2rem;
   }
 
   & .index-card {
     width: 5in;
     height: 3in;
     position: relative;
-    margin: 2rem auto;
+    margin: 0 auto;
     z-index: 2;
     display: grid;
     grid-template-rows: auto 1fr;

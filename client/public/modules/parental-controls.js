@@ -66,6 +66,10 @@ const lolol = [
         label: 'F-DOS',
         laugh: 'fdos.saga'
       },
+      {
+        label: 'Sonic A.I.R.',
+        laugh: 'sonic.saga'
+      },
     ]
   },
   {
@@ -115,22 +119,25 @@ $.draw((target) => {
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
 
+  const authChip = `
+    <poker-face></poker-face>
+  `
+
   target.innerHTML = `
     <data-tooltip class="control" aria-live="assertive">
       <div class="control-tab-list">
-        <div class="heading-label">Chat</div>
-        ${chatRooms.map(chat).join('')}
-
+        ${authChip}
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
             ${lol(x.lol)}
           `
         }).join('')}
-        <button class="control-tab" data-disconnect>
-          Disconnect
-        </button>
 
+        <hr>
+
+        <div class="heading-label">Chat</div>
+        ${chatRooms.map(chat).join('')}
       </div>
       <div class="control-view">
         ${content}
@@ -208,7 +215,6 @@ $.style(`
     display: block;
     height: 100%;
     background: linear-gradient(165deg, rgba(255,255,255,.85) 60%, dodgerblue);
-    color: white;
     overflow: hidden;
   }
 
@@ -222,12 +228,12 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    padding: 1rem;
+    padding: 1rem 1rem 1rem;
     overflow: auto;
     background: rgba(255,255,255,.65);
+    position: relative;
   }
   & .control-tab {
-    padding: 0;
     display: block;
     border: 0;
     border-radius: 1rem;
@@ -272,9 +278,14 @@ $.style(`
     text-align: right;
     font-weight: 600;
   }
-`)
 
-$.when('click', '[data-disconnect]', async () => {
-  clearSession()
-})
+  & hr {
+    border-color: rgba(0,0,0,.05);
+  }
+
+  & poker-face {
+    display: block;
+    height: 280px;
+  }
+`)
 
