@@ -126,7 +126,6 @@ $.draw((target) => {
   target.innerHTML = `
     <data-tooltip class="control" aria-live="assertive">
       <div class="control-tab-list">
-        ${authChip}
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
@@ -138,6 +137,7 @@ $.draw((target) => {
 
         <div class="heading-label">Chat</div>
         ${chatRooms.map(chat).join('')}
+        ${authChip}
       </div>
       <div class="control-view">
         ${content}

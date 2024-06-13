@@ -7,15 +7,15 @@ $.draw(() => {
   const { companyName, companyEmployeeId } = getSession()
 
   return `
-    <button data-disconnect>
-      Disconnect
-    </button>
     <div class="player">
       ${companyEmployeeId}
     </div>
     <div class="console">
       ${companyName}
     </div>
+    <button data-disconnect>
+      Disconnect
+    </button>
   `
 })
 

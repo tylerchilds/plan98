@@ -3,8 +3,11 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import supabase from '@sillonious/database'
 import { render } from '@sillonious/saga'
-import { BayunCore } from '@sillonious/vault'
+import { bayunCore } from '@sillonious/vault'
 import { getSession, clearSession } from './comedy-notebook.js'
+
+const encryptionPolicy = BayunCore.EncryptionPolicy.GROUP;
+const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
 
 /*
    ^
@@ -12,16 +15,6 @@ import { getSession, clearSession } from './comedy-notebook.js'
   !&{
    #
 */
-
-const appId = plan98.env.VAULT_APP_ID; // provided on admin panel
-const appSecret = plan98.env.VAULT_APP_SECRET; // provided on admin panel
-const appSalt = plan98.env.VAULT_APP_SALT; // provided on admin panel
-const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
-const enableFaceRecognition = false;
-const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
-
-const bayunCore = BayunCore.init(appId, appSecret, appSalt,
-  localStorageMode, enableFaceRecognition, baseURL);
 
 const $ = module('chat-room', { jokes: {} })
 
@@ -143,15 +136,7 @@ $.draw(target => {
   }
   const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
-  const lines = getLines(target)
-
   const view = `
-    <div name="transport">
-      <div name="actions">
-        <button data-zero>Clear</button>
-      </div>
-    </div>
-
     <div class="log">
       <div class="content">
         ${Object.keys(jokes).map((id) => {
@@ -176,7 +161,7 @@ $.draw(target => {
       <button class="send" type="submit" data-command="enter">
         Send
       </button>
-      <textarea name="message" style="background-image: ${lines}">${draft}</textarea>
+      <textarea name="message">${draft}</textarea>
     </form>
   `
 
@@ -209,10 +194,10 @@ async function send(event) {
   } = getSession()
   const { room } = $.learn()
 
-  const text = await bayunCore.lockText(sessionId, message.value);
+  const text = await bayunCore.lockText(sessionId, message.value, encryptionPolicy, keyGenerationPolicy, room);
   message.value = ''
-  const cn = await bayunCore.lockText(sessionId, companyName);
-  const ceid = await bayunCore.lockText(sessionId, companyEmployeeId);
+  const cn = await bayunCore.lockText(sessionId, companyName, encryptionPolicy, keyGenerationPolicy, room);
+  const ceid = await bayunCore.lockText(sessionId, companyEmployeeId, encryptionPolicy, keyGenerationPolicy, room);
 
   state[`ls/drafts/${room}`] = ''
 
@@ -229,30 +214,12 @@ async function send(event) {
   }
 }
 
-function getLines(target) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext('2d');
-
-  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
-  canvas.height = rhythm;
-  canvas.width = rhythm;
-
-  ctx.fillStyle = 'transparent';
-  ctx.fillRect(0, 0, rhythm, rhythm);
-
-  ctx.fillStyle = 'dodgerblue';
-  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
-
-  return `url(${canvas.toDataURL()}`;
-}
-
 $.style(`
   & {
     display: grid;
     grid-template-rows: 1fr 8rem;
     position: relative;
     height: 100%;
-    background: linear-gradient(135deg, var(--wheel-0-0), 60%, var(--wheel-0-4));
     color: white;
     line-height: 2rem;
     font-size: 1rem;
