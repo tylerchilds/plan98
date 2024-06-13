@@ -6,7 +6,7 @@ import { showModal } from '@plan98/modal'
 
 const $ = module('comedy-notebook', {
   sessionId: '',
-  companyName: 'sillyz.computer',
+  companyName: plan98.host,
   companyEmployeeId: '',
   password: '',
   autoCreateEmployee: true,
