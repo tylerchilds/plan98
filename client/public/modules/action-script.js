@@ -36,20 +36,28 @@ $.style(`
   }
 
   & button {
-    background: dodgerblue;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
     border: none;
-    border-radius: 2rem;
+    border-radius: 1rem;
     color: white;
-    transition: all 100ms ease-in-out;
-    padding: .5rem;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
     width: 100%;
-    filter: grayscale(1);
   }
 
   & button:focus,
   & button:hover {
-    background: dodgerblue;
-    color: white;
-    filter: grayscale(0);
+    background-color: rebeccapurple;
   }
+
+  &.secondary button {
+    background-color: rgba(99,99,99,.65);
+  }
+
+  &.secondary button:focus,
+  &.secondary button:hover {
+    background-color: rgba(99,99,99,.35);
+  }
+
 `)

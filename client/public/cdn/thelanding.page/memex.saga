@@ -1,6 +1,8 @@
 { template
 engine: thelanding.page
 
+<wizard-journey
+
 Generic Park
 
 The Generic Park System is a park prototyping platform. All parks need the same critical infrastructure. Nobody tips the plumber, but will toot their own horn, so the Generic Park System architecture is around brand labels.

@@ -1,12 +1,13 @@
-# Welcome!
+# Here 4 business?
 
-Would you be interested in browsing the shops?
-
-<action-script
-text: Yes
-data-saga: browse.saga
+If you're not here to talk business, you should probably go back to the playground.
 
 <action-script
-text: No
-data-action: ok
+text: Make Money
+data-saga: welcome.saga
+
+<action-script
+text: To The Playground
+data-action: toThePlayground
 data-script: /public/cdn/thelanding.page/game-state.js
+class: secondary

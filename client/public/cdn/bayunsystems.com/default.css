@@ -57,6 +57,7 @@ saga-genesis > sillonious-memex {
 
 body wizard-journey.active {
   inset: 0;
+  position: fixed;
   max-height: 100%;
   max-width: 100%;
 }

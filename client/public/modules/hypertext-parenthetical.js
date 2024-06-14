@@ -4,9 +4,7 @@ const $ = module('hypertext-parenthetical')
 
 $.draw((target) => {
   return `
-    <hypertext-highlighter color="dodgerblue">
-      ${target.innerText}
-    </hypertext-highlighter>
+    ${target.innerText}
   `
 })
 

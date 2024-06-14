@@ -4,9 +4,7 @@ const $ = module('hypertext-effect')
 
 $.draw((target) => {
   return `
-    <hypertext-highlighter color="orange">
-      ${target.innerText}
-    </hypertext-highlighter>
+    ${target.innerText}
   `
 })
 

@@ -4,9 +4,7 @@ const $ = module('hypertext-address')
 
 $.draw((target) => {
   return `
-    <hypertext-highlighter color="lime">
-      ${target.innerText}
-    </hypertext-highlighter>
+    ${target.innerText}
   `
 })
 

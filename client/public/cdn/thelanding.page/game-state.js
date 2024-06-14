@@ -23,7 +23,9 @@ export function emptyCart() {
   }
 }
 
-
+export function toThePlayground() {
+  window.location.href = '?world=sillyz.computer'
+}
 
 export function takeButton() {
   alert('button took')

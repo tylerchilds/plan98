@@ -4,9 +4,7 @@ const $ = module('hypertext-puppet')
 
 $.draw((target) => {
   return `
-    <hypertext-highlighter color="yellow">
-      ${target.innerText}
-    </hypertext-highlighter>
+    ${target.innerText}
   `
 })
 

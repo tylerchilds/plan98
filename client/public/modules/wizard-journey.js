@@ -29,7 +29,16 @@ const $ = module('wizard-journey', {
   cache: {}
 })
 
-export function setupSaga(nextSaga, target) {
+addEventListener("popstate", (event) => {
+  const { lastSaga } = event.state || {}
+  if(lastSaga) {
+    setupSaga(lastSaga, document.querySelector($.link), {back: true})
+  } else {
+    document.querySelector($.link).trap.deactivate()
+  }
+});
+
+export function setupSaga(nextSaga, target, options={}) {
   const root = target.closest($.link)
   const host = root.getAttribute('host')
   let { activeDialect, activeWorld } = $.learn()
@@ -46,6 +55,10 @@ export function setupSaga(nextSaga, target) {
       }
       if(!root) window.location.href = key + window.location.search
       const saga = await response.text()
+
+      if(!options.back) {
+        self.history.pushState({ lastSaga: nextSaga }, "");
+      }
       $.teach(
         { [key]: saga },
         (state, payload) => {
@@ -112,13 +125,17 @@ $.style(`
     min-height: auto;
     position: absolute;
     max-width: 100%;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     margin: auto;
     max-width: 320px;
-    max-height: 100%;
+    max-height: 480px;
+    background: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
     overflow: auto;
+    border-radius: 1rem;
   }
 
   & [data-close] {
@@ -147,7 +164,7 @@ $.style(`
     position: absolute;
     inset: 0;
     margin: auto;
-    background: rgba(0,0,0,1);
+    background: linear-gradient(105deg, rebeccapurple, rgba(33,33,33,.5) 30%), linear-gradient(165deg, rgba(33,33,33,.5) 80%, dodgerblue), black;
     color: white;
     padding: .5rem;
     overflow: visible;

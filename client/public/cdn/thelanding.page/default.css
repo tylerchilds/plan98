@@ -17,6 +17,8 @@ header {
 
 main {
   height: auto;
+  position: relative;
+  z-index: 10000;
 }
 
 main xml-html > best-buy {
@@ -45,8 +47,10 @@ saga-genesis > sillonious-memex {
 
 body wizard-journey.active {
   inset: 0;
+  position: fixed;
   max-height: 100%;
   max-width: 100%;
+  z-index: 1000;
 }
 
 body data-tooltip {
@@ -73,6 +77,10 @@ main hypertext-address {
   max-width: 55ch;
   padding: 0 1rem;
   margin: 1rem auto;
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 1000;
+  text-transform: none;
 }
 
 main hypertext-quote {

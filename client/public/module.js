@@ -1,5 +1,6 @@
 import statebus, { state as s } from 'statebus'
 import { innerHTML } from 'diffhtml'
+import Computer from '@sillonious/computer'
 
 const logs = {}
 
@@ -160,12 +161,15 @@ function dispatchCreate(target) {
   target.reactive = true
 }
 
-new MutationObserver((mutationsList) => {
-  const targets = [...mutationsList]
-    .map(getSubscribers)
-    .flatMap(x => x)
-  maybeCreateReactive(targets)
-}).observe(document.body, { childList: true, subtree: true });
+self.onload = () => {
+  new MutationObserver((mutationsList) => {
+    const targets = [...mutationsList]
+      .map(getSubscribers)
+      .flatMap(x => x)
+    maybeCreateReactive(targets)
+  }).observe(document.body, { childList: true, subtree: true });
+  new Computer(self.plan98, { registry: '/public/modules' })
+}
 
 function sufficientlyUniqueId() {
   // https://stackoverflow.com/a/2117523

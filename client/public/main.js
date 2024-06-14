@@ -1,5 +1,4 @@
 import module from '@silly/tag'
-import Computer from '@sillonious/computer'
 import { doingBusinessAs } from "@sillonious/brand"
 
 const parameters = new URLSearchParams(window.location.search)
@@ -31,9 +30,8 @@ const newpage = `
   <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `
 
-module('#main').draw(target => root ? homepage : newpage)
 
-export default new Computer(window.plan98, { registry: '/public/modules' })
+module('#main').draw(target => root ? homepage : newpage)
 
 export function setDatabase(url) {
   localStorage.setItem("plan98.database", 'https://sillonious.pockethost.io')

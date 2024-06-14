@@ -69,27 +69,25 @@ $.draw((target) => {
 
   if(lite) {
     return `
-    <div name="square">
-      <div class="skybox active">
-        <div class="f">
-          <div id="foreground">
-            <div id="logo">
-              <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                ${title}
-              </hypertext-variable>
-              <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
-                ${subtitle}
-              </hypertext-variable>
+      <div name="square">
+        <div class="skybox active">
+          <div class="f">
+            <div id="foreground">
+              <div id="logo">
+                <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
+                  ${title}
+                </hypertext-variable>
+                <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
+                  ${subtitle}
+                </hypertext-variable>
+              </div>
+              <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
+              </rainbow-action>
             </div>
-            <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
-            </rainbow-action>
-            <button data-about class="cta" data-tooltip="Learn about where here is.">Subscribe</button>
-            <button data-upgrade class="cta">
-              Develop
-            </button>
           </div>
         </div>
       </div>
+      <plan98-banner world="thelanding.page" pitch="Here 4 Business?" cta="Get out of town!"></plan98-banner>
     `
   }
 
@@ -176,11 +174,6 @@ $.when('click', '[data-about]', (event) => {
   `, { centered: true })
 })
 
-$.when('click', '[data-upgrade]', (event) => {
-  window.location.href = '?world=yourlovedones.online'
-  //$.teach({ lite: false })
-})
-
 $.when('click', '[data-tutorial]', start)
 $.when('click', '[data-endgame]', finish)
 
@@ -233,7 +226,6 @@ $.style(`
     color: white;
     border: none;
     border-radius: 100%;
-    margin: 1rem;
     padding: 1rem;
   }
 
