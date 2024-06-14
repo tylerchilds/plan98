@@ -85,7 +85,10 @@ export function setupSaga(nextSaga, target, options={}) {
           root.innerHTML = `
             <data-tooltip>
               <button data-close>Close</button>
-              ${render(saga)}
+              <div class="wrapper">
+                <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
+                ${render(saga)}
+              </div>
             </data-tooltip>
           `
         }
@@ -121,7 +124,7 @@ $.style(`
     & { display: none !important; }
   }
 
-  & xml-html {
+  & .wrapper {
     min-height: auto;
     position: absolute;
     max-width: 100%;
@@ -129,13 +132,14 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    margin: auto;
-    max-width: 320px;
-    max-height: 480px;
-    background: rgba(255,255,255,.85);
+    margin: 1rem auto;
+    max-width: 480px;
+    max-height: 100%;
+    background: rgba(255,255,255,.5);
     color: rgba(0,0,0,.85);
     overflow: auto;
     border-radius: 1rem;
+    padding: 0rem 0 2rem;
   }
 
   & [data-close] {
@@ -158,13 +162,12 @@ $.style(`
     background: dodgerblue;
   }
 
-
   &:not(:empty) {
     display: block;
     position: absolute;
     inset: 0;
     margin: auto;
-    background: linear-gradient(105deg, rebeccapurple, rgba(33,33,33,.5) 30%), linear-gradient(165deg, rgba(33,33,33,.5) 80%, dodgerblue), black;
+    background: linear-gradient(105deg, rebeccapurple, rgba(200,200,200,.5) 30%), linear-gradient(165deg, rgba(200,200,200,.5) 80%, dodgerblue), white;
     color: white;
     padding: .5rem;
     overflow: visible;
@@ -174,7 +177,7 @@ $.style(`
       6px 6px 12px 12px rgba(0,0,0,.5),
       18px 18px 36px 36px rgba(0,0,0,.25);
     animation: &-fade-in 1000ms forwards;
-    z-index: 9000;
+    z-index: 10000;
   }
 
   @keyframes &-fade-in {

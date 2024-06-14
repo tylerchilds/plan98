@@ -5,9 +5,10 @@ Okay, here's the deal, let's just skip past the dialog, say you pay to win the g
 <action-script
 text: Deal
 data-saga: deal.saga
+class: money
 
 <action-script
 text: No Deal
 data-saga: welcome.saga
-
+class: secondary
 

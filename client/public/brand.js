@@ -131,7 +131,7 @@ export const doingBusinessAs = {
   },
   'thelanding.page': {
     emote: ':)',
-    logo: '/cdn/thelanding.page/logo.svg',
+    logo: '/cdn/thelanding.page/giggle.svg',
     image: '/cdn/tychi.me/photos/sillyz.JPG',
     imageDescription: 'The Master Sword',
     latitude: '37.770613',
@@ -154,10 +154,6 @@ export const doingBusinessAs = {
       {
         title: 'Subscribe',
         tag: 'stay-tuned'
-      },
-      {
-        title: 'Shop',
-        tag: 'wizard-journey'
       },
     ],
     endOfHead: `

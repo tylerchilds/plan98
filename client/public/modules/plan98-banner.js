@@ -32,8 +32,9 @@ $.style(`
     right: 0;
     text-align: right;
     background: dodgerblue;
-    padding: 1rem;
+    padding: .5rem;
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.5), orange);
+    font-size: 1rem;
   }
 
   & button {
@@ -44,7 +45,7 @@ $.style(`
     font-weight: 600;
     border-radius: 1rem;
     transition: background-color 200ms ease-in-out;
-    padding: 1rem;
+    padding: .5rem;
   }
 
   & button:hover,
@@ -53,7 +54,7 @@ $.style(`
   }
 
   & .banner-pitch {
-    padding: 1rem;
+    padding: .5rem;
     display: inline-block;
   }
 `)

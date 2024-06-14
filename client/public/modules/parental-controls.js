@@ -8,10 +8,11 @@ const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
 const $ = module('parental-controls', {
-  content: '<comedy-notebook></comedy-notebook>',
+  content: '<hyper-script src="/public/cdn/thelanding.page/memex.saga"></hyper-script>',
   activeDialect: '/en-us/',
   activeWorld: 'sillyz.computer',
-  chatRooms: []
+  chatRooms: [],
+  sidebar: true
 })
 
 getMyGroups().then(chatRooms => $.teach({ chatRooms }))
@@ -115,7 +116,7 @@ $.draw((target) => {
     <comedy-notebook></comedy-notebook>
   `
 
-  const { content, chatRooms } = $.learn()
+  const { sidebar, content, chatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
 
@@ -124,7 +125,12 @@ $.draw((target) => {
   `
 
   target.innerHTML = `
-    <data-tooltip class="control" aria-live="assertive">
+    <data-tooltip class="control ${sidebar ? 'sidebar': ''}" aria-live="assertive">
+      <div class="control-toggle">
+        <button data-sidebar>
+          ${sidebar ? 'Menu.' : 'Menu?'}
+        </button>
+      </div>
       <div class="control-tab-list">
         ${lolol.map((x, index) => {
           return `
@@ -139,7 +145,7 @@ $.draw((target) => {
         ${chatRooms.map(chat).join('')}
         ${authChip}
       </div>
-      <div class="control-view">
+      <div class="control-view ${sidebar ? '' : 'no-sidebar' }">
         ${content}
       </div>
     </data-tooltip>
@@ -179,6 +185,11 @@ $.when('click', '[data-laugh]', async (event) => {
   outLoud(laugh)
 })
 
+$.when('click', '[data-sidebar]', async (event) => {
+  const { sidebar } = $.learn()
+  $.teach({ sidebar: !sidebar })
+})
+
 $.when('click', '[data-group-id]', async (event) => {
   const { groupId } = event.target.dataset
   setRoom(groupId)
@@ -216,14 +227,29 @@ $.style(`
     height: 100%;
     background: linear-gradient(165deg, rgba(255,255,255,.85) 60%, dodgerblue);
     overflow: hidden;
+    position: relative;
+  }
+
+  & .control-toggle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 10;
   }
 
   & .control {
     display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  & .control.sidebar {
     grid-template-columns: 320px auto;
   }
 
   & .control-tab-list {
+    display: none;
+  }
+  & .sidebar .control-tab-list {
     gap: .5rem;
     display: flex;
     flex-direction: column;
@@ -256,6 +282,30 @@ $.style(`
     background: dodgerblue;
     color: white;
   }
+
+  & .control-toggle button {
+    display: block;
+    border: 0;
+    line-height: 1;
+    width: 4rem;
+    color: white;
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: .5rem;
+    color: white;
+    background-image: linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.5));
+    background-color: rebeccapurple;
+    transition: background 200ms ease-in-out;
+    flex: none;
+  }
+
+  & .control-toggle button:hover,
+  & .control-toggle button:focus {
+    background-color: blueviolet;
+    color: white;
+  }
+
 
   & .control-view {
     overflow: auto;

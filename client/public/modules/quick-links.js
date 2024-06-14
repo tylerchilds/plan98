@@ -45,19 +45,19 @@ $.style(`
     display: inline-block;
     padding: 13px;
     font-size: 1.5rem;
-    background: lemonchiffon;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: goldenrod;
     border: none;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     text-decoration: none;
-    color: dodgerblue;
+    color: white;
     pointer-events: all;
+    border-radius: 1rem;
   }
 
   & button:hover,
   & button:focus {
-    background: dodgerblue;
+    background-color: darkgoldenrod;
     color: white;
     box-shadow: 0px 0px 8px 8px rgba(0,0,0,.1);
-    transform: scale(1.2);
   }
 `)

@@ -9,5 +9,4 @@ data-saga: app.saga
 <action-script
 text: I need a sales funnel
 data-saga: funnel.saga
-
-
+class: money

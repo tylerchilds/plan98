@@ -11,5 +11,4 @@ data-saga: brand.saga
 <action-script
 text: My product
 data-saga: product.saga
-
-
+class: money

@@ -9,4 +9,4 @@ data-saga: budget.saga
 <action-script
 text: I ball with no budget
 data-saga: lfg.saga
-
+class: money

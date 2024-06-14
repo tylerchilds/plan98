@@ -38,6 +38,7 @@ $.style(`
   & button {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: dodgerblue;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
     border: none;
     border-radius: 1rem;
     color: white;
@@ -59,5 +60,15 @@ $.style(`
   &.secondary button:hover {
     background-color: rgba(99,99,99,.35);
   }
+
+  &.money button {
+    background-color: lime;
+  }
+
+  &.money button:focus,
+  &.money button:hover {
+    background-color: rebeccapurple;
+  }
+
 
 `)

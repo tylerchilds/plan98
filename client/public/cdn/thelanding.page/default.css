@@ -13,12 +13,12 @@ body {
 
 header {
   margin: 5rem 0;
+  max-height: 50vh;
 }
 
 main {
   height: auto;
   position: relative;
-  z-index: 10000;
 }
 
 main xml-html > best-buy {
@@ -26,7 +26,7 @@ main xml-html > best-buy {
 }
 
 main braid-mail {
-  max-width: 55ch;
+  max-width: 480px;
   margin: auto;
 }
 
@@ -50,7 +50,6 @@ body wizard-journey.active {
   position: fixed;
   max-height: 100%;
   max-width: 100%;
-  z-index: 1000;
 }
 
 body data-tooltip {
@@ -69,12 +68,15 @@ main > xml-html {
 
 main hypertext-action {
   padding: 0 1rem;
-  max-width: 55ch;
+  max-width: 720px;
   margin: 1rem auto;
 }
 
 main hypertext-address {
-  max-width: 55ch;
+  max-width: 720px;
+}
+main hypertext-address {
+  max-width: 720px;
   padding: 0 1rem;
   margin: 1rem auto;
   font-size: 2.5rem;
@@ -84,11 +86,16 @@ main hypertext-address {
 }
 
 main hypertext-quote {
-  max-width: 35ch;
+  max-width: 480px;
   margin: 1rem auto;
   padding: 0 1rem;
 }
 
 main qr-pay {
   padding: 1rem;
+}
+
+main action-script {
+  max-width: 280px;
+  margin: 1rem auto;
 }

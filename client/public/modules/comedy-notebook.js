@@ -393,7 +393,9 @@ $.style(`
   & .actions {
     margin: 0 1rem;
     position: fixed;
-    top: 2rem;
+    top: 4rem;
+    right: 0;
+    text-align: right;
     z-index: 10;
   }
 
