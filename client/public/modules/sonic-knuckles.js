@@ -8,7 +8,7 @@ $.draw(() => {
 <button
 onclick:(function(){window.location.href='/cdn/spacejam.com/sonic3air_web.html'})()
 text: Go Fast
-style: position: fixed; top: 50%; left: 0; right: 0; margin: auto; background: dodgerblue; color: white; font-size: 3rem; line-height: 3rem; padding: 2rem; border-radius: 100%; border: none;
+style: position: absolute; top: 50%; left: 0; right: 0; margin: auto; background: dodgerblue; color: white; font-size: 3rem; line-height: 3rem; padding: 2rem; border-radius: 100%; border: none;
   `)
 })
 

@@ -71,7 +71,14 @@ $.draw((target) => {
     return `
       <div name="square">
         <div class="skybox active">
+          <div class="e">
+            <div style="display: grid;place-content: center;">
+              <sticky-note>
+              </sticky-note>
+            </div>
+          </div>
           <div class="f">
+            <sillyz-avatar></sillyz-avatar>
             <div id="foreground">
               <div id="logo">
                 <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">

@@ -7,20 +7,14 @@ import { setRoom, getRoom } from './chat-room.js'
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
-const $ = module('parental-controls', {
-  content: '<hyper-script src="/public/cdn/thelanding.page/memex.saga"></hyper-script>',
-  activeDialect: '/en-us/',
-  activeWorld: 'sillyz.computer',
-  chatRooms: [],
-  sidebar: true
-})
-
-getMyGroups().then(chatRooms => $.teach({ chatRooms }))
-
 const lolol = [
   {
     label: 'Office',
     lol: [
+      {
+        label: 'Script',
+        laugh: 'script.saga'
+      },
       {
         label: 'Notes',
         laugh: 'notes.saga'
@@ -71,6 +65,11 @@ const lolol = [
         label: 'Sonic A.I.R.',
         laugh: 'sonic.saga'
       },
+      {
+        label: 'Mind Chess',
+        laugh: 'mind-chess.saga'
+      },
+
     ]
   },
   {
@@ -110,6 +109,20 @@ const lolol = [
   },
 ]
 
+const $ = module('parental-controls', {
+  content: '...',
+  activeDialect: '/en-us/',
+  activeWorld: 'sillyz.computer',
+  chatRooms: [],
+  sidebar: true,
+  activeLolol: 0,
+  activeLol: 0
+})
+
+outLoud(lolol[0].lol[0].laugh)
+
+getMyGroups().then(chatRooms => $.teach({ chatRooms }))
+
 $.draw((target) => {
   const { sessionId } = getSession()
   if(!sessionId) return `
@@ -135,7 +148,7 @@ $.draw((target) => {
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
-            ${lol(x.lol)}
+            ${lol(x.lol, index)}
           `
         }).join('')}
 
@@ -172,16 +185,21 @@ function chat(group) {
   `
 }
 
-function lol(laughs) {
-  return laughs.map((y, index) => `
-    <button class="control-tab" data-laugh="${y.laugh}">
-      ${y.label}
-    </button>
-  `).join('')
+function lol(laughs, lolol) {
+  const { activeLolol, activeLol } = $.learn()
+  return laughs.map((y, lol) => {
+    const isActive = activeLolol === lolol && activeLol === lol
+    return `
+      <button class="control-tab ${isActive ? '-active' : '' }" data-lolol="${lolol}" data-lol="${lol}" data-laugh="${y.laugh}">
+        ${y.label}
+      </button>
+    `
+  }).join('')
 }
 
 $.when('click', '[data-laugh]', async (event) => {
-  const { laugh } = event.target.dataset
+  const { laugh, lol, lolol } = event.target.dataset
+  $.teach({ activeLol: parseInt(lol, 10), activeLolol: parseInt(lolol, 10) })
   outLoud(laugh)
 })
 
@@ -258,6 +276,8 @@ $.style(`
     overflow: auto;
     background: rgba(255,255,255,.65);
     position: relative;
+    z-index: 3;
+    overflow-x: hidden;
   }
   & .control-tab {
     display: block;
@@ -293,16 +313,20 @@ $.style(`
     width: 100%;
     text-align: left;
     padding: .5rem;
+    position: relative;
+    top: 2rem;
     color: white;
+    font-size: 1rem;
+    border-radius: 0 1rem 1rem 0;
     background-image: linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.5));
-    background-color: rebeccapurple;
+    background-color: rgba(0,0,0,.5);
     transition: background 200ms ease-in-out;
     flex: none;
   }
 
   & .control-toggle button:hover,
   & .control-toggle button:focus {
-    background-color: blueviolet;
+    background-color: rgba(0,0,0,.25);
     color: white;
   }
 
@@ -310,6 +334,7 @@ $.style(`
   & .control-view {
     overflow: auto;
     position: relative;
+    z-index: 2;
   }
 
   & data-tooltip,

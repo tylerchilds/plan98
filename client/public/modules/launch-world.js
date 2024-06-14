@@ -5,7 +5,7 @@ const $ = tag('launch-world')
 $.draw((target) => {
   return `
     <button>
-      Launch  World
+      Giggle It
     </button>
   `
 })
@@ -25,7 +25,8 @@ $.style(`
     background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: dodgerblue;
     color: white;
-    font-size: 3rem;
+    font-size: 2rem;
+    font-weight: 1000;
     padding: 2rem;
     margin: 2rem auto;
     border-radius: 2rem;

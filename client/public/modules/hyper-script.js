@@ -501,14 +501,15 @@ $.style(`
 
   & [name="navi"] button,
   & [name="actions"] button {
-    background: lemonchiffon;
+    background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.25));
+    background-color: rebeccapurple;
+    border-radius: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     border: none;
-    color: saddlebrown;
+    color: white;
     height: 2rem;
     transition: color 100ms;
-    padding: .25rem 1rem;
-    padding: .5rem;
+    padding: .5rem 1rem;
   font-size: 1rem;
   --v-font-mono: 0;
   --v-font-casl: 1;
@@ -524,8 +525,8 @@ $.style(`
   & [name="navi"] button:focus,
   & [name="actions"] button:hover,
   & [name="actions"] button:focus {
-    background: saddlebrown;
-    color: lemonchiffon;
+    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    color: white;
   }
 
   & [name="actions"] {
@@ -547,7 +548,7 @@ $.style(`
   }
 
   & [name="navi"] {
-    position: fixed;
+    position: absolute;
     reft: 0;
     margin: auto;
     top: 0;
@@ -644,8 +645,8 @@ $.style(`
   & [data-panel="read"] [data-read],
   & [data-panel="perform"] [data-perform],
   & [data-panel="write"] [data-write] {
-    background: saddlebrown;
-    color: lemonchiffon;
+    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    color: white;
     cursor: default;
   }
 
