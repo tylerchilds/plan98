@@ -124,11 +124,7 @@ outLoud(lolol[0].lol[0].laugh)
 getMyGroups().then(chatRooms => $.teach({ chatRooms }))
 
 $.draw((target) => {
-  const { sessionId } = getSession()
-  if(!sessionId) return `
-    <comedy-notebook></comedy-notebook>
-  `
-
+  const { sessionId, companyName, companyEmployeeId } = getSession()
   const { sidebar, content, chatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
@@ -145,6 +141,7 @@ $.draw((target) => {
         </button>
       </div>
       <div class="control-tab-list">
+        <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
@@ -153,9 +150,10 @@ $.draw((target) => {
         }).join('')}
 
         <hr>
-
-        <div class="heading-label">Chat</div>
-        ${chatRooms.map(chat).join('')}
+        ${sessionId ? `
+          <div class="heading-label">Chat</div>
+          ${chatRooms.map(chat).join('')}
+        ` : ``}
         ${authChip}
       </div>
       <div class="control-view ${sidebar ? '' : 'no-sidebar' }">
@@ -361,6 +359,10 @@ $.style(`
   & poker-face {
     display: block;
     height: 280px;
+  }
+
+  & img + .heading-label {
+    margin-top: 0;
   }
 `)
 
