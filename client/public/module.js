@@ -161,7 +161,6 @@ function dispatchCreate(target) {
   target.reactive = true
 }
 
-window.onload = () => {
   new MutationObserver((mutationsList) => {
     const targets = [...mutationsList]
       .map(getSubscribers)
@@ -169,7 +168,6 @@ window.onload = () => {
     maybeCreateReactive(targets)
   }).observe(document.body, { childList: true, subtree: true });
   new Computer(self.plan98, { registry: '/public/modules' })
-}
 
 function sufficientlyUniqueId() {
   // https://stackoverflow.com/a/2117523
