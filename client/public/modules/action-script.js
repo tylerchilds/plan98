@@ -93,7 +93,15 @@ function paste(nextSaga, target, options={}) {
     })
 }
 
-
+addEventListener("popstate", (event) => {
+  const { lastSaga } = event.state || {}
+  const root = document.querySelector('wizard-journey') || document.querySelector('main') || document.querySelector('body')
+  if(lastSaga) {
+    paste(lastSaga, root, {back: true})
+  } else {
+    paste('time.saga', root, {back: true})
+  }
+});
 
 $.style(`
   & {

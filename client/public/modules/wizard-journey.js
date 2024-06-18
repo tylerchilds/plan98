@@ -29,15 +29,6 @@ const $ = module('wizard-journey', {
   cache: {}
 })
 
-addEventListener("popstate", (event) => {
-  const { lastSaga } = event.state || {}
-  if(lastSaga) {
-    setupSaga(lastSaga, document.querySelector($.link), {back: true})
-  } else {
-    document.querySelector($.link).trap.deactivate()
-  }
-});
-
 export function setupSaga(nextSaga, target, options={}) {
   const root = target.closest($.link) || target.closest('main') || target.closest('body')
   const host = root.getAttribute('host')
@@ -56,9 +47,6 @@ export function setupSaga(nextSaga, target, options={}) {
       if(!root) window.location.href = key + window.location.search
       const saga = await response.text()
 
-      if(!options.back) {
-        self.history.pushState({ lastSaga: nextSaga }, "");
-      }
       $.teach(
         { [key]: saga },
         (state, payload) => {
