@@ -27,6 +27,11 @@ const lolol = [
         label: 'Browser',
         laugh: 'browser.saga'
       },
+      {
+        label: 'Maps',
+        laugh: 'maps.saga'
+      },
+
     ]
   },
   {
