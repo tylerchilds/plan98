@@ -26,7 +26,7 @@ $.when('click', '[data-world]', (event) => {
 $.style(`
   & {
     display: block;
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     right: 0;

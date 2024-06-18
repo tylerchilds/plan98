@@ -10,3 +10,6 @@ data-saga: budget.saga
 text: I ball with no budget
 data-saga: lfg.saga
 class: money
+
+{ template
+engine: wrapper

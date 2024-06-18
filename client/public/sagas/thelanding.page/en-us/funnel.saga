@@ -10,3 +10,6 @@ data-saga: why-funnel.saga
 text: I Love It
 data-saga: deal.saga
 class: money
+
+{ template
+engine: wrapper

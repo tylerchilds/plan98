@@ -1,1 +1,4 @@
 # Product
+
+{ template
+engine: wrapper

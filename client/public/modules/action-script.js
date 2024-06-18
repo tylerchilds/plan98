@@ -1,7 +1,14 @@
 import module from '@silly/tag'
-import { setupSaga } from './wizard-journey.js'
+import { render } from '@sillonious/saga'
+import * as focusTrap from 'focus-trap'
 
-const $ = module('action-script')
+const raw = '/public'
+const currentWorkingDirectory = '/sagas/'
+
+const $ = module('action-script', {
+  activeWorld: plan98.host || 'actuality.network',
+  activeDialect: '/en-us/',
+})
 
 $.draw(target => {
   if(!target.querySelector('button')) {
@@ -25,9 +32,68 @@ $.when('click', 'button', async (event) => {
 
   }
   if(saga) {
-    setupSaga(saga, event.target)
+    paste(saga, event.target, {})
   }
 })
+
+function paste(nextSaga, target, options={}) {
+  const root = target.closest('wizard-journey') || target.closest('main') || target.closest('body')
+  const host = root.getAttribute('host')
+  let { activeDialect, activeWorld } = $.learn()
+  activeWorld = host ? host : activeWorld
+  const key = currentWorkingDirectory + activeWorld + activeDialect + nextSaga
+
+  target.dataset.lastHtml = target.innerHTML
+  target.innerHTML = `<a href="${key}">Loading...</a>`
+  fetch(raw+key)
+    .then(async response => {
+      if(response.status === 404) {
+        target.innerHTML = target.dataset.lastHtml
+        return
+      }
+      if(!root) window.location.href = key + window.location.search
+      const saga = await response.text()
+
+      if(!options.back) {
+        self.history.pushState({ lastSaga: nextSaga }, "");
+      }
+      $.teach(
+        { [key]: saga },
+        (state, payload) => {
+          return {
+            ...state,
+            key,
+            cache: {
+              ...state.cache,
+              ...payload
+            }
+          }
+        }
+      )
+      schedule(() => {
+        if(!root.trap) {
+          root.trap = focusTrap.createFocusTrap(target, {
+            onActivate: onActivate($, target),
+            onDeactivate: onDeactivate($, target),
+            clickOutsideDeactivates: true
+          });
+        }
+        if(root.trap) {
+          root.trap.activate()
+          root.innerHTML = `
+            <data-tooltip>
+              ${render(saga)}
+            </data-tooltip>
+          `
+        }
+      })
+    })
+    .catch(e => {
+      console.error(e)
+    })
+}
+
+
 
 $.style(`
   & {
@@ -69,6 +135,23 @@ $.style(`
   &.money button:hover {
     background-color: rebeccapurple;
   }
-
-
 `)
+
+
+function onActivate($, target){
+  return () => {
+    target.classList.add('active')
+    //trapUntil($, target, anybodyPressesReset)
+  }
+}
+
+function onDeactivate($, target) {
+  return () => {
+    $.teach({ trapped: false })
+    target.classList.remove('active')
+    target.remove()
+  }
+}
+
+
+function schedule(x) { setTimeout(x, 1) }

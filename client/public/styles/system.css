@@ -504,3 +504,27 @@ button {
   margin: 0 auto;
   padding: 1in 1rem;
 }
+
+.darkroom {
+  background: rgba(200,200,200,.5);
+}
+
+.screenplay {
+  max-width: 8in;
+  padding: 1in;
+  background: white;
+  margin: auto;
+  color: rgba(0,0,0,.85);
+  font-size: 12pt;
+  font-family: courier;
+}
+
+.screenplay hypertext-quote {
+  max-width: 4in;
+  margin: 1rem auto;
+}
+
+.screenplay xml-html {
+  overflow: auto;
+  max-height: 100%;
+}

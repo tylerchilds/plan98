@@ -246,7 +246,9 @@ function validated(htmlString){
 }
 
 const templates = {
-  'thelanding.page': spa
+  'thelanding.page': spa,
+  'wrapper': wrapper,
+  'screenplay': screenplay,
 }
 
 function template(state, content){
@@ -273,5 +275,23 @@ function spa(content) {
     <footer>
       <mega-footer></mega-footer>
     </footer>
+  `
+}
+
+function wrapper(content) {
+  return `
+    <div class="wrapper">
+      ${content}
+    </div>
+  `
+}
+
+function screenplay(content) {
+  return `
+    <div class="darkroom">
+      <div class="screenplay">
+        ${content}
+      </div>
+    </div>
   `
 }

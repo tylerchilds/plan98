@@ -12,3 +12,5 @@ text: No Deal
 data-saga: welcome.saga
 class: secondary
 
+{ template
+engine: wrapper

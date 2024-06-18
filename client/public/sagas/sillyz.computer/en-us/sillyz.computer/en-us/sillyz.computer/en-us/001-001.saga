@@ -1,0 +1,17 @@
+The orange tentacle propels the future and the past, forwards and back.
+
+There's a blue kazoo and an indigo umbrella.
+
+<action-script
+text: Blue Kazoo
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-saga: 004-001.saga
+data-emerald: 4
+
+<action-script
+text: Indigo Umbrella
+data-action: takeEmerald
+data-script: /public/cdn/thelanding.page/game-state.js
+data-emerald: 5
+data-saga: 005-001.saga

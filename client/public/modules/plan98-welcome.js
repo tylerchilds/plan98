@@ -401,21 +401,46 @@ $.style(`
  }
   @keyframes &-rainbow-background {
     0% {
-			background: var(--theme, orange);
+			background: var(--theme, var(--wheel-0-6));
     }
-    33% {
-			background: var(--theme, dodgerblue);
+    8% {
+			background: var(--theme, var(--wheel-1-6));
     }
-    66% {
-			background: var(--theme, lime);
+    16% {
+			background: var(--theme, var(--wheel-2-6));
+    }
+    24% {
+			background: var(--theme, var(--wheel-3-6));
+    }
+    32% {
+			background: var(--theme, var(--wheel-4-6));
+    }
+    40% {
+			background: var(--theme, var(--wheel-5-6));
+    }
+    48% {
+			background: var(--theme, var(--wheel-6-6));
+    }
+    56% {
+			background: var(--theme, var(--wheel-7-6));
+    }
+    64% {
+			background: var(--theme, var(--wheel-8-6));
+    }
+    72% {
+			background: var(--theme, var(--wheel-9-6));
+    }
+    80% {
+			background: var(--theme, var(--wheel-10-6));
+    }
+    88% {
+			background: var(--theme, var(--wheel-11-6));
     }
     100% {
-			background: var(--theme, purple);
+			background: var(--theme, var(--wheel-0-6));
     }
   }
 
-
-      
  & .layout {
    display: grid;
    grid-template-columns: repeat(48, 1fr);

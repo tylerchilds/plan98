@@ -1,0 +1,13 @@
+# Totals 
+
+<shopping-cart
+
+<sillonious-action
+action: hostPressesStartStop
+label: Ship Order
+saga: shipping.saga
+
+<action-script
+text: Leave
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

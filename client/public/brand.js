@@ -5,18 +5,20 @@ const reverseProxyLookup = `
   #123<br/>
   Foster City, CA 94404
 `
+
+const language = `en-us`
 const emeraldOfTime
-  = `/public/sagas/time.saga`
+  = `/public/sagas/sillyz.computer/${language}/time.saga`
 const emeraldOfSpace
-  = `/public/sagas/space.saga`
+  = `/public/sagas/sillyz.computer/${language}/space.saga`
 const emeraldOfTrust
-  = `/public/sagas/trust.saga`
+  = `/public/sagas/sillyz.computer/${language}/trust.saga`
 const emeraldOfTruth
-  = `/public/sagas/truth.saga`
+  = `/public/sagas/sillyz.computer/${language}/truth.saga`
 const emeraldOfSelf
-  = `/public/sagas/self.saga`
+  = `/public/sagas/sillyz.computer/${language}/self.saga`
 const emeraldOfSecurity
-  = `/public/sagas/security.saga`
+  = `/public/sagas/sillyz.computer/${language}/security.saga`
 const emeraldOfNow
   = `/public/cdn/sillyz.computer/index.saga`
 

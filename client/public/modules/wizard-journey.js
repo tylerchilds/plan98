@@ -39,7 +39,7 @@ addEventListener("popstate", (event) => {
 });
 
 export function setupSaga(nextSaga, target, options={}) {
-  const root = target.closest($.link)
+  const root = target.closest($.link) || target.closest('main') || target.closest('body')
   const host = root.getAttribute('host')
   let { activeDialect, activeWorld } = $.learn()
   activeWorld = host ? host : activeWorld
@@ -139,7 +139,7 @@ $.style(`
     color: rgba(0,0,0,.85);
     overflow: auto;
     border-radius: 1rem;
-    padding: 0rem 0 2rem;
+    padding: 1rem;
   }
 
   & [data-close] {
@@ -183,9 +183,11 @@ $.style(`
   @keyframes &-fade-in {
     0% {
       opacity: 0;
+      transform: scale(1.1);
     }
     100% {
       opacity: 1;
+      transform: scale(1);
     }
   }
 

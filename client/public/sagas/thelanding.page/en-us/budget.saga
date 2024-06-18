@@ -12,3 +12,6 @@ data-saga: brand.saga
 text: My product
 data-saga: product.saga
 class: money
+
+{ template
+engine: wrapper
