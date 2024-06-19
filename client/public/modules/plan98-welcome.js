@@ -218,6 +218,7 @@ $.style(`
     display: grid;
     margin: auto;
     height: 100%;
+    max-height: 80vh;
     animation: &-rainbow-background 10000ms ease-in-out infinite alternate-reverse;
     position: relative;
   }
