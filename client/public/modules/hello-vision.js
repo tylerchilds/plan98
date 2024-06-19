@@ -13,7 +13,7 @@ function loop(target) {
   return () => {
     const { active } = $.learn()
     target.classifier.classify((err, results) => {
-      console.log(results);
+      $.teach({ results });
     });
 
     if(active) {
@@ -25,17 +25,40 @@ function loop(target) {
 const elf = 'hello-vision'
 
 // Make a prediction with a selected image
-const $ = tag(elf)
+const $ = tag(elf, { results: [] })
 
 
 class VideoFeed extends HTMLElement {
   constructor() {
     super();
     // Initialize your component here
-    $.draw(() => `<video></video>`)
-    const video = this.querySelector('video')
-    video.srcObject = null
-    this.classifier = ml5.imageClassifier('MobileNet', video, () => modelLoaded(this));
+    $.draw((target) => {
+      if(!target.initialized) {
+        target.initialized = true
+        target.insertAdjacentHTML('beforeend', `<video></video>`)
+        const video = target.querySelector('video')
+        video.srcObject = null
+        target.classifier = ml5.imageClassifier('MobileNet', video, () => modelLoaded(target));
+      }
+
+      const { results } = $.learn()
+
+      if(!target.querySelector('ol')) {
+        target.insertAdjacentHTML('afterbegin', `
+          <ol>
+            <li></li>
+            <li></li>
+            <li></li>
+          </ol>
+        `)
+      }
+
+      const list = this.querySelector('ol')
+      results.map((classification, index) => {
+        list.children[index].innerText = classification.label
+      })
+    })
+
   }
 
   connectedCallback() {
