@@ -1,13 +1,21 @@
 import module from '@silly/tag'
 import { getSession, clearSession } from './comedy-notebook.js'
 import { getMyGroups, getOtherGroups } from './party-chat.js'
-import { render } from '@sillonious/saga'
 import { setRoom, getRoom } from './chat-room.js'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
 const lolol = [
+  {
+    label: 'Welcome',
+    lol: [
+      {
+        label: 'Start',
+        laugh: 'start.saga'
+      }
+    ]
+  },
   {
     label: 'Office',
     lol: [
@@ -113,24 +121,27 @@ const lolol = [
     ]
   },
 ]
+const { laugh } = lolol[0].lol[0]
+let lastLaugh = laugh
+let lastSidebar = false
 
 const $ = module('parental-controls', {
   content: '...',
+  laugh,
   activeDialect: '/en-us/',
   activeWorld: 'sillyz.computer',
   chatRooms: [],
-  sidebar: true,
-  activeLolol: 0,
-  activeLol: 0
+  sidebar: false,
+  lololID: 0,
+  lolID: 0
 })
 
-outLoud(lolol[0].lol[0].laugh)
+outLoud(laugh, 0, 0)
 
 getMyGroups().then(chatRooms => $.teach({ chatRooms }))
-
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
-  const { sidebar, content, chatRooms } = $.learn()
+  const { sidebar, laugh, saga, lolID, lololID, chatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
 
@@ -138,7 +149,23 @@ $.draw((target) => {
     <poker-face></poker-face>
   `
 
-  target.innerHTML = `
+  if(laugh !== lastLaugh && target.querySelector('iframe')) {
+    lastLaugh = laugh
+    target.querySelector('iframe').src = saga
+    target.querySelector('.-active').classList.remove('-active')
+    target.querySelector(`.control-tab[data-lol="${lolID}"][data-lolol="${lololID}"]`).classList.add('-active')
+    return
+  }
+
+  if(sidebar !== lastSidebar) {
+    target.querySelector('[data-sidebar]').innerText = sidebar ? 'Menu.' : 'Menu?'
+    sidebar
+    ? target.querySelector('data-tooltip').classList.add('sidebar')
+    : target.querySelector('data-tooltip').classList.remove('sidebar')
+    return
+  }
+
+  return `
     <data-tooltip class="control ${sidebar ? 'sidebar': ''}" aria-live="assertive">
       <div class="control-toggle">
         <button data-sidebar>
@@ -162,7 +189,7 @@ $.draw((target) => {
         ${authChip}
       </div>
       <div class="control-view ${sidebar ? '' : 'no-sidebar' }">
-        ${content}
+        <iframe src="${saga}" title="Okay"></iframe>
       </div>
     </data-tooltip>
   `
@@ -189,9 +216,9 @@ function chat(group) {
 }
 
 function lol(laughs, lolol) {
-  const { activeLolol, activeLol } = $.learn()
+  const { lololID, lolID } = $.learn()
   return laughs.map((y, lol) => {
-    const isActive = activeLolol === lolol && activeLol === lol
+    const isActive = lololID === lolol && lolID === lol
     return `
       <button class="control-tab ${isActive ? '-active' : '' }" data-lolol="${lolol}" data-lol="${lol}" data-laugh="${y.laugh}">
         ${y.label}
@@ -202,44 +229,29 @@ function lol(laughs, lolol) {
 
 $.when('click', '[data-laugh]', async (event) => {
   const { laugh, lol, lolol } = event.target.dataset
-  $.teach({ activeLol: parseInt(lol, 10), activeLolol: parseInt(lolol, 10) })
-  outLoud(laugh)
+  const lolID = parseInt(lol, 10)
+  const lololID = parseInt(lolol, 10)
+  outLoud(laugh, lolID, lololID)
 })
 
 $.when('click', '[data-sidebar]', async (event) => {
   const { sidebar } = $.learn()
+  lastSidebar = sidebar
   $.teach({ sidebar: !sidebar })
 })
 
 $.when('click', '[data-group-id]', async (event) => {
   const { groupId } = event.target.dataset
   setRoom(groupId)
-  $.teach({ content: '<chat-room></chat-room>' })
+  outLoud('chat-room.saga')
 })
 
 
 
-function outLoud(laugh) {
-  const { activeDialect, activeWorld } = $.learn()
-  const key = currentWorkingDirectory + activeWorld + activeDialect + laugh
-  $.teach({ content: null })
-
-  fetch(raw+key)
-    .then(async response => {
-      if(response.status === 404) {
-        $.teach({ content: '404' })
-        return
-      }
-      const saga = await response.text()
-      const content = render(saga)
-
-      $.teach({ content })
-    })
-    .catch(e => {
-
-      $.teach({ content: `Error... ${e}` })
-      console.error(e)
-    })
+function outLoud(nextLaugh, lolID, lololID) {
+  const { laugh, activeDialect, activeWorld } = $.learn()
+  const key = currentWorkingDirectory + activeWorld + activeDialect + nextLaugh
+  $.teach({ laugh: nextLaugh, saga: key, lolID, lololID })
 }
 
 $.style(`

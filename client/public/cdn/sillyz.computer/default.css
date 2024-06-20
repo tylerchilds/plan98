@@ -10,10 +10,6 @@ xml-html {
   background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.75));
 }
 
-saga-genesis > xml-html {
-  padding: 1rem;
-}
-
 img,
 video {
   max-width: 100%;
@@ -49,9 +45,7 @@ saga-genesis action-script {
 }
 
 main saga-genesis > xml-html {
-  padding-bottom: 6rem;
   min-height: 100%;
-  height: auto;
 }
 
 [pathname="/"] #main {

@@ -16,14 +16,16 @@ const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
    #
 */
 
-const $ = module('chat-room', { jokes: {} })
 
-export function setRoom(room) {
-  $.teach({ room })
+const $ = module('chat-room', { jokes: {} })
+state[`ls/${$.link}`] ||= {room: null}
+
+export function setRoom(r) {
+  state[`ls/${$.link}`].room = r
 }
 
 export function getRoom() {
-  return $.learn().room
+  return state[`ls/${$.link}`].room
 }
 
 
@@ -32,9 +34,9 @@ async function connect(target) {
     sessionId,
   } = getSession()
 
-  let { room } = $.learn();
   if(!sessionId) return
 
+  const room = getRoom()
   if(target.subscribedTo === room) return
   target.subscribedTo = room
 
@@ -117,7 +119,7 @@ function deleteJoke(state, payload) {
 }
 
 $.when('input', 'textarea', (event) => {
-  const { room } = $.learn()
+  const room = getRoom()
   state[`ls/drafts/${room}`] = event.target.value
 })
 
@@ -129,8 +131,8 @@ $.draw(target => {
       <comedy-notebook></comedy-notebook>
     </sticky-note>
   `
-  const { room, jokes } = $.learn()
-
+  const { jokes } = $.learn()
+  const room = getRoom()
   if(!room) {
     return 'Please Consider...'
   }
@@ -192,7 +194,7 @@ async function send(event) {
     companyName,
     companyEmployeeId
   } = getSession()
-  const { room } = $.learn()
+  const room = getRoom()
 
   const text = await bayunCore.lockText(sessionId, message.value, encryptionPolicy, keyGenerationPolicy, room);
   message.value = ''
