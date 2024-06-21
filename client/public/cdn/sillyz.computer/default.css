@@ -48,11 +48,7 @@ main saga-genesis > xml-html {
   min-height: 100%;
 }
 
-[pathname="/"] #main {
+[pathname^="/sagas"] saga-genesis xml-html {
   font-size: 1.5rem;
-}
-
-[pathname="/"] plan98-welcome {
-  margin: -1rem -1rem 4rem;
 }
 

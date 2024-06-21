@@ -19,7 +19,7 @@ $.draw((target) => {
 
 $.when('click', '[data-world]', (event) => {
   const { world } = event.target.dataset
-  window.location.href = `?world=${world}`
+  top.location.href = `/?world=${world}`
 })
 
 

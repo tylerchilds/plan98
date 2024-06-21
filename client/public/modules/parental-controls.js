@@ -157,7 +157,7 @@ $.draw((target) => {
     return
   }
 
-  if(sidebar !== lastSidebar) {
+  if(sidebar !== lastSidebar && target.querySelector('[data-sidebar]')) {
     target.querySelector('[data-sidebar]').innerText = sidebar ? 'Menu.' : 'Menu?'
     sidebar
     ? target.querySelector('data-tooltip').classList.add('sidebar')
@@ -266,7 +266,7 @@ $.style(`
   & .control-toggle {
     position: absolute;
     left: 0;
-    top: 0;
+    top: 2rem;
     z-index: 10;
   }
 
@@ -328,8 +328,6 @@ $.style(`
     width: 100%;
     text-align: left;
     padding: .5rem;
-    position: relative;
-    top: 2rem;
     color: white;
     font-size: 1rem;
     border-radius: 0 1rem 1rem 0;
