@@ -6,12 +6,6 @@ body {
   margin: 0 auto;
 }
 
-body:not([pathname="/"]) > sillonious-brand > saga-genesis > xml-html {
-  max-width: 6in;
-  margin: auto;
-  padding: 1in 1rem;
-}
-
 [pathname="/"] #main {
   padding-top: 25vh;
   background: white;
@@ -47,12 +41,6 @@ main stay-tuned {
 img,
 video {
   max-width: 100%;
-}
-
-body > sillonious-brand,
-sillinous-brand > saga-genesis,
-saga-genesis > sillonious-memex {
-  height: 100%;
 }
 
 body wizard-journey.active {

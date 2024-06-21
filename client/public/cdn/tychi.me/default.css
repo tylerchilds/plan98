@@ -6,11 +6,6 @@ xml-html {
   height: 100%;
 }
 
-saga-genesis xml-html {
-  margin: auto;
-  height: 100%;
-}
-
 img,
 video {
   max-width: 100%;

@@ -13,7 +13,8 @@ $.style(`
     display: block;
     text-align: center;
     text-transform: uppercase;
-    margin: 1rem 0 0;
+    margin: 1rem auto 0;
+    padding: 0 1rem;
     place-self: end start;
     overflow: hidden;
   }

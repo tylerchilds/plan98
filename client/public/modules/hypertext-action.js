@@ -5,7 +5,8 @@ const $ = module('hypertext-action')
 $.style(`
   & {
     display: block;
-    margin: 1rem 0;
+    margin: 1rem auto;
+    padding: 0 1rem;
     place-self: start;
   }
 `)

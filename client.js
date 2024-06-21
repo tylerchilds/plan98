@@ -83,7 +83,6 @@ async function page() {
 
 async function markdownSanitizer(md, { endOfHead }) {
   const dom = await page()
-  console.log(endOfHead)
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
@@ -98,7 +97,6 @@ async function markdownSanitizer(md, { endOfHead }) {
 
 async function sagaSanitizer(saga, { endOfHead }) {
   const dom = await page()
-  console.log(endOfHead)
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
@@ -187,10 +185,8 @@ async function router(request, context) {
   }
 
   if(pathname === '/') {
-
     const file = await home(request, business)
 
-  console.log('tf', file)
     if(file) {
       return new Response(file, {
         headers,

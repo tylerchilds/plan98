@@ -18,20 +18,11 @@ style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)
 document.head.appendChild(style)
 
-const root = window.location.pathname === '/'
-
-const homepage = `
-  <sillonious-brand host="${plan98.host}">
-    <saga-genesis></saga-genesis>
-  </sillonious-brand>
-`
-
 const newpage = `
   <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `
 
-
-module('#main').draw(target => root ? homepage : newpage)
+module('#main').draw(target => newpage)
 
 export function setDatabase(url) {
   localStorage.setItem("plan98.database", 'https://sillonious.pockethost.io')

@@ -106,7 +106,7 @@ addEventListener("popstate", (event) => {
 $.style(`
   & {
     display: block;
-    margin: 1rem;
+    margin: 1rem auto;
   }
 
   & button {

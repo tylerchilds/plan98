@@ -15,6 +15,7 @@ $.style(`
     text-align: center;
     place-self: center;
     overflow: hidden;
+    padding: 0 1rem;
   }
 
   &::before {

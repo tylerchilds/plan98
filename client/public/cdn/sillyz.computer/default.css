@@ -16,39 +16,39 @@ video {
   max-height: 50vh;
 }
 
-saga-genesis hypertext-action {
+xml-html hypertext-action {
   max-width: 720px;
   margin: 1rem auto;
 }
 
-saga-genesis hypertext-address {
+xml-html hypertext-address {
   max-width: 720px;
-  margin: 1rem auto;
+  margin: 4rem auto 1rem;
   font-size: 2.5rem;
   line-height: 1;
   font-weight: 1000;
   text-transform: none;
 }
 
-saga-genesis hypertext-quote {
+xml-html hypertext-quote {
   max-width: 480px;
   margin: 1rem auto;
 }
 
-saga-genesis qr-pay {
+xml-html qr-pay {
   padding: 1rem;
 }
 
-saga-genesis action-script {
+xml-html action-script {
   max-width: 280px;
   margin: 1rem auto;
 }
 
-main saga-genesis > xml-html {
+main > xml-html {
   min-height: 100%;
 }
 
-[pathname^="/sagas"] saga-genesis xml-html {
+[pathname^="/sagas"] xml-html {
   font-size: 1.5rem;
 }
 

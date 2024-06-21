@@ -65,8 +65,7 @@ $.draw((target) => {
       Share
     </button>
     <main class="output" style="background-image: ${stars}">
-      <iframe src="${sagaDemo}"></iframe>
-      <iframe src="${saga}"></iframe>
+      <hyper-script src="${saga}"></byper-script>
     </main>
   `
 })
@@ -415,7 +414,7 @@ $.style(`
       inset: 0;
       z-index: 1;
       display: grid;
-      grid-template-rows: 1fr 1fr;
+      grid-template-rows: 1fr;
       place-items: center;
       padding-top: 2rem;
       height: 100%;

@@ -12,7 +12,8 @@ $.style(`
   & {
     display: block;
     text-transform: uppercase;
-    margin: 1rem 0;
+    margin: 1rem auto;
+    padding: 0 1rem;
     place-self: start end;
     overflow: hidden;
   }
