@@ -257,7 +257,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: linear-gradient(165deg, rgba(255,255,255,.85) 60%, dodgerblue);
+    background: linear-gradient(165deg, rgba(255,255,255,.85) 60%, rgba(255,255,255,.15));
     overflow: hidden;
     position: relative;
   }
