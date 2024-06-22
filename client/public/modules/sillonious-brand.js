@@ -194,6 +194,7 @@ $.style(`
     backface-visibility: hidden;
     display: block;
     cursor: url('/public/icons/gh057.svg') 0 0, auto;
+    overflow: auto;
   }
 
   & .frontside-paper,

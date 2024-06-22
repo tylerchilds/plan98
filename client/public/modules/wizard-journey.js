@@ -113,8 +113,6 @@ $.style(`
   }
 
   & .wrapper {
-    min-height: auto;
-    position: absolute;
     max-width: 100%;
     top: 0;
     bottom: 0;
@@ -128,6 +126,7 @@ $.style(`
     overflow: auto;
     border-radius: 1rem;
     padding: 1rem;
+    height: 100vh;
   }
 
   & [data-close] {
@@ -152,20 +151,13 @@ $.style(`
 
   &:not(:empty) {
     display: block;
-    position: absolute;
-    inset: 0;
     margin: auto;
     background: linear-gradient(105deg, rebeccapurple, rgba(200,200,200,.5) 30%), linear-gradient(165deg, rgba(200,200,200,.5) 80%, dodgerblue), white;
     color: white;
     padding: .5rem;
     overflow: visible;
-    opacity: 0;
-    box-shadow:
-      2px 2px 4px 4px rgba(0,0,0,.10),
-      6px 6px 12px 12px rgba(0,0,0,.5),
-      18px 18px 36px 36px rgba(0,0,0,.25);
-    animation: &-fade-in 1000ms forwards;
     z-index: 10000;
+    position: relative;
   }
 
   @keyframes &-fade-in {

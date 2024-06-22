@@ -74,7 +74,6 @@ function drawCardinal(buttons) {
 
 
 $.draw((target) => {
-  if(self.self !== self.top) return '<plan98-welcome></plan98-welcome>'
   const { suggestions, suggestable, joypros } = $.learn()
   if(joypros.length === 0) return
   const { art, diskette } = state['ls/sillonious-memex'] || { art: 'sillyz.computer' }

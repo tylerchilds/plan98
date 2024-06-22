@@ -158,7 +158,7 @@ $.draw((target) => {
   }
 
   if(sidebar !== lastSidebar && target.querySelector('[data-sidebar]')) {
-    target.querySelector('[data-sidebar]').innerText = sidebar ? 'Menu.' : 'Menu?'
+    target.querySelector('[data-sidebar]').innerText = sidebar ? 'Play' : 'Pause'
     sidebar
     ? target.querySelector('data-tooltip').classList.add('sidebar')
     : target.querySelector('data-tooltip').classList.remove('sidebar')
@@ -169,11 +169,10 @@ $.draw((target) => {
     <data-tooltip class="control ${sidebar ? 'sidebar': ''}" aria-live="assertive">
       <div class="control-toggle">
         <button data-sidebar>
-          ${sidebar ? 'Menu.' : 'Menu?'}
+          Pause
         </button>
       </div>
       <div class="control-tab-list">
-        <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
@@ -287,7 +286,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    padding: 1rem 1rem 1rem;
+    padding: 5rem 1rem 1rem;
     overflow: auto;
     background: rgba(255,255,255,.65);
     position: relative;
@@ -318,7 +317,7 @@ $.style(`
     color: white;
   }
 
-  & .control-toggle button {
+  & .control-toggle .control-tab {
     display: block;
     border: 0;
     line-height: 1;
@@ -337,8 +336,8 @@ $.style(`
     flex: none;
   }
 
-  & .control-toggle button:hover,
-  & .control-toggle button:focus {
+  & .control-toggle .control-tab:hover,
+  & .control-toggle .control-tab:focus {
     background-color: rgba(0,0,0,.25);
     color: white;
   }
@@ -379,5 +378,23 @@ $.style(`
   & img + .heading-label {
     margin-top: 0;
   }
+
+  & [data-sidebar] {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: rgba(0,0,0,.5);
+    border: none;
+    border-radius: 0 1rem 1rem 0;
+    padding: .5rem 1rem .5rem 2rem;
+    color: rgba(255,255,255,.5);
+    transition: background 200ms ease-in-out;
+  }
+
+  & [data-sidebar]:focus,
+  & [data-sidebar]:hover {
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+  }
+
 `)
 

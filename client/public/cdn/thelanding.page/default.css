@@ -39,13 +39,6 @@ video {
   max-width: 100%;
 }
 
-body wizard-journey.active {
-  inset: 0;
-  position: fixed;
-  max-height: 100%;
-  max-width: 100%;
-}
-
 body data-tooltip {
   height: 100%;
 }

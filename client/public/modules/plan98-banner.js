@@ -56,6 +56,8 @@ $.style(`
   & .banner-pitch {
     padding: .5rem;
     display: inline-block;
+    background: rgba(255,255,255,.5);
+    border-radius: 1rem;
   }
 `)
 
