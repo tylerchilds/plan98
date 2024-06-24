@@ -61,12 +61,7 @@ $.draw((target) => {
   }
 
   return `
-    <button data-share>
-      Share
-    </button>
-    <main class="output" style="background-image: ${stars}">
-      <hyper-script src="${saga}"></byper-script>
-    </main>
+    <comedy-notebook></comedy-notebook>
   `
 })
 
@@ -195,6 +190,7 @@ $.style(`
     display: block;
     cursor: url('/public/icons/gh057.svg') 0 0, auto;
     overflow: auto;
+    background-color: var(--theme, var(--wheel-0-6, dodgerblue));
   }
 
   & .frontside-paper,

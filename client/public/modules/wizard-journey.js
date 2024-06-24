@@ -20,7 +20,9 @@ const currentWorkingDirectory = '/sagas/'
 const genesisSaga = '000-000.saga'
 
 const overworld = {
-  '/': genesisSaga
+  '/': genesisSaga,
+  '/sagas/sillyz.computer/en-us/start.saga': genesisSaga
+
 }
 
 const $ = module('wizard-journey', {
@@ -65,7 +67,7 @@ export function setupSaga(nextSaga, target, options={}) {
           root.trap = focusTrap.createFocusTrap(target, {
             onActivate: onActivate($, target),
             onDeactivate: onDeactivate($, target),
-            clickOutsideDeactivates: true
+            clickOutsideDeactivates: false
           });
         }
         if(root.trap) {
@@ -103,13 +105,27 @@ $.draw((target) => {
   }
 })
 
-$.when('click', '[data-close]', (event) => {
-  event.target.closest($.link).trap.deactivate()
-})
 
 $.style(`
   @media print {
     & { display: none !important; }
+  }
+
+
+  & {
+    display: block;
+    margin: auto;
+    background: linear-gradient(105deg, rebeccapurple, rgba(200,200,200,.5) 30%), linear-gradient(165deg, rgba(200,200,200,.5) 80%, dodgerblue), white;
+    color: white;
+    padding: .5rem;
+    overflow: visible;
+    z-index: 10000;
+    position: relative;
+  }
+
+  xml-html > & {
+    margin-top: 5rem;
+    margin-bottom: 5rem;
   }
 
   & .wrapper {
@@ -147,17 +163,6 @@ $.style(`
   & [data-close]:focus,
   & [data-close]:hover {
     background: dodgerblue;
-  }
-
-  &:not(:empty) {
-    display: block;
-    margin: auto;
-    background: linear-gradient(105deg, rebeccapurple, rgba(200,200,200,.5) 30%), linear-gradient(165deg, rgba(200,200,200,.5) 80%, dodgerblue), white;
-    color: white;
-    padding: .5rem;
-    overflow: visible;
-    z-index: 10000;
-    position: relative;
   }
 
   @keyframes &-fade-in {
