@@ -4,6 +4,7 @@ html {
 }
 body {
   margin: 0 auto;
+  --theme: white;
 }
 
 [pathname="/"] #main {
