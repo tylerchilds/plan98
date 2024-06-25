@@ -15,6 +15,11 @@ import { config } from "https://deno.land/x/dotenv/mod.ts";
 
 config()
 
+function safeEnv(key) {
+  const value = Deno.env.get(key)
+  return value ? `${key}: "${value}",` : ''
+}
+
 const terminalHeaders = {
   'Cross-Origin-Embedder-Policy': 'require-corp',
   'Cross-Origin-Opener-Policy': 'same-origin',
@@ -58,21 +63,21 @@ async function page() {
     <script>
       self.plan98 = {
         env: {
-          ADYEN_API_KEY: "${Deno.env.get('ADYEN_API_KEY')}",
-          ADYEN_MERCHANT_ACCOUNT: "${Deno.env.get('ADYEN_MERCHANT_ACCOUNT')}",
-          ADYEN_CLIENT_KEY: "${Deno.env.get('ADYEN_CLIENT_KEY')}",
-          ADYEN_HMAC_KEY: "${Deno.env.get('ADYEN_HMAC_KEY')}",
+          ${safeEnv('ADYEN_API_KEY')}
+          ${safeEnv('ADYEN_MERCHANT_ACCOUNT')}
+          ${safeEnv('ADYEN_CLIENT_KEY')}
+          ${safeEnv('ADYEN_HMAC_KEY')}
 
-          BUTTONDOWN_TOKEN: "${Deno.env.get('BUTTONDOWN_TOKEN')}",
+          ${safeEnv('BUTTONDOWN_TOKEN')}
 
-          SUPABASE_URL: "${Deno.env.get('SUPABASE_URL')}",
-          SUPABASE_KEY: "${Deno.env.get('SUPABASE_KEY')}",
+          ${safeEnv('SUPABASE_URL')}
+          ${safeEnv('SUPABASE_KEY')}
 
-          VAULT_APP_ID: "${Deno.env.get('VAULT_APP_ID')}",
-          VAULT_APP_SECRET: "${Deno.env.get('VAULT_APP_SECRET')}",
-          VAULT_APP_SALT: "${Deno.env.get('VAULT_APP_SALT')}",
-          VAULT_BASE_URL: "${Deno.env.get('VAULT_BASE_URL')}",
-          VAULT_PUBLIC_KEY: "${Deno.env.get('VAULT_PUBLIC_KEY')}",
+          ${safeEnv('VAULT_APP_ID')}
+          ${safeEnv('VAULT_APP_SECRET')}
+          ${safeEnv('VAULT_APP_SALT')}
+          ${safeEnv('VAULT_BASE_URL')}
+          ${safeEnv('VAULT_PUBLIC_KEY')}
         }
       }
     </script>

@@ -5,7 +5,7 @@ body {
   color: rgba(0,0,0,.85);
 }
 
-sillonious-brand xml-html {
+sillonious-brand > xml-html {
   background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.75));
 }
 

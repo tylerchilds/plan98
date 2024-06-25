@@ -82,7 +82,10 @@ const lolol = [
         label: 'Mind Chess',
         laugh: 'mind-chess.saga'
       },
-
+      {
+        label: 'Pocket Dexter',
+        laugh: 'pokedex.saga'
+      },
     ]
   },
   {
@@ -117,6 +120,14 @@ const lolol = [
       {
         label: 'Code',
         laugh: 'code.saga'
+      },
+      {
+        label: 'A-Frame',
+        laugh: 'aframe.saga'
+      },
+      {
+        label: 'Havok',
+        laugh: 'havok.saga'
       },
     ]
   },
