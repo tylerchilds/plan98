@@ -2,6 +2,6 @@ The blue device can dial directions and dimensions-- any one, any time, any spac
 
 Ahead is the throne room.
 
-<sillonious-action
-label: To the throne room.
-saga: 999-999.saga
+<action-script
+text: To the throne room.
+data-saga: 999-999.saga

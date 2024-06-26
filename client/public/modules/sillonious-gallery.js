@@ -27,7 +27,7 @@ $.draw(() => {
     <action-script data-win data-action="ok" data-script="/public/cdn/thelanding.page/game-state.js">
       Hyper Space
     </action-script>
-    <action-script data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
+    <action-script data-saga="000-000.saga" data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
       Reset
     </action-script>
   ` : `

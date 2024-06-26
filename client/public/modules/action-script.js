@@ -81,9 +81,11 @@ function paste(nextSaga, target, options={}) {
         if(root.trap) {
           root.trap.activate()
           root.innerHTML = `
-            <data-tooltip>
+            <button data-close>Close</button>
+            <div class="wrapper">
+              <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
               ${render(saga)}
-            </data-tooltip>
+            </div>
           `
         }
       })

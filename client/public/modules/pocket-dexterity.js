@@ -44,7 +44,7 @@ class VideoFeed extends HTMLElement {
 
         schedule(async () => {
           const options = { numLabels: 6 }; //Specify the number of classes/labels
-          target.classifier = await ml5.imageClassifier('/cdn/sillyz.computer/pokedex/model.json', video, options);
+          target.classifier = await ml5.imageClassifier('/cdn/sillyz.computer/pokedex/v2/model.json', video, options);
           classify(target)
         })
       }
