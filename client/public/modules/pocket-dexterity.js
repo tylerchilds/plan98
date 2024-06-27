@@ -243,7 +243,7 @@ function schedule(x, delay=1) { setTimeout(x, delay) }
 $.when('click', '.hyper-visor button', (event) => {
   const { id } = event.target.dataset
   showModal(`
-    <sillyz-computer id="${id}"><sillyz-computer>
+    <sillyz-computer id="${id}"></sillyz-computer>
   `)
 })
 
