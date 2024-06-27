@@ -407,5 +407,10 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
 `)
 
