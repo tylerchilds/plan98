@@ -495,15 +495,15 @@ $.style(`
     position: absolute;
     right: 0;
     top: 2rem;
-    z-index: 2;
+    z-index: 3;
     overflow: auto;
   }
 
   & [name="navi"] button,
   & [name="actions"] button {
     background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.25));
-    background-color: rebeccapurple;
-    border-radius: 1rem;
+    background-color: rgba(0,0,0,.85);
+    border-radius: .5rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     border: none;
     color: white;
@@ -556,7 +556,7 @@ $.style(`
     display: block;
     text-align: center;
     gap: .5rem;
-    z-index: 1;
+    z-index: 3;
   }
 
   & [name="theater"] {
@@ -621,6 +621,16 @@ $.style(`
 
   & [name="write"] {
     position: relative;
+  }
+
+  & [name="write"]::before {
+    content: '';
+    position: absolute;
+    border-left: 1px solid var(--wheel-0-6, orange);
+    top: 0;
+    left: 1rem;
+    bottom: 0;
+    z-index: 2;
   }
 
   & [name="write"] textarea {

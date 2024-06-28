@@ -117,7 +117,7 @@ $.draw((target) => {
         </div>
       </div>
     </div>
-    <div name="carousel" style="background-image: url(${doingBusinessAs[art].image})">
+    <div name="carousel" style="background-color: ${doingBusinessAs[art].color}">
       <div name="screen">
         <button data-open>
           ${frame}
@@ -149,7 +149,6 @@ function findDeck(art, diskette) {
             <div class="title-bar">
               ${mascot}
             </div>
-            <img src="${image}" alt="${imageDescription}" />
           </div>
         </button>
       </div>
