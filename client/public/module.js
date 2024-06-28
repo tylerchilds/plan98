@@ -162,7 +162,7 @@ function dispatchCreate(target) {
 }
 
 
-try {
+window.addEventListener('load', () => {
   new MutationObserver((mutationsList) => {
     const targets = [...mutationsList]
       .map(getSubscribers)
@@ -170,10 +170,7 @@ try {
     maybeCreateReactive(targets)
   }).observe(document.body, { childList: true, subtree: true });
   new Computer(self.plan98, { registry: '/public/modules' })
-} catch (e) {
-  document.body.innerHTML = "Retrying in 5 seconds..."
-  setTimeout(() => window.location.href = window.location.href, 5000)
-}
+});
 
 function sufficientlyUniqueId() {
   // https://stackoverflow.com/a/2117523
