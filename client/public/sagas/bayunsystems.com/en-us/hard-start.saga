@@ -1,0 +1,20 @@
+<wizard-feedback
+
+Next, take a few moments to think of a handful of happy thoughts.
+
+You're going to ask yourself questions that you'll then need to answer every time you reconnect.
+
+It is best to think about positive memories daily, so consider dicovering your digital twin as a form of daily self reflection.
+
+<bayun-question
+index: 0
+placeholder: Who do you want to be every day?
+
+<bayun-answer
+index: 0
+placeholder: I want to be the Jester!
+
+<action-script
+text: Next Question
+data-action: begin
+data-script: /public/modules/bayun-wizard.js
