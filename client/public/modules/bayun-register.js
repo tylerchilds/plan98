@@ -20,6 +20,7 @@ const steps = [
   function step1() {
 
     return `
+      <div class="progress"></div>
       Ask us to ask you questions every time you want us to make sure that you are you claim to be.
       <div class="button-row">
         <div></div>
@@ -30,6 +31,7 @@ const steps = [
   function step2() {
     const { question1 } = $.learn()
     return `
+      <div class="progress"></div>
       <label class="field">
         <span class="label">Question 1</span>
         <textarea class="name-pair" name="question1">${question1}</textarea>
@@ -44,8 +46,10 @@ const steps = [
   function step3() {
     const { question1, answer1 } = $.learn()
     return `
+      <div class="progress"></div>
+      ${question1}
       <label class="field">
-        <span class="label">${question1}</span>
+        <span class="label">Answer 1</span>
         <textarea class="name-pair" name="answer1">${answer1}</textarea>
       </label>
 
@@ -59,6 +63,7 @@ const steps = [
     const { question2 } = $.learn()
 
     return `
+      <div class="progress"></div>
       <label class="field">
         <span class="label">Question 2</span>
         <textarea class="name-pair" name="question2">${question2}</textarea>
@@ -73,8 +78,10 @@ const steps = [
   function step5() {
     const { question2, answer2 } = $.learn()
     return `
+      <div class="progress"></div>
+      ${question2}
       <label class="field">
-        <span class="label">${question2}</span>
+        <span class="label">Answer 2</span>
         <textarea class="name-pair" name="answer2">${answer2}</textarea>
       </label>
 
@@ -87,6 +94,7 @@ const steps = [
   function step6() {
     const { question3 } = $.learn()
     return `
+      <div class="progress"></div>
       <label class="field">
         <span class="label">Question 3</span>
         <textarea class="name-pair" name="question3">${question3}</textarea>
@@ -101,8 +109,10 @@ const steps = [
   function step7() {
     const { question3, answer3 } = $.learn()
     return `
+      <div class="progress"></div>
+      ${question3}
       <label class="field">
-        <span class="label">${question3}</span>
+        <span class="label">Answer 3</span>
         <textarea class="name-pair" name="answer3">${answer3}</textarea>
       </label>
 
@@ -115,6 +125,7 @@ const steps = [
   function step8() {
     const { question4 } = $.learn()
     return `
+      <div class="progress"></div>
       <label class="field">
         <span class="label">Question 4</span>
         <textarea class="name-pair" name="question4">${question4}</textarea>
@@ -129,8 +140,10 @@ const steps = [
   function step9() {
     const { question4 } = $.learn()
     return `
+      <div class="progress"></div>
+      ${question4}
       <label class="field">
-        <span class="label">${question4}</span>
+        <span class="label">Answer 4</span>
         <textarea class="name-pair" name="answer4"></textarea>
       </label>
 
@@ -143,6 +156,7 @@ const steps = [
   function step10() {
     const { question5 } = $.learn()
     return `
+      <div class="progress"></div>
       <label class="field">
         <span class="label">Question 5</span>
         <textarea class="name-pair" name="question5">${question5}</textarea>
@@ -157,51 +171,21 @@ const steps = [
   function step11() {
     const { question5 } = $.learn()
     return `
+      <div class="progress"></div>
+      ${question5}
       <label class="field">
-        <span class="label">${question5}</span>
+        <span class="label">Answer 5</span>
         <textarea class="name-pair" name="answer5"></textarea>
       </label>
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step12() {
-    const {
-      question1,
-      answer1,
-      question2,
-      answer2,
-      question3,
-      answer3,
-      question4,
-      answer4,
-      question5,
-      answer5,
-    } = $.learn()
-    return `
-      If everything looks right, continue!
-      <dl>
-        <dt>${question1}</dt>
-        <dd>${answer1}</dd>
-        <dt>${question2}</dt>
-        <dd>${answer2}</dd>
-        <dt>${question3}</dt>
-        <dd>${answer3}</dd>
-        <dt>${question4}</dt>
-        <dd>${answer4}</dd>
-        <dt>${question5}</dt>
-        <dd>${answer5}</dd>
-      </dl>
+      This was the last answer, check your work by going back or finish registering now!
+
       <div class="button-row">
         <button data-back>Back</button>
         <button data-submit>Register</button>
       </div>
     `
-  },
-
+  }
 ]
 
 $.draw((target) => {
@@ -209,8 +193,10 @@ $.draw((target) => {
     return `Before we can secure your profile, we need to finish the basics.`
   }
   const { step } = $.learn()
-  if(step !== target.lastStep) {
-    target.lastStep = step
+  if(step !== parseInt(target.dataset.step)) {
+    target.dataset.step = step
+    target.dataset.steps = step
+    target.style.setProperty("--progress", `${step / steps.length * 100}%`);
     target.innerHTML = steps[step](target)
   }
 })
@@ -270,6 +256,18 @@ const authorizeEmployeeCallback = (data) => {
 const newUserCredentialsCallback = (data) =>{
 
   if (data.sessionId){
+    const {
+      question1,
+      answer1,
+      question2,
+      answer2,
+      question3,
+      answer3,
+      question4,
+      answer4,
+      question5,
+      answer5,
+    } = $.learn()
 
     const authorizeEmployeeCallback = (data) => {
       if (data.sessionId) {
@@ -290,21 +288,44 @@ const newUserCredentialsCallback = (data) =>{
 
     //Take User Input for Security Questions and Answers
     //Here securityQuestionsAnswers object is created just for reference
-    var securityQuestionsAnswers=[];
-    securityQuestionsAnswers.push({question: "<question1>", answer: "<answer1>"});
-    securityQuestionsAnswers.push({question: "<question2>", answer: "<answer2>"});
-    securityQuestionsAnswers.push({question: "<question3>", answer: "<answer3>"});
-    securityQuestionsAnswers.push({question: "<question4>", answer: "<answer4>"});
-    securityQuestionsAnswers.push({question: "<question5>", answer: "<answer5>"});
+    const securityQuestionsAnswers=[];
+    securityQuestionsAnswers.push({
+      question: question1,
+      answer: answer1
+    });
 
-    // Take User Input for optional passphrase
-    const passphrase="<passphrase>";
+    securityQuestionsAnswers.push({
+      question: question2,
+      answer: answer2
+    });
+
+    securityQuestionsAnswers.push({
+      question: question3,
+      answer: answer3
+    });
+
+    securityQuestionsAnswers.push({
+      question: question4,
+      answer: answer4
+    });
+
+    securityQuestionsAnswers.push({
+      question: question5,
+      answer: answer5
+    });
 
     // Take user Input for optional registerFaceId
-    const registerFaceId=true;
+    const registerFaceId=false;
 
-    bayunCore.setNewUserCredentials(data.sessionId, securityQuestionsAnswers,
-      passphrase, registerFaceId, authorizeEmployeeCallback, successCallback, failureCallback);
+    bayunCore.setNewUserCredentials(
+      data.sessionId,
+      securityQuestionsAnswers,
+      null, //passphrase,
+      registerFaceId,
+      authorizeEmployeeCallback,
+      successCallback,
+      failureCallback
+    );
   }
 }
 
@@ -407,14 +428,63 @@ $.when('click', '[data-submit]', (event) => {
   }
 
   if(!companyEmployeeId) {
-    errors.push('Missing company name')
+    errors.push('Missing employee id')
   }
 
   if(!email) {
-    errors.push('Missing company name')
+    errors.push('Missing email')
   }
 
   if(errors.length > 0) {
     setErrors(errors)
   }
 })
+
+$.style(`
+  & {
+    display: block;
+    padding: 0 1rem;
+    margin: 1rem auto;
+  }
+
+  & .button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+  }
+
+  & button {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  & button:focus,
+  & button:hover {
+    background-color: rebeccapurple;
+  }
+
+  & [data-back] {
+    background-color: rgba(99,99,99,.65);
+  }
+
+  & [data-back]:focus,
+  & [data-back]:hover {
+    background-color: rgba(99,99,99,.35);
+  }
+
+  & .progress {
+    width: var(--progress, 0%);
+    height: 1rem;
+    margin: 1rem auto;
+    border-radius: 1rem;
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), lime;
+    min-width: 1rem;
+  }
+`)
