@@ -198,6 +198,22 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
   },
+  'bayunsystems.com': {
+    emote: ':)',
+    logo: '/cdn/thelanding.page/logo.svg',
+    latitude: '37.782562',
+    longitude: '-122.471554',
+    zoom: 13,
+    tagline: 'A pop-up book.',
+    mascot: 'AN0051610',
+    saga: '/public/cdn/bayunsystems.com/index.saga',
+    contact: 'Tommi',
+    brandHue: 55,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
+  },
   'tommi.space': {
     emote: ':)',
     logo: '/cdn/thelanding.page/logo.svg',

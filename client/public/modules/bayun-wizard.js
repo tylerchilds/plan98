@@ -12,12 +12,14 @@ const $ = module('bayun-wizard', {
 })
 
 export function setupSaga(nextSaga, target, options={}) {
-  const root = target.closest($.link) || target.closest('main') || target.closest('body')
+  const root = target === self
+    ? document.querySelector($.link)
+    : target.closest($.link) || target.closest('main') || target.closest('body')
   const { activeDialect } = $.learn()
   const key = currentWorkingDirectory + 'bayunsystems.com' + activeDialect + nextSaga
 
-  target.dataset.lastHtml = target.innerHTML
-  target.innerHTML = `<a href="${key}">Loading...</a>`
+  root.dataset.lastHtml = target.innerHTML
+  root.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(raw+key)
     .then(async response => {
       if(response.status === 404) {
