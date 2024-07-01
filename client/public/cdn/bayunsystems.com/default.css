@@ -11,10 +11,6 @@ body {
   background: white;
 }
 
-header {
-  margin: 5rem 0;
-}
-
 main {
   height: auto;
 }
@@ -48,6 +44,10 @@ body wizard-journey.active {
   position: fixed;
   max-height: 100%;
   max-width: 100%;
+}
+
+body sillonious-brand {
+  background: black;
 }
 
 body data-tooltip {

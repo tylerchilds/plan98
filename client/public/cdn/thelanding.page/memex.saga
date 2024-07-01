@@ -4,7 +4,7 @@ engine: thelanding.page
 <launch-world
 world: sillyz.computer
 
-<wizard-journey
+<bayun-wizard
 
 # Generic Park
 

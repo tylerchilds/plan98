@@ -1,20 +1,20 @@
 import tag from '@silly/tag'
 
-const $ = tag('language-selector')
-
-$.draw((target) => {
-  const { mode } = $.learn()
-  return modes(target, mode)
-})
+const $ = tag('language-selector', { mode: 'unknown' })
 
 const map = {
   unknown: language,
   known: dialect
 }
 
+$.draw((target) => {
+  const { mode } = $.learn()
+  return modes(target, mode)
+})
+
 function modes(target, mode) {
   if(map[mode]) {
-    map[mode](target)
+    return map[mode](target)
   }
 }
 
@@ -22,10 +22,14 @@ function language(target) {
   const l = target.getAttribute('language')
 
   return `
-    ${l}
-    <select>
-      <option value="en">English</option>
-    </select>
+    <label class="field">
+      <span class="label">
+        ${l}
+      </span>
+      <select>
+        <option value="en">English</option>
+      </select>
+    </label>
   `
 }
 
@@ -33,9 +37,13 @@ function dialect(target) {
   const d = target.getAttribute('dialect')
 
   return `
-    ${d}
-    <select>
-      <option value="us">American</option>
-    </select>
+    <label class="field">
+      <span class="label">
+        ${d}
+      </span>
+      <select>
+        <option value="us">American</option>
+      </select>
+    </label>
   `
 }

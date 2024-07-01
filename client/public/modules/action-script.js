@@ -118,6 +118,7 @@ $.style(`
   & {
     display: block;
     margin: 1rem auto;
+    max-width: 320px;
   }
 
   & button {

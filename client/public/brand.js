@@ -206,7 +206,7 @@ export const doingBusinessAs = {
     zoom: 13,
     tagline: 'A pop-up book.',
     mascot: 'AN0051610',
-    saga: '/public/cdn/bayunsystems.com/index.saga',
+    saga: '/public/sagas/bayunsystems.com/index.saga',
     contact: 'Tommi',
     brandHue: 55,
     brandRange: 360,
