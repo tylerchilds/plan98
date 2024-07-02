@@ -245,7 +245,7 @@ const securityQuestionsCallback = data => {
        
       const successCallback = data => {
         if (data.sessionId) {
-          synthia()
+          synthia(self)
         }};
       
       const failureCallback = error => {
@@ -260,7 +260,7 @@ const securityQuestionsCallback = data => {
 const successCallback = data => {
   if (data.sessionId) {
     //LoggedIn Successfully
-    synthia()
+    synthia(self)
   }
 };
 

@@ -243,12 +243,6 @@ $.when('click', '[data-next]', (event) => {
   next()
 })
 
-const sessionId = "<sessionId>";
-const companyName = "bayunsystems.com"; // company portion from loginId
-const companyEmployeeId = "username"; //username portion from loginId
-const email = "username@bayunsystems.com"; //loginId
-const isCompanyOwnedEmail = true;
-
 const authorizeEmployeeCallback = (data) => {
   if (data.sessionId) {
     if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
@@ -271,7 +265,6 @@ const newUserCredentialsCallback = (data) =>{
       question5,
       answer5,
     } = $.learn()
-
     const authorizeEmployeeCallback = (data) => {
       if (data.sessionId) {
         if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
@@ -357,7 +350,7 @@ const securityQuestionsCallback = data => {
       const successCallback = data => {
         //Security Questions' Answers validated and registered employee successfully.
         //Login to continue.
-        login()
+        login(self)
       };
 
       const failureCallback = error => {
@@ -372,7 +365,7 @@ const securityQuestionsCallback = data => {
 const successCallback = data => {
   //Employee Registered Successfully
   //Login to continue.
-  login()
+  login(self)
 };
 
 const failureCallback = error => {

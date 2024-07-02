@@ -82,17 +82,19 @@ $.draw((target) => {
 $.style(`
 
   & {
-    display: block;
+    display: grid;
     margin: auto;
     background: linear-gradient(105deg, rebeccapurple, rgba(0,0,0,.5) 30%), linear-gradient(165deg, rgba(0,0,0,.85) 80%, dodgerblue), white;
     color: white;
     padding: .5rem;
     overflow: visible;
     position: relative;
+    height: 100%;
+    place-items: center;
   }
 
   & .wrapper {
-    max-width: 100%;
+    width: 100%;
     top: 0;
     bottom: 0;
     left: 0;
