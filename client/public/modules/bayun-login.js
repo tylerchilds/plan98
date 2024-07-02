@@ -151,7 +151,7 @@ const steps = [
 
       <div class="button-row">
         <button data-back>Back</button>
-        <button data-submit>Register</button>
+        <button data-connect>Connect</button>
       </div>
     `
   }
@@ -228,31 +228,13 @@ const securityQuestionsCallback = data => {
       let securityQuestionsArray = data.securityQuestions;
       //securityQuestionsArray is a list of Security Question Objects with questionId, questionText 
       // Iterate through securityQuestionsArray
+      // debugger
       securityQuestionsArray.forEach(val=>{
         console.log(val.questionId);
         console.log(val.questionText);
       });
       //Show custom UI to take user input for the answers.
       //Call validateSecurityQuestions function with the user provided answers.
-      
-      //Here answers object is created just for reference
-      var answers=[]; 
-      answers.push({questionId: "<questionId1>", answer: "<answer1>"});
-      answers.push({questionId: "<questionId2>", answer: "<answer2>"});
-      answers.push({questionId: "<questionId3>", answer: "<answer3>"});
-      answers.push({questionId: "<questionId4>", answer: "<answer4>"});
-      answers.push({questionId: "<questionId5>", answer: "<answer5>"});
-       
-      const successCallback = data => {
-        if (data.sessionId) {
-          synthia(self)
-        }};
-      
-      const failureCallback = error => {
-        setError(error)
-      };
-       
-       bayunCore.validateSecurityQuestions(data.sessionId, answers, null, successCallback, failureCallback);
     }
   }
 }
@@ -293,23 +275,35 @@ function questions() {
   const questions = $.learn()
 }
 
-$.when('click', '[data-submit]', (event) => {
+$.when('click', '[data-connect]', (event) => {
   if(ready()) {
+    //Here answers object is created just for reference
+    var answers=[]; 
+    answers.push({questionId: "<questionId1>", answer: "<answer1>"});
+    answers.push({questionId: "<questionId2>", answer: "<answer2>"});
+    answers.push({questionId: "<questionId3>", answer: "<answer3>"});
+    answers.push({questionId: "<questionId4>", answer: "<answer4>"});
+    answers.push({questionId: "<questionId5>", answer: "<answer5>"});
+     
+    const successCallback = data => {
+      if (data.sessionId) {
+        synthia(self)
+      }};
+    
+    const failureCallback = error => {
+      setError(error)
+    };
+     
+     bayunCore.validateSecurityQuestions(
+       data.sessionId,
+       answers,
+       null,
+       successCallback,
+       failureCallback
+     );
   }
 
   const errors = []
-
-  if(!companyName) {
-    errors.push('Missing company name')
-  }
-
-  if(!companyEmployeeId) {
-    errors.push('Missing employee id')
-  }
-
-  if(!email) {
-    errors.push('Missing email')
-  }
 
   if(errors.length > 0) {
     setErrors(errors)
