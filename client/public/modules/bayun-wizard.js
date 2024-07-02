@@ -214,7 +214,7 @@ export function identify(event) {
 
 export function register(event) {
   if(!getEmployeeId()) {
-    setError('Enter an employee Id')
+    seterror('enter an employee id')
     return
   }
   setupSaga('register.saga', event.target)
@@ -227,6 +227,16 @@ export function login(event) {
   }
   setupSaga('login.saga', event.target)
 }
+
+export function synthia(event) {
+  if(!getEmployeeId()) {
+    seterror('enter an employee id')
+    return
+  }
+  setupSaga('synthia.saga', event.target)
+}
+
+
 
 /*
  *

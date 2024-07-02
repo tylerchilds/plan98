@@ -1,6 +1,6 @@
 import module from '@silly/tag'
-import { bayunCore } from '@sillonious/vault'
-import { getCompanyName, getEmployeeId, getEmail, setErrors } from './bayun-wizard.js'
+import { BayunCore, bayunCore } from '@sillonious/vault'
+import { login, getCompanyName, getEmployeeId, getEmail, setError, setErrors } from './bayun-wizard.js'
 
 const $ = module('bayun-register', {
   step: 0,
@@ -21,9 +21,9 @@ const steps = [
 
     return `
       <div class="progress"></div>
-      Ask us to ask you questions every time you want us to make sure that you are you claim to be.
+      Ask us to ask you questions every time you want us to make sure that you are who you claim to be.
       <div class="button-row">
-        <div></div>
+        <button data-history>Previous</button>
         <button data-next>Next</button>
       </div>
     `
@@ -138,13 +138,13 @@ const steps = [
     `
   },
   function step9() {
-    const { question4 } = $.learn()
+    const { question4, answer4 } = $.learn()
     return `
       <div class="progress"></div>
       ${question4}
       <label class="field">
         <span class="label">Answer 4</span>
-        <textarea class="name-pair" name="answer4"></textarea>
+        <textarea class="name-pair" name="answer4">${answer4}</textarea>
       </label>
 
       <div class="button-row">
@@ -219,6 +219,10 @@ function next() {
   }
 }
 
+$.when('click', '[data-history]', (event) => {
+  history.back()
+})
+
 $.when('click', '[data-back]', (event) => {
   back()
 })
@@ -254,7 +258,6 @@ const authorizeEmployeeCallback = (data) => {
 };
 
 const newUserCredentialsCallback = (data) =>{
-
   if (data.sessionId){
     const {
       question1,
@@ -280,10 +283,11 @@ const newUserCredentialsCallback = (data) =>{
     const successCallback = data => {
       //Employee Registered Successfully
       //Login to continue.
+      login()
     };
 
     const failureCallback = error => {
-      console.error(error);
+      setError(error)
     };
 
     //Take User Input for Security Questions and Answers
@@ -353,10 +357,11 @@ const securityQuestionsCallback = data => {
       const successCallback = data => {
         //Security Questions' Answers validated and registered employee successfully.
         //Login to continue.
+        login()
       };
 
       const failureCallback = error => {
-        console.error(error);
+        setError(error)
       };
 
       bayunCore.validateSecurityQuestions(data.sessionId, answers, authorizeEmployeeCallback, successCallback, failureCallback);
@@ -364,35 +369,14 @@ const securityQuestionsCallback = data => {
   }
 };
 
-const passphraseCallback = data => {
-  if (data.sessionId) {
-    if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_PASSPHRASE){
-
-      //Show custom UI to take user input for the passphrase.
-      const passphrase="<passphrase>";
-
-      const successCallback = data => {
-        //Passphrase validated and Employee is registered successfully.
-        //Login to continue.
-      };
-
-      const failureCallback = error => {
-        console.error(error);
-      };
-
-      //Call validatePassphrase function with the user provided passphrase.
-      bayunCore.validatePassphrase(data.sessionId, passphrase, authorizeEmployeeCallback, successCallback, failureCallback);
-    }
-  }
-};
-
 const successCallback = data => {
   //Employee Registered Successfully
   //Login to continue.
+  login()
 };
 
 const failureCallback = error => {
-  console.error(error);
+  setError(error)
 };
 
 function ready() {
@@ -404,6 +388,10 @@ function ready() {
 }
 
 $.when('click', '[data-submit]', (event) => {
+  const companyName = getCompanyName()
+  const companyEmployeeId = getEmployeeId()
+  const email = getEmail()
+
   if(ready()) {
     bayunCore.registerEmployeeWithoutPassword(
       '', //sessionId,
