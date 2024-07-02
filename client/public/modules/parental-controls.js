@@ -1,5 +1,5 @@
 import module from '@silly/tag'
-import { getSession, clearSession } from './comedy-notebook.js'
+import { bayunCore } from '@sillonious/vault'
 import { getMyGroups, getOtherGroups } from './party-chat.js'
 import { setRoom, getRoom } from './chat-room.js'
 
@@ -135,6 +135,7 @@ const lolol = [
 const { laugh } = lolol[0].lol[0]
 let lastLaugh = laugh
 let lastSidebar = false
+let lastAvatar = false
 
 const $ = module('parental-controls', {
   content: '...',
@@ -143,22 +144,64 @@ const $ = module('parental-controls', {
   activeWorld: 'sillyz.computer',
   chatRooms: [],
   sidebar: false,
+  avatar: false,
   lololID: 0,
   lolID: 0
 })
 
 outLoud(laugh, 0, 0)
 
-getMyGroups().then(chatRooms => $.teach({ chatRooms }))
+getMyGroups().then(chatRooms => {
+  $.teach({ chatRooms })
+})
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
-  const { sidebar, laugh, saga, lolID, lololID, chatRooms } = $.learn()
+  const { avatar, sidebar, laugh, saga, lolID, lololID, chatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
 
-  const authChip = `
-    <poker-face></poker-face>
+  const authChip = sessionId ? `
+    <img data-avatar src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" alt="" />
+    <div class="tongue">
+      <div class="console">
+        <div class="data">
+          ${companyName}
+        </div>
+      </div>
+      <div class="player">
+        <div class="data">
+          ${companyEmployeeId}
+        </div>
+      </div>
+      <button data-disconnect>
+        Disconnect
+      </button>
+      ${sessionId && chatRooms ? `
+        <div class="heading-label">Chat</div>
+        ${chatRooms.map(chat).join('')}
+      ` : ``}
+    </div>
+  ` : `
+    <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
+    <div class="tongue">
+      <form method="post" class="quick-auth">
+        <div class="console">
+          <input type="text" placeholder="console" name="companyName" />
+        </div>
+        <div class="player">
+          <input placeholder="player" name="companyEmployeeId" />
+        </div>
+        <div class="password">
+          <input type="password" name="password" />
+        </div>
+
+        <button type="submit">
+          Connect
+        </button>
+      </form>
+    </div>
   `
+
 
   if(laugh !== lastLaugh && target.querySelector('iframe')) {
     lastLaugh = laugh
@@ -169,10 +212,19 @@ $.draw((target) => {
   }
 
   if(sidebar !== lastSidebar && target.querySelector('[data-sidebar]')) {
+    lastSidebar = sidebar
     target.querySelector('[data-sidebar]').innerText = sidebar ? 'Play' : 'Pause'
     sidebar
-    ? target.querySelector('data-tooltip').classList.add('sidebar')
-    : target.querySelector('data-tooltip').classList.remove('sidebar')
+      ? target.querySelector('data-tooltip').classList.add('sidebar')
+      : target.querySelector('data-tooltip').classList.remove('sidebar')
+    return
+  }
+
+  if(avatar !== lastAvatar && target.querySelector('[data-sidebar]')) {
+    lastAvatar = avatar
+    avatar
+      ? target.querySelector('.control-avatar').classList.add('show')
+      : target.querySelector('.control-avatar').classList.remove('show')
     return
   }
 
@@ -184,6 +236,9 @@ $.draw((target) => {
         </button>
       </div>
       <div class="control-tab-list">
+        <div class="control-avatar">
+          ${authChip}
+        </div>
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
@@ -192,11 +247,6 @@ $.draw((target) => {
         }).join('')}
 
         <hr>
-        ${sessionId ? `
-          <div class="heading-label">Chat</div>
-          ${chatRooms.map(chat).join('')}
-        ` : ``}
-        ${authChip}
       </div>
       <div class="control-view ${sidebar ? '' : 'no-sidebar' }">
         <iframe src="${saga}" title="Okay"></iframe>
@@ -246,9 +296,14 @@ $.when('click', '[data-laugh]', async (event) => {
 
 $.when('click', '[data-sidebar]', async (event) => {
   const { sidebar } = $.learn()
-  lastSidebar = sidebar
   $.teach({ sidebar: !sidebar })
 })
+
+$.when('click', '[data-avatar]', async (event) => {
+  const { avatar } = $.learn()
+  $.teach({ avatar: !avatar })
+})
+
 
 $.when('click', '[data-group-id]', async (event) => {
   const { groupId } = event.target.dataset
@@ -256,7 +311,60 @@ $.when('click', '[data-group-id]', async (event) => {
   outLoud('chat-room.saga')
 })
 
+function getSession() {
+  return state['ls/bayun'] || {}
+}
 
+function clearSession() {
+  state['ls/bayun'] = {}
+}
+
+function setSession({ sessionId, companyName, companyEmployeeId }) {
+  state['ls/bayun'] = {
+    sessionId,
+    companyName,
+    companyEmployeeId
+  }
+}
+
+$.when('submit', '.quick-auth', async (event) => {
+  event.preventDefault()
+
+  const companyEmployeeId = event.target.companyEmployeeId.value
+  const companyName = event.target.companyName.value
+  const password = event.target.password.value
+
+  const successCallback = async data => {
+    const {
+      sessionId,
+    } = data
+
+    setSession({ sessionId, companyName, companyEmployeeId })
+  };
+
+  const failureCallback = error => {
+    $.teach({ error: `${error}` })
+  };
+
+  bayunCore.loginWithPassword(
+    '', //sessionId,
+    companyName,
+    companyEmployeeId,
+    password,
+    true, //autoCreateEmployee,
+    null, // TODO: @bayun, what is?
+    noop.bind('securityQuestionsCallback'),
+    noop.bind('passphraseCallback'),
+    successCallback,
+    failureCallback
+  );
+})
+
+function noop(){}
+
+$.when('click', '[data-disconnect]', async () => {
+  clearSession()
+})
 
 function outLoud(nextLaugh, lolID, lololID) {
   const { laugh, activeDialect, activeWorld } = $.learn()
@@ -268,7 +376,6 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: linear-gradient(165deg, rgba(255,255,255,.85) 60%, rgba(255,255,255,.15));
     overflow: hidden;
     position: relative;
   }
@@ -276,7 +383,7 @@ $.style(`
   & .control-toggle {
     position: absolute;
     left: 0;
-    top: 2rem;
+    top: 1rem;
     z-index: 10;
   }
 
@@ -360,6 +467,23 @@ $.style(`
     z-index: 2;
   }
 
+  & .control-avatar {
+    overflow: auto;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    max-width: 100%;
+    width: 320px;
+    pointer-events: none;
+  }
+
+  & .control-avatar.show {
+
+  }
+
   & data-tooltip,
   & xml-html,
   & data-tooltip .control {
@@ -412,5 +536,85 @@ $.style(`
     height: 100%;
     border: none;
   }
+
+  & .control-avatar {
+  }
+
+  & .control-avatar button {
+    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
+    background-color: lime;
+    color: white;
+    display: block;
+    border: 0;
+    border-radius: 0 0 1rem 1rem;
+    line-height: 1;
+    width: 4rem;
+    width: 100%;
+    text-align: left;
+    padding: 1rem;
+    transition: all 200ms ease-in-out;
+    flex: none;
+  }
+
+  & .control-avatar [data-disconnect] {
+    background-color: orange;
+  }
+
+
+  & .control-avatar button:hover,
+  & .control-avatar button:focus {
+    background-color: rebeccapurple;
+    color: white;
+  }
+
+  & .player {
+  }
+
+  & .control-avatar .console {
+    background: rgba(128,128,128,.5);
+    padding-top: 3rem;
+  }
+
+  & .control-avatar input {
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    padding: 1rem;
+    max-width: 100%;
+  }
+
+  & .control-avatar .data {
+    padding: 1rem;
+  }
+
+
+  & .control-avatar [data-avatar] {
+    max-width: 64px;
+    border-radius: 100%;
+    aspect-ratio: 1;
+    position: absolute;
+    top: .5rem;
+    right: .5rem;
+    border: 3px solid var(--wheel-0-6, dodgerblue);
+    z-index: 10;
+    pointer-events: all;
+  }
+
+  & .tongue {
+    background: rgba(0,0,0,.85);
+    height: 100%;
+    color: rgba(255,255,255,.85);
+    opacity: 0;
+    transition: opacity 200ms ease-in-out;
+    overflow: hidden;
+    width: 100%;
+    pointer-events: none;
+  }
+
+  & .show .tongue {
+    opacity: 1;
+    pointer-events: all;
+  }
+
 `)
 
