@@ -163,19 +163,23 @@ $.draw((target) => {
   const authChip = sessionId ? `
     <img data-avatar src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" alt="" />
     <div class="tongue">
-      <div class="console">
-        <div class="data">
-          ${companyName}
+      <div class="quick-auth">
+        <div class="console">
+          <label>Company</label>
+          <div class="companyName">
+            ${companyName}
+          </div>
         </div>
-      </div>
-      <div class="player">
-        <div class="data">
-          ${companyEmployeeId}
+        <div class="player">
+          <label>Identity</label>
+          <div class="companyEmployeeId">
+            ${companyEmployeeId}
+          </div>
         </div>
+        <button class="auth-button" data-disconnect>
+          Disconnect
+        </button>
       </div>
-      <button class="auth-button" data-disconnect>
-        Disconnect
-      </button>
       ${sessionId && chatRooms ? `
         <div class="heading-label">Chat</div>
         ${chatRooms.map(chat).join('')}
@@ -186,12 +190,15 @@ $.draw((target) => {
     <div class="tongue">
       <form method="post" class="quick-auth">
         <div class="console">
+          <label>Company</label>
           <input type="text" placeholder="console" name="companyName" />
         </div>
         <div class="player">
+          <label>Identity</label>
           <input placeholder="player" name="companyEmployeeId" />
         </div>
         <div class="password">
+          <label>Password</label>
           <input type="password" name="password" />
         </div>
 
@@ -235,7 +242,7 @@ $.draw((target) => {
           Pause
         </button>
       </div>
-      <div class="control-tab-list">
+      <div class="control-tab-list ${avatar ? 'multiplayer': ''}">
         <div class="control-avatar">
           ${authChip}
         </div>
@@ -378,6 +385,20 @@ $.style(`
     height: 100%;
     overflow: hidden;
     position: relative;
+  }
+
+  & .quick-auth {
+    background: rgba(0,0,0,.85);
+    border-radius: 1rem;
+    overflow: hidden;
+  }
+
+  & .quick-auth label {
+    color: rgba(255,255,255,.65);
+    padding: 0 1rem;
+    text-transform: uppercase;
+    font-size: .85rem;
+    font-weight: 800;
   }
 
   & .control-toggle {
@@ -582,12 +603,18 @@ $.style(`
     border: none;
     background: transparent;
     color: rgba(255,255,255,.85);
-    padding: 1rem;
+    padding: .5rem 1rem;
+    margin-bottom: .5rem;
     max-width: 100%;
   }
 
-  & .control-avatar .data {
-    padding: 1rem;
+  & .control-avatar .companyName {
+    padding: .5rem 1rem;
+    margin-bottom: .5rem;
+  }
+  & .control-avatar .companyEmployeeId {
+    padding: .5rem 1rem;
+    margin-bottom: .5rem;
   }
 
 
@@ -604,7 +631,7 @@ $.style(`
   }
 
   & .tongue {
-    background: linear-gradient(45deg, rgba(0,0,0,1), rgba(0,0,0,.65)), var(--wheel-0-6);
+    background: linear-gradient(45deg, rgba(255,255,255,.75), rgba(255,255,255,.5)), var(--wheel-0-6);
     height: 100%;
     color: rgba(255,255,255,.85);
     opacity: 0;
@@ -621,6 +648,10 @@ $.style(`
   & .multiplayer .tongue {
     opacity: 1;
     pointer-events: all;
+  }
+
+  & .password {
+    background: black;
   }
 
 `)
