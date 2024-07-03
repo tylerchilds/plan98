@@ -1,9 +1,24 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
+import { getCompanies } from './bayun-wizard.js'
 import { getMyGroups, getOtherGroups } from './party-chat.js'
 import { setRoom, getRoom } from './chat-room.js'
 
-const raw = '/public'
+const companies = getCompanies().map((company) => {
+  return `
+    <option value="${company}">
+      ${company}
+    </option>
+  `
+}).join('')
+
+const companiesField = `
+  <label>Company</label>
+  <select name="companyName" class="companyName">
+    ${companies}
+  </select>
+`
+
 const currentWorkingDirectory = '/sagas/'
 
 const lolol = [
@@ -154,9 +169,14 @@ outLoud(laugh, 0, 0)
 getMyGroups().then(chatRooms => {
   $.teach({ chatRooms })
 })
+
+getOtherGroups().then(otherChatRooms => {
+  $.teach({ otherChatRooms })
+})
+
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
-  const { avatar, sidebar, laugh, saga, lolID, lololID, chatRooms } = $.learn()
+  const { avatar, sidebar, laugh, saga, lolID, lololID, chatRooms, otherChatRooms } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
 
@@ -180,18 +200,24 @@ $.draw((target) => {
           Disconnect
         </button>
       </div>
-      ${sessionId && chatRooms ? `
-        <div class="heading-label">Chat</div>
-        ${chatRooms.map(chat).join('')}
-      ` : ``}
+      <div class="tastebuds">
+        ${sessionId && chatRooms ? `
+          <div class="heading-label">Chat</div>
+          ${chatRooms.map(chat).join('')}
+        ` : ``}
+        ${sessionId && otherChatRooms ? `
+          <div class="heading-label">Other Chats</div>
+          ${otherChatRooms.map(chat).join('')}
+        ` : ``}
+
+      </div>
     </div>
   ` : `
     <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
     <div class="tongue">
       <form method="post" class="quick-auth">
         <div class="console">
-          <label>Company</label>
-          <input type="text" placeholder="console" name="companyName" />
+          ${companiesField}
         </div>
         <div class="player">
           <label>Identity</label>
@@ -208,7 +234,6 @@ $.draw((target) => {
       </form>
     </div>
   `
-
 
   if(laugh !== lastLaugh && target.querySelector('iframe')) {
     lastLaugh = laugh
@@ -318,6 +343,22 @@ $.when('click', '[data-group-id]', async (event) => {
   outLoud('chat-room.saga')
 })
 
+$.when('click', '.other-groups button', (event) => {
+  const { sessionId } = getSession()
+  const { id } = event.target.dataset
+  outLoud('chat-room.saga')
+  bayunCore.joinPublicGroup(sessionId, id)
+    .then(result => {
+      getMyGroups()
+      activateGroup(sessionId, id)
+    })
+    .catch(error => {
+          console.log("Error caught");
+          console.log(error);
+    });
+})
+
+
 function getSession() {
   return state['ls/bayun'] || {}
 }
@@ -347,6 +388,10 @@ $.when('submit', '.quick-auth', async (event) => {
     } = data
 
     setSession({ sessionId, companyName, companyEmployeeId })
+
+    getMyGroups().then(chatRooms => {
+      $.teach({ chatRooms })
+    })
   };
 
   const failureCallback = error => {
@@ -636,13 +681,16 @@ $.style(`
     color: rgba(255,255,255,.85);
     opacity: 0;
     transition: opacity 200ms ease-in-out;
-    overflow: hidden;
+    overflow: auto;
     width: 100%;
     pointer-events: none;
+    padding: 1rem;
+  }
+
+  & .tastebuds {
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    padding: 1rem;
   }
 
   & .multiplayer .tongue {
@@ -654,5 +702,12 @@ $.style(`
     background: black;
   }
 
+  & .console select {
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    border: none;
+    width: 100%;
+    display: block;
+  }
 `)
 
