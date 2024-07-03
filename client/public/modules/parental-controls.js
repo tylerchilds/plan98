@@ -173,7 +173,7 @@ $.draw((target) => {
           ${companyEmployeeId}
         </div>
       </div>
-      <button data-disconnect>
+      <button class="auth-button" data-disconnect>
         Disconnect
       </button>
       ${sessionId && chatRooms ? `
@@ -195,7 +195,7 @@ $.draw((target) => {
           <input type="password" name="password" />
         </div>
 
-        <button type="submit">
+        <button class="auth-button" type="submit">
           Connect
         </button>
       </form>
@@ -223,8 +223,8 @@ $.draw((target) => {
   if(avatar !== lastAvatar && target.querySelector('[data-sidebar]')) {
     lastAvatar = avatar
     avatar
-      ? target.querySelector('.control-avatar').classList.add('show')
-      : target.querySelector('.control-avatar').classList.remove('show')
+      ? target.querySelector('.control-tab-list').classList.add('multiplayer')
+      : target.querySelector('.control-tab-list').classList.remove('multiplayer')
     return
   }
 
@@ -411,6 +411,9 @@ $.style(`
     z-index: 3;
     overflow-x: hidden;
   }
+  & .multiplayer.control-tab-list {
+    overflow: hidden;
+  }
   & .control-tab {
     display: block;
     border: 0;
@@ -540,7 +543,7 @@ $.style(`
   & .control-avatar {
   }
 
-  & .control-avatar button {
+  & .control-avatar .auth-button {
     background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
     background-color: lime;
     color: white;
@@ -601,7 +604,7 @@ $.style(`
   }
 
   & .tongue {
-    background: rgba(0,0,0,.85);
+    background: linear-gradient(45deg, rgba(0,0,0,1), rgba(0,0,0,.65)), var(--wheel-0-6);
     height: 100%;
     color: rgba(255,255,255,.85);
     opacity: 0;
@@ -609,9 +612,13 @@ $.style(`
     overflow: hidden;
     width: 100%;
     pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 1rem;
   }
 
-  & .show .tongue {
+  & .multiplayer .tongue {
     opacity: 1;
     pointer-events: all;
   }
