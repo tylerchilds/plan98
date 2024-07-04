@@ -325,6 +325,7 @@ $.style(`
     --local-x: 0;
     --local-y: 100px;
     overflow: auto;
+    height: 100%;
   }
 
   & .grid {
@@ -395,4 +396,5 @@ $.style(`
   & button .field {
     transform: rotateZ(45deg);
   }
+
 `)

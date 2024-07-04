@@ -28,6 +28,10 @@ const lolol = [
       {
         label: 'Start',
         laugh: 'start.saga'
+      },
+      {
+        label: 'Secure',
+        laugh: 'secure.saga'
       }
     ]
   },
@@ -166,13 +170,16 @@ const $ = module('parental-controls', {
 
 outLoud(laugh, 0, 0)
 
-getMyGroups().then(chatRooms => {
-  $.teach({ chatRooms })
-})
+function refreshRooms() {
+  getMyGroups().then(chatRooms => {
+    $.teach({ chatRooms })
+  })
 
-getOtherGroups().then(otherChatRooms => {
-  $.teach({ otherChatRooms })
-})
+  getOtherGroups().then(otherChatRooms => {
+    $.teach({ otherChatRooms })
+  })
+}
+refreshRooms()
 
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
@@ -207,7 +214,7 @@ $.draw((target) => {
         ` : ``}
         ${sessionId && otherChatRooms ? `
           <div class="heading-label">Other Chats</div>
-          ${otherChatRooms.map(chat).join('')}
+          ${otherChatRooms.map(otherChat).join('')}
         ` : ``}
 
       </div>
@@ -299,9 +306,17 @@ function scrollSidebar() {
   list.scrollTop = this.dataset.top
 }
 
+function otherChat(group) {
+  return `
+    <button class="out-group control-tab" data-group-id="${group.groupId}">
+      ${group.groupName}
+    </button>
+  `
+}
+
 function chat(group) {
   return `
-    <button class="control-tab" data-group-id="${group.groupId}">
+    <button class="in-group control-tab" data-group-id="${group.groupId}">
       ${group.groupName}
     </button>
   `
@@ -337,25 +352,22 @@ $.when('click', '[data-avatar]', async (event) => {
 })
 
 
-$.when('click', '[data-group-id]', async (event) => {
+$.when('click', '.in-group', async (event) => {
   const { groupId } = event.target.dataset
   setRoom(groupId)
   outLoud('chat-room.saga')
 })
 
-$.when('click', '.other-groups button', (event) => {
+$.when('click', '.out-group', async (event) => {
   const { sessionId } = getSession()
-  const { id } = event.target.dataset
-  outLoud('chat-room.saga')
-  bayunCore.joinPublicGroup(sessionId, id)
-    .then(result => {
-      getMyGroups()
-      activateGroup(sessionId, id)
-    })
-    .catch(error => {
-          console.log("Error caught");
-          console.log(error);
-    });
+  const { groupId } = event.target.dataset
+  await bayunCore.joinPublicGroup(sessionId, groupId).catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+
+  refreshRooms()
+  setRoom(groupId)
 })
 
 
@@ -388,10 +400,7 @@ $.when('submit', '.quick-auth', async (event) => {
     } = data
 
     setSession({ sessionId, companyName, companyEmployeeId })
-
-    getMyGroups().then(chatRooms => {
-      $.teach({ chatRooms })
-    })
+    refreshRooms()
   };
 
   const failureCallback = error => {

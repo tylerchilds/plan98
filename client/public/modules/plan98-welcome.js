@@ -70,7 +70,23 @@ $.draw((target) => {
   if(lite) {
     return `
       <div name="square">
+        <section class="layout">
+          <twgl-demo></twgl-demo>
+          <div class="horizon"></div>
+          <div class="land">
+            <div class="grid-3d"></div>
+            <div class="elements"></div>
+          </div>
+        </section>
         <div class="skybox active">
+          <div class="a">
+          </div>
+          <div class="c">
+          </div>
+          <div class="b">
+          </div>
+          <div class="d">
+          </div>
           <div class="e">
             <div style="display: grid;place-content: center;">
               <sticky-note>
@@ -221,6 +237,7 @@ $.style(`
     max-height: 80vh;
     animation: &-rainbow-background 10000ms ease-in-out infinite alternate-reverse;
     position: relative;
+    overflow: hidden;
   }
 
   &::before {

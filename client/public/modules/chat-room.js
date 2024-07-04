@@ -24,10 +24,20 @@ export function setRoom(r) {
   state[`ls/${$.link}`].room = r
 }
 
+export function joinRoom(r) {
+  const {
+    sessionId,
+  } = getSession()
+
+  bayunCore.joinPublicGroup(sessionId, r).catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+}
+
 export function getRoom() {
   return state[`ls/${$.link}`].room
 }
-
 
 async function connect(target) {
   const {
@@ -429,7 +439,7 @@ $.when('click', '.message', (event) => {
 
   const { text } = $.learn().jokes[id]
   showModal(`
-    <div style="border-radius: 1rem; padding: 1rem; background: rgba(0,0,0,.85); color: rgba(255,255,255,.85);">
+    <div class="full-child-xml-html" style="padding: 1rem; background: rgba(0,0,0,1); color: rgba(255,255,255,.85); position: absolute; inset: 0;">
       ${render(text)}
     </div>
   `)

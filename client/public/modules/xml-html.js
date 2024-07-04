@@ -4,5 +4,8 @@ document.body.insertAdjacentHTML("beforeend", `
     sillonious-brand > xml-html {
       height: 100%;
     }
+    .full-child-xml-html xml-html {
+      height: 100%;
+    }
   </style>
 `)
