@@ -71,10 +71,8 @@ $.draw((target) => {
     return `
       <div name="square">
         <section class="layout">
-          <twgl-demo></twgl-demo>
           <div class="horizon"></div>
           <div class="land">
-            <div class="grid-3d"></div>
             <div class="elements"></div>
           </div>
         </section>
