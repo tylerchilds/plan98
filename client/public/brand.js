@@ -35,8 +35,8 @@ export const doingBusinessAs = {
     mascot: 'Silly Sillonious',
     saga: emeraldOfTime,
     contact: reverseProxyLookup,
-    brandHue: 55,
-    brandRange: 45,
+    brandHue: 0,
+    brandRange: 360,
     color: new Color('lch', [50, 75, 55])
       .display()
       .toString({format: 'hex'}),
