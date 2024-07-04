@@ -17,12 +17,36 @@ tag: middle-earth
 
 You are a wonderfully complex person with many interests.
 
-To keep track of all your favorite things, I'm sure you have a handy, dandy notebook.
+@ Steve
+> To keep track of all your favorite things, I'm sure you have a handy, dandy notebook.
 
-I too have a handy dandy notebook.
+@ Joe
+> I too have a handy dandy notebook.
 
-Can I show you my handy dandy notebook?
+@ Ty
+> Can I show you my handy dandy notebook?
 
+# watch
+<app-simulator
+class: timemachine
+app: comedy-notebook
+
+# phone
+<app-simulator
+class: iphone
+app: comedy-notebook
+
+# tablet
+<app-simulator
+class: ipad
+app: comedy-notebook
+
+# tv
+<app-simulator
+class: full
+app: comedy-notebook
+
+# as is
 <comedy-notebook
 
 & Pneumatic Unix

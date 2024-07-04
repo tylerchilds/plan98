@@ -200,6 +200,19 @@ async function router(request, context) {
     }
   }
 
+  if(pathname.startsWith('/app/')) {
+    const [app] = pathname.split('/app/')[1].split('/')
+    const file = await showApp(request, app)
+
+    console.log(file)
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
   if(pathname === '/news.xml') {
     const feed = new Podcast({
         title: 'title',
@@ -338,6 +351,20 @@ async function home(request, business) {
   } 
   return file
 }
+
+async function showApp(request, tag) {
+  const dom = await page()
+  dom.body.insertAdjacentHTML('afterbegin', `
+    <sillonious-brand>
+      <${tag}></${tag}>
+    </sillonious-brand>
+  `)
+  // remove the lazy-bootstrap to lock the document
+  //dom.getElementById('lazy-bootstrap').remove()
+  dom.getElementById('main').remove()
+  return `<!DOCTYPE html>${dom.documentElement}`
+}
+
 
 
 async function about(headers, request) {
