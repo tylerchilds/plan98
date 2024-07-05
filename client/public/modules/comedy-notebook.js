@@ -51,7 +51,10 @@ $.draw((target) => {
 
   const focus = document.activeElement
   target.innerHTML = `
-    <div class="page" >
+    <div class="page">
+      <button class="action-accordion">
+        &amp;
+      </button>
       <div class="actions">
         <button data-new>
           New Joke
@@ -62,15 +65,15 @@ $.draw((target) => {
         <button data-logout>
           Logout
         </button>
-
       </div>
       <div class="setlist">
         ${Object.keys(jokes).map((id) => {
           return `
             <div name="joke" class="index-card">
-              <input name="setup" type="text" data-id="${id}" value="${jokes[id].setup}" />
-              <textarea name="punchline" data-id="${id}" style="background-image: ${lines}">${jokes[id].punchline}</textarea>
-              <div class="joke-actions">
+              <button class="action-accordion">
+                &amp;
+              </button>
+              <div class="actions">
                 <button data-preview data-id="${id}">
                   Preview
                 </button>
@@ -78,6 +81,8 @@ $.draw((target) => {
                   Save
                 </button>
               </div>
+              <input name="setup" type="text" data-id="${id}" value="${jokes[id].setup}" />
+              <textarea name="punchline" data-id="${id}" style="background-image: ${lines}">${jokes[id].punchline}</textarea>
             </div>
           `
         }).join('')}
@@ -86,6 +91,9 @@ $.draw((target) => {
   `
 })
 
+$.when('click', '.action-accordion', async (event) => {
+  event.target.classList.toggle('active')
+})
 $.when('click', '[data-save]', async (event) => {
   const { id } = event.target.dataset
   const setup = event.target.closest($.link).querySelector(`[data-id="${id}"][name="setup"]`).value
@@ -390,6 +398,24 @@ $.style(`
     outline-color: orange
   }
 
+  & .action-accordion {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0,0,0,.65);
+    border: 2px solid dodgerblue;
+    color: rgba(255,255,255,.85);
+    border-radius: 100%;
+    opacity: .5;
+    transition: all 200ms ease-in-out;
+  }
+  & .action-accordion:hover {
+    background: dodgerblue;
+    border: 2px solid rgba(255,255,255,1);
+    opacity: 1;
+  }
   & .actions {
     margin: 0 1rem;
     position: absolute;
@@ -397,6 +423,11 @@ $.style(`
     right: 0;
     text-align: right;
     z-index: 10;
+    display: none;
+  }
+
+  & .action-accordion.active + .actions {
+    display: block;
   }
 
   & .joke-actions {
@@ -440,12 +471,7 @@ $.style(`
     padding: 0 0 5rem;
   }
 
-  & .actions {
-    grid-area: actions;
-  }
-
   & .setlist {
-    grid-area: list;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(5in, 1fr));
     gap: 2rem;
