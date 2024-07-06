@@ -173,15 +173,16 @@ $.draw((target) => {
   const fadeOut = nextPanel && activePanel !== nextPanel
 
   const perspective = `
+    <button class="action-accordion">
+      &amp;
+    </button>
+    <div class="actions">
+      <button data-write>Program</button>
+      <button data-read>Play</button>
+      <button data-perform>Pitch</button>
+      ${play ? `<button data-play>Play</button>` : ''}
+    </div>
     <div class="grid" data-panel="${activePanel}">
-      <div name="transport">
-        <div name="actions">
-          <button data-write>Program</button>
-          <button data-read>Play</button>
-          <button data-perform>Pitch</button>
-          ${play ? `<button data-play>Play</button>` : ''}
-        </div>
-      </div>
       <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
         ${view}
       </transition>
@@ -236,6 +237,10 @@ function sourceFile(target) {
       return data
     })()
 }
+
+$.when('click', '.action-accordion', async (event) => {
+  event.target.classList.toggle('active')
+})
 
 $.when('input', '[name="typewriter"]', (event) => {
   const src = source(event.target)
@@ -484,23 +489,13 @@ $.style(`
     line-height: 2rem;
   }
   & .grid {
-    display: grid;
-    grid-template-rows: 1fr;
     height: 100%;
   }
 
   & [name="transport"] {
-    overflow-x: auto;
-    max-width: calc(100vw - 1.5rem - 1px);
-    position: absolute;
-    right: 0;
-    top: 2rem;
-    z-index: 3;
-    overflow: auto;
   }
 
-  & [name="navi"] button,
-  & [name="actions"] button {
+  & [name="navi"] button {
     background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.25));
     background-color: rgba(0,0,0,.85);
     border-radius: .5rem;
@@ -522,21 +517,71 @@ $.style(`
   }
 
   & [name="navi"] button:hover,
-  & [name="navi"] button:focus,
-  & [name="actions"] button:hover,
-  & [name="actions"] button:focus {
+  & [name="navi"] button:focus {
     background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     color: white;
   }
 
-  & [name="actions"] {
-    display: inline-flex;
-    justify-content: end;
-    border: 1px solid rgba(255,255,255,.15);
-    gap: .25rem;
-    padding-right: 1rem;
-    border-radius: 1.5rem 0 0 1.5rem;
+  & .action-accordion {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0,0,0,.65);
+    border: 2px solid dodgerblue;
+    color: rgba(255,255,255,.85);
+    border-radius: 100%;
+    opacity: .5;
+    transition: all 200ms ease-in-out;
+    z-index: 10;
   }
+  & .action-accordion:hover {
+    background: dodgerblue;
+    border: 2px solid rgba(255,255,255,1);
+    opacity: 1;
+  }
+  & .actions {
+    margin: 0 1rem;
+    position: absolute;
+    top: 4rem;
+    right: 0;
+    text-align: right;
+    z-index: 10;
+    display: none;
+  }
+
+  & .action-accordion.active + .actions {
+    display: block;
+  }
+
+  & .actions button {
+    background: lemonchiffon;
+    color: saddlebrown;
+    border: none;
+    line-height: 1rem;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    padding: .5rem;
+    font-size: 1rem;
+    --v-font-mono: 0;
+    --v-font-casl: 1;
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & .actions button:focus,
+  & .joke-actions button:focus,
+  & .actions button:hover,
+  & .joke-actions button:hover {
+    background: saddlebrown;
+    color: lemonchiffon;
+  }
+
+
 
   & [name="page"] {
     margin: 0;
