@@ -1,6 +1,5 @@
 body {
   margin: 0 auto;
-  background-image: linear-gradient(170deg, rgba(0,0,0,.85) 10%, rgba(0,0,0,.5), rgba(0,0,0,.25));
   background-position: scroll;
   color: rgba(0,0,0,.85);
 }

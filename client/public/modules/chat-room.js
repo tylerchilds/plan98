@@ -174,19 +174,10 @@ $.draw(target => {
     <button data-info>
       Group Info
     </button>
-    <button data-invite>
-      Invite
-    </button>
-    <button data-kick>
-      Kick
-    </button>
     <button data-leave>
       Leave
     </button>
-    <button data-delete disabled>
-      Delete
-    </button>
-  ` : `
+    ` : `
     <button data-info>
       Group Info
     </button>
@@ -626,7 +617,16 @@ $.when('click', '[data-info]', (event) => {
       <div class="groupName">
         ${groupName}
       </div>
+      Add names below to invite them to the group!
+      <br>
+      <br>
+      <bayun-addmembers></bayun-addmembers>
+      <button class="button" data-add>Invite to Group</button>
+
       ${view}
+      <button class="button" data-delete disabled>
+        Delete
+      </button>
     </chat-room>
   `)
 });
@@ -660,26 +660,6 @@ $.when('click', '[data-add]', async (event) => {
     }
   });
 
-
-$.when('click', '[data-invite]', async (event) => {
-  const room = getRoom()
-  showModal(`
-    <chat-room shell="true">
-      Add names below to invite them to the group!
-      <br>
-      <br>
-      <bayun-addmembers></bayun-addmembers>
-      <button class="button" data-add>Invite to Group</button>
-    </chat-room>
-  `)
-})
-
-$.when('click', '[data-kick]', (event) => {
-  const room = getRoom()
-  const {
-    sessionId,
-  } = getSession()
-});
 
 $.when('click', '[data-remove]', (event) => {
   const {

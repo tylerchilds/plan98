@@ -496,12 +496,10 @@ $.style(`
   }
 
   & [name="navi"] button {
-    background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.25));
-    background-color: rgba(0,0,0,.85);
-    border-radius: .5rem;
+    background: lemonchiffon;
+    color: saddlebrown;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     border: none;
-    color: white;
     height: 2rem;
     transition: color 100ms;
     padding: .5rem 1rem;
@@ -518,8 +516,8 @@ $.style(`
 
   & [name="navi"] button:hover,
   & [name="navi"] button:focus {
-    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    color: white;
+    background: saddlebrown;
+    color: lemonchiffon;
   }
 
   & .action-accordion {
@@ -594,7 +592,7 @@ $.style(`
 
   & [name="navi"] {
     position: absolute;
-    reft: 0;
+    right: 60px;
     margin: auto;
     top: 0;
     height: 2rem;
