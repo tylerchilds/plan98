@@ -100,6 +100,27 @@ async function connect(target) {
     }
   )
   .subscribe()
+
+  bayunCore.getGroupById(sessionId, room)
+    .then(result => {
+      console.log("Response received for getGroupById.");
+      console.log(result);
+      const groupList = result.groupMembers.reduce((all, one) => {
+        if(!all[one.companyName]) {
+          all[one.companyName] = {
+            members: []
+          }
+        }
+        all[one.companyName].members.push(one.companyEmployeeId)
+        return all
+      }, {})
+      $.teach({ groupName: result.groupName, groupList })
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
+
 }
 
 function mergeJoke(state, payload) {
@@ -142,36 +163,44 @@ $.draw(target => {
       <comedy-notebook></comedy-notebook>
     </sticky-note>
   `
-  const { jokes } = $.learn()
+  const { groupList, jokes } = $.learn()
   const room = getRoom()
   if(!room) {
     return 'Please Consider...'
   }
   const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
+  const actions = groupList && groupList[companyName]?.members.includes(companyEmployeeId) ? `
+    <button data-info>
+      Group Info
+    </button>
+    <button data-invite>
+      Invite
+    </button>
+    <button data-kick>
+      Kick
+    </button>
+    <button data-leave>
+      Leave
+    </button>
+    <button data-delete disabled>
+      Delete
+    </button>
+  ` : `
+    <button data-info>
+      Group Info
+    </button>
+    <button data-join>
+      Join
+    </button>
+  `
+
   const view = `
     <button class="action-accordion">
       &amp;
     </button>
     <div class="actions">
-      <button data-join>
-        Join
-      </button>
-      <button data-info>
-        Group Info
-      </button>
-      <button data-invite>
-        Invite
-      </button>
-      <button data-kick>
-        Kick
-      </button>
-      <button data-leave>
-        Leave
-      </button>
-      <button data-delete disabled>
-        Delete
-      </button>
+      ${actions}
     </div>
 
     <div class="log">
@@ -558,6 +587,7 @@ $.when('click', '[data-join]', async (event) => {
   } = getSession()
   const room = getRoom()
 
+  debugger
   await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
     console.log("Error caught");
     console.log(error);
@@ -569,48 +599,36 @@ $.when('click', '[data-info]', (event) => {
   const {
     sessionId,
   } = getSession()
-  bayunCore.getGroupById(sessionId, room)
-    .then(result => {
-      console.log("Response received for getGroupById.");
-      console.log(result);
-      const list = result.groupMembers.reduce((all, one) => {
-        if(!all[one.companyName]) {
-          all[one.companyName] = {
-            members: []
-          }
-        }
-        all[one.companyName].members.push(one.companyEmployeeId)
-        return all
-      }, {})
 
-      const groupedList = Object.keys(list).map(company => {
-        const items = list[company].members.map(unix => {
-          return `
-            <div class="unix-item">
-              ${unix}
-            </div>
-          `
-        }).join('')
-        return `
-          <div class="companyName">
-            ${company}
-          </div>
-          ${items}
-        `
-      }).join('')
-      showModal(`
-        <chat-room shell="true">
-          <div class="groupName">
-            ${result.groupName}
-          </div>
-          ${groupedList}
-        </chat-room>
-      `)
-    })
-    .catch(error => {
-      console.log("Error caught");
-      console.log(error);
-    });
+  const { groupName, groupList } = $.learn()
+
+  const view = Object.keys(groupList).map(company => {
+    const items = groupList[company].members.map(unix => {
+      return `
+        <div class="unix-item">
+          ${unix}
+          <button data-remove data-unix="${unix}" data-company="${company}">
+            Remove
+          </button>
+        </div>
+      `
+    }).join('')
+    return `
+      <div class="companyName">
+        ${company}
+      </div>
+      ${items}
+    `
+  }).join('')
+
+  showModal(`
+    <chat-room shell="true">
+      <div class="groupName">
+        ${groupName}
+      </div>
+      ${view}
+    </chat-room>
+  `)
 });
 
 $.when('click', '[data-add]', async (event) => {
@@ -661,51 +679,6 @@ $.when('click', '[data-kick]', (event) => {
   const {
     sessionId,
   } = getSession()
-  bayunCore.getGroupById(sessionId, room)
-    .then(result => {
-      console.log("Response received for getGroupById.");
-      console.log(result);
-      const list = result.groupMembers.reduce((all, one) => {
-        if(!all[one.companyName]) {
-          all[one.companyName] = {
-            members: []
-          }
-        }
-        all[one.companyName].members.push(one.companyEmployeeId)
-        return all
-      }, {})
-
-      const groupedList = Object.keys(list).map(company => {
-        const items = list[company].members.map(unix => {
-          return `
-            <div class="unix-item">
-              ${unix}
-              <button data-remove data-unix="${unix}" data-company="${company}">
-                Remove
-              </button>
-            </div>
-          `
-        }).join('')
-        return `
-          <div class="companyName">
-            ${company}
-          </div>
-          ${items}
-        `
-      }).join('')
-      showModal(`
-        <chat-room shell="true">
-          <div class="groupName">
-            ${result.groupName}
-          </div>
-          ${groupedList}
-        </chat-room>
-      `)
-    })
-    .catch(error => {
-      console.log("Error caught");
-      console.log(error);
-    });
 });
 
 $.when('click', '[data-remove]', (event) => {

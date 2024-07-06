@@ -361,13 +361,8 @@ $.when('click', '.in-group', async (event) => {
 $.when('click', '.out-group', async (event) => {
   const { sessionId } = getSession()
   const { groupId } = event.target.dataset
-  await bayunCore.joinPublicGroup(sessionId, groupId).catch(error => {
-    console.log("Error caught");
-    console.log(error);
-  });
-
-  refreshRooms()
   setRoom(groupId)
+  outLoud('chat-room.saga')
 })
 
 
