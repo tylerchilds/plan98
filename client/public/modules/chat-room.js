@@ -134,6 +134,7 @@ $.when('input', 'textarea', (event) => {
 })
 
 $.draw(target => {
+  if(target.getAttribute('shell')) return
   const { sessionId, companyEmployeeId, companyName } = getSession()
   connect(target)
   if(!sessionId) return `
@@ -149,6 +150,30 @@ $.draw(target => {
   const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
   const view = `
+    <button class="action-accordion">
+      &amp;
+    </button>
+    <div class="actions">
+      <button data-join>
+        Join
+      </button>
+      <button data-info>
+        Group Info
+      </button>
+      <button data-invite>
+        Invite
+      </button>
+      <button data-kick>
+        Kick
+      </button>
+      <button data-leave>
+        Leave
+      </button>
+      <button data-delete disabled>
+        Delete
+      </button>
+    </div>
+
     <div class="log">
       <div class="content">
         ${Object.keys(jokes).map((id) => {
@@ -197,6 +222,10 @@ $.when('submit', 'form', (event) => {
   send(event)
 })
 
+$.when('click', '.action-accordion', async (event) => {
+  event.target.classList.toggle('active')
+})
+
 async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const {
@@ -233,8 +262,20 @@ $.style(`
     position: relative;
     height: 100%;
     color: white;
-    line-height: 2rem;
     font-size: 1rem;
+  }
+
+  &[shell] {
+    display: block;
+    color: rgba(0,0,0,.85);
+    background: rgba(255,255,255, .65);
+    backdrop-filter: blur(10px);
+    border-radius: 1rem;
+    padding: 1rem;
+    width: 100%;
+    max-width: 320px;
+    max-height: 480px;
+    height: 100%;
   }
 
   & sticky-note {
@@ -425,6 +466,83 @@ $.style(`
   & .originator .avatar {
     display: none;
   }
+
+  & .action-accordion {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 50px;
+    height: 50px;
+    background: rgba(0,0,0,.65);
+    border: 2px solid dodgerblue;
+    color: rgba(255,255,255,.85);
+    border-radius: 100%;
+    opacity: .5;
+    transition: all 200ms ease-in-out;
+    z-index: 10;
+  }
+  & .action-accordion:hover {
+    background: dodgerblue;
+    border: 2px solid rgba(255,255,255,1);
+    opacity: 1;
+  }
+  & .actions {
+    margin: 0 1rem;
+    position: absolute;
+    top: 4rem;
+    right: 0;
+    text-align: right;
+    z-index: 10;
+    display: none;
+  }
+
+  & .action-accordion.active + .actions {
+    display: block;
+  }
+
+  & .actions button {
+    background: lemonchiffon;
+    color: saddlebrown;
+    border: none;
+    line-height: 1rem;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    padding: .5rem;
+    font-size: 1rem;
+    --v-font-mono: 0;
+    --v-font-casl: 1;
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & .actions button:focus,
+  & .joke-actions button:focus,
+  & .actions button:hover,
+  & .joke-actions button:hover {
+    background: saddlebrown;
+    color: lemonchiffon;
+  }
+
+  & .button {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  & .button:focus,
+  & .button:hover {
+    background-color: rebeccapurple;
+    color: white;
+  }
 `)
 
 $.when('scroll', 'textarea', drawLines);
@@ -434,6 +552,216 @@ function drawLines (event) {
   event.target.style.backgroundPosition = `0px ${-scrollTop}px`;
 }
 
+$.when('click', '[data-join]', async (event) => {
+  const {
+    sessionId,
+  } = getSession()
+  const room = getRoom()
+
+  await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+})
+
+$.when('click', '[data-info]', (event) => {
+  const room = getRoom()
+  const {
+    sessionId,
+  } = getSession()
+  bayunCore.getGroupById(sessionId, room)
+    .then(result => {
+      console.log("Response received for getGroupById.");
+      console.log(result);
+      const list = result.groupMembers.reduce((all, one) => {
+        if(!all[one.companyName]) {
+          all[one.companyName] = {
+            members: []
+          }
+        }
+        all[one.companyName].members.push(one.companyEmployeeId)
+        return all
+      }, {})
+
+      const groupedList = Object.keys(list).map(company => {
+        const items = list[company].members.map(unix => {
+          return `
+            <div class="unix-item">
+              ${unix}
+            </div>
+          `
+        }).join('')
+        return `
+          <div class="companyName">
+            ${company}
+          </div>
+          ${items}
+        `
+      }).join('')
+      showModal(`
+        <chat-room shell="true">
+          <div class="groupName">
+            ${result.groupName}
+          </div>
+          ${groupedList}
+        </chat-room>
+      `)
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
+});
+
+$.when('click', '[data-add]', async (event) => {
+  const {
+    sessionId,
+  } = getSession()
+  const room = getRoom()
+  const groupMembers = event.target.closest($.link).querySelector('bayun-addmembers').list || []
+
+  const addMembersResponse = await bayunCore.addMembersToGroup(sessionId,room,groupMembers);
+
+  const addedMembersCount = addMembersResponse.addedMembersCount;
+  console.log("Total Members Added : ",addedMembersCount);
+  //Iterating over the list of error objects
+  if(addMembersResponse.addMemberErrObject.length!=0){
+      let errorList = addMembersResponse.addMemberErrObject;
+
+      for(let i = 0 ; i < errorList.length ; i++){
+        let errorMessage = errorList[i].errorMessage;
+        console.log("Error Message: ",errorMessage);
+        //Iterating over the list of members those who couldn't be added to the group
+        for(let j = 1 ; j <= errorList[i].membersList.length ; j++){
+          let memberDetails = errorList[i].membersList[j-1];
+          console.log("Details for "+(j)+" employee");
+          console.log("company employee ID: ",memberDetails.companyEmployeeId);
+          console.log("company name: ",memberDetails.companyName);
+        }
+      }
+    }
+  });
+
+
+$.when('click', '[data-invite]', async (event) => {
+  const room = getRoom()
+  showModal(`
+    <chat-room shell="true">
+      Add names below to invite them to the group!
+      <br>
+      <br>
+      <bayun-addmembers></bayun-addmembers>
+      <button class="button" data-add>Invite to Group</button>
+    </chat-room>
+  `)
+})
+
+$.when('click', '[data-kick]', (event) => {
+  const room = getRoom()
+  const {
+    sessionId,
+  } = getSession()
+  bayunCore.getGroupById(sessionId, room)
+    .then(result => {
+      console.log("Response received for getGroupById.");
+      console.log(result);
+      const list = result.groupMembers.reduce((all, one) => {
+        if(!all[one.companyName]) {
+          all[one.companyName] = {
+            members: []
+          }
+        }
+        all[one.companyName].members.push(one.companyEmployeeId)
+        return all
+      }, {})
+
+      const groupedList = Object.keys(list).map(company => {
+        const items = list[company].members.map(unix => {
+          return `
+            <div class="unix-item">
+              ${unix}
+              <button data-remove data-unix="${unix}" data-company="${company}">
+                Remove
+              </button>
+            </div>
+          `
+        }).join('')
+        return `
+          <div class="companyName">
+            ${company}
+          </div>
+          ${items}
+        `
+      }).join('')
+      showModal(`
+        <chat-room shell="true">
+          <div class="groupName">
+            ${result.groupName}
+          </div>
+          ${groupedList}
+        </chat-room>
+      `)
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
+});
+
+$.when('click', '[data-remove]', (event) => {
+  const {
+    sessionId
+  } = getSession()
+  const room = getRoom()
+  const { company, unix } = event.target.dataset
+
+  bayunCore.removeMemberFromGroup(
+    sessionId,
+    room,
+    unix,
+    company
+  )
+  .then(result => {
+    console.log("Response received for removeMemberFromGroup.");
+    console.log(result);
+  })
+  .catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+});
+
+$.when('click', '[data-leave]', (event) => {
+  const {
+    sessionId
+  } = getSession()
+  const room = getRoom()
+  bayunCore.leaveGroup(sessionId, room)
+    .then(result => {
+      console.log("Response received for leaveGroup.");
+      console.log(result);
+  })
+  .catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+});
+
+$.when('click', '[data-delete]', (event) => {
+  const {
+    sessionId
+  } = getSession()
+  const room = getRoom()
+  bayunCore.deleteGroup(sessionId, room)
+    .then(result => {
+      console.log("Response received for deleteGroup.");
+      console.log(result);
+  })
+  .catch(error => {
+    console.log("Error caught");
+    console.log(error);
+  });
+});
 $.when('click', '.message', (event) => {
   const { id } = event.target.dataset
 
