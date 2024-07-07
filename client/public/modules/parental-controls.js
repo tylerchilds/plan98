@@ -359,7 +359,6 @@ $.when('click', '.in-group', async (event) => {
 })
 
 $.when('click', '.out-group', async (event) => {
-  const { sessionId } = getSession()
   const { groupId } = event.target.dataset
   setRoom(groupId)
   outLoud('chat-room.saga')

@@ -101,6 +101,8 @@ async function connect(target) {
   )
   .subscribe()
 
+  state[`ls/${$.link}`].groupName = null
+  state[`ls/${$.link}`].groupList = null
   bayunCore.getGroupById(sessionId, room)
     .then(result => {
       console.log("Response received for getGroupById.");
@@ -114,7 +116,9 @@ async function connect(target) {
         all[one.companyName].members.push(one.companyEmployeeId)
         return all
       }, {})
-      $.teach({ groupName: result.groupName, groupList })
+
+      state[`ls/${$.link}`].groupName = result.groupName
+      state[`ls/${$.link}`].groupList = groupList
     })
     .catch(error => {
       console.log("Error caught");
@@ -163,7 +167,9 @@ $.draw(target => {
       <comedy-notebook></comedy-notebook>
     </sticky-note>
   `
-  const { groupList, jokes } = $.learn()
+  const { jokes } = $.learn()
+
+  const { groupList } = state[`ls/${$.link}`]
   const room = getRoom()
   if(!room) {
     return 'Please Consider...'
@@ -178,9 +184,6 @@ $.draw(target => {
       Leave
     </button>
     ` : `
-    <button data-info>
-      Group Info
-    </button>
     <button data-join>
       Join
     </button>
@@ -296,6 +299,7 @@ $.style(`
     max-width: 320px;
     max-height: 480px;
     height: 100%;
+    overflow: auto;
   }
 
   & sticky-note {
@@ -578,7 +582,6 @@ $.when('click', '[data-join]', async (event) => {
   } = getSession()
   const room = getRoom()
 
-  debugger
   await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
     console.log("Error caught");
     console.log(error);
@@ -591,16 +594,21 @@ $.when('click', '[data-info]', (event) => {
     sessionId,
   } = getSession()
 
-  const { groupName, groupList } = $.learn()
+  const { groupList, groupName } = state[`ls/${$.link}`]
 
   const view = Object.keys(groupList).map(company => {
     const items = groupList[company].members.map(unix => {
-      return `
-        <div class="unix-item">
-          ${unix}
+    const removeButton = groupList ? `
           <button data-remove data-unix="${unix}" data-company="${company}">
             Remove
           </button>
+      ` : `
+        hey
+      `
+      return `
+        <div class="unix-item">
+          ${unix}
+          ${removeButton}
         </div>
       `
     }).join('')
