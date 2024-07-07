@@ -21,6 +21,18 @@ const companiesField = `
 
 const currentWorkingDirectory = '/sagas/'
 
+const personalLolol = [
+  {
+    label: 'My',
+    lol: [
+      {
+        label: 'profile',
+        laugh: 'profile.saga'
+      },
+    ]
+  }
+]
+
 const lolol = [
   {
     label: 'Welcome',
@@ -165,7 +177,7 @@ const $ = module('parental-controls', {
   sidebar: false,
   avatar: false,
   lololID: 0,
-  lolID: 0
+  lolID: 0,
 })
 
 outLoud(laugh, 0, 0)
@@ -208,6 +220,13 @@ $.draw((target) => {
         </button>
       </div>
       <div class="tastebuds">
+        ${personalLolol.map((x, index) => {
+          return `
+            <div class="heading-label">${x.label}</div>
+            ${myLol(x.lol, index)}
+          `
+        }).join('')}
+
         ${sessionId && chatRooms ? `
           <div class="heading-label">Chat</div>
           ${chatRooms.map(chat).join('')}
@@ -321,6 +340,17 @@ function chat(group) {
     </button>
   `
 }
+
+function myLol(laughs, lolol) {
+  return laughs.map((y, lol) => {
+    return `
+      <button class="control-tab" data-lolol="${lolol}" data-lol="${lol}" data-laugh="${y.laugh}">
+        ${y.label}
+      </button>
+    `
+  }).join('')
+}
+
 
 function lol(laughs, lolol) {
   const { lololID, lolID } = $.learn()

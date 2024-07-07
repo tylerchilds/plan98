@@ -78,6 +78,9 @@ async function page() {
           ${safeEnv('VAULT_APP_SALT')}
           ${safeEnv('VAULT_BASE_URL')}
           ${safeEnv('VAULT_PUBLIC_KEY')}
+
+          ${safeEnv('BRAID_TEXT_PROXY')}
+          ${safeEnv('STATEBUS_PROXY')}
         }
       }
     </script>

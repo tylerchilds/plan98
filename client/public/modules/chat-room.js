@@ -61,14 +61,14 @@ async function connect(target) {
 
   plan98_group_text.map(async (row) => {
     const text = await bayunCore.unlockText(sessionId, row.text)
-    const ceid = await bayunCore.unlockText(sessionId, row.companyEmployeeId)
-    const cn = await bayunCore.unlockText(sessionId, row.companyName)
+    const unix = await bayunCore.unlockText(sessionId, row.companyEmployeeId)
+    const company = await bayunCore.unlockText(sessionId, row.companyName)
     $.teach({
       id: row.id,
       created_at: row.created_at,
       text,
-      companyName: cn,
-      companyEmployeeId: ceid
+      companyName: company,
+      companyEmployeeId: unix
     }, mergeJoke)
   })
 
@@ -81,16 +81,16 @@ async function connect(target) {
         payload.new.room === room
       ) {
         const text = await bayunCore.unlockText(sessionId, payload.new.text)
-        const ceid = await bayunCore.unlockText(sessionId, payload.new.companyEmployeeId)
-        const cn = await bayunCore.unlockText(sessionId, payload.new.companyName)
+        const unix = await bayunCore.unlockText(sessionId, payload.new.companyEmployeeId)
+        const company = await bayunCore.unlockText(sessionId, payload.new.companyName)
 
         $.teach({
           id: payload.new.id,
           room: payload.new.room,
           created_at: payload.new.created_at,
           text,
-          companyName: cn,
-          companyEmployeeId: ceid
+          companyName: company,
+          companyEmployeeId: unix
         }, mergeJoke)
       }
 
@@ -200,13 +200,14 @@ $.draw(target => {
     <div class="log">
       <div class="content">
         ${Object.keys(jokes).map((id) => {
-          const { created_at, text, companyEmployeeId: ceid, companyName: cn } = jokes[id]
-          const color = doingBusinessAs[cn] ? doingBusinessAs[cn].color : 'dodgerblue'
+          const { created_at, text, companyEmployeeId: unix, companyName: company } = jokes[id]
+          const color = doingBusinessAs[company] ? doingBusinessAs[company].color : 'dodgerblue'
+          const { avatar } = social(company, unix)
           return `
-            <div aria-role="button" class="message ${companyName} ${companyEmployeeId === ceid && companyName === cn ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
+            <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
               <div class="meta" data-tooltip="${created_at}">
-                <object class="avatar" data="/cdn/tychi.me/photos/unprofessional-headshot.jpg" type="image/png">
-                  <img src="/cdn/${companyName}/${companyEmployeeId}/avatar.jpg" />
+                <object class="avatar" data="${avatar}" type="image/png">
+                  <img src="${avatar}" />
                 </object>
               </div>
               <div class="body">
@@ -227,6 +228,10 @@ $.draw(target => {
 
   return view
 })
+
+function social(company, unix) {
+  return state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] || { avatar: '/cdn/tychi.me/photos/professional-headshot.jpg' }
+}
 
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
@@ -260,15 +265,15 @@ async function send(event) {
 
   const text = await bayunCore.lockText(sessionId, message.value, encryptionPolicy, keyGenerationPolicy, room);
   message.value = ''
-  const cn = await bayunCore.lockText(sessionId, companyName, encryptionPolicy, keyGenerationPolicy, room);
-  const ceid = await bayunCore.lockText(sessionId, companyEmployeeId, encryptionPolicy, keyGenerationPolicy, room);
+  const company = await bayunCore.lockText(sessionId, companyName, encryptionPolicy, keyGenerationPolicy, room);
+  const unix = await bayunCore.lockText(sessionId, companyEmployeeId, encryptionPolicy, keyGenerationPolicy, room);
 
   state[`ls/drafts/${room}`] = ''
 
   const { data, error } = await supabase
   .from('plan98_group_text')
   .insert([
-    { room, text, companyName: cn, companyEmployeeId: ceid },
+    { room, text, companyName: company, companyEmployeeId: unix },
   ])
   .select()
 
