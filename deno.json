@@ -30,8 +30,8 @@
     "start-braidmail": "cd server/braidmail/braidmail-main && node server-demo.js",
     "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
 
-    "provision-verison-control": "cd server/braidmail && ./provision.sh",
-    "start-version-control": "cd server/braidmail/braidmail-main && node server-demo.js",
+    "provision-verison-control": "cd server/braid-text && ./provision.sh",
+    "start-version-control": "cd server/braid-text/braid-text-master && node server-demo.js",
     "reverse-version-control": "ssh -N -R 8888:localhost:8888 braidmail.$USER.me",
 
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
