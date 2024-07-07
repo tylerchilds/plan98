@@ -1,0 +1,177 @@
+thelanding.page {
+	reverse_proxy localhost:8000
+}
+
+drive.tychi.me {
+	reverse_proxy localhost:8888
+}
+
+local.tychi.me {
+	reverse_proxy localhost:1998
+}
+
+pocket.tychi.me {
+	reverse_proxy localhost:8090
+}
+
+pocketbase.mattmuller.info {
+	reverse_proxy localhost:8090
+}
+
+94404-969-g-edgewater-blvd-123.thelanding.page {
+	reverse_proxy localhost:8080
+}
+
+live.thelanding.page {
+	reverse_proxy localhost:8080
+}
+
+solid.thelanding.page {
+	reverse_proxy localhost:3000
+}
+
+owncast.thelanding.page {
+	reverse_proxy localhost:1935
+}
+braid.thelanding.page {
+	reverse_proxy localhost:1989
+}
+gun.thelanding.page {
+	reverse_proxy localhost:8765
+}
+
+sillyz.computer {
+	reverse_proxy localhost:8000
+}
+1998.social {
+	reverse_proxy localhost:8000
+}
+yourlovedones.online {
+	reverse_proxy localhost:8000
+}
+ncity.executiontime.pub {
+	reverse_proxy localhost:8000
+}
+css.ceo {
+	reverse_proxy localhost:8000
+}
+y2k38.info {
+	reverse_proxy localhost:8000
+}
+tychi.me {
+	reverse_proxy localhost:8000
+}
+
+braid.sillyz.computer {
+	reverse_proxy localhost:1989
+}
+braid.1998.social {
+	reverse_proxy localhost:1989
+}
+braid.yourlovedones.online {
+	reverse_proxy localhost:1989
+}
+braid.ncity.executiontime.pub {
+	reverse_proxy localhost:1989
+}
+braid.css.ceo {
+	reverse_proxy localhost:1989
+}
+braid.y2k38.info {
+	reverse_proxy localhost:1989
+}
+braid.tychi.me {
+	reverse_proxy localhost:1989
+}
+
+braidmail.sillyz.computer {
+	reverse_proxy localhost:7465
+}
+braidmail.1998.social {
+	reverse_proxy localhost:7465
+}
+braidmail.yourlovedones.online {
+	reverse_proxy localhost:7465
+}
+braidmail.ncity.executiontime.pub {
+	reverse_proxy localhost:7465
+}
+braidmail.css.ceo {
+	reverse_proxy localhost:7465
+}
+braidmail.y2k38.info {
+	reverse_proxy localhost:7465
+}
+braidmail.tychi.me {
+	reverse_proxy localhost:7465
+}
+
+braid-text.sillyz.computer {
+	reverse_proxy localhost:8888
+}
+braid-text.1998.social {
+	reverse_proxy localhost:8888
+	log {
+		output file /var/log/caddy/access.log
+		level DEBUG
+	}
+}
+braid-text.yourlovedones.online {
+	reverse_proxy localhost:8888
+}
+braid-text.ncity.executiontime.pub {
+	reverse_proxy localhost:8888
+}
+braid-text.css.ceo {
+	reverse_proxy localhost:8888
+}
+braid-text.y2k38.info {
+	reverse_proxy localhost:8888
+}
+braid-text.tychi.me {
+	reverse_proxy localhost:8888
+}
+
+gun.sillyz.computer {
+	reverse_proxy localhost:8765
+}
+gun.1998.social {
+	reverse_proxy localhost:8765
+}
+gun.yourlovedones.online {
+	reverse_proxy localhost:8765
+}
+gun.ncity.executiontime.pub {
+	reverse_proxy localhost:8765
+}
+gun.css.ceo {
+	reverse_proxy localhost:8765
+}
+gun.y2k38.info {
+	reverse_proxy localhost:8765
+}
+gun.tychi.me {
+	reverse_proxy localhost:8765
+}
+
+base.sillyz.computer {
+	reverse_proxy localhost:8090
+}
+base.1998.social {
+	reverse_proxy localhost:8090
+}
+base.yourlovedones.online {
+	reverse_proxy localhost:8090
+}
+base.ncity.executiontime.pub {
+	reverse_proxy localhost:8090
+}
+base.css.ceo {
+	reverse_proxy localhost:8090
+}
+base.y2k38.info {
+	reverse_proxy localhost:8090
+}
+base.tychi.me {
+	reverse_proxy localhost:8090
+}

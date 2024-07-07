@@ -140,7 +140,7 @@ if (is_nodejs) {
 }
 
 
-function braid_fetch (url, params = {}) {
+export function braid_fetch (url, params = {}) {
 	// Initialize the headers object
 	if (!params.headers)
 		params.headers = new Headers()

@@ -3,25 +3,30 @@ import 'gun'
 
 const gun = window.Gun(['https://gun.1998.social/gun']);
 
-const $ = module('quick-media', {media: {}})
+const $ = module('quick-media')
 export default $
 
 $.draw((target) => {
   subscribe(target)
 
-  const { media } = $.learn()
-
-  const input = `<input type="file" name="input" accept="image/*">`
-  const image = `<img name="image" alt="picture resized at ${media.updatedAt}" src="${media.value}">`
+  const input = target.getAttribute('edit') ? `<input type="file" name="input" accept="image/*">` : ''
 
   return `
     ${input}
-    ${image}
+    ${image(target)}
   `
 })
 
-$.when('click', '[name="image"]', () => {
-  event.target.closest($.link).querySelector('[name="input"]').click()
+function image(target) {
+  const key = target.getAttribute('key') || 'paste'
+  const media = $.learn()[key]
+  return media ? `<img name="image" alt="picture resized at ${media.updatedAt}" src="${media.value}">` : `<img name="image" alt="default" src="/cdn/tychi.me/photos/professional-headshot.jpg">`
+}
+
+$.when('click', '[name="image"]', (event) => {
+  const root = event.target.closest($.link)
+  const input = root.querySelector('[name="input"]')
+  if(input) { input.click() }
 })
 $.when('change', '[name="input"]', onImageSelection)
 
@@ -126,11 +131,10 @@ async function getResizedImageFromFile(file, maxDimensionSize) {
 function subscribe(target) {
   if(target.subscribed) return
   target.subscribed = true
-
   const key = target.getAttribute('key') || 'paste'
-  target.gun = gun.get(target.id).get(key)
+  target.gun = gun.get($.link).get(key)
   target.gun.on(media => {
-    $.teach({ media })
+    $.teach({ [key]: media })
   })
 }
 
@@ -138,12 +142,17 @@ $.style(`
   & {
     display: block;
     position: relative;
+    height: 100%;
   }
 
   & img {
     margin: 0 auto;
     position: relative;
     z-index: 2;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 100%;
+    overflow: hidden;
   }
 
   & input {

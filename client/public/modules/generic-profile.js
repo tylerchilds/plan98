@@ -1,42 +1,51 @@
 import tag from '@silly/tag'
+import { getSession, clearSession } from './comedy-notebook.js'
+import { social } from './chat-room.js'
 
 const $ = tag('generic-profile')
 
 $.draw((target) => {
-  const lines = getLines(target)
-  return `
+  const user = hotAccount(target)
+  return user ? `
     <div class="header">
-      <div class="photo"></div>
-      <div class="company">
-        ${target.getAttribute('name') || '(missing no.)'}
+      <div class="photo">
+        <quick-media edit="true" key="${user.avatar}"></quick-media>
       </div>
+    </div>
+    <div class="nickname">
+      <input class="hot-input" name="nickname" value="${user.nickname || ''}" />
     </div>
     <div class="grid">
       <div class="sidebar">
+        <label>tagline</label>
+        <textarea name="tagline" class="hot-input">${user.tagline || ''}</textarea>
       </div>
       <div class="body">
-        <div name="joke" class="index-card">
-          <input name="setup" type="text" />
-          <textarea name="punchline" style="background-image: ${lines}"></textarea>
-        </div>
-        <div name="joke" class="index-card">
-          <input name="setup" type="text" />
-          <textarea name="punchline" style="background-image: ${lines}"></textarea>
-        </div>
-        <div name="joke" class="index-card">
-          <input name="setup" type="text" />
-          <textarea name="punchline" style="background-image: ${lines}"></textarea>
-        </div>
-        <div name="joke" class="index-card">
-          <input name="setup" type="text" />
-          <textarea name="punchline" style="background-image: ${lines}"></textarea>
-        </div>
       </div>
     </div>
-  `
+  ` : ''
+})
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
+
+function hotAccount(target) {
+  const { companyName, companyEmployeeId } = getSession()
+  const company = target.closest($.link).getAttribute('company') || companyName || 'sillyz.computer'
+  const unix = target.closest($.link).getAttribute('unix') || companyEmployeeId || 'tychi'
+  return social(company, unix)
+}
+
+$.when('input', '.hot-input', (event) => {
+  const node = event.target
+  const user = hotAccount(node)
+  user[node.name] = node.value
 })
 
 $.style(`
+  & {
+    padding: 0 1rem;
+    display: block;
+  }
   @media (min-width: 768px) {
     & .grid {
       display: grid;
@@ -52,35 +61,40 @@ $.style(`
     height: 300px;
     background: dodgerblue;
     position: relative;
-    margin-bottom: 4rem;
+    margin: 0 -1rem 4rem -1rem;
   }
 
   & .photo {
     background-color: orange;
-    width: 75px;
-    height: 75px;
+    width: 180px;
+    height: 180px;
     padding: 4px;
     border-radius: 100%;
     position: absolute;
     bottom: -40px;
-    left: 40px;
+    left: 0;
+    right: 0;
+    margin: auto;
     overflow: hidden;
   }
 
-  & .company {
-    position: absolute;
-    bottom: -40px;
-    left: 125px;
-  }
-
-  & .photo::before {
-    display: block;
-    content: '';
-    background: white;
-    width: 100%;
+  & quick-media {
     height: 100%;
     border-radius: 100%;
+    overflow: hidden;
   }
+
+
+  & quick-media img {
+    object-fit: cover;
+    width: 172px;
+    height: 172px;
+  }
+  & .company {
+    font-size: 2rem;
+    font-weight: 600;
+  }
+
   & [name="setup"] {
     font-size: 2rem;
     border: none;
@@ -123,24 +137,10 @@ $.style(`
     max-width: 100%;
   }
 
-  & text-area {
+  & textarea {
     resize: none;
+    width: 100%;
+    display: block;
   }
 `)
 
-function getLines(target) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext('2d');
-
-  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
-  canvas.height = rhythm;
-  canvas.width = rhythm;
-
-  ctx.fillStyle = 'transparent';
-  ctx.fillRect(0, 0, rhythm, rhythm);
-
-  ctx.fillStyle = 'dodgerblue';
-  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
-
-  return `url(${canvas.toDataURL()}`;
-}

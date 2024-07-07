@@ -206,9 +206,9 @@ $.draw(target => {
           return `
             <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
               <div class="meta" data-tooltip="${created_at}">
-                <object class="avatar" data="${avatar}" type="image/png">
+                <quick-media class="avatar" key="${avatar}">
                   <img src="${avatar}" />
-                </object>
+                </quick-media>
               </div>
               <div class="body">
                 ${escapeHyperText(text)}
@@ -229,8 +229,17 @@ $.draw(target => {
   return view
 })
 
-function social(company, unix) {
-  return state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] || { avatar: '/cdn/tychi.me/photos/professional-headshot.jpg' }
+export function social(company, unix) {
+  let user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix]
+
+  if(!user) {
+    user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] = {
+      avatar: `/cache/avatars/${company}/${unix}`,
+      company,
+      unix
+  }
+  }
+  return user
 }
 
 function escapeHyperText(text = '') {
@@ -571,6 +580,11 @@ $.style(`
   & .button:hover {
     background-color: rebeccapurple;
     color: white;
+  }
+
+  & quick-media {
+    border-radius: 100%;
+    overflow: hidden;
   }
 `)
 

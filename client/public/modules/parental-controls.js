@@ -2,7 +2,7 @@ import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import { getCompanies } from './bayun-wizard.js'
 import { getMyGroups, getOtherGroups } from './party-chat.js'
-import { setRoom, getRoom } from './chat-room.js'
+import { social, setRoom, getRoom } from './chat-room.js'
 
 const companies = getCompanies().map((company) => {
   return `
@@ -167,6 +167,8 @@ const { laugh } = lolol[0].lol[0]
 let lastLaugh = laugh
 let lastSidebar = false
 let lastAvatar = false
+let lastUser = false
+let lastAuthState = false
 
 const $ = module('parental-controls', {
   content: '...',
@@ -195,12 +197,16 @@ refreshRooms()
 
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
-  const { avatar, sidebar, laugh, saga, lolID, lololID, chatRooms, otherChatRooms } = $.learn()
+  const { avatar, sidebar, laugh, saga, lolID, lololID } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
+  const user = social(companyName, companyEmployeeId)
 
+  const authState = sessionId
   const authChip = sessionId ? `
-    <img data-avatar src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" alt="" />
+    <button data-avatar>
+    <quick-media key="${user.avatar}"></quick-media>
+    </button>
     <div class="tongue">
       <div class="quick-auth">
         <div class="console">
@@ -227,15 +233,7 @@ $.draw((target) => {
           `
         }).join('')}
 
-        ${sessionId && chatRooms ? `
-          <div class="heading-label">Chat</div>
-          ${chatRooms.map(chat).join('')}
-        ` : ``}
-        ${sessionId && otherChatRooms ? `
-          <div class="heading-label">Other Chats</div>
-          ${otherChatRooms.map(otherChat).join('')}
-        ` : ``}
-
+        <chat-lists></chat-lists>
       </div>
     </div>
   ` : `
@@ -261,6 +259,13 @@ $.draw((target) => {
     </div>
   `
 
+  if(authState !== lastAuthState && target.querySelector('.control-avatar')) {
+    lastAuthState = authState
+    target.querySelector('.control-avatar').innerHTML = authChip
+    return
+  }
+
+
   if(laugh !== lastLaugh && target.querySelector('iframe')) {
     lastLaugh = laugh
     target.querySelector('iframe').src = saga
@@ -283,6 +288,11 @@ $.draw((target) => {
     avatar
       ? target.querySelector('.control-tab-list').classList.add('multiplayer')
       : target.querySelector('.control-tab-list').classList.remove('multiplayer')
+    return
+  }
+
+  if(user !== lastUser && target.querySelector('[data-avatar]')) {
+    lastUser = user.company + user.unix
     return
   }
 
@@ -325,22 +335,6 @@ function scrollSidebar() {
   list.scrollTop = this.dataset.top
 }
 
-function otherChat(group) {
-  return `
-    <button class="out-group control-tab" data-group-id="${group.groupId}">
-      ${group.groupName}
-    </button>
-  `
-}
-
-function chat(group) {
-  return `
-    <button class="in-group control-tab" data-group-id="${group.groupId}">
-      ${group.groupName}
-    </button>
-  `
-}
-
 function myLol(laughs, lolol) {
   return laughs.map((y, lol) => {
     return `
@@ -350,7 +344,6 @@ function myLol(laughs, lolol) {
     `
   }).join('')
 }
-
 
 function lol(laughs, lolol) {
   const { lololID, lolID } = $.learn()
@@ -395,7 +388,7 @@ $.when('click', '.out-group', async (event) => {
 })
 
 
-function getSession() {
+export function getSession() {
   return state['ls/bayun'] || {}
 }
 
@@ -699,6 +692,8 @@ $.style(`
   & .control-avatar [data-avatar] {
     max-width: 64px;
     border-radius: 100%;
+    overflow: hidden;
+    padding: 0;
     aspect-ratio: 1;
     position: absolute;
     top: .5rem;
