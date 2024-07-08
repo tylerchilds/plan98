@@ -151,12 +151,13 @@ $.style(`
     z-index: 2;
     height: 100%;
     object-fit: cover;
-    border-radius: 100%;
     overflow: hidden;
+    width: 100%;
   }
 
   & input {
     position: absolute;
     z-index: 1;
+    opacity: 0;
   }
 `)

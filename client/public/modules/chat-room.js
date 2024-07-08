@@ -210,9 +210,7 @@ $.draw(target => {
                   <img src="${avatar}" />
                 </quick-media>
               </div>
-              <div class="body">
-                ${escapeHyperText(text)}
-              </div>
+              <div class="body">${escapeHyperText(text)}</div>
             </div>
           `
         }).join('')}
@@ -234,7 +232,12 @@ export function social(company, unix) {
 
   if(!user) {
     user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] = {
+      nickname: `/cache/nickname/${company}/${unix}`,
+      tagline: `/cache/tagline/${company}/${unix}`,
       avatar: `/cache/avatars/${company}/${unix}`,
+      hero: `/cache/heroes/${company}/${unix}`,
+      likes: `/edge/likes/${company}/${unix}`,
+      dislikes: `/edge/dislikes/${company}/${unix}`,
       company,
       unix
   }
@@ -467,7 +470,7 @@ $.style(`
   }
 
   & .message {
-    margin: 1rem 4rem 1rem 4rem;
+    margin: .5rem 4rem .5rem 4rem;
     padding: .5rem;
     border-radius: 1rem;
     background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--business-color, dodgerblue);
@@ -475,6 +478,10 @@ $.style(`
     color: white;
     position: relative;
     border: none;
+  }
+
+  & .message .body {
+    white-space: pre;
   }
 
   & .message.originator {
