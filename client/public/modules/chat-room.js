@@ -217,10 +217,12 @@ $.draw(target => {
       </div>
     </div>
     <form class="new-message-form" data-command="enter">
-      <button class="send" type="submit" data-command="enter">
+      <button class="button send" type="submit" data-command="enter">
         Send
       </button>
-      <textarea name="message">${draft}</textarea>
+      <div class="text-well">
+        <textarea name="message">${draft}</textarea>
+      </div>
     </form>
   `
 
@@ -268,6 +270,7 @@ $.when('click', '.action-accordion', async (event) => {
 
 async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
+  debugger
   const {
     sessionId,
     companyName,
@@ -298,7 +301,7 @@ async function send(event) {
 $.style(`
   & {
     display: grid;
-    grid-template-rows: 1fr 8rem;
+    grid-template-rows: 1fr calc(9rem + 8px);
     position: relative;
     height: 100%;
     color: white;
@@ -326,13 +329,9 @@ $.style(`
   & .new-message-form button {
     position: relative;
     z-index: 2;
-    background: lemonchiffon;
-    border: none;
-    color: saddlebrown;
-    cursor: pointer;
     height: 2rem;
-    transition: all 100ms;
     padding: .25rem 1rem;
+    margin: .5rem;
   }
 
   & .new-message-form button[disabled] {
@@ -364,7 +363,6 @@ $.style(`
   & .new-message-form {
     width: 100%;
     position: relative;
-    background: rgba(0,0,0,.85);
     z-index: 2;
   }
   & .story-chat-form,
@@ -463,6 +461,15 @@ $.style(`
     line-height: 2rem;
     height: 6rem;
     border: none;
+    background: rgba(0,0,0,.85);
+    color: white;
+    border-radius: .5rem;
+    padding: 8px;
+  }
+
+  & .text-well {
+    background: rgba(0,0,0,.25);
+    padding: 8px;
   }
 
   & .send {
@@ -546,8 +553,9 @@ $.style(`
   }
 
   & .actions button {
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
+    color: white;
     border: none;
     line-height: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
@@ -567,8 +575,7 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background: saddlebrown;
-    color: lemonchiffon;
+    background-color: rebeccapurple;
   }
 
   & .button {
@@ -580,7 +587,6 @@ $.style(`
     color: white;
     transition: background-color 200ms ease-in-out;
     padding: 1rem;
-    width: 100%;
   }
 
   & .button:focus,
@@ -607,7 +613,6 @@ $.when('click', '[data-join]', async (event) => {
     sessionId,
   } = getSession()
   const room = getRoom()
-
   await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
     console.log("Error caught");
     console.log(error);
