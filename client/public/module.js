@@ -1,7 +1,5 @@
 import statebus, { state as s } from 'statebus'
-import { innerHTML } from 'diffhtml'
 import Computer from '@sillonious/computer'
-
 const logs = {}
 
 export const state = s
@@ -26,9 +24,17 @@ function update(link, target, compositor) {
   if(target.beforeUpdate) {
     target.beforeUpdate()
   }
-
   const html = compositor(target)
-  if(html) innerHTML(target, html)
+
+  if(html) {
+    if(!target.__dd) {
+      target.innerHTML = html
+      target.__dd = create_dom_diff(html)
+    }
+    const diff = target.__dd.patch(html)
+    // Apply DOM diff to actual DOM
+    apply_dom_diff(target, diff)
+  }
 
   if(target.afterUpdate) {
     target.afterUpdate()
@@ -37,7 +43,8 @@ function update(link, target, compositor) {
 
 function draw(link, compositor) {
   insight('module:draw', link)
-  listen(CREATE_EVENT, link, (event) => {
+  listen(CREATE_EVENT, link, async (event) => {
+    await init_dom_diff()
     statebus.reactive(
       update.bind(null, link, event.target, compositor)
     )()
