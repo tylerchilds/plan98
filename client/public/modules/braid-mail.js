@@ -165,6 +165,10 @@ $.style(`
     max-height: 100vh;
   }
 
+  & .list {
+    overflow: hidden;
+  }
+
   & .list .active {
     background: dodgerblue !important;
     color: rgba(255,255,255,.85);
@@ -196,6 +200,7 @@ $.style(`
       max-height: 25vh;
     }
   }
+
   @media screen and (min-width: 768px) {
     & .panes {
       display: grid;

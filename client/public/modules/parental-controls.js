@@ -29,6 +29,10 @@ const personalLolol = [
         label: 'profile',
         laugh: 'profile.saga'
       },
+      {
+        label: 'braid',
+        laugh: 'braid.saga'
+      },
     ]
   }
 ]
