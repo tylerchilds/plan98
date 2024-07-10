@@ -55,7 +55,7 @@ function doit() {
   if( worker != null )
     worker.terminate();
 
-  worker = new Worker("./public/modules/trade-maximizer/trademax-worker.js");
+  worker = new Worker("./public/elves/trade-maximizer/trademax-worker.js");
   worker.onmessage = processmessage;
   worker.postMessage([RUN, url]);
 }

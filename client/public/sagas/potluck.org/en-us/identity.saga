@@ -7,9 +7,9 @@ Enter your callsign and either register to be shown the ropes from scratch or lo
 <action-script
 text: Register
 data-action: register
-data-script: /public/modules/bayun-wizard.js
+data-script: /public/elves/bayun-wizard.js
 
 <action-script
 text: Login
 data-action: login
-data-script: /public/modules/bayun-wizard.js
+data-script: /public/elves/bayun-wizard.js

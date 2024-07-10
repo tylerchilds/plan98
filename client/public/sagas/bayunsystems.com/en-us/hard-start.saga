@@ -17,4 +17,4 @@
 <action-script
 text: Continue
 data-action: identify
-data-script: /public/modules/bayun-wizard.js
+data-script: /public/elves/bayun-wizard.js

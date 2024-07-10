@@ -11,4 +11,4 @@ placeholder: I want to be the Jester!
 <action-script
 text: Next Question
 data-action: submitQuestion0
-data-script: /public/modules/bayun-wizard.js
+data-script: /public/elves/bayun-wizard.js

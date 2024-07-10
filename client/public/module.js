@@ -168,7 +168,7 @@ self.addEventListener('pageshow',() => {
       .flatMap(x => x)
     maybeCreateReactive(targets)
   }).observe(document.body, { childList: true, subtree: true });
-  new Computer(self.plan98, { registry: '/public/modules' })
+  new Computer(self.plan98, { registry: '/public/elves' })
 });
 
 function sufficientlyUniqueId() {
