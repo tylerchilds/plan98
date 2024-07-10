@@ -5,7 +5,7 @@ const bases = {}
 const logoutCallbacks = []
 
 export function getBase(target) {
-  const { base } = target.closest('[data-base]').dataset
+  const { base } = (target.closest('[data-base]') || document.querySelector('[data-base]')).dataset
   return bases[base]
 }
 

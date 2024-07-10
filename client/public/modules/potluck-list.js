@@ -1,6 +1,7 @@
 import module from '@silly/tag'
 import { connect, getBase, whenLogout } from "./potluck-authentication.js"
 import { currentBusiness } from './sillonious-brand.js'
+import { showModal } from './plan98-modal.js'
 
 const linkElement = document.createElement("link");
 linkElement.rel = "stylesheet";
@@ -26,6 +27,10 @@ $.draw(target => {
 
   const app = account ? `
     <potluck-authentication class="authenticated"></potluck-authentication>
+    <button data-create>
+      Create
+    </button>
+    or return
     <div class="list">
       ${potlucksView}
     </div>
@@ -44,11 +49,14 @@ $.draw(target => {
   `
 })
 
-async function query(target, account) {
+function query(target, account) {
   if(target.dataset.account === account) return
   target.dataset.account = account
+  refresh(target)
+}
+
+export async function refresh(target) {
   const base = getBase(target)
-  //const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
   const potlucks = await base.collection('potlucks').getList(1, 30, {});
 
   $.teach({
@@ -64,6 +72,12 @@ $.when('click', '.list button', (event) => {
   const { id } = event.target.dataset
   showModal(`
     <potluck-view data-id="${id}"></potluck-view>
+  `)
+})
+
+$.when('click', '[data-create]', (event) => {
+  showModal(`
+    <potluck-new></potluck-new>
   `)
 })
 
@@ -105,5 +119,9 @@ $.style(`
   & .list button:focus {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: goldenrod;
+  }
+
+  & [data-create] {
+  
   }
 `)
