@@ -71,7 +71,9 @@ whenLogout(() => {
 $.when('click', '.list button', (event) => {
   const { id } = event.target.dataset
   showModal(`
-    <potluck-view data-id="${id}"></potluck-view>
+    <div style="background: white; border-radius: 1rem; padding: 1rem">
+      <potluck-view data-id="${id}"></potluck-view>
+    </div>
   `)
 })
 
@@ -102,21 +104,22 @@ $.style(`
     margin: 1rem 0;
   }
 
-  & .list button {
+  & button {
     border: none;
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: dodgerblue;
     color: rgba(255,255,255,.85);
     display: block;
     width: 100%;
+    padding: 1rem;
   }
 
   & .list button em {
     color: rgba(255,255,255,.65);
   }
 
-  & .list button:hover,
-  & .list button:focus {
+  & button:hover,
+  & button:focus {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: goldenrod;
   }

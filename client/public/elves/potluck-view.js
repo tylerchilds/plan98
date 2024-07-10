@@ -4,12 +4,11 @@ import { connect, getBase, whenLogout } from "./potluck-authentication.js"
 const $ = module('potluck-view')
 
 $.draw(target => {
-  const account = state['ls/~']
   connect(target)
-  query(target, account)
+  query(target)
   const { potluck } = $.learn()
 
-  const app = account ? `
+  const app = potluck ? `
     <div class="list">
       ${potluck.name}
     </div>
@@ -25,8 +24,8 @@ $.draw(target => {
 })
 
 async function query(target, account) {
-  if(target.dataset.account === account) return
-  target.dataset.account = account
+  if(target.dataset.queried) return
+  target.dataset.queried = true
   const base = getBase(target)
   //const resultSpace = await base.collection('my_namespace').getList(1, 30, {});
   const potluck = await base.collection('potlucks').getOne(target.dataset.id);

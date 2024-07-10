@@ -28,13 +28,13 @@ $.draw((target) => {
   const account = state['ls/~']
 
   return account ? `
+    <button name="logout">
+      Logout
+    </button>
     Logged in as:
     ${account.admin ? account.admin.email : ''}
     ${account.record ? account.record.email : ''}
     (${getBase(target).authStore.model.id})
-    <button name="logout">
-      Logout
-    </button>
   ` : `
     <form>
       <label class="field">
@@ -146,6 +146,13 @@ $.style(`
   & .button:focus {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: goldenrod;
+  }
+
+  & [name="logout"] {
+    float: right;
+    display: inline-block;
+    width: auto;
+    padding: 1rem;
   }
 
 `)
