@@ -161,8 +161,7 @@ function dispatchCreate(target) {
   target.reactive = true
 }
 
-
-window.addEventListener('load', () => {
+self.addEventListener('pageshow',() => {
   new MutationObserver((mutationsList) => {
     const targets = [...mutationsList]
       .map(getSubscribers)
