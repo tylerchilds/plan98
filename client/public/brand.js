@@ -94,6 +94,30 @@ export const doingBusinessAs = {
     color: new Color('lch', [50, 75, 15])
       .display()
       .toString({format: 'hex'}),
+    endOfHead: `
+      <script src="https://widget.clym-sdk.net/blocking.js"></script>
+      <script>
+      (function(d,s,i,w,o){
+      var js,cjs=d.getElementsByTagName(s)[0];
+      if(d.getElementById(i))return;
+      js=d.createElement('script');
+      js.id=i;
+      js.src="https://widget.clym-sdk.net/clym.js";
+      js.onload=function(){Clym&&Clym.load(i,w,o);};
+      cjs.parentNode.insertBefore(js, cjs);
+      }(document,'script','clym-privacy','a6ccc06b25bd4dc1abfa91e04btycg0p',{}));
+      </script>
+      <script type="module">
+        import Plausible from 'plausible-tracker'
+        const plausible = Plausible({
+          domain: 'thelanding.page'
+        })
+        const { trackPageview } = Plausible()
+        // Track a page view
+        trackPageview()
+      </script>
+    `
+
   },
   'css.ceo': {
     emote: ':p',
@@ -158,29 +182,6 @@ export const doingBusinessAs = {
         tag: 'stay-tuned'
       },
     ],
-    endOfHead: `
-      <script src="https://widget.clym-sdk.net/blocking.js"></script>
-      <script>
-      (function(d,s,i,w,o){
-      var js,cjs=d.getElementsByTagName(s)[0];
-      if(d.getElementById(i))return;
-      js=d.createElement('script');
-      js.id=i;
-      js.src="https://widget.clym-sdk.net/clym.js";
-      js.onload=function(){Clym&&Clym.load(i,w,o);};
-      cjs.parentNode.insertBefore(js, cjs);
-      }(document,'script','clym-privacy','a6ccc06b25bd4dc1abfa91e04btycg0p',{}));
-      </script>
-      <script type="module">
-        import Plausible from 'plausible-tracker'
-        const plausible = Plausible({
-          domain: 'thelanding.page'
-        })
-        const { trackPageview } = Plausible()
-        // Track a page view
-        trackPageview()
-      </script>
-    `
   },
   'tychi.me': {
     emote: ':)',
