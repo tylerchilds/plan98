@@ -64,7 +64,7 @@ $.draw((target) => {
   const { html, lite } = $.learn()
   if(html) return html
 
-  const title = target.getAttribute('title') || 'Sillyz'
+  const title = 'Tyler'
   const subtitle = target.getAttribute('subtitle') || 'Flying Disk'
 
   if(lite) {
