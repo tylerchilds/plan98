@@ -111,7 +111,7 @@ function replaceCursor(target) {
   if(paused) {
     paused.focus()
 
-    if(paused.tagName === 'TEXTAREA') {
+    if(tags.includes(paused.tagName)) {
       paused.selectionStart = sel[0];
       paused.selectionEnd = sel[1];
     }

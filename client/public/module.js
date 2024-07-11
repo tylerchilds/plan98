@@ -21,7 +21,7 @@ const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
 
-function update(link, target, compositor, lifeCycle) {
+function update(link, target, compositor, lifeCycle={}) {
   insight('module:update', link)
   if(lifeCycle.beforeUpdate) {
     lifeCycle.beforeUpdate(target)

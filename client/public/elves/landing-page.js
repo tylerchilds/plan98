@@ -264,7 +264,7 @@ $.draw(() => {
 $.when('click', '[data-publish]', (event) => {
   showModal(`
     <div style="width: 100%; height: 100%; background: rgba(255,255,255,1); padding: 1rem;"
-      <div style="max-width: 55rem; margin: auto;"
+      <div style="max-width: 55rem; margin: auto;">
         <landing-publish></landing-publish>
       </div>
     </div>
@@ -280,7 +280,7 @@ function splash(top10) {
 
   return `
     <div class="hero">
-      <a href="${breaking.permalink}">
+      <a class="hero-image" href="${breaking.permalink}">
         <img src="${breaking.img}" />
       </a>
       <a class="title" href="${breaking.permalink}">
@@ -308,7 +308,7 @@ function splash(top10) {
 function teaser(post) {
   return `
     <div class="teaser">
-      <a href="${post.permalink}">
+      <a class="teaser-image" href="${post.permalink}">
         <img src="${post.img}" />
       </a>
       <a class="title" href="${post.permalink}">
@@ -358,6 +358,7 @@ $.style(`
     grid-template-columns: 2fr 4fr 1fr;
     gap: 1rem;
     grid-template-areas: "header header header" "sidebar content third";
+    padding: 1rem;
   }
 
   & .sidebar {
@@ -393,16 +394,20 @@ $.style(`
         "sidebar third";
       grid-template-columns: 1fr 1fr;
     }
-
-    & . {
-      grid-template-columns: 1fr;
-    }
   }
 
   @media (max-width: 767px) {
     & {
       display: block;
       grid-template-columns: 1fr
+    }
+
+    & .important {
+      display: block;
+    }
+
+    & .featured {
+      display: block;
     }
   }
 
@@ -472,12 +477,24 @@ $.style(`
     border-radius: 1rem;
     border: none;
     position: absolute;
-    right: 1rem;
-    top: 1rem;
+    right: 0;
+    top: 0;
   }
 
   & [data-publish]:hover,
   & [data-publish]:focus {
     background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
+  }
+
+  & .hero {
+    positon: relative;
+  }
+
+  & .hero-image {
+    display: block;
+  }
+
+  & .teaser-image {
+    display: block;
   }
 `)

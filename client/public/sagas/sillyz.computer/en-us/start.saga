@@ -1,5 +1,3 @@
-<landing-page
-
 <plan98-welcome
 tag: middle-earth
 
@@ -29,33 +27,33 @@ You are a wonderfully complex person with many interests.
 > Can I show you my handy dandy notebook?
 
 # watch
-what if URLs like /app/comedy-notebook were apps?
+what if your life was in your watch?
 
 <app-simulator
 class: timemachine
-app: comedy-notebook
+app: landing-page
 
 # phone
 what if those same apps were on your phone from the store?
 <app-simulator
 class: iphone
-app: comedy-notebook
+app: landing-page
 
 # tablet
 what if the app was your entire device?
 <app-simulator
 class: ipad
-app: comedy-notebook
+app: landing-page
 
 # tv
 what if the entire thing was a game?
 <app-simulator
 class: full
-app: comedy-notebook
+app: landing-page
 
 # as is
 what if real life was the console?
-<comedy-notebook
+<landing-page
 
 what will you do, when given Paper&copy;&trade;&hearts;
 

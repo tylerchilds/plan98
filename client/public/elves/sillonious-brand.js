@@ -190,7 +190,7 @@ $.style(`
     display: block;
     cursor: url('/public/icons/gh057.svg') 0 0, auto;
     overflow: auto;
-    background-color: var(--theme, var(--wheel-0-6, dodgerblue));
+    background-color: var(--theme, white);
   }
 
   & .frontside-paper,

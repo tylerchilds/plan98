@@ -12,7 +12,6 @@ sillonious-brand > xml-html {
 img,
 video {
   max-width: 100%;
-  max-height: 50vh;
 }
 
 xml-html hypertext-action {
