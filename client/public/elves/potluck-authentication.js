@@ -153,6 +153,6 @@ $.style(`
     display: inline-block;
     width: auto;
     padding: 1rem;
+    border-radius: 1rem;
   }
-
 `)

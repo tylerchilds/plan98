@@ -81,6 +81,8 @@ async function page() {
 
           ${safeEnv('BRAID_TEXT_PROXY')}
           ${safeEnv('STATEBUS_PROXY')}
+
+          ${safeEnv('POCKETBASE_URL')}
         }
       }
     </script>

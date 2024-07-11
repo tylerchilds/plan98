@@ -3,7 +3,7 @@ import { doingBusinessAs } from "@sillonious/brand"
 
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
-const database = localStorage.getItem("plan98.database") || 'http://localhost:8090';
+const database = localStorage.getItem("plan98.database") || self.plan98.env.POCKETBASE_URL;
 
 self.plan98 = {
   ...self.plan98 || {},
