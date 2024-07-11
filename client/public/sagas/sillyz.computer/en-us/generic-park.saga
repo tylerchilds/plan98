@@ -1,0 +1,496 @@
+{ template
+engine: thelanding.page
+
+<launch-world
+world: sillyz.computer
+
+<bayun-wizard
+
+# Generic Park
+
+The Generic Park System is a park prototyping platform. All parks need the same critical infrastructure. Nobody tips the plumber, but will toot their own horn, so the Generic Park System architecture is around brand labels.
+
+Need flyers, banners, websites and promotional materials? No problem. How about apps for self-
+
+<iframe
+width: 100%
+style: height: 480px !important
+src: https://www.youtube.com/embed/Bh7Ccm4vKd0?si=rbpuZHVLWV2wh0LX
+title: YouTube video player
+frameborder: 0
+allow: accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share
+referrerpolicy: strict-origin-when-cross-origin
+allowfullscreen: true
+
+<stay-tuned
+
+# Recording Studio
+
+A couple podcasters sit in a booth, PAUL an experienced comedian interviews TY, an amatuer.
+
+@ Ty
+> My first crush? Oh man, that's embarassing.
+
+@ Paul
+> Out with it.
+
+@ Ty
+> Okay, okay, but you need to understand I was a kid too back then.
+
+@ Paul
+> First crush bit. We were all kids, cut the pretext, keep it tight.
+
+@ Ty
+> So I was terrified of dinosaurs, was anyone else afraid of dinosaurs?
+
+Paul nods along.
+
+<best-buy
+pitch: Totally broke? No worries. First play is on the house.
+tag: hello-world
+action: Try for Free
+
+@ Ty
+> How old were you when you first saw Jurassic Park
+
+@ Paul
+> Nice, opening it up to a little crowd work.
+
+@ Ty
+> I was five! Look, I'm not the first one to propose draconian parental controls, but five was too young for genetically modified dinosaurs in Hawaii trying to gobble up little kids in the kitchen.
+
+@ Paul
+> Is the kitchen relevant? That line was a bit long. Cut something somewhere.
+
+@ Ty
+> The kitchen scene hit home-- my mom worked the school cafeteria, my imagination is vivid. I saw no difference between a film set and my reality.
+
+@ Paul
+> And that's the scene with the kids-- you were the kid, got it-- go on.
+
+@ Ty
+> Her name was Lex. Did anyone else have a crush on Lex?
+
+@ Paul
+> I'm Speilberg's age, so definitely not.
+
+@ Ty
+> I was a kid!
+
+@ Paul
+> Right, right. What about this girl?
+
+@ Ty
+> Okay, do you remember the entire plot of the movie?
+
+@ Paul
+> Yeah, it was a commentary on bio-technology and disastrous consequences-- a thin veil painting scientists that genetically splice dinosaurs as villians.
+
+@ Ty
+> That's what Hollywood wanted you to see! 
+
+@ Paul
+> Oh god, I walked into it.
+
+<best-buy
+pitch: Not looking to be hood-winked by a technologist ever again?
+tag: hello-world
+action: Start from Scratch
+
+@ Ty
+> The real story in Jurassic Park was the subplot following Lex and her brother Tim-- a dungeons and dragons like campaign I'm calling "Lawyers and Laboratories".
+
+Paul smirks, amused.
+
+@ Ty
+> Keeping a long story short, the villians in Jurassic Park were not the dinosaurs, the scientists, or even the bumbling billionare that funded the thing.
+
+Paul smiles.
+
+@ Ty
+> Dennis Nedry. Computer programmer, playing every side of the same coin, calling a quarter 50 cents in schrodinger's economy. The original crypto bro.
+
+Paul laughs.
+
+@ Ty
+> His software controlled all the hardware throughout the entire park. Remember, the adults in the film were facing not just the dinosaurs in the jungle, but technical hijinks at every turn.
+
+Paul thinks a moment, then nods
+
+@ Ty
+> Do you remember how and when the adventurers in Lawyers and Laboratories regained control of all the systems in the park?
+
+@ Paul
+> Do you know how long ago I first and last saw that? I only thought it was a movie about dinosaurs.
+
+@ Ty
+> Lex. She saved the day.
+
+<iframe
+width: 100%
+style: height: 480px !important
+src: https://www.youtube.com/embed/dFUlAQZB9Ng?si=jvhAsvBvgxIelKTz
+title: YouTube video player
+frameborder: 0
+allow: accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share
+referrerpolicy: strict-origin-when-cross-origin
+allowfullscreen: true
+
+@ Paul
+> Okay, so this girl what, was a hero and that turned you on?
+
+@ Ty
+> She saved me from the dinosaurs Paul! Her entire story arc, sans the dinosaurs, was the most believable technically sound plot I've ever experienced, to date.
+
+@ Paul
+> Oh my god. She's why you're into computers.
+
+<best-buy
+pitch: Feeling Confused? Collaborate with like-minded players in like-minded places.
+tag: hello-world
+action: Book a Workshop
+
+@ Ty
+> Ariana Richards played Lex. I swear I'm not a stalker-- just doing my homework for this bit. When presented with the opportunity to be a famed Hollywood actress, she retired because she loved painting. Attractive through and through, what's not to get into computers over her for Paul?
+
+@ Paul 
+> She's still too young for me and you're married. I'm married too.
+
+@ Ty
+> Ah, and this is where things start to get really interesting.
+
+@ Paul
+> Oh god.
+
+@ Ty
+> My wife does business operations for a bio-technology company in South San Francisco. The one Jurassic Park is based on. They still use the same core unix system from Jurassic Park.
+
+@ Paul
+> Is that proprietary information?
+
+@ Ty
+> Is the fact that every technology company in not just Silicon Valley, but the Silicon Everywheres run their employee access managment systems through ancient bell labs tech? No Paul, it is just so boring that it only gets 15 seconds in a blockbuster film despite it being the reality suspension device used to set the film on Earth-616.
+
+@ Paul
+> Whoa guy.
+
+@ Ty
+> Sorry. I get worked up because my business objective is trying to sell Jurassic Park scale information techology systems that are technically backwards compatible with the not actually fictional system featured in Jurassic Park. Not only that, but I'm literally compatible with every mainstream chip on the market today.
+
+@ Paul
+> This is an ad?
+
+@ Ty
+> This is an ad.
+
+@ Paul
+> Okay, so what about your wife at work.
+
+@ Ty
+> When you think about it, I kind of did marry the girl from Jurassic Park, just a real life version.
+
+@ Paul
+> Awww.
+
+<best-buy
+pitch: Need a scalable turn-key solution? Consider End to End Support and Services Solutions.
+tag: hello-world
+action: Deploy a Fleet
+
+@ Ty
+> The next thing I wanted to talk to you about. So I've been trying to ground Elves in reality too.
+
+@ Paul
+> Remind me of what Elves is again?
+
+@ Ty
+> The starter Lawyers and Laboratories campaign I'm devising to teach international workshops on Plan98.
+
+@ Paul
+> Is this a physical pen and paper thing or a virtual thing?
+
+@ Ty
+> Both. And a movie. I'm in talks with Mattel about a Treasure Mountain branding collaboration set in the Barbie Cinematic Universe with Ariana reprising her role as Jurassic "Lex" Barbie to teach girls to paint and code, but that's all I can say at this time. We'll have printed character sheets to play fully offline, but the same sheet has a digital version to keep playing online later after the film festival workshop.
+
+@ Paul
+> Have you tested this game on anybody already?
+
+@ Ty
+> What do you think we've been playing the whole time?
+
+@ Paul
+> I don't have a character sheet, what-- are you keeping track of my stats?
+
+@ Ty
+> Haha, nope, this is a high fantasy campaign, we keep the math light and the jokes thick.
+
+@ Paul
+> Are we in a Laywers and Laboratories campaign right now?
+
+@ Ty
+> Of course we are. It started as an idea. I wanted to make Allan's bar more famous than the german bar up the street that was the centerpiece in the "gizmodo bought an iphone 4 that was left in a silicon valley bar" campaign.
+
+@ Paul
+> The bar we met at. The bar where you had your comedy debut. Why there?
+
+@ Ty
+> I liked that you were hosting comedy Paul. I was a sad tech boy back then.
+
+@ Paul
+> Alright, alright. Flattered, continue... Dungeon Master?
+
+@ Ty
+> That terminology is actually proprietary, so I'd prefer if you didn't call me that pronoun specifically, even though I identify with your usage of the term in spiritual practice.
+
+@ Paul
+> Game Master?
+
+@ Ty
+> I am pretty good at games, but let's just call me Player One, since I want to also play and win the game, not just be an arbitrary system arbiter that stacks the deck in their favor.
+
+@ Paul
+> Player One, continue?
+
+<best-buy
+pitch: Expand your capabiilties by networking with exclusive club membership perks.
+tag: multiplayer-lobby
+action: Tag a Friend
+
+@ John Hammond
+> it's a lot of money
+
+@ Mike Backes
+> I don't care how much money it is
+
+@ John Hammond
+> Mike, It is a lot of money
+
+@ Mike Backes
+> John, It is always a lot of money
+
+@ John Hammond
+> This is more money than even I have ever dreamed
+
+@ Mike Backes
+> you have so much money you do not dream of it
+
+@ John Hammond
+> That's exactly my point
+
+@ Mike Backes
+> OK John, tell me what is it this time?
+
+@ John Hammond
+> Dinosaurs
+
+@ Mike Backes
+> get out of my office
+
+@ John Hammond
+> A lot of fucking money, Mike
+
+@ Mike Backes
+> are you even listening to yourself? a lot of money? dinosaurs? what sort of evil forces are at play?
+
+@ John Hammond
+> That's the best part, Mike! international waters!
+
+@ Mike Backes
+> as I said, out of my office.
+
+@ John Hammond
+> i'm just gonna leave this pre-signed check here and be on my way
+
+@ Mike Backes
+> now, I don't want you to get the wrong idea so I'm just gonna ask you to take this with you
+
+@ John Hammond
+> Did you look at the number Mike?
+
+@ Mike Backes
+> I'm not working for you again. I don't need to look at the number.
+
+@ John Hammond
+> I'm not asking you to work for me
+
+@ Mike Backes
+> What's the check for John?
+
+@ John Hammond
+> OK, OK I promise I won't be breathing down your neck this time.
+
+@ Mike Backes
+> Out of my office
+
+@ John Hammond
+> I got a guy with a strategy. You only talk to him every two weeks.
+
+@ Mike Backes
+> And how often do I talk to you?
+
+@ John Hammond
+> you take that check and I leave this room. You never see me again.
+
+@ Mike Backes
+> Every two weeks for how long?
+
+@ John Hammond
+> Until we finish everything in the memo
+
+@ Mike Backes
+> The memo?
+
+@ John Hammond
+> Check the memo line in the check. We're living in the future now. That's a Hyper Link.
+
+@ Mike Backes
+> Don't patronize me, I know what a hyper link is.
+
+Mike looks at the check.
+
+@ Mike Backes
+> Whoa. That is a big number!
+
+@ John Hammond
+> Every two weeks until the memo is finished.
+
+@ Mike Backes
+> How big is this memo?
+
+@ John Hammond
+> How many parsecs did Han Solo complete the kessel run in?
+
+@ Mike Backes
+> don't use nerd, conversion math to try and trick me into thinking your memo is not a novel.
+
+@ John Hammond
+> Oh Mike, but the memo is a novel and I trust in giving you that check now before you meet my project supervisor that you will keep the timeline to as few two week meetings as possible.
+
+@ Mike Backes
+> And I never see you again?
+
+@ John Hammond
+> I'm not so evil, am I?
+
+@ Mike Backes
+> Here? No. In the safety of my office? No. But there's a reason why we meet in my office?
+
+@ John Hammond
+> And why is that?
+
+@ Mike Backes
+> Otherwise we'd never meet at all.
+
+@ John Hammond
+> I'm not the same man you once knew. I have moved on to the greater good.
+
+@ Mike Backes
+> I was always in it for the greater good.
+
+@ John Hammond
+> And you're a better man than I-- the reason I visit your office and not you to mine.
+
+@ Mike Backes
+> I miss you John. I don't trust you, but I'll have your memo done in two weeks so I never have to see your guy again.
+
+@ John Hammond
+> I knew you had it in you.
+
+<best-buy
+pitch: Be Ridiculous
+tag: hello-world
+action: Unless?
+
+# Now
+
+The TIME TEAM holds a council meeting, interviewing IAN MALCOLM
+
+@ Silly
+> Did you have to kill the lawyer?
+
+IAN MALCOLM licks his lips and looks at the camera to let you know that he knows that you know that he is JEFF GOLDBLUM
+
+@ IAN MALCOLM
+& smirking
+> there were two other statistically significant potential opportunities to induce chaos, but I would be lying if I said I didn't smile when I found out what happened was the most probable.
+
+@ Shelly
+> So technically you could have saved the lawyer too.
+
+@ IAN MALCOLM
+> The odds were cast before Ellie and Grant investigated, pardon my french, triceratops crap.
+
+@ Sally
+> So you're saying sacrificing the lawyer was the only way to save Grant, Ellie, and the kids in the end?
+
+@ IAN MALCOLM
+> I'm saying I'm a victim too here, that was the only way any of us were getting off the island.
+
+@ Wally
+> You chose not to sacrifice yourself?
+
+@ IAN MALCOLM
+> I'm saying in the other two realities where anyone at all survived The Jurassic Park incident Hammond died and the rest of us couldn't afford a helicopter ride home.
+
+@ Sully
+> It became a survival video game?
+
+@ IAN MALCOLM
+> If by survival video game, you mean living out the rest of your days on a dinosaur infested island because no one wanted to learn enough chaos theory to escape.
+
+@ Silly
+> And that's how you got here?
+
+@ IAN MALCOLM
+> I'll tell you what I did. I started from dying of old age surrounded by the tender love and care of an entire civilization of saurus I led out of conflict and into prosperous economic systems.
+
+@ Shelly
+> Stop waxing.
+
+@ Ian Malcolm
+> Haha, alright alright. I uh, did actually want to figure out a way off the island even if i did beat the so called game.
+
+@ Sally
+> Right, right, so how did you get here?
+
+@ Ian Malcolm
+> Once I realized I truly was in control of my own destiny and demise-- I lived many other successful lives before I decided to take on the Jurassic Park Incident.
+
+@ Wally
+> You intended to be on the island?
+
+@ Ian Malcolm
+> Before me, the incident resulted in no survivors. Why not take a chance on becoming a hero?
+
+@ Sully
+> So you mastered the art of time travel?
+
+@ Ian Malcolm
+> I wouldn't say that at all. Through intention and intution, I see the doors.
+
+@ Wally
+> You see the doors too?
+
+@ Ian Malcolm
+> I didn't before. It wasn't until I lived long enough alongside the dinosaurs that I gained their spiritual intuition.
+
+@ Silly
+> I want dinosaur spiritual intuition!
+
+@ Ian Malcolm
+> I know this lovely, deadly island.
+
+@ Shelly
+> Okay, okay. So you just took a door here?
+
+@ Ian Malcolm
+> Exactly. Sorry to crash the party, but thanks for having me.
+
+@ Sally
+> You're leaving?
+
+@ Ian Malcolm
+> I could use a bite to eat, a warm shower, and a long nap. I'm not seeing that reality in this future, but I know where to find you.
+
+@ Sully
+> We have a lot more games besides Jurassic Park to play.

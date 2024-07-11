@@ -21,25 +21,25 @@ const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
 
-function update(link, target, compositor) {
+function update(link, target, compositor, lifeCycle) {
   insight('module:update', link)
-  if(target.beforeUpdate) {
-    target.beforeUpdate()
+  if(lifeCycle.beforeUpdate) {
+    lifeCycle.beforeUpdate(target)
   }
 
   const html = compositor(target)
   if(html) innerHTML(target, html)
 
-  if(target.afterUpdate) {
-    target.afterUpdate()
+  if(lifeCycle.afterUpdate) {
+    lifeCycle.afterUpdate(target)
   }
 }
 
-function draw(link, compositor) {
+function draw(link, compositor, lifeCycle={}) {
   insight('module:draw', link)
   listen(CREATE_EVENT, link, (event) => {
     statebus.reactive(
-      update.bind(null, link, event.target, compositor)
+      update.bind(null, link, event.target, compositor, lifeCycle)
     )()
   })
 }
