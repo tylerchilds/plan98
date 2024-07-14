@@ -34,25 +34,31 @@ class: timemachine
 app: landing-page
 
 # phone
+
 what if those same apps were on your phone from the store?
+
 <app-simulator
 class: iphone
 app: landing-page
 
 # tablet
+
 what if the app was your entire device?
+
 <app-simulator
 class: ipad
 app: landing-page
 
 # tv
 what if the entire thing was a game?
+
 <app-simulator
-class: full
+class: tv
 app: landing-page
 
-# as is
-what if real life was the console?
+# embedded
+what if everything was every where?
+
 <landing-page
 
 what will you do, when given Paper&copy;&trade;&hearts;

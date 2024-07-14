@@ -8,25 +8,13 @@ $.draw((target) => {
   const app = target.getAttribute('app')
 
   return `
-    <div class="device">
-      <iframe src="/app/${app}"></iframe>
+    <div class="space">
+      <div class="device">
+        <iframe src="/app/${app}"></iframe>
+      </div>
     </div>
   `
 })
-
-document.addEventListener('touchmove', function(event) {
-    let iframe = document.querySelector(`${$.link} iframe`);
-    let iframeRect = iframe.getBoundingClientRect();
-    let touchY = event.touches[0].clientY;
-
-    if (touchY > iframeRect.top && touchY < iframeRect.bottom) {
-        // Inside iframe, let iframe handle the scroll
-        return;
-    }
-
-    // Outside iframe, let parent handle the scroll
-    event.stopPropagation();
-}, { passive: false });
 
 $.style(`
   & {
@@ -38,13 +26,36 @@ $.style(`
     position: relative;
   }
 
+  & .space {
+    margin: auto;
+  }
+
   & .device {
     width: 320px;
     height: 480px;
     border-radius: 13px;
     overflow: hidden;
+    border: 5px solid rgba(0,0,0,.85);
+    box-sizing: content-box;
     margin: auto;
   }
+
+  &.timemachine .space {
+    width: calc(40mm + 4rem);
+  }
+
+  &.ipad .space {
+    width: calc(1024px + 4rem);
+  }
+
+  &.iphone .space {
+    width: calc(320px + 4rem);
+  }
+
+  &.tv .space {
+    width: calc(1920px + 4rem);
+  }
+
 
   &.timemachine .device {
     width: 40mm;
@@ -61,8 +72,8 @@ $.style(`
     height: 480px;
   }
 
-  &.full .device {
-    width: 100%;
-    height: 100vh;
+  &.tv .device {
+    width: 1920px;
+    height: 1080px;
   }
 `)
