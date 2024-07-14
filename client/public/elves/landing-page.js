@@ -554,20 +554,12 @@ $.style(`
     margin: auto;
     text-align: left;
     border: 1px solid rgba(0,0,0,.65);
-    font-size: 1rem;
+    font-size: 1.2rem;
     border-radius: 1.5rem;
     padding: .5rem 1rem;
     margin: 1rem auto;
     width: 100%;
     max-width: 480px;
-  }
-
-  @media (min-width: 768px) {
-    & .search input {
-      padding: 1rem 2rem;
-      font-size: 2rem;
-      border-radius: 3rem;
-    }
   }
 
   & .search button {

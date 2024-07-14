@@ -14,6 +14,20 @@ $.draw((target) => {
   `
 })
 
+$.when('touchstart', 'iframe', function(event) {
+  const startY = event.touches[0].clientY;
+
+  event.target.contentWindow.addEventListener('touchmove', function(e) {
+    const endY = e.touches[0].clientY;
+    const deltaY = endY - startY;
+
+    if ((deltaY > 0 && event.target.scrollY === 0) || (deltaY < 0 && event.target.scrollY + event.target.innerHeight >= event.target.document.body.scrollHeight)) {
+      e.preventDefault();
+      self.scrollBy(0, -deltaY);
+    }
+  });
+});
+
 $.style(`
   & {
     display: block;
