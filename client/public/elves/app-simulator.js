@@ -14,19 +14,19 @@ $.draw((target) => {
   `
 })
 
-$.when('touchstart', 'iframe', function(event) {
-  const startY = event.touches[0].clientY;
+document.addEventListener('touchmove', function(event) {
+    let iframe = document.querySelector(`${$.link} iframe`);
+    let iframeRect = iframe.getBoundingClientRect();
+    let touchY = event.touches[0].clientY;
 
-  event.target.contentWindow.addEventListener('touchmove', function(e) {
-    const endY = e.touches[0].clientY;
-    const deltaY = endY - startY;
-
-    if ((deltaY > 0 && event.target.scrollY === 0) || (deltaY < 0 && event.target.scrollY + event.target.innerHeight >= event.target.document.body.scrollHeight)) {
-      e.preventDefault();
-      self.scrollBy(0, -deltaY);
+    if (touchY > iframeRect.top && touchY < iframeRect.bottom) {
+        // Inside iframe, let iframe handle the scroll
+        return;
     }
-  });
-});
+
+    // Outside iframe, let parent handle the scroll
+    event.stopPropagation();
+}, { passive: false });
 
 $.style(`
   & {
