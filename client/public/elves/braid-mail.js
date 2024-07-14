@@ -9,11 +9,10 @@ $.draw(render)
 function render (target) {
   initialize(target)
   const { posts, activeIndex } = $.learn()
-  const publisher = target.getAttribute('publisher')
   const list = posts.map((p, index) => {
     return `
       <button data-index="${index}" class="${activeIndex === index ? 'active' : '' }">
-        ${p.subject || ''}
+        ${p.subject || '(untitled)'}
       </button>
     `
   }).join('\n')
@@ -32,7 +31,7 @@ function render (target) {
   const activePost = posts[activeIndex]
 
   return `
-    ${publisher ? form : ''}
+    ${form}
     <div class="panes">
       <div class="list">
         ${list}
@@ -162,11 +161,11 @@ $.when('click', '[data-index]', (event) => {
 $.style(`
   & {
     display: block;
-    max-height: 100vh;
+    height: 100%;
   }
 
   & .list {
-    overflow: hidden;
+    overflow: auto;
   }
 
   & .list .active {
@@ -180,15 +179,15 @@ $.style(`
     font-size: 1rem;
     width: 100%;
     text-align: left;
-    background: rgba(0,0,0,.85);
-    color: rgba(255,255,255,.85);
+    color: dodgerblue;
     border: none;
+    background: white;
   }
 
   & .list button:hover,
   & .list button:focus {
-    background: rgba(255,255,255,.85);
-    color: rgba(0,0,0,.85);
+    background: dodgerblue;
+    color: white;
   }
 
   & .panes {
@@ -204,7 +203,7 @@ $.style(`
   @media screen and (min-width: 768px) {
     & .panes {
       display: grid;
-      grid-template-columns: 180px auto;
+      grid-template-columns: 1fr 1.618fr;
     }
   }
 

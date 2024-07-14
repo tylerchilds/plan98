@@ -239,15 +239,17 @@ const $ = elves('landing-page', {
 $.draw(() => {
   const { top10, categories, ring } = $.learn()
   return `
-    <div class="header">
-      <div>
-        <img src="/cdn/thelanding.page/giggle.svg" />
-      </div>
-      <div class="right-align">
+    <div class="hero">
+      <div class="top-bar">
         <button data-publish>
           Create
         </button>
       </div>
+      <form class="search" method="get">
+        <img src="/cdn/thelanding.page/giggle.svg" />
+        <input placeholder="Keywords..." type="text" name="search" />
+        <button type="submit">Discover</button>
+      </form>
     </div>
     <div class="content">
       ${splash(top10)}
@@ -276,11 +278,11 @@ function splash(top10) {
 
   const featured = top10.slice(1,3).map(teaser).join('')
   const important = top10.slice(3,6).map(teaser).join('')
-  const rest = top10.slice(6,9).map(teaser).join('')
+  const rest = top10.slice(6,10).map(teaser).join('')
 
   return `
-    <div class="hero">
-      <a class="hero-image" href="${breaking.permalink}">
+    <div class="breaking">
+      <a class="breaking-image" href="${breaking.permalink}">
         <img src="${breaking.img}" />
       </a>
       <a class="title" href="${breaking.permalink}">
@@ -354,11 +356,13 @@ function minimal(feeds) {
 
 $.style(`
   & {
+    position: relative;
     display: grid;
     grid-template-columns: 2fr 4fr 1fr;
     gap: 1rem;
-    grid-template-areas: "header header header" "sidebar content third";
-    padding: 1rem;
+    grid-template-areas: "hero hero hero" "sidebar content third";
+    grid-template-rows: 100vh auto;
+    padding: 0 1rem;
   }
 
   & .sidebar {
@@ -385,21 +389,26 @@ $.style(`
     grid-area: content;
   }
 
-
   @media (max-width: 1024px) {
     & {
       grid-template-areas:
-        "header header"
+        "hero hero"
         "content content"
         "sidebar third";
       grid-template-columns: 1fr 1fr;
+      grid-template-rows: 100vh auto auto;
     }
   }
 
   @media (max-width: 767px) {
     & {
-      display: block;
-      grid-template-columns: 1fr
+      grid-template-columns: 1fr;
+      grid-template-areas:
+        "hero"
+        "content"
+        "sidebar"
+        "third";
+      grid-template-rows: 100vh auto auto auto;
     }
 
     & .important {
@@ -411,14 +420,47 @@ $.style(`
     }
   }
 
+  @media (max-height: 319px) {
+    & {
+      grid-template-rows: auto auto auto auto;
+    }
+
+    & .hero {
+      margin-top: 3.5rem;
+    }
+  }
+
   & .teaser {
     clear: both;
     display: block;
   }
 
-  & .rest .teaser img {
-    float: left;
-    max-width: 180px;
+  & .rest .teaser {
+    display: grid;
+    grid-template-columns: 1fr 1.618fr;
+    grid-template-areas:
+      "image title"
+      "image lead";
+    grid-template-rows: auto 1fr;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 479px) {
+    & .rest .teaser {
+      display: block;
+    }
+  }
+
+  & .rest .teaser .teaser-image {
+    grid-area: image;
+  }
+
+  & .rest .teaser .title {
+    grid-area: title;
+  }
+
+  & .rest .teaser .lead {
+    grid-area: lead;
   }
 
   & sidebar {
@@ -451,22 +493,26 @@ $.style(`
     min-height: 50px;
   }
 
-  & .header img {
-    max-height: 4rem;
+  & .hero img {
+    max-width: 320px;
   }
 
-  & .header {
+  & .hero {
     clear: both;
-    grid-area: header;
+    grid-area: hero;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    justify-content: center;
+    grid-template-columns: 1fr;
+    place-content: center;
   }
 
-  & .right-align {
-    jutify-self: end;
-    align-self: start;
-    position: relative;
+  & .top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255,255,255,.85);
+    z-index: 2;
+    padding: .5rem;
   }
 
   & [data-publish] {
@@ -476,9 +522,7 @@ $.style(`
     padding: .5rem 1rem;
     border-radius: 1rem;
     border: none;
-    position: absolute;
-    right: 0;
-    top: 0;
+    float: right;
   }
 
   & [data-publish]:hover,
@@ -486,15 +530,63 @@ $.style(`
     background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
   }
 
-  & .hero {
+  & .breaking {
     positon: relative;
   }
 
-  & .hero-image {
+  & .breaking-image {
     display: block;
   }
 
   & .teaser-image {
     display: block;
+  }
+
+  & .search {
+    text-align: center;
+  }
+
+  & .search img {
+    display: block;
+  }
+  & .search input {
+    display: block;
+    margin: auto;
+    text-align: left;
+    border: 1px solid rgba(0,0,0,.65);
+    font-size: 1rem;
+    border-radius: 1.5rem;
+    padding: .5rem 1rem;
+    margin: 1rem auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  @media (min-width: 768px) {
+    & .search input {
+      padding: 1rem 2rem;
+      font-size: 2rem;
+      border-radius: 3rem;
+    }
+  }
+
+  & .search button {
+    display: inline-block;
+  }
+
+  & .search button {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+  }
+
+  & .search button:focus,
+  & .search button:hover {
+    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
   }
 `)

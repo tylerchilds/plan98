@@ -124,6 +124,19 @@ const lolol = [
     ]
   },
   {
+    label: 'Lore',
+    lol: [
+      {
+        label: 'Sagas',
+        laugh: 'sagas.saga'
+      },
+      {
+        label: 'Elves',
+        laugh: 'elves.saga'
+      },
+    ]
+  },
+  {
     label: 'Chats',
     lol: [
       {
@@ -153,7 +166,7 @@ const lolol = [
     label: 'Hard Mode',
     lol: [
       {
-        label: 'Code',
+        label: 'code',
         laugh: 'code.saga'
       },
       {
@@ -164,6 +177,7 @@ const lolol = [
         label: 'Havok',
         laugh: 'havok.saga'
       },
+
     ]
   },
 ]

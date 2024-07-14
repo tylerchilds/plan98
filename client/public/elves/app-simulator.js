@@ -16,9 +16,8 @@ $.draw((target) => {
 
 $.style(`
   & {
-    display: grid;
-    place-content: center;
-    height: 100%;
+    display: block;
+    padding: 5rem 1rem;
     background-image: linear-gradient(35deg, dodgerblue, rgba(0,0,0,.5));
     background-size: cover;
     overflow: auto;
@@ -30,7 +29,7 @@ $.style(`
     height: 480px;
     border-radius: 13px;
     overflow: hidden;
-    position: relative
+    margin: auto;
   }
 
   &.timemachine .device {
@@ -50,8 +49,6 @@ $.style(`
 
   &.full .device {
     width: 100%;
-    height: 100%;
-    position: absolute;
-    inset: 0;
+    height: 100vh;
   }
 `)
