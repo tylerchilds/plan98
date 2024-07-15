@@ -160,14 +160,14 @@ const steps = [
 $.draw((target) => {
   start(target)
 
-  const { questions } = $.learn()
+  const { question1 } = $.learn()
   if(getFeedback().length > 0 ) {
     return `
       Something's up right now...
       <button data-history>Back</button>
     `
   }
-  if(!questions) {
+  if(!question1) {
     return 'loading...'
   }
   const { step } = $.learn()
@@ -230,6 +230,10 @@ const securityQuestionsCallback = data => {
       // Iterate through securityQuestionsArray
       // debugger
       securityQuestionsArray.forEach(val=>{
+
+        $.teach({
+          [`question${val.questionId}`]: val.questionText
+        })
         console.log(val.questionId);
         console.log(val.questionText);
       });
@@ -271,20 +275,53 @@ function start(target) {
   }
 }
 
-function questions() {
-  const questions = $.learn()
+function securityQuestionsAnswers() {
+  const {
+    question1,
+    answer1,
+    question2,
+    answer2,
+    question3,
+    answer3,
+    question4,
+    answer4,
+    question5,
+    answer5,
+  } = $.learn()
+
+  //Take User Input for Security Questions and Answers
+  //Here securityQuestionsAnswers object is created just for reference
+  const qa=[];
+  qa.push({
+    question: question1,
+    answer: answer1
+  });
+
+  qa.push({
+    question: question2,
+    answer: answer2
+  });
+
+  qa.push({
+    question: question3,
+    answer: answer3
+  });
+
+  qa.push({
+    question: question4,
+    answer: answer4
+  });
+
+  qa.push({
+    question: question5,
+    answer: answer5
+  });
+
+  return qa
 }
 
 $.when('click', '[data-connect]', (event) => {
   if(ready()) {
-    //Here answers object is created just for reference
-    var answers=[]; 
-    answers.push({questionId: "<questionId1>", answer: "<answer1>"});
-    answers.push({questionId: "<questionId2>", answer: "<answer2>"});
-    answers.push({questionId: "<questionId3>", answer: "<answer3>"});
-    answers.push({questionId: "<questionId4>", answer: "<answer4>"});
-    answers.push({questionId: "<questionId5>", answer: "<answer5>"});
-     
     const successCallback = data => {
       if (data.sessionId) {
         synthia(self)
@@ -296,7 +333,7 @@ $.when('click', '[data-connect]', (event) => {
      
      bayunCore.validateSecurityQuestions(
        data.sessionId,
-       answers,
+       securityQuestionsAnswers(),
        null,
        successCallback,
        failureCallback

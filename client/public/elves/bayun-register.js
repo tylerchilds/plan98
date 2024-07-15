@@ -243,134 +243,120 @@ $.when('click', '[data-next]', (event) => {
   next()
 })
 
-const authorizeEmployeeCallback = (data) => {
-  if (data.sessionId) {
-    if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
-      // You can get employeePublicKey in data.employeePublicKey for it's authorization
-    }
-  }
-};
-
-const newUserCredentialsCallback = (data) =>{
-  if (data.sessionId){
-    const {
-      question1,
-      answer1,
-      question2,
-      answer2,
-      question3,
-      answer3,
-      question4,
-      answer4,
-      question5,
-      answer5,
-    } = $.learn()
-    const authorizeEmployeeCallback = (data) => {
-      if (data.sessionId) {
-        if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
-          // You can get employeePublicKey in data.employeePublicKey for it's authorization
-        }
+function authorizeEmployee(event) {
+  return function authorizeEmployeeCallback(data){
+    if (data.sessionId) {
+      if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
+        // You can get employeePublicKey in data.employeePublicKey for it's authorization
       }
-    };
-
-    const successCallback = data => {
-      //Employee Registered Successfully
-      //Login to continue.
-      login()
-    };
-
-    const failureCallback = error => {
-      setError(error)
-    };
-
-    //Take User Input for Security Questions and Answers
-    //Here securityQuestionsAnswers object is created just for reference
-    const securityQuestionsAnswers=[];
-    securityQuestionsAnswers.push({
-      question: question1,
-      answer: answer1
-    });
-
-    securityQuestionsAnswers.push({
-      question: question2,
-      answer: answer2
-    });
-
-    securityQuestionsAnswers.push({
-      question: question3,
-      answer: answer3
-    });
-
-    securityQuestionsAnswers.push({
-      question: question4,
-      answer: answer4
-    });
-
-    securityQuestionsAnswers.push({
-      question: question5,
-      answer: answer5
-    });
-
-    // Take user Input for optional registerFaceId
-    const registerFaceId=false;
-
-    bayunCore.setNewUserCredentials(
-      data.sessionId,
-      securityQuestionsAnswers,
-      null, //passphrase,
-      registerFaceId,
-      authorizeEmployeeCallback,
-      successCallback,
-      failureCallback
-    );
-  }
+    }
+  };
 }
 
-const securityQuestionsCallback = data => {
-  if (data.sessionId) {
-    if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS){
-      let securityQuestionsArray = data.securityQuestions;
-      //securityQuestionsArray is a list of Security Question Objects with questionId, questionText
-      // Iterate through securityQuestionsArray
-      securityQuestionsArray.forEach(val=>{
-        console.log(val.questionId);
-        console.log(val.questionText);
-      });
-      //Show custom UI to take user input for the answers.
-      //Call validateSecurityQuestions function with the user provided answers.
-
-      //Here answers object is created just for reference
-      var answers=[];
-      answers.push({questionId: "<questionId1>", answer: "<answer1>"});
-      answers.push({questionId: "<questionId2>", answer: "<answer2>"});
-      answers.push({questionId: "<questionId3>", answer: "<answer3>"});
-      answers.push({questionId: "<questionId4>", answer: "<answer4>"});
-      answers.push({questionId: "<questionId5>", answer: "<answer5>"});
-
+function newUserCredentials(event) {
+  return function newUserCredentialsCallback(data) {
+    if (data.sessionId){
       const successCallback = data => {
-        //Security Questions' Answers validated and registered employee successfully.
+        //Employee Registered Successfully
         //Login to continue.
-        login(self)
+        login(event)
       };
 
       const failureCallback = error => {
         setError(error)
       };
 
-      bayunCore.validateSecurityQuestions(data.sessionId, answers, authorizeEmployeeCallback, successCallback, failureCallback);
+      // Take user Input for optional registerFaceId
+      const registerFaceId=false;
+
+      bayunCore.setNewUserCredentials(
+        data.sessionId,
+        securityQuestionsAnswers(),
+        null, //passphrase,
+        registerFaceId,
+        authorizeEmployee(event),
+        successCallback,
+        failureCallback
+      );
     }
   }
-};
+}
 
-const successCallback = data => {
-  //Employee Registered Successfully
-  //Login to continue.
-  login(self)
-};
+function securityQuestionsAnswers() {
+  const {
+    question1,
+    answer1,
+    question2,
+    answer2,
+    question3,
+    answer3,
+    question4,
+    answer4,
+    question5,
+    answer5,
+  } = $.learn()
 
-const failureCallback = error => {
-  setError(error)
-};
+  //Take User Input for Security Questions and Answers
+  //Here securityQuestionsAnswers object is created just for reference
+  const qa=[];
+  qa.push({
+    question: question1,
+    answer: answer1
+  });
+
+  qa.push({
+    question: question2,
+    answer: answer2
+  });
+
+  qa.push({
+    question: question3,
+    answer: answer3
+  });
+
+  qa.push({
+    question: question4,
+    answer: answer4
+  });
+
+  qa.push({
+    question: question5,
+    answer: answer5
+  });
+
+  return qa
+}
+
+function securityQuestions(event) {
+  return function securityQuestionsCallback(data) {
+    if (data.sessionId) {
+      if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS){
+
+        // we can get the questions from data.securityQuestions,
+        // but we already have the first pass in memory
+        // data.securityQuestions;
+
+        const successCallback = data => {
+          //Security Questions' Answers validated and registered employee successfully.
+          //Login to continue.
+          login(event)
+        };
+
+        const failureCallback = error => {
+          setError(error)
+        };
+
+        bayunCore.validateSecurityQuestions(
+          data.sessionId,
+          securityQuestionsAnswers(),
+          authorizeEmployee(event),
+          successCallback,
+          failureCallback
+        );
+      }
+    }
+  };
+}
 
 function ready() {
   const companyName = getCompanyName()
@@ -385,6 +371,17 @@ $.when('click', '[data-submit]', (event) => {
   const companyEmployeeId = getEmployeeId()
   const email = getEmail()
 
+
+  const successCallback = data => {
+    //Employee Registered Successfully
+    //Login to continue.
+    login(event)
+  };
+
+  const failureCallback = error => {
+    setError(error)
+  };
+
   if(ready()) {
     bayunCore.registerEmployeeWithoutPassword(
       '', //sessionId,
@@ -392,9 +389,9 @@ $.when('click', '[data-submit]', (event) => {
       companyEmployeeId,
       email,
       true, //isCompanyOwnedEmail,
-      authorizeEmployeeCallback,
-      newUserCredentialsCallback,
-      securityQuestionsCallback,
+      authorizeEmployee(event),
+      newUserCredentials(event),
+      securityQuestions(event),
       null, //passphraseCallback,
       successCallback,
       failureCallback
