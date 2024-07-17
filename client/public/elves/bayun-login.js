@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { synthia, getFeedback, getCompanyName, getEmployeeId, setError, setErrors } from './bayun-wizard.js'
+import { connected, getFeedback, getCompanyName, getEmployeeId, setSessionId, setError, setErrors } from './bayun-wizard.js'
 
 const $ = module('bayun-login', {
   step: 0,
@@ -16,7 +16,7 @@ const steps = [
     const { questions, answer1 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[0].questionText}
+      ${questions[1]}
       <label class="field">
         <span class="label">Answer 1</span>
         <textarea class="name-pair" name="answer1">${answer1}</textarea>
@@ -28,27 +28,11 @@ const steps = [
       </div>
     `
   },
-  function step4() {
-    const { question2 } = $.learn()
-
+  function step2() {
+    const { questions, answer2 } = $.learn()
     return `
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 2</span>
-        <textarea class="name-pair" name="question2">${question2}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step5() {
-    const { question2, answer2 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${question2}
+      ${questions[2]}
       <label class="field">
         <span class="label">Answer 2</span>
         <textarea class="name-pair" name="answer2">${answer2}</textarea>
@@ -60,26 +44,11 @@ const steps = [
       </div>
     `
   },
-  function step6() {
-    const { question3 } = $.learn()
+  function step3() {
+    const { questions, answer3 } = $.learn()
     return `
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 3</span>
-        <textarea class="name-pair" name="question3">${question3}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step7() {
-    const { question3, answer3 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${question3}
+      ${questions[3]}
       <label class="field">
         <span class="label">Answer 3</span>
         <textarea class="name-pair" name="answer3">${answer3}</textarea>
@@ -91,29 +60,14 @@ const steps = [
       </div>
     `
   },
-  function step8() {
-    const { question4 } = $.learn()
+  function step4() {
+    const { questions, answer4 } = $.learn()
     return `
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 4</span>
-        <textarea class="name-pair" name="question4">${question4}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step9() {
-    const { question4 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${question4}
+      ${questions[4]}
       <label class="field">
         <span class="label">Answer 4</span>
-        <textarea class="name-pair" name="answer4"></textarea>
+        <textarea class="name-pair" name="answer4">${answer4}</textarea>
       </label>
 
       <div class="button-row">
@@ -122,55 +76,37 @@ const steps = [
       </div>
     `
   },
-  function step10() {
-    const { question5 } = $.learn()
+  function step5() {
+    const { questions, answer5 } = $.learn()
     return `
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 5</span>
-        <textarea class="name-pair" name="question5">${question5}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step11() {
-    const { question5 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${question5}
+      ${questions[5]}
       <label class="field">
         <span class="label">Answer 5</span>
-        <textarea class="name-pair" name="answer5"></textarea>
+        <textarea class="name-pair" name="answer5">${answer5}</textarea>
       </label>
-
-      This was the last answer, check your work by going back or finish registering now!
 
       <div class="button-row">
         <button data-back>Back</button>
         <button data-connect>Connect</button>
       </div>
     `
-  }
+  },
 ]
 
 $.draw((target) => {
   start(target)
 
-  const { question1 } = $.learn()
+  const { questions, step } = $.learn()
   if(getFeedback().length > 0 ) {
     return `
       Something's up right now...
       <button data-history>Back</button>
     `
   }
-  if(!question1) {
+  if(!questions) {
     return 'loading...'
   }
-  const { step } = $.learn()
   if(step !== parseInt(target.dataset.step)) {
     target.dataset.step = step
     target.dataset.steps = step
@@ -229,30 +165,21 @@ const securityQuestionsCallback = data => {
       //securityQuestionsArray is a list of Security Question Objects with questionId, questionText 
       // Iterate through securityQuestionsArray
       // debugger
-      securityQuestionsArray.forEach(val=>{
 
-        $.teach({
-          [`question${val.questionId}`]: val.questionText
-        })
-        console.log(val.questionId);
-        console.log(val.questionText);
+      const questions = {}
+      securityQuestionsArray.forEach(val=>{
+        questions[val.questionId] = val.questionText
       });
+
+      $.teach({
+        sessionId: data.sessionId,
+        questions
+      })
       //Show custom UI to take user input for the answers.
       //Call validateSecurityQuestions function with the user provided answers.
     }
   }
 }
-
-const successCallback = data => {
-  if (data.sessionId) {
-    //LoggedIn Successfully
-    synthia(self)
-  }
-};
-
-const failureCallback = error => {
-  setError(error)
-};
 function start(target) {
   const companyName = getCompanyName()
   const companyEmployeeId = getEmployeeId()
@@ -261,6 +188,19 @@ function start(target) {
 
   if(prerequirements && !target.inquired) {
     target.inquired = true
+
+    const successCallback = data => {
+      if (data.sessionId) {
+        setSessionId(data.sessionId)
+        //LoggedIn Successfully
+        connected({ target })
+      }
+    };
+
+    const failureCallback = error => {
+      setError(error)
+    };
+
     schedule(() => {
       bayunCore.loginWithoutPassword(
         '', //sessionId,
@@ -277,15 +217,10 @@ function start(target) {
 
 function securityQuestionsAnswers() {
   const {
-    question1,
     answer1,
-    question2,
     answer2,
-    question3,
     answer3,
-    question4,
     answer4,
-    question5,
     answer5,
   } = $.learn()
 
@@ -293,27 +228,27 @@ function securityQuestionsAnswers() {
   //Here securityQuestionsAnswers object is created just for reference
   const qa=[];
   qa.push({
-    question: question1,
+    questionId: '1',
     answer: answer1
   });
 
   qa.push({
-    question: question2,
+    questionId: '2',
     answer: answer2
   });
 
   qa.push({
-    question: question3,
+    questionId: '3',
     answer: answer3
   });
 
   qa.push({
-    question: question4,
+    questionId: '4',
     answer: answer4
   });
 
   qa.push({
-    question: question5,
+    questionId: '5',
     answer: answer5
   });
 
@@ -321,24 +256,24 @@ function securityQuestionsAnswers() {
 }
 
 $.when('click', '[data-connect]', (event) => {
-  if(ready()) {
-    const successCallback = data => {
-      if (data.sessionId) {
-        synthia(self)
-      }};
-    
-    const failureCallback = error => {
-      setError(error)
-    };
-     
-     bayunCore.validateSecurityQuestions(
-       data.sessionId,
-       securityQuestionsAnswers(),
-       null,
-       successCallback,
-       failureCallback
-     );
-  }
+  const { sessionId } = $.learn()
+  const successCallback = data => {
+    if (data.sessionId) {
+      setSessionId(data.sessionId)
+      connected(event)
+    }};
+
+  const failureCallback = error => {
+    setError(error)
+  };
+
+  bayunCore.validateSecurityQuestions(
+    sessionId,
+    securityQuestionsAnswers(),
+    null,
+    successCallback,
+    failureCallback
+  );
 
   const errors = []
 

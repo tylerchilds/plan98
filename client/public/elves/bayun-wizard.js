@@ -230,36 +230,9 @@ export function login(event) {
   setupSaga('login.saga', event.target)
 }
 
-export function synthia(event) {
-  if(!getEmployeeId()) {
-    seterror('enter an employee id')
-    return
-  }
-  setupSaga('synthia.saga', event.target)
+export function connected(event) {
+  setupSaga('welcome.saga', event.target)
 }
-
-
-
-/*
- *
- * companyEmployeeId: for storing secure documents
- * employee-pick.saga
- *
- * with these, a determination: to register or to log in?
- *
- * to log in, we'd first need to know if the patron exists
- */
-
-const failureCallback = error => {
-  setError(error)
-};
-
-/*
- *
- * when known, the patron will be prompted with five questions they declared at registration
- *
- * with knowledge, they with be admitted access to the rooms of the party as invited
- */
 
 export function setSessionId(x) {
   state['ls/bayun'].sessionId = x
