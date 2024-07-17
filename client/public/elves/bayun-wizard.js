@@ -93,6 +93,10 @@ $.style(`
     place-items: center;
   }
 
+  & textarea {
+    resize: none;
+  }
+
   & .wrapper {
     width: 100%;
     top: 0;
