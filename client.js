@@ -358,10 +358,20 @@ async function home(request, business) {
 }
 
 async function showApp(request, tag) {
+  const url = new URL(request.url)
+
+  console.log(url)
+  let attributes = ''
+  for(const p of url.searchParams) {
+    attributes += `${[p[0]]}="${p[1]}"`
+  }
+
+  console.log(attributes)
+
   const dom = await page()
   dom.body.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>
-      <${tag}></${tag}>
+      <${tag} ${attributes}></${tag}>
     </sillonious-brand>
   `)
   // remove the lazy-bootstrap to lock the document
@@ -369,8 +379,6 @@ async function showApp(request, tag) {
   dom.getElementById('main').remove()
   return `<!DOCTYPE html>${dom.documentElement}`
 }
-
-
 
 async function about(headers, request) {
   const { search } = new URL(request.url);
