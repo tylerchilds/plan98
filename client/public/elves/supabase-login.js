@@ -1,66 +1,101 @@
 import supabase from '@sillonious/database'
-
-import module, { state } from '@silly/tag'
+import module from '@silly/tag'
 import { showModal } from '@plan98/modal'
 
 const $ = module('supabase-login', {
   email: '',
   password: '',
   message: null,
-  connected: true
+  connected: false,
+  newAccount: true,
+  user: null
 })
 
-$.draw((target) => {
-  const { message, connected, error, email, password } = $.learn()
 
-  if(!connected) {
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    localStorage.setItem('supabase.auth.token', JSON.stringify(session));
+  } else {
+    localStorage.removeItem('supabase.auth.token');
+  }
+});
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
+async function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  schedule(() => $.teach({ message: null }))
+
+  const savedSession = localStorage.getItem('supabase.auth.token');
+
+  if (savedSession) {
+    const session = JSON.parse(savedSession);
+    await supabase.auth.setSession(session.access_token);
+    $.teach({ user: session.user })
+  }
+}
+
+$.draw((target) => {
+  mount(target)
+  const {
+    message,
+    user,
+    newAccount
+  } = $.learn()
+
+  if(!user) {
     return `
-      <div name="login">
-        <hypertext-variable class="title" monospace="0" casual="1" weight="800" slant="0" cursive="1">
+      <h2>Authenticate</h2>
+      <div class="message">${message ? message : ''}</div>
+      <form method="POST" name="authenticate">
+        <label class="field">
+          <span class="label">Email</span>
+          <input type="text" name="email" required/>
+        </label>
+        <label class="field">
+          <span class="label">Password</span>
+          <input type="password" name="password" required/>
+        </label>
+        <button type="submit">
           Authenticate
-        </hypertext-variable>
-        <div class="error">
-          ${message ? message : ''}
-        </div>
-        <form method="POST" action="loginWithPassword">
-          <label class="field">
-            <span class="label">Email</span>
-            <input data-bind value="${email}" type="text" name="email" required/>
-          </label>
-          <label class="field">
-            <span class="label">Password</span>
-            <input data-bind type="password" value="${password}" name="password" required/>
-          </label>
-          <button type="submit">
-            Authenticate
+        </button>
+
+        <div style="text-align: center">
+          <div>
+          - or -
+          </div>
+
+          <button data-register class="secondary">
+            Register
           </button>
-        </form>
-      </div>
+        </div>
+      </form>
     `
   }
 
   return `
+    <p>
+    Connected as: ${user.email}!
+    </p>
+    <weild-organizations></weild-organizations>
     <button data-logout>
       Disconnect
-    </button>
-
-    <button data-dashboard>
-      Go to Dashboard
     </button>
   `
 })
 
-$.when('click', '[data-dashboard]', async () => {
-  window.location.href = '/app/weild-dealdash'
+$.when('click', '[data-register]', (event) => {
+  event.preventDefault()
+  showModal(`
+    <div style="background: white; padding 1rem;">
+      <weild-registration></weild-registration>
+    </div>
+  `)
 })
 
 $.when('click', '[data-logout]', async () => {
+  $.teach({ message: null })
   disconnect()
-})
-
-$.when('input', '[data-bind]', event => {
-  const { name, value } = event.target;
-  $.teach({ [name]: value })
 })
 
 export async function getUser() {
@@ -70,66 +105,42 @@ export async function getUser() {
 export async function disconnect() {
   const { error } = await supabase.auth.signOut()
   if(!error) {
-    $.teach({ connected: false })
+    $.teach({ user: null })
+    window.location.href = '/'
   }
 }
 
-$.when('submit', 'form', (event) => {
+$.when('submit', '[name="authenticate"]', async (event) => {
   event.preventDefault()
-})
-$.when('click', '[type="submit"]', async (event) => {
   $.teach({ message: null })
-  let connected
 
-  const {
+  const email = event.target.email.value
+  const password = event.target.password.value
+
+  const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
-  } = $.learn()
+  })
 
-  {  // login
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if(!error) {
-      connected = true
-      debugger
-      $.teach({ password: '', connected })
-    }
+  if(!error) {
+    const { data: { user } } = await supabase.auth.getUser()
+    $.teach({ password: '', user })
   }
 
-  if(connected) return
-  $.teach({ message: "Issue with authentication... Retrying..." })
-
-  { // or create
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
-    if(!error) {
-      $.teach({
-        message: 'Registration Successful. Confirm your email, then authenticate'
-      })
-      return
-    }
-
-    $.teach({ message: "Unable to authenticate at this time, please try agian later." })
-  }
+  $.teach({
+    message: "Unable to authenticate at this time, please try agian later."
+  })
 })
-
 
 $.style(`
   & {
-    overflow: auto;
-    min-height: 480px;
+    max-width: 320px;
+    padding: 1rem;
     display: block;
-    height: 100%;
-    width: 100%;
-    line-height: 2rem;
-    position: relative;
-    padding: 6rem 0;
+  }
+
+  & weild-organizations {
+    margin-bottom: 3rem;
   }
 
   & *:focus {
@@ -142,34 +153,11 @@ $.style(`
     padding: 0 0 5rem;
   }
 
-  & [name="login"] {
-    background: lemonchiffon;
-    max-width: 320px;
-    margin: auto;
-    inset: 0;
-    padding: 1rem;
-    position: absolute;
-    aspect-ratio: 1;
-    box-shadow:
-      0px 0px 4px 4px rgba(0,0,0,.10),
-      0px 0px 12px 12px rgba(0,0,0,.05);
-  }
-
   & .label {
-    color: saddlebrown;
-  }
-  & .title {
-    margin-bottom: 1rem;
-    display: block;
-    color: saddlebrown;
+    color: rgba(0,0,0,.85);
   }
 
   & [type="submit"] {
     width: 100%;
   }
 `)
-
-$.when('scroll', 'textarea', function({ target }) {
-    const scrollTop = target.scrollTop;
-    target.style.backgroundPosition = `0px ${-scrollTop}px`;
-});

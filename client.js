@@ -73,6 +73,11 @@ async function page() {
           ${safeEnv('SUPABASE_URL')}
           ${safeEnv('SUPABASE_KEY')}
 
+          ${safeEnv('S3_COMPAT_ACCESS_KEY')}
+          ${safeEnv('S3_COMPAT_SECRET_KEY')}
+          ${safeEnv('S3_COMPAT_ENDPOINT')}
+          ${safeEnv('S3_COMPAT_BUCKET')}
+
           ${safeEnv('VAULT_APP_ID')}
           ${safeEnv('VAULT_APP_SECRET')}
           ${safeEnv('VAULT_APP_SALT')}
