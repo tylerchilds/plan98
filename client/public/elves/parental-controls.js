@@ -13,7 +13,7 @@ const companies = getCompanies().map((company) => {
 }).join('')
 
 const companiesField = `
-  <label>Company</label>
+  <label>Organization</label>
   <select name="companyName" class="companyName">
     ${companies}
   </select>
@@ -44,6 +44,10 @@ const lolol = [
       {
         label: 'Start',
         laugh: 'start.saga'
+      },
+      {
+        label: 'Search',
+        laugh: 'search.saga'
       },
       {
         label: 'Secure',
@@ -184,7 +188,6 @@ const lolol = [
 const { laugh } = lolol[0].lol[0]
 let lastLaugh = laugh
 let lastSidebar = false
-let lastAvatar = false
 let lastUser = false
 let lastAuthState = false
 
@@ -221,20 +224,25 @@ $.draw((target) => {
   const user = social(companyName, companyEmployeeId)
 
   const authState = sessionId
+  const avatarHTML = sessionId ? `
+    <div data-avatar>
+      <quick-media key="${user.avatar}"></quick-media>
+    </div>
+  ` : `
+    <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
+  `
+
   const authChip = sessionId ? `
-    <button data-avatar>
-    <quick-media key="${user.avatar}"></quick-media>
-    </button>
     <div class="tongue">
       <div class="quick-auth">
         <div class="console">
-          <label>Company</label>
+          <label>Organization</label>
           <div class="companyName">
             ${companyName}
           </div>
         </div>
         <div class="player">
-          <label>Identity</label>
+          <label>Member</label>
           <div class="companyEmployeeId">
             ${companyEmployeeId}
           </div>
@@ -243,26 +251,15 @@ $.draw((target) => {
           Disconnect
         </button>
       </div>
-      <div class="tastebuds">
-        ${personalLolol.map((x, index) => {
-          return `
-            <div class="heading-label">${x.label}</div>
-            ${myLol(x.lol, index)}
-          `
-        }).join('')}
-
-        <chat-lists></chat-lists>
-      </div>
     </div>
   ` : `
-    <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
     <div class="tongue">
       <form method="post" class="quick-auth">
         <div class="console">
           ${companiesField}
         </div>
         <div class="player">
-          <label>Identity</label>
+          <label>Member</label>
           <input placeholder="player" name="companyEmployeeId" />
         </div>
         <div class="password">
@@ -280,6 +277,7 @@ $.draw((target) => {
   if(authState !== lastAuthState && target.querySelector('.control-avatar')) {
     lastAuthState = authState
     target.querySelector('.control-avatar').innerHTML = authChip
+    target.querySelector('[data-sidebar]').innerHTML = avatarHTML
     return
   }
 
@@ -294,20 +292,12 @@ $.draw((target) => {
 
   if(sidebar !== lastSidebar && target.querySelector('[data-sidebar]')) {
     lastSidebar = sidebar
-    target.querySelector('[data-sidebar]').innerText = sidebar ? 'Play' : 'Pause'
     sidebar
       ? target.querySelector('data-tooltip').classList.add('sidebar')
       : target.querySelector('data-tooltip').classList.remove('sidebar')
     return
   }
 
-  if(avatar !== lastAvatar && target.querySelector('[data-sidebar]')) {
-    lastAvatar = avatar
-    avatar
-      ? target.querySelector('.control-tab-list').classList.add('multiplayer')
-      : target.querySelector('.control-tab-list').classList.remove('multiplayer')
-    return
-  }
 
   if(user !== lastUser && target.querySelector('[data-avatar]')) {
     lastUser = user.company + user.unix
@@ -318,13 +308,25 @@ $.draw((target) => {
     <data-tooltip class="control ${sidebar ? 'sidebar': ''}" aria-live="assertive">
       <div class="control-toggle">
         <button data-sidebar>
-          Pause
+          ${avatarHTML}
         </button>
       </div>
-      <div class="control-tab-list ${avatar ? 'multiplayer': ''}">
+      <div class="control-tab-list">
         <div class="control-avatar">
           ${authChip}
         </div>
+
+        <div class="tastebuds">
+          ${personalLolol.map((x, index) => {
+            return `
+              <div class="heading-label">${x.label}</div>
+              ${myLol(x.lol, index)}
+            `
+          }).join('')}
+
+          <chat-lists></chat-lists>
+        </div>
+
         ${lolol.map((x, index) => {
           return `
             <div class="heading-label">${x.label}</div>
@@ -386,12 +388,6 @@ $.when('click', '[data-sidebar]', async (event) => {
   const { sidebar } = $.learn()
   $.teach({ sidebar: !sidebar })
 })
-
-$.when('click', '[data-avatar]', async (event) => {
-  const { avatar } = $.learn()
-  $.teach({ avatar: !avatar })
-})
-
 
 $.when('click', '.in-group', async (event) => {
   const { groupId } = event.target.dataset
@@ -493,7 +489,7 @@ $.style(`
   & .control-toggle {
     position: absolute;
     left: 0;
-    top: 1rem;
+    top: 0;
     z-index: 10;
   }
 
@@ -514,7 +510,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    padding: 5rem 1rem 1rem;
+    padding: 1rem;
     overflow: auto;
     background: rgba(255,255,255,.65);
     position: relative;
@@ -581,13 +577,6 @@ $.style(`
   }
 
   & .control-avatar {
-    overflow: auto;
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
     max-width: 100%;
     width: 320px;
     pointer-events: none;
@@ -632,8 +621,10 @@ $.style(`
     font-weight: 800;
     background: rgba(0,0,0,.5);
     border: none;
-    border-radius: 0 1rem 1rem 0;
-    padding: .5rem 1rem .5rem 2rem;
+    border-radius: 0 0 1rem 0;
+    padding: .5rem .5rem .5rem 1rem;
+    width: calc(80px + 1.5rem);
+    height: calc(80px + 1rem);
     color: rgba(255,255,255,.5);
     transition: background 200ms ease-in-out;
   }
@@ -685,7 +676,7 @@ $.style(`
 
   & .control-avatar .console {
     background: rgba(128,128,128,.5);
-    padding-top: 3rem;
+    padding-top: 80px;
   }
 
   & .control-avatar input {
@@ -707,30 +698,22 @@ $.style(`
   }
 
 
-  & .control-avatar [data-avatar] {
-    max-width: 64px;
+  & [data-avatar] {
+    max-width: 72px;
     border-radius: 100%;
     overflow: hidden;
     padding: 0;
     aspect-ratio: 1;
-    position: absolute;
-    top: .5rem;
-    right: .5rem;
-    border: 3px solid var(--wheel-0-6, dodgerblue);
     z-index: 10;
-    pointer-events: all;
+    pointer-events: none;
   }
 
   & .tongue {
-    background: linear-gradient(45deg, rgba(255,255,255,.75), rgba(255,255,255,.5)), var(--wheel-0-6);
-    height: 100%;
     color: rgba(255,255,255,.85);
-    opacity: 0;
     transition: opacity 200ms ease-in-out;
     overflow: auto;
     width: 100%;
-    pointer-events: none;
-    padding: 1rem;
+    pointer-events: all;
   }
 
   & .tastebuds {
@@ -739,9 +722,6 @@ $.style(`
     gap: .5rem;
   }
 
-  & .multiplayer .tongue {
-    opacity: 1;
-    pointer-events: all;
   }
 
   & .password {

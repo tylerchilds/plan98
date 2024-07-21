@@ -199,7 +199,7 @@ $.when('click', '[data-tutorial]', start)
 $.when('click', '[data-endgame]', finish)
 
 function start(event) {
-  const tag = event.target.closest($.link).getAttribute('tag') || 'mine-sweeper'
+  const url = event.target.closest($.link).getAttribute('url') || '/app/hyper-browser'
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
@@ -208,7 +208,7 @@ function start(event) {
   }
 
   showModal(`
-    <${tag}></${tag}>
+    <iframe src="${url}" style="width: 100%; height: 100%; border: 0;"></iframe>
   `, { centered: true })
 }
 

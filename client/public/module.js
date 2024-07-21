@@ -161,13 +161,21 @@ function dispatchCreate(target) {
   target.reactive = true
 }
 
-new MutationObserver((mutationsList) => {
-  const targets = [...mutationsList]
-    .map(getSubscribers)
-    .flatMap(x => x)
-  maybeCreateReactive(targets)
-}).observe(document.body, { childList: true, subtree: true });
-new Computer(self.plan98, { registry: '/public/elves' })
+function elves() {
+  new MutationObserver((mutationsList) => {
+    const targets = [...mutationsList]
+      .map(getSubscribers)
+      .flatMap(x => x)
+    maybeCreateReactive(targets)
+  }).observe(document.body, { childList: true, subtree: true });
+  new Computer(self.plan98, { registry: '/public/elves' })
+}
+
+try {
+  elves()
+} catch(e) {
+  setTimeout(elves,1000)
+}
 
 function sufficientlyUniqueId() {
   // https://stackoverflow.com/a/2117523

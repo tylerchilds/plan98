@@ -43,7 +43,9 @@ $.draw(() => {
     <div
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
-      <button data-close>Close</button>
+      <div class="action-wrapper">
+        <button data-close>Close</button>
+      </div>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
           ${modalHeader}
@@ -251,20 +253,25 @@ $.style(`
     }
   }
 
+  & .action-wrapper {
+    pointer-event: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 1101;
+    padding: 1rem;
+  }
   & [data-close] {
+    pointer-event: all;
     background: black;
     border: none;
-    border-radius: 0 0 0 1rem;
+    border-radius: 1rem;
     color: white;
-    padding: 0 1rem 0 .5rem;
-    line-height: 1;
-    height: 2rem;
+    padding: .5rem 1rem;
     opacity: .8;
     transition: opacity: 200ms;
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 1101;
   }
 
   & [data-close]:hover,
