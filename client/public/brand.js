@@ -23,6 +23,24 @@ const emeraldOfNow
   = `/public/cdn/sillyz.computer/index.saga`
 
 export const doingBusinessAs = {
+  'dwebcamp.org': {
+    emote: ';)',
+    logo: '/cdn/thelanding.page/logo.svg',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    imageDescription: 'A wired collection of silly musical equipment',
+    latitude: '37.769100',
+    longitude: '-122.454583',
+    zoom: 10,
+    tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
+    mascot: 'Silly Sillonious',
+    saga:`/public/sagas/dwebcamp.org/${language}/000-000.saga`,
+    contact: reverseProxyLookup,
+    brandHue: 0,
+    brandRange: 360,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
+  },
   'sillyz.computer': {
     emote: ';)',
     logo: '/cdn/thelanding.page/logo.svg',

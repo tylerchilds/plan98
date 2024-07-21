@@ -1,5 +1,7 @@
 import tag from '@silly/tag'
 import * as braid from 'braid-http'
+import { marked } from 'marked'
+import { render } from '@sillonious/saga'
 
 const myersDiff = document.createElement("script");
 myersDiff.src = "https://braid.org/code/myers-diff1.js";
@@ -14,6 +16,13 @@ simpleton.src = "https://unpkg.com/braid-text/simpleton-client.js"
 simpleton.integrity = "";
 simpleton.crossOrigin = "";
 document.body.appendChild(simpleton)
+
+const mimes = {
+  'text/x-saga': render,
+  'text/saga': render,
+  'text/markdown': marked,
+  'text/braid': null // default case, handle in draw
+}
 
 const $ = tag('simpleton-client')
 
@@ -30,12 +39,42 @@ requestAnimationFrame(readyLoop)
 $.draw((target) => {
   const { ready } = $.learn()
   const tag = target.getAttribute('tag') || 'textarea'
+  const mime = plan98.parameters.get('mime') || target.getAttribute('mime') || 'text/braid'
 
   if(!ready) {
     return
   }
   if(!target.simpleton) {
     const resource = (target.getAttribute('host') || plan98.env.BRAID_TEXT_PROXY) + (target.getAttribute('path') || location.pathname)
+    if(typeof mimes[mime] === 'function') {
+      // no mime, just be a clown ok
+      target.innerHTML = `
+        <div class="client"></div>
+      `
+      target.texty = target.querySelector('.client')
+
+      target.simpleton = simpleton_client(resource, {
+        apply_remote_update: ({ state, patches }) => {
+          if (state !== undefined) {
+            target.texty.dataset.value = state
+            target.texty.innerHTML = mimes[mime](state);
+          } else {
+            apply_mime_on_update(mimes[mime], target, patches);
+          }
+          return target.texty.dataset.value;
+        },
+        generate_local_diff_update: (prev_state) => {
+          var patches = diff(prev_state, target.texty.innerHTML);
+          if (patches.length === 0) return null;
+          return { patches, new_state: target.texty.innerHTML };
+        },
+      });
+
+      // this was a mime, no need to return
+      return
+    }
+
+    // no mime, just be a clown ok
     target.innerHTML = `
       <${tag} class="client"></${tag}>
     `
@@ -54,6 +93,8 @@ $.draw((target) => {
       },
     });
   }
+
+  return
 })
 
 $.when('input', '.client', (event) => {
@@ -114,6 +155,31 @@ function apply_patches_and_update_selection(textarea, patches) {
   textarea.selectionEnd = sel[1];
 }
 
+function apply_mime_on_update(mime, target, patches) {
+  if(patches.length === 0) return
+  let offset = 0;
+  for (const p of patches) {
+    p.range[0] += offset;
+    p.range[1] += offset;
+    offset -= p.range[1] - p.range[0];
+    offset += p.content.length;
+  }
+
+  let original = target.texty.dataset.value;
+
+  for (const p of patches) {
+    const range = p.range;
+
+    original =
+      original.substring(0, range[0]) +
+      p.content +
+      original.substring(range[1]);
+  }
+
+  target.texty.dataset.value = original;
+  target.texty.innerHTML = mime(original)
+}
+
 $.style(`
   & {
     min-height: 5rem;
@@ -122,12 +188,14 @@ $.style(`
     display: block;
     max-width: 100%;
     overflow: auto;
+    height: 100%;
   }
 
   & input {
     border: none;
   }
   & textarea {
+    display: block;
     width: 100%;
     height: 100%;
     resize: none;
