@@ -193,8 +193,12 @@ $.style(`
 
   & input {
     border: none;
+    background: lemonchiffon;
+    color: saddlebrown;
   }
   & textarea {
+    background: lemonchiffon;
+    color: saddlebrown;
     display: block;
     width: 100%;
     height: 100%;
@@ -202,7 +206,6 @@ $.style(`
     border: none;
     padding: 0rem 1rem;
     line-height: 2rem;
-    background-color: white;
     position: relative;
     z-index: 3;
     background-position-y: -1px;

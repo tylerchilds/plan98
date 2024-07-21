@@ -39,6 +39,7 @@ $.style(`
     width: 100%;
     display: block;
   }
+
   & .grid {
     display: grid;
     height: 100%;
@@ -83,7 +84,9 @@ $.style(`
     display: block;
     transform: translate(-0%, 150%) rotateZ(45deg);
   }
-  & simpleton-client {
+  & simpleton-client textarea {
 
+    background: transparent;
   }
+
 `)
