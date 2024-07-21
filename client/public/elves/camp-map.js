@@ -119,5 +119,6 @@ $.style(`
 
   & > * {
     grid-area: center;
+    place-self: center;
   }
 `)
