@@ -170,9 +170,14 @@ const lolol = [
     label: 'Hard Mode',
     lol: [
       {
-        label: 'code',
+        label: 'Development Environment',
         laugh: 'code.saga'
       },
+      {
+        label: 'File System',
+        laugh: 'files.saga'
+      },
+
       {
         label: 'A-Frame',
         laugh: 'aframe.saga'

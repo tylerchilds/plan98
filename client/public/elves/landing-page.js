@@ -1,4 +1,5 @@
 import elves from '@silly/tag'
+import { idx, documents } from './giggle-search.js'
 
 const $ = elves('landing-page', {
   query: "",
@@ -249,19 +250,26 @@ $.draw(() => {
       </div>
       <form class="search" method="get">
         <img src="/cdn/thelanding.page/giggle.svg" />
-        <input placeholder="Imagine..." type="text" value="${query}" name="search" />
+        <div class="input-grid">
+          <input placeholder="Imagine..." type="text" value="${query}" name="search" />
+          <button type="submit">??</button>
+        </div>
         <div class="suggestions ${focused ? 'focused' : ''}">
           <div class="suggestion-box">
             ${suggestions.map((x, i) => {
+              const item = documents.find(y => {
+                return x.ref === y.path
+              })
+
+
               return `
-                <button data-suggestion="${i}">
-                  ${x}
+                <button data-suggestion="${item.name}">
+                  ${item.name}
                 </button>
               `
             }).join('')}
           </div>
         </div>
-        <button type="submit">Discover</button>
       </form>
     </div>
     <div class="content">
@@ -278,14 +286,19 @@ $.draw(() => {
 
 $.when('submit', 'form', (event) => {
   event.preventDefault()
-  alert($.learn().query)
+  window.location.href = '/app/giggle-search?query=' + $.learn().query
 })
 
 $.when('click', '[data-suggestion]', event => {
   event.preventDefault()
-  const { suggestions } = $.learn()
   const { suggestion } = event.target.dataset
-  $.teach({ query: suggestions[suggestion] })
+  $.teach({ query: suggestion })
+})
+
+$.when('input', '[name="search"]', (event) => {
+  const { value } = event.target;
+  const suggestions = idx.search(value)
+  $.teach({ suggestions,  query: event.target.value  })
 })
 
 $.when('focus', '[name="search"]', event => {
@@ -299,19 +312,6 @@ $.when('blur', '[name="search"]', event => {
 })
 
 $.when('keyup', '[name="search"]', event => {
-  const { value } = event.target;
-  $.teach({ address: value })
-  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${value}`)
-    .then(res => res.json())
-    .then(function (data) {
-        const suggestions = data.map(function (item) {
-          return item.display_name;
-        });
-        $.teach({ suggestions })
-    })
-    .catch(function (error) {
-        console.error(error);
-    })
 })
 
 $.when('click', '[data-publish]', (event) => {
@@ -606,11 +606,12 @@ $.style(`
     text-align: left;
     border: 1px solid rgba(0,0,0,.65);
     font-size: 1.2rem;
-    border-radius: 1.5rem;
     padding: .5rem 1rem;
-    margin: 1rem auto;
+    margin: 1rem auto 0;
     width: 100%;
     max-width: 480px;
+    border-radius: 1.5rem 0 0 1.5rem;
+
   }
 
   & .search button {
@@ -637,6 +638,9 @@ $.style(`
     display: none;
     position: relative;
     max-height: 300px;
+    max-width: 480px;
+    margin: auto;
+    text-align: left;
   }
 
   & .suggestions.focused {
@@ -650,6 +654,7 @@ $.style(`
     max-height: 80vh;
     overflow: auto;
     z-index: 10;
+    
   }
 
   & .suggestion-box button {
@@ -661,6 +666,7 @@ $.style(`
     padding: .5rem;
     width: 100%;
     filter: grayscale(1);
+    text-align: left;
   }
 
   & .suggestion-box button:focus,
@@ -675,13 +681,21 @@ $.style(`
     display: block;
   }
 
-  & [name="search"] {
-    padding: .5rem;
-    borde-radius: 1rem;
-    width: 100%;
-    display: block;
-    margin: 1rem 0;
+  & .input-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    max-width: 480px;
+    margin: auto;
+    text-align: left;
   }
 
+  & .input-grid button {
+    font-size: 1.2rem;
+    border-radius: 0 1.5rem 1.5rem 0;
+    padding: .5rem 1rem;
+    margin: 1rem auto 0;
+    width: 100%;
+    max-width: 480px;
+  }
 
 `)

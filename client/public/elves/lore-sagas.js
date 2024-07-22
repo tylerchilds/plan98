@@ -30,8 +30,8 @@ const Types = {
   }
 }
 
-export let idx
-export const documents = [];
+let idx
+const documents = [];
 
 (async function buildIndex() {
   try {
@@ -81,17 +81,13 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   }).join('')
 }
 
-const $ = tag('giggle-search', {query: ''})
+const $ = tag('lore-sagas')
 
 $.draw((target) => {
-  const { query, thinking, error, results, ready } = $.learn()
+  const { thinking, error, results, ready } = $.learn()
 
   if(!ready) {
     return 'Loading...'
-  }
-
-  if(target.getAttribute('query') && !target.searched) {
-    setTimeout(() => search(target.getAttribute('query')), 1)
   }
 
   if(thinking) {
@@ -107,11 +103,10 @@ $.draw((target) => {
       })
 
       return `
-        <div class="result">
+        <div>
           <a href="/app/code-module?src=${item.path}">
             ${item.name}
           </a>
-          <div class="disambiguous">${item.path}</div>
         </div>
       `
     }).join('')
@@ -121,13 +116,14 @@ $.draw((target) => {
       <form method="post">
         <label class="field">
           <input
-            value="${query}"
             name="query"
             placeholder="bears, beats, battlestar galactica..."
           />
         </label>
         <input type="hidden" value="1" name="embed" />
+        <rainbow-action>
         <input type="submit" value="Search" />
+        </rainbow-action>
       </form>
       </div>
       <div class="list">
@@ -151,13 +147,14 @@ $.draw((target) => {
         <form method="post">
           <label class="field">
             <input
-              value="${query}"
               name="query"
               placeholder="bears, beats, battlestar galactica..."
             />
           </label>
           <input type="hidden" value="1" name="embed" />
+          <rainbow-action>
           <input type="submit" value="Search" />
+          </rainbow-action>
         </form>
       </div>
     </div>
@@ -168,27 +165,8 @@ $.when('submit', 'form', async (event) => {
   event.preventDefault()
 
   if(idx) {
-    const query = event.target.query.value
-    search(query)
+    $.teach({ results: {}, thinking: true })
+    const results = idx.search(event.target.query.value)
+    $.teach({ thinking: false,  results })
   }
 })
-
-function search(query) {
-  $.teach({ results: {}, thinking: true, query })
-  const results = idx.search(query)
-  $.teach({ thinking: false,  results })
-}
-
-$.style(`
-  & {
-    
-  }
-
-  & .result {
-    margin-bottom: 1rem;
-  }
-
-  & .disambiguous {
-    color: rgba(0,0,0,.65);
-  }
-`)
