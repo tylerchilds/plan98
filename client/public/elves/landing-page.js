@@ -252,7 +252,7 @@ $.draw(() => {
         <img src="/cdn/thelanding.page/giggle.svg" />
         <div class="input-grid">
           <input placeholder="Imagine..." type="text" value="${query}" name="search" />
-          <button type="submit">??</button>
+          <button type="submit">*</button>
         </div>
         <div class="suggestions ${focused ? 'focused' : ''}">
           <div class="suggestion-box">
@@ -263,8 +263,13 @@ $.draw(() => {
 
 
               return `
-                <button data-suggestion="${item.name}">
-                  ${item.name}
+                <button data-name="${item.name}" data-path="${item.path}">
+                  <div class="path">
+                    ${item.path}
+                  </div>
+                  <div class="name">
+                    ${item.name}
+                  </div>
                 </button>
               `
             }).join('')}
@@ -289,10 +294,10 @@ $.when('submit', 'form', (event) => {
   window.location.href = '/app/giggle-search?query=' + $.learn().query
 })
 
-$.when('click', '[data-suggestion]', event => {
+$.when('click', '[data-path]', event => {
   event.preventDefault()
-  const { suggestion } = event.target.dataset
-  $.teach({ query: suggestion })
+  const { path } = event.target.dataset
+  window.location.href = '/app/code-module?src=' +path
 })
 
 $.when('input', '[name="search"]', (event) => {
@@ -621,7 +626,6 @@ $.style(`
   & .search button {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: dodgerblue;
-    text-shadow: 1px 1px rgba(0,0,0,.85);
     border: none;
     border-radius: 1rem;
     color: white;
@@ -658,14 +662,14 @@ $.style(`
   }
 
   & .suggestion-box button {
-    background: dodgerblue;
-    border: none;
+    background: white;
+    border: 1px solid dodgerblue;
+    margin: 1px 0;
     border-radius: 2rem;
-    color: white;
+    color: dodgerblue;
     transition: all 100ms ease-in-out;
     padding: .5rem;
     width: 100%;
-    filter: grayscale(1);
     text-align: left;
   }
 
@@ -698,4 +702,20 @@ $.style(`
     max-width: 480px;
   }
 
+  & [data-suggestion] {
+    position: relative;
+  }
+  & .path {
+    text-align: right;
+    position: absolute;
+    right: .5rem;
+    color: rgba(0,0,0,.5);
+    white-space: nowrap;
+  }
+
+  & .name {
+    text-align: right;
+    position: relative;
+    z-index: 2;
+  }
 `)

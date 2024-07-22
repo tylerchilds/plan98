@@ -110,15 +110,16 @@ $.when('click', '[target="_blank"]', (event) => {
 
 $.style(`
   & {
-    display: grid;
-    place-content: center;
-    grid-template-areas: 'center';
+    position: relative;
     height: 100%;
-    background: black;
+    display: block;
   }
 
   & > * {
     grid-area: center;
     place-self: center;
+    position: absolute;
+    inset: 0;
+    margin: auto;
   }
 `)

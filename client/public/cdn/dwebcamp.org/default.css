@@ -1,0 +1,47 @@
+body {
+  margin: 0 auto;
+  background-position: scroll;
+  color: rgba(0,0,0,.85);
+}
+
+sillonious-brand > xml-html {
+  background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.75));
+  overflow: auto;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+xml-html hypertext-action {
+  max-width: 720px;
+  margin: 1rem auto;
+}
+
+xml-html hypertext-address {
+  max-width: 720px;
+  margin: 4rem auto 1rem;
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 1000;
+  text-transform: none;
+}
+
+xml-html hypertext-quote {
+  max-width: 480px;
+  margin: 1rem auto;
+}
+
+xml-html qr-pay {
+  padding: 1rem;
+}
+
+xml-html action-script {
+  max-width: 280px;
+  margin: 1rem auto;
+}
+
+main > xml-html {
+  min-height: 100%;
+}
