@@ -619,14 +619,16 @@ $.style(`
   & [data-sidebar] {
     font-size: 1.5rem;
     font-weight: 800;
-    background: rgba(0,0,0,.5);
+    background: transparent;
+    padding: 0;
     border: none;
-    border-radius: 0 0 1rem 0;
-    padding: .5rem .5rem .5rem 1rem;
-    width: calc(80px + 1.5rem);
-    height: calc(80px + 1rem);
+    border-radius: 100%;
+    width: 80px;
+    height: 80px;
     color: rgba(255,255,255,.5);
     transition: background 200ms ease-in-out;
+    display: grid;
+    place-content: center;
   }
 
   & [data-sidebar]:focus,
@@ -676,7 +678,7 @@ $.style(`
 
   & .control-avatar .console {
     background: rgba(128,128,128,.5);
-    padding-top: 80px;
+    padding-top: 64px;
   }
 
   & .control-avatar input {

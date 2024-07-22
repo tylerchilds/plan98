@@ -759,8 +759,10 @@ $.when('click', '.message', (event) => {
 
   const { text } = $.learn().jokes[id]
   showModal(`
-    <div class="full-child-xml-html" style="padding: 1rem; background: rgba(0,0,0,1); color: rgba(255,255,255,.85); position: absolute; inset: 0;">
-      ${render(text)}
+    <div class="full-child-xml-html" style="padding: 0 1rem; background: rgba(200,200,200,1); position: absolute; inset: 0;">
+      <div style="margin: 0 auto; max-width: 6in; background: white; height: 100%;">
+        ${render(text)}
+      </div>
     </div>
   `)
 })

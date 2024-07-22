@@ -1,6 +1,8 @@
 import elves from '@silly/tag'
 
 const $ = elves('landing-page', {
+  query: "",
+  suggestions: [],
   top10: [
     {
       title: 'Hello World',
@@ -237,7 +239,7 @@ const $ = elves('landing-page', {
 })
 
 $.draw(() => {
-  const { top10, categories, ring } = $.learn()
+  const { top10, suggestions, focused, categories, ring, query } = $.learn()
   return `
     <div class="hero">
       <div class="top-bar">
@@ -247,7 +249,18 @@ $.draw(() => {
       </div>
       <form class="search" method="get">
         <img src="/cdn/thelanding.page/giggle.svg" />
-        <input placeholder="Keywords..." type="text" name="search" />
+        <input placeholder="Imagine..." type="text" value="${query}" name="search" />
+        <div class="suggestions ${focused ? 'focused' : ''}">
+          <div class="suggestion-box">
+            ${suggestions.map((x, i) => {
+              return `
+                <button data-suggestion="${i}">
+                  ${x}
+                </button>
+              `
+            }).join('')}
+          </div>
+        </div>
         <button type="submit">Discover</button>
       </form>
     </div>
@@ -261,6 +274,44 @@ $.draw(() => {
       ${minimal(ring)}
     </div>
   `
+})
+
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+  alert($.learn().query)
+})
+
+$.when('click', '[data-suggestion]', event => {
+  event.preventDefault()
+  const { suggestions } = $.learn()
+  const { suggestion } = event.target.dataset
+  $.teach({ query: suggestions[suggestion] })
+})
+
+$.when('focus', '[name="search"]', event => {
+  $.teach({ focused: true })
+})
+
+$.when('blur', '[name="search"]', event => {
+  setTimeout(() => {
+    $.teach({ focused: false })
+  }, 200)
+})
+
+$.when('keyup', '[name="search"]', event => {
+  const { value } = event.target;
+  $.teach({ address: value })
+  fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${value}`)
+    .then(res => res.json())
+    .then(function (data) {
+        const suggestions = data.map(function (item) {
+          return item.display_name;
+        });
+        $.teach({ suggestions })
+    })
+    .catch(function (error) {
+        console.error(error);
+    })
 })
 
 $.when('click', '[data-publish]', (event) => {
@@ -581,4 +632,56 @@ $.style(`
   & .search button:hover {
     background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
   }
+
+  & .suggestions {
+    display: none;
+    position: relative;
+    max-height: 300px;
+  }
+
+  & .suggestions.focused {
+    display: block;
+  }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 0;
+    height: 300px;
+    max-height: 80vh;
+    overflow: auto;
+    z-index: 10;
+  }
+
+  & .suggestion-box button {
+    background: dodgerblue;
+    border: none;
+    border-radius: 2rem;
+    color: white;
+    transition: all 100ms ease-in-out;
+    padding: .5rem;
+    width: 100%;
+    filter: grayscale(1);
+  }
+
+  & .suggestion-box button:focus,
+  & .suggestion-box button:hover {
+    background: dodgerblue;
+    color: white;
+    filter: grayscale(0);
+  }
+
+
+  & [data-suggestion] {
+    display: block;
+  }
+
+  & [name="search"] {
+    padding: .5rem;
+    borde-radius: 1rem;
+    width: 100%;
+    display: block;
+    margin: 1rem 0;
+  }
+
+
 `)

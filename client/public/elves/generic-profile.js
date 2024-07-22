@@ -92,10 +92,8 @@ $.style(`
   }
 
   & .photo {
-    background-color: var(--wheel-0-6);
     width: 180px;
     height: 180px;
-    padding: 4px;
     border-radius: 100%;
     position: relative;
     left: 0;

@@ -7,22 +7,14 @@ $.draw(() => {
 
   return `
     <form>
-      <input placeholder="969 Edgewater Blvd #123 Foster City, CA, 94404" value="${address}" type="text" />
     </form>
-    <div class="suggestions ${focused ? 'focused' : ''}">
-      <div class="suggestion-box">
-        ${suggestions.map((x, i) => {
-          return `
-            <button data-suggestion="${i}">
-              ${x}
-            </button>
-          `
-        }).join('')}
-      </div>
-    </div>
-  `
+      `
 })
 
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+  alert($.learn().query)
+})
 
 $.when('click', '[data-suggestion]', event => {
   const { suggestions } = $.learn()
