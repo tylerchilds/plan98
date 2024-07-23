@@ -238,6 +238,14 @@ export function connected(event) {
   setupSaga('welcome.saga', event.target)
 }
 
+export function setSession({ sessionId, companyName, companyEmployeeId }) {
+  state['ls/bayun'] = {
+    sessionId,
+    companyName,
+    companyEmployeeId
+  }
+}
+
 export function setSessionId(x) {
   state['ls/bayun'].sessionId = x
 }
