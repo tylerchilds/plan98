@@ -6,7 +6,7 @@ $.draw((target) => {
   const src = target.getAttribute('src') || window.location.pathname
   return `
     <div class="remix">
-      <a href="/app/braid-code?path=${src}">
+      <a href="/app/braid-code?src=${src}">
         Goto:Editor
       </a>
     </div>
@@ -80,7 +80,7 @@ $.style(`
   & iframe {
     height: 100%;
   }
-  & [href^="/app/simpleton-client"] {
+  & [href^="/app/"] {
     display: block;
     transform: translate(-0%, 150%) rotateZ(45deg);
   }
