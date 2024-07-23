@@ -496,6 +496,7 @@ $.style(`
   }
 
   & [name="navi"] button {
+    pointer-events: all;
     background: lemonchiffon;
     color: saddlebrown;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
@@ -591,10 +592,12 @@ $.style(`
   }
 
   & [name="navi"] {
+    pointer-events: none;
     position: absolute;
-    right: 60px;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
     margin: auto;
-    top: 0;
     height: 2rem;
     display: block;
     text-align: center;
@@ -640,9 +643,9 @@ $.style(`
     grid-area: stage;
     transition: opacity 100ms;
     border-radius: 1rem;
-    padding: 1rem;
     margin: 0;
-    background: white;
+    text-shadow: .1rem .1rem rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
     overflow: auto;
     opacity: 1;
     z-index: 2;
@@ -717,7 +720,7 @@ $.style(`
     font-family: courier;
   }
   & [name="perform"] {
-    background: black;
+    background: #54796d;
   }
 
   & iframe {
@@ -735,6 +738,7 @@ $.style(`
 
   & input[type="number"] {
     -moz-appearance: textfield;
+    padding: .5rem 1rem;
   }
 
   & [name="typewriter"] {
@@ -894,7 +898,63 @@ $.style(`
 
   &	hypertext-blankline {
       display: block;
-    }
+  }
+
+  & [name="stage"] hypertext-parenthetical,
+  & [name="stage"] hypertext-puppet,
+  & [name="stage"] hypertext-action,
+  & [name="stage"] hypertext-quote,
+  & [name="stage"] hypertext-address,
+  & [name="stage"] hypertext-effect {
+    height: auto;
+    width: auto;
+    place-self: end start;
+    line-height: 1.25;
+  }
+
+  & [name="stage"] hypertext-address {
+    place-self: end start;
+    font-size: 6rem;
+    padding: 0;
+    background: none;
+    font-weight: 800;
+  }
+
+  & [name="stage"] hypertext-puppet {
+    font-size: 6rem;
+    padding: 3rem;
+  }
+
+  & [name="stage"] hypertext-quote {
+    font-size: 4rem;
+    padding: 2rem;
+  }
+
+  & [name="stage"] hypertext-effect {
+    font-size: 2rem;
+    padding: 1rem;
+    place-self: end start;
+    font-style: italic;
+  }
+
+  & [name="stage"] hypertext-embodied {
+    font-size: 2rem;
+    place-self: end end;
+    font-style: italic;
+    padding: 1rem;
+  }
+
+  & [name="stage"] hypertext-action,
+  & [name="stage"] hypertext-parenthetical {
+    font-size: 2rem;
+    place-self: end center;
+    padding: 1rem;
+  }
+
+  & [name="stage"] > * {
+    height: 100%;
+    width: 100%;
+  }
 `)
 
 function getStars() {

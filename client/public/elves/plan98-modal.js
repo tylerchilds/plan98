@@ -254,7 +254,7 @@ $.style(`
   }
 
   & .action-wrapper {
-    pointer-event: none;
+    pointer-events: none;
     position: absolute;
     bottom: 0;
     left: 0;
@@ -264,7 +264,7 @@ $.style(`
     padding: 1rem;
   }
   & [data-close] {
-    pointer-event: all;
+    pointer-events: all;
     background: black;
     border: none;
     border-radius: 1rem;

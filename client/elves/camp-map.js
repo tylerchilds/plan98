@@ -2,6 +2,7 @@ import tag from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import { getSession, getCompanies, setSession, clearSession } from './bayun-wizard.js'
 import { social, setRoom, getRoom } from './camp-chat.js'
+import { showModal } from './plan98-modal.js'
 
 const companies = getCompanies().map((company) => {
   return `
@@ -22,6 +23,11 @@ let lastSidebar = false
 let lastUser = false
 let lastAuthState = false
 const $ = tag('camp-map')
+
+$.when('click', 'svg a[href]', (event) => {
+  debugger
+  event.preventDefault()
+})
 
 $.when('submit', '.quick-auth', async (event) => {
   event.preventDefault()

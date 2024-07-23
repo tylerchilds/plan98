@@ -23,6 +23,17 @@ let lastUser = false
 let lastAuthState = false
 const $ = tag('camp-map')
 
+
+document.addEventListener('click', function(event) {
+  if (event.target.closest('svg a')) {
+    event.preventDefault();
+    const href = event.target.closest('svg a').getAttribute('href');
+    showModal(`
+      <iframe style="width: 100%; height: 100%; border: none;" src="${event.target.href}"></iframe>
+    `);
+  }
+}, true); // t
+
 $.when('submit', '.quick-auth', async (event) => {
   event.preventDefault()
 
@@ -196,94 +207,94 @@ $.draw((target) => {
           <title>map</title>
         <g style="opacity: 0.25;" transform="matrix(0.9999999999999999, 0, 0, 0.9999999999999999, 2.2737367544323206e-13, -2.2737367544323206e-13)">
           <title>legend</title>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/wayback-wheel">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/wayback-wheel">
             <rect x="2968.106" y="1993.377" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/hackers-hall">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/hackers-hall">
             <rect x="2967.526" y="2072.681" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/migration-library">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/migration-library">
             <rect x="2968.391" y="2145.291" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/tree-house">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/tree-house">
             <rect x="2964.069" y="2224.143" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/cultivation-station">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/cultivation-station">
             <rect x="2963.205" y="2299.347" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/access-to-knowledge-amphitheater">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/access-to-knowledge-amphitheater">
             <rect x="2963.205" y="2373.685" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/campfire">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/campfire">
             <rect x="2970.12" y="2450.521" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/stages">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/stages">
             <rect x="2964.07" y="2526.588" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/ai-think-tank">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/ai-think-tank">
             <rect x="2966.663" y="2603.52" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/art-barn">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/art-barn">
             <rect x="2964.934" y="2678.723" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/volunteers">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/volunteers">
             <rect x="3445.924" y="1991.716" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/nest">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/nest">
             <rect x="3442.467" y="2069.512" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/impact-island">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/impact-island">
             <rect x="3445.06" y="2145.579" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/heartwood-chapel">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/heartwood-chapel">
             <rect x="3439.874" y="2222.319" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/lightning-salon">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/lightning-salon">
             <rect x="3440.739" y="2297.522" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/tea-tent">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/tea-tent">
             <rect x="3439.01" y="2375.125" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/redwood-cathedral">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/redwood-cathedral">
             <rect x="3443.331" y="2451.193" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/schedule">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/schedule">
             <rect x="3434.352" y="2533.407" width="467.694" height="215.73" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/registration">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/registration">
             <rect x="2491.722" y="1841.206" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/info-point">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/info-point">
             <rect x="2494.09" y="1917.526" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/first-aid-facility">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/first-aid-facility">
             <rect x="2490.426" y="1994.466" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/cabins">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/cabins">
             <rect x="2489.205" y="2071.406" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/adirondacks">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/adirondacks">
             <rect x="2492.869" y="2149.567" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/deluxe-tents">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/deluxe-tents">
             <rect x="2494.085" y="2224.059" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/regular-tents">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/regular-tents">
             <rect x="2491.643" y="2299.777" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/single-tents">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/single-tents">
             <rect x="2490.422" y="2377.938" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/self-camping-areas">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/self-camping-areas">
             <rect x="2495.307" y="2452.435" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/toilets">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/toilets">
             <rect x="2489.2" y="2529.375" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/showers">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/showers">
             <rect x="2491.643" y="2606.315" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
-          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braid/dweb/coffee-hollow">
+          <a target="_blank" rel="noreferrer" href="/app/camp-thread?src=/braidurl/dweb/coffee-hollow">
             <rect x="2491.643" y="2683.254" width="467.694" height="74.336" style="fill: rgb(30, 144, 255);"/>
           </a>
         </g>

@@ -88,10 +88,6 @@ function openChat(groupId) {
   const chatroom = `/app/camp-chat?room=${groupId}`
   if(self.self !== self.top) {
     window.location.href = chatroom
-  } else {
-    showModal(`
-      <iframe src="${chatroom}"></iframe>
-    `)
   }
 }
 
