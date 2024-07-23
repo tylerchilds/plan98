@@ -51,7 +51,7 @@ $.draw((target) => {
       target.innerHTML = `
         <div class="client"></div>
         <div class="history">
-          <camp-chat room="${resource}"></camp-chat>
+          <iframe src="/app/chat-lists"></iframe>
         </div>
       `
       target.texty = target.querySelector('.client')
@@ -81,7 +81,7 @@ $.draw((target) => {
     target.innerHTML = `
       <${tag} class="client"></${tag}>
       <div class="history">
-        <camp-chat room="${resource}"></camp-chat>
+        <iframe src="/app/chat-lists"></iframe>
       </div>
     `
     target.texty = target.querySelector(tag)

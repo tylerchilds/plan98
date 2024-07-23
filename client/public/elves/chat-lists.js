@@ -74,6 +74,27 @@ $.draw(() => {
   `
 })
 
+$.when('click', '.in-group', (event) => {
+  const { groupId } = event.target.dataset
+  openChat(groupId)
+})
+
+$.when('click', '.out-group', (event) => {
+  const { groupId } = event.target.dataset
+  openChat(groupId)
+})
+
+function openChat(groupId) {
+  const chatroom = `/app/camp-chat?room=${groupId}`
+  if(self.self !== self.top) {
+    window.location.href = chatroom
+  } else {
+    showModal(`
+      <iframe src="${chatroom}"></iframe>
+    `)
+  }
+}
+
 $.style(`
   & {
     display: flex;

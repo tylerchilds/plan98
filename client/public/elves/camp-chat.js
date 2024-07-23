@@ -266,7 +266,6 @@ $.when('click', '.action-accordion', async (event) => {
 
 async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
-  debugger
   const {
     sessionId,
     companyName,
@@ -612,7 +611,20 @@ $.when('click', '[data-join]', async (event) => {
   await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
     console.log("Error caught");
     console.log(error);
-  });
+    const groupType = BayunCore.GroupType.PUBLIC;
+
+    bayunCore.createGroup(sessionId, room, groupType)
+        .then(async result => {
+          await bayunCore.joinPublicGroup(sessionId, result.groupId).catch(error => {
+            console.log("Error caught");
+            console.log(error);
+          })
+          .catch(error => {
+            console.log("Error caught");
+            console.log(error);
+          });
+        });
+  })
 })
 
 $.when('click', '[data-info]', (event) => {
