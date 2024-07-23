@@ -108,7 +108,7 @@ $.draw((target) => {
 
       return `
         <div class="result">
-          <a href="/app/code-module?src=${item.path}">
+          <a href="/app/braid-code?src=${item.path}">
             ${item.name}
           </a>
           <div class="disambiguous">${item.path}</div>

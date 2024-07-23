@@ -183,8 +183,11 @@ async function router(request, context) {
     }
 
     try {
-      console.log(data.src)
-      await Deno.writeTextFile(`./client${data.src}`, data.file)
+      const segments = data.src.split('/')
+      const shortPath = segments.slice(0, -1).join('/')
+      await Deno.mkdir(`./client/` + shortPath, { recursive: true });
+      await Deno.writeTextFile(`./client${data.src}`, data.file, {create: true})
+      console.log(data.file)
       return new Response(JSON.stringify({ ok: 'ok' }, null, 2), {
         headers: { "content-type": "application/json; charset=utf-8" },
         status: 200
@@ -328,7 +331,7 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
     statusCode = Status.NotFound
     console.error(e + '\n' + pathname + '\n' + e)
     return new Response(file, {
-      headers: { ...headers, ...terminalHeaders },
+      headers: { ...headers },
       status: statusCode
     })
 

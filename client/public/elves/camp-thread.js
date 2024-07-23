@@ -3,10 +3,10 @@ import tag from '@silly/tag'
 const $ = tag('camp-thread')
 
 $.draw((target) => {
-  const src = target.getAttribute('src')
+  const src = target.getAttribute('src') || window.location.pathname
   return `
     <div class="remix">
-      <a href="/app/simpleton-client?path=${src}">
+      <a href="/app/braid-code?path=${src}">
         Goto:Editor
       </a>
     </div>
