@@ -4,9 +4,8 @@ import ml5 from 'ml5'
 // Initialize the Image Classifier method with MobileNet
 
 // When the model is loaded
-function modelLoaded(target) {
+function modelReady(target) {
   $.teach({ active: true })
-  requestAnimationFrame(loop(target))
 }
 
 function loop(target) {
@@ -38,7 +37,14 @@ class VideoFeed extends HTMLElement {
         target.insertAdjacentHTML('beforeend', `<video></video>`)
         const video = target.querySelector('video')
         video.srcObject = null
-        target.classifier = ml5.imageClassifier('MobileNet', video, () => modelLoaded(target));
+
+        schedule(() => {
+          const featureExtractor = ml5.featureExtractor('MobileNet', modelReady);
+          // Create a new classifier using those features and give the video we want to use
+          const options = { numLabels: 6 }; //Specify the number of classes/labels
+          target.classifier = featureExtractor.classification(video, options);
+          classify(target)
+        })
       }
 
       const { results } = $.learn()
@@ -90,6 +96,25 @@ class VideoFeed extends HTMLElement {
   }
 }
 
+function classify(target) {
+  target.classifier.classify(gotResults.bind(target));
+}
+
+// Show the results
+function gotResults(err, result) {
+  // Display any error
+  if (err) {
+    console.error(err);
+  }
+  select('#result').html(result[0].label);
+  select('#confidence').html(result[0].confidence);
+
+  classificationResult = result[0].label;
+  confidence = result[0].confidence;
+
+  classify(this);
+}
+
 customElements.define(elf, VideoFeed);
 
 $.style(`
@@ -105,3 +130,5 @@ $.style(`
     object-fit: cover;
   }
 `)
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
