@@ -6,7 +6,7 @@ $.draw((target) => {
   const src = target.getAttribute('src') || window.location.pathname
   return `
     <div class="remix">
-      <a href="/app/braid-code?src=${src}">
+      <a href="/app/camp-code?path=${src}">
         Goto:Editor
       </a>
     </div>
@@ -16,13 +16,15 @@ $.draw((target) => {
   `
 })
 
-$.when('click', '[href^="/app/simpleton-client"]', (event) => {
+$.when('click', '[href^="/app/"]', (event) => {
   event.preventDefault()
   if(event.target.closest($.link).querySelector('.editor')) return
   const div = document.createElement('div')
   div.innerHTML = `
-    <button data-close-editor>Close</button>
     <iframe src="${event.target.href}"></iframe>
+    <div class="action-wrapper">
+      <button data-close-editor>Close</button>
+    </div>
   `
   div.classList.add('editor')
   event.target.closest($.link).querySelector('.grid').appendChild(div)
@@ -69,13 +71,43 @@ $.style(`
   }
 
   & .editor button {
-    position: absolute;
-    right: 0;
     border: none;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.75)), dodgerblue;
+    background: rgba(0,0,0,.85);
     padding: .25rem .5rem;
     color: white;
   }
+
+  & .action-wrapper {
+    pointer-event: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 1101;
+    padding: 1rem;
+  }
+  & [data-close-editor] {
+    pointer-event: all;
+    background: black;
+    border: none;
+    border-radius: 1rem;
+    color: white;
+    padding: .5rem 1rem;
+    opacity: .8;
+    transition: opacity: 200ms;
+  }
+
+  & [data-close-editor]:hover,
+  & [data-close-editor]:focus {
+    cursor: pointer;
+    opacity: 1;
+  }
+
+  & [data-close-editor] * {
+    pointer-events: none;
+  }
+
 
   & iframe {
     height: 100%;

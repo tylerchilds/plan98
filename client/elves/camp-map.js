@@ -1,7 +1,7 @@
 import tag from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import { getSession, getCompanies, setSession, clearSession } from './bayun-wizard.js'
-import { social, setRoom, getRoom } from './chat-room.js'
+import { social, setRoom, getRoom } from './camp-chat.js'
 
 const companies = getCompanies().map((company) => {
   return `
