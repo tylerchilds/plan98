@@ -308,7 +308,7 @@ $.draw((target) => {
       </svg>
     </div>
     <div class="remix">
-      <a href="/app/braid-code?src=/elves/camp-map.js">
+      <a href="/app/code-module?src=/elves/camp-map.js">
         Goto:Editor
       </a>
     </div>

@@ -41,6 +41,7 @@ export const documents = [];
     idx = lunr(function () {
       this.ref('path')
       this.field('path')
+      this.field('keywords')
       this.field('type')
       this.field('name')
       this.field('extension')
@@ -65,6 +66,7 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
     if(type === Types.File.type) {
       const node = {
         path: currentPath,
+        keywords: currentPath.split('/').join(' '),
         name,
         type,
         extension
@@ -91,6 +93,7 @@ $.draw((target) => {
   }
 
   if(target.getAttribute('query') && !target.searched) {
+    target.searched = true
     setTimeout(() => search(target.getAttribute('query')), 1)
   }
 
@@ -108,7 +111,7 @@ $.draw((target) => {
 
       return `
         <div class="result">
-          <a href="/app/braid-code?src=${item.path}">
+          <a href="/app/code-module?src=${item.path}">
             ${item.name}
           </a>
           <div class="disambiguous">${item.path}</div>
@@ -175,6 +178,7 @@ $.when('submit', 'form', async (event) => {
 
 function search(query) {
   $.teach({ results: {}, thinking: true, query })
+  window.history.replaceState('', '', updateURLParameter(window.location.href, 'query', query))
   const results = idx.search(query)
   $.teach({ thinking: false,  results })
 }
@@ -192,3 +196,49 @@ $.style(`
     color: rgba(0,0,0,.65);
   }
 `)
+
+// https://stackoverflow.com/questions/1090948/change-url-parameters-and-specify-defaults-using-javascript
+function updateURLParameter(url, param, paramVal)
+{
+    var TheAnchor = null;
+    var newAdditionalURL = "";
+    var tempArray = url.split("?");
+    var baseURL = tempArray[0];
+    var additionalURL = tempArray[1];
+    var temp = "";
+
+    if (additionalURL) 
+    {
+        var tmpAnchor = additionalURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor = tmpAnchor[1];
+        if(TheAnchor)
+            additionalURL = TheParams;
+
+        tempArray = additionalURL.split("&");
+
+        for (var i=0; i<tempArray.length; i++)
+        {
+            if(tempArray[i].split('=')[0] != param)
+            {
+                newAdditionalURL += temp + tempArray[i];
+                temp = "&";
+            }
+        }        
+    }
+    else
+    {
+        var tmpAnchor = baseURL.split("#");
+        var TheParams = tmpAnchor[0];
+            TheAnchor  = tmpAnchor[1];
+
+        if(TheParams)
+            baseURL = TheParams;
+    }
+
+    if(TheAnchor)
+        paramVal += "#" + TheAnchor;
+
+    var rows_txt = temp + "" + param + "=" + paramVal;
+    return baseURL + "?" + newAdditionalURL + rows_txt;
+}

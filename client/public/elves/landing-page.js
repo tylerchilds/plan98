@@ -297,7 +297,7 @@ $.when('submit', 'form', (event) => {
 $.when('click', '[data-path]', event => {
   event.preventDefault()
   const { path } = event.target.dataset
-  window.location.href = '/app/braid-code?src=' +path
+  window.location.href = '/app/code-module?src=' +path
 })
 
 $.when('input', '[name="search"]', (event) => {

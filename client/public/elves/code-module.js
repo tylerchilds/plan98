@@ -80,8 +80,10 @@ $.draw(target => {
         &amp;
       </button>
       <div class="actions">
-        <button class="publish">Publish</button>
         <button class="privatize">Privatize</button>
+      </div>
+      <div name="navi">
+        <button class="publish">Publish</button>
       </div>
     `
 
@@ -210,6 +212,46 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
+    background: saddlebrown;
+    color: lemonchiffon;
+  }
+
+  & [name="navi"] {
+    pointer-events: none;
+    position: fixed;
+    bottom: 1rem;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 2rem;
+    display: block;
+    text-align: center;
+    gap: .5rem;
+    z-index: 3;
+  }
+
+  & [name="navi"] button {
+    pointer-events: all;
+    background: lemonchiffon;
+    color: saddlebrown;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    border: none;
+    height: 2rem;
+    transition: color 100ms;
+    padding: .5rem 1rem;
+  font-size: 1rem;
+  --v-font-mono: 0;
+  --v-font-casl: 1;
+  --v-font-wght: 800;
+  --v-font-slnt: -15;
+  --v-font-crsv: 1;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  transition: background 200ms ease-in-out;
+  }
+
+  & [name="navi"] button:hover,
+  & [name="navi"] button:focus {
     background: saddlebrown;
     color: lemonchiffon;
   }
