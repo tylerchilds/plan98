@@ -29,7 +29,7 @@ document.addEventListener('click', function(event) {
     event.preventDefault();
     const href = event.target.closest('svg a').getAttribute('href');
     showModal(`
-      <iframe style="width: 100%; height: 100%; border: none;" src="${event.target.href}"></iframe>
+      <iframe style="width: 100%; height: 100%; border: none;" src="${href}"></iframe>
     `);
   }
 }, true); // t

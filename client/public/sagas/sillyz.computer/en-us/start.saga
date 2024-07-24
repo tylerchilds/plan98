@@ -31,7 +31,7 @@ what if your life was in your watch?
 
 <app-simulator
 class: timemachine
-app: landing-page
+app: camp-map
 
 # phone
 
@@ -39,7 +39,7 @@ what if those same apps were on your phone from the store?
 
 <app-simulator
 class: iphone
-app: landing-page
+app: camp-map
 
 # tablet
 
@@ -47,19 +47,19 @@ what if the app was your entire device?
 
 <app-simulator
 class: ipad
-app: landing-page
+app: camp-map
 
 # tv
 what if the entire thing was a game?
 
 <app-simulator
 class: tv
-app: landing-page
+app: camp-map
 
 # embedded
 what if everything was every where?
 
-<landing-page
+<camp-map
 
 what will you do, when given Paper&copy;&trade;&hearts;
 
