@@ -133,7 +133,7 @@ function persist(target, $, _flags) {
 $.style(`
   & {
 		display: block;
-    overflow: scroll;
+    overflow: hidden;
     height: 100%;
     max-height: 100%;
     position: relative;
@@ -148,6 +148,11 @@ $.style(`
 
   & .cm-content {
     background: rgba(255,255,255,.85);
+  }
+
+  & .cm-editor {
+    height: 100%;
+    overflow: auto;
   }
 
   & .select {

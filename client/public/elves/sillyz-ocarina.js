@@ -159,14 +159,14 @@ function toPattern(_$, buttons) {
 }
 
 function toMotion(_$, buttons) {
-  const [vertical] = [...buttons].splice(-1)
-  const [horizontal] = [...buttons].splice(-2)
+  const [up] = [...buttons].splice(12)
+  const [down] = [...buttons].splice(13)
 
   return {
-    up: vertical === -1,
-    down: vertical === 1,
-    left: horizontal === -1,
-    right: horizontal === 1
+    up: up === 1,
+    down: down === 1,
+    //left: horizontal === -1,
+    //right: horizontal === 1
   }
 }
 

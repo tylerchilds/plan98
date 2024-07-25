@@ -51,6 +51,16 @@ const fantasyController = {
     '/button/1': gamepadButton(1),
     '/button/2': gamepadButton(2),
     '/button/3': gamepadButton(3),
+    '/button/4': gamepadButton(4),
+    '/button/5': gamepadButton(5),
+    '/button/6': gamepadButton(6),
+    '/button/7': gamepadButton(7),
+    '/button/8': gamepadButton(8),
+    '/button/9': gamepadButton(9),
+    '/button/10': gamepadButton(10),
+    '/button/11': gamepadButton(11),
+    '/button/12': gamepadButton(12),
+    '/button/13': gamepadButton(13),
     '/axis/0': gamepadAxis(0),
     '/axis/1': gamepadAxis(1),
   },
@@ -274,6 +284,7 @@ function remappableButton(slot, button, value) {
   if(buttonOrder.includes(button)) return
   if(value !== UPPER_THRESHOLD) return
 	$.teach(button, (state, payload) => {
+    console.log(payload)
 		return {
 			...state,
 			remaps: {
@@ -342,7 +353,6 @@ function addOSC(gamepad, slot) {
       value
     }
   })
-  console.log(fantasyController.osc)
   return {
     osc: {
       ...fantasyController.osc,
