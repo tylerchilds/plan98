@@ -28,7 +28,7 @@ document.addEventListener('click', function(event) {
   if (event.target.closest('svg a')) {
     event.preventDefault();
     const href = event.target.closest('svg a').getAttribute('href');
-    window.location.href = href
+    self.open(href,'_blank')
   }
 }, true); // t
 
