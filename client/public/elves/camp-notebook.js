@@ -45,16 +45,14 @@ $.draw((target) => {
   }
   subscribe(target)
   target.innerHTML = `
-    <div class="sidebar">
-      <button data-new>
+    <div class="sidebar control-tab-list">
+      <button data-new class="control-tab action">
         New Joke
       </button>
-      <button data-logout>
-        Logout
-      </button>
+
       ${Object.keys(notes).map((id) => {
         return `
-          <button data-activate="${id}">
+          <button data-activate="${id}" class="control-tab ${activeId === id ? '-active': ''}">
             ${notes[id].path || 'unorganized'}
           </button>
         `
@@ -64,8 +62,8 @@ $.draw((target) => {
     <div class="main">
       ${notes[activeId] ? `
         <div class="note">
-          <input data-bind="${activeId}" name="path" type="text" data-id="${activeId}" value="${notes[activeId].path}" />
-          <textarea data-bind="${activeId}" name="note" data-id="${activeId}">${notes[activeId].note}</textarea>
+          <input placeholder="unorganized" data-bind="${activeId}" name="path" type="text" data-id="${activeId}" value="${notes[activeId].path}" />
+          <textarea data-bind="${activeId}" name="note" data-id="${activeId}" placeholder="todo...">${notes[activeId].note}</textarea>
         </div>
       `: ''}
     </div>
@@ -163,24 +161,50 @@ $.style(`
   & {
     overflow: auto;
     min-height: 480px;
-    display: grid;
-    grid-template-columns: 1fr 1.618fr;
+    display: block;
     height: 100%;
     width: 100%;
     line-height: 2rem;
     position: relative;
-    padding: 6rem 0;
+  }
+
+  & .sidebar {
+    padding: 1rem;
+    overflow: auto;
+  }
+
+  @media screen and (max-width: 768px) {
+    .sidebar {
+      max-height: 25vh;
+    }
+  }
+
+  .main {
+    padding: 1rem;
+    background: white;
+  }
+
+  .note {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+  }
+
+  @media screen and (min-width: 768px) {
+    & {
+      display: grid;
+      grid-template-columns: 1fr 1.618fr;
+    }
   }
 
   & *:focus {
-    border-color: orange;
-    outline-color: orange
+    border-color: dodgerblue;
+    outline-color: dodgerblue
   }
 
   & [name="path"] {
     font-size: 2rem;
     border: none;
-    border-bottom: 3px solid orange;
     padding: .5rem 1rem;
     width: 100%;
   }
@@ -201,7 +225,7 @@ $.style(`
   & .note {
     display: grid;
     grid-area: active;
-    background: rgba(200,200,200,1);
+    gap: 1rem;
   }
 
   & .paper {
@@ -240,6 +264,55 @@ $.style(`
 
   & [type="submit"] {
     width: 100%;
+  }
+  & .sidebar .control-tab-list {
+    gap: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 1rem;
+    overflow: auto;
+    background: rgba(255,255,255,.65);
+    position: relative;
+    z-index: 3;
+    overflow-x: hidden;
+  }
+  & .control-tab {
+    display: block;
+    border: 0;
+    border-radius: 1rem;
+    line-height: 1;
+    width: 4rem;
+    color: white;
+    display: block;
+    width: 100%;
+    margin: .5rem 0;
+    text-align: left;
+    padding: 1rem;
+    color: dodgerblue;
+    background: rgba(255,255,255,.85);
+    transition: background 200ms ease-in-out;
+    flex: none;
+    
+  }
+
+  & .control-tab.-active,
+  & .control-tab:hover,
+  & .control-tab:focus {
+    background: dodgerblue;
+    color: white;
+  }
+
+
+  & .control-tab.action {
+    background-color: dodgerblue;
+    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    color: white;
+  }
+
+  & .control-tab.action:hover,
+  & .control-tab.action:focus {
+    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
   }
 `)
 
