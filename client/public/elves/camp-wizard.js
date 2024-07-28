@@ -19,7 +19,6 @@ export function setupSaga(nextSaga, target, options={}) {
     : target.closest($.link) || target.closest('main') || target.closest('body')
   const { activeDialect } = $.learn()
   const key = currentWorkingDirectory + 'dwebcamp.org' + activeDialect + nextSaga
-
   root.dataset.lastHtml = target.innerHTML
   root.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(raw+key)
@@ -56,7 +55,6 @@ export function setupSaga(nextSaga, target, options={}) {
           root.trap.activate()
           root.innerHTML = `
             <div class="wrapper">
-              <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
               ${render(saga)}
             </div>
           `
@@ -84,8 +82,6 @@ $.style(`
   & {
     display: grid;
     margin: auto;
-    background: linear-gradient(105deg, rebeccapurple, rgba(0,0,0,.5) 30%), linear-gradient(165deg, rgba(0,0,0,.85) 80%, dodgerblue), white;
-    color: white;
     padding: .5rem;
     overflow: visible;
     position: relative;
@@ -97,13 +93,17 @@ $.style(`
     resize: none;
   }
 
+  & .wrapper > xml-html {
+    height: 100%;
+  }
+
   & .wrapper {
+    height: 100%;
     width: 100%;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
-    height: auto;
     margin: 1rem auto;
     max-width: 480px;
     max-height: 100%;
@@ -288,18 +288,6 @@ export function getEmployeeId() {
  *
  * */
 
-export function actuallySecure(event) {
-  setupSaga('hard-start.saga', event.target)
-}
-
-export function begin(event) {
-  setupSaga('hard-question0.saga', event.target)
-}
-
-export function save0(event) {
-  setupSaga('hard-question1.saga', event.target)
-}
-
-export function kickTheTires(event) {
-  setupSaga('soft-start.saga', event.target)
+export function start(event) {
+  setupSaga('000-001.saga', event.target)
 }
