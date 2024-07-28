@@ -5,13 +5,11 @@ Will you chase them or will they chase you?
 <action-script
 text: Chase Eggs
 data-action: takeEmerald
-data-script: /public/cdn/thelanding.page/game-state.js
-data-saga: 000-001.saga
+data-script: /public/elves/silly-wizard.js
 data-emerald: 0
 
 <action-script
 text: Flee Tentacles
 data-action: takeEmerald
-data-script: /public/cdn/thelanding.page/game-state.js
+data-script: /public/elves/silly-wizard.js
 data-emerald: 1
-data-saga: 001-001.saga
