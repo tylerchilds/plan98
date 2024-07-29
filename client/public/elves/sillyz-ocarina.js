@@ -14,14 +14,31 @@ import party, {
 } from '@sillonious/party'
 
 const synths = [...new Array(24)].map(() =>
-  new Wad({source : 'sine'})
+  new Wad({
+    source : 'triangle',
+    tuna   : {
+        Overdrive : {
+            outputGain: 0.5,         //0 to 1+
+            drive: 0.7,              //0 to 1
+            curveAmount: 1,          //0 to 1
+            algorithmIndex: 0,       //0 to 5, selects one of our drive algorithms
+            bypass: 0
+        },
+        Chorus : {
+            intensity: 0.3,  //0 to 1
+            rate: 4,         //0.001 to 8
+            stereoPhase: 0,  //0 to 180
+            bypass: 0
+        }
+    }
+})
 )
 
 const $ = module('sillyz-ocarina', {
   colors: [],
   start: 0,
   length: 360,
-  octave: 4,
+  octave: 3,
   reverse: false,
 	pitch: 0,
   activeFrets: [],
@@ -30,7 +47,7 @@ const $ = module('sillyz-ocarina', {
   frames: {},
 })
 
-const strumVelocity = 75
+const strumVelocity = 1000
 const sustainedDuration = 100
 const actionableFPS = 4
 

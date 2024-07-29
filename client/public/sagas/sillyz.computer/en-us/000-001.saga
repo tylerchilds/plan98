@@ -4,14 +4,10 @@ Yonder is a desert. Hither is a meadow.
 
 <action-script
 text: Yonder to the desert
-data-action: takeEmerald
-data-script: /public/cdn/thelanding.page/game-state.js
-data-saga: 002-001.saga
-data-emerald: 2
+data-action: yonderToTheDesert
+data-script: /public/elves/silly-wizard.js
 
 <action-script
 text: Hither to the meadow.
-data-action: takeEmerald
-data-script: /public/cdn/thelanding.page/game-state.js
-data-saga: 003-001.saga
-data-emerald: 3
+data-action: hitherToTheMeadow
+data-script: /public/elves/silly-wizard.js

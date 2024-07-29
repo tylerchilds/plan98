@@ -4,12 +4,10 @@ Will you chase them or will they chase you?
 
 <action-script
 text: Chase Eggs
-data-action: takeEmerald
+data-action: chaseEggs
 data-script: /public/elves/silly-wizard.js
-data-emerald: 0
 
 <action-script
 text: Flee Tentacles
-data-action: takeEmerald
+data-action: fleeTentacles
 data-script: /public/elves/silly-wizard.js
-data-emerald: 1

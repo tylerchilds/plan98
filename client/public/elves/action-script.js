@@ -27,7 +27,7 @@ $.when('click', 'button', async (event) => {
   if(script) {
     const dispatch = (await import(script))[action]
     if(dispatch) {
-      self.history.pushState({ action, script, saga }, "");
+      self.history.pushState({ action, script }, "");
       await dispatch(event, root)
     }
 
@@ -98,19 +98,14 @@ function paste(nextSaga, target, options={}) {
 }
 
 addEventListener("popstate", async (event) => {
-  const { lastSaga, action, script, saga } = event.state || {}
-  const root = document.querySelector('wizard-journey') || document.querySelector('main') || document.querySelector('body')
-  if(lastSaga || saga) {
-    paste(lastSaga || saga, root, {back: true})
-  } else {
-    if(script) {
-      const dispatch = (await import(script))[action]
-      if(dispatch) {
-        await dispatch(event, root)
-      }
-    } else {
-      paste('time.saga', root, {back: true})
+  const { action, script } = event.state || {}
+  if(script) {
+    const dispatch = (await import(script))[action]
+    if(dispatch) {
+      await dispatch(event)
     }
+  } else {
+    location.reload()
   }
 });
 

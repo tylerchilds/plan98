@@ -7,13 +7,8 @@ const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 const tutorial = 'origin-story.saga'
 
-const emeraldMap = {
-  0: '000-001.saga',
-  1: '001-001.saga',
-}
-
-export function currentSave() {
-  if(!state['ls/save-file']) blankSave()
+export function currentSave(event) {
+  if(!state['ls/save-file']) blankSave(event)
   return state['ls/save-file']
 }
 
@@ -25,20 +20,56 @@ export function learn(event) {
   setupSaga('learn.saga', event.target)
 }
 
-export function takeEmerald(event, root) {
-  const { emerald } = root.dataset
-  const index = parseInt(emerald)
-  if(emerald) {
-    currentSave().chaosEmerald[index] = true
-  }
+export function chaseEggs(event) {
+  currentSave(event).chaosEmerald[0] = true
+  setupSaga('000-001.saga', event.target)
+}
 
-  if(emeraldMap[emerald]) {
-    setupSaga(emeraldMap[emerald], event.target)
-    return
-  }
+export function fleeTentacles(event) {
+  currentSave(event).chaosEmerald[1] = true
+  setupSaga('001-001.saga', event.target)
+}
 
+export function yonderToTheDesert(event) {
+  currentSave(event).chaosEmerald[2] = true
+  setupSaga('002-001.saga', event.target)
+}
+
+export function hitherToTheMeadow(event) {
+  currentSave(event).chaosEmerald[3] = true
+  setupSaga('003-001.saga', event.target)
+}
+
+export function blueKazoo(event) {
+  currentSave(event).chaosEmerald[4] = true
+  setupSaga('004-001.saga', event.target)
+}
+
+export function indigoUmbrella(event) {
+  currentSave(event).chaosEmerald[5] = true
+  setupSaga('005-001.saga', event.target)
+}
+
+export function throneRoom(event) {
+  setupSaga('999-999.saga', event.target)
+}
+
+export function takePaper(event) {
+  currentSave(event).chaosEmerald[6] = true
+  setupSaga('006-001.saga', event.target)
+}
+
+export function rewindTime(event) {
   setupSaga('000-000.saga', event.target)
 }
+
+
+export function blankSave(event) {
+  state['ls/save-file'] = {
+    chaosEmerald: [],
+  }
+}
+
 const $ = module('silly-wizard', {
   activeDialect: '/en-us/',
   cache: {}
@@ -48,7 +79,9 @@ export function setupSaga(nextSaga, target, options={}) {
   softReset()
   const root = target === self
     ? document.querySelector($.link)
-    : target.closest($.link) || target.closest('main') || target.closest('body')
+    : target.closest($.link)
+
+  if(!root) return
   const { activeDialect } = $.learn()
   const key = currentWorkingDirectory + 'sillyz.computer' + activeDialect + nextSaga
   root.dataset.lastHtml = target.innerHTML

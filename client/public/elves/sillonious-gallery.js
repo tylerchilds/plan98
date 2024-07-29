@@ -12,10 +12,8 @@ $.draw(() => {
         You approach a tome. A tomb? A pile of papers. In a graveyard.
       </hypertext-action>
       <action-script
-        data-saga="006-001.saga"
-        data-action="takeEmerald"
-        data-script="/public/cdn/thelanding.page/game-state.js"
-        data-emerald="6"
+        data-action="takePaper"
+        data-script="/public/elves/silly-wizard.js"
       >Violet Journal</action-script>
     `
   }
@@ -24,17 +22,19 @@ $.draw(() => {
     <hypertext-action>
       You win!
     </hypertext-action>
-    <action-script data-win data-action="ok" data-script="/public/cdn/thelanding.page/game-state.js">
+    <action-script data-win data-action="ok" data-script="/public/elves/silly-wizard.js">
       Hyper Space
     </action-script>
-    <action-script data-saga="000-000.saga" data-action="blankSave" data-script="/public/cdn/thelanding.page/game-state.js">
+    <action-script data-action="blankSave" data-script="/public/elves/silly-wizard.js">
       Reset
     </action-script>
   ` : `
     <hypertext-action>
       You're not strong enough yet...
     </hypertext-action>
-    <action-script data-saga="000-000.saga">Rewind Time</action-script>
+    <action-script data-action="rewindTime" data-script="/public/elves/silly-wizard.js">
+      Rewind Time
+    </action-script>
   `
 
 })
