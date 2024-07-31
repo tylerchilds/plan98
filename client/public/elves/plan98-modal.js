@@ -43,9 +43,7 @@ $.draw(() => {
     <div
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
-      <div class="action-wrapper">
-        <button data-close>Close</button>
-      </div>
+      <button data-close>Close</button>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
           ${modalHeader}
