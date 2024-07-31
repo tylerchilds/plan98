@@ -207,9 +207,7 @@ function start(event) {
     window.location.href = `/404`
   }
 
-  showModal(`
-    <iframe src="${url}" style="width: 100%; height: 100%; border: 0;"></iframe>
-  `, { centered: true })
+  window.location.href = url
 }
 
 function finish() {
