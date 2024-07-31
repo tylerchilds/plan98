@@ -123,7 +123,6 @@ export function showModal(nextBody, options = {}) {
 window.showModal = showModal
 
 export function hideModal() {
-  alert('ok')
   const { isOpen, layer } = $.learn()
 
   const nextLayer = layer - 1
@@ -252,23 +251,20 @@ $.style(`
     }
   }
 
-  & .action-wrapper {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    text-align: center;
-    z-index: 1101;
-    padding: 1rem;
-  }
   & [data-close] {
     background: black;
     border: none;
-    border-radius: 1rem;
+    border-radius: 0 0 0 1rem;
     color: white;
-    padding: .5rem 1rem;
+    padding: 0 1rem 0 .5rem;
+    line-height: 1;
+    height: 2rem;
     opacity: .8;
     transition: opacity: 200ms;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1101;
   }
 
   & [data-close]:hover,
@@ -278,5 +274,6 @@ $.style(`
   }
 
   & [data-close] * {
+    pointer-events: none;
   }
 `)
