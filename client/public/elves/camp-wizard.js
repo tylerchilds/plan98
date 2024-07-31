@@ -8,7 +8,6 @@ const currentWorkingDirectory = '/sagas/'
 const tutorial = '000-000.saga'
 
 const $ = module('camp-wizard', {
-  activeDialect: '/en-us/',
   cache: {}
 })
 
@@ -17,8 +16,8 @@ export function setupSaga(nextSaga, target, options={}) {
   const root = target === self
     ? document.querySelector($.link)
     : target.closest($.link) || target.closest('main') || target.closest('body')
-  const { activeDialect } = $.learn()
-  const key = currentWorkingDirectory + 'dwebcamp.org' + activeDialect + nextSaga
+  const dialect = plan98.parameters.get('dialect') || 'en-us'
+  const key = `${currentWorkingDirectory}dwebcamp.org/${dialect}/${nextSaga}`
   root.dataset.lastHtml = target.innerHTML
   root.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(raw+key)
@@ -29,7 +28,6 @@ export function setupSaga(nextSaga, target, options={}) {
       }
       if(!root) window.location.href = key + window.location.search
       const saga = await response.text()
-
       $.teach(
         { [key]: saga },
         (state, payload) => {
@@ -51,14 +49,12 @@ export function setupSaga(nextSaga, target, options={}) {
             clickOutsideDeactivates: false
           });
         }
-        if(root.trap) {
-          root.trap.activate()
-          root.innerHTML = `
-            <div class="wrapper">
-              ${render(saga)}
-            </div>
-          `
-        }
+        root.innerHTML = `
+          <div class="wrapper">
+            ${render(saga)}
+          </div>
+        `
+        root.trap.activate()
       })
     })
     .catch(e => {
@@ -290,4 +286,13 @@ export function getEmployeeId() {
 
 export function start(event) {
   setupSaga('000-001.saga', event.target)
+}
+
+export function goToMap(event) {
+  const dialect = plan98.parameters.get('dialect') || 'en-us'
+  window.location.href = `/app/camp-map?dialect=${dialect}`
+}
+
+export function initiation(event) {
+  setupSaga('initiation.saga', event.target)
 }

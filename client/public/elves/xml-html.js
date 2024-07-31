@@ -7,5 +7,10 @@ document.body.insertAdjacentHTML("beforeend", `
     .full-child-xml-html xml-html {
       height: 100%;
     }
+
+    xml-html > a {
+      display: block;
+      margin: 1rem 0;
+    }
   </style>
 `)

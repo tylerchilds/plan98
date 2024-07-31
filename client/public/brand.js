@@ -33,7 +33,7 @@ export const doingBusinessAs = {
     zoom: 10,
     tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
     mascot: 'Silly Sillonious',
-    saga:`/public/sagas/dwebcamp.org/${language}/000-000.saga`,
+    saga:`/public/sagas/dwebcamp.org/welcome.saga`,
     contact: reverseProxyLookup,
     brandHue: 0,
     brandRange: 360,
