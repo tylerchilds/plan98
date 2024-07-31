@@ -123,26 +123,7 @@ export function showModal(nextBody, options = {}) {
 window.showModal = showModal
 
 export function hideModal() {
-  const { isOpen, layer } = $.learn()
-
-  const nextLayer = layer - 1
-
-  if(nextLayer <= 1) {
-    document.body.classList.remove('trap-modal')
-    self.removeEventListener('keydown', hideListener);
-    $.teach({
-      isOpen: false,
-      layer: 0
-    })
-
-    return
-  }
-
-
-  $.teach({
-    body: $.learn()[`layer-${layer}`],
-    layer: nextLayer
-  })
+  alert('hi')
 }
 
 window.hideModal = hideModal
