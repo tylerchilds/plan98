@@ -43,7 +43,7 @@ $.draw(() => {
     <div
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
-      <button data-close>Close</button>
+      <button class="close-the-modal">Close</button>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
           ${modalHeader}
@@ -111,7 +111,7 @@ export function showModal(nextBody, options = {}) {
   }
 
   $.teach({
-    body: `${nextLayer} :  ${nextBody}`,
+    body: nextBody,
     layer: nextLayer,
     isOpen: true,
     centered: false,
@@ -147,7 +147,7 @@ export function hideModal() {
 
 window.hideModal = hideModal
 
-$.when('click', '[data-close]', hideModal)
+$.when('click', '.close-the-modal', hideModal)
 
 $.style(`
   & {
@@ -251,8 +251,8 @@ $.style(`
     }
   }
 
-  & [data-close] {
-    background: black;
+  & .close-the-modal {
+    background: dodgerblue;
     border: none;
     border-radius: 0 0 0 1rem;
     color: white;
@@ -267,13 +267,9 @@ $.style(`
     z-index: 1101;
   }
 
-  & [data-close]:hover,
-  & [data-close]:focus {
+  & .close-the-modal:hover,
+  & .close-the-modal:focus {
     cursor: pointer;
     opacity: 1;
-  }
-
-  & [data-close] * {
-    pointer-events: none;
   }
 `)
