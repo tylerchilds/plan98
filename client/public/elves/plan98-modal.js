@@ -103,6 +103,7 @@ export function showModal(nextBody, options = {}) {
   document.body.classList.add('trap-modal')
   self.addEventListener('keydown', hideListener);
 
+  alert(layer)
   const { isOpen, layer, body } = $.learn()
   const nextLayer = layer + 1
 
