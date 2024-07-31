@@ -125,6 +125,7 @@ export function showModal(nextBody, options = {}) {
 window.showModal = showModal
 
 export function hideModal() {
+  alert('ok')
   const { isOpen, layer } = $.learn()
 
   const nextLayer = layer - 1
