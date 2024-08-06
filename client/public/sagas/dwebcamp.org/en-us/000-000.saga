@@ -2,5 +2,5 @@ Hey. Welcome to dweb camp, the forest that will reconfigure your reality.
 
 <action-script
 text: Start
-data-action: start
+data-action: goToMap
 data-script: /public/elves/camp-wizard.js
