@@ -1,7 +1,6 @@
 import module from '@silly/tag'
 import { render } from '@sillonious/saga'
 import { doingBusinessAs } from '@sillonious/brand'
-import * as focusTrap from 'focus-trap'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
@@ -79,7 +78,7 @@ export function setupSaga(nextSaga, target, options={}) {
   softReset()
   const root = target === self
     ? document.querySelector($.link)
-    : target.closest($.link)
+    : target.closest($.link) || target.closest('xml-html') || document.body
 
   if(!root) return
   const { activeDialect } = $.learn()
@@ -109,21 +108,11 @@ export function setupSaga(nextSaga, target, options={}) {
         }
       )
       schedule(() => {
-        if(!root.trap) {
-          root.trap = focusTrap.createFocusTrap(target, {
-            onActivate: onActivate($, target),
-            onDeactivate: onDeactivate($, target),
-            clickOutsideDeactivates: false
-          });
-        }
-        if(root.trap) {
-          root.trap.activate()
-          root.innerHTML = `
-            <div class="wrapper">
-              ${render(saga)}
-            </div>
-          `
-        }
+        root.innerHTML = `
+          <div class="wrapper">
+            ${render(saga)}
+          </div>
+        `
       })
     })
     .catch(e => {
