@@ -8,4 +8,4 @@ data-script: /public/elves/startup-wizard.js
 <action-script
 text: Go somewhere else
 data-action: go_000_004
-data-script: /public/eleves/startup-wizard.js
+data-script: /public/elves/startup-wizard.js

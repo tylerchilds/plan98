@@ -5,8 +5,13 @@ const $ = module('hypertext-quote')
 $.style(`
   & {
     display: block;
-    margin: 1rem 1in;
-    width: 4in;
     place-self: end center;
+  }
+
+  @media (min-width: 768px) {
+    & {
+      margin: 1rem 1in;
+      width: 4in;
+    }
   }
 `)

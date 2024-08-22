@@ -158,21 +158,24 @@ $.style(`
     resize: none;
   }
 
+  @media (min-width: 768px) {
+    & .wrapper {
+      margin: auto;
+      padding: 0 1in 0 1.5in;
+      max-width: 8.5in;
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.85);
+      overflow: auto;
+    }
+  }
+
   & .wrapper {
     height: 100%;
     width: 100%;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto;
-    padding: 0 1rem;
-    max-width: 55ch;
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.85);
     overflow: auto;
   }
-
   @keyframes &-fade-in {
     0% {
       opacity: 0;
