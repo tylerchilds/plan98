@@ -82,6 +82,15 @@ $.when('click', '[data-logout]', async () => {
   disconnect()
 })
 
+export async function disconnect() {
+  const { error } = await supabase.auth.signOut()
+  if(!error) {
+    $.teach({ user: null })
+    location.reload()
+  }
+}
+
+
 $.when('click', '[data-next]', async (event) => {
   const root = event.target.closest($.link)
   const { action, script } = root.dataset
