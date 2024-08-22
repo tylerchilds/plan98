@@ -1,0 +1,11 @@
+Welcome back, Silly!
+
+<action-script
+text: I am not Silly.
+data-action: go_000_001
+data-script: /public/elves/startup-wizard.js
+
+<action-script
+text: Who are you?
+data-action: go_000_002
+data-script: /public/elves/startup-wizard.js

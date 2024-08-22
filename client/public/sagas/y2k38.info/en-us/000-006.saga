@@ -1,0 +1,12 @@
+@ Synthia
+> I must have been rebooted. Have we met before?
+
+<action-script
+text: I am new
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_007
+
+<action-script
+text: You know me
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_009

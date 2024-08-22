@@ -1,0 +1,15 @@
+# Int. Classroom Fake Web 101
+
+@ Synthia
+> Try this out...
+
+<language-selector
+language: Language
+data-script: /public/elves/startup-wizard.js
+data-action: openMemex
+go: Go
+
+<action-script
+text: Skip Class
+data-script: /public/elves/startup-wizard.js
+data-action: skipClass

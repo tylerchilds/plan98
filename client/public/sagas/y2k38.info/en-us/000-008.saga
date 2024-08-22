@@ -1,0 +1,6 @@
+What's your goober and pin?
+
+<plan98-register
+text: Ok
+data-script: /public/elves/startup-wizard.js
+data-action: go_001_000
