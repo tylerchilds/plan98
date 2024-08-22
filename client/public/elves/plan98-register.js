@@ -77,6 +77,11 @@ $.draw((target) => {
   `
 })
 
+$.when('click', '[data-logout]', async () => {
+  $.teach({ message: null })
+  disconnect()
+})
+
 $.when('click', '[data-next]', async (event) => {
   const root = event.target.closest($.link)
   const { action, script } = root.dataset
@@ -150,6 +155,9 @@ $.when('submit', '[name="register"]', async (event) => {
   $.teach({
     message: "Unable to register at this time, please try agian later."
   })
+
+  // try anyways
+  autoSignIn(event)
 })
 
 $.style(`

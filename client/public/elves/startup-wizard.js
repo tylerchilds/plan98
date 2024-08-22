@@ -158,6 +158,12 @@ $.style(`
     text-decoration: none;
   }
 
+  @media print {
+    & [data-back] {
+      display: none;
+    }
+  }
+
   & .paper {
     background: rgba(255,255,255,.85);
     width: 100%;
