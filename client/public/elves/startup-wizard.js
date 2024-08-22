@@ -114,6 +114,7 @@ export function setupSaga(nextSaga, target, options={}) {
         root.innerHTML = `
           <div class="paper">
             <div class="wrapper">
+              <a href="javascript:;" data-back>Back</a>
               ${render(saga)}
             </div>
           </div>
@@ -124,6 +125,10 @@ export function setupSaga(nextSaga, target, options={}) {
       console.error(e)
     })
 }
+
+$.when('click', '[data-back]', () => {
+  history.back()
+})
 
 $.draw((target) => {
   const { key, cache } = $.learn()
@@ -137,7 +142,6 @@ $.draw((target) => {
 })
 
 $.style(`
-
   & {
     display: grid;
     margin: auto;
@@ -146,6 +150,12 @@ $.style(`
     height: 100%;
     place-items: center;
     background: rgba(128,128,128,1);
+  }
+
+  & [data-back] {
+    padding: 1rem;
+    display: inline-block;
+    text-decoration: none;
   }
 
   & .paper {

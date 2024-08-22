@@ -113,7 +113,8 @@ $.style(`
   & {
     display: block;
     margin: 1rem auto;
-    max-width: 320px;
+    max-width: calc(320px + 2rem);
+    padding: 0 1rem;
   }
 
   & button {

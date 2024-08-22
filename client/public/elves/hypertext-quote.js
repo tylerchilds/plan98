@@ -6,6 +6,8 @@ $.style(`
   & {
     display: block;
     place-self: end center;
+    padding: 0 1rem;
+
   }
 
   @media (min-width: 768px) {
