@@ -205,6 +205,18 @@ $.style(`
     pointer-events: all;
   }
 
+  & #canvas-edges {
+    z-index: 150;
+    pointer-events: none;
+    user-select: none;
+    overflow: visible;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
   & [name="node"] {
     transform: translate3d(var(--ic-x,0), var(--ic-y,0), 0);
     background: lemonchiffon;
