@@ -510,13 +510,17 @@ button {
 }
 
 .screenplay {
-  max-width: 8in;
-  padding: 1in;
   background: white;
   margin: auto;
   color: rgba(0,0,0,.85);
   font-size: 12pt;
   font-family: courier;
+}
+@media (min-width: 768px) {
+  .screenplay {
+    max-width: 8.5in;
+    padding: 1in 1in 1in 1.5in;
+  }
 }
 
 .screenplay xml-html {

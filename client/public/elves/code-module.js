@@ -15,7 +15,7 @@ const $ = module('code-module')
 eruda.init();
 
 function sourceFile(target) {
-  const src = target.closest('[src]').getAttribute('src')
+  const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
   const data = $.learn()[src] || {}
 
   if(target.initialized) return data

@@ -1,108 +1,55 @@
 import module from '@silly/tag'
 import { render } from '@sillonious/saga'
 import { doingBusinessAs } from '@sillonious/brand'
+import { link as feedbackChannelLink } from './feedback-channel.js';
+import { getUser } from './plan98-reconnect.js'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
-const tutorial = 'index.saga'
+const tutorial = 'identity.saga'
 
-export function openMemex(event) {
-  setupSaga('memex.saga', event.target)
-}
-
-export function skipClass(event) {
-  window.location.href = '/app/silly-wizard'
-}
-
-
-export function goToCodeSpace(event) {
-  setupSaga('code-space.saga', event.target)
-}
-
-export function goSomeWhereElse(event) {
-  window.location.href = '/?world=' + state['ls/companyName']
-}
-
-export function start(event) {
-  setupSaga('000-000.saga', event.target)
-}
-
-export function go_000_001(event) {
-  setupSaga('000-001.saga', event.target)
-}
-
-export function go_000_002(event) {
-  setupSaga('000-002.saga', event.target)
-}
-
-export function go_000_003(event) {
-  setupSaga('000-003.saga', event.target)
-}
-
-export function go_000_004(event) {
-  setupSaga('000-004.saga', event.target)
-}
-
-export function go_000_005(event) {
-  setupSaga('000-005.saga', event.target)
-}
-
-export function go_000_006(event) {
-  setupSaga('000-006.saga', event.target)
-}
-
-export function go_000_007(event) {
-  setupSaga('000-007.saga', event.target)
-}
-
-export function go_000_008(event) {
-  setupSaga('000-008.saga', event.target)
-}
-
-export function go_000_009(event) {
-  setupSaga('000-009.saga', event.target)
-}
-
-export function go_001_000(event) {
-  window.location.href = '/app/plan98-wallet#challenge'
-}
-
-
-export function blankSave(event) {
-  state['ls/save-file'] = {
-    chaosEmerald: [],
-  }
-}
-
-const $ = module('startup-wizard', {
+const $ = module('plan98-wallet', {
   cache: {}
 })
+
+const accountKey = `ls/${$.link}/account`
+
+const hashFunctions = {
+  '#challenge': challenge
+}
+
+export function getList() {
+  return state['ls/wallet-1998/list'] || []
+}
+
+export function challenge() {
+  return 'provisioned.saga'
+}
 
 export function setupSaga(nextSaga, target, options={}) {
   softReset()
   const root = target === self
     ? document.querySelector($.link)
     : target.closest($.link) || document.querySelector($.link) || target.closest('xml-html') || document.body
-
-  if(!root) return
   const activeDialect = state['ls/xx-yy'] || 'en-us'
-  const key = currentWorkingDirectory + 'y2k38.info/' + activeDialect +'/'+ nextSaga
+  const identifier = currentWorkingDirectory + '1998.social/' + activeDialect + '/'+nextSaga
+
   root.dataset.lastHtml = target.innerHTML
-  fetch(raw+key)
+  fetch(raw+identifier)
     .then(async response => {
       if(response.status === 404) {
         target.innerHTML = target.dataset.lastHtml
         return
       }
-      if(!root) window.location.href = key + window.location.search
+      if(!root) window.location.href = identifier + window.location.search
       const saga = await response.text()
 
       $.teach(
-        { [key]: saga },
+        { [identifier]: saga },
         (state, payload) => {
           return {
             ...state,
-            key,
+            identifier,
             cache: {
               ...state.cache,
               ...payload
@@ -114,7 +61,7 @@ export function setupSaga(nextSaga, target, options={}) {
         root.innerHTML = `
           <div class="paper">
             <div class="wrapper screenplay">
-              <a href="javascript:;" data-back>Back</a>
+              <a href="javascript:;" data-history-back>Back</a>
               ${render(saga)}
             </div>
           </div>
@@ -126,18 +73,37 @@ export function setupSaga(nextSaga, target, options={}) {
     })
 }
 
-$.when('click', '[data-back]', () => {
+$.when('click', '[data-history-back]', () => {
   history.back()
 })
 
+async function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  const user = await getUser().catch(e => console.error(e))
+  if(!user) {
+    window.location.href = '/?world=sillyz.computer'
+  }
+
+  if(!user.error) {
+    $.teach({ ...user })
+  }
+}
+
 $.draw((target) => {
-  const { key, cache } = $.learn()
+  mount(target)
+  const { identifier, cache } = $.learn()
 
-  const content = cache[key]
-
-  if(!content || !target.mounted) {
-    target.mounted = true
-    setupSaga(tutorial, target)
+  const content = cache[identifier]
+  
+  let start = tutorial
+  const hash = target.getAttribute('hash') || window.location.hash
+  if(hashFunctions[hash]) {
+    const result = hashFunctions[hash]()
+    start = result ? result : start
+  }
+  if(!content) {
+    setupSaga(start, target)
   }
 })
 
@@ -196,41 +162,6 @@ $.style(`
   }
 `)
 
-function trapUntil($, target, terminator) {
-  $.teach({ trapped: true })
-  function loop(time) {
-    let { trapped } = $.learn()
-    try {
-      if(terminator(party)) {
-        trapped = false
-        target.trap.deactivate()
-      }
-    } catch(reason) {
-      const flavor = `the ${time} terminator failed`
-      const source = `for ${terminator.toString()}`
-
-      console.error(`${flavor} ${source} because`, reason)
-    }
-    if(trapped) requestAnimationFrame(loop)
-  }
-  requestAnimationFrame(loop)
-}
-
-function onActivate($, target){
-  return () => {
-    target.classList.add('active')
-    //trapUntil($, target, anybodyPressesReset)
-  }
-}
-
-function onDeactivate($, target) {
-  return () => {
-    $.teach({ trapped: false })
-    target.classList.remove('active')
-    target.remove()
-  }
-}
-
 function schedule(x) { setTimeout(x, 1) }
 
 /*
@@ -242,32 +173,32 @@ function schedule(x) { setTimeout(x, 1) }
  *
  */
 export function getSession() {
-  return state['ls/bayun'] || {}
+  return state[accountKey] || {}
 }
 
 export function clearSession() {
-  state['ls/bayun'] = {}
+  state[accountKey] = {}
 }
 
 export function getFeedback() {
-  return state['ls/bayun'].feedback || []
+  return state[accountKey].feedback || []
 }
 
 export function softReset() {
-  if(!state['ls/bayun']) {
-    state['ls/bayun'] = {}
+  if(!state[accountKey]) {
+    state[accountKey] = {}
   }
-  state['ls/bayun'].feedback = []
+  state[accountKey].feedback = []
 }
 
 export function setError(error) {
-  state['ls/bayun'].feedback = [
+  state[feedbackChannelLink].feedback = [
     { message: `${error}`, type: 'error'}
   ]
 }
 
 export function setErrors(errors) {
-  state['ls/bayun'].feedback = errors.map((error) => {
+  state[feedbackChannelLink].feedback = errors.map((error) => {
     return { message: `${error}`, type: 'error'}
   })
 }
@@ -288,7 +219,7 @@ export function identify(event) {
 
 export function register(event) {
   if(!getEmployeeId()) {
-    seterror('enter an employee id')
+    setError('enter an employee id')
     return
   }
   setupSaga('register.saga', event.target)
@@ -306,38 +237,30 @@ export function connected(event) {
   setupSaga('welcome.saga', event.target)
 }
 
+export function setSession({ sessionId, companyName, companyEmployeeId }) {
+  state[accountKey] = {
+    sessionId,
+    companyName,
+    companyEmployeeId
+  }
+}
+
 export function setSessionId(x) {
-  state['ls/bayun'].sessionId = x
+  state[accountKey].sessionId = x
 }
 export function getSessionId() {
-  return state['ls/bayun'].sessionId
+  return state[accountKey].sessionId
 }
 
-export function setEmail(x) {
-  state['ls/bayun'].email = x
-}
-
-export function getEmail() {
-  const fallback = getCompanyName() && getEmployeeId()
-    ? getCompanyName() + '@'  +  getEmployeeId()
-    : null
-  return state['ls/bayun'].email || fallback
-}
-export function setCompanyName(x) {
-  state['ls/bayun'].companyName = x
-}
-export function getCompanyName() {
-  return state['ls/bayun'].companyName
-}
 export function getCompanies() {
   return Object.keys(doingBusinessAs)
 }
 
-export function setEmployeeId(x) {
-  state['ls/bayun'].companyEmployeeId = x
+export function setEmail(x) {
+  state[accountKey].email = x
 }
-export function getEmployeeId() {
-  return state['ls/bayun'].companyEmployeeId
+export function getEmail() {
+  return state[accountKey].email
 }
 
 /*
@@ -355,3 +278,19 @@ export function getEmployeeId() {
  *
  *
  * */
+
+export function actuallySecure(event) {
+  setupSaga('hard-start.saga', event.target)
+}
+
+export function begin(event) {
+  setupSaga('hard-question0.saga', event.target)
+}
+
+export function save0(event) {
+  setupSaga('hard-question1.saga', event.target)
+}
+
+export function kickTheTires(event) {
+  setupSaga('soft-start.saga', event.target)
+}

@@ -1,0 +1,15 @@
+Your memex is protected at the edge of your senses. The security process wizard journey is arduous, how committed are you?
+
+Are you the type that wants things done by the book and to code?
+
+<action-script
+text: Actually Secure
+data-action: actuallySecure
+data-script: /public/elves/wallet-1998.js
+
+Maybe you're just looking to get your feet wet and more familiar with the concepts?
+
+<action-script
+text: Kick the Tires
+data-action: kickTheTires
+data-script: /public/elves/wallet-1998.js

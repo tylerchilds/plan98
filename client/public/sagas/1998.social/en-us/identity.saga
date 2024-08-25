@@ -1,0 +1,15 @@
+<feedback-channel
+
+Enter your callsign and either register to be shown the ropes from scratch or log in to be welcomed back.
+
+<employee-1998
+
+<action-script
+text: Register
+data-action: register
+data-script: /public/elves/wallet-1998.js
+
+<action-script
+text: Login
+data-action: login
+data-script: /public/elves/wallet-1998.js
