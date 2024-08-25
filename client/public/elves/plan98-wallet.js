@@ -262,6 +262,20 @@ export function setEmail(x) {
 export function getEmail() {
   return state[accountKey].email
 }
+export function setCompanyName(x) {
+  state[accountKey].companyName = x
+}
+export function getCompanyName() {
+  return state[accountKey].companyName
+}
+
+export function setEmployeeId(x) {
+  state[accountKey].companyEmployeeId = x
+}
+export function getEmployeeId() {
+  return state[accountKey].companyEmployeeId
+}
+
 
 /*
  *
