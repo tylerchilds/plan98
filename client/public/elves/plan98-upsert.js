@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { connected, getFeedback, getCompanyName, getEmployeeId, setSessionId, setError, setErrors } from './plan98-wallet.js'
+import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, setError, setErrors } from './plan98-wallet.js'
 import { getUser } from './plan98-reconnect.js'
 
 const $ = module('plan98-upsert', {
@@ -12,151 +12,92 @@ const $ = module('plan98-upsert', {
   answer5: '',
 })
 
-const steps = [
-  function step1() {
-    const { questions, answer1 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${questions[1]}
-      <label class="field">
-        <span class="label">Answer 1</span>
-        <textarea class="name-pair" name="answer1">${answer1}</textarea>
-      </label>
+const modes = {
+  provision: function provisionMode(target) {
+    const {
+      question1,
+      answer1,
+      question2,
+      answer2,
+      question3,
+      answer3,
+      question4,
+      answer4,
+      question5,
+      answer5,
+    } = $.learn()
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+    return `
+      Write these secrets down, you'll need them to access this profile.
+      <div class="password-grid">
+        <input class="name-pair" name="question1" value=${question1}/>
+        <input class="name-pair" name="answer1" value=${answer1}/>
+        <input class="name-pair" name="question2" value=${question2}/>
+        <input class="name-pair" name="answer2" value=${answer2}/>
+        <input class="name-pair" name="question3" value=${question3}/>
+        <input class="name-pair" name="answer3" value=${answer3}/>
+        <input class="name-pair" name="question4" value=${question4}/>
+        <input class="name-pair" name="answer4" value=${answer4}/>
+        <input class="name-pair" name="question5" value=${question5}/>
+        <input class="name-pair" name="answer5" value=${answer5}/>
       </div>
+      <button data-provision>
+        Provision
+      </button>
     `
   },
-  function step2() {
-    const { questions, answer2 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${questions[2]}
-      <label class="field">
-        <span class="label">Answer 2</span>
-        <textarea class="name-pair" name="answer2">${answer2}</textarea>
-      </label>
+  challenge: function challengeMode(target) {
+    const {
+      questions,
+      answer1,
+      answer2,
+      answer3,
+      answer4,
+      answer5,
+    } = $.learn()
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step3() {
-    const { questions, answer3 } = $.learn()
     return `
-      <div class="progress"></div>
-      ${questions[3]}
-      <label class="field">
-        <span class="label">Answer 3</span>
-        <textarea class="name-pair" name="answer3">${answer3}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+      Enter the corresponding secrets to access this profile.
+      <div class="password-grid">
+        <input class="name-pair" disabled name="question1" value=${questions[1]}/>
+        <input class="name-pair" name="answer1" value=${answer1}/>
+        <input class="name-pair" disabled name="question2" value=${questions[2]}/>
+        <input class="name-pair" name="answer2" value=${answer2}/>
+        <input class="name-pair" disabled name="question3" value=${questions[3]}/>
+        <input class="name-pair" name="answer3" value=${answer3}/>
+        <input class="name-pair" disabled name="question4" value=${questions[4]}/>
+        <input class="name-pair" name="answer4" value=${answer4}/>
+        <input class="name-pair" disabled name="question5" value=${questions[5]}/>
+        <input class="name-pair" name="answer5" value=${answer5}/>
       </div>
+      <button data-validate>
+        Validate
+      </button>
     `
-  },
-  function step4() {
-    const { questions, answer4 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${questions[4]}
-      <label class="field">
-        <span class="label">Answer 4</span>
-        <textarea class="name-pair" name="answer4">${answer4}</textarea>
-      </label>
+  }
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
-    `
-  },
-  function step5() {
-    const { questions, answer5 } = $.learn()
-    return `
-      <div class="progress"></div>
-      ${questions[5]}
-      <label class="field">
-        <span class="label">Answer 5</span>
-        <textarea class="name-pair" name="answer5">${answer5}</textarea>
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-connect>Connect</button>
-      </div>
-    `
-  },
-]
+}
 
 $.draw((target) => {
-  start(target)
+  const { mode } = $.learn()
 
-  const { questions, step } = $.learn()
-  if(getFeedback().length > 0 ) {
-    return `
-      Something's up right now...
-      <button data-history>Back</button>
-    `
+  if(modes[mode]) {
+
+    return modes[mode](target)
   }
-  if(!questions) {
-    return 'loading...'
-  }
-  if(step !== parseInt(target.dataset.step)) {
-    target.dataset.step = step
-    target.dataset.steps = step
-    target.style.setProperty("--progress", `${step / steps.length * 100}%`);
-    target.innerHTML = steps[step](target)
-  }
+
+  return `
+    <button data-start>
+      Go
+    </button>
+  `
 })
 
 function schedule(x) { setTimeout(x, 1) }
-function back() {
-  const { step } = $.learn()
-  if(step-1 < 0) {
-    $.teach({ step: 0 })
-  } else {
-    $.teach({ step: step - 1 })
-  }
-}
-
-function next() {
-  const { step } = $.learn()
-  if(step+1 >= steps.length) {
-    $.teach({ step: steps.length - 1 })
-  } else {
-    $.teach({ step: step + 1 })
-  }
-}
-
-$.when('click', '[data-back]', (event) => {
-  back()
-})
-
-$.when('click', '[data-history]', (event) => {
-  history.back()
-})
 
 $.when('input', '.name-pair', (event) => {
   const field = event.target
   $.teach({ [field.name]: field.value })
-})
-
-$.when('click', '[data-next]', (event) => {
-  const pairs = [...event.target.closest($.link).querySelectorAll('.name-pair')]
-
-  if(pairs.length > 0) {
-    pairs.map((field) => {
-      $.teach({ [field.name]: field.value })
-    })
-  }
-  next()
 })
 
 const securityQuestionsCallback = data => {
@@ -174,33 +115,70 @@ const securityQuestionsCallback = data => {
 
       $.teach({
         sessionId: data.sessionId,
-        questions
+        questions,
+        mode: 'challenge'
       })
       //Show custom UI to take user input for the answers.
       //Call validateSecurityQuestions function with the user provided answers.
     }
   }
 }
-async function start(target) {
-  const user = await getUser().catch(e => console.error(e))
-  const [companyEmployeeId, companyName] = user.data.user.email.split('@')
 
+$.when('click', '[data-start]', (event) => {
+  start(event)
+})
+
+$.when('click', '[data-provision]', (event) => {
+  provision(event) 
+})
+
+$.when('click', '[data-validate]', (event) => {
+  validate(event) 
+})
+
+async function start(event) {
+  const user = await getUser().catch(e => console.error(e))
+  const { email } = user.data.user
+  const [companyEmployeeId, companyName] = email.split('@')
   const prerequirements = companyName && companyEmployeeId
 
-  if(prerequirements && !target.inquired) {
-    target.inquired = true
-
+  if(prerequirements) {
     const successCallback = data => {
-      debugger
       if (data.sessionId) {
         setSessionId(data.sessionId)
         //LoggedIn Successfully
-        connected({ target })
+        connected(event)
+        $.teach({
+          email
+        })
       }
     };
 
     const failureCallback = error => {
-      debugger
+      if(error === "BayunErrorEmployeeDoesNotExist") {
+        const [
+          answer1,
+          answer2,
+          answer3,
+          answer4,
+          answer5
+        ] = crypto.randomUUID().split('-')
+
+        $.teach({
+          mode: 'provision',
+          email,
+          question1: 'PLAN98_PASSWORD_1',
+          answer1,
+          question2: 'PLAN98_PASSWORD_2',
+          answer2,
+          question3: 'PLAN98_PASSWORD_3',
+          answer3,
+          question4: 'PLAN98_PASSWORD_4',
+          answer4,
+          question5: 'PLAN98_PASSWORD_5',
+          answer5,
+        })
+      }
       setError(error)
     };
 
@@ -218,7 +196,7 @@ async function start(target) {
   }
 }
 
-function securityQuestionsAnswers() {
+function securityQuestionsAnswersActivation() {
   const {
     answer1,
     answer2,
@@ -258,7 +236,7 @@ function securityQuestionsAnswers() {
   return qa
 }
 
-$.when('click', '[data-connect]', (event) => {
+function validate(event) {
   const { sessionId } = $.learn()
   const successCallback = data => {
     if (data.sessionId) {
@@ -272,24 +250,168 @@ $.when('click', '[data-connect]', (event) => {
 
   bayunCore.validateSecurityQuestions(
     sessionId,
-    securityQuestionsAnswers(),
+    securityQuestionsAnswersActivation(),
     null,
     successCallback,
     failureCallback
   );
+}
 
-  const errors = []
+function authorizeEmployee(event) {
+  return function authorizeEmployeeCallback(data){
+    if (data.sessionId) {
+      if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
+        // You can get employeePublicKey in data.employeePublicKey for it's authorization
+      }
+    }
+  };
+}
 
-  if(errors.length > 0) {
-    setErrors(errors)
+function newUserCredentials(event) {
+  return function newUserCredentialsCallback(data) {
+    if (data.sessionId){
+      const successCallback = data => {
+        setSessionId(data.sessionId)
+        validate(event)
+      };
+
+      const failureCallback = error => {
+        setError(error)
+      };
+
+      // Take user Input for optional registerFaceId
+      const registerFaceId=false;
+
+      bayunCore.setNewUserCredentials(
+        data.sessionId,
+        securityQuestionsAnswersSetup(),
+        null, //passphrase,
+        registerFaceId,
+        authorizeEmployee(event),
+        successCallback,
+        failureCallback
+      );
+    }
   }
-})
+}
+
+function securityQuestionsAnswersSetup() {
+  const {
+    question1,
+    answer1,
+    question2,
+    answer2,
+    question3,
+    answer3,
+    question4,
+    answer4,
+    question5,
+    answer5,
+  } = $.learn()
+
+  //Take User Input for Security Questions and Answers
+  //Here securityQuestionsAnswers object is created just for reference
+  const qa=[];
+  qa.push({
+    question: question1,
+    answer: answer1
+  });
+
+  qa.push({
+    question: question2,
+    answer: answer2
+  });
+
+  qa.push({
+    question: question3,
+    answer: answer3
+  });
+
+  qa.push({
+    question: question4,
+    answer: answer4
+  });
+
+  qa.push({
+    question: question5,
+    answer: answer5
+  });
+
+  return qa
+}
+
+function securityQuestions(event) {
+  return function securityQuestionsCallback(data) {
+    if (data.sessionId) {
+      if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS){
+
+        // we can get the questions from data.securityQuestions,
+        // but we already have the first pass in memory
+        // data.securityQuestions;
+
+        const successCallback = data => {
+          //Security Questions' Answers validated and registered employee successfully.
+          //Login to continue.
+          login(event)
+        };
+
+        const failureCallback = error => {
+          setError(error)
+        };
+
+        bayunCore.validateSecurityQuestions(
+          data.sessionId,
+          securityQuestionsAnswersSetup(),
+          authorizeEmployee(event),
+          successCallback,
+          failureCallback
+        );
+      }
+    }
+  };
+}
+
+async function provision(event) {
+  const user = await getUser().catch(e => console.error(e))
+  const { email } = user.data.user
+  const [companyEmployeeId, companyName] = email.split('@')
+  const prerequirements = companyName && companyEmployeeId
+
+  if(prerequirements) {
+    const successCallback = data => {
+      validate(event)
+    };
+
+    const failureCallback = error => {
+      setError(error)
+    };
+
+    bayunCore.registerEmployeeWithoutPassword(
+      '', //sessionId,
+      companyName,
+      companyEmployeeId,
+      email,
+      true, //isCompanyOwnedEmail,
+      authorizeEmployee(event),
+      newUserCredentials(event),
+      securityQuestions(event),
+      null, //passphraseCallback,
+      successCallback,
+      failureCallback
+    );
+  }
+}
 
 $.style(`
   & {
     display: block;
     padding: 0 1rem;
     margin: 1rem auto;
+  }
+
+  & .password-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   & .button-row {
