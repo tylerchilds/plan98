@@ -20,8 +20,6 @@ $.style(`
   & {
     display: block;
     padding: 5rem 1rem;
-    background-image: linear-gradient(35deg, dodgerblue, rgba(0,0,0,.5));
-    background-size: cover;
     overflow: auto;
     position: relative;
   }

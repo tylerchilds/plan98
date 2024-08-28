@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, setError, setErrors } from './plan98-wallet.js'
+import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, setError, setErrors, setEmail, getEmail } from './plan98-wallet.js'
 import { getUser } from './plan98-reconnect.js'
 
 const $ = module('plan98-upsert', {
@@ -86,7 +86,10 @@ $.draw((target) => {
     return modes[mode](target)
   }
 
+  const email = getEmail()
+
   return `
+    ${email}
     <button data-start>
       Go
     </button>

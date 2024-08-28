@@ -6,7 +6,7 @@ import { getUser } from './plan98-reconnect.js'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
-const tutorial = 'identity.saga'
+const tutorial = 'wallet.saga'
 
 const $ = module('plan98-wallet', {
   cache: {}
