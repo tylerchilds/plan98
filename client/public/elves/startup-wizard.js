@@ -112,8 +112,8 @@ export function setupSaga(nextSaga, target, options={}) {
       )
       schedule(() => {
         root.innerHTML = `
-          <div class="paper">
-            <div class="wrapper screenplay">
+          <div class="desktop">
+            <div class="paper screenplay">
               <a href="javascript:;" data-back>Back</a>
               ${render(saga)}
             </div>
@@ -149,7 +149,6 @@ $.style(`
     position: relative;
     height: 100%;
     place-items: center;
-    background: rgba(128,128,128,1);
   }
 
   & [data-back] {
@@ -164,8 +163,8 @@ $.style(`
     }
   }
 
-  & .paper {
-    background: rgba(255,255,255,.85);
+  & .desktop {
+    background: rgba(128,128,128,1);
     width: 100%;
     height: 100%;
   }
@@ -174,11 +173,11 @@ $.style(`
     resize: none;
   }
 
-  & .wrapper {
+  & .paper {
     height: 100%;
     width: 100%;
-    background: rgba(255,255,255,.85);
-    color: rgba(0,0,0,.85);
+    background: white;
+    color: black);
     overflow: auto;
   }
   @keyframes &-fade-in {

@@ -90,7 +90,6 @@ const $ = module('hyper-script', {
 })
 
 $.draw((target) => {
-  const lines = getLines(target)
   const { id } = target
   const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
   const { file } = sourceFile(target)
@@ -108,7 +107,7 @@ $.draw((target) => {
       const escapedFile = escapeHyperText(file)
       return `
         <div name="write">
-          <textarea name="typewriter" style="background-image: ${lines}">${escapedFile}</textarea>
+          <textarea name="typewriter">${escapedFile}</textarea>
           <div name="navi">
             <button data-publish>Publish</button>
           </div>
@@ -119,7 +118,7 @@ $.draw((target) => {
       const html = hyperSanitizer(file)
       return `
         <div name="read">
-          <div name="page">
+          <div name="page" class="screenplay">
             ${html}
           </div>
           <div name="navi">
@@ -173,9 +172,6 @@ $.draw((target) => {
   const fadeOut = nextPanel && activePanel !== nextPanel
 
   const perspective = `
-    <button class="action-accordion">
-      &amp;
-    </button>
     <div class="actions">
       <button data-write>Program</button>
       <button data-read>Play</button>
@@ -237,10 +233,6 @@ function sourceFile(target) {
       return data
     })()
 }
-
-$.when('click', '.action-accordion', async (event) => {
-  event.target.classList.toggle('active')
-})
 
 $.when('input', '[name="typewriter"]', (event) => {
   const src = source(event.target)
@@ -496,7 +488,6 @@ $.style(`
   }
 
   & [name="navi"] button {
-    pointer-events: all;
     background: lemonchiffon;
     color: saddlebrown;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
@@ -521,37 +512,13 @@ $.style(`
     color: lemonchiffon;
   }
 
-  & .action-accordion {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 50px;
-    height: 50px;
-    background: rgba(0,0,0,.65);
-    border: 2px solid dodgerblue;
-    color: rgba(255,255,255,.85);
-    border-radius: 100%;
-    opacity: .5;
-    transition: all 200ms ease-in-out;
-    z-index: 10;
-  }
-  & .action-accordion:hover {
-    background: dodgerblue;
-    border: 2px solid rgba(255,255,255,1);
-    opacity: 1;
-  }
   & .actions {
     margin: 0 1rem;
     position: absolute;
-    top: 4rem;
+    top: 0rem;
     right: 0;
     text-align: right;
     z-index: 10;
-    display: none;
-  }
-
-  & .action-accordion.active + .actions {
-    display: block;
   }
 
   & .actions button {
@@ -584,7 +551,6 @@ $.style(`
 
   & [name="page"] {
     margin: 0;
-    padding: 0;
   }
 
   & [name="page"] xml-html > *${notHiddenChildren} {
@@ -592,10 +558,8 @@ $.style(`
   }
 
   & [name="navi"] {
-    pointer-events: none;
     position: absolute;
-    bottom: 1rem;
-    left: 0;
+    top: 2rem;
     right: 0;
     margin: auto;
     height: 2rem;
@@ -614,10 +578,7 @@ $.style(`
   & [name="screen"] {
     position:relative;
     overflow: hidden;
-    aspect-ratio: 16/9;
-    transform: translateY(-50%);
-    top: 50%;
-    max-height: calc(100vh - 6rem);
+    height: 100%;
     margin: auto;
   }
 
@@ -632,20 +593,15 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
-    padding: 1rem;
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     place-content: center;
   }
 
   & [name="stage"] > * {
-    display: block;
     grid-area: stage;
     transition: opacity 100ms;
-    border-radius: 1rem;
     margin: 0;
-    text-shadow: .1rem .1rem rgba(0,0,0,.85);
-    color: rgba(255,255,255,.85);
     overflow: auto;
     opacity: 1;
     z-index: 2;
@@ -707,17 +663,19 @@ $.style(`
   }
 
   & [name="read"] {
-    background: white;
-    box-shadow: 2px 2px 4px 4px rgba(0,0,0,.10);
     margin: 0 auto;
-    padding: 0 1rem;
-    max-width: calc(6.5in + 2rem);
     overflow: auto;
+    background: rgba(128,128,128,1);
   }
   & [name="page"] {
-    padding: 1in 0;
-    font-size: 12pt;
-    font-family: courier;
+    background: white;
+    box-shadow: 2px 2px 4px 4px rgba(0,0,0,.10);
+    height: 100%;
+    width: 100%;
+    background: white;
+    margin: auto;
+    color: black;
+    overflow: auto;
   }
   & [name="perform"] {
     background: #54796d;
@@ -909,46 +867,38 @@ $.style(`
     height: auto;
     width: auto;
     place-self: end start;
-    line-height: 1.25;
+    font-size: 80px;
+    line-height: 120px;
+    background: rgba(0,0,0,.65);
+    text-shadow: .1rem .1rem rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    position: relative;
   }
 
   & [name="stage"] hypertext-address {
     place-self: end start;
-    font-size: 6rem;
-    padding: 0;
-    background: none;
-    font-weight: 800;
   }
 
   & [name="stage"] hypertext-puppet {
-    font-size: 6rem;
-    padding: 3rem;
   }
 
   & [name="stage"] hypertext-quote {
-    font-size: 4rem;
-    padding: 2rem;
   }
 
   & [name="stage"] hypertext-effect {
-    font-size: 2rem;
-    padding: 1rem;
     place-self: end start;
-    font-style: italic;
   }
 
   & [name="stage"] hypertext-embodied {
-    font-size: 2rem;
     place-self: end end;
-    font-style: italic;
-    padding: 1rem;
   }
 
   & [name="stage"] hypertext-action,
   & [name="stage"] hypertext-parenthetical {
-    font-size: 2rem;
     place-self: end center;
-    padding: 1rem;
   }
 
   & [name="stage"] > * {
@@ -956,65 +906,5 @@ $.style(`
     width: 100%;
   }
 `)
-
-function getStars() {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext('2d');
-
-  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
-
-  // landscape tabloid? 11x17
-  canvas.height = rhythm * 11;
-  canvas.width = rhythm * 17;
-
-  ctx.fillStyle = 'dodgerblue';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'lime';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'orange';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillStyle = 'rebeccapurple';
-  for(let i = 0; i < rhythm; i++) {
-    ctx.fillRect(random(canvas.width), random(canvas.height), 1, 1);
-  }
-  ctx.fillRect(0, rhythm - 1, 1, 1);
-
-  return `url(${canvas.toDataURL()}`;
-}
-
-function getLines(target) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext('2d');
-
-  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
-  canvas.height = rhythm;
-  canvas.width = rhythm;
-
-  ctx.fillStyle = 'transparent';
-  ctx.fillRect(0, 0, rhythm, rhythm);
-
-  ctx.fillStyle = 'dodgerblue';
-  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
-
-  return `url(${canvas.toDataURL()}`;
-}
-
-$.when('scroll', 'textarea', drawLines);
-
-function drawLines (event) {
-  const scrollTop = event.target.scrollTop;
-  event.target.style.backgroundPosition = `0px ${-scrollTop}px`;
-}
-
-
-function random(max) {
-  return Math.floor(Math.random() * max);
-}
 
 function schedule(x, delay=1) { setTimeout(x, delay) }

@@ -515,6 +515,7 @@ button {
   color: rgba(0,0,0,.85);
   font-size: 12pt;
   font-family: courier;
+  padding: 1in 1rem;
 }
 @media (min-width: 768px) {
   .screenplay {
