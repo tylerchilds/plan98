@@ -3,6 +3,7 @@ import { idx, documents } from './giggle-search.js'
 
 const $ = elves('landing-page', {
   query: "",
+  suggestIndex: 0,
   suggestions: [],
   top10: [
     {
@@ -240,7 +241,7 @@ const $ = elves('landing-page', {
 })
 
 $.draw(() => {
-  const { top10, suggestions, focused, categories, ring, query } = $.learn()
+  const { top10, suggestions, focused, categories, ring, query, suggestIndex } = $.learn()
   return `
     <div class="hero">
       <div class="top-bar">
@@ -251,7 +252,7 @@ $.draw(() => {
       <form class="search" method="get">
         <img src="/cdn/thelanding.page/giggle.svg" />
         <div class="input-grid">
-          <input placeholder="Imagine..." type="text" value="${query}" name="search" />
+          <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
           <button type="submit">*</button>
         </div>
         <div class="suggestions ${focused ? 'focused' : ''}">
@@ -261,9 +262,8 @@ $.draw(() => {
                 return x.ref === y.path
               })
 
-
               return `
-                <button data-name="${item.name}" data-path="${item.path}">
+                <button class="${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}">
                   <div class="path">
                     ${item.path}
                   </div>
@@ -312,8 +312,38 @@ $.when('focus', '[name="search"]', event => {
 
 $.when('blur', '[name="search"]', event => {
   setTimeout(() => {
-    $.teach({ focused: false })
+    $.teach({ focused: false, suggestIndex: 0 })
   }, 200)
+})
+
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', '[name="search"]', event => {
+  if(event.keyCode === down) {
+    event.preventDefault()
+    $.teach({ suggestIndex: $.learn().suggestIndex + 1 })
+    return
+  }
+
+  if(event.keyCode === up) {
+    event.preventDefault()
+    $.teach({ suggestIndex: $.learn().suggestIndex - 1 })
+    return
+  }
+
+  if(event.keyCode === enter) {
+    event.preventDefault()
+    const { suggestions, suggestIndex } = $.learn()
+    const item = documents.find(y => {
+      return suggestions[suggestIndex].ref === y.path
+    })
+
+    if(item) {
+      window.location.href = '/app/code-module?src=' +item.path
+      return
+    }
+  }
 })
 
 $.when('keyup', '[name="search"]', event => {
@@ -662,11 +692,11 @@ $.style(`
   }
 
   & .suggestion-box button {
-    background: white;
+    background-color: white;
     border: 1px solid dodgerblue;
     margin: 1px 0;
     border-radius: 2rem;
-    color: dodgerblue;
+    color: white;
     transition: all 100ms ease-in-out;
     padding: .5rem;
     width: 100%;
@@ -675,9 +705,15 @@ $.style(`
 
   & .suggestion-box button:focus,
   & .suggestion-box button:hover {
-    background: dodgerblue;
+    background-color: dodgerblue;
     color: white;
     filter: grayscale(0);
+  }
+
+  & .suggestion-box button.active {
+    color: white;
+    filter: grayscale(0);
+    background-color: dodgerblue;
   }
 
 
@@ -709,7 +745,7 @@ $.style(`
     text-align: right;
     position: absolute;
     right: .5rem;
-    color: rgba(0,0,0,.5);
+    color: rgba(255,255,255,.5);
     white-space: nowrap;
   }
 

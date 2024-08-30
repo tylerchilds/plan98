@@ -173,10 +173,10 @@ $.draw((target) => {
 
   const perspective = `
     <div class="actions">
-      <button data-write>Program</button>
-      <button data-read>Play</button>
-      <button data-perform>Pitch</button>
-      ${play ? `<button data-play>Play</button>` : ''}
+      <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Editor</button>
+      <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Paper</button>
+      <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Slideshow</button>
+      ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
     </div>
     <div class="grid" data-panel="${activePanel}">
       <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
@@ -513,10 +513,9 @@ $.style(`
   }
 
   & .actions {
-    margin: 0 1rem;
     position: absolute;
-    top: 0rem;
-    right: 0;
+    top: 1rem;
+    right: 1rem;
     text-align: right;
     z-index: 10;
   }
@@ -541,6 +540,8 @@ $.style(`
 
   & .actions button:focus,
   & .joke-actions button:focus,
+  & .actions button.active,
+  & .joke-actions button.active,
   & .actions button:hover,
   & .joke-actions button:hover {
     background: saddlebrown;
@@ -559,8 +560,8 @@ $.style(`
 
   & [name="navi"] {
     position: absolute;
-    top: 2rem;
-    right: 0;
+    bottom: 1rem;
+    right: 1rem;
     margin: auto;
     height: 2rem;
     display: block;
@@ -628,7 +629,7 @@ $.style(`
   & [name="write"]::before {
     content: '';
     position: absolute;
-    border-left: 1px solid var(--wheel-0-6, orange);
+    border-left: 1px solid firebrick;
     top: 0;
     left: 1rem;
     bottom: 0;
@@ -867,14 +868,14 @@ $.style(`
     height: auto;
     width: auto;
     place-self: end start;
-    font-size: 80px;
-    line-height: 120px;
+    font-size: 60px;
+    line-height: 100px;
     background: rgba(0,0,0,.65);
     text-shadow: .1rem .1rem rgba(0,0,0,.85);
     color: rgba(255,255,255,.85);
-    bottom: 2rem;
-    left: 2rem;
-    right: 2rem;
+    bottom: 80px;
+    left: 80px;
+    right: 80px;
     position: relative;
   }
 

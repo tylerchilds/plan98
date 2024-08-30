@@ -34,6 +34,8 @@ function sourceFile(target) {
 }
 
 $.when('click', '.privatize', (event) => {
+  // use this function to encrypt local copies
+  // should only be visible when end 2 end encryptable
 })
 $.when('click', '.publish', (event) => {
   const { file, src } = sourceFile(event.target)
@@ -76,9 +78,6 @@ $.draw(target => {
 
   if(file && !target.view) {
     const amp = `
-      <button class="action-accordion">
-        &amp;
-      </button>
       <div class="actions">
         <button class="privatize">Privatize</button>
       </div>
@@ -91,7 +90,7 @@ $.draw(target => {
       <select class="select">
         ${stack.split(',').map((filename) => {
           return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
-        })}
+        }).join('')}
       </select>
       ${amp}
     `: `
@@ -137,7 +136,7 @@ $.style(`
     height: 100%;
     max-height: 100%;
     position: relative;
-    padding: 0;
+    padding-top: 2rem;
   }
 
   & select {
@@ -157,7 +156,7 @@ $.style(`
 
   & .select {
     position: absolute;
-    top: 2rem;
+    top: 0rem;
     left: 0;
     right: 0;
   }
@@ -182,17 +181,11 @@ $.style(`
     opacity: 1;
   }
   & .actions {
-    margin: 0 1rem;
     position: absolute;
-    top: 4rem;
-    right: 0;
+    top: 1rem;
+    right: 1rem;
     text-align: right;
     z-index: 10;
-    display: none;
-  }
-
-  & .action-accordion.active + .actions {
-    display: block;
   }
 
   & .actions button {
@@ -225,8 +218,7 @@ $.style(`
     pointer-events: none;
     position: fixed;
     bottom: 1rem;
-    left: 0;
-    right: 0;
+    right: 1rem;
     margin: auto;
     height: 2rem;
     display: block;

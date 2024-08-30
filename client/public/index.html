@@ -103,6 +103,7 @@
           "@geckos.io/client": "https://esm.sh/@geckos.io/client@3.0.0",
           "@lezer/highlight": "https://esm.sh/@lezer/highlight@1.2.0",
           "@replit/codemirror-vim": "https://esm.sh/@replit/codemirror-vim@6.2.1",
+          "@shoelace-style/shoelace/tree": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/tree/tree.js",
           "@sillonious/brand": "/public/brand.js",
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@silly/tag": "/public/module.js",
@@ -269,5 +270,32 @@
 
       </main>
     </data-tooltip>
+    <script>
+      let debug = false
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          const mode = !debug ? debugMode : normalMode
+          mode()
+        }
+      });
+
+      function normalMode() {
+        debug = false
+        hideModal()
+      }
+
+      function debugMode() {
+        showModal(`
+          <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
+            <div style="overflow: auto; height: 100%;">
+              <source-code></source-code>
+            </div>
+          </div>
+        `, { centered: true })
+        debug = true
+      }
+
+    </script>
   </body>
 </html>

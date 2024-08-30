@@ -129,7 +129,7 @@ export function hideModal() {
 
   const nextLayer = layer - 1
 
-  if(nextLayer <= 1) {
+  if(nextLayer < 1) {
     document.body.classList.remove('trap-modal')
     self.removeEventListener('keydown', hideListener);
     $.teach({

@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, setError, setErrors, setEmail, getEmail } from './plan98-wallet.js'
+import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 import { getUser } from './plan98-reconnect.js'
 
 const $ = module('plan98-upsert', {
@@ -88,10 +88,16 @@ $.draw((target) => {
 
   const email = getEmail()
 
-  return `
-    ${email}
+  target.innerHTML = `
+    ${getAuthenticatedAt() ? `
+    <button data-connect="${email}">
+      ${email}
+    </button>
+    ` : `
+      No Current Identities
+    `}
     <button data-start>
-      Go
+      Add Identity
     </button>
   `
 })
@@ -139,20 +145,31 @@ $.when('click', '[data-validate]', (event) => {
   validate(event) 
 })
 
+$.when('click', '[data-connect]', (event) => {
+  const email = event.target.dataset.connect
+  setActiveAccount(email)
+  window.location.href = '/app/parental-controls'
+})
+
+
 async function start(event) {
   const user = await getUser().catch(e => console.error(e))
   const { email } = user.data.user
   const [companyEmployeeId, companyName] = email.split('@')
   const prerequirements = companyName && companyEmployeeId
 
+  setEmail(email)
+  setCompanyName(companyName)
+  setEmployeeId(companyEmployeeId)
+
   if(prerequirements) {
     const successCallback = data => {
       if (data.sessionId) {
         setSessionId(data.sessionId)
         //LoggedIn Successfully
-        connected(event)
         $.teach({
-          email
+          email,
+          mode: null
         })
       }
     };
@@ -244,7 +261,10 @@ function validate(event) {
   const successCallback = data => {
     if (data.sessionId) {
       setSessionId(data.sessionId)
-      connected(event)
+      setAuthenticatedAt(new Date())
+      $.teach({
+        mode: null
+      })
     }};
 
   const failureCallback = error => {

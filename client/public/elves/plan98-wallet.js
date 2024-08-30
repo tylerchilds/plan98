@@ -176,6 +176,10 @@ export function getSession() {
   return state[accountKey] || {}
 }
 
+export function setActiveAccount(email) {
+  state['ls/bayun'] = getSession()
+}
+
 export function clearSession() {
   state[accountKey] = {}
 }
@@ -262,6 +266,14 @@ export function setEmail(x) {
 export function getEmail() {
   return state[accountKey].email
 }
+
+export function setAuthenticatedAt(x) {
+  state[accountKey].authenticatedAt = x.toISOString()
+}
+export function getAuthenticatedAt() {
+  return state[accountKey].authenticatedAt
+}
+
 export function setCompanyName(x) {
   state[accountKey].companyName = x
 }
