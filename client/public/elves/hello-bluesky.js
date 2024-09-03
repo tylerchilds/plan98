@@ -116,24 +116,6 @@ $.draw(target => {
   return view
 })
 
-export function social(company, unix) {
-  let user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix]
-
-  if(!user) {
-    user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] = {
-      nickname: `/cache/nickname/${company}/${unix}`,
-      tagline: `/cache/tagline/${company}/${unix}`,
-      avatar: `/cache/avatars/${company}/${unix}`,
-      hero: `/cache/heroes/${company}/${unix}`,
-      likes: `/edge/likes/${company}/${unix}`,
-      dislikes: `/edge/dislikes/${company}/${unix}`,
-      company,
-      unix
-  }
-  }
-  return user
-}
-
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
     actor => ({
