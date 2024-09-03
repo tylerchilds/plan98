@@ -33,6 +33,10 @@ function sourceFile(target) {
     })()
 }
 
+$.when('click', '.preview', (event) => {
+  const src = event.target.closest($.link).getAttribute('src')
+  self.open(src, '_blank')
+})
 $.when('click', '.privatize', (event) => {
   // use this function to encrypt local copies
   // should only be visible when end 2 end encryptable
@@ -79,6 +83,7 @@ $.draw(target => {
   if(file && !target.view) {
     const amp = `
       <div class="actions">
+        <button class="preview" data-src="${src}">Preview</button>
         <button class="privatize">Privatize</button>
       </div>
       <div name="navi">
