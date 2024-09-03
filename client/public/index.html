@@ -90,6 +90,7 @@
     <script type="importmap">
       {
         "imports": {
+          "@atproto/api": "https://esm.sh/@atproto/api@0.13.5",
           "@aws-sdk/client-s3": "https://esm.sh/@aws-sdk/client-s3@3.616.0",
           "@aws-sdk/middleware-endpoint": "https://esm.sh/@aws-sdk/middleware-endpoint@3.374.0",
           "@braid/mail": "/public/cdn/braid.org/feed-client.js",
@@ -104,6 +105,7 @@
           "@lezer/highlight": "https://esm.sh/@lezer/highlight@1.2.0",
           "@replit/codemirror-vim": "https://esm.sh/@replit/codemirror-vim@6.2.1",
           "@shoelace-style/shoelace/tree": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/tree/tree.js",
+          "@shoelace-style/shoelace/relative-time": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/relative-time/relative-time.js",
           "@sillonious/brand": "/public/brand.js",
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@silly/tag": "/public/module.js",
@@ -178,6 +180,7 @@
           "uuid": "https://esm.sh/uuid@9.0.1",
           "uxn.wasm": "https://esm.sh/uxn.wasm@0.8.0",
           "uxn.wasm/util": "https://esm.sh/uxn.wasm@0.8.0/util",
+          "webamp": "https://esm.sh/webamp@1.5.0",
           "webpd": "https://esm.sh/webpd@1.0.0-alpha.8",
           "web-audio-daw": "https://esm.sh/web-audio-daw@4.13.2",
           "webaudiofont": "https://esm.sh/webaudiofont@3.0.4",
@@ -187,6 +190,8 @@
       }
     </script>
     <script async type="module" id="lazy-bootstrap" src="/public/main.js"></script>
+    <link media="print" onload="this.media='all'" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/light.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace-autoloader.js"></script>
   </head>
   <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
     <data-tooltip>
@@ -272,13 +277,39 @@
     </data-tooltip>
     <script>
       let debug = false
+      let help = false
       window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           event.preventDefault()
           const mode = !debug ? debugMode : normalMode
           mode()
         }
+
+        if (event.metaKey) {
+          const meta = !help ? goHelp : noHelp
+          meta()
+        }
       });
+
+      function goHelp() {
+        if(help) return
+        help = true
+        showModal(`
+          <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
+            <div style="overflow: auto; height: 100%;">
+              <landing-page></landing-page>
+            </div>
+          </div>
+        `, { centered: true })
+
+      }
+
+      function noHelp() {
+        help = false
+        hideModal()
+      }
+
+
 
       function normalMode() {
         debug = false
@@ -286,6 +317,7 @@
       }
 
       function debugMode() {
+        debug = true
         showModal(`
           <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
             <div style="overflow: auto; height: 100%;">
@@ -293,7 +325,6 @@
             </div>
           </div>
         `, { centered: true })
-        debug = true
       }
 
     </script>

@@ -161,7 +161,7 @@ $.style(`
   .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
-    background: rgba(0,0,0, .5);
+    background: rgba(255,255,255, .75);
     position: fixed;
     top: 0;
     bottom: 0;

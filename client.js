@@ -116,9 +116,11 @@ async function sagaSanitizer(saga, { endOfHead }) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
   dom.body.insertAdjacentHTML('afterbegin', `
-    <sillonious-brand>
-      ${render(saga)}
-    </sillonious-brand>
+    <data-tooltip>
+      <sillonious-brand>
+        ${render(saga)}
+      </sillonious-brand>
+    </data-tooltip>
   `)
   // remove the lazy-bootstrap to lock the document
   //dom.getElementById('lazy-bootstrap').remove()
@@ -378,9 +380,11 @@ async function showApp(request, tag) {
 
   const dom = await page()
   dom.body.insertAdjacentHTML('afterbegin', `
-    <sillonious-brand>
-      <${tag} ${attributes}></${tag}>
-    </sillonious-brand>
+    <data-tooltip>
+      <sillonious-brand>
+        <${tag} ${attributes}></${tag}>
+      </sillonious-brand>
+    </data-tooltip>
   `)
   // remove the lazy-bootstrap to lock the document
   //dom.getElementById('lazy-bootstrap').remove()

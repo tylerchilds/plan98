@@ -190,9 +190,6 @@ $.draw(target => {
   `
 
   const view = `
-    <button class="action-accordion">
-      &amp;
-    </button>
     <div class="actions">
       ${actions}
     </div>
@@ -539,19 +536,12 @@ $.style(`
     opacity: 1;
   }
   & .actions {
-    margin: 0 1rem;
     position: absolute;
-    top: 4rem;
-    right: 0;
+    top: 1rem;
+    right: 1rem;
     text-align: right;
     z-index: 10;
-    display: none;
   }
-
-  & .action-accordion.active + .actions {
-    display: block;
-  }
-
   & .actions button {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: dodgerblue;

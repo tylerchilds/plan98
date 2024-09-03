@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { connected, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
+import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 import { getUser } from './plan98-reconnect.js'
 
 const $ = module('plan98-upsert', {

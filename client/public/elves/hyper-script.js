@@ -84,7 +84,7 @@ function countShots(instructions) {
 const $ = module('hyper-script', {
   // raw text of the file
   file: pitch,
-  activePanel: panels.write,
+  activePanel: window.location.hash?.split('#')[1] || panels.write,
   activeShot: 0,
   shotCount: countShots(pitch)
 })
@@ -868,14 +868,15 @@ $.style(`
     height: auto;
     width: auto;
     place-self: end start;
-    font-size: 60px;
-    line-height: 100px;
+    font-size: 40px;
+    padding: 13px;
+    line-height: 1.3;
     background: rgba(0,0,0,.65);
     text-shadow: .1rem .1rem rgba(0,0,0,.85);
     color: rgba(255,255,255,.85);
     bottom: 80px;
-    left: 80px;
-    right: 80px;
+    left: 0px;
+    right: 0px;
     position: relative;
   }
 
