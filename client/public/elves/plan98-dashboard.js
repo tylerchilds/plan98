@@ -190,7 +190,7 @@ const lolol = [
     ]
   },
 ]
-const { laugh } = lolol[0].lol[1]
+const { laugh } = lolol[1].lol[0]
 let lastLaugh = laugh
 let lastSidebar = false
 let lastUser = false
