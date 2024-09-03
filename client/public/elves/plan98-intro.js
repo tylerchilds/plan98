@@ -21,25 +21,45 @@ const friends = {
 const $ = elf('plan98-intro')
 
 $.draw((target) => {
-
+  const { menu, started } = $.learn()
+  const src = target.getAttribute('src')
   return `
-    <div class="wall">
-      <div class="logo-mark">
-        <div class="plan98-letters">
-          Plan98
+    <div class="wall ${started && !menu ? 'broken':''}">
+      <div>
+      <div class="frame">
+        <div class="logo-mark">
+          <div class="plan98-letters">
+            Plan98
+          </div>
+          <div class="plan98-slants">
+            <div class="slant-1"></div>
+            <div class="slant-2"></div>
+            <div class="slant-3"></div>
+          </div>
         </div>
-        <div class="plan98-slants">
-          <div class="slant-1"></div>
-          <div class="slant-2"></div>
-          <div class="slant-3"></div>
+        <div class="about">
+          Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
         </div>
+        <button class="break-fourth-wall" ${started ? 'style="visibility: hidden;"' : ''}>
+          Connect
+        </button>
       </div>
-      <button class="break-fourth-wall">
-        Connect
-      </button>
+      </div>
     </div>
     <div class="fourth">
-      ${target.innerHTML}
+      <iframe src="${src}" name="plan98-window"></iframe>
+    </div>
+    <div class="menu ${menu ? 'show-menu': ''} ${started ? '':'hide-menu'}" aria-live="assertive">
+      <div class="control-toggle">
+        <button data-toggle>
+          #
+        </button>
+      </div>
+      <div class="menu-items">
+        <a href="/app/hello-world" target="plan98-window">
+          Hello World
+        </a>
+      </div>
     </div>
   `
 })
@@ -54,8 +74,17 @@ const settingsInterval = setInterval(() => {
   })
 }, 5000)
 
+$.when('click', '[data-toggle]', async (event) => {
+  const { menu } = $.learn()
+  $.teach({ menu: !menu })
+})
+
+$.when('click', '.menu-items a', () => {
+  $.teach({ menu: false })
+})
+
 $.when('click', '.break-fourth-wall', (event) => {
-  event.target.parentNode.remove()
+  $.teach({ started: true })
   clearInterval(settingsInterval)
 })
 
@@ -71,6 +100,57 @@ $.style(`
     height: 100%;
     width: 100%;
     display: block;
+  }
+  & .menu {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    max-width: 100%;
+    width: 320px;
+    max-height: 480px;
+  }
+
+  & .break-fourth-wall {
+    width: 100%;
+  }
+  & .control-toggle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 4;
+  }
+
+  & [data-toggle] {
+    background: var(--color);
+    background-image: linear-gradient(rgba(0,0,0, .25), rgba(0,0,0,.5));
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    display: grid;
+    place-content: center;
+  }
+
+  & .menu-items {
+    display: none;
+  }
+  & .show-menu .menu-items {
+    gap: .5rem;
+    height: 100%;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: .5rem;
+    padding: 1rem 1rem calc(50px + 1rem);
+    overflow: auto;
+    background: rgba(255,255,255,1);
+    position: relative;
+    z-index: 3;
+    overflow-x: hidden;
+  }
+
+  & .hide-menu {
+    display: none;
   }
 
   & .logo-mark {
@@ -91,6 +171,19 @@ $.style(`
     margin: 2rem;
   }
 
+  & .frame {
+    max-width: 100%;
+    width: 320px;
+  }
+
+  & .about {
+    background: rgba(0,0,0,1);
+    color: white;
+    text-shadow: 1px 1px 5px var(--color);
+    padding: 1rem;
+    margin-bottom: 2rem;
+  }
+
   & .plan98-slants {
     display: grid;
     grid-template-columns: 1ch 1ch 1ch;
@@ -98,7 +191,7 @@ $.style(`
     position: absolute;
     right: 0;
     top: 0;
-    transform: skew(-25deg) translateX(.5ch);
+    transform: skew(-25deg);
   }
 
   & .slant-1 {
@@ -126,6 +219,9 @@ $.style(`
     height: 100%;
     width: 100%;
     overflow: hidden;
+    opacity: .85;
+    position: fixed;
+    z-index: 2;
   }
 
   & .wall button {
@@ -134,6 +230,10 @@ $.style(`
     color: white;
     border: none;
     padding: 1rem;
+  }
+
+  & .wall.broken {
+    z-index: 1;
   }
 
   & .wall button:hover,
@@ -149,9 +249,18 @@ $.style(`
 
 
 
-  & .fourth:first-child {
+  & .broken + .fourth {
     height: 100%;
     opacity: 1;
     overflow: auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  & .menu {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 3;
   }
 `)

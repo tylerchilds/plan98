@@ -115,6 +115,7 @@ export function setupSaga(nextSaga, target, options={}) {
           <div class="desktop">
             <div class="paper screenplay">
               <a href="javascript:;" data-back>Back</a>
+              <a href="/app/hyper-script?src=${raw+key}">Edit</a>
               ${render(saga)}
             </div>
           </div>
