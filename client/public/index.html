@@ -106,6 +106,7 @@
           "@replit/codemirror-vim": "https://esm.sh/@replit/codemirror-vim@6.2.1",
           "@shoelace-style/shoelace/tree": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/tree/tree.js",
           "@shoelace-style/shoelace/relative-time": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/relative-time/relative-time.js",
+          "@shoelace-style/shoelace/icon": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/icon/icon.js",
           "@sillonious/brand": "/public/brand.js",
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@silly/tag": "/public/module.js",
@@ -119,6 +120,7 @@
           "@sillonious/drive": "/public/drive.js",
           "@sillonious/database": "/public/database.js",
           "@plan98/modal": "/public/elves/plan98-modal.js",
+          "@plan98/intro": "/public/elves/plan98-intro.js",
           "@tanstack/table-core": "https://esm.sh/@tanstack/table-core@8.16.0",
           "@theatre/studio": "https://esm.sh/@theatre/studio@0.7.1",
           "@theatre/core": "https://esm.sh/@theatre/core@0.7.1",
@@ -277,40 +279,13 @@
     </data-tooltip>
     <script>
       let debug = false
-      let help = false
       window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           event.preventDefault()
           const mode = !debug ? debugMode : normalMode
           mode()
         }
-
-        if (event.metaKey) {
-          const meta = !help ? goHelp : noHelp
-          meta()
-        }
       });
-
-      function goHelp() {
-        if(help) return
-        help = true
-        showModal(`
-          <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
-            <div style="overflow: auto; height: 100%;">
-              <landing-page></landing-page>
-            </div>
-          </div>
-        `, { centered: true })
-
-      }
-
-      function noHelp() {
-        help = false
-        hideModal()
-      }
-
-
-
       function normalMode() {
         debug = false
         hideModal()
