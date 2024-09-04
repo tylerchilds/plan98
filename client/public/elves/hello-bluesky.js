@@ -32,7 +32,9 @@ $.when('submit', 'form', async (event) => {
 
 
 async function login() {
-  const blueskyCreds = state['ls/blueskyCreds']
+  const blueskyCreds = state['ls/blueskyCreds'] || {}
+
+  if(!blueskyCreds.service) return
 
   agent = new BskyAgent({
     service: blueskyCreds.service
@@ -81,7 +83,6 @@ $.draw(target => {
   }
 
   if(authenticated && !feed) {
-    target.connected = true
     fetchTimeline()
     return
   }
@@ -103,7 +104,7 @@ $.draw(target => {
         }).join('')}
       </div>
     </div>
-    <form class="new-message-form" data-command="enter">
+    <form class="send-form" data-command="enter">
       <button class="button send" type="submit" data-command="enter">
         Send
       </button>
@@ -137,15 +138,15 @@ $.when('click', '.message', (event) => {
 
   if(text) {
     showModal(`
-      <div class="full-child-xml-html" style="padding: 0 1rem; background: rgba(200,200,200,1); position: absolute; inset: 0;">
-        <div style="margin: 0 auto; max-width: 6in; background: white; height: 100%;">
+      <div style="padding: 0 1rem; height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
+        <div class="screenplay">
           ${render(text)}
         </div>
       </div>
     `)
   }
 })
-$.when('submit', 'form', (event) => {
+$.when('submit', '.send-form', (event) => {
   event.preventDefault()
   send(event)
 })
@@ -188,7 +189,7 @@ $.style(`
     place-self: center;
   }
 
-  & .new-message-form button {
+  & .send-form button {
     position: absolute;;
     right: 0;
     bottom: 0;
@@ -198,13 +199,13 @@ $.style(`
     margin: .5rem;
   }
 
-  & .new-message-form button[disabled] {
+  & .send-form button[disabled] {
     opacity: .5;
     background: rgba(255,255,255,.5);
   }
 
-  & .new-message-form button:hover,
-  & .new-message-form button:focus {
+  & .send-form button:hover,
+  & .send-form button:focus {
     background: saddlebrown;
     color: lemonchiffon;
   }

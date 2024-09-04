@@ -15,25 +15,23 @@ $.style(`
     margin: 1rem auto;
     padding: 0 1rem;
     place-self: end start;
-    position: relative;
+    text-align: center;
   }
 
-  &::before {
-    content: '@';
-    right: 1rem;
-    position: absolute;
-    color: rgba(0,0,0,.5);
-    line-height: 1.4;
-    font-size: 1.25rem;
-  }
-
-  @media (min-width: 768px) {
-    & {
-      text-align: center;
-    }
-
+  @media screen {
     &::before {
-      content: none;
+      content: '@';
+      background: dodgerblue;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      left: 0;
+      position: absolute;
+      border-radius: 100%;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
     }
   }
 `)

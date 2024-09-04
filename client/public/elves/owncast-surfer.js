@@ -18,13 +18,14 @@ $.draw((target) => {
 
   return `
     <div name="transport">
-      <div class="actions" style="transform: rotate(45deg);">
-        <button data-action="up"></button>
-        <button data-action="right"></button>
-        <button data-action="left"></button>
-        <button data-action="down"></button>
+      <div class="actions" style="transform: rotate(45deg) translate(-20%, -20%);">
+        <button data-action="up"><span>^</span></button>
+        <button data-action="right"><span>&gt;</span></button>
+        <button data-action="left"><span>&lt;</span></button>
+        <button data-action="down"><span>v</span></button>
       </div>
     </div>
+
 
     <div name="carousel">
       <div name="screen">
@@ -32,9 +33,17 @@ $.draw((target) => {
         ${deck}
       </div>
     </div>
-
   `
+}, {
+  afterUpdate: ensureActiveIsCentered
 })
+
+function ensureActiveIsCentered(target) {
+  const activeItem = target.querySelector('.deck .item.active')
+  if(activeItem) {
+    activeItem.scrollIntoView()
+  }
+}
 
 function surf(target, channelGuide) {
   if(!target.queried) {
@@ -49,21 +58,19 @@ function surf(target, channelGuide) {
   const cards = list.instances.map((station, index) => {
     return `
       <div class="sleeve">
-        <button class="card ${channel === index ? 'active': ''}" data-code="${station.url}">
-          <div class="backside">
-            <qr-code data-fg="saddlebrown" style="max-height: 120px; margin: auto;" text="${station.url}"></qr-code>
-          </div>
-          <div class="frontside">
-            <div class="title-bar">
-              ${station.name}
-            </div>
+        <button class="item ${channel === index ? 'active': ''}" data-code="${station.url}" data-index="${index}">
+          <div class="marquee">
             <img src="${station.url + station.logo}" alt="${station.description}" />
-            <p>
+            <span class="title-bar">
+              ${station.name}
+            </span>
+            <qr-code data-fg="saddlebrown" style="max-height: 120px; margin: auto;" text="${station.url}"></qr-code>
+            <span>
               ${station.streamTitle}
-            </p>
-            <p>
+            </span>
+            <span>
               ${station.viewerCount}
-            </p>
+            </span>
           </div>
         </button>
       </div>
@@ -71,9 +78,6 @@ function surf(target, channelGuide) {
   }).join('')
 
   return `
-    <div class="name">
-      ${list.name}
-    </div>
     <div class="deck" style="--hand-offset: ${channel * -.5}in">
       ${cards}
     </div>
@@ -84,10 +88,10 @@ function interdimensionalCable({ sections }) {
   $.teach({ sections })
 }
 
-$.when('click', '.card', event => {
+$.when('click', '.item', event => {
   event.stopPropagation()
-  const { code } = event.target.dataset
-  window.location.href = code
+  const { code, index } = event.target.dataset
+  $.teach({ channel: parseInt(index) })
 })
 
 $.when('click', '[data-action]', event => {
@@ -97,7 +101,7 @@ $.when('click', '[data-action]', event => {
 
 
 const actions = {
-  up: () => {
+  left: () => {
     const { section, sections } = $.learn()
     
     $.teach({
@@ -105,7 +109,7 @@ const actions = {
       channel: 0
     })
   },
-  left: () => {
+  up: () => {
     const { section, sections, channel } = $.learn()
     const list = sections[section]
     if(!list.instances) return
@@ -113,7 +117,7 @@ const actions = {
       channel: mod(channel - 1, list.instances.length)
     })
   },
-  right: () => {
+  down: () => {
     const { section, sections, channel } = $.learn()
     const list = sections[section]
     if(!list.instances) return
@@ -121,7 +125,7 @@ const actions = {
       channel: mod(channel + 1, list.instances.length)
     })
   },
-  down: () => {
+  right: () => {
     const { section, sections } = $.learn()
     $.teach({
       section: mod(section + 1, sections.length),
@@ -158,17 +162,16 @@ $.style(`
     z-index: 2;
     width: 100%;
     height: 100%;
-    padding: 1rem;
     overflow: hidden;
   }
 
   & [name="screen"] {
     display: grid;
 		grid-template-columns: 1fr;
-		grid-template-rows: 1fr;
+		grid-template-rows: 1fr 200px;
     place-content: center;
     place-self: start;
-    height: calc(100% - 3in);
+    height: 100%;
     width: 100%;
     border-radius: 1rem;
   }
@@ -194,59 +197,8 @@ $.style(`
     inset: 0;
   }
 
-  & .card {
-    padding: 0;
-    pointer-events: all;
-    aspect-ratio: 1;
-    transform-style: preserve-3d;
-    display: block;
-    width: 2.5in;
-    height: 3.5in;
-    line-height: 1;
-    border: none;
-    background: transparent;
-  }
-
-  & .frontside,
-  & .backside {
-    height: 100%;
-    width: 100%;
-    box-shadow: 0 0 4px 1px rgba(0,0,0,.85);
-    position: relative;
-    max-width: 100%;
-    margin: 0 auto;
-    border-radius: .25in;
-    box-sizing: border-box;
-    backface-visibility: hidden;
-    opacity: .9999;
-    transition: transform 200ms ease-in-out, opacity 200ms ease-in-out;
-    overflow: hidden;
-  }
-
-  & .frontside {
-    background: linear-gradient(165deg, black 70%, dodgerblue);
-    color: rgba(255,255,255,.85);
-    border: .05in solid var(--color);
-    padding: .05in;
-    transform: rotateY(180deg);
-    background-blend-mode: multiply;
-    opacity: 0;
-  }
-
-  & .backside {
-    display: grid;
-    place-items: center;
-    position: absolute;
-    inset: 0;
-    background: lemonchiffon;
-    z-index: 1;
-    transform: rotateY(0deg);
-  }
-
-  & .card.active > .frontside {
-    pointer-events: none;
-    transform: rotateY(0deg);
-    opacity: 1;
+  & .item.active {
+    background-color: dodgerblue;
   }
 
   & .card.active > .backside {
@@ -255,18 +207,48 @@ $.style(`
 
   & .deck {
     white-space: nowrap;
-    transform: translateX(var(--hand-offset));
     transition: transform 100ms ease-in-out;
-    position: absolute;
-    left: calc(50% - 1.25in);
-    bottom: 0;
+    height: 100%;
+    width: 100%;
     z-index: 3;
+    overflow-x: hidden;
   }
 
   & .deck .sleeve {
-    display: inline-block;
-    width: .5in;
+    height: 2rem;
   }
+
+  & .sleeve img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    aspect-ratio: 1;
+    display: inline-block;
+  }
+  & .sleeve qr-code {
+    height: 100%;
+    display: inline-block;
+    margin: 0;
+  }
+
+  & .sleeve button {
+    width: 100%;
+    display: block;
+    height: 100%;
+    text-align: left;
+    border: none;
+    border-radius: none;
+    background: rgba(0,0,0,.65);
+    background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    color: white;
+  }
+
+  & .sleeve button:hover,
+  & .sleeve button:focus {
+    background-color: dodgerblue;
+  }
+
+
   & .deck .card {
     transform: translateY(6rem);
     transition: transfokm 250ms ease-in-out;
@@ -278,20 +260,24 @@ $.style(`
     position: relative;
   }
 
-
 	& .actions {
 		display: grid;
 		grid-area: slot;
 		grid-template-columns: 1fr 1fr;
-		width: 250px;
-		height: 250px;
+		width: 125px;
+		height: 125px;
 		clip-path: circle(50%);
 		place-self: end center;
     bottom: 0;
-    left: 0;
+    right: 2rem;
     z-index: 4;
     position: absolute;
 	}
+
+  & .actions [data-action] span {
+    transform: rotate(-45deg);
+    display: block;
+  }
 
 	& .actions button {
 		width: 100%;
@@ -299,6 +285,35 @@ $.style(`
     border: none;
     background: linear-gradient(-225deg, rgba(200, 200, 200, 1), rgba(128,128,128,1))
 	}
+
+  & .marquee {
+    animation: &-marquee 10000ms linear infinite;
+    white-space: nowrap;
+    height: 100%;
+    display: inline-flex;
+    overflow: hidden;
+  }
+
+ @keyframes &-marquee {
+   0% {
+     transform: translateX(50%);
+     opacity: 0;
+   }
+
+   5% {
+    opacity: 1;
+   }
+
+   95% {
+    opacity: 1;
+   }
+   100% {
+     transform: translateX(-50%);
+     opacity: 0;
+   }
+ }
+
+
 `)
 
 function mod(x, n) {

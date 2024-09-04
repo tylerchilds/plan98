@@ -1,4 +1,5 @@
 import elf from '@silly/tag'
+import { render } from "@sillonious/saga"
 
 const palette = [
   'firebrick', // accent 1
@@ -62,16 +63,21 @@ $.draw((target) => {
         </div>
       </div>
       <div class="body" ${started ? 'style="visibility: hidden;"' : ''}>
-        <div class="about">
-          Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
+        <div class="screenplay">
+          ${render(`# about
+
+@ synthia
+> Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
+
+<button
+class: break-fourth-wall
+text: Connect
+`)}
         </div>
-        <button class="break-fourth-wall">
-          Connect
-        </button>
       </div>
     </div>
     <div class="fourth">
-      <iframe src="${src}" name="plan98-window"></iframe>
+      <iframe src="${src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
     </div>
     <div class="menu ${menu ? 'show-menu': ''} ${started ? '':'hide-menu'}" aria-live="assertive">
       <div class="control-toggle">
@@ -80,8 +86,11 @@ $.draw((target) => {
         </button>
       </div>
       <div class="menu-items">
-        <a href="/app/hello-world" target="plan98-window">
-          Hello World
+        <a href="/app/hello-bluesky" target="plan98-window">
+          Hello Bluesky
+        </a>
+        <a href="/app/owncast-surfer" target="plan98-window">
+          Owncast Surfer
         </a>
       </div>
     </div>
@@ -147,7 +156,8 @@ function handleMetaKey() {
   if(self.self !== self.top) {
     self.parent.postMessage({ whisper: 'metaKey' }, "*");
   } else {
-    document.body.insertAdjacentHTML("beforeend", '<plan98-intro></plan98-intro>')
+    const node = document.body.querySelector('sillonious-brand')|| document.body
+    node.insertAdjacentHTML("beforeend", '<plan98-intro></plan98-intro>')
   }
 }
 
@@ -160,8 +170,8 @@ $.style(`
     --blue: dodgerblue;
     --purple: mediumpurple;
     position: relative;
-    height: 100%;
     width: 100%;
+    max-height: 100%;
     display: block;
   }
   & .menu {
@@ -258,9 +268,7 @@ $.style(`
   }
 
   & .body {
-    padding: 2rem 1rem;
-    max-width: 55ch;
-    margin: auto;
+    height: 100%;
   }
 
   & .about {
@@ -274,7 +282,8 @@ $.style(`
     position: absolute;
     right: 0;
     top: 0;
-    transform: skew(-25deg);
+    transform: skew(-25deg) translateX(-1rem);
+    opacity: .75;
   }
 
   & .slant-1 {
@@ -293,7 +302,7 @@ $.style(`
     color: rgba(255,255,255,1);
     text-shadow: 1px 1px rgba(0,0,0,1);
     border-bottom: 1rem solid var(--underline-color, mediumseagreen);
-    padding: 0 1rem;
+    padding: 0 2rem;
   }
 
   & .wall {
@@ -302,7 +311,6 @@ $.style(`
     overflow-x: hidden;
     overflow-y: auto;
     opacity: .85;
-    position: fixed;
     z-index: 2;
   }
 
@@ -338,12 +346,13 @@ $.style(`
     height: 100%;
     opacity: 1;
     overflow: auto;
-    position: relative;
+    position: absolute;
+    inset: 0;
     z-index: 2;
   }
 
   & .menu {
-    position: fixed;
+    position: absolute;
     bottom: 0;
     left: 0;
     z-index: 3;

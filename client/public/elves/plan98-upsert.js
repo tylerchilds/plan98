@@ -148,7 +148,7 @@ $.when('click', '[data-validate]', (event) => {
 $.when('click', '[data-connect]', (event) => {
   const email = event.target.dataset.connect
   setActiveAccount(email)
-  window.location.href = '/app/parental-controls'
+  window.location.href = '/app/plan98-dashboard'
 })
 
 

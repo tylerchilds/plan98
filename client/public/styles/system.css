@@ -516,6 +516,8 @@ button {
   font-size: 12pt;
   font-family: courier;
   padding: 1in 1rem;
+  position: relative;
+  min-height: 100%;
 }
 @media (min-width: 768px) {
   .screenplay {

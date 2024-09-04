@@ -115,16 +115,15 @@ async function sagaSanitizer(saga, { endOfHead }) {
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
-  dom.body.insertAdjacentHTML('afterbegin', `
-    <data-tooltip>
-      <sillonious-brand>
-        ${render(saga)}
-      </sillonious-brand>
-    </data-tooltip>
-  `)
   // remove the lazy-bootstrap to lock the document
   //dom.getElementById('lazy-bootstrap').remove()
-  dom.getElementById('main').remove()
+  const main = dom.getElementById('main')
+  main.parentNode.insertAdjacentHTML('afterbegin', `
+    <sillonious-brand>
+      ${render(saga)}
+    </sillonious-brand>
+  `)
+  main.remove()
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 
@@ -379,16 +378,13 @@ async function showApp(request, tag) {
   console.log(attributes)
 
   const dom = await page()
-  dom.body.insertAdjacentHTML('afterbegin', `
-    <data-tooltip>
-      <sillonious-brand>
-        <${tag} ${attributes}></${tag}>
-      </sillonious-brand>
-    </data-tooltip>
+  const main = dom.getElementById('main')
+  main.parentNode.insertAdjacentHTML('afterbegin', `
+    <sillonious-brand>
+      <${tag} ${attributes}></${tag}>
+    </sillonious-brand>
   `)
-  // remove the lazy-bootstrap to lock the document
-  //dom.getElementById('lazy-bootstrap').remove()
-  dom.getElementById('main').remove()
+  main.remove()
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 

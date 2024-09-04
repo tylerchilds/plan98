@@ -180,6 +180,7 @@ $.style(`
     background: white;
     color: black);
     overflow: auto;
+    position: relative;
   }
   @keyframes &-fade-in {
     0% {
