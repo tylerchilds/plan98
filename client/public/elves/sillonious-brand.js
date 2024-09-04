@@ -61,7 +61,7 @@ $.draw((target) => {
   }
 
   return `
-    <comedy-notebook></comedy-notebook>
+  <plan98-intro src="/app/plan98-dashboard"></plan98-intro>
   `
 })
 
