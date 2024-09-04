@@ -92,6 +92,15 @@ text: Connect
         <a href="/app/owncast-surfer" target="plan98-window">
           Owncast Surfer
         </a>
+        <a href="steam://rungameid/413150">
+          Stardew Valley
+        </a>
+        <a href="/app/sonic-knuckles">
+          Sonic & Knuckles
+        </a>
+        <a href="steam://rungameid/584400">
+          Sonic Mania
+        </a>
       </div>
     </div>
   `
