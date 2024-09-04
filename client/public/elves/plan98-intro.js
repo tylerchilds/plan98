@@ -1,5 +1,6 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
+import { idx, documents } from './giggle-search.js'
 
 const palette = [
   'firebrick', // accent 1
@@ -38,11 +39,14 @@ const friends = {
 }
 
 const $ = elf('plan98-intro', {
-  accents: ['firebrick', 'darkorange', 'gold']
+  accents: ['firebrick', 'darkorange', 'gold'],
+  query: "",
+  suggestIndex: 0,
+  suggestions: [],
 })
 
 $.draw((target) => {
-  const { menu, started, accents } = $.learn()
+  const { menu, started, accents, query, suggestIndex, focused, suggestions } = $.learn()
   const src = target.getAttribute('src')
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
@@ -62,9 +66,37 @@ $.draw((target) => {
           </div>
         </div>
       </div>
-      <div class="body" ${started ? 'style="visibility: hidden;"' : ''}>
-        <div class="screenplay">
-          ${render(`# about
+      <div class="nav">
+        <form class="search" method="get">
+          <div class="input-grid">
+            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
+            <button type="submit">*</button>
+          </div>
+          <div class="suggestions ${focused ? 'focused' : ''}">
+            <div class="suggestion-box">
+              ${suggestions.map((x, i) => {
+                const item = documents.find(y => {
+                  return x.ref === y.path
+                })
+
+                return `
+                  <button class="${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-tooltip="${item.path}">
+                    <div class="name">
+                      ${item.name}
+                    </div>
+                  </button>
+                `
+              }).join('')}
+            </div>
+          </div>
+        </form>
+
+      </div>
+      ${started ?'': `
+        <div class="body">
+
+          <div class="screenplay">
+            ${render(`# about
 
 @ synthia
 > Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
@@ -73,8 +105,9 @@ $.draw((target) => {
 class: break-fourth-wall
 text: Connect
 `)}
+          </div>
         </div>
-      </div>
+      `}
     </div>
     <div class="fourth">
       <iframe src="${src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
@@ -104,7 +137,16 @@ text: Connect
       </div>
     </div>
   `
+}, {
+  afterUpdate: ensureActiveIsCentered
 })
+
+function ensureActiveIsCentered(target) {
+  const activeItem = target.querySelector('.suggestion-box .active')
+  if(activeItem) {
+    activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
+  }
+}
 
 const settingsInterval = setInterval(() => {
   const index = Math.floor(Math.random() * palette.length)
@@ -120,6 +162,59 @@ const settingsInterval = setInterval(() => {
     })
   })
 }, 2500)
+
+
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', '[name="search"]', event => {
+  if(event.keyCode === down) {
+    event.preventDefault()
+    $.teach({ suggestIndex: $.learn().suggestIndex + 1 })
+    return
+  }
+
+  if(event.keyCode === up) {
+    event.preventDefault()
+    $.teach({ suggestIndex: $.learn().suggestIndex - 1 })
+    return
+  }
+
+  if(event.keyCode === enter) {
+    event.preventDefault()
+    const { suggestions, suggestIndex } = $.learn()
+    const item = documents.find(y => {
+      return suggestions[suggestIndex].ref === y.path
+    })
+
+    if(item) {
+      window.location.href = '/app/code-module?src=' +item.path
+      return
+    }
+  }
+})
+
+$.when('click', '[data-path]', event => {
+  event.preventDefault()
+  const { path } = event.target.dataset
+  window.location.href = '/app/code-module?src=' +path
+})
+
+$.when('input', '[name="search"]', (event) => {
+  const { value } = event.target;
+  const suggestions = idx.search(value)
+  $.teach({ suggestions,  query: event.target.value  })
+})
+
+$.when('focus', '[name="search"]', event => {
+  $.teach({ focused: true })
+})
+
+$.when('blur', '[name="search"]', event => {
+  setTimeout(() => {
+    $.teach({ focused: false, suggestIndex: 0 })
+  }, 200)
+})
 
 $.when('click', '[data-toggle]', async (event) => {
   const { menu } = $.learn()
@@ -182,6 +277,7 @@ $.style(`
     width: 100%;
     max-height: 100%;
     display: block;
+    height: 100%;
   }
   & .menu {
     position: absolute;
@@ -271,13 +367,9 @@ $.style(`
   & .hero {
     background-color: var(--color, mediumpurple);
     background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
-    height: 50vh;
+    padding-top: 100px;
     display: grid;
     place-items: end center;
-  }
-
-  & .body {
-    height: 100%;
   }
 
   & .about {
@@ -315,8 +407,8 @@ $.style(`
   }
 
   & .wall {
-    height: 100%;
     width: 100%;
+    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
     opacity: .85;
@@ -366,4 +458,120 @@ $.style(`
     left: 0;
     z-index: 3;
   }
+
+  & .search {
+    text-align: center;
+  }
+
+  & .search img {
+    display: block;
+  }
+  & .search input {
+    display: block;
+    margin: auto;
+    text-align: left;
+    border: 1px solid var(--button-color, dodgerblue);
+    font-size: 1.2rem;
+    padding: .5rem 1rem;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 480px;
+
+  }
+
+  & .search button {
+    display: inline-block;
+  }
+
+  & .search button {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: var(--button-color, dodgerblue);
+    border: none;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+  }
+
+  & .search button:focus,
+  & .search button:hover {
+    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
+  }
+
+  & .suggestions {
+    display: none;
+    position: relative;
+    max-height: 300px;
+    max-width: 480px;
+    margin: auto;
+    text-align: left;
+  }
+
+  & .suggestions.focused {
+    display: block;
+  }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 0;
+    height: 300px;
+    max-height: 80vh;
+    overflow: auto;
+    z-index: 10;
+    
+  }
+
+  & .suggestion-box button {
+    background: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
+    color: var(--button-color, dodgerblue);
+    transition: all 100ms ease-in-out;
+    padding: .5rem;
+    width: 100%;
+    text-align: left;
+    max-width: 100%;
+  }
+
+  & .suggestion-box button:focus,
+  & .suggestion-box button:hover {
+    background-color: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    color: white;
+  }
+
+  & .suggestion-box button.active {
+    color: white;
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    background-color: var(--button-color, dodgerblue);
+  }
+
+
+  & [data-suggestion] {
+    display: block;
+  }
+
+  & .input-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    max-width: 480px;
+    margin: auto;
+    text-align: left;
+  }
+
+  & .input-grid button {
+    font-size: 1.2rem;
+    padding: .5rem 1rem;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  & [data-suggestion] {
+    position: relative;
+  }
+
+  & .name {
+    position: relative;
+    z-index: 2;
+  }
+
 `)
