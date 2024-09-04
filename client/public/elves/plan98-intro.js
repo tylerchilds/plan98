@@ -70,7 +70,9 @@ $.draw((target) => {
         <form class="search" method="get">
           <div class="input-grid">
             <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-            <button type="submit">*</button>
+            <button type="submit">
+              <sl-icon name="search"></sl-icon>
+            </button>
           </div>
           <div class="suggestions ${focused ? 'focused' : ''}">
             <div class="suggestion-box">
@@ -92,7 +94,29 @@ $.draw((target) => {
         </form>
 
       </div>
-      ${started ?'': `
+      ${started ?render(`
+<a
+href: /app/hello-bluesky
+target: plan98-window
+text: Hello Bluesky
+
+<a
+href: /app/owncast-surfer
+target: plan98-window
+text: Owncast Surfer
+
+<a
+href: steam://rungameid/413150
+text: Stardew Valley
+
+<a
+href: /app/sonic-knuckles
+text: Sonic and Knuckles
+
+<a
+href: steam://rungameid/584400
+text: Sonic Mania
+`): `
         <div class="body">
 
           <div class="screenplay">
@@ -112,30 +136,6 @@ text: Connect
     <div class="fourth">
       <iframe src="${src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
     </div>
-    <div class="menu ${menu ? 'show-menu': ''} ${started ? '':'hide-menu'}" aria-live="assertive">
-      <div class="control-toggle">
-        <button data-toggle>
-          #
-        </button>
-      </div>
-      <div class="menu-items">
-        <a href="/app/hello-bluesky" target="plan98-window">
-          Hello Bluesky
-        </a>
-        <a href="/app/owncast-surfer" target="plan98-window">
-          Owncast Surfer
-        </a>
-        <a href="steam://rungameid/413150">
-          Stardew Valley
-        </a>
-        <a href="/app/sonic-knuckles">
-          Sonic & Knuckles
-        </a>
-        <a href="steam://rungameid/584400">
-          Sonic Mania
-        </a>
-      </div>
-    </div>
   `
 }, {
   afterUpdate: ensureActiveIsCentered
@@ -146,6 +146,17 @@ function ensureActiveIsCentered(target) {
   if(activeItem) {
     activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
   }
+
+  // don't do this
+  // unrelated, just keep the search icon there ok
+  //
+  const ogIcon = target.querySelector('sl-icon')
+  const iconParent = ogIcon.parentNode
+
+  const icon = document.createElement('sl-icon')
+  icon.name = ogIcon.name
+  ogIcon.remove()
+  iconParent.appendChild(icon)
 }
 
 const settingsInterval = setInterval(() => {
@@ -160,6 +171,7 @@ const settingsInterval = setInterval(() => {
       node.style.setProperty('--color', currentC);
       return currentC
     })
+    $.teach({accents})
   })
 }, 2500)
 
@@ -188,7 +200,7 @@ $.when('keydown', '[name="search"]', event => {
     })
 
     if(item) {
-      window.location.href = '/app/code-module?src=' +item.path
+      window.location.href = '/app/media-plexer?src=' +item.path
       return
     }
   }
@@ -197,7 +209,7 @@ $.when('keydown', '[name="search"]', event => {
 $.when('click', '[data-path]', event => {
   event.preventDefault()
   const { path } = event.target.dataset
-  window.location.href = '/app/code-module?src=' +path
+  window.location.href = '/app/media-plexer?src=' +path
 })
 
 $.when('input', '[name="search"]', (event) => {
@@ -219,10 +231,6 @@ $.when('blur', '[name="search"]', event => {
 $.when('click', '[data-toggle]', async (event) => {
   const { menu } = $.learn()
   $.teach({ menu: !menu })
-})
-
-$.when('click', '.menu-items a', () => {
-  $.teach({ menu: false })
 })
 
 $.when('click', '.break-fourth-wall', (event) => {
@@ -311,35 +319,6 @@ $.style(`
     font-weight: 800;
     font-size: 24px;
     pointer-events: all;
-  }
-
-  & .menu {
-    pointer-events: none;
-  }
-  
-  & .show-menu {
-    pointer-events: all;
-  }
-  & .menu-items {
-    display: none;
-  }
-  & .show-menu .menu-items {
-    gap: .5rem;
-    height: 100%;
-    display: flex;
-    flex-direction: column-reverse;
-    gap: .5rem;
-    padding: 1rem 1rem calc(50px + 1rem);
-    overflow: auto;
-    background: rgba(255,255,255,1);
-    position: relative;
-    z-index: 3;
-    overflow-x: hidden;
-    border: 2px solid var(--color, mediumpurple);
-  }
-
-  & .hide-menu {
-    display: none;
   }
 
   & .logo-mark {
