@@ -45,29 +45,29 @@ $.draw((target) => {
   const src = target.getAttribute('src')
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
-      <div>
-      <div class="frame">
-        <div style="text-align: center">
-          <div class="logo-mark">
-            <div class="plan98-letters">
-              Plan98
-            </div>
-            <div class="plan98-slants">
-              <div class="slant-1" style="--color: ${accents[0]}"></div>
-              <div class="slant-2" style="--color: ${accents[1]}"></div>
-              <div class="slant-3" style="--color: ${accents[2]}"></div>
+      <div class="hero">
+        <div class="frame">
+          <div style="text-align: center">
+            <div class="logo-mark">
+              <div class="plan98-letters">
+                Plan98
+              </div>
+              <div class="plan98-slants">
+                <div class="slant-1" style="--color: ${accents[0]}"></div>
+                <div class="slant-2" style="--color: ${accents[1]}"></div>
+                <div class="slant-3" style="--color: ${accents[2]}"></div>
+              </div>
             </div>
           </div>
-        </div>
-        <div  ${started ? 'style="visibility: hidden;"' : ''}>
-          <div class="about">
-            Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
-          </div>
-          <button class="break-fourth-wall">
-            Connect
-          </button>
         </div>
       </div>
+      <div class="body" ${started ? 'style="visibility: hidden;"' : ''}>
+        <div class="about">
+          Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
+        </div>
+        <button class="break-fourth-wall">
+          Connect
+        </button>
       </div>
     </div>
     <div class="fourth">
@@ -195,8 +195,16 @@ $.style(`
     place-content: center;
     font-weight: 800;
     font-size: 24px;
+    pointer-events: all;
   }
 
+  & .menu {
+    pointer-events: none;
+  }
+  
+  & .show-menu {
+    pointer-events: all;
+  }
   & .menu-items {
     display: none;
   }
@@ -212,6 +220,7 @@ $.style(`
     position: relative;
     z-index: 3;
     overflow-x: hidden;
+    border: 2px solid var(--color, mediumpurple);
   }
 
   & .hide-menu {
@@ -233,20 +242,28 @@ $.style(`
     font-family: 'Recursive';
     font-size: 72px;
     position: relative;
-    margin: 1rem 0;
     display: inline-block;
   }
 
   & .frame {
     max-width: 100%;
-    width: 320px;
+  }
+
+  & .hero {
+    background-color: var(--color, mediumpurple);
+    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
+    height: 50vh;
+    display: grid;
+    place-items: end center;
+  }
+
+  & .body {
+    padding: 2rem 1rem;
+    max-width: 55ch;
+    margin: auto;
   }
 
   & .about {
-    background: rgba(0,0,0,1);
-    color: white;
-    text-shadow: 1px 1px 5px var(--color);
-    padding: 1rem;
     margin-bottom: 2rem;
   }
 
@@ -280,13 +297,10 @@ $.style(`
   }
 
   & .wall {
-    background-color: var(--color, mediumpurple);
-    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
-    display: grid;
-    place-content: center;
     height: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     opacity: .85;
     position: fixed;
     z-index: 2;
@@ -298,6 +312,9 @@ $.style(`
     color: white;
     border: none;
     padding: 1rem;
+    max-width: 320px;;
+    margin: auto;
+    display: block;
   }
 
   & .wall.broken {
