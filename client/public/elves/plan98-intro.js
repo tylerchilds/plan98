@@ -46,7 +46,7 @@ const $ = elf('plan98-intro', {
 })
 
 $.draw((target) => {
-  const { menu, started, accents, query, suggestIndex, focused, suggestions } = $.learn()
+  const { url, menu, started, accents, query, suggestIndex, focused, suggestions } = $.learn()
   const src = target.getAttribute('src')
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
@@ -68,12 +68,6 @@ $.draw((target) => {
       </div>
       <div class="nav">
         <form class="search" method="get">
-          <div class="input-grid">
-            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-            <button type="submit">
-              <sl-icon name="search"></sl-icon>
-            </button>
-          </div>
           <div class="suggestions ${focused ? 'focused' : ''}">
             <div class="suggestion-box">
               ${suggestions.map((x, i) => {
@@ -91,8 +85,13 @@ $.draw((target) => {
               }).join('')}
             </div>
           </div>
+          <div class="input-grid">
+            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
+            <button type="submit">
+              <sl-icon name="search"></sl-icon>
+            </button>
+          </div>
         </form>
-
       </div>
       ${started ?render(`
 <a
@@ -134,29 +133,39 @@ text: Connect
       `}
     </div>
     <div class="fourth">
-      <iframe src="${src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
+      <iframe src="${url || src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
     </div>
   `
 }, {
-  afterUpdate: ensureActiveIsCentered
+  afterUpdate
 })
 
-function ensureActiveIsCentered(target) {
-  const activeItem = target.querySelector('.suggestion-box .active')
-  if(activeItem) {
-    activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
+function afterUpdate(target) {
+  { // scroll item into view
+    const activeItem = target.querySelector('.suggestion-box .active')
+    if(activeItem) {
+      activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
+    }
   }
 
-  // don't do this
-  // unrelated, just keep the search icon there ok
-  //
-  const ogIcon = target.querySelector('sl-icon')
-  const iconParent = ogIcon.parentNode
+  { // recover icons from the virtual dom
+    const ogIcon = target.querySelector('sl-icon')
+    const iconParent = ogIcon.parentNode
 
-  const icon = document.createElement('sl-icon')
-  icon.name = ogIcon.name
-  ogIcon.remove()
-  iconParent.appendChild(icon)
+    const icon = document.createElement('sl-icon')
+    icon.name = ogIcon.name
+    ogIcon.remove()
+    iconParent.appendChild(icon)
+  }
+
+  { // focus cursor, when "focused" but not ~focused~
+    const { focused } = $.learn()
+    const search = target.querySelector('[name="search"]')
+
+    if(focused && search !== document.activeElement) {
+      search.focus()
+    }
+  }
 }
 
 const settingsInterval = setInterval(() => {
@@ -200,7 +209,10 @@ $.when('keydown', '[name="search"]', event => {
     })
 
     if(item) {
-      window.location.href = '/app/media-plexer?src=' +item.path
+      const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
+      const url = '/app/media-plexer?src=' +item.path
+      iframe.src = url
+      $.teach({ started: true, menu: false, url  })
       return
     }
   }
@@ -208,8 +220,11 @@ $.when('keydown', '[name="search"]', event => {
 
 $.when('click', '[data-path]', event => {
   event.preventDefault()
-  const { path } = event.target.dataset
-  window.location.href = '/app/media-plexer?src=' +path
+  const url = '/app/media-plexer?src=' +item.path
+  debugger
+  const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
+  iframe.src = url
+  $.teach({ menu: true, url  })
 })
 
 $.when('input', '[name="search"]', (event) => {
@@ -249,10 +264,9 @@ export function superKey() {
   self.addEventListener('keydown', handleEvent);
 
   self.addEventListener('message', function handleMessage(event) {
-  if(event.data.whisper === 'metaKey') {
-    handleMetaKey()
-  } else { console.log(event) }
-
+    if(event.data.whisper === 'metaKey') {
+      handleMetaKey()
+    } else { console.log(event) }
   });
 }
 
@@ -494,7 +508,7 @@ $.style(`
     max-height: 80vh;
     overflow: auto;
     z-index: 10;
-    
+    transform: translateY(-100%);
   }
 
   & .suggestion-box button {
@@ -551,4 +565,10 @@ $.style(`
     z-index: 2;
   }
 
+  & .nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
 `)

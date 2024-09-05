@@ -226,12 +226,10 @@ $.draw((target) => {
   const { avatar, sidebar, laugh, saga, lolID, lololID } = $.learn()
   target.beforeUpdate = scrollSave
   target.afterUpdate = scrollSidebar
-  const user = social(companyName, companyEmployeeId)
 
   const authState = sessionId
   const avatarHTML = sessionId ? `
     <div data-avatar>
-      <quick-media key="${user.avatar}"></quick-media>
     </div>
   ` : `
     <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
@@ -300,12 +298,6 @@ $.draw((target) => {
     sidebar
       ? target.querySelector('data-tooltip').classList.add('sidebar')
       : target.querySelector('data-tooltip').classList.remove('sidebar')
-    return
-  }
-
-
-  if(user !== lastUser && target.querySelector('[data-avatar]')) {
-    lastUser = user.company + user.unix
     return
   }
 
