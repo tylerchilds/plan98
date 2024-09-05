@@ -43,6 +43,8 @@ const $ = elf('plan98-intro', {
   query: "",
   suggestIndex: 0,
   suggestions: [],
+  suggestionsLength: 0,
+  menu: true
 })
 
 $.draw((target) => {
@@ -65,33 +67,6 @@ $.draw((target) => {
             </div>
           </div>
         </div>
-      </div>
-      <div class="nav">
-        <form class="search" method="get">
-          <div class="suggestions ${focused ? 'focused' : ''}">
-            <div class="suggestion-box">
-              ${suggestions.map((x, i) => {
-                const item = documents.find(y => {
-                  return x.ref === y.path
-                })
-
-                return `
-                  <button class="${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-tooltip="${item.path}">
-                    <div class="name">
-                      ${item.name}
-                    </div>
-                  </button>
-                `
-              }).join('')}
-            </div>
-          </div>
-          <div class="input-grid">
-            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-            <button type="submit">
-              <sl-icon name="search"></sl-icon>
-            </button>
-          </div>
-        </form>
       </div>
       ${started ?render(`
 <a
@@ -135,6 +110,36 @@ text: Connect
     <div class="fourth">
       <iframe src="${url || src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
     </div>
+    <div class="nav">
+      <form class="search" method="get">
+        <div class="suggestions ${focused ? 'focused' : ''}">
+          <div class="suggestion-box">
+            ${suggestions.map((x, i) => {
+              const item = documents.find(y => {
+                return x.ref === y.path
+              })
+
+              return `
+                <button class="auto-item ${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}">
+                  <div class="name">
+                    ${item.name}
+                  </div>
+                </button>
+              `
+            }).join('')}
+          </div>
+        </div>
+        <div class="input-grid">
+          <div class="logo-wrapper">
+          <plan98-logo></plan98-logo>
+          </div>
+          <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
+          <button type="submit">
+            <sl-icon name="search"></sl-icon>
+          </button>
+        </div>
+      </form>
+    </div>
   `
 }, {
   afterUpdate
@@ -156,6 +161,14 @@ function afterUpdate(target) {
     icon.name = ogIcon.name
     ogIcon.remove()
     iconParent.appendChild(icon)
+
+    const ogLogo = target.querySelector('plan98-logo')
+    const logoParent = ogLogo.parentNode
+
+    const logo = document.createElement('plan98-logo')
+    logo.name = ogLogo.name
+    ogLogo.remove()
+    logoParent.appendChild(logo)
   }
 
   { // focus cursor, when "focused" but not ~focused~
@@ -177,7 +190,7 @@ const settingsInterval = setInterval(() => {
     target.style.setProperty('--underline-color', underlines[color]);
     const accents = [...target.querySelectorAll('[class^="slant-"]')].map((node, i) => {
       const currentC = friends[color][i]
-      node.style.setProperty('--color', currentC);
+      target.style.setProperty('--accent-color-'+i, currentC);
       return currentC
     })
     $.teach({accents})
@@ -189,15 +202,20 @@ const down = 40;
 const up = 38;
 const enter = 13;
 $.when('keydown', '[name="search"]', event => {
+  const { suggestionsLength } = $.learn()
   if(event.keyCode === down) {
     event.preventDefault()
-    $.teach({ suggestIndex: $.learn().suggestIndex + 1 })
+    const nextIndex = $.learn().suggestIndex + 1
+    if(nextIndex >= suggestionsLength) return
+    $.teach({ suggestIndex: nextIndex })
     return
   }
 
   if(event.keyCode === up) {
     event.preventDefault()
-    $.teach({ suggestIndex: $.learn().suggestIndex - 1 })
+    const nextIndex = $.learn().suggestIndex - 1
+    if(nextIndex < 0) return
+    $.teach({ suggestIndex: nextIndex })
     return
   }
 
@@ -218,19 +236,18 @@ $.when('keydown', '[name="search"]', event => {
   }
 })
 
-$.when('click', '[data-path]', event => {
+$.when('click', '.auto-item', event => {
   event.preventDefault()
-  const url = '/app/media-plexer?src=' +item.path
-  debugger
+  const url = '/app/media-plexer?src=' +event.target.dataset.path
   const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
   iframe.src = url
-  $.teach({ menu: true, url  })
+  $.teach({ started: true, menu: false, url  })
 })
 
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
   const suggestions = idx.search(value)
-  $.teach({ suggestions,  query: event.target.value  })
+  $.teach({ suggestions, suggestionsLength: suggestions.length, query: event.target.value  })
 })
 
 $.when('focus', '[name="search"]', event => {
@@ -238,7 +255,10 @@ $.when('focus', '[name="search"]', event => {
 })
 
 $.when('blur', '[name="search"]', event => {
-  $.teach({ focused: false, suggestIndex: 0 })
+  setTimeout(() => {
+    $.teach({ focused: false, suggestIndex: 0 })
+    document.activeElement.blur()
+  }, 250)
 })
 
 $.when('click', '[data-toggle]', async (event) => {
@@ -258,7 +278,7 @@ export function superKey() {
 
   function handleEvent (event) {
     if (event.metaKey) {
-      handleMetaKey()
+      handleSuperKey(event)
     }
   }
   self.addEventListener('keydown', handleEvent);
@@ -270,10 +290,12 @@ export function superKey() {
   });
 }
 
-function handleMetaKey() {
+export function handleSuperKey(event) {
   if(document.querySelector('plan98-intro')) {
     const { menu } = $.learn()
-    $.teach({ menu: !menu })
+    const focused = !menu
+    $.teach({ menu: !menu, started: true, focused })
+
     return
   }
 
@@ -330,7 +352,6 @@ $.style(`
     place-content: center;
     font-weight: 800;
     font-size: 24px;
-    pointer-events: all;
   }
 
   & .logo-mark {
@@ -374,18 +395,18 @@ $.style(`
     position: absolute;
     right: 0;
     top: 0;
-    transform: skew(-25deg) translateX(-1rem);
+    transform: skew(-50deg) translateX(-1rem);
     opacity: .75;
   }
 
   & .slant-1 {
-    background: var(--color, var(--red));
+    background: var(--accent-color-0, var(--red));
   }
   & .slant-2 {
-    background: var(--color, var(--orange));
+    background: var(--accent-color-1, var(--orange));
   }
   & .slant-3 {
-    background: var(--color, var(--yellow));
+    background: var(--accent-color-2, var(--yellow));
   }
 
   & .plan98-letters {
@@ -470,21 +491,18 @@ $.style(`
 
   }
 
-  & .search button {
-    display: inline-block;
-  }
-
-  & .search button {
+  & .search .auto-item {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: var(--button-color, dodgerblue);
     border: none;
     color: white;
     transition: background-color 200ms ease-in-out;
     padding: 1rem;
+    display: block;
   }
 
-  & .search button:focus,
-  & .search button:hover {
+  & .search .auto-item:focus,
+  & .search .auto-item:hover {
     background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
   }
 
@@ -511,7 +529,7 @@ $.style(`
     transform: translateY(-100%);
   }
 
-  & .suggestion-box button {
+  & .suggestion-box .auto-item {
     background: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
     color: var(--button-color, dodgerblue);
@@ -522,14 +540,14 @@ $.style(`
     max-width: 100%;
   }
 
-  & .suggestion-box button:focus,
-  & .suggestion-box button:hover {
+  & .suggestion-box .auto-item:focus,
+  & .suggestion-box .auto-item:hover {
     background-color: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     color: white;
   }
 
-  & .suggestion-box button.active {
+  & .suggestion-box .auto-item.active {
     color: white;
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     background-color: var(--button-color, dodgerblue);
@@ -542,19 +560,40 @@ $.style(`
 
   & .input-grid {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 3rem 1fr auto;
+    grid-template-rows: 3rem;
     max-width: 480px;
     margin: auto;
     text-align: left;
   }
 
-  & .input-grid button {
+  & .input-grid .logo-wrapper {
+    aspect-ratio: 1;
+  }
+
+  & .input-grid [type="submit"] {
     font-size: 1.2rem;
     padding: .5rem 1rem;
     margin: 0 auto;
     width: 100%;
     max-width: 480px;
   }
+
+  & .input-grid [type="submit"] {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: var(--button-color, dodgerblue);
+    border: none;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+    display: block;
+  }
+
+  & .input-grid [type="submit"]:hover,
+  & .input-grid [type="submit"]:focus {
+    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
+  }
+
 
   & [data-suggestion] {
     position: relative;
@@ -570,5 +609,6 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: 100;
   }
 `)
