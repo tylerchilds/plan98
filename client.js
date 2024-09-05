@@ -216,7 +216,7 @@ async function router(request, context) {
 
   if(pathname.startsWith('/app/')) {
     const [app] = pathname.split('/app/')[1].split('/')
-    const file = await showApp(request, app)
+    const file = await showApp(request, app, business)
 
     console.log(file)
     if(file) {
@@ -366,7 +366,7 @@ async function home(request, business) {
   return file
 }
 
-async function showApp(request, tag) {
+async function showApp(request, tag, { endOfHead }) {
   const url = new URL(request.url)
 
   console.log(url)
@@ -376,8 +376,11 @@ async function showApp(request, tag) {
   }
 
   console.log(attributes)
-
   const dom = await page()
+  if(endOfHead) {
+    dom.head.insertAdjacentHTML('beforeend', endOfHead)
+  }
+
   const main = dom.getElementById('main')
   main.parentNode.insertAdjacentHTML('afterbegin', `
     <sillonious-brand>

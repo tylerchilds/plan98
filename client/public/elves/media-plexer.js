@@ -23,7 +23,7 @@ $.draw((target) => {
 })
 
 function iframeRenderer(path) {
-  return `<iframe src="${path}" title="${path}"></iframe>"`
+  return `<iframe src="${path}" title="${path}"></iframe>`
 }
 
 function codeRenderer(path) {

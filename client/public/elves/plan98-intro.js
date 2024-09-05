@@ -223,9 +223,7 @@ $.when('focus', '[name="search"]', event => {
 })
 
 $.when('blur', '[name="search"]', event => {
-  setTimeout(() => {
-    $.teach({ focused: false, suggestIndex: 0 })
-  }, 200)
+  $.teach({ focused: false, suggestIndex: 0 })
 })
 
 $.when('click', '[data-toggle]', async (event) => {

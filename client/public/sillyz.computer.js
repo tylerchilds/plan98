@@ -1,3 +1,7 @@
+self.computer ||= {}
+self.computer.sillyz ||= {}
+self.computer.sillyz.elves ||= {}
+
 function ready() {
   console.log(window.plan98, ' is ready')
 }
@@ -29,11 +33,13 @@ function modules({ registry }) {
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true
+    self.computer.sillyz.elves[tag] = {}
     await import(url).catch((e) => {
       definable = false
       console.error(e)
     })
     try {
+      definable = definable && !self.computer.sillyz.elves[tag].declined
       definable = definable && document.querySelector(tag) && document.querySelector(tag).matches(':not(:defined)')
       if(definable) {
         customElements.define(tag, class WebComponent extends HTMLElement {
