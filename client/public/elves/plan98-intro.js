@@ -142,10 +142,27 @@ text: Connect
     </div>
   `
 }, {
+  beforeUpdate,
   afterUpdate
 })
 
+function beforeUpdate(target) {
+  { // save suggestion box scroll top
+    const list = target.querySelector('.suggestion-box')
+    if(!list) return
+    console.log(list.scrollTop)
+    target.dataset.scrollpos = list.scrollTop
+  }
+}
+
 function afterUpdate(target) {
+  { // scroll suggestions
+    const list = target.querySelector('.suggestion-box')
+    if(!list) return
+    console.log(target.dataset.scrollpos)
+    list.scrollTop = target.dataset.scrollpos
+  }
+
   { // scroll item into view
     const activeItem = target.querySelector('.suggestion-box .active')
     if(activeItem) {
@@ -523,10 +540,10 @@ $.style(`
     position: absolute;
     inset: 0;
     height: 300px;
-    max-height: 80vh;
     overflow: auto;
     z-index: 10;
     transform: translateY(-100%);
+    max-height: calc(100vh - 3rem);
   }
 
   & .suggestion-box .auto-item {
