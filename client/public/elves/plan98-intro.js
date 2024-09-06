@@ -45,12 +45,17 @@ const $ = elf('plan98-intro', {
   suggestions: [],
   suggestionsLength: 0,
   menu: true,
-  now: new Date().toLocaleString()
+  now: new Date().toLocaleString(),
+  activeWorkspace: 'first',
+  first: '/app/plan98-dashboard',
+  second: '/app/hyper-script',
+  third: '/app/sillyz-ocarina',
+  fourth: '/app/landing-page',
+  allActive: false
 })
 
 $.draw((target) => {
-  const { url, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
-  const src = target.getAttribute('src')
+  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
       <div class="hero">
@@ -108,8 +113,11 @@ text: Connect
         </div>
       `}
     </div>
-    <div class="fourth">
-      <iframe src="${url || src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
+    <div class="fourth ${allActive ? 'show-all' : ''}">
+      <iframe src="${first}" class="${activeWorkspace === 'first' ? 'active' :''} "name="first"></iframe>
+      <iframe src="${second}" class="${activeWorkspace === 'second' ? 'active' :''} "name="second"></iframe>
+      <iframe src="${third}" class="${activeWorkspace === 'third' ? 'active' :''} "name="third"></iframe>
+      <iframe src="${fourth}" class="${activeWorkspace === 'fourth' ? 'active' :''} "name="fourth"></iframe>
     </div>
     <div class="suggestions ${focused ? 'focused' : ''}">
       <div class="suggestion-box">
@@ -142,20 +150,23 @@ text: Connect
         </div>
       </form>
       <div class="workspaces">
-        <button data-workspace="1">
+        <button data-workspace="first">
           1
         </button>
-        <button data-workspace="2">
+        <button data-workspace="second">
           2
         </button>
-        <button data-workspace="3">
+        <button data-workspace="third">
           3
         </button>
-        <button data-workspace="4">
+        <button data-workspace="fourth">
           4
         </button>
         <button class="now">
           ${now}
+        </button>
+        <button data-all-workspaces>
+          <sl-icon name="grid"></sl-icon>
         </button>
       </div>
     </div>
@@ -188,14 +199,16 @@ function afterUpdate(target) {
   }
 
   { // recover icons from the virtual dom
-    const ogIcon = target.querySelector('sl-icon')
-    const iconParent = ogIcon.parentNode
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('sl-icon')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
 
-    const icon = document.createElement('sl-icon')
-    icon.name = ogIcon.name
-    ogIcon.remove()
-    iconParent.appendChild(icon)
-
+  { // recover logo from the virtual dom
     const ogLogo = target.querySelector('plan98-logo')
     const logoParent = ogLogo.parentNode
 
@@ -216,21 +229,35 @@ function afterUpdate(target) {
 }
 
 $.when('click','[target="plan98-window"]', (event) => {
-  $.teach({ started: true, menu: false })
+  event.preventDefault()
+  const url = event.target.href
+  updateActiveWorkspace(url)
 })
 
+$.when('click','[data-workspace]', (event) => {
+  event.preventDefault()
+  $.teach({ allActive: false, started: true, menu: false, activeWorkspace: event.target.dataset.workspace })
+})
+
+$.when('click','[data-all-workspaces]', (event) => {
+  event.preventDefault()
+  $.teach({ started: true, menu: false, allActive: !$.learn().allActive })
+})
 
 $.when('submit', '.search', (event) => {
   event.preventDefault()
-
-
-  const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
   const search = event.target.closest($.link).querySelector('[name="search"]')
   const url = '/app/giggle-search?query=' +search.value
+  updateActiveWorkspace(url)
+})
+
+function updateActiveWorkspace(url) {
+  const { activeWorkspace } = $.learn()
+  const iframe = event.target.closest($.link).querySelector(`[name="${activeWorkspace}"]`)
   iframe.src = url
   document.activeElement.blur()
-  $.teach({ started: true, menu: false, url  })
-})
+  $.teach({ started: true, menu: false, [activeWorkspace]: url  })
+}
 
 const settingsInterval = setInterval(() => {
   const index = Math.floor(Math.random() * palette.length)
@@ -280,8 +307,7 @@ $.when('keydown', '[name="search"]', event => {
     if(item) {
       const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
       const url = '/app/media-plexer?src=' +item.path
-      iframe.src = url
-      $.teach({ started: true, menu: false, url  })
+      updateActiveWorkspace(url)
       document.activeElement.blur()
       return
     }
@@ -291,9 +317,8 @@ $.when('keydown', '[name="search"]', event => {
 $.when('click', '.auto-item', event => {
   event.preventDefault()
   const url = '/app/media-plexer?src=' +event.target.dataset.path
-  const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
-  iframe.src = url
-  $.teach({ started: true, menu: false, url, suggestIndex: parseInt(event.target.dataset.index) })
+  updateActiveWorkspace(url)
+  $.teach({  suggestIndex: parseInt(event.target.dataset.index) })
 })
 
 $.when('input', '[name="search"]', (event) => {
@@ -505,7 +530,18 @@ $.style(`
     height: 0;
   }
 
+  & .fourth iframe {
+    display: none;
+  }
+  & .fourth .active {
+    display: block;
+    grid-area: all;
+  }
 
+  & .fourth.show-all iframe {
+    grid-area: initial;
+    display: block;
+  }
 
   & .broken + .fourth {
     height: 100%;
@@ -515,6 +551,10 @@ $.style(`
     inset: 0;
     z-index: 2;
     padding-bottom: 3rem;
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "all all" "all all";
   }
 
   & .menu {
@@ -669,7 +709,7 @@ $.style(`
     right: 0;
     z-index: 4;
     background: var(--color);
-    background-image: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65));
+    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
     display: grid;
     grid-template-columns: auto 1fr;
     overflow: auto;
@@ -679,6 +719,7 @@ $.style(`
     display: flex;
   }
 
+  & [data-all-workspaces],
   & [data-workspace] {
     border: 1px solid var(--button-color, dodgerblue);
     background: var(--color, mediumpurple);
