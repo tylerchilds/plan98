@@ -223,9 +223,12 @@ $.when('click','[target="plan98-window"]', (event) => {
 $.when('submit', '.search', (event) => {
   event.preventDefault()
 
+
   const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
-  const url = '/app/media-plexer?src=' +item.path
+  const search = event.target.closest($.link).querySelector('[name="search"]')
+  const url = '/app/giggle-search?query=' +search.value
   iframe.src = url
+  document.activeElement.blur()
   $.teach({ started: true, menu: false, url  })
 })
 

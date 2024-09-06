@@ -105,8 +105,8 @@ $.draw(target => {
       </div>
     </div>
     <form class="send-form" data-command="enter">
-      <button class="button send" type="submit" data-command="enter">
-        Send
+      <button data-tooltip="send" class="button send" type="submit" data-command="enter">
+        <sl-icon name="send"></sl-icon>
       </button>
       <div class="text-well">
         <textarea name="message" placeholder="Today..."></textarea>
@@ -270,6 +270,10 @@ $.style(`
     body {
       overflow: visible !important;
     }
+  }
+
+  & [name="message"] {
+    padding-right: 3rem;
   }
 
   & [name="transport"] {
