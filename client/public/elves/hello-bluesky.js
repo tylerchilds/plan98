@@ -138,7 +138,7 @@ $.when('click', '.message', (event) => {
 
   if(text) {
     showModal(`
-      <div style="padding: 0 1rem; height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
+      <div style="height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
         <div class="screenplay">
           ${render(text)}
         </div>

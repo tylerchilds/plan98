@@ -110,35 +110,50 @@ text: Connect
     <div class="fourth">
       <iframe src="${url || src || '/app/plan98-dashboard'}" name="plan98-window"></iframe>
     </div>
+    <div class="suggestions ${focused ? 'focused' : ''}">
+      <div class="suggestion-box">
+        ${suggestions.map((x, i) => {
+          const item = documents.find(y => {
+            return x.ref === y.path
+          })
+
+          return `
+            <button type="button" class="auto-item ${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+              <div class="name">
+                ${item.name}
+              </div>
+            </button>
+          `
+        }).join('')}
+      </div>
+    </div>
+
     <div class="nav">
       <form class="search" method="get">
-        <div class="suggestions ${focused ? 'focused' : ''}">
-          <div class="suggestion-box">
-            ${suggestions.map((x, i) => {
-              const item = documents.find(y => {
-                return x.ref === y.path
-              })
-
-              return `
-                <button class="auto-item ${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
-                  <div class="name">
-                    ${item.name}
-                  </div>
-                </button>
-              `
-            }).join('')}
-          </div>
-        </div>
         <div class="input-grid">
           <div class="logo-wrapper">
-          <plan98-logo></plan98-logo>
+            <plan98-logo></plan98-logo>
           </div>
           <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-          <button type="submit">
+          <button tab-index="1" type="submit">
             <sl-icon name="search"></sl-icon>
           </button>
         </div>
       </form>
+      <div class="workspaces">
+        <button data-workspace="1">
+          1
+        </button>
+        <button data-workspace="2">
+          2
+        </button>
+        <button data-workspace="3">
+          3
+        </button>
+        <button data-workspace="4">
+          4
+        </button>
+      </div>
     </div>
   `
 }, {
@@ -150,7 +165,6 @@ function beforeUpdate(target) {
   { // save suggestion box scroll top
     const list = target.querySelector('.suggestion-box')
     if(!list) return
-    console.log(list.scrollTop)
     target.dataset.scrollpos = list.scrollTop
   }
 }
@@ -159,7 +173,6 @@ function afterUpdate(target) {
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
     if(!list) return
-    console.log(target.dataset.scrollpos)
     list.scrollTop = target.dataset.scrollpos
   }
 
@@ -198,8 +211,18 @@ function afterUpdate(target) {
   }
 }
 
+$.when('click','[target="plan98-window"]', (event) => {
+  $.teach({ started: true, menu: false })
+})
+
+
 $.when('submit', '.search', (event) => {
   event.preventDefault()
+
+  const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
+  const url = '/app/media-plexer?src=' +item.path
+  iframe.src = url
+  $.teach({ started: true, menu: false, url  })
 })
 
 const settingsInterval = setInterval(() => {
@@ -252,6 +275,7 @@ $.when('keydown', '[name="search"]', event => {
       const url = '/app/media-plexer?src=' +item.path
       iframe.src = url
       $.teach({ started: true, menu: false, url  })
+      document.activeElement.blur()
       return
     }
   }
@@ -416,7 +440,7 @@ $.style(`
     position: absolute;
     right: 0;
     top: 0;
-    transform: skew(-50deg) translateX(-1rem);
+    transform: skew(-25deg) translateX(-1rem);
     opacity: .75;
   }
 
@@ -483,6 +507,7 @@ $.style(`
     position: absolute;
     inset: 0;
     z-index: 2;
+    padding-bottom: 3rem;
   }
 
   & .menu {
@@ -509,9 +534,10 @@ $.style(`
     margin: 0 auto;
     width: 100%;
     max-width: 480px;
-
+    border-radius: 0;
   }
 
+  & .suggestions .auto-item,
   & .search .auto-item {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     background-color: var(--button-color, dodgerblue);
@@ -534,6 +560,7 @@ $.style(`
     max-width: 480px;
     margin: auto;
     text-align: left;
+    bottom: 3rem;
   }
 
   & .suggestions.focused {
@@ -584,7 +611,6 @@ $.style(`
     grid-template-columns: 3rem 1fr auto;
     grid-template-rows: 3rem;
     max-width: 480px;
-    margin: auto;
     text-align: left;
   }
 
@@ -634,6 +660,24 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: 100;
+    z-index: 4;
+    background: var(--color);
+    background-image: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65));
+    display: grid;
+    grid-template-columns: auto 1fr;
+    overflow: auto;
+  }
+
+  & .workspaces {
+    display: flex;
+  }
+
+  & [data-workspace] {
+    border: 1px solid var(--button-color, dodgerblue);
+    background: var(--color, mediumpurple);
+    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
+    color: var(--button-color, dodgerblue);
+    height: 100%;
+    aspect-ratio: 1;
   }
 `)

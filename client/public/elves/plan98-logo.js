@@ -4,7 +4,7 @@ const $ = elf('plan98-logo')
 
 $.draw(() => {
   return `
-    <button data-super>
+    <button type="button" data-super>
       <div class="plan98-letters">
         98
       </div>
@@ -48,6 +48,6 @@ $.style(`
   }
 
   & [data-super] .plan98-slants {
-    transform: skew(-50deg) translateX(5px);
+    transform: skew(-25deg) translateX(5px);
   }
 `)
