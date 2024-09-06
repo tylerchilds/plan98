@@ -316,7 +316,7 @@ $.when('click', '[data-toggle]', async (event) => {
 })
 
 $.when('click', '.break-fourth-wall', (event) => {
-  $.teach({ started: true })
+  $.teach({ started: true, menu: false })
   clearInterval(settingsInterval)
 })
 
@@ -562,7 +562,6 @@ $.style(`
     position: relative;
     max-height: 300px;
     max-width: 480px;
-    margin: auto;
     text-align: left;
     bottom: 3rem;
   }
@@ -688,7 +687,8 @@ $.style(`
 
   & .now {
     white-space: nowrap;
-    background: black;
+    background: var(--color, transparent);
+    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
     color: white;
     height: 100%;
     font-size: 12px;

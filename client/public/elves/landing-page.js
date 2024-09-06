@@ -3,8 +3,6 @@ import { idx, documents } from './giggle-search.js'
 
 const $ = elves('landing-page', {
   query: "",
-  suggestIndex: 0,
-  suggestions: [],
   top10: [
     {
       title: 'Hello World',
@@ -241,42 +239,13 @@ const $ = elves('landing-page', {
 })
 
 $.draw(() => {
-  const { top10, suggestions, focused, categories, ring, query, suggestIndex } = $.learn()
+  const { top10, categories, ring, query } = $.learn()
   return `
-    <div class="hero">
       <div class="top-bar">
         <button data-publish>
           Create
         </button>
       </div>
-      <form class="search" method="get">
-        <img src="/cdn/thelanding.page/giggle.svg" />
-        <div class="input-grid">
-          <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-          <button type="submit">*</button>
-        </div>
-        <div class="suggestions ${focused ? 'focused' : ''}">
-          <div class="suggestion-box">
-            ${suggestions.map((x, i) => {
-              const item = documents.find(y => {
-                return x.ref === y.path
-              })
-
-              return `
-                <button class="${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}">
-                  <div class="path">
-                    ${item.path}
-                  </div>
-                  <div class="name">
-                    ${item.name}
-                  </div>
-                </button>
-              `
-            }).join('')}
-          </div>
-        </div>
-      </form>
-    </div>
     <div class="content">
       ${splash(top10)}
     </div>
@@ -446,8 +415,8 @@ $.style(`
     display: grid;
     grid-template-columns: 2fr 4fr 1fr;
     gap: 1rem;
-    grid-template-areas: "hero hero hero" "sidebar content third";
-    grid-template-rows: 100vh auto;
+    grid-template-areas: "sidebar content third";
+    grid-template-rows: auto;
     padding: 0 1rem;
   }
 
@@ -478,11 +447,10 @@ $.style(`
   @media (max-width: 1024px) {
     & {
       grid-template-areas:
-        "hero hero"
         "content content"
         "sidebar third";
       grid-template-columns: 1fr 1fr;
-      grid-template-rows: 100vh auto auto;
+      grid-template-rows: auto auto;
     }
   }
 
@@ -490,11 +458,10 @@ $.style(`
     & {
       grid-template-columns: 1fr;
       grid-template-areas:
-        "hero"
         "content"
         "sidebar"
         "third";
-      grid-template-rows: 100vh auto auto auto;
+      grid-template-rows: auto auto auto;
     }
 
     & .important {
@@ -508,11 +475,7 @@ $.style(`
 
   @media (max-height: 319px) {
     & {
-      grid-template-rows: auto auto auto auto;
-    }
-
-    & .hero {
-      margin-top: 3.5rem;
+      grid-template-rows: auto auto auto;
     }
   }
 
@@ -577,18 +540,6 @@ $.style(`
 
   & .sidebar .teaser {
     min-height: 50px;
-  }
-
-  & .hero img {
-    max-width: 320px;
-  }
-
-  & .hero {
-    clear: both;
-    grid-area: hero;
-    display: grid;
-    grid-template-columns: 1fr;
-    place-content: center;
   }
 
   & .top-bar {
