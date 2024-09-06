@@ -44,11 +44,12 @@ const $ = elf('plan98-intro', {
   suggestIndex: null,
   suggestions: [],
   suggestionsLength: 0,
-  menu: true
+  menu: true,
+  now: new Date().toLocaleString()
 })
 
 $.draw((target) => {
-  const { url, menu, started, accents, query, suggestIndex, focused, suggestions } = $.learn()
+  const { url, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
   const src = target.getAttribute('src')
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
@@ -152,6 +153,9 @@ text: Connect
         </button>
         <button data-workspace="4">
           4
+        </button>
+        <button class="now">
+          ${now}
         </button>
       </div>
     </div>
@@ -330,7 +334,7 @@ export function superKey() {
 
   self.addEventListener('message', function handleMessage(event) {
     if(event.data.whisper === 'metaKey') {
-      handleMetaKey()
+      handleSuperKey()
     } else { console.log(event) }
   });
 }
@@ -611,6 +615,7 @@ $.style(`
     grid-template-columns: 3rem 1fr auto;
     grid-template-rows: 3rem;
     max-width: 480px;
+    min-width: 320px;
     text-align: left;
   }
 
@@ -679,5 +684,16 @@ $.style(`
     color: var(--button-color, dodgerblue);
     height: 100%;
     aspect-ratio: 1;
+  }
+
+  & .now {
+    white-space: nowrap;
+    background: black;
+    color: white;
+    height: 100%;
+    font-size: 12px;
+    border-color: transparent;
+    padding: 12px;
+    margin-left: auto;
   }
 `)
