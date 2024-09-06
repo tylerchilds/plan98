@@ -41,7 +41,7 @@ const friends = {
 const $ = elf('plan98-intro', {
   accents: ['firebrick', 'darkorange', 'gold'],
   query: "",
-  suggestIndex: 0,
+  suggestIndex: null,
   suggestions: [],
   suggestionsLength: 0,
   menu: true
@@ -120,7 +120,7 @@ text: Connect
               })
 
               return `
-                <button class="auto-item ${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}">
+                <button class="auto-item ${suggestIndex === i ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
                   <div class="name">
                     ${item.name}
                   </div>
@@ -198,6 +198,10 @@ function afterUpdate(target) {
   }
 }
 
+$.when('submit', '.search', (event) => {
+  event.preventDefault()
+})
+
 const settingsInterval = setInterval(() => {
   const index = Math.floor(Math.random() * palette.length)
   const color = palette[index];
@@ -219,10 +223,10 @@ const down = 40;
 const up = 38;
 const enter = 13;
 $.when('keydown', '[name="search"]', event => {
-  const { suggestionsLength } = $.learn()
+  const { suggestionsLength, suggestIndex } = $.learn()
   if(event.keyCode === down) {
     event.preventDefault()
-    const nextIndex = $.learn().suggestIndex + 1
+    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength) return
     $.teach({ suggestIndex: nextIndex })
     return
@@ -230,13 +234,13 @@ $.when('keydown', '[name="search"]', event => {
 
   if(event.keyCode === up) {
     event.preventDefault()
-    const nextIndex = $.learn().suggestIndex - 1
+    const nextIndex = (suggestIndex === null) ? suggestionsLength - 1: suggestIndex - 1
     if(nextIndex < 0) return
     $.teach({ suggestIndex: nextIndex })
     return
   }
 
-  if(event.keyCode === enter) {
+  if(event.keyCode === enter && suggestIndex !== null) {
     event.preventDefault()
     const { suggestions, suggestIndex } = $.learn()
     const item = documents.find(y => {
@@ -258,13 +262,13 @@ $.when('click', '.auto-item', event => {
   const url = '/app/media-plexer?src=' +event.target.dataset.path
   const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
   iframe.src = url
-  $.teach({ started: true, menu: false, url  })
+  $.teach({ started: true, menu: false, url, suggestIndex: parseInt(event.target.dataset.index) })
 })
 
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
   const suggestions = idx.search(value)
-  $.teach({ suggestions, suggestionsLength: suggestions.length, query: event.target.value  })
+  $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, query: event.target.value  })
 })
 
 $.when('focus', '[name="search"]', event => {
@@ -273,7 +277,7 @@ $.when('focus', '[name="search"]', event => {
 
 $.when('blur', '[name="search"]', event => {
   setTimeout(() => {
-    $.teach({ focused: false, suggestIndex: 0 })
+    $.teach({ focused: false })
     document.activeElement.blur()
   }, 250)
 })
@@ -582,6 +586,10 @@ $.style(`
     max-width: 480px;
     margin: auto;
     text-align: left;
+  }
+
+  & .input-grid *:focus {
+    outline: 3px solid var(--underline-color, mediumseagreen);
   }
 
   & .input-grid .logo-wrapper {
