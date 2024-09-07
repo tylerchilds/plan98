@@ -777,7 +777,7 @@ $.style(`
     height: 100%;
     font-size: 12px;
     border-color: transparent;
-    padding: 12px;
+    padding: 0 12px;
     margin-left: auto;
   }
 `)
