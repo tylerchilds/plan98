@@ -47,10 +47,10 @@ const $ = elf('plan98-intro', {
   menu: true,
   now: new Date().toLocaleString(),
   activeWorkspace: 'first',
-  first: '/app/plan98-dashboard',
-  second: '/app/hyper-script',
-  third: '/app/sillyz-ocarina',
-  fourth: '/app/landing-page',
+  first: '/app/story-board',
+  second: '/app/dial-tone',
+  third: '/app/hyper-script',
+  fourth: '/app/plan98-dashboard',
   allActive: false
 })
 

@@ -13,13 +13,30 @@ function engine(target) {
 }
 
 $.draw(target => {
-  return `
-    <canvas width="300px" height="300px">Sorry, your browser is too old for this demo.</canvas>
+  mount(target)
+})
+
+function mount(target) {
+  if(target.innerHTML) return
+
+  target.innerHTML = `
     <div id="info">
       <button data-undo>Undo</button>
     </div>
   `
-})
+
+  const canvas = document.createElement('canvas')
+  // resize the canvas to fill browser window dynamically
+  self.addEventListener('resize', resizeCanvas, false);
+
+  function resizeCanvas() {
+    canvas.width = self.innerWidth;
+    canvas.height = self.innerHeight;
+  }
+
+  resizeCanvas();
+  target.appendChild(canvas)
+}
 
 let lineWidth = 0
 let isMousedown = false
@@ -36,7 +53,7 @@ const requestIdleCallback = window.requestIdleCallback || function (fn) { setTim
 function drawOnCanvas (target, stroke) {
   const { canvas } = engine(target)
   const context = canvas.getContext('2d')
-  context.strokeStyle = 'black'
+  context.strokeStyle = 'white'
   context.lineCap = 'round'
   context.lineJoin = 'round'
 
@@ -187,10 +204,20 @@ function end (e) {
 
   lineWidth = 0
 };
-
 $.style(`
+  & {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
   & canvas {
-    background: lemonchiffon;
+    background: #54796d;
     touch-action: none;
+  }
+
+  & [data-undo] {
+    position: absolute;
+    top: 0;
+    right: 0;
   }
 `)
