@@ -1,6 +1,8 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
+import { showModal, hideModal } from '@plan98/modal'
+import natsort from 'natsort'
 
 const palette = [
   'firebrick', // accent 1
@@ -50,31 +52,12 @@ const $ = elf('plan98-intro', {
   first: '/app/story-board',
   second: '/app/dial-tone',
   third: '/app/hyper-script',
-  fourth: '/app/plan98-dashboard',
+  fourth: '/app/middle-earth',
   allActive: false
 })
 
-$.draw((target) => {
-  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
-  return `
-    <div class="wall ${started && !menu ? 'broken':''}">
-      <div class="hero">
-        <div class="frame">
-          <div style="text-align: center">
-            <div class="logo-mark">
-              <div class="plan98-letters">
-                Plan98
-              </div>
-              <div class="plan98-slants">
-                <div class="slant-1" style="--color: ${accents[0]}"></div>
-                <div class="slant-2" style="--color: ${accents[1]}"></div>
-                <div class="slant-3" style="--color: ${accents[2]}"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      ${started ?render(`
+function zune() {
+  const playlist = render(`
 <a
 href: /app/hello-bluesky
 target: plan98-window
@@ -96,7 +79,49 @@ text: Sonic and Knuckles
 <a
 href: steam://rungameid/584400
 text: Sonic Mania
-`): `
+`)
+
+  return `
+    <div class="zune">
+      ${alphabetical(playlist)}
+    </div>
+  `
+}
+
+function alphabetical(xmlHTML) {
+  var sorter = natsort();
+  const page = new DOMParser().parseFromString(xmlHTML, "text/html");
+  const node = page.querySelector('xml-html')
+  const children = [...node.children]
+  children.sort(function(a, b) {
+    return sorter(a.innerText, b.innerText);
+  }).map((x) => {
+    node.appendChild(x)
+  });
+  return `${node.outerHTML}`
+}
+
+$.draw((target) => {
+  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
+  return `
+    <div class="wall ${started && !menu ? 'broken':''}">
+      ${started ? zune() : `
+      <div class="hero">
+        <div class="frame">
+          <div style="text-align: center">
+            <div class="logo-mark">
+              <div class="plan98-letters">
+                Plan98
+              </div>
+              <div class="plan98-slants">
+                <div class="slant-1" style="--color: ${accents[0]}"></div>
+                <div class="slant-2" style="--color: ${accents[1]}"></div>
+                <div class="slant-3" style="--color: ${accents[2]}"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
         <div class="body">
 
           <div class="screenplay">
@@ -228,6 +253,21 @@ function afterUpdate(target) {
   }
 }
 
+$.when('click','.now', (event) => {
+  showModal('')
+  hideModal()
+  showModal(`
+    <div class="card">
+      <calendar-range months="2">
+        <div class="grid">
+          <calendar-month></calendar-month>
+          <calendar-month offset="1"></calendar-month>
+        </div>
+      </calendar-range>
+    </div>
+  `)
+})
+
 $.when('click','[target="plan98-window"]', (event) => {
   event.preventDefault()
   const url = event.target.href
@@ -344,7 +384,7 @@ $.when('click', '[data-toggle]', async (event) => {
 })
 
 $.when('click', '.break-fourth-wall', (event) => {
-  $.teach({ started: true, menu: false })
+  $.teach({ started: true })
   clearInterval(settingsInterval)
 })
 
