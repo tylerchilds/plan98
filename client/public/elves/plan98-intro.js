@@ -83,6 +83,14 @@ text: Sonic Mania
 
   return `
     <div class="zune">
+      <div class="zune-bar">
+        <button data-system>
+          9
+        </button>
+        <button data-media>
+          Now Playing
+        </button>
+      </div>
       ${alphabetical(playlist)}
     </div>
   `
@@ -273,6 +281,10 @@ function afterUpdate(target) {
   }
 }
 
+$.when('click','[data-system]', (event) => {
+  window.dispatchEvent(new KeyboardEvent("keydown",{'key': 'Escape'}));
+})
+
 $.when('click','.now', (event) => {
   showModal('')
   hideModal()
@@ -384,6 +396,7 @@ $.when('click', '.auto-item', event => {
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
   const suggestions = idx.search(value)
+debugger
   $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, query: event.target.value  })
 })
 
@@ -563,7 +576,7 @@ $.style(`
     z-index: 2;
   }
 
-  & .wall button {
+  & .break-fourth-wall {
     background-color: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0, .25), rgba(0,0,0,.5));
     color: white;
@@ -578,8 +591,8 @@ $.style(`
     z-index: 1;
   }
 
-  & .wall button:hover,
-  & .wall button:focus {
+  & .break-fourth-wall:hover,
+  & .break-fourth-wall:focus {
     background-image: linear-gradient(rgba(0,0,0, .15), rgba(0,0,0,.4));
   }
 
@@ -829,6 +842,16 @@ $.style(`
   & .zune a:active {
   }
 
+  & .zune-bar {
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    display: flex;
+  }
+
+  & .zune xml-html {
+    columns: 320px;
+  }
+
   & .category {
     margin-top: 1rem;
     margin-right: 1rem;
@@ -842,5 +865,24 @@ $.style(`
     border-top: none;
     border-bottom: 1px solid rgba(255,255,255,.25);
     margin: 1rem 0;
+  }
+
+  & [data-media],
+  & [data-system] {
+    font-weight: 1000;
+    border: none;
+    font-size: 1rem;
+    background: black;
+    color: white;
+    padding: 9px;
+  }
+
+  & [data-system] {
+    font-weight: 1000;
+  }
+
+  & [data-media] {
+    margin-left: auto;
+    font-weight: 400;
   }
 `)
