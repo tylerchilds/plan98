@@ -93,12 +93,32 @@ function alphabetical(xmlHTML) {
   const page = new DOMParser().parseFromString(xmlHTML, "text/html");
   const node = page.querySelector('xml-html')
   const children = [...node.children]
+  const usedLetters = {}
   children.sort(function(a, b) {
     return sorter(a.innerText, b.innerText);
   }).map((x) => {
+    if(!x.innerText) return
+    const lowerFirst = x.innerText[0].toLowerCase()
+    if(!usedLetters[lowerFirst]) {
+      usedLetters[lowerFirst] = true
+      const letter = document.createElement('div')
+      letter.innerHTML = `<span id="${$.link}-${lowerFirst}" class="category">${lowerFirst}</span>`
+      node.appendChild(letter)
+    }
+
     node.appendChild(x)
   });
-  return `${node.outerHTML}`
+  return `
+    ${
+      Object
+        .keys(usedLetters)
+        .sort(natsort())
+        .map(x => `<a href="#${$.link}-${x}" class="category">${x}</a>`)
+        .join('')
+    }
+    <hr/>
+    ${node.outerHTML}
+  `
 }
 
 $.draw((target) => {
@@ -540,7 +560,6 @@ $.style(`
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
-    opacity: .85;
     z-index: 2;
   }
 
@@ -779,5 +798,49 @@ $.style(`
     border-color: transparent;
     padding: 0 12px;
     margin-left: auto;
+  }
+
+  & .zune {
+    font-weight: 100;
+    font-size: 2rem;
+    line-height: 1;
+    background: black;
+    color: rgba(255,255,255,.65);
+    height: 100%;
+    overflow-y: auto;
+  }
+
+  & .zune xml-html {
+    overflow: hidden auto;
+  }
+
+  & .zune a:link,
+  & .zune a:visited {
+    color: rgba(255,255,255,.65);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  & .zune a:hover,
+  & .zune a:focus {
+    color: rgba(255,255,255,1);
+  }
+
+  & .zune a:active {
+  }
+
+  & .category {
+    margin-top: 1rem;
+    margin-right: 1rem;
+    display: inline-block;
+    padding: 1rem 1rem 0 .25rem;
+    border: 1px solid rgba(255,255,255,.65);
+    line-height: 1;
+  }
+
+  & hr {
+    border-top: none;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    margin: 1rem 0;
   }
 `)
