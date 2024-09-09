@@ -49,11 +49,11 @@ const $ = elf('plan98-intro', {
   suggestionsLength: 0,
   menu: true,
   now: new Date().toLocaleString(),
-  activeWorkspace: null,
-  first: '/app/story-board',
-  second: '/app/dial-tone',
-  third: '/app/hyper-script',
-  fourth: '/app/middle-earth',
+  activeWorkspace: 'first',
+  first: '/app/startup-wizard',
+  second: null,
+  third: null,
+  fourth: null,
   allActive: false
 })
 
@@ -84,6 +84,22 @@ text: Sonic Mania
 <a
 href: /private/tychi.1998.social/Music/Ohm-N-I_-_Vaporwave/Ohm-N-I_-_Vaporwave_-_07_Whats_Going_On.mp3
 text: what's going on
+
+<a
+href: /app/story-board
+text: Story Board
+
+<a
+href: /app/dial-tone
+text: Dial Tone
+
+<a
+href: /app/hyper-script
+text: Hyper Script
+
+<a
+href: /app/middle-earth
+text: Middle Earth
 `)
 
   return `
@@ -170,7 +186,7 @@ $.draw((target) => {
 
   return `
     <div class="siri">${contextMenu}</div>
-    <div class="wall ${activeWorkspace && !menu ? 'broken':''}">
+    <div class="wall ${!menu ? 'broken':''}">
       ${started ? zune() : `
       <div class="hero">
         <div class="frame">
@@ -205,10 +221,10 @@ text: Connect
       `}
     </div>
     <div class="fourth ${allActive ? 'show-all' : ''}">
-      <iframe src="${first}" class="${activeWorkspace === 'first' ? 'active' :''} "name="first"></iframe>
-      <iframe src="${second}" class="${activeWorkspace === 'second' ? 'active' :''} "name="second"></iframe>
-      <iframe src="${third}" class="${activeWorkspace === 'third' ? 'active' :''} "name="third"></iframe>
-      <iframe src="${fourth}" class="${activeWorkspace === 'fourth' ? 'active' :''} "name="fourth"></iframe>
+      ${renderWorkspaceView('first')}
+      ${renderWorkspaceView('second')}
+      ${renderWorkspaceView('third')}
+      ${renderWorkspaceView('fourth')}
     </div>
     <div class="suggestions ${focused ? 'focused' : ''}">
       <div class="suggestion-box">
@@ -241,18 +257,10 @@ text: Connect
         </div>
       </form>
       <div class="workspaces">
-        <button class="show-workspace ${activeWorkspace === 'first' ? 'active' :''} " data-workspace="first">
-          1
-        </button>
-        <button class="show-workspace ${activeWorkspace === 'second' ? 'active' :''} " data-workspace="second">
-          2
-        </button>
-        <button class="show-workspace ${activeWorkspace === 'third' ? 'active' :''} " data-workspace="third">
-          3
-        </button>
-        <button class="show-workspace ${activeWorkspace === 'fourth' ? 'active' :''} " data-workspace="fourth">
-          4
-        </button>
+        ${renderWorkspaceToggle('first', '1')}
+        ${renderWorkspaceToggle('second', '2')}
+        ${renderWorkspaceToggle('third', '3')}
+        ${renderWorkspaceToggle('fourth', '4')}
         <button class="now">
           ${now}
         </button>
@@ -266,6 +274,27 @@ text: Connect
   beforeUpdate,
   afterUpdate
 })
+
+function renderWorkspaceView(key) {
+  const data = $.learn()
+  if(!data[key]) return ''
+
+  return `
+      <iframe src="${data[key]}" class="${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
+  `
+}
+
+function renderWorkspaceToggle(key, label) {
+  const data = $.learn()
+  if(!data[key]) return ''
+
+  return `
+    <button class="show-workspace ${data.activeWorkspace === key ? 'active' :''} " data-workspace="${key}">
+      ${label}
+    </button>
+  `
+}
+
 
 function beforeUpdate(target) {
   { // save suggestion box scroll top
@@ -308,15 +337,6 @@ function afterUpdate(target) {
     ogLogo.remove()
     logoParent.appendChild(logo)
   }
-
-  { // focus cursor, when "focused" but not ~focused~
-    const { focused } = $.learn()
-    const search = target.querySelector('[name="search"]')
-
-    if(focused && search !== document.activeElement) {
-      search.focus()
-    }
-  }
 }
 
 $.when('click','[data-system]', (event) => {
@@ -339,12 +359,12 @@ $.when('click','.now', (event) => {
 
 $.when('click','.show-workspace', (event) => {
   event.preventDefault()
-  $.teach({ allActive: false, started: true, menu: false, activeWorkspace: event.target.dataset.workspace })
+  $.teach({ allActive: false, menu: false, activeWorkspace: event.target.dataset.workspace })
 })
 
 $.when('click','[data-all-workspaces]', (event) => {
   event.preventDefault()
-  $.teach({ started: true, menu: false, allActive: !$.learn().allActive })
+  $.teach({ menu: false, allActive: !$.learn().allActive })
 })
 
 $.when('submit', '.search', (event) => {
@@ -360,7 +380,7 @@ function updateActiveWorkspace(url) {
   const iframe = event.target.closest($.link).querySelector(`[name="${workspace}"]`)
   iframe.src = url
   document.activeElement.blur()
-  $.teach({ started: true, menu: false, [activeWorkspace]: url, activeWorkspace: workspace  })
+  $.teach({ menu: false, [activeWorkspace]: url, activeWorkspace: workspace  })
 }
 
 const settingsInterval = setInterval(() => {
@@ -473,10 +493,12 @@ export function superKey() {
 
 export function handleSuperKey(event) {
   if(document.querySelector('plan98-intro')) {
-    const { menu } = $.learn()
-    const focused = !menu
-    $.teach({ menu: !menu, started: true, focused })
-
+    const { menu, started } = $.learn()
+    if(!started) {
+      $.teach({ started: true })
+      return
+    }
+    $.teach({ menu: !menu, started: true })
     return
   }
 
@@ -508,7 +530,7 @@ function createWorkspaceAction(href, workspace) {
 
 export function setWorkspace(event) {
   const { workspace, href } = event.target.dataset
-  $.teach({ menu: false, focused: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
+  $.teach({ menu: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
 }
 
 
@@ -734,6 +756,7 @@ $.style(`
     opacity: 0;
     transition: opacity 250ms ease-in-out;
     height: 0;
+    background: var(--color, mediumpurple);
   }
 
   & .fourth iframe {
@@ -990,11 +1013,7 @@ $.style(`
 
   & .zune xml-html {
     overflow: hidden auto;
-    padding: 1rem 0;
-  }
-
-  & .zune xml-html a {
-    display: inline-block;
+    padding: 1rem;
   }
 
   & .zune a:link,
@@ -1013,7 +1032,7 @@ $.style(`
   }
 
   & .categories {
-    padding: 1rem 0;
+    padding: 1rem;
     border-bottom: 1px solid rgba(255,255,255,.25);
   }
   & .zune-bar {
