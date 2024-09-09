@@ -508,7 +508,7 @@ function createWorkspaceAction(href, workspace) {
 
 export function setWorkspace(event) {
   const { workspace, href } = event.target.dataset
-  $.teach({ menu: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
+  $.teach({ menu: false, focused: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
 }
 
 
@@ -919,6 +919,7 @@ $.style(`
     display: grid;
     grid-template-columns: auto 1fr;
     overflow: auto;
+    height: 3rem;
   }
 
   & .workspaces {
@@ -932,6 +933,7 @@ $.style(`
     background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
     color: var(--button-color, dodgerblue);
     aspect-ratio: 1;
+    padding: 0;
     height: 100%;
     opacity: .25;
   }
@@ -1035,6 +1037,7 @@ $.style(`
     padding: 1rem 1rem 0 .25rem;
     border: 1px solid rgba(255,255,255,.65);
     line-height: 1;
+    aspect-ratio: 1;
   }
 
   & [data-media],
