@@ -48,7 +48,7 @@ const $ = elf('plan98-intro', {
   suggestionsLength: 0,
   menu: true,
   now: new Date().toLocaleString(),
-  activeWorkspace: 'first',
+  activeWorkspace: null,
   first: '/app/story-board',
   second: '/app/dial-tone',
   third: '/app/hyper-script',
@@ -117,20 +117,21 @@ function alphabetical(xmlHTML) {
     node.appendChild(x)
   });
   return `
-    ${
-      Object
-        .keys(usedLetters)
-        .sort(natsort())
-        .map(x => `<a href="#${$.link}-${x}" class="category">${x}</a>`)
-        .join('')
-    }
-    <hr/>
+    <div class="categories">
+      ${
+        Object
+          .keys(usedLetters)
+          .sort(natsort())
+          .map(x => `<a href="#${$.link}-${x}" class="category">${x}</a>`)
+          .join('')
+      }
+    </div>
     ${node.outerHTML}
   `
 }
 
 $.draw((target) => {
-  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, accents, query, suggestIndex, focused, suggestions, now } = $.learn()
+  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, suggestions, now } = $.learn()
   return `
     <div class="wall ${started && !menu ? 'broken':''}">
       ${started ? zune() : `
@@ -142,9 +143,9 @@ $.draw((target) => {
                 Plan98
               </div>
               <div class="plan98-slants">
-                <div class="slant-1" style="--color: ${accents[0]}"></div>
-                <div class="slant-2" style="--color: ${accents[1]}"></div>
-                <div class="slant-3" style="--color: ${accents[2]}"></div>
+                <div class="slant-1"></div>
+                <div class="slant-2"></div>
+                <div class="slant-3"></div>
               </div>
             </div>
           </div>
@@ -821,10 +822,18 @@ $.style(`
     color: rgba(255,255,255,.65);
     height: 100%;
     overflow-y: auto;
+    display: block;
+    padding: 2rem 0 3rem;
+    gap: 2rem;
   }
 
   & .zune xml-html {
     overflow: hidden auto;
+    padding: 1rem 0;
+  }
+
+  & .zune xml-html a {
+    display: inline-block;
   }
 
   & .zune a:link,
@@ -842,9 +851,17 @@ $.style(`
   & .zune a:active {
   }
 
-  & .zune-bar {
-    margin-bottom: 2rem;
+  & .categories {
+    padding: 1rem 0;
     border-bottom: 1px solid rgba(255,255,255,.25);
+  }
+  & .zune-bar {
+    background: black;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     display: flex;
   }
 
@@ -861,20 +878,21 @@ $.style(`
     line-height: 1;
   }
 
-  & hr {
-    border-top: none;
-    border-bottom: 1px solid rgba(255,255,255,.25);
-    margin: 1rem 0;
-  }
-
   & [data-media],
   & [data-system] {
     font-weight: 1000;
     border: none;
     font-size: 1rem;
     background: black;
-    color: white;
+    color: rgba(255,255,255,.85);
     padding: 9px;
+  }
+
+  & [data-media]:hover,
+  & [data-media]:focus,
+  & [data-system]:hover,
+  & [data-system]:focus {
+    color: rgba(255,255,255,1);
   }
 
   & [data-system] {
