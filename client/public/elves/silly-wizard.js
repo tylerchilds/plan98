@@ -161,6 +161,7 @@ $.style(`
     color: rgba(0,0,0,.85);
     overflow: auto;
     border-radius: 1rem;
+    position: relative;
   }
 
   @keyframes &-fade-in {
