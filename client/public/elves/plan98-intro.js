@@ -1,6 +1,7 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
+import { actionScript } from './action-script.js'
 import { showModal, hideModal } from '@plan98/modal'
 import natsort from 'natsort'
 
@@ -56,16 +57,16 @@ const $ = elf('plan98-intro', {
   allActive: false
 })
 
+$.when('click', '.action-script', actionScript)
+
 function zune() {
   const playlist = render(`
 <a
 href: /app/hello-bluesky
-target: plan98-window
 text: Hello Bluesky
 
 <a
 href: /app/owncast-surfer
-target: plan98-window
 text: Owncast Surfer
 
 <a
@@ -79,6 +80,10 @@ text: Sonic and Knuckles
 <a
 href: steam://rungameid/584400
 text: Sonic Mania
+
+<a
+href: /private/tychi.1998.social/Music/Ohm-N-I_-_Vaporwave/Ohm-N-I_-_Vaporwave_-_07_Whats_Going_On.mp3
+text: what's going on
 `)
 
   return `
@@ -130,10 +135,42 @@ function alphabetical(xmlHTML) {
   `
 }
 
-$.draw((target) => {
-  const { first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, suggestions, now } = $.learn()
+function createContext(actions) {
+  const list = actions.map((data) => {
+    const attributes = Object.keys(data).map(key => {
+      return `data-${key}="${data[key]}"`
+    }).join(' ')
+    return `
+      <div>
+        <button class="action-script" ${attributes}>
+          ${data.text}
+        </button>
+      </div>
+    `
+  }).join('')
+
   return `
-    <div class="wall ${started && !menu ? 'broken':''}">
+    <div>
+      <button data-close-context> 
+        back
+      </button>
+    </div>
+    ${list}
+  `
+}
+
+$.when('click', '[data-close-context]', (event) => {
+  $.teach({ contextActions: null })
+})
+
+$.draw((target) => {
+  const { suggestions, contextActions, first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, now } = $.learn()
+
+  const contextMenu = contextActions ? createContext(contextActions) : ''
+
+  return `
+    <div class="siri">${contextMenu}</div>
+    <div class="wall ${activeWorkspace && !menu ? 'broken':''}">
       ${started ? zune() : `
       <div class="hero">
         <div class="frame">
@@ -204,22 +241,22 @@ text: Connect
         </div>
       </form>
       <div class="workspaces">
-        <button data-workspace="first">
+        <button class="show-workspace ${activeWorkspace === 'first' ? 'active' :''} " data-workspace="first">
           1
         </button>
-        <button data-workspace="second">
+        <button class="show-workspace ${activeWorkspace === 'second' ? 'active' :''} " data-workspace="second">
           2
         </button>
-        <button data-workspace="third">
+        <button class="show-workspace ${activeWorkspace === 'third' ? 'active' :''} " data-workspace="third">
           3
         </button>
-        <button data-workspace="fourth">
+        <button class="show-workspace ${activeWorkspace === 'fourth' ? 'active' :''} " data-workspace="fourth">
           4
         </button>
         <button class="now">
           ${now}
         </button>
-        <button data-all-workspaces>
+        <button data-all-workspaces ${allActive ? 'class="active"' : ''}>
           <sl-icon name="grid"></sl-icon>
         </button>
       </div>
@@ -287,8 +324,7 @@ $.when('click','[data-system]', (event) => {
 })
 
 $.when('click','.now', (event) => {
-  showModal('')
-  hideModal()
+  return
   showModal(`
     <div class="card">
       <calendar-range months="2">
@@ -301,13 +337,7 @@ $.when('click','.now', (event) => {
   `)
 })
 
-$.when('click','[target="plan98-window"]', (event) => {
-  event.preventDefault()
-  const url = event.target.href
-  updateActiveWorkspace(url)
-})
-
-$.when('click','[data-workspace]', (event) => {
+$.when('click','.show-workspace', (event) => {
   event.preventDefault()
   $.teach({ allActive: false, started: true, menu: false, activeWorkspace: event.target.dataset.workspace })
 })
@@ -326,10 +356,11 @@ $.when('submit', '.search', (event) => {
 
 function updateActiveWorkspace(url) {
   const { activeWorkspace } = $.learn()
-  const iframe = event.target.closest($.link).querySelector(`[name="${activeWorkspace}"]`)
+  const workspace = activeWorkspace || 'first'
+  const iframe = event.target.closest($.link).querySelector(`[name="${workspace}"]`)
   iframe.src = url
   document.activeElement.blur()
-  $.teach({ started: true, menu: false, [activeWorkspace]: url  })
+  $.teach({ started: true, menu: false, [activeWorkspace]: url, activeWorkspace: workspace  })
 }
 
 const settingsInterval = setInterval(() => {
@@ -397,7 +428,6 @@ $.when('click', '.auto-item', event => {
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
   const suggestions = idx.search(value)
-debugger
   $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, query: event.target.value  })
 })
 
@@ -456,6 +486,109 @@ export function handleSuperKey(event) {
     const node = document.body.querySelector('sillonious-brand')|| document.body
     node.insertAdjacentHTML("beforeend", '<plan98-intro></plan98-intro>')
   }
+}
+
+$.when('click', '.zune xml-html a', (event) => {
+  event.preventDefault()
+
+  const actions = rules(event.target)
+
+  $.teach({ contextActions: actions })
+})
+
+function createWorkspaceAction(href, workspace) {
+  return {
+    text: 'replace ' + workspace + ' window pane',
+    action: 'setWorkspace',
+    script: import.meta.url,
+    href,
+    workspace
+  }
+}
+
+export function setWorkspace(event) {
+  const { workspace, href } = event.target.dataset
+  $.teach({ menu: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
+}
+
+
+function createExternalLinkAction(href) {
+  return {
+    text: 'launch externally',
+    action: 'openExternal',
+    script: import.meta.url,
+    href
+  }
+}
+
+export function openExternal(event) {
+  const { href } = event.target.dataset
+  self.open(href, '_blank')
+  $.teach({ contextActions: null })
+}
+
+function createPlayAction(href) {
+  return {
+    text: 'play now',
+    action: 'playNow',
+    script: import.meta.url,
+    href
+  }
+}
+
+export function playNow(event) {
+  const { href } = event.target.dataset
+  alert(href)
+}
+
+function createPlaylistAction(href) {
+  return {
+    text: 'to playlist',
+    action: 'toPlaylist',
+    script: import.meta.url,
+    href
+  }
+}
+
+export function toPlaylist(event) {
+  const { href } = event.target.dataset
+  alert(href)
+}
+
+
+function createPlayQueueAction(href) {
+  return {
+    text: 'to queue',
+    action: 'queuePlay',
+    script: import.meta.url,
+    href
+  }
+}
+
+export function queuePlay(event) {
+  const { href } = event.target.dataset
+  alert(href)
+}
+
+function rules(anchor) {
+  const actions = []
+
+  if(anchor.matches('[href$=".mp3"], [href$=".wav"]')) {
+    actions.push(createPlayAction(anchor.href));
+    actions.push(createPlaylistAction(anchor.href));
+    actions.push(createPlayQueueAction(anchor.href));
+  }
+  // window manager related
+  if(anchor.matches('[href^="steam://"]')) {
+    actions.push(createExternalLinkAction(anchor.href));
+  } else {
+    actions.push(createWorkspaceAction(anchor.href, 'first'));
+    actions.push(createWorkspaceAction(anchor.href, 'second'));
+    actions.push(createWorkspaceAction(anchor.href, 'third'));
+    actions.push(createWorkspaceAction(anchor.href, 'fourth'));
+  }
+
+  return actions
 }
 
 $.style(`
@@ -793,13 +926,23 @@ $.style(`
   }
 
   & [data-all-workspaces],
-  & [data-workspace] {
+  & .show-workspace {
     border: 1px solid var(--button-color, dodgerblue);
     background: var(--color, mediumpurple);
     background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
     color: var(--button-color, dodgerblue);
-    height: 100%;
     aspect-ratio: 1;
+    height: 100%;
+    opacity: .25;
+  }
+
+  & [data-all-workspaces]:hover,
+  & .show-workspace:hover,
+  & [data-all-workspaces]:focus,
+  & .show-workspace:focus,
+  & [data-all-workspaces].active,
+  & .show-workspace.active {
+    opacity: 1;
   }
 
   & .now {
@@ -814,6 +957,22 @@ $.style(`
     margin-left: auto;
   }
 
+  & .siri button {
+    font-weight: 100;
+    color: rgba(255,255,255,.65);
+    font-size: 2rem;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    display: inline-block;
+    margin: 1rem 0;
+    text-align: left;
+  }
+
+  & .siri button:hover,
+  & .siri button:focus {
+    color: rgba(255,255,255,1);
+  }
   & .zune {
     font-weight: 100;
     font-size: 2rem;
@@ -902,5 +1061,20 @@ $.style(`
   & [data-media] {
     margin-left: auto;
     font-weight: 400;
+  }
+
+  & .siri {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 1);
+    backdrop-filter: blur(150px);
+    z-index: 9001;
+  }
+
+  & .siri:not(:empty) {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
   }
 `)

@@ -21,8 +21,8 @@ $.draw(target => {
   `
 })
 
-$.when('click', 'button', async (event) => {
-  const root = event.target.closest($.link)
+export async function actionScript(event) {
+  const root = event.target.closest($.link) || event.target.closest('.'+$.link)
   const { action, script, saga } = root.dataset
   if(script) {
     const dispatch = (await import(script))[action]
@@ -35,7 +35,9 @@ $.when('click', 'button', async (event) => {
   if(saga) {
     paste(saga, event.target, {})
   }
-})
+}
+
+$.when('click', 'button', actionScript)
 
 function paste(nextSaga, target, options={}) {
   // first issue: []
