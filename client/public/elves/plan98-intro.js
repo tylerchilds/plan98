@@ -105,15 +105,6 @@ text: Middle Earth
 
   return `
     <div class="zune">
-      <div class="zune-bar">
-        <button data-system>
-          9
-        </button>
-        <button data-media>
-          <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
-        </button>
-        <audio name="walkman" src="${currentTrack}"></audio>
-      </div>
       ${alphabetical(playlist)}
     </div>
   `
@@ -128,27 +119,38 @@ $.when('click', '[data-media]', (event) => {
   $.teach({ audioPlaying: !audioPlaying })
 })
 
+$.when('click', 'a[href^="#"]', (event) => {
+  event.preventDefault()
+  const [_,name] = event.target.href.split('#')
+  const tile = event.target.closest($.link).querySelector(`[name="${name}"]`)
+  tile.scrollIntoView()
+})
+
 function alphabetical(xmlHTML) {
   var sorter = natsort();
   const page = new DOMParser().parseFromString(xmlHTML, "text/html");
   const node = page.querySelector('xml-html')
   const children = [...node.children]
   const usedLetters = {}
+
   children.sort(function(a, b) {
     return sorter(a.innerText, b.innerText);
   }).map((x) => {
+    const tile = document.createElement('div')
+    tile.classList.add('tile')
     if(!x.innerText) return
     const lowerFirst = x.innerText[0].toLowerCase()
     if(!usedLetters[lowerFirst]) {
       usedLetters[lowerFirst] = true
-      const letter = document.createElement('div')
-      letter.innerHTML = `<a name="${$.link}-${lowerFirst}"></a><span class="category">${lowerFirst}</span>`
-      node.appendChild(letter)
+      tile.innerHTML = `<a name="${$.link}-${lowerFirst}"></a><a class="category" href="#back-to-top">${lowerFirst}</a>`
     }
 
-    node.appendChild(x)
+    x.classList.add('app-action')
+    tile.appendChild(x)
+    node.appendChild(tile)
   });
   return `
+    <a name="back-to-top"></a>
     <div class="categories">
       ${
         Object
@@ -191,11 +193,20 @@ $.when('click', '[data-close-context]', (event) => {
 })
 
 $.draw((target) => {
-  const { suggestions, contextActions, first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, now } = $.learn()
+  const { audioPlaying, currentTrack, suggestions, contextActions, first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, now } = $.learn()
 
   const contextMenu = contextActions ? createContext(contextActions) : ''
 
   return `
+    <div class="zune-bar">
+      <button data-system>
+        9
+      </button>
+      <button data-media>
+        <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
+      </button>
+      <audio name="walkman" src="${currentTrack}"></audio>
+    </div>
     <div class="siri">${contextMenu}</div>
     <div class="wall ${!menu ? 'broken':''}">
       ${started ? zune() : `
@@ -288,7 +299,7 @@ text: Connect
 
 function renderWorkspaceView(key) {
   const data = $.learn()
-  if(!data[key]) return ''
+  if(!data[key]) return `<button data-create="${key}">Create</button>`
 
   return `
       <iframe src="${data[key]}" class="${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
@@ -524,7 +535,7 @@ export function handleSuperKey(event) {
   }
 }
 
-$.when('click', '.zune xml-html a', (event) => {
+$.when('click', '.zune .app-action', (event) => {
   event.preventDefault()
 
   const actions = rules(event.target)
@@ -800,7 +811,7 @@ $.style(`
     background: var(--color, mediumpurple);
   }
 
-  & .fourth iframe {
+  & .fourth > * {
     display: none;
   }
   & .fourth .active {
@@ -808,7 +819,7 @@ $.style(`
     grid-area: all;
   }
 
-  & .fourth.show-all iframe {
+  & .broken + .show-all > * {
     grid-area: initial;
     display: block;
   }
@@ -820,7 +831,7 @@ $.style(`
     position: absolute;
     inset: 0;
     z-index: 2;
-    padding-bottom: 3rem;
+    padding: 2rem 0 3rem;
     display: grid;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr;
@@ -1057,6 +1068,16 @@ $.style(`
     padding: 1rem;
   }
 
+  & .zune .tile {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  & .app-action {
+    margin: 1rem 0;
+    display: block;
+  }
+
   & .zune a:link,
   & .zune a:visited {
     color: rgba(255,255,255,.65);
@@ -1084,6 +1105,8 @@ $.style(`
     left: 0;
     right: 0;
     display: flex;
+    height: 2rem;
+    z-index: 9001;
   }
 
   & .zune xml-html {
@@ -1091,13 +1114,18 @@ $.style(`
   }
 
   & .category {
-    margin-top: 1rem;
-    margin-right: 1rem;
+    margin: 1rem 1rem 0 0;
     display: inline-block;
     padding: 1rem 1rem 0 .25rem;
     border: 1px solid rgba(255,255,255,.65);
     line-height: 1;
     aspect-ratio: 1;
+    opacity: .65;
+  }
+
+  & .category:hover,
+  & .category:focus {
+    opacity: 1;
   }
 
   & [data-media],
@@ -1132,12 +1160,12 @@ $.style(`
     inset: 0;
     background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(150px);
-    z-index: 9001;
+    z-index: 9000;
   }
 
   & .siri:not(:empty) {
     display: flex;
     flex-direction: column;
-    padding: 1rem;
+    padding: 3rem 1rem;
   }
 `)
