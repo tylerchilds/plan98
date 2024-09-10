@@ -273,9 +273,11 @@ $.style(`
     background: black;
     border: none;
     color: white;
-    padding: .5rem 1rem;
+    padding: 0 .5rem;
+    height: 2rem;
+    font-size: 1rem;
     opacity: .8;
-    transition: opacity: 200ms;
+    transition: opacity 200ms;
   }
 
   & [data-close]:hover,

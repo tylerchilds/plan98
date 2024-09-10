@@ -362,8 +362,9 @@ function afterUpdate(target) {
 }
 
 $.when('click','[data-system]', (event) => {
+  const { contextActions } = $.learn()
   $.teach({
-    contextActions: [
+    contextActions: contextActions ? null : [
       {
         text: 'escape',
         action: 'escape',
@@ -570,7 +571,8 @@ function createWorkspaceAction(href, workspace) {
 export function setWorkspace(event) {
   if(!event.target.dataset) return
   const { workspace, href } = event.target.dataset
-  $.teach({ menu: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
+  const customApp = href.endsWith('.saga') ? `/app/hyper-script?src=${href}`: href
+  $.teach({ menu: false, activeWorkspace: workspace, [workspace]: customApp, contextActions: null })
 }
 
 

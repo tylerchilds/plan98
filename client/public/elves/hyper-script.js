@@ -506,7 +506,7 @@ $.style(`
 
   & .actions {
     z-index: 10;
-    background: #54796d;
+    background: transparent;
     border-bottom: 1px solid rgba(255,255,255,.25);
     position: absolute;
     top: 0;
@@ -522,11 +522,11 @@ $.style(`
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: .5rem;
     font-size: 1rem;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 800;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
     transition: background 200ms ease-in-out;
@@ -921,6 +921,7 @@ $.style(`
 
   & .menu-actions  button {
     width: 100%;
+    text-align: left;
   }
 
 `)

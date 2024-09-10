@@ -82,7 +82,6 @@ $.draw(target => {
 
   if(file && !target.view) {
     const amp = `
-      <div class="actions">
         <div class="menu-item">
           <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
             File
@@ -93,18 +92,21 @@ $.draw(target => {
             <button class="publish">Publish</button>
           </div>
         </div>
-      </div>
     `
 
     target.innerHTML = stack ? `
-      <select class="select">
-        ${stack.split(',').map((filename) => {
-          return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
-        }).join('')}
-      </select>
-      ${amp}
+      <div class="actions">
+        ${amp}
+        <select class="select menu-item right">
+          ${stack.split(',').map((filename) => {
+            return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
+          }).join('')}
+        </select>
+      </div>
     `: `
-      ${amp}
+      <div class="actions">
+        ${amp}
+      </div>
     `
 
     const config = {
@@ -153,6 +155,11 @@ $.style(`
     width: 100%;
     max-width: 100%;
     text-overflow: ellipsis;
+    background: black;
+    color: rgba(255,255,255,.65);
+    border: none;
+    padding: 0 .5rem;
+    height: 2rem;
   }
 
   & .cm-content {
@@ -173,13 +180,15 @@ $.style(`
 
   & .actions {
     z-index: 10;
-    background: #54796d;
+    background: transparent;
     border-bottom: 1px solid rgba(255,255,255,.25);
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     display: flex;
+    height: 2rem;
+    padding-right: 2rem;
   }
 
   & .actions button {
@@ -187,13 +196,13 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
+    height: 2rem;
     font-size: 1rem;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 800;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
     transition: background 200ms ease-in-out;
@@ -239,8 +248,12 @@ $.style(`
 
   & .menu-actions  button {
     width: 100%;
+    text-align: left;
   }
 
+  & .menu-item.right {
+    margin-left: auto;
+  }
 
 `)
 
