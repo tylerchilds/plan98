@@ -76,18 +76,23 @@ $.when('change', 'select', (event) => {
 
 
 $.draw(target => {
-  const { src } = $.learn()
+  const { src, activeMenu } = $.learn()
   const { file } = sourceFile(target)
   const stack = target.getAttribute('stack')
 
   if(file && !target.view) {
     const amp = `
       <div class="actions">
-        <button class="preview" data-src="${src}">Preview</button>
-        <button class="privatize">Privatize</button>
-      </div>
-      <div name="navi">
-        <button class="publish">Publish</button>
+        <div class="menu-item">
+          <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+            File
+          </button>
+          <div class="menu-actions" data-menu="file">
+            <button class="preview" data-src="${src}">Preview</button>
+            <button class="privatize">Privatize</button>
+            <button class="publish">Publish</button>
+          </div>
+        </div>
       </div>
     `
 
@@ -166,38 +171,21 @@ $.style(`
     right: 0;
   }
 
-  & .action-accordion {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 50px;
-    height: 50px;
-    background: rgba(0,0,0,.65);
-    border: 2px solid dodgerblue;
-    color: rgba(255,255,255,.85);
-    border-radius: 100%;
-    opacity: .5;
-    transition: all 200ms ease-in-out;
-    z-index: 10;
-  }
-  & .action-accordion:hover {
-    background: dodgerblue;
-    border: 2px solid rgba(255,255,255,1);
-    opacity: 1;
-  }
   & .actions {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    text-align: right;
     z-index: 10;
+    background: #54796d;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
   }
 
   & .actions button {
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: black;
+    color: rgba(255,255,255,.85);
     border: none;
-    line-height: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: .5rem;
     font-size: 1rem;
@@ -215,8 +203,8 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background: saddlebrown;
-    color: lemonchiffon;
+    color: #fff;
+    background: #54796d;
   }
 
   & [name="navi"] {
@@ -232,30 +220,25 @@ $.style(`
     z-index: 3;
   }
 
-  & [name="navi"] button {
-    pointer-events: all;
-    background: lemonchiffon;
-    color: saddlebrown;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    border: none;
-    height: 2rem;
-    transition: color 100ms;
-    padding: .5rem 1rem;
-  font-size: 1rem;
-  --v-font-mono: 0;
-  --v-font-casl: 1;
-  --v-font-wght: 800;
-  --v-font-slnt: -15;
-  --v-font-crsv: 1;
-  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-  font-family: "Recursive";
-  transition: background 200ms ease-in-out;
+  & .menu-item {
+    position: relative;
   }
 
-  & [name="navi"] button:hover,
-  & [name="navi"] button:focus {
-    background: saddlebrown;
-    color: lemonchiffon;
+  & .menu-actions {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
+    background: #54796d;
+  }
+
+  & [data-menu-target].active + .menu-actions {
+    display: block;
+  }
+
+  & .menu-actions  button {
+    width: 100%;
   }
 
 
@@ -266,3 +249,22 @@ $.when('click', '.action-accordion', async (event) => {
 })
 
 function schedule(x, delay=1) { setTimeout(x, delay) }
+
+$.when('click', '[data-menu-target]', (event) => {
+  const active = event.target.closest($.link).querySelector(`[data-menu-target].active`)
+  if(active){
+    active.classList.remove('active')
+  }
+
+  event.target.classList.add('active')
+  event.stopImmediatePropagation()
+})
+
+$.when('click', '*', () => {
+  $.teach({ activeMenu: null })
+  const active = event.target.querySelector(`[data-menu-target].active`)
+  if(active){
+    active.classList.remove('active')
+  }
+})
+

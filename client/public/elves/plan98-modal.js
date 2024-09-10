@@ -101,7 +101,9 @@ let hideListener = (event) => {
   }
 }
 
+let onHide
 export function showModal(nextBody, options = {}) {
+  onHide = options.onHide
   document.body.classList.add('trap-modal')
   self.addEventListener('keydown', hideListener);
 
@@ -125,6 +127,10 @@ export function showModal(nextBody, options = {}) {
 window.showModal = showModal
 
 export function hideModal() {
+  if(onHide) {
+    onHide()
+    onHide = null
+  }
   const { isOpen, layer } = $.learn()
 
   const nextLayer = layer - 1

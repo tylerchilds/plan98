@@ -299,7 +299,7 @@ text: Connect
 
 function renderWorkspaceView(key) {
   const data = $.learn()
-  if(!data[key]) return `<button data-create="${key}">Create</button>`
+  if(!data[key]) return `<div class="empty-pane"><button data-create="${key}" data-tooltip="create" aria-label="create"></button></div>`
 
   return `
       <iframe src="${data[key]}" class="${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
@@ -362,8 +362,22 @@ function afterUpdate(target) {
 }
 
 $.when('click','[data-system]', (event) => {
-  window.dispatchEvent(new KeyboardEvent("keydown",{'key': 'Escape'}));
+  $.teach({
+    contextActions: [
+      {
+        text: 'escape',
+        action: 'escape',
+        script: import.meta.url
+      }
+    ]
+  })
 })
+
+export function escape() {
+  $.teach({ contextActions: null })
+  hideModal()
+  window.dispatchEvent(new KeyboardEvent("keydown",{'key': 'Escape'}));
+}
 
 $.when('click','.now', (event) => {
   return
@@ -821,7 +835,6 @@ $.style(`
 
   & .broken + .show-all > * {
     grid-area: initial;
-    display: block;
   }
 
   & .broken + .fourth {
@@ -1167,5 +1180,31 @@ $.style(`
     display: flex;
     flex-direction: column;
     padding: 3rem 1rem;
+  }
+
+  & [data-create] {
+    background: lemonchiffon;
+    border: none;
+    border-radius: none;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+  }
+
+  & [data-create]::before{
+    content: '';
+    display: block;
+    width: 6rem;
+    height: 6rem;
+    background-color: #E83FB8;
+    border-radius: 100%;
+  }
+
+  & .empty-pane {
+    place-items: center;
+    display: none;
+  }
+
+  & .show-all .empty-pane {
+    display: grid;
   }
 `)

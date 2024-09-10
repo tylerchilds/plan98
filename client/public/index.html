@@ -7,9 +7,9 @@
     <title>&lt;:-)</title>
     <style>
       :root {
-        --shadow: 0px 0px 4px 4px rgba(0,0,0,.10),
-                  0px 0px 12px 12px rgba(0,0,0,.5),
-                  0px 0px 36px 36px rgba(0,0,0,.25);
+        --shadow: 0px 0px 2px 2px rgba(0,0,0,.25),
+                  0px 0px 6px 6px rgba(0,0,0,.15),
+                  0px 0px 2rem 2rem rgba(0,0,0,.05);
       }
       html, body {
         height: 100%;
@@ -292,8 +292,10 @@
         }
       });
       function normalMode() {
-        debug = false
-        hideModal()
+        if(debug) {
+          debug = false
+          hideModal()
+        }
       }
 
       function debugMode() {
@@ -304,7 +306,7 @@
               <source-code></source-code>
             </div>
           </div>
-        `, { centered: true })
+        `, { centered: true, onHide: normalMode })
       }
 
     </script>
