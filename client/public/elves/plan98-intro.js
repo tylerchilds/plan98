@@ -60,6 +60,7 @@ const $ = elf('plan98-intro', {
 $.when('click', '.action-script', actionScript)
 
 function zune() {
+  const { audioPlaying, currentTrack } = $.learn()
   const playlist = render(`
 <a
 href: /app/hello-bluesky
@@ -109,13 +110,23 @@ text: Middle Earth
           9
         </button>
         <button data-media>
-          Now Playing
+          <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
         </button>
+        <audio name="walkman" src="${currentTrack}"></audio>
       </div>
       ${alphabetical(playlist)}
     </div>
   `
 }
+
+$.when('click', '[data-media]', (event) => {
+  const { audioPlaying } = $.learn()
+  const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
+
+  audioPlaying ? walkman.pause() : walkman.play()
+
+  $.teach({ audioPlaying: !audioPlaying })
+})
 
 function alphabetical(xmlHTML) {
   var sorter = natsort();
@@ -131,7 +142,7 @@ function alphabetical(xmlHTML) {
     if(!usedLetters[lowerFirst]) {
       usedLetters[lowerFirst] = true
       const letter = document.createElement('div')
-      letter.innerHTML = `<span id="${$.link}-${lowerFirst}" class="category">${lowerFirst}</span>`
+      letter.innerHTML = `<a name="${$.link}-${lowerFirst}"></a><span class="category">${lowerFirst}</span>`
       node.appendChild(letter)
     }
 
@@ -440,9 +451,12 @@ $.when('keydown', '[name="search"]', event => {
 
 $.when('click', '.auto-item', event => {
   event.preventDefault()
-  const url = '/app/media-plexer?src=' +event.target.dataset.path
-  updateActiveWorkspace(url)
-  $.teach({  suggestIndex: parseInt(event.target.dataset.index) })
+
+  const target = document.createElement('a')
+  target.href = event.target.dataset.path
+  const contextActions = rules(target)
+  //updateActiveWorkspace(url)
+  $.teach({ contextActions, suggestIndex: parseInt(event.target.dataset.index) })
 })
 
 $.when('input', '[name="search"]', (event) => {
@@ -452,7 +466,7 @@ $.when('input', '[name="search"]', (event) => {
 })
 
 $.when('focus', '[name="search"]', event => {
-  $.teach({ focused: true })
+  $.teach({ started: true, focused: true })
 })
 
 $.when('blur', '[name="search"]', event => {
@@ -529,6 +543,7 @@ function createWorkspaceAction(href, workspace) {
 }
 
 export function setWorkspace(event) {
+  if(!event.target.dataset) return
   const { workspace, href } = event.target.dataset
   $.teach({ menu: false, activeWorkspace: workspace, [workspace]: href, contextActions: null })
 }
@@ -560,7 +575,11 @@ function createPlayAction(href) {
 
 export function playNow(event) {
   const { href } = event.target.dataset
-  alert(href)
+
+  const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
+  walkman.src = href
+  walkman.play()
+  $.teach({ audioPlaying: true, currentTrack: href, contextActions: null })
 }
 
 function createPlaylistAction(href) {
@@ -592,6 +611,26 @@ export function queuePlay(event) {
   alert(href)
 }
 
+function createPreviewAction(href) {
+  return {
+    text: 'preview',
+    action: 'preview',
+    script: import.meta.url,
+    href
+  }
+}
+
+export function preview(event) {
+  const { href } = event.target.dataset
+
+  const url = '/app/media-plexer?src=' + href
+
+  showModal(`
+    <iframe src="${url}" style="width: 100%;border: none; height: 100%;"></iframe>
+  `)
+}
+
+
 function rules(anchor) {
   const actions = []
 
@@ -609,6 +648,8 @@ function rules(anchor) {
     actions.push(createWorkspaceAction(anchor.href, 'third'));
     actions.push(createWorkspaceAction(anchor.href, 'fourth'));
   }
+
+  actions.push(createPreviewAction(anchor.href, 'fourth'));
 
   return actions
 }

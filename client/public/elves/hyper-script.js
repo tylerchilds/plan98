@@ -91,7 +91,7 @@ const $ = module('hyper-script', {
 
 $.draw((target) => {
   const { id } = target
-  const { activePanel, nextPanel, shotCount, activeShot, lastAction } = $.learn()
+  const { activePanel, nextPanel, shotCount, activeShot, lastAction, activeMenu } = $.learn()
   const { file } = sourceFile(target)
 
   if(target.lastPanel !== activePanel) {
@@ -108,9 +108,6 @@ $.draw((target) => {
       return `
         <div name="write">
           <textarea name="typewriter">${escapedFile}</textarea>
-          <div name="navi">
-            <button data-publish>Publish</button>
-          </div>
         </div>
       `
     },
@@ -120,9 +117,6 @@ $.draw((target) => {
         <div name="read">
           <div name="page" class="screenplay">
             ${html}
-          </div>
-          <div name="navi">
-            <button data-print>Print</button>
           </div>
         </div>
       `
@@ -173,10 +167,27 @@ $.draw((target) => {
 
   const perspective = `
     <div class="actions">
-      <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Editor</button>
-      <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Paper</button>
-      <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Slideshow</button>
-      ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
+      <div class="menu-item">
+        <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+          File
+        </button>
+        <div class="menu-actions" data-menu="file">
+          <button data-publish>Publish</button>
+          <button data-print>Print</button>
+        </div>
+      </div>
+      <div class="menu-item">
+        <button data-menu-target="view" class="${activeMenu === 'view'?'active':''}">
+          View
+        </button>
+        <div class="menu-actions" data-menu="view">
+          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Editor</button>
+          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Paper</button>
+          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Slideshow</button>
+          ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
+        </div>
+      </div>
+
     </div>
     <div class="grid" data-panel="${activePanel}">
       <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
@@ -241,6 +252,12 @@ $.when('input', '[name="typewriter"]', (event) => {
 
 $.when('click', '[data-read]', (event) => {
   $.teach({ nextPanel: panels.read })
+})
+
+$.when('click', '[data-menu-target]', (event) => {
+  const { menuTarget } = event.target.dataset
+  $.teach({ activeMenu: menuTarget })
+  event.stopImmediatePropagation()
 })
 
 $.when('click', '[data-print]', async (event) => {
@@ -487,44 +504,22 @@ $.style(`
   & [name="transport"] {
   }
 
-  & [name="navi"] button {
-    background: lemonchiffon;
-    color: saddlebrown;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    border: none;
-    height: 2rem;
-    transition: color 100ms;
-    padding: .5rem 1rem;
-  font-size: 1rem;
-  --v-font-mono: 0;
-  --v-font-casl: 1;
-  --v-font-wght: 800;
-  --v-font-slnt: -15;
-  --v-font-crsv: 1;
-  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-  font-family: "Recursive";
-  transition: background 200ms ease-in-out;
-  }
-
-  & [name="navi"] button:hover,
-  & [name="navi"] button:focus {
-    background: saddlebrown;
-    color: lemonchiffon;
-  }
-
   & .actions {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    text-align: right;
     z-index: 10;
+    background: #54796d;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+
   }
 
   & .actions button {
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: black;
+    color: rgba(255,255,255,.85);
     border: none;
-    line-height: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: .5rem;
     font-size: 1rem;
@@ -544,8 +539,8 @@ $.style(`
   & .joke-actions button.active,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background: saddlebrown;
-    color: lemonchiffon;
+    color: #fff;
+    background: #54796d;
   }
 
 
@@ -666,7 +661,7 @@ $.style(`
   & [name="read"] {
     margin: 0 auto;
     overflow: auto;
-    background: rgba(128,128,128,1);
+    background: #54796d;
   }
   & [name="page"] {
     background: white;
@@ -907,6 +902,32 @@ $.style(`
     height: 100%;
     width: 100%;
   }
+
+  & .menu-item {
+    position: relative;
+  }
+
+  & .menu-actions {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
+    background: #54796d;
+  }
+
+  & [data-menu-target].active + .menu-actions {
+    display: block;
+  }
+
+  & .menu-actions  button {
+    width: 100%;
+  }
+
 `)
 
+
 function schedule(x, delay=1) { setTimeout(x, delay) }
+$.when('click', '*', () => {
+  $.teach({ activeMenu: null })
+})

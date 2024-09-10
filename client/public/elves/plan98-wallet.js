@@ -115,7 +115,7 @@ $.style(`
     position: relative;
     height: 100%;
     place-items: center;
-    background: rgba(128,128,128,1);
+    background: #54796d;
   }
 
   & [data-back] {
@@ -131,7 +131,6 @@ $.style(`
   }
 
   & .paper {
-    background: rgba(255,255,255,.85);
     width: 100%;
     height: 100%;
   }

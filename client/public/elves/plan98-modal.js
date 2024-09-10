@@ -44,7 +44,7 @@ $.draw(() => {
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
-        <button data-close>Close</button>
+        <button data-close><sl-icon name="x-circle"></sl-icon></button>
       </div>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
@@ -161,7 +161,7 @@ $.style(`
   .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
-    background: rgba(255,255,255, .75);
+    background: black;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -259,15 +259,13 @@ $.style(`
     top: 0;
     left: 0;
     right: 0;
-    text-align: center;
+    text-align: right;
     z-index: 1101;
-    padding: 1rem;
   }
   & [data-close] {
     pointer-events: all;
     background: black;
     border: none;
-    border-radius: 1rem;
     color: white;
     padding: .5rem 1rem;
     opacity: .8;

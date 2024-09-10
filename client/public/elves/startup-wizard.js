@@ -165,7 +165,7 @@ $.style(`
   }
 
   & .desktop {
-    background: rgba(128,128,128,1);
+    background: #54796d;
     width: 100%;
     height: 100%;
   }
