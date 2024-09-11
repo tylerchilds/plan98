@@ -634,7 +634,7 @@ $.when('click', '.zune .app-action', (event) => {
 
 function createWorkspaceAction(href, workspace) {
   return {
-    text: 'replace ' + workspace + ' window pane',
+    text: workspace + ' pane',
     action: 'setWorkspace',
     script: import.meta.url,
     href,
