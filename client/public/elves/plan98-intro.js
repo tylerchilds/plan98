@@ -216,7 +216,7 @@ $.draw((target) => {
       <audio name="walkman" src="${currentTrack}"></audio>
       <button data-playlist>
         <span class="marquee">
-          Select Track alsd kfalsdk fnalskdfn s
+          Sum 41 - In Too Deep - All Killer No Filler
         </span>
 
         <span class="system-button -nested">
@@ -401,6 +401,11 @@ $.when('click','[data-system]', (event) => {
   $.teach({
     contextActions: contextActions ? null : [
       {
+        text: 'identity',
+        action: 'identity',
+        script: import.meta.url
+      },
+      {
         text: 'escape',
         action: 'escape',
         script: import.meta.url
@@ -408,6 +413,22 @@ $.when('click','[data-system]', (event) => {
     ]
   })
 })
+
+export function identity(event) {
+  const { contextActions } = $.learn()
+  showModal(`
+    <plan98-wallet></plan98-wallet>
+  `, { onHide: restoreContext(contextActions) })
+}
+
+function restoreContext(contextActions) {
+  return function thunk() {
+    const wallet = document.querySelector('plan98-modal plan98-wallet')
+
+    if(wallet) wallet.remove()
+    $.teach({ contextActions })
+  }
+}
 
 export function escape() {
   $.teach({ contextActions: null })
@@ -430,7 +451,7 @@ $.when('click','.now', (event) => {
 })
 
 $.when('click','[data-playlist]', (event) => {
-  $.teach({ playlistVisible: !$.learn().playlistVisible })
+  $.teach({ playlistVisible: !$.learn().playlistVisible, contextActions: null })
 })
 
 $.when('click','.show-workspace', (event) => {
@@ -1244,7 +1265,7 @@ $.style(`
     font-size: 1rem;
     background: transparent;
     color: rgba(255,255,255,.85);
-    padding: 9px;
+    padding: 0 9px;
   }
 
   & .system-button.-large {
@@ -1288,6 +1309,7 @@ $.style(`
     animation: &-marquee-track 15000ms linear infinite alternate;
     white-space: nowrap;
     display: inline-block;
+    line-height: 2rem;
   }
 
   @keyframes &-marquee-track {

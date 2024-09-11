@@ -159,6 +159,7 @@ $.style(`
     background: black;
     color: rgba(255,255,255,.65);
     border: none;
+    border-radius: 0;
     padding: 0 .5rem;
     height: 2rem;
   }

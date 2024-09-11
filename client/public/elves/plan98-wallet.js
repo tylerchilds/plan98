@@ -57,21 +57,26 @@ export function setupSaga(nextSaga, target, options={}) {
           }
         }
       )
-      schedule(() => {
-        root.innerHTML = `
-          <div class="paper">
-            <div class="wrapper screenplay">
-              <a href="javascript:;" data-history-back>Back</a>
-              ${render(saga)}
-            </div>
-          </div>
-        `
-      })
+      showSaga(root, saga)
     })
     .catch(e => {
       console.error(e)
     })
 }
+
+function showSaga(root, saga) {
+  schedule(() => {
+    root.innerHTML = `
+      <div class="paper">
+        <div class="wrapper screenplay">
+          <a href="javascript:;" data-history-back>Back</a>
+          ${render(saga)}
+        </div>
+      </div>
+    `
+  })
+}
+
 
 $.when('click', '[data-history-back]', () => {
   history.back()
@@ -105,6 +110,8 @@ $.draw((target) => {
   if(!content) {
     setupSaga(start, target)
   }
+
+  showSaga(target, content)
 })
 
 $.style(`

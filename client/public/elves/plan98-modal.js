@@ -25,7 +25,7 @@ const $ = module('plan98-modal', {
 
 export default $
 
-$.draw(() => {
+$.draw((target) => {
   const {
     body,
     isOpen,
