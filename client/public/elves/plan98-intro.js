@@ -266,29 +266,31 @@ text: Connect
       </div>
     </div>
 
-    <div class="nav">
-      <form class="search" method="get">
-        <div class="input-grid">
-          <div class="logo-wrapper">
-            <plan98-logo></plan98-logo>
+    <div class="nav-wrapper">
+      <div class="nav">
+        <form class="search" method="get">
+          <div class="input-grid">
+            <div class="logo-wrapper">
+              <plan98-logo></plan98-logo>
+            </div>
+            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
+            <button tab-index="1" type="submit">
+              <sl-icon name="search"></sl-icon>
+            </button>
           </div>
-          <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-          <button tab-index="1" type="submit">
-            <sl-icon name="search"></sl-icon>
+        </form>
+        <div class="workspaces">
+          ${renderWorkspaceToggle('first', '1')}
+          ${renderWorkspaceToggle('second', '2')}
+          ${renderWorkspaceToggle('third', '3')}
+          ${renderWorkspaceToggle('fourth', '4')}
+          <button class="now">
+            ${now}
+          </button>
+          <button data-all-workspaces ${allActive ? 'class="active"' : ''}>
+            <sl-icon name="grid"></sl-icon>
           </button>
         </div>
-      </form>
-      <div class="workspaces">
-        ${renderWorkspaceToggle('first', '1')}
-        ${renderWorkspaceToggle('second', '2')}
-        ${renderWorkspaceToggle('third', '3')}
-        ${renderWorkspaceToggle('fourth', '4')}
-        <button class="now">
-          ${now}
-        </button>
-        <button data-all-workspaces ${allActive ? 'class="active"' : ''}>
-          <sl-icon name="grid"></sl-icon>
-        </button>
       </div>
     </div>
   `
@@ -963,6 +965,8 @@ $.style(`
 
   & .input-grid .logo-wrapper {
     aspect-ratio: 1;
+    position: sticky;
+    left: 0;
   }
 
   & .input-grid [type="submit"] {
@@ -998,22 +1002,29 @@ $.style(`
     z-index: 2;
   }
 
-  & .nav {
+  & .nav-wrapper {
+    transform: rotateX(180deg);
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 4;
+    z-index: 2;
+    overflow: auto;
+    height: calc(3rem+10px);
+    padding-bottom: 10px;
+  }
+  & .nav {
+    transform: rotateX(-180deg);
     background: var(--color);
     background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
-    display: grid;
-    grid-template-columns: auto 1fr;
-    overflow: auto;
+    display: flex;
     height: 3rem;
   }
 
   & .workspaces {
     display: flex;
+    width: 100%;
   }
 
   & [data-all-workspaces],
@@ -1182,6 +1193,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     padding: 3rem 1rem;
+    overflow: auto;
   }
 
   & [data-create] {
@@ -1206,7 +1218,11 @@ $.style(`
     display: none;
   }
 
-  & .show-all .empty-pane {
+  & .show-all > .empty-pane {
     display: grid;
+  }
+
+  & .show-all > iframe {
+    display: block;
   }
 `)

@@ -272,18 +272,17 @@ $.style(`
     pointer-events: all;
     background: black;
     border: none;
-    color: white;
-    padding: 0 .5rem;
+    color: rgba(255,255,255,.65);
+    padding: 9px;
     height: 2rem;
     font-size: 1rem;
-    opacity: .8;
-    transition: opacity 200ms;
+    transition: color 200ms;
   }
 
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    opacity: 1;
+    color: rgba(255,255,255,1);
   }
 
   & [data-close] * {

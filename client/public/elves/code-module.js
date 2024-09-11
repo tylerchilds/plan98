@@ -149,6 +149,7 @@ $.style(`
     max-height: 100%;
     position: relative;
     padding-top: 2rem;
+    background: mediumseagreen;
   }
 
   & select {
@@ -187,7 +188,6 @@ $.style(`
     left: 0;
     right: 0;
     display: flex;
-    height: 2rem;
     padding-right: 2rem;
   }
 
@@ -255,6 +255,28 @@ $.style(`
     margin-left: auto;
   }
 
+  & .cm-editor .cm-gutters {
+    background: black;
+    color: rgba(255,255,255,.65);
+  }
+
+  & .cm-editor .cm-content {
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+  }
+
+  & .cm-editor .cm-activeLine {
+    background: mediumseagreen;
+    color: white;
+  }
+
+  & .cm-editor .cm-activeLineGutter {
+    background: mediumseagreen;
+  }
+
+  & .cm-editor .cm-cursor {
+    border-left-color: white;
+  }
 `)
 
 $.when('click', '.action-accordion', async (event) => {
