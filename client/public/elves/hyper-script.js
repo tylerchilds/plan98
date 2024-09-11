@@ -136,18 +136,6 @@ $.draw((target) => {
               </div>
             </div>
           </div>
-          <div name="navi"
-            ${activeShot === 0 ? 'data-first' : ''}
-            ${activeShot === shotCount ? 'data-last' : ''}
-          >
-            <button data-back>
-              Back
-            </button>
-            <input id="shot-slot" data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
-            <button data-next>
-              Next
-            </button>
-          </div>
         </div>
       `
     },
@@ -164,6 +152,25 @@ $.draw((target) => {
 
   const view = (views[activePanel] || views['default'])()
   const fadeOut = nextPanel && activePanel !== nextPanel
+
+  const navi = activePanel === panels.perform ? `
+    <div name="navi"
+      ${activeShot === 0 ? 'data-first' : ''}
+      ${activeShot === shotCount ? 'data-last' : ''}
+    >
+      <button data-back>
+        <span>
+        <sl-icon name="arrow-left-circle"></sl-icon>
+        </span>
+      </button>
+      <input id="shot-slot" data-shot type="number" min="0" max="${shotCount}" value="${activeShot}"/>
+      <button data-next>
+        <span>
+        <sl-icon name="arrow-right-circle"></sl-icon>
+        </span>
+      </button>
+    </div>
+  ` : ``
 
   const perspective = `
     <div class="actions">
@@ -187,7 +194,7 @@ $.draw((target) => {
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>
-
+      ${navi}
     </div>
     <div class="grid" data-panel="${activePanel}">
       <transition class="${fadeOut ? 'out' : ''}" data-id="${id}">
@@ -204,7 +211,15 @@ $.draw((target) => {
   }
 
   return perspective
-})
+}, { beforeUpdate })
+
+function beforeUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      ogIcon.remove()
+    })
+  }
+}
 
 // the hyperSanitizer function turns fiction stories into non-fiction
 export function hyperSanitizer(script) {
@@ -560,15 +575,9 @@ $.style(`
   }
 
   & [name="navi"] {
-    position: absolute;
-    bottom: 1rem;
-    right: 1rem;
-    margin: auto;
+    margin-left: auto;
     height: 2rem;
     display: block;
-    text-align: center;
-    gap: .5rem;
-    z-index: 3;
   }
 
   & [name="theater"] {
@@ -717,11 +726,11 @@ $.style(`
   & [data-shot] {
     width: 6ch;
     border: none;
-    background: rgba(33,33,33,.85);
     color: white;
+    background: transparent;
+    border-color: 1px solid rgba(255,255,255,.65);
     text-align: center;
-    border-radius: 1rem;
-    padding: 0 .5rem;
+    height: 100%;
   }
 
   & [data-first] [data-back],
