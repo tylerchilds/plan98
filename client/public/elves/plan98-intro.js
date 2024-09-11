@@ -3,6 +3,7 @@ import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
 import { actionScript } from './action-script.js'
 import { showModal, hideModal } from '@plan98/modal'
+import { showPanel, hidePanel } from './plan98-panel.js'
 import natsort from 'natsort'
 
 const palette = [
@@ -59,9 +60,13 @@ const $ = elf('plan98-intro', {
 
 $.when('click', '.action-script', actionScript)
 
+function playlist() {
+  return`
+  play
+  `
+}
 function zune() {
-  const { audioPlaying, currentTrack } = $.learn()
-  const playlist = render(`
+  const bookmarks = render(`
 <a
 href: /app/hello-bluesky
 text: Hello Bluesky
@@ -105,7 +110,7 @@ text: Middle Earth
 
   return `
     <div class="zune">
-      ${alphabetical(playlist)}
+      ${alphabetical(bookmarks)}
     </div>
   `
 }
@@ -118,6 +123,12 @@ $.when('click', '[data-media]', (event) => {
 
   $.teach({ audioPlaying: !audioPlaying })
 })
+
+$.when('click', '[data-create]', (event) => {
+  const { create } = event.target.dataset
+  $.teach({ activeWorkspace: create, [create]: '/app/new-save' })
+})
+
 
 $.when('click', 'a[href^="#"]', (event) => {
   event.preventDefault()
@@ -193,21 +204,33 @@ $.when('click', '[data-close-context]', (event) => {
 })
 
 $.draw((target) => {
-  const { audioPlaying, currentTrack, suggestions, contextActions, first, second, third, fourth, allActive, activeWorkspace, menu, started, query, suggestIndex, focused, now } = $.learn()
+  const { audioPlaying, currentTrack, suggestions, contextActions, allActive, menu, started, query, suggestIndex, focused, now, playlistVisible } = $.learn()
 
   const contextMenu = contextActions ? createContext(contextActions) : ''
 
   return `
     <div class="zune-bar">
-      <button data-system>
+      <button data-system class="system-button">
         9
       </button>
-      <button data-media>
+      <button data-playlist>
+        <span class="marquee">
+          ok ok aslkdf asldf nasdlf kansdflk nasdlkfn
+        </span>
+      </button>
+      <button data-back-track class="system-button">
+        <sl-icon name="skip-backward-circle"></sl-icon>
+      </button>
+      <button data-media class="system-button">
         <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
+      </button>
+      <button data-next-track class="system-button">
+        <sl-icon name="skip-forward-circle"></sl-icon>
       </button>
       <audio name="walkman" src="${currentTrack}"></audio>
     </div>
     <div class="siri">${contextMenu}</div>
+    <div class="cortana ${playlistVisible ? 'active': ''}">${playlist()}</div>
     <div class="wall ${!menu ? 'broken':''}">
       ${started ? zune() : `
       <div class="hero">
@@ -396,10 +419,59 @@ $.when('click','.now', (event) => {
   `)
 })
 
+$.when('click','[data-playlist]', (event) => {
+  $.teach({ playlistVisible: !$.learn().playlistVisible })
+})
+
 $.when('click','.show-workspace', (event) => {
   event.preventDefault()
   $.teach({ allActive: false, menu: false, activeWorkspace: event.target.dataset.workspace })
 })
+
+$.when('contextmenu','.show-workspace', promptWorkspaceClear)
+
+function promptWorkspaceClear(event) {
+  event.preventDefault()
+  const { workspace } = event.target.dataset
+  $.teach({
+    contextActions: [
+      {
+        text: 'clear workspace',
+        action: 'clearWorkspace',
+        script: import.meta.url,
+        workspace
+      }
+    ]
+  })
+}
+
+export function clearWorkspace(event) {
+  const { workspace } = event.target.dataset
+  $.teach({  [workspace]: null, contextActions: null })
+}
+
+let clearWorkspaceTimer
+$.when('touchstart', '.show-workspace', startClearWatch)
+$.when('touchend', '.show-workspace', endClearWatch)
+
+$.when('mousedown', '.show-workspace', startClearWatch)
+$.when('mouseup', '.show-workspace', endClearWatch)
+
+function startClearWatch(event) {
+  if(clearWorkspaceTimer) {
+    clearTimeout(clearWorkspaceTimer)
+  }
+  clearWorkspaceTimer = setTimeout(() => {
+    promptWorkspaceClear(event)
+  }, 1000)
+}
+
+function endClearWatch(_event) {
+  if(clearWorkspaceTimer) {
+    clearTimeout(clearWorkspaceTimer)
+  }
+}
+
 
 $.when('click','[data-all-workspaces]', (event) => {
   event.preventDefault()
@@ -537,10 +609,10 @@ export function handleSuperKey(event) {
   if(document.querySelector('plan98-intro')) {
     const { menu, started } = $.learn()
     if(!started) {
-      $.teach({ started: true })
+      $.teach({ started: true, playlistVisible: false })
       return
     }
-    $.teach({ menu: !menu, started: true })
+    $.teach({ menu: !menu, started: true, playlistVisible: false })
     return
   }
 
@@ -696,6 +768,7 @@ $.style(`
     max-height: 100%;
     display: block;
     height: 100%;
+    overflow-x: hidden;
   }
   & .menu {
     position: absolute;
@@ -1081,6 +1154,7 @@ $.style(`
     font-size: 2rem;
     line-height: 1;
     background: black;
+    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.95)), linear-gradient(var(--color), var(--accent-color-0));
     color: rgba(255,255,255,.65);
     height: 100%;
     overflow-y: auto;
@@ -1154,9 +1228,8 @@ $.style(`
     opacity: 1;
   }
 
-  & [data-media],
-  & [data-system] {
-    font-weight: 1000;
+  & .system-button {
+    font-weight: 400;
     border: none;
     font-size: 1rem;
     background: black;
@@ -1164,10 +1237,8 @@ $.style(`
     padding: 9px;
   }
 
-  & [data-media]:hover,
-  & [data-media]:focus,
-  & [data-system]:hover,
-  & [data-system]:focus {
+  & .system-button:hover,
+  & .system-button:focus {
     color: rgba(255,255,255,1);
   }
 
@@ -1175,11 +1246,51 @@ $.style(`
     font-weight: 1000;
   }
 
-  & [data-media] {
+  & [data-playlist] {
     margin-left: auto;
-    font-weight: 400;
+    margin-right: 1rem;
+    background: black;
+    border: none;
+    overflow: hidden;
+    max-width: 120px;
+    color: rgba(255,255,255,.65);
   }
 
+  & .marquee {
+    pointer-events: none;
+    animation: &-marquee-track 15000ms linear infinite alternate;
+    white-space: nowrap;
+    display: inline-block;
+  }
+
+  @keyframes &-marquee-track {
+    0% {
+      transform: translateX(20px);
+    }
+
+    100% {
+      transform: translateX(calc(-100% + 100px));
+    }
+  }
+
+  & .cortana {
+    position: absolute;
+    top: 2rem;
+    right: 0;
+    bottom: 3rem;
+    max-width: 320px;
+    width: 100%;
+    z-index: 8999;
+    transform: translateX(100%);
+    transition: transform 100ms ease-out;
+    background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
+    backdrop-filter: blur(150px);
+  }
+
+
+  & .cortana.active {
+    transform: translateX(0);
+  }
   & .siri {
     display: none;
     position: absolute;

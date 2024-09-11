@@ -39,9 +39,11 @@ $.draw(() => {
 
   return `
     <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
+      <div class="action-wrapper">
+        <button data-close><sl-icon name="x-circle"></sl-icon></button>
+      </div>
       <div class="panel">
         <div class="body">
-          <button data-close>Close</button>
           ${panelHeader}
           ${body}
         </div>
@@ -191,26 +193,31 @@ $.style(`
     }
   }
 
+  & .action-wrapper {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: right;
+    z-index: 1101;
+  }
+
   & [data-close] {
+    pointer-events: all;
     background: black;
     border: none;
-    border-radius: 0 0 0 1rem;
-    color: white;
-    padding: 0 1rem 0 .5rem;
-    line-height: 1;
+    color: rgba(255,255,255,.65);
+    padding: 9px;
     height: 2rem;
-    opacity: .8;
-    transition: opacity: 200ms;
-    position: fixed;
-    top: 0;
-    right: 0;
-    z-index: 1101;
+    font-size: 1rem;
+    transition: color 200ms;
   }
 
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    opacity: 1;
+    color: rgba(255,255,255,1);
   }
 
   & [data-close] * {

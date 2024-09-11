@@ -485,10 +485,28 @@ $.style(`
     }
   }
 
+  & .actions {
+    z-index: 10;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    background: black;
+  }
+
   @media screen {
     & {
       height: 100%;
       width: 100%;
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+    }
+
+    & .actions {
+      display: flex;
     }
   }
   & {
@@ -502,17 +520,6 @@ $.style(`
   }
 
   & [name="transport"] {
-  }
-
-  & .actions {
-    z-index: 10;
-    background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,.25);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
   }
 
   & .actions button {

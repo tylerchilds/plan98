@@ -1,9 +1,33 @@
 import module from '@silly/tag'
-import 'gun'
 
-const gun = window.Gun(['https://gun.1998.social/gun']);
+let lineWidth = 0
+let isMousedown = false
+let points = []
+let strokeHistory = []
+const strokeRevisory = []
 
-const $ = module('story-board')
+const $ = module('story-board', {
+  color: 'white',
+  background: '#54796d',
+  trays: ['stroke-tray', 'fill-tray'],
+  trayZ: 3,
+  'stroke-tray': {
+    label: "Set Stroke",
+    visible: false,
+    x: 20,
+    y: 50,
+    z: 1,
+    target: 'color'
+  },
+  'fill-tray': {
+    label: "Set Fill",
+    visible: false,
+    x: 50,
+    y: 100,
+    z: 2,
+    target: 'background'
+  }
+})
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')
@@ -13,35 +37,129 @@ function engine(target) {
 }
 
 $.draw(target => {
+  if(target.innerHTML) return update(target)
   mount(target)
 })
 
-function mount(target) {
-  if(target.innerHTML) return
+function update(target) {
+  { // menu items
+    const { activeMenu } = $.learn()
+    const currentlyActive = target.querySelector('[data-menu-target].active')
+    if(currentlyActive) {
+      currentlyActive.classList.remove('active')
+    }
+    const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
+    if(activeItem) {
+      activeItem.classList.add('active')
+    }
+  }
 
+  { // windows
+    const { trays } = $.learn()
+    trays.map(tray => {
+      const {x, y, z, visible} = $.learn()[tray]
+      const node = target.querySelector('#'+tray)
+      node.style.setProperty("--x", `${x}px`);
+      node.style.setProperty("--y", `${y}px`);
+      node.style.setProperty("--z", `${z}`);
+      node.style.display = visible ? 'grid' : 'none'
+      const icon = target.querySelector(`[data-menu="view"] [data-tray="${tray}"] sl-icon`)
+      icon.name = visible ? 'check-square' : 'square'
+    })
+  }
+
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('sl-icon')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+
+  return null // don't send anything back
+}
+
+function mount(target) {
+  const { trays } = $.learn()
+  const trayViews = trays.map(tray => {
+    const { x, y, z, visible, label, target } = $.learn()[tray]
+
+    return `
+      <div class="tray" id="${tray}" style="--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z); display: ${visible ? 'grid' : 'none'}">
+        <div class="tray-title-bar" data-tray="${tray}">
+          ${label}
+          <button class="tray-close" data-tray="${tray}">
+            <sl-icon name="x-circle"></sl-icon>
+          </button>
+        </div>
+        <div class="tray-body">
+          <input class="picker" type="color" data-target="${target}" />
+        </div>
+      </div>
+    `
+  }).join('')
   target.innerHTML = `
-    <div id="info">
-      <button data-undo>Undo</button>
+    <div class="actions">
+      <div class="menu-item">
+        <button data-menu-target="file">
+          File
+        </button>
+        <div class="menu-actions" data-menu="file">
+          <button data-new>New</button>
+          <button data-save-as>Save As</button>
+          <button data-save>Save</button>
+          <button data-download>Download</button>
+        </div>
+      </div>
+      <div class="menu-item">
+        <button data-menu-target="edit">
+          Edit
+        </button>
+        <div class="menu-actions" data-menu="edit">
+          <button data-undo>Undo</button>
+          <button data-redo>Redo</button>
+        </div>
+      </div>
+      <div class="menu-item">
+        <button data-menu-target="view">
+          View
+        </button>
+        <div class="menu-actions" data-menu="view">
+          <button data-set-fill data-tray="fill-tray">
+            <span>
+              <sl-icon name="square"></sl-icon>
+            </span>
+            <span>Set Fill</span>
+          </button>
+          <button data-set-stroke data-tray="stroke-tray">
+            <span>
+              <sl-icon name="square"></sl-icon>
+            </span>
+            <span>Set Stroke</span>
+          </button>
+        </div>
+      </div>
     </div>
+
+    ${trayViews}
   `
 
   const canvas = document.createElement('canvas')
-  // resize the canvas to fill browser window dynamically
   self.addEventListener('resize', resizeCanvas, false);
 
   function resizeCanvas() {
     canvas.width = self.innerWidth;
     canvas.height = self.innerHeight;
+    const context = canvas.getContext('2d')
+    context.fillStyle = $.learn().background
+    context.fillRect(0, 0, canvas.width, canvas.height)
   }
 
   resizeCanvas();
   target.appendChild(canvas)
 }
-
-let lineWidth = 0
-let isMousedown = false
-let points = []
-const strokeHistory = []
 
 const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
 
@@ -53,11 +171,10 @@ const requestIdleCallback = window.requestIdleCallback || function (fn) { setTim
 function drawOnCanvas (target, stroke) {
   const { canvas } = engine(target)
   const context = canvas.getContext('2d')
-  context.strokeStyle = 'white'
+  context.strokeStyle = stroke.color
   context.lineCap = 'round'
   context.lineJoin = 'round'
 
-  console.log(stroke)
   const l = stroke.length - 1
   if (stroke.length >= 3) {
     const xc = (stroke[l].x + stroke[l - 1].x) / 2
@@ -77,15 +194,44 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
+
+$.when('click', '[data-new]', function download (event) {
+  strokeHistory = []
+  redraw(event)
+})
+
+$.when('click', '[data-download]', function download (event) {
+  const { canvas } = engine(event.target)
+  
+  const data = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+  window.location.href = data
+})
+
+$.when('click', '[data-set-fill]', function setFill (event) {
+  const visible = !$.learn()['fill-tray'].visible
+  setState('fill-tray', { visible })
+})
+
+$.when('click', '[data-set-stroke]', function setStroke (event) {
+  const visible = !$.learn()['stroke-tray'].visible
+  setState('stroke-tray', { visible })
+})
 /**
  * Remove the previous stroke from history and repaint the entire canvas based on history
  * @return {void}
  */
 $.when('click', '[data-undo]', function undoDraw (event) {
+  const stroke = strokeHistory.pop()
+  strokeRevisory.unshift(stroke)
+  redraw(event)
+})
+
+function redraw(event) {
   const { canvas } = engine(event.target)
   const context = canvas.getContext('2d')
-  strokeHistory.pop()
   context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = $.learn().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
 
   strokeHistory.map(function (stroke) {
     if (strokeHistory.length === 0) return
@@ -98,7 +244,16 @@ $.when('click', '[data-undo]', function undoDraw (event) {
       drawOnCanvas(event.target, strokePath)
     })
   })
+}
+
+$.when('click', '[data-redo]', function redoDraw (event) {
+  if(strokeRevisory.length === 0) return
+
+  const stroke = strokeRevisory.shift()
+  strokeHistory.push(stroke)
+  redraw(event)
 })
+
 
 $.when('touchstart', 'canvas', start)
 $.when('mousedown', 'canvas', start)
@@ -134,6 +289,7 @@ $.when('mousemove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
+  const { color } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMousedown) return
@@ -154,7 +310,7 @@ function move (e) {
 
   // smoothen line width
   lineWidth = (Math.log(pressure + 1) * 4 * 0.2 + lineWidth * 0.8)
-  points.push({ x, y, lineWidth })
+  points.push({ x, y, lineWidth, color })
 
   drawOnCanvas(e.target, points);
 
@@ -204,20 +360,211 @@ function end (e) {
 
   lineWidth = 0
 };
+
+const paneByTarget = (target) => {
+  const { id } = target.closest('window-pane')
+  return paneById(id)
+}
+
+
+function setState(tray, payload) {
+  $.teach(payload, function merge(state) {
+    return {
+      ...state,
+      [tray]: {
+        ...state[tray],
+        ...payload
+      }
+    }
+  })
+}
+
+$.when('mousedown', '.tray-title-bar', grab)
+$.when('mousemove', '.tray-title-bar', drag)
+$.when('mouseup', '.tray-title-bar', ungrab)
+$.when('mouseout', '.tray-title-bar', ungrab)
+$.when('input', '.picker', setColor)
+$.when('click', '.tray-close', closeTray)
+
+function setColor(event) {
+  const { target } = event.target.dataset
+  const { value } = event.target
+
+  $.teach({ [target]: value })
+  redraw(event)
+}
+
+function closeTray(event) {
+  const { tray } = event.target.dataset
+  setState(tray, { visible: false })
+}
+
+// grab a pane
+function grab({ target }) {
+  const { tray } = event.target.dataset
+  const { z } = $.learn()[tray]
+  const { trayZ } = $.learn()
+  const newZ = trayZ + 1
+
+  setState(tray, { grabbed: true, z: newZ })
+  $.teach({ trayZ: newZ })
+}
+
+// drag a pane
+function drag(event) {
+  const { target, movementX, movementY } = event
+
+  const { tray } = target.dataset
+  const { grabbed, x, y } = $.learn()[tray]
+
+  if(grabbed) {
+    setState(tray, {
+      x: x + movementX,
+      y: y + movementY
+    })
+  }
+}
+
+// release a pane
+function ungrab({ target }) {
+  const { tray } = target.dataset
+  setState(tray, { grabbed: false })
+}
+
 $.style(`
   & {
     display: block;
     height: 100%;
+    position: relative;
     overflow: hidden;
   }
   & canvas {
-    background: #54796d;
     touch-action: none;
   }
 
-  & [data-undo] {
+  & .actions {
+    z-index: 10;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,.25);
     position: absolute;
     top: 0;
+    left: 0;
     right: 0;
+    display: none;
+    background: black;
+  }
+
+  @media screen {
+    & {
+      height: 100%;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 2rem 1fr;
+    }
+
+    & .actions {
+      display: flex;
+    }
+  }
+
+  & .actions button {
+    background: black;
+    color: rgba(255,255,255,.85);
+    border: none;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    padding: .5rem;
+    font-size: 1rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & .actions button:focus,
+  & .actions button.active,
+  & .actions button:hover {
+    color: #fff;
+    background: #54796d;
+  }
+
+  & .menu-item {
+    position: relative;
+  }
+
+  & .menu-actions {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
+    background: #54796d;
+  }
+
+  & [data-menu-target].active + .menu-actions {
+    display: block;
+  }
+
+  & .menu-actions  button {
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  & .tray {
+    position: absolute;
+    width: 160px;
+    height: 90px;
+    background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
+    padding: 2px;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  & .tray-title-bar {
+    padding: 9px;
+    font-size: 1rem;
+    line-height: 1;
+    color: white;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none;
+    position: relative;
+    display: flex;
+  }
+
+  & .tray-body {
+    background: white;
+    color: black;
+    height: 100%;
+  }
+
+  & .tray [type="color"] {
+    border: none;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+  }
+
+  & .tray-close {
+    margin-left: auto;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: white;
   }
 `)
+
+$.when('click', '*', () => {
+  $.teach({ activeMenu: null })
+})
+
+$.when('click', '[data-menu-target]', (event) => {
+  const { menuTarget } = event.target.dataset
+  $.teach({ activeMenu: menuTarget })
+  event.stopImmediatePropagation()
+})
+

@@ -203,9 +203,9 @@ $.style(`
   }
   & .controls select {
     background: transparent;
-    border: 1px solid white;
-    border-radius: none;
-    color: white;
+    border: 1px solid rgba(255,255,255,.65);
+    border-radius: 0;
+    color: rgba(255,255,255,.65);
   }
 `)
 
