@@ -213,24 +213,34 @@ $.draw((target) => {
       <button data-system class="system-button">
         9
       </button>
+      <audio name="walkman" src="${currentTrack}"></audio>
       <button data-playlist>
         <span class="marquee">
-          ok ok aslkdf asldf nasdlf kansdflk nasdlkfn
+          Select Track alsd kfalsdk fnalskdfn s
+        </span>
+
+        <span class="system-button -nested">
+          <sl-icon name="cassette"></sl-icon>
         </span>
       </button>
-      <button data-back-track class="system-button">
-        <sl-icon name="skip-backward-circle"></sl-icon>
-      </button>
-      <button data-media class="system-button">
-        <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
-      </button>
-      <button data-next-track class="system-button">
-        <sl-icon name="skip-forward-circle"></sl-icon>
-      </button>
-      <audio name="walkman" src="${currentTrack}"></audio>
     </div>
     <div class="siri">${contextMenu}</div>
-    <div class="cortana ${playlistVisible ? 'active': ''}">${playlist()}</div>
+    <div class="cortana ${playlistVisible ? 'active': ''}">
+      <img src="" />
+      <div class="transport">
+        <button data-back-track class="system-button -large">
+          <sl-icon name="skip-backward-circle"></sl-icon>
+        </button>
+        <button data-media class="system-button -large">
+          <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
+        </button>
+        <button data-next-track class="system-button -large">
+          <sl-icon name="skip-forward-circle"></sl-icon>
+        </button>
+      </div>
+
+      ${playlist()}
+    </div>
     <div class="wall ${!menu ? 'broken':''}">
       ${started ? zune() : `
       <div class="hero">
@@ -1232,9 +1242,23 @@ $.style(`
     font-weight: 400;
     border: none;
     font-size: 1rem;
-    background: black;
+    background: transparent;
     color: rgba(255,255,255,.85);
     padding: 9px;
+  }
+
+  & .system-button.-large {
+    font-size: 2rem;
+    padding: 1rem;
+  }
+
+  & .system-button.-nested {
+    position: absolute;
+    right: 0;
+    height: 2rem;
+    line-height: 2rem;
+    padding: 0 .5rem;
+    background: black;
   }
 
   & .system-button:hover,
@@ -1244,16 +1268,19 @@ $.style(`
 
   & [data-system] {
     font-weight: 1000;
+    margin-right: 1rem;
   }
 
   & [data-playlist] {
     margin-left: auto;
-    margin-right: 1rem;
+    position: relative;
     background: black;
     border: none;
     overflow: hidden;
-    max-width: 120px;
+    max-width: 220px;
     color: rgba(255,255,255,.65);
+    display: grid;
+    grid-template-columns: 1fr 2rem;
   }
 
   & .marquee {
@@ -1269,7 +1296,7 @@ $.style(`
     }
 
     100% {
-      transform: translateX(calc(-100% + 100px));
+      transform: translateX(calc(-100% + 200px));
     }
   }
 
@@ -1335,5 +1362,13 @@ $.style(`
 
   & .show-all > iframe {
     display: block;
+  }
+
+  & [data-back-track] {
+  }
+
+  & .transport {
+    font-size: 2rem;
+    text-align: center;
   }
 `)
