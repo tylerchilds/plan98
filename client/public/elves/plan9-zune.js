@@ -11,7 +11,6 @@ export default $
 
 $.when('click', '.zune .app-action', (event) => {
   event.preventDefault()
-
   const actions = rules(event.target)
 
   if(actions.length > 0) {
@@ -64,7 +63,7 @@ $.draw((target) => {
       ${playlist()}
     </div>
     <div class="wall ${!menu ? 'broken':''}">
-      ${started ? zune() : `
+      ${started ? zune(target) : `
       <div class="hero">
         <div class="frame">
           <div style="text-align: center">
@@ -157,8 +156,9 @@ function playlist() {
   play
   `
 }
-function zune() {
+function zune(target) {
   const { hypermedia } = $.learn()
+  const src = hypermedia || target.getAttribute('src')
   const bookmarks = render(`
 <a
 href: /app/interdimensional-cable
@@ -207,7 +207,7 @@ text: Middle Earth
 
   return `
     <div class="zune">
-      ${hypermedia ? `<iframe src="${hypermedia}"></iframe>`:''}
+      ${src ? `<iframe src="${src}"></iframe>`:''}
       ${alphabetical(bookmarks)}
     </div>
   `
@@ -533,6 +533,7 @@ $.style(`
     overflow-y: auto;
     z-index: 2;
     pointer-events: all;
+    background: white;
   }
 
   & .break-fourth-wall {

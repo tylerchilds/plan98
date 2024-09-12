@@ -161,6 +161,7 @@ function buildHeaders(parameters, pathname, extension) {
 
 async function router(request, context) {
   const { pathname, host, search } = new URL(request.url);
+
   const parameters = new URLSearchParams(search)
   const world = parameters.get('world') || host || 'sillyz.computer'
   const business = doingBusinessAs[world] || {}
@@ -218,7 +219,6 @@ async function router(request, context) {
     const [app] = pathname.split('/app/')[1].split('/')
     const file = await showApp(request, app, business)
 
-    console.log(file)
     if(file) {
       return new Response(file, {
         headers,
@@ -226,6 +226,63 @@ async function router(request, context) {
       })
     }
   }
+
+  if(pathname.startsWith('/9/')) {
+    const src = '/' + pathname.split('/9/')[1]
+    const file = await remix(request, { src, tag: 'plan9-zune' }, business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
+  if(pathname.startsWith('/98/')) {
+    const src = '/' + pathname.split('/98/')[1]
+    const file = await remix(request, { src, tag: 'sillyz-computer' }, business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
+  if(pathname.startsWith('/x/iphone/')) {
+    const src = '/' + pathname.split('/x/iphone/')[1]
+    const file = await remix(request, {
+      src,
+      tag: 'proto-type',
+      attributes: 'class="iphone"'
+    }, business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
+  if(pathname.startsWith('/x/watch/')) {
+    const src = '/' + pathname.split('/x/watch/')[1]
+    const file = await remix(request, {
+      src,
+      tag: 'proto-type',
+      attributes: 'class="timemachine"'
+    }, business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
 
   if(pathname === '/news.xml') {
     const feed = new Podcast({
@@ -390,6 +447,23 @@ async function showApp(request, tag, { endOfHead }) {
   main.remove()
   return `<!DOCTYPE html>${dom.documentElement}`
 }
+
+async function remix(request, { src, tag, attributes=''}, { endOfHead }) {
+  const dom = await page()
+  if(endOfHead) {
+    dom.head.insertAdjacentHTML('beforeend', endOfHead)
+  }
+
+  const main = dom.getElementById('main')
+  main.parentNode.insertAdjacentHTML('afterbegin', `
+    <sillonious-brand>
+      <${tag} src="${src}" ${attributes}></${tag}>
+    </sillonious-brand>
+  `)
+  main.remove()
+  return `<!DOCTYPE html>${dom.documentElement}`
+}
+
 
 async function about(headers, request) {
   const { search } = new URL(request.url);

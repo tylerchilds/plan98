@@ -52,13 +52,14 @@ export const lookup = {
 }
 
 $.draw(target => {
+  const src = target.getAttribute('src') || '/app/startup-wizard'
   if(lookup[target.id]) {
     return `<middle-earth id="${target.id}"></middle-earth>`
   }
 
   return `
     <div class="bottom">
-      <plan98-intro src="/app/startup-wizard"></plan98-intro>
+      <plan98-intro src="${src}"></plan98-intro>
     </div>
     <div class="top">
       <plan9-zune></plan9-zune>

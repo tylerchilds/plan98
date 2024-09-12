@@ -62,7 +62,7 @@ const $ = elf('plan98-intro', {
   menu: true,
   now: new Date().toLocaleString(),
   activeWorkspace: 'first',
-  first: '/app/startup-wizard',
+  first: null,
   second: null,
   third: null,
   fourth: null,
@@ -72,7 +72,15 @@ const $ = elf('plan98-intro', {
 
 export default $
 
+function init(target) {
+  if(target.supercalifragilisticexpialidocious) return
+  target.supercalifragilisticexpialidocious = true
+  const src = target.getAttribute('src')
+  schedule(() => $.teach({ first: src }))
+}
+
 $.draw((target) => {
+  init(target)
   const { suggestions, allActive, broken, query, suggestIndex, focused, now } = $.learn()
 
   randomTheme(target)
@@ -144,13 +152,13 @@ function renderWorkspaceView(key) {
   if(!data[key]) return `<div class="empty-pane"><button data-create="${key}" data-tooltip="create" aria-label="create"></button></div>`
 
   return `
-      <iframe src="${data[key]}" class="${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
+      <iframe src="${data[key]}" class="empty-pane ${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
   `
 }
 
 $.when('click', '[data-create]', (event) => {
   const { create } = event.target.dataset
-  $.teach({ activeWorkspace: create, [create]: '/app/new-save' })
+  $.teach({ activeWorkspace: create, [create]: '/app/story-board' })
 })
 
 function renderWorkspaceToggle(key, label) {
@@ -290,9 +298,6 @@ $.when('submit', '.search', (event) => {
 function updateActiveWorkspace(url) {
   const { activeWorkspace } = $.learn()
   const workspace = activeWorkspace || 'first'
-  const iframe = event.target.closest($.link).querySelector(`[name="${workspace}"]`)
-  iframe.src = url
-  document.activeElement.blur()
   $.teach({ menu: false, [activeWorkspace]: url, activeWorkspace: workspace  })
 }
 
@@ -550,7 +555,7 @@ $.style(`
     background-image: linear-gradient(rgba(0,0,0, .15), rgba(0,0,0,.4));
   }
 
-  & .fourth .active {
+  & .fourth .empty-pane.active {
     display: block;
     grid-area: main;
   }
@@ -1021,3 +1026,5 @@ $.style(`
     color: rgba(255,255,255,.65);
   }
 `)
+
+function schedule(x) { setTimeout(x, 1) }
