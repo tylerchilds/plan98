@@ -161,6 +161,10 @@ function zune() {
   const { hypermedia } = $.learn()
   const bookmarks = render(`
 <a
+href: /app/interdimensional-cable
+text: Interdimensional Cable
+
+<a
 href: /app/hello-bluesky
 text: Hello Bluesky
 
@@ -835,11 +839,19 @@ $.style(`
     display: block;
   }
 
+  & .category {
+    text-decoration: none;
+  }
+
+  & .app-action {
+    text-decoration: none;
+    white-space: pre-wrap;
+    line-height: 1.1;
+  }
+
   & .zune a:link,
   & .zune a:visited {
     color: rgba(255,255,255,.65);
-    text-decoration: none;
-    white-space: nowrap;
   }
 
   & .zune a:hover,

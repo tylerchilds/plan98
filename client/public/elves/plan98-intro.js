@@ -96,6 +96,9 @@ $.draw((target) => {
             <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
               <div class="name">
                 ${item.name}
+                <span class="sentence-path">
+                  ${item.path.split('/').reverse().slice(1,-1).join(' ')}
+                </span>
               </div>
             </button>
           `
@@ -353,9 +356,11 @@ $.when('click', '.auto-item', event => {
   $.teach({ contextActions, suggestIndex: parseInt(event.target.dataset.index) })
 })
 
+
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
-  const suggestions = idx.search(value)
+  const sort = natsort();
+  const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
   $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, query: event.target.value  })
 })
 
@@ -717,6 +722,8 @@ $.style(`
   & .name {
     position: relative;
     z-index: 2;
+    display: flex;
+    white-space: nowrap;
   }
 
   & .nav-wrapper {
@@ -727,7 +734,7 @@ $.style(`
     right: 0;
     z-index: 4;
     z-index: 2;
-    overflow: auto;
+    overflow: hidden;
     height: calc(3rem+10px);
     padding-bottom: 10px;
   }
@@ -1005,5 +1012,12 @@ $.style(`
   & .transport {
     font-size: 2rem;
     text-align: center;
+  }
+
+  & .sentence-path {
+    white-space: nowrap;
+    margin-left: auto;
+    overflow: hidden;
+    color: rgba(255,255,255,.65);
   }
 `)

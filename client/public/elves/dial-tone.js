@@ -78,8 +78,8 @@ $.draw(() => {
       <button class="note root" data-note="${root}">
         ${root}
       </button>
-      <button class="note plus-5" data-note="${root + 5}">
-        ${root + 5}
+      <button class="note minus-7" data-note="${root - 7}">
+        ${root - 7}
       </button>
       <button class="note plus-7" data-note="${root + 7}">
         ${root + 7}
@@ -93,8 +93,8 @@ $.draw(() => {
       <button class="note plus-4" data-note="${root + 4}">
         ${root + 4}
       </button>
-      <button class="note plus-11" data-note="${root + 11}">
-        ${root + 11}
+      <button class="note minus-2" data-note="${root - 2}">
+        ${root - 2}
       </button>
     </div>
   `
@@ -150,13 +150,13 @@ $.style(`
     background-color: mediumseagreen;
   }
 
-  & .the-compass .plus-11 {
+  & .the-compass .minus-2 {
     grid-row: 3 / 5;
     grid-column: 1 / 3;
     background-color: yellow;
   }
 
-  & .the-compass .plus-5 {
+  & .the-compass .minus-7 {
     grid-row: 1 / 3;
     grid-column: 2 / 4;
     background-color: red;
