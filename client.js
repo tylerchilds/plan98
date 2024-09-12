@@ -228,7 +228,7 @@ async function router(request, context) {
   }
 
   if(pathname.startsWith('/9/')) {
-    const src = '/' + pathname.split('/9/')[1]
+    const src = '/' + pathname.split('/9/')[1] + '?' + parameters.toString().replace('%2F', '/')
     const file = await remix(request, { src, tag: 'plan9-zune' }, business)
 
     if(file) {
@@ -240,7 +240,7 @@ async function router(request, context) {
   }
 
   if(pathname.startsWith('/98/')) {
-    const src = '/' + pathname.split('/98/')[1]
+    const src = '/' + pathname.split('/98/')[1] + '?' + parameters.toString().replace('%2F', '/')
     const file = await remix(request, { src, tag: 'sillyz-computer' }, business)
 
     if(file) {
@@ -252,7 +252,7 @@ async function router(request, context) {
   }
 
   if(pathname.startsWith('/x/iphone/')) {
-    const src = '/' + pathname.split('/x/iphone/')[1]
+    const src = '/' + pathname.split('/x/iphone/')[1] + '?' + parameters.toString().replace('%2F', '/')
     const file = await remix(request, {
       src,
       tag: 'proto-type',
@@ -350,6 +350,10 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
 
   if(pathname === '/plan98/about') {
     return about(headers, request)
+  }
+
+  if(pathname === '/plan98/mp3s') {
+    return mp3s(headers, request)
   }
 
   if(pathname === '/plan98/owncast') {
@@ -520,6 +524,65 @@ async function about(headers, request) {
 
   }
 }
+
+
+async function mp3s(headers, request) {
+  const { search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const world = parameters.get('world')
+  if(world) {
+    const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        ...headers,
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+  } else {
+    let paths = []
+
+    const currentPath = Deno.cwd() + '/client'
+    const files = walk(currentPath, {
+      skip: [
+        /\.git/,
+        /\.autosave/,
+        /\.swp/,
+        /\.swo/,
+        /\.env/,
+        /node_modules/,
+        /backup/,
+        /db/
+      ],
+      includeDirs: false
+    })
+
+    for await(const file of files) {
+      const { name } = file
+      const [_, path] = file.path.split(currentPath)
+      if(name.endsWith('.mp3')) {
+        paths.push({ path, name })
+      }
+    }
+
+    paths = sortPaths([...paths], byPath, '/')
+
+    const data = {
+      plan98: {
+        type: 'FileSystem',
+        children: [kids(paths)]
+      }
+    }
+
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        ...headers,
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+
+  }
+}
+
 
 function ResponseData(data) {
   return new Response(JSON.stringify(data, null, 2), {

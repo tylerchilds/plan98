@@ -1,10 +1,77 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { actionScript } from './action-script.js'
+import lunr from 'lunr'
 import natsort from 'natsort'
 
+const Types = {
+  File: {
+    type: 'File',
+  },
+  Directory: {
+    type: 'Directory',
+  },
+}
+
+export let idx
+export const documents = [];
+
+(async function buildIndex() {
+  try {
+    const { plan98 } = await fetch(`/plan98/mp3s`)
+      .then(res => res.json())
+
+    idx = lunr(function () {
+      this.ref('path')
+      this.field('path')
+      this.field('keywords')
+      this.field('type')
+      this.field('name')
+      this.field('extension')
+
+      nest(this, { tree: plan98, pathParts: [], subtree: plan98 })
+    })
+    $.teach({ ready: true })
+  } catch (e) {
+    console.info('Build: Failed')
+    console.error(e)
+    return
+  }
+})()
+
+function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
+  if(!subtree.children) return ''
+  return subtree.children.map((child, index) => {
+    const { name, type, extension } = child
+    const currentPathParts = [...pathParts, name]
+    const currentPath = currentPathParts.join('/') || '/'
+
+    if(type === Types.File.type) {
+      const node = {
+        path: currentPath,
+        keywords: currentPath.split('/').join(' '),
+        name,
+        type,
+        extension
+      }
+      idx.add(node)
+      documents.push(node)
+    }
+
+    if(type === Types.Directory.type) {
+      nest(idx, { tree, pathParts: currentPathParts, subtree: child })
+    }
+
+    return '-'
+  }).join('')
+}
+
 const $ = elf('plan9-zune', {
-  menu: true
+  menu: true,
+  suggestIndex: null,
+  suggestions: [],
+  suggesttionsLength: 0,
+  musicFilter: ''
 })
 
 export default $
@@ -61,6 +128,7 @@ $.draw((target) => {
         </button>
       </div>
       ${playlist()}
+      ${library()}
     </div>
     <div class="wall ${!menu ? 'broken':''}">
       ${started ? zune(target) : `
@@ -97,11 +165,33 @@ text: Connect
     </div>
 `
 }, {
+  beforeUpdate,
   afterUpdate
 })
 
+function beforeUpdate(target) {
+  { // save suggestion box scroll top
+    const list = target.querySelector('.suggestion-box')
+    if(!list) return
+    target.dataset.scrollpos = list.scrollTop
+  }
+}
 
 function afterUpdate(target) {
+  { // scroll suggestions
+    const list = target.querySelector('.suggestion-box')
+    if(!list) return
+    list.scrollTop = target.dataset.scrollpos
+  }
+
+  { // scroll item into view
+    const activeItem = target.querySelector('.suggestion-box .active')
+    if(activeItem) {
+      activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
+    }
+  }
+
+
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -153,7 +243,39 @@ function alphabetical(xmlHTML) {
 
 function playlist() {
   return`
-  play
+    <details open="true">
+      <summary>Next</summary>
+    </details>
+  `
+}
+
+function library() {
+  const { musicFilter, suggestIndex, suggestions } = $.learn()
+
+  const start = Math.max(suggestIndex - 5, 0)
+  const end = Math.min(suggestIndex + 5, suggestions.length - 1)
+  return`
+    <details open="true">
+      <summary>Library</summary>
+      <div class="search">
+        <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
+        <div class="suggestions">
+            ${suggestions.slice(start, end).map((x, i) => {
+              const item = documents.find(y => {
+                return x.ref === y.path
+              })
+
+              return `
+                <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+                  <div class="name">
+                    ${item.name}
+                  </div>
+                </button>
+              `
+            }).join('')}
+        </div>
+      </div>
+    </details>
   `
 }
 function zune(target) {
@@ -212,6 +334,80 @@ text: Middle Earth
     </div>
   `
 }
+
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', '[name="search"]', event => {
+  const { suggestionsLength, suggestIndex } = $.learn()
+  if(event.keyCode === down) {
+    event.preventDefault()
+    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
+    if(nextIndex >= suggestionsLength -1) return
+    $.teach({ suggestIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === up) {
+    event.preventDefault()
+    const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
+    if(nextIndex < 0) return
+    $.teach({ suggestIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === enter && suggestIndex !== null) {
+    event.preventDefault()
+    const { suggestions, suggestIndex } = $.learn()
+    const item = documents.find(y => {
+      return suggestions[suggestIndex].ref === y.path
+    })
+
+    if(item) {
+      const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
+      const url = '/app/media-plexer?src=' +item.path
+      updateActiveWorkspace(url)
+      document.activeElement.blur()
+      return
+    }
+  }
+})
+
+$.when('click', '.auto-item', event => {
+  event.preventDefault()
+
+  const target = document.createElement('a')
+  target.href = event.target.dataset.path
+  const contextActions = rules(target)
+  //updateActiveWorkspace(url)
+  //
+  let { suggestIndex } = $.learn()
+  const index = parseInt(event.target.dataset.index)
+  const start = Math.max(suggestIndex - 5, 0)
+  suggestIndex += start + index
+  $.teach({ contextActions, suggestIndex })
+})
+
+
+
+$.when('input', '[name="search"]', (event) => {
+  const { value } = event.target;
+  const sort = natsort();
+  const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
+  $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, musicFilter: event.target.value  })
+})
+
+$.when('focus', '[name="search"]', event => {
+  $.teach({ focused: true })
+})
+
+$.when('blur', '[name="search"]', event => {
+  setTimeout(() => {
+    $.teach({ focused: false })
+    document.activeElement.blur()
+  }, 250)
+})
+
 
 $.when('click', '[data-media]', (event) => {
   const { audioPlaying } = $.learn()
@@ -424,8 +620,8 @@ $.style(`
     pointer-events: none;
   }
 
-  & a,
-  & button {
+  & .zune-bar,
+  & .cortana {
     pointer-events: all;
   }
 
@@ -634,29 +830,11 @@ $.style(`
   }
 
   & .suggestions {
-    display: none;
-    position: relative;
-    max-height: 300px;
-    max-width: 480px;
-    text-align: left;
-    bottom: 3rem;
-  }
-
-  & .suggestions.focused {
     display: block;
+    text-align: left;
   }
 
-  & .suggestion-box {
-    position: absolute;
-    inset: 0;
-    height: 300px;
-    overflow: auto;
-    z-index: 10;
-    transform: translateY(-100%);
-    max-height: calc(100vh - 3rem);
-  }
-
-  & .suggestion-box .auto-item {
+  & .suggestions .auto-item {
     background: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
     color: var(--button-color, dodgerblue);
@@ -667,14 +845,14 @@ $.style(`
     max-width: 100%;
   }
 
-  & .suggestion-box .auto-item:focus,
-  & .suggestion-box .auto-item:hover {
+  & .suggestions .auto-item:focus,
+  & .suggestions .auto-item:hover {
     background-color: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     color: white;
   }
 
-  & .suggestion-box .auto-item.active {
+  & .suggestions .auto-item.active {
     color: white;
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     background-color: var(--button-color, dodgerblue);
@@ -962,11 +1140,12 @@ $.style(`
   }
 
   & .cortana {
+    overflow: auto;
     position: absolute;
     top: 2rem;
+    left: 0;
     right: 0;
     bottom: 0;
-    max-width: 320px;
     width: 100%;
     z-index: 8999;
     transform: translateX(100%);
@@ -982,6 +1161,7 @@ $.style(`
   & .siri {
     display: none;
     position: absolute;
+    pointer-events: all;
     inset: 0;
     background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(150px);
@@ -1031,5 +1211,15 @@ $.style(`
   & .transport {
     font-size: 2rem;
     text-align: center;
+  }
+
+  & details {
+    padding:
+  }
+
+  & summary {
+    padding: 1rem;
+    color: rgba(255,255,255,.65);
+    font-weight: 600;
   }
 `)

@@ -3,7 +3,7 @@ import { parseM3U, writeM3U } from "@iptv/playlist";
 import Hls from 'hls.js'
 
 
-const $ = elf('interdimensional-cable', { channels: [], start: 0, stop: 0, length: 0 })
+const $ = elf('interdimensional-cable', { status: 'fetching channels', channels: [], start: 0, stop: 0, length: 0 })
 
 state[`ls/${$.link}`] ||= {history: []}
 
@@ -12,6 +12,7 @@ fetch('https://iptv-org.github.io/iptv/index.m3u')
   .then((m3u) => {
     const { channels } = parseM3U(m3u)
     $.teach({
+      status: 'ready',
       channels,
       length: channels.length,
       start: 0,
@@ -20,41 +21,82 @@ fetch('https://iptv-org.github.io/iptv/index.m3u')
   }).catch(console.error)
 
 $.when('click', '[data-random]', randomChannel)  
+let timeoutTimeout
 function randomChannel() {
-  const { src, channels, length } = $.learn()
+  clearTimeout(timeoutTimeout)
+  const { src, channels, length, retry } = $.learn()
   state[`ls/${$.link}`].history.push(src)
   const station = channels[Math.floor(Math.random() * length)]
-  $.teach({ station })
+  $.teach({ station, status: 'changing station'  })
+
+  timeoutTimeout = setTimeout(() => {
+    const newRetry = (retry || 0) + 1
+    $.teach({
+      station,
+      retry: newRetry,
+      status: 'failed to find, retry attempt: ' + newRetry
+    })
+    randomChannel()
+  }, 5000)
 }
 
-$.draw(() => {
-  const { channels, station } = $.learn()
-  if(!channels) return '...'
+$.draw((target) => {
+  const { channels, station, status } = $.learn()
+
+  if(status === 'playing') {
+    target.querySelector('.status').innerText = status
+    return
+  }
+  if(!channels) return `
+    <div class="status">${status?status:''}</div>
+  `
 
   if(!station) {
-    return `<button data-random>Random</button>`
+    return `
+      <div class="status">${status?status:''}</div>
+      <button data-random>Random</button>
+    `
   }
   
   return `
-    <video src="${station.url}"></video>
+    <div class="status">${status?status:''}</div>
     <button data-random>Random</button>
+    <video></video>
   `
 }, { afterUpdate })
 
 function afterUpdate(target) {
+  const video = target.querySelector('video')
+  if(!video) return
+  const { station } = $.learn()
   {
-    const { station } = $.learn()
     if(station && target.src !== station.url) {
-      const video = target.querySelector('video')
-      const hls = new Hls();
-      hls.loadSource(station.url);
-      hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED,function() {
-        video.play();
-      });
+      target.src = station.url
+      try {
+        const hls = new Hls();
+        hls.loadSource(station.url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED,function() {
+          try {
+            clearTimeout(timeoutTimeout)
+            video.play();
+            $.teach({ status: 'playing', retry: 0 })
+          } catch (e) {
+            $.teach({ status: 'error' })
+          }
+        });
+
+      } catch (e) {
+        randomChannel()
+      }
     }
   }
 }
+
+$.when('error', 'video', () => {
+  $.teach({ status: 'video error, shuffling in 5' })
+  setTimeout(randomChannel, 5000)
+})
 
 $.when('input', 'input', async (event) => {
   })
@@ -91,6 +133,18 @@ $.style(`
 
   }
 
+  & .status {
+    position: absolute;
+    border: none;
+    top: 0;
+    right: 0;
+    height: 2rem;
+    line-height: 2rem;
+    background: black;
+    color: rgba(255,255,255,.65);
+    padding: 0 1rem;
+  }
+
   & [data-random] {
     position: absolute;
     border: none;
@@ -102,3 +156,5 @@ $.style(`
     color: rgba(255,255,255,.65);
   }
 `)
+
+function schedule(x, delay=1) { setTimeout(x, delay) }
