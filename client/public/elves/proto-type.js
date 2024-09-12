@@ -19,7 +19,6 @@ $.draw((target) => {
 $.style(`
   & {
     display: grid;
-    padding: 5rem 1rem;
     overflow: auto;
     position: relative;
     background: #54796d;
