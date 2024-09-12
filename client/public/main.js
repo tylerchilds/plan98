@@ -1,8 +1,6 @@
 import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
-import { superKey } from "@plan98/intro"
 
-superKey()
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
 const database = localStorage.getItem("plan98.database") || self.plan98.env.POCKETBASE_URL;

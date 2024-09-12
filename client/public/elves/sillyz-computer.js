@@ -1,4 +1,8 @@
 import tag from '@silly/tag'
+import $intro from './plan98-intro.js'
+import $zune from './plan9-zune.js'
+
+$intro.teach({ broken: true })
 
 const $ = tag('sillyz-computer')
 
@@ -31,7 +35,6 @@ export const lookup = {
     latitude: '37.772322',
     longitude:  '-122.465443',
   },
-
   '134': {
     title: "Vaporeon's",
     subtitle: "Aurora Beam",
@@ -53,7 +56,14 @@ $.draw(target => {
     return `<middle-earth id="${target.id}"></middle-earth>`
   }
 
-  return `<plan98-welcome></plan98-welcome>`
+  return `
+    <div class="bottom">
+      <plan98-intro></plan98-intro>
+    </div>
+    <div class="top">
+      <plan9-zune></plan9-zune>
+    </div>
+  `
 })
 
 $.style(`
@@ -61,5 +71,53 @@ $.style(`
     display: block;
     width: 100%;
     height: 100%;
+    position: relative;
+  }
+
+  & .top {
+    position: absolute;
+    inset: 0 0 3rem 0;
+    grid-area: midship;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  & .bottom {
+    position: absolute;
+    inset: 2rem 0 0 0;
+    grid-area: midship;
   }
 `)
+
+
+function handleEvent (event) {
+  if (event.metaKey) {
+    handleSuperKey(event)
+  }
+}
+self.addEventListener('keydown', handleEvent);
+
+self.addEventListener('message', function handleMessage(event) {
+  if(event.data.whisper === 'metaKey') {
+    handleSuperKey()
+  } else { console.log(event) }
+});
+
+function handleSuperKey(event) {
+  const { menu } = $zune.learn()
+  $zune.teach({ menu: !menu })
+
+  const { broken } = $intro.learn()
+  $intro.teach({ broken: !broken })
+
+  if(document.querySelector('plan9-zune')) return
+
+  if(self.self !== self.top) {
+    self.parent.postMessage({ whisper: 'metaKey' }, "*");
+  } else {
+    const node = document.body.querySelector('sillonious-brand') || document.body
+    node.insertAdjacentHTML("beforeend", '<sillyz-computer></sillyz-computer>')
+  }
+}
+
+

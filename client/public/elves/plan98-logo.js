@@ -1,5 +1,4 @@
 import elf from '@silly/tag'
-import { handleSuperKey } from "@plan98/intro"
 const $ = elf('plan98-logo')
 
 $.draw(() => {
@@ -19,7 +18,13 @@ $.draw(() => {
 
 $.when('click', '[data-super]', (event) => {
   event.preventDefault()
-  handleSuperKey()
+  const e = new KeyboardEvent('keydown', {
+    metaKey: true,     // Simulates the Meta key being pressed
+    bubbles: true,     // The event will propagate up the DOM
+    cancelable: true   // The event can be canceled
+  });
+  // Dispatch the event on the target element (e.g., document)
+  document.dispatchEvent(e)
 })
 
 $.style(`

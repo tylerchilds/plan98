@@ -120,7 +120,6 @@ $.style(`
     transform: translateY(-50%);
   }
 
-
   & .the-compass button {
     position: relative;
     overflow: hidden;
@@ -185,7 +184,6 @@ $.style(`
     transform: translateY(-13%);
   }
 
-
   & .the-compass .root {
     grid-row: 3 / 5;
     grid-column: 3 / 5;
@@ -200,6 +198,7 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 1;
+    height: 2rem;
   }
   & .controls select {
     background: transparent;
