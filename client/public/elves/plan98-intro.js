@@ -739,7 +739,7 @@ $.style(`
     right: 0;
     z-index: 4;
     z-index: 2;
-    overflow: hidden;
+    overflow: auto;
     height: calc(3rem+10px);
     padding-bottom: 10px;
   }
