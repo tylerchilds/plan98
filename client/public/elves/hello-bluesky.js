@@ -14,6 +14,11 @@ function fetchTimeline() {
   });
 }
 
+$.when('click', '[data-logout]', (event) => {
+  logout()
+})
+
+
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
@@ -48,6 +53,12 @@ async function login() {
   $.teach({ authenticated: true })
 
 }
+
+async function logout() {
+  const blueskyCreds = state['ls/blueskyCreds'] = {}
+  $.teach({ authenticated: false })
+}
+
 
 function loginForm() {
   return `
@@ -89,6 +100,7 @@ $.draw(target => {
 
   const view = `
     <div class="log">
+      <button data-logout>logout</button>
       <div class="content">
         ${feed.map(({ post }) => {
           return `

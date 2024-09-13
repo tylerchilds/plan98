@@ -94,8 +94,16 @@ export function requestFullZune() {
 
 export function requestScreen(hypermedia) {
   hideModal()
-  $.teach({ hypermedia, contextActions: null, menu: true })
+
+  if(document.querySelector($.link)) {
+    $.teach({ hypermedia, contextActions: null, menu: true, started: true })
+    return true
+  }
+
+  self.open(hypermedia)
+  return false
 }
+
 
 
 $.draw((target) => {
@@ -112,14 +120,13 @@ $.draw((target) => {
         <span class="marquee">
           Sum 41 - In Too Deep - All Killer No Filler
         </span>
-
         <span class="system-button -nested">
           <sl-icon name="cassette"></sl-icon>
         </span>
       </button>
     </div>
     <div class="siri">${contextMenu}</div>
-    <div class="cortana ${playlistVisible ? 'active': ''}">
+    <div class="cortana ${!contextMenu && playlistVisible ? 'active': ''}">
       <img src="" />
       <div class="transport">
         <button data-back-track class="system-button -large">
@@ -135,7 +142,7 @@ $.draw((target) => {
       ${playlist()}
       ${library()}
     </div>
-    <div class="wall ${!menu ? 'broken':''}">
+    <div class="wall ${contextMenu ? 'broken':''}">
       ${started ? zune(target) : `
       <div class="hero">
         <div class="frame">
@@ -217,6 +224,14 @@ function afterUpdate(target) {
       if(zune) {
         zune.scrollTop = 0
       }
+    }
+  }
+
+  { // cleanup when contextActions exist and playlist is visible
+    const { contextActions, playlistVisible } = $.learn()
+
+    if(contextActions && playlistVisible) {
+      $.teach({ playlistVisible: false })
     }
   }
 }
@@ -636,6 +651,7 @@ $.style(`
     height: 100%;
     overflow-x: hidden;
     pointer-events: none;
+    background: black;
   }
 
   & .zune-bar,
@@ -763,7 +779,8 @@ $.style(`
 
   & .wall.broken {
     z-index: 1;
-    display: none;
+    pointer-events: none;
+    opacity: 0;
   }
 
   & .break-fourth-wall:hover,
@@ -1166,24 +1183,30 @@ $.style(`
     bottom: 0;
     width: 100%;
     z-index: 8999;
-    transform: translateX(100%);
-    transition: transform 100ms ease-out;
+    transform-origin: top center;
+    transform: scale(1.1);
+    transition: all 175ms ease-out;
     background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
     backdrop-filter: blur(150px);
+    pointer-events: none;
+    opacity: 0;
   }
 
 
   & .cortana.active {
-    transform: translateX(0);
+    transform: scale(1);
+    opacity: 1;
   }
   & .siri {
-    display: none;
     position: absolute;
-    pointer-events: all;
+    pointer-events: none;
     inset: 0;
     background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(150px);
     z-index: 9000;
+    transform: scale(.9);
+    transform-origin: top left;
+    opacity: 0;
   }
 
   & .siri:not(:empty) {
@@ -1191,6 +1214,10 @@ $.style(`
     flex-direction: column;
     padding: 3rem 1rem;
     overflow: auto;
+    transform: scale(1);
+    transition: all 175ms ease-out;
+    opacity: 1;
+    pointer-events: all;
   }
 
   & [data-create] {

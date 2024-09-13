@@ -27,7 +27,7 @@ function randomChannel() {
   const { src, channels, length, retry } = $.learn()
   state[`ls/${$.link}`].history.push(src)
   const station = channels[Math.floor(Math.random() * length)]
-  $.teach({ station, status: 'changing station'  })
+  $.teach({ station, status: 'changing station', src: station.url  })
 
   timeoutTimeout = setTimeout(() => {
     const newRetry = (retry || 0) + 1
@@ -41,17 +41,21 @@ function randomChannel() {
 }
 
 $.draw((target) => {
-  const { channels, station, status } = $.learn()
+  let { channels, station, status, src, playing } = $.learn()
+
+  src = src ? src : target.getAttribute('src')
 
   if(status === 'playing') {
     target.querySelector('.status').innerText = status
+
+    target.querySelector('.keep-watching').innerHTML = `<qr-code src="/app/interdimensional-cable?src=${src}" data-fg="rgba(0,0,0,.65)" data-bg="transparent"></qr-code>`
     return
   }
   if(!channels) return `
     <div class="status">${status?status:''}</div>
   `
 
-  if(!station) {
+  if(!station || !src) {
     return `
       <div class="status">${status?status:''}</div>
       <button data-random>Random</button>
@@ -62,25 +66,36 @@ $.draw((target) => {
     <div class="status">${status?status:''}</div>
     <button data-random>Random</button>
     <video></video>
+    <div class="keep-watching"></div>
   `
-}, { afterUpdate })
+}, { beforeUpdate, afterUpdate })
+
+function beforeUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('qr-code')].map(icon => {
+      if(icon.src !== target.src) {
+        icon.remove()
+      }
+    })
+  }
+}
 
 function afterUpdate(target) {
   const video = target.querySelector('video')
   if(!video) return
-  const { station } = $.learn()
+  const { src } = $.learn()
   {
-    if(station && target.src !== station.url) {
-      target.src = station.url
+    if(target.src !== src) {
+      if(src) target.src = src
       try {
         const hls = new Hls();
-        hls.loadSource(station.url);
+        hls.loadSource(target.src);
         hls.attachMedia(video);
         hls.on(Hls.Events.MANIFEST_PARSED,function() {
           try {
             clearTimeout(timeoutTimeout)
             video.play();
-            $.teach({ status: 'playing', retry: 0 })
+            $.teach({ status: 'playing', retry: 0, src: target.src })
           } catch (e) {
             $.teach({ status: 'error' })
           }
@@ -91,6 +106,7 @@ function afterUpdate(target) {
       }
     }
   }
+
 }
 
 $.when('error', 'video', () => {
@@ -131,6 +147,31 @@ $.style(`
     place-content: center;
     height: 100%;
 
+  }
+
+  & .keep-watching {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: 1rem;
+    width: 320px;
+    height: 320px;
+    opacity: 1;
+  }
+
+  @keyframes &-fade-out {
+    0% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+
+  }
+
+  & .keep-watching:not(:empty) {
+    animation: &-fade-out 2500ms ease-out 10000ms forwards;
+    background: rgba(255,255,255,.65);
   }
 
   & .status {

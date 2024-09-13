@@ -144,7 +144,19 @@ $.draw(target => {
   `
 
   return view
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('chat-room')].map(node => {
+      const nodeParent = node.parentNode
+      const newNode = document.createElement('chat-room')
+      node.remove()
+      nodeParent.appendChild(newNode)
+    })
+  }
+
+}
 
 $.when('input', '[data-bind]', event => {
   const { name, value } = event.target;
@@ -314,6 +326,8 @@ $.style(`
   }
 
   & .all-logs {
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 
   & .all-logs button {

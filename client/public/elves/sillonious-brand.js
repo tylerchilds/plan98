@@ -61,7 +61,7 @@ $.draw((target) => {
   }
 
   return `
-    <plan9-zune src="/app/plan98-dashboard"></plan9-zune>
+    <plan9-zune src="/app/story-board"></plan9-zune>
   `
 })
 

@@ -435,8 +435,7 @@ async function provision(event) {
 $.style(`
   & {
     display: block;
-    padding: 0 1rem;
-    margin: 1rem auto;
+    margin: 0 auto;
   }
 
   & .password-grid {

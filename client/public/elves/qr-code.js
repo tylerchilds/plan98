@@ -8,7 +8,7 @@ const $ = module('qr-code')
 
 $.draw(target => {
   const codes = $.learn()
-  const code = target.getAttribute('text')
+  const code = target.getAttribute('src') || target.getAttribute('text')
   const image = codes[code]
   const { fg='saddlebrown', bg='lemonchiffon' } = target.dataset
   generate(target, code, {fg, bg})

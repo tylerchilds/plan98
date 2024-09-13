@@ -155,7 +155,6 @@ function deleteJoke(state, payload) {
 
 $.when('input', 'textarea', (event) => {
   const room = getRoom()
-  state[`ls/drafts/${room}`] = event.target.value
 })
 
 $.draw(target => {
@@ -174,7 +173,6 @@ $.draw(target => {
   if(!room) {
     return 'Please Consider...'
   }
-  const draft = escapeHyperText(state[`ls/drafts/${room}`])
 
   const actions = groupList && groupList[companyName]?.members.includes(companyEmployeeId) ? `
     <button data-info>
@@ -215,22 +213,63 @@ $.draw(target => {
     </div>
     <form class="new-message-form" data-command="enter">
       <button class="button send" type="submit" data-command="enter">
-        Send
+        <sl-icon name="arrow-up-circle"></sl-icon>
       </button>
       <div class="text-well">
-        <textarea name="message">${draft}</textarea>
+        <textarea name="message"></textarea>
       </div>
     </form>
   `
 
   return view
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  replaceCursor(target)
+  saveCursor(target)
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('sl-icon')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+}
+
+let sel = []
+const tags = ['TEXTAREA', 'INPUT']
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.field = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  }
+}
+
+function replaceCursor(target) {
+  const field = target.querySelector(`[name="${target.dataset.field}"]`)
+  
+  if(field) {
+    field.focus()
+
+    if(tags.includes(field.tagName)) {
+      field.selectionStart = sel[0];
+      field.selectionEnd = sel[1];
+    }
+  }
+}
+
+function clearCursor(target) {
+  target.dataset.field = null
+  sel = []
+}
 
 export function social(company, unix) {
-  let user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix]
-
-  if(!user) {
-    user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] = {
+  return {
       nickname: `/cache/nickname/${company}/${unix}`,
       tagline: `/cache/tagline/${company}/${unix}`,
       avatar: `/cache/avatars/${company}/${unix}`,
@@ -240,8 +279,6 @@ export function social(company, unix) {
       company,
       unix
   }
-  }
-  return user
 }
 
 function escapeHyperText(text = '') {
@@ -279,7 +316,6 @@ async function send(event) {
   const company = await bayunCore.lockText(sessionId, companyName, encryptionPolicy, keyGenerationPolicy, room);
   const unix = await bayunCore.lockText(sessionId, companyEmployeeId, encryptionPolicy, keyGenerationPolicy, room);
 
-  state[`ls/drafts/${room}`] = ''
 
   const { data, error } = await supabase
   .from('plan98_group_text')
@@ -297,7 +333,7 @@ async function send(event) {
 $.style(`
   & {
     display: grid;
-    grid-template-rows: 1fr calc(9rem + 8px);
+    grid-template-rows: 1fr auto;
     position: relative;
     height: 100%;
     color: white;
@@ -320,25 +356,6 @@ $.style(`
 
   & sticky-note {
     place-self: center;
-  }
-
-  & .new-message-form button {
-    position: relative;
-    z-index: 2;
-    height: 2rem;
-    padding: .25rem 1rem;
-    margin: .5rem;
-  }
-
-  & .new-message-form button[disabled] {
-    opacity: .5;
-    background: rgba(255,255,255,.5);
-  }
-
-  & .new-message-form button:hover,
-  & .new-message-form button:focus {
-    background: saddlebrown;
-    color: lemonchiffon;
   }
 
   & .captains-log {
@@ -454,37 +471,38 @@ $.style(`
     width: 100%;
     display: block;
     resize: none;
-    line-height: 2rem;
-    height: 6rem;
-    border: none;
+    border: 1px solid rgba(255,255,255,.65);
     background: rgba(0,0,0,.85);
-    color: white;
+    color: rgba(255,255,255,.65);
     border-radius: .5rem;
     padding: 8px;
   }
 
   & .text-well {
     background: rgba(0,0,0,.25);
-    padding: 8px;
   }
 
-  & .send {
-    float: right;
+  & .button.send {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    padding: .5rem;
+    color: white;
+    z-index: 1;
   }
 
   & .message {
-    margin: .5rem 4rem .5rem 4rem;
-    padding: .5rem;
-    border-radius: 1rem;
-    background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--business-color, dodgerblue);
-    text-shadow: 1px 1px rgba(0,0,0,.65);
-    color: white;
     position: relative;
     border: none;
+    padding: 3px;
   }
 
   & .message .body {
-    white-space: pre;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    vertical-align: top;
+    pointer-events: none;
+    margin-left: 2.5rem;
   }
 
   & .message.originator {
@@ -589,6 +607,15 @@ $.style(`
     overflow: hidden;
   }
 `)
+
+$.when('input', 'textarea', (event) => {
+  event.target.style.height = (event.target.scrollHeight) + "px";
+});
+
+$.when('blur', 'textarea', (event) => {
+  clearCursor(event.target.closest($.link))
+});
+
 
 $.when('scroll', 'textarea', drawLines);
 
