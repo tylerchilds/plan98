@@ -9,7 +9,7 @@ const strokeRevisory = []
 const $ = module('story-board', {
   color: 'white',
   background: '#54796d',
-  trays: ['stroke-tray', 'fill-tray'],
+  trays: ['stroke-tray', 'fill-tray', 'silly-tray'],
   trayZ: 3,
   'stroke-tray': {
     label: "Set Stroke",
@@ -17,7 +17,9 @@ const $ = module('story-board', {
     x: 20,
     y: 50,
     z: 1,
-    target: 'color'
+    body: `
+      <input class="picker" type="color" data-target="color" />
+    `
   },
   'fill-tray': {
     label: "Set Fill",
@@ -25,8 +27,23 @@ const $ = module('story-board', {
     x: 50,
     y: 100,
     z: 2,
-    target: 'background'
+    body: `
+      <input class="picker" type="color" data-target="background" />
+    `
+  },
+  'silly-tray': {
+    label: "Set Silly",
+    visible: false,
+    width: 640,
+    height: 480,
+    x: 100,
+    y: 150,
+    z: 3,
+    body: `
+      <iframe src="/9/app/plan98-welcome"></iframe>
+    `
   }
+
 })
 
 function engine(target) {
@@ -84,10 +101,10 @@ function update(target) {
 function mount(target) {
   const { trays } = $.learn()
   const trayViews = trays.map(tray => {
-    const { x, y, z, visible, label, target } = $.learn()[tray]
+    const { width, height, x, y, z, visible, label, body } = $.learn()[tray]
 
     return `
-      <div class="tray" id="${tray}" style="--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z); display: ${visible ? 'grid' : 'none'}">
+      <div class="tray" id="${tray}" style="--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z); display: ${visible ? 'grid' : 'none'}">
         <div class="tray-title-bar" data-tray="${tray}">
           ${label}
           <button class="tray-close" data-tray="${tray}">
@@ -95,7 +112,7 @@ function mount(target) {
           </button>
         </div>
         <div class="tray-body">
-          <input class="picker" type="color" data-target="${target}" />
+          ${body}
         </div>
       </div>
     `
@@ -138,6 +155,12 @@ function mount(target) {
               <sl-icon name="square"></sl-icon>
             </span>
             <span>Set Stroke</span>
+          </button>
+          <button data-set-silly data-tray="silly-tray">
+            <span>
+              <sl-icon name="square"></sl-icon>
+            </span>
+            <span>Set Silly</span>
           </button>
         </div>
       </div>
@@ -211,6 +234,12 @@ $.when('click', '[data-set-fill]', function setFill (event) {
   const visible = !$.learn()['fill-tray'].visible
   setState('fill-tray', { visible })
 })
+
+$.when('click', '[data-set-silly]', function setSilly (event) {
+  const visible = !$.learn()['silly-tray'].visible
+  setState('silly-tray', { visible })
+})
+
 
 $.when('click', '[data-set-stroke]', function setStroke (event) {
   const visible = !$.learn()['stroke-tray'].visible
@@ -516,8 +545,8 @@ $.style(`
 
   & .tray {
     position: absolute;
-    width: 160px;
-    height: 90px;
+    width: var(--width, 160px);
+    height: var(--height, 90px);
     background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
     padding: 2px;
     display: grid;

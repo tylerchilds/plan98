@@ -268,7 +268,7 @@ async function router(request, context) {
   }
 
   if(pathname.startsWith('/x/watch/')) {
-    const src = '/' + pathname.split('/x/watch/')[1]
+    const src = '/' + pathname.split('/x/watch/')[1] + '?' + parameters.toString().replace('%2F', '/')
     const file = await remix(request, {
       src,
       tag: 'proto-type',

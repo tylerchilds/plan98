@@ -108,7 +108,6 @@ $.draw((target) => {
           </div>
         </div>
       </div>
-      <plan98-banner world="thelanding.page" pitch="Here 4 Business?" cta="Get out of town!"></plan98-banner>
     `
   }
 
@@ -199,7 +198,7 @@ $.when('click', '[data-tutorial]', start)
 $.when('click', '[data-endgame]', finish)
 
 function start(event) {
-  const url = event.target.closest($.link).getAttribute('url') || '/app/hyper-browser'
+  const url = event.target.closest($.link).getAttribute('url') || '/9/404'
   const close = 'plan98-welcome.close'
   const start = 'plan98-welcome.start'
   window[close] = hideModal;
@@ -230,7 +229,6 @@ $.style(`
     display: grid;
     margin: auto;
     height: 100%;
-    max-height: 80vh;
     animation: &-rainbow-background 10000ms ease-in-out infinite alternate-reverse;
     position: relative;
     overflow: hidden;
@@ -238,7 +236,7 @@ $.style(`
 
   &::before {
     content: '';
-    background: linear-gradient(-45deg, rgba(0,0,0,.25), rgba(0,0,0,.65));
+    background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
     position: absolute;
     inset: 0;
   }
@@ -268,8 +266,8 @@ $.style(`
     transform-style: preserve-3d;
     width: 100%;
     aspect-ratio: 1;
-    max-width: calc(100vmin - 2rem);
-    max-height: calc(100vmin - 2rem);
+    max-width: 100vmin;
+    max-height: 100vmin;
     place-self: center;
   }
 

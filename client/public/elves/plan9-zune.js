@@ -180,8 +180,9 @@ function beforeUpdate(target) {
 function afterUpdate(target) {
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
-    if(!list) return
-    list.scrollTop = target.dataset.scrollpos
+    if(list) {
+      list.scrollTop = target.dataset.scrollpos
+    }
   }
 
   { // scroll item into view
@@ -200,6 +201,18 @@ function afterUpdate(target) {
       ogIcon.remove()
       iconParent.appendChild(icon)
     })
+  }
+
+  {
+    const { hypermedia } = $.learn()
+    if(target.hypermedia !== hypermedia) {
+      target.hypermedia = hypermedia
+      const zune = target.querySelector('.zune')
+
+      if(zune) {
+        zune.scrollTop = 0
+      }
+    }
   }
 }
 
