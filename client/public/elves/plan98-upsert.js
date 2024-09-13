@@ -2,6 +2,7 @@ import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 import { getUser } from './plan98-reconnect.js'
+import { requestScreen } from './plan9-zune.js'
 
 const $ = module('plan98-upsert', {
   step: 0,
@@ -90,15 +91,21 @@ $.draw((target) => {
 
   target.innerHTML = `
     ${getAuthenticatedAt() ? `
-    <button data-connect="${email}">
-      ${email}
-    </button>
+      <div>
+        <button data-connect="${email}">
+          ${email}
+        </button>
+      </div>
     ` : `
-      No Current Identities
+      <div>
+        No Current Identities
+      </div>
     `}
-    <button data-start>
-      Add Identity
-    </button>
+      <div>
+        <button data-start>
+          Add Identity
+        </button>
+      </div>
   `
 })
 
@@ -148,7 +155,7 @@ $.when('click', '[data-validate]', (event) => {
 $.when('click', '[data-connect]', (event) => {
   const email = event.target.dataset.connect
   setActiveAccount(email)
-  window.location.href = '/app/hyper-browser'
+  requestScreen('/app/party-chat')
 })
 
 
@@ -441,23 +448,6 @@ $.style(`
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: .5rem;
-  }
-
-  & button {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: dodgerblue;
-    text-shadow: 1px 1px rgba(0,0,0,.85);
-    border: none;
-    border-radius: 1rem;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    width: 100%;
-  }
-
-  & button:focus,
-  & button:hover {
-    background-color: rebeccapurple;
   }
 
   & [data-back] {

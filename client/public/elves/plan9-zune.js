@@ -89,7 +89,12 @@ $.when('click', '.zune .app-action', (event) => {
 
 
 export function requestFullZune() {
-  $.teach({ contextActions: null, menu: false })
+  $.teach({ contextActions: null, menu: true })
+}
+
+export function requestScreen(hypermedia) {
+  hideModal()
+  $.teach({ hypermedia, contextActions: null, menu: true })
 }
 
 

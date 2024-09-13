@@ -267,7 +267,6 @@ $.when('click', '.action-accordion', async (event) => {
 
 async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
-  debugger
   const {
     sessionId,
     companyName,

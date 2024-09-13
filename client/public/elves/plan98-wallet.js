@@ -2,6 +2,7 @@ import module from '@silly/tag'
 import { render } from '@sillonious/saga'
 import { doingBusinessAs } from '@sillonious/brand'
 import { link as feedbackChannelLink } from './feedback-channel.js';
+import { actionScript } from './action-script.js'
 import { getUser } from './plan98-reconnect.js'
 
 const raw = '/public'
@@ -11,6 +12,7 @@ const tutorial = 'wallet.saga'
 const $ = module('plan98-wallet', {
   cache: {}
 })
+$.when('click', '.action-script', actionScript)
 
 const accountKey = `ls/${$.link}/account`
 
@@ -67,19 +69,49 @@ export function setupSaga(nextSaga, target, options={}) {
 function showSaga(root, saga) {
   schedule(() => {
     root.innerHTML = `
-      <div class="paper">
-        <div class="wrapper screenplay">
-          <a href="javascript:;" data-history-back>Back</a>
-          ${render(saga)}
+      <div class="siri">
+        <div>
+          <button data-history-back>
+            back
+          </button>
         </div>
+        ${render(saga)}
       </div>
     `
   })
 }
 
+function createContext(actions) {
+  const list = actions.map((data) => {
+    const attributes = Object.keys(data).map(key => {
+      return `data-${key}="${data[key]}"`
+    }).join(' ')
+    return `
+      <div>
+        <button class="action-script" ${attributes}>
+          ${data.text}
+        </button>
+      </div>
+    `
+  }).join('')
 
-$.when('click', '[data-history-back]', () => {
-  history.back()
+  return `
+    <div>
+      <button data-close-context> 
+        back
+      </button>
+    </div>
+    ${list}
+  `
+}
+
+
+$.when('click', '[data-history-back]', (event) => {
+  if(event.target.closest('plan98-modal')) {
+    hideModal()
+  } else {
+    history.back()
+  }
 })
 
 async function mount(target) {
@@ -116,13 +148,14 @@ $.draw((target) => {
 
 $.style(`
   & {
-    display: grid;
+    display: block;
+    background: black;
+    color: rgba(255,255,255,.65);
     margin: auto;
     overflow: auto;
     position: relative;
     height: 100%;
-    place-items: center;
-    background: #54796d;
+    width: 100%;
   }
 
   & [data-back] {
@@ -146,13 +179,6 @@ $.style(`
     resize: none;
   }
 
-  & .wrapper {
-    height: 100%;
-    width: 100%;
-    background: rgba(255,255,255,.85);
-    color: rgba(0,0,0,.85);
-    overflow: auto;
-  }
   @keyframes &-fade-in {
     0% {
       opacity: 0;
@@ -166,6 +192,42 @@ $.style(`
 
   &.active {
   }
+
+  & .siri {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 1rem;
+    overflow: auto;
+  }
+
+  & .siri button {
+    font-weight: 100;
+    color: rgba(255,255,255,.65);
+    font-size: 2rem;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    display: inline-block;
+    margin: 1rem 0;
+    text-align: left;
+  }
+
+  & .siri button:hover,
+  & .siri button:focus {
+    color: rgba(255,255,255,1);
+  }
+
+  & .zune .tile {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+
+  & .app-action {
+    margin: 1rem 0;
+    display: block;
+  }
+
+
 `)
 
 function schedule(x) { setTimeout(x, 1) }
