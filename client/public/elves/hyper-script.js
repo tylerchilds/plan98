@@ -185,7 +185,7 @@ $.draw((target) => {
       </div>
       <div class="menu-item">
         <button data-menu-target="view" class="${activeMenu === 'view'?'active':''}">
-          View
+          Mode
         </button>
         <div class="menu-actions" data-menu="view">
           <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Editor</button>
@@ -504,10 +504,6 @@ $.style(`
     z-index: 10;
     background: transparent;
     border-bottom: 1px solid rgba(255,255,255,.25);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     display: none;
     background: black;
   }
@@ -517,7 +513,7 @@ $.style(`
       height: 100%;
       width: 100%;
       display: grid;
-      grid-template-columns: 2rem 1fr;
+      grid-template-rows: 2rem 1fr;
     }
 
     & .actions {
@@ -525,7 +521,6 @@ $.style(`
     }
   }
   & {
-    display: block;
     overflow: auto;
     color: black;
     line-height: 2rem;
@@ -542,8 +537,9 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
+    padding: 0 .5rem;
     font-size: 1rem;
+    line-height: 2rem;
     --v-font-mono: 1;
     --v-font-casl: 0;
     --v-font-wght: 400;
