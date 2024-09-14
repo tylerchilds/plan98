@@ -47,15 +47,15 @@ $.draw((target) => {
 
   if(status === 'playing') {
     target.querySelector('.status').innerText = status
-
-    target.querySelector('.keep-watching').innerHTML = `<qr-code src="/app/interdimensional-cable?src=${src}" data-fg="rgba(0,0,0,.65)" data-bg="transparent"></qr-code>`
+    const app = window.location.origin + `/app/interdimensional-cable?src=${src}`
+    target.querySelector('.keep-watching').innerHTML = `<qr-code data-tooltip="${app}" src="${app}" data-fg="rgba(0,0,0,.65)" data-bg="transparent"></qr-code>`
     return
   }
   if(!channels) return `
     <div class="status">${status?status:''}</div>
   `
 
-  if(!station || !src) {
+  if(!station && !src) {
     return `
       <div class="status">${status?status:''}</div>
       <button data-random>Random</button>
@@ -68,22 +68,14 @@ $.draw((target) => {
     <video></video>
     <div class="keep-watching"></div>
   `
-}, { beforeUpdate, afterUpdate })
-
-function beforeUpdate(target) {
-  { // recover icons from the virtual dom
-    [...target.querySelectorAll('qr-code')].map(icon => {
-      if(icon.src !== target.src) {
-        icon.remove()
-      }
-    })
-  }
-}
+}, { afterUpdate })
 
 function afterUpdate(target) {
   const video = target.querySelector('video')
   if(!video) return
-  const { src } = $.learn()
+  let { src } = $.learn()
+  src = src ? src : target.getAttribute('src')
+
   {
     if(target.src !== src) {
       if(src) target.src = src
@@ -95,12 +87,12 @@ function afterUpdate(target) {
           try {
             clearTimeout(timeoutTimeout)
             video.play();
-            $.teach({ status: 'playing', retry: 0, src: target.src })
+            $.teach({ retry: 0 })
           } catch (e) {
             $.teach({ status: 'error' })
           }
         });
-
+        $.teach({ status: 'playing', src: target.src })
       } catch (e) {
         randomChannel()
       }

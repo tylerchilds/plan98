@@ -233,7 +233,7 @@ $.when('click','.now', (event) => {
 
 $.when('click','.show-workspace', (event) => {
   event.preventDefault()
-  $.teach({ allActive: false, menu: false, activeWorkspace: event.target.dataset.workspace })
+  $.teach({ allActive: false, broken: false, activeWorkspace: event.target.dataset.workspace })
   requestFullZune()
 })
 
@@ -577,6 +577,10 @@ $.style(`
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "main main" "main main";
+  }
+
+  & .fourth.broken {
+    display: none;
   }
 
   & .menu {

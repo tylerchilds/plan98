@@ -89,7 +89,7 @@ $.when('click', '.zune .app-action', (event) => {
 
 
 export function requestFullZune() {
-  $.teach({ contextActions: null, menu: true })
+  $.teach({ contextActions: null, menu: false })
 }
 
 export function requestScreen(hypermedia) {
@@ -142,7 +142,7 @@ $.draw((target) => {
       ${playlist()}
       ${library()}
     </div>
-    <div class="wall ${contextMenu ? 'broken':''}">
+    <div class="wall ${!menu ? 'broken':''} ${contextActions ? 'hidden' : ''}">
       ${started ? zune(target) : `
       <div class="hero">
         <div class="frame">
@@ -491,7 +491,7 @@ function createContext(actions) {
 }
 
 $.when('click', '[data-close-context]', (event) => {
-  $.teach({ contextActions: null })
+  $.teach({ contextActions: null, menu: true })
 })
 
 $.when('click','[data-system]', (event) => {
@@ -649,9 +649,8 @@ $.style(`
     max-height: 100%;
     display: block;
     height: 100%;
-    overflow-x: hidden;
+    overflow: hidden;
     pointer-events: none;
-    background: black;
   }
 
   & .zune-bar,
@@ -807,6 +806,9 @@ $.style(`
     grid-area: initial;
   }
 
+  & .hidden + .fourth {
+    display: none;
+  }
   & .broken + .fourth {
     height: 100%;
     opacity: 1;
@@ -1083,7 +1085,7 @@ $.style(`
   & .zune-bar {
     background: black;
     border-bottom: 1px solid rgba(255,255,255,.25);
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
@@ -1202,10 +1204,7 @@ $.style(`
     pointer-events: none;
     inset: 0;
     background: rgba(0, 0, 0, 1);
-    backdrop-filter: blur(150px);
     z-index: 9000;
-    transform: scale(.9);
-    transform-origin: top left;
     opacity: 0;
   }
 
@@ -1214,8 +1213,7 @@ $.style(`
     flex-direction: column;
     padding: 3rem 1rem;
     overflow: auto;
-    transform: scale(1);
-    transition: all 175ms ease-out;
+    transition: opacity 175ms ease-out;
     opacity: 1;
     pointer-events: all;
   }
@@ -1266,5 +1264,9 @@ $.style(`
     padding: 1rem;
     color: rgba(255,255,255,.65);
     font-weight: 600;
+  }
+
+  & .hidden {
+    display: none;
   }
 `)
