@@ -149,7 +149,7 @@ $.draw((target) => {
 
 function renderWorkspaceView(key) {
   const data = $.learn()
-  if(!data[key]) return `<div class="empty-pane"><button data-create="${key}" data-tooltip="create" aria-label="create"></button></div>`
+  if(!data[key]) return `<div class="empty-pane"><iframe src="/app/sillyz-computer"></iframe></div>`
 
   return `
       <iframe src="${data[key]}" class="empty-pane ${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>

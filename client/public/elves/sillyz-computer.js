@@ -52,6 +52,16 @@ export const lookup = {
 }
 
 $.draw(target => {
+  const { resources, resourceActions } = $.learn()
+
+  if(!resources) {
+    return `
+      <div class="resource">
+        ${ resourceActions ? '' : '<button data-create aria-label="create"></button>' }
+      </div>
+    `
+  }
+
   const src = target.getAttribute('src') || '/app/startup-wizard'
   if(lookup[target.id]) {
     return `<middle-earth id="${target.id}"></middle-earth>`
@@ -65,6 +75,10 @@ $.draw(target => {
       <plan9-zune></plan9-zune>
     </div>
   `
+})
+
+$.when('click', '[data-create]', (event) => {
+  $.teach({ resources: 'medium' })
 })
 
 $.style(`
@@ -87,6 +101,30 @@ $.style(`
     position: absolute;
     inset: 2rem 0 0 0;
     grid-area: midship;
+  }
+
+  & [data-create] {
+    background: lemonchiffon;
+    border: none;
+    border-radius: none;
+    box-shadow: var(--shadow);
+    padding: 2rem;
+  }
+
+  & [data-create]::before{
+    content: '';
+    display: block;
+    width: 6rem;
+    height: 6rem;
+    background-color: #E83FB8;
+    border-radius: 100%;
+  }
+
+  & .resource {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    height: 100%;
   }
 `)
 
