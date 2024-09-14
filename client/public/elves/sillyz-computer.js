@@ -1,6 +1,7 @@
 import tag from '@silly/tag'
 import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
+import { actionScript } from './action-script.js'
 
 $intro.teach({ broken: true })
 
@@ -52,17 +53,17 @@ export const lookup = {
 }
 
 $.draw(target => {
-  const { resources, resourceActions } = $.learn()
+  const src = target.getAttribute('src') || '/app/startup-wizard'
+  const { resourceLevel, resourceActions } = $.learn()
 
-  if(!resources) {
+  if(!resourceLevel) {
     return `
       <div class="resource">
-        ${ resourceActions ? '' : '<button data-create aria-label="create"></button>' }
+        ${ resourceActions ? resourceMenu(resourceActions) : `<button data-create="${src}" aria-label="create"></button>` }
       </div>
     `
   }
 
-  const src = target.getAttribute('src') || '/app/startup-wizard'
   if(lookup[target.id]) {
     return `<middle-earth id="${target.id}"></middle-earth>`
   }
@@ -77,9 +78,98 @@ $.draw(target => {
   `
 })
 
-$.when('click', '[data-create]', (event) => {
-  $.teach({ resources: 'medium' })
+function resourceMenu(actions) {
+  const list = actions.map((data) => {
+    const attributes = Object.keys(data).map(key => {
+      return `data-${key}="${data[key]}"`
+    }).join(' ')
+    return `
+      <div>
+        <button class="action-script" ${attributes}>
+          ${data.text}
+        </button>
+      </div>
+    `
+  }).join('')
+
+  return `
+    <div class="synthia">
+      <div>
+        <button data-close-context> 
+          back
+        </button>
+      </div>
+      ${list}
+    </div>
+  `
+}
+
+$.when('click', '[data-close-context]', (event) => {
+  $.teach({ resourceActions: null })
 })
+$.when('click', '[data-create]', (event) => {
+  $.teach({
+    resourceActions: [
+      {
+        text: 'low',
+        action: 'low',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
+      {
+        text: 'medium',
+        action: 'medium',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
+      {
+        text: 'high',
+        action: 'high',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
+      {
+        text: 'ultra',
+        action: 'ultra',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
+      {
+        text: 'sillywood',
+        action: 'sillywood',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
+    ]
+  })
+})
+
+$.when('click', '.action-script', actionScript)
+export function low(event) {
+  const { src } = event.target.dataset
+  window.location.href = src
+}
+
+export function medium(event) {
+  const { src } = event.target.dataset
+  window.location.href = '/9' + src
+}
+
+export function high(event) {
+  debugger
+  const { src } = event.target.dataset
+  window.location.href = '/98' + src
+}
+
+export function ultra(event) {
+  $.teach({ resourceLevel: 'ultra' })
+}
+
+export function sillywood(event) {
+  const { src } = event.target.dataset
+  window.location.href = '/x/iphone' + src
+}
+
 
 $.style(`
   & {
@@ -125,6 +215,42 @@ $.style(`
     place-items: center;
     width: 100%;
     height: 100%;
+  }
+
+  & .synthia button {
+    font-weight: 100;
+    color: rgba(0,0,0,.65);
+    font-size: 2rem;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    display: inline-block;
+    margin: 1rem 0;
+    text-align: left;
+  }
+
+  & .synthia button:hover,
+  & .synthia button:focus {
+    color: rgba(0,0,0,1);
+  }
+}
+  & .synthia {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 1);
+    backdrop-filter: blur(150px);
+    z-index: 9000;
+  }
+
+  & .synthia:not(:empty) {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 1rem;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+    background: white;
   }
 `)
 

@@ -241,7 +241,7 @@ async function router(request, context) {
 
   if(pathname.startsWith('/98/')) {
     const src = '/' + pathname.split('/98/')[1] + '?' + parameters.toString().replace('%2F', '/')
-    const file = await remix(request, { src, tag: 'sillyz-computer' }, business)
+    const file = await remix(request, { src, tag: 'plan98-intro' }, business)
 
     if(file) {
       return new Response(file, {

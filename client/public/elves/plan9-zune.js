@@ -1269,4 +1269,39 @@ $.style(`
   & .hidden {
     display: none;
   }
+
+  & .siri button {
+    font-weight: 100;
+    color: rgba(255,255,255,.65);
+    font-size: 2rem;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    display: inline-block;
+    margin: 1rem 0;
+    text-align: left;
+  }
+
+  & .siri button:hover,
+  & .siri button:focus {
+    color: rgba(255,255,255,1);
+  }
+}
+  & .siri {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 1);
+    backdrop-filter: blur(150px);
+    z-index: 9000;
+  }
+
+  & .siri:not(:empty) {
+    display: flex;
+    flex-direction: column;
+    padding: 3rem 1rem;
+    overflow: auto;
+  }
+
+
 `)
