@@ -95,7 +95,7 @@ function resourceMenu(actions) {
   return `
     <div class="synthia">
       <div>
-        <button data-close-context> 
+        <button data-no-actions> 
           back
         </button>
       </div>
@@ -104,7 +104,7 @@ function resourceMenu(actions) {
   `
 }
 
-$.when('click', '[data-close-context]', (event) => {
+$.when('click', '[data-no-actions]', (event) => {
   $.teach({ resourceActions: null })
 })
 $.when('click', '[data-create]', (event) => {
