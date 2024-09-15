@@ -9,7 +9,7 @@ let chooseFour = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'con
 
 var samples = SampleLibrary.load({
   instruments: chooseFour,
-  baseUrl: "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
+  baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '/private') + "/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
 })
 
 var current

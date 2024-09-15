@@ -88,6 +88,7 @@ async function page() {
           ${safeEnv('STATEBUS_PROXY')}
 
           ${safeEnv('POCKETBASE_URL')}
+          ${safeEnv('HEAVY_ASSET_CDN_URL')}
         }
       }
     </script>

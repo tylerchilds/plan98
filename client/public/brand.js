@@ -35,8 +35,8 @@ export const doingBusinessAs = {
     mascot: 'Silly Sillonious',
     saga:`/public/sagas/dwebcamp.org/welcome.saga`,
     contact: reverseProxyLookup,
-    brandHue: 0,
-    brandRange: 360,
+    brandHue: 60,
+    brandRange: 30,
     color: new Color('lch', [50, 75, 55])
       .display()
       .toString({format: 'hex'}),
