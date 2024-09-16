@@ -156,7 +156,6 @@ export function medium(event) {
 }
 
 export function high(event) {
-  debugger
   const { src } = event.target.dataset
   window.location.href = '/98' + src
 }
