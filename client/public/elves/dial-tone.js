@@ -4,31 +4,27 @@ import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instrumen
 
 const $ = elf('dial-tone', { root: 60, samples: {} })
 
+let current
 // load samples / choose 4 random instruments from the list //
-let chooseFour = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
+const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
-var samples = SampleLibrary.load({
-  instruments: chooseFour,
-  baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '/private') + "/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
-})
+function load(instrument) {
+  current = SampleLibrary.load({
+    instruments: instrument,
+    baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '/private') + "/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
+  })
 
-var current
-// show keyboard on load //
-Tone.loaded().then(function() {
-  // loop through instruments and set release, connect to master output
-  for (var property in samples) {
-    if (samples.hasOwnProperty(property)) {
-      console.log(samples[property])
-      samples[property].release = .5;
-      samples[property].toDestination();
-    }
-  }
+  Tone.loaded().then(function() {
+    current.release = .5;
+    current.toDestination();
+  })
+}
 
-  current = samples[chooseFour[0]];
-})
+load('piano')
+
 // show error message on loading error //
 $.when('change', '.samples', function(event) {
-  current = samples[event.target.value];
+  load(instruments[event.target.value]);
 })
 
 $.when('change', '.notes', function(event) {
@@ -49,10 +45,10 @@ const midiCodes = [...new Array(116)].map((_, i) => i)
 
 $.draw(() => {
   const { root } = $.learn()
-  const instruments = Object.keys(samples).map((item) => {
+  const list = Object.keys(instruments).map((item) => {
     return `
-      <option ${current === item ? 'selected="true"':''}>
-        ${item}
+      <option value="${item}" ${current === instruments[item] ? 'selected="true"':''}>
+        ${instruments[item]}
       </option>
     `
   })
@@ -68,7 +64,7 @@ $.draw(() => {
   return `
     <div class="controls">
       <select class="samples">
-        ${instruments}
+        ${list}
       </select>
       <select class="notes">
         ${notes}
@@ -90,8 +86,8 @@ $.draw(() => {
       <button class="note plus-9" data-note="${root + 9}">
         ${root + 9}
       </button>
-      <button class="note plus-4" data-note="${root + 4}">
-        ${root + 4}
+      <button class="note minus-9" data-note="${root - 9}">
+        ${root - 9}
       </button>
       <button class="note minus-2" data-note="${root - 2}">
         ${root - 2}
@@ -170,7 +166,7 @@ $.style(`
     transform: translateY(13%);
   }
 
-  & .the-compass .plus-4 {
+  & .the-compass .minus-9 {
     grid-row: 5 / 7;
     grid-column: 2 / 4;
     background-color: dodgerblue;
@@ -205,6 +201,7 @@ $.style(`
     border: 1px solid rgba(255,255,255,.65);
     border-radius: 0;
     color: rgba(255,255,255,.65);
+    padding: .5rem;
   }
 `)
 
