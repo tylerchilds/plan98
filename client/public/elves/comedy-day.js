@@ -17,10 +17,7 @@ $.draw(target => {
     <div class="note">
       <ol>
         <li>
-          if you have photos or videos to add, please reach out to <a href="mailto:ty@sillyz.computer">ty@sillyz.computer</a>
-        </li>
-        <li>
-          if you know ty@sillyz.computer already has your photos or videos and would like them uploaded, please let him know
+          issues? <a href="mailto:ty@sillyz.computer">ty@sillyz.computer</a>
         </li>
         <li>
           <a href="https://sillyz.computer">Powered by Sillyz.Computer</a>
@@ -98,6 +95,11 @@ $.style(`
     box-shadow: 1px 1px 3px rgba(255, 255, 255, .85);
     transform: scale(1.05);
   }
+
+  & [data-file] img {
+    width: 100%;
+    max-width: 100%;
+  }
 `)
 
 function albumHelper2024() {
@@ -142,7 +144,7 @@ function albumHelper2024() {
       entries.forEach((entry) => {
         if(entry.isIntersecting) {
           const { file } = entry.target.dataset
-          entry.target.innerHTML = `<img src="${paths.thumbnail(file)}" srcset="${paths.small(file)} 320w, ${paths.medium(file)} 640w, ${paths.large(file)} 1280w, ${paths.hd(file)} 1920w" alt=""/>`
+          entry.target.innerHTML = `<img src="${paths.thumbnail(file)}" srcset="${paths.thumbnail(file)}, ${paths.small(file)} 320w, ${paths.medium(file)} 640w, ${paths.large(file)} 1280w, ${paths.hd(file)} 1920w" alt=""/>`
         } else {
           entry.target.innerHTML = ''
         }
