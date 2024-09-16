@@ -51,7 +51,7 @@ function afterUpdate(target) {
 }
 
 $.when('click', '[data-file]', (event) => {
-  showModal(event.target.innerHTML)
+  showModal(event.target.dataset.modal)
 })
 
 $.style(`
@@ -144,21 +144,12 @@ function albumHelper2024() {
       entries.forEach((entry) => {
         if(entry.isIntersecting) {
           const { file } = entry.target.dataset
-          entry.target.innerHTML = `<img src="${paths.thumbnail(file)}" srcset="${paths.thumbnail(file)}, ${paths.small(file)} 320w, ${paths.medium(file)} 640w, ${paths.large(file)} 1280w, ${paths.hd(file)} 1920w" alt=""/>`
+          entry.target.innerHTML = `<img src="${paths.thumbnail(file)}" srcset="${paths.thumbnail(file)}, ${paths.small(file)} 320w, ${paths.medium(file)} 640w" alt=""/>`
+          entry.target.dataset.modal = `<img src="${paths.thumbnail(file)}" srcset="${paths.thumbnail(file)}, ${paths.small(file)} 320w, ${paths.medium(file)} 640w, ${paths.large(file)} 1280w, ${paths.hd(file)} 1920w" alt=""/>`
         } else {
           entry.target.innerHTML = ''
         }
-        // Each entry describes an intersection change for one observed
-        // target element:
-        //   entry.boundingClientRect
-        //   entry.intersectionRatio
-        //   entry.intersectionRect
-        //   entry.isIntersecting
-        //   entry.rootBounds
-        //   entry.target
-        //   entry.time
       });
-
     }
   }
 }
