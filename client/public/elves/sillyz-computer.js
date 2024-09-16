@@ -123,20 +123,8 @@ $.when('click', '[data-create]', (event) => {
         src: event.target.dataset.create
       },
       {
-        text: 'high',
-        action: 'high',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
-      {
         text: 'ultra',
         action: 'ultra',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
-      {
-        text: 'sillywood',
-        action: 'sillywood',
         script: import.meta.url,
         src: event.target.dataset.create
       },
@@ -155,20 +143,9 @@ export function medium(event) {
   window.location.href = '/9' + src
 }
 
-export function high(event) {
-  const { src } = event.target.dataset
-  window.location.href = '/98' + src
-}
-
 export function ultra(event) {
   $.teach({ resourceLevel: 'ultra' })
 }
-
-export function sillywood(event) {
-  const { src } = event.target.dataset
-  window.location.href = '/x/iphone' + src
-}
-
 
 $.style(`
   & {
