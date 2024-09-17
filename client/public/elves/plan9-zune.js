@@ -96,7 +96,7 @@ export function requestScreen(hypermedia) {
   hideModal()
 
   if(document.querySelector($.link)) {
-    $.teach({ hypermedia, contextActions: null, menu: true, started: true })
+    $.teach({ hypermedia, contextActions: null, menu: true })
     return true
   }
 
@@ -107,7 +107,7 @@ export function requestScreen(hypermedia) {
 
 
 $.draw((target) => {
-  const { hypermedia, audioPlaying, currentTrack, contextActions, menu, started, playlistVisible } = $.learn()
+  const { hypermedia, audioPlaying, currentTrack, contextActions, menu, playlistVisible } = $.learn()
   const contextMenu = contextActions ? createContext(contextActions) : ''
 
   return `
@@ -143,37 +143,7 @@ $.draw((target) => {
       ${library()}
     </div>
     <div class="wall ${!menu ? 'broken':''} ${contextActions ? 'hidden' : ''}">
-      ${started ? zune(target) : `
-      <div class="hero">
-        <div class="frame">
-          <div style="text-align: center">
-            <div class="logo-mark">
-              <div class="plan98-letters">
-                Plan98
-              </div>
-              <div class="plan98-slants">
-                <div class="slant-1"></div>
-                <div class="slant-2"></div>
-                <div class="slant-3"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-        <div class="body">
-          <div class="screenplay">
-            ${render(`# about
-
-@ synthia
-> Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be unable to take part in the spoils after ending the time loop of 2038.
-
-<button
-class: break-fourth-wall
-text: Connect
-`)}
-          </div>
-        </div>
-      `}
+      ${zune(target)}
     </div>
 `
 }, {
@@ -632,18 +602,8 @@ $.when('click', '[data-toggle]', async (event) => {
   $.teach({ menu: !menu })
 })
 
-$.when('click', '.break-fourth-wall', (event) => {
-  $.teach({ started: true })
-})
-
 $.style(`
   & {
-    --red: firebrick;
-    --orange: darkorange;
-    --yellow: gold;
-    --green: mediumseagreen;
-    --blue: dodgerblue;
-    --purple: mediumpurple;
     position: relative;
     width: 100%;
     max-height: 100%;
@@ -668,9 +628,6 @@ $.style(`
     max-height: 480px;
   }
 
-  & .break-fourth-wall {
-    width: 100%;
-  }
   & .control-toggle {
     position: absolute;
     bottom: 0;
@@ -712,49 +669,6 @@ $.style(`
   & .frame {
     max-width: 100%;
   }
-
-  & .hero {
-    background-color: var(--color, mediumpurple);
-    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
-    padding-top: 100px;
-    display: grid;
-    place-items: end center;
-  }
-
-  & .about {
-    margin-bottom: 2rem;
-  }
-
-  & .plan98-slants {
-    display: grid;
-    grid-template-columns: 1ch 1ch 1ch;
-    height: 100%;
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: skew(-25deg) translateX(-1rem);
-    opacity: .75;
-  }
-
-  & .slant-1 {
-    background: var(--accent-color-0, var(--red));
-  }
-  & .slant-2 {
-    background: var(--accent-color-1, var(--orange));
-  }
-  & .slant-3 {
-    background: var(--accent-color-2, var(--yellow));
-  }
-
-  & .plan98-letters {
-    position: relative;
-    z-index: 2;
-    color: rgba(255,255,255,1);
-    text-shadow: 1px 1px rgba(0,0,0,1);
-    border-bottom: 1rem solid var(--underline-color, mediumseagreen);
-    padding: 0 2rem;
-  }
-
   & .wall {
     width: 100%;
     height: 100%;
@@ -763,17 +677,6 @@ $.style(`
     z-index: 2;
     pointer-events: all;
     background: white;
-  }
-
-  & .break-fourth-wall {
-    background-color: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0, .25), rgba(0,0,0,.5));
-    color: white;
-    border: none;
-    padding: 1rem;
-    max-width: 320px;;
-    margin: auto;
-    display: block;
   }
 
   & .wall.broken {

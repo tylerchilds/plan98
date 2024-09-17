@@ -55,4 +55,36 @@ $.style(`
   & [data-super] .plan98-slants {
     transform: skew(-25deg) translateX(5px);
   }
+
+  & .plan98-slants {
+    display: grid;
+    grid-template-columns: 1ch 1ch 1ch;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transform: skew(-25deg) translateX(-1rem);
+    opacity: .75;
+  }
+
+  & .slant-1 {
+    background: var(--accent-color-0, var(--red));
+  }
+  & .slant-2 {
+    background: var(--accent-color-1, var(--orange));
+  }
+  & .slant-3 {
+    background: var(--accent-color-2, var(--yellow));
+  }
+
+  & .plan98-letters {
+    position: relative;
+    z-index: 2;
+    color: rgba(255,255,255,1);
+    text-shadow: 1px 1px rgba(0,0,0,1);
+    border-bottom: 1rem solid var(--underline-color, mediumseagreen);
+    padding: 0 2rem;
+  }
+
+
 `)

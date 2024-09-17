@@ -188,9 +188,9 @@ $.draw((target) => {
           Mode
         </button>
         <div class="menu-actions" data-menu="view">
-          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Editor</button>
-          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Paper</button>
-          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Slideshow</button>
+          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Edit</button>
+          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Preview</button>
+          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Present</button>
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>
@@ -270,8 +270,9 @@ $.when('click', '[data-read]', (event) => {
 })
 
 $.when('click', '[data-menu-target]', (event) => {
+  const { activeMenu } = $.learn()
   const { menuTarget } = event.target.dataset
-  $.teach({ activeMenu: menuTarget })
+  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
 })
 
@@ -940,6 +941,11 @@ $.style(`
 
 
 function schedule(x, delay=1) { setTimeout(x, delay) }
-$.when('click', '*', () => {
+$.when('click', '*', (event) => {
+
+  if(event.target.closest('.menu-item')) {
+    // child of a menu item
+    return
+  }
   $.teach({ activeMenu: null })
 })

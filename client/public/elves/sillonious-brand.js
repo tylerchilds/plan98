@@ -61,7 +61,7 @@ $.draw((target) => {
   }
 
   return `
-    <dial-tone></dial-tone>
+    <draw-term></draw-term>
   `
 })
 

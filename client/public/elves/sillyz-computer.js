@@ -53,7 +53,7 @@ export const lookup = {
 }
 
 $.draw(target => {
-  const src = target.getAttribute('src') || '/app/story-board'
+  const src = target.getAttribute('src') || '/404'
   const { resourceLevel, resourceActions } = $.learn()
 
   if(!resourceLevel) {
@@ -134,12 +134,12 @@ $.when('click', '[data-create]', (event) => {
 
 $.when('click', '.action-script', actionScript)
 export function low(event) {
-  const { src } = event.target.dataset
+  const src = event.target.dataset.src || '/404'
   window.location.href = src
 }
 
 export function medium(event) {
-  const { src } = event.target.dataset
+  const src = event.target.dataset.src || '/404'
   window.location.href = '/9' + src
 }
 

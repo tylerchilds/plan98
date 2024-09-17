@@ -611,13 +611,18 @@ $.style(`
   }
 `)
 
-$.when('click', '*', () => {
+$.when('click', '*', (event) => {
+  if(event.target.closest('.menu-item')) {
+    // child of a menu item
+    return
+  }
   $.teach({ activeMenu: null })
 })
 
 $.when('click', '[data-menu-target]', (event) => {
+  const { activeMenu } = $.learn()
   const { menuTarget } = event.target.dataset
-  $.teach({ activeMenu: menuTarget })
+  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
 })
 
