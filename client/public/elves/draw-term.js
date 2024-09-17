@@ -16,7 +16,7 @@ const $ = elf('draw-term', {
     y: 150,
     z: 3,
     body: `
-      <iframe src="/9/app/plan98-welcome"></iframe>
+      <iframe src="/app/startup-wizard"></iframe>
     `
   }
 })
@@ -87,7 +87,7 @@ function afterUpdate(target) {
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
-    cursor.style = `position: absolute; left: var(--start-x); top: var(--start-y); width: var(--x); height: var(--y); background: dodgerblue; ${isMouseDown ? 'display: block;' : 'display: none;'}; transform: var(--transform); pointer-events: none;`
+    cursor.style = `position: absolute; left: var(--start-x); top: var(--start-y); width: var(--x); height: var(--y); background: lemonchiffon; ${isMouseDown ? 'display: block;' : 'display: none;'}; transform: var(--transform); pointer-events: none;`
   }
 
   {
@@ -205,7 +205,7 @@ $.style(`
   }
 
   & canvas {
-    background: lemonchiffon;
+    background: #54796d;
   }
 
   & .tray {
@@ -331,7 +331,7 @@ function end (e) {
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
         body: `
-          <iframe src="/9/app/plan98-welcome"></iframe>
+          <iframe src="/app/sillyz-computer"></iframe>
         `
       }
       return newState

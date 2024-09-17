@@ -53,7 +53,7 @@ export const lookup = {
 }
 
 $.draw(target => {
-  const src = target.getAttribute('src') || '/app/startup-wizard'
+  const src = target.getAttribute('src') || '/app/story-board'
   const { resourceLevel, resourceActions } = $.learn()
 
   if(!resourceLevel) {

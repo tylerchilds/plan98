@@ -9,7 +9,7 @@ const strokeRevisory = []
 const $ = module('story-board', {
   color: 'white',
   background: '#54796d',
-  trays: ['stroke-tray', 'fill-tray', 'silly-tray'],
+  trays: ['stroke-tray', 'fill-tray', 'sound-tray', 'silly-tray'],
   trayZ: 3,
   'stroke-tray': {
     label: "Set Stroke",
@@ -31,6 +31,18 @@ const $ = module('story-board', {
       <input class="picker" type="color" data-target="background" />
     `
   },
+  'sound-tray': {
+    label: "Set Sound",
+    visible: true,
+    width: 320,
+    height: 480,
+    x: 30,
+    y: 30,
+    z: 4,
+    body: `
+      <iframe src="/app/dial-tone"></iframe>
+    `
+  },
   'silly-tray': {
     label: "Set Silly",
     visible: false,
@@ -40,7 +52,7 @@ const $ = module('story-board', {
     y: 150,
     z: 3,
     body: `
-      <iframe src="/9/app/plan98-welcome"></iframe>
+      <iframe src="/9/app/comedy-day"></iframe>
     `
   }
 
@@ -162,6 +174,13 @@ function mount(target) {
             </span>
             <span>Set Silly</span>
           </button>
+          <button data-set-sound data-tray="sound-tray">
+            <span>
+              <sl-icon name="square"></sl-icon>
+            </span>
+            <span>Set Sound</span>
+          </button>
+
         </div>
       </div>
     </div>
@@ -238,6 +257,11 @@ $.when('click', '[data-set-fill]', function setFill (event) {
 $.when('click', '[data-set-silly]', function setSilly (event) {
   const visible = !$.learn()['silly-tray'].visible
   setState('silly-tray', { visible })
+})
+
+$.when('click', '[data-set-sound]', function setSilly (event) {
+  const visible = !$.learn()['sound-tray'].visible
+  setState('sound-tray', { visible })
 })
 
 
