@@ -6,32 +6,10 @@ const $ = elf('draw-term', {
   x: null,
   y: null,
   isMouseDown: false,
-  trays: ['stroke-tray', 'fill-tray', 'silly-tray'],
+  trays: ['silly-tray'],
   trayZ: 3,
-  'stroke-tray': {
-    label: "Set Stroke",
-    width: 640,
-    height: 480,
-    x: 20,
-    y: 50,
-    z: 1,
-    body: `
-      <input class="picker" type="color" data-target="color" />
-    `
-  },
-  'fill-tray': {
-    label: "Set Fill",
-    width: 640,
-    height: 480,
-    x: 50,
-    y: 100,
-    z: 2,
-    body: `
-      <input class="picker" type="color" data-target="background" />
-    `
-  },
   'silly-tray': {
-    label: "Set Silly",
+    label: "Sillyz.Computer",
     width: 640,
     height: 480,
     x: 100,
@@ -53,28 +31,33 @@ function engine(target) {
 function render(target) {
   const container = target.querySelector('.trays')
   return function runtime(tray) {
-    const { width, height, x, y, z, label, body } = $.learn()[tray]
-    let node = container.querySelector('#'+tray)
-    if(node) {
-      node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
-    } else {
+    const { maximized, width, height, x, y, z, label, body } = $.learn()[tray]
+    let node = container.querySelector(`[data-id="${tray}"]`)
+    if(!node) {
       node = document.createElement('div')
-      container.appendChild(node)
-      node.outerHTML = `
-        <div class="tray" id="${tray}" style="--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);">
-          <div class="tray-title-bar" data-tray="${tray}">
-            ${label}
-            <button class="tray-close" data-tray="${tray}">
-              <sl-icon name="x-circle"></sl-icon>
-            </button>
-          </div>
-          <div class="tray-body">
-            ${body}
-          </div>
+      node.classList.add('tray');
+      node.dataset.id = tray
+      node.innerHTML = `
+        <div class="tray-title-bar" data-tray="${tray}">
+          ${label}
+          <button class="tray-close" data-tray="${tray}">
+            <sl-icon name="x-circle"></sl-icon>
+          </button>
+        </div>
+        <div class="tray-body">
+          ${body}
+        </div>
+
+        <div class="tray" data-id="${tray}" style="--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);">
         </div>
       `
+      container.appendChild(node)
     }
-    node.dataset.persist = true
+
+    node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
+    node.setAttribute('class', maximized ? 'tray maximized' : 'tray')
+    console.log({ maximized })
+    node.persist = true
   }
 }
 
@@ -90,7 +73,7 @@ $.draw((target) => {
 function beforeUpdate(target) {
   {
     const { startX, startY, x, y, invertX, invertY } = $.learn()
-    target.style = `--start-x: ${startX}px; --start-y: ${startY}px; --x: ${x}px; --y: ${y}px; --transform: translate(${invertX ? '-100' : '0' }%, ${invertY ? '-100' : '0'}%);` 
+    target.style = `--start-x: ${startX}px; --start-y: ${startY}px; --x: ${Math.abs(x)}px; --y: ${Math.abs(y)}px; --transform: translate(${invertX ? '-100' : '0' }%, ${invertY ? '-100' : '0'}%);` 
   }
 
   {
@@ -101,16 +84,6 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
-  { // recover icons from the virtual dom
-    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
-      const iconParent = ogIcon.parentNode
-      const icon = document.createElement('sl-icon')
-      icon.name = ogIcon.name
-      ogIcon.remove()
-      iconParent.appendChild(icon)
-    })
-  }
-
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
@@ -121,20 +94,43 @@ function afterUpdate(target) {
     const { trays } = $.learn()
     trays.map(render(target))
   }
-  /*
+
   {
     [...(target.querySelectorAll('.tray') || [])].filter(x => {
       return !x.persist
     }).map(x => x.remove())
   }
-  */
 }
 
 $.when('mousedown', '.tray-title-bar', grab)
 $.when('mousemove', '.tray-title-bar', drag)
+$.when('dblclick', '.tray-title-bar', toggleFull)
 $.when('mouseup', '.tray-title-bar', ungrab)
 $.when('mouseout', '.tray-title-bar', ungrab)
 $.when('click', '.tray-close', closeTray)
+
+function toggleFull(event) {
+  const tray = event.target.closest('.tray').dataset.id
+  const { maximized } = $.learn()[tray]
+  maximized ? restore(tray) : maximize(tray)
+}
+
+function maximize(tray) {
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].maximized = true
+    return newState
+  })
+}
+
+// restore a pane
+function restore(tray) {
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].maximized = false
+    return newState
+  })
+}
 
 function closeTray(event) {
   const { tray } = event.target.dataset
@@ -144,12 +140,11 @@ function closeTray(event) {
 
     if(trayIndex >= 0) {
       newState.trays.splice(trayIndex, 1)
-      delete newState[tray]
+      delete newState[payload]
     }
 
     return newState
   })
-  setState(tray, { visible: false })
 }
 
 // grab a pane
@@ -223,6 +218,11 @@ $.style(`
     grid-template-rows: auto 1fr;
   }
 
+  & .tray iframe {
+    position: absolute;
+    inset: 0;
+  }
+
   & .tray-title-bar {
     padding: 9px;
     font-size: 1rem;
@@ -239,6 +239,15 @@ $.style(`
     background: white;
     color: black;
     height: 100%;
+    position: relative;
+  }
+
+  & .tray.maximized {
+    transform: translate(0, 0) !important;
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
   }
 
   & .tray [type="color"] {
@@ -298,26 +307,36 @@ function move (e) {
     y = e.clientY - startY
   }
 
-  $.teach({ x: Math.abs(x), y: Math.abs(y), invertX: x < 0, invertY: y < 0 })
+  $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
 }
 
 $.when('touchend', 'canvas', end)
 $.when('touchleave', 'canvas', end)
 $.when('mouseup', 'canvas', end)
 function end (e) {
-  const { startX, isMouseDown, startY } = $.learn()
+  const { startX, x, y, invertX, invertY, startY } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
-  let x, y;
 
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    x = e.touches[0].clientX - startX
-    y = e.touches[0].clientY - startY
-  } else {
-    x = e.clientX - startX
-    y = e.clientY - startY
+  if(Math.abs(x) > 100 && Math.abs(y) > 100) {
+    $.teach(self.crypto.randomUUID(), (state, payload) => {
+      const newState = {...state}
+      newState.trays.push(payload)
+      newState.trayZ += 1
+      newState[payload] = {
+        label: "Draw Term",
+        width: Math.abs(x),
+        height: Math.abs(y),
+        x: invertX ? startX + x : startX,
+        y: invertY ? startY + y : startY,
+        z: newState.trayZ,
+        body: `
+          <iframe src="/9/app/plan98-welcome"></iframe>
+        `
+      }
+      return newState
+    })
   }
 
   $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
 };
-
