@@ -195,7 +195,7 @@ $.style(`
   & {
     position: relative;
     overflow: hidden;
-    touch-action: manipulation;
+    touch-action: none;
   }
 
   &,
