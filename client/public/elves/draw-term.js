@@ -233,7 +233,7 @@ $.style(`
       0px .7rem 0 .5px var(--orange),
       0px 1.1rem 0 .5px var(--yellow);
     display: block;
-    margin: 0 2rem;
+    margin: 0 1rem;
     opacity: .4;
     transform: opacity 100ms ease-in-out;
   }
@@ -344,7 +344,7 @@ $.style(`
     border: none;
     border-radius: 0;
     color: white;
-    padding: 5px 5px 0;
+    padding: 3px 5px 0;
   }
 
   & .tray-close {
@@ -353,7 +353,7 @@ $.style(`
     border: none;
     border-radius: 0;
     color: white;
-    padding: 5px 5px 0;
+    padding: 3px 5px 0;
   }
 
 `)
@@ -420,7 +420,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: '/app/story-board'
+        url: '/app/sillyz-computer'
       }
       return newState
     })
