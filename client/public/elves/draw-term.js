@@ -31,7 +31,7 @@ function engine(target) {
 function render(target) {
   const container = target.querySelector('.trays')
   return function runtime(tray) {
-    const { maximized, width, height, x, y, z, url } = $.learn()[tray]
+    const { maximized, grabbed, width, height, x, y, z, url } = $.learn()[tray]
     let node = container.querySelector(`[data-id="${tray}"]`)
     if(!node) {
       node = document.createElement('div')
@@ -72,7 +72,8 @@ function render(target) {
       node.dataset.url = url
       node.querySelector('iframe').src = url
     }
-    console.log({ maximized })
+
+    node.dataset.grabbed = grabbed
     node.persist = true
   }
 }
@@ -113,7 +114,7 @@ function afterUpdate(target) {
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
-    cursor.style = `position: absolute; left: var(--start-x); top: var(--start-y); width: var(--x); height: var(--y); background: lemonchiffon; ${isMouseDown ? 'display: block;' : 'display: none;'}; transform: var(--transform); pointer-events: none;`
+    cursor.style = `z-index: 9000; position: absolute; left: var(--start-x); top: var(--start-y); width: var(--x); height: var(--y); background: lemonchiffon; ${isMouseDown ? 'display: block;' : 'display: none;'}; transform: var(--transform); pointer-events: none;`
   }
 
   {
@@ -225,19 +226,29 @@ $.style(`
     touch-action: none;
   }
 
-  & .grabber {
-    pointer-events: none;
-  }
-
   & .grabber::before {
     content: '';
     box-shadow:
-      0px .3rem 0 .5px rgba(255,255,255,.25),
-      0px .7rem 0 .5px rgba(255,255,255,.25),
-      0px 1.1rem 0 .5px rgba(255,255,255,.25);
+      0px .3rem 0 .5px var(--red),
+      0px .7rem 0 .5px var(--orange),
+      0px 1.1rem 0 .5px var(--yellow);
     display: block;
     margin: 0 2rem;
+    opacity: .4;
+    transform: opacity 100ms ease-in-out;
   }
+
+  & .grabber:hover::before {
+    content: '';
+    box-shadow:
+      0px .3rem 0 .5px var(--purple),
+      0px .7rem 0 .5px var(--blue),
+      0px 1.1rem 0 .5px var(--green);
+    display: block;
+    margin: 0 2rem;
+    opacity: .6;
+  }
+
 
   &,
   & canvas {
@@ -250,8 +261,19 @@ $.style(`
     background: #54796d;
   }
 
-  & [data-mouse="true"] .tray {
+  &[data-mouse="true"] .tray {
     pointer-events: none !important;
+  }
+
+  & .grabber {
+    pointer-events: none;
+  }
+
+  & [data-grabbed="true"] .grabber::before {
+    box-shadow:
+      0px .3rem 0 .5px var(--purple),
+      0px .7rem 0 .5px var(--blue),
+      0px 1.1rem 0 .5px var(--green);
   }
 
   & .tray {
@@ -344,11 +366,11 @@ function start(e) {
   const context = canvas.getContext('2d')
   let startX, startY, x, y;
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    startX = e.touches[0].clientX
-    startY = e.touches[0].clientY
+    startX = e.touches[0].clientX - rectangle.left
+    startY = e.touches[0].clientY - rectangle.top
   } else {
-    startX = e.clientX
-    startY = e.clientY
+    startX = e.clientX - rectangle.left
+    startY = e.clientY -rectangle.top
   }
 
   x = 0
@@ -369,11 +391,11 @@ function move (e) {
 
   let x, y
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    x = e.touches[0].clientX - startX
-    y = e.touches[0].clientY - startY
+    x = e.touches[0].clientX - startX - rectangle.left
+    y = e.touches[0].clientY - startY - rectangle.top
   } else {
-    x = e.clientX - startX
-    y = e.clientY - startY
+    x = e.clientX - startX - rectangle.left
+    y = e.clientY - startY - rectangle.top
   }
 
   $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
@@ -398,7 +420,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: '/app/sillyz-computer'
+        url: '/app/story-board'
       }
       return newState
     })

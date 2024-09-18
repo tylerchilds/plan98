@@ -222,7 +222,7 @@ function alphabetical(xmlHTML) {
     const lowerFirst = x.innerText[0].toLowerCase()
     if(!usedLetters[lowerFirst]) {
       usedLetters[lowerFirst] = true
-      tile.innerHTML = `<a name="${$.link}-${lowerFirst}"></a><a class="category" href="#back-to-top">${lowerFirst}</a>`
+      tile.innerHTML = `<a class="category" href="#back-to-top">${lowerFirst}</a><a name="${$.link}-${lowerFirst}" class=""></a>`
     }
 
     x.classList.add('app-action')
@@ -230,7 +230,6 @@ function alphabetical(xmlHTML) {
     node.appendChild(tile)
   });
   return `
-    <a name="back-to-top"></a>
     <div class="categories">
       ${
         Object
@@ -240,6 +239,7 @@ function alphabetical(xmlHTML) {
           .join('')
       }
     </div>
+    <a name="back-to-top"></a>
     ${node.outerHTML}
   `
 }
@@ -441,7 +441,7 @@ $.when('click', 'a[href^="#"]', (event) => {
   event.preventDefault()
   const [_,name] = event.target.href.split('#')
   const tile = event.target.closest($.link).querySelector(`[name="${name}"]`)
-  tile.scrollIntoView()
+  tile.scrollIntoView({block: "end", inline: "end", behavior: 'smooth'})
 })
 
 $.when('click', '.action-script', actionScript)
@@ -494,6 +494,7 @@ $.when('click','[data-system]', (event) => {
 
 export function identity(event) {
   const { contextActions } = $.learn()
+  hideModal() // todo: find the root cause of this
   showModal(`
     <plan98-wallet></plan98-wallet>
   `, { onHide: restoreContext(contextActions) })
@@ -994,6 +995,9 @@ $.style(`
   & .categories {
     padding: 1rem;
     border-bottom: 1px solid rgba(255,255,255,.25);
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
   }
   & .zune-bar {
     background: black;
@@ -1012,13 +1016,17 @@ $.style(`
   }
 
   & .category {
-    margin: 1rem 1rem 0 0;
+    margin: 1rem 0 0;
     display: inline-block;
-    padding: 1rem 1rem 0 .25rem;
+    padding: 0;
     border: 1px solid rgba(255,255,255,.65);
     line-height: 1;
     aspect-ratio: 1;
     opacity: .65;
+    width: 3rem;
+    height: 3rem;
+    display: grid;
+    place-items: end end;
   }
 
   & .category:hover,

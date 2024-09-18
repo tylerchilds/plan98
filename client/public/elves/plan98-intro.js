@@ -414,6 +414,7 @@ export function preview(event) {
 
   const url = '/app/media-plexer?src=' + href
 
+  hideModal() // todo: find root cause for this work around...
   showModal(`
     <iframe src="${url}" style="width: 100%;border: none; height: 100%;"></iframe>
   `)
