@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { getSession } from './parental-controls.js'
+import { getSession } from './plan98-wallet.js'
 
 export async function getMyGroups() {
   const { sessionId } = getSession()

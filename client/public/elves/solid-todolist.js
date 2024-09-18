@@ -57,18 +57,16 @@ new Promise((resolve) => {
 // html is a render function; if a string is returned, it is rendered
 // whenever state changes, the render function will be called on each target
 $.draw((target) => {
-  const { loading } = $.learn();
-  const { user, loading: userLoading } = currentUser()
-
-  if(loading || userLoading) {
-    return `Loading...`
-  }
+  const { user } = currentUser()
 
   if(!user) {
-    return `Please log in`
+    return `<div><solid-user></solid-user></div>`
   }
 
   return `
+    <div>
+    <solid-user></solid-user>
+    </div>
     <header class="header">
       <h1>todos</h1>
       ${showNewItemForm($)}
@@ -87,7 +85,20 @@ $.draw((target) => {
       </footer>
     </section>
   `
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('solid-user')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('solid-user')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+
+}
 
 interactives.forEach(async (url) => {
   const { default: start } = await import(url)  

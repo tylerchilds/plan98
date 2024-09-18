@@ -1,10 +1,12 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
+import { getUser, disconnect } from './plan98-reconnect.js'
 import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
-import { getUser } from './plan98-reconnect.js'
+
 import { requestScreen } from './plan9-zune.js'
 
 const $ = module('plan98-upsert', {
+  loading: true,
   step: 0,
   answer1: '',
   answer2: '',
@@ -75,39 +77,105 @@ const modes = {
         Validate
       </button>
     `
+  },
+  registration: function registrationMode(target) {
+    return `
+      <plan98-register data-script="${import.meta.url}" data-action="refresh"></plan98-register>
+    `
+  },
+}
+
+$.when('connected', 'plan98-register', (event) => {
+  refresh()
+})
+
+$.when('disconnected', 'plan98-register', (event) => {
+  refresh()
+})
+
+
+function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  refresh()
+}
+
+async function refresh() {
+  const user = await getUser().catch(e => console.error(e))
+  if(!user) {
+    $.teach({ user: null, loading: false })
   }
 
+  if(!user.error) {
+    $.teach({ user, loading: false })
+  }
+
+  $.teach({ loading: false })
 }
 
 $.draw((target) => {
-  const { mode } = $.learn()
+  mount(target)
+  const { mode, user, loading } = $.learn()
+
+  if(loading) return
+
+  if(!user) {
+    return modes['registration'](target)
+  }
 
   if(modes[mode]) {
-
     return modes[mode](target)
   }
 
   const email = getEmail()
 
   target.innerHTML = `
+    <div>
+      <div class="identity-label">account</div>
+      <button data-account>
+        ${user.data.user.email}
+      </button>
+      <div style="text-align: right;">
+        <button data-logout>
+          Logout
+        </button>
+      </div>
+    </div>
+    <hr/>
     ${getAuthenticatedAt() ? `
       <div>
+        <div class="identity-label">wallet</div>
         <button data-connect="${email}">
           ${email}
         </button>
+        <div style="text-align: right;">
+          <button data-disconnect>
+            Disconnect
+          </button>
+        </div>
       </div>
     ` : `
-      <div>
-        No Current Identities
-      </div>
-    `}
       <div>
         <button data-start>
           Add Identity
         </button>
       </div>
+    `}
   `
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('plan98-registration')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('plan98-registration')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+}
+
 
 function schedule(x) { setTimeout(x, 1) }
 
@@ -156,6 +224,18 @@ $.when('click', '[data-connect]', (event) => {
   const email = event.target.dataset.connect
   setActiveAccount(email)
   requestScreen('/app/plan98-pager')
+})
+
+$.when('click', '[data-account]', (event) => {
+  requestScreen('/app/plan98-register')
+})
+
+$.when('click', '[data-logout]', (event) => {
+  disconnect()
+})
+
+$.when('click', '[data-disconnect]', (event) => {
+  clearSession()
 })
 
 
@@ -438,6 +518,11 @@ $.style(`
     margin: 0 auto;
   }
 
+  & hr {
+    border: 0;
+    border-bottom: 1px solid rgba(255,255,255,.2);
+  }
+
   & .password-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -466,4 +551,11 @@ $.style(`
     background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), lime;
     min-width: 1rem;
   }
+
+  & .identity-label {
+    color: rgba(255,255,255,.4);
+    font-weight: 800;
+    margin-top: 2rem;
+  }
 `)
+

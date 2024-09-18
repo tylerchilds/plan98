@@ -227,6 +227,10 @@ $.style(`
     display: block;
   }
 
+  & .siri [data-logout],
+  & .siri [data-disconnect] {
+    font-size: 1.5rem;
+  }
 
 `)
 

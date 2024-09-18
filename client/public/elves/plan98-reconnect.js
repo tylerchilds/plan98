@@ -103,7 +103,6 @@ export async function disconnect() {
   const { error } = await supabase.auth.signOut()
   if(!error) {
     $.teach({ user: null })
-    location.reload()
   }
 }
 

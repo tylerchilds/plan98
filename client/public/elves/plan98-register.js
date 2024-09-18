@@ -14,8 +14,14 @@ const $ = module('plan98-register', {
 supabase.auth.onAuthStateChange((event, session) => {
   if (session) {
     localStorage.setItem('supabase.auth.token', JSON.stringify(session));
+    [...document.querySelectorAll($.link)].map((x) => {
+      x.dispatchEvent(new Event('connected'))
+    })
   } else {
     localStorage.removeItem('supabase.auth.token');
+    [...document.querySelectorAll($.link)].map((x) => {
+      x.dispatchEvent(new Event('disconnected'))
+    })
   }
 });
 
@@ -45,7 +51,7 @@ $.draw((target) => {
 
   if(!user) {
     return `
-      <h2>Register</h2>
+      <h2>Connect</h2>
       <div class="message">${message ? message : ''}</div>
       <form method="POST" name="register">
         <label class="field">
@@ -57,7 +63,7 @@ $.draw((target) => {
           <input type="password" name="password" required/>
         </label>
         <button class="call-to-action" type="submit">
-          Register
+          Connect
         </button>
       </form>
     `
