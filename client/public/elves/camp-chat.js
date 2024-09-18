@@ -43,10 +43,10 @@ async function connect(target) {
   if(!sessionId) return
 
   const room = target.getAttribute('room')
-  if(target.subscribedTo === room) return
+  if(target.subscribedTo === room || !room) return
   target.subscribedTo = room
 
-  $.teach({ jokes: [] })
+  $.teach({ jokes: [], room })
   
   const { data: plan98_group_text, error } = await supabase
   .from('plan98_group_text')
@@ -154,6 +154,11 @@ $.when('input', 'textarea', (event) => {
   state[`ls/drafts/${room}`] = event.target.value
 })
 
+$.when('change', '', (event) => {
+  const room = getRoom(event.target)
+  $.teach({ room })
+})
+
 $.draw(target => {
   if(target.getAttribute('shell')) return
   const { sessionId, companyEmployeeId, companyName } = getSession()
@@ -163,10 +168,9 @@ $.draw(target => {
       <comedy-notebook></comedy-notebook>
     </sticky-note>
   `
-  const { jokes } = $.learn()
+  const { jokes, room } = $.learn()
 
   const { groupList } = state[`ls/${$.link}`]
-  const room = getRoom(target)
   if(!room) {
     return 'Please Consider...'
   }
@@ -186,9 +190,6 @@ $.draw(target => {
   `
 
   const view = `
-    <button class="action-accordion">
-      &amp;
-    </button>
     <div class="actions">
       ${actions}
     </div>
@@ -226,21 +227,16 @@ $.draw(target => {
 })
 
 export function social(company, unix) {
-  let user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix]
-
-  if(!user) {
-    user = state[plan98.env.STATEBUS_PROXY + '/' + company + '/' + unix] = {
-      nickname: `/cache/nickname/${company}/${unix}`,
-      tagline: `/cache/tagline/${company}/${unix}`,
-      avatar: `/cache/avatars/${company}/${unix}`,
-      hero: `/cache/heroes/${company}/${unix}`,
-      likes: `/edge/likes/${company}/${unix}`,
-      dislikes: `/edge/dislikes/${company}/${unix}`,
-      company,
-      unix
+  return {
+    nickname: `/cache/nickname/${company}/${unix}`,
+    tagline: `/cache/tagline/${company}/${unix}`,
+    avatar: `/cache/avatars/${company}/${unix}`,
+    hero: `/cache/heroes/${company}/${unix}`,
+    likes: `/edge/likes/${company}/${unix}`,
+    dislikes: `/edge/dislikes/${company}/${unix}`,
+    company,
+    unix
   }
-  }
-  return user
 }
 
 function escapeHyperText(text = '') {
@@ -258,10 +254,6 @@ function escapeHyperText(text = '') {
 $.when('submit', 'form', (event) => {
   event.preventDefault()
   send(event)
-})
-
-$.when('click', '.action-accordion', async (event) => {
-  event.target.classList.toggle('active')
 })
 
 async function send(event) {
@@ -412,15 +404,6 @@ $.style(`
     overflow: auto;
   }
 
-  & [name="actions"] {
-    display: inline-flex;
-    justify-content: end;
-    border: 1px solid rgba(255,255,255,.15);
-    gap: .25rem;
-		padding-right: 1rem;
-    border-radius: 1.5rem 0 0 1.5rem;
-  }
-
   & .grid {
     display: grid;
     grid-template-columns: 180px 1fr;
@@ -514,53 +497,40 @@ $.style(`
     display: none;
   }
 
-  & .action-accordion {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    width: 50px;
-    height: 50px;
-    background: rgba(0,0,0,.65);
-    border: 2px solid dodgerblue;
-    color: rgba(255,255,255,.85);
-    border-radius: 100%;
-    opacity: .5;
-    transition: all 200ms ease-in-out;
-    z-index: 10;
-  }
-  & .action-accordion:hover {
-    background: dodgerblue;
-    border: 2px solid rgba(255,255,255,1);
-    opacity: 1;
-  }
   & .actions {
-    margin: 0 1rem;
-    position: absolute;
-    top: 4rem;
-    right: 0;
-    text-align: right;
     z-index: 10;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,.25);
     display: none;
+    background: black;
   }
 
-  & .action-accordion.active + .actions {
-    display: block;
-  }
+  @media screen {
+    & {
+      height: 100%;
+      width: 100%;
+      display: grid;
+      grid-template-rows: 2rem 1fr;
+    }
 
+    & .actions {
+      display: flex;
+    }
+  }
+ 
   & .actions button {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: dodgerblue;
-    color: white;
+    background: black;
+    color: rgba(255,255,255,.85);
     border: none;
-    line-height: 1rem;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
+    padding: 0 .5rem;
     font-size: 1rem;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 800;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
+    line-height: 2rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
     transition: background 200ms ease-in-out;
@@ -568,10 +538,15 @@ $.style(`
 
   & .actions button:focus,
   & .joke-actions button:focus,
+  & .actions button.active,
+  & .joke-actions button.active,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background-color: rebeccapurple;
+    color: #fff;
+    background: #54796d;
   }
+
+
 
   & .button {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));

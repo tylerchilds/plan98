@@ -155,7 +155,7 @@ $.when('click', '[data-validate]', (event) => {
 $.when('click', '[data-connect]', (event) => {
   const email = event.target.dataset.connect
   setActiveAccount(email)
-  requestScreen('/app/party-chat')
+  requestScreen('/app/plan98-pager')
 })
 
 

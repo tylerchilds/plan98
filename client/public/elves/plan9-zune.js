@@ -100,7 +100,7 @@ export function requestScreen(hypermedia) {
     return true
   }
 
-  self.open(hypermedia)
+  window.location.href = hypermedia
   return false
 }
 
@@ -328,6 +328,16 @@ text: Hyper Script
 <a
 href: /app/middle-earth
 text: Middle Earth
+
+<a
+href: /app/startup-wizard
+text: Startup Wizard
+
+<a
+href: /app/draw-term
+text: Draw Term
+
+
 `)
 
   return `

@@ -11,16 +11,13 @@ const $ = elf('draw-term', {
   trays: ['silly-tray'],
   trayZ: 3,
   'silly-tray': {
-    label: "Sillyz.Computer",
     width: 640,
     height: 480,
     maximized: true,
     x: 100,
     y: 150,
     z: 3,
-    body: `
-      <iframe src="/app/startup-wizard"></iframe>
-    `
+    url: '/app/startup-wizard'
   }
 })
 
@@ -34,21 +31,25 @@ function engine(target) {
 function render(target) {
   const container = target.querySelector('.trays')
   return function runtime(tray) {
-    const { maximized, width, height, x, y, z, label, body } = $.learn()[tray]
+    const { maximized, width, height, x, y, z, url } = $.learn()[tray]
     let node = container.querySelector(`[data-id="${tray}"]`)
     if(!node) {
       node = document.createElement('div')
       node.classList.add('tray');
       node.dataset.id = tray
       node.innerHTML = `
-        <div class="tray-title-bar" data-tray="${tray}">
-          ${label}
+        <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
+          <button class="tray-toggle" data-tray="${tray}">
+            <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
+          </button>
+          <input value="${url}" name="browser" data-tray="${tray}"/>
+          <div class="grabber"></div>
           <button class="tray-close" data-tray="${tray}">
             <sl-icon name="x-circle"></sl-icon>
           </button>
         </div>
         <div class="tray-body">
-          ${body}
+          <iframe src="${url}" title="${url}"></iframe>
         </div>
 
         <div class="tray" data-id="${tray}" style="--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);">
@@ -58,11 +59,28 @@ function render(target) {
     }
 
     node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
-    node.setAttribute('class', maximized ? 'tray maximized' : 'tray')
+
+    if(maximized) {
+      node.setAttribute('class', 'tray maximized')
+      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen-exit'
+    } else {
+      node.setAttribute('class', 'tray')
+      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen'
+    }
+
+    if(node.dataset.url !== url) {
+      node.dataset.url = url
+      node.querySelector('iframe').src = url
+    }
     console.log({ maximized })
     node.persist = true
   }
 }
+
+$.when('input', '[name="browser"]', (event) => {
+  const { tray } = event.target.dataset
+  setState(tray, { url: event.target.value })
+})
 
 $.draw((target) => {
   if(target.innerHTML) return
@@ -83,6 +101,11 @@ function beforeUpdate(target) {
     [...(target.querySelectorAll('.tray') || [])].map(x => {
       x.persist = false
     })
+  }
+
+  {
+    const { isMouseDown } = $.learn()
+    target.dataset.mouse = isMouseDown
   }
 }
 
@@ -111,6 +134,7 @@ $.when('dblclick', '.tray-title-bar', toggleFull)
 $.when('mouseup', '.tray-title-bar', ungrab)
 $.when('mouseout', '.tray-title-bar', ungrab)
 $.when('click', '.tray-close', closeTray)
+$.when('click', '.tray-toggle', toggleFull)
 
 function toggleFull(event) {
   const tray = event.target.closest('.tray').dataset.id
@@ -201,6 +225,20 @@ $.style(`
     touch-action: none;
   }
 
+  & .grabber {
+    pointer-events: none;
+  }
+
+  & .grabber::before {
+    content: '';
+    box-shadow:
+      0px .3rem 0 .5px rgba(255,255,255,.25),
+      0px .7rem 0 .5px rgba(255,255,255,.25),
+      0px 1.1rem 0 .5px rgba(255,255,255,.25);
+    display: block;
+    margin: 0 2rem;
+  }
+
   &,
   & canvas {
     display: block;
@@ -210,6 +248,10 @@ $.style(`
 
   & canvas {
     background: #54796d;
+  }
+
+  & [data-mouse="true"] .tray {
+    pointer-events: none !important;
   }
 
   & .tray {
@@ -228,7 +270,7 @@ $.style(`
   }
 
   & .tray-title-bar {
-    padding: 9px;
+    padding: 9px 4px;
     font-size: 1rem;
     line-height: 1;
     color: white;
@@ -236,7 +278,21 @@ $.style(`
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none;
     position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1.618fr 1fr auto;
+  }
+
+  & .tray-title-bar input {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    width: 100%;
+  }
+
+  & .tray-title-bar input:focus {
+    color: rgba(255,255,255,.85);
+    column-span: 2;
   }
 
   & .tray-body {
@@ -261,12 +317,21 @@ $.style(`
     padding: 0;
   }
 
+  & .tray-toggle {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    color: white;
+    padding: 5px 5px 0;
+  }
+
   & .tray-close {
     margin-left: auto;
     background: transparent;
     border: none;
     border-radius: 0;
     color: white;
+    padding: 5px 5px 0;
   }
 
 `)
@@ -328,15 +393,12 @@ function end (e) {
       newState.trays.push(payload)
       newState.trayZ += 1
       newState[payload] = {
-        label: "Draw Term",
         width: Math.abs(x),
         height: Math.abs(y),
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        body: `
-          <iframe src="/app/sillyz-computer"></iframe>
-        `
+        url: '/app/sillyz-computer'
       }
       return newState
     })
