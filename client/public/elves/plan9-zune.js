@@ -1103,6 +1103,7 @@ $.style(`
     top: 2rem;
     left: 0;
     right: 0;
+    padding-bottom: 3rem;
     bottom: 0;
     width: 100%;
     z-index: 8999;
@@ -1111,14 +1112,15 @@ $.style(`
     transition: all 175ms ease-out;
     background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
     backdrop-filter: blur(150px);
-    pointer-events: none;
     opacity: 0;
+    pointer-events: none;
   }
 
 
   & .cortana.active {
     transform: scale(1);
     opacity: 1;
+    pointer-events: all;
   }
   & .siri {
     position: absolute;

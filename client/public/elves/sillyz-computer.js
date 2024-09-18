@@ -145,7 +145,7 @@ export function medium(event) {
 
 export function ultra(event) {
   if(event.type === 'popstate') {
-    $.teach({ resourceLevel: null })
+    $.teach({ resourceLevel: null, resourceActions: null })
   } else {
     const to = 'ultra'
     self.history.pushState({ type: 'resourceLevel', from: null, to }, "");
