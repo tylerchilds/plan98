@@ -88,11 +88,14 @@ $.when('click', '[data-logout]', async () => {
   disconnect()
 })
 
+export async function getUser() {
+  return await supabase.auth.getUser()
+}
+
 export async function disconnect() {
   const { error } = await supabase.auth.signOut()
   if(!error) {
     $.teach({ user: null })
-    location.reload()
   }
 }
 

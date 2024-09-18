@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { getUser, disconnect } from './plan98-reconnect.js'
+import { getUser, disconnect } from './plan98-register.js'
 import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 
 import { requestScreen } from './plan9-zune.js'
@@ -78,7 +78,7 @@ const modes = {
       </button>
     `
   },
-  registration: function registrationMode(target) {
+  register: function registrationMode(target) {
     return `
       <plan98-register data-script="${import.meta.url}" data-action="refresh"></plan98-register>
     `
@@ -115,12 +115,12 @@ async function refresh() {
 
 $.draw((target) => {
   mount(target)
-  const { mode, user, loading } = $.learn()
+  const { mode, user, loading, lastUpdate } = $.learn()
 
   if(loading) return
 
   if(!user) {
-    return modes['registration'](target)
+    return modes['register'](target)
   }
 
   if(modes[mode]) {
@@ -166,9 +166,9 @@ $.draw((target) => {
 
 function afterUpdate(target) {
   { // recover icons from the virtual dom
-    [...target.querySelectorAll('plan98-registration')].map(ogIcon => {
+    [...target.querySelectorAll('plan98-register')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
-      const icon = document.createElement('plan98-registration')
+      const icon = document.createElement('plan98-register')
       icon.name = ogIcon.name
       ogIcon.remove()
       iconParent.appendChild(icon)
@@ -230,8 +230,10 @@ $.when('click', '[data-account]', (event) => {
   requestScreen('/app/plan98-register')
 })
 
-$.when('click', '[data-logout]', (event) => {
-  disconnect()
+$.when('click', '[data-logout]', async (event) => {
+  await disconnect()
+  $.teach({ user: null })
+  refresh()
 })
 
 $.when('click', '[data-disconnect]', (event) => {
