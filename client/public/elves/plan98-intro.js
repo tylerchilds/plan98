@@ -313,7 +313,6 @@ function randomTheme(target) {
   target.style.setProperty('--accent-color-3', friends[color][2]);
 }
 
-
 const down = 40;
 const up = 38;
 const enter = 13;

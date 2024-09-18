@@ -1,4 +1,7 @@
 import elf from '@silly/tag'
+import { innerHTML } from 'diffhtml'
+import natsort from 'natsort'
+import { idx, documents } from './giggle-search.js'
 
 const $ = elf('draw-term', {
   startX: null,
@@ -8,12 +11,14 @@ const $ = elf('draw-term', {
   invertX: false,
   invertY: false,
   isMouseDown: false,
+  suggestions: [],
   trays: ['silly-tray'],
   trayZ: 3,
   'silly-tray': {
     width: 640,
     height: 480,
     maximized: true,
+    focused: false,
     x: 100,
     y: 150,
     z: 3,
@@ -31,7 +36,25 @@ function engine(target) {
 function render(target) {
   const container = target.querySelector('.trays')
   return function runtime(tray) {
-    const { maximized, grabbed, width, height, x, y, z, url } = $.learn()[tray]
+    const {
+      suggestions,
+      suggestIndex,
+    } = $.learn()
+    const {
+      maximized,
+      grabbed,
+      width,
+      height,
+      x,
+      y,
+      z,
+      url,
+      focused
+    } = $.learn()[tray]
+
+    const start = Math.max(suggestIndex - 5, 0)
+    const end = Math.min(suggestIndex + 5, suggestions.length - 1)
+
     let node = container.querySelector(`[data-id="${tray}"]`)
     if(!node) {
       node = document.createElement('div')
@@ -42,12 +65,21 @@ function render(target) {
           <button class="tray-toggle" data-tray="${tray}">
             <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
           </button>
-          <input value="${url}" name="browser" data-tray="${tray}"/>
+          <form class="search" method="get">
+            <div class="input-grid">
+              <input value="${url}" autocomplete="off" name="browser" data-tray="${tray}"/>
+
+              <button class="tray-sync" data-tray="${tray}" tab-index="1" type="submit">
+                <sl-icon name="arrow-down-up"></sl-icon>
+              </button>
+            </div>
+          </form>
           <div class="grabber"></div>
           <button class="tray-close" data-tray="${tray}">
             <sl-icon name="x-circle"></sl-icon>
           </button>
         </div>
+        <div class="suggestions"></div>
         <div class="tray-body">
           <iframe src="${url}" title="${url}"></iframe>
         </div>
@@ -68,6 +100,34 @@ function render(target) {
       node.querySelector('.tray-toggle sl-icon').name = 'fullscreen'
     }
 
+    const maybies = node.querySelector('.suggestions')
+    if(focused) {
+      innerHTML(maybies, `
+        <div class="suggestion-box">
+          ${suggestions.slice(start, end).map((x, i) => {
+            const item = documents.find(y => {
+              return x.ref === y.path
+            })
+
+            return `
+              <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+                <div class="hyper-name">
+                  <span class="file-name">
+                    ${item.name}
+                  </span>
+                  <span class="hyper-sentence">
+                    ${item.path.split('/').reverse().slice(1,-1).join(' ')}
+                  </span>
+                </div>
+              </button>
+            `
+          }).join('')}
+        </div>
+      `)
+    } else {
+      maybies.innerHTML = null
+    }
+
     if(node.dataset.url !== url) {
       node.dataset.url = url
       node.querySelector('iframe').src = url
@@ -78,10 +138,75 @@ function render(target) {
   }
 }
 
-$.when('input', '[name="browser"]', (event) => {
-  const { tray } = event.target.dataset
-  setState(tray, { url: event.target.value })
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', '[name="browser"]', event => {
+  const { suggestionsLength, suggestIndex } = $.learn()
+  if(event.keyCode === down) {
+    event.preventDefault()
+    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
+    if(nextIndex >= suggestionsLength -1) return
+    $.teach({ suggestIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === up) {
+    event.preventDefault()
+    const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
+    if(nextIndex < 0) return
+    $.teach({ suggestIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === enter && suggestIndex !== null) {
+    event.preventDefault()
+    const { suggestions, suggestIndex } = $.learn()
+    const item = documents.find(y => {
+      return suggestions[suggestIndex].ref === y.path
+    })
+
+    if(item) {
+      const { tray } = event.target.dataset
+      const url = '/app/media-plexer?src=' +item.path
+      document.activeElement.blur()
+      setState(tray, { url, focused: false })
+      return
+    }
+  }
 })
+
+$.when('input', '[name="browser"]', (event) => {
+  const { value } = event.target;
+  const { tray } = event.target.dataset
+  setState(tray, { buffer: value })
+
+  const sort = natsort();
+  const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
+  $.teach({
+    suggestions,
+    suggestIndex: null,
+  })
+})
+
+$.when('submit', '.search', (event) => {
+  event.preventDefault()
+  const { tray } = event.target.dataset
+  const { buffer } = $.learn()[tray]
+  const url = '/app/giggle-search?query=' + buffer
+  setState(tray, { url, focused: false })
+})
+
+$.when('focus', '[name="browser"]', event => {
+  const { tray } = event.target.dataset
+  setState(tray, { focused: true })
+})
+
+$.when('blur', '[name="browser"]', event => {
+  const { tray } = event.target.dataset
+  setState(tray, { focused: false })
+})
+
 
 $.draw((target) => {
   if(target.innerHTML) return
@@ -93,6 +218,14 @@ $.draw((target) => {
 }, { beforeUpdate, afterUpdate })
 
 function beforeUpdate(target) {
+  saveCursor(target) // first things first
+  { // save suggestion box scroll top
+    const list = target.querySelector('.suggestion-box')
+    if(list) {
+      target.dataset.scrollpos = list.scrollTop
+    }
+  }
+
   {
     const { startX, startY, x, y, invertX, invertY } = $.learn()
     target.style = `--start-x: ${startX}px; --start-y: ${startY}px; --x: ${Math.abs(x)}px; --y: ${Math.abs(y)}px; --transform: translate(${invertX ? '-100' : '0' }%, ${invertY ? '-100' : '0'}%);` 
@@ -111,6 +244,21 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
+  { // scroll suggestions
+    const list = target.querySelector('.suggestion-box')
+    if(list) {
+      list.scrollTop = target.dataset.scrollpos
+    }
+  }
+
+  { // scroll item into view
+    const activeItem = target.querySelector('.suggestion-box .active')
+    if(activeItem) {
+      activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
+    }
+  }
+
+
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
@@ -127,6 +275,8 @@ function afterUpdate(target) {
       return !x.persist
     }).map(x => x.remove())
   }
+
+  replaceCursor(target) // first things first
 }
 
 $.when('mousedown', '.tray-title-bar', grab)
@@ -135,7 +285,17 @@ $.when('dblclick', '.tray-title-bar', toggleFull)
 $.when('mouseup', '.tray-title-bar', ungrab)
 $.when('mouseout', '.tray-title-bar', ungrab)
 $.when('click', '.tray-close', closeTray)
+$.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-toggle', toggleFull)
+
+function syncTray(event) {
+  event.preventDefault()
+  const { tray } = event.target.dataset
+  const { buffer } = $.learn()[tray]
+
+  const url = buffer.startsWith('/') ? buffer : '/app/giggle-search?query=' + buffer
+  setState(tray, { url, focused: false })
+}
 
 function toggleFull(event) {
   const tray = event.target.closest('.tray').dataset.id
@@ -283,7 +443,7 @@ $.style(`
     background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
     padding: 2px;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto 1px 1fr;
   }
 
   & .tray iframe {
@@ -292,7 +452,7 @@ $.style(`
   }
 
   & .tray-title-bar {
-    padding: 9px 4px;
+    padding: 5px 4px;
     font-size: 1rem;
     line-height: 1;
     color: white;
@@ -310,6 +470,7 @@ $.style(`
     background: transparent;
     color: rgba(255,255,255,.65);
     width: 100%;
+    padding: 4px;
   }
 
   & .tray-title-bar input:focus {
@@ -339,6 +500,8 @@ $.style(`
     padding: 0;
   }
 
+  & .tray-sync,
+  & .tray-close,
   & .tray-toggle {
     background: transparent;
     border: none;
@@ -347,13 +510,89 @@ $.style(`
     padding: 3px 5px 0;
   }
 
+  & .tray-toggle {
+  }
+
   & .tray-close {
     margin-left: auto;
-    background: transparent;
+  }
+
+  & .input-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    text-align: left;
+  }
+
+  & *:focus {
+    outline: 3px solid var(--underline-color, mediumseagreen);
+  }
+
+  & .suggestions .auto-item {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: var(--button-color, dodgerblue);
     border: none;
-    border-radius: 0;
     color: white;
-    padding: 3px 5px 0;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+    display: block;
+  }
+
+  & .suggestions:not(:empty) {
+    display: block;
+    position: relative;
+    background: var(--green, mediumseagreen);
+    text-align: left;
+  }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 0;
+    height: 300px;
+    overflow: auto;
+    z-index: 10;
+    max-height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .suggestion-box .auto-item {
+    background: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
+    color: var(--button-color, dodgerblue);
+    transition: all 100ms ease-in-out;
+    padding: .5rem;
+    width: 100%;
+    text-align: left;
+    max-width: 100%;
+  }
+
+  & .suggestion-box .auto-item:focus,
+  & .suggestion-box .auto-item:hover {
+    background-color: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    color: white;
+  }
+
+  & .suggestion-box .auto-item.active {
+    color: white;
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    background-color: var(--button-color, dodgerblue);
+  }
+
+  & .hyper-name {
+    display: flex;
+    overflow: auto;
+  }
+
+  & .file-name {
+    white-space: nowrap;
+    padding-right: 2rem;
+  }
+  & .hyper-sentence {
+    white-space: nowrap;
+    margin-left: auto;
+    overflow: hidden;
+    color: rgba(255,255,255,.65);
   }
 
 `)
@@ -428,3 +667,30 @@ function end (e) {
 
   $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
 };
+
+const tags = ['TEXTAREA', 'INPUT']
+let sel = []
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.paused = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  } else {
+    target.dataset.paused = null
+  }
+}
+
+function replaceCursor(target) {
+  const paused = target.querySelector(`[name="${target.dataset.paused}"]`)
+  
+  if(paused) {
+    paused.focus()
+
+    if(tags.includes(paused.tagName)) {
+      paused.selectionStart = sel[0];
+      paused.selectionEnd = sel[1];
+    }
+  }
+}
