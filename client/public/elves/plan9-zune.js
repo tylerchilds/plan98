@@ -71,7 +71,8 @@ const $ = elf('plan9-zune', {
   suggestIndex: null,
   suggestions: [],
   suggesttionsLength: 0,
-  musicFilter: ''
+  musicFilter: '',
+  contextActions: null
 })
 
 export default $
@@ -471,7 +472,7 @@ function createContext(actions) {
 }
 
 $.when('click', '[data-close-context]', (event) => {
-  $.teach({ contextActions: null, menu: true })
+  $.teach({ contextActions: null })
 })
 
 $.when('click','[data-system]', (event) => {

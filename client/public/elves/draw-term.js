@@ -70,7 +70,7 @@ function render(target) {
               <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
               <button class="tray-sync" data-tray="${tray}" tab-index="1" type="submit">
-                <sl-icon name="arrow-down-up"></sl-icon>
+                <sl-icon name="telephone"></sl-icon>
               </button>
             </div>
           </form>

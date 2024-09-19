@@ -57,7 +57,6 @@ const friends = {
 
 const $ = elf('plan98-intro', {
   query: "",
-  menu: true,
   now: new Date().toLocaleString(),
   activeWorkspace: 'first',
   first: null,
@@ -133,6 +132,8 @@ $.when('click', '[data-create]', (event) => {
 function renderWorkspaceToggle(key, label) {
   const data = $.learn()
 
+  if(!data[key]) return ''
+
   return `
     <button class="show-workspace ${data.activeWorkspace === key ? 'active' :''} " data-workspace="${key}">
       ${label}
@@ -183,8 +184,14 @@ $.when('click','.now', (event) => {
 
 $.when('click','.show-workspace', (event) => {
   event.preventDefault()
-  $.teach({ allActive: false, broken: false, activeWorkspace: event.target.dataset.workspace })
-  requestFullZune()
+  const { longpress } = $.learn()
+  if(!longpress) {
+    $.teach({ allActive: false, broken: false, activeWorkspace: event.target.dataset.workspace })
+    requestFullZune()
+  } else {
+    $.teach({ longpress: false })
+  }
+
 })
 
 $.when('contextmenu','.show-workspace', promptWorkspaceClear)
@@ -222,7 +229,8 @@ function startClearWatch(event) {
     clearTimeout(clearWorkspaceTimer)
   }
   clearWorkspaceTimer = setTimeout(() => {
-    promptWorkspaceClear(event)
+    event.target.dispatchEvent(new Event('contextmenu'))
+    $.teach({longpress: true})
   }, 1000)
 }
 
@@ -235,14 +243,14 @@ function endClearWatch(_event) {
 
 $.when('click','[data-all-workspaces]', (event) => {
   event.preventDefault()
-  $.teach({ menu: false, allActive: !$.learn().allActive })
+  $.teach({ allActive: !$.learn().allActive })
   requestFullZune()
 })
 
 function updateActiveWorkspace(url) {
   const { activeWorkspace } = $.learn()
   const workspace = activeWorkspace || 'first'
-  $.teach({ menu: false, [activeWorkspace]: url, activeWorkspace: workspace  })
+  $.teach({ [activeWorkspace]: url, activeWorkspace: workspace  })
 }
 
 function randomTheme(target) {

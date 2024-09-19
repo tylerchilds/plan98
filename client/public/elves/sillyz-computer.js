@@ -3,7 +3,7 @@ import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { actionScript } from './action-script.js'
 
-$intro.teach({ broken: true })
+$zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer')
 
