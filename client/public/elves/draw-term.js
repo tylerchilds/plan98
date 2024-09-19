@@ -279,7 +279,7 @@ function afterUpdate(target) {
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
-    cursor.style = `z-index: 9000; position: absolute; left: var(--start-x); top: var(--start-y); width: var(--x); height: var(--y); background: lemonchiffon; ${isMouseDown ? 'display: block;' : 'display: none;'}; transform: var(--transform); pointer-events: none;`
+    cursor.style = `${isMouseDown ? 'display: block;' : 'display: none;'};`
   }
 
   {
@@ -436,6 +436,17 @@ $.style(`
 
   & canvas {
     background: #54796d;
+  }
+
+  & .cursor {
+    position: absolute;
+    left: var(--start-x);
+    top: var(--start-y);
+    width: var(--x);
+    height: var(--y);
+    background: lemonchiffon;
+    transform: var(--transform);
+    pointer-events: none;
   }
 
   &[data-mouse="true"] .tray {

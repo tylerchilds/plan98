@@ -699,6 +699,7 @@ $.style(`
     aspect-ratio: 1;
     position: sticky;
     left: 0;
+    height: 100%;
   }
 `)
 
