@@ -187,16 +187,18 @@ $.draw((target) => {
     <div class="siri">${contextMenu}</div>
     <div class="cortana ${!contextMenu && playlistVisible ? 'active': ''}">
       <audio name="walkman" src="${currentTrack}" controls="true"></audio>
-      <div class="transport">
-        <button data-back-track class="system-button -large">
-          <sl-icon name="skip-backward-circle"></sl-icon>
-        </button>
-        <button data-media class="system-button -large">
-          <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
-        </button>
-        <button data-next-track class="system-button -large">
-          <sl-icon name="skip-forward-circle"></sl-icon>
-        </button>
+      <div class="current-media">
+        <div class="transport">
+          <button data-back-track class="system-button -large">
+            <sl-icon name="skip-backward-circle"></sl-icon>
+          </button>
+          <button data-media class="system-button -large">
+            <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
+          </button>
+          <button data-next-track class="system-button -large">
+            <sl-icon name="skip-forward-circle"></sl-icon>
+          </button>
+        </div>
       </div>
       <div class="playlist">
         ${playlist()}
@@ -1153,7 +1155,6 @@ $.style(`
     background: black;
     border: none;
     overflow: hidden;
-    max-width: 220px;
     color: rgba(255,255,255,.65);
     display: grid;
     grid-template-columns: 1fr 2rem;
@@ -1182,7 +1183,7 @@ $.style(`
     }
 
     100% {
-      transform: translateX(calc(-100% + 200px));
+      transform: translateX(calc(-50%));
     }
   }
 
@@ -1192,7 +1193,6 @@ $.style(`
     top: 2rem;
     left: 0;
     right: 0;
-    padding-bottom: 3rem;
     bottom: 0;
     width: 100%;
     z-index: 8999;
@@ -1203,6 +1203,9 @@ $.style(`
     backdrop-filter: blur(150px);
     opacity: 0;
     pointer-events: none;
+    display: grid;
+    grid-template-rows: 2rem 180px 1fr;
+    padding-bottom: 3rem;
   }
 
 
@@ -1268,6 +1271,11 @@ $.style(`
     text-align: center;
   }
 
+  & .current-media {
+    display: grid;
+    place-items: end center;
+  }
+
   & details {
     padding:
   }
@@ -1328,6 +1336,7 @@ $.style(`
     padding: .5rem;
     border-radius: none;
     border: none;
+    width: 100%;
   }
 
   & .track.active {

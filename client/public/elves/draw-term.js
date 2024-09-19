@@ -67,7 +67,8 @@ function render(target) {
           <button class="tray-toggle" data-tray="${tray}">
             <sl-icon name="${minimized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
           </button>
-          <form class="search" method="get">
+          <div class="grabber"></div>
+          <form class="search minimizable" method="get">
             <div class="input-grid">
               <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
@@ -76,8 +77,8 @@ function render(target) {
               </button>
             </div>
           </form>
-          <div class="grabber"></div>
-          <button class="tray-close" data-tray="${tray}">
+          <div class="grabber minimizable"></div>
+          <button class="tray-close minimizable" data-tray="${tray}">
             <sl-icon name="x-circle"></sl-icon>
           </button>
         </div>
@@ -440,29 +441,22 @@ $.style(`
     touch-action: none;
   }
 
+  & .grabber {
+    display: block;
+    width: 100%;
+  }
+
   & .grabber::before {
     content: '';
     box-shadow:
-      0px .4rem 0 .5px var(--red),
-      0px .8rem 0 .5px var(--orange),
+      0px .2rem 0 .5px var(--red),
+      0px .7rem 0 .5px var(--orange),
       0px 1.2rem 0 .5px var(--yellow);
     display: block;
-    margin: 0 1rem;
+    margin: 0;
     opacity: .4;
     transform: opacity 100ms ease-in-out;
   }
-
-  & .grabber:hover::before {
-    content: '';
-    box-shadow:
-      0px .3rem 0 .5px var(--purple),
-      0px .7rem 0 .5px var(--blue),
-      0px 1.1rem 0 .5px var(--green);
-    display: block;
-    margin: 0 2rem;
-    opacity: .6;
-  }
-
 
   &,
   & canvas {
@@ -498,9 +492,9 @@ $.style(`
 
   & [data-grabbed="true"] .grabber::before {
     box-shadow:
-      0px .3rem 0 .5px var(--purple),
+      0px .2rem 0 .5px var(--purple),
       0px .7rem 0 .5px var(--blue),
-      0px 1.1rem 0 .5px var(--green);
+      0px 1.2rem 0 .5px var(--green);
   }
 
   & .tray {
@@ -528,7 +522,8 @@ $.style(`
     user-select: none;
     position: relative;
     display: grid;
-    grid-template-columns: auto 1.618fr 1fr auto;
+    grid-template-columns: auto 1rem 1.618fr 1fr auto;
+    gap: 5px;
   }
 
   & .tray-title-bar input {
@@ -537,7 +532,8 @@ $.style(`
     background: transparent;
     color: rgba(255,255,255,.65);
     width: 100%;
-    padding: 4px;
+    padding: 0 4px 0;
+    height: 100%;
   }
 
   & .tray-title-bar input:focus {
@@ -561,8 +557,17 @@ $.style(`
   }
 
   & .tray.minimized:not(.maximized) {
+    width: auto;
     height: auto;
     grid-template-rows: auto 1px 0;
+  }
+
+  & .tray.minimized:not(.maximized) .tray-title-bar {
+    grid-template-columns: auto 1rem;
+  }
+
+  & .tray.minimized:not(.maximized) .minimizable {
+    display: none;
   }
 
   & .tray [type="color"] {
