@@ -77,17 +77,69 @@ const $ = elf('plan9-zune', {
 
 export default $
 
-$.when('click', '.zune .app-action', (event) => {
+
+$.when('contextmenu','.zune .app-action', promptContext)
+
+function promptContext(event) {
   event.preventDefault()
   const actions = rules(event.target)
 
   if(actions.length > 0) {
     $.teach({ contextActions: actions })
+  }
+}
+
+export function clearWorkspace(event) {
+  const { workspace } = event.target.dataset
+  $.teach({  [workspace]: null, contextActions: null })
+  requestActionMenu(null)
+}
+
+let clearWorkspaceTimer
+$.when('touchstart', '.zune .app-action', startClearWatch)
+$.when('touchend', '.zune .app-action', endClearWatch)
+
+$.when('mousedown', '.zune .app-action', startClearWatch)
+$.when('mouseup', '.zune .app-action', endClearWatch)
+
+function startClearWatch(event) {
+  if(clearWorkspaceTimer) {
+    clearTimeout(clearWorkspaceTimer)
+  }
+  clearWorkspaceTimer = setTimeout(() => {
+    event.target.dispatchEvent(new Event('contextmenu'))
+    $.teach({longpress: true})
+  }, 1000)
+}
+
+function endClearWatch(_event) {
+  if(clearWorkspaceTimer) {
+    clearTimeout(clearWorkspaceTimer)
+  }
+}
+
+$.when('click', '.zune .app-action', async (event) => {
+  event.preventDefault()
+  const { longpress } = $.learn()
+  if(!longpress) {
+    const actions = rules(event.target)
+    if(actions.length > 0) {
+      const { script, action } = actions[0]
+      const dispatch = (await import(script))[action]
+      await dispatch({
+        target: {
+          dataset: {
+            ...actions[0]
+          }
+        }
+      })
+    } else {
+      $.teach({ hypermedia: event.target.href })
+    }
   } else {
-    $.teach({ hypermedia: event.target.href })
+    $.teach({ longpress: false })
   }
 })
-
 
 export function requestFullZune() {
   $.teach({ contextActions: null, menu: false })
@@ -447,16 +499,22 @@ $.when('click', 'a[href^="#"]', (event) => {
 
 $.when('click', '.action-script', actionScript)
 
+function makeButton(data) {
+  const attributes = Object.keys(data).map(key => {
+    return `data-${key}="${data[key]}"`
+  }).join(' ')
+  return `
+    <button class="action-script" ${attributes}>
+      ${data.text}
+    </button>
+  `
+}
+
 function createContext(actions) {
   const list = actions.map((data) => {
-    const attributes = Object.keys(data).map(key => {
-      return `data-${key}="${data[key]}"`
-    }).join(' ')
     return `
       <div>
-        <button class="action-script" ${attributes}>
-          ${data.text}
-        </button>
+        ${makeButton(data)}
       </div>
     `
   }).join('')

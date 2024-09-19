@@ -18,6 +18,7 @@ const $ = elf('draw-term', {
     width: 640,
     height: 480,
     maximized: true,
+    minimized: false,
     focused: false,
     x: 100,
     y: 150,
@@ -42,6 +43,7 @@ function render(target) {
     } = $.learn()
     const {
       maximized,
+      minimized,
       grabbed,
       width,
       height,
@@ -63,7 +65,7 @@ function render(target) {
       node.innerHTML = `
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
           <button class="tray-toggle" data-tray="${tray}">
-            <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
+            <sl-icon name="${minimized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
           </button>
           <form class="search" method="get">
             <div class="input-grid">
@@ -94,9 +96,14 @@ function render(target) {
 
     if(maximized) {
       node.setAttribute('class', 'tray maximized')
-      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen-exit'
     } else {
       node.setAttribute('class', 'tray')
+    }
+
+    if(minimized) {
+      node.classList.add('minimized')
+      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen-exit'
+    } else {
       node.querySelector('.tray-toggle sl-icon').name = 'fullscreen'
     }
 
@@ -301,12 +308,12 @@ function afterUpdate(target) {
 
 $.when('mousedown', '.tray-title-bar', grab)
 $.when('mousemove', '.tray-title-bar', drag)
-$.when('dblclick', '.tray-title-bar', toggleFull)
+$.when('dblclick', '.tray-title-bar', toggleMax)
 $.when('mouseup', '.tray-title-bar', ungrab)
 $.when('mouseout', '.tray-title-bar', ungrab)
 $.when('click', '.tray-close', closeTray)
 $.when('click', '.tray-sync', syncTray)
-$.when('click', '.tray-toggle', toggleFull)
+$.when('click', '.tray-toggle', toggleMin)
 
 function syncTray(event) {
   event.preventDefault()
@@ -319,25 +326,50 @@ function syncTray(event) {
   setState(tray, { url, focused: false })
 }
 
-function toggleFull(event) {
+function toggleMax(event) {
   const tray = event.target.closest('.tray').dataset.id
   const { maximized } = $.learn()[tray]
-  maximized ? restore(tray) : maximize(tray)
+  maximized ? restoreMax(tray) : maximize(tray)
 }
 
 function maximize(tray) {
   $.teach(tray, (state, payload) => {
     const newState = {...state} 
     newState[payload].maximized = true
+    newState[payload].minimized = false
     return newState
   })
 }
 
 // restore a pane
-function restore(tray) {
+function restoreMax(tray) {
   $.teach(tray, (state, payload) => {
     const newState = {...state} 
     newState[payload].maximized = false
+    return newState
+  })
+}
+
+function toggleMin(event) {
+  const tray = event.target.closest('.tray').dataset.id
+  const { minimized } = $.learn()[tray]
+  minimized ? restoreMin(tray) : minimize(tray)
+}
+
+function minimize(tray) {
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].minimized = true
+    newState[payload].maximized = false
+    return newState
+  })
+}
+
+// restore a pane
+function restoreMin(tray) {
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].minimized = false
     return newState
   })
 }
@@ -411,9 +443,9 @@ $.style(`
   & .grabber::before {
     content: '';
     box-shadow:
-      0px .3rem 0 .5px var(--red),
-      0px .7rem 0 .5px var(--orange),
-      0px 1.1rem 0 .5px var(--yellow);
+      0px .4rem 0 .5px var(--red),
+      0px .8rem 0 .5px var(--orange),
+      0px 1.2rem 0 .5px var(--yellow);
     display: block;
     margin: 0 1rem;
     opacity: .4;
@@ -440,7 +472,7 @@ $.style(`
   }
 
   & canvas {
-    background: var(--background, #54796d);
+    background: var(--background, lemonchiffon);
   }
 
   & .cursor {
@@ -449,9 +481,11 @@ $.style(`
     top: var(--start-y);
     width: var(--x);
     height: var(--y);
-    background: var(--color, lemonchiffon);
+    background: var(--color, dodgerblue);
     transform: var(--transform);
     pointer-events: none;
+    z-index: 9001;
+    opacity: .65;
   }
 
   &[data-mouse="true"] .tray {
@@ -524,6 +558,11 @@ $.style(`
     inset: 0;
     width: 100% !important;
     height: 100% !important;
+  }
+
+  & .tray.minimized:not(.maximized) {
+    height: auto;
+    grid-template-rows: auto 1px 0;
   }
 
   & .tray [type="color"] {
@@ -625,7 +664,7 @@ $.style(`
 
   & .hyper-name {
     display: flex;
-    overflow: auto;
+    overflow: hidden;
   }
 
   & .file-name {

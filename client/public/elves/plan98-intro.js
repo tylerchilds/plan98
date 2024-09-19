@@ -9,6 +9,7 @@ import natsort from 'natsort'
 requestThirdPartyRules(function ruleFilter(anchor) {
   const actions = []
   if(!anchor.matches('[href^="steam://"]')) {
+    actions.push(createWorkspaceAction(anchor.href));
     actions.push(createWorkspaceAction(anchor.href, 'first'));
     actions.push(createWorkspaceAction(anchor.href, 'second'));
     actions.push(createWorkspaceAction(anchor.href, 'third'));
@@ -265,12 +266,21 @@ function randomTheme(target) {
 }
 
 function createWorkspaceAction(href, workspace) {
-  return {
-    text: workspace + ' pane',
+  const stock = {
     action: 'setWorkspace',
     script: import.meta.url,
-    href,
-    workspace
+    href
+  }
+  if(workspace) {
+    return {
+      ...stock,
+      workspace,
+      text: workspace + ' pane'
+    }
+  }
+  return {
+    ...stock,
+    text: 'active pane'
   }
 }
 
@@ -278,7 +288,26 @@ export function setWorkspace(event) {
   if(!event.target.dataset) return
   const { workspace, href } = event.target.dataset
   const customApp = href.endsWith('.saga') ? `/app/hyper-script?src=${href}`: href
-  $.teach({ broken: false, activeWorkspace: workspace, [workspace]: customApp, contextActions: null })
+
+  const stock = {
+    broken: false,
+    contextActions: null
+  }
+
+  if(workspace) {
+    $.teach({
+      ...stock,
+      activeWorkspace: workspace,
+      [workspace]: customApp,
+    })
+  } else {
+    const { activeWorkspace } = $.learn()
+    $.teach({
+      ...stock,
+      [activeWorkspace]: customApp,
+    })
+  }
+
   requestFullZune()
 }
 
