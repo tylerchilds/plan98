@@ -67,7 +67,7 @@ function render(target) {
           </button>
           <form class="search" method="get">
             <div class="input-grid">
-              <input value="${url}" autocomplete="off" name="browser" data-tray="${tray}"/>
+              <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
               <button class="tray-sync" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="arrow-down-up"></sl-icon>
@@ -79,7 +79,7 @@ function render(target) {
             <sl-icon name="x-circle"></sl-icon>
           </button>
         </div>
-        <div class="suggestions"></div>
+        <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
           <iframe src="${url}" title="${url}"></iframe>
         </div>
@@ -131,6 +131,7 @@ function render(target) {
     if(node.dataset.url !== url) {
       node.dataset.url = url
       node.querySelector('iframe').src = url
+      node.querySelector('.browser').value = url
     }
 
     node.dataset.grabbed = grabbed
@@ -141,7 +142,7 @@ function render(target) {
 const down = 40;
 const up = 38;
 const enter = 13;
-$.when('keydown', '[name="browser"]', event => {
+$.when('keydown', '.browser', event => {
   const { suggestionsLength, suggestIndex } = $.learn()
   if(event.keyCode === down) {
     event.preventDefault()
@@ -176,7 +177,21 @@ $.when('keydown', '[name="browser"]', event => {
   }
 })
 
-$.when('input', '[name="browser"]', (event) => {
+$.when('click', '.auto-item', event => {
+  event.preventDefault()
+  const { tray } = event.target.closest('[data-tray]').dataset
+  const { path } = event.target.dataset
+
+  const url = '/app/media-plexer?src=' + path
+  document.activeElement.blur()
+  setState(tray, { url, focused: false })
+  $.teach({
+    suggestIndex: parseInt(event.target.dataset.index)
+  })
+})
+
+
+$.when('input', '.browser', (event) => {
   const { value } = event.target;
   const { tray } = event.target.dataset
   setState(tray, { buffer: value })
@@ -197,14 +212,16 @@ $.when('submit', '.search', (event) => {
   setState(tray, { url, focused: false })
 })
 
-$.when('focus', '[name="browser"]', event => {
+$.when('focus', '.browser', event => {
   const { tray } = event.target.dataset
   setState(tray, { focused: true })
 })
 
-$.when('blur', '[name="browser"]', event => {
-  const { tray } = event.target.dataset
-  setState(tray, { focused: false })
+$.when('blur', '.browser', event => {
+  setTimeout(() => {
+    const { tray } = event.target.dataset
+    setState(tray, { focused: false })
+  }, 250)
 })
 
 

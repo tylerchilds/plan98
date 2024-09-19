@@ -56,9 +56,6 @@ const friends = {
 
 const $ = elf('plan98-intro', {
   query: "",
-  suggestIndex: null,
-  suggestions: [],
-  suggestionsLength: 0,
   menu: true,
   now: new Date().toLocaleString(),
   activeWorkspace: 'first',
@@ -83,11 +80,9 @@ function init(target) {
 
 $.draw((target) => {
   init(target)
-  const { suggestions, allActive, broken, query, suggestIndex, focused, now } = $.learn()
+  const { allActive, broken, now } = $.learn()
 
   randomTheme(target)
-  const start = Math.max(suggestIndex - 5, 0)
-  const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   return `
     <div class="fourth ${broken ? 'broken' : ''} ${allActive ? 'show-all' : ''}">
       ${renderWorkspaceView('first')}
@@ -95,41 +90,12 @@ $.draw((target) => {
       ${renderWorkspaceView('third')}
       ${renderWorkspaceView('fourth')}
     </div>
-    <div class="suggestions ${focused ? 'focused' : ''}">
-      <div class="suggestion-box">
-        ${suggestions.slice(start, end).map((x, i) => {
-          const item = documents.find(y => {
-            return x.ref === y.path
-          })
-
-          return `
-            <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
-              <div class="name">
-                ${item.name}
-                <span class="sentence-path">
-                  ${item.path.split('/').reverse().slice(1,-1).join(' ')}
-                </span>
-              </div>
-            </button>
-          `
-        }).join('')}
-      </div>
-    </div>
-
     <div class="nav-wrapper">
       <div class="nav">
-        <form class="search" method="get">
-          <div class="input-grid">
-            <div class="logo-wrapper">
-              <plan98-logo></plan98-logo>
-            </div>
-            <input placeholder="Imagine..." type="text" value="${query}" name="search" autocomplete="off" />
-            <button tab-index="1" type="submit">
-              <sl-icon name="search"></sl-icon>
-            </button>
-          </div>
-        </form>
         <div class="workspaces">
+          <div class="logo-wrapper">
+            <plan98-logo></plan98-logo>
+          </div>
           ${renderWorkspaceToggle('first', '1')}
           ${renderWorkspaceToggle('second', '2')}
           ${renderWorkspaceToggle('third', '3')}
@@ -175,27 +141,9 @@ function renderWorkspaceToggle(key, label) {
 
 
 function beforeUpdate(target) {
-  { // save suggestion box scroll top
-    const list = target.querySelector('.suggestion-box')
-    if(!list) return
-    target.dataset.scrollpos = list.scrollTop
-  }
 }
 
 function afterUpdate(target) {
-  { // scroll suggestions
-    const list = target.querySelector('.suggestion-box')
-    if(!list) return
-    list.scrollTop = target.dataset.scrollpos
-  }
-
-  { // scroll item into view
-    const activeItem = target.querySelector('.suggestion-box .active')
-    if(activeItem) {
-      activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
-    }
-  }
-
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -289,13 +237,6 @@ $.when('click','[data-all-workspaces]', (event) => {
   requestFullZune()
 })
 
-$.when('submit', '.search', (event) => {
-  event.preventDefault()
-  const search = event.target.closest($.link).querySelector('[name="search"]')
-  const url = '/app/giggle-search?query=' +search.value
-  updateActiveWorkspace(url)
-})
-
 function updateActiveWorkspace(url) {
   const { activeWorkspace } = $.learn()
   const workspace = activeWorkspace || 'first'
@@ -312,73 +253,6 @@ function randomTheme(target) {
   target.style.setProperty('--accent-color-2', friends[color][1]);
   target.style.setProperty('--accent-color-3', friends[color][2]);
 }
-
-const down = 40;
-const up = 38;
-const enter = 13;
-$.when('keydown', '[name="search"]', event => {
-  const { suggestionsLength, suggestIndex } = $.learn()
-  if(event.keyCode === up) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
-    if(nextIndex >= suggestionsLength -1) return
-    $.teach({ suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === down) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
-    if(nextIndex < 0) return
-    $.teach({ suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === enter && suggestIndex !== null) {
-    event.preventDefault()
-    const { suggestions, suggestIndex } = $.learn()
-    const item = documents.find(y => {
-      return suggestions[suggestIndex].ref === y.path
-    })
-
-    if(item) {
-      const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
-      const url = '/app/media-plexer?src=' +item.path
-      updateActiveWorkspace(url)
-      document.activeElement.blur()
-      return
-    }
-  }
-})
-
-$.when('click', '.auto-item', event => {
-  event.preventDefault()
-
-  const target = document.createElement('a')
-  target.href = event.target.dataset.path
-  const contextActions = rules(target)
-  //updateActiveWorkspace(url)
-  $.teach({ contextActions, suggestIndex: parseInt(event.target.dataset.index) })
-})
-
-
-$.when('input', '[name="search"]', (event) => {
-  const { value } = event.target;
-  const sort = natsort();
-  const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
-  $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length, query: event.target.value  })
-})
-
-$.when('focus', '[name="search"]', event => {
-  $.teach({ focused: true })
-})
-
-$.when('blur', '[name="search"]', event => {
-  setTimeout(() => {
-    $.teach({ focused: false })
-    document.activeElement.blur()
-  }, 250)
-})
 
 function createWorkspaceAction(href, workspace) {
   return {
@@ -524,151 +398,6 @@ $.style(`
     bottom: 0;
     left: 0;
     z-index: 3;
-  }
-
-  & .search {
-    text-align: center;
-  }
-
-  & .search img {
-    display: block;
-  }
-  & .search input {
-    display: block;
-    margin: auto;
-    text-align: left;
-    border: 1px solid var(--button-color, dodgerblue);
-    font-size: 1.2rem;
-    padding: .5rem 1rem;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 480px;
-    border-radius: 0;
-  }
-
-  & .suggestions .auto-item,
-  & .search .auto-item {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .search .auto-item:focus,
-  & .search .auto-item:hover {
-    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
-  }
-
-  & .suggestions {
-    display: none;
-    position: absolute;
-    max-height: 300px;
-    text-align: left;
-    bottom: 3rem;
-    left: 0;
-    right: 0;
-  }
-
-  & .suggestions.focused {
-    display: block;
-  }
-
-  & .suggestion-box {
-    position: absolute;
-    inset: 0;
-    height: 300px;
-    overflow: auto;
-    z-index: 10;
-    transform: translateY(-100%);
-    max-height: calc(100vh - 3rem);
-    display: flex;
-    flex-direction: column-reverse;
-  }
-
-  & .suggestion-box .auto-item {
-    background: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
-    color: var(--button-color, dodgerblue);
-    transition: all 100ms ease-in-out;
-    padding: .5rem;
-    width: 100%;
-    text-align: left;
-    max-width: 100%;
-  }
-
-  & .suggestion-box .auto-item:focus,
-  & .suggestion-box .auto-item:hover {
-    background-color: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    color: white;
-  }
-
-  & .suggestion-box .auto-item.active {
-    color: white;
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    background-color: var(--button-color, dodgerblue);
-  }
-
-
-  & [data-suggestion] {
-    display: block;
-  }
-
-  & .input-grid {
-    display: grid;
-    grid-template-columns: 3rem 1fr auto;
-    grid-template-rows: 3rem;
-    max-width: 480px;
-    min-width: 320px;
-    text-align: left;
-  }
-
-  & .input-grid *:focus {
-    outline: 3px solid var(--underline-color, mediumseagreen);
-  }
-
-  & .input-grid .logo-wrapper {
-    aspect-ratio: 1;
-    position: sticky;
-    left: 0;
-  }
-
-  & .input-grid [type="submit"] {
-    font-size: 1.2rem;
-    padding: .5rem 1rem;
-    margin: 0 auto;
-    width: 100%;
-    max-width: 480px;
-  }
-
-  & .input-grid [type="submit"] {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .input-grid [type="submit"]:hover,
-  & .input-grid [type="submit"]:focus {
-    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
-  }
-
-
-  & [data-suggestion] {
-    position: relative;
-  }
-
-  & .name {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    white-space: nowrap;
   }
 
   & .nav-wrapper {
@@ -964,6 +693,12 @@ $.style(`
     margin-left: auto;
     overflow: hidden;
     color: rgba(255,255,255,.65);
+  }
+
+  & .logo-wrapper {
+    aspect-ratio: 1;
+    position: sticky;
+    left: 0;
   }
 `)
 
