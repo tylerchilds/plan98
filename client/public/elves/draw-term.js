@@ -245,7 +245,10 @@ function beforeUpdate(target) {
 
   {
     const { startX, startY, x, y, invertX, invertY } = $.learn()
-    target.style = `--start-x: ${startX}px; --start-y: ${startY}px; --x: ${Math.abs(x)}px; --y: ${Math.abs(y)}px; --transform: translate(${invertX ? '-100' : '0' }%, ${invertY ? '-100' : '0'}%);` 
+    const background = target.getAttribute('background')
+    const color = target.getAttribute('color')
+    
+    target.style = `--start-x: ${startX}px; --start-y: ${startY}px; --x: ${Math.abs(x)}px; --y: ${Math.abs(y)}px; --transform: translate(${invertX ? '-100' : '0' }%, ${invertY ? '-100' : '0'}%); ${background ? `--background: ${background};` : ``} ${color ? `--color: ${color}` : ``}`
   }
 
   {
@@ -437,7 +440,7 @@ $.style(`
   }
 
   & canvas {
-    background: #54796d;
+    background: var(--background, #54796d);
   }
 
   & .cursor {
@@ -446,7 +449,7 @@ $.style(`
     top: var(--start-y);
     width: var(--x);
     height: var(--y);
-    background: lemonchiffon;
+    background: var(--color, lemonchiffon);
     transform: var(--transform);
     pointer-events: none;
   }
@@ -538,6 +541,17 @@ $.style(`
     border-radius: 0;
     color: white;
     padding: 3px 5px 0;
+    opacity: .65;
+    transition: opacity 100ms;
+  }
+
+  & .tray-sync:hover,
+  & .tray-sync:focus,
+  & .tray-close:hover,
+  & .tray-close:focus,
+  & .tray-toggle:hover,
+  & .tray-toggle:focus {
+    opacity: 1;
   }
 
   & .tray-toggle {
