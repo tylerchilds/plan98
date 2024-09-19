@@ -323,7 +323,7 @@ function syncTray(event) {
   url = buffer.startsWith('/') ? buffer : '/app/giggle-search?query=' + buffer
 
   event.target.closest('.tray').querySelector('iframe').src = url
-  setState(tray, { url, focused: false })
+  setState(tray, { url, focused: false, minimized: false })
 }
 
 function toggleMax(event) {

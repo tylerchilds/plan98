@@ -4,6 +4,12 @@ import { actionScript } from './action-script.js'
 import lunr from 'lunr'
 import natsort from 'natsort'
 
+state['ls/mp3'] ||= {
+  length: 0,
+  current: 0,
+  list: []
+}
+
 const Types = {
   File: {
     type: 'File',
@@ -160,6 +166,7 @@ export function requestScreen(hypermedia) {
 
 
 $.draw((target) => {
+  const { current, list } = state['ls/mp3']
   const { hypermedia, audioPlaying, currentTrack, contextActions, menu, playlistVisible } = $.learn()
   const contextMenu = contextActions ? createContext(contextActions) : ''
 
@@ -168,10 +175,9 @@ $.draw((target) => {
       <button data-system class="system-button">
         9
       </button>
-      <audio name="walkman" src="${currentTrack}"></audio>
       <button data-playlist>
         <span class="marquee">
-          Sum 41 - In Too Deep - All Killer No Filler
+          ${list[current] ? list[current] : 'Sum 41 - In Too Deep - All Killer No Filler'}
         </span>
         <span class="system-button -nested">
           <sl-icon name="cassette"></sl-icon>
@@ -180,7 +186,7 @@ $.draw((target) => {
     </div>
     <div class="siri">${contextMenu}</div>
     <div class="cortana ${!contextMenu && playlistVisible ? 'active': ''}">
-      <img src="" />
+      <audio name="walkman" src="${currentTrack}" controls="true"></audio>
       <div class="transport">
         <button data-back-track class="system-button -large">
           <sl-icon name="skip-backward-circle"></sl-icon>
@@ -192,7 +198,9 @@ $.draw((target) => {
           <sl-icon name="skip-forward-circle"></sl-icon>
         </button>
       </div>
-      ${playlist()}
+      <div class="playlist">
+        ${playlist()}
+      </div>
       ${library()}
     </div>
     <div class="wall ${!menu ? 'broken':''} ${contextActions ? 'hidden' : ''}">
@@ -298,40 +306,41 @@ function alphabetical(xmlHTML) {
 }
 
 function playlist() {
-  return`
-    <details open="true">
-      <summary>Next</summary>
-    </details>
-  `
+  const { list, current } = state['ls/mp3']
+  return list.map((url, i) => {
+    const [piece, album, artist] = url.split('/').reverse()
+    return `
+      <button class="track ${current === i ? 'active' : ''}" data-id="${i}">
+        <span class="id">${i}</span> <span class="piece">${piece}</span> <span class="album">${album}</span> <span class="artist">${artist}</span>
+      </button>
+    `
+  }).join('')
 }
 
 function library() {
-  const { musicFilter, suggestIndex, suggestions } = $.learn()
+  const { musicFilter, suggestIndex, suggestions, showSuggestions } = $.learn()
 
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   return`
-    <details open="true">
-      <summary>Library</summary>
-      <div class="search">
-        <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
-        <div class="suggestions">
-            ${suggestions.slice(start, end).map((x, i) => {
-              const item = documents.find(y => {
-                return x.ref === y.path
-              })
+    <div class="search">
+      <div class="suggestions">
+        ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
+          const item = documents.find(y => {
+            return x.ref === y.path
+          })
 
-              return `
-                <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
-                  <div class="name">
-                    ${item.name}
-                  </div>
-                </button>
-              `
-            }).join('')}
-        </div>
+          return `
+            <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+              <div class="name">
+                ${item.name}
+              </div>
+            </button>
+          `
+        }).join('') : ''}
       </div>
-    </details>
+      <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
+    </div>
   `
 }
 function zune(target) {
@@ -406,7 +415,7 @@ const up = 38;
 const enter = 13;
 $.when('keydown', '[name="search"]', event => {
   const { suggestionsLength, suggestIndex } = $.learn()
-  if(event.keyCode === down) {
+  if(event.keyCode === up) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength -1) return
@@ -414,7 +423,7 @@ $.when('keydown', '[name="search"]', event => {
     return
   }
 
-  if(event.keyCode === up) {
+  if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
     if(nextIndex < 0) return
@@ -430,9 +439,11 @@ $.when('keydown', '[name="search"]', event => {
     })
 
     if(item) {
-      const iframe = event.target.closest($.link).querySelector('[name="plan98-window"]')
-      const url = '/app/media-plexer?src=' +item.path
-      updateActiveWorkspace(url)
+      const target = document.createElement('a')
+      target.href = item.path
+      const contextActions = rules(target)
+
+      $.teach({ contextActions })
       document.activeElement.blur()
       return
     }
@@ -445,7 +456,6 @@ $.when('click', '.auto-item', event => {
   const target = document.createElement('a')
   target.href = event.target.dataset.path
   const contextActions = rules(target)
-  //updateActiveWorkspace(url)
   //
   let { suggestIndex } = $.learn()
   const index = parseInt(event.target.dataset.index)
@@ -464,12 +474,12 @@ $.when('input', '[name="search"]', (event) => {
 })
 
 $.when('focus', '[name="search"]', event => {
-  $.teach({ focused: true })
+  $.teach({ showSuggestions: true })
 })
 
 $.when('blur', '[name="search"]', event => {
   setTimeout(() => {
-    $.teach({ focused: false })
+    $.teach({ showSuggestions: false })
     document.activeElement.blur()
   }, 250)
 })
@@ -477,11 +487,19 @@ $.when('blur', '[name="search"]', event => {
 
 $.when('click', '[data-media]', (event) => {
   const { audioPlaying } = $.learn()
+  const { current, list } = state['ls/mp3']
   const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
 
-  audioPlaying ? walkman.pause() : walkman.play()
-
-  $.teach({ audioPlaying: !audioPlaying })
+  if(audioPlaying) {
+    walkman.pause()
+    $.teach({ audioPlaying: !audioPlaying })
+  } else {
+    if(walkman.src !== list[current]) {
+      walkman.src = list[current]
+    }
+    walkman.play()
+    $.teach({ audioPlaying: !audioPlaying, currentTrack: list[current] })
+  }
 })
 
 $.when('click', '[data-create]', (event) => {
@@ -623,22 +641,9 @@ function createPlaylistAction(href) {
 
 export function toPlaylist(event) {
   const { href } = event.target.dataset
-  alert(href)
-}
-
-
-function createPlayQueueAction(href) {
-  return {
-    text: 'to queue',
-    action: 'queuePlay',
-    script: import.meta.url,
-    href
-  }
-}
-
-export function queuePlay(event) {
-  const { href } = event.target.dataset
-  alert(href)
+  state['ls/mp3'].length += 1
+  state['ls/mp3'].list.push(href)
+  $.teach({ contextActions: null })
 }
 
 const thirdPartyRules = []
@@ -663,7 +668,6 @@ function rules(anchor) {
   if(anchor.matches('[href$=".mp3"], [href$=".wav"]')) {
     actions.push(createPlayAction(anchor.href));
     actions.push(createPlaylistAction(anchor.href));
-    actions.push(createPlayQueueAction(anchor.href));
   }
   // window manager related
   if(anchor.matches('[href^="steam://"]')) {
@@ -811,6 +815,10 @@ $.style(`
 
   & .search {
     text-align: center;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
   }
 
   & .search img {
@@ -820,13 +828,18 @@ $.style(`
     display: block;
     margin: auto;
     text-align: left;
-    border: 1px solid var(--button-color, dodgerblue);
+    background: transparent;
     font-size: 1.2rem;
     padding: .5rem 1rem;
     margin: 0 auto;
     width: 100%;
-    max-width: 480px;
+    color: rgba(255,255,255,.65);
     border-radius: 0;
+    border: none;
+  }
+
+  & .search input:focus {
+    color: rgba(255,255,255,.85);
   }
 
   & .suggestions .auto-item,
@@ -846,8 +859,10 @@ $.style(`
   }
 
   & .suggestions {
-    display: block;
+    display: flex;
     text-align: left;
+    overflow: hidden;
+    flex-direction: column-reverse;
   }
 
   & .suggestions .auto-item {
@@ -1142,11 +1157,20 @@ $.style(`
     color: rgba(255,255,255,.65);
     display: grid;
     grid-template-columns: 1fr 2rem;
+    opacity: .65;
   }
+
+
+  & [data-playlist]:hover,
+  & [data-playlist]:focus {
+    opacity: 1;
+  }
+
+
 
   & .marquee {
     pointer-events: none;
-    animation: &-marquee-track 15000ms linear infinite alternate;
+    animation: &-marquee-track 30000ms linear infinite alternate;
     white-space: nowrap;
     display: inline-block;
     line-height: 2rem;
@@ -1291,5 +1315,103 @@ $.style(`
     overflow: auto;
   }
 
+  & audio {
+    margin: 0 auto 2rem;
+    display: block;
+    width: 100%;
+  }
 
+  & .track {
+    text-align: left;
+    color: rgba(255,255,255,.65);
+    background: transparent;
+    padding: .5rem;
+    border-radius: none;
+    border: none;
+  }
+
+  & .track.active {
+    background-color: var(--green, mediumseagreen);
+    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
+  }
+
+  & .playlist {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  & .id {
+    color: rgba(255,255,255,.25);
+  }
+  & .piece {
+    color: rgba(255,255,255,.85);
+  }
+  & .artist {
+    color: rgba(255,255,255,.5);
+  }
+  & .album {
+    color: rgba(255,255,255,.65);
+  }
 `)
+const nextEvent = new CustomEvent("next", {
+  detail: {
+    type: "next",
+  },
+});
+
+$.when('click', '[data-next-track]', (event) => {
+  event.target.closest($.link).querySelector('audio').dispatchEvent(nextEvent)
+})
+
+const backEvent = new CustomEvent("back", {
+  detail: {
+    type: "back",
+  },
+});
+
+$.when('click', '[data-back-track]', (event) => {
+    event.target.closest($.link).querySelector('audio').dispatchEvent(backEvent)
+})
+
+$.when('next', 'audio', (event) => {
+  const walkman = event.target
+  const { current, length, list } = state['ls/mp3']
+  const next = mod(current + 1, length)
+  state['ls/mp3'].current = next
+  const href = list[next]
+  walkman.src = href
+  walkman.play()
+  $.teach({ audioPlaying: true, currentTrack: href })
+})
+
+$.when('ended', 'audio', (event) => {
+
+  event.target.dispatchEvent(nextEvent)
+})
+
+$.when('back', 'audio', (event) => {
+  const walkman = event.target
+  const { current, length, list } = state['ls/mp3']
+  const back = mod(current + 1, length)
+  state['ls/mp3'].current = back
+  const href = list[back]
+  walkman.src = href
+  walkman.play()
+  $.teach({ audioPlaying: true, currentTrack: href })
+})
+
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
+
+$.when('click', '.track', (event) => {
+  const walkman = event.target.closest($.link).querySelector('audio')
+  const { list } = state['ls/mp3']
+  const { id } = event.target.dataset
+  const next = parseInt(id)
+  state['ls/mp3'].current = next
+  const href = list[next]
+  walkman.src = href
+  walkman.play()
+  $.teach({ audioPlaying: true, currentTrack: href })
+})

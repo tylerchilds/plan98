@@ -26,27 +26,3 @@ $.draw(() => {
   `
 })
 
-$.when('click', '[data-next]', (event) => {
-  const nextEvent = new CustomEvent("next", {
-    detail: {
-      type: "next",
-    },
-  });
-  event.target.closest($.link).querySelector('audio').dispatchEvent(nextEvent)
-})
-
-$.when('click', '[data-back]', (event) => {
-  const backEvent = new CustomEvent("back", {
-    detail: {
-      type: "back",
-    },
-  });
-  event.target.closest($.link).querySelector('audio').dispatchEvent(backEvent)
-})
-
-$.when('next', 'audio', () => {
-alert('next')
-})
-$.when('back', 'audio', () => {
-alert('back')
-})
