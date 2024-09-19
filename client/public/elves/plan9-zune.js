@@ -588,6 +588,12 @@ export function requestThirdPartyRules(filter, options) {
   thirdPartyRules.push(filter)
 }
 
+
+export function requestActionMenu(actions) {
+  $.teach({ contextActions: actions })
+}
+
+
 function thirdPartyActions(anchor) {
   return thirdPartyRules.flatMap(filter => filter(anchor))
 }

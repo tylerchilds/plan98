@@ -308,9 +308,11 @@ $.when('click', '.tray-toggle', toggleFull)
 function syncTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
-  const { buffer } = $.learn()[tray]
+  let { buffer, url } = $.learn()[tray]
+  buffer ||= url
+  url = buffer.startsWith('/') ? buffer : '/app/giggle-search?query=' + buffer
 
-  const url = buffer.startsWith('/') ? buffer : '/app/giggle-search?query=' + buffer
+  event.target.closest('.tray').querySelector('iframe').src = url
   setState(tray, { url, focused: false })
 }
 

@@ -3,7 +3,7 @@ import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
 import { actionScript } from './action-script.js'
 import { showModal, hideModal } from '@plan98/modal'
-import { requestThirdPartyRules, requestFullZune } from './plan9-zune.js'
+import { requestThirdPartyRules, requestActionMenu, requestFullZune } from './plan9-zune.js'
 import natsort from 'natsort'
 
 requestThirdPartyRules(function ruleFilter(anchor) {
@@ -15,6 +15,7 @@ requestThirdPartyRules(function ruleFilter(anchor) {
     actions.push(createWorkspaceAction(anchor.href, 'fourth'));
     actions.push(createPreviewAction(anchor.href, 'fourth'));
   }
+
   return actions
 }, {})
 
@@ -191,21 +192,22 @@ $.when('contextmenu','.show-workspace', promptWorkspaceClear)
 function promptWorkspaceClear(event) {
   event.preventDefault()
   const { workspace } = event.target.dataset
-  $.teach({
-    contextActions: [
+  if($.learn()[workspace]) {
+    requestActionMenu([
       {
         text: 'clear workspace',
         action: 'clearWorkspace',
         script: import.meta.url,
         workspace
       }
-    ]
-  })
+    ])
+  }
 }
 
 export function clearWorkspace(event) {
   const { workspace } = event.target.dataset
   $.teach({  [workspace]: null, contextActions: null })
+  requestActionMenu(null)
 }
 
 let clearWorkspaceTimer
