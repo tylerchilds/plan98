@@ -244,6 +244,7 @@ $.draw((target) => {
 
 function beforeUpdate(target) {
   saveCursor(target) // first things first
+
   { // save suggestion box scroll top
     const list = target.querySelector('.suggestion-box')
     if(list) {
@@ -272,6 +273,12 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
+  {
+    const { grabbing } = $.learn()
+    const trays = target.querySelector('.trays')
+    trays.dataset.grabbing = !!grabbing
+  }
+
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
     if(list) {
@@ -307,11 +314,18 @@ function afterUpdate(target) {
   replaceCursor(target) // first things first
 }
 
+$.when('touchstart', '.tray-title-bar', grab)
 $.when('mousedown', '.tray-title-bar', grab)
-$.when('mousemove', '.tray-title-bar', drag)
+
+$.when('touchmove', 'canvas', drag)
+$.when('mousemove', 'canvas', drag)
+
+
 $.when('dblclick', '.tray-title-bar', toggleMax)
 $.when('mouseup', '.tray-title-bar', ungrab)
-$.when('mouseout', '.tray-title-bar', ungrab)
+$.when('touchend', '.tray-title-bar', ungrab)
+$.when('mouseup', 'canvas', ungrab)
+$.when('touchend', 'canvas', ungrab)
 $.when('click', '.tray-close', closeTray)
 $.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-toggle', toggleMin)
@@ -391,21 +405,25 @@ function closeTray(event) {
 }
 
 // grab a pane
+let grabTimeout
 function grab({ target }) {
   const { tray } = event.target.dataset
   const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
 
-  setState(tray, { grabbed: true, z: newZ })
-  $.teach({ trayZ: newZ })
+  grabTimeout = setTimeout(() => {
+    setState(tray, { grabbed: true, z: newZ })
+    $.teach({ trayZ: newZ, grabbing: tray })
+  }, 100)
 }
 
 // drag a pane
 function drag(event) {
+  const tray = $.learn().grabbing
+  if(!tray) return
   const { target, movementX, movementY } = event
 
-  const { tray } = target.dataset
   const { grabbed, x, y } = $.learn()[tray]
 
   if(grabbed) {
@@ -418,8 +436,11 @@ function drag(event) {
 
 // release a pane
 function ungrab({ target }) {
-  const { tray } = target.dataset
+  clearTimeout(grabTimeout)
+  const tray = $.learn().grabbing
+  if(!tray) return
   setState(tray, { grabbed: false })
+  $.teach({ grabbing: null })
 }
 
 function setState(tray, payload) {
@@ -483,6 +504,10 @@ $.style(`
     opacity: .65;
   }
 
+  & .trays[data-grabbing="true"] {
+    pointer-events: none !important;
+  }
+
   &[data-mouse="true"] .tray {
     pointer-events: none !important;
   }
@@ -496,6 +521,10 @@ $.style(`
       0px .2rem 0 .5px var(--purple),
       0px .7rem 0 .5px var(--blue),
       0px 1.2rem 0 .5px var(--green);
+  }
+
+  & .trays[data-mousedown="true"] {
+    pointer-events: none;
   }
 
   & .tray {
@@ -691,6 +720,8 @@ $.when('touchstart', 'canvas', start)
 $.when('mousedown', 'canvas', start)
 
 function start(e) {
+  const { grabbing } = $.learn()
+  if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let startX, startY, x, y;
@@ -713,7 +744,8 @@ $.when('mousemove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { startX, isMouseDown, startY } = $.learn()
+  const { startX, isMouseDown, startY, grabbing } = $.learn()
+  if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMouseDown) return
@@ -734,6 +766,8 @@ $.when('touchend', 'canvas', end)
 $.when('touchleave', 'canvas', end)
 $.when('mouseup', 'canvas', end)
 function end (e) {
+  const { grabbing } = $.learn()
+  if(grabbing) return
   const { startX, x, y, invertX, invertY, startY } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
