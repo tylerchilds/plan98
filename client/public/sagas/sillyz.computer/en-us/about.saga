@@ -16,6 +16,13 @@ As the story grew, the shape of the story changed.
 app: sillyz-computer
 class: iphone
 
+<app-simulator
+app: sillyz-computer
+class: ipad
+
+<iframe
+src: /app/sillyz-computer
+
 <chroma-ratio
 src: /9/app/draw-term
 
@@ -28,3 +35,5 @@ src: http://localhost:8000/app/hyper-script?src=/public/sagas/sillyz.computer/en
 
 <iframe
 src: /app/draw-term?background=%2354796d&amp;color=%2354796d
+
+end

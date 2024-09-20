@@ -15,7 +15,6 @@ $.style(`
     margin: 1rem auto;
     padding: 0 1rem;
     place-self: start end;
-    background: white;
   }
 
   @media screen {

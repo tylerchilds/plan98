@@ -519,6 +519,8 @@ $.style(`
 
     & .actions {
       display: flex;
+      position: sticky;
+      top: 0;
     }
   }
   & {
@@ -878,17 +880,18 @@ $.style(`
     font-size: 40px;
     padding: 13px;
     line-height: 1.3;
-    background: rgba(0,0,0,.65);
     text-shadow: .1rem .1rem rgba(0,0,0,.85);
-    color: rgba(255,255,255,.85);
+    color: white;
     bottom: 80px;
     left: 0px;
     right: 0px;
     position: relative;
   }
 
-  & [name="stage"] hypertext-address {
-    place-self: end start;
+  & [name="stage"] hypertext-quote::before,
+  & [name="stage"] hypertext-pupper::before,
+  & [name="stage"] hypertext-address::before {
+    display: none;
   }
 
   & [name="stage"] hypertext-puppet {
@@ -913,6 +916,14 @@ $.style(`
   & [name="stage"] > * {
     height: 100%;
     width: 100%;
+    --v-font-mono: 0;
+    --v-font-casl: 1;
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+
   }
 
   & .menu-item {
