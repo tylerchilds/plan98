@@ -3,7 +3,7 @@ import { innerHTML } from 'diffhtml'
 import natsort from 'natsort'
 import { idx, documents } from './giggle-search.js'
 
-const $ = elf('draw-term', {
+let initial = {
   startX: null,
   startY: null,
   x: null,
@@ -12,20 +12,28 @@ const $ = elf('draw-term', {
   invertY: false,
   isMouseDown: false,
   suggestions: [],
-  trays: ['silly-tray'],
   trayZ: 3,
-  'silly-tray': {
-    width: 640,
-    height: 480,
-    maximized: true,
-    minimized: false,
-    focused: false,
-    x: 100,
-    y: 150,
-    z: 3,
-    url: '/app/startup-wizard'
+  trays: [],
+}
+
+if(plan98.parameters.get('tutorial')) {
+  initial = {
+    ...initial,
+    trays: ['silly-tray'],
+    'silly-tray': {
+      width: 640,
+      height: 480,
+      maximized: true,
+      minimized: false,
+      focused: false,
+      x: 20,
+      y: 20,
+      z: 3,
+      url: '/app/startup-wizard'
+    }
   }
-})
+}
+const $ = elf('draw-term', initial)
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')

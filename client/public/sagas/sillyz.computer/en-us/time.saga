@@ -1,2 +1,2 @@
 <sillyz-computer
-src: /app/draw-term
+src: /app/draw-term?tutorial=true

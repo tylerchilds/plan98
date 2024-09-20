@@ -182,15 +182,21 @@ $.style(`
     border-radius: none;
     box-shadow: var(--shadow);
     padding: 2rem;
+    max-width: 10rem;
+    aspect-ratio: 1;
+    width: 100%;
   }
 
   & [data-create]::before{
     content: '';
     display: block;
-    width: 6rem;
-    height: 6rem;
+    width: 100%;
+    aspect-ratio: 1;
     background-color: #E83FB8;
     border-radius: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
   }
 
   & .resource {

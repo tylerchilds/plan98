@@ -1,0 +1,30 @@
+# Sillyz.Computer
+
+Paper "Pretend" Time Machine
+
+<app-simulator
+app: sillyz-computer
+class: timemachine
+
+At the start, was the story. And the story continued on until the end.
+
+The end.
+
+As the story grew, the shape of the story changed.
+
+<app-simulator
+app: sillyz-computer
+class: iphone
+
+<chroma-ratio
+src: /9/app/draw-term
+
+<chroma-ratio
+src: /app/story-board
+class: flip
+
+<chroma-ratio
+src: http://localhost:8000/app/hyper-script?src=/public/sagas/sillyz.computer/en-us/about.saga
+
+<iframe
+src: /app/draw-term?background=%2354796d&amp;color=%2354796d
