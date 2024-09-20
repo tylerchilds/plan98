@@ -444,6 +444,7 @@ $.style(`
   & .grabber {
     display: block;
     width: 100%;
+    padding: 0 .25rem;
   }
 
   & .grabber::before {
@@ -522,7 +523,7 @@ $.style(`
     user-select: none;
     position: relative;
     display: grid;
-    grid-template-columns: auto 1rem 1.618fr 1fr auto;
+    grid-template-columns: auto 2rem 1.618fr 1fr auto;
     gap: 5px;
   }
 
@@ -560,10 +561,11 @@ $.style(`
     width: auto;
     height: auto;
     grid-template-rows: auto 1px 0;
+    border-radius: 1rem;
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto 1rem;
+    grid-template-columns: auto 2rem;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {
