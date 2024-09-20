@@ -2,7 +2,7 @@ import elf from '@silly/tag'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 
-const $ = elf('dial-tone', { root: 60, samples: {} })
+const $ = elf('dial-tone', { root: 60, meander: true, samples: {} })
 
 let current
 // load samples / choose 4 random instruments from the list //
@@ -69,6 +69,9 @@ $.draw(() => {
       <select class="notes">
         ${notes}
       </select>
+      <button data-meander>
+        ??
+      </button>
     </div>
     <div class="the-compass">
       <button class="note root" data-note="${root}">
@@ -188,7 +191,7 @@ $.style(`
 
   & .controls {
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr auto auto;
     position: absolute;
     top: 0;
     left: 0;
@@ -203,7 +206,17 @@ $.style(`
     color: rgba(255,255,255,.65);
     padding: .5rem;
   }
+
+  & .controls button {
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    border: 1px solid rgba(255,255,255,.65);
+    padding: 0 .5rem;
+  }
 `)
+
+$.when('click', '[data-meander]', meanderMaybe)
+function meanderMaybe() { $.teach({ meander: !$.learn().meander }) }
 
 $.when('touchstart', '.note', attack)
 $.when('touchend', '.note', release)
@@ -211,14 +224,14 @@ $.when('touchend', '.note', release)
 $.when('mousedown', '.note', attack)
 $.when('mouseup', '.note', release)
 
-$.when('mouseover', '.note', attack)
-$.when('mouseout', '.note', release)
-
-
 function attack(event) {
+  const { meander } = $.learn()
   if(!current) return
   const note = event.target.dataset.note
   current.triggerAttack(Tone.Frequency(note, "midi").toNote());
+  if(meander) {
+    $.teach({ root: parseInt(note) })
+  }
 }
 
 function release(event) {
