@@ -244,6 +244,30 @@ $.when('blur', '.browser', event => {
 
 $.draw((target) => {
   if(target.innerHTML) return
+  const src = target.getAttribute('src')
+  if(src) {
+    requestIdleCallback(() => {
+      const tray = $.learn().trays[0]
+      if(tray) {
+        setState(tray, { url, focused: false, minimized: false })
+      } else {
+        $.teach(self.crypto.randomUUID(), (state, payload) => {
+          const newState = {...state}
+          newState.trays.push(payload)
+          newState.trayZ += 1
+          newState[payload] = {
+            width: 300,
+            height: 150,
+            x: 0,
+            y: 0,
+            z: newState.trayZ,
+            url: src
+          }
+          return newState
+        })
+      }
+    })
+  }
   return `
     <div class="trays"></div>
     <div class="cursor"></div>
@@ -312,6 +336,21 @@ function afterUpdate(target) {
   {
     const { trays } = $.learn()
     trays.map(render(target))
+  }
+
+  {
+    if(target.matches('.inline')) {
+      const { trays } = $.learn()
+      const somethingMaxed = trays.some(x => {
+        const tray = $.learn()[x]
+        return tray.maximized
+      })
+
+      if(somethingMaxed) { 
+        target.classList.remove('inline'); 
+        target.classList.add('online')
+      }
+    }
   }
 
   {
@@ -467,8 +506,27 @@ function setState(tray, payload) {
 $.style(`
   & {
     position: relative;
-    overflow: hidden;
     touch-action: none;
+  }
+
+  &.inline {
+    display: inline-block;
+    height: 2.4rem;
+  }
+
+  &.inline .tray:not(.minimized) {
+    transform: translate(0, 0) !important;
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  &.online {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
   }
 
   & .grabber {

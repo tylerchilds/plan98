@@ -87,10 +87,6 @@
         z-index: 1;
       }
 
-      button * {
-        pointer-events: none;
-      }
-
       body {
         max-width: 55rem;
         margin: 3rem auto;
@@ -98,26 +94,6 @@
 
       sillonious-brand {
         padding: 1rem;
-      }
-
-      .deus-ex-machina {
-        border: 0;
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-      }
-
-      .tagline button {
-        background: none;
-        border: 0;
-        padding: 1rem;
-        margin: -1rem;
-      }
-
-      button > *{
-        pointer-events: none
       }
 
       @media print {
@@ -373,6 +349,8 @@
   </head>
   <body>
     <sillonious-brand>
+      <draw-term src="/9/app/story-board" class="inline"></draw-term>
+
       <h1 class="title">
         Tyler Childs
       </h1>
@@ -395,7 +373,6 @@
             Embedded an encryptable personal computing platform into a line item on a resume
           </li>
         </ul>
-        <draw-term src="/9/app/story-board" class="inline"></draw-term>
       </section>
       <section data-view="pocket">
         <h2 class="headline">
