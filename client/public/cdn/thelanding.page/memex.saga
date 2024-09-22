@@ -1,1 +1,7 @@
-<landing-page
+# Computerless
+
+Summon your data from anywhere
+
+<app-simulator
+class: iphone
+app: draw-term?color=white&amp;background=black

@@ -33,6 +33,7 @@ if(plan98.parameters.get('tutorial')) {
     }
   }
 }
+
 const $ = elf('draw-term', initial)
 
 function engine(target) {

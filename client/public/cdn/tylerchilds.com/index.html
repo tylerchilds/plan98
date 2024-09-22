@@ -6,11 +6,97 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link href="/public/styles/system.css" rel="stylesheet">
     <link href="./identity.css" rel="stylesheet" />
     <style type="text/css">
+      :root {
+        --shadow: 0px 0px 2px 2px rgba(0,0,0,.25),
+                  0px 0px 6px 6px rgba(0,0,0,.15),
+                  0px 0px 2rem 2rem rgba(0,0,0,.05);
+        --red: firebrick;
+        --orange: darkorange;
+        --yellow: gold;
+        --green: mediumseagreen;
+        --blue: dodgerblue;
+        --purple: mediumpurple;
+      }
+
+      :not(:defined) {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        place-content: center;
+      }
+      :not(:defined)::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        animation: loader 3000ms ease-in-out alternate infinite;
+        width: 3.25in;
+        height: 3.12in;
+        opacity: .5;
+        mix-blend-mode: multiply;
+        margin: auto;
+        background: lemonchiffon;
+        overflow: hidden;
+        pointer-events: none;
+      }
+
+      @keyframes loader {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media screen {
+        body{ overflow: auto; }
+      }
+
+      body > *{
+        position: relative;
+        z-index: 2;
+      }
+
+      main {
+        position: relative;
+        height: 100%;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+      }
+
+      boot-loader {
+        max-width: 100%;
+        margin: auto;
+        pointer-events: none;
+      }
+
+      #bootloader {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        z-index: 1;
+      }
+
+      button * {
+        pointer-events: none;
+      }
+
       body {
         max-width: 55rem;
-        margin: 4rem auto;
+        margin: 3rem auto;
+      }
+
+      sillonious-brand {
         padding: 1rem;
       }
 
@@ -34,27 +120,10 @@
         pointer-events: none
       }
 
-      footer {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(.75in, 1fr));
-        gap: 2rem;
-      }
-
-      footer > * {
-        aspect-ratio: 1;
-        width: 100%;
-      }
-
-      footer hypertext-highlighter {
-        display: block;
-      }
-
-      footer qr-code {
-        width: 100%;
-        min-width: auto;
-      }
-
       @media print {
+        draw-term {
+          overflow: hidden;
+        }
         html,
         body {
           max-width: auto;
@@ -137,6 +206,11 @@
 
       body {
         font-size: 15px;
+        overflow-x: hidden;
+      }
+
+      sillonious-brand {
+        overflow-x: hidden;
       }
 
       hr {
@@ -147,7 +221,7 @@
         margin: 0 0 1rem 1rem;
       }
 
-      .logo {
+      .title {
         font-size: 2rem;
         margin-bottom: 1rem;
         text-align: center;
@@ -185,133 +259,147 @@
     <script type="importmap">
       {
         "imports": {
+          "@atproto/api": "https://esm.sh/@atproto/api@0.13.5",
+          "@aws-sdk/client-s3": "https://esm.sh/@aws-sdk/client-s3@3.616.0",
+          "@aws-sdk/middleware-endpoint": "https://esm.sh/@aws-sdk/middleware-endpoint@3.374.0",
+          "@braid/mail": "/public/cdn/braid.org/feed-client.js",
+          "@electric-sql/pglite": "https://cdn.jsdelivr.net/npm/@electric-sql/pglite/dist/index.js",
           "@inrupt/solid-client-authn-browser": "https://esm.sh/@inrupt/solid-client-authn-browser@1.17.5?bundle-deps",
+          "@lottiefiles/lottie-player": "https://esm.sh/@lottiefiles/lottie-player@2.0.3",
           "@pyscript/core": "https://pyscript.net/snapshots/2023.11.1.RC3/core.js",
+          "@codemirror/basic-setup": "https://esm.sh/@codemirror/basic-setup@0.20.0",
+          "@dimforge/rapier2d": "https://cdn.skypack.dev/@dimforge/rapier2d-compat",
+          "@dimforge/rapier3d": "https://cdn.skypack.dev/@dimforge/rapier3d-compat",
+          "@fullcalendar/core": "https://esm.sh/@fullcalendar/core@6.1.15",
+          "@fullcalendar/daygrid": "https://esm.sh/@fullcalendar/daygrid@6.1.15",
+          "@fullcalendar/interaction": "https://esm.sh/@fullcalendar/interaction@6.1.15",
+          "@geckos.io/client": "https://esm.sh/@geckos.io/client@3.0.0",
+          "@iptv/playlist": "https://esm.sh/@iptv/playlist@1.1.0",
+          "@lezer/highlight": "https://esm.sh/@lezer/highlight@1.2.0",
+          "@mux/mux-player": "https://esm.sh/@mux/mux-player@2.9.1",
+          "@replit/codemirror-vim": "https://esm.sh/@replit/codemirror-vim@6.2.1",
+          "@shoelace-style/shoelace/tree": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/tree/tree.js",
+          "@shoelace-style/shoelace/relative-time": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/relative-time/relative-time.js",
+          "@shoelace-style/shoelace/icon": "https://esm.sh/@shoelace-style/shoelace@2.16.0/dist/components/icon/icon.js",
+          "@sillonious/brand": "/public/brand.js",
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@silly/tag": "/public/module.js",
+          "@sillonious/payments": "/public/elves/payment-debugger.js",
           "@sillonious/saga": "/public/saga.js",
-          "@sillonious/brand": "/public/brand.js",
           "@sillonious/party": "/public/elves/sillonious-party.js",
-          "@sillonious/solid-utils": "/public/elves/sillonious-party.js",
+          "@sillonious/sports": "/public/elves/sillonious-sports.js",
+          "@sillonious/solid-utils": "/public/elves/illonious-party.js",
           "@sillonious/solid/user": "/public/elves/solid-user.js",
+          "@sillonious/vault": "/public/cdn/bayunsystems.com/vault.js",
+          "@sillonious/drive": "/public/drive.js",
+          "@sillonious/database": "/public/database.js",
+          "@plan98/modal": "/public/elves/plan98-modal.js",
+          "@plan98/intro": "/public/elves/plan98-intro.js",
+          "@tanstack/table-core": "https://esm.sh/@tanstack/table-core@8.16.0",
+          "@theatre/studio": "https://esm.sh/@theatre/studio@0.7.1",
+          "@theatre/core": "https://esm.sh/@theatre/core@0.7.1",
+          "@uiw/codemirror-themes": "https://esm.sh/@uiw/codemirror-themes@4.21.25",
+          "@uiw/codemirror-theme-gruvbox-dark": "https://esm.sh/@uiw/codemirror-theme-gruvbox-dark@4.21.25",
           "@wasmer/sdk": "https://esm.sh/@wasmer/sdk@0.6.0",
           "activitypub-testing": "https://esm.sh/activitypub-testing@0.9.2",
           "activitypub-actor-tester": "https://cdn.jsdelivr.net/npm/activitypub-actor-tester@0.1.1/dist/activitypub-actor-tester.js",
           "aframe": "https://esm.sh/aframe@1.5.0",
+          "ag-grid-community": "https://esm.sh/ag-grid-community",
           "babylonjs": "https://esm.sh/babylonjs@6.33.1",
+          "braid-http": "https://esm.sh/braid-http@0.3.3",
+          "cally": "https://esm.sh/cally@0.4.0",
+          "cards": "https://esm.sh/cards@2.0.3",
           "codemirror": "https://esm.sh/codemirror@6.0.1",
+          "chess": "https://esm.sh/chess@1.2.1",
           "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
+          "d3": "https://esm.sh/d3@7.9.0",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+          "eruda": "https://esm.sh/eruda@3.0.1",
           "fantasydata-node-client": "https://esm.sh/fantasydata-node-client@1.6.0",
           "focus-trap" : "https://esm.sh/focus-trap",
           "gridjs": "https://esm.sh/gridjs@6.0.6",
-          "gun": "https://esm.sh/gun@0.2020.1239",
-          "gun/sea": "https://esm.sh/gun@0.2020.1239/sea.js",
+          "@lottiefiles/lottie-player": "https://esm.sh/@lottiefiles/lottie-player@2.0.3",
+          "gun": "https://cdn.jsdelivr.net/gh/amark/gun@master/gun.js",
+          "gun/sea": "https://cdn.jsdelivr.net/gh/amark/gun@master/sea.js",
+          "gun/rad": "https://cdn.jsdelivr.net/gh/amark/gun@master/rad.js",
           "havok": "https://esm.sh/@babylonjs/havok@1.3.0",
+          "hls.js": "https://esm.sh/hls.js@1.5.15",
+          "htmx.org": "https://esm.sh/htmx.org@1.9.11",
           "katex": "https://esm.sh/katex@0.16.9",
           "loro-crdt": "https://esm.sh/loro-crdt@0.10.1",
+          "lunr": "https://esm.sh/lunr@2.3.9",
+          "maplibre-gl": "https://esm.sh/maplibre-gl@4.0.2",
           "marked": "https://esm.sh/marked@11.1.0",
+          "ml5": "https://esm.sh/ml5@0.12.2",
           "motion": "https://esm.sh/motion@10.17.0",
           "natsort": "https://esm.sh/natsort@2.0.3",
+          "netplayjs": "https://esm.sh/netplayjs@0.4.1",
+          "@observablehq/plot": "https://esm.sh/@observablehq/plot@0.6.14",
+          "@christianliebel/paint": "https://esm.sh/@christianliebel/paint@1.2.0",
           "p2panda-js": "https://esm.sh/p2panda-js@0.8.1",
+          "phaser": "https://esm.sh/phaser@3.80.1",
+          "plausible-tracker": "https://esm.sh/plausible-tracker@0.3.8",
+          "prismjs": "https://esm.sh/prismjs@1.29.0",
           "pocketbase": "https://esm.sh/pocketbase@0.20.1",
+          "pouchdb": "https://esm.sh/pouchdb@8.0.1",
           "qr-creator": "https://esm.sh/qr-creator@1.0.0",
           "quill" : "https://esm.sh/quill@1.3.7",
           "react": "https://esm.sh/react@18.2.0",
           "react-dom": "https://esm.sh/react-dom@18.2.0",
           "simple-peer": "https://esm.sh/simple-peer@9.11.1",
+          "simpleton-client": "https://esm.sh/braid-text@0.0.9/simpleton-client.js",
           "solid-file-client": "https://esm.sh/solid-file-client@2.1.3?bundle-deps",
           "statebus": "/public/_statebus.js",
+          "sqlite": "/public/sqlite.js",
+          "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.39.8",
           "three": "https://esm.sh/three@0.160.0",
           "tone@next": "https://esm.sh/tone@next",
           "twgl.js": "https://esm.sh/twgl.js@5.5.3",
           "uuid": "https://esm.sh/uuid@9.0.1",
           "uxn.wasm": "https://esm.sh/uxn.wasm@0.8.0",
           "uxn.wasm/util": "https://esm.sh/uxn.wasm@0.8.0/util",
+          "webamp": "https://esm.sh/webamp@1.5.0",
+          "webpd": "https://esm.sh/webpd@1.0.0-alpha.8",
+          "web-audio-daw": "https://esm.sh/web-audio-daw@4.13.2",
+          "webaudiofont": "https://esm.sh/webaudiofont@3.0.4",
           "xterm": "https://esm.sh/xterm@5.3.0",
           "xterm-addon-fit": "https://esm.sh/xterm-addon-fit@0.8.0"
         }
       }
     </script>
+    <script async type="module" id="lazy-bootstrap" src="/public/main.js"></script>
+    <link media="print" onload="this.media='all'" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/themes/light.css" />
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace-autoloader.js"></script>
   </head>
   <body>
-    <my-resume>
-      <h1 class="logo">
+    <sillonious-brand>
+      <h1 class="title">
         Tyler Childs
       </h1>
       <p class="contact">
-        network@tychi.me
+        ty@sillyz.computer
         <br/>
         (Jack of Web Trades)
       </p>
-      <div class="tagline">
-        <hypertext-highlighter color="lemonchiffon">
-          <button data-toggle="paper">
-            paper
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="darkorange">
-          <button data-toggle="pocket">
-            pocket
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="dodgerblue">
-          <button data-toggle="product">
-            product
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="lime">
-          <button data-toggle="process">
-            process
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="rebeccapurple">
-          <button data-toggle="platform">
-            platform
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="firebrick">
-          <button data-toggle="pipeline">
-            pipeline
-          </button>
-        </hypertext-highlighter>
-        |
-        <hypertext-highlighter color="gold">
-          <button data-toggle="prospects">
-            prospects
-          </button>
-        </hypertext-highlighter>
-      </div>
-      <hr />
+
 
       <section data-view="paper">
         <h2 class="headline">
-          <hypertext-highlighter color="lemonchiffon">
-            Founder, Owner, Operator, Liason - (Sillyz.Computer) 2022 - Current
-          </hypertext-highlighter>
+          Founder, Owner, Operator, Liason - (Sillyz.Computer) 2022 - Current
         </h2>
         <ul>
           <li>
-            Explored the pragmatic relationship between the computer arts and sciences
+            Software Education (Internet Archive; DWeb) and Entertainment (Beta Blox Season 15)
           </li>
           <li>
-             Innovated free to play technology- in your palm- or around you- in parallel- and performable- for your business- or family
-          </li>
-          <li>
-            Re-tailored mind bicycles
+            Embedded an encryptable personal computing platform into a line item on a resume
           </li>
         </ul>
+        <draw-term src="/9/app/story-board" class="inline"></draw-term>
       </section>
       <section data-view="pocket">
         <h2 class="headline">
-          <hypertext-highlighter color="darkorange">
-            Senior Software Engineer (Netflix) 2018 - 2022
-          </hypertext-highlighter>
+          Senior Software Engineer (Netflix) 2018 - 2022
         </h2>
         <ul>
           <li>
@@ -321,16 +409,14 @@
             Prototyped and productized experiments for payment and partner flows
           </li>
           <li>
-            Placed first in the Studio Hackday 2019 event, slinging code and polishing the facade
+            Placed first in the Studio Hackday 2019 event (TerraVision) [1]
           </li>
         </ul>
       </section>
 
       <section data-view="product">
         <h2 class="headline">
-          <hypertext-highlighter color="dodgerblue">
-            Design Technologist (Inflection) 2014 - 2018
-          </hypertext-highlighter>
+          Design Technologist (Inflection) 2014 - 2018
         </h2>
         <ul>
           <li>
@@ -347,9 +433,7 @@
 
       <section data-view="process">
         <h2 class="headline">
-          <hypertext-highlighter color="lime">
-            Web Developer (Liberty University) 2012 - 2014
-          </hypertext-highlighter>
+          Web Developer (Liberty University) 2012 - 2014
         </h2>
         <ul>
           <li>
@@ -363,9 +447,7 @@
 
       <section data-view="platform">
         <h2 class="headline">
-          <hypertext-highlighter color="rebeccapurple">
-            Technical Solutions (Marketing Advocate) 2008 - 2012
-          </hypertext-highlighter>
+          Technical Solutions (Marketing Advocate) 2008 - 2012
         </h2>
         <ul>
           <li>
@@ -376,9 +458,7 @@
     
       <section data-view="pipeline">
         <h2 class="headline">
-          <hypertext-highlighter color="firebrick">
-            Freelance est. 2006
-          </hypertext-highlighter>
+          Freelance est. 2006
         </h2>
         <ul>
           <li>
@@ -389,9 +469,7 @@
 
       <section data-view="prospects">
         <h2 class="headline">
-          <hypertext-highlighter color="gold">
-            Education
-          </hypertext-highlighter>
+          Education
         </h2>
         <ul>
           <li>
@@ -406,92 +484,12 @@
         </ul>
       </section>
       <footer>
-        <div data-view="paper">
-          <hypertext-highlighter color="lemonchiffon">
-            <qr-code text="https://sillyz.computer"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="pocket">
-          <hypertext-highlighter color="darkorange">
-            <qr-code text="https://1998.social"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="product">
-          <hypertext-highlighter color="dodgerblue">
-            <qr-code text="https://yourlovedones.online"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="process">
-          <hypertext-highlighter color="lime">
-            <qr-code text="https://ncity.executiontime.pub"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="platform">
-          <hypertext-highlighter color="rebeccapurple">
-            <qr-code text="https://css.ceo"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="pipeline">
-          <hypertext-highlighter color="firebrick">
-            <qr-code text="https://y2k38.info"></qr-code>
-          </hypertext-highlighter>
-        </div>
-        <div data-view="prospects">
-          <hypertext-highlighter color="gold">
-            <qr-code text="https://thelanding.page"></qr-code>
-          </hypertext-highlighter>
-        </div>
+        [1]: <a href="https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb">https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb</a>
       </footer>
-    </my-resume>
+    </sillonious-brand>
     <script type="module" id="lazy-bootstrap" src="/public/main.js"></script>
     <script type="module">
-      import module from "@silly/tag"
-
-      const $ = module('my-resume', {
-        paper: false,
-        pocket: false,
-        product: false,
-        process: false,
-        platform: false,
-        pipeline: false,
-        prospects: false,
-      })
-
-      $.when('click', '[data-toggle]', (event) => {
-        const { toggle } = event.target.dataset
-        const root = event.target.closest($.link)
-        const disabled = !$.learn()[toggle]
-
-        $.teach({ [toggle]: disabled })
-
-        const views = root.querySelectorAll(`[data-view="${toggle}"]`)
-
-        if(views.length > 0) {
-          [...views].map(target => {
-            disabled
-            ? target.classList.add('disabled')
-            : target.classList.remove('disabled')
-          })
-        }
-      })
-
-      $.style(`
-        & .disabled {
-          opacity: .25;
-        }
-      `)
-
-      $.draw(target => {
-        const data = $.learn()
-        const fields = Object.keys(data)
-        const zeroState = fields.every(x => data[x])
-
-        if(zeroState) {
-          document.body.insertAdjacentHTML("beforeend", `
-            <iframe class="deus-ex-machina" src="/?world=sillyz.computer"></iframe>
-          `)
-        }
-      })
+      import "/public/elves/sillyz-computer.js"
     </script>
   </body>
 </html>

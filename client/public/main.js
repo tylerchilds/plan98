@@ -1,12 +1,14 @@
 import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 
+self.plan98 ||= { env: {} }
+
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
 const database = localStorage.getItem("plan98.database") || self.plan98.env.POCKETBASE_URL;
 
 self.plan98 = {
-  ...self.plan98 || {},
+  ...self.plan98,
   parameters,
   database,
   host: world ? world : doingBusinessAs[window.location.host] ? window.location.host : 'sillyz.computer',

@@ -218,24 +218,31 @@ $.style(`
 $.when('click', '[data-meander]', meanderMaybe)
 function meanderMaybe() { $.teach({ meander: !$.learn().meander }) }
 
-$.when('touchstart', '.note', attack)
-$.when('touchend', '.note', release)
+$.when('pointerdown', '.note', attack)
+$.when('pointerup', '.note', release)
 
-$.when('mousedown', '.note', attack)
-$.when('mouseup', '.note', release)
-
+const attacking = {}
 function attack(event) {
-  const { meander } = $.learn()
-  if(!current) return
+  console.log(event)
+  event.preventDefault()
+  event.stopPropagation()
   const note = event.target.dataset.note
+  console.log(note)
+  if(!current || attacking[note]) return
   current.triggerAttack(Tone.Frequency(note, "midi").toNote());
-  if(meander) {
-    $.teach({ root: parseInt(note) })
-  }
+  attacking[note] = true
 }
 
 function release(event) {
-  if(!current) return
+  console.log(event)
   const note = event.target.dataset.note
+  if(attacking[note]) {
+    delete attacking[note]
+  }
+  if(!current) return
   current.triggerRelease(Tone.Frequency(note, "midi").toNote());
+  const { meander } = $.learn()
+  if(meander) {
+    $.teach({ root: parseInt(note) })
+  }
 }

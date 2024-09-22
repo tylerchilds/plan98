@@ -269,8 +269,11 @@ function handleSuperKey(event) {
   if(self.self !== self.top) {
     self.parent.postMessage({ whisper: 'metaKey' }, "*");
   } else {
-    const node = document.body.querySelector('sillonious-brand') || document.body
-    node.insertAdjacentHTML("beforeend", '<sillyz-computer></sillyz-computer>')
+    const isSilly = !!document.body.querySelector('sillyz-computer')
+    if(!isSilly) {
+      const node = document.body.querySelector('sillonious-brand') || document.body
+      node.insertAdjacentHTML("beforeend", '<sillyz-computer></sillyz-computer>')
+    }
   }
 }
 
