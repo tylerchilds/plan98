@@ -86,7 +86,6 @@ ul {
 }
 
 .tagline {
-  text-align: center;
 }
 
 .headline {
@@ -94,7 +93,6 @@ ul {
 }
 
 .contact {
-  text-align: center;
 }
 
 @media print {
