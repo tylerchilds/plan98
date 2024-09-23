@@ -13,9 +13,9 @@ $.draw(target => {
   const { fg='saddlebrown', bg='lemonchiffon' } = target.dataset
   generate(target, code, {fg, bg})
   return image ? `
-    <div class="portal" style="--fg: ${fg}; --bg: ${bg}">
+    <button class="portal" style="--fg: ${fg}; --bg: ${bg}">
       ${image}
-    </div>
+    </button>
   ` : 'loading...'
 })
 
@@ -39,6 +39,11 @@ async function generate(target, code, {fg, bg}) {
   $.teach({ [code]: `<img src="${dataURL}" alt="code" />`})
 }
 
+$.when('click', '.portal', (event) => {
+  const link = event.target.closest($.link)
+  const code = link.getAttribute('src') || link.getAttribute('text')
+  window.location.href = code
+})
 
 $.style(`
   & {
@@ -53,7 +58,11 @@ $.style(`
   & .portal {
     display: grid;
     height: 100%;
+    width: 100%;
     place-content: center;
+    border: 0;
+    background: transparent;
+    border-radius: 0;
   }
   & img {
     position: absolute;

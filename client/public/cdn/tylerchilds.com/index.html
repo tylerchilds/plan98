@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="/public/styles/system.css" rel="stylesheet">
-    <link href="./identity.css" rel="stylesheet" />
     <style type="text/css">
       :root {
         --shadow: 0px 0px 2px 2px rgba(0,0,0,.25),
@@ -117,7 +116,7 @@
       .wrapper {
         max-width: 55rem;
         margin: 0 auto;
-        padding: 5rem 1rem 1rem;
+        padding: 4rem 1rem 1rem;
         overflow-x: hidden;
         overflow-y: auto;
         position: absolute;
@@ -237,7 +236,6 @@
       .contact,
       .headline,
       .tagline {
-        font-family: "Fira Code", sans-serif;
         font-weight: 400;
         font-size: 1rem;
         margin: 1.5rem 0 .5rem;
@@ -262,6 +260,18 @@
       header {
         display: grid;
         grid-template-columns: 1fr auto;
+      }
+
+      .fade {
+        background: lemonchiffon;
+        color: dodgerblue;
+        display: inline-block;
+      }
+
+      sillonious-brand sillyz-computer {
+        position: fixed;
+        inset: 0;
+        z-index: 9001;
       }
     </style>
     <script async src="/vendor/es-module-shims.js"></script>
@@ -386,7 +396,7 @@
         <header>
           <div>
           <h1 class="title">
-            Ty Childs
+            Ty<span class="fade">ler</span> Chi<span class="fade">lds</span>
           </h1>
           <p class="contact">
             ty@sillyz.computer

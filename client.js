@@ -111,16 +111,22 @@ async function markdownSanitizer(md, { endOfHead }) {
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 
-async function sagaSanitizer(saga, { endOfHead }) {
+async function sagaSanitizer(saga, { endOfHead, parameters }) {
   const dom = await page()
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
+  let attributes = ''
+  if(parameters) {
+    attributes = Object.keys(parameters).map(x => `${x}=${parameters[x]}`).join(' ')
+  }
+
+
   // remove the lazy-bootstrap to lock the document
   //dom.getElementById('lazy-bootstrap').remove()
   const main = dom.getElementById('main')
   main.parentNode.insertAdjacentHTML('afterbegin', `
-    <sillonious-brand>
+    <sillonious-brand ${attributes}>
       ${render(saga)}
     </sillonious-brand>
   `)
@@ -190,7 +196,6 @@ async function router(request, context) {
       const shortPath = segments.slice(0, -1).join('/')
       await Deno.mkdir(`./client/` + shortPath, { recursive: true });
       await Deno.writeTextFile(`./client${data.src}`, data.file, {create: true})
-      console.log(data.file)
       return new Response(JSON.stringify({ ok: 'ok' }, null, 2), {
         headers: { "content-type": "application/json; charset=utf-8" },
         status: 200
@@ -340,7 +345,7 @@ async function router(request, context) {
       const stylesheetPI = '<?xml-stylesheet type="text/xsl" href="news.xsl"?>';
 xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetPI}`);
     } catch(e) {
-      console.log(e)
+      console.error(e)
     }
         // Set content type as XML
     const headers = new Headers();
@@ -389,7 +394,12 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
       file = await Deno.readTextFile(`./client/public/404.saga`)
     } else {
       const saga = await Deno.readTextFile(`./client/public/404.saga`)
-      file = await sagaSanitizer(saga, business)
+      file = await sagaSanitizer(saga, {
+        ...business,
+        parameters: {
+          'class': 'screenplay'
+        }
+      })
     }
     statusCode = Status.NotFound
     console.error(e + '\n' + pathname + '\n' + e)
@@ -411,6 +421,20 @@ const byPath = (x) => x.path
 const byName = (x) => x.name
 
 async function home(request, business) {
+  console.log(request)
+  if(business.page) {
+    let file
+    try {
+      console.log(business.page)
+      file = await Deno.readTextFile(`./client${business.page}`)
+        .catch(console.error)
+    } catch (e) {
+      console.error(e + '\n' + pathname + '\n' + e)
+    } 
+    return file
+  }
+
+
   if(!business.saga) {
     const dom = await page()
     return `<!DOCTYPE html>${dom.documentElement}`
@@ -431,13 +455,11 @@ async function home(request, business) {
 async function showApp(request, tag, { endOfHead }) {
   const url = new URL(request.url)
 
-  console.log(url)
   let attributes = ''
   for(const p of url.searchParams) {
     attributes += `${[p[0]]}="${p[1]}"`
   }
 
-  console.log(attributes)
   const dom = await page()
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)

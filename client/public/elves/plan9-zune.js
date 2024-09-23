@@ -1,6 +1,7 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { actionScript } from './action-script.js'
+import { hideModal } from '@plan98/modal'
 import lunr from 'lunr'
 import natsort from 'natsort'
 

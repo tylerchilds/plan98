@@ -271,8 +271,9 @@ function handleSuperKey(event) {
   } else {
     const isSilly = !!document.body.querySelector('sillyz-computer')
     if(!isSilly) {
+      const today = new Date().toJSON().slice(0, 10)
       const node = document.body.querySelector('sillonious-brand') || document.body
-      node.insertAdjacentHTML("beforeend", '<sillyz-computer></sillyz-computer>')
+      node.insertAdjacentHTML("beforeend", `<sillyz-computer src="/app/hyper-script?src=/public/sagas/my/${today}.saga"></sillyz-computer>`)
     }
   }
 }

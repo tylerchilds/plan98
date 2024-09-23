@@ -134,9 +134,13 @@ function persist(target, $, _flags) {
 	return (update) => {
     if(update.changes.inserted.length < 0) return
 
-    const src = target.closest('[src]').getAttribute('src')
-		const file = update.view.state.doc.toString()
-    $.teach({ [src]: { file, src }})
+    const srcNode = target.closest('[src]')
+
+    if(srcNode) {
+      srcNode.getAttribute('src')
+      const file = update.view.state.doc.toString()
+      $.teach({ [src]: { file, src }})
+    }
 	}
 }
 
