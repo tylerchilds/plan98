@@ -3,6 +3,8 @@ import { doingBusinessAs } from "@sillonious/brand"
 
 self.plan98 ||= { env: {} }
 
+self.requestIdleCallback = self.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
+
 const parameters = new URLSearchParams(window.location.search)
 const world = parameters.get('world')
 const database = localStorage.getItem("plan98.database") || self.plan98.env.POCKETBASE_URL;
