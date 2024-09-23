@@ -33,7 +33,7 @@ const $ = module('story-board', {
   },
   'sound-tray': {
     label: "Set Sound",
-    visible: true,
+    visible: false,
     width: 320,
     height: 480,
     x: 30,
@@ -52,7 +52,7 @@ const $ = module('story-board', {
     y: 150,
     z: 3,
     body: `
-      <iframe src="/9/app/comedy-day"></iframe>
+      <iframe src="/app/sillyz.computer"></iframe>
     `
   }
 

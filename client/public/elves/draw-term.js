@@ -109,12 +109,12 @@ function render(target) {
     } else {
       node.setAttribute('class', 'tray')
     }
-
+    const fullScreenIcon = node.querySelector('.tray-toggle sl-icon')
     if(minimized) {
       node.classList.add('minimized')
-      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen-exit'
+      fullScreenIcon.name = 'fullscreen-exit'
     } else {
-      node.querySelector('.tray-toggle sl-icon').name = 'fullscreen'
+      fullScreenIcon.name = 'fullscreen'
     }
 
     const maybies = node.querySelector('.suggestions')
@@ -511,7 +511,7 @@ $.style(`
 
   &.inline {
     display: inline-block;
-    height: 2.4rem;
+    height: 2.2rem;
   }
 
   &.inline .tray:not(.minimized) {
@@ -524,7 +524,7 @@ $.style(`
 
   &.online {
     display: block;
-    position: fixed;
+    position: absolute;
     inset: 0;
     z-index: 100;
   }

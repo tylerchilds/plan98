@@ -210,7 +210,14 @@ $.draw((target) => {
     return
   }
 
-  return perspective
+  // don't use the vdom when reading a full script.
+  const vdom = $.learn().activePanel !== panels.read
+
+  if(vdom) {
+    return perspective
+  } else {
+    target.innerHTML = perspective
+  }
 }, { beforeUpdate })
 
 function beforeUpdate(target) {
@@ -232,7 +239,6 @@ function source(target) {
   const explicit = head.getAttribute('src')
   const remote = head.getAttribute('remote') || ''
   const implicit = `/public/journal/${today}.saga`
-
   return `${remote}${explicit || implicit}`
 }
 
@@ -266,7 +272,7 @@ $.when('input', '[name="typewriter"]', (event) => {
 })
 
 $.when('click', '[data-read]', (event) => {
-  $.teach({ nextPanel: panels.read })
+  $.teach({ nextPanel: panels.read, activeMenu: null })
 })
 
 $.when('click', '[data-menu-target]', (event) => {
@@ -336,7 +342,7 @@ $.when('click', '[data-publish]', (event) => {
     "Authorization": "Bearer no-key"
   }
 
-  $.teach({ thinking: true })
+  $.teach({ thinking: true, activeMenu: null })
 
   fetch(src, {
     headers: headers,
@@ -347,7 +353,7 @@ $.when('click', '[data-publish]', (event) => {
     })
   }).then((response) => response.text()).then((result) => {
     const data = JSON.parse(result)
-    toast(data.error ? 'bad' : 'good')
+    toast(data.error ? 'Access Denied' : 'Saved!')
   })
 })
 
@@ -359,7 +365,8 @@ $.when('click', '[data-perform]', (event) => {
   $.teach({
     shotCount: countShots(file),
     activeShot: 0,
-    nextPanel: panels.perform
+    nextPanel: panels.perform,
+    activeMenu: null
   })
 })
 
@@ -441,11 +448,17 @@ function reverse(beats) {
 }
 
 $.when('click', '[data-write]', (event) => {
-  $.teach({ nextPanel: panels.write })
+  $.teach({
+    nextPanel: panels.write,
+    activeMenu: null
+  })
 })
 
 $.when('click', '[data-play]', (event) => {
-  $.teach({ nextPanel: panels.play })
+  $.teach({
+    nextPanel: panels.play,
+    activeMenu: null
+  })
 })
 
 function escapeHyperText(text = '') {
@@ -514,7 +527,7 @@ $.style(`
       height: 100%;
       width: 100%;
       display: grid;
-      grid-template-rows: 2rem 1fr;
+      grid-template-rows: auto 1fr;
     }
 
     & .actions {

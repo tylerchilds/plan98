@@ -114,13 +114,18 @@
         pointer-events: none;
       }
 
-      body {
+      .wrapper {
         max-width: 55rem;
-        margin: 3rem auto;
+        margin: 0 auto;
+        padding: 5rem 1rem 1rem;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: absolute;
+        inset: 0;
       }
 
       sillonious-brand {
-        padding: 1rem;
+        padding: 0;
       }
 
       @media print {
@@ -141,7 +146,7 @@
 
         @page {
           size: 8.5in 11in;
-          margin: .5in;
+          margin: .35in;
         }
       }
       @font-face {
@@ -204,16 +209,16 @@
         font-family: "Recursive", sans-serif;
         line-height: 1.4;
         color: #555;
-        padding: .25rem 0;
       }
 
       body {
         font-size: 15px;
         overflow-x: hidden;
+        position: relative;
       }
 
       sillonious-brand {
-        overflow-x: hidden;
+        overflow: hidden;
       }
 
       hr {
@@ -377,126 +382,127 @@
   </head>
   <body>
     <sillonious-brand>
-      <draw-term src="/9/app/story-board" class="inline"></draw-term>
+      <div class="wrapper">
+        <header>
+          <div>
+          <h1 class="title">
+            Ty Childs
+          </h1>
+          <p class="contact">
+            ty@sillyz.computer
+            <br/>
+            A Clown and a Software Architect
+          </p>
+          </div>
+          <div>
+            <qr-code data-fg="black" data-bg="white" text="https://sillyz.computer"></qr-code>
+          </div>
+        </header>
 
-      <header>
-        <div>
-        <h1 class="title">
-          Ty Childs
-        </h1>
-        <p class="contact">
-          ty@sillyz.computer
-          <br/>
-          A Clown and a Software Architect
-        </p>
-        </div>
-        <div>
-          <qr-code data-fg="black" data-bg="white" text="https://sillyz.computer"></qr-code>
-        </div>
-      </header>
+        <section data-view="paper">
+          <h2 class="headline">
+            Founder, Owner, Operator, Liason - (Sillyz.Computer) 2022 - Current
+          </h2>
+          <ul>
+            <li>
+              Software Education (Internet Archive; DWeb) and Entertainment (Beta Blox Season 15; DWeb)
+            </li>
+            <li>
+              Embedded an encryptable personal computing platform into a line item on a resume
+            </li>
+          </ul>
+        </section>
+        <section data-view="pocket">
+          <h2 class="headline">
+            Senior Software Engineer (Netflix) 2018 - 2022
+          </h2>
+          <ul>
+            <li>
+              Premiered prepaid direct carrier billing in global markets as technical lead
+            </li>
+            <li>
+              Prototyped and productized experiments for payment and partner flows
+            </li>
+            <li>
+              Placed first in the Studio Hackday 2019 event (TerraVision) [1]
+            </li>
+          </ul>
+        </section>
 
-      <section data-view="paper">
-        <h2 class="headline">
-          Founder, Owner, Operator, Liason - (Sillyz.Computer) 2022 - Current
-        </h2>
-        <ul>
-          <li>
-            Software Education (Internet Archive; DWeb) and Entertainment (Beta Blox Season 15; DWeb)
-          </li>
-          <li>
-            Embedded an encryptable personal computing platform into a line item on a resume
-          </li>
-        </ul>
-      </section>
-      <section data-view="pocket">
-        <h2 class="headline">
-          Senior Software Engineer (Netflix) 2018 - 2022
-        </h2>
-        <ul>
-          <li>
-            Premiered prepaid direct carrier billing in global markets as technical lead
-          </li>
-          <li>
-            Prototyped and productized experiments for payment and partner flows
-          </li>
-          <li>
-            Placed first in the Studio Hackday 2019 event (TerraVision) [1]
-          </li>
-        </ul>
-      </section>
+        <section data-view="product">
+          <h2 class="headline">
+            Design Technologist (Inflection) 2014 - 2018
+          </h2>
+          <ul>
+            <li>
+              Productized a white-label-able NIST LOA3 and SOC2 compliant identity verification wizard
+            </li>
+            <li>
+              Partnered with a security company to authorize and authenticate online prescriptions
+            </li>
+            <li>
+              Pioneerered a design system for product consistency, flexibility, and velocity
+            </li>
+          </ul>
+        </section>
 
-      <section data-view="product">
-        <h2 class="headline">
-          Design Technologist (Inflection) 2014 - 2018
-        </h2>
-        <ul>
-          <li>
-            Productized a white-label-able NIST LOA3 and SOC2 compliant identity verification wizard
-          </li>
-          <li>
-            Partnered with a security company to authorize and authenticate online prescriptions
-          </li>
-          <li>
-            Pioneerered a design system for product consistency, flexibility, and velocity
-          </li>
-        </ul>
-      </section>
+        <section data-view="process">
+          <h2 class="headline">
+            Web Developer (Liberty University) 2012 - 2014
+          </h2>
+          <ul>
+            <li>
+              Tutored programming for introductory courses through data structures and algorithms
+            </li>
+            <li>
+              Developed and maintained various microsites and applications, including student accounts
+            </li>
+          </ul>
+        </section>
 
-      <section data-view="process">
-        <h2 class="headline">
-          Web Developer (Liberty University) 2012 - 2014
-        </h2>
-        <ul>
-          <li>
-            Tutored programming for introductory courses through data structures and algorithms
-          </li>
-          <li>
-            Developed and maintained various microsites and applications, including student accounts
-          </li>
-        </ul>
-      </section>
+        <section data-view="platform">
+          <h2 class="headline">
+            Technical Solutions (Marketing Advocate) 2008 - 2012
+          </h2>
+          <ul>
+            <li>
+              Designed white label experiences from pre-sale through deployment in partner channels
+            </li>
+          </ul>
+        </section>
+      
+        <section data-view="pipeline">
+          <h2 class="headline">
+            Freelance est. 2006
+          </h2>
+          <ul>
+            <li>
+              Ghost produced jokes, blogs, sites, apps, systems, networks, promotionals
+            </li>
+          </ul>
+        </section>
 
-      <section data-view="platform">
-        <h2 class="headline">
-          Technical Solutions (Marketing Advocate) 2008 - 2012
-        </h2>
-        <ul>
-          <li>
-            Designed white label experiences from pre-sale through deployment in partner channels
-          </li>
-        </ul>
-      </section>
-    
-      <section data-view="pipeline">
-        <h2 class="headline">
-          Freelance est. 2006
-        </h2>
-        <ul>
-          <li>
-            Ghost produced jokes, blogs, sites, apps, systems, networks, promotionals
-          </li>
-        </ul>
-      </section>
-
-      <section data-view="prospects">
-        <h2 class="headline">
-          Education
-        </h2>
-        <ul>
-          <li>
-            B.S. Web Design and Development (Liberty University) 2013
-          </li>
-          <li>
-            A.A. Web Design (Cape Cod Community College) 2009
-          </li>
-          <li>
-            Skills: SEO, Graphic Design, Linux, Rust, JavaScript, React, Photo/Videography, Comedy
-          </li>
-        </ul>
-      </section>
-      <footer>
-        [1]: <a href="https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb">https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb</a>
-      </footer>
+        <section data-view="prospects">
+          <h2 class="headline">
+            Education
+          </h2>
+          <ul>
+            <li>
+              B.S. Web Design and Development (Liberty University) 2013
+            </li>
+            <li>
+              A.A. Web Design (Cape Cod Community College) 2009
+            </li>
+            <li>
+              Skills: SEO, Graphic Design, Linux, Rust, JavaScript, React, Photo/Videography, Comedy
+            </li>
+          </ul>
+        </section>
+        <footer>
+          [1]: <a href="https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb">https://netflixtechblog.com/netflix-studio-hack-day-may-2019-b4a0ecc629eb</a>
+        </footer>
+      </div>
+      <draw-term src="/9/app/draw-term?src=/app/hyper-script" class="inline"></draw-term>
     </sillonious-brand>
     <script type="module" id="lazy-bootstrap" src="/public/main.js"></script>
     <script type="module">

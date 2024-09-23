@@ -1,7 +1,6 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
-import { actionScript } from './action-script.js'
 import { showModal, hideModal } from '@plan98/modal'
 import { requestThirdPartyRules, requestActionMenu, requestFullZune } from './plan9-zune.js'
 import natsort from 'natsort'
