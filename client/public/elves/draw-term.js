@@ -367,6 +367,7 @@ $.when('contextmenu', '.tray-title-bar', preventDefault)
 $.when('pointerdown', '.tray-title-bar', grab)
 
 $.when('pointermove', 'canvas', drag)
+$.when('pointermove', '.tray-title-bar', drag)
 
 
 $.when('dblclick', '.tray-title-bar', toggleMax)
@@ -453,7 +454,7 @@ function closeTray(event) {
 // grab a pane
 let grabTimeout
 function grab(event) {
-  console.log(event)
+  event.preventDefault()
   const { tray } = event.target.dataset
   const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
@@ -620,6 +621,12 @@ $.style(`
     display: grid;
     grid-template-columns: auto 2rem 1.618fr 1fr auto;
     gap: 5px;
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
   }
 
   & .tray-title-bar input {
