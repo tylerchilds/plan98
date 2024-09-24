@@ -362,18 +362,16 @@ function afterUpdate(target) {
   replaceCursor(target) // first things first
 }
 
-$.when('touchstart', '.tray-title-bar', grab)
-$.when('mousedown', '.tray-title-bar', grab)
+function preventDefault(e) { e.preventDefault() }
+$.when('contextmenu', '.tray-title-bar', preventDefault)
+$.when('pointerdown', '.tray-title-bar', grab)
 
-$.when('touchmove', 'canvas', drag)
-$.when('mousemove', 'canvas', drag)
+$.when('pointermove', 'canvas', drag)
 
 
 $.when('dblclick', '.tray-title-bar', toggleMax)
-$.when('mouseup', '.tray-title-bar', ungrab)
-$.when('touchend', '.tray-title-bar', ungrab)
-$.when('mouseup', 'canvas', ungrab)
-$.when('touchend', 'canvas', ungrab)
+$.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', 'canvas', ungrab)
 $.when('click', '.tray-close', closeTray)
 $.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-toggle', toggleMin)
@@ -454,7 +452,8 @@ function closeTray(event) {
 
 // grab a pane
 let grabTimeout
-function grab({ target }) {
+function grab(event) {
+  console.log(event)
   const { tray } = event.target.dataset
   const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
@@ -783,8 +782,7 @@ $.style(`
 
 `)
 
-$.when('touchstart', 'canvas', start)
-$.when('mousedown', 'canvas', start)
+$.when('pointerdown', 'canvas', start)
 
 function start(e) {
   const { grabbing } = $.learn()
@@ -806,8 +804,7 @@ function start(e) {
   $.teach({ startX, startY, isMouseDown: true, x, y })
 }
 
-$.when('touchmove', 'canvas', move)
-$.when('mousemove', 'canvas', move)
+$.when('pointermove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
@@ -829,9 +826,7 @@ function move (e) {
   $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
 }
 
-$.when('touchend', 'canvas', end)
-$.when('touchleave', 'canvas', end)
-$.when('mouseup', 'canvas', end)
+$.when('pointerup', 'canvas', end)
 function end (e) {
   const { grabbing } = $.learn()
   if(grabbing) return
