@@ -1,5 +1,6 @@
 import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
+import { innerHTML } from 'diffhtml'
 import { actionScript } from './action-script.js'
 import { hideModal } from '@plan98/modal'
 import natsort from 'natsort'
@@ -29,7 +30,7 @@ let p98
     const { plan98 } = await fetch(`/plan98/about`)
       .then(res => res.json())
 
-    const p98 = plan98
+    p98 = plan98
 
     idx = lunr(function () {
       this.ref('path')
@@ -55,7 +56,7 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
     const currentPathParts = [...pathParts, name]
     const currentPath = currentPathParts.join('/') || '/'
 
-    if(type === Types.File.type) {
+    if(type === Types.Directory.type) {
       const node = {
         path: currentPath,
         keywords: currentPath.split('/').join(' '),
@@ -63,11 +64,9 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
         type,
         extension
       }
+
       idx.add(node)
       documents.push(node)
-    }
-
-    if(type === Types.Directory.type) {
       nest(idx, { tree, pathParts: currentPathParts, subtree: child })
     }
 
@@ -80,10 +79,7 @@ const $ = elf('plan98-park', {
   suggestions: [],
   suggesttionsLength: 0,
   filter: '',
-	celestials: ['silly', 'sally', 'sully','shelly','sol'],
-	silly: aBox({x: '-1', y: '.5', z: '-3', pitch: '45' }, { color: '#4CC3D9' }),
-	sally: aSphere({y: '1.25', z: '-5'}, { color: '#EF2D5E', radius: '1.25' }),
-	sully: aCylinder({x: '1', y: '.75', z: '-3', }, { color: '#FFC65D', radius: '.5', height: '1.5' }),
+	celestials: ['shelly','sol'],
 	shelly: aPlane({z: '-4', yaw: '-90'}, { color: '#7BC8A4',  width: '10', height: '10' }),
 	sol: aSky({}, { color: 'lemonchiffon' }),
 })
@@ -116,8 +112,11 @@ $.draw((target) => {
 	return `
 		<a-scene>
 			${scene.join('')}
+      <a-entity class="irix"></a-entity>
 		</a-scene>
-    ${library()}
+    <div class="library">
+      ${library(null)}
+    </div>
 	`
 }, {
   beforeUpdate,
@@ -125,12 +124,16 @@ $.draw((target) => {
 })
 
 function component(name) {
+  return draw3d(celestials(name))
+}
+
+function draw3d(data) {
 	const {
 		avatar,
 		x, y, z,
 		yaw, pitch, roll,
 		args
-	} = celestials(name)
+	} = data
 	return `
 		<${avatar}
 			id="${name}"
@@ -141,10 +144,30 @@ function component(name) {
 	`
 }
 
+
 function increment(target) {
+  const irix = target.querySelector('.irix')
+  const { enclosure } = $.learn()
 	celestials().map(name => {
-		target.querySelector(`[id="${name}"]`).outerHTML = component(name)
+    const node = target.querySelector(`[id="${name}"]`)
+    if(node) {
+      node.outerHTML = component(name)
+    }
 	})
+
+  if(enclosure) {
+    const dinosaurs = enclosure.children.map((eggs, i) => {
+      if(eggs.type === Types.Directory.type) {
+        return draw3d(aCylinder({x: -2 * i, z: -2 * (i / 10) - 5, y: 1, }, { color: '#FFC65D', radius: .5, height: 1.5 }))
+      }
+
+      if(eggs.type === Types.File.type) {
+        console.log((i / 10))
+        return draw3d(aBox({x: 2 * i, z: -2 * (i / 10) - 5, y: 1, pitch: 45 }, { color: '#4CC3D9' }))
+      }
+    }).join('')
+    irix.innerHTML = dinosaurs
+  }
 }
 
 function beforeUpdate(target) {
@@ -156,10 +179,6 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
-  {
-    increment(target)
-  }
-
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
     if(list) {
@@ -184,13 +203,22 @@ function afterUpdate(target) {
       iconParent.appendChild(icon)
     })
   }
+
+  {
+    library(target.querySelector('.library'))
+  }
+
+  {
+    increment(target)
+  }
 }
 
-function library() {
+function library(target) {
   const { filter, suggestIndex, suggestions, showSuggestions } = $.learn()
+
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
-  return`
+  const search = `
     <div class="search">
       <input placeholder="Search..." type="text" value="${filter}" name="search" autocomplete="off" />
       <div class="suggestions">
@@ -210,6 +238,13 @@ function library() {
       </div>
     </div>
   `
+
+  if(target) {
+    innerHTML(target, search)
+    return
+  } else {
+    return search
+  }
 }
 
 const down = 40;
@@ -254,20 +289,25 @@ $.when('keydown', '[name="search"]', event => {
 
 $.when('click', '.auto-item', event => {
   event.preventDefault()
+  const { path } = event.target.dataset
 
-  debugger
-  const target = document.createElement('a')
-  target.href = event.target.dataset.path
-  const contextActions = rules(target)
-  //
+  const enclosure = jurassicFrom(path)
   let { suggestIndex } = $.learn()
   const index = parseInt(event.target.dataset.index)
   const start = Math.max(suggestIndex - 5, 0)
   suggestIndex = start + index
-  $.teach({ contextActions, suggestIndex })
+  $.teach({ suggestIndex, enclosure })
 })
 
 
+function jurassicFrom(path) {
+  const files = path.split('/').reduce((directory, current) => {
+    const next = directory.children.find(x => x.name === current)
+    return next
+  }, p98)
+
+  return files
+}
 
 $.when('input', '[name="search"]', (event) => {
   const { value } = event.target;
