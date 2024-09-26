@@ -86,11 +86,11 @@ $.draw(() => {
       <button class="note plus-2" data-note="${root + 2}">
         ${root + 2}
       </button>
-      <button class="note plus-9" data-note="${root + 9}">
-        ${root + 9}
+      <button class="note plus-5" data-note="${root + 5}">
+        ${root + 5}
       </button>
-      <button class="note minus-9" data-note="${root - 9}">
-        ${root - 9}
+      <button class="note minus-5" data-note="${root - 5}">
+        ${root - 5}
       </button>
       <button class="note minus-2" data-note="${root - 2}">
         ${root - 2}
@@ -169,14 +169,14 @@ $.style(`
     transform: translateY(13%);
   }
 
-  & .the-compass .minus-9 {
+  & .the-compass .minus-5 {
     grid-row: 5 / 7;
     grid-column: 2 / 4;
     background-color: dodgerblue;
     transform: translateY(-13%);
   }
 
-  & .the-compass .plus-9 {
+  & .the-compass .plus-5 {
     grid-row: 5 / 7;
     grid-column: 4 / 6;
     background-color: mediumpurple;

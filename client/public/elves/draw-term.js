@@ -367,11 +367,8 @@ $.when('contextmenu', '.tray-title-bar', preventDefault)
 $.when('pointerdown', '.tray-title-bar', grab)
 
 $.when('pointermove', 'canvas', drag)
-$.when('pointermove', '.tray-title-bar', drag)
-
 
 $.when('dblclick', '.tray-title-bar', toggleMax)
-$.when('pointerup', '.tray-title-bar', ungrab)
 $.when('pointerup', 'canvas', ungrab)
 $.when('click', '.tray-close', closeTray)
 $.when('click', '.tray-sync', syncTray)

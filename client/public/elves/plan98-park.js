@@ -80,8 +80,8 @@ const $ = elf('plan98-park', {
   suggesttionsLength: 0,
   filter: '',
 	celestials: ['shelly','sol'],
-	shelly: aPlane({z: '-4', yaw: '-90'}, { color: '#7BC8A4',  width: '10', height: '10' }),
-	sol: aSky({}, { color: 'lemonchiffon' }),
+	shelly: aPlane({z: '-4', y: -.5, yaw: '-90'}, { color: 'mediumseagreen',  width: '10', height: '10' }),
+	sol: aSky({}, { color: 'dodgerblue' }),
 })
 
 export default $
@@ -158,12 +158,36 @@ function increment(target) {
   if(enclosure) {
     const dinosaurs = enclosure.children.map((eggs, i) => {
       if(eggs.type === Types.Directory.type) {
-        return draw3d(aCylinder({x: -2 * i, z: -2 * (i / 10) - 5, y: 1, }, { color: '#FFC65D', radius: .5, height: 1.5 }))
+        return draw3d(
+          aCylinder({
+            x: -12 * (i % 10),
+            z: -12 * (parseInt(i / 10)) - 5,
+            y: 4,
+          }, {
+            color: 'firebrick',
+            radius: 3,
+            width: 3,
+            height: 9,
+            ['data-path']: eggs.path,
+            ['data-name']: eggs.name
+          })
+        )
       }
 
       if(eggs.type === Types.File.type) {
-        console.log((i / 10))
-        return draw3d(aBox({x: 2 * i, z: -2 * (i / 10) - 5, y: 1, pitch: 45 }, { color: '#4CC3D9' }))
+        console.log((i % 10))
+        return draw3d(
+          aBox({
+            x: 2 * (i % 10),
+            z: -2 * (parseInt(i / 10)) - 5,
+            y: 0,
+            pitch: 45
+          }, {
+            color: 'darkorange',
+            ['data-path']: eggs.path,
+            ['data-name']: eggs.name
+          })
+        )
       }
     }).join('')
     irix.innerHTML = dinosaurs
@@ -278,9 +302,9 @@ $.when('keydown', '[name="search"]', event => {
     if(item) {
       const target = document.createElement('a')
       target.href = item.path
-      const contextActions = rules(target)
 
-      $.teach({ contextActions })
+      const enclosure = jurassicFrom(item.path)
+      $.teach({ enclosure })
       document.activeElement.blur()
       return
     }
