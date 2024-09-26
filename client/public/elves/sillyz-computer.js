@@ -128,6 +128,12 @@ $.when('click', '[data-create]', (event) => {
         script: import.meta.url,
         src: event.target.dataset.create
       },
+      {
+        text: 'elf world',
+        action: 'elfworld',
+        script: import.meta.url,
+        src: event.target.dataset.create
+      },
     ]
   })
 })
@@ -152,6 +158,13 @@ export function ultra(event) {
     $.teach({ resourceLevel: to })
   }
 }
+
+export function elfworld(event) {
+  const src = event.target.dataset.src || '/404'
+  window.location.href = '/x/elf' + src
+}
+
+
 
 $.style(`
   & {

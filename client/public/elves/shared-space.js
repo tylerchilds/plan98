@@ -34,7 +34,7 @@ if(plan98.parameters.get('tutorial')) {
   }
 }
 
-const $ = elf('draw-term', initial)
+const $ = elf('shared-space', initial)
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')
@@ -360,7 +360,33 @@ function afterUpdate(target) {
   }
 
   replaceCursor(target) // first things first
+
+  {
+    target.style.backgroundImage = getStars(target)
+  }
 }
+
+function getStars(target) {
+  const background = 'rgba(255,255,255,.85)';
+  const color = 'rgba(0,0,0,.85)';
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).fontSize);
+
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = background;
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = color;
+  ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
+
+  return `url(${canvas.toDataURL()})`;
+}
+
+
 
 function preventDefault(e) { e.preventDefault() }
 $.when('contextmenu', '.tray-title-bar', preventDefault)
@@ -506,6 +532,7 @@ $.style(`
   & {
     position: relative;
     touch-action: none;
+    background: rgba(0,0,0,.85);
   }
 
   &.inline {
@@ -551,10 +578,6 @@ $.style(`
     display: block;
     width: 100%;
     height: 100%;
-  }
-
-  & canvas {
-    background: var(--background, lemonchiffon);
   }
 
   & .cursor {
