@@ -2,13 +2,12 @@ import elf from '@silly/tag'
 import { render } from "@sillonious/saga"
 import { actionScript } from './action-script.js'
 import { hideModal } from '@plan98/modal'
-import lunr from 'lunr'
 import natsort from 'natsort'
+import lunr from 'lunr'
+import 'aframe'
 
-state['ls/mp3'] ||= {
-  length: 0,
-  current: 0,
-  list: []
+const orientation = {
+	x: '0', y: '0', z: '0', roll: '0', pitch: '0', yaw: '0'
 }
 
 const Types = {
@@ -20,13 +19,17 @@ const Types = {
   },
 }
 
+
 export let idx
 export const documents = [];
+let p98
 
 (async function buildIndex() {
   try {
-    const { plan98 } = await fetch(`/plan98/mp3s`)
+    const { plan98 } = await fetch(`/plan98/about`)
       .then(res => res.json())
+
+    const p98 = plan98
 
     idx = lunr(function () {
       this.ref('path')
@@ -35,7 +38,6 @@ export const documents = [];
       this.field('type')
       this.field('name')
       this.field('extension')
-
       nest(this, { tree: plan98, pathParts: [], subtree: plan98 })
     })
     $.teach({ ready: true })
@@ -73,147 +75,77 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   }).join('')
 }
 
-const $ = elf('plan9-zune', {
-  menu: true,
+const $ = elf('plan98-park', {
   suggestIndex: null,
   suggestions: [],
   suggesttionsLength: 0,
-  musicFilter: '',
-  contextActions: null
+  filter: '',
+	celestials: ['silly', 'sally', 'sully','shelly','sol'],
+	silly: aBox({x: '-1', y: '.5', z: '-3', pitch: '45' }, { color: '#4CC3D9' }),
+	sally: aSphere({y: '1.25', z: '-5'}, { color: '#EF2D5E', radius: '1.25' }),
+	sully: aCylinder({x: '1', y: '.75', z: '-3', }, { color: '#FFC65D', radius: '.5', height: '1.5' }),
+	shelly: aPlane({z: '-4', yaw: '-90'}, { color: '#7BC8A4',  width: '10', height: '10' }),
+	sol: aSky({}, { color: 'lemonchiffon' }),
 })
 
 export default $
 
-
-$.when('contextmenu','.zune .app-action', promptContext)
-
-function promptContext(event) {
-  event.preventDefault()
-  const actions = rules(event.target)
-
-  if(actions.length > 0) {
-    $.teach({ contextActions: actions })
-  }
+function celestials(name) {
+	return name ? $.learn()[name] : $.learn().celestials
 }
 
-export function clearWorkspace(event) {
-  const { workspace } = event.target.dataset
-  $.teach({  [workspace]: null, contextActions: null })
-  requestActionMenu(null)
+function nested(target) {
+  return target.parentNode.closest($.link)
 }
-
-let clearWorkspaceTimer
-$.when('touchstart', '.zune .app-action', startClearWatch)
-$.when('touchend', '.zune .app-action', endClearWatch)
-
-$.when('mousedown', '.zune .app-action', startClearWatch)
-$.when('mouseup', '.zune .app-action', endClearWatch)
-
-function startClearWatch(event) {
-  if(clearWorkspaceTimer) {
-    clearTimeout(clearWorkspaceTimer)
-  }
-  clearWorkspaceTimer = setTimeout(() => {
-    event.target.dispatchEvent(new Event('contextmenu'))
-    $.teach({longpress: true})
-  }, 1000)
-}
-
-function endClearWatch(_event) {
-  if(clearWorkspaceTimer) {
-    clearTimeout(clearWorkspaceTimer)
-  }
-}
-
-$.when('click', '.zune .app-action', async (event) => {
-  event.preventDefault()
-  const { longpress } = $.learn()
-  if(!longpress) {
-    const actions = rules(event.target)
-    if(actions.length > 0) {
-      const { script, action } = actions[0]
-      const dispatch = (await import(script))[action]
-      await dispatch({
-        target: {
-          dataset: {
-            ...actions[0]
-          }
-        }
-      })
-    } else {
-      $.teach({ hypermedia: event.target.href })
-    }
-  } else {
-    $.teach({ longpress: false })
-  }
-})
-
-export function requestFullZune() {
-  $.teach({ contextActions: null, menu: false })
-}
-
-export function requestScreen(hypermedia) {
-  hideModal()
-
-  if(document.querySelector($.link)) {
-    $.teach({ hypermedia, contextActions: null, menu: true })
-    return true
-  }
-
-  window.location.href = hypermedia
-  return false
-}
-
-
 
 $.draw((target) => {
-  const { current, list } = state['ls/mp3']
-  const { hypermedia, audioPlaying, currentTrack, contextActions, menu, playlistVisible } = $.learn()
-  const contextMenu = contextActions ? createContext(contextActions) : ''
+  if(!plan98.parameters.get('side-quest')) {
+    const random = self.crypto.randomUUID() 
+    const query = plan98.parameters.toString()
+    window.location.href = window.location.origin+window.location.pathname+`${query? '?'+query+'&': '?'}side-quest=${random}`
+    return 'loading'
+  }
 
-  return `
-    <div class="zune-bar">
-      <button data-system class="system-button">
-        9
-      </button>
-      <button data-playlist>
-        <span class="marquee">
-          ${list[current] ? list[current] : 'Sum 41 - In Too Deep - All Killer No Filler'}
-        </span>
-        <span class="system-button -nested">
-          <sl-icon name="cassette"></sl-icon>
-        </span>
-      </button>
-    </div>
-    <div class="siri">${contextMenu}</div>
-    <div class="cortana ${!contextMenu && playlistVisible ? 'active': ''}">
-      <audio name="walkman" src="${currentTrack}" controls="true"></audio>
-      <div class="current-media">
-        <div class="transport">
-          <button data-back-track class="system-button -large">
-            <sl-icon name="skip-backward-circle"></sl-icon>
-          </button>
-          <button data-media class="system-button -large">
-            <sl-icon name="${audioPlaying ? 'pause-circle' : 'play-circle'}"></sl-icon>
-          </button>
-          <button data-next-track class="system-button -large">
-            <sl-icon name="skip-forward-circle"></sl-icon>
-          </button>
-        </div>
-      </div>
-      <div class="playlist">
-        ${playlist()}
-      </div>
-      ${library()}
-    </div>
-    <div class="wall ${!menu ? 'broken':''} ${contextActions ? 'hidden' : ''}">
-      ${zune(target)}
-    </div>
-`
+
+  if(nested(target)) return 'Please, no side quests on your side quest'
+	if(target.mounted) return
+	target.mounted = true
+
+	const scene = celestials().map(component)
+
+	return `
+		<a-scene>
+			${scene.join('')}
+		</a-scene>
+    ${library()}
+	`
 }, {
   beforeUpdate,
   afterUpdate
 })
+
+function component(name) {
+	const {
+		avatar,
+		x, y, z,
+		yaw, pitch, roll,
+		args
+	} = celestials(name)
+	return `
+		<${avatar}
+			id="${name}"
+			position="${x} ${y} ${z}"
+			rotation="${yaw} ${pitch} ${roll}"
+			${args}
+		></${avatar}>
+	`
+}
+
+function increment(target) {
+	celestials().map(name => {
+		target.querySelector(`[id="${name}"]`).outerHTML = component(name)
+	})
+}
 
 function beforeUpdate(target) {
   { // save suggestion box scroll top
@@ -224,6 +156,10 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
+  {
+    increment(target)
+  }
+
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
     if(list) {
@@ -248,85 +184,15 @@ function afterUpdate(target) {
       iconParent.appendChild(icon)
     })
   }
-
-  {
-    const { hypermedia } = $.learn()
-    if(target.hypermedia !== hypermedia) {
-      target.hypermedia = hypermedia
-      const zune = target.querySelector('.zune')
-
-      if(zune) {
-        zune.scrollTop = 0
-      }
-    }
-  }
-
-  { // cleanup when contextActions exist and playlist is visible
-    const { contextActions, playlistVisible } = $.learn()
-
-    if(contextActions && playlistVisible) {
-      $.teach({ playlistVisible: false })
-    }
-  }
-}
-
-function alphabetical(xmlHTML) {
-  var sorter = natsort();
-  const page = new DOMParser().parseFromString(xmlHTML, "text/html");
-  const node = page.querySelector('xml-html')
-  const children = [...node.children]
-  const usedLetters = {}
-
-  children.sort(function(a, b) {
-    return sorter(a.innerText, b.innerText);
-  }).map((x) => {
-    const tile = document.createElement('div')
-    tile.classList.add('tile')
-    if(!x.innerText) return
-    const lowerFirst = x.innerText[0].toLowerCase()
-    if(!usedLetters[lowerFirst]) {
-      usedLetters[lowerFirst] = true
-      tile.innerHTML = `<a class="category" href="#back-to-top">${lowerFirst}</a><a name="${$.link}-${lowerFirst}" class=""></a>`
-    }
-
-    x.classList.add('app-action')
-    tile.appendChild(x)
-    node.appendChild(tile)
-  });
-  return `
-    <div class="categories">
-      ${
-        Object
-          .keys(usedLetters)
-          .sort(natsort())
-          .map(x => `<a href="#${$.link}-${x}" class="category">${x}</a>`)
-          .join('')
-      }
-    </div>
-    <a name="back-to-top"></a>
-    ${node.outerHTML}
-  `
-}
-
-function playlist() {
-  const { list, current } = state['ls/mp3']
-  return list.map((url, i) => {
-    const [piece, album, artist] = url.split('/').reverse()
-    return `
-      <button class="track ${current === i ? 'active' : ''}" data-id="${i}">
-        <span class="id">${i}</span> <span class="piece">${piece}</span> <span class="album">${album}</span> <span class="artist">${artist}</span>
-      </button>
-    `
-  }).join('')
 }
 
 function library() {
-  const { musicFilter, suggestIndex, suggestions, showSuggestions } = $.learn()
-
+  const { filter, suggestIndex, suggestions, showSuggestions } = $.learn()
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   return`
     <div class="search">
+      <input placeholder="Search..." type="text" value="${filter}" name="search" autocomplete="off" />
       <div class="suggestions">
         ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
           const item = documents.find(y => {
@@ -342,73 +208,6 @@ function library() {
           `
         }).join('') : ''}
       </div>
-      <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
-    </div>
-  `
-}
-function zune(target) {
-  const { hypermedia } = $.learn()
-  const src = hypermedia || target.getAttribute('src')
-  const bookmarks = render(`
-<a
-href: /app/interdimensional-cable
-text: Interdimensional Cable
-
-<a
-href: /app/hello-bluesky
-text: Hello Bluesky
-
-<a
-href: /app/owncast-surfer
-text: Owncast Surfer
-
-<a
-href: steam://rungameid/413150
-text: Stardew Valley
-
-<a
-href: /app/sonic-knuckles
-text: Sonic and Knuckles
-
-<a
-href: steam://rungameid/584400
-text: Sonic Mania
-
-<a
-href: /private/tychi.1998.social/Music/Ohm-N-I_-_Vaporwave/Ohm-N-I_-_Vaporwave_-_07_Whats_Going_On.mp3
-text: what's going on
-
-<a
-href: /app/story-board
-text: Story Board
-
-<a
-href: /app/dial-tone
-text: Dial Tone
-
-<a
-href: /app/hyper-script
-text: Hyper Script
-
-<a
-href: /app/middle-earth
-text: Middle Earth
-
-<a
-href: /app/startup-wizard
-text: Startup Wizard
-
-<a
-href: /app/draw-term
-text: Draw Term
-
-
-`)
-
-  return `
-    <div class="zune">
-      ${src ? `<iframe src="${src}"></iframe>`:''}
-      ${alphabetical(bookmarks)}
     </div>
   `
 }
@@ -418,7 +217,7 @@ const up = 38;
 const enter = 13;
 $.when('keydown', '[name="search"]', event => {
   const { suggestionsLength, suggestIndex } = $.learn()
-  if(event.keyCode === up) {
+  if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength -1) return
@@ -426,7 +225,7 @@ $.when('keydown', '[name="search"]', event => {
     return
   }
 
-  if(event.keyCode === down) {
+  if(event.keyCode === up) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
     if(nextIndex < 0) return
@@ -456,6 +255,7 @@ $.when('keydown', '[name="search"]', event => {
 $.when('click', '.auto-item', event => {
   event.preventDefault()
 
+  debugger
   const target = document.createElement('a')
   target.href = event.target.dataset.path
   const contextActions = rules(target)
@@ -487,30 +287,6 @@ $.when('blur', '[name="search"]', event => {
   }, 250)
 })
 
-
-$.when('click', '[data-media]', (event) => {
-  const { audioPlaying } = $.learn()
-  const { current, list } = state['ls/mp3']
-  const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
-
-  if(audioPlaying) {
-    walkman.pause()
-    $.teach({ audioPlaying: !audioPlaying })
-  } else {
-    if(walkman.src !== list[current]) {
-      walkman.src = list[current]
-    }
-    walkman.play()
-    $.teach({ audioPlaying: !audioPlaying, currentTrack: list[current] })
-  }
-})
-
-$.when('click', '[data-create]', (event) => {
-  const { create } = event.target.dataset
-  $.teach({ activeWorkspace: create, [create]: '/app/new-save' })
-})
-
-
 $.when('click', 'a[href^="#"]', (event) => {
   event.preventDefault()
   const [_,name] = event.target.href.split('#')
@@ -518,58 +294,8 @@ $.when('click', 'a[href^="#"]', (event) => {
   tile.scrollIntoView({block: "end", inline: "end", behavior: 'smooth'})
 })
 
-$.when('click', '.action-script', actionScript)
-
-function makeButton(data) {
-  const attributes = Object.keys(data).map(key => {
-    return `data-${key}="${data[key]}"`
-  }).join(' ')
-  return `
-    <button class="action-script" ${attributes}>
-      ${data.text}
-    </button>
-  `
-}
-
-function createContext(actions) {
-  const list = actions.map((data) => {
-    return `
-      <div>
-        ${makeButton(data)}
-      </div>
-    `
-  }).join('')
-
-  return `
-    <div>
-      <button data-close-context> 
-        back
-      </button>
-    </div>
-    ${list}
-  `
-}
-
 $.when('click', '[data-close-context]', (event) => {
   $.teach({ contextActions: null })
-})
-
-$.when('click','[data-system]', (event) => {
-  const { contextActions } = $.learn()
-  $.teach({
-    contextActions: contextActions ? null : [
-      {
-        text: 'identity',
-        action: 'identity',
-        script: import.meta.url
-      },
-      {
-        text: 'escape',
-        action: 'escape',
-        script: import.meta.url
-      }
-    ]
-  })
 })
 
 export function identity(event) {
@@ -693,12 +419,6 @@ $.style(`
     display: block;
     height: 100%;
     overflow: hidden;
-    pointer-events: none;
-  }
-
-  & .zune-bar,
-  & .cortana {
-    pointer-events: all;
   }
 
   & .menu {
@@ -819,7 +539,7 @@ $.style(`
   & .search {
     text-align: center;
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
     left: 0;
   }
@@ -836,13 +556,11 @@ $.style(`
     padding: .5rem 1rem;
     margin: 0 auto;
     width: 100%;
-    color: rgba(255,255,255,.65);
     border-radius: 0;
     border: none;
   }
 
   & .search input:focus {
-    color: rgba(255,255,255,.85);
   }
 
   & .suggestions .auto-item,
@@ -865,7 +583,7 @@ $.style(`
     display: flex;
     text-align: left;
     overflow: hidden;
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 
   & .suggestions .auto-item {
@@ -1052,10 +770,6 @@ $.style(`
     display: block;
   }
 
-  & .category {
-    text-decoration: none;
-  }
-
   & .app-action {
     text-decoration: none;
     white-space: pre-wrap;
@@ -1097,331 +811,66 @@ $.style(`
   & .zune xml-html {
     columns: 320px;
   }
-
-  & .category {
-    margin: 1rem 0 0;
-    display: inline-block;
-    padding: 0;
-    border: 1px solid rgba(255,255,255,.65);
-    line-height: 1;
-    aspect-ratio: 1;
-    opacity: .65;
-    width: 3rem;
-    height: 3rem;
-    display: grid;
-    place-items: end end;
-  }
-
-  & .category:hover,
-  & .category:focus {
-    opacity: 1;
-  }
-
-  & .system-button {
-    font-weight: 400;
-    border: none;
-    font-size: 1rem;
-    background: transparent;
-    color: rgba(255,255,255,.85);
-    padding: 0 9px;
-  }
-
-  & .system-button.-large {
-    font-size: 2rem;
-    padding: 1rem;
-  }
-
-  & .system-button.-nested {
-    position: absolute;
-    right: 0;
-    height: 2rem;
-    line-height: 2rem;
-    padding: 0 .5rem;
-    background: black;
-  }
-
-  & .system-button:hover,
-  & .system-button:focus {
-    color: rgba(255,255,255,1);
-  }
-
-  & [data-system] {
-    font-weight: 1000;
-    margin-right: 1rem;
-  }
-
-  & [data-playlist] {
-    margin-left: auto;
-    position: relative;
-    background: black;
-    border: none;
-    overflow: hidden;
-    color: rgba(255,255,255,.65);
-    display: grid;
-    grid-template-columns: 1fr 2rem;
-    opacity: .65;
-  }
-
-
-  & [data-playlist]:hover,
-  & [data-playlist]:focus {
-    opacity: 1;
-  }
-
-
-
-  & .marquee {
-    pointer-events: none;
-    animation: &-marquee-track 30000ms linear infinite alternate;
-    white-space: nowrap;
-    display: inline-block;
-    line-height: 2rem;
-  }
-
-  @keyframes &-marquee-track {
-    0% {
-      transform: translateX(20px);
-    }
-
-    100% {
-      transform: translateX(calc(-50%));
-    }
-  }
-
-  & .cortana {
-    overflow: auto;
-    position: absolute;
-    top: 2rem;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    z-index: 8999;
-    transform-origin: top center;
-    transform: scale(1.1);
-    transition: all 175ms ease-out;
-    background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
-    backdrop-filter: blur(150px);
-    opacity: 0;
-    pointer-events: none;
-    display: grid;
-    grid-template-rows: 2rem 180px 1fr;
-    padding-bottom: 3rem;
-  }
-
-
-  & .cortana.active {
-    transform: scale(1);
-    opacity: 1;
-    pointer-events: all;
-  }
-  & .siri {
-    position: absolute;
-    pointer-events: none;
-    inset: 0;
-    background: rgba(0, 0, 0, 1);
-    z-index: 9000;
-    opacity: 0;
-  }
-
-  & .siri:not(:empty) {
-    display: flex;
-    flex-direction: column;
-    padding: 3rem 1rem;
-    overflow: auto;
-    transition: opacity 175ms ease-out;
-    opacity: 1;
-    pointer-events: all;
-  }
-
-  & [data-create] {
-    background: lemonchiffon;
-    border: none;
-    border-radius: none;
-    box-shadow: var(--shadow);
-    padding: 2rem;
-  }
-
-  & [data-create]::before{
-    content: '';
-    display: block;
-    width: 6rem;
-    height: 6rem;
-    background-color: #E83FB8;
-    border-radius: 100%;
-  }
-
-  & .empty-pane {
-    place-items: center;
-    display: none;
-  }
-
-  & .show-all > .empty-pane {
-    display: grid;
-  }
-
-  & .show-all > iframe {
-    display: block;
-  }
-
-  & [data-back-track] {
-  }
-
-  & .transport {
-    font-size: 2rem;
-    text-align: center;
-  }
-
-  & .current-media {
-    display: grid;
-    place-items: end center;
-  }
-
-  & details {
-    padding:
-  }
-
-  & summary {
-    padding: 1rem;
-    color: rgba(255,255,255,.65);
-    font-weight: 600;
-  }
-
-  & .hidden {
-    display: none;
-  }
-
-  & .siri button {
-    font-weight: 100;
-    color: rgba(255,255,255,.65);
-    font-size: 2rem;
-    background: transparent;
-    border: none;
-    border-radius: none;
-    display: inline-block;
-    margin: 1rem 0;
-    text-align: left;
-  }
-
-  & .siri button:hover,
-  & .siri button:focus {
-    color: rgba(255,255,255,1);
-  }
-}
-  & .siri {
-    display: none;
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 1);
-    backdrop-filter: blur(150px);
-    z-index: 9000;
-  }
-
-  & .siri:not(:empty) {
-    display: flex;
-    flex-direction: column;
-    padding: 3rem 1rem;
-    overflow: auto;
-  }
-
-  & audio {
-    margin: 0 auto 2rem;
-    display: block;
-    width: 100%;
-  }
-
-  & .track {
-    text-align: left;
-    color: rgba(255,255,255,.65);
-    background: transparent;
-    padding: .5rem;
-    border-radius: none;
-    border: none;
-    width: 100%;
-  }
-
-  & .track.active {
-    background-color: var(--green, mediumseagreen);
-    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
-  }
-
-  & .playlist {
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  & .id {
-    color: rgba(255,255,255,.25);
-  }
-  & .piece {
-    color: rgba(255,255,255,.85);
-  }
-  & .artist {
-    color: rgba(255,255,255,.5);
-  }
-  & .album {
-    color: rgba(255,255,255,.65);
-  }
 `)
-const nextEvent = new CustomEvent("next", {
-  detail: {
-    type: "next",
-  },
-});
 
-$.when('click', '[data-next-track]', (event) => {
-  event.target.closest($.link).querySelector('audio').dispatchEvent(nextEvent)
-})
-
-const backEvent = new CustomEvent("back", {
-  detail: {
-    type: "back",
-  },
-});
-
-$.when('click', '[data-back-track]', (event) => {
-    event.target.closest($.link).querySelector('audio').dispatchEvent(backEvent)
-})
-
-$.when('next', 'audio', (event) => {
-  const walkman = event.target
-  const { current, length, list } = state['ls/mp3']
-  const next = mod(current + 1, length)
-  state['ls/mp3'].current = next
-  const href = list[next]
-  walkman.src = href
-  walkman.play()
-  $.teach({ audioPlaying: true, currentTrack: href })
-})
-
-$.when('ended', 'audio', (event) => {
-
-  event.target.dispatchEvent(nextEvent)
-})
-
-$.when('back', 'audio', (event) => {
-  const walkman = event.target
-  const { current, length, list } = state['ls/mp3']
-  const back = mod(current + 1, length)
-  state['ls/mp3'].current = back
-  const href = list[back]
-  walkman.src = href
-  walkman.play()
-  $.teach({ audioPlaying: true, currentTrack: href })
-})
-
-function mod(x, n) {
-  return ((x % n) + n) % n;
+function position(priority) {
+	return Object.keys(orientation).reduce((clean, key) => {
+		if(priority[key]) {
+			clean[key] = priority[key]
+		}
+		return clean
+	}, {})
 }
 
-$.when('click', '.track', (event) => {
-  const walkman = event.target.closest($.link).querySelector('audio')
-  const { list } = state['ls/mp3']
-  const { id } = event.target.dataset
-  const next = parseInt(id)
-  state['ls/mp3'].current = next
-  const href = list[next]
-  walkman.src = href
-  walkman.play()
-  $.teach({ audioPlaying: true, currentTrack: href })
-})
+function reduceConflicts(conflicts) {
+	return Object.keys(conflicts)
+		.reduce((str, key) => {
+			return `${str} ${key}="${conflicts[key]}"`
+		}, '')
+}
+
+function aBox(priority, conflicts) {
+	return {
+		avatar: 'a-box',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
+function aSphere(priority, conflicts) {
+	return {
+		avatar: 'a-sphere',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
+function aCylinder(priority, conflicts) {
+	return {
+		avatar: 'a-cylinder',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
+function aPlane(priority, conflicts) {
+	return {
+		avatar: 'a-plane',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
+function aSky(priority, conflicts) {
+	return {
+		avatar: 'a-sky',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
