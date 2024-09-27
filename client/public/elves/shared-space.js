@@ -2,6 +2,7 @@ import elf from '@silly/tag'
 import { innerHTML } from 'diffhtml'
 import natsort from 'natsort'
 import { idx, documents } from './giggle-search.js'
+import { showPanel } from './plan98-panel.js'
 
 let initial = {
   startX: null,
@@ -91,8 +92,8 @@ function renderDisplays(target) {
       person.dataset.person = display
       person.innerHTML = `
         <div class="display-title-bar" data-display="${display}">
-          <button class="profile">
-            <img src="${image}" class="profile-image" alt="image of ${name}"
+          <button class="profile" data-display="${display}">
+            <img src="${image}" class="profile-image" alt="image of ${name}" />
             <span class="profile-name">
               ${name}
             </span>
@@ -259,6 +260,25 @@ $.when('keydown', '.browser', event => {
   }
 })
 
+$.when('click', '.profile', event => {
+  const { display } = event.target.dataset
+  const {
+    width,
+    height,
+    name,
+    image
+  } = $.learn()[display]
+
+
+  showPanel(`
+    <div style="padding: 1rem;">
+      width: ${width}<br/>
+      height: ${height}<br/>
+      name: ${name}<br/>
+      image: ${image}<br/>
+    </div>
+  `)
+})
 $.when('click', '.auto-item', event => {
   event.preventDefault()
   const { tray } = event.target.closest('[data-tray]').dataset
@@ -616,27 +636,36 @@ $.style(`
   }
 
   & .profile {
-    display: grid;
-    grid-template-columns: 2rem auto;
+    background: linear-gradient(25deg, rgba(255,255,255,.65), rgba(255,255,255,.85));
+    display: inline-grid;
+    grid-template-columns: 1.2rem auto 1fr;
+    grid-template-rows: 1.2rem;
     gap: .5rem;
     place-items: center;
     background: transparent;
     border: none;
     border-radius: none;
-    background: lemonchiffon;
-    padding: .5rem;
+    background: rgba(255,255,255,.65);
+    padding: .25rem;
     opacity: .5;
     pointer-events: all;
   }
 
   & .profile:hover,
   & .profile:focus {
+    background: rgba(255,255,255,1);
     opacity: .85;
     z-index: 10000;
+    position: relative;
   }
 
   & .profile-image {
     border-radius: 100%;
+    aspect-ratio: 1;
+  }
+
+  & .profile-name {
+    place-self: start;
   }
 
   & .displays.stack {
@@ -662,7 +691,7 @@ $.style(`
   & .display {
     width: var(--width, 160px);
     height: var(--height, 90px);
-    border: 5px solid lemonchiffon;
+    border: 5px solid rgba(255,255,255,.85);
     position: absolute;
     inset: 0;
     margin: auto;
@@ -676,6 +705,7 @@ $.style(`
     pointer-events: none;
   }
   & .display-title-bar {
+    padding: 0 0 5px;
     font-size: 1rem;
     line-height: 1;
     color: white;
@@ -683,8 +713,7 @@ $.style(`
     -ms-user-select: none; /* IE 10 and IE 11 */
     user-select: none;
     position: relative;
-    display: grid;
-    grid-template-columns: auto 2rem 1.618fr 1fr auto;
+    display: block;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -718,6 +747,7 @@ $.style(`
     display: block;
     width: 100%;
     padding: 0 .25rem;
+    height: 100%;
   }
 
   & .grabber::before {
@@ -853,6 +883,10 @@ $.style(`
   }
 
   &[data-mouse="true"] .tray {
+    pointer-events: none !important;
+  }
+
+  &[data-mouse="true"] .profile {
     pointer-events: none !important;
   }
 

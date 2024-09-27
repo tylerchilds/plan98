@@ -140,7 +140,6 @@ $.style(`
   }
 
   & .panel {
-    animation: &-in 250ms ease-in-out forwards;
     margin: auto;
     box-sizing: border-box;
     position: relative;
@@ -149,8 +148,6 @@ $.style(`
     width: 320px;
     max-width: 100%;
     width: 100%;
-    z-index: -1;
-    opacity: 0;
   }
 
   & .body {
@@ -161,10 +158,6 @@ $.style(`
     position: absolute;
     right: 0;
     pointer-events: all;
-    box-shadow:
-      0px 0px 4px 4px rgba(0,0,0,.10),
-      0px 0px 12px 12px rgba(0,0,0,.5),
-      0px 0px 36px 36px rgba(0,0,0,.25);
     width: 100%;
     overflow: auto;
   }
@@ -175,22 +168,6 @@ $.style(`
     font-weight: 800;
     padding: .5rem;
     text-align: center;
-  }
-
-  @keyframes &-in {
-    0% {
-      opacity: 0;
-      filter: blur(10px);
-      z-index: -1;
-      background: rgba(0,0,0,0);
-    }
-
-    100% {
-      opacity: 1;
-      filter: blur(0px);
-      z-index: 1100;
-      background: rgba(0,0,0,.25);
-    }
   }
 
   & .action-wrapper {
@@ -205,9 +182,9 @@ $.style(`
 
   & [data-close] {
     pointer-events: all;
-    background: black;
+    background: transparent;
     border: none;
-    color: rgba(255,255,255,.65);
+    opacity: .65;
     padding: 9px;
     height: 2rem;
     font-size: 1rem;
@@ -217,7 +194,7 @@ $.style(`
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    color: rgba(255,255,255,1);
+    opacity: 1;
   }
 
   & [data-close] * {

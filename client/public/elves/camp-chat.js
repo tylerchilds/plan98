@@ -215,7 +215,7 @@ $.draw(target => {
     </div>
     <form class="new-message-form" data-command="enter">
       <button class="button send" type="submit" data-command="enter">
-        Send
+        <sl-icon name="send"></sl-icon>
       </button>
       <div class="text-well">
         <textarea name="message">${draft}</textarea>
