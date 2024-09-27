@@ -626,6 +626,7 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
+    overflow-x: auto;
   }
 
   & .tray-title-bar input {

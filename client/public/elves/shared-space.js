@@ -14,13 +14,38 @@ let initial = {
   suggestions: [],
   trayZ: 3,
   trays: [],
+  displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
+  'display-self': {
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+    name: "Me",
+    image: "/cdn/tychi.me/photos/unprofessional-headshot.jpg"
+  },
+  'display-ipad': {
+    width: 1024,
+    height: 768,
+    name: "ipad",
+    image: "/cdn/tychi.me/photos/unprofessional-headshot.jpg"
+  },
+  'display-iphone': {
+    width: 320,
+    height: 480,
+    name: "iphone",
+    image: "/cdn/tychi.me/photos/unprofessional-headshot.jpg"
+  },
+  'display-watch': {
+    width: 140,
+    height: 160,
+    name: "watch",
+    image: "/cdn/tychi.me/photos/unprofessional-headshot.jpg"
+  },
 }
 
 if(plan98.parameters.get('tutorial')) {
   initial = {
     ...initial,
-    trays: ['silly-tray'],
-    'silly-tray': {
+    trays: ['tray-silly'],
+    'tray-silly': {
       width: 640,
       height: 480,
       maximized: true,
@@ -41,6 +66,46 @@ function engine(target) {
   const rectangle = canvas.getBoundingClientRect()
 
   return { canvas, rectangle }
+}
+
+function renderDisplays(target) {
+  const container = target.querySelector('.displays')
+  const peoples = target.querySelector('.peoples')
+  return function runtime(display) {
+    const {
+      width,
+      height,
+      name,
+      image
+    } = $.learn()[display]
+
+    let node = container.querySelector(`[data-id="${display}"]`)
+    let person = peoples.querySelector(`[data-person="${display}"]`)
+    if(!node) {
+      node = document.createElement('div')
+      person = document.createElement('div')
+      node.classList.add('display');
+      person.classList.add('person');
+      person.classList.add('display');
+      node.dataset.id = display
+      person.dataset.person = display
+      person.innerHTML = `
+        <div class="display-title-bar" data-display="${display}">
+          <button class="profile">
+            <img src="${image}" class="profile-image" alt="image of ${name}"
+            <span class="profile-name">
+              ${name}
+            </span>
+          </button>
+        </div>
+      `
+      container.appendChild(node)
+      peoples.appendChild(person)
+    }
+
+    node ? node.style = `--width: ${width}px; --height: ${height}px;` : null
+    person ? person.style = `--width: ${width}px; --height: ${height}px;` : null
+  }
 }
 
 function render(target) {
@@ -269,9 +334,11 @@ $.draw((target) => {
     })
   }
   return `
-    <div class="trays"></div>
-    <div class="cursor"></div>
-    <canvas></canvas>
+    <div class="displays stack"></div>
+    <div class="trays stack"></div>
+    <div class="cursor stack"></div>
+    <canvas class="canvas stack"></canvas>
+    <div class="peoples stack"></div>
   `
 }, { beforeUpdate, afterUpdate })
 
@@ -326,12 +393,17 @@ function afterUpdate(target) {
     }
   }
 
-
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
     cursor.style = `${isMouseDown ? 'display: block;' : 'display: none;'};`
   }
+
+  {
+    const { displays } = $.learn()
+    displays.map(renderDisplays(target))
+  }
+
 
   {
     const { trays } = $.learn()
@@ -533,6 +605,93 @@ $.style(`
     position: relative;
     touch-action: none;
     background: rgba(0,0,0,.85);
+    display: grid;
+    width: 100%;
+    height: 100%;
+    place-items: center;
+    grid-template-areas: "root-of-${$.link}";
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    transform: translate(var(--pan-shared-space-x, 0), var(--pan-shared-spax-y, 0));
+  }
+
+  & .profile {
+    display: grid;
+    grid-template-columns: 2rem auto;
+    gap: .5rem;
+    place-items: center;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    background: lemonchiffon;
+    padding: .5rem;
+    opacity: .5;
+    pointer-events: all;
+  }
+
+  & .profile:hover,
+  & .profile:focus {
+    opacity: .85;
+    z-index: 10000;
+  }
+
+  & .profile-image {
+    border-radius: 100%;
+  }
+
+  & .displays.stack {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+  & .peoples.stack {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
+
+  & .trays {
+    z-index: 9003;
+    pointer-events: none;
+  }
+
+  & .display {
+    width: var(--width, 160px);
+    height: var(--height, 90px);
+    border: 5px solid lemonchiffon;
+    position: absolute;
+    inset: 0;
+    margin: auto;
+  }
+
+  & .display.person {
+    border-color: transparent;
+  }
+  & .peoples {
+    z-index: 9002;
+    pointer-events: none;
+  }
+  & .display-title-bar {
+    font-size: 1rem;
+    line-height: 1;
+    color: white;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 2rem 1.618fr 1fr auto;
+    gap: 5px;
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
   }
 
   &.inline {
@@ -573,11 +732,15 @@ $.style(`
     transform: opacity 100ms ease-in-out;
   }
 
-  &,
-  & canvas {
-    display: block;
+  & .stack {
+    grid-area: root-of-${$.link};
     width: 100%;
     height: 100%;
+    overflow: hidden;
+  }
+
+  & .canvas {
+    z-index: 9002;
   }
 
   & .cursor {
@@ -589,7 +752,7 @@ $.style(`
     background: var(--color, dodgerblue);
     transform: var(--transform);
     pointer-events: none;
-    z-index: 9001;
+    z-index: 9004;
     opacity: .65;
   }
 
@@ -624,6 +787,7 @@ $.style(`
     padding: 2px;
     display: grid;
     grid-template-rows: auto 1px 1fr;
+    pointer-events: all;
   }
 
   & .tray iframe {
@@ -649,6 +813,8 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
+    pointer-events: all;
+    overflow-x: auto;
   }
 
   & .tray-title-bar input {
@@ -671,7 +837,26 @@ $.style(`
     color: black;
     height: 100%;
     position: relative;
+
   }
+
+  & .trays[data-grabbing="true"] .tray {
+    pointer-events: none;
+  }
+
+  &[data-mouse="true"] .tray {
+    pointer-events: none;
+  }
+
+
+    pointer-events: none !important;
+  }
+
+  &[data-mouse="true"] .tray {
+    pointer-events: none !important;
+  }
+
+
 
   & .tray.maximized {
     transform: translate(0, 0) !important;
@@ -864,7 +1049,7 @@ function end (e) {
   const context = canvas.getContext('2d')
 
   if(Math.abs(x) > 100 && Math.abs(y) > 100) {
-    $.teach(self.crypto.randomUUID(), (state, payload) => {
+    $.teach(`tray-${self.crypto.randomUUID()}`, (state, payload) => {
       const newState = {...state}
       newState.trays.push(payload)
       newState.trayZ += 1
@@ -909,3 +1094,18 @@ function replaceCursor(target) {
     }
   }
 }
+
+self.addEventListener("resize", function () {
+  $.teach({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  }, (s,p) => {
+    return {
+      ...s,
+      'display-self': {
+        ...s['display-self'],
+        ...p
+      }
+    }
+  })
+});
