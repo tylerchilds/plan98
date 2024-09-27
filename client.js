@@ -289,6 +289,20 @@ async function router(request, context) {
     }
   }
 
+  if(pathname.startsWith('/x/elf/')) {
+    const src = '/' + pathname.split('/x/elf/')[1] + '?' + parameters.toString().replace('%2F', '/')
+    const file = await remix(request, {
+      src,
+      tag: 'plan98-park',
+    }, business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
 
   if(pathname === '/news.xml') {
     const feed = new Podcast({
