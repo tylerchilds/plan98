@@ -593,6 +593,13 @@ $.style(`
     pointer-events: none;
   }
 
+  & .trays:empty::before {
+    content: 'Draw a rectangle that is not tiny."
+    position: absolute;
+    inset: 0;
+    margin: auto;
+  }
+
   & .tray {
     position: absolute;
     width: var(--width, 160px);

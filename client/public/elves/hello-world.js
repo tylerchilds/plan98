@@ -1,3 +1,4 @@
-import module from '@silly/tag'
+import elf from '@plan98/elf'
 
-module('hello-world').draw(() => `Hello World`)
+elf('hello-world')
+.draw((_target) => `Hello World`)
