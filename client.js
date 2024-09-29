@@ -410,9 +410,6 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
       const saga = await Deno.readTextFile(`./client/public/404.saga`)
       file = await sagaSanitizer(saga, {
         ...business,
-        parameters: {
-          'class': 'screenplay'
-        }
       })
     }
     statusCode = Status.NotFound

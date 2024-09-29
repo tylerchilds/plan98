@@ -10,13 +10,13 @@ const $ = tag('sillyz-computer')
 function newComputerActions(src) {
   return [
     {
-      text: 'full',
+      text: 'window',
       action: 'low',
       script: import.meta.url,
       src
     },
     {
-      text: 'minimal',
+      text: 'mobile',
       action: 'medium',
       script: import.meta.url,
       src

@@ -13,12 +13,14 @@ let initial = {
   isMouseDown: false,
   suggestions: [],
   trayZ: 3,
+  focusedTray: null,
   trays: [],
 }
 
 if(plan98.parameters.get('tutorial')) {
   initial = {
     ...initial,
+    focusedTray: 'silly-tray',
     trays: ['silly-tray'],
     'silly-tray': {
       width: 640,
@@ -49,6 +51,7 @@ function render(target) {
     const {
       suggestions,
       suggestIndex,
+      focusedTray
     } = $.learn()
     const {
       maximized,
@@ -72,6 +75,7 @@ function render(target) {
       node.classList.add('tray');
       node.dataset.id = tray
       node.innerHTML = `
+        <button class="tray-wake" data-tray="${tray}"></button>
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
           <button class="tray-action tray-toggle" data-tray="${tray}">
             <sl-icon name="${minimized ? 'arrows-collapse' : 'arrows-expand' }"></sl-icon>
@@ -109,6 +113,12 @@ function render(target) {
     }
 
     node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
+
+    if(focusedTray === tray) {
+      node.dataset.focused = true
+    } else {
+      node.dataset.focused = false
+    }
 
     const fullScreenIcon = node.querySelector('.tray-maxer sl-icon')
     if(maximized) {
@@ -321,12 +331,11 @@ function afterUpdate(target) {
     trays.dataset.grabbing = !!grabbing
   }
 
-{
+  {
     const { resizing } = $.learn()
     const trays = target.querySelector('.trays')
     trays.dataset.resizing = !!resizing
   }
-
 
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
@@ -480,7 +489,7 @@ function grab(event) {
   const { tray } = event.target.dataset
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
-  $.teach({ trayZ: newZ })
+  $.teach({ trayZ: newZ, focusedTray: tray })
   setState(tray, { z: newZ })
   grabTimeout = setTimeout(() => {
     setState(tray, { grabbed: true })
@@ -540,7 +549,7 @@ function drag(event) {
 }
 
 // release a pane
-function ungrab({ target }) {
+function ungrab(event) {
   clearTimeout(grabTimeout)
   const tray = $.learn().grabbing
   if(!tray) return
@@ -559,7 +568,7 @@ function resize(event) {
   const { tray } = event.target.dataset
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
-  $.teach({ resizing: tray, trayZ: newZ })
+  $.teach({ resizing: tray, trayZ: newZ, focusedTray: tray })
   setState(tray, { resize: event.target.dataset.direction, z: newZ })
   grabOffsetX = offsetX
   grabOffsetY = offsetY
@@ -697,7 +706,47 @@ $.style(`
     pointer-events: none !important;
   }
 
+  & .tray {
+    pointer-events: none;
+    filter: grayscale(1);
+  }
+
   &[data-mouse="true"] .tray {
+    pointer-events: none !important;
+  }
+
+  & .tray[data-focused="true"] {
+    pointer-events: all;
+    filter: grayscale(0);
+  }
+
+  & .tray-wake {
+    background: none;
+    position: absolute;
+    inset: 0;
+    background: 0;
+    border: 0;
+    padding: 0;
+    pointer-events: all;
+  }
+
+  & .tray-wake:hover,
+  & .tray-wake:focus {
+    background: rgba(0,0,0,.85);
+    outline: 2px solid mediumseagreen;
+    outline-offset: 2px;
+  }
+
+  & .tray[data-focused="true"] .tray-wake {
+    display: none;
+  }
+
+  & [data-resizing="true"] .tray[data-focused="true"],
+  & [data-grabbing="true"] .tray[data-focused="true"],
+  &[data-mouse="true"] .tray[data-focused="true"],
+  & [data-resizing="true"] .tray-wake,
+  & [data-grabbing="true"] .tray-wake,
+  &[data-mouse="true"] .tray-wake {
     pointer-events: none !important;
   }
 
@@ -966,19 +1015,29 @@ function move (e) {
   $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
 }
 
+$.when('click', '.tray-wake', wake)
+function wake (e) {
+  const { trayZ } = $.learn()
+  const newZ = trayZ + 1
+  const { tray } = event.target.dataset
+  $.teach({ trayZ: newZ, focusedTray: tray })
+  setState(tray, { z: newZ })
+}
 $.when('pointerup', 'canvas', end)
 function end (e) {
   const { grabbing } = $.learn()
   if(grabbing) return
-  const { startX, x, y, invertX, invertY, startY } = $.learn()
+  const { focusedTray, startX, x, y, invertX, invertY, startY } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
-  if(Math.abs(x) > 10 && Math.abs(y) > 10) {
-    $.teach(self.crypto.randomUUID(), (state, payload) => {
+  if(Math.abs(x) > 50 && Math.abs(y) > 50) {
+    const tray = self.crypto.randomUUID()
+    $.teach(tray, (state, payload) => {
       const newState = {...state}
       newState.trays.push(payload)
       newState.trayZ += 1
+      newState.focusedTray = tray
       newState[payload] = {
         width: Math.abs(x),
         height: Math.abs(y),
