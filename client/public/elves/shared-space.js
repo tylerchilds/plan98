@@ -570,8 +570,10 @@ function closeTray(event) {
 
 // grab a pane
 let grabTimeout
+let grabOffsetX, grabOffsetY
 function grab(event) {
   event.preventDefault()
+  const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
   const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
@@ -580,23 +582,41 @@ function grab(event) {
   grabTimeout = setTimeout(() => {
     setState(tray, { grabbed: true, z: newZ })
     $.teach({ trayZ: newZ, grabbing: tray })
+    grabOffsetX = offsetX
+    grabOffsetY = offsetY
   }, 100)
 }
 
 // drag a pane
+let lastX, lastY;
 function drag(event) {
+  let { target, clientX, clientY } = event
   const tray = $.learn().grabbing
   if(!tray) return
-  const { target, movementX, movementY } = event
-
   const { grabbed, x, y } = $.learn()[tray]
 
-  if(grabbed) {
-    setState(tray, {
-      x: x + movementX,
-      y: y + movementY
-    })
+  if (lastX !== undefined && lastY !== undefined) {
+    const movementX = clientX - lastX;
+    const movementY = clientY - lastY;
+    // Use movementX and movementY here
+    if(grabbed) {
+      setState(tray, {
+        x: x + movementX,
+        y: y + movementY
+      })
+    }
+  } else {
+    if(grabbed) {
+      setState(tray, {
+        x: clientX - grabOffsetX,
+        y: clientY - grabOffsetY
+      })
+    }
+
   }
+
+  lastX = clientX;
+  lastY = clientY;
 }
 
 // release a pane
@@ -606,6 +626,10 @@ function ungrab({ target }) {
   if(!tray) return
   setState(tray, { grabbed: false })
   $.teach({ grabbing: null })
+  lastX = undefined;
+  lastY = undefined;
+  grabOffsetX = undefined
+  grabOffsetY = undefined
 }
 
 function setState(tray, payload) {
@@ -622,6 +646,7 @@ function setState(tray, payload) {
 
 $.style(`
   & {
+    overflow: hidden;
     position: relative;
     touch-action: none;
     background: rgba(0,0,0,.85);

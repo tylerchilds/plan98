@@ -73,30 +73,36 @@ function render(target) {
       node.dataset.id = tray
       node.innerHTML = `
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
-          <button class="tray-toggle" data-tray="${tray}">
-            <sl-icon name="${minimized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
+          <button class="tray-action tray-toggle" data-tray="${tray}">
+            <sl-icon name="${minimized ? 'arrows-collapse' : 'arrows-expand' }"></sl-icon>
           </button>
           <div class="grabber"></div>
+          <button class="tray-action tray-maxer" data-tray="${tray}">
+            <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
+          </button>
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
-              <button class="tray-sync" data-tray="${tray}" tab-index="1" type="submit">
+              <button class="tray-action tray-sync" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="telephone"></sl-icon>
               </button>
             </div>
           </form>
           <div class="grabber minimizable"></div>
-          <button class="tray-close minimizable" data-tray="${tray}">
-            <sl-icon name="x-circle"></sl-icon>
+          <button class="tray-action tray-close minimizable" data-tray="${tray}">
+            <sl-icon name="x-lg"></sl-icon>
           </button>
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
           <iframe src="${url}" title="${url}"></iframe>
         </div>
-
-        <div class="tray" data-id="${tray}" style="--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);">
+        <div class="resize-actions">
+          <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left" data-tray="${tray}">
+          </button>
+          <button aria-label="resize right" data-direction="se" class="tray-resize minimizable resize-right" data-tray="${tray}">
+          </button>
         </div>
       `
       container.appendChild(node)
@@ -104,17 +110,20 @@ function render(target) {
 
     node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
 
+    const fullScreenIcon = node.querySelector('.tray-maxer sl-icon')
     if(maximized) {
       node.setAttribute('class', 'tray maximized')
-    } else {
-      node.setAttribute('class', 'tray')
-    }
-    const fullScreenIcon = node.querySelector('.tray-toggle sl-icon')
-    if(minimized) {
-      node.classList.add('minimized')
       fullScreenIcon.name = 'fullscreen-exit'
     } else {
+      node.setAttribute('class', 'tray')
       fullScreenIcon.name = 'fullscreen'
+    }
+    const miniScreenIcon = node.querySelector('.tray-toggle sl-icon')
+    if(minimized) {
+      node.classList.add('minimized')
+      miniScreenIcon.name = 'arrows-expand'
+    } else {
+      miniScreenIcon.name = 'arrows-collapse'
     }
 
     const maybies = node.querySelector('.suggestions')
@@ -312,6 +321,13 @@ function afterUpdate(target) {
     trays.dataset.grabbing = !!grabbing
   }
 
+{
+    const { resizing } = $.learn()
+    const trays = target.querySelector('.trays')
+    trays.dataset.resizing = !!resizing
+  }
+
+
   { // scroll suggestions
     const list = target.querySelector('.suggestion-box')
     if(list) {
@@ -365,13 +381,18 @@ function afterUpdate(target) {
 function preventDefault(e) { e.preventDefault() }
 $.when('contextmenu', '.tray-title-bar', preventDefault)
 $.when('pointerdown', '.tray-title-bar', grab)
+$.when('pointerdown', '.tray-resize', resize)
 
 $.when('pointermove', 'canvas', drag)
 $.when('pointermove', '.tray-title-bar', drag)
+$.when('pointermove', '.tray-resize', drag)
 
 $.when('dblclick', '.tray-title-bar', toggleMax)
+$.when('click', '.tray-maxer', toggleMax)
 $.when('pointerup', 'canvas', ungrab)
+$.when('pointerup', 'canvas', unresize)
 $.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', '.tray-resize', unresize)
 $.when('click', '.tray-close', closeTray)
 $.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-toggle', toggleMin)
@@ -452,8 +473,10 @@ function closeTray(event) {
 
 // grab a pane
 let grabTimeout
+let grabOffsetX, grabOffsetY
 function grab(event) {
   event.preventDefault()
+  const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
   const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
@@ -462,23 +485,58 @@ function grab(event) {
   grabTimeout = setTimeout(() => {
     setState(tray, { grabbed: true, z: newZ })
     $.teach({ trayZ: newZ, grabbing: tray })
-  }, 100)
+    grabOffsetX = offsetX
+    grabOffsetY = offsetY
+  }, 250)
 }
 
 // drag a pane
+let lastX, lastY;
 function drag(event) {
-  const tray = $.learn().grabbing
+  let { target, clientX, clientY } = event
+  const { grabbing, resizing } = $.learn()
+  console.log(resizing)
+  const tray = grabbing || resizing
   if(!tray) return
-  const { target, movementX, movementY } = event
+  const { grabbed, resize, x, y, width, height } = $.learn()[tray]
 
-  const { grabbed, x, y } = $.learn()[tray]
+  if (lastX !== undefined && lastY !== undefined) {
+    const movementX = clientX - lastX;
+    const movementY = clientY - lastY;
+    // Use movementX and movementY here
+    if(grabbed) {
+      setState(tray, {
+        x: x + movementX,
+        y: y + movementY
+      })
+    }
+    if(resize) {
+      if(resize === 'sw') {
+        setState(tray, {
+          x: x + movementX,
+          height: height + movementY,
+          width: width - movementX
+        })
+      }
+      if(resize === 'se') {
+        setState(tray, {
+          height: height + movementY,
+          width: width + movementX
+        })
+      }
+    }
+  } else {
+    if(grabbed) {
+      setState(tray, {
+        x: clientX - grabOffsetX,
+        y: clientY - grabOffsetY
+      })
+    }
 
-  if(grabbed) {
-    setState(tray, {
-      x: x + movementX,
-      y: y + movementY
-    })
   }
+
+  lastX = clientX;
+  lastY = clientY;
 }
 
 // release a pane
@@ -488,7 +546,33 @@ function ungrab({ target }) {
   if(!tray) return
   setState(tray, { grabbed: false })
   $.teach({ grabbing: null })
+  lastX = undefined;
+  lastY = undefined;
+  grabOffsetX = undefined
+  grabOffsetY = undefined
 }
+
+// grab a pane
+function resize(event) {
+  event.preventDefault()
+  const { offsetX, offsetY } = event
+  const { tray } = event.target.dataset
+  setState(tray, { resize: event.target.dataset.direction })
+  $.teach({ resizing: tray })
+  grabOffsetX = offsetX
+  grabOffsetY = offsetY
+}
+function unresize({ target }) {
+  const tray = $.learn().resizing
+  if(!tray) return
+  setState(tray, { resize: null })
+  $.teach({ resizing: null })
+  lastX = undefined;
+  lastY = undefined;
+  grabOffsetX = undefined
+  grabOffsetY = undefined
+}
+
 
 function setState(tray, payload) {
   $.teach(payload, function merge(state) {
@@ -506,6 +590,29 @@ $.style(`
   & {
     position: relative;
     touch-action: none;
+    overflow: hidden;
+  }
+
+  & .resize-right,
+  & .resize-left {
+    position: absolute;
+    bottom: -.5rem;
+    width: 1rem;
+    height: 1rem;
+    background: rgba(255,255,255,.15);
+    border: 1px solid rgb(0,0,0,.15);
+    border-radius: 100%;
+    cursor: resize;
+  }
+
+  & .resize-left {
+    left: -.5rem;
+    cursor: sw-resize;
+  }
+
+  & .resize-right {
+    right: -.5rem;
+    cursor: se-resize;
   }
 
   &.inline {
@@ -570,6 +677,7 @@ $.style(`
     opacity: .65;
   }
 
+  & .trays[data-resizing="true"],
   & .trays[data-grabbing="true"] {
     pointer-events: none !important;
   }
@@ -582,6 +690,11 @@ $.style(`
     pointer-events: none;
   }
 
+  & [data-grabbed="true"] {
+    transform: scale(1.1);
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
   & [data-grabbed="true"] .grabber::before {
     box-shadow:
       0px .2rem 0 .5px var(--purple),
@@ -625,7 +738,7 @@ $.style(`
     user-select: none;
     position: relative;
     display: grid;
-    grid-template-columns: auto 2rem 1.618fr 1fr auto;
+    grid-template-columns: auto 2rem auto minmax(100px, 1.618fr) 2rem auto;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -658,6 +771,10 @@ $.style(`
     position: relative;
   }
 
+  & .tray-resize {
+    pointer-events: all;
+  }
+
   & .tray.maximized {
     transform: translate(0, 0) !important;
     position: absolute;
@@ -674,7 +791,7 @@ $.style(`
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto 2rem;
+    grid-template-columns: auto 2rem auto;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {
@@ -688,9 +805,7 @@ $.style(`
     padding: 0;
   }
 
-  & .tray-sync,
-  & .tray-close,
-  & .tray-toggle {
+  & .tray-action {
     background: transparent;
     border: none;
     border-radius: 0;
@@ -700,12 +815,8 @@ $.style(`
     transition: opacity 100ms;
   }
 
-  & .tray-sync:hover,
-  & .tray-sync:focus,
-  & .tray-close:hover,
-  & .tray-close:focus,
-  & .tray-toggle:hover,
-  & .tray-toggle:focus {
+  & .tray-action:hover,
+  & .tray-action:focus {
     opacity: 1;
   }
 
