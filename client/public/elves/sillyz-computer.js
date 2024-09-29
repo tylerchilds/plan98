@@ -94,12 +94,15 @@ function resourceMenu(actions) {
 
   return `
     <div class="synthia">
-      <div>
-        <button data-no-actions> 
-          back
-        </button>
+      <input>
+      <div class="resource-actions">
+        <div>
+          <button data-no-actions> 
+            back
+          </button>
+        </div>
+        ${list}
       </div>
-      ${list}
     </div>
   `
 }
@@ -111,29 +114,24 @@ $.when('click', '[data-create]', (event) => {
   $.teach({
     resourceActions: [
       {
-        text: 'low',
-        action: 'low',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
-      {
-        text: 'medium',
+        text: 'minimal',
         action: 'medium',
         script: import.meta.url,
         src: event.target.dataset.create
       },
       {
-        text: 'ultra',
+        text: 'desktop',
         action: 'ultra',
         script: import.meta.url,
         src: event.target.dataset.create
       },
       {
-        text: 'elf world',
+        text: 'gaming',
         action: 'elfworld',
         script: import.meta.url,
         src: event.target.dataset.create
       },
+
     ]
   })
 })
@@ -248,11 +246,18 @@ $.style(`
   & .synthia:not(:empty) {
     display: flex;
     flex-direction: column;
-    padding: 3rem 1rem;
     overflow: auto;
     width: 100%;
     height: 100%;
     background: white;
+  }
+
+  & .synthia input {
+    margin-bottom: 1rem;
+  }
+
+  & .resource-actions {
+    padding: 0 1rem;
   }
 `)
 

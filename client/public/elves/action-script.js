@@ -22,6 +22,7 @@ $.draw(target => {
 })
 
 export async function actionScript(event) {
+  event.stopImmediatePropagation()
   const root = event.target.closest($.link) || event.target.closest('.'+$.link)
   const { action, script, saga } = root.dataset
   root.classList.add('active')

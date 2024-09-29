@@ -64,7 +64,6 @@ const $ = elf('plan98-intro', {
   third: null,
   fourth: null,
   allActive: false,
-  broken: false
 })
 
 export default $
@@ -80,11 +79,11 @@ function init(target) {
 
 $.draw((target) => {
   init(target)
-  const { allActive, broken, now } = $.learn()
+  const { allActive, now } = $.learn()
 
   randomTheme(target)
   return `
-    <div class="fourth ${broken ? 'broken' : ''} ${allActive ? 'show-all' : ''}">
+    <div class="fourth ${allActive ? 'show-all' : ''}">
       ${renderWorkspaceView('first')}
       ${renderWorkspaceView('second')}
       ${renderWorkspaceView('third')}
@@ -186,7 +185,7 @@ $.when('click','.show-workspace', (event) => {
   event.preventDefault()
   const { longpress } = $.learn()
   if(!longpress) {
-    $.teach({ allActive: false, broken: false, activeWorkspace: event.target.dataset.workspace })
+    $.teach({ allActive: false, activeWorkspace: event.target.dataset.workspace })
     requestFullZune()
   } else {
     $.teach({ longpress: false })
@@ -289,7 +288,6 @@ export function setWorkspace(event) {
   const customApp = href.endsWith('.saga') ? `/app/hyper-script?src=${href}`: href
 
   const stock = {
-    broken: false,
     contextActions: null
   }
 
@@ -425,10 +423,6 @@ $.style(`
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "main main" "main main";
-  }
-
-  & .fourth.broken {
-    display: none;
   }
 
   & .menu {

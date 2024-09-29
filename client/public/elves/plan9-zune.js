@@ -383,6 +383,11 @@ href: /app/story-board
 text: Story Board
 
 <a
+href: /app/story-board
+text: Elf World
+
+
+<a
 href: /app/dial-tone
 text: Dial Tone
 
@@ -643,10 +648,18 @@ function createPlaylistAction(href) {
 }
 
 export function toPlaylist(event) {
+  const { audioPlaying } = $.learn()
   const { href } = event.target.dataset
   state['ls/mp3'].length += 1
   state['ls/mp3'].list.push(href)
-  $.teach({ contextActions: null })
+
+  if(!audioPlaying) {
+    const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
+    walkman.src = href
+    walkman.play()
+  }
+
+  $.teach({ contextActions: null, playlistVisible: true, audioPlaying: true })
 }
 
 const thirdPartyRules = []
@@ -1423,5 +1436,5 @@ $.when('click', '.track', (event) => {
   const href = list[next]
   walkman.src = href
   walkman.play()
-  $.teach({ audioPlaying: true, currentTrack: href })
+  t
 })
