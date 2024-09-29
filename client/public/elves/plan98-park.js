@@ -95,15 +95,7 @@ function nested(target) {
 }
 
 $.draw((target) => {
-  if(!plan98.parameters.get('side-quest')) {
-    const random = self.crypto.randomUUID() 
-    const query = plan98.parameters.toString()
-    window.location.href = window.location.origin+window.location.pathname+`${query? '?'+query+'&': '?'}side-quest=${random}`
-    return 'loading'
-  }
-
-
-  if(nested(target)) return 'Please, no side quests on your side quest'
+  if(nested(target)) return 'paradox averted'
 	if(target.mounted) return
 	target.mounted = true
 

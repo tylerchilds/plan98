@@ -478,13 +478,13 @@ function grab(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  const { z } = $.learn()[tray]
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
-
+  $.teach({ trayZ: newZ })
+  setState(tray, { z: newZ })
   grabTimeout = setTimeout(() => {
-    setState(tray, { grabbed: true, z: newZ })
-    $.teach({ trayZ: newZ, grabbing: tray })
+    setState(tray, { grabbed: true })
+    $.teach({ grabbing: tray })
     grabOffsetX = offsetX
     grabOffsetY = offsetY
   }, 250)
@@ -557,8 +557,10 @@ function resize(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  setState(tray, { resize: event.target.dataset.direction })
-  $.teach({ resizing: tray })
+  const { trayZ } = $.learn()
+  const newZ = trayZ + 1
+  $.teach({ resizing: tray, trayZ: newZ })
+  setState(tray, { resize: event.target.dataset.direction, z: newZ })
   grabOffsetX = offsetX
   grabOffsetY = offsetY
 }
@@ -599,17 +601,30 @@ $.style(`
     bottom: -.5rem;
     width: 1rem;
     height: 1rem;
-    background: rgba(255,255,255,.15);
     border: 1px solid rgb(0,0,0,.15);
+    background: transparent;
     border-radius: 100%;
     cursor: resize;
   }
 
+  & .resize-right::before,
+  & .resize-left::before {
+    content: '';
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid rgb(255,255,255,.15);
+    border-radius: 100%;
+    bottom: -.5rem;
+    position: absolute;
+  }
+  & .resize-left::before,
   & .resize-left {
     left: -.5rem;
     cursor: sw-resize;
   }
 
+  & .resize-right::before,
   & .resize-right {
     right: -.5rem;
     cursor: se-resize;
@@ -959,7 +974,7 @@ function end (e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
-  if(Math.abs(x) > 100 && Math.abs(y) > 100) {
+  if(Math.abs(x) > 10 && Math.abs(y) > 10) {
     $.teach(self.crypto.randomUUID(), (state, payload) => {
       const newState = {...state}
       newState.trays.push(payload)
@@ -970,7 +985,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: '/app/sillyz-computer'
+        url: '/app/sillyz-computer?page=silly'
       }
       return newState
     })

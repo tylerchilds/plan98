@@ -7,6 +7,39 @@ $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer')
 
+function newComputerActions(src) {
+  return [
+    {
+      text: 'full',
+      action: 'low',
+      script: import.meta.url,
+      src
+    },
+    {
+      text: 'minimal',
+      action: 'medium',
+      script: import.meta.url,
+      src
+    },
+    {
+      text: 'desktop',
+      action: 'ultra',
+      script: import.meta.url,
+      src
+    },
+    {
+      text: 'gaming',
+      action: 'elfworld',
+      script: import.meta.url,
+      src
+    },
+  ]
+}
+
+const actionsCatalog = {
+  silly: newComputerActions
+}
+
 export const lookup = {
   '004': {
     title: "Charmander's",
@@ -54,6 +87,7 @@ export const lookup = {
 
 $.draw(target => {
   const src = target.getAttribute('src') || '/404'
+  mount(target, src)
   const { resourceLevel, resourceActions } = $.learn()
 
   if(!resourceLevel) {
@@ -77,6 +111,17 @@ $.draw(target => {
     </div>
   `
 })
+
+function mount(target, src) {
+  if(target.mounted) return
+  target.mounted = true
+  const page = actionsCatalog[target.getAttribute('page')]
+  if(page) {
+    requestIdleCallback(() => {
+      $.teach({ resourceActions: page(src) })
+    })
+  }
+}
 
 function resourceMenu(actions) {
   const list = actions.map((data) => {
@@ -110,29 +155,11 @@ function resourceMenu(actions) {
 $.when('click', '[data-no-actions]', (event) => {
   $.teach({ resourceActions: null })
 })
-$.when('click', '[data-create]', (event) => {
-  $.teach({
-    resourceActions: [
-      {
-        text: 'minimal',
-        action: 'medium',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
-      {
-        text: 'desktop',
-        action: 'ultra',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
-      {
-        text: 'gaming',
-        action: 'elfworld',
-        script: import.meta.url,
-        src: event.target.dataset.create
-      },
 
-    ]
+$.when('click', '[data-create]', (event) => {
+  const src = event.target.dataset.create
+  $.teach({
+    resourceActions: newComputerActions(src)
   })
 })
 
@@ -171,6 +198,17 @@ $.style(`
     height: 100%;
     position: relative;
     background: #54796d;
+    animation: &-fade-in ease-in-out 1000ms forwards;
+  }
+
+  @keyframes &-fade-in {
+    0% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
   }
 
   & .top {
