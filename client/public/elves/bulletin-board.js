@@ -566,6 +566,7 @@ $.style(`
     position: absolute;
     inset: 0;
     margin: auto;
+    transform: translate3d(0,0,0);
     mix-blend-mode: soft-light;
   }
 
