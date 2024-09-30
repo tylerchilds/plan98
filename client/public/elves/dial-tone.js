@@ -103,8 +103,12 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: black;
+    background: transparent;
     position: relative;
+  }
+
+  &.headless .controls {
+    display: none;
   }
   & .the-compass {
     display: grid;

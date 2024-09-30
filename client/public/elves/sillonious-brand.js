@@ -93,8 +93,8 @@ $.style(`
     transform-style: preserve-3d;
     backface-visibility: hidden;
     display: block;
-    cursor: url('/public/icons/gh057.svg') 0 0, auto;
+    /*cursor: url('/public/icons/gh057.svg') 0 0, auto;*/
     overflow: auto;
-    background-color: var(--theme, white);
+    background: transparent;
   }
 `)

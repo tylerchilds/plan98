@@ -102,13 +102,31 @@ $.draw((target) => {
 	const scene = celestials().map(component)
 
 	return `
+    <div class="heads-up-display">
+      <div class="preview"></div>
+      <div>
+        <div class="library">
+          ${library(null)}
+        </div>
+      </div>
+      <div class="movement">
+        <sillonious-joypro></sillonious-joypro>
+        <div aria-role="button" class="literally">
+          <middle-earth></middle-earth>
+          <button class="not-literally">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>
+        </div>
+      </div>
+    </div>
 		<a-scene>
+      <a-camera>
+        <a-cursor></a-cursor>
+        <!-- Or <a-entity cursor></a-entity> -->
+      </a-camera>
 			${scene.join('')}
       <a-entity class="irix"></a-entity>
 		</a-scene>
-    <div class="library">
-      ${library(null)}
-    </div>
 	`
 }, {
   beforeUpdate,
@@ -136,6 +154,14 @@ function draw3d(data) {
 	`
 }
 
+state['ls/game'] ||= {
+  inventory: {},
+  bank: {}
+}
+
+function posessed(path) {
+  return !!state['ls/game'].inventory[path]
+}
 
 function increment(target) {
   const irix = target.querySelector('.irix')
@@ -156,7 +182,9 @@ function increment(target) {
             z: -12 * (parseInt(i / 10)) - 5,
             y: 4,
           }, {
+            wireframe: posessed(eggs.path),
             color: 'firebrick',
+            'class': 'interactive-directory',
             radius: 3,
             width: 3,
             height: 9,
@@ -167,7 +195,6 @@ function increment(target) {
       }
 
       if(eggs.type === Types.File.type) {
-        console.log((i % 10))
         return draw3d(
           aBox({
             x: 2 * (i % 10),
@@ -175,7 +202,9 @@ function increment(target) {
             y: 0,
             pitch: 45
           }, {
+            wireframe: posessed(eggs.path),
             color: 'darkorange',
+            'class': 'interactive-file',
             ['data-path']: eggs.path,
             ['data-name']: eggs.name
           })
@@ -185,6 +214,45 @@ function increment(target) {
     irix.innerHTML = dinosaurs
   }
 }
+
+$.when('click', '.interactive-file', (event) => {
+  const { path } = event.target.dataset
+  const taken = state['ls/game'].inventory[path]
+  state['ls/game'].inventory[path] = !taken
+})
+
+let fuseTimeout
+$.when('mouseenter', '.interactive-file', (event) => {
+  fuseTimeout = setTimeout(() => {
+    event.target.dispatchEvent(new Event('click'))
+  }, 1500)
+  const preview = '/app/media-plexer?src=' + event.target.dataset.path
+  $.teach({ preview })
+})
+
+$.when('mouseleave', '.interactive-file', (event) => {
+  clearTimeout(fuseTimeout)
+  $.teach({ preview: null })
+})
+
+$.when('click', '.interactive-directory', (event) => {
+  const { path } = event.target.dataset
+  const taken = state['ls/game'].inventory[path]
+  state['ls/game'].inventory[path] = !taken
+})
+
+$.when('mouseenter', '.interactive-directory', (event) => {
+  console.log(event.target.dataset.path)
+  fuseTimeout = setTimeout(() => {
+    event.target.dispatchEvent(new Event('click'))
+  }, 1500)
+})
+
+$.when('mouseleave', '.interactive-directory', (event) => {
+  clearTimeout(fuseTimeout)
+  console.log(event.target.dataset.path)
+})
+
 
 function beforeUpdate(target) {
   { // save suggestion box scroll top
@@ -225,6 +293,14 @@ function afterUpdate(target) {
   }
 
   {
+    preview(target.querySelector('.preview'))
+  }
+
+  {
+    map(target.querySelector('.literally'))
+  }
+
+  {
     increment(target)
   }
 }
@@ -262,6 +338,37 @@ function library(target) {
     return search
   }
 }
+
+function preview(target) {
+  const { preview } = $.learn()
+
+  if(!preview) {
+    target.dataset.last = null
+    target.innerHTML = ''
+    return
+  }
+
+  if(target.dataset.last !== preview) {
+    target.dataset.last = preview
+    target.innerHTML = `
+      <button data-goto="${preview}">
+        <iframe src="${preview}"></iframe>
+      </button>
+    `
+  }
+}
+
+function map(target) {
+  const { fullMap } = $.learn()
+
+  if(fullMap) {
+    target.classList.add('full')
+    target.querySelector('middle-earth').map.invalidateSize()
+  } else {
+    target.classList.remove('full')
+  }
+}
+
 
 const down = 40;
 const up = 38;
@@ -353,6 +460,20 @@ $.when('click', 'a[href^="#"]', (event) => {
 $.when('click', '[data-close-context]', (event) => {
   $.teach({ contextActions: null })
 })
+
+$.when('click', '[data-goto]', (event) => {
+  const { goto } = event.target.dataset
+  window.location.href = goto
+})
+
+$.when('click', '.literally', (event) => {
+  $.teach({ fullMap: true })
+})
+
+$.when('click', '.not-literally', (event) => {
+  $.teach({ fullMap: false })
+})
+
 
 export function identity(event) {
   const { contextActions } = $.learn()
@@ -477,6 +598,72 @@ $.style(`
     overflow: hidden;
   }
 
+  & .a-enter-vr, .a-enter-ar {
+    display: none;
+  }
+
+  & .movement {
+    grid-column: -1 / 1;
+    place-content: end;
+  }
+
+  & .literally {
+    margin: 0 auto;
+    aspect-ratio: 1;
+    border-radius: 100%;
+    max-height: 180px;
+    background: transparent;
+    border: none;
+    position: absolute;
+    padding: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+  }
+
+  & .heads-up-display {
+    grid-template-columns: 1fr 1.618fr;
+    grid-template-rows: 1fr 1.618fr;
+    width: 100%;
+    height: 100%;
+    inset: 0;
+    position: absolute;
+    display: grid;
+    z-index: 100;
+    pointer-events: none;
+  }
+
+
+  & .preview:not(:empty) {
+    opacity: 1;
+  }
+  & .preview {
+    width: 100%;
+    opacity: 0;
+    aspect-ratio: 16 / 9;
+    border: 1px solid white;
+    box-shadow: 1px 1px black;
+  }
+
+  & .preview iframe {
+    display: block;
+    border: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  & .preview button {
+    pointer-events: all;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+  }
+
   & .menu {
     position: absolute;
     right: 0;
@@ -593,11 +780,8 @@ $.style(`
   }
 
   & .search {
-    text-align: center;
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
+    pointer-events: all;
+    position: relative;
   }
 
   & .search img {
@@ -640,6 +824,60 @@ $.style(`
     text-align: left;
     overflow: hidden;
     flex-direction: column;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 500;
+  }
+
+  & .literally {
+    pointer-events: all;
+    border: 1px solid black;
+  }
+
+  & .literally middle-earth {
+    pointer-events: none;
+    border: 1px solid white;
+    border-radius: 100%;
+  }
+
+  & .literally .not-literally {
+    display: none;
+  }
+
+  & .literally.full {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    max-height: 100%;
+    border-radius: 0;
+    aspect-ratio: auto;
+  }
+
+  & .literally.full .not-literally {
+    display: block;
+    position: absolute;
+    pointer-events: all;
+    right: 0;
+    top: 0;
+    z-index: 500;
+    background: black;
+    border-radius: 100%;
+    border: 0;
+    color: white;
+    font-size: 3rem;
+    aspect-ratio: 1;
+    line-height: 1;
+    padding: 1rem;
+  }
+  & .literally.full middle-earth {
+    pointer-events: all;
+    border-radius: 0;
+  }
+
+  & sillonious-joypro {
+    position: relative;
+    z-index: 500;
   }
 
   & .suggestions .auto-item {
