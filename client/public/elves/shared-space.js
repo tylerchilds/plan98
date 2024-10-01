@@ -424,7 +424,6 @@ function afterUpdate(target) {
     displays.map(renderDisplays(target))
   }
 
-
   {
     const { trays } = $.learn()
     trays.map(render(target))
@@ -793,6 +792,14 @@ $.style(`
     height: 100%;
     overflow: hidden;
   }
+
+  & .displays.stack {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    position: relative;
+  }
+
 
   & .canvas {
     z-index: 9002;

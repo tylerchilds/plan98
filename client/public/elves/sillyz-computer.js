@@ -33,6 +33,13 @@ function newComputerActions(src) {
       script: import.meta.url,
       src
     },
+    {
+      text: 'coop',
+      action: 'coop',
+      script: import.meta.url,
+      src
+    },
+
   ]
 }
 
@@ -208,6 +215,10 @@ export function elfworld(event) {
   window.location.href = '/x/elf' + src
 }
 
+export function coop(event) {
+  const src = event.target.dataset.src || '/404'
+  window.location.href = '/app/bulletin-board?src=' + src
+}
 
 
 $.style(`
