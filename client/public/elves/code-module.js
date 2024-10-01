@@ -137,7 +137,7 @@ function persist(target, $, _flags) {
     const srcNode = target.closest('[src]')
 
     if(srcNode) {
-      srcNode.getAttribute('src')
+      const src = srcNode.getAttribute('src')
       const file = update.view.state.doc.toString()
       $.teach({ [src]: { file, src }})
     }
@@ -153,7 +153,8 @@ $.style(`
     max-height: 100%;
     position: relative;
     padding-top: 2rem;
-    background: mediumseagreen;
+    background: white;
+    color: black;
   }
 
   & select {
@@ -186,7 +187,7 @@ $.style(`
 
   & .actions {
     z-index: 10;
-    background: transparent;
+    background: black;
     border-bottom: 1px solid rgba(255,255,255,.25);
     position: absolute;
     top: 0;
@@ -266,17 +267,16 @@ $.style(`
   }
 
   & .cm-editor .cm-content {
-    background: rgba(0,0,0,.85);
-    color: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
   }
 
   & .cm-editor .cm-activeLine {
-    background: mediumseagreen;
+    background: black;
     color: white;
   }
 
   & .cm-editor .cm-activeLineGutter {
-    background: mediumseagreen;
+    background: black;
   }
 
   & .cm-editor .cm-cursor {

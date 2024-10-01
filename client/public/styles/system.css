@@ -513,7 +513,9 @@ button {
 }
 
 .darkroom {
-  background: rgba(200,200,200,.5);
+  background: #54796d;
+  height: 100%;
+  overflow: auto;
 }
 
 .screenplay {

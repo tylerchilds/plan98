@@ -85,10 +85,29 @@ export const lookup = {
   },
 }
 
+$.when('click', '[data-ok]', (event) => {
+  event.target.closest($.link).removeAttribute('error')
+  $.teach({ error: null })
+})
+
 $.draw(target => {
+  const error = $.learn().error || target.getAttribute('error')
   const src = target.getAttribute('src') || '/404'
   mount(target, src)
   const { resourceLevel, resourceActions } = $.learn()
+
+  if(error) {
+    return `
+      <div class="resource">
+        <div style="text-align: center;">
+          <div class="error">
+            ${error}
+          </div>
+          <button data-ok data-create="${src}" aria-label="create"></button>
+        </div>
+      </div>
+    `
+  }
 
   if(!resourceLevel) {
     return `
@@ -199,6 +218,13 @@ $.style(`
     position: relative;
     background: #54796d;
     animation: &-fade-in ease-in-out 1000ms forwards;
+  }
+
+  & .error {
+    color: black;
+    background: white;
+    padding: 2rem;
+    font-size: 2rem;
   }
 
   @keyframes &-fade-in {

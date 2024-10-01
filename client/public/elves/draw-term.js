@@ -78,7 +78,7 @@ function render(target) {
         <button class="tray-wake" data-tray="${tray}"></button>
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
           <button class="tray-action tray-toggle" data-tray="${tray}">
-            <sl-icon name="${minimized ? 'arrows-collapse' : 'arrows-expand' }"></sl-icon>
+            <sl-icon name="${minimized ? 'zoom-in' : 'zoom-out' }"></sl-icon>
           </button>
           <div class="grabber"></div>
           <button class="tray-action tray-maxer" data-tray="${tray}">
@@ -94,7 +94,7 @@ function render(target) {
             </div>
           </form>
           <div class="grabber minimizable"></div>
-          <button class="tray-action tray-close minimizable" data-tray="${tray}">
+          <button class="tray-action tray-close" data-tray="${tray}">
             <sl-icon name="x-lg"></sl-icon>
           </button>
         </div>
@@ -131,9 +131,9 @@ function render(target) {
     const miniScreenIcon = node.querySelector('.tray-toggle sl-icon')
     if(minimized) {
       node.classList.add('minimized')
-      miniScreenIcon.name = 'arrows-expand'
+      miniScreenIcon.name = 'zoom-in'
     } else {
-      miniScreenIcon.name = 'arrows-collapse'
+      miniScreenIcon.name = 'zoom-out'
     }
 
     const maybies = node.querySelector('.suggestions')
@@ -686,6 +686,12 @@ $.style(`
 
   & canvas {
     background: var(--background, lemonchiffon);
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
   }
 
   & .cursor {
@@ -797,9 +803,6 @@ $.style(`
     font-size: 1rem;
     line-height: 1;
     color: white;
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10 and IE 11 */
-    user-select: none;
     position: relative;
     display: grid;
     grid-template-columns: auto 2rem auto minmax(100px, 1.618fr) 2rem auto;
@@ -855,7 +858,7 @@ $.style(`
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto 2rem auto;
+    grid-template-columns: auto 2rem auto auto;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {

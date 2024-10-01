@@ -18,7 +18,7 @@ function source(target) {
 $.draw((target) => {
   const [path, _args] = source(target).split('?')
   const extension = path.split('.').pop()
-  const renderer = renderers[extension] || iframeRenderer
+  const renderer = renderers[extension] || (() => `<sillyz-computer error="format to be defined: ${extension}" src="${path}"></sillyz-computer>`)
   return renderer(path)
 })
 

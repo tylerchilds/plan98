@@ -1436,5 +1436,4 @@ $.when('click', '.track', (event) => {
   const href = list[next]
   walkman.src = href
   walkman.play()
-  t
 })

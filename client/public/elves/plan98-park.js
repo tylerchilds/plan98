@@ -121,7 +121,7 @@ $.draw((target) => {
     </div>
 		<a-scene>
       <a-camera>
-        <a-cursor></a-cursor>
+        <a-cursor material="color: white;"></a-cursor>
         <!-- Or <a-entity cursor></a-entity> -->
       </a-camera>
 			${scene.join('')}
@@ -605,6 +605,7 @@ $.style(`
   & .movement {
     grid-column: -1 / 1;
     place-content: end;
+    padding: 1rem;
   }
 
   & .literally {
