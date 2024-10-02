@@ -21,8 +21,8 @@ const $ = module('bulletin-board', {
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   zoom: 1,
-  color: 'white',
-  background: '#54796d',
+  color: 'black',
+  background: 'white',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
   'display-self': {
     width: document.documentElement.clientWidth,
@@ -55,6 +55,7 @@ $.draw(target => {
 }, { afterUpdate })
 
 function afterUpdate(target) {
+
   {
     const { displays } = $.learn()
     displays.map(renderDisplays(target))
@@ -74,12 +75,24 @@ function afterUpdate(target) {
     const { mode } = $.learn()
     const src = target.getAttribute('src')
     const camera = target.querySelector('.camera')
-    if(camera && mode === modes.camera) {
+    if(!camera.innerHTML && mode === modes.camera) {
       camera.innerHTML = `
-        <live-help room="${src}" class="stack"></live-help>
+        <live-help src="${src}" class="stack"></live-help>
       `
     }
   }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const chat = target.querySelector('.chat')
+    if(!chat.innerHTML && mode === modes.chat) {
+      chat.innerHTML = `
+        <plan98-chat src="${src}" class="stack"></plan98-chat>
+      `
+    }
+  }
+
 
   { // menu items
     const { activeMenu } = $.learn()
@@ -138,17 +151,19 @@ function update(target) {
 
 function mount(target) {
   const { panX, panY, zoom } = $.learn()
+
+  const stars = getStars(target)
   target.innerHTML = `
     <div class="actions">
       <div class="menu-group">
-        <button data-mode="move">
-          <sl-icon name="arrows-move"></sl-icon>
-        </button>
-        <button data-mode="draw">
-          <sl-icon name="pencil"></sl-icon>
-        </button>
         <button data-mode="cursor">
           <sl-icon name="cursor"></sl-icon>
+        </button>
+        <button data-mode="gaming">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <button data-mode="camera">
+          <sl-icon name="camera-reels"></sl-icon>
         </button>
         <button data-mode="chat">
           <sl-icon name="chat"></sl-icon>
@@ -156,11 +171,11 @@ function mount(target) {
         <button data-mode="calendar">
           <sl-icon name="calendar3"></sl-icon>
         </button>
-        <button data-mode="gaming">
-          <sl-icon name="joystick"></sl-icon>
+        <button data-mode="draw">
+          <sl-icon name="pencil"></sl-icon>
         </button>
-        <button data-mode="camera">
-          <sl-icon name="camera-reels"></sl-icon>
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
         </button>
       </div>
       <div class="menu-item disabled">
@@ -202,13 +217,18 @@ function mount(target) {
         </div>
       </div>
     </div>
+    <div class="stars" style="background-image: ${stars}"></div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
       <draw-term background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
-      <div class="camera"></div>
-      <div class="chat"></div>
+      <div class="pane">
+        <div class="camera" data-pane="camera"></div>
+        <div class="chat" data-pane="chat"></div>
+        <div class="calendar" data-pane="calendar"></div>
+        <div class="gaming" data-pane="gaming"><dial-tone></dial-tone></div>
+      </div>
     </div>
   `
 
@@ -514,6 +534,15 @@ $.style(`
     z-index: 2;
   }
 
+  & .stars {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 3;
+    pointer-events: none;
+    opacity: .5;
+  }
+
   & canvas {
     touch-action: none;
   }
@@ -525,12 +554,15 @@ $.style(`
     bottom: 0;
     right: 0;
     display: none;
+    max-width: 100%;
+    width: 100%;
   }
+
 
   & .display {
     width: var(--width, 160px);
     height: var(--height, 90px);
-    border: 5px solid rgba(255,255,255,.85);
+    border: 5px solid lemonchiffon;
     position: absolute;
     inset: 0;
     margin: auto;
@@ -571,6 +603,8 @@ $.style(`
 
   & .menu-group {
     display: flex;
+    overflow: auto;
+    margin-right: auto;
   }
 
   & .menu-item {
@@ -618,6 +652,7 @@ $.style(`
   & draw-term {
     pointer-events: none;
     opacity: .5;
+    position: relative;
   }
 
   &:not([data-mode="${modes.cursor}"]) draw-term .tray .tray-wake,
@@ -631,11 +666,41 @@ $.style(`
     opacity: 1;
   }
 
+  & .viewport {
+    position: fixed;
+    display: none;
+    inset: 0;
+  }
+
+  & .viewport .pane {
+    grid-area: viewport-of-${$.link};
+    display: grid;
+    grid-template-areas: "viewport-of-${$.link}";
+    width: 100%;
+    height: 100%;
+    padding-bottom: 4rem;
+  }
+
+  & .viewport [data-pane] {
+    display: none;
+    position: absolute;
+    inset: 0 0 4rem;
+  }
+
+  &[data-mode="${modes.calendar}"] .viewport,
+  &[data-mode="${modes.gaming}"] .viewport,
+  &[data-mode="${modes.chat}"] .viewport,
   &[data-mode="${modes.camera}"] .viewport {
-    position: relative;
+    display: block;
     z-index: 3;
   }
 
+  &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
+  &[data-mode="${modes.gaming}"] [data-pane="${modes.gaming}"],
+  &[data-mode="${modes.chat}"] [data-pane="${modes.chat}"],
+  &[data-mode="${modes.camera}"] [data-pane="${modes.camera}"] {
+    display: block;
+  }
 
   & draw-term.stack {
     width: 5000px;
@@ -654,6 +719,22 @@ $.style(`
     mix-blend-mode: soft-light;
   }
 `)
+
+function getStars(target) {
+  const color = 'rgba(0,0,0,.85)';
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = color;
+  ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
+
+  return `url(${canvas.toDataURL()})`;
+}
 
 $.when('click', '*', (event) => {
   if(event.target.closest('.menu-item')) {
