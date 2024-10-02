@@ -11,12 +11,12 @@ const modes = {
   cursor: 'cursor',
   chat: 'chat',
   move: 'move',
-  video: 'video',
+  camera: 'camera',
   calendar: 'calendar'
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.draw,
+  mode: modes.move,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   color: 'white',
@@ -41,7 +41,7 @@ const $ = module('bulletin-board', {
 })
 
 function engine(target) {
-  const canvas = target.closest($.link).querySelector('canvas')
+  const canvas = target.closest($.link).querySelector('.canvas.stack')
   const rectangle = canvas.getBoundingClientRect()
 
   return { canvas, rectangle }
@@ -59,12 +59,24 @@ function afterUpdate(target) {
   }
 
   {
+    const workspace = target.querySelector('.workspace')
     const { mode } = $.learn()
-    if(target.mode !== mode) {
-      target.mode = mode
+    if(workspace.dataset.mode !== mode) {
+      workspace.dataset.mode = mode
       const buttons = [...target.querySelectorAll('[data-mode]')]
       buttons.map(x => x.classList.remove('active'))
       target.querySelector(`[data-mode="${mode}"]`).classList.add('active')
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const camera = target.querySelector('.camera')
+    if(camera && mode === modes.camera) {
+      camera.innerHTML = `
+        <live-help room="${src}" class="stack"></live-help>
+      `
     }
   }
 
@@ -127,14 +139,14 @@ function mount(target) {
   target.innerHTML = `
     <div class="actions">
       <div class="menu-group">
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
+        </button>
         <button data-mode="draw">
           <sl-icon name="pencil"></sl-icon>
         </button>
         <button data-mode="cursor">
           <sl-icon name="cursor"></sl-icon>
-        </button>
-        <button data-mode="move">
-          <sl-icon name="arrows-move"></sl-icon>
         </button>
         <button data-mode="camera">
           <sl-icon name="camera-reels"></sl-icon>
@@ -167,6 +179,8 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px;">
+      <div class="stack camera"></div>
+      <draw-term background="transparent" color="lemonchiffon" class="stack"></draw-term>
       <div class="displays stack"></div>
     </div>
   `
@@ -342,11 +356,13 @@ function startMove(e) {
 
 function moveDraw(e) {
   e.preventDefault()
+
   const { color } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMousedown) return
 
+  console.log(e)
   let pressure = 0.1
   let x, y
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
@@ -545,6 +561,30 @@ $.style(`
     overflow: hidden;
   }
 
+  & live-help,
+  & draw-term {
+    pointer-events: none;
+    opacity: .5;
+  }
+
+  & draw-term .tray[data-focused="true"] {
+    pointer-events: none;
+  }
+
+  & [data-mode="${modes.cursor}"] draw-term .tray[data-focused="true"] {
+    pointer-events: all;
+  }
+
+  & [data-mode="${modes.camera}"] live-help,
+  & [data-mode="${modes.cursor}"] draw-term {
+    pointer-events: all;
+    opacity: 1;
+  }
+
+  & draw-term.stack {
+    width: 5000px;
+    height: 5000px;
+  }
   & .canvas.stack {
     width: auto;
     height: auto;
