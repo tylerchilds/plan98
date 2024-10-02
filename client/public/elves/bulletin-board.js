@@ -20,9 +20,11 @@ const $ = module('bulletin-board', {
   mode: modes.move,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
+  panXmod: 0,
+  panYmod: 0,
   zoom: 1,
-  color: 'black',
-  background: 'white',
+  color: 'white',
+  background: 'dodgerblue',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
   'display-self': {
     width: document.documentElement.clientWidth,
@@ -129,11 +131,14 @@ function renderDisplays(target) {
 
 function update(target) {
   {
-    const { panX, panY, zoom } = $.learn()
+    const { panX, panY, panXmod, panYmod, zoom } = $.learn()
     const workspace = target.querySelector('.workspace')
+    const stars = target.querySelector('.stars')
     workspace.style.setProperty("--pan-x", panX + 'px');
     workspace.style.setProperty("--pan-y", panY + 'px');
     workspace.style.setProperty("--zoom", zoom);
+    stars.style.setProperty("--pan-x-mod", panXmod + 'px');
+    stars.style.setProperty("--pan-y-mod", panYmod + 'px');
   }
 
   { // recover icons from the virtual dom
@@ -150,7 +155,7 @@ function update(target) {
 }
 
 function mount(target) {
-  const { panX, panY, zoom } = $.learn()
+  const { panX, panY, panXmod, panYmod, zoom } = $.learn()
 
   const stars = getStars(target)
   target.innerHTML = `
@@ -217,7 +222,6 @@ function mount(target) {
         </div>
       </div>
     </div>
-    <div class="stars" style="background-image: ${stars}"></div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
       <draw-term background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
       <div class="displays stack"></div>
@@ -237,11 +241,11 @@ function mount(target) {
 
   canvas.classList.add('stack')
   canvas.classList.add('canvas')
+  canvas.classList.add('stars')
 
   canvas.width = 5000;
   canvas.height = 5000;
-  context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
+  canvas.style=`background-image: ${stars}, linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5)); --pan-x-mod: ${panXmod}px; --pan-y-mod: ${panYmod}px;`
 
   target.querySelector('.workspace').appendChild(canvas)
 }
@@ -295,8 +299,6 @@ function redraw(event) {
   const { canvas } = engine(event.target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
 
   strokeHistory.map(function (stroke) {
     if (strokeHistory.length === 0) return
@@ -476,7 +478,6 @@ function moveMove(e) {
   panX += e.clientX - panStartX - rectangle.left
   panY += e.clientY - panStartY - rectangle.top
 
-  console.log(panX, panY)
   $.teach({ panX, panY })
 }
 
@@ -506,8 +507,11 @@ function endDraw(e) {
 };
 
 function endMove(e) {
-
-  $.teach({ startX: null, startY: null, panHappening: false })
+  const { panX, panY } = $.learn()
+  const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const panXmod = panX % rhythm
+  const panYmod = panY % rhythm
+  $.teach({ panXmod, panYmod, startX: null, startY: null, panHappening: false })
 }
 
 
@@ -535,12 +539,8 @@ $.style(`
   }
 
   & .stars {
-    width: 100%;
-    height: 100%;
-    position: relative;
-    z-index: 3;
-    pointer-events: none;
-    opacity: .5;
+    background-position: var(--pan-x-mod,0) var(--pan-y-mod,0);
+    background-color: dodgerblue;
   }
 
   & canvas {
@@ -566,6 +566,7 @@ $.style(`
     position: absolute;
     inset: 0;
     margin: auto;
+    mix-blend-mode: soft-light;
   }
 
   @media screen {
@@ -598,7 +599,7 @@ $.style(`
   & .actions button.active,
   & .actions button:hover {
     color: #fff;
-    background: #54796d;
+    background: dodgerblue;
   }
 
   & .menu-group {
@@ -716,12 +717,10 @@ $.style(`
     height: 5000px;
     position: relative;
     pointer-events: none;
-    mix-blend-mode: soft-light;
   }
 `)
 
 function getStars(target) {
-  const color = 'rgba(0,0,0,.85)';
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext('2d');
 
@@ -730,8 +729,13 @@ function getStars(target) {
   canvas.height = rhythm;
   canvas.width = rhythm;
 
+  let color = 'rgba(255,255,255,.85)';
   ctx.fillStyle = color;
   ctx.fillRect(rhythm / 2, rhythm / 2, 1, 1);
+
+  color = 'rgba(0,0,0,.85)';
+  ctx.fillStyle = color;
+  ctx.fillRect(rhythm / 2 + 1, rhythm / 2 + 1, 1, 1);
 
   return `url(${canvas.toDataURL()})`;
 }
