@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <draw-term></draw-term>
+    <sillyz-computer src="/app/draw-term"></sillyz-computer>
   `
 })
 

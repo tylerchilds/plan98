@@ -17,6 +17,8 @@ const modes = {
 
 const $ = module('bulletin-board', {
   mode: modes.draw,
+  panX: -2500 + document.documentElement.clientWidth / 2,
+  panY: -2500 + document.documentElement.clientHeight / 2,
   color: 'white',
   background: '#54796d',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
@@ -36,7 +38,6 @@ const $ = module('bulletin-board', {
     width: 140,
     height: 160,
   },
-
 })
 
 function engine(target) {
@@ -66,6 +67,18 @@ function afterUpdate(target) {
       target.querySelector(`[data-mode="${mode}"]`).classList.add('active')
     }
   }
+
+  { // menu items
+    const { activeMenu } = $.learn()
+    const currentlyActive = target.querySelector('[data-menu-target].active')
+    if(currentlyActive) {
+      currentlyActive.classList.remove('active')
+    }
+    const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
+    if(activeItem) {
+      activeItem.classList.add('active')
+    }
+  }
 }
 
 function renderDisplays(target) {
@@ -89,16 +102,11 @@ function renderDisplays(target) {
 }
 
 function update(target) {
-  { // menu items
-    const { activeMenu } = $.learn()
-    const currentlyActive = target.querySelector('[data-menu-target].active')
-    if(currentlyActive) {
-      currentlyActive.classList.remove('active')
-    }
-    const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
-    if(activeItem) {
-      activeItem.classList.add('active')
-    }
+  {
+    const { panX, panY } = $.learn()
+    const workspace = target.querySelector('.workspace')
+    workspace.style.setProperty("--pan-x", panX + 'px');
+    workspace.style.setProperty("--pan-y", panY + 'px');
   }
 
   { // recover icons from the virtual dom
@@ -115,6 +123,7 @@ function update(target) {
 }
 
 function mount(target) {
+  const { panX, panY } = $.learn()
   target.innerHTML = `
     <div class="actions">
       <div class="menu-group">
@@ -157,23 +166,23 @@ function mount(target) {
         </div>
       </div>
     </div>
-    <div class="displays stack"></div>
+    <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px;">
+      <div class="displays stack"></div>
+    </div>
   `
 
   const canvas = document.createElement('canvas')
-  self.addEventListener('resize', resizeCanvas, false);
+  const context = canvas.getContext('2d')
+
   canvas.classList.add('stack')
+  canvas.classList.add('canvas')
 
-  function resizeCanvas() {
-    canvas.width = self.innerWidth;
-    canvas.height = self.innerHeight;
-    const context = canvas.getContext('2d')
-    context.fillStyle = $.learn().background
-    context.fillRect(0, 0, canvas.width, canvas.height)
-  }
+  canvas.width = 5000;
+  canvas.height = 5000;
+  context.fillStyle = $.learn().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
 
-  resizeCanvas();
-  target.appendChild(canvas)
+  target.querySelector('.workspace').appendChild(canvas)
 }
 
 /**
@@ -251,8 +260,53 @@ $.when('click', '[data-redo]', function redoDraw (event) {
 
 
 $.when('pointerdown', 'canvas', start)
+$.when('pointermove', 'canvas', move)
+$.when('pointerup', 'canvas', end)
+
+const startModes = {
+  'draw': startDraw,
+  'move': startMove,
+}
+
+const moveModes = {
+  'draw': moveDraw,
+  'move': moveMove,
+}
+
+const endModes = {
+  'draw': endDraw,
+  'move': endMove,
+}
+
+
 
 function start(e) {
+  const { mode } = $.learn()
+
+  if(startModes[mode]) {
+    startModes[mode](e)
+  }
+}
+
+function move(e) {
+  const { mode } = $.learn()
+
+  if(moveModes[mode]) {
+    moveModes[mode](e)
+  }
+}
+
+function end(e) {
+  const { mode } = $.learn()
+
+  if(endModes[mode]) {
+    endModes[mode](e)
+  }
+}
+
+
+
+function startDraw(e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -278,9 +332,15 @@ function start(e) {
   drawOnCanvas(e.target, points)
 }
 
-$.when('pointermove', 'canvas', move)
+function startMove(e) {
+  const { rectangle } = engine(e.target)
+  const panStartX = e.clientX - rectangle.left
+  const panStartY = e.clientY - rectangle.top
 
-function move (e) {
+  $.teach({ panStartX, panStartY, panHappening: true })
+}
+
+function moveDraw(e) {
   e.preventDefault()
   const { color } = $.learn()
   const { canvas, rectangle } = engine(e.target)
@@ -326,8 +386,20 @@ function move (e) {
   })
 }
 
-$.when('pointerup', 'canvas', end)
-function end (e) {
+function moveMove(e) {
+  const { rectangle } = engine(e.target)
+  let { panX, panY, panStartX, panStartY, panHappening } = $.learn()
+
+  if(!panHappening) return
+
+  panX += e.clientX - panStartX - rectangle.left
+  panY += e.clientY - panStartY - rectangle.top
+
+  console.log(panX, panY)
+  $.teach({ panX, panY })
+}
+
+function endDraw(e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -352,18 +424,31 @@ function end (e) {
   lineWidth = 0
 };
 
+function endMove(e) {
+
+  $.teach({ startX: null, startY: null, panHappening: false })
+}
+
+
 $.style(`
   & {
     position: relative;
     overflow: hidden;
-    display: grid;
     width: 100%;
     height: 100%;
+    display: block;
+    background: black;
+  }
+
+  & .workspace {
+    width: 100%;
+    height: 100%;
+    display: grid;
     place-items: center;
     grid-template-areas: "root-of-${$.link}";
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
-    transform: translate(var(--pan-shared-space-x, 0), var(--pan-shared-spax-y, 0));
+    transform: translate(var(--pan-x, 0), var(--pan-y, 0));
   }
 
   & canvas {
@@ -460,10 +545,14 @@ $.style(`
     overflow: hidden;
   }
 
+  & .canvas.stack {
+    width: auto;
+    height: auto;
+  }
   & .displays.stack {
     display: grid;
-    width: 100%;
-    height: 100%;
+    width: 5000px;
+    height: 5000px;
     position: relative;
     pointer-events: none;
     mix-blend-mode: soft-light;
@@ -485,3 +574,17 @@ $.when('click', '[data-menu-target]', (event) => {
   event.stopImmediatePropagation()
 })
 
+self.addEventListener("resize", function () {
+  $.teach({
+    width: document.documentElement.clientWidth,
+    height: document.documentElement.clientHeight,
+  }, (s,p) => {
+    return {
+      ...s,
+      'display-self': {
+        ...s['display-self'],
+        ...p
+      }
+    }
+  })
+});
