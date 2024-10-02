@@ -6,7 +6,17 @@ let points = []
 let strokeHistory = []
 const strokeRevisory = []
 
+const modes = {
+  draw: 'draw',
+  cursor: 'cursor',
+  chat: 'chat',
+  move: 'move',
+  video: 'video',
+  calendar: 'calendar'
+}
+
 const $ = module('bulletin-board', {
+  mode: modes.draw,
   color: 'white',
   background: '#54796d',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
@@ -45,6 +55,16 @@ function afterUpdate(target) {
   {
     const { displays } = $.learn()
     displays.map(renderDisplays(target))
+  }
+
+  {
+    const { mode } = $.learn()
+    if(target.mode !== mode) {
+      target.mode = mode
+      const buttons = [...target.querySelectorAll('[data-mode]')]
+      buttons.map(x => x.classList.remove('active'))
+      target.querySelector(`[data-mode="${mode}"]`).classList.add('active')
+    }
   }
 }
 
@@ -97,20 +117,43 @@ function update(target) {
 function mount(target) {
   target.innerHTML = `
     <div class="actions">
-      <div class="menu-item">
-        <button data-menu-target="file">
-          File
+      <div class="menu-group">
+        <button data-mode="draw">
+          <sl-icon name="pencil"></sl-icon>
         </button>
-        <div class="menu-actions" data-menu="file">
-        </div>
+        <button data-mode="cursor">
+          <sl-icon name="cursor"></sl-icon>
+        </button>
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
+        </button>
+        <button data-mode="camera">
+          <sl-icon name="camera-reels"></sl-icon>
+        </button>
+        <button data-mode="chat">
+          <sl-icon name="chat"></sl-icon>
+        </button>
+        <button data-mode="calendar">
+          <sl-icon name="calendar3"></sl-icon>
+        </button>
       </div>
       <div class="menu-item">
         <button data-menu-target="edit">
-          Edit
+          <sl-icon name="watch"></sl-icon>
         </button>
         <div class="menu-actions" data-menu="edit">
-          <button data-undo>Undo</button>
-          <button data-redo>Redo</button>
+          <button data-undo>
+            <span>
+            <sl-icon name="arrow-counterclockwise"></sl-icon>
+            </span>
+            Undo
+          </button>
+          <button data-redo>
+            <span>
+            <sl-icon name="arrow-clockwise"></sl-icon>
+            </span>
+            Redo
+          </button>
         </div>
       </div>
     </div>
@@ -164,6 +207,10 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
+$.when('click', '[data-mode]', function updateMode (event) {
+  const { mode } = event.target.dataset
+  $.teach({ mode })
+})
 /**
  * Remove the previous stroke from history and repaint the entire canvas based on history
  * @return {void}
@@ -326,13 +373,10 @@ $.style(`
   & .actions {
     z-index: 10;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,.25);
     position: absolute;
-    top: 0;
-    left: 0;
+    bottom: 0;
     right: 0;
     display: none;
-    background: black;
   }
 
   & .display {
@@ -355,7 +399,6 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
     font-size: 1rem;
     --v-font-mono: 1;
     --v-font-casl: 0;
@@ -365,6 +408,10 @@ $.style(`
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
     transition: background 200ms ease-in-out;
+    font-size: 2rem;
+    padding: 1rem;
+    line-height: 1;
+    display: inline-flex;
   }
 
   & .actions button:focus,
@@ -374,6 +421,10 @@ $.style(`
     background: #54796d;
   }
 
+  & .menu-group {
+    display: flex;
+  }
+
   & .menu-item {
     position: relative;
   }
@@ -381,9 +432,9 @@ $.style(`
   & .menu-actions {
     display: none;
     position: absolute;
-    left: 0;
-    bottom: 0;
-    transform: translateY(100%);
+    right: 0;
+    top: 0;
+    transform: translateY(-100%);
     background: #54796d;
   }
 
@@ -395,6 +446,11 @@ $.style(`
     width: 100%;
     text-align: left;
     white-space: nowrap;
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-flex;
+    padding: .5rem;
+    gap: .5rem;
   }
 
   & .stack {
