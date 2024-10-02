@@ -244,7 +244,7 @@ $.when('submit', '.search', (event) => {
   event.preventDefault()
   const { tray } = event.target.dataset
   const { buffer } = $.learn()[tray]
-  const url = '/app/giggle-search?query=' + buffer
+  const url = buffer.indexOf('://') ? buffer : '/app/giggle-search?query=' + buffer
   setState(tray, { url, focused: false })
 })
 
@@ -411,7 +411,11 @@ function syncTray(event) {
   const { tray } = event.target.dataset
   let { buffer, url } = $.learn()[tray]
   buffer ||= url
-  url = buffer.startsWith('/') ? buffer : '/app/giggle-search?query=' + buffer
+  url = buffer.startsWith('/')
+    ? buffer
+    : buffer.indexOf('://')
+      ? buffer
+      : '/app/giggle-search?query=' + buffer
 
   event.target.closest('.tray').querySelector('iframe').src = url
   setState(tray, { url, focused: false, minimized: false })
@@ -504,7 +508,6 @@ let lastX, lastY;
 function drag(event) {
   let { target, clientX, clientY } = event
   const { grabbing, resizing } = $.learn()
-  console.log(resizing)
   const tray = grabbing || resizing
   if(!tray) return
   const { grabbed, resize, x, y, width, height } = $.learn()[tray]
@@ -791,6 +794,8 @@ $.style(`
     padding: 2px;
     display: grid;
     grid-template-rows: auto 1px 1fr;
+    max-width: 100vw;
+    max-height: 100vh;
   }
 
   & .tray iframe {
@@ -842,8 +847,11 @@ $.style(`
     pointer-events: all;
   }
 
-  & .tray.maximized {
+  &:not(.infinite) .tray.maximized {
     transform: translate(0, 0) !important;
+ }
+
+  & .tray.maximized {
     position: absolute;
     inset: 0;
     width: 100% !important;

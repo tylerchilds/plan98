@@ -13,19 +13,7 @@ const gun = Gun(['https://gun.1998.social/gun']);
    #
 */
 
-const $ = module('story-chat', { virtual: true })
-
-const commands = {
-  comment: '!',
-  address: '#',
-  puppet: '@',
-  parenthetical: '&',
-  quote: '>',
-  module: '<',
-  donottouch: '{',
-  effect: '^',
-  enter: ' ',
-}
+const $ = module('plan98-chat', { virtual: true })
 
 $.draw(target => {
   const { file } = sourceFile(target)
@@ -42,38 +30,12 @@ $.draw(target => {
     <div class="captains-log">
       ${log}
       <div class="communicator">
-        <form class="story-chat-form" data-command="enter">
+        <form class="story-chat-form">
           <input type="text" name="message">
-          <button type="submit" data-command="enter">
-            add
+          <button type="submit">
+            <sl-icon name="hand-thumbs-up"></sl-icon>
           </button>
         </form>
-        <div class="story-chat-row">
-          <button data-command="comment">
-            !
-          </button>
-          <button data-command="address">
-            #
-          </button>
-          <button data-command="puppet">
-            @
-          </button>
-          <button data-command="parenthetical">
-            &
-          </button>
-          <button data-command="quote">
-            &gt;
-          </button>
-          <button data-command="module">
-            &lt;
-          </button>
-          <button disabled data-command="donottouch">
-            {
-          </button>
-          <button data-command="effect">
-            ^
-          </button>
-        </div>
       </div>
     </div>
   `
@@ -133,10 +95,7 @@ function send(event) {
   let { file } = sourceFile(event.target)
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const path = source(event.target)
-  const { command } = event.target.dataset
-  if(!commands[command]) return
-  const symbol = commands[command]
-  file = file+'\n'+symbol+message.value
+  file = file+'\n'+message.value
   gun.get($.link).get(path).put({ file }, () => {
     message.value = ''
   })
@@ -213,24 +172,19 @@ $.style(`
     right: 0;
     width: 100%;
     padding: .5rem;
-    border-radius: 1rem;
+    border-radius: 0;
     background: rgba(0,0,0,.85);
     z-index: 2;
   }
-  & .story-chat-form,
-  & .story-chat-row {
+  & .story-chat-form {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: 1fr auto;
     gap: .5rem;
     width: 100%;
     overflow: auto;
   }
 
-  & .story-chat-row {
-  }
-
   & .story-chat-form [type="text"] {
-    grid-column: 1/8;
   }
 
   & .story-chat-row > * {
@@ -242,7 +196,7 @@ $.style(`
     background: rgba(255,255,255,.15);
     padding: 0 1rem;
     color: white;
-    border-radius: 1rem;
+    border-radius: 0;
     width: 100%;
   }
 

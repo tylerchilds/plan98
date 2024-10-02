@@ -637,7 +637,7 @@ $.style(`
 
 
   & .preview:not(:empty) {
-    opacity: 1;
+    opacity: .85;
   }
   & .preview {
     width: 100%;
@@ -840,6 +840,7 @@ $.style(`
     pointer-events: none;
     border: 1px solid white;
     border-radius: 100%;
+    opacity: .5;
   }
 
   & .literally .not-literally {
@@ -853,6 +854,10 @@ $.style(`
     max-height: 100%;
     border-radius: 0;
     aspect-ratio: auto;
+  }
+
+  & .literally.full middle-earth {
+    opacity: 1;
   }
 
   & .literally.full .not-literally {

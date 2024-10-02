@@ -12,13 +12,15 @@ const modes = {
   chat: 'chat',
   move: 'move',
   camera: 'camera',
-  calendar: 'calendar'
+  calendar: 'calendar',
+  gaming: 'gaming',
 }
 
 const $ = module('bulletin-board', {
   mode: modes.move,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
+  zoom: 1,
   color: 'white',
   background: '#54796d',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
@@ -59,10 +61,9 @@ function afterUpdate(target) {
   }
 
   {
-    const workspace = target.querySelector('.workspace')
     const { mode } = $.learn()
-    if(workspace.dataset.mode !== mode) {
-      workspace.dataset.mode = mode
+    if(target.dataset.mode !== mode) {
+      target.dataset.mode = mode
       const buttons = [...target.querySelectorAll('[data-mode]')]
       buttons.map(x => x.classList.remove('active'))
       target.querySelector(`[data-mode="${mode}"]`).classList.add('active')
@@ -115,10 +116,11 @@ function renderDisplays(target) {
 
 function update(target) {
   {
-    const { panX, panY } = $.learn()
+    const { panX, panY, zoom } = $.learn()
     const workspace = target.querySelector('.workspace')
     workspace.style.setProperty("--pan-x", panX + 'px');
     workspace.style.setProperty("--pan-y", panY + 'px');
+    workspace.style.setProperty("--zoom", zoom);
   }
 
   { // recover icons from the virtual dom
@@ -135,7 +137,7 @@ function update(target) {
 }
 
 function mount(target) {
-  const { panX, panY } = $.learn()
+  const { panX, panY, zoom } = $.learn()
   target.innerHTML = `
     <div class="actions">
       <div class="menu-group">
@@ -148,17 +150,39 @@ function mount(target) {
         <button data-mode="cursor">
           <sl-icon name="cursor"></sl-icon>
         </button>
-        <button data-mode="camera">
-          <sl-icon name="camera-reels"></sl-icon>
-        </button>
         <button data-mode="chat">
           <sl-icon name="chat"></sl-icon>
         </button>
         <button data-mode="calendar">
           <sl-icon name="calendar3"></sl-icon>
         </button>
+        <button data-mode="gaming">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <button data-mode="camera">
+          <sl-icon name="camera-reels"></sl-icon>
+        </button>
       </div>
-      <div class="menu-item">
+      <div class="menu-item disabled">
+        <button data-menu-target="zoom">
+          <sl-icon name="plus-slash-minus"></sl-icon>
+        </button>
+        <div class="menu-actions" data-menu="zoom">
+          <button data-zoom-in>
+            <span>
+            <sl-icon name="zoom-in"></sl-icon>
+            </span>
+            Zoom In
+          </button>
+          <button data-zoom-out>
+            <span>
+            <sl-icon name="zoom-out"></sl-icon>
+            </span>
+            Zoom Out
+          </button>
+        </div>
+      </div>
+
         <button data-menu-target="edit">
           <sl-icon name="watch"></sl-icon>
         </button>
@@ -178,10 +202,13 @@ function mount(target) {
         </div>
       </div>
     </div>
-    <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px;">
-      <div class="stack camera"></div>
-      <draw-term background="transparent" color="lemonchiffon" class="stack"></draw-term>
+    <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
+      <draw-term background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
       <div class="displays stack"></div>
+    </div>
+    <div class="viewport">
+      <div class="camera"></div>
+      <div class="chat"></div>
     </div>
   `
 
@@ -270,6 +297,24 @@ $.when('click', '[data-redo]', function redoDraw (event) {
   const stroke = strokeRevisory.shift()
   strokeHistory.push(stroke)
   redraw(event)
+})
+
+$.when('click', '[data-zoom-in]', function redoDraw (event) {
+  let { zoom } = $.learn()
+
+  zoom += .1
+  if(zoom <= 2) {
+    $.teach({ zoom })
+  }
+})
+
+$.when('click', '[data-zoom-out]', function redoDraw (event) {
+  let { zoom } = $.learn()
+
+  zoom -= .1
+  if(zoom >= 0) {
+    $.teach({ zoom })
+  }
 })
 
 
@@ -464,7 +509,9 @@ $.style(`
     grid-template-areas: "root-of-${$.link}";
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
-    transform: translate(var(--pan-x, 0), var(--pan-y, 0));
+    transform: translate(var(--pan-x, 0), var(--pan-y, 0)) scale(var(--zoom, 1));
+    position: relative;
+    z-index: 2;
   }
 
   & canvas {
@@ -530,6 +577,12 @@ $.style(`
     position: relative;
   }
 
+  & .menu-item.disabled {
+    filter: grayscale(1);
+    opacity: .5;
+    pointer-events: none;
+  }
+
   & .menu-actions {
     display: none;
     position: absolute;
@@ -567,19 +620,22 @@ $.style(`
     opacity: .5;
   }
 
-  & draw-term .tray[data-focused="true"] {
-    pointer-events: none;
+  &:not([data-mode="${modes.cursor}"]) draw-term .tray .tray-wake,
+  &:not([data-mode="${modes.cursor}"]) draw-term .tray[data-focused="true"] {
+    pointer-events: none !important;
   }
 
-  & [data-mode="${modes.cursor}"] draw-term .tray[data-focused="true"] {
-    pointer-events: all;
-  }
-
-  & [data-mode="${modes.camera}"] live-help,
-  & [data-mode="${modes.cursor}"] draw-term {
+  &[data-mode="${modes.camera}"] live-help,
+  &[data-mode="${modes.cursor}"] draw-term {
     pointer-events: all;
     opacity: 1;
   }
+
+  &[data-mode="${modes.camera}"] .viewport {
+    position: relative;
+    z-index: 3;
+  }
+
 
   & draw-term.stack {
     width: 5000px;
