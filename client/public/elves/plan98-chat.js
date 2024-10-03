@@ -27,26 +27,38 @@ $.draw(target => {
         <button data-logout>Disconnect</button>
       </div>
     </div>
-    <div class="captains-log">
+    <div class="log">
       ${log}
-      <div class="communicator">
-        <form class="story-chat-form">
-          <input type="text" name="message">
-          <button type="submit">
-            <sl-icon name="hand-thumbs-up"></sl-icon>
-          </button>
-        </form>
-      </div>
     </div>
+    <form class="send-form" data-command="enter">
+      <button data-tooltip="send" class="send" type="submit" data-command="enter">
+        <sl-icon name="arrow-up"></sl-icon>
+      </button>
+      <div class="text-well">
+        <textarea name="message" placeholder="Today..."></textarea>
+      </div>
+    </form>
   `
 
   return view
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('sl-icon')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+}
 
 function source(target) {
-  const src = target.getAttribute('src')
+  const src = target.closest($.link).getAttribute('src')
   const today = new Date().toJSON().slice(0, 10)
-  const dynamic = `saga://${today}.saga`
+  const dynamic = `${today}.saga`
   return src || dynamic
 }
 
@@ -85,21 +97,22 @@ Invite someone above.
     })()
 }
 
-$.when('click', 'button[data-command]', send)
 $.when('submit', 'form', (event) => {
   event.preventDefault()
-  const { command } = event.target.dataset
   send(event)
+  event.target.querySelector('[name="message"]').focus()
 })
 function send(event) {
   let { file } = sourceFile(event.target)
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const path = source(event.target)
   file = file+'\n'+message.value
+  message.value = ''
   gun.get($.link).get(path).put({ file }, () => {
-    message.value = ''
+    console.log('saved')
   })
 }
+
 
 $.when('click', '[data-zero]', () => {
   const path = source(event.target)
@@ -124,6 +137,8 @@ $.style(`
     height: 100%;
     background: rgba(0,0,0,.85);
     color: white;
+    display: grid;
+    grid-template-rows: 1fr auto;
   }
 
   & button {
@@ -131,10 +146,10 @@ $.style(`
     z-index: 2;
     background: rgba(0,0,0,.85);
     border: none;
-    color: dodgerblue;
+    color: rgba(255,255,255,.85);
     cursor: pointer;
     height: 2rem;
-    border-radius: 1rem;
+    border-radius: 0;
     transition: all 100ms;
     padding: .25rem 1rem;
   }
@@ -156,56 +171,71 @@ $.style(`
     margin-bottom: .5rem;
   }
 
-  & .captains-log {
+  & textarea {
     width: 100%;
-    height: 100%;
-    max-height: calc(100% - 6rem);
-    padding: 6rem 1rem;
-    overflow: auto;
-  }
-
-  & .communicator {
-    position: absolute;
-    height: 6rem;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    padding: .5rem;
-    border-radius: 0;
+    display: block;
+    resize: none;
+    border: none;
     background: rgba(0,0,0,.85);
-    z-index: 2;
-  }
-  & .story-chat-form {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: .5rem;
-    width: 100%;
-    overflow: auto;
-  }
-
-  & .story-chat-form [type="text"] {
-  }
-
-  & .story-chat-row > * {
-    flex: 1;
-  }
-
-  & .communicator input {
-    border: 1px solid orange;
-    background: rgba(255,255,255,.15);
-    padding: 0 1rem;
     color: white;
     border-radius: 0;
-    width: 100%;
+    padding: 8px;
   }
 
+  & .text-well {
+    background: rgba(0,0,0,.25);
+    padding: 4px;
+  }
+
+  & .send {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    color: rgba(255,255,255,.85);
+    background: dodgerblue;
+    padding: .5rem;
+    border-radius: 100%;
+    font-weight: 800;
+    border: 1px solid dodgerblue;
+    transition: all 100ms ease-in-out;
+  }
+
+
+  & .send-form button {
+    position: absolute;;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    margin: .5rem;
+  }
+
+  & .send-form button[disabled] {
+    opacity: .5;
+    background: rgba(255,255,255,.5);
+  }
+
+  & .send-form button:hover,
+  & .send-form button:focus {
+    background: rgba(0,0,0,.85);
+    border: 1px solid dodgerblue;
+    color: dodgerblue;
+  }
+
+  & .log {
+    overflow: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    overflow-anchor: auto !important;
+    padding: 6rem 0 1rem;
+  }
+
+
   @media print {
-    & button, & .communicator {
+    & button {
       display: none;
 
     }
-    & .captains-log {
+    & .log {
       max-height: initial;
     }
     body {
@@ -233,3 +263,8 @@ $.style(`
   }
 
 `)
+
+$.when('input', 'textarea', (event) => {
+  event.target.style.height = "auto";
+  event.target.style.height = (event.target.scrollHeight) + "px";
+});

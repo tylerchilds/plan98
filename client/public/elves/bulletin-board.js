@@ -161,26 +161,26 @@ function mount(target) {
   target.innerHTML = `
     <div class="actions">
       <div class="menu-group">
-        <button data-mode="cursor">
-          <sl-icon name="cursor"></sl-icon>
-        </button>
-        <button data-mode="gaming">
-          <sl-icon name="joystick"></sl-icon>
-        </button>
-        <button data-mode="camera">
-          <sl-icon name="camera-reels"></sl-icon>
-        </button>
-        <button data-mode="chat">
-          <sl-icon name="chat"></sl-icon>
-        </button>
-        <button data-mode="calendar">
-          <sl-icon name="calendar3"></sl-icon>
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
         </button>
         <button data-mode="draw">
           <sl-icon name="pencil"></sl-icon>
         </button>
-        <button data-mode="move">
-          <sl-icon name="arrows-move"></sl-icon>
+        <button data-mode="chat">
+          <sl-icon name="chat"></sl-icon>
+        </button>
+        <button data-mode="camera">
+          <sl-icon name="camera-reels"></sl-icon>
+        </button>
+        <button data-mode="calendar">
+          <sl-icon name="calendar3"></sl-icon>
+        </button>
+        <button data-mode="gaming">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <button data-mode="cursor">
+          <sl-icon name="cursor"></sl-icon>
         </button>
       </div>
       <div class="menu-item disabled">
