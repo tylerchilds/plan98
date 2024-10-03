@@ -14,7 +14,6 @@ class VideoFeed extends HTMLElement {
   }
 
   connectedCallback() {
-    debugger
     const video = this.querySelector('video')
     // Create and start video stream
     navigator.mediaDevices.getUserMedia({ video: true, audio: true })
@@ -46,6 +45,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
+    background: black;
   }
 
   & video {
