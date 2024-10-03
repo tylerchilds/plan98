@@ -11,7 +11,7 @@ const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', '
 function load(instrument) {
   current = SampleLibrary.load({
     instruments: instrument,
-    baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '/private') + "/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
+    baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
   })
 
   Tone.loaded().then(function() {

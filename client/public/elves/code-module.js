@@ -1,6 +1,5 @@
 import module from '@silly/tag'
 import { toast } from './plan98-toast.js'
-import eruda from 'eruda'
 import { vim } from "@replit/codemirror-vim"
 
 import {
@@ -10,9 +9,6 @@ import {
 } from "@codemirror/basic-setup"
 
 const $ = module('code-module')
-
-// be honest; we want a debugger whenever we code
-eruda.init();
 
 function sourceFile(target) {
   const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
