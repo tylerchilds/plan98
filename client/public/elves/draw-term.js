@@ -512,6 +512,10 @@ function drag(event) {
   if(!tray) return
   const { grabbed, resize, x, y, width, height } = $.learn()[tray]
 
+  const panX = getComputedStyle(event.target).getPropertyValue("--pan-x") || 0;
+  const panY = getComputedStyle(event.target).getPropertyValue("--pan-y") || 0;
+
+  debugger
   if (lastX !== undefined && lastY !== undefined) {
     const movementX = clientX - lastX;
     const movementY = clientY - lastY;
@@ -540,8 +544,8 @@ function drag(event) {
   } else {
     if(grabbed) {
       setState(tray, {
-        x: clientX - grabOffsetX,
-        y: clientY - grabOffsetY
+        x: clientX - grabOffsetX - parseInt(panX, 10),
+        y: clientY - grabOffsetY - parseInt(panY, 10)
       })
     }
 

@@ -34,7 +34,7 @@ function newComputerActions(src) {
       src
     },
     {
-      text: 'coop',
+      text: 'office',
       action: 'coop',
       script: import.meta.url,
       src

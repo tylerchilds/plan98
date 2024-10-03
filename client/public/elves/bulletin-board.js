@@ -299,6 +299,8 @@ function redraw(event) {
   const { canvas } = engine(event.target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = $.learn().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
 
   strokeHistory.map(function (stroke) {
     if (strokeHistory.length === 0) return
@@ -449,24 +451,6 @@ function moveDraw(e) {
   points.push({ x, y, lineWidth, color })
 
   drawOnCanvas(e.target, points);
-
-  requestIdleCallback(() => {
-    $.teach({ pressure })
-
-    const touch = e.touches ? e.touches[0] : null
-    if (touch) {
-      $.teach({
-        touchesHTML: `
-          touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
-          radiusX = ${touch.radiusX} <br/>
-          radiusY = ${touch.radiusY} <br/>
-          rotationAngle = ${touch.rotationAngle} <br/>
-          altitudeAngle = ${touch.altitudeAngle} <br/>
-          azimuthAngle = ${touch.azimuthAngle} <br/>
-        `
-      })
-    }
-  })
 }
 
 function moveMove(e) {
