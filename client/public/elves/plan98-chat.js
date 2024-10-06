@@ -32,7 +32,7 @@ $.draw(target => {
     </div>
     <form class="send-form" data-command="enter">
       <button data-tooltip="send" class="send" type="submit" data-command="enter">
-        <sl-icon name="arrow-up"></sl-icon>
+        <sl-icon name="arrow-up-circle"></sl-icon>
       </button>
       <div class="text-well">
         <textarea name="message" placeholder="Today..."></textarea>

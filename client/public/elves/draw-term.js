@@ -515,7 +515,6 @@ function drag(event) {
   const panX = getComputedStyle(event.target).getPropertyValue("--pan-x") || 0;
   const panY = getComputedStyle(event.target).getPropertyValue("--pan-y") || 0;
 
-  debugger
   if (lastX !== undefined && lastY !== undefined) {
     const movementX = clientX - lastX;
     const movementY = clientY - lastY;

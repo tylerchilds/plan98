@@ -179,18 +179,18 @@ $.draw((target) => {
           File
         </button>
         <div class="menu-actions" data-menu="file">
-          <button data-publish>Publish</button>
+          <button data-publish>Save</button>
           <button data-print>Print</button>
         </div>
       </div>
       <div class="menu-item">
         <button data-menu-target="view" class="${activeMenu === 'view'?'active':''}">
-          Mode
+          View
         </button>
         <div class="menu-actions" data-menu="view">
-          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Edit</button>
-          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Preview</button>
-          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Present</button>
+          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Rewrite</button>
+          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Review</button>
+          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Rehearse</button>
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>

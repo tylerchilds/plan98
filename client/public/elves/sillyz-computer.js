@@ -105,6 +105,9 @@ $.draw(target => {
 
   if(error) {
     return `
+      <a ${resourceActions ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+        <span><sl-icon name="info-circle"></sl-icon></span> About
+      </a>
       <div class="resource">
         <div style="text-align: center;">
           <div class="error">
@@ -118,6 +121,9 @@ $.draw(target => {
 
   if(!resourceLevel) {
     return `
+      <a ${resourceActions ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+        <span><sl-icon name="info-circle"></sl-icon></span> About
+      </a>
       <div class="resource">
         ${ resourceActions ? resourceMenu(resourceActions) : `<button data-create="${src}" aria-label="create"></button>` }
       </div>
@@ -136,7 +142,21 @@ $.draw(target => {
       <plan9-zune></plan9-zune>
     </div>
   `
-})
+}, { afterUpdate })
+
+function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+      const iconParent = ogIcon.parentNode
+      const icon = document.createElement('sl-icon')
+      icon.name = ogIcon.name
+      ogIcon.remove()
+      iconParent.appendChild(icon)
+    })
+  }
+}
+
+
 
 function mount(target, src) {
   if(target.mounted) return
@@ -231,6 +251,33 @@ $.style(`
     animation: &-fade-in ease-in-out 1000ms forwards;
   }
 
+  & .about-out {
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    background: black;
+    padding: 1rem;
+    color: white;
+    text-decoration: none;
+    display: inline-grid;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    line-height: 1;
+    animation: &-about-out 1000ms ease-in-out forwards 7777ms;
+  }
+
+  @keyframes &-about-out {
+    0% {
+      opacity: 1;
+      pointer-events: all;
+    }
+    100% {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+
   & .error {
     color: black;
     background: white;
@@ -290,6 +337,7 @@ $.style(`
     place-items: center;
     width: 100%;
     height: 100%;
+    position: relative;
   }
 
   & .synthia button {
