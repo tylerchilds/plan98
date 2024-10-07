@@ -3,9 +3,18 @@ import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { actionScript } from './action-script.js'
 
+// synthia is eval and must be stopped
+const synthia = eval
+// welcome to the every letter formation
+const nonce = `<div class="nonce"></div>`
+
 $zune.teach({ menu: false })
 
-const $ = tag('sillyz-computer')
+const $ = tag('sillyz-computer', {
+  bookmarks: [],
+  bookmarkIndex: null,
+  code: ''
+})
 
 function newComputerActions(src) {
   return [
@@ -167,9 +176,17 @@ function mount(target, src) {
       $.teach({ resourceActions: page(src) })
     })
   }
+
+  const code = target.getAttribute('code')
+  if(code) {
+    requestIdleCallback(() => {
+      $.teach({ code })
+    })
+  }
 }
 
 function resourceMenu(actions) {
+  const { bookmarks, code, bookmarkIndex } = $.learn()
   const list = actions.map((data) => {
     const attributes = Object.keys(data).map(key => {
       return `data-${key}="${data[key]}"`
@@ -185,7 +202,33 @@ function resourceMenu(actions) {
 
   return `
     <div class="synthia">
-      <input>
+      <div class="title-bar">
+        <button data-calculate class="synthia-action">
+          <sl-icon name="calculator"></sl-icon>
+        </button>
+        <input name="synthia" value="${code}"autocomplete="off" type="text">
+        <button data-voice class="synthia-action">
+          <sl-icon name="mic"></sl-icon>
+        </button>
+        <button data-camera class="synthia-action">
+          <sl-icon name="camera"></sl-icon>
+        </button>
+      </div>
+      <div class="suggestion-box">
+        ${bookmarks.map((x, i) => {
+
+          return `
+            <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''}" data-url="${x.url}" data-index="${i}">
+              <div class="icon">
+                ${x.image?`<img src="${x.image}" />`:`${nonce}`}
+              </div>
+              <div class="name">
+                ${x.name}
+              </div>
+            </button>
+          `
+        }).join('')}
+      </div>
       <div class="resource-actions">
         <div>
           <button data-no-actions> 
@@ -198,8 +241,57 @@ function resourceMenu(actions) {
   `
 }
 
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', '[name="synthia"]', event => {
+  const { bookmarksLength, bookmarkIndex } = $.learn()
+  if(event.keyCode === down) {
+    event.preventDefault()
+    const nextIndex = (bookmarkIndex === null) ? 0 : bookmarkIndex + 1
+    if(nextIndex >= bookmarksLength -1) return
+    $.teach({ bookmarkIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === up) {
+    event.preventDefault()
+    const nextIndex = (bookmarkIndex === null) ? bookmarksLength - 2 : bookmarkIndex - 1
+    if(nextIndex < 0) return
+    $.teach({ bookmarkIndex: nextIndex })
+    return
+  }
+
+  if(event.keyCode === enter && bookmarkIndex !== null) {
+    event.preventDefault()
+    const { bookmarks, bookmarkIndex } = $.learn()
+    const item = documents.find(y => {
+      return bookmarks[bookmarkIndex].ref === y.path
+    })
+
+    if(item) {
+      const { tray } = event.target.dataset
+      const url = '/app/media-plexer?src=' +item.path
+      document.activeElement.blur()
+      setState(tray, { url, focused: false })
+      return
+    }
+  }
+})
+
+$.when('keyup', '[name="synthia"]', event => {
+  $.teach({ code: event.target.value })
+})
+
+
 $.when('click', '[data-no-actions]', (event) => {
   $.teach({ resourceActions: null })
+})
+
+$.when('click', '[data-calculate]', (event) => {
+  const { code } = $.learn()
+  const response = synthia(code)
+  $.teach({ bookmarks: [{ name: response }] })
 })
 
 $.when('click', '[data-create]', (event) => {
@@ -261,8 +353,10 @@ $.style(`
     color: white;
     text-decoration: none;
     display: inline-grid;
-    grid-template-columns: auto 1fr;
-    gap: 1rem;
+    font-size: 1rem;
+    padding: .5rem;
+    grid-template-columns: auto 1fr auto;
+    gap: .5rem;
     line-height: 1;
     animation: &-about-out 1000ms ease-in-out forwards 7777ms;
   }
@@ -309,27 +403,37 @@ $.style(`
     grid-area: midship;
   }
 
+  & .nonce,
   & [data-create] {
     background: lemonchiffon;
     border: none;
     border-radius: none;
     box-shadow: var(--shadow);
-    padding: 2rem;
     max-width: 10rem;
     aspect-ratio: 1;
     width: 100%;
+    position: relative;
+    min-height: 2rem;
+    min-width: 2rem;
   }
 
+  & .nonce::before,
   & [data-create]::before{
+    position: absolute;
+    inset: 0%;
     content: '';
     display: block;
-    width: 100%;
+    width: 60%;
     aspect-ratio: 1;
     background-color: #E83FB8;
     border-radius: 100%;
     max-width: 100%;
     max-height: 100%;
     margin: auto;
+  }
+
+  & .nonce {
+    box-shadow: none;
   }
 
   & .resource {
@@ -340,7 +444,7 @@ $.style(`
     position: relative;
   }
 
-  & .synthia button {
+  & .synthia .resource-actions button {
     font-weight: 100;
     color: rgba(0,0,0,.65);
     font-size: 2rem;
@@ -352,8 +456,8 @@ $.style(`
     text-align: left;
   }
 
-  & .synthia button:hover,
-  & .synthia button:focus {
+  & .synthia .resource-actions button:hover,
+  & .synthia .resource-actions button:focus {
     color: rgba(0,0,0,1);
   }
 }
@@ -364,6 +468,7 @@ $.style(`
     background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(150px);
     z-index: 9000;
+    padding: 1rem 0 0;
   }
 
   & .synthia:not(:empty) {
@@ -375,13 +480,99 @@ $.style(`
     background: white;
   }
 
-  & .synthia input {
-    margin-bottom: 1rem;
-  }
-
   & .resource-actions {
     padding: 0 1rem;
   }
+
+  & .suggestion-box {
+    position: absolute;
+    inset: 3rem 0 0;
+    overflow: auto;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    pointer-events: none;
+  }
+
+  & .suggestion-box .auto-item {
+    transition: all 100ms ease-in-out;
+    padding: .5rem;
+    width: 100%;
+    text-align: left;
+    max-width: 100%;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto 1fr;
+    pointer-events: all;
+    border: none;
+  }
+
+  & .suggestion-box .auto-item:focus,
+  & .suggestion-box .auto-item:hover {
+    background-color: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    color: white;
+  }
+
+  & .suggestion-box .auto-item.active {
+    color: white;
+    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
+    background-color: var(--button-color, dodgerblue);
+  }
+
+
+  & .title-bar {
+    padding: 5px 4px;
+    font-size: 1rem;
+    height: 2rem;
+    min-height: 2rem;
+    line-height: 1;
+    color: white;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    color: rgba(0,0,0,.85);
+    background: rgba(255,255,255,.85);
+    gap: 5px;
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    overflow-x: auto;
+    padding: 0 5px;
+  }
+
+  & .title-bar input {
+    border: 1px solid rgba(0,0,0,.85);
+    border-radius: 0;
+    background: transparent;
+    color: rgba(0,0,0,.85);
+    width: 100%;
+    padding: 0 4px 0;
+    height: 100%;
+  }
+
+  & .title-bar input:focus {
+    column-span: 2;
+  }
+
+  & .synthia-action {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 5px;
+    opacity: .65;
+    transition: opacity 100ms;
+  }
+
+  & .synthia-action:hover,
+  & .synthia-action:focus {
+    opacity: 1;
+  }
+
+
 `)
 
 
@@ -418,5 +609,3 @@ function handleSuperKey(event) {
     }
   }
 }
-
-
