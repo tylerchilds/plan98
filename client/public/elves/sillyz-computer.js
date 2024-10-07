@@ -106,6 +106,10 @@ $.when('click', '[data-ok]', (event) => {
   $.teach({ error: null })
 })
 
+$.when('click', '.synthia-clear', (event) => {
+  $.teach({ code: '' })
+})
+
 $.draw(target => {
   const error = $.learn().error || target.getAttribute('error')
   const src = target.getAttribute('src') || '/404'
@@ -186,7 +190,7 @@ function mount(target, src) {
 }
 
 function resourceMenu(actions) {
-  const { bookmarks, code, calculation, bookmarkIndex } = $.learn()
+  const { bookmarks, code, calculation, bookmarkIndex, promptHeight } = $.learn()
   const list = actions.map((data) => {
     const attributes = Object.keys(data).map(key => {
       return `data-${key}="${data[key]}"`
@@ -243,7 +247,12 @@ function resourceMenu(actions) {
         <button data-calculate class="synthia-action">
           <sl-icon name="calculator"></sl-icon>
         </button>
-        <input name="synthia" value="${code}"autocomplete="off" type="text">
+        <div class="prompt">
+          <textarea ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code}</textarea>
+          <button data-voice class="synthia-action synthia-clear">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>
+        </div>
         <button data-voice class="synthia-action">
           <sl-icon name="mic"></sl-icon>
         </button>
@@ -594,10 +603,22 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
-    overflow-x: auto;
   }
 
-  & .title-bar input {
+
+  & .title-bar .prompt {
+    position: relative;
+    z-index: 1000;
+  }
+
+  & .synthia-clear {
+    position: absolute;
+    z-index: 1000;
+    right: 0;
+    top: 3px;
+  }
+
+  & .title-bar textarea {
     border: 1px solid rgba(0,0,0,.85);
     border-radius: 0;
     background: transparent;
@@ -605,12 +626,19 @@ $.style(`
     width: 100%;
     padding: 0 4px 0;
     height: 100%;
+    resize: none;
+    line-height: 1.5;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    background: white;
   }
 
-  & .title-bar input:focus {
-    column-span: 2;
-  }
 
+  & .title-bar textarea:focus {
+    height: var(--prompt-height);
+  }
   & .synthia-action {
     background: transparent;
     border: none;
@@ -680,3 +708,7 @@ function encode(url) {
 function decode(encodedUrl) {
   return decodeURIComponent(encodedUrl.replace(/\+/g, '%20'));
 }
+
+$.when('input', 'textarea', (event) => {
+  $.teach({ promptHeight: event.target.scrollHeight })
+});
