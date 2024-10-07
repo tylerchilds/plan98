@@ -107,6 +107,7 @@ $.when('click', '[data-ok]', (event) => {
 })
 
 $.when('click', '.synthia-clear', (event) => {
+  event.target.closest($.link).querySelector('[name="synthia"]').value =''
   $.teach({ code: '' })
 })
 
@@ -248,10 +249,10 @@ function resourceMenu(actions) {
           <sl-icon name="calculator"></sl-icon>
         </button>
         <div class="prompt">
-          <textarea ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code}</textarea>
-          <button data-voice class="synthia-action synthia-clear">
+          <textarea ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
+          ${code ? `<button data-voice class="synthia-action synthia-clear">
             <sl-icon name="x-lg"></sl-icon>
-          </button>
+          </button>`:''}
         </div>
         <button data-voice class="synthia-action">
           <sl-icon name="mic"></sl-icon>
