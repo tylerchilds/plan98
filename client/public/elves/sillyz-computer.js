@@ -180,13 +180,13 @@ function mount(target, src) {
   const code = target.getAttribute('code')
   if(code) {
     requestIdleCallback(() => {
-      $.teach({ code })
+      $.teach({ code, resourceActions: [] })
     })
   }
 }
 
 function resourceMenu(actions) {
-  const { bookmarks, code, bookmarkIndex } = $.learn()
+  const { bookmarks, code, calculation, bookmarkIndex } = $.learn()
   const list = actions.map((data) => {
     const attributes = Object.keys(data).map(key => {
       return `data-${key}="${data[key]}"`
@@ -199,6 +199,43 @@ function resourceMenu(actions) {
       </div>
     `
   }).join('')
+
+  const view = (code && calculation) || (code && bookmarks)
+   ? `
+      <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
+          return `
+            <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''}" data-url="${x.url}" data-index="${i}">
+              <div class="icon">
+                ${x.image?`<img src="${x.image}" />`:`${nonce}`}
+              </div>
+              <div class="name">
+                ${x.name}
+              </div>
+            </button>
+          `
+        }).join('')}</div>
+      <div class="instructions">
+        <p>Nothing to see... yet.</p>
+
+        <p>Perform a calculation in the box above by clicking the calculator icon to the left of it.</p>
+
+        <p>Alternatively, change the query to find one of your bookmarks.</p>
+
+        <p>Select the microphone icon to use voice to search</p>
+        
+        <p>Select the camera to search visually</p>
+      </div>
+    `:`
+      <div class="resource-actions">
+        <div>
+          <button data-no-actions> 
+            back
+          </button>
+        </div>
+        ${list}
+      </div>
+    </div>
+  `
 
   return `
     <div class="synthia">
@@ -214,30 +251,21 @@ function resourceMenu(actions) {
           <sl-icon name="camera"></sl-icon>
         </button>
       </div>
-      <div class="suggestion-box">
-        ${bookmarks.map((x, i) => {
+      ${view}
+    `
+}
 
-          return `
-            <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''}" data-url="${x.url}" data-index="${i}">
-              <div class="icon">
-                ${x.image?`<img src="${x.image}" />`:`${nonce}`}
-              </div>
-              <div class="name">
-                ${x.name}
-              </div>
-            </button>
-          `
-        }).join('')}
+function results(x) {
+  if(!x) return ''
+  return `
+    <button type="button" class="auto-item" data-url="${x.url}">
+      <div class="icon">
+        ${x.image?`<img src="${x.image}" />`:`${nonce}`}
       </div>
-      <div class="resource-actions">
-        <div>
-          <button data-no-actions> 
-            back
-          </button>
-        </div>
-        ${list}
+      <div class="name">
+        ${x.name}
       </div>
-    </div>
+    </button>
   `
 }
 
@@ -280,7 +308,13 @@ $.when('keydown', '[name="synthia"]', event => {
 })
 
 $.when('keyup', '[name="synthia"]', event => {
-  $.teach({ code: event.target.value })
+  const code = event.target.value
+
+  if(code) {
+  $.teach({ code, bookmarks: [] })
+  } else {
+    $.teach({ code, bookmarks: [] })
+  }
 })
 
 
@@ -288,10 +322,24 @@ $.when('click', '[data-no-actions]', (event) => {
   $.teach({ resourceActions: null })
 })
 
+$.when('click', '[data-url]', (event) => {
+  const { url } = event.target.dataset
+
+  open(url)
+})
+
+
 $.when('click', '[data-calculate]', (event) => {
   const { code } = $.learn()
   const response = synthia(code)
-  $.teach({ bookmarks: [{ name: response }] })
+
+  if(!response) {
+    $.teach({ calculation: null })
+    return
+  }
+
+  const calculation = { name: response, url: '/app/sillyz-computer?src=/app/sillyz-computer&code=' + encode(code) }
+  $.teach({ calculation })
 })
 
 $.when('click', '[data-create]', (event) => {
@@ -413,8 +461,14 @@ $.style(`
     aspect-ratio: 1;
     width: 100%;
     position: relative;
-    min-height: 2rem;
-    min-width: 2rem;
+    min-height: 1rem;
+    min-width: 1rem;
+  }
+
+  & .auto-item .icon {
+    padding: 3px 0;
+    display: grid;
+    place-items: center;
   }
 
   & .nonce::before,
@@ -468,7 +522,6 @@ $.style(`
     background: rgba(0, 0, 0, 1);
     backdrop-filter: blur(150px);
     z-index: 9000;
-    padding: 1rem 0 0;
   }
 
   & .synthia:not(:empty) {
@@ -478,15 +531,16 @@ $.style(`
     width: 100%;
     height: 100%;
     background: white;
+    padding: 1rem 0;
   }
 
   & .resource-actions {
-    padding: 0 1rem;
+    padding: 1rem;
   }
 
   & .suggestion-box {
     position: absolute;
-    inset: 3rem 0 0;
+    inset: 4rem 0 0;
     overflow: auto;
     z-index: 10;
     display: flex;
@@ -522,7 +576,7 @@ $.style(`
 
 
   & .title-bar {
-    padding: 5px 4px;
+    padding: 2px 5px;
     font-size: 1rem;
     height: 2rem;
     min-height: 2rem;
@@ -541,7 +595,6 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     overflow-x: auto;
-    padding: 0 5px;
   }
 
   & .title-bar input {
@@ -562,9 +615,12 @@ $.style(`
     background: transparent;
     border: none;
     border-radius: 0;
-    padding: 5px;
+    padding: 3px 5px;
     opacity: .65;
     transition: opacity 100ms;
+    border-radius: 100%;
+    display: grid;
+    place-items: center;
   }
 
   & .synthia-action:hover,
@@ -572,7 +628,14 @@ $.style(`
     opacity: 1;
   }
 
+  & .suggestion-box:empty + .instructions {
+    display: block;
+  }
 
+  & .instructions {
+    display: none;
+    padding: 1rem;
+  }
 `)
 
 
@@ -608,4 +671,12 @@ function handleSuperKey(event) {
       node.insertAdjacentHTML("beforeend", `<sillyz-computer src="/app/hyper-script?src=/public/sagas/my/${today}.saga"></sillyz-computer>`)
     }
   }
+}
+
+function encode(url) {
+  return encodeURIComponent(url).replace(/%20/g, '+');
+}
+
+function decode(encodedUrl) {
+  return decodeURIComponent(encodedUrl.replace(/\+/g, '%20'));
 }

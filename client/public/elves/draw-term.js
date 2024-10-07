@@ -888,9 +888,12 @@ $.style(`
     border: none;
     border-radius: 0;
     color: white;
-    padding: 3px 5px 0;
+    padding: 3px 5px;
     opacity: .65;
     transition: opacity 100ms;
+    border-radius: 100%;
+    display: grid;
+    place-items: center;
   }
 
   & .tray-action:hover,
