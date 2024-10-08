@@ -561,7 +561,7 @@ $.style(`
 
   & .suggestion-box {
     position: absolute;
-    bottom: 3rem;
+    bottom: 2rem;
     left: 0;
     right: 0;
     overflow: auto;
@@ -610,7 +610,7 @@ $.style(`
     display: grid;
     grid-template-columns: auto 1fr auto auto;
     color: rgba(0,0,0,.85);
-    background: rgba(255,255,255,.85);
+    background: rgba(255,255,255,1);
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -618,6 +618,10 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
   }
 
 
