@@ -223,7 +223,7 @@ function resourceMenu(actions) {
           </div>
           ${list}
         </div>
-        <div class="instructions">
+        <div class="wrapper">
           <p>Perform a calculation by entering a formula below and then click the calculator icon to the left of it.</p>
 
           <p>Alternatively, use the formula as a query to find one of your bookmarks.</p>
@@ -540,6 +540,7 @@ $.style(`
     border-radius: none;
     display: inline-block;
     margin: 1rem 0;
+    padding: 0;
     text-align: left;
   }
 
@@ -687,10 +688,6 @@ $.style(`
   & .synthia-action:hover,
   & .synthia-action:focus {
     color: rgba(0,0,0,1);
-  }
-
-  & .instructions {
-    padding: 1rem;
   }
 `)
 
