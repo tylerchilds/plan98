@@ -74,7 +74,7 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   }).join('')
 }
 
-const $ = elf('plan98-park', {
+const $ = elf('generic-park', {
   suggestIndex: null,
   suggestions: [],
   suggesttionsLength: 0,
@@ -344,7 +344,7 @@ function preview(target) {
 
   if(!preview) {
     target.dataset.last = null
-    target.innerHTML = ''
+    target.innerHTML = '<a href="javascript:self.history.back()">back</a>'
     return
   }
 
@@ -598,6 +598,21 @@ $.style(`
     overflow: hidden;
   }
 
+  & [href="javascript:self.history.back()"] {
+    text-decoration: none;
+    color: rgba(255,255,255,.85);
+    text-shadow: 1px 1px 1px rgba(0,0,0,5);
+    border: none;
+    font-weight: 100;
+    font-size: 2rem;
+    background: transparent;
+    border-radius: none;
+    display: inline-block;
+    margin: 1rem;
+    text-align: left;
+
+  }
+
   & .a-enter-vr, .a-enter-ar {
     display: none;
   }
@@ -643,8 +658,7 @@ $.style(`
     width: 100%;
     opacity: 0;
     aspect-ratio: 16 / 9;
-    border: 1px solid white;
-    box-shadow: 1px 1px black;
+    pointer-events: all;
   }
 
   & .preview iframe {

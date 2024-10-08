@@ -62,6 +62,18 @@ const PROP_TIME = Symbol('p-time')
 // actor embeds rich hyper media content
 const ACTOR_TIME = Symbol('a-time')
 
+export function r($, path, options={}) {
+  let string = $.learn()[path] || ''
+  fetch(path)
+    .then(res => res.text())
+    .then(saga => {
+      string = render(saga)
+      $.teach({ [path]: string })
+    })
+
+  return string
+}
+
 export function render(script) {
   // nothing in, nothing out
   if(!script) return ''

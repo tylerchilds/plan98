@@ -538,6 +538,23 @@ button {
 .screenplay xml-html {
   overflow: auto;
   max-height: 100%;
+
+}
+.screenplay xml-html { display: block; overflow: auto; }
+sillonious-brand > xml-html {
+  height: 100%;
+}
+
+.screenplay xml-html > a {
+  display: block;
+  margin: 1rem 0;
+}
+
+.screenplay hypertext-action {
+  display: block;
+  margin: 1rem auto;
+  padding: 0 1rem;
+  place-self: start
 }
 
 .call-to-action {

@@ -11,6 +11,7 @@ Learn the language of the E.L.F. and you will be blessed with their abilities.
 */
 
 import elf from '@silly/tag'
+import { r } from '@sillonious/saga'
 
 const $ = elf('saga-about')
 
@@ -18,48 +19,39 @@ $.draw(() => {
 
   return `
     <a href="javascript:history.back()" style="float: left;">
-
-      back
-
+      ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.back.saga')}
     </a>
 
-
     <h1>
-
-      More languages coming soon!
-
+      ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.header.saga')}
     </h1>
 
     <a href="/sagas/sillyz.computer/en-us/about.saga">
-
-      English
-
+      ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.english.saga')}
     </a>
 
     <a href="/app/code-module?src=/public/elves/saga-about.js">
-
-      JavaScript (en-us)
-
+      ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.js.saga')}
     </a>
 
     <hr>
 
     <div class="fine-print">
       <p>
-        this internet experience is founded on performance, security, and transparency as the three pillars. the foundation (plan98) is permissible in multiple license formats, but the live installation is protected under the MIT license under legal advice provided to the author. the spirit of the project is personal access to all knowledge for all persons, a form of memory expansion: a memex.
+        ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.memex.saga')}
       </p>
 
       <p>
-        all artists retain full ownership and copyrights to their material, processes, and products. their works are not and will not be used to train generative models for deriving derivative works.
+        ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.privacy.saga')}
       </p>
 
       <p>
-        for questions comments or concerns, contact player one
+        ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.terms.saga')}
       </p>
     </div>
 
-    <a href="mailto:player1@sillyz.computer">
-      player1@sillyz.computer
+    <a href="${r($, '/public/sagas/sillyz.computer/en-us/saga-about.mailto.href.saga')}">
+      ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.mailto.label.saga')}
     </a>
   `
 

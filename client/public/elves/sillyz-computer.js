@@ -131,6 +131,7 @@ $.draw(target => {
           <button data-ok data-create="${src}" aria-label="create"></button>
         </div>
       </div>
+      ${computer()}
     `
   }
 
@@ -142,11 +143,15 @@ $.draw(target => {
       <div class="resource">
         ${ resourceActions ? resourceMenu(resourceActions) : `<button data-create="${src}" aria-label="create"></button>` }
       </div>
+      ${computer()}
     `
   }
 
   if(lookup[target.id]) {
-    return `<middle-earth id="${target.id}"></middle-earth>`
+    return `
+      <middle-earth id="${target.id}"></middle-earth>
+      ${computer()}
+    `
   }
 
   return `
@@ -156,6 +161,7 @@ $.draw(target => {
     <div class="top">
       <plan9-zune></plan9-zune>
     </div>
+    ${computer()}
   `
 }, { afterUpdate })
 
@@ -227,37 +233,43 @@ function resourceMenu(actions) {
           <p>Select the camera to search visually</p>
         </div>
       </div>
-
-      <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
-        return `
-          <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''} data-url="${x.url}" data-index="${i}">
-            <div class="icon">
-              ${x.image?`<img src="${x.image}" />`:`${nonce}`}
-            </div>
-            <div class="name">
-              ${x.name}
-            </div>
-          </button>
-        `
-      }).join('')}</div>
-      <div class="title-bar">
-        <button data-calculate class="synthia-action">
-          <sl-icon name="calculator"></sl-icon>
-        </button>
-        <div class="prompt">
-          <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
-          ${code ? `<button data-voice class="synthia-action synthia-clear">
-            <sl-icon name="x-lg"></sl-icon>
-          </button>`:''}
-        </div>
-        <button data-voice class="synthia-action">
-          <sl-icon name="mic"></sl-icon>
-        </button>
-        <button data-camera class="synthia-action">
-          <sl-icon name="camera"></sl-icon>
-        </button>
-      </div>
     `
+}
+
+function computer() {
+  const { promptHeight, calculation, bookmarks, code } = $.learn()
+  return `
+    <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
+      return `
+        <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''} data-url="${x.url}" data-index="${i}">
+          <div class="icon">
+            ${x.image?`<img src="${x.image}" />`:`${nonce}`}
+          </div>
+          <div class="name">
+            ${x.name}
+          </div>
+        </button>
+      `
+    }).join('')}</div>
+
+    <div class="title-bar">
+      <button data-calculate class="synthia-action">
+        <sl-icon name="calculator"></sl-icon>
+      </button>
+      <div class="prompt">
+        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
+        ${code ? `<button data-voice class="synthia-action synthia-clear">
+          <sl-icon name="x-lg"></sl-icon>
+        </button>`:''}
+      </div>
+      <button data-voice class="synthia-action">
+        <sl-icon name="mic"></sl-icon>
+      </button>
+      <button data-camera class="synthia-action">
+        <sl-icon name="camera"></sl-icon>
+      </button>
+    </div>
+  `
 }
 
 function results(x) {
@@ -460,7 +472,7 @@ $.style(`
 
   & .top {
     position: absolute;
-    inset: 0 0 3rem 0;
+    inset: 0 0 5rem 0;
     grid-area: midship;
     z-index: 2;
     pointer-events: none;
@@ -468,7 +480,7 @@ $.style(`
 
   & .bottom {
     position: absolute;
-    inset: 2rem 0 0 0;
+    inset: 2rem 0;
     grid-area: midship;
   }
 

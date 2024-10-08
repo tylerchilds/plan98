@@ -293,7 +293,7 @@ async function router(request, context) {
     const src = '/' + pathname.split('/x/elf/')[1] + '?' + parameters.toString().replace('%2F', '/')
     const file = await remix(request, {
       src,
-      tag: 'plan98-park',
+      tag: 'generic-park',
     }, business)
 
     if(file) {
