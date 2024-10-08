@@ -5,6 +5,7 @@ import 'gun/sea'
 
 const Gun = window.Gun
 
+let lastPost = ''
 const gun = Gun(['https://gun.1998.social/gun']);
 const user = gun.user().recall({ sessionStorage: true })
 
@@ -15,6 +16,10 @@ const $ = module('my-journal', {
   pass: '',
   post: ''
 })
+
+export function bookmarks() {
+
+}
 
 gun.on('auth', () => {
   $.teach({ authenticated: true })
@@ -78,9 +83,17 @@ $.draw(target => {
       ${authenticated ? regular : fakie}
     </div>
   `
-})
+}, { beforeUpdate, afterUpdate })
 
-$.when('change', '.keyable', (event) => {
+function beforeUpdate(target) {
+  saveCursor(target) // first things first
+}
+
+function afterUpdate(target) {
+  replaceCursor(target) // first things first
+}
+
+$.when('input', '.keyable', (event) => {
   event.preventDefault()
   const { name, value } = event.target
   $.teach({[name]: value})
@@ -95,9 +108,14 @@ $.when('click', '#signout', (event) => {
 $.when('click', '#signup', (event) => {
   event.preventDefault()
   const { alias, pass } = $.learn()
-  user.create(alias, pass)
-  user.auth(alias, pass)
-  $.teach({ pass: '' })
+  user.create(alias, pass, function createdCallback(ack) {
+    console.log(ack)
+    user.auth(alias, pass, function authenticatedCallback(ack) {
+      console.log(ack)
+      $.teach({ pass: '' })
+    })
+  })
+
 })
 
 $.when('click', '#signin', (event) => {
@@ -110,9 +128,39 @@ $.when('click', '#signin', (event) => {
 $.when('submit', '#post', (event) => {
   event.preventDefault()
   const { post } = $.learn()
-  user.get('journal').set(post, (a, b,c) => {
-    $.teach({ post: '' }) })
+  lastPost = post
+  $.teach({ post: '' })
+  console.log(lastPost)
+  user.get('journal').set(lastPost, (a, b,c) => {
+  })
 })
+
+const tags = ['TEXTAREA', 'INPUT']
+let sel = []
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.paused = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  } else {
+    target.dataset.paused = null
+  }
+}
+
+function replaceCursor(target) {
+  const paused = target.querySelector(`[name="${target.dataset.paused}"]`)
+  
+  if(paused) {
+    paused.focus()
+
+    if(tags.includes(paused.tagName)) {
+      paused.selectionStart = sel[0];
+      paused.selectionEnd = sel[1];
+    }
+  }
+}
 
 $.style(`
   &::before {

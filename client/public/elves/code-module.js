@@ -33,10 +33,6 @@ $.when('click', '.preview', (event) => {
   const src = event.target.closest($.link).getAttribute('src')
   self.open(src, '_blank')
 })
-$.when('click', '.privatize', (event) => {
-  // use this function to encrypt local copies
-  // should only be visible when end 2 end encryptable
-})
 $.when('click', '.publish', (event) => {
   const { file, src } = sourceFile(event.target)
 
@@ -83,9 +79,15 @@ $.draw(target => {
             File
           </button>
           <div class="menu-actions" data-menu="file">
-            <button class="preview" data-src="${src}">Preview</button>
-            <button class="privatize">Privatize</button>
-            <button class="publish">Publish</button>
+            <button class="publish">Save</button>
+          </div>
+        </div>
+        <div class="menu-item">
+          <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+            View
+          </button>
+          <div class="menu-actions" data-menu="file">
+            <button class="preview" data-src="${src}">Raw</button>
           </div>
         </div>
     `

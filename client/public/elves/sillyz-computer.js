@@ -2,6 +2,7 @@ import tag from '@silly/tag'
 import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { actionScript } from './action-script.js'
+import { bookmarks } from './my-journal.js'
 
 // synthia is eval and must be stopped
 const synthia = eval
@@ -19,7 +20,7 @@ const $ = tag('sillyz-computer', {
 function newComputerActions(src) {
   return [
     {
-      text: 'window',
+      text: 'pane',
       action: 'low',
       script: import.meta.url,
       src
@@ -108,7 +109,7 @@ $.when('click', '[data-ok]', (event) => {
 
 $.when('click', '.synthia-clear', (event) => {
   event.target.closest($.link).querySelector('[name="synthia"]').value =''
-  $.teach({ code: '' })
+  $.teach({ code: '', bookmarks: [], calculation: null, error: false })
 })
 
 $.draw(target => {
@@ -205,51 +206,46 @@ function resourceMenu(actions) {
     `
   }).join('')
 
-  const view = (code && calculation) || (code && bookmarks)
-   ? `
-      <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
-          return `
-            <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''}" data-url="${x.url}" data-index="${i}">
-              <div class="icon">
-                ${x.image?`<img src="${x.image}" />`:`${nonce}`}
-              </div>
-              <div class="name">
-                ${x.name}
-              </div>
-            </button>
-          `
-        }).join('')}</div>
-      <div class="instructions">
-        <p>Nothing to see... yet.</p>
-
-        <p>Perform a calculation in the box above by clicking the calculator icon to the left of it.</p>
-
-        <p>Alternatively, change the query to find one of your bookmarks.</p>
-
-        <p>Select the microphone icon to use voice to search</p>
-        
-        <p>Select the camera to search visually</p>
-      </div>
-    `:`
-      <div class="resource-actions">
-        <div>
-          <button data-no-actions> 
-            back
-          </button>
-        </div>
-        ${list}
-      </div>
-    </div>
-  `
-
   return `
     <div class="synthia">
+      <div class="top-column">
+        <div class="resource-actions wrapper">
+          <div>
+            <button data-no-actions> 
+              back
+            </button>
+          </div>
+          ${list}
+        </div>
+        <div class="instructions">
+          <p>Perform a calculation by entering a formula below and then click the calculator icon to the left of it.</p>
+
+          <p>Alternatively, use the formula as a query to find one of your bookmarks.</p>
+
+          <p>Select the microphone icon to use voice to search</p>
+
+          <p>Select the camera to search visually</p>
+        </div>
+      </div>
+
+      <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
+        return `
+          <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''} data-url="${x.url}" data-index="${i}">
+            <div class="icon">
+              ${x.image?`<img src="${x.image}" />`:`${nonce}`}
+            </div>
+            <div class="name">
+              ${x.name}
+            </div>
+          </button>
+        `
+      }).join('')}</div>
       <div class="title-bar">
         <button data-calculate class="synthia-action">
           <sl-icon name="calculator"></sl-icon>
         </button>
         <div class="prompt">
-          <textarea ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
+          <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
           ${code ? `<button data-voice class="synthia-action synthia-clear">
             <sl-icon name="x-lg"></sl-icon>
           </button>`:''}
@@ -261,14 +257,13 @@ function resourceMenu(actions) {
           <sl-icon name="camera"></sl-icon>
         </button>
       </div>
-      ${view}
     `
 }
 
 function results(x) {
   if(!x) return ''
   return `
-    <button type="button" class="auto-item" data-url="${x.url}">
+    <button type="button" class="auto-item ${x.error ? 'calculation-error':'' }" data-url="${x.url}">
       <div class="icon">
         ${x.image?`<img src="${x.image}" />`:`${nonce}`}
       </div>
@@ -303,9 +298,7 @@ $.when('keydown', '[name="synthia"]', event => {
   if(event.keyCode === enter && bookmarkIndex !== null) {
     event.preventDefault()
     const { bookmarks, bookmarkIndex } = $.learn()
-    const item = documents.find(y => {
-      return bookmarks[bookmarkIndex].ref === y.path
-    })
+    const item = bookmarks[bookmarkIndex]
 
     if(item) {
       const { tray } = event.target.dataset
@@ -335,22 +328,29 @@ $.when('click', '[data-no-actions]', (event) => {
 $.when('click', '[data-url]', (event) => {
   const { url } = event.target.dataset
 
-  open(url)
+  if(url) {
+    open(url)
+  }
 })
 
 
 $.when('click', '[data-calculate]', (event) => {
   const { code } = $.learn()
-  const response = synthia(code)
 
-  if(!response) {
-    $.teach({ calculation: null })
-    return
+  try {
+    let response = synthia(code)
+
+    if(!response) {
+      $.teach({ calculation: null, error: false })
+      return
+    }
+
+    const calculation = { name: response, url: '/app/sillyz-computer?src=/app/sillyz-computer&code=' + encode(code) }
+    $.teach({ calculation, error: false })
+  } catch(e) {
+    $.teach({ calculation: { name: e.message, error: true } })
   }
-
-  const calculation = { name: response, url: '/app/sillyz-computer?src=/app/sillyz-computer&code=' + encode(code) }
-  $.teach({ calculation })
-})
+  })
 
 $.when('click', '[data-create]', (event) => {
   const src = event.target.dataset.create
@@ -428,6 +428,17 @@ $.style(`
       opacity: 0;
       pointer-events: none;
     }
+  }
+
+  & .suggestion-box .auto-item.calculation-error {
+    background: firebrick;
+    color: rgba(255,255,255,.85);
+  }
+
+  & .suggestion-box .auto-item.calculation-error:hover,
+  & .suggestion-box .auto-item.calculation-error:focus {
+    background: firebrick;
+    color: rgba(255,255,255,.85);
   }
 
   & .error {
@@ -544,13 +555,15 @@ $.style(`
     padding: 1rem 0;
   }
 
-  & .resource-actions {
-    padding: 1rem;
+  & .wrapper {
+    padding: 0 1rem;
   }
 
   & .suggestion-box {
     position: absolute;
-    inset: 4rem 0 0;
+    bottom: 3rem;
+    left: 0;
+    right: 0;
     overflow: auto;
     z-index: 10;
     display: flex;
@@ -586,6 +599,7 @@ $.style(`
 
 
   & .title-bar {
+    margin-top: auto;
     padding: 2px 5px;
     font-size: 1rem;
     height: 2rem;
@@ -632,8 +646,10 @@ $.style(`
     position: absolute;
     left: 0;
     right: 0;
-    top: 0;
+    bottom: 0;
     background: white;
+    min-height: 28px;
+    max-height: 50vh;
   }
 
 
@@ -657,12 +673,7 @@ $.style(`
     opacity: 1;
   }
 
-  & .suggestion-box:empty + .instructions {
-    display: block;
-  }
-
   & .instructions {
-    display: none;
     padding: 1rem;
   }
 `)

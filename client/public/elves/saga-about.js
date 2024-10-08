@@ -17,18 +17,18 @@ const $ = elf('saga-about')
 $.draw(() => {
 
   return `
+    <a href="javascript:history.back()" style="float: left;">
+
+      back
+
+    </a>
+
 
     <h1>
 
       More languages coming soon!
 
     </h1>
-
-    <a href="javascript:history.back()">
-
-      Back
-
-    </a>
 
     <a href="/sagas/sillyz.computer/en-us/about.saga">
 
