@@ -677,16 +677,16 @@ $.style(`
     border: none;
     border-radius: 0;
     padding: 3px 5px;
-    opacity: .65;
     transition: opacity 100ms;
     border-radius: 100%;
     display: grid;
     place-items: center;
+    color: rgba(0,0,0,.65);
   }
 
   & .synthia-action:hover,
   & .synthia-action:focus {
-    opacity: 1;
+    color: rgba(0,0,0,1);
   }
 
   & .instructions {
