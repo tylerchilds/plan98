@@ -64,6 +64,7 @@ const panels = {
   read: 'read',
   // perform to have a guide in real-time
   perform: 'perform',
+  rewind: 'rewind',
   play: 'play',
 }
 
@@ -75,7 +76,7 @@ const notHiddenChildren = `:not(${hiddenChildren})`
 function countShots(instructions) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = hyperSanitizer(instructions)
-  const shotList = Array.from(wrapper.children[0].children).filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
+  const shotList = Array.from(wrapper.querySelector('xml-html').children).filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   return shotList.length - 1
 }
@@ -86,8 +87,14 @@ const $ = module('hyper-script', {
   file: pitch,
   activePanel: window.location.hash?.split('#')[1] || panels.write,
   activeShot: 0,
-  shotCount: countShots(pitch)
+  shotCount: countShots(pitch),
+  rewinding: false,
 })
+
+setInterval(function rewindMaybe(){
+  const { rewinding } = $.learn()
+  if(rewinding) rewindForSure()
+}, 1000)
 
 $.draw((target) => {
   const { id } = target
@@ -139,6 +146,24 @@ $.draw((target) => {
         </div>
       `
     },
+    [panels.rewind]: () => {
+      const start = activeShot
+      const end = activeShot + 1
+      const html = hyperSanitizer(file)
+      const motion = getMotion(html, { active: activeShot, forwards: false, start, end })
+      return `
+        <div name="rewind">
+          <div name="theater">
+            <div name="screen">
+              <div name="stage">
+                ${motion}
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    },
+
     [panels.play]: () => `
       <div name="play">
         ${play}
@@ -191,6 +216,7 @@ $.draw((target) => {
           <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Rewrite</button>
           <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Review</button>
           <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Rehearse</button>
+          <button class="${activePanel === panels.rewind ? 'active' : ''}" data-rewind>Rewind</button>
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>
@@ -272,7 +298,11 @@ $.when('input', '[name="typewriter"]', (event) => {
 })
 
 $.when('click', '[data-read]', (event) => {
-  $.teach({ nextPanel: panels.read, activeMenu: null })
+  $.teach({
+    nextPanel: panels.read,
+    activeMenu: null,
+    rewinding: false
+  })
 })
 
 $.when('click', '[data-menu-target]', (event) => {
@@ -368,9 +398,37 @@ $.when('click', '[data-perform]', (event) => {
     shotCount: countShots(file),
     activeShot: 0,
     nextPanel: panels.perform,
-    activeMenu: null
+    activeMenu: null,
+    rewinding: false
   })
 })
+
+$.when('click', '[data-rewind]', (event) => {
+  const { file } = sourceFile(event.target)
+  const shotCount = countShots(file)
+  $.teach({
+    shotCount,
+    activeShot: shotCount,
+    nextPanel: panels.rewind,
+    activeMenu: null,
+    rewinding: true
+  })
+})
+
+function rewindForSure() {
+  const { shotCount, activeShot } = $.learn()
+  const backFrame = activeShot - 1
+  if(backFrame < 0) {
+    $.teach({
+      activeShot: shotCount,
+    })
+    return
+  }
+
+  $.teach({
+    activeShot: backFrame,
+  })
+}
 
 $.when('click', '[data-back]', (event) => {
   const { activeShot } = $.learn()
@@ -415,7 +473,7 @@ $.when('click', '[data-next]', (event) => {
 function getMotion(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
   wrapper.innerHTML = html;
-  const children = Array.from(wrapper.children[0].children)
+  const children = Array.from(wrapper.querySelector('xml-html').children)
     .filter(x => !hiddenChildren.includes(x.tagName.toLowerCase()))
 
   if(children[active]) {
@@ -452,14 +510,16 @@ function reverse(beats) {
 $.when('click', '[data-write]', (event) => {
   $.teach({
     nextPanel: panels.write,
-    activeMenu: null
+    activeMenu: null,
+    rewinding: false
   })
 })
 
 $.when('click', '[data-play]', (event) => {
   $.teach({
     nextPanel: panels.play,
-    activeMenu: null
+    activeMenu: null,
+    rewinding: false
   })
 })
 
@@ -642,6 +702,7 @@ $.style(`
   & [name="read"],
   & [name="print"],
   & [name="perform"],
+  & [name="rewind"],
   & [name="write"] {
     display: none;
   }
@@ -675,12 +736,14 @@ $.style(`
 
   & [data-panel="read"] [name="read"],
   & [data-panel="perform"] [name="perform"],
+  & [data-panel="rewind"] [name="rewind"],
   & [data-panel="write"] [name="write"] {
     display: block;
   }
 
   & [data-panel="read"] [data-read],
   & [data-panel="perform"] [data-perform],
+  & [data-panel="rewind"] [data-rewind],
   & [data-panel="write"] [data-write] {
     background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     color: white;
@@ -705,7 +768,9 @@ $.style(`
   & [name="perform"] {
     background: #54796d;
   }
-
+  & [name="rewind"] {
+    background: black;
+  }
   & iframe {
     display: block;
     border: none;
