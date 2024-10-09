@@ -160,30 +160,7 @@ function mount(target) {
   const stars = getStars(target)
   target.innerHTML = `
     <div class="actions">
-      <div class="menu-group">
-        <button data-mode="move">
-          <sl-icon name="arrows-move"></sl-icon>
-        </button>
-        <button data-mode="draw">
-          <sl-icon name="pencil"></sl-icon>
-        </button>
-        <button data-mode="chat">
-          <sl-icon name="chat"></sl-icon>
-        </button>
-        <button data-mode="camera">
-          <sl-icon name="camera-reels"></sl-icon>
-        </button>
-        <button data-mode="calendar">
-          <sl-icon name="calendar3"></sl-icon>
-        </button>
-        <button data-mode="gaming">
-          <sl-icon name="joystick"></sl-icon>
-        </button>
-        <button data-mode="cursor">
-          <sl-icon name="cursor"></sl-icon>
-        </button>
-      </div>
-      <div class="menu-item disabled">
+      <div class="menu-item">
         <button data-menu-target="zoom">
           <sl-icon name="plus-slash-minus"></sl-icon>
         </button>
@@ -202,7 +179,7 @@ function mount(target) {
           </button>
         </div>
       </div>
-
+      <div class="menu-item">
         <button data-menu-target="edit">
           <sl-icon name="watch"></sl-icon>
         </button>
@@ -220,6 +197,31 @@ function mount(target) {
             Redo
           </button>
         </div>
+      </div>
+    </div>
+    <div class="toolbelt-actions">
+      <div class="menu-group">
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
+        </button>
+        <button data-mode="draw" class="">
+          <sl-icon name="pencil"></sl-icon>
+        </button>
+        <button data-mode="chat">
+          <sl-icon name="chat"></sl-icon>
+        </button>
+        <button data-mode="camera">
+          <sl-icon name="camera-reels"></sl-icon>
+        </button>
+        <button data-mode="calendar">
+          <sl-icon name="calendar3"></sl-icon>
+        </button>
+        <button data-mode="gaming">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <button data-mode="cursor">
+          <sl-icon name="cursor"></sl-icon>
+        </button>
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
@@ -245,7 +247,7 @@ function mount(target) {
 
   canvas.width = 5000;
   canvas.height = 5000;
-  canvas.style=`background-image: ${stars}, linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5)); --pan-x-mod: ${panXmod}px; --pan-y-mod: ${panYmod}px;`
+  canvas.style=`background-image: ${stars}, linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));`
 
   target.querySelector('.workspace').appendChild(canvas)
 }
@@ -394,9 +396,10 @@ function startDraw(e) {
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let x, y;
+  const { color } = $.learn()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
     if (e.touches[0]["force"] > 0) {
-      pressure = e.touches[0]["force"]
+      pressure = e.touches[0]["force"] || 1
     }
     x = e.touches[0].clientX - rectangle.left
     y = e.touches[0].clientY - rectangle.top
@@ -410,8 +413,7 @@ function startDraw(e) {
 
   lineWidth = Math.log(pressure + 1)
   context.lineWidth = lineWidth// pressure * 50;
-
-  points.push({ x, y, lineWidth })
+  points.push({ x, y, lineWidth, color })
   drawOnCanvas(e.target, points)
 }
 
@@ -431,7 +433,6 @@ function moveDraw(e) {
   const context = canvas.getContext('2d')
   if (!isMousedown) return
 
-  console.log(e)
   let pressure = 0.1
   let x, y
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
@@ -448,6 +449,8 @@ function moveDraw(e) {
 
   // smoothen line width
   lineWidth = (Math.log(pressure + 1) * 4 * 0.2 + lineWidth * 0.8)
+
+  console.log(e, lineWidth)
   points.push({ x, y, lineWidth, color })
 
   drawOnCanvas(e.target, points);
@@ -523,15 +526,19 @@ $.style(`
   }
 
   & .stars {
-    background-position: var(--pan-x-mod,0) var(--pan-y-mod,0);
     background-color: dodgerblue;
   }
 
   & canvas {
     touch-action: none;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
   }
 
-  & .actions {
+  & .toolbelt-actions {
     z-index: 10;
     background: transparent;
     position: absolute;
@@ -540,6 +547,48 @@ $.style(`
     display: none;
     max-width: 100%;
     width: 100%;
+  }
+
+  & .actions {
+    z-index: 10;
+    background: transparent;
+    border-bottom: 1px solid rgba(255,255,255,.25);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: none;
+    background: black;
+  }
+
+  @media screen {
+    & .actions {
+      display: flex;
+    }
+  }
+
+  & .actions button {
+    background: black;
+    color: rgba(255,255,255,.85);
+    border: none;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    padding: .5rem;
+    font-size: 1rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & .actions button:focus,
+  & .actions button.active,
+  & .actions button:hover {
+    color: #fff;
+    background: #54796d;
   }
 
 
@@ -555,12 +604,12 @@ $.style(`
   }
 
   @media screen {
-    & .actions {
+    & .toolbelt-actions {
       display: flex;
     }
   }
 
-  & .actions button {
+  & .toolbelt-actions button {
     background: black;
     color: rgba(255,255,255,.85);
     border: none;
@@ -580,9 +629,9 @@ $.style(`
     display: inline-flex;
   }
 
-  & .actions button:focus,
-  & .actions button.active,
-  & .actions button:hover {
+  & .toolbelt-actions button:focus,
+  & .toolbelt-actions button.active,
+  & .toolbelt-actions button:hover {
     color: #fff;
     background: dodgerblue;
   }
@@ -606,9 +655,9 @@ $.style(`
   & .menu-actions {
     display: none;
     position: absolute;
-    right: 0;
-    top: 0;
-    transform: translateY(-100%);
+    left: 0;
+    bottom: 0;
+    transform: translateY(100%);
     background: #54796d;
   }
 
