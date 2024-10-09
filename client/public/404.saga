@@ -1,6 +1,8 @@
 { template
 engine: screenplay
 
+<saga-admin
+
 # The End
 
 @ Silly

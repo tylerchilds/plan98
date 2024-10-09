@@ -122,7 +122,7 @@ $.draw((target) => {
       const html = hyperSanitizer(file)
       return `
         <div name="read">
-          <div name="page" class="screenplay">
+          <div name="page">
             ${html}
           </div>
         </div>
@@ -153,11 +153,9 @@ $.draw((target) => {
       const motion = getMotion(html, { active: activeShot, forwards: false, start, end })
       return `
         <div name="rewind">
-          <div name="theater">
-            <div name="screen">
-              <div name="stage">
-                ${motion}
-              </div>
+          <div name="shadow-box">
+            <div name="light-box">
+              ${motion}
             </div>
           </div>
         </div>
@@ -644,7 +642,7 @@ $.style(`
     margin: 0;
   }
 
-  & [name="page"] xml-html > *${notHiddenChildren} {
+  & [name="page"] > xml-html > *${notHiddenChildren} {
     display: block;
   }
 
@@ -658,6 +656,21 @@ $.style(`
     width: 100%;
     height: 100%;
     background: rgba(255,255,255,.15);
+  }
+
+
+  & [name="shadow-box"] {
+    display: grid;
+    place-content: center;
+    height: 100%;
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  & [name="light-box"] {
+    aspect-ratio: 2.35 / 1;
+    background: white;
+    width: 100%;
   }
 
   & [name="screen"] {
@@ -1027,6 +1040,55 @@ $.style(`
     width: 100%;
     text-align: left;
   }
+
+
+  @media screen {
+    & [name="read"] .screenplay hypertext-quote::before {
+      content: '>';
+      background: gold;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      position: absolute;
+      left: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 100%;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+    }
+
+    & [name="read"] .screenplay hypertext-address::before {
+      content: '#';
+      background: mediumseagreen;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      left: 0;
+      position: absolute;
+      border-radius: 100%;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+    }
+
+    & [name="read"] .screenplay hypertext-puppet::before {
+      content: '@';
+      background: dodgerblue;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      left: 0;
+      position: absolute;
+      border-radius: 100%;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+    }
+  }
+
 
 `)
 
