@@ -89,6 +89,7 @@ async function page() {
 
           ${safeEnv('POCKETBASE_URL')}
           ${safeEnv('HEAVY_ASSET_CDN_URL')}
+          ${safeEnv('PLAN98_HOME')}
         }
       }
     </script>

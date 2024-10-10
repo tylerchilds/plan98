@@ -18,7 +18,7 @@ const $ = elf('saga-about')
 $.draw(() => {
 
   return `
-    <a href="javascript:history.back()" style="float: left;">
+    <a href="javascript:history.length===1?close():history.back()" style="float: left;">
       ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.back.saga')}
     </a>
 

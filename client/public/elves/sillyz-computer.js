@@ -2,7 +2,8 @@ import tag from '@silly/tag'
 import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { actionScript } from './action-script.js'
-import { bookmarks } from './my-journal.js'
+
+const sillyzPreferred = '/app/draw-term'
 
 // synthia is eval and must be stopped
 const synthia = eval
@@ -12,8 +13,6 @@ const nonce = `<div class="nonce"></div>`
 $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer', {
-  bookmarks: [],
-  bookmarkIndex: null,
   code: ''
 })
 
@@ -109,7 +108,6 @@ $.when('click', '[data-ok]', (event) => {
 
 $.when('click', '.synthia-clear', (event) => {
   event.target.closest($.link).querySelector('[name="synthia"]').value =''
-  $.teach({ code: '', bookmarks: [], calculation: null, error: false })
 })
 
 $.draw(target => {
@@ -141,7 +139,7 @@ $.draw(target => {
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
-        ${ resourceActions ? resourceMenu(resourceActions) : `<button data-create="${src}" aria-label="create"></button>` }
+        ${ resourceActions ? `<iframe src="${plan98.env.PLAN98_HOME || sillyzPreferred || '/app/draw-term'}"></iframe>` : `<button data-create="${src}" aria-label="create"></button>` }
       </div>
       ${computer()}
     `
@@ -198,7 +196,6 @@ function mount(target, src) {
 }
 
 function resourceMenu(actions) {
-  const { bookmarks, code, calculation, bookmarkIndex, promptHeight } = $.learn()
   const list = actions.map((data) => {
     const attributes = Object.keys(data).map(key => {
       return `data-${key}="${data[key]}"`
@@ -226,31 +223,19 @@ function resourceMenu(actions) {
         <div class="wrapper">
           <p>Perform a calculation by entering a formula below and then click the calculator icon to the left of it.</p>
 
-          <p>Alternatively, use the formula as a query to find one of your bookmarks.</p>
-
           <p>Select the microphone icon to use voice to search</p>
 
           <p>Select the camera to search visually</p>
         </div>
       </div>
-    `
+    </div>
+  `
 }
 
 function computer() {
-  const { promptHeight, calculation, bookmarks, code } = $.learn()
+  const { promptHeight, calculation, code } = $.learn()
   return `
-    <div class="suggestion-box">${results(calculation)}${bookmarks.map((x, i) => {
-      return `
-        <button type="button" class="auto-item ${bookmarkIndex === i ? 'active': ''} data-url="${x.url}" data-index="${i}">
-          <div class="icon">
-            ${x.image?`<img src="${x.image}" />`:`${nonce}`}
-          </div>
-          <div class="name">
-            ${x.name}
-          </div>
-        </button>
-      `
-    }).join('')}</div>
+    <div class="suggestion-box">${results(calculation)}</div>
 
     <div class="title-bar">
       <button data-calculate class="synthia-action">
@@ -286,49 +271,13 @@ function results(x) {
   `
 }
 
-const down = 40;
-const up = 38;
-const enter = 13;
-$.when('keydown', '[name="synthia"]', event => {
-  const { bookmarksLength, bookmarkIndex } = $.learn()
-  if(event.keyCode === down) {
-    event.preventDefault()
-    const nextIndex = (bookmarkIndex === null) ? 0 : bookmarkIndex + 1
-    if(nextIndex >= bookmarksLength -1) return
-    $.teach({ bookmarkIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === up) {
-    event.preventDefault()
-    const nextIndex = (bookmarkIndex === null) ? bookmarksLength - 2 : bookmarkIndex - 1
-    if(nextIndex < 0) return
-    $.teach({ bookmarkIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === enter && bookmarkIndex !== null) {
-    event.preventDefault()
-    const { bookmarks, bookmarkIndex } = $.learn()
-    const item = bookmarks[bookmarkIndex]
-
-    if(item) {
-      const { tray } = event.target.dataset
-      const url = '/app/media-plexer?src=' +item.path
-      document.activeElement.blur()
-      setState(tray, { url, focused: false })
-      return
-    }
-  }
-})
-
 $.when('keyup', '[name="synthia"]', event => {
   const code = event.target.value
 
   if(code) {
-  $.teach({ code, bookmarks: [] })
+  $.teach({ code })
   } else {
-    $.teach({ code, bookmarks: [] })
+    $.teach({ code })
   }
 })
 

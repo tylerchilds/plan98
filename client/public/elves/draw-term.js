@@ -3,7 +3,7 @@ import { innerHTML } from 'diffhtml'
 import natsort from 'natsort'
 import { idx, documents } from './giggle-search.js'
 
-let initial = {
+const initial = {
   startX: null,
   startY: null,
   x: null,
@@ -15,25 +15,6 @@ let initial = {
   trayZ: 3,
   focusedTray: null,
   trays: [],
-}
-
-if(plan98.parameters.get('tutorial')) {
-  initial = {
-    ...initial,
-    focusedTray: 'silly-tray',
-    trays: ['silly-tray'],
-    'silly-tray': {
-      width: 640,
-      height: 480,
-      maximized: true,
-      minimized: false,
-      focused: false,
-      x: 20,
-      y: 20,
-      z: 3,
-      url: '/app/startup-wizard'
-    }
-  }
 }
 
 const $ = elf('draw-term', initial)
@@ -139,8 +120,7 @@ function render(target) {
     const maybies = node.querySelector('.suggestions')
     if(focused) {
       innerHTML(maybies, `
-        <div class="suggestion-box">
-          ${suggestions.slice(start, end).map((x, i) => {
+        <div class="suggestion-box">${suggestions.slice(start, end).map((x, i) => {
             const item = documents.find(y => {
               return x.ref === y.path
             })
@@ -157,8 +137,7 @@ function render(target) {
                 </div>
               </button>
             `
-          }).join('')}
-        </div>
+          }).join('')}</div>
       `)
     } else {
       maybies.innerHTML = null
@@ -271,16 +250,20 @@ $.draw((target) => {
         setState(tray, { url, focused: false, minimized: false })
       } else {
         $.teach(self.crypto.randomUUID(), (state, payload) => {
+          const tray = payload
           const newState = {...state}
-          newState.trays.push(payload)
+          newState.trays.push(tray)
+          newState.focusedTray = tray
           newState.trayZ += 1
-          newState[payload] = {
+          newState[tray] = {
             width: 300,
             height: 150,
             x: 0,
             y: 0,
             z: newState.trayZ,
-            url: src
+            url: src,
+            maximized: true,
+            focused: true
           }
           return newState
         })
@@ -935,6 +918,9 @@ $.style(`
     text-align: left;
   }
 
+  & .suggestion-box:empty {
+    pointer-events: none;
+  }
   & .suggestion-box {
     position: absolute;
     inset: 0;
