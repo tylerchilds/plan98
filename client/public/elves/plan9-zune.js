@@ -187,6 +187,7 @@ $.draw((target) => {
     </div>
     <div class="siri">${contextMenu}</div>
     <div class="cortana ${!contextMenu && playlistVisible ? 'active': ''}">
+      ${library()}
       <audio name="walkman" src="${currentTrack}" controls="true"></audio>
       <div class="current-media">
         <div class="transport">
@@ -204,7 +205,6 @@ $.draw((target) => {
       <div class="playlist">
         ${playlist()}
       </div>
-      ${library()}
     </div>
     <div class="wall ${!menu ? 'broken':''} ${contextActions ? 'hidden' : ''}">
       ${zune(target)}
@@ -327,6 +327,7 @@ function library() {
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   return`
     <div class="search">
+      <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
       <div class="suggestions">
         ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
           const item = documents.find(y => {
@@ -342,7 +343,6 @@ function library() {
           `
         }).join('') : ''}
       </div>
-      <input placeholder="Search..." type="text" value="${musicFilter}" name="search" autocomplete="off" />
     </div>
   `
 }
@@ -423,7 +423,7 @@ const up = 38;
 const enter = 13;
 $.when('keydown', '[name="search"]', event => {
   const { suggestionsLength, suggestIndex } = $.learn()
-  if(event.keyCode === up) {
+  if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength -1) return
@@ -431,7 +431,7 @@ $.when('keydown', '[name="search"]', event => {
     return
   }
 
-  if(event.keyCode === down) {
+  if(event.keyCode === up) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
     if(nextIndex < 0) return
@@ -832,7 +832,7 @@ $.style(`
   & .search {
     text-align: center;
     position: absolute;
-    bottom: 0;
+    top: 0;
     right: 0;
     left: 0;
   }
@@ -878,7 +878,7 @@ $.style(`
     display: flex;
     text-align: left;
     overflow: hidden;
-    flex-direction: column-reverse;
+    flex-direction: column;
   }
 
   & .suggestions .auto-item {
@@ -1219,7 +1219,7 @@ $.style(`
     pointer-events: none;
     display: grid;
     grid-template-rows: 2rem 180px 1fr;
-    padding-bottom: 3rem;
+    padding-top: 3rem;
   }
 
 

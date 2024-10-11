@@ -103,7 +103,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: transparent;
+    background: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5)),#54796d;
     position: relative;
   }
 

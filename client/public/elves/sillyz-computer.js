@@ -13,93 +13,20 @@ const nonce = `<div class="nonce"></div>`
 $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer', {
-  code: ''
+  code: '',
+  start: false
 })
 
-function newComputerActions(src) {
-  return [
-    {
-      text: 'pane',
-      action: 'low',
-      script: import.meta.url,
-      src
-    },
-    {
-      text: 'mobile',
-      action: 'medium',
-      script: import.meta.url,
-      src
-    },
-    {
-      text: 'desktop',
-      action: 'ultra',
-      script: import.meta.url,
-      src
-    },
-    {
-      text: 'gaming',
-      action: 'elfworld',
-      script: import.meta.url,
-      src
-    },
-    {
-      text: 'office',
-      action: 'coop',
-      script: import.meta.url,
-      src
-    },
-
-  ]
+export function start() {
+  $.teach({ start: true })
 }
 
-const actionsCatalog = {
-  silly: newComputerActions
+export function stop() {
+  $.teach({ start: false })
 }
 
-export const lookup = {
-  '004': {
-    title: "Charmander's",
-    subtitle: "Ember",
-    tag: 'sillyz-ocarina',
-    latitude: '37.769100',
-    longitude: '-122.454583',
-  },
-  '007': {
-    title: "Squirtle's",
-    subtitle: "Bubble",
-    tag: 'sillyz-ocarina',
-    latitude: '37.771336',
-    longitude: '-122.460065',
-  },
-  '035': {
-    title: "Clefairy's",
-    subtitle: "Metronome",
-    tag: 'sillyz-ocarina',
-    latitude: '37.772006',
-    longitude: '-122.462220',
-  },
-  '097': {
-    title: "Hypno's",
-    subtitle: "Future Sight",
-    tag: 'sillyz-ocarina',
-    latitude: '37.772322',
-    longitude:  '-122.465443',
-  },
-  '134': {
-    title: "Vaporeon's",
-    subtitle: "Aurora Beam",
-    tag: 'sillyz-ocarina',
-    latitude: '37.772366',
-    longitude: '-122.467315',
-  },
-  '147': {
-    title: "Dratini's",
-    subtitle: "Dragon Dance",
-    tag: 'sillyz-ocarina',
-    latitude: '37.771326',
-    longitude: '-122.470304',
-  },
-}
+self.plan98.start = start
+self.plan98.stop = stop
 
 $.when('click', '[data-ok]', (event) => {
   event.target.closest($.link).removeAttribute('error')
@@ -112,13 +39,15 @@ $.when('click', '.synthia-clear', (event) => {
 
 $.draw(target => {
   const error = $.learn().error || target.getAttribute('error')
-  const src = target.getAttribute('src') || '/404'
-  mount(target, src)
-  const { resourceLevel, resourceActions } = $.learn()
+  const srcAttribute = target.getAttribute('src') || '/404'
+  mount(target, srcAttribute)
+  const { start, online, src } = $.learn()
+
+  const app = src || srcAttribute || plan98.env.PLAN98_HOME || sillyzPreferred || '/app/draw-term'
 
   if(error) {
     return `
-      <a ${resourceActions ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+      <a ${online ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
@@ -126,28 +55,21 @@ $.draw(target => {
           <div class="error">
             ${error}
           </div>
-          <button data-ok data-create="${src}" aria-label="create"></button>
+          <button data-ok data-create="${app}" aria-label="create"></button>
         </div>
       </div>
       ${computer()}
     `
   }
 
-  if(!resourceLevel) {
+  if(!start) {
     return `
-      <a ${resourceActions ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+      <a ${online ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
-        ${ resourceActions ? `<iframe src="${plan98.env.PLAN98_HOME || sillyzPreferred || '/app/draw-term'}"></iframe>` : `<button data-create="${src}" aria-label="create"></button>` }
+        ${ online ? `<iframe src="${app}"></iframe>` : `<button data-create="${src}" aria-label="create"></button>` }
       </div>
-      ${computer()}
-    `
-  }
-
-  if(lookup[target.id]) {
-    return `
-      <middle-earth id="${target.id}"></middle-earth>
       ${computer()}
     `
   }
@@ -180,56 +102,19 @@ function afterUpdate(target) {
 function mount(target, src) {
   if(target.mounted) return
   target.mounted = true
-  const page = actionsCatalog[target.getAttribute('page')]
-  if(page) {
-    requestIdleCallback(() => {
-      $.teach({ resourceActions: page(src) })
-    })
-  }
 
   const code = target.getAttribute('code')
   if(code) {
     requestIdleCallback(() => {
-      $.teach({ code, resourceActions: [] })
+      $.teach({ code })
     })
   }
-}
 
-function resourceMenu(actions) {
-  const list = actions.map((data) => {
-    const attributes = Object.keys(data).map(key => {
-      return `data-${key}="${data[key]}"`
-    }).join(' ')
-    return `
-      <div>
-        <button class="action-script" ${attributes}>
-          ${data.text}
-        </button>
-      </div>
-    `
-  }).join('')
-
-  return `
-    <div class="synthia">
-      <div class="top-column">
-        <div class="resource-actions wrapper">
-          <div>
-            <button data-no-actions> 
-              back
-            </button>
-          </div>
-          ${list}
-        </div>
-        <div class="wrapper">
-          <p>Perform a calculation by entering a formula below and then click the calculator icon to the left of it.</p>
-
-          <p>Select the microphone icon to use voice to search</p>
-
-          <p>Select the camera to search visually</p>
-        </div>
-      </div>
-    </div>
-  `
+  if(src) {
+    requestIdleCallback(() => {
+      $.teach({ src })
+    })
+  }
 }
 
 function computer() {
@@ -281,16 +166,11 @@ $.when('keyup', '[name="synthia"]', event => {
   }
 })
 
-
-$.when('click', '[data-no-actions]', (event) => {
-  $.teach({ resourceActions: null })
-})
-
 $.when('click', '[data-url]', (event) => {
   const { url } = event.target.dataset
 
   if(url) {
-    open(url)
+    window.location.href = url
   }
 })
 
@@ -316,41 +196,11 @@ $.when('click', '[data-calculate]', (event) => {
 $.when('click', '[data-create]', (event) => {
   const src = event.target.dataset.create
   $.teach({
-    resourceActions: newComputerActions(src)
+    online: true
   })
 })
 
 $.when('click', '.action-script', actionScript)
-export function low(event) {
-  const src = event.target.dataset.src || '/404'
-  window.location.href = src
-}
-
-export function medium(event) {
-  const src = event.target.dataset.src || '/404'
-  window.location.href = '/9' + src
-}
-
-export function ultra(event) {
-  if(event.type === 'popstate') {
-    $.teach({ resourceLevel: null, resourceActions: null })
-  } else {
-    const to = 'ultra'
-    self.history.pushState({ type: 'resourceLevel', from: null, to }, "");
-    $.teach({ resourceLevel: to })
-  }
-}
-
-export function elfworld(event) {
-  const src = event.target.dataset.src || '/404'
-  window.location.href = '/x/elf' + src
-}
-
-export function coop(event) {
-  const src = event.target.dataset.src || '/404'
-  window.location.href = '/app/bulletin-board?src=' + src
-}
-
 
 $.style(`
   & {
@@ -476,7 +326,7 @@ $.style(`
     display: grid;
     place-items: center;
     width: 100%;
-    height: 100%;
+    height: calc(100% - 2rem);
     position: relative;
   }
 
