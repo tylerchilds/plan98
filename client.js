@@ -222,6 +222,19 @@ async function router(request, context) {
     }
   }
 
+  // temporary workaround for go live
+  if(pathname === '/weird-variety') {
+    const file = await showApp(request, 'weird-variety', business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
+
   if(pathname.startsWith('/app/')) {
     const [app] = pathname.split('/app/')[1].split('/')
     const file = await showApp(request, app, business)

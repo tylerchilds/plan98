@@ -52,7 +52,7 @@ export const doingBusinessAs = {
     zoom: 10,
     tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
     mascot: 'Silly Sillonious',
-    saga: '/public/sagas/living-impaired.thelanding.page/en-us/weird-variety.saga',
+    saga: '/public/sagas/living-impaired.thelanding.page/memex.saga',
     contact: reverseProxyLookup,
     brandHue: 60,
     brandRange: 30,
