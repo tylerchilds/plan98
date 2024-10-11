@@ -593,6 +593,11 @@ $.style(`
     overflow: hidden;
   }
 
+  &.cinema {
+    --draw-term-bg: #54796d;
+    --draw-term-fg: #54796d;
+  }
+
   & .resize-right,
   & .resize-left {
     position: absolute;
@@ -674,7 +679,7 @@ $.style(`
   }
 
   & canvas {
-    background: var(--background, lemonchiffon);
+    background: var(--draw-term-bg, var(--background, lemonchiffon));
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
@@ -689,7 +694,7 @@ $.style(`
     top: var(--start-y);
     width: var(--x);
     height: var(--y);
-    background: var(--color, dodgerblue);
+    background: var(--draw-term-bg, var(--color, dodgerblue));
     transform: var(--transform);
     pointer-events: none;
     z-index: 9001;

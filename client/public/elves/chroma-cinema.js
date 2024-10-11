@@ -15,15 +15,20 @@ $.draw((target) => {
 $.style(`
   & {
     display: grid;
-    background: #54796d;
     place-content: center;
     height: 100%;
     width: 100%;
     grid-template-columns: 1fr;
+    background: black;
   }
 
   & .overlay {
     aspect-ratio: 2.35 / 1;
     width: 100%;
+    background: #54796d;
+  }
+
+  &.invert {
+    background: #54796d;
   }
 `)
