@@ -43,7 +43,22 @@ export const doingBusinessAs = {
       .toString({format: 'hex'}),
   },
   'living-impaired.thelanding.page': {
+    emote: ';)',
+    logo: '/cdn/thelanding.page/logo.svg',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    imageDescription: 'A wired collection of silly musical equipment',
+    latitude: '37.769100',
+    longitude: '-122.454583',
+    zoom: 10,
+    tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
+    mascot: 'Silly Sillonious',
     saga: '/public/sagas/living-impaired.thelanding.page/en-us/weird-variety.saga',
+    contact: reverseProxyLookup,
+    brandHue: 60,
+    brandRange: 30,
+    color: new Color('lch', [50, 75, 55])
+      .display()
+      .toString({format: 'hex'}),
   },
 
   'dwebcamp.org': {
