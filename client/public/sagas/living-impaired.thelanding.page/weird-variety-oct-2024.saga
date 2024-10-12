@@ -1,36 +1,104 @@
+<live-title
+line: Introduction and Traditional Stand-up
 
-# Set List
+<live-empty
 
-Opener - LI Intro and Traditional Stand-up (15  min)
+<live-credit
+artist: Brett/Lost Church
+piece: Sports Team Hype
 
- 1. Intro - Brett/Lost Church - Sports Team Hype
+<live-empty
 
- 2. Clay Tara purpose and Intro Toby
+<live-credit
+artist: Clay and Tara
+piece: Purpose
 
- 3. Toby Stand-up (3-5 min) + Jeff Oskay
+<live-empty
 
- 4. Jeff Stand-up (10-15 min)
+<live-credit
+artist: Toby
+piece: Introduction
 
-LI: Act 1 (25 min) - Best of Skits over the years/Time Machine
+<live-empty
 
- 1. Old Men/Time Machine
+<live-credit
+artist: Toby
+piece: Stand-up
 
- 2. Conjoined Twins
+<live-empty
 
- 3. Creeptos
+<live-credit
+artist: Jeff Oskay
+piece: Stand-up
 
- 4. Uncle Touchy
+<live-empty
 
- 5. Mentalist and then Amazing Randy 
+<live-title
+line: Act 1 - Best of Skits over the years/Time Machine
 
-LI: Act 2 (25 min) - New and Old
+<live-empty
 
- 1. Last Supper
+<live-credit
+artist: ???
+piece: Old Men/Time Machine
 
- 2. God Then vs Now
+<live-empty
 
- 3. AI Skit 
+<live-credit
+artist: ???
+piece: Conjoined Twins
 
- 4. Land of the Lost 
+<live-empty
 
- 5. Broadway Skit 
+<live-credit
+artist: ???
+piece: Creeptos
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: Uncle Touchy
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: Mentalist and Amazing Randy
+
+<live-empty
+
+<live-title
+line: Act 2 - New and Old
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: Last Supper
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: God Then vs Now
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: AI Skit
+
+<live-empty
+
+<live-credit
+artist: ???
+piece: Land of the Lost
+
+<live-empty
+
+<live-credit
+artist: ???
+
+<live-empty
+piece: Broadway Skit
