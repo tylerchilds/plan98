@@ -4,7 +4,6 @@ const $ = elf('weird-variety')
 
 $.draw((target) => {
   return `
-    Hello World
     <mux-player
       stream-type="on-demand"
       playback-id="ckZGO55bYvUb3N9Kx02Saj3gQKMmFbKt00hfy6VFPsWGY"
@@ -14,3 +13,13 @@ $.draw((target) => {
     ></mux-player>
   `
 })
+
+$.style(`
+  & {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    background: black;
+    place-items: center;
+  }
+`)
