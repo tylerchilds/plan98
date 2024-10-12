@@ -22,4 +22,8 @@ $.style(`
     background: black;
     place-items: center;
   }
+
+  & mux-player {
+    border: none;
+  }
 `)

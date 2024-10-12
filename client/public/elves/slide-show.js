@@ -43,7 +43,7 @@ $.draw((target) => {
   const slide = getSlide(quest, { index: activeShot, forwards })
 
   target.innerHTML = `
-    <div class="lower-third">
+    <div class="lightbox">
       ${slide}
     </div>
   `
@@ -133,11 +133,16 @@ $.style(`
     position: relative;
   }
 
-  & .lower-third {
+  & .lightbox {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
+    top: 0;
+  }
+
+  &.lower-third .lightbox {
+    top: auto;
     height: 33%;
   }
 `)
