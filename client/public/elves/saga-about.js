@@ -65,6 +65,9 @@ $.style(`
     display: block;
     margin: auto;
     font-size: 2rem;
+    background: white;
+    height: 100%;
+    overflow: auto;
   }
 
   & a:link,
@@ -72,6 +75,7 @@ $.style(`
     padding: 1rem;
     color: rgba(0,0,0,.85);
     text-decoration: none;
+    display: inline-block;
   }
 
   & .fine-print {

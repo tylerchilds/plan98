@@ -41,13 +41,13 @@ $.draw(target => {
   const error = $.learn().error || target.getAttribute('error')
   const srcAttribute = target.getAttribute('src') || '/404'
   mount(target, srcAttribute)
-  const { start, online, src } = $.learn()
+  const { start, src } = $.learn()
 
   const app = src || srcAttribute || plan98.env.PLAN98_HOME || sillyzPreferred || '/app/draw-term'
 
   if(error) {
     return `
-      <a ${online ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+      <a class="about-out" href="/app/saga-about">
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
@@ -64,11 +64,11 @@ $.draw(target => {
 
   if(!start) {
     return `
-      <a ${online ? `style="display:none;"`: `class="about-out"`} href="/app/saga-about">
+      <a class="about-out" href="/app/saga-about">
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
-        ${ online ? `<iframe src="${app}"></iframe>` : `<button data-create="${src}" aria-label="create"></button>` }
+        <button data-create="${src}" aria-label="create"></button>
       </div>
       ${computer()}
     `
@@ -194,10 +194,8 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const src = event.target.dataset.create
-  $.teach({
-    online: true
-  })
+  const app = event.target.dataset.create
+  event.target.closest($.link).outerHTML = `<iframe src="${app}"></iframe>`
 })
 
 $.when('click', '.action-script', actionScript)
