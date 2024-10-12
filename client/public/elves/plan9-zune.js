@@ -407,6 +407,13 @@ text: Startup Wizard
 href: /app/draw-term
 text: Draw Term
 
+<a
+href: /app/bulletin-board
+text: Bulletin Board
+
+<a
+href: /app/my-journal
+text: My Journal
 
 `)
 
