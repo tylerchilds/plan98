@@ -34,6 +34,15 @@ $.style(`
     text-shadow: 1px 1px black
   }
 
+  & .artist:empty {
+    display: none;
+  }
+
+  & .piece:empty {
+    display: none;
+  }
+
+
   @keyframes &-fade-in {
     0% {
       opacity: 0;
