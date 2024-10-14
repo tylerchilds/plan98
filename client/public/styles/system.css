@@ -36,7 +36,7 @@
 	--bg: var(--white);
 	--fg: var(--black);
 
-  --border-radius: 4px;
+  --border-radius: 0;
 	--color-link: hsl(230, 60%, 50%);
 	--color-link-visited: hsl(290, 60%, 50%);
 	--color-link-hover: hsl(230, 80%, 60%);
@@ -252,13 +252,14 @@ button {
 .button {
 	--border-color: transparent;
 	--border-color-hover: transparent;
-	--background-color: var(--wheel-0-5);
-	--background-color-hover: var(--wheel-0-6);
-	--text-color: var(--wheel-0-0);
-	--text-color-hover: var(--wheel-0-1);
+	--background-color: dodgerblue;
+	--background-color-hover: rebeccapurple;
+	--text-color: rgba(255,255,255,.85);
+	--text-color-hover: white;
 
 	align-items: center;
 	align-content: center;
+  background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
 	background-color: var(--background-color);
 	border: var(--border-thickness) solid var(--border-color);
 	border-radius: var(--border-radius);
@@ -267,11 +268,12 @@ button {
 	cursor: pointer;
 	display: inline-block;
 	font-size: var(--font-size);
+  font-weight: 600;
 	justify-content: center;
 	line-height: 1rem;
 	max-width: 100%;
 	min-height: 2rem;
-	padding: .5rem 1rem;
+	padding: 1rem;
 	text-align: center;
 	transition-duration: 250ms;
 	transition-property: all;
@@ -346,7 +348,7 @@ button {
 	font-size: .75rem;
 	line-height: 1rem;
 	min-height: 1rem;
-	padding: 0 .5rem;
+	padding: .5rem;
 }
 
 .button--large {
@@ -355,8 +357,98 @@ button {
 	font-size: 1.25rem;
 	line-height: 1.5rem;
 	min-height: 3rem;
-	padding: .25rem 2rem;
+	padding: 1rem 2rem;
 }
+
+.actions {
+  z-index: 10;
+  background: transparent;
+  border-bottom: 1px solid rgba(255,255,255,.25);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: none;
+  background: black;
+}
+
+@media screen {
+  .actions {
+    display: flex;
+  }
+}
+
+.actions .menu-item {
+  position: relative;
+}
+
+.actions .menu-item.disabled {
+  filter: grayscale(1);
+  opacity: .5;
+  pointer-events: none;
+}
+
+.actions .menu-actions {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  transform: translateY(100%);
+  background: #54796d;
+}
+
+.actions [data-menu-target].active + .menu-actions {
+  display: block;
+}
+
+.actions .menu-actions  button {
+  width: 100%;
+  text-align: left;
+  white-space: nowrap;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  padding: .5rem;
+  gap: .5rem;
+}
+
+
+
+.actions button {
+  background: black;
+  color: rgba(255,255,255,.85);
+  border: none;
+  box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+  padding: .5rem;
+  font-size: 1rem;
+  --v-font-mono: 1;
+  --v-font-casl: 0;
+  --v-font-wght: 400;
+  --v-font-slnt: 0;
+  --v-font-crsv: 0;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  transition: background 200ms ease-in-out;
+}
+
+.actions button:focus,
+.actions button.active,
+.actions button:hover {
+  color: #fff;
+  background: #54796d;
+}
+
+.toolbelt-actions {
+  z-index: 10;
+  background: transparent;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: none;
+  max-width: 100%;
+  width: 100%;
+}
+
 
 .field [disabled] + *,
 [disabled] {

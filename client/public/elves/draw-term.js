@@ -1052,7 +1052,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: '/app/sillyz-computer?page=silly'
+        url: '/app/my-journal'
       }
       return newState
     })

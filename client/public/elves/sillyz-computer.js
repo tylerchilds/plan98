@@ -3,7 +3,7 @@ import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { actionScript } from './action-script.js'
 
-const sillyzPreferred = '/app/draw-term'
+const sillyzPreferred = '/app/my-journal'
 
 // synthia is eval and must be stopped
 const synthia = eval
@@ -419,8 +419,8 @@ $.style(`
     position: relative;
     display: grid;
     grid-template-columns: auto 1fr auto auto;
-    color: rgba(0,0,0,.85);
-    background: rgba(255,255,255,1);
+    color: rgba(255,255,255,.85);
+    background: rgba(0,0,0,1);
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -448,10 +448,10 @@ $.style(`
   }
 
   & .title-bar textarea {
-    border: 1px solid rgba(0,0,0,.85);
+    border: 1px solid rgba(255,255,255,.5);
     border-radius: 0;
-    background: transparent;
-    color: rgba(0,0,0,.85);
+    background: rgba(0,0,0,1);
+    color: rgba(255,255,255,1);
     width: 100%;
     padding: 0 4px 0;
     height: 100%;
@@ -461,7 +461,6 @@ $.style(`
     left: 0;
     right: 0;
     bottom: 0;
-    background: white;
     min-height: 28px;
     max-height: 50vh;
   }
@@ -469,6 +468,8 @@ $.style(`
 
   & .title-bar textarea:focus {
     height: var(--prompt-height);
+    outline: 2px solid mediumseagreen;
+    outline-offset: 2px
   }
   & .synthia-action {
     background: transparent;
@@ -479,12 +480,12 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-items: center;
-    color: rgba(0,0,0,.65);
+    color: rgba(255,255,255,.65);
   }
 
   & .synthia-action:hover,
   & .synthia-action:focus {
-    color: rgba(0,0,0,1);
+    color: rgba(255,255,255,1);
   }
 `)
 
