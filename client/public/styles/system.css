@@ -436,6 +436,8 @@ button {
   display: inline-flex;
   padding: .5rem;
   gap: .5rem;
+  text-align: left;
+  display: block;
 }
 
 
@@ -485,9 +487,7 @@ button {
 
 .field {
 	display: grid;
-  background: linear-gradient(rgba(255,255,255,1), rgba(255,255,255,.85)), linear-gradient(transparent, dodgerblue);
   backdrop-filter: blur(8px);
-  color: rgba(0,0,0,.65);
 	margin-bottom: 1rem;
 	position: relative;
 	text-align: left;
@@ -521,7 +521,6 @@ button {
 	border-radius: var(--border-radius);
 	box-sizing: border-box;
   color: rgba(0, 0, 0, .85);
-  text-shadow: 1px 1px rgba(255,255,255,.85);
   font-size: 1.1rem;
 	margin-top: -2px;
 	padding: .5rem;

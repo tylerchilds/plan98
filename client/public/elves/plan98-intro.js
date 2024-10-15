@@ -13,7 +13,7 @@ requestThirdPartyRules(function ruleFilter(anchor) {
     actions.push(createWorkspaceAction(anchor.href, 'second'));
     actions.push(createWorkspaceAction(anchor.href, 'third'));
     actions.push(createWorkspaceAction(anchor.href, 'fourth'));
-    actions.push(createPreviewAction(anchor.href, 'fourth'));
+    actions.push(createPreviewAction(anchor.href));
   }
 
   return actions
@@ -59,11 +59,13 @@ const $ = elf('plan98-intro', {
   query: "",
   now: new Date().toLocaleString(),
   activeWorkspace: 'first',
+  workspaces: ['first', 'second', 'third', 'fourth'],
   first: null,
   second: null,
   third: null,
   fourth: null,
   allActive: false,
+  workspaceCount: 0
 })
 
 export default $
@@ -93,7 +95,9 @@ $.draw((target) => {
       <div class="nav">
         <div class="workspaces">
           <div class="logo-wrapper">
-            <plan98-logo></plan98-logo>
+            <button type="button" data-super>
+              <span>disks</span>
+            </button>
           </div>
           ${renderWorkspaceToggle('first', '1')}
           ${renderWorkspaceToggle('second', '2')}
@@ -116,7 +120,7 @@ $.draw((target) => {
 
 function renderWorkspaceView(key) {
   const data = $.learn()
-  if(!data[key]) return `<div class="empty-pane ${data.activeWorkspace === key ? 'active' :''}"><iframe src="/app/sillyz-computer"></iframe></div>`
+  if(!data[key]) return `<div class="empty-pane ${data.activeWorkspace === key ? 'active' :''}"><iframe src="/app/my-journal"></iframe></div>`
 
   return `
     <iframe src="${data[key]}" class="empty-pane ${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>
@@ -130,8 +134,6 @@ $.when('click', '[data-create]', (event) => {
 
 function renderWorkspaceToggle(key, label) {
   const data = $.learn()
-
-  if(!data[key]) return ''
 
   return `
     <button class="show-workspace ${data.activeWorkspace === key ? 'active' :''} " data-workspace="${key}">
@@ -154,17 +156,19 @@ function afterUpdate(target) {
       iconParent.appendChild(icon)
     })
   }
-
-  { // recover logo from the virtual dom
-    const ogLogo = target.querySelector('plan98-logo')
-    const logoParent = ogLogo.parentNode
-
-    const logo = document.createElement('plan98-logo')
-    logo.name = ogLogo.name
-    ogLogo.remove()
-    logoParent.appendChild(logo)
-  }
 }
+
+$.when('click', '[data-super]', (event) => {
+  event.preventDefault()
+  const e = new KeyboardEvent('keydown', {
+    metaKey: true,     // Simulates the Meta key being pressed
+    bubbles: true,     // The event will propagate up the DOM
+    cancelable: true   // The event can be canceled
+  });
+  // Dispatch the event on the target element (e.g., document)
+  document.dispatchEvent(e)
+})
+
 
 $.when('click','.now', (event) => {
   requestFullZune()
@@ -383,6 +387,7 @@ $.style(`
     overflow-y: auto;
     z-index: 2;
     pointer-events: all;
+    padding-top: 2rem;
   }
 
   & .break-fourth-wall {
@@ -728,10 +733,29 @@ $.style(`
   }
 
   & .logo-wrapper {
-    aspect-ratio: 1;
+    width: 120px;
     position: sticky;
     left: 0;
     height: 100%;
+  }
+
+  & [data-super] {
+    background-color: var(--button-color, dodgerblue);
+    background-image: linear-gradient(rgba(0,0,0, .25), rgba(0,0,0,.5));
+    color: white;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
+    border: none;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: end end;
+    padding: .5rem;
+    font-weight: 1000;
+  }
+
+  & [data-super]:focus,
+  & [data-super]:hover {
+    background-image: linear-gradient(rgba(0,0,0, .05), rgba(0,0,0,.25));
   }
 `)
 

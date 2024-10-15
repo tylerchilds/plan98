@@ -64,7 +64,7 @@ export function go_000_009(event) {
 }
 
 export function go_001_000(event) {
-  window.location.href = '/9/app/my-journal'
+  window.location.href = '/app/my-journal'
 }
 
 

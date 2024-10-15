@@ -10,6 +10,7 @@ const modes = {
   draw: 'draw',
   cursor: 'cursor',
   chat: 'chat',
+  note: 'note',
   move: 'move',
   camera: 'camera',
   calendar: 'calendar',
@@ -17,7 +18,7 @@ const modes = {
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.move,
+  mode: modes.note,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   panXmod: 0,
@@ -201,6 +202,9 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
+        <button data-mode="note">
+          <sl-icon name="file-text"></sl-icon>
+        </button>
         <button data-mode="move">
           <sl-icon name="arrows-move"></sl-icon>
         </button>
@@ -230,6 +234,9 @@ function mount(target) {
     </div>
     <div class="viewport">
       <div class="pane">
+        <div class="note" data-pane="note">
+          <simpleton-client src="/hi"></simpleton-client>
+        </div>
         <div class="camera" data-pane="camera"></div>
         <div class="chat" data-pane="chat"></div>
         <div class="calendar" data-pane="calendar"></div>
@@ -690,11 +697,21 @@ $.style(`
     position: relative;
   }
 
+  & simpleton-client {
+    mix-blend-mode: multiply;
+    filter: invert(1);
+    opacity: 0;
+  }
+
   &:not([data-mode="${modes.cursor}"]) draw-term .tray .tray-wake,
   &:not([data-mode="${modes.cursor}"]) draw-term .tray[data-focused="true"] {
     pointer-events: none !important;
   }
 
+  &[data-mode="${modes.note}"] simpleton-client {
+    pointer-events: all;
+    opacity: 1;
+  }
   &[data-mode="${modes.camera}"] live-help,
   &[data-mode="${modes.cursor}"] draw-term {
     pointer-events: all;
@@ -713,15 +730,17 @@ $.style(`
     grid-template-areas: "viewport-of-${$.link}";
     width: 100%;
     height: 100%;
+    padding-top: 2rem;
     padding-bottom: 4rem;
   }
 
   & .viewport [data-pane] {
     display: none;
     position: absolute;
-    inset: 0 0 4rem;
+    inset: 2rem 0 4rem;
   }
 
+  &[data-mode="${modes.note}"] .viewport,
   &[data-mode="${modes.calendar}"] .viewport,
   &[data-mode="${modes.gaming}"] .viewport,
   &[data-mode="${modes.chat}"] .viewport,
@@ -730,6 +749,7 @@ $.style(`
     z-index: 3;
   }
 
+  &[data-mode="${modes.note}"] [data-pane="${modes.note}"],
   &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
   &[data-mode="${modes.gaming}"] [data-pane="${modes.gaming}"],
   &[data-mode="${modes.chat}"] [data-pane="${modes.chat}"],

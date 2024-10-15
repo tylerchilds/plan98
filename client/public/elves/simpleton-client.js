@@ -45,7 +45,7 @@ $.draw((target) => {
     return
   }
   if(!target.simpleton) {
-    const resource = (target.getAttribute('host') || plan98.env.BRAID_TEXT_PROXY) + (target.getAttribute('path') || location.pathname)
+    const resource = (target.getAttribute('host') || plan98.env.BRAID_TEXT_PROXY) + (target.getAttribute('src') || target.getAttribute('path') || location.pathname)
     if(typeof mimes[mime] === 'function') {
       // no mime, just be a clown ok
       target.innerHTML = `

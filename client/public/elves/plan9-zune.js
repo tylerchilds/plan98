@@ -4,6 +4,15 @@ import { actionScript } from './action-script.js'
 import { hideModal } from '@plan98/modal'
 import lunr from 'lunr'
 import natsort from 'natsort'
+import 'gun'
+import 'gun/sea'
+
+const Gun = window.Gun
+
+let bookmark = ''
+const gun = Gun(['https://gun.1998.social/gun']);
+const user = gun.user().recall({ sessionStorage: true })
+
 
 state['ls/mp3'] ||= {
   length: 0,
@@ -73,16 +82,86 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   }).join('')
 }
 
-const $ = elf('plan9-zune', {
+const initial = {
+  authenticated: false,
+  bookmarks: [],
+  alias: '',
+  pass: '',
+  href: '',
+  text: '',
   menu: true,
   suggestIndex: null,
   suggestions: [],
   suggesttionsLength: 0,
   musicFilter: '',
   contextActions: null
-})
+
+}
+
+
+const $ = elf('plan9-zune', initial)
 
 export default $
+
+gun.on('auth', () => {
+  $.teach({ authenticated: true })
+  user.get('journal').map().on(observe)
+})
+
+const processedTimestamps = new Set();
+function observe(bookmark, timestamp) {
+  if(!timestamp) return
+  if(!bookmark) return
+  if(!bookmark.text) return
+  if (!processedTimestamps.has(timestamp)) {
+    processedTimestamps.add(timestamp);
+    $.teach({ [timestamp]: bookmark }, add(timestamp))
+  }
+}
+
+function add(timestamp) {
+  return (state, payload) => {
+    return {
+      ...state,
+      ...payload,
+      bookmarks: [...state.bookmarks, timestamp]
+    }
+  }
+}
+
+$.when('click', '#factory-reset', (event) => {
+  event.preventDefault()
+  obliterate(user.get('journal'))
+  $.teach(initial)
+  user.leave()
+})
+
+function obliterate(node) {
+  node.map().once((child, key) => {
+    if (child) {
+      obliterate(node.get(key));
+    }
+  });
+
+  node.put(null);
+}
+
+
+
+$.when('submit', '#post', (event) => {
+  event.preventDefault()
+  const { href, text } = $.learn()
+  bookmark = { href, text }
+  $.teach({ href: '', text: '' })
+  user.get('journal').get(new Date().toISOString()).put(bookmark)
+})
+
+
+$.when('input', '.keyable', (event) => {
+  event.preventDefault()
+  const { name, value } = event.target
+  $.teach({[name]: value, message: ''})
+})
 
 
 $.when('contextmenu','.zune .app-action', promptContext)
@@ -270,15 +349,39 @@ function afterUpdate(target) {
   }
 }
 
+function elvish(bookmark) {
+  const { href, text } = bookmark
+  if(!href) return ''
+  // temporary workaround; also me: forever
+  const link = href.split('?')[0]
+  return `
+<a
+href: ${link}
+text: ${text || link}
+`
+}
+
+
 function alphabetical(xmlHTML) {
   var sorter = natsort();
   const page = new DOMParser().parseFromString(xmlHTML, "text/html");
   const node = page.querySelector('xml-html')
+
+  if(!node) {
+    const { safeMode } = $.learn()
+    if(!safeMode) {
+      requestIdleCallback(() => {
+        $.teach({ safeMode: true })
+      })
+    }
+    return 'error'
+  }
+
   const children = [...node.children]
   const usedLetters = {}
 
   children.sort(function(a, b) {
-    return sorter(a.innerText, b.innerText);
+    return sorter(a.innerText.toLowerCase(), b.innerText.toLowerCase());
   }).map((x) => {
     const tile = document.createElement('div')
     tile.classList.add('tile')
@@ -347,9 +450,12 @@ function library() {
   `
 }
 function zune(target) {
-  const { hypermedia } = $.learn()
+const { hypermedia, safeMode, bookmarks, text, href } = $.learn()
   const src = hypermedia || target.getAttribute('src')
-  const bookmarks = render(`
+  const myBookmarks = bookmarks.map((timestamp) => elvish($.learn()[timestamp])).join('')
+  const saga = render(`
+${safeMode ? '' : myBookmarks}
+
 <a
 href: /app/interdimensional-cable
 text: Interdimensional Cable
@@ -420,10 +526,25 @@ text: My Journal
   return `
     <div class="zune">
       ${src ? `<iframe src="${src}"></iframe>`:''}
-      ${alphabetical(bookmarks)}
+      <form id="post" class="new-bookmark" method="post">
+        <input class="keyable" placeholder="bookmark" name="text" value="${text}">
+
+        <input class="keyable" placeholder="link" name="href" value="${href}">
+        <button type="submit" class="button square" aria-label="bookmark">
+          <sl-icon name="journal-bookmark"></sl-icon>
+        </button>
+        <button class="nonce" aria-label="new" data-action="new"></button>
+      </form>
+
+      ${alphabetical(saga)}
     </div>
   `
 }
+
+$.when('click', '[data-action="new"]', (event) => {
+  const visibility = 'private' // 'public'
+  window.location.href = `/app/bulletin-board?src=/${visibility}/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
+})
 
 const down = 40;
 const up = 38;
@@ -1060,6 +1181,7 @@ $.style(`
   & .zune xml-html {
     overflow: hidden auto;
     padding: 1rem;
+    display: block;
   }
 
   & .zune .tile {
@@ -1382,6 +1504,53 @@ $.style(`
   & .album {
     color: rgba(255,255,255,.65);
   }
+  & .keyable {
+    border: none;
+    border-radius: 0;
+    padding: .5rem;
+    width: 100%;
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    height: 2rem;
+    padding: 0 .5rem;
+  }
+
+  & .keyable:focus {
+    outline: 2px solid var(--underline-color, mediumseagreen);
+    outline-offset: 2px;
+  }
+
+  & .square {
+    aspect-ratio: 1;
+    padding: 0;
+  }
+
+
+
+  & form {
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,85);
+    padding: 1rem;
+    margin: auto;
+    display: flex;
+    gap: .5rem;
+  }
+
+  & form.block {
+    flex-direction: column;
+    max-width: 320px;
+  }
+
+
+  & .new-bookmark {
+    display: grid;
+    grid-template-columns: 1fr 1fr 2rem 2rem;
+    margin-bottom: 1rem;
+    background: rgba(0,0,0,.85);
+    font-size: 1rem;
+  }
+
+
 `)
 const nextEvent = new CustomEvent("next", {
   detail: {
