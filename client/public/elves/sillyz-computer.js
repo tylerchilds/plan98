@@ -1,6 +1,7 @@
 import tag from '@silly/tag'
 import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
+import { innerHTML } from 'diffhtml'
 import { actionScript } from './action-script.js'
 
 const sillyzPreferred = '/app/my-journal'
@@ -58,7 +59,7 @@ $.draw(target => {
           <button data-ok data-create="${app}" aria-label="create"></button>
         </div>
       </div>
-      ${computer()}
+      <div class="plot-hole"></div>
     `
   }
 
@@ -70,9 +71,12 @@ $.draw(target => {
       <div class="resource">
         <button ${src ? `src="${src}"`:''} data-create aria-label="create"></button>
       </div>
-      ${computer()}
+      <div class="plot-hole"></div>
     `
   }
+
+  if(target.ready) return
+  target.ready = true
 
   return `
     <div class="bottom">
@@ -81,11 +85,22 @@ $.draw(target => {
     <div class="top">
       <plan9-zune></plan9-zune>
     </div>
-    ${computer()}
+    <div class="plot-hole"></div>
   `
-}, { afterUpdate })
+}, { beforeUpdate, afterUpdate })
+
+function beforeUpdate(target) {
+  saveCursor(target) // first things first
+}
 
 function afterUpdate(target) {
+  {
+    const plotHole = target.querySelector('.plot-hole')
+    computer(plotHole)
+  }
+
+  replaceCursor(target) // first things first, but after the plot-hole
+
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -97,7 +112,32 @@ function afterUpdate(target) {
   }
 }
 
+const tags = ['TEXTAREA', 'INPUT']
+let sel = []
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.paused = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  } else {
+    target.dataset.paused = null
+  }
+}
 
+function replaceCursor(target) {
+  const paused = target.querySelector(`[name="${target.dataset.paused}"]`)
+  
+  if(paused) {
+    paused.focus()
+
+    if(tags.includes(paused.tagName)) {
+      paused.selectionStart = sel[0];
+      paused.selectionEnd = sel[1];
+    }
+  }
+}
 
 function mount(target, src) {
   if(target.mounted) return
@@ -117,9 +157,9 @@ function mount(target, src) {
   }
 }
 
-function computer() {
+function computer(node) {
   const { promptHeight, calculation, code } = $.learn()
-  return `
+  innerHTML(node, `
     <div class="suggestion-box">${results(calculation)}</div>
 
     <div class="title-bar">
@@ -139,7 +179,7 @@ function computer() {
         <sl-icon name="camera"></sl-icon>
       </button>
     </div>
-  `
+  `)
 }
 
 function results(x) {
@@ -156,7 +196,7 @@ function results(x) {
   `
 }
 
-$.when('keyup', '[name="synthia"]', event => {
+$.when('input', '[name="synthia"]', event => {
   const code = event.target.value
 
   if(code) {

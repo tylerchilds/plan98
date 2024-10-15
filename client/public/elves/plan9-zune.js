@@ -253,7 +253,7 @@ $.draw((target) => {
   return `
     <div class="zune-bar">
       <button data-system class="system-button">
-        9
+        $
       </button>
       <button data-playlist>
         <span class="marquee">
@@ -295,6 +295,14 @@ $.draw((target) => {
 })
 
 function beforeUpdate(target) {
+  { // action script block
+    const { authenticated } = $.learn()
+    const { action, script } = target.dataset
+    if(authenticated && action && script) {
+      actionScript(target, action, script)
+    }
+  }
+
   { // save suggestion box scroll top
     const list = target.querySelector('.suggestion-box')
     if(!list) return
@@ -316,7 +324,6 @@ function afterUpdate(target) {
       activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
     }
   }
-
 
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
@@ -692,7 +699,12 @@ $.when('click','[data-system]', (event) => {
   $.teach({
     contextActions: contextActions ? null : [
       {
-        text: 'identity',
+        text: 'account',
+        action: 'escape',
+        script: import.meta.url
+      },
+      {
+        text: 'wallets',
         action: 'identity',
         script: import.meta.url
       },
@@ -700,7 +712,12 @@ $.when('click','[data-system]', (event) => {
         text: 'escape',
         action: 'escape',
         script: import.meta.url
-      }
+      },
+      {
+        text: 'factory reset',
+        action: 'escape',
+        script: import.meta.url
+      },
     ]
   })
 })

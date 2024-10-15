@@ -42,8 +42,8 @@
 	--color-link-hover: hsl(230, 80%, 60%);
 	--color-link-active: hsl(350, 60%, 50%);
 
-	--focus-outline: 2px dotted var(--color-primary-tint1);
-	--focus-outline-offset: 2pxm;
+	--focus-outline: 2px solid mediumseagreen;
+	--focus-outline-offset: 2px;
 	--font-family: 'Recursive', 'Avenir', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Verdana', sans-serif;
 	--font-mono: 'BerkeleyMono', 'Monaco', 'Courier New', monospace;
 	--font-heading: var(--font-family);

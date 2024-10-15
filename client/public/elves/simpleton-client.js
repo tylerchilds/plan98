@@ -193,12 +193,12 @@ $.style(`
 
   & input {
     border: none;
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: rgba(255,255,255,1);
+    color: black;
   }
   & textarea {
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: rgba(255,255,255,1);
+    color: black;
     display: block;
     width: 100%;
     height: 100%;

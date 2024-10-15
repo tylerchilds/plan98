@@ -699,7 +699,6 @@ $.style(`
 
   & simpleton-client {
     mix-blend-mode: multiply;
-    filter: invert(1);
     opacity: 0;
   }
 
