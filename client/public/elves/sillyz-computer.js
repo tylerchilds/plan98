@@ -39,7 +39,7 @@ $.when('click', '.synthia-clear', (event) => {
 
 $.draw(target => {
   const error = $.learn().error || target.getAttribute('error')
-  const srcAttribute = target.getAttribute('src') || '/404'
+  const srcAttribute = target.getAttribute('src')
   mount(target, srcAttribute)
   const { start, src } = $.learn()
 
@@ -68,7 +68,7 @@ $.draw(target => {
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
-        <button data-create="${src}" aria-label="create"></button>
+        <button ${src ? `src="${src}"`:''} data-create aria-label="create"></button>
       </div>
       ${computer()}
     `
@@ -76,7 +76,7 @@ $.draw(target => {
 
   return `
     <div class="bottom">
-      <plan98-intro src="${src}"></plan98-intro>
+      <plan98-intro src="${src || '/app/startup-wizard'}"></plan98-intro>
     </div>
     <div class="top">
       <plan9-zune></plan9-zune>
@@ -194,8 +194,11 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const app = event.target.dataset.create
-  event.target.closest($.link).outerHTML = `<iframe src="${app}"></iframe>`
+  const src = event.target.getAttribute('src')
+
+  src
+    ? event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
+    : start()
 })
 
 $.when('click', '.action-script', actionScript)

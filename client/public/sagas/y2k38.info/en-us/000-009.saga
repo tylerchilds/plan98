@@ -1,6 +1,5 @@
 Reconnect your goober...
 
-<plan98-reconnect
-text: Ok
+<my-journal
 data-script: /public/elves/startup-wizard.js
 data-action: go_001_000

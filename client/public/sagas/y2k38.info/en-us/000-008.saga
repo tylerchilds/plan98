@@ -1,6 +1,5 @@
 What's your goober and pin?
 
-<plan98-register
-text: Ok
+<my-journal
 data-script: /public/elves/startup-wizard.js
 data-action: go_001_000

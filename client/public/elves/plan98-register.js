@@ -40,8 +40,6 @@ async function mount(target) {
   }
 }
 
-
-
 $.draw((target) => {
   mount(target)
   const {

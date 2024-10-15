@@ -64,7 +64,7 @@ export function go_000_009(event) {
 }
 
 export function go_001_000(event) {
-  window.location.href = '/app/plan98-wallet#challenge'
+  window.location.href = '/9/app/my-journal'
 }
 
 
@@ -114,8 +114,9 @@ export function setupSaga(nextSaga, target, options={}) {
         root.innerHTML = `
           <div class="desktop">
             <div class="paper screenplay">
-              <a href="javascript:;" data-back>Back</a>
+              <a href="javascript:history.back();" data-back>Back</a>
               <a href="/app/hyper-script?src=${raw+key}">Edit</a>
+              <plan98-hero></plan98-hero>
               ${render(saga)}
             </div>
           </div>

@@ -89,13 +89,14 @@ $.draw(target => {
       </div>
     </div>
 
-    <form id="post" method="post">
+    <form id="post" class="new-bookmark" method="post">
       <input class="keyable" placeholder="text" name="text" value="${text}">
 
       <input class="keyable" placeholder="link" name="href" value="${href}">
       <button type="submit" class="button" aria-label="bookmark">
         <sl-icon name="journal-bookmark"></sl-icon>
       </button>
+      <button class="nonce" aria-label="new" data-action="new"></button>
     </form>
 
     <div class="book">${bookCache}</div>
@@ -112,7 +113,25 @@ $.draw(target => {
   `
 }, { beforeUpdate, afterUpdate })
 
+async function actionScript(target, action, script) {
+  if(script) {
+    const dispatch = (await import(script))[action]
+    if(dispatch) {
+      self.history.pushState({ action, script }, "");
+      await dispatch(event, target)
+    }
+  }
+}
+
 function beforeUpdate(target) {
+  {
+    const { authenticated } = $.learn()
+    const { action, script } = target.dataset
+    if(authenticated && action && script) {
+      actionScript(target, action, script)
+    }
+  }
+
   saveCursor(target) // first things first
 
   {
@@ -216,6 +235,11 @@ function card(bookmark) {
     text
   }
 }
+
+$.when('click', '[data-action="new"]', (event) => {
+  const visibility = 'private' // 'public'
+  window.location.href = `/app/bulletin-board?src=/${visibility}/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
+})
 
 $.when('click', '[data-href]', (event) => {
   const { href } = event.target.dataset
@@ -338,7 +362,7 @@ $.style(`
   & .book {
     display: grid;
     gap: .25rem;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   }
 
   & .card {
@@ -348,6 +372,7 @@ $.style(`
     width: 100%;
     padding: 0;
     border: none;
+    background: #54796d;
     boarder-radius: 0;
     display: flex;
     aspect-ratio: 2 / 3;
@@ -428,6 +453,11 @@ $.style(`
     100% {
       opacity: 1;
     }
+  }
+
+  .new-bookmark {
+    display: grid;
+    grid-template-columns: 1fr 1fr 4rem 4rem;
   }
 `)
 
