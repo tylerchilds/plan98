@@ -64,7 +64,6 @@ const panels = {
   read: 'read',
   // perform to have a guide in real-time
   perform: 'perform',
-  rewind: 'rewind',
   play: 'play',
 }
 
@@ -88,13 +87,7 @@ const $ = module('hyper-script', {
   activePanel: window.location.hash?.split('#')[1] || panels.write,
   activeShot: 0,
   shotCount: countShots(pitch),
-  rewinding: false,
 })
-
-setInterval(function rewindMaybe(){
-  const { rewinding } = $.learn()
-  if(rewinding) rewindForSure()
-}, 1000)
 
 $.draw((target) => {
   const { id } = target
@@ -122,7 +115,7 @@ $.draw((target) => {
       const html = hyperSanitizer(file)
       return `
         <div name="read">
-          <div name="page">
+          <div name="page" class="screenplay">
             ${html}
           </div>
         </div>
@@ -141,21 +134,6 @@ $.draw((target) => {
               <div name="stage">
                 ${motion}
               </div>
-            </div>
-          </div>
-        </div>
-      `
-    },
-    [panels.rewind]: () => {
-      const start = activeShot
-      const end = activeShot + 1
-      const html = hyperSanitizer(file)
-      const motion = getMotion(html, { active: activeShot, forwards: false, start, end })
-      return `
-        <div name="rewind">
-          <div name="shadow-box">
-            <div name="light-box">
-              ${motion}
             </div>
           </div>
         </div>
@@ -214,7 +192,6 @@ $.draw((target) => {
           <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Rewrite</button>
           <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Review</button>
           <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Rehearse</button>
-          <button class="${activePanel === panels.rewind ? 'active' : ''}" data-rewind>Rewind</button>
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>
@@ -304,7 +281,6 @@ $.when('click', '[data-read]', (event) => {
   $.teach({
     nextPanel: panels.read,
     activeMenu: null,
-    rewinding: false
   })
 })
 
@@ -402,36 +378,8 @@ $.when('click', '[data-perform]', (event) => {
     activeShot: 0,
     nextPanel: panels.perform,
     activeMenu: null,
-    rewinding: false
   })
 })
-
-$.when('click', '[data-rewind]', (event) => {
-  const { file } = sourceFile(event.target)
-  const shotCount = countShots(file)
-  $.teach({
-    shotCount,
-    activeShot: shotCount,
-    nextPanel: panels.rewind,
-    activeMenu: null,
-    rewinding: true
-  })
-})
-
-function rewindForSure() {
-  const { shotCount, activeShot } = $.learn()
-  const backFrame = activeShot - 1
-  if(backFrame < 0) {
-    $.teach({
-      activeShot: shotCount,
-    })
-    return
-  }
-
-  $.teach({
-    activeShot: backFrame,
-  })
-}
 
 $.when('click', '[data-back]', (event) => {
   const { activeShot } = $.learn()
@@ -514,7 +462,6 @@ $.when('click', '[data-write]', (event) => {
   $.teach({
     nextPanel: panels.write,
     activeMenu: null,
-    rewinding: false
   })
 })
 
@@ -522,7 +469,6 @@ $.when('click', '[data-play]', (event) => {
   $.teach({
     nextPanel: panels.play,
     activeMenu: null,
-    rewinding: false
   })
 })
 
@@ -720,7 +666,6 @@ $.style(`
   & [name="read"],
   & [name="print"],
   & [name="perform"],
-  & [name="rewind"],
   & [name="write"] {
     display: none;
   }
@@ -754,14 +699,12 @@ $.style(`
 
   & [data-panel="read"] [name="read"],
   & [data-panel="perform"] [name="perform"],
-  & [data-panel="rewind"] [name="rewind"],
   & [data-panel="write"] [name="write"] {
     display: block;
   }
 
   & [data-panel="read"] [data-read],
   & [data-panel="perform"] [data-perform],
-  & [data-panel="rewind"] [data-rewind],
   & [data-panel="write"] [data-write] {
     background-image: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
     color: white;
@@ -785,9 +728,6 @@ $.style(`
   }
   & [name="perform"] {
     background: #54796d;
-  }
-  & [name="rewind"] {
-    background: black;
   }
   & iframe {
     display: block;
@@ -1054,8 +994,8 @@ $.style(`
       background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
       position: absolute;
       left: 0;
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 2rem;
+      height: 2rem;
       border-radius: 100%;
       display: grid;
       place-items: center;
@@ -1070,8 +1010,8 @@ $.style(`
       left: 0;
       position: absolute;
       border-radius: 100%;
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 2rem;
+      height: 2rem;
       display: grid;
       place-items: center;
       font-size: 1rem;
@@ -1085,8 +1025,8 @@ $.style(`
       left: 0;
       position: absolute;
       border-radius: 100%;
-      width: 1.5rem;
-      height: 1.5rem;
+      width: 2rem;
+      height: 2rem;
       display: grid;
       place-items: center;
       font-size: 1rem;

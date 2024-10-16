@@ -726,6 +726,7 @@ export function identity(event) {
   const { contextActions } = $.learn()
   hideModal() // todo: find the root cause of this
   showModal(`
+    <plan98-upsert></plan98-upsert>
     <plan98-wallet></plan98-wallet>
   `, { onHide: restoreContext(contextActions) })
 }

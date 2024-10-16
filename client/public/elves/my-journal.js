@@ -27,7 +27,11 @@ export function bookmarks() {
 
 gun.on('auth', () => {
   $.teach({ authenticated: true })
-  user.get('journal').map().on(observe)
+  user.get('journal').map().on(observe);
+
+  [...document.querySelectorAll($.link)].map((x) => {
+    x.dispatchEvent(new Event('connected'))
+  })
 })
 
 const processedTimestamps = new Set();
@@ -532,7 +536,11 @@ $.when('click', '#signout', disconnect)
 export function disconnect (event) {
   event.preventDefault()
   user.leave()
-  $.teach({ authenticated: false })
+  $.teach({ authenticated: false });
+
+  [...document.querySelectorAll($.link)].map((x) => {
+    x.dispatchEvent(new Event('disconnected'))
+  })
 }
 
 export function getUser() {
@@ -563,7 +571,7 @@ $.when('click', '#factory-reset', (event) => {
   event.preventDefault()
   obliterate(user.get('journal'))
   $.teach(initial)
-  user.leave()
+  disconnect()
 })
 
 function obliterate(node) {

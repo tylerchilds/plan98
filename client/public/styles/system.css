@@ -28,8 +28,8 @@
 
 :focus {
     position: relative;
-    border-color: dodgerblue;
-    outline: 2px solid dodgerblue;
+    outline: 2px solid mediumseagreen;
+    outline-offset: 2px;
 }
 
 :root {

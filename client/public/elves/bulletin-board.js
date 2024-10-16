@@ -137,7 +137,7 @@ function afterUpdate(target) {
     const chat = target.querySelector('.chat')
     if(!chat.innerHTML && mode === modes.chat) {
       chat.innerHTML = `
-        <plan98-chat src="${src}" class="stack"></plan98-chat>
+        <time-team room="1" src="${src}" class="stack"></time-team>
       `
     }
   }

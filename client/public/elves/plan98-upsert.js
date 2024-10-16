@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { getUser, disconnect } from './my-journal.js'
+import { getUser, disconnect } from './plan98-register.js'
 import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 
 import { requestScreen } from './plan9-zune.js'
@@ -80,7 +80,7 @@ const modes = {
   },
   register: function registrationMode(target) {
     return `
-      <my-journal data-script="${import.meta.url}" data-action="refresh"></my-journal>
+      <plan98-register data-script="${import.meta.url}" data-action="refresh"></plan98-register>
     `
   },
 }
