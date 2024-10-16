@@ -1052,7 +1052,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: '/app/my-journal'
+        url: `/app/hyper-script?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
       }
       return newState
     })

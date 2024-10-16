@@ -3,13 +3,14 @@ import * as braid from 'braid-http'
 import { marked } from 'marked'
 import { render } from '@sillonious/saga'
 
+self.braid_fetch = braid.fetch
+
 const myersDiff = document.createElement("script");
 myersDiff.src = "https://braid.org/code/myers-diff1.js";
 myersDiff.integrity = "";
 myersDiff.crossOrigin = "";
 document.body.appendChild(myersDiff)
 
-self.braid_fetch = braid.fetch
 
 const simpleton = document.createElement("script");
 simpleton.src = "https://unpkg.com/braid-text/simpleton-client.js"
@@ -26,12 +27,17 @@ const mimes = {
 
 const $ = tag('simpleton-client')
 
+let readySwitch = 0
 function readyLoop() {
+  if(readySwitch === 1) return
   if(!self.simpleton_client) {
     requestAnimationFrame(readyLoop)
     return
   }
-  $.teach({ ready: true })
+  readySwitch = 1
+  requestIdleCallback(() => {
+    $.teach({ ready: true })
+  })
 }
 
 requestAnimationFrame(readyLoop)
@@ -204,7 +210,7 @@ $.style(`
     height: 100%;
     resize: none;
     border: none;
-    padding: 0rem 1rem;
+    padding: 1rem;
     line-height: 2rem;
     position: relative;
     z-index: 3;

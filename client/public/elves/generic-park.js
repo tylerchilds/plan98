@@ -111,12 +111,6 @@ $.draw((target) => {
       </div>
       <div class="movement">
         <sillonious-joypro></sillonious-joypro>
-        <div aria-role="button" class="literally">
-          <middle-earth></middle-earth>
-          <button class="not-literally">
-            <sl-icon name="x-lg"></sl-icon>
-          </button>
-        </div>
       </div>
     </div>
 		<a-scene>
@@ -297,10 +291,6 @@ function afterUpdate(target) {
   }
 
   {
-    map(target.querySelector('.literally'))
-  }
-
-  {
     increment(target)
   }
 }
@@ -341,12 +331,6 @@ function library(target) {
 
 function preview(target) {
   const { preview } = $.learn()
-
-  if(!preview) {
-    target.dataset.last = null
-    target.innerHTML = '<a href="javascript:self.history.back()">back</a>'
-    return
-  }
 
   if(target.dataset.last !== preview) {
     target.dataset.last = preview
@@ -465,15 +449,6 @@ $.when('click', '[data-goto]', (event) => {
   const { goto } = event.target.dataset
   window.location.href = goto
 })
-
-$.when('click', '.literally', (event) => {
-  $.teach({ fullMap: true })
-})
-
-$.when('click', '.not-literally', (event) => {
-  $.teach({ fullMap: false })
-})
-
 
 export function identity(event) {
   const { contextActions } = $.learn()
@@ -598,21 +573,6 @@ $.style(`
     overflow: hidden;
   }
 
-  & [href="javascript:self.history.back()"] {
-    text-decoration: none;
-    color: rgba(255,255,255,.85);
-    text-shadow: 1px 1px 1px rgba(0,0,0,5);
-    border: none;
-    font-weight: 100;
-    font-size: 2rem;
-    background: transparent;
-    border-radius: none;
-    display: inline-block;
-    margin: 1rem;
-    text-align: left;
-
-  }
-
   & .a-enter-vr, .a-enter-ar {
     display: none;
   }
@@ -621,21 +581,6 @@ $.style(`
     grid-column: -1 / 1;
     place-content: end;
     padding: 1rem;
-  }
-
-  & .literally {
-    margin: 0 auto;
-    aspect-ratio: 1;
-    border-radius: 100%;
-    max-height: 180px;
-    background: transparent;
-    border: none;
-    position: absolute;
-    padding: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    overflow: hidden;
   }
 
   & .heads-up-display {
@@ -843,56 +788,6 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 500;
-  }
-
-  & .literally {
-    pointer-events: all;
-    border: 1px solid black;
-  }
-
-  & .literally middle-earth {
-    pointer-events: none;
-    border: 1px solid white;
-    border-radius: 100%;
-    opacity: .5;
-  }
-
-  & .literally .not-literally {
-    display: none;
-  }
-
-  & .literally.full {
-    pointer-events: none;
-    position: absolute;
-    inset: 0;
-    max-height: 100%;
-    border-radius: 0;
-    aspect-ratio: auto;
-  }
-
-  & .literally.full middle-earth {
-    opacity: 1;
-  }
-
-  & .literally.full .not-literally {
-    display: block;
-    position: absolute;
-    pointer-events: all;
-    right: 0;
-    top: 0;
-    z-index: 500;
-    background: black;
-    border-radius: 100%;
-    border: 0;
-    color: white;
-    font-size: 3rem;
-    aspect-ratio: 1;
-    line-height: 1;
-    padding: 1rem;
-  }
-  & .literally.full middle-earth {
-    pointer-events: all;
-    border-radius: 0;
   }
 
   & sillonious-joypro {

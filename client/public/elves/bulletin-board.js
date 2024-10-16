@@ -12,13 +12,15 @@ const modes = {
   chat: 'chat',
   note: 'note',
   move: 'move',
+  map: 'map',
+  gallery: 'gallery',
   camera: 'camera',
   calendar: 'calendar',
   gaming: 'gaming',
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.note,
+  mode: modes.move,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   panXmod: 0,
@@ -81,6 +83,50 @@ function afterUpdate(target) {
     if(!camera.innerHTML && mode === modes.camera) {
       camera.innerHTML = `
         <live-help src="${src}" class="stack"></live-help>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const note = target.querySelector('.note')
+    if(!note.innerHTML && mode === modes.note) {
+      note.innerHTML = `
+        <simpleton-client src="${src || '/404'}"></simpleton-client>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const gallery = target.querySelector('.gallery')
+    if(!gallery.innerHTML && mode === modes.gallery) {
+      gallery.innerHTML = `
+        <comedy-day src="${src}" class="stack"></comedy-day>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const gaming = target.querySelector('.gaming')
+    if(!gaming.innerHTML && mode === modes.gaming) {
+      gaming.innerHTML = `
+        <generic-park src="${src}" class="stack"></generic-park>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const map = target.querySelector('.map')
+    if(!map.innerHTML && mode === modes.map) {
+      map.innerHTML = `
+        <middle-earth src="${src}" class="stack"></middle-earth>
       `
     }
   }
@@ -202,20 +248,26 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
-        <button data-mode="note">
-          <sl-icon name="file-text"></sl-icon>
-        </button>
         <button data-mode="move">
           <sl-icon name="arrows-move"></sl-icon>
         </button>
         <button data-mode="draw" class="">
           <sl-icon name="pencil"></sl-icon>
         </button>
+        <button data-mode="note">
+          <sl-icon name="file-text"></sl-icon>
+        </button>
         <button data-mode="chat">
           <sl-icon name="chat"></sl-icon>
         </button>
         <button data-mode="camera">
           <sl-icon name="camera-reels"></sl-icon>
+        </button>
+        <button data-mode="map">
+          <sl-icon name="compass"></sl-icon>
+        </button>
+        <button data-mode="gallery">
+          <sl-icon name="images"></sl-icon>
         </button>
         <button data-mode="calendar">
           <sl-icon name="calendar3"></sl-icon>
@@ -229,18 +281,18 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
-      <draw-term background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
+      <draw-term src="/app/sillyz-computer" background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
       <div class="pane">
-        <div class="note" data-pane="note">
-          <simpleton-client src="/hi"></simpleton-client>
-        </div>
+        <div class="note" data-pane="note"></div>
         <div class="camera" data-pane="camera"></div>
         <div class="chat" data-pane="chat"></div>
+        <div class="map" data-pane="map"></div>
+        <div class="gallery" data-pane="gallery"></div>
         <div class="calendar" data-pane="calendar"></div>
-        <div class="gaming" data-pane="gaming"><dial-tone></dial-tone></div>
+        <div class="gaming" data-pane="gaming"></div>
       </div>
     </div>
   `
@@ -294,6 +346,11 @@ $.when('click', '[data-mode]', function updateMode (event) {
   const { mode } = event.target.dataset
   $.teach({ mode })
 })
+
+$.when('click', '.toolbelt-actions', function updateMode (event) {
+  $.teach({ mode: modes.move })
+})
+
 /**
  * Remove the previous stroke from history and repaint the entire canvas based on history
  * @return {void}
@@ -308,8 +365,6 @@ function redraw(event) {
   const { canvas } = engine(event.target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
 
   strokeHistory.map(function (stroke) {
     if (strokeHistory.length === 0) return
@@ -566,6 +621,7 @@ $.style(`
     right: 0;
     display: none;
     background: black;
+    height: 2rem;
   }
 
   @media screen {
@@ -579,7 +635,8 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
+    padding: 0;
+    height: 100%;
     font-size: 1rem;
     --v-font-mono: 1;
     --v-font-casl: 0;
@@ -651,6 +708,7 @@ $.style(`
 
   & .menu-item {
     position: relative;
+    aspect-ratio: 1;
   }
 
   & .menu-item.disabled {
@@ -668,6 +726,10 @@ $.style(`
     background: #54796d;
   }
 
+
+  & [data-menu-target] {
+    aspect-ratio: 1;
+  }
   & [data-menu-target].active + .menu-actions {
     display: block;
   }
@@ -687,7 +749,6 @@ $.style(`
     grid-area: root-of-${$.link};
     width: 100%;
     height: 100%;
-    overflow: hidden;
   }
 
   & live-help,
@@ -741,6 +802,8 @@ $.style(`
 
   &[data-mode="${modes.note}"] .viewport,
   &[data-mode="${modes.calendar}"] .viewport,
+  &[data-mode="${modes.map}"] .viewport,
+  &[data-mode="${modes.gallery}"] .viewport,
   &[data-mode="${modes.gaming}"] .viewport,
   &[data-mode="${modes.chat}"] .viewport,
   &[data-mode="${modes.camera}"] .viewport {
@@ -750,6 +813,8 @@ $.style(`
 
   &[data-mode="${modes.note}"] [data-pane="${modes.note}"],
   &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
+  &[data-mode="${modes.map}"] [data-pane="${modes.map}"],
+  &[data-mode="${modes.gallery}"] [data-pane="${modes.gallery}"],
   &[data-mode="${modes.gaming}"] [data-pane="${modes.gaming}"],
   &[data-mode="${modes.chat}"] [data-pane="${modes.chat}"],
   &[data-mode="${modes.camera}"] [data-pane="${modes.camera}"] {

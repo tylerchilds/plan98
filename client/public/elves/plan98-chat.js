@@ -15,9 +15,13 @@ const gun = Gun(['https://gun.1998.social/gun']);
 
 const $ = module('plan98-chat', { virtual: true })
 
+const logs = {}
 $.draw(target => {
   const { file } = sourceFile(target)
-  const log = render(file) || ''
+  logs[target.id] = render(file) || ''
+
+  if(target.mounted) return
+  target.mounted = true
 
   const view = `
     <div name="transport">
@@ -27,9 +31,7 @@ $.draw(target => {
         <button data-logout>Disconnect</button>
       </div>
     </div>
-    <div class="log">
-      ${log}
-    </div>
+    <div class="log"></div>
     <form class="send-form" data-command="enter">
       <button data-tooltip="send" class="send" type="submit" data-command="enter">
         <sl-icon name="arrow-up-circle"></sl-icon>
@@ -52,6 +54,11 @@ function afterUpdate(target) {
       ogIcon.remove()
       iconParent.appendChild(icon)
     })
+  }
+
+  {
+    const log = target.querySelector('.log')
+    log.innerHTML = logs[target.id]
   }
 }
 
@@ -180,6 +187,7 @@ $.style(`
     color: white;
     border-radius: 0;
     padding: 8px;
+    max-height: 25vh;
   }
 
   & .text-well {
@@ -193,7 +201,7 @@ $.style(`
     right: 0;
     color: rgba(255,255,255,.85);
     background: dodgerblue;
-    padding: .5rem;
+    padding: .3rem .3rem 0;
     border-radius: 100%;
     font-weight: 800;
     border: 1px solid dodgerblue;
@@ -227,6 +235,12 @@ $.style(`
     flex-direction: column-reverse;
     overflow-anchor: auto !important;
     padding: 6rem 0 1rem;
+  }
+
+  & .log xml-html {
+    display: flex;
+    gap: 4px;
+    flex-direction: column;
   }
 
 
@@ -268,3 +282,16 @@ $.when('input', 'textarea', (event) => {
   event.target.style.height = "auto";
   event.target.style.height = (event.target.scrollHeight) + "px";
 });
+
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', 'textarea', event => {
+  if(event.keyCode === enter && !event.shiftKey) {
+    event.preventDefault()
+    const form = event.target.closest($.link).querySelector('form')
+
+    form.requestSubmit()
+  }
+})
+

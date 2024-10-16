@@ -1,4 +1,5 @@
 import module from '@silly/tag'
+import * as protomapsL from 'protomaps-leaflet'
 import { doingBusinessAs } from './sillonious-brand.js'
 
 const linkElement = document.createElement("link");
@@ -28,11 +29,8 @@ function mount(target) {
 	}
 
 	target.map = L.map(target).setView([37.7691, -122.4580], 13);
-
-	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-	}).addTo(target.map);
+  const layer = protomapsL.leafletLayer({url:`https://api.protomaps.com/tiles/v3/{z}/{x}/{y}.mvt?key=${plan98.env.PROTOMAPS_API_KEY}`,theme:"light"})
+  layer.addTo(target.map)
 
 	const polygon = L.polygon([
 		[51.509, -0.08],

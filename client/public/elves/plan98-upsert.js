@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
-import { getUser, disconnect } from './plan98-register.js'
+import { getUser, disconnect } from './my-journal.js'
 import { connected, getSession, getFeedback, login, getCompanyName, getEmployeeId, setSessionId, clearSession, setError, setErrors, setEmail, setAuthenticatedAt, getAuthenticatedAt, setEmployeeId, setCompanyName, getEmail, setActiveAccount } from './plan98-wallet.js'
 
 import { requestScreen } from './plan9-zune.js'
@@ -80,7 +80,7 @@ const modes = {
   },
   register: function registrationMode(target) {
     return `
-      <plan98-register data-script="${import.meta.url}" data-action="refresh"></plan98-register>
+      <my-journal data-script="${import.meta.url}" data-action="refresh"></my-journal>
     `
   },
 }
@@ -100,8 +100,8 @@ function mount(target) {
   refresh()
 }
 
-async function refresh() {
-  const user = await getUser().catch(e => console.error(e))
+function refresh() {
+  const user = getUser()
   if(!user) {
     $.teach({ user: null, loading: false })
   }
@@ -518,6 +518,7 @@ $.style(`
   & {
     display: block;
     margin: 0 auto;
+    height: 100%;
   }
 
   & hr {

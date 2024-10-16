@@ -527,11 +527,18 @@ $.when('input', '.keyable', (event) => {
   $.teach({[name]: value, message: ''})
 })
 
-$.when('click', '#signout', (event) => {
+$.when('click', '#signout', disconnect)
+
+export function disconnect (event) {
   event.preventDefault()
   user.leave()
   $.teach({ authenticated: false })
-})
+}
+
+export function getUser() {
+  const { authenticated } = $.learn()
+  return authenticated ? user : ''
+}
 
 $.when('click', '#sign-a-panda-in', (event) => {
   event.preventDefault()
@@ -763,6 +770,7 @@ $.style(`
   & .zune xml-html {
     overflow: hidden auto;
     padding: 1rem;
+    display: block;
   }
 
   & .zune .tile {

@@ -120,7 +120,7 @@ $.draw((target) => {
 
 function renderWorkspaceView(key) {
   const data = $.learn()
-  if(!data[key]) return `<div class="empty-pane ${data.activeWorkspace === key ? 'active' :''}"><iframe src="/app/my-journal"></iframe></div>`
+  if(!data[key]) return `<div class="empty-pane ${data.activeWorkspace === key ? 'active' :''}"><iframe src="/app/draw-term"></iframe></div>`
 
   return `
     <iframe src="${data[key]}" class="empty-pane ${data.activeWorkspace === key ? 'active' :''} "name="${key}"></iframe>

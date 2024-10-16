@@ -279,7 +279,12 @@ function sourceFile(target) {
       schedule(() => {
         let file = pitch
         fetch(src).then(async res => {
-          file = await res.text()
+          if(res.status === 404) {
+
+            file = 'untitled'
+          } else {
+            file = await res.text()
+          }
         }).catch((error) => {
           console.error(error)
         }).finally(() => {

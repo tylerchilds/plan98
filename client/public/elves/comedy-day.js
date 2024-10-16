@@ -81,7 +81,7 @@ $.style(`
     aspect-ratio: 16 / 9;
     background: black;
     display: grid;
-    place-content: center;
+    place-items: center;
     border-radius: 3px;
     box-shadow: 1px 1px 3px rgba(0, 0, 0, .85);
     border: none;
@@ -99,6 +99,7 @@ $.style(`
   & [data-file] img {
     width: 100%;
     max-width: 100%;
+    height: 100%;
   }
 `)
 
