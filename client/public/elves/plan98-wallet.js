@@ -132,7 +132,7 @@ $.draw((target) => {
   const { identifier, cache } = $.learn()
 
   const content = cache[identifier]
-  
+
   let start = tutorial
   const hash = target.getAttribute('hash') || window.location.hash
   if(hashFunctions[hash]) {

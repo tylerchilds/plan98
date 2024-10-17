@@ -56,7 +56,7 @@ $.draw(target => {
           <div class="error">
             ${error}
           </div>
-          <button data-ok data-create="${app}" aria-label="create"></button>
+          <button data-ok data-create src="${app}" aria-label="create"></button>
         </div>
       </div>
       <div class="plot-hole"></div>
@@ -234,11 +234,9 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const src = event.target.getAttribute('src')
+  const src = event.target.getAttribute('src') || `/app/bulletin-board?src=${`/private/${$.link}/${new Date().toISOString()}`}.saga`
 
-  src
-    ? event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
-    : start()
+  event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
 })
 
 $.when('click', '.action-script', actionScript)

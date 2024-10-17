@@ -277,6 +277,7 @@ $.style(`
     height: 2rem;
     font-size: 1rem;
     transition: color 200ms;
+    border-radius: 100%;
   }
 
   & [data-close]:hover,

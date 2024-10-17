@@ -13,6 +13,7 @@ const $ = module('plan98-upsert', {
   answer3: '',
   answer4: '',
   answer5: '',
+  user: {}
 })
 
 const modes = {
@@ -119,7 +120,7 @@ $.draw((target) => {
 
   if(loading) return
 
-  if(!user) {
+  if(!user.data) {
     return modes['register'](target)
   }
 

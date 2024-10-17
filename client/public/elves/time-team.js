@@ -179,7 +179,7 @@ $.draw(target => {
           const color = doingBusinessAs[company] ? doingBusinessAs[company].color : 'dodgerblue'
           const { avatar } = social(company, unix)
           return `
-            <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-timestamp="${timestamp}">
+            <div aria-role="button" class="message ${company} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-timestamp="${timestamp}">
               <div class="meta" data-tooltip="${created_at}">
                 <quick-media class="avatar" key="${avatar}">
                   <img src="${avatar}" />
@@ -283,9 +283,6 @@ $.when('click', '.action-accordion', async (event) => {
 })
 
 async function send(event) {
-
-  
-
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const {
     sessionId,
@@ -293,7 +290,6 @@ async function send(event) {
     companyEmployeeId
   } = getSession()
   const room = getRoom(event.target)
-  let company, unix
 /*
   const text = await bayunCore.lockText(
     sessionId,
@@ -321,8 +317,8 @@ async function send(event) {
   const payload = {
     room,
     text: message.value,
-    companyName: company ||'sillyz',
-    companyEmployeeId: unix || 'tychi'
+    companyName,
+    companyEmployeeId
   }
 
   message.value = ''
@@ -592,6 +588,19 @@ $.when('input', 'textarea', (event) => {
   event.target.style.height = "auto";
   event.target.style.height = (event.target.scrollHeight) + "px";
 });
+
+const down = 40;
+const up = 38;
+const enter = 13;
+$.when('keydown', 'textarea', event => {
+  if(event.keyCode === enter && !event.shiftKey) {
+    event.preventDefault()
+    const form = event.target.closest($.link).querySelector('form')
+
+    form.requestSubmit()
+  }
+})
+
 
 $.when('blur', 'textarea', (event) => {
   clearCursor(event.target.closest($.link))

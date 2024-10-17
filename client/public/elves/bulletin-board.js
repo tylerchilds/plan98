@@ -20,7 +20,7 @@ const modes = {
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.move,
+  mode: modes.cursor,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   panXmod: 0,
@@ -248,6 +248,9 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
+        <button data-mode="cursor">
+          <sl-icon name="cursor"></sl-icon>
+        </button>
         <button data-mode="move">
           <sl-icon name="arrows-move"></sl-icon>
         </button>
@@ -274,9 +277,6 @@ function mount(target) {
         </button>
         <button data-mode="gaming">
           <sl-icon name="joystick"></sl-icon>
-        </button>
-        <button data-mode="cursor">
-          <sl-icon name="cursor"></sl-icon>
         </button>
       </div>
     </div>
@@ -609,6 +609,8 @@ $.style(`
     display: none;
     max-width: 100%;
     width: 100%;
+    padding: .5rem;
+    overflow: auto;
   }
 
   & .actions {
@@ -687,8 +689,8 @@ $.style(`
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
     transition: background 200ms ease-in-out;
-    font-size: 2rem;
-    padding: 1rem;
+    font-size: 1.5rem;
+    padding: .75rem;
     line-height: 1;
     display: inline-flex;
   }
@@ -702,7 +704,6 @@ $.style(`
 
   & .menu-group {
     display: flex;
-    overflow: auto;
     margin-right: auto;
   }
 
@@ -771,6 +772,14 @@ $.style(`
   &[data-mode="${modes.note}"] simpleton-client {
     pointer-events: all;
     opacity: 1;
+  }
+
+  &[data-mode="${modes.move}"] .toolbelt-actions {
+    pointer-events: none;
+  }
+
+  &[data-mode="${modes.move}"] .toolbelt-actions .menu-group {
+    pointer-events: all;
   }
   &[data-mode="${modes.camera}"] live-help,
   &[data-mode="${modes.cursor}"] draw-term {
