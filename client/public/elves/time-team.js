@@ -192,7 +192,7 @@ $.draw(target => {
       </div>
     </div>
     <form class="new-message-form" data-command="enter">
-      <button class="button send" type="submit" data-command="enter">
+      <button class="send" type="submit" data-command="enter">
         <sl-icon name="arrow-up-circle"></sl-icon>
       </button>
       <div class="text-well">
@@ -481,16 +481,18 @@ $.style(`
     padding: 4px;
   }
 
-  & .button.send {
+  & .send {
     position: absolute;
     bottom: 0;
     right: 0;
-    padding: 0 .5rem 0;
+    padding: .3rem;
+    background: dodgerblue;
     margin: .5rem;
     color: white;
     z-index: 1;
     border-radius: 100%;
     display: grid;
+    border: none;
   }
 
   & .message {

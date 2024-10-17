@@ -1,7 +1,5 @@
-# Computerless
-
-Summon your data from anywhere
+# Personal Computer
 
 <app-simulator
 class: iphone
-app: draw-term?color=white&amp;background=black
+app: /app/bulletin-board

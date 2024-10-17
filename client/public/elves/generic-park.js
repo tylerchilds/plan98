@@ -25,7 +25,7 @@ export let idx
 export const documents = [];
 let p98
 
-(async function buildIndex() {
+async function buildIndex(target) {
   try {
     const { plan98 } = await fetch(`/plan98/about`)
       .then(res => res.json())
@@ -42,12 +42,21 @@ let p98
       nest(this, { tree: plan98, pathParts: [], subtree: plan98 })
     })
     $.teach({ ready: true })
+
+  const src = target.getAttribute('src')
+  if(src) {
+    requestIdleCallback(() => {
+      const enclosure = jurassicFrom(src)
+      $.teach({ enclosure })
+    })
+  }
+
   } catch (e) {
     console.info('Build: Failed')
     console.error(e)
     return
   }
-})()
+}
 
 function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   if(!subtree.children) return ''
@@ -79,9 +88,10 @@ const $ = elf('generic-park', {
   suggestions: [],
   suggesttionsLength: 0,
   filter: '',
-	celestials: ['shelly','sol'],
-	shelly: aPlane({z: '-4', y: -.5, yaw: '-90'}, { color: 'mediumseagreen',  width: '10', height: '10' }),
-	sol: aSky({}, { color: 'dodgerblue' }),
+	celestials: ['water','dark', 'island-1'],
+	'island-1': aPlane({z: '0', y: -1, yaw: '-90'}, { color: 'mediumseagreen',  width: '100', height: '100' }),
+	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'dodgerblue',  width: '5000', height: '5000' }),
+	dark: aSky({}, { color: 'black' }),
 })
 
 export default $
@@ -98,6 +108,7 @@ $.draw((target) => {
   if(nested(target)) return 'paradox averted'
 	if(target.mounted) return
 	target.mounted = true
+  buildIndex(target)
 
 	const scene = celestials().map(component)
 
@@ -197,7 +208,7 @@ function increment(target) {
             pitch: 45
           }, {
             wireframe: posessed(eggs.path),
-            color: 'darkorange',
+            color: 'gold',
             'class': 'interactive-file',
             ['data-path']: eggs.path,
             ['data-name']: eggs.name

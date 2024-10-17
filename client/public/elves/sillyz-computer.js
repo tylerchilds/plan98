@@ -35,7 +35,10 @@ $.when('click', '[data-ok]', (event) => {
 })
 
 $.when('click', '.synthia-clear', (event) => {
-  event.target.closest($.link).querySelector('[name="synthia"]').value =''
+  const node = event.target.closest($.link).querySelector('[name="synthia"]')
+
+  node.value =''
+  node.focus()
 })
 
 $.draw(target => {
@@ -168,7 +171,7 @@ function computer(node) {
       </button>
       <div class="prompt">
         <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
-        ${code ? `<button data-voice class="synthia-action synthia-clear">
+        ${code ? `<button class="synthia-action synthia-clear">
           <sl-icon name="x-lg"></sl-icon>
         </button>`:''}
       </div>
@@ -209,11 +212,18 @@ $.when('input', '[name="synthia"]', event => {
 $.when('click', '[data-url]', (event) => {
   const { url } = event.target.dataset
 
-  if(url) {
+  if(url && !event.target.matches('.calculation-error')) {
     window.location.href = url
   }
 })
 
+$.when('click', '[data-voice]', (event) => {
+  $.teach({ calculation: { name: 'voice to search coming soon', error: true } })
+})
+
+$.when('click', '[data-camera]', (event) => {
+  showModal(`<pocket-dexterity></pocket-dexterity>`)
+})
 
 $.when('click', '[data-calculate]', (event) => {
   const { code } = $.learn()
@@ -226,7 +236,7 @@ $.when('click', '[data-calculate]', (event) => {
       return
     }
 
-    const calculation = { name: response, url: '/app/sillyz-computer?src=/app/sillyz-computer&code=' + encode(code) }
+    const calculation = { name: response, url: '/app/sillyz-computer?code=' + encode(code) }
     $.teach({ calculation, error: false })
   } catch(e) {
     $.teach({ calculation: { name: e.message, error: true } })

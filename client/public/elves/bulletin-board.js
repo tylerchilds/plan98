@@ -115,7 +115,7 @@ function afterUpdate(target) {
     const gaming = target.querySelector('.gaming')
     if(!gaming.innerHTML && mode === modes.gaming) {
       gaming.innerHTML = `
-        <generic-park src="${src}" class="stack"></generic-park>
+        <generic-park src="/public/elves" class="stack"></generic-park>
       `
     }
   }
@@ -128,6 +128,10 @@ function afterUpdate(target) {
       map.innerHTML = `
         <middle-earth src="${src}" class="stack"></middle-earth>
       `
+    }
+
+    if(map && map.querySelector('middle-earth')) {
+      map.querySelector('middle-earth')?.map.invalidateSize()
     }
   }
 
@@ -208,10 +212,30 @@ function mount(target) {
   target.innerHTML = `
     <div class="actions">
       <div class="menu-item">
-        <button data-menu-target="zoom">
-          <sl-icon name="plus-slash-minus"></sl-icon>
+        <button data-menu-target="file">
+          File
         </button>
-        <div class="menu-actions" data-menu="zoom">
+        <div class="menu-actions" data-menu="file">
+          <button data-file-open>
+            <span>
+            <sl-icon name="folder2-open"></sl-icon>
+            </span>
+            Open
+          </button>
+          <button data-file-save>
+            <span>
+            <sl-icon name="floppy"></sl-icon>
+            </span>
+            Save
+          </button>
+        </div>
+      </div>
+
+      <div class="menu-item">
+        <button data-menu-target="view">
+          View
+        </button>
+        <div class="menu-actions" data-menu="view">
           <button data-zoom-in>
             <span>
             <sl-icon name="zoom-in"></sl-icon>
@@ -228,7 +252,7 @@ function mount(target) {
       </div>
       <div class="menu-item">
         <button data-menu-target="edit">
-          <sl-icon name="watch"></sl-icon>
+          Edit
         </button>
         <div class="menu-actions" data-menu="edit">
           <button data-undo>
@@ -281,7 +305,7 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
-      <draw-term src="/app/sillyz-computer" background="transparent" color="lemonchiffon" class="infinite stack"></draw-term>
+      <shared-terminal src="/app/sillyz-computer" background="transparent" color="lemonchiffon" class="infinite stack"></shared-terminal>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
@@ -345,10 +369,6 @@ function drawOnCanvas (target, stroke) {
 $.when('click', '[data-mode]', function updateMode (event) {
   const { mode } = event.target.dataset
   $.teach({ mode })
-})
-
-$.when('click', '.toolbelt-actions', function updateMode (event) {
-  $.teach({ mode: modes.move })
 })
 
 /**
@@ -611,6 +631,7 @@ $.style(`
     width: 100%;
     padding: .5rem;
     overflow: auto;
+    pointer-events: none;
   }
 
   & .actions {
@@ -637,7 +658,7 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: 0;
+    padding: 0 .5rem;
     height: 100%;
     font-size: 1rem;
     --v-font-mono: 1;
@@ -705,6 +726,7 @@ $.style(`
   & .menu-group {
     display: flex;
     margin-right: auto;
+    pointer-events: all;
   }
 
   & .menu-item {
@@ -753,7 +775,7 @@ $.style(`
   }
 
   & live-help,
-  & draw-term {
+  & shared-terminal {
     pointer-events: none;
     opacity: .5;
     position: relative;
@@ -764,8 +786,8 @@ $.style(`
     opacity: 0;
   }
 
-  &:not([data-mode="${modes.cursor}"]) draw-term .tray .tray-wake,
-  &:not([data-mode="${modes.cursor}"]) draw-term .tray[data-focused="true"] {
+  &:not([data-mode="${modes.cursor}"]) shared-terminal .tray .tray-wake,
+  &:not([data-mode="${modes.cursor}"]) shared-terminal .tray[data-focused="true"] {
     pointer-events: none !important;
   }
 
@@ -774,15 +796,8 @@ $.style(`
     opacity: 1;
   }
 
-  &[data-mode="${modes.move}"] .toolbelt-actions {
-    pointer-events: none;
-  }
-
-  &[data-mode="${modes.move}"] .toolbelt-actions .menu-group {
-    pointer-events: all;
-  }
   &[data-mode="${modes.camera}"] live-help,
-  &[data-mode="${modes.cursor}"] draw-term {
+  &[data-mode="${modes.cursor}"] shared-terminal {
     pointer-events: all;
     opacity: 1;
   }
@@ -830,7 +845,7 @@ $.style(`
     display: block;
   }
 
-  & draw-term.stack {
+  & shared-terminal.stack {
     width: 5000px;
     height: 5000px;
   }
