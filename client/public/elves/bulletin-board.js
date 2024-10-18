@@ -631,7 +631,7 @@ $.style(`
     width: 100%;
     padding: .5rem;
     overflow: auto;
-    pointer-events: none;
+    display: inline-block;
   }
 
   & .actions {
@@ -731,7 +731,6 @@ $.style(`
 
   & .menu-item {
     position: relative;
-    aspect-ratio: 1;
   }
 
   & .menu-item.disabled {
