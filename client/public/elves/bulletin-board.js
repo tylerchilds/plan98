@@ -228,6 +228,7 @@ function mount(target) {
             </span>
             Save
           </button>
+          <input value="${window.location.href}" data-share>
         </div>
       </div>
 
@@ -326,6 +327,7 @@ function mount(target) {
 
   canvas.classList.add('stack')
   canvas.classList.add('canvas')
+  canvas.classList.add('bulletin-canvas')
   canvas.classList.add('stars')
 
   canvas.width = 5000;
@@ -369,6 +371,12 @@ function drawOnCanvas (target, stroke) {
 $.when('click', '[data-mode]', function updateMode (event) {
   const { mode } = event.target.dataset
   $.teach({ mode })
+})
+
+$.when('click', '[data-file-open]', function updateMode (event) {
+})
+
+$.when('click', '[data-file-save]', function updateMode (event) {
 })
 
 /**
@@ -426,9 +434,9 @@ $.when('click', '[data-zoom-out]', function redoDraw (event) {
 })
 
 
-$.when('pointerdown', 'canvas', start)
-$.when('pointermove', 'canvas', move)
-$.when('pointerup', 'canvas', end)
+$.when('pointerdown', '.bulletin-canvas', start)
+$.when('pointermove', '.bulletin-canvas', move)
+$.when('pointerup', '.bulletin-canvas', end)
 
 const startModes = {
   'draw': startDraw,
@@ -448,6 +456,7 @@ const endModes = {
 
 
 function start(e) {
+  e.preventDefault()
   const { mode } = $.learn()
 
   if(startModes[mode]) {
@@ -456,6 +465,7 @@ function start(e) {
 }
 
 function move(e) {
+  e.preventDefault()
   const { mode } = $.learn()
 
   if(moveModes[mode]) {
@@ -464,6 +474,7 @@ function move(e) {
 }
 
 function end(e) {
+  e.preventDefault()
   const { mode } = $.learn()
 
   if(endModes[mode]) {
@@ -858,6 +869,13 @@ $.style(`
     height: 5000px;
     position: relative;
     pointer-events: none;
+  }
+
+  & [data-share] {
+    border: none;
+    background: black;
+    color: white;
+    padding: .25rem;
   }
 `)
 

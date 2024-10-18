@@ -57,9 +57,9 @@ function add(timestamp) {
 
 $.draw(target => {
   const data = $.learn()
-  const {message,bookmarks, authenticated, alias, pass, href, text} = data
+  const {message,bookmarks, authenticated, authorized, alias, pass, href, text} = data
 
-  const fakie = `
+  const empty = `
     <form class="block">
       <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
       <label class="field">
@@ -75,6 +75,10 @@ $.draw(target => {
         Sign a Panda in
       </button>
     </form>
+  `
+
+  const halfway = `
+    hi
   `
 
   const regular = `
@@ -102,7 +106,12 @@ $.draw(target => {
 
   return `
     <div class="inner">
-      ${authenticated ? regular : fakie}
+      ${authenticated
+        ? authorized
+          ? regular
+          : halfway
+        : empty
+      }
     </div>
   `
 }, { beforeUpdate, afterUpdate })

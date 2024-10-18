@@ -1,7 +1,6 @@
 import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
-import supabase from '@sillonious/database'
 import { render } from '@sillonious/saga'
 import { bayunCore } from '@sillonious/vault'
 import { getSession, clearSession } from './plan98-wallet.js'
