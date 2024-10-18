@@ -30,6 +30,7 @@ export async function actionScript(event) {
   otherActions.map((x) => {
     x.classList.add('inactive')
   })
+  debugger
   if(script) {
         const dispatch = (await import(script))[action]
     if(dispatch) {

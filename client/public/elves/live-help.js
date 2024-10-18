@@ -27,5 +27,5 @@ script.onload = function () {
   `)
 };
 
-script.src = "https://8x8.vc/external_api.js";
+script.src = `https://8x8.vc/${'vpaas-magic-cookie-601556760e2e4612a620aad1abd2b1d1'}/external_api.js`;
 document.head.appendChild(script); 
