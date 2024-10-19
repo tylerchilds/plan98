@@ -801,6 +801,13 @@ $.style(`
     pointer-events: none !important;
   }
 
+  &[data-mode="${modes.draw}"] .workspace .displays *,
+  &[data-mode="${modes.draw}"] .workspace shared-terminal * {
+    pointer-events: none !important;
+  }
+  &[data-mode="${modes.move}"] .workspace shared-terminal * {
+    pointer-events: none !important;
+  }
   &[data-mode="${modes.note}"] simpleton-client {
     pointer-events: all;
     opacity: 1;
