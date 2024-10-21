@@ -20,7 +20,7 @@ const modes = {
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.cursor,
+  mode: modes.move,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   panXmod: 0,
@@ -273,11 +273,11 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
-        <button data-mode="cursor">
-          <sl-icon name="cursor"></sl-icon>
-        </button>
         <button data-mode="move">
           <sl-icon name="arrows-move"></sl-icon>
+        </button>
+        <button data-mode="cursor">
+          <sl-icon name="cursor"></sl-icon>
         </button>
         <button data-mode="draw" class="">
           <sl-icon name="pencil"></sl-icon>

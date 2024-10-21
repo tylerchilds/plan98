@@ -170,7 +170,7 @@ function computer(node) {
         <sl-icon name="calculator"></sl-icon>
       </button>
       <div class="prompt">
-        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" autocomplete="off">${code||''}</textarea>
+        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" placeholder="prompt synthia" autocomplete="off">${code||''}</textarea>
         ${code ? `<button class="synthia-action synthia-clear">
           <sl-icon name="x-lg"></sl-icon>
         </button>`:''}
@@ -449,11 +449,11 @@ $.style(`
   & .suggestion-box .auto-item:hover {
     background-color: var(--button-color, dodgerblue);
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    color: white;
+    color: saddlebrown;
   }
 
   & .suggestion-box .auto-item.active {
-    color: white;
+    color: saddlebrown;
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     background-color: var(--button-color, dodgerblue);
   }
@@ -466,12 +466,11 @@ $.style(`
     height: 2rem;
     min-height: 2rem;
     line-height: 1;
-    color: white;
+    color: saddlebrown;
     position: relative;
     display: grid;
     grid-template-columns: auto 1fr auto auto;
-    color: rgba(255,255,255,.85);
-    background: rgba(0,0,0,1);
+    background: lemonchiffon;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -499,10 +498,10 @@ $.style(`
   }
 
   & .title-bar textarea {
-    border: 1px solid rgba(255,255,255,.5);
+    border: 1px solid mediumseagreen;
     border-radius: 0;
-    background: rgba(0,0,0,1);
-    color: rgba(255,255,255,1);
+    background: lemonchiffon;
+    color: saddlebrown;
     width: 100%;
     padding: 0 4px 0;
     height: 100%;
@@ -531,12 +530,12 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-items: center;
-    color: rgba(255,255,255,.65);
+    color: dodgerblue;
   }
 
   & .synthia-action:hover,
   & .synthia-action:focus {
-    color: rgba(255,255,255,1);
+    color: dodgerblue;
   }
 `)
 
