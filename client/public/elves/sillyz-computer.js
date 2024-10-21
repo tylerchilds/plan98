@@ -37,6 +37,7 @@ $.when('click', '[data-ok]', (event) => {
 $.when('click', '.synthia-clear', (event) => {
   const node = event.target.closest($.link).querySelector('[name="synthia"]')
 
+  $.teach({ calculation: null, error: false })
   node.value =''
   node.focus()
 })
@@ -201,12 +202,11 @@ function results(x) {
 
 $.when('input', '[name="synthia"]', event => {
   const code = event.target.value
-
-  if(code) {
-  $.teach({ code })
-  } else {
-    $.teach({ code })
-  }
+  $.teach({
+    code,
+    calculation: null,
+    error: false 
+  })
 })
 
 $.when('click', '[data-url]', (event) => {
@@ -498,7 +498,7 @@ $.style(`
   }
 
   & .title-bar textarea {
-    border: 1px solid mediumseagreen;
+    border: 1px solid saddlebrown;
     border-radius: 0;
     background: lemonchiffon;
     color: saddlebrown;
@@ -530,7 +530,7 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-items: center;
-    color: dodgerblue;
+    color: saddlebrown;
   }
 
   & .synthia-action:hover,

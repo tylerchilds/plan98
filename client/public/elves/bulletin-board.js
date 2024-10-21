@@ -687,6 +687,7 @@ $.style(`
   & .actions button:hover {
     color: #fff;
     background: #54796d;
+    z-index: 2;
   }
 
 
@@ -885,6 +886,10 @@ $.style(`
     padding: .25rem;
   }
 `)
+
+$.when('focus', '[data-share]', (event) => {
+  event.target.select()
+})
 
 function getStars(target) {
   const canvas = document.createElement("canvas");
