@@ -1,9 +1,6 @@
-import { innerHTML } from 'diffhtml'
+import diffHTML from 'diffhtml'
 import Computer from '@sillonious/computer'
-import 'gun'
-const gun = window.Gun(['https://gun.1998.social/gun']);
 
-const database = {}
 const logs = {}
 
 export function insights() {
@@ -20,28 +17,52 @@ function insight(name, link) {
 const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
+const reactiveFunctions = {}
+
+
+function react(link) {
+  if(!reactiveFunctions[link]) return
+
+  Object.keys(reactiveFunctions[link])
+    .map(id => reactiveFunctions[link][id]())
+}
+
+const notifications = {
+  [react.toString()]: react
+}
+
+function notify(link) {
+  Object.keys(notifications)
+    .map(key => notifications[key](link))
+}
+
+const store = createStore({}, notify)
+
 
 function update(link, target, compositor, lifeCycle={}) {
   insight('module:update', link)
   if(lifeCycle.beforeUpdate) {
-    lifeCycle.beforeUpdate(target)
+    lifeCycle.beforeUpdate.call(this, target)
   }
 
   const html = compositor.call(this, target)
-  if(html) innerHTML(target, html)
+  if(html) diffHTML.innerHTML(target, html)
 
   if(lifeCycle.afterUpdate) {
-    lifeCycle.afterUpdate(target)
+    lifeCycle.afterUpdate.call(this, target)
   }
 }
 
 function draw(link, compositor, lifeCycle={}) {
   insight('module:draw', link)
+  if(!reactiveFunctions[link]) {
+    reactiveFunctions[link] = {}
+  }
+
   listen(CREATE_EVENT, link, (event) => {
-    gun.get(this.seed).get(link).on(cache => {
-      database[link] = JSON.parse(cache) || {}
-      update(link, event.target, compositor, lifeCycle)
-    })
+    const draw = update.bind(this, link, event.target, compositor, lifeCycle)
+    reactiveFunctions[link][event.target.id] = draw
+    draw()
   })
 }
 
@@ -58,27 +79,23 @@ function style(link, stylesheet) {
 
 export function learn(link) {
   insight('module:learn', link)
-  return database[link] || {}
+  return store.get(link) || {}
 }
 
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
   insight('module:teach', link)
-  gun.get(this.seed).get(link).once(cache => {
-    const data = cache ? JSON.parse(cache) : {}
-    const latest = nuance(data, knowledge);
-    gun.get(this.seed).get(link).put(JSON.stringify(latest))
-  })
+  store.set(link, knowledge, nuance)
 }
 
 export function when(link1, type, link2, callback) {
   const link = `${link1} ${link2}`
   insight('module:when:'+type, link)
-  listen(type, link, callback)
+  listen.call(this, type, link, callback)
 }
 
 export default function module(link, initialState = {}) {
   insight('module', link)
-  teach.call(this, link, initialState)
+  teach(link, initialState)
 
   return {
     link,
@@ -109,7 +126,7 @@ export function listen(type, link, handler = () => null) {
     ) {
 
       insight('module:listen:'+type, link)
-      handler.call(null, event);
+      handler.call(this, event);
     }
   };
 
@@ -160,7 +177,7 @@ function getSubscribers({ target }) {
 
 function dispatchCreate(target) {
   insight('module:create', target.localName)
-  if(!target.id) target.id = sufficientlyUniqueId()
+  if(!target.id) target.id = self.crypto.randomUUID()
   target.dispatchEvent(new Event(CREATE_EVENT))
   target.reactive = true
 }
@@ -181,10 +198,25 @@ try {
   setTimeout(elves,1000)
 }
 
-function sufficientlyUniqueId() {
-  // https://stackoverflow.com/a/2117523
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    const r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
+function createStore(initialState = {}, subscribe = () => null) {
+  let state = {
+    ...initialState
+  };
+
+  return {
+    set: function(link, knowledge, nuance) {
+      const wisdom = nuance(state[link] || {}, knowledge);
+
+      state = {
+        ...state,
+        [link]: wisdom
+      };
+
+      subscribe(link);
+    },
+
+    get: function(link) {
+      return state[link];
+    }
+  }
 }

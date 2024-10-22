@@ -1,7 +1,11 @@
-import gelf from '@silly/gelf'
+import elf from '@silly/elf'
 import { innerHTML } from 'diffhtml'
 import natsort from 'natsort'
 import { idx, documents } from './giggle-search.js'
+
+import 'gun'
+import 'gun/open'
+const gun = window.Gun(['https://gun.1998.social/gun']);
 
 const initial = {
   startX: null,
@@ -16,7 +20,24 @@ const initial = {
   focusedTray: null,
 }
 
-const $ = gelf.call({ seed: self.location.href }, 'shared-terminal', initial)
+function read($) {
+  const href = window.location.href
+  return $.learn()[href] || {}
+}
+
+function write($, data, merge = (node, data, key) => {
+  node.get(key).put(data[key])
+}) {
+  const href = window.location.href
+  Object
+    .keys(data)
+    .forEach(key => {
+      const entry = gun.get($.link).get(href)
+      merge(entry, data, key)
+    })
+}
+
+const $ = elf.call({read, write}, 'shared-terminal')
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')
@@ -27,14 +48,14 @@ function engine(target) {
 
 function render(target) {
   const container = target.querySelector('.trays')
-  return function runtime(tray) {
-    const data = $.learn()[tray]
+  return (tray) => {
+    const data = this.read($)[tray]
     if(!data) return
     const {
-      suggestions,
+      suggestions=[],
       suggestIndex,
       focusedTray
-    } = $.learn()
+    } = this.read($)
     const {
       maximized,
       minimized,
@@ -159,12 +180,12 @@ const down = 40;
 const up = 38;
 const enter = 13;
 $.when('keydown', '.browser', event => {
-  const { suggestionsLength, suggestIndex } = $.learn()
+  const { suggestionsLength=0, suggestIndex } = this.read($)
   if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength -1) return
-    $.teach({ suggestIndex: nextIndex })
+    write($, { suggestIndex: nextIndex })
     return
   }
 
@@ -172,13 +193,13 @@ $.when('keydown', '.browser', event => {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
     if(nextIndex < 0) return
-    $.teach({ suggestIndex: nextIndex })
+    write($, { suggestIndex: nextIndex })
     return
   }
 
   if(event.keyCode === enter && suggestIndex !== null) {
     event.preventDefault()
-    const { suggestions, suggestIndex } = $.learn()
+    const { suggestions=[], suggestIndex } = this.read($)
     const item = documents.find(y => {
       return suggestions[suggestIndex].ref === y.path
     })
@@ -201,7 +222,7 @@ $.when('click', '.auto-item', event => {
   const url = '/app/media-plexer?src=' + path
   document.activeElement.blur()
   setState(tray, { url, focused: false })
-  $.teach({
+  write($, {
     suggestIndex: parseInt(event.target.dataset.index)
   })
 })
@@ -214,7 +235,7 @@ $.when('input', '.browser', (event) => {
 
   const sort = natsort();
   const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
-  $.teach({
+  write($, {
     suggestions,
     suggestIndex: null,
   })
@@ -223,7 +244,7 @@ $.when('input', '.browser', (event) => {
 $.when('submit', '.search', (event) => {
   event.preventDefault()
   const { tray } = event.target.dataset
-  const { buffer } = $.learn()[tray]
+  const { buffer } = this.read($)[tray]
   const url = buffer.indexOf('://') ? buffer : '/app/giggle-search?query=' + buffer
   setState(tray, { url, focused: false })
 })
@@ -241,13 +262,15 @@ $.when('blur', '.browser', event => {
 })
 
 
-$.draw((target) => {
+$.draw(function boop(target) {
+  if(!target.subscribed) subscribe(target)
   if(target.innerHTML) return
   const src = target.getAttribute('src')
   if(src) {
     requestIdleCallback(() => {
       const tray = self.crypto.randomUUID()
-      const { trayZ } = $.learn()
+  console.log(this)
+      const { trayZ=1 } = this.read($)
       setState(tray, {
         width: 300,
         height: 150,
@@ -257,17 +280,18 @@ $.draw((target) => {
         url: src,
         maximized: true,
         focused: true
-
       })
-      $.teach({
-        focusedTray: tray
-      }, (state, payload) => {
-        const newState = {...state}
-        newState.trays ||= []
-        newState.trays.push(payload)
-        newState.focusedTray = payload
-        newState.trayZ += 1
-        return newState
+
+      write($, {
+        focusedTray: tray,
+        trayZ: trayZ + 1
+      })
+
+      write($, {
+        trays: tray
+      }, function mergeTrays(node, data, key) {
+        const edge = node.get(key)
+        edge.get(data[key]).put(true)
       })
     })
   }
@@ -276,7 +300,10 @@ $.draw((target) => {
     <div class="cursor"></div>
     <canvas></canvas>
   `
-}, { beforeUpdate, afterUpdate })
+}, {
+  beforeUpdate,
+  afterUpdate
+})
 
 function beforeUpdate(target) {
   saveCursor(target) // first things first
@@ -289,7 +316,7 @@ function beforeUpdate(target) {
   }
 
   {
-    const { startX, startY, x, y, invertX, invertY } = $.learn()
+    const { startX, startY, x, y, invertX, invertY } = this.read($)
     const background = target.getAttribute('background')
     const color = target.getAttribute('color')
     
@@ -303,20 +330,20 @@ function beforeUpdate(target) {
   }
 
   {
-    const { isMouseDown } = $.learn()
+    const { isMouseDown } = this.read($)
     target.dataset.mouse = isMouseDown
   }
 }
 
 function afterUpdate(target) {
   {
-    const { grabbing } = $.learn()
+    const { grabbing } = this.read($)
     const trays = target.querySelector('.trays')
     trays.dataset.grabbing = !!grabbing
   }
 
   {
-    const { resizing } = $.learn()
+    const { resizing } = this.read($)
     const trays = target.querySelector('.trays')
     trays.dataset.resizing = !!resizing
   }
@@ -335,25 +362,24 @@ function afterUpdate(target) {
     }
   }
 
-
   {
-    const { isMouseDown } = $.learn()
+    const { isMouseDown } = this.read($)
     const cursor = target.querySelector('.cursor')
     cursor.style = `${isMouseDown ? 'display: block;' : 'display: none;'};`
   }
 
   {
-    const { trays } = $.learn()
-    if(trays) {
-      trays.map(render(target))
+    const { trays } = this.read($)
+    if(trays) { 
+      Object.keys(trays).map(render.call(this, target))
     }
   }
 
   {
-    const { trays } = $.learn()
+    const { trays } = this.read($)
     if(target.matches('.inline') && trays) {
       const somethingMaxed = trays.some(x => {
-        const tray = $.learn()[x]
+        const tray = this.read($)[x]
         return tray.maximized
       })
 
@@ -371,6 +397,20 @@ function afterUpdate(target) {
   }
 
   replaceCursor(target) // first things first
+}
+
+function subscribe(target) {
+  target.subscribed = true
+  const href = window.location.href
+  const entry = gun.get($.link).get(href)
+  entry.once(data => {
+    if(!data) {
+      entry.put(initial)
+    }
+  })
+  entry.open((data) => {
+    $.teach({[href]: data})
+  });
 }
 
 function preventDefault(e) { e.preventDefault() }
@@ -395,7 +435,7 @@ $.when('click', '.tray-toggle', toggleMin)
 function syncTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
-  let { buffer, url } = $.learn()[tray]
+  let { buffer, url } = this.read($)[tray]
   buffer ||= url
   url = buffer.startsWith('/')
     ? buffer
@@ -409,65 +449,56 @@ function syncTray(event) {
 
 function toggleMax(event) {
   const tray = event.target.closest('.tray').dataset.id
-  const { maximized } = $.learn()[tray]
+  const { maximized } = this.read($)[tray]
   maximized ? restoreMax(tray) : maximize(tray)
 }
 
 function maximize(tray) {
-  $.teach(tray, (state, payload) => {
-    const newState = {...state} 
-    newState[payload].maximized = true
-    newState[payload].minimized = false
-    return newState
+  setState(tray, {
+    maximized: true,
+    minimized: false
   })
 }
 
 // restore a pane
 function restoreMax(tray) {
-  $.teach(tray, (state, payload) => {
-    const newState = {...state} 
-    newState[payload].maximized = false
-    return newState
+  setState(tray, {
+    maximized: false,
   })
 }
 
 function toggleMin(event) {
   const tray = event.target.closest('.tray').dataset.id
-  const { minimized } = $.learn()[tray]
+  const { minimized } = this.read($)[tray]
   minimized ? restoreMin(tray) : minimize(tray)
 }
 
 function minimize(tray) {
-  $.teach(tray, (state, payload) => {
-    const newState = {...state} 
-    newState[payload].minimized = true
-    newState[payload].maximized = false
-    return newState
+  setState(tray, {
+    minimized: true,
+    maximized: false
   })
 }
 
 // restore a pane
 function restoreMin(tray) {
-  $.teach(tray, (state, payload) => {
-    const newState = {...state} 
-    newState[payload].minimized = false
-    return newState
+  setState(tray, {
+    minimized: false,
   })
 }
 
 function closeTray(event) {
   const { tray } = event.target.dataset
-  $.teach(tray, (state, payload) => {
-    const newState = {...state} 
-    newState.trays ||= []
-    const trayIndex = newState.trays.indexOf(payload)
 
-    if(trayIndex >= 0) {
-      newState.trays.splice(trayIndex, 1)
-      delete newState[payload]
-    }
+  write($, {
+    trays: tray
+  }, function mergeTrays(node, data, key) {
+    const edge = node.get(key)
+    edge.get(data[key]).put(null)
+  })
 
-    return newState
+  write($, tray, function merge(node, tray) {
+    node.get(tray).put(null)
   })
 }
 
@@ -478,26 +509,23 @@ function grab(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  const { trayZ } = $.learn()
+  const { trayZ=1 } = this.read($)
   const newZ = trayZ + 1
-  $.teach({ trayZ: newZ, focusedTray: tray })
-  setState(tray, { z: newZ })
-  grabTimeout = setTimeout(() => {
-    setState(tray, { grabbed: true })
-    $.teach({ grabbing: tray })
-    grabOffsetX = offsetX
-    grabOffsetY = offsetY
-  }, 250)
+  write($, { trayZ: newZ, focusedTray: tray })
+  setState(tray, { z: newZ, grabbed: true })
+  write($, { grabbing: tray })
+  grabOffsetX = offsetX
+  grabOffsetY = offsetY
 }
 
 // drag a pane
 let lastX, lastY;
 function drag(event) {
   let { target, clientX, clientY } = event
-  const { grabbing, resizing } = $.learn()
+  const { grabbing, resizing } = read($)
   const tray = grabbing || resizing
   if(!tray) return
-  const { grabbed, resize, x, y, width, height } = $.learn()[tray]
+  const { grabbed, resize, x, y, width, height } = this.read($)[tray]
 
   const panX = getComputedStyle(event.target).getPropertyValue("--pan-x") || 0;
   const panY = getComputedStyle(event.target).getPropertyValue("--pan-y") || 0;
@@ -544,10 +572,10 @@ function drag(event) {
 // release a pane
 function ungrab(event) {
   clearTimeout(grabTimeout)
-  const tray = $.learn().grabbing
+  const tray = this.read($).grabbing
   if(!tray) return
   setState(tray, { grabbed: false })
-  $.teach({ grabbing: null })
+  write($, { grabbing: null })
   lastX = undefined;
   lastY = undefined;
   grabOffsetX = undefined
@@ -559,18 +587,18 @@ function resize(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  const { trayZ } = $.learn()
+  const { trayZ=1 } = this.read($)
   const newZ = trayZ + 1
-  $.teach({ resizing: tray, trayZ: newZ, focusedTray: tray })
+  write($, { resizing: tray, trayZ: newZ, focusedTray: tray })
   setState(tray, { resize: event.target.dataset.direction, z: newZ })
   grabOffsetX = offsetX
   grabOffsetY = offsetY
 }
 function unresize({ target }) {
-  const tray = $.learn().resizing
+  const tray = this.read($).resizing
   if(!tray) return
   setState(tray, { resize: null })
-  $.teach({ resizing: null })
+  write($, { resizing: null })
   lastX = undefined;
   lastY = undefined;
   grabOffsetX = undefined
@@ -579,14 +607,8 @@ function unresize({ target }) {
 
 
 function setState(tray, payload) {
-  $.teach(payload, function merge(state) {
-    return {
-      ...state,
-      [tray]: {
-        ...state[tray],
-        ...payload
-      }
-    }
+  write($, payload, function merge(node, data, key) {
+    node.get(tray).get(key).put(data[key])
   })
 }
 
@@ -986,7 +1008,7 @@ $.style(`
 $.when('pointerdown', 'canvas', start)
 
 function start(e) {
-  const { grabbing } = $.learn()
+  const { grabbing } = this.read($)
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
@@ -1002,14 +1024,14 @@ function start(e) {
   x = 0
   y = 0
 
-  $.teach({ startX, startY, isMouseDown: true, x, y })
+  write($, { startX, startY, isMouseDown: true, x, y })
 }
 
 $.when('pointermove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { startX, isMouseDown, startY, grabbing } = $.learn()
+  const { startX, isMouseDown, startY, grabbing } = this.read($)
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
@@ -1023,47 +1045,49 @@ function move (e) {
     x = e.clientX - startX - rectangle.left
     y = e.clientY - startY - rectangle.top
   }
-
-  $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
+  write($, { x, y, invertX: x < 0, invertY: y < 0 })
 }
 
 $.when('click', '.tray-wake', wake)
 function wake (e) {
-  const { trayZ } = $.learn()
+  const { trayZ=1 } = this.read($)
   const newZ = trayZ + 1
   const { tray } = event.target.dataset
-  $.teach({ trayZ: newZ, focusedTray: tray })
+  write($, { trayZ: newZ, focusedTray: tray })
   setState(tray, { z: newZ })
 }
 $.when('pointerup', 'canvas', end)
 function end (e) {
-  const { grabbing } = $.learn()
+  const { grabbing } = this.read($)
   if(grabbing) return
-  const { focusedTray, startX, x, y, invertX, invertY, startY } = $.learn()
+  const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = this.read($)
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
   if(Math.abs(x) > 50 && Math.abs(y) > 50) {
     const tray = self.crypto.randomUUID()
-    $.teach(tray, (state, payload) => {
-      const newState = {...state}
-      newState.trays ||= []
-      newState.trays.push(payload)
-      newState.trayZ += 1
-      newState.focusedTray = tray
-      newState[payload] = {
-        width: Math.abs(x),
-        height: Math.abs(y),
-        x: invertX ? startX + x : startX,
-        y: invertY ? startY + y : startY,
-        z: newState.trayZ,
-        url: `/app/hyper-script?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
-      }
-      return newState
+    write($, {
+      focusedTray: tray
+    })
+
+    write($, {
+      trays: tray
+    }, function mergeTrays(node, data, key) {
+      const edge = node.get(key)
+      edge.get(data[key]).put(true)
+    })
+
+    setState(tray, {
+      width: Math.abs(x),
+      height: Math.abs(y),
+      x: invertX ? startX + x : startX,
+      y: invertY ? startY + y : startY,
+      z: trayZ + 1,
+      url: `/app/hyper-script?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
     })
   }
 
-  $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+  write($, { startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
 };
 
 const tags = ['TEXTAREA', 'INPUT']
@@ -1092,3 +1116,4 @@ function replaceCursor(target) {
     }
   }
 }
+

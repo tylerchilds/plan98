@@ -131,6 +131,7 @@ $.style(`
     opacity: 1;
     transition: opacity 100ms ease-in-out;
     position: relative;
+    background: #54796d;
   }
 
   & .lightbox {
