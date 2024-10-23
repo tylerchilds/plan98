@@ -14,7 +14,7 @@ const nonce = `<div class="nonce"></div>`
 $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer', {
-  code: '',
+  code: 'plan98.start()',
   start: false
 })
 

@@ -29,14 +29,19 @@ app.get("/mp4ify", async (req, res) => {
 
   const download = await fetch(`https://stream.mux.com/${req.query.playback_id}/capped-1080p.mp4?download=cats`)
 
-  const file = await Deno.open(`./videos/${req.query.asset_id}.mp4`, { create: true, write: true })
+  let error = 'success'
+  try {
+    const file = await Deno.open(`./videos/${req.query.asset_id}.mp4`, { create: true, write: true })
 
-  console.log(download.body)
+    console.log(download.body)
 
-  await download.body.pipeTo(file.writable)
-  file.close()
+    await download.body.pipeTo(file.writable)
+    file.close()
+  } catch(e) {
+    error = e
+  }
 
-  res.send('done?')
+  res.send('done? ' + error)
 })
 
 app.listen(6868);
