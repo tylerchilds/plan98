@@ -1,7 +1,7 @@
 import module from '@silly/tag'
 
 const $ = module('hello-nickname', {
-  'nickname': 'Earthling'
+  'nickname': 'Uncle Toto'
 })
 
 $.draw(() => {
