@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <sillyz-computer src="/app/bulletin-board"></sillyz-computer>
+    <sillyz-computer src="/app/hyper-script"></sillyz-computer>
   `
 })
 

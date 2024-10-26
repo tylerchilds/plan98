@@ -182,6 +182,9 @@ function computer(node) {
       <button data-camera class="synthia-action">
         <sl-icon name="camera"></sl-icon>
       </button>
+      <button data-gaming class="synthia-action">
+        <sl-icon name="joystick"></sl-icon>
+      </button>
     </div>
   `)
 }
@@ -224,6 +227,11 @@ $.when('click', '[data-voice]', (event) => {
 $.when('click', '[data-camera]', (event) => {
   showModal(`<pocket-dexterity></pocket-dexterity>`)
 })
+
+$.when('click', '[data-gaming]', (event) => {
+  window.location.href = "/app/generic-park?src=/public/elves"
+})
+
 
 $.when('click', '[data-calculate]', (event) => {
   const { code } = $.learn()
@@ -469,7 +477,7 @@ $.style(`
     color: saddlebrown;
     position: relative;
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     background: lemonchiffon;
     gap: 5px;
     touch-action: manipulation;
