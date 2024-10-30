@@ -21,8 +21,8 @@
     "start-identity": "deno run -A identity.js",
     "reverse-identity": "ssh -N -R 3000:localhost:3000 wallet.$USER.me",
 
-    "start-repository": "cd ../SourceCode/esm.sh && go run main.go --config=config.json --dev",
-    "reverse-repository": "ssh -N -R 8080:localhost:8090 esm.$USER.me",
+    "start-modules": "cd server/esm.sh/esm.sh-main && go run main.go --config=config.json",
+    "reverse-modules": "ssh -N -R 8181:localhost:8181 esm.$USER.me",
 
     "start-relay": "cd server/relay && npm start",
     "reverse-relay": "ssh -N -R 8765:localhost:8765 relay.$USER.me",
