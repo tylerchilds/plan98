@@ -8,6 +8,8 @@ const processConfiguration = {
   reverseServer: false,
   identity: false,
   reverseIdentity: false,
+  modules: true,
+  reverseModules: false,
   relay: true,
   reverseRelay: false,
   database: false,
