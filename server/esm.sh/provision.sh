@@ -7,8 +7,6 @@ curl -L -o esm.sh.tar.gz https://github.com/esm-dev/esm.sh/archive/main.tar.gz
 # Extract the downloaded archive
 tar -xzvf esm.sh.tar.gz
 
-cp config.json esm.sh-main
-
 # Navigate into the extracted directory
 cd esm.sh-main
 

@@ -18,8 +18,6 @@ const processConfiguration = {
   reverseVersionControl: false,
   multiplayer: true,
   reverseMultiplayer: false,
-  modules: true,
-  reverseModules: false,
   features: {
     client: {
       "id": "plan98-start-client",
@@ -51,14 +49,14 @@ const processConfiguration = {
       "cmd": "deno task reverse-identity",
       "autostart": true
     },
-    modules: {
-      "id": "plan98-start-modules",
-      "cmd": "deno task start-modules",
+    repository: {
+      "id": "plan98-start-repository",
+      "cmd": "deno task start-repository",
       "autostart": true
     },
-    reverseModules: {
-      "id": "plan98-reverse-modules",
-      "cmd": "deno task reverse-modules",
+    reverseRepository: {
+      "id": "plan98-reverse-repository",
+      "cmd": "deno task reverse-repository",
       "autostart": true
     },
     relay: {
@@ -101,6 +99,7 @@ const processConfiguration = {
       "cmd": "deno task reverse-version-control",
       "autostart": true
     },
+
     multiplayer: {
       "id": "plan98-start-multiplayer",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",
@@ -111,6 +110,8 @@ const processConfiguration = {
       "cmd": "deno task reverse-multiplayer",
       "autostart": true
     },
+
+
   }
 }
 

@@ -151,6 +151,9 @@ export const doingBusinessAs = {
       .display()
       .toString({format: 'hex'}),
     endOfHead: `
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/index.global.min.js'></script>
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/web-component@6.1.15/index.global.min.js'></script>
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.15/index.global.min.js'></script>
       <script src="https://widget.clym-sdk.net/blocking.js"></script>
       <script>
       (function(d,s,i,w,o){
@@ -239,6 +242,9 @@ export const doingBusinessAs = {
       },
     ],
     endOfHead: `
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.15/index.global.min.js'></script>
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/web-component@6.1.15/index.global.min.js'></script>
+      <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.15/index.global.min.js'></script>
     `
   },
   'tychi.me': {
