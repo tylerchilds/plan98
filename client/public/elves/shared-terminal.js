@@ -1083,7 +1083,7 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      url: `/app/hyper-script?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+      url: `/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
     })
   }
 
