@@ -50,7 +50,7 @@ $.draw(() => {
       </p>
     </div>
 
-    <a href="${r($, '/public/sagas/sillyz.computer/en-us/saga-about.mailto.href.saga')}">
+    <a href="mailto:player1@sillyz.computer">
       ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.mailto.label.saga')}
     </a>
   `

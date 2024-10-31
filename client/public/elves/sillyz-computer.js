@@ -274,9 +274,9 @@ $.style(`
     z-index: 2;
     top: 0;
     left: 0;
-    background: black;
+    background: lemonchiffon;
     padding: 1rem;
-    color: white;
+    color: saddlebrown;
     text-decoration: none;
     display: inline-grid;
     font-size: 1rem;
