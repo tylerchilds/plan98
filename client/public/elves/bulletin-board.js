@@ -112,17 +112,6 @@ function afterUpdate(target) {
   {
     const { mode } = $.learn()
     const src = target.getAttribute('src')
-    const gaming = target.querySelector('.gaming')
-    if(!gaming.innerHTML && mode === modes.gaming) {
-      gaming.innerHTML = `
-        <generic-park src="/public/elves" class="stack"></generic-park>
-      `
-    }
-  }
-
-  {
-    const { mode } = $.learn()
-    const src = target.getAttribute('src')
     const map = target.querySelector('.map')
     if(!map.innerHTML && mode === modes.map) {
       map.innerHTML = `
@@ -299,9 +288,6 @@ function mount(target) {
         </button>
         <button data-mode="calendar">
           <sl-icon name="calendar3"></sl-icon>
-        </button>
-        <button data-mode="gaming">
-          <sl-icon name="joystick"></sl-icon>
         </button>
       </div>
     </div>
