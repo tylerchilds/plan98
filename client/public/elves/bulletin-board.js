@@ -809,6 +809,10 @@ $.style(`
   &[data-mode="${modes.move}"] .workspace shared-terminal * {
     pointer-events: none !important;
   }
+
+  &[data-mode="${modes.move}"] .workspace shared-terminal iframe{
+    display: none;
+  }
   &[data-mode="${modes.note}"] simpleton-client {
     pointer-events: all;
     opacity: 1;

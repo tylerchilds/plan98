@@ -216,43 +216,49 @@ function drawIrix(tray) {
         <button class="blank-action" data-tray="${tray}" data-href="/app/file-system">
           <sl-icon name="archive"></sl-icon>
         </button>
-        <input value="All Files" class="app-name">
+        <input disabled value="All Files" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga">
           <sl-icon name="people"></sl-icon>
         </button>
-        <input value="Collaborative Text" class="app-name">
+        <input disabled value="Collaborative Text" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-synth">
-          <sl-icon name="people"></sl-icon>
+          <sl-icon name="music-note"></sl-icon>
         </button>
-        <input value="Amateur Synth" class="app-name">
+        <input disabled value="Amateur Synth" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
           <sl-icon name="people"></sl-icon>
         </button>
-        <input value="Professional Synth" class="app-name">
+        <input disabled value="Professional Synth" class="app-name">
       </div>
       <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
-          <sl-icon name="people"></sl-icon>
+        <button class="blank-action" data-tray="${tray}" data-href="/app/hyper-script">
+          <sl-icon name="code-slash"></sl-icon>
         </button>
-        <input value="Script Editor" class="app-name">
+        <input disabled value="Script Editor" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/code-module">
-          <sl-icon name="people"></sl-icon>
+          <sl-icon name="braces"></sl-icon>
         </button>
-        <input value="Code Editor" class="app-name">
+        <input disabled value="Code Editor" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/9/">
-          <sl-icon name="people"></sl-icon>
+          <sl-icon name="music-player"></sl-icon>
         </button>
-        <input value="Plan9 Zune" class="app-name">
+        <input disabled value="Plan9 Zune" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/generic-park/">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <input disabled value="Generic Park" class="app-name">
       </div>
 
     </div>
@@ -724,6 +730,12 @@ $.style(`
     position: relative;
     touch-action: none;
     overflow: hidden;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none; 
+     -khtml-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+            user-select: none;
   }
 
   &.cinema {
@@ -881,6 +893,11 @@ $.style(`
   & [data-grabbing="true"] .tray-wake,
   &[data-mouse="true"] .tray-wake {
     pointer-events: none !important;
+  }
+
+
+  & [data-grabbing="true"] iframe {
+    display: none !important;
   }
 
   & .grabber {
@@ -1104,6 +1121,7 @@ $.style(`
     white-space: nowrap;
     padding-right: 2rem;
   }
+
   & .hyper-sentence {
     white-space: nowrap;
     margin-left: auto;
@@ -1132,10 +1150,16 @@ $.style(`
     width: 100%;
   }
 
+  & .app-name[disabled] {
+    color: rgba(0,0,0,.85);
+    opacity: 1;
+  }
+
   & .irix-launcher {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
     padding: 8px;
+    gap: 8px;
     justify-items: center;
   }
 `)

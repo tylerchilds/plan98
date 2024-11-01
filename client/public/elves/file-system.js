@@ -629,6 +629,11 @@ $.style(`
     width: 100%;
   }
 
+  & .file-name[disabled] {
+    color: rgba(0,0,0,.85);
+    opacity: 1;
+  }
+
   & .system-icon {
     font-size: 3rem;
   }
