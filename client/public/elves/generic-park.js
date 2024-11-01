@@ -44,12 +44,11 @@ async function buildIndex(target) {
     $.teach({ ready: true })
 
   const src = target.getAttribute('src')
-  if(src) {
-    requestIdleCallback(() => {
-      const enclosure = jurassicFrom(src)
-      $.teach({ enclosure })
-    })
-  }
+  requestIdleCallback(() => {
+    const enclosure = jurassicFrom(src)
+    const { back } = $.learn()
+    $.teach({ enclosure })
+  })
 
   } catch (e) {
     console.info('Build: Failed')
@@ -178,13 +177,13 @@ function increment(target) {
     }
 	})
 
-  if(enclosure) {
+  if(enclosure && enclosure.children) {
     const dinosaurs = enclosure.children.map((eggs, i) => {
       if(eggs.type === Types.Directory.type) {
         return draw3d(
           aCylinder({
-            x: -12 * (i % 10),
-            z: -12 * (parseInt(i / 10)) - 5,
+            x: -10 + (-12 * (i % 10)),
+            z: -120 + (-12 * (parseInt(i / 10)) - 5),
             y: 4,
           }, {
             wireframe: posessed(eggs.path),
@@ -242,9 +241,18 @@ $.when('mouseleave', '.interactive-file', (event) => {
 
 $.when('click', '.interactive-directory', (event) => {
   const { path } = event.target.dataset
-  const taken = state['ls/game'].inventory[path]
-  state['ls/game'].inventory[path] = !taken
+  const enclosure = jurassicFrom(path)
+  $.teach({ enclosure, back: false })
+  self.history.pushState({ type: `${$.link}-navigation`, path }, "");
 })
+
+addEventListener("popstate", async (event) => {
+  const { type, path } = event.state || {}
+  if(type === `${$.link}-navigation`) {
+    const enclosure = jurassicFrom(path)
+    $.teach({ enclosure, back: true })
+  }
+});
 
 $.when('mouseenter', '.interactive-directory', (event) => {
   console.log(event.target.dataset.path)
@@ -398,7 +406,9 @@ $.when('keydown', '[name="search"]', event => {
       target.href = item.path
 
       const enclosure = jurassicFrom(item.path)
-      $.teach({ enclosure })
+      $.teach({ enclosure, back: false })
+
+      self.history.pushState({ type: `${$.link}-navigation`, path: item.path }, "");
       document.activeElement.blur()
       return
     }
@@ -414,11 +424,17 @@ $.when('click', '.auto-item', event => {
   const index = parseInt(event.target.dataset.index)
   const start = Math.max(suggestIndex - 5, 0)
   suggestIndex = start + index
-  $.teach({ suggestIndex, enclosure })
+  $.teach({ suggestIndex, enclosure, back: false })
+  self.history.pushState({ type: `${$.link}-navigation`, path }, "");
 })
 
 
 function jurassicFrom(path) {
+  // the root node edge case
+  if(!path || path === '/') {
+    return p98.children[0]
+  }
+
   const files = path.split('/').reduce((directory, current) => {
     const next = directory.children.find(x => x.name === current)
     return next

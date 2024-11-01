@@ -37,12 +37,12 @@ async function buildIndex(target) {
     $.teach({ ready: true })
 
   const src = target.getAttribute('src')
-  if(src) {
-    requestIdleCallback(() => {
-      const enclosure = jurassicFrom(src)
-      $.teach({ enclosure })
-    })
-  }
+
+  requestIdleCallback(() => {
+    const enclosure = jurassicFrom(src)
+    $.teach({ enclosure })
+    self.history.pushState({ type: `${$.link}-navigation`, path: src }, "");
+  })
 
   } catch (e) {
     console.info('Build: Failed')
@@ -108,14 +108,18 @@ $.draw((target) => {
 })
 
 function draw2d(data, attributes) {
-	const {
-		icon
-	} = data
-	return `
-		<button ${reduceAttributes(attributes)}>
-      <sl-icon name="${icon}"></sl-icon>
-    </button>
-	`
+  const {
+    name,
+    icon
+  } = data
+  return `
+    <div class="file-reference">
+      <button ${reduceAttributes(attributes)}>
+      <sl-icon name="${icon}" class="system-icon"></sl-icon>
+      </button>
+      <input value="${name}" class="file-name">
+    </div>
+  `
 }
 
 
@@ -127,6 +131,7 @@ function increment(target) {
     const dinosaurs = enclosure.children.map((eggs, i) => {
       if(eggs.type === Types.Directory.type) {
         return draw2d({
+          name: eggs.name,
           icon: 'folder'
         }, {
           'class': 'interactive-directory',
@@ -137,6 +142,7 @@ function increment(target) {
 
       if(eggs.type === Types.File.type) {
         return draw2d({
+          name: eggs.name,
           icon: iconByPath(eggs.path)
         }, {
           'class': 'interactive-file',
@@ -208,13 +214,24 @@ function iconByPath(path) {
 
 $.when('click', '.interactive-file', (event) => {
   const { path } = event.target.dataset
+  window.location.href = '/app/media-plexer?src='+path
 })
 
 $.when('click', '.interactive-directory', (event) => {
   const { path } = event.target.dataset
   const enclosure = jurassicFrom(path)
   $.teach({ enclosure })
+  self.history.pushState({ type: `${$.link}-navigation`, path }, "");
 })
+
+addEventListener("popstate", async (event) => {
+  const { type, path } = event.state || {}
+  if(type === `${$.link}-navigation`) {
+    const enclosure = jurassicFrom(path)
+    $.teach({ enclosure })
+  }
+});
+
 
 function beforeUpdate(target) {
   { // save suggestion box scroll top
@@ -347,6 +364,11 @@ $.when('click', '.auto-item', event => {
 
 
 function jurassicFrom(path) {
+  // the root node edge case
+  if(!path || path === '/') {
+    return p98.children[0]
+  }
+
   const files = path.split('/').reduce((directory, current) => {
     const next = directory.children.find(x => x.name === current)
     return next
@@ -929,6 +951,35 @@ $.style(`
 
   & .zune xml-html {
     columns: 320px;
+  }
+
+  & .file-reference {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    aspect-ratio: 1;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  & .file-name {
+    border-radius: 1rem;
+    font-size: .8rem;
+    line-height: 1;
+    border: none;
+    width: auto;
+    display: inline-block;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  & .system-icon {
+    font-size: 3rem;
+  }
+
+  & .irix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 8px;
   }
 `)
 
