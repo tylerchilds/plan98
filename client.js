@@ -545,14 +545,14 @@ async function about(headers, request) {
         /backup/,
         /db/
       ],
-      includeDirs: false
+      includeDirs: true,
     })
 
 
     for await(const file of files) {
       const { name } = file
       const [_, path] = file.path.split(currentPath)
-      paths.push({ path, name })
+      paths.push({ path, name, isDirectory: file.isDirectory })
     }
 
     paths = sortPaths([...paths], byPath, '/')
@@ -651,7 +651,7 @@ async function owncast(headers, request) {
 }
 
 function kids(paths) {
-  const root = { name: '', type: 'Directory', children: [] };
+  const root = { name: '', path: '/', type: 'Directory', children: [] };
 
   for (const system of paths) {
     const [_, ...pathComponents] = system.path.split('/');
@@ -665,15 +665,14 @@ function kids(paths) {
       let childNode = currentNode.children.find(node => node.name === component);
 
       if (!childNode) {
-        const extension = path.extname(system.path);
-        childNode = { extension, path: system.path, name: component, type: 'Directory', children: [] };
+        childNode = { path: system.path, name: component, type: 'Directory', children: [] };
         currentNode.children.push(childNode);
       }
 
       currentNode = childNode;
     }
 
-    currentNode.type = 'File'; // Mark the last node as a file
+    currentNode.type = system.isDirectory ? 'Directory' : 'File'; 
     delete currentNode.children
   }
 
