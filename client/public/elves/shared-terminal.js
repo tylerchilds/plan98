@@ -219,22 +219,101 @@ function drawIrix(tray) {
         <input disabled value="All Files" class="app-name">
       </div>
       <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term">
+          <sl-icon name="circle"></sl-icon>
+        </button>
+        <input disabled value="Silly Computer" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/giggle-search">
+          <sl-icon name="search"></sl-icon>
+        </button>
+        <input disabled value="Search" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/middle-earth">
+          <sl-icon name="globe2"></sl-icon>
+        </button>
+        <input disabled value="Planet Earth" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/startup-wizard">
+          <sl-icon name="shop"></sl-icon>
+        </button>
+        <input disabled value="Story Mode" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/my-journal">
+          <sl-icon name="journal"></sl-icon>
+        </button>
+        <input disabled value="My Journal" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/hyper-browser">
+          <sl-icon name="controller"></sl-icon>
+        </button>
+        <input disabled value="Hyper Browser" class="app-name">
+      </div>
+      <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga">
           <sl-icon name="people"></sl-icon>
         </button>
         <input disabled value="Collaborative Text" class="app-name">
       </div>
+
       <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-synth">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/bulletin-board?src=/private/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}">
+          <sl-icon name="window-stack"></sl-icon>
+        </button>
+        <input disabled value="Bulletin Board" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
           <sl-icon name="music-note"></sl-icon>
         </button>
         <input disabled value="Amateur Synth" class="app-name">
       </div>
       <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
-          <sl-icon name="people"></sl-icon>
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-synth">
+          <sl-icon name="music-note-beamed"></sl-icon>
         </button>
         <input disabled value="Professional Synth" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/video-feed/">
+          <sl-icon name="camera-reels"></sl-icon>
+        </button>
+        <input disabled value="Video Feed" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-piano">
+          <sl-icon name="keyboard"></sl-icon>
+        </button>
+        <input disabled value="Silly Piano" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/story-board">
+          <sl-icon name="brush"></sl-icon>
+        </button>
+        <input disabled value="Chalk Board" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/paint-app">
+          <sl-icon name="paint-bucket"></sl-icon>
+        </button>
+        <input disabled value="Old Paint" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/mine-sweeper/">
+          <sl-icon name="minecart"></sl-icon>
+        </button>
+        <input disabled value="Mine Sweeper" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/generic-park/">
+          <sl-icon name="joystick"></sl-icon>
+        </button>
+        <input disabled value="Generic Park" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/hyper-script">
@@ -255,12 +334,35 @@ function drawIrix(tray) {
         <input disabled value="Plan9 Zune" class="app-name">
       </div>
       <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/generic-park/">
-          <sl-icon name="joystick"></sl-icon>
+        <button class="blank-action" data-tray="${tray}" data-href="/app/main-quest/">
+          <sl-icon name="balloon"></sl-icon>
         </button>
-        <input disabled value="Generic Park" class="app-name">
+        <input disabled value="Havok Physics" class="app-name">
       </div>
-
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/wallet-1998/">
+          <sl-icon name="wallet"></sl-icon>
+        </button>
+        <input disabled value="Wallet" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/wallet-metamask/">
+          <sl-icon name="wallet2"></sl-icon>
+        </button>
+        <input disabled value="Meta Mask" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sonic-knuckles/">
+          <sl-icon name="browser-firefox"></sl-icon>
+        </button>
+        <input disabled value="Sonic and Knuckles" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/draw-term/">
+          <sl-icon name="terminal"></sl-icon>
+        </button>
+        <input disabled value="Draw Term 98" class="app-name">
+      </div>
     </div>
   `
 }
