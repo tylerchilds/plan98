@@ -253,7 +253,7 @@ function sourceFile(target) {
   return data.file
     ? data
     : (function initialize() {
-      schedule(() => {
+      requestIdleCallback(() => {
         let file = pitch
         fetch(src).then(async res => {
           if(res.status === 404) {
@@ -1033,12 +1033,8 @@ $.style(`
       color: rgba(0,0,0,.65);
     }
   }
-
-
 `)
 
-
-function schedule(x, delay=1) { setTimeout(x, delay) }
 $.when('click', '*', (event) => {
 
   if(event.target.closest('.menu-item')) {

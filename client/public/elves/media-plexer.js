@@ -8,7 +8,9 @@ const renderers = {
   'svg': iframeRenderer,
   'css': codeRenderer,
   'js': codeRenderer,
-  'html': codeRenderer
+  'html': codeRenderer,
+  'md': markdownRenderer,
+  'mp3': audioRenderer,
 }
 
 function source(target) {
@@ -33,5 +35,17 @@ function codeRenderer(path) {
 function sagaRenderer(path) {
   return `
     <hyper-script src="${path}"></hyper-script>
+  `
+}
+
+function markdownRenderer(path) {
+  return `
+    <mark-down src="${path}"></mark-down>
+  `
+}
+
+function audioRenderer(path) {
+  return `
+    <audio src="${path}" controls="true"></audio>
   `
 }

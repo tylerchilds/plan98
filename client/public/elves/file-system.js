@@ -962,7 +962,7 @@ $.style(`
   }
 
   & .file-name {
-    border-radius: 1rem;
+    border-radius: 0;
     font-size: .8rem;
     line-height: 1;
     border: none;
