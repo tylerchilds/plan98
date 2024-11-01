@@ -122,7 +122,6 @@ function draw2d(data, attributes) {
   `
 }
 
-
 function increment(target) {
   const irix = target.querySelector('.irix')
   const { enclosure } = $.learn()
@@ -231,7 +230,6 @@ addEventListener("popstate", async (event) => {
     $.teach({ enclosure })
   }
 });
-
 
 function beforeUpdate(target) {
   { // save suggestion box scroll top

@@ -695,3 +695,12 @@ sillonious-brand > xml-html {
   background-color: rebeccapurple;
 }
 
+
+.file-reference .interactive-directory,
+.file-reference .interactive-file,
+.application .blank-action {
+  background: lemonchiffon;
+  color: saddlebrown;
+  border: none;
+  border-radius: 0;
+}

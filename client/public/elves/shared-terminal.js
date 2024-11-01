@@ -103,7 +103,7 @@ function render(target) {
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
-          <iframe src="${url}" title="${url}"></iframe>
+          ${drawTray(tray, url)}
         </div>
         <div class="resize-actions">
           <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left" data-tray="${tray}">
@@ -167,14 +167,98 @@ function render(target) {
 
     if(node.dataset.url !== url) {
       node.dataset.url = url
-      node.querySelector('iframe').src = url
-      node.querySelector('.browser').value = url
+      const trayBody = node.querySelector('.tray-body')
+      const irix = node.querySelector('.irix-launcher')
+
+      const iframe = node.querySelector('iframe')
+      if(url !== 'about:blank' && !iframe) {
+        if(irix) {
+          irix.remove()
+        }
+        trayBody.insertAdjacentHTML('beforeend', `
+          <iframe src="${url}" title="${url}"></iframe>
+        `)
+      } else if(url === 'about:blank') {
+        if(iframe) {
+          iframe.remove()
+        }
+
+        if(!irix) {
+          trayBody.insertAdjacentHTML('beforeend', drawIrix(tray))
+        }
+      }
+
+      if(iframe) {
+        iframe.src = url
+      }
+
+      const browser = node.querySelector('.browser')
+      if(browser) {
+        browser.value = url
+      }
     }
 
     node.dataset.grabbed = grabbed
     node.persist = true
   }
 }
+
+function drawTray(tray, url) {
+  return url === 'about:blank' ? drawIrix(tray) : `
+    <iframe src="${url}" title="${url}"></iframe>
+  `
+}
+
+function drawIrix(tray) {
+  return `
+    <div class="irix-launcher">
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/file-system">
+          <sl-icon name="archive"></sl-icon>
+        </button>
+        <input value="All Files" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Collaborative Text" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-synth">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Amateur Synth" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Professional Synth" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Script Editor" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/code-module">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Code Editor" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/9/">
+          <sl-icon name="people"></sl-icon>
+        </button>
+        <input value="Plan9 Zune" class="app-name">
+      </div>
+
+    </div>
+  `
+}
+
 
 const down = 40;
 const up = 38;
@@ -221,11 +305,34 @@ $.when('click', '.auto-item', event => {
 
   const url = '/app/media-plexer?src=' + path
   document.activeElement.blur()
-  setState(tray, { url, focused: false })
+  setState(tray, { url, focused: true })
   write($, {
     suggestIndex: parseInt(event.target.dataset.index)
   })
 })
+
+$.when('click', '.blank-action', event => {
+  event.preventDefault()
+  const { tray } = event.target.closest('[data-tray]').dataset
+  const { href } = event.target.dataset
+
+  document.activeElement.blur()
+  setState(tray, { url: href, focused: true })
+  write($, {
+    suggestIndex: parseInt(event.target.dataset.index)
+  })
+
+  self.history.pushState({ type: `${$.link}-navigation`, tray, path: 'about:blank' }, "");
+})
+
+addEventListener("popstate", async (event) => {
+  const { type, path, tray } = event.state || {}
+  console.log(tray, path)
+  if(type === `${$.link}-navigation`) {
+    setState(tray, { url: path })
+  }
+});
+
 
 
 $.when('input', '.browser', (event) => {
@@ -810,7 +917,7 @@ $.style(`
     background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
     padding: 2px;
     display: grid;
-    grid-template-rows: auto 1px 1fr;
+    grid-template-rows: 2rem 1px 1fr;
     max-width: 100vw;
     max-height: 100vh;
   }
@@ -858,6 +965,7 @@ $.style(`
     color: black;
     height: 100%;
     position: relative;
+    overflow: auto;
   }
 
   & .tray-resize {
@@ -1003,6 +1111,33 @@ $.style(`
     color: rgba(255,255,255,.65);
   }
 
+  & .application {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    aspect-ratio: 1;
+    width: 128px;
+    height: 128px;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  & .app-name {
+    border-radius: 0;
+    font-size: .8rem;
+    line-height: 1;
+    border: none;
+    width: auto;
+    display: inline-block;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  & .irix-launcher {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    padding: 8px;
+    justify-items: center;
+  }
 `)
 
 $.when('pointerdown', 'canvas', start)
@@ -1083,7 +1218,7 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      url: `/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+      url: `about:blank`
     })
   }
 
