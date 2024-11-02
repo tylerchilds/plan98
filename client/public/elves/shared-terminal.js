@@ -481,6 +481,7 @@ $.draw(function boop(target) {
   if(!target.subscribed) subscribe(target)
   if(target.innerHTML) return
   const src = target.getAttribute('src')
+
   if(src) {
     requestIdleCallback(() => {
       const tray = self.crypto.randomUUID()
@@ -489,8 +490,8 @@ $.draw(function boop(target) {
       setState(tray, {
         width: 300,
         height: 150,
-        x: 0,
-        y: 0,
+        x: 2500 - (window.outerWidth / 2),
+        y: 2500 - (window.outerHeight / 2),
         z: trayZ+1,
         url: src,
         maximized: true,
@@ -501,7 +502,6 @@ $.draw(function boop(target) {
         focusedTray: tray,
         trayZ: trayZ + 1
       })
-
       write($, {
         trays: tray
       }, function mergeTrays(node, data, key) {

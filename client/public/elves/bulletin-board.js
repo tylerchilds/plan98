@@ -20,7 +20,7 @@ const modes = {
 }
 
 const $ = module('bulletin-board', {
-  mode: modes.move,
+  mode: modes.cursor,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
   panXmod: 0,
@@ -57,10 +57,16 @@ function engine(target) {
 $.draw(target => {
   if(target.innerHTML) return update(target)
   mount(target)
-}, { afterUpdate })
+}, { beforeUpdate, afterUpdate })
+
+function beforeUpdate(target) {
+  {
+    const { beltGrabbed } = $.learn()
+    target.dataset.belt = beltGrabbed ? 'true' : 'false'
+  }
+}
 
 function afterUpdate(target) {
-
   {
     const { displays } = $.learn()
     displays.map(renderDisplays(target))
@@ -134,7 +140,6 @@ function afterUpdate(target) {
       `
     }
   }
-
 
   { // menu items
     const { activeMenu } = $.learn()
@@ -262,11 +267,14 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
-        <button data-mode="move">
-          <sl-icon name="arrows-move"></sl-icon>
+        <button class="toolbelt-grabber">
+          <sl-icon name="grip-vertical"></sl-icon>
         </button>
         <button data-mode="cursor">
           <sl-icon name="cursor"></sl-icon>
+        </button>
+        <button data-mode="move">
+          <sl-icon name="arrows-move"></sl-icon>
         </button>
         <button data-mode="draw" class="">
           <sl-icon name="pencil"></sl-icon>
@@ -292,7 +300,7 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
-      <shared-terminal src="/app/sillyz-computer" background="transparent" color="lemonchiffon" class="infinite stack"></shared-terminal>
+      <shared-terminal src="about:blank" background="transparent" color="lemonchiffon" class="infinite stack"></shared-terminal>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
@@ -580,6 +588,67 @@ function endMove(e) {
   $.teach({ panXmod, panYmod, startX: null, startY: null, panHappening: false })
 }
 
+$.when('pointerdown', '.toolbelt-grabber', grabToolbelt)
+$.when('pointermove', 'canvas', dragToolbelt)
+$.when('pointermove', '.toolbelt-grabber', dragToolbelt)
+$.when('pointerup', 'canvas', ungrabToolbelt)
+$.when('pointerup', '.toolbelt-grabber', ungrabToolbelt)
+
+// grab a pane
+function grabToolbelt(event) {
+  event.preventDefault()
+  const { offsetX, offsetY } = event
+  const { beltOffsetX } = $.learn()
+
+  if(!beltOffsetX) {
+    $.teach({
+      beltOffsetX: offsetX,
+      beltOffsetY: offsetY,
+      beltGrabbed: true
+    })
+  } else {
+    $.teach({
+      beltGrabbed: true
+    })
+  }
+}
+
+// drag a pane
+let lastBeltX, lastBeltY;
+function dragToolbelt(event) {
+  const { target, clientX, clientY } = event
+  const { beltGrabbed, beltOffsetX, beltOffsetY } = $.learn()
+  if(!beltGrabbed) return
+
+  if (lastBeltX !== undefined && lastBeltY !== undefined) {
+    const movementX = clientX - lastBeltX;
+    const movementY = clientY - lastBeltY;
+    // Use movementX and movementY here
+      $.teach({
+        beltOffsetX: beltOffsetX + movementX,
+        beltOffsetY: beltOffsetY + movementY
+      })
+  } else {
+    $.teach({
+      x: clientX - beltOffsetX,
+      y: clientY - beltOffsetY
+    })
+  }
+
+  lastBeltX = clientX;
+  lastBeltY = clientY;
+}
+
+// release a pane
+function ungrabToolbelt(event) {
+  $.teach({
+    beltGrabbed: false,
+  })
+  lastBeltX = undefined;
+  lastBeltY = undefined;
+}
+
+
 
 $.style(`
   & {
@@ -589,6 +658,10 @@ $.style(`
     height: 100%;
     display: block;
     background: black;
+  }
+
+  &[data-belt="true"] .workspace :not(canvas) {
+    pointer-events: none;
   }
 
   & .workspace {
@@ -627,8 +700,14 @@ $.style(`
     max-width: 100%;
     width: 100%;
     padding: .5rem;
-    overflow: auto;
+    overflow: hidden;
     display: inline-block;
+    transform: translate(var(--belt-offset-x, 0), var(--belt-offset-y, 0));
+  }
+
+  & .toolbelt-grabber {
+    position: sticky;
+    left: 0;
   }
 
   & .actions {
@@ -725,6 +804,7 @@ $.style(`
     display: flex;
     margin-right: auto;
     pointer-events: all;
+    overflow: auto;
   }
 
   & .menu-item {
