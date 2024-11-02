@@ -486,6 +486,7 @@ function end(e) {
 
 
 function startDraw(e) {
+  e.preventDefault()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -512,6 +513,7 @@ function startDraw(e) {
 }
 
 function startMove(e) {
+  e.preventDefault()
   const { rectangle } = engine(e.target)
   const panStartX = e.clientX - rectangle.left
   const panStartY = e.clientY - rectangle.top
@@ -551,6 +553,7 @@ function moveDraw(e) {
 }
 
 function moveMove(e) {
+  e.preventDefault()
   const { rectangle } = engine(e.target)
   let { panX, panY, panStartX, panStartY, panHappening } = $.learn()
 
@@ -563,6 +566,7 @@ function moveMove(e) {
 }
 
 function endDraw(e) {
+  e.preventDefault()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -588,6 +592,7 @@ function endDraw(e) {
 };
 
 function endMove(e) {
+  e.preventDefault()
   const { panX, panY } = $.learn()
   const rhythm = parseFloat(getComputedStyle(document.documentElement).fontSize);
   const panXmod = panX % rhythm
@@ -621,6 +626,7 @@ function grabToolbelt(event) {
 // drag a pane
 let lastBeltX, lastBeltY;
 function dragToolbelt(event) {
+  event.preventDefault()
   const { target, clientX, clientY } = event
   const { beltGrabbed, beltOffsetX, beltOffsetY } = $.learn()
   if(!beltGrabbed) return
@@ -646,14 +652,13 @@ function dragToolbelt(event) {
 
 // release a pane
 function ungrabToolbelt(event) {
+  event.preventDefault()
   $.teach({
     beltGrabbed: false,
   })
   lastBeltX = undefined;
   lastBeltY = undefined;
 }
-
-
 
 $.style(`
   & {
@@ -667,6 +672,10 @@ $.style(`
 
   &[data-belt="true"] .workspace :not(canvas) {
     pointer-events: none;
+  }
+
+  &[data-belt="true"] .toolbelt-actions .menu-group {
+    overflow: hidden;
   }
 
   & .workspace {

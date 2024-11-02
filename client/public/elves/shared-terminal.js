@@ -736,6 +736,7 @@ function grab(event) {
 // drag a pane
 let lastX, lastY;
 function drag(event) {
+  event.preventDefault()
   let { target, clientX, clientY } = event
   const { grabbing, resizing } = read($)
   const tray = grabbing || resizing
@@ -786,6 +787,7 @@ function drag(event) {
 
 // release a pane
 function ungrab(event) {
+  event.preventDefault()
   clearTimeout(grabTimeout)
   const tray = this.read($).grabbing
   if(!tray) return
@@ -1269,6 +1271,7 @@ $.style(`
 $.when('pointerdown', 'canvas', start)
 
 function start(e) {
+  e.preventDefault()
   const { grabbing } = this.read($)
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
@@ -1310,7 +1313,8 @@ function move (e) {
 }
 
 $.when('click', '.tray-wake', wake)
-function wake (e) {
+function wake (event) {
+  event.preventDefault()
   const { trayZ=1 } = this.read($)
   const newZ = trayZ + 1
   const { tray } = event.target.dataset
@@ -1319,6 +1323,7 @@ function wake (e) {
 }
 $.when('pointerup', 'canvas', end)
 function end (e) {
+  e.preventDefault()
   const { grabbing } = this.read($)
   if(grabbing) return
   const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = this.read($)
