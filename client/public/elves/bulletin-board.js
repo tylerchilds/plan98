@@ -186,6 +186,13 @@ function update(target) {
     stars.style.setProperty("--pan-y-mod", panYmod + 'px');
   }
 
+  {
+    const { beltOffsetX, beltOffsetY } = $.learn()
+    const toolbelt = target.querySelector('.toolbelt-actions')
+
+    toolbelt.style = `--belt-offset-x: ${beltOffsetX}px; --belt-offset-y: ${beltOffsetY}px;`
+  }
+
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -597,13 +604,11 @@ $.when('pointerup', '.toolbelt-grabber', ungrabToolbelt)
 // grab a pane
 function grabToolbelt(event) {
   event.preventDefault()
-  const { offsetX, offsetY } = event
   const { beltOffsetX } = $.learn()
-
   if(!beltOffsetX) {
     $.teach({
-      beltOffsetX: offsetX,
-      beltOffsetY: offsetY,
+      beltOffsetX: 0,
+      beltOffsetY: 0,
       beltGrabbed: true
     })
   } else {
