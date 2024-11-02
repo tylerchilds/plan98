@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Baskervville:ital@0;1&display=swap');
+
+body {
+  font-family: "Baskervville", serif;
+  font-weight: 400;
+  font-style: normal;
+  margin: 0 auto;
+  background-position: scroll;
+  color: rgba(0,0,0,.85);
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+xml-html hypertext-action {
+  margin: 0;
+}
+
+xml-html hypertext-blankline {
+  margin: 1rem 0;
+  display: block;
+}
