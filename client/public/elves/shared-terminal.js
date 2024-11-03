@@ -1066,6 +1066,12 @@ $.style(`
     overflow-x: auto;
   }
 
+
+  & [data-resizing="true"] .tray-title-bar,
+  & [data-grabbing="true"] .tray-title-bar {
+    overflow-x: hidden;
+  }
+
   & .tray-title-bar input {
     border: none;
     border-radius: 0;

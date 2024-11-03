@@ -274,35 +274,38 @@ function mount(target) {
     </div>
     <div class="toolbelt-actions">
       <div class="menu-group">
-        <button class="toolbelt-grabber">
+        <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
-        <button data-mode="cursor">
+        <button data-mode="cursor" data-tooltip="Open Windows">
           <sl-icon name="cursor"></sl-icon>
         </button>
-        <button data-mode="move">
+        <button data-mode="move"  data-tooltip="Pan Canvas">
           <sl-icon name="arrows-move"></sl-icon>
         </button>
-        <button data-mode="draw" class="">
+        <button data-mode="draw" class="" data-tooltip="Sketch">
           <sl-icon name="pencil"></sl-icon>
         </button>
-        <button data-mode="note">
+        <button data-mode="note"  data-tooltip="Colocate Notes">
           <sl-icon name="file-text"></sl-icon>
         </button>
-        <button data-mode="chat">
+        <button data-mode="chat" data-tooltip="Quick Chat">
           <sl-icon name="chat"></sl-icon>
         </button>
-        <button data-mode="camera">
+        <button data-mode="camera"  data-tooltip="Conference">
           <sl-icon name="camera-reels"></sl-icon>
         </button>
-        <button data-mode="map">
+        <button data-mode="map" data-tooltip="Relevant Places">
           <sl-icon name="compass"></sl-icon>
         </button>
-        <button data-mode="gallery">
+        <button data-mode="gallery" data-tooltip="Photo Gallery">
           <sl-icon name="images"></sl-icon>
         </button>
-        <button data-mode="calendar">
+        <button data-mode="calendar"  data-tooltip="Scheduling">
           <sl-icon name="calendar3"></sl-icon>
+        </button>
+        <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
+          <sl-icon name="grip-vertical"></sl-icon>
         </button>
       </div>
     </div>
@@ -724,6 +727,11 @@ $.style(`
     left: 0;
   }
 
+  & .menu-group button.toolbelt-grabber {
+    padding: .75rem .25rem;
+  }
+
+
   & .actions {
     z-index: 10;
     background: transparent;
@@ -917,7 +925,6 @@ $.style(`
     width: 100%;
     height: 100%;
     padding-top: 2rem;
-    padding-bottom: 4rem;
   }
 
   & .viewport [data-pane] {
