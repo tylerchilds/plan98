@@ -1,4 +1,4 @@
-# The Paper Nautilus Umbrella - The Flying Disk Operating System (Patent Pending)
+# The Paper Nautilus Umbrella - The Flying Disk Operating System
 
 In a void, a paper in the breeze.
 
