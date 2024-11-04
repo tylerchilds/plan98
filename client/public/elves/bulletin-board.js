@@ -698,8 +698,9 @@ $.style(`
     background-color: dodgerblue;
   }
 
+  & .toolbelt-grabber,
   & canvas {
-    touch-action: none;
+    touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
