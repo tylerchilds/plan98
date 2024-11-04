@@ -491,13 +491,16 @@ $.draw(function boop(target) {
   if(src) {
     requestIdleCallback(() => {
       const tray = self.crypto.randomUUID()
-  console.log(this)
+
+      let vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+      let vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
+
       const { trayZ=1 } = this.read($)
       setState(tray, {
         width: 300,
         height: 150,
-        x: 2500 - (window.outerWidth / 2),
-        y: 2500 - (window.outerHeight / 2),
+        x: 2500 - (vw / 2),
+        y: 2500 - (vh / 2),
         z: trayZ+1,
         url: src,
         maximized: true,

@@ -182,6 +182,7 @@ $.draw((target) => {
         <div class="menu-actions" data-menu="file">
           <button data-publish>Save</button>
           <button data-print>Print</button>
+          <button data-debug>Debug</button>
         </div>
       </div>
       <div class="menu-item">
@@ -289,6 +290,13 @@ $.when('click', '[data-menu-target]', (event) => {
   const { menuTarget } = event.target.dataset
   $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
+})
+
+let debugged = false
+$.when('click', '[data-debug]', (event) => {
+  if(debugged) return
+  debugged = true
+  document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
 })
 
 $.when('click', '[data-print]', async (event) => {
