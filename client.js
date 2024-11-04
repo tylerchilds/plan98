@@ -141,21 +141,33 @@ const sanitizers = {
   '.md': markdownSanitizer,
 }
 
-const extensions = {
+const dynamicExtensions = {
   '.md': {
     raw: 'text/plain',
     rich: 'text/html',
   },
 }
 
-function buildHeaders(parameters, pathname, extension) {
+const contentTypes = {
+
+}
+
+function contentType(pathname, extension) {
   const type = pathname.startsWith('/public/') ? 'raw' : 'rich'
+  if(contentTypes[extension]) {
+    return contentTypes[extension]
+  }
+  return dynamicExtensions[extension]
+    ? dynamicExtensions[extension][type]
+    : typeByExtension(extension)
+
+}
+
+function buildHeaders(parameters, pathname, extension) {
   const debug = parameters.get('debug')
   let headers = {
     'Cross-Origin-Resource-Policy': 'same-origin',
-    'content-type': extensions[extension]
-      ? extensions[extension][type]
-      : typeByExtension(extension)
+    'content-type': contentType(pathname, extension)
   }
 
   if(debug === 'true') {

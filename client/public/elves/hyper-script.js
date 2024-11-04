@@ -307,9 +307,9 @@ $.when('click', '[data-print]', async (event) => {
     <div class="print-banner">
       Looks good! <button onclick="(()=>{window.print();window.close()})()">Print</button>
     </div>
-    <hyper-script data-print="true">
+    <div class="screenplay">
       ${html}
-    </hyper-script>
+    </div>
     <style type="text/css">
       body {overflow: auto; height: auto !important; }
       xml-html {height: 100%; overflow: auto; }
@@ -988,19 +988,25 @@ $.style(`
 
 
   @media screen {
+    & [name="read"] .screenplay hypertext-quote {
+      position: relative;
+    }
+
     & [name="read"] .screenplay hypertext-quote::before {
       content: '>';
       background: gold;
       background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
       position: absolute;
       left: 0;
-      width: 2rem;
-      height: 2rem;
-      border-radius: 100%;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      padding: 0 1rem;
       display: grid;
-      place-items: center;
+      place-items: start;
       font-size: 1rem;
       color: rgba(0,0,0,.65);
+      opacity: .25;
     }
 
     & [name="read"] .screenplay hypertext-address::before {
@@ -1008,14 +1014,15 @@ $.style(`
       background: mediumseagreen;
       background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
       left: 0;
+      right: 0;
+      padding: 0 1rem;
       position: absolute;
-      border-radius: 100%;
-      width: 2rem;
       height: 2rem;
       display: grid;
-      place-items: center;
+      place-items: start;
       font-size: 1rem;
       color: rgba(0,0,0,.65);
+      opacity: .25;
     }
 
     & [name="read"] .screenplay hypertext-puppet::before {
@@ -1023,14 +1030,15 @@ $.style(`
       background: dodgerblue;
       background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
       left: 0;
+      right: 0;
+      padding: 0 1rem;
       position: absolute;
-      border-radius: 100%;
-      width: 2rem;
       height: 2rem;
       display: grid;
-      place-items: center;
+      place-items: start;
       font-size: 1rem;
       color: rgba(0,0,0,.65);
+      opacity: .25;
     }
   }
 `)

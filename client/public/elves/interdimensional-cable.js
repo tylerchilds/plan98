@@ -2,7 +2,6 @@ import elf from '@silly/tag'
 import { parseM3U, writeM3U } from "@iptv/playlist";
 import Hls from 'hls.js'
 
-
 const $ = elf('interdimensional-cable', { status: 'fetching channels', channels: [], start: 0, stop: 0, length: 0 })
 
 state[`ls/${$.link}`] ||= {history: []}

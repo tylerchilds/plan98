@@ -219,10 +219,16 @@ function drawIrix(tray) {
         <input disabled value="All Files" class="app-name">
       </div>
       <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
           <sl-icon name="circle"></sl-icon>
         </button>
         <input disabled value="Silly Computer" class="app-name">
+      </div>
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/interdimensional-cable">
+          <sl-icon name="tv"></sl-icon>
+        </button>
+        <input disabled value="Interdimensional Cable" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/giggle-search">

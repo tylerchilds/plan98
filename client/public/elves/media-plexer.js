@@ -11,6 +11,8 @@ const renderers = {
   'html': codeRenderer,
   'md': markdownRenderer,
   'mp3': audioRenderer,
+  'mp4': videoRenderer,
+  'm3u8': hlsRenderer,
 }
 
 function source(target) {
@@ -47,5 +49,17 @@ function markdownRenderer(path) {
 function audioRenderer(path) {
   return `
     <audio src="${path}" controls="true"></audio>
+  `
+}
+
+function videoRenderer(path) {
+  return `
+    <video src="${path}" controls="true"></video>
+  `
+}
+
+function hlsRenderer(path) {
+  return `
+    <hls-video src="${path}" controls="true"></hls-video>
   `
 }

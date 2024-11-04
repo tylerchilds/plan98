@@ -275,11 +275,12 @@ function afterUpdate(target) {
 }
 
 function library(target) {
-  const { filter, suggestIndex, suggestions, showSuggestions } = $.learn()
+  const { path, filter, suggestIndex, suggestions, showSuggestions } = $.learn()
 
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   const search = `
+    <input name="path" value="${path}">
     <div class="search">
       <input placeholder="Search..." type="text" value="${filter}" name="search" autocomplete="off" />
       <div class="suggestions">
@@ -362,6 +363,7 @@ $.when('click', '.auto-item', event => {
 
 
 function jurassicFrom(path) {
+  $.teach({path})
   // the root node edge case
   if(!path || path === '/') {
     return p98.children[0]
