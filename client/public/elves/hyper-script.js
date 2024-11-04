@@ -314,23 +314,23 @@ $.when('click', '[data-print]', async (event) => {
       body {overflow: auto; height: auto !important; }
       xml-html {height: 100%; overflow: auto; }
       .print-banner {
-        background: rgba(0,0,0,.85);
         padding: 1rem;
         text-align: right;
         color: white;
       }
 
       .print-banner button {
-        background: lemonchiffon;
-        color: saddlebrown;
+        background: dodgerblue;
+        color: white;
         border: none;
         padding: 1rem;
+        opacity: .85;
+        transition: opacity 100ms ease-in-out;
       }
 
       .print-banner button:hover,
       .print-banner button:focus {
-        background: dodgerblue;
-        color: white;
+        opacity: 1;
       }
       @media print {
         .print-banner {

@@ -15,4 +15,12 @@ $.style(`
       width: 4in;
     }
   }
+
+  @media print {
+    & {
+      margin: 1rem auto;
+      width: 4in;
+    }
+
+  }
 `)
