@@ -225,6 +225,13 @@ function drawIrix(tray) {
         <input disabled value="Silly Computer" class="app-name">
       </div>
       <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/app/impromptu-stagehand">
+          <sl-icon name="person-raised-hand"></sl-icon>
+        </button>
+        <input disabled value="Impromptu Stagehand" class="app-name">
+      </div>
+
+      <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/interdimensional-cable">
           <sl-icon name="tv"></sl-icon>
         </button>

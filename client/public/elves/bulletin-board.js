@@ -118,6 +118,17 @@ function afterUpdate(target) {
   {
     const { mode } = $.learn()
     const src = target.getAttribute('src')
+    const calendar = target.querySelector('.calendar')
+    if(!calendar.innerHTML && mode === modes.calendar) {
+      calendar.innerHTML = `
+        <impromptu-stagehand src="${src}"></impromptu-stagehand>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
     const map = target.querySelector('.map')
     if(!map.innerHTML && mode === modes.map) {
       map.innerHTML = `
@@ -957,6 +968,10 @@ $.style(`
   &[data-mode="${modes.chat}"] [data-pane="${modes.chat}"],
   &[data-mode="${modes.camera}"] [data-pane="${modes.camera}"] {
     display: block;
+  }
+
+  & .calendar {
+    background: white;
   }
 
   & shared-terminal.stack {
