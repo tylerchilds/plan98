@@ -8,6 +8,7 @@ const strokeRevisory = []
 
 const modes = {
   draw: 'draw',
+  music: 'music',
   cursor: 'cursor',
   chat: 'chat',
   note: 'note',
@@ -122,6 +123,28 @@ function afterUpdate(target) {
     if(!calendar.innerHTML && mode === modes.calendar) {
       calendar.innerHTML = `
         <impromptu-stagehand src="${src}"></impromptu-stagehand>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const draw = target.querySelector('.draw')
+    if(!draw.innerHTML && mode === modes.draw) {
+      draw.innerHTML = `
+        <iframe src="/app/story-board?src=${src}"></iframe>
+      `
+    }
+  }
+
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const music = target.querySelector('.music')
+    if(!music.innerHTML && mode === modes.music) {
+      music.innerHTML = `
+        <iframe src="/app/dial-tone?src=${src}"></iframe>
       `
     }
   }
@@ -297,6 +320,9 @@ function mount(target) {
         <button data-mode="draw" class="" data-tooltip="Sketch">
           <sl-icon name="pencil"></sl-icon>
         </button>
+        <button data-mode="music" class="" data-tooltip="Sounds">
+          <sl-icon name="music-note"></sl-icon>
+        </button>
         <button data-mode="note"  data-tooltip="Colocate Notes">
           <sl-icon name="file-text"></sl-icon>
         </button>
@@ -331,6 +357,8 @@ function mount(target) {
         <div class="chat" data-pane="chat"></div>
         <div class="map" data-pane="map"></div>
         <div class="gallery" data-pane="gallery"></div>
+        <div class="draw" data-pane="draw"></div>
+        <div class="music" data-pane="music"></div>
         <div class="calendar" data-pane="calendar"></div>
         <div class="gaming" data-pane="gaming"></div>
       </div>
@@ -454,17 +482,14 @@ $.when('pointermove', '.bulletin-canvas', move)
 $.when('pointerup', '.bulletin-canvas', end)
 
 const startModes = {
-  'draw': startDraw,
   'move': startMove,
 }
 
 const moveModes = {
-  'draw': moveDraw,
   'move': moveMove,
 }
 
 const endModes = {
-  'draw': endDraw,
   'move': endMove,
 }
 
@@ -497,35 +522,6 @@ function end(e) {
   }
 }
 
-
-
-function startDraw(e) {
-  e.preventDefault()
-  const { canvas, rectangle } = engine(e.target)
-  const context = canvas.getContext('2d')
-  let pressure = 0.1;
-  let x, y;
-  const { color } = $.learn()
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    if (e.touches[0]["force"] > 0) {
-      pressure = e.touches[0]["force"] || 1
-    }
-    x = e.touches[0].clientX - rectangle.left
-    y = e.touches[0].clientY - rectangle.top
-  } else {
-    pressure = 1.0
-    x = e.clientX - rectangle.left
-    y = e.clientY - rectangle.top
-  }
-
-  isMousedown = true
-
-  lineWidth = Math.log(pressure + 1)
-  context.lineWidth = lineWidth// pressure * 50;
-  points.push({ x, y, lineWidth, color })
-  drawOnCanvas(e.target, points)
-}
-
 function startMove(e) {
   e.preventDefault()
   const { rectangle } = engine(e.target)
@@ -533,37 +529,6 @@ function startMove(e) {
   const panStartY = e.clientY - rectangle.top
 
   $.teach({ panStartX, panStartY, panHappening: true })
-}
-
-function moveDraw(e) {
-  e.preventDefault()
-
-  const { color } = $.learn()
-  const { canvas, rectangle } = engine(e.target)
-  const context = canvas.getContext('2d')
-  if (!isMousedown) return
-
-  let pressure = 0.1
-  let x, y
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    if (e.touches[0]["force"] > 0) {
-      pressure = e.touches[0]["force"]
-    }
-    x = e.touches[0].clientX - rectangle.left
-    y = e.touches[0].clientY - rectangle.top
-  } else {
-    pressure = 1.0
-    x = e.clientX - rectangle.left
-    y = e.clientY - rectangle.top
-  }
-
-  // smoothen line width
-  lineWidth = (Math.log(pressure + 1) * 4 * 0.2 + lineWidth * 0.8)
-
-  console.log(e, lineWidth)
-  points.push({ x, y, lineWidth, color })
-
-  drawOnCanvas(e.target, points);
 }
 
 function moveMove(e) {
@@ -578,32 +543,6 @@ function moveMove(e) {
 
   $.teach({ panX, panY })
 }
-
-function endDraw(e) {
-  e.preventDefault()
-  const { canvas, rectangle } = engine(e.target)
-  const context = canvas.getContext('2d')
-  let pressure = 0.1;
-  let x, y;
-
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    if (e.touches[0]["force"] > 0) {
-      pressure = e.touches[0]["force"]
-    }
-    x = e.touches[0].clientX - rectangle.left
-    y = e.touches[0].clientY - rectangle.top
-  } else {
-    pressure = 1.0
-    x = e.clientX - rectangle.left
-    y = e.clientY - rectangle.top
-  }
-
-  isMousedown = false
-
-  requestIdleCallback(function () { strokeHistory.push([...points]); points = []})
-
-  lineWidth = 0
-};
 
 function endMove(e) {
   e.preventDefault()
@@ -684,6 +623,7 @@ $.style(`
     background: black;
   }
 
+  &[data-belt="true"] .viewport,
   &[data-belt="true"] .workspace :not(canvas) {
     pointer-events: none;
   }
@@ -946,10 +886,12 @@ $.style(`
   & .viewport [data-pane] {
     display: none;
     position: absolute;
-    inset: 2rem 0 4rem;
+    inset: 2rem 0 0;
   }
 
   &[data-mode="${modes.note}"] .viewport,
+  &[data-mode="${modes.draw}"] .viewport,
+  &[data-mode="${modes.music}"] .viewport,
   &[data-mode="${modes.calendar}"] .viewport,
   &[data-mode="${modes.map}"] .viewport,
   &[data-mode="${modes.gallery}"] .viewport,
@@ -961,6 +903,8 @@ $.style(`
   }
 
   &[data-mode="${modes.note}"] [data-pane="${modes.note}"],
+  &[data-mode="${modes.draw}"] [data-pane="${modes.draw}"],
+  &[data-mode="${modes.music}"] [data-pane="${modes.music}"],
   &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
   &[data-mode="${modes.map}"] [data-pane="${modes.map}"],
   &[data-mode="${modes.gallery}"] [data-pane="${modes.gallery}"],

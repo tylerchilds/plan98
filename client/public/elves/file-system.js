@@ -280,9 +280,8 @@ function library(target) {
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   const search = `
-    <input name="path" value="${path}">
     <div class="search">
-      <input placeholder="Search..." type="text" value="${filter}" name="search" autocomplete="off" />
+      <input placeholder="Search..." type="text" value="${path}" name="search" autocomplete="off" />
       <div class="suggestions">
         ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
           const item = documents.find(y => {
