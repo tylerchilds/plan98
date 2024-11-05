@@ -721,8 +721,12 @@ $.style(`
     overflow: hidden;
     display: inline-block;
     transform: translate(var(--belt-offset-x, 0), var(--belt-offset-y, 0));
+    pointer-events: none;
   }
 
+  & .toolbelt-actions button {
+    pointer-events: all;
+  }
   & .toolbelt-grabber {
     position: sticky;
     left: 0;
