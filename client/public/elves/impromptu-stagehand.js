@@ -56,7 +56,7 @@ link.draw((target) => {
         button += '</select>'
       } else {
         button = session ? `
-          <button data-about data-tooltip="${tooltip(schedule[id])}" data-where="${where}" data-when="${when}">
+          <button data-update data-tooltip="${tooltip(schedule[id])}" data-where="${where}" data-when="${when}">
             ${session.what}
           </button>
         ` : `
@@ -86,6 +86,12 @@ link.draw((target) => {
   return `
     Un-Employed Un-Conference 
 
+    <div class="horizon-scroll">
+      ${grid}
+    </div>
+
+    <hr>
+
     ${ proposing ? `
       <fieldset>
         <legend>
@@ -113,10 +119,6 @@ link.draw((target) => {
     ` : `
       <button data-new>New Session</button>
     ` }
-
-    <div class="horizon-scroll">
-      ${grid}
-    </div>
 
     <div class="irix-launcher">
       ${allSessions}
@@ -179,6 +181,12 @@ link.when('click', 'button[data-insert]', (event) => {
   const { when, where } = event.target.dataset
   link.teach({ focused: `${when}-${where}` })
 })
+
+link.when('click', 'button[data-update]', (event) => {
+  const { when, where } = event.target.dataset
+  link.teach({ focused: `${when}-${where}` })
+})
+
 
 link.when('click', '[data-unfocus]', () => {
   link.teach({ focused: null, proposing: true })
