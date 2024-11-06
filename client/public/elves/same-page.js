@@ -7,7 +7,7 @@ const link = elf('same-page', {
 link.draw(() => {
   const { uuid } = link.learn()
   return `
-    <a href="https://sillyz.computer" class="nonce word-mark">
+    <a href="/?world=sillyz.computer" class="nonce word-mark">
       <span class="word">Same</span><strong class="word"><em>Same</em></strong><span class="word">.Page</span>
     </a>
     <form class="search minimizable" action="/app/bulletin-board" method="get">

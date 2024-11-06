@@ -1004,12 +1004,7 @@ https://medium.com/@joelmalone/prevent-edge-swipe-gestures-in-your-html-game-but
   function touchStart(ev) {
     if (ev.touches.length === 1) {
       const touch = ev.touches[0];
-      if (
-        touch.clientX < window.innerWidth * 0.1 ||
-        touch.clientX > window.innerWidth * 0.9
-      ) {
-        ev.preventDefault();
-      }
+      ev.preventDefault();
     }
   }
 
