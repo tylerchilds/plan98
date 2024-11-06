@@ -67,7 +67,7 @@ function render(target) {
           </button>
           <form class="search minimizable" method="get">
             <div class="input-grid">
-              <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
+              <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
               <button class="tray-action tray-sync" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="telephone"></sl-icon>

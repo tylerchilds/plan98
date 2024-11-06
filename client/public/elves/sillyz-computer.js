@@ -60,7 +60,7 @@ $.draw(target => {
           <div class="error">
             ${error}
           </div>
-          <button data-ok data-create src="${app}" aria-label="create"></button>
+          <button data-ok class="nonce" data-create src="${app}" aria-label="create"></button>
         </div>
       </div>
       <div class="plot-hole"></div>
@@ -73,7 +73,7 @@ $.draw(target => {
         <span><sl-icon name="info-circle"></sl-icon></span> About
       </a>
       <div class="resource">
-        <button ${src ? `src="${src}"`:''} data-create aria-label="create"></button>
+        <button ${src ? `src="${src}"`:''} class="nonce" data-create aria-label="create"></button>
       </div>
       <div class="plot-hole"></div>
     `
@@ -340,43 +340,10 @@ $.style(`
     grid-area: midship;
   }
 
-  & .nonce,
-  & [data-create] {
-    background: lemonchiffon;
-    border: none;
-    border-radius: none;
-    box-shadow: var(--shadow);
-    max-width: 10rem;
-    aspect-ratio: 1;
-    width: 100%;
-    position: relative;
-    min-height: 1rem;
-    min-width: 1rem;
-  }
-
   & .auto-item .icon {
     padding: 3px 0;
     display: grid;
     place-items: center;
-  }
-
-  & .nonce::before,
-  & [data-create]::before{
-    position: absolute;
-    inset: 0%;
-    content: '';
-    display: block;
-    width: 60%;
-    aspect-ratio: 1;
-    background-color: #E83FB8;
-    border-radius: 100%;
-    max-width: 100%;
-    max-height: 100%;
-    margin: auto;
-  }
-
-  & .nonce {
-    box-shadow: none;
   }
 
   & .resource {

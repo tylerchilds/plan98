@@ -89,7 +89,7 @@ function render(target) {
           </button>
           <form class="search minimizable" method="get">
             <div class="input-grid">
-              <input value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
+              <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
               <button class="tray-action tray-sync" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="telephone"></sl-icon>
@@ -230,7 +230,12 @@ function drawIrix(tray) {
         </button>
         <input disabled value="Impromptu Stagehand" class="app-name">
       </div>
-
+      <div class="application">
+        <button class="blank-action" data-tray="${tray}" data-href="/?world=ncity.executiontime.pub">
+          <sl-icon name="egg-fried"></sl-icon>
+        </button>
+        <input disabled value="Cyberpunk 2077" class="app-name">
+      </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/interdimensional-cable">
           <sl-icon name="tv"></sl-icon>
@@ -241,7 +246,7 @@ function drawIrix(tray) {
         <button class="blank-action" data-tray="${tray}" data-href="/app/giggle-search">
           <sl-icon name="search"></sl-icon>
         </button>
-        <input disabled value="Search" class="app-name">
+        <input disabled value="Giggle Search" class="app-name">
       </div>
       <div class="application">
         <button class="blank-action" data-tray="${tray}" data-href="/app/middle-earth">

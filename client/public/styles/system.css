@@ -704,3 +704,32 @@ sillonious-brand > xml-html {
   border: none;
   border-radius: 0;
 }
+
+
+.nonce {
+  background: lemonchiffon;
+  border: none;
+  border-radius: none;
+  box-shadow: var(--shadow);
+  max-width: 10rem;
+  aspect-ratio: 1;
+  width: 100%;
+  position: relative;
+  min-height: 1rem;
+  min-width: 1rem;
+  box-shadow: none;
+}
+
+.nonce::before {
+  position: absolute;
+  inset: 0%;
+  content: '';
+  display: block;
+  width: 60%;
+  aspect-ratio: 1;
+  background-color: #E83FB8;
+  border-radius: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: auto;
+}

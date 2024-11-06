@@ -100,7 +100,7 @@ link.draw((target) => {
         <form>
           <label class="field">
             <span class="label">Who</span>
-            <input name="who" value="${form.who || ''}" placeholder="cft,kev,mix,tychi,wendy">
+            <input name="who" value="${form.who || ''}" placeholder="tychi,clown">
           </label>
 
           <label class="field">
