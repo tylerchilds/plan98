@@ -4,10 +4,16 @@ const link = elf('same-page', {
   uuid: self.crypto.randomUUID()
 })
 
+function locate(uuid) {
+ return `${window.location.origin}/app/bulletin-board?src=${`/private/${link.link}/${uuid}`}.saga`
+
+}
+
 link.draw(() => {
   const { uuid } = link.learn()
+  const blueprint = locate(uuid)
   return `
-    <form class="search minimizable" action="/app/bulletin-board" method="get">
+    <form class="search minimizable" method="post">
       <div class="input-grid">
         <input placeholder="netdir://" value="${uuid}" autocomplete="off" name="src" />
 
@@ -20,14 +26,14 @@ link.draw(() => {
       Pick a Card. Any. Card.
     </div>
     <div class="bloop-grid">
-      <button class="card spin" data-uuid="${uuid}">
+      <button class="card spin" data-blueprint="${blueprint}">
         <div class="frontside">
           <div class="nonce word-mark">
             <span class="word">Same</span><strong class="word"><em>Same</em></strong><span class="word">.Page</span>
           </div>
         </div>
         <div class="backside">
-          <qr-code text="${window.location.origin}/app/bulletin-board?src=${uuid}" data-fg="saddlebrown" data-bg="lemonchiffon"></qr-code>
+          <qr-code text="${blueprint}" data-fg="saddlebrown" data-bg="lemonchiffon"></qr-code>
         </div>
       </button>
     </div>
@@ -35,9 +41,17 @@ link.draw(() => {
 })
 
 link.when('click', '.card', (event) => {
-  const { uuid } = event.target.dataset
-  window.location.href = window.location.origin + `/app/bulletin-board?src=${uuid}`
+  const { blueprint } = event.target.dataset
+  window.location.href = blueprint
 })
+
+link.when('submit', 'form', (event) => {
+  event.preventDefault()
+  const { uuid } = link.learn()
+  const blueprint = locate(uuid)
+  window.location.href = blueprint
+})
+
 
 link.style(`
   & {
