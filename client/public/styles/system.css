@@ -733,3 +733,119 @@ sillonious-brand > xml-html {
   max-height: 100%;
   margin: auto;
 }
+
+.card {
+  padding: 0;
+  pointer-events: all;
+  aspect-ratio: 1;
+  transform-style: preserve-3d;
+  display: block;
+  width: 2.5in;
+  height: 3.5in;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  border-radius: .25in;
+}
+
+.frontside,
+.backside {
+  height: 100%;
+  width: 100%;
+  box-shadow: 0 0 4px 1px lemonchiffon;
+  position: relative;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: .25in;
+  box-sizing: border-box;
+  backface-visibility: hidden;
+  opacity: .9999;
+  overflow: hidden;
+}
+
+.frontside {
+  background: lemonchiffon;
+  color: rgba(255,255,255,.85);
+  border: .05in solid var(--color);
+  padding: .05in;
+  transform: rotateY(180deg);
+  background-blend-mode: multiply;
+  display: grid;
+  place-items: center;
+}
+
+.backside {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  background: lemonchiffon;
+  z-index: 1;
+  transform: rotateY(0deg);
+}
+
+.card:hover > .frontside,
+.card:focus > .frontside,
+.card.active > .frontside {
+  pointer-events: none;
+  transform: rotateY(0deg);
+  opacity: 1;
+}
+
+.card:hover > .backside,
+.card:focus > .backside,
+.card.active > .backside {
+  transform: rotateY(180deg);
+}
+
+.card.spin {
+  animation: spin 10000ms linear infinite alternate-reverse;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotateY(0deg);
+  }
+
+  1% {
+    transform: rotateY(180deg);
+  }
+
+  50% {
+    transform: rotateY(180deg);
+  }
+
+  51% {
+    transform: rotateY(360deg);
+  }
+
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.deck {
+  white-space: nowrap;
+  transform: translateX(var(--hand-offset));
+  transition: transform 100ms ease-in-out;
+  position: absolute;
+  left: calc(50% - 1.25in);
+  bottom: 0;
+  z-index: 3;
+}
+
+.deck .sleeve {
+  display: inline-block;
+  width: .5in;
+}
+
+.deck .card {
+  transform: translateY(6rem);
+  transition: transfokm 250ms ease-in-out;
+}
+
+.deck .card.active {
+  transform: translateY(0);
+  z-index: 2;
+  position: relative;
+}

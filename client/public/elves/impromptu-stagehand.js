@@ -5,17 +5,19 @@ import elf from '@silly/elf'
 const link = elf('impromptu-stagehand', {
   schedule: {},
   sessions: [],
-  form: {}
+  form: {},
+  types: ['apple', 'banana', 'coconut', 'dill pickles', 'eggs', 'french toast', 'grapes']
 })
 
 // hours are how many times are available
-const hours = ['0', '1', '2', '3', '4', '5', '6', '7']
+const hours = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
 
 // circles are how many spaces are available
-const circles = ['A', 'B', 'C', 'D', 'E', 'F', 'G']
+const circles = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I']
 
 link.draw((target) => {
   const {
+    types,
     proposing,
     schedule,
     sessions,
@@ -46,7 +48,7 @@ link.draw((target) => {
 
       let button
       if(focused === id) {
-        button = `<select class="active" id="${id}" data-when="${when}" data-where="${where}">`
+        button = `<select class="active cell" id="${id}" data-when="${when}" data-where="${where}">`
         button += `<option disabled>-</option>`
         button += sessions.map(({ what }, index) => {
           return `
@@ -56,7 +58,7 @@ link.draw((target) => {
         button += '</select>'
       } else {
         button = session ? `
-          <button data-update data-tooltip="${tooltip(schedule[id])}" data-where="${where}" data-when="${when}">
+          <button data-update class="idea" data-type="${session.type}" data-tooltip="${tooltip(schedule[id])}" data-where="${where}" data-when="${when}">
             ${session.what}
           </button>
         ` : `
@@ -74,11 +76,14 @@ link.draw((target) => {
   grid += '</tbody>'
   grid += '</table>'
 
-  const allSessions = sessions.map(({ who, what, why }, id) => {
+  const allSessions = sessions.map(({ type, who, what, why }, id) => {
     return `
-      <div class="card" data-tooltip="${tooltip(id)}">
+      <div class="idea" data-type="${type}" data-tooltip="${tooltip(id)}">
         <strong>${what}</strong>
         ${why}
+
+        <hr>
+        ${who}
       </div>
     `
   }).join('')
@@ -99,13 +104,25 @@ link.draw((target) => {
         </legend>
         <form>
           <label class="field">
+            <span class="label">Type</span>
+            <select name="type">
+              <option disabled>The Aforementioned "Any" Type</option>
+              ${types.map((type) => {
+                return `
+                  <option value="${type}">${type}</option>
+                `
+              })}
+            </select>
+          </label>
+
+          <label class="field">
             <span class="label">Who</span>
             <input name="who" value="${form.who || ''}" placeholder="tychi,clown">
           </label>
 
           <label class="field">
             <span class="label">What</span>
-            <input name="what" value="${form.what || ''}" placeholder="un-gaming un-conferencing">
+            <input name="what" value="${form.what || ''}" placeholder="un-gamifying un-conferences">
           </label>
 
           <label class="field">
@@ -148,6 +165,7 @@ function tooltip(id) {
   const session = sessions[id]
   if(!session) return
   return `
+    ${session.type}<br>
     ${session.who}<br>
     ${session.what}<br>
     ${session.why}<br>
@@ -215,7 +233,7 @@ link.when('input', 'input', (event) => {
   })
 })
 
-link.when('change', 'select', (event) => {
+link.when('change', 'select.cell', (event) => {
   const { when, where } = event.target.dataset
   const { sessions } = link.learn()
 
@@ -225,6 +243,21 @@ link.when('change', 'select', (event) => {
       ...state,
       schedule: {
         ...state.schedule,
+        ...payload
+      }
+    }
+  })
+})
+
+
+link.when('change', 'select[name="type"]', (event) => {
+  link.teach({
+    type: event.target.value
+  }, (state, payload) => {
+    return {
+      ...state,
+      form: {
+        ...state.form,
         ...payload
       }
     }
@@ -258,17 +291,53 @@ link.style(`
     table-layout: fixed;
   }
 
+  & table th,
+  & table td {
+    height: 3rem;
+    width: 18ch;
+  }
+
   & table button {
     width: 100%;
     display: block;
     height: 100%;
     border: none;
     border-radius: 0;
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: linear-gradient(rgba(255,255,255,.65),rgba(255,255,255,.5));
+    background-color: lemonchiffon;
+    color: rgba(0,0,0,.85);
   }
 
-  & table select {
+  & .idea[data-type="apple"] {
+    background-color: firebrick;
+  }
+
+  & .idea[data-type="banana"] {
+    background-color: darkorange;
+  }
+
+  & .idea[data-type="coconut"] {
+    background-color: gold;
+  }
+
+  & .idea[data-type="dill pickle"] {
+    background-color: mediumseagreen;
+  }
+
+  & .idea[data-type="eggs"] {
+    background-color: dodgerblue;
+  }
+
+  & .idea[data-type="french toast"] {
+    background-color: saddlebrown;
+  }
+
+  & .idea[data-type="grapes"] {
+    background-color: mediumpurple;
+  }
+
+  & table select,
+  & .field select {
     background: lemonchiffon;
     color: saddlebrown;
     border: none;
@@ -315,10 +384,12 @@ link.style(`
     color: saddlebrown;
   }
 
-  & .card {
-    background: lemonchiffon;
-    color: saddlebrown;
+  & .idea {
+    background: linear-gradient(rgba(255,255,255,.65),rgba(255,255,255,.5));
+    background-color: lemonchiffon;
+    color: rgba(0,0,0,.85);
     aspect-ratio: 1;
-    width: 180px;
+    min-width: 18ch;
+    width: 100%;
   }
 `)

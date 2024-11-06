@@ -7,9 +7,6 @@ const link = elf('same-page', {
 link.draw(() => {
   const { uuid } = link.learn()
   return `
-    <a href="/?world=sillyz.computer" class="nonce word-mark">
-      <span class="word">Same</span><strong class="word"><em>Same</em></strong><span class="word">.Page</span>
-    </a>
     <form class="search minimizable" action="/app/bulletin-board" method="get">
       <div class="input-grid">
         <input placeholder="netdir://" value="${uuid}" autocomplete="off" name="src" />
@@ -19,7 +16,27 @@ link.draw(() => {
         </button>
       </div>
     </form>
+    <div class="slogan">
+      Pick a Card. Any. Card.
+    </div>
+    <div class="bloop-grid">
+      <button class="card spin" data-uuid="${uuid}">
+        <div class="frontside">
+          <div class="nonce word-mark">
+            <span class="word">Same</span><strong class="word"><em>Same</em></strong><span class="word">.Page</span>
+          </div>
+        </div>
+        <div class="backside">
+          <qr-code text="${window.location.origin}/app/bulletin-board?src=${uuid}" data-fg="saddlebrown" data-bg="lemonchiffon"></qr-code>
+        </div>
+      </button>
+    </div>
   `
+})
+
+link.when('click', '.card', (event) => {
+  const { uuid } = event.target.dataset
+  window.location.href = window.location.origin + `/app/bulletin-board?src=${uuid}`
 })
 
 link.style(`
@@ -28,6 +45,18 @@ link.style(`
     width: 100%;
     height: 100%;
     place-content: center;
+  }
+
+  & .bloop-grid {
+    display: grid;
+    place-items: center;
+  }
+
+  & .slogan {
+    font-size: 1.5rem;
+    text-align: center;
+    color: rgba(0,0,0,.65);
+    margin: 2rem;
   }
 
   & .word-mark {
@@ -75,10 +104,16 @@ link.style(`
   }
 
   & button {
-    background: saddlebrown;
+    background: #E83FB8;
     color: lemonchiffon;
-    border: 1px solid saddlebrown;
+    border: 1px solid #E83FB8;
     padding: 1rem;
     aspect-ratio: 1;
+  }
+
+  & button:hover,
+  & button:focus {
+    background: lemonchiffon;
+    color: #E83FB8;
   }
 `)
