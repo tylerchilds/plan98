@@ -1,0 +1,35 @@
+! The following document describes the structure of the software systems that compose into one silly computer.
+
+# Architecture - Interior Mountain Caverns
+
+DENO.JSON hangs out by the POOL of CONFIGURATIONS.
+
+@ deno.json
+> Hey. I'm like the mailman. I know what everyone in town goes by and where they hang out.
+
+The MAIN CAVERN opens into a series of RAMPS and ROUTES that go UP and DOWN and IN and OUT.
+
+@ deno.json
+> Ask me about anyone and how to get into or out of trouble with or without them involved or knowing which way or whichever.
+
+UP the CAVERN WALL are ROUTES with signs for ANDROID, APPLE, WINDOWS, which correspond to MECHANICS, AGRICULTURE, and CARPENTRY skills.
+
+@ deno.json
+> We've got less flashy things going on downstairs too.
+
+DOWN into the CHASM DEPTHS are ROUTES with signs for HYPERTEXT, JAVASCRIPT, and SYSTEMS, being CHARISMA, KNOWLEDGE, and WISDOM respectively.
+
+@ deno.json
+> Just inside the horizon, we've got some tangibles.
+
+AHEAD into the YONDER CREVICES are more ROUTES with signs for INSTRUMENTS, ACCESSORIES, PURSES which attenuate as MUSIC, STYLE, and DEXTERITY.
+
+@ deno.json
+> Anyways, if you haven't seen any elves yet, don't take that personally. They're not shy. They just guard themselves from heartbreak unless you've taken an interest to their trinkets.
+
+A BUTTON on the GROUND reflects the lights from all the CAVE ROUTES, invisible to the naked eye without such an ACCESSORY.
+
+<action-script
+text: TAKE BUTTON
+data-action: takeButton
+data-script: /public/cdn/thelanding.page/game-state.js
