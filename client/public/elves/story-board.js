@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import module from '@silly/elf'
 
 let lineWidth = 0
 let isMousedown = false
@@ -625,20 +625,3 @@ $.when('click', '[data-menu-target]', (event) => {
   $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
 })
-
-(function preventBrowserHistorySwipeGestures() {
-  function touchStart(ev) {
-    if (ev.touches.length === 1) {
-      const touch = ev.touches[0];
-      ev.preventDefault();
-    }
-  }
-
-  // Safari defaults to passive: true for the touchstart event, so we need  to explicitly specify false
-  // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-  const options= { passive: false };
-
-  window.addEventListener("touchstart", touchStart, options);
-
-  return () => window.removeEventListener("touchstart", touchStart, options);
-})()
