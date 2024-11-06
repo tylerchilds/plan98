@@ -245,6 +245,7 @@ function mount(target) {
 
   const stars = getStars(target)
   target.innerHTML = `
+    <!--
     <div class="actions">
       <div class="menu-item">
         <button data-menu-target="file">
@@ -286,26 +287,8 @@ function mount(target) {
           </button>
         </div>
       </div>
-      <div class="menu-item">
-        <button data-menu-target="edit">
-          Edit
-        </button>
-        <div class="menu-actions" data-menu="edit">
-          <button data-undo>
-            <span>
-            <sl-icon name="arrow-counterclockwise"></sl-icon>
-            </span>
-            Undo
-          </button>
-          <button data-redo>
-            <span>
-            <sl-icon name="arrow-clockwise"></sl-icon>
-            </span>
-            Redo
-          </button>
-        </div>
-      </div>
     </div>
+    -->
     <div class="toolbelt-actions">
       <div class="menu-group">
         <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
