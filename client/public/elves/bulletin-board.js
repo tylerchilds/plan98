@@ -863,13 +863,12 @@ $.style(`
     grid-template-areas: "viewport-of-${$.link}";
     width: 100%;
     height: 100%;
-    padding-top: 2rem;
   }
 
   & .viewport [data-pane] {
     display: none;
     position: absolute;
-    inset: 2rem 0 0;
+    inset: 0;
   }
 
   &[data-mode="${modes.note}"] .viewport,
