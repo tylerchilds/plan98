@@ -80,10 +80,12 @@ function render(target) {
       node.innerHTML = `
         <button class="tray-wake" data-tray="${tray}"></button>
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
+          <button class="tray-action tray-close" data-tray="${tray}">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>
           <button class="tray-action tray-toggle" data-tray="${tray}">
             <sl-icon name="${minimized ? 'zoom-in' : 'zoom-out' }"></sl-icon>
           </button>
-          <div class="grabber"></div>
           <button class="tray-action tray-maxer" data-tray="${tray}">
             <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
           </button>
@@ -97,9 +99,7 @@ function render(target) {
             </div>
           </form>
           <div class="grabber minimizable"></div>
-          <button class="tray-action tray-close" data-tray="${tray}">
-            <sl-icon name="x-lg"></sl-icon>
-          </button>
+          <div class="grabber"></div>
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
@@ -1076,7 +1076,7 @@ $.style(`
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto 2rem auto minmax(100px, 1.618fr) 2rem auto;
+    grid-template-columns: auto auto auto minmax(100px, 1.618fr) 2rem 2rem;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -1134,12 +1134,12 @@ $.style(`
   & .tray.minimized:not(.maximized) {
     width: auto;
     height: auto;
-    grid-template-rows: auto 1px 0;
+    grid-template-rows: auto auto 1px 0;
     border-radius: 1rem;
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto 2rem auto auto;
+    grid-template-columns: auto auto auto 2rem;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {

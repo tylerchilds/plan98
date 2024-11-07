@@ -14,7 +14,22 @@ const nonce = `<div class="nonce"></div>`
 $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer', {
-  code: 'plan98.start()',
+  code: `/* sillyz.computer and the adventure of zelda*/
+import('@silly/elf').then((elf) => {
+
+  const zelda = elf.default('game-over')
+
+  zelda.draw(() => 'canvas/canvas', { beforeUpdate, afterUpdate })
+
+  function afterUpdate(target) { }
+  function beforeUpdate(target) { }
+
+  zelda.style("& { display: block; height: 100%; width: 100%;}")
+  zelda.style("& canvas { display: block; height: 100%; width: 100%; background: lemonchiffon; }")
+
+  // document.body.innerHTML = 'game-over/game-over'
+})
+  `,
   start: false
 })
 
@@ -557,6 +572,9 @@ function decode(encodedUrl) {
   return decodeURIComponent(encodedUrl.replace(/\+/g, '%20'));
 }
 
+$.when('focus', 'textarea', (event) => {
+  $.teach({ promptHeight: event.target.scrollHeight })
+});
 $.when('input', 'textarea', (event) => {
   $.teach({ promptHeight: event.target.scrollHeight })
 });
