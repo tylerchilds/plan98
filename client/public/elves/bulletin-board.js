@@ -17,6 +17,7 @@ const modes = {
   gallery: 'gallery',
   camera: 'camera',
   calendar: 'calendar',
+  collaborate: 'collaborate',
   gaming: 'gaming',
 }
 
@@ -126,6 +127,25 @@ function afterUpdate(target) {
       `
     }
   }
+
+  {
+    const { mode } = $.learn()
+    const collaborate = target.querySelector('.collaborate')
+    if(!collaborate.innerHTML && mode === modes.collaborate) {
+      collaborate.innerHTML = `
+        <div style="display: grid; height: 100%; place-items: center">
+          <button class="toolbelt-export">
+            <sticky-note>
+              <qr-code src="${window.location.href}"></qr-code>
+            </sticky-note>
+          </button>
+        </div>
+      `
+    } else {
+      collaborate.innerHTML = ''
+    }
+  }
+
 
   {
     const { mode } = $.learn()
@@ -324,6 +344,9 @@ function mount(target) {
         <button data-mode="calendar"  data-tooltip="Scheduling">
           <sl-icon name="calendar3"></sl-icon>
         </button>
+        <button data-mode="collaborate" data-tooltip="Export">
+          <sl-icon name="box-arrow-up-right"></sl-icon>
+        </button>
         <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
@@ -344,6 +367,7 @@ function mount(target) {
         <div class="music" data-pane="music"></div>
         <div class="calendar" data-pane="calendar"></div>
         <div class="gaming" data-pane="gaming"></div>
+        <div class="collaborate" data-pane="collaborate"></div>
       </div>
     </div>
   `
@@ -398,6 +422,11 @@ $.when('click', '[data-mode]', function updateMode (event) {
   const { mode } = event.target.dataset
   $.teach({ mode })
 })
+
+$.when('click', '.toolbelt-export', function updateMode (event) {
+  window.top.location.href = window.location.href
+})
+
 
 $.when('click', '[data-file-open]', function updateMode (event) {
 })
@@ -875,6 +904,7 @@ $.style(`
   &[data-mode="${modes.draw}"] .viewport,
   &[data-mode="${modes.music}"] .viewport,
   &[data-mode="${modes.calendar}"] .viewport,
+  &[data-mode="${modes.collaborate}"] .viewport,
   &[data-mode="${modes.map}"] .viewport,
   &[data-mode="${modes.gallery}"] .viewport,
   &[data-mode="${modes.gaming}"] .viewport,
@@ -888,6 +918,7 @@ $.style(`
   &[data-mode="${modes.draw}"] [data-pane="${modes.draw}"],
   &[data-mode="${modes.music}"] [data-pane="${modes.music}"],
   &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
+  &[data-mode="${modes.collaborate}"] [data-pane="${modes.collaborate}"],
   &[data-mode="${modes.map}"] [data-pane="${modes.map}"],
   &[data-mode="${modes.gallery}"] [data-pane="${modes.gallery}"],
   &[data-mode="${modes.gaming}"] [data-pane="${modes.gaming}"],
@@ -898,6 +929,17 @@ $.style(`
 
   & .calendar {
     background: white;
+  }
+
+  & .collaborate {
+    background: black;
+  }
+
+
+  & .collaborate button {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
   }
 
   & shared-terminal.stack {
