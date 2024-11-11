@@ -81,7 +81,7 @@ const $ = elf('file-system', {
   suggestions: [],
   suggesttionsLength: 0,
   filter: '',
-  view: 'grid'
+  view: 'list'
 })
 
 export default $
@@ -118,12 +118,17 @@ function draw2dFile(data, attributes) {
     name,
     icon
   } = data
+  const edit = false
   return `
     <div class="file-reference">
       <a href="${path}" ${reduceAttributes(attributes)}>
         <sl-icon name="${icon}" class="system-icon"></sl-icon>
       </a>
-      <input value="${name}" class="file-name" disabled="true">
+      ${edit? `<input value="${name}" class="file-name">` : `
+        <a href="${path}" class="file-name" data-path="${path}">
+          ${name}
+        </a>
+      `}
     </div>
   `
 }
@@ -134,12 +139,19 @@ function draw2dDirectory(data, attributes) {
     name,
     icon
   } = data
+  const edit = false
   return `
     <div class="file-reference">
       <a href="/app/file-system?src=${path}" ${reduceAttributes(attributes)}>
         <sl-icon name="${icon}" class="system-icon"></sl-icon>
       </a>
-      <input value="${name}" class="file-name" disabled="true">
+      ${edit? `
+        <input value="${name}" class="directory-name">
+      ` : `
+        <a class="directory-name" data-path="${path}" href="/app/file-system?src=${path}">
+          ${name}
+        </a>
+      `}
     </div>
   `
 }
@@ -258,12 +270,27 @@ $.when('click', '.interactive-file', (event) => {
   window.location.href = '/app/media-plexer?src='+path
 })
 
+
 $.when('click', '.interactive-directory', (event) => {
   event.preventDefault()
   const { path } = event.target.dataset
   const enclosure = jurassicFrom(path)
   $.teach({ enclosure })
   self.history.pushState({ type: `${$.link}-navigation`, path }, "");
+})
+
+$.when('click', '.directory-name', (event) => {
+  event.preventDefault()
+  const { path } = event.target.dataset
+  const enclosure = jurassicFrom(path)
+  $.teach({ enclosure })
+  self.history.pushState({ type: `${$.link}-navigation`, path }, "");
+})
+
+$.when('click', '.file-name', (event) => {
+  event.preventDefault()
+  const { path } = event.target.dataset
+  window.location.href = '/app/media-plexer?src='+path
 })
 
 addEventListener("popstate", async (event) => {
@@ -339,6 +366,15 @@ function library(target) {
 
   const search = `
     <div class="search">
+      <button class="action-button" data-back>
+        <sl-icon name="arrow-left"></sl-icon>
+      </button>
+      <button class="action-button" data-up>
+        <sl-icon name="arrow-up"></sl-icon>
+      </button>
+      <button class="action-button" data-forward>
+        <sl-icon name="arrow-right"></sl-icon>
+      </button>
       <input placeholder="Search..." type="text" value="${path || '/'}" name="search" autocomplete="off" />
       <button class="action-button" data-popover='${settings}'>
         <sl-icon name="three-dots-vertical"></sl-icon>
@@ -471,6 +507,23 @@ $.when('click', '[data-goto]', (event) => {
   window.location.href = goto
 })
 
+$.when('click', '[data-back]', (event) => {
+  history.back()
+})
+
+$.when('click', '[data-up]', (event) => {
+  const { path } = $.learn()
+  const src = path.split('/').slice(0,-1).join('/')
+  const enclosure = jurassicFrom(src)
+  $.teach({ enclosure })
+})
+
+$.when('click', '[data-forward]', (event) => {
+  history.forward()
+})
+
+
+
 export function identity(event) {
   const { contextActions } = $.learn()
   hideModal() // todo: find the root cause of this
@@ -595,7 +648,7 @@ $.style(`
 
   & .action-button {
     background: black;
-    color: rgba(255,255,255,.85);
+    color: rgba(255,255,255,.65);
     border: 0;
     border-radius: 0;
     height: 2rem;
@@ -604,11 +657,22 @@ $.style(`
     padding: 0 .5rem;
   }
 
+
+  & .action-button:hover,
+  & .action-button:focus {
+    color: rgba(255,255,255,.85);
+  }
+
   & .search {
     pointer-events: all;
     position: relative;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto auto auto 1fr auto;
+    background: black;
+  }
+
+  & .search input {
+    color: rgba(255,255,255,.85);
   }
 
   & .search img {
@@ -701,6 +765,7 @@ $.style(`
     padding: 0;
   }
 
+  & [data-view="list"] .interactive-directory,
   & [data-view="list"] .interactive-file {
     aspect-ratio: 1;
     text-decoration: none;
@@ -711,17 +776,23 @@ $.style(`
     padding: 0;
   }
 
+  & .directory-name,
   & .file-name {
     border-radius: 0;
     font-size: .8rem;
     line-height: 1;
     border: none;
     width: auto;
-    display: inline-block;
+    display: inline-grid;
     max-width: 100%;
     width: 100%;
+    text-decoration: none;
+    place-items: center start;
+    padding: .5rem;
+    color: rgba(0,0,0,.85);
   }
 
+  & .directory-name[disabled],
   & .file-name[disabled] {
     color: rgba(0,0,0,.85);
     opacity: 1;
