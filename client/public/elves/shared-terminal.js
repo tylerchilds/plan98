@@ -411,6 +411,7 @@ $.when('keydown', '.browser', event => {
     event.preventDefault()
     const { suggestions=[], suggestIndex } = $.learn($)
     const item = documents.find(y => {
+      if(!suggestions[suggestIndex]) return false
       return suggestions[suggestIndex].ref === y.path
     })
 
@@ -1059,7 +1060,7 @@ $.style(`
     background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
     padding: 2px;
     display: grid;
-    grid-template-rows: 2rem 1px 1fr;
+    grid-template-rows: 2rem 0 1fr;
     max-width: 100vw;
     max-height: 100vh;
   }
@@ -1134,7 +1135,7 @@ $.style(`
   & .tray.minimized:not(.maximized) {
     width: auto;
     height: auto;
-    grid-template-rows: auto auto 1px 0;
+    grid-template-rows: auto auto 0 0;
     border-radius: 1rem;
   }
 

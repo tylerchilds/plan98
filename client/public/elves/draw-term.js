@@ -784,7 +784,7 @@ $.style(`
     background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
     padding: 2px;
     display: grid;
-    grid-template-rows: auto 1px 1fr;
+    grid-template-rows: auto 0 1fr;
     max-width: 100vw;
     max-height: 100vh;
   }
@@ -852,7 +852,7 @@ $.style(`
   & .tray.minimized:not(.maximized) {
     width: auto;
     height: auto;
-    grid-template-rows: auto auto 1px 0;
+    grid-template-rows: auto auto 0 0;
     border-radius: 1rem;
   }
 

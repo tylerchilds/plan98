@@ -376,6 +376,9 @@ function library(target) {
         <sl-icon name="arrow-right"></sl-icon>
       </button>
       <input placeholder="Search..." type="text" value="${path || '/'}" name="search" autocomplete="off" />
+      <button class="action-button" data-down>
+        <sl-icon name="arrow-down"></sl-icon>
+      </button>
       <button class="action-button" data-popover='${settings}'>
         <sl-icon name="three-dots-vertical"></sl-icon>
       </button>
@@ -510,6 +513,14 @@ $.when('click', '[data-goto]', (event) => {
 $.when('click', '[data-back]', (event) => {
   history.back()
 })
+
+$.when('click', '[data-down]', (event) => {
+  const { value } = event.target.closest($.link).querySelector('[name="search"]');
+  const enclosure = jurassicFrom(value)
+  $.teach({ enclosure })
+})
+
+
 
 $.when('click', '[data-up]', (event) => {
   const { path } = $.learn()
@@ -667,7 +678,7 @@ $.style(`
     pointer-events: all;
     position: relative;
     display: grid;
-    grid-template-columns: auto auto auto 1fr auto;
+    grid-template-columns: auto auto auto 1fr auto auto;
     background: black;
   }
 

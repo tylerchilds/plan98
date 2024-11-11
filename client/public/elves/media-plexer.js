@@ -13,6 +13,7 @@ const renderers = {
   'mp3': audioRenderer,
   'wav': audioRenderer,
   'mp4': videoRenderer,
+  'mov': videoRenderer,
   'm3u8': hlsRenderer,
 }
 
