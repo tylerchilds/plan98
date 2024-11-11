@@ -63,3 +63,12 @@ function hlsRenderer(path) {
     <hls-video src="${path}" controls="true"></hls-video>
   `
 }
+
+$.style(`
+  & {
+    display: grid;
+    background: black;
+    place-items: center;
+    height: 100%;
+  }
+`)

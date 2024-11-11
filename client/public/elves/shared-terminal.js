@@ -390,7 +390,7 @@ const down = 40;
 const up = 38;
 const enter = 13;
 $.when('keydown', '.browser', event => {
-  const { suggestionsLength=0, suggestIndex } = this.read($)
+  const { suggestionsLength=0, suggestIndex } = $.learn()
   if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
@@ -409,7 +409,7 @@ $.when('keydown', '.browser', event => {
 
   if(event.keyCode === enter && suggestIndex !== null) {
     event.preventDefault()
-    const { suggestions=[], suggestIndex } = this.read($)
+    const { suggestions=[], suggestIndex } = $.learn($)
     const item = documents.find(y => {
       return suggestions[suggestIndex].ref === y.path
     })

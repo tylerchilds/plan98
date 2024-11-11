@@ -356,9 +356,10 @@ $.when('click', '[data-print]', async (event) => {
 $.when('click', '[data-publish]', (event) => {
   const src = source(event.target)
 
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer no-key"
+    "Authorization": `Basic ${authorization}`
   }
 
   $.teach({ thinking: true, activeMenu: null })
@@ -371,8 +372,12 @@ $.when('click', '[data-publish]', (event) => {
       src
     })
   }).then((response) => response.text()).then((result) => {
-    const data = JSON.parse(result)
-    toast(data.error ? 'Access Denied' : 'Saved!')
+    try {
+      const data = JSON.parse(result)
+      toast(data.error ? 'Access Denied' : 'Saved!')
+    } catch(e) {
+      toast(result)
+    }
   })
 })
 
