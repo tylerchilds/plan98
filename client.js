@@ -63,6 +63,9 @@ async function page() {
     <script>
       self.plan98 = {
         env: {
+          ${safeEnv('PLAN98_USERNAME')}
+          ${safeEnv('PLAN98_PASSWORD')}
+
           ${safeEnv('ADYEN_API_KEY')}
           ${safeEnv('ADYEN_MERCHANT_ACCOUNT')}
           ${safeEnv('ADYEN_CLIENT_KEY')}
@@ -180,7 +183,50 @@ function buildHeaders(parameters, pathname, extension) {
   return headers
 }
 
+const USERNAME = "user";
+const PASSWORD = "password";
+
+// Helper function to decode the base64 credentials from the Authorization header
+function parseBasicAuth(header) {
+  const regex = /^Basic (.+)$/;
+  const match = header.match(regex);
+  if (!match) return null;
+
+  const base64Credentials = match[1];
+  const decodedCredentials = atob(base64Credentials);
+  const [username, password] = decodedCredentials.split(":", 2);
+
+  return [username, password];
+}
+
 async function router(request, context) {
+
+  // only require authorization if we have a username
+  if(Deno.env.get('PLAN98_USERNAME')) {
+    const authHeader = request.headers.get("Authorization");
+
+    if (!authHeader) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": 'Basic realm="Secure Area"',
+        },
+      });
+    }
+
+    const [username, password] = parseBasicAuth(authHeader) || [];
+
+    // Check if the credentials match the expected ones
+    if (!(username === Deno.env.get('PLAN98_USERNAME') && password === Deno.env.get('PLAN98_PASSWORD'))) {
+      return new Response("Unauthorized", {
+        status: 401,
+        headers: {
+          "WWW-Authenticate": 'Basic realm="Secure Area"',
+        },
+      });
+    }
+  }
+
   const { pathname, host, search } = new URL(request.url);
 
   const parameters = new URLSearchParams(search)

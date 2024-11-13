@@ -81,15 +81,21 @@ const $ = elf('file-system', {
   suggestions: [],
   suggesttionsLength: 0,
   filter: '',
+  view: 'list'
 })
 
 export default $
+
+function embedded(target) {
+  return target.dataset.embedded === 'true'
+}
 
 function nested(target) {
   return target.parentNode.closest($.link)
 }
 
 $.draw((target) => {
+  if(embedded(target)) return
   if(nested(target)) return 'paradox averted'
 	if(target.mounted) return
 	target.mounted = true
@@ -99,7 +105,6 @@ $.draw((target) => {
     <div class="library">
       ${library(null)}
     </div>
-
     <div class="irix"></div>
 	`
 }, {
@@ -107,29 +112,70 @@ $.draw((target) => {
   afterUpdate
 })
 
-function draw2d(data, attributes) {
+function draw2dFile(data, attributes) {
   const {
+    path,
     name,
     icon
   } = data
+  const edit = false
   return `
     <div class="file-reference">
-      <button ${reduceAttributes(attributes)}>
-      <sl-icon name="${icon}" class="system-icon"></sl-icon>
-      </button>
-      <input value="${name}" class="file-name">
+      <a href="${path}" ${reduceAttributes(attributes)}>
+        <sl-icon name="${icon}" class="system-icon"></sl-icon>
+      </a>
+      ${edit? `<input value="${name}" class="file-name">` : `
+        <a href="${path}" class="file-name" data-path="${path}">
+          ${name}
+        </a>
+      `}
     </div>
   `
 }
 
+function draw2dDirectory(data, attributes) {
+  const {
+    path,
+    name,
+    icon
+  } = data
+  const edit = false
+  return `
+    <div class="file-reference">
+      <a href="/app/file-system?src=${path}" ${reduceAttributes(attributes)}>
+        <sl-icon name="${icon}" class="system-icon"></sl-icon>
+      </a>
+      ${edit? `
+        <input value="${name}" class="directory-name">
+      ` : `
+        <a class="directory-name" data-path="${path}" href="/app/file-system?src=${path}">
+          ${name}
+        </a>
+      `}
+    </div>
+  `
+}
+
+
 function increment(target) {
   const irix = target.querySelector('.irix')
-  const { enclosure } = $.learn()
+  if(!irix) return
+  const { enclosure, view, path } = $.learn()
+
+  irix.dataset.view = view
+
+  if(view === 'game') {
+    if(!irix.querySelector('iframe')) {
+      irix.innerHTML = `<iframe src="/app/generic-park?src=${path}"></iframe>`
+    }
+    return
+  }
 
   if(enclosure) {
     const dinosaurs = enclosure.children.map((eggs, i) => {
       if(eggs.type === Types.Directory.type) {
-        return draw2d({
+        return draw2dDirectory({
+          path: eggs.path,
           name: eggs.name,
           icon: 'folder'
         }, {
@@ -140,7 +186,8 @@ function increment(target) {
       }
 
       if(eggs.type === Types.File.type) {
-        return draw2d({
+        return draw2dFile({
+          path: eggs.path,
           name: eggs.name,
           icon: iconByPath(eggs.path)
         }, {
@@ -211,16 +258,39 @@ function iconByPath(path) {
   return knownTypes.indexOf(extension) > -1 ? 'filetype-'+extension : 'file-earmark'
 }
 
+$.when('click', '[data-view]', (event) => {
+  const { view } = event.target.dataset
+  $.teach({ view })
+})
+
+
 $.when('click', '.interactive-file', (event) => {
+  event.preventDefault()
   const { path } = event.target.dataset
   window.location.href = '/app/media-plexer?src='+path
 })
 
+
 $.when('click', '.interactive-directory', (event) => {
+  event.preventDefault()
   const { path } = event.target.dataset
   const enclosure = jurassicFrom(path)
   $.teach({ enclosure })
   self.history.pushState({ type: `${$.link}-navigation`, path }, "");
+})
+
+$.when('click', '.directory-name', (event) => {
+  event.preventDefault()
+  const { path } = event.target.dataset
+  const enclosure = jurassicFrom(path)
+  $.teach({ enclosure })
+  self.history.pushState({ type: `${$.link}-navigation`, path }, "");
+})
+
+$.when('click', '.file-name', (event) => {
+  event.preventDefault()
+  const { path } = event.target.dataset
+  window.location.href = '/app/media-plexer?src='+path
 })
 
 addEventListener("popstate", async (event) => {
@@ -279,24 +349,54 @@ function library(target) {
 
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
+
+  const settings = `
+    <file-system data-embedded="true">
+      <button data-view="grid">
+        <span><sl-icon name="grid"></sl-icon></span> Grid
+      </button>
+      <button data-view="list">
+        <span><sl-icon name="list-stars"></sl-icon></span> List
+      </button>
+      <button data-view="game">
+        <span><sl-icon name="joystick"></sl-icon></span> Immersive
+      </button>
+    </file-system>
+  `
+
   const search = `
     <div class="search">
-      <input placeholder="Search..." type="text" value="${path}" name="search" autocomplete="off" />
-      <div class="suggestions">
-        ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
-          const item = documents.find(y => {
-            return x.ref === y.path
-          })
+      <button class="action-button" data-back>
+        <sl-icon name="arrow-left"></sl-icon>
+      </button>
+      <button class="action-button" data-up>
+        <sl-icon name="arrow-up"></sl-icon>
+      </button>
+      <button class="action-button" data-forward>
+        <sl-icon name="arrow-right"></sl-icon>
+      </button>
+      <input placeholder="Search..." type="text" value="${path || '/'}" name="search" autocomplete="off" />
+      <button class="action-button" data-down>
+        <sl-icon name="arrow-down"></sl-icon>
+      </button>
+      <button class="action-button" data-popover='${settings}'>
+        <sl-icon name="three-dots-vertical"></sl-icon>
+      </button>
+    </div>
+    <div class="suggestions">
+      ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
+        const item = documents.find(y => {
+          return x.ref === y.path
+        })
 
-          return `
-            <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
-              <div class="name">
-                ${item.name}
-              </div>
-            </button>
-          `
-        }).join('') : ''}
-      </div>
+        return `
+          <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+            <div class="name">
+              ${item.name}
+            </div>
+          </button>
+        `
+      }).join('') : ''}
     </div>
   `
 
@@ -409,6 +509,31 @@ $.when('click', '[data-goto]', (event) => {
   const { goto } = event.target.dataset
   window.location.href = goto
 })
+
+$.when('click', '[data-back]', (event) => {
+  history.back()
+})
+
+$.when('click', '[data-down]', (event) => {
+  const { value } = event.target.closest($.link).querySelector('[name="search"]');
+  const enclosure = jurassicFrom(value)
+  $.teach({ enclosure })
+})
+
+
+
+$.when('click', '[data-up]', (event) => {
+  const { path } = $.learn()
+  const src = path.split('/').slice(0,-1).join('/')
+  const enclosure = jurassicFrom(src)
+  $.teach({ enclosure })
+})
+
+$.when('click', '[data-forward]', (event) => {
+  history.forward()
+})
+
+
 
 export function identity(event) {
   const { contextActions } = $.learn()
@@ -532,9 +657,33 @@ $.style(`
     height: 100%;
   }
 
+  & .action-button {
+    background: black;
+    color: rgba(255,255,255,.65);
+    border: 0;
+    border-radius: 0;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    padding: 0 .5rem;
+  }
+
+
+  & .action-button:hover,
+  & .action-button:focus {
+    color: rgba(255,255,255,.85);
+  }
+
   & .search {
     pointer-events: all;
     position: relative;
+    display: grid;
+    grid-template-columns: auto auto auto 1fr auto auto;
+    background: black;
+  }
+
+  & .search input {
+    color: rgba(255,255,255,.85);
   }
 
   & .search img {
@@ -545,12 +694,13 @@ $.style(`
     margin: auto;
     text-align: left;
     background: transparent;
-    font-size: 1.2rem;
-    padding: .5rem 1rem;
+    font-size: 1rem;
+    padding: .5rem;
     margin: 0 auto;
     width: 100%;
     border-radius: 0;
     border: none;
+    height: 2rem;
   }
 
   & .search input:focus {
@@ -559,7 +709,7 @@ $.style(`
   & .suggestions .auto-item,
   & .search .auto-item {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
+    background-color: var(--button-color, lemonchiffon);
     border: none;
     color: white;
     transition: background-color 200ms ease-in-out;
@@ -584,9 +734,9 @@ $.style(`
   }
 
   & .suggestions .auto-item {
-    background: var(--button-color, dodgerblue);
+    background: var(--button-color, lemonchiffon);
     background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
-    color: var(--button-color, dodgerblue);
+    color: var(--button-color, lemonchiffon);
     transition: all 100ms ease-in-out;
     padding: .5rem;
     width: 100%;
@@ -596,7 +746,7 @@ $.style(`
 
   & .suggestions .auto-item:focus,
   & .suggestions .auto-item:hover {
-    background-color: var(--button-color, dodgerblue);
+    background-color: var(--button-color, lemonchiffon);
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
     color: white;
   }
@@ -604,14 +754,14 @@ $.style(`
   & .suggestions .auto-item.active {
     color: white;
     background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    background-color: var(--button-color, dodgerblue);
+    background-color: var(--button-color, lemonchiffon);
   }
 
   & [data-suggestion] {
     display: block;
   }
 
-  & .file-reference {
+  & [data-view="grid"] .file-reference {
     display: grid;
     grid-template-rows: 1fr auto;
     aspect-ratio: 1;
@@ -619,31 +769,68 @@ $.style(`
     padding: 0;
   }
 
+  & [data-view="list"] .file-reference {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  & [data-view="list"] .interactive-directory,
+  & [data-view="list"] .interactive-file {
+    aspect-ratio: 1;
+    text-decoration: none;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  & .directory-name,
   & .file-name {
     border-radius: 0;
     font-size: .8rem;
     line-height: 1;
     border: none;
     width: auto;
-    display: inline-block;
+    display: inline-grid;
     max-width: 100%;
     width: 100%;
+    text-decoration: none;
+    place-items: center start;
+    padding: .5rem;
+    color: rgba(0,0,0,.85);
   }
 
+  & .directory-name[disabled],
   & .file-name[disabled] {
     color: rgba(0,0,0,.85);
     opacity: 1;
   }
 
-  & .system-icon {
+  & .irix[data-view="grid"] .system-icon {
     font-size: 3rem;
   }
 
-  & .irix {
+  & .irix[data-view="grid"] {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
     gap: 8px;
   }
+
+  & .irix[data-view="list"] {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  & .irix[data-view="game"] {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
 `)
 
 function reduceAttributes(attributes) {

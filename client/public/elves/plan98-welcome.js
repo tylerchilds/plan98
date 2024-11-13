@@ -102,8 +102,8 @@ $.draw((target) => {
                   ${subtitle}
                 </hypertext-variable>
               </div>
-              <rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
-              </rainbow-action>
+              <!--<rainbow-action prefix="<button data-tutorial>" suffix="</button>" text="Start">
+              </rainbow-action>-->
             </div>
           </div>
         </div>
@@ -174,11 +174,11 @@ $.draw((target) => {
                 Paper
               </hypertext-variable>
               <hypertext-variable id="vt2" monospace="1" slant="0" casual="0" cursive="0">
-                Nautilus
+                Nautiloids
               </hypertext-variable>
             </div>
-              <rainbow-action class="start" prefix="<button data-endgame>" suffix="</button>" text="Start">
-              </rainbow-action>
+              <!--<rainbow-action class="start" prefix="<button data-endgame>" suffix="</button>" text="Start">
+              </rainbow-action>-->
               <button data-about class="cta" data-tooltip="Learn about where here is.">Subscribe</button>
             </div>
           </div>

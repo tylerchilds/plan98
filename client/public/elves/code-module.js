@@ -153,6 +153,7 @@ $.style(`
     padding-top: 2rem;
     background: white;
     color: black;
+    max-width: 100%;
   }
 
   & select {

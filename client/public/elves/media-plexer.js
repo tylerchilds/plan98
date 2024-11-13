@@ -11,7 +11,9 @@ const renderers = {
   'html': codeRenderer,
   'md': markdownRenderer,
   'mp3': audioRenderer,
+  'wav': audioRenderer,
   'mp4': videoRenderer,
+  'mov': videoRenderer,
   'm3u8': hlsRenderer,
 }
 
@@ -22,7 +24,7 @@ function source(target) {
 $.draw((target) => {
   const [path, _args] = source(target).split('?')
   const extension = path.split('.').pop()
-  const renderer = renderers[extension] || (() => `<sillyz-computer error="format to be defined: ${extension}" src="${path}"></sillyz-computer>`)
+  const renderer = renderers[extension.toLowerCase()] || (() => `<sillyz-computer error="format to be defined: ${extension}" src="${path}"></sillyz-computer>`)
   return renderer(path)
 })
 
@@ -63,3 +65,12 @@ function hlsRenderer(path) {
     <hls-video src="${path}" controls="true"></hls-video>
   `
 }
+
+$.style(`
+  & {
+    display: grid;
+    background: black;
+    place-items: center;
+    height: 100%;
+  }
+`)

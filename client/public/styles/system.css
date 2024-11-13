@@ -703,6 +703,8 @@ sillonious-brand > xml-html {
   color: saddlebrown;
   border: none;
   border-radius: 0;
+  display: grid;
+  place-items: center;
 }
 
 
