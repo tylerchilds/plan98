@@ -703,7 +703,7 @@ $.style(`
     bottom: 0;
     right: 0;
     display: none;
-    max-width: 100%;
+    max-width: 75%;
     width: 100%;
     padding: .5rem;
     overflow: hidden;
@@ -715,6 +715,14 @@ $.style(`
   & .toolbelt-actions button {
     pointer-events: all;
   }
+
+  & .toolbelt-actions .toolbelt-grabber:focus,
+  & .toolbelt-actions .toolbelt-grabber.active,
+  & .toolbelt-actions .toolbelt-grabber:hover {
+    color: #E83FB8;
+    background: lemonchiffon;
+  }
+
   & .toolbelt-grabber {
     position: sticky;
     left: 0;
@@ -722,6 +730,7 @@ $.style(`
 
   & .menu-group button.toolbelt-grabber {
     padding: .75rem .25rem;
+    color: #E83FB8;
   }
 
 

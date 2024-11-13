@@ -190,6 +190,14 @@ $.style(`
     border: none;
     width: 100%;
     height: auto;
+    opacity: 1;
+    transition: opacity calc(1000ms / 8);
+  }
+
+  & .step.active,
+  & .step:hover,
+  & .step:focus {
+    opacity: .1;
   }
 `)
 
