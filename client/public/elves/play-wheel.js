@@ -62,13 +62,17 @@ $.draw((target) => {
   const { start, length, reverse, colors, debug, colorVariables } = $.learn()
   const wheel = colors.map((lightness, i) => {
     console.log({ lightness })
-    const steps = lightness.map((x, ii) => `
-      <button
-        class="step"
-        data-note="${((ii * 12) + i)}"
-        style="background: var(${x.name})">
-      </button>
-    `).join('')
+    const steps = lightness.map((x, ii) => {
+      const noteAlgorithm = ((ii * 12) + mod(i * 7, 12))
+      console.log(noteAlgorithm)
+      return`
+        <button
+          class="step"
+          data-note="${noteAlgorithm}"
+          style="background: var(${x.name})">
+        </button>
+      `
+    }).join('')
     return `
       <div class="group" style="transform: rotate(${i * 30}deg)">
         ${steps}
@@ -119,6 +123,12 @@ $.style(`
     background: black;
     display: block;
     height: 100%;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: none;
   }
 
   & [data-escape] {
@@ -193,13 +203,14 @@ function recalculate() {
   const { start, length, reverse } = $.learn()
 
   const colors = [...Array(12)].map((_, hueIndex) => {
-    const step = ((length / 12) * hueIndex)
+    const hueFifths = mod(hueIndex * 7, 12)
+    const step = ((length / 12) * hueFifths)
     const hue = reverse
       ? start - step
       : start + step
 
     return lightnessStops.map(([l, c], i) => {
-      const name = `--wheel-${hueIndex}-${i}`
+      const name = `--wheel-${hueFifths}-${i}`
       const value = new Color('lch', [l, c, hue])
         .display()
         .toString()
@@ -207,7 +218,7 @@ function recalculate() {
       return {
         name,
         value,
-        block: hueIndex,
+        block: hueFifths,
         inline: i
       }
     })
