@@ -155,6 +155,7 @@ $.style(`
     background: white;
     color: black;
     max-width: 100%;
+    width: 100%;
   }
 
   & select {
