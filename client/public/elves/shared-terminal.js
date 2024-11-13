@@ -276,7 +276,7 @@ function drawIrix(tray) {
 
         <input disabled value="Amateur Synth" class="app-name">
       </button>
-      <button class="application" data-tray="${tray}" data-href="/app/sillyz-synth">
+      <button class="application" data-tray="${tray}" data-href="/app/sillyz-ocarina">
         <span><sl-icon name="music-note-beamed"></sl-icon></span>
 
         <input disabled value="Professional Synth" class="app-name">
