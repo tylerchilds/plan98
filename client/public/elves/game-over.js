@@ -25,10 +25,22 @@ import('@silly/elf').then((elf) => {
   // when the silly pointer is lifted up from the canvas, end tracking
   silly.when('pointerup', 'canvas', end)
 
+  // when the nonce is clicked, naviate home
+  silly.when('click', '.nonce', () => {
+    window.location.href = '/'
+  })
+
   // when silly is updated, we draw the elves that run in sillyz mind
   silly.draw((target) => {
-    // any other elf can hide behind the canvas
-    return '<plan98-welcome></plan98-welcome><canvas></canvas>'
+    // once we've drawn the first time, let's handle updates surgically
+    if(target.innerHTML) return
+
+    // layer the welcome screen behind the sticky nose under the invisible canvas
+    return `
+      <plan98-welcome></plan98-welcome>
+      <canvas></canvas>
+      <button class="nonce"></button>
+    `
   },
     // hooks happen before draw updates and after draw updates
     { beforeUpdate, afterUpdate }
@@ -37,30 +49,44 @@ import('@silly/elf').then((elf) => {
   // beforeUpdate, use case: persist ephemeral user experience for a frame
   function beforeUpdate(target) {
     {
-      // scope to run before
+      // learn the status of whether silly is pressed
+      const { pressed } = silly.learn()
+      if(pressed) {
+        // label the target as pressed
+        target.classList.add('pressed')
+      } else {
+        // unlabel the target as pressed
+        target.classList.remove('pressed')
+      }
     }
   }
 
-  // afterUpdate, use case: persist ephemeral user experience for a frame
+  // afterUpdate, use case: recover ephemeral user experience for a frame
   function afterUpdate(target) {
     {
       // scope to run after
+      const { x, y } = silly.learn()
+      // set the endgame x and endgame y variables to update layout
+      target.style.setProperty('--endgame-x', x + 'px')
+      target.style.setProperty('--endgame-y', y + 'px')
     }
   }
 
   function start(event) {
-    const { target, x, y } = event
-    console.log({ target, x, y })
+    const { x, y } = event
+    // teach the x, y coordinates and activate pressed
+    silly.teach({ x, y, pressed: true })
   }
 
   function move(event) {
-    const { target, x, y } = event
-    console.log({ target, x, y })
+    const { x, y } = event
+    // update the x, y coordinates
+    silly.teach({ x, y })
   }
 
   function end(event) {
-    const { target } = event
-    console.log({ target })
+    // deactivate pressed
+    silly.teach({ pressed: false })
   }
 
   // silly can be re-composited with style
@@ -70,6 +96,16 @@ import('@silly/elf').then((elf) => {
       height: 100%;
       width: 100%;
       position: relative;
+    }
+
+    & .nonce {
+      position: absolute;
+      left: 0;
+      right: 0;
+      transform: translate(calc(var(--endgame-x) - 1.5rem), calc(var(--endgame-y) - 1.5rem));
+      transform-origin: center;
+      width: 3rem;
+      height: 3rem;
     }
 
     & > * {
@@ -82,5 +118,16 @@ import('@silly/elf').then((elf) => {
       height: 100%;
       width: 100%;
     }
+
+    & .nonce {
+      pointer-events: none;
+    }
+
+    &.pressed .nonce {
+      display: none;
+      pointer-events: all;
+    }
   `)
 }).catch(e => console.error(e))
+
+customElements.define('game-over', class WebComponent extends HTMLElement { constructor() { super() } });

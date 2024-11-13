@@ -18,12 +18,6 @@ const $ = tag('sillyz-computer', {
   start: false
 })
 
-fetch('/elves/game-over.js')
-  .then(res => res.text())
-  .then(file => $.teach({
-    code: file + '\n' + "document.body.innerHTML = '<game-over></game-over>'"
-  }))
-
 export function start() {
   $.teach({ start: true })
 }
@@ -158,6 +152,12 @@ function mount(target, src) {
     requestIdleCallback(() => {
       $.teach({ code })
     })
+  } else {
+    fetch('/elves/game-over.js')
+      .then(res => res.text())
+      .then(file => $.teach({
+        code: file + '\n' + "document.body.innerHTML = '<game-over></game-over>'"
+      }))
   }
 
   if(src) {
@@ -180,7 +180,7 @@ function escapeHyperText(text = '') {
 }
 
 function computer(node) {
-  const { promptHeight, calculation, code } = $.learn()
+  const { promptHeight, calculation, code, promptActive } = $.learn()
   innerHTML(node, `
     <div class="suggestion-box">${results(calculation)}</div>
 
@@ -188,11 +188,13 @@ function computer(node) {
       <button data-calculate class="synthia-action">
         <sl-icon name="calculator"></sl-icon>
       </button>
-      <div class="prompt">
-        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" placeholder="prompt synthia" autocomplete="off">${escapeHyperText(code)||''}</textarea>
-        ${code ? `<button class="synthia-action synthia-clear">
-          <sl-icon name="x-lg"></sl-icon>
-        </button>`:''}
+      <div class="prompt ${promptActive ? 'focused' : ''}" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''}>
+        <div class="code-canvas">
+          <textarea rows="1" name="synthia" placeholder="prompt synthia" autocomplete="off">${escapeHyperText(code)||''}</textarea>
+          ${code ? `<button class="synthia-action synthia-clear">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>`:''}
+        </div>
       </div>
       <button data-voice class="synthia-action">
         <sl-icon name="mic"></sl-icon>
@@ -479,15 +481,50 @@ $.style(`
 
   & .title-bar .prompt {
     position: relative;
-    z-index: 1000;
   }
 
-  & .synthia-clear {
+  & .title-bar .prompt.focused {
+    position: static;
+  }
+
+  & .prompt .synthia-clear {
+    display: none;
+  }
+
+  & .prompt .synthia-clear:hover,
+  & .prompt .synthia-clear:focus {
+    opacity: 1;
+    background: saddlebrown;
+    color: lemonchiffon;
+  }
+
+  & .focused .synthia-clear {
     position: absolute;
     z-index: 1000;
-    right: 0;
-    top: 3px;
+    right: .5rem;
+    top: .5rem;
+    background: saddlebrown;
+    color: lemonchiffon;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+    opacity: .5;
+    transition: opacity 100ms;
   }
+
+  & code-canvas {
+    height: 100%;
+  }
+  & .focused .code-canvas {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: var(--prompt-height);
+    min-height: 28px;
+    max-height: 50vh;
+  }
+
 
   & .title-bar textarea {
     border: 1px solid saddlebrown;
@@ -499,19 +536,19 @@ $.style(`
     height: 100%;
     resize: none;
     line-height: 1.5;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    min-height: 28px;
-    max-height: 50vh;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+
   }
 
-
-  & .title-bar textarea:focus {
-    height: var(--prompt-height);
+  & .title-bar .focused textarea {
     outline: 2px solid mediumseagreen;
-    outline-offset: 2px
+    outline-offset: 2px;
   }
   & .synthia-action {
     background: transparent;
@@ -575,8 +612,12 @@ function decode(encodedUrl) {
 }
 
 $.when('focus', 'textarea', (event) => {
-  $.teach({ promptHeight: event.target.scrollHeight })
+  $.teach({ promptHeight: event.target.scrollHeight, promptActive: true })
 });
 $.when('input', 'textarea', (event) => {
   $.teach({ promptHeight: event.target.scrollHeight })
+});
+
+$.when('blur', 'textarea', (event) => {
+  $.teach({ promptActive: false })
 });
