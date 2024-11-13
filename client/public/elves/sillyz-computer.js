@@ -14,24 +14,15 @@ const nonce = `<div class="nonce"></div>`
 $zune.teach({ menu: false })
 
 const $ = tag('sillyz-computer', {
-  code: `/* sillyz.computer and the adventure of zelda*/
-import('@silly/elf').then((elf) => {
-
-  const zelda = elf.default('game-over')
-
-  zelda.draw(() => 'canvas/canvas', { beforeUpdate, afterUpdate })
-
-  function afterUpdate(target) { }
-  function beforeUpdate(target) { }
-
-  zelda.style("& { display: block; height: 100%; width: 100%;}")
-  zelda.style("& canvas { display: block; height: 100%; width: 100%; background: lemonchiffon; }")
-
-  // document.body.innerHTML = 'game-over/game-over'
-})
-  `,
+  code: ``,
   start: false
 })
+
+fetch('/elves/game-over.js')
+  .then(res => res.text())
+  .then(file => $.teach({
+    code: file + '\n' + "document.body.innerHTML = '<game-over></game-over>'"
+  }))
 
 export function start() {
   $.teach({ start: true })
@@ -176,6 +167,18 @@ function mount(target, src) {
   }
 }
 
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g,
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
 function computer(node) {
   const { promptHeight, calculation, code } = $.learn()
   innerHTML(node, `
@@ -186,7 +189,7 @@ function computer(node) {
         <sl-icon name="calculator"></sl-icon>
       </button>
       <div class="prompt">
-        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" placeholder="prompt synthia" autocomplete="off">${code||''}</textarea>
+        <textarea rows="1" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''} name="synthia" placeholder="prompt synthia" autocomplete="off">${escapeHyperText(code)||''}</textarea>
         ${code ? `<button class="synthia-action synthia-clear">
           <sl-icon name="x-lg"></sl-icon>
         </button>`:''}
@@ -250,7 +253,6 @@ $.when('click', '[data-gaming]', (event) => {
 
 $.when('click', '[data-calculate]', (event) => {
   const { code } = $.learn()
-
   try {
     let response = synthia(code)
 
