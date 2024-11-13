@@ -10,7 +10,7 @@ Learn the language of the E.L.F. and you will be blessed with their abilities.
 
 */
 
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 import { r } from '@sillonious/saga'
 
 const $ = elf('saga-about')

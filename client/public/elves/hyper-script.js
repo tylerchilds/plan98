@@ -84,7 +84,7 @@ function countShots(instructions) {
 const $ = module('hyper-script', {
   // raw text of the file
   file: pitch,
-  activePanel: window.location.hash?.split('#')[1] || panels.write,
+  activePanel: window.location.hash?.split('#')[1] || panels.read,
   activeShot: 0,
   shotCount: countShots(pitch),
 })
@@ -190,9 +190,9 @@ $.draw((target) => {
           View
         </button>
         <div class="menu-actions" data-menu="view">
-          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Rewrite</button>
-          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Review</button>
-          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Rehearse</button>
+          <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Read</button>
+          <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Write</button>
+          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Run</button>
           ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
         </div>
       </div>
@@ -365,7 +365,7 @@ $.when('click', '[data-publish]', (event) => {
   $.teach({ thinking: true, activeMenu: null })
 
   fetch(src, {
-    headers: headers,
+    headers,
     method: 'POST',
     body: JSON.stringify({
       file: state[$.link][src].file,

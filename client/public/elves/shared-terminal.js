@@ -216,8 +216,8 @@ function drawIrix(tray) {
         <span><sl-icon name="archive"></sl-icon></span>
         <input disabled value="All Files" class="app-name">
       </button>
-      <button class="application" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
-        <span><sl-icon name="circle"></sl-icon></span>
+      <button class="application" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/play-wheel?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
+        <span class="nonce-icon nonce"></span>
 
         <input disabled value="Silly Computer" class="app-name">
       </button>
@@ -1242,6 +1242,14 @@ $.style(`
     padding: 0;
   }
 
+  & .application .nonce-icon {
+    width: calc(2rem + 3px);
+    height: calc(2rem + 3px);
+  }
+
+  & .application > span {
+    display: flex;
+  }
   & .application sl-icon {
     background: lemonchiffon;
     color: saddlebrown;
@@ -1269,7 +1277,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     padding: 4px;
-    gap: 0;
+    gap: 4px;
     justify-items: center;
   }
 `)

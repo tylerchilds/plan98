@@ -15,6 +15,7 @@ const renderers = {
   'mp4': videoRenderer,
   'mov': videoRenderer,
   'm3u8': hlsRenderer,
+  'csv': csvRenderer,
 }
 
 function source(target) {
@@ -65,6 +66,13 @@ function hlsRenderer(path) {
     <hls-video src="${path}" controls="true"></hls-video>
   `
 }
+
+function csvRenderer(path) {
+  return `
+    <spread-sheet src="${path}"></spread-sheet>
+  `
+}
+
 
 $.style(`
   & {

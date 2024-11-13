@@ -1,13 +1,26 @@
 import module from '@silly/tag'
 const $ = module('data-popover')
 
-$.when('click', '[data-popover]', attack)
+$.when('click', '[data-popover]', pop)
 
 $.when('click', '*:not([data-popover])', release)
 
-function attack(event) {
-  popover(event, event.target.dataset.popover)
+function pop(event) {
+  const { popped }= $.learn()
+
+  if(!popped) {
+    attack(event, event.target.dataset.popover)
+  } else {
+    release()
+  }
+
+  $.teach({ popped: !popped })
 }
+
+function attack (e, x) {
+  popover(e, x)
+}
+
 
 function release () {
   popover()
@@ -77,7 +90,6 @@ const popoverStyles = `
     .data-popover button {
       display: block;
       border: none;
-      background: transparent;
       text-align: left;
       transition: all 100ms;
       width: 100%;

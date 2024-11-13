@@ -19,7 +19,6 @@ const lightnessStops = [
   [95, 120]
 ]
 
-export const notes = [60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71]
 
 const eventMap = {
   37: () => baseOctave--,
@@ -30,10 +29,8 @@ let synths = [...Array(12)]
 synths = synths.map(() => new Tone.Synth().toDestination())
 
 export function playNote(_$, flags) {
-  const { keys, theme, index } = flags
-  const [block, inline] = keys
+  const { note, theme, index } = flags
 
-  const note = notes[parseInt(inline) % notes.length]
   const now = Tone.now()
 
   synths[index].triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), "8n", now);
@@ -65,11 +62,10 @@ $.draw((target) => {
   const { start, length, reverse, colors, debug, colorVariables } = $.learn()
   const wheel = colors.map((lightness, i) => {
     console.log({ lightness })
-    const steps = lightness.map((x) => `
+    const steps = lightness.map((x, ii) => `
       <button
         class="step"
-        data-block="${x.block}"
-        data-inline="${x.inline}"
+        data-note="${((ii * 12) + i)}"
         style="background: var(${x.name})">
       </button>
     `).join('')
@@ -81,7 +77,8 @@ $.draw((target) => {
   }).join('')
 
   const settings = `
-    <play-wheel data-embedded="true">
+    <play-wheel data-embedded="true" src="${target.getAttribute('src')}">
+      <button class="nonce" data-escape aria-label="To Ethnography"></button>
       <form>
         ${start} ${length} ${reverse}
          <label class="field">
@@ -103,9 +100,7 @@ $.draw((target) => {
   `
 
   return `
-    <button class="action-button" data-popover='${settings}'>
-      <sl-icon name="three-dots-vertical"></sl-icon>
-    </button>
+    <button class="nonce action-button" data-popover='${settings}' aria-label="settings"></button>
     <div class="grid">
       <div class="wheel" style="${colorVariables}">
         ${wheel}
@@ -126,6 +121,14 @@ $.style(`
     height: 100%;
   }
 
+  & [data-escape] {
+    width: 50px;
+    height: 50px;
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+
   & .action-button {
     position: absolute;
     top: 0;
@@ -133,6 +136,8 @@ $.style(`
     left: auto;
     bottom: auto;
     z-index: 10;
+    width: 50px;
+    height: 50px;
   }
 
   & .grid {
@@ -170,7 +175,6 @@ $.style(`
     grid-template-columns: 1fr;
     grid-template-rows: repeat(7, 1fr);
     clip-path: polygon(10% 0%, 50% 100%, 90% 0%);
-    gap: 5px;
   }
   & .step {
     border: none;
@@ -229,14 +233,18 @@ $.when('change', '[type="checkbox"]', (event) => {
   $.teach({ [name]: checked, colors: recalculate() })
 })
 
+$.when('click', '[data-escape]', (event) => {
+  const src = event.target.closest($.link).getAttribute('src')
+  window.location.href = src || '/app/hyper-script'
+})
 $.when('click', '.step', play)
 $.when('pointermove', '.step', play)
 
 function play(event) {
-  const { block, inline } = event.target.dataset
+  const { note, block, inline } = event.target.dataset
   playNote($, {
     index: 0,
-    keys: [parseInt(block), parseInt(inline)]
+    note
   })
 
   const html = document.querySelector('html')

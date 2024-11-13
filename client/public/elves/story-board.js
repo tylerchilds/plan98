@@ -131,6 +131,9 @@ function mount(target) {
   }).join('')
   target.innerHTML = `
     <div class="actions">
+      <a href="/app/saga-about" style="height: 2rem; width: 2rem;" class="nonce">
+
+      </a>
       <div class="menu-item">
         <button data-menu-target="file">
           File
@@ -505,6 +508,7 @@ $.style(`
     right: 0;
     display: none;
     background: black;
+    height: 2rem;
   }
 
   @media screen {
@@ -525,8 +529,9 @@ $.style(`
     color: rgba(255,255,255,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: .5rem;
+    padding: .25rem .5rem;
     font-size: 1rem;
+    height: 100%;
     --v-font-mono: 1;
     --v-font-casl: 0;
     --v-font-wght: 400;

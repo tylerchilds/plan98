@@ -36,9 +36,10 @@ $.when('click', '.preview', (event) => {
 $.when('click', '.publish', (event) => {
   const { file, src } = sourceFile(event.target)
 
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
   const headers = {
     "Content-Type": "application/json",
-    "Authorization": "Bearer no-key"
+    "Authorization": `Basic ${authorization}`
   }
 
   $.teach({ thinking: true })

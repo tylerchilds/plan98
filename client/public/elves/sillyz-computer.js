@@ -51,10 +51,8 @@ $.draw(target => {
 
   if(error) {
     return `
-      <a class="about-out" href="/app/saga-about">
-        <span><sl-icon name="info-circle"></sl-icon></span> About
-      </a>
       <div class="resource">
+        <story-board></story-board>
         <div style="text-align: center;">
           <div class="error">
             ${error}
@@ -68,10 +66,8 @@ $.draw(target => {
 
   if(!start) {
     return `
-      <a class="about-out" href="/app/saga-about">
-        <span><sl-icon name="info-circle"></sl-icon></span> About
-      </a>
       <div class="resource">
+        <story-board></story-board>
         <button ${src ? `src="${src}"`:''} class="nonce" data-create aria-label="create"></button>
       </div>
       <div class="plot-hole"></div>
@@ -287,35 +283,6 @@ $.style(`
     animation: &-fade-in ease-in-out 1000ms forwards;
   }
 
-  & .about-out {
-    position: absolute;
-    z-index: 2;
-    top: 0;
-    left: 0;
-    background: lemonchiffon;
-    padding: 1rem;
-    color: saddlebrown;
-    text-decoration: none;
-    display: inline-grid;
-    font-size: 1rem;
-    padding: .5rem;
-    grid-template-columns: auto 1fr auto;
-    gap: .5rem;
-    line-height: 1;
-    animation: &-about-out 1000ms ease-in-out forwards 7777ms;
-  }
-
-  @keyframes &-about-out {
-    0% {
-      opacity: 1;
-      pointer-events: all;
-    }
-    100% {
-      opacity: 0;
-      pointer-events: none;
-    }
-  }
-
   & .suggestion-box .auto-item.calculation-error {
     background: firebrick;
     color: rgba(255,255,255,.85);
@@ -370,6 +337,11 @@ $.style(`
     width: 100%;
     height: calc(100% - 2rem);
     position: relative;
+  }
+
+  & .resource story-board {
+    position: absolute;
+    inset: 0;
   }
 
   & .synthia .resource-actions button {
