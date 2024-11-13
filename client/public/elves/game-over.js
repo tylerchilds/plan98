@@ -1,4 +1,4 @@
-/* the ethnography of the time machine */
+/* the live action re-telling of the time machine */
 
 // import includes modules
 //
@@ -25,7 +25,7 @@ import('@silly/elf').then((elf) => {
   // when the silly pointer is lifted up from the canvas, end tracking
   silly.when('pointerup', 'canvas', end)
 
-  // when the nonce is clicked, naviate home
+  // when the nonce is clicked, navigate home
   silly.when('click', '.nonce', () => {
     window.location.href = '/'
   })

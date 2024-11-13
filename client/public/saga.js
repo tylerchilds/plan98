@@ -64,12 +64,15 @@ const ACTOR_TIME = Symbol('a-time')
 
 export function r($, path, options={}) {
   let string = $.learn()[path] || ''
-  fetch(path)
-    .then(res => res.text())
-    .then(saga => {
-      string = render(saga)
-      $.teach({ [path]: string })
-    })
+
+  if(!string) {
+    fetch(path)
+      .then(res => res.text())
+      .then(saga => {
+        string = saga
+        $.teach({ [path]: string })
+      })
+  }
 
   return string
 }
