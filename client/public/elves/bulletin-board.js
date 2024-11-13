@@ -1,4 +1,5 @@
 import module from '@silly/tag'
+import { consoleShow, consoleHide } from './plan98-console.js'
 
 let lineWidth = 0
 let isMousedown = false
@@ -347,6 +348,9 @@ function mount(target) {
         <button data-mode="collaborate" data-tooltip="Export">
           <sl-icon name="box-arrow-up-right"></sl-icon>
         </button>
+        <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
+          <sl-icon name="bug"></sl-icon>
+        </button>
         <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
@@ -565,11 +569,32 @@ function endMove(e) {
   $.teach({ panXmod, panYmod, startX: null, startY: null, panHappening: false })
 }
 
+$.when('click', '.toolbelt-debugger', debugToolbelt)
+
+function debugToolbelt(event) {
+  let console = document.body.querySelector('plan98-console')
+  if(!console) {
+    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
+    console = document.body.querySelector('plan98-console')
+  } else {
+    console.classList.toggle('hidden')
+  }
+
+  if(console.matches('.hidden')) {
+    consoleHide()
+  } else {
+    consoleShow()
+  }
+
+  event.target.classList.toggle('enabled')
+}
+
 $.when('pointerdown', '.toolbelt-grabber', grabToolbelt)
 $.when('pointermove', 'canvas', dragToolbelt)
 $.when('pointermove', '.toolbelt-grabber', dragToolbelt)
 $.when('pointerup', 'canvas', ungrabToolbelt)
 $.when('pointerup', '.toolbelt-grabber', ungrabToolbelt)
+
 
 // grab a pane
 function grabToolbelt(event) {
@@ -788,6 +813,11 @@ $.style(`
   & .toolbelt-actions button:hover {
     color: #fff;
     background: dodgerblue;
+  }
+
+  & .toolbelt-actions button.enabled {
+    background: black;
+    color: dodgerblue;
   }
 
   & .menu-group {
