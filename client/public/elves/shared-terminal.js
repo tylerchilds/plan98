@@ -212,175 +212,145 @@ function drawTray(tray, url) {
 function drawIrix(tray) {
   return `
     <div class="irix-launcher">
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/file-system">
-          <sl-icon name="archive"></sl-icon>
-        </button>
+      <button class="application" data-tray="${tray}" data-href="/app/file-system">
+        <span><sl-icon name="archive"></sl-icon></span>
         <input disabled value="All Files" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
-          <sl-icon name="circle"></sl-icon>
-        </button>
-        <input disabled value="Silly Computer" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/impromptu-stagehand">
-          <sl-icon name="person-raised-hand"></sl-icon>
-        </button>
-        <input disabled value="Impromptu Stagehand" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/?world=ncity.executiontime.pub">
-          <sl-icon name="egg-fried"></sl-icon>
-        </button>
-        <input disabled value="Cyberpunk 2077" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/interdimensional-cable">
-          <sl-icon name="tv"></sl-icon>
-        </button>
-        <input disabled value="Interdimensional Cable" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/giggle-search">
-          <sl-icon name="search"></sl-icon>
-        </button>
-        <input disabled value="Giggle Search" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/middle-earth">
-          <sl-icon name="globe2"></sl-icon>
-        </button>
-        <input disabled value="Planet Earth" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/startup-wizard">
-          <sl-icon name="shop"></sl-icon>
-        </button>
-        <input disabled value="Story Mode" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/my-journal">
-          <sl-icon name="journal"></sl-icon>
-        </button>
-        <input disabled value="My Journal" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/hyper-browser">
-          <sl-icon name="controller"></sl-icon>
-        </button>
-        <input disabled value="Hyper Browser" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga">
-          <sl-icon name="people"></sl-icon>
-        </button>
-        <input disabled value="Collaborative Text" class="app-name">
-      </div>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
+        <span><sl-icon name="circle"></sl-icon></span>
 
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/bulletin-board?src=/private/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}">
-          <sl-icon name="window-stack"></sl-icon>
-        </button>
+        <input disabled value="Silly Computer" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/impromptu-stagehand">
+        <span><sl-icon name="person-raised-hand"></sl-icon></span>
+
+        <input disabled value="Impromptu Stagehand" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/?world=ncity.executiontime.pub">
+        <span><sl-icon name="egg-fried"></sl-icon></span>
+
+        <input disabled value="Cyberpunk 2077" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/interdimensional-cable">
+        <span><sl-icon name="tv"></sl-icon></span>
+
+        <input disabled value="Interdimensional Cable" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/giggle-search">
+        <span><sl-icon name="search"></sl-icon></span>
+
+        <input disabled value="Giggle Search" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/middle-earth">
+        <span><sl-icon name="globe2"></sl-icon></span>
+
+        <input disabled value="Planet Earth" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/startup-wizard">
+        <span><sl-icon name="shop"></sl-icon></span>
+
+        <input disabled value="Story Mode" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/my-journal">
+        <span><sl-icon name="journal"></sl-icon></span>
+
+        <input disabled value="My Journal" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/hyper-browser">
+        <span><sl-icon name="controller"></sl-icon></span>
+
+        <input disabled value="Hyper Browser" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga">
+        <span><sl-icon name="people"></sl-icon></span>
+
+        <input disabled value="Collaborative Text" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/bulletin-board?src=/private/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}">
+        <span><sl-icon name="window-stack"></sl-icon></span>
+
         <input disabled value="Bulletin Board" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/dial-tone">
-          <sl-icon name="music-note"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/dial-tone">
+        <span><sl-icon name="music-note"></<span>sl-icon></span>
+
         <input disabled value="Amateur Synth" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-synth">
-          <sl-icon name="music-note-beamed"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/sillyz-synth">
+        <span><sl-icon name="music-note-beamed"></sl-icon></span>
+
         <input disabled value="Professional Synth" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/video-feed/">
-          <sl-icon name="camera-reels"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/video-feed/">
+        <span><sl-icon name="camera-reels"></sl-icon></span>
+
         <input disabled value="Video Feed" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sillyz-piano">
-          <sl-icon name="keyboard"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/sillyz-piano">
+        <span><sl-icon name="keyboard"></sl-icon></span>
+
         <input disabled value="Silly Piano" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/story-board">
-          <sl-icon name="brush"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/story-board">
+        <span><sl-icon name="brush"></sl-icon></span>
+
         <input disabled value="Chalk Board" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/paint-app">
-          <sl-icon name="paint-bucket"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/paint-app">
+        <span><sl-icon name="paint-bucket"></sl-icon></span>
+
         <input disabled value="Old Paint" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/mine-sweeper/">
-          <sl-icon name="minecart"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/mine-sweeper/">
+        <span><sl-icon name="minecart"></sl-icon></span>
+
         <input disabled value="Mine Sweeper" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/generic-park/">
-          <sl-icon name="joystick"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/generic-park/">
+        <span><sl-icon name="joystick"></sl-icon></span>
+
         <input disabled value="Generic Park" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/hyper-script">
-          <sl-icon name="code-slash"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/hyper-script">
+        <span><sl-icon name="code-slash"></sl-icon></span>
+
         <input disabled value="Script Editor" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/code-module">
-          <sl-icon name="braces"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/code-module">
+        <span><sl-icon name="braces"></sl-icon></span>
+
         <input disabled value="Code Editor" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/9/">
-          <sl-icon name="music-player"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/9/">
+        <span><sl-icon name="music-player"></sl-icon></span>
+
         <input disabled value="Plan9 Zune" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/main-quest/">
-          <sl-icon name="balloon"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/main-quest/">
+        <span><sl-icon name="balloon"></sl-icon></span>
+
         <input disabled value="Havok Physics" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/wallet-1998/">
-          <sl-icon name="wallet"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/wallet-1998/">
+        <span><sl-icon name="wallet"></sl-icon></span>
+
         <input disabled value="Wallet" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/wallet-metamask/">
-          <sl-icon name="wallet2"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/wallet-metamask/">
+        <span><sl-icon name="wallet2"></sl-icon></span>
+
         <input disabled value="Meta Mask" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/sonic-knuckles/">
-          <sl-icon name="browser-firefox"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/sonic-knuckles/">
+        <span><sl-icon name="browser-firefox"></sl-icon></span>
+
         <input disabled value="Sonic and Knuckles" class="app-name">
-      </div>
-      <div class="application">
-        <button class="blank-action" data-tray="${tray}" data-href="/app/draw-term/">
-          <sl-icon name="terminal"></sl-icon>
-        </button>
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/draw-term/">
+        <span><sl-icon name="terminal"></sl-icon></span>
+
         <input disabled value="Draw Term 98" class="app-name">
-      </div>
+      </button>
     </div>
   `
 }
@@ -438,7 +408,7 @@ $.when('click', '.auto-item', event => {
   })
 })
 
-$.when('click', '.blank-action', event => {
+$.when('click', '.application', event => {
   event.preventDefault()
   const { tray } = event.target.closest('[data-tray]').dataset
   const { href } = event.target.dataset
@@ -1262,13 +1232,20 @@ $.style(`
   }
 
   & .application {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    aspect-ratio: 1;
-    width: 128px;
-    height: 128px;
+    border: none;
     border-radius: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px;
+    border-radius: 0;
+    background: transparent;
     padding: 0;
+  }
+
+  & .application sl-icon {
+    background: lemonchiffon;
+    color: saddlebrown;
+    padding: 8px;
   }
 
   & .app-name {
@@ -1280,18 +1257,19 @@ $.style(`
     display: inline-block;
     max-width: 100%;
     width: 100%;
+    color: saddlebrown;
+    background: transparent;
   }
 
   & .app-name[disabled] {
-    color: rgba(0,0,0,.85);
     opacity: 1;
   }
 
   & .irix-launcher {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-    padding: 8px;
-    gap: 8px;
+    display: flex;
+    flex-direction: column;
+    padding: 4px;
+    gap: 0;
     justify-items: center;
   }
 `)

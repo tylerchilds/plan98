@@ -697,8 +697,7 @@ sillonious-brand > xml-html {
 
 
 .file-reference .interactive-directory,
-.file-reference .interactive-file,
-.application .blank-action {
+.file-reference .interactive-file {
   background: lemonchiffon;
   color: saddlebrown;
   border: none;

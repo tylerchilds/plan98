@@ -800,12 +800,12 @@ $.style(`
     text-decoration: none;
     place-items: center start;
     padding: .5rem;
-    color: rgba(0,0,0,.85);
+    color: saddlebrown;
   }
 
   & .directory-name[disabled],
   & .file-name[disabled] {
-    color: rgba(0,0,0,.85);
+    color: saddlebrown;
     opacity: 1;
   }
 

@@ -35,11 +35,10 @@ $.when('click', '[data-ok]', (event) => {
 })
 
 $.when('click', '.synthia-clear', (event) => {
+  event.preventDefault()
   const node = event.target.closest($.link).querySelector('[name="synthia"]')
 
-  $.teach({ calculation: null, error: false })
-  node.value =''
-  node.focus()
+  $.teach({ calculation: null, error: false, promptActive: false })
 })
 
 $.draw(target => {
