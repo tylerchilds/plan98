@@ -19,7 +19,7 @@ const steps = [
       ${questions[1]}
       <label class="field">
         <span class="label">Answer 1</span>
-        <textarea class="name-pair" name="answer1">${answer1}</textarea>
+        <input class="name-pair" name="answer1" value="${answer1}" />
       </label>
 
       <div class="button-row">
@@ -35,7 +35,7 @@ const steps = [
       ${questions[2]}
       <label class="field">
         <span class="label">Answer 2</span>
-        <textarea class="name-pair" name="answer2">${answer2}</textarea>
+        <input class="name-pair" name="answer2" value="${answer2}" />
       </label>
 
       <div class="button-row">
@@ -51,7 +51,7 @@ const steps = [
       ${questions[3]}
       <label class="field">
         <span class="label">Answer 3</span>
-        <textarea class="name-pair" name="answer3">${answer3}</textarea>
+        <input class="name-pair" name="answer3" value="${answer3}" />
       </label>
 
       <div class="button-row">
@@ -67,7 +67,7 @@ const steps = [
       ${questions[4]}
       <label class="field">
         <span class="label">Answer 4</span>
-        <textarea class="name-pair" name="answer4">${answer4}</textarea>
+        <input class="name-pair" name="answer4" value="${answer4}" />
       </label>
 
       <div class="button-row">
@@ -83,7 +83,7 @@ const steps = [
       ${questions[5]}
       <label class="field">
         <span class="label">Answer 5</span>
-        <textarea class="name-pair" name="answer5">${answer5}</textarea>
+        <input class="name-pair" name="answer5" value="${answer5}" />
       </label>
 
       <div class="button-row">

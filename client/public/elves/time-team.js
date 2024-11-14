@@ -138,7 +138,7 @@ $.draw(target => {
   const { sessionId, companyEmployeeId, companyName } = getSession()
   connect(target)
   if(!sessionId) return `
-    <my-journal></my-journal>
+    <bayun-wizard></bayun-wizard>
   `
   const { groupList } = state[`ls/${$.link}`]
   const room = getRoom(target)

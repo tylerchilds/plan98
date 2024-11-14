@@ -56,7 +56,7 @@ export function setupSaga(nextSaga, target, options={}) {
           root.trap.activate()
           root.innerHTML = `
             <div class="wrapper">
-              <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
+              <div class="nonce" style="margin: 1rem auto; width: 128px;"></div>
               ${render(saga)}
             </div>
           `
@@ -84,7 +84,7 @@ $.style(`
   & {
     display: grid;
     margin: auto;
-    background: linear-gradient(105deg, rebeccapurple, rgba(0,0,0,.5) 30%), linear-gradient(165deg, rgba(0,0,0,.85) 80%, dodgerblue), white;
+    background: black;
     color: white;
     padding: .5rem;
     overflow: visible;
@@ -107,10 +107,10 @@ $.style(`
     margin: 1rem auto;
     max-width: 480px;
     max-height: 100%;
-    background: rgba(255,255,255,.85);
+    background: rgba(255,255,255,1);
     color: rgba(0,0,0,.85);
     overflow: auto;
-    border-radius: 1rem;
+    border-radius: 0;
   }
 
   @keyframes &-fade-in {
