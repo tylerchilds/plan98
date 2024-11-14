@@ -67,7 +67,7 @@ $.draw(target => {
   if(!start) {
     return `
       <div class="resource">
-        <story-board></story-board>
+        <div class="story-board"><story-board></story-board></div>
         <button ${src ? `src="${src}"`:''} class="nonce" data-create aria-label="create"></button>
       </div>
       <div class="plot-hole"></div>
@@ -109,6 +109,16 @@ function afterUpdate(target) {
       iconParent.appendChild(icon)
     })
   }
+
+  { // recover story-board from the virtual dom
+    [...target.querySelectorAll('story-board')].map(node => {
+      const guardian = node.parentNode
+      const child = document.createElement('story-board')
+      node.remove()
+      guardian.appendChild(child)
+    })
+  }
+
 }
 
 const tags = ['TEXTAREA', 'INPUT']
@@ -148,10 +158,10 @@ function mount(target, src) {
       $.teach({ code })
     })
   } else {
-    fetch('/elves/game-over.js')
+    fetch('/elves/clown-jukebox.js')
       .then(res => res.text())
       .then(file => $.teach({
-        code: file + '\n' + "document.body.innerHTML = '<game-over></game-over>'"
+        code: file + '\n' + "document.body.innerHTML = '<clown-jukebox></clown-jukebox>'"
       }))
   }
 
@@ -349,7 +359,7 @@ $.style(`
     position: relative;
   }
 
-  & .resource story-board {
+  & .resource .story-board {
     position: absolute;
     inset: 0;
   }

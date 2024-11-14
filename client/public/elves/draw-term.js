@@ -67,7 +67,6 @@ function render(target) {
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
-
               <button class="tray-action tray-sync" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="telephone"></sl-icon>
               </button>
@@ -393,6 +392,10 @@ function syncTray(event) {
       ? buffer
       : '/app/giggle-search?query=' + buffer
 
+
+  // comment out this line to just stay here and refresh the iframe instead
+  window.top.location.href = url
+  //
   event.target.closest('.tray').querySelector('iframe').src = url
   setState(tray, { url, focused: false, minimized: false })
 }
@@ -1045,7 +1048,7 @@ function end (e) {
         x: invertX ? startX + x : startX,
         y: invertY ? startY + y : startY,
         z: newState.trayZ,
-        url: `/app/hyper-script?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+        url: `/app/simpleton-client?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
       }
       return newState
     })

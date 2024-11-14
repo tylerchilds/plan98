@@ -32,7 +32,7 @@ const $ = module('story-board', {
     `
   },
   'sound-tray': {
-    label: "Set Sound",
+    label: "Sound",
     visible: false,
     width: 320,
     height: 480,
@@ -44,7 +44,7 @@ const $ = module('story-board', {
     `
   },
   'silly-tray': {
-    label: "Set Silly",
+    label: "Blueprint",
     visible: false,
     width: 640,
     height: 480,
@@ -52,7 +52,7 @@ const $ = module('story-board', {
     y: 150,
     z: 3,
     body: `
-      <iframe src="/app/sillyz.computer"></iframe>
+      <iframe src="/app/draw-term"></iframe>
     `
   }
 
@@ -175,13 +175,13 @@ function mount(target) {
             <span>
               <sl-icon name="square"></sl-icon>
             </span>
-            <span>Set Silly</span>
+            <span>Terminal</span>
           </button>
           <button data-set-sound data-tray="sound-tray">
             <span>
               <sl-icon name="square"></sl-icon>
             </span>
-            <span>Set Sound</span>
+            <span>Audio Notes</span>
           </button>
 
         </div>
@@ -501,13 +501,13 @@ $.style(`
   & .actions {
     z-index: 10;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,.25);
+    border-bottom: 1px solid saddlebrown;
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     display: none;
-    background: black;
+    background: lemonchiffon;
     height: 2rem;
   }
 
@@ -525,10 +525,9 @@ $.style(`
   }
 
   & .actions button {
-    background: black;
-    color: rgba(255,255,255,.85);
+    background: lemonchiffon;
+    color: saddlebrown;
     border: none;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: .25rem .5rem;
     font-size: 1rem;
     height: 100%;
