@@ -2,21 +2,10 @@ import tag from '@silly/tag'
 import * as braid from 'braid-http'
 import { marked } from 'marked'
 import { render } from '@sillonious/saga'
+import { diff_main } from '@braid/myers-diff'
+import { simpleton_client } from '@braid/simpleton-client'
 
 self.braid_fetch = braid.fetch
-
-const myersDiff = document.createElement("script");
-myersDiff.src = "https://braid.org/code/myers-diff1.js";
-myersDiff.integrity = "";
-myersDiff.crossOrigin = "";
-document.body.appendChild(myersDiff)
-
-
-const simpleton = document.createElement("script");
-simpleton.src = "https://unpkg.com/braid-text/simpleton-client.js"
-simpleton.integrity = "";
-simpleton.crossOrigin = "";
-document.body.appendChild(simpleton)
 
 const mimes = {
   'text/x-saga': render,
@@ -27,29 +16,10 @@ const mimes = {
 
 const $ = tag('simpleton-client')
 
-let readySwitch = 0
-function readyLoop() {
-  if(readySwitch === 1) return
-  if(!self.simpleton_client) {
-    requestAnimationFrame(readyLoop)
-    return
-  }
-  readySwitch = 1
-  requestIdleCallback(() => {
-    $.teach({ ready: true })
-  })
-}
-
-requestAnimationFrame(readyLoop)
-
 $.draw((target) => {
-  const { ready } = $.learn()
   const tag = target.getAttribute('tag') || 'textarea'
   const mime = plan98.parameters.get('mime') || target.getAttribute('mime') || 'text/braid'
 
-  if(!ready) {
-    return
-  }
   if(!target.simpleton) {
     const resource = (target.getAttribute('host') || plan98.env.BRAID_TEXT_PROXY) + (target.getAttribute('src') || target.getAttribute('path') || location.pathname)
     if(typeof mimes[mime] === 'function') {
