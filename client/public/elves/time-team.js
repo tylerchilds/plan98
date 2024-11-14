@@ -334,6 +334,7 @@ $.style(`
     color: white;
     font-size: 1rem;
     background: black;
+    overflow: auto;
   }
 
   &[shell] {
