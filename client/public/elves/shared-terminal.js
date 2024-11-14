@@ -83,12 +83,6 @@ function render(target) {
           <button class="tray-action tray-close" data-tray="${tray}">
             <sl-icon name="x-lg"></sl-icon>
           </button>
-          <button class="tray-action tray-toggle" data-tray="${tray}">
-            <sl-icon name="${minimized ? 'zoom-in' : 'zoom-out' }"></sl-icon>
-          </button>
-          <button class="tray-action tray-maxer" data-tray="${tray}">
-            <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
-          </button>
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
@@ -123,20 +117,14 @@ function render(target) {
       node.dataset.focused = false
     }
 
-    const fullScreenIcon = node.querySelector('.tray-maxer sl-icon')
     if(maximized) {
       node.setAttribute('class', 'tray maximized')
-      fullScreenIcon.name = 'fullscreen-exit'
     } else {
       node.setAttribute('class', 'tray')
-      fullScreenIcon.name = 'fullscreen'
     }
-    const miniScreenIcon = node.querySelector('.tray-toggle sl-icon')
     if(minimized) {
       node.classList.add('minimized')
-      miniScreenIcon.name = 'zoom-in'
     } else {
-      miniScreenIcon.name = 'zoom-out'
     }
 
     const maybies = node.querySelector('.suggestions')
@@ -419,18 +407,18 @@ $.when('click', '.application', event => {
     suggestIndex: parseInt(event.target.dataset.index)
   })
 
-  self.history.pushState({ type: `${$.link}-navigation`, tray, path: 'about:blank' }, "");
+  const path = 'about:blank'
+  console.log(tray, path)
+  self.history.pushState({ type: `${$.link}-navigation`, tray, path }, "");
 })
 
 addEventListener("popstate", async (event) => {
   const { type, path, tray } = event.state || {}
-  console.log(tray, path)
+  console.log(tray, path, type)
   if(type === `${$.link}-navigation`) {
     setState(tray, { url: path })
   }
 });
-
-
 
 $.when('input', '.browser', (event) => {
   const { value } = event.target;
@@ -650,7 +638,30 @@ function syncTray(event) {
       ? buffer
       : '/app/giggle-search?query=' + buffer
 
-  event.target.closest('.tray').querySelector('iframe').src = url
+  const irix = event.target.closest('.tray').querySelector('.irix-launcher')
+  const iframe = event.target.closest('.tray').querySelector('iframe')
+  if(url !== 'about:blank' && !iframe) {
+    if(irix) {
+      irix.remove()
+    }
+    trayBody.insertAdjacentHTML('beforeend', `
+      <iframe src="${url}" title="${url}"></iframe>
+    `)
+  } else if(url === 'about:blank') {
+    if(iframe) {
+      iframe.remove()
+    }
+
+    if(!irix) {
+      trayBody.insertAdjacentHTML('beforeend', drawIrix(tray))
+    }
+  }
+
+  if(iframe) {
+    iframe.src = url
+  }
+
+
   setState(tray, { url, focused: false, minimized: false })
 }
 
@@ -1047,7 +1058,7 @@ $.style(`
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto auto auto minmax(100px, 1.618fr) 2rem 2rem;
+    grid-template-columns: auto minmax(100px, 1.618fr) 1fr;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -1056,6 +1067,7 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     overflow-x: auto;
+    overflow-y: hidden;
   }
 
 

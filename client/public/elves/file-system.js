@@ -295,6 +295,7 @@ $.when('click', '.file-name', (event) => {
 
 addEventListener("popstate", async (event) => {
   const { type, path } = event.state || {}
+  console.log(type, path)
   if(type === `${$.link}-navigation`) {
     const enclosure = jurassicFrom(path)
     $.teach({ enclosure })

@@ -374,7 +374,6 @@ function mount(target) {
         <div class="collaborate" data-pane="collaborate"></div>
       </div>
     </div>
-    <plan98-console></plan98-console>
   `
 
   const canvas = document.createElement('canvas')
@@ -1060,23 +1059,3 @@ self.addEventListener("resize", function () {
   })
 });
 
-
-/*
-https://medium.com/@joelmalone/prevent-edge-swipe-gestures-in-your-html-game-but-only-in-safari-fba815a529a2
-*/
-(function preventBrowserHistorySwipeGestures() {
-  function touchStart(ev) {
-    if (ev.touches.length === 1) {
-      const touch = ev.touches[0];
-      ev.preventDefault();
-    }
-  }
-
-  // Safari defaults to passive: true for the touchstart event, so we need  to explicitly specify false
-  // See https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener
-  const options= { passive: false };
-
-  window.addEventListener("touchstart", touchStart, options);
-
-  return () => window.removeEventListener("touchstart", touchStart, options);
-})()

@@ -269,7 +269,17 @@ $.when('click', '[data-create]', (event) => {
   const src = event.target.getAttribute('src') || `/app/bulletin-board?src=${`/private/${$.link}/${new Date().toISOString()}`}.saga`
 
   event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
+  self.history.pushState({ type: `${$.link}-navigation`, href: window.location.href }, "");
 })
+
+addEventListener("popstate", async (event) => {
+  const { type, href } = event.state || {}
+  console.log(tray, path, type)
+  if(type === `${$.link}-navigation`) {
+    window.location.href = href
+  }
+});
+
 
 $.when('click', '.action-script', actionScript)
 
