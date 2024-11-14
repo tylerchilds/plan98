@@ -64,9 +64,6 @@ function render(target) {
           <button class="tray-action tray-toggle" data-tray="${tray}">
             <sl-icon name="${minimized ? 'zoom-in' : 'zoom-out' }"></sl-icon>
           </button>
-          <button class="tray-action tray-maxer" data-tray="${tray}">
-            <sl-icon name="${maximized ? 'fullscreen-exit' : 'fullscreen' }"></sl-icon>
-          </button>
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
@@ -76,7 +73,6 @@ function render(target) {
               </button>
             </div>
           </form>
-          <div class="grabber minimizable"></div>
           <div class="grabber"></div>
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
@@ -101,13 +97,10 @@ function render(target) {
       node.dataset.focused = false
     }
 
-    const fullScreenIcon = node.querySelector('.tray-maxer sl-icon')
     if(maximized) {
       node.setAttribute('class', 'tray maximized')
-      fullScreenIcon.name = 'fullscreen-exit'
     } else {
       node.setAttribute('class', 'tray')
-      fullScreenIcon.name = 'fullscreen'
     }
     const miniScreenIcon = node.querySelector('.tray-toggle sl-icon')
     if(minimized) {
@@ -801,7 +794,7 @@ $.style(`
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto auto auto minmax(100px, 1.618fr) 2rem 2rem;
+    grid-template-columns: auto auto minmax(100px, 1.618fr) 2rem;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -852,12 +845,12 @@ $.style(`
   & .tray.minimized:not(.maximized) {
     width: auto;
     height: auto;
-    grid-template-rows: auto auto 0 0;
+    grid-template-rows: auto 0 0;
     border-radius: 1rem;
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto auto auto 2rem;
+    grid-template-columns: auto auto 2rem;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {
