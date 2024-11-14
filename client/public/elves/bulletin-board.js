@@ -374,6 +374,7 @@ function mount(target) {
         <div class="collaborate" data-pane="collaborate"></div>
       </div>
     </div>
+    <plan98-console></plan98-console>
   `
 
   const canvas = document.createElement('canvas')
