@@ -116,6 +116,8 @@ $.style(`
 
     & .foreground {
       overflow: auto;
+      background: black;
+      color: white;
     }
 
     & .foreground button {
