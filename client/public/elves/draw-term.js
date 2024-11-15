@@ -79,9 +79,14 @@ function render(target) {
           <iframe src="${url}" title="${url}"></iframe>
         </div>
         <div class="resize-actions">
-          <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left" data-tray="${tray}">
+          <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
           </button>
-          <button aria-label="resize right" data-direction="se" class="tray-resize minimizable resize-right" data-tray="${tray}">
+          <button aria-label="resize right" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
+          </button>
+
+          <button aria-label="resize left" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
+          </button>
+          <button aria-label="resize right" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
           </button>
         </div>
       `
@@ -518,6 +523,22 @@ function drag(event) {
           width: width + movementX
         })
       }
+      if(resize === 'ne') {
+        setState(tray, {
+          y: y + movementY,
+          height: height - movementY,
+          width: width + movementX
+        })
+      }
+      if(resize === 'nw') {
+        setState(tray, {
+          x: x + movementX,
+          y: y + movementY,
+          height: height - movementY,
+          width: width - movementX
+        })
+      }
+
     }
   } else {
     if(grabbed) {
@@ -594,40 +615,76 @@ $.style(`
     --draw-term-fg: #54796d;
   }
 
-  & .resize-right,
-  & .resize-left {
+  & .resize-right-bottom,
+  & .resize-left-bottom {
     position: absolute;
     bottom: -.5rem;
     width: 1rem;
     height: 1rem;
-    border: 1px solid rgb(0,0,0,.15);
+    border: 1px solid #54796d;
     background: transparent;
     border-radius: 100%;
     cursor: resize;
   }
 
-  & .resize-right::before,
-  & .resize-left::before {
+  & .resize-right-bottom::before,
+  & .resize-left-bottom::before {
     content: '';
     display: block;
     width: 1rem;
     height: 1rem;
-    border: 1px solid rgb(255,255,255,.15);
+    background-color: #E83FB8;
     border-radius: 100%;
     bottom: -.5rem;
     position: absolute;
   }
-  & .resize-left::before,
-  & .resize-left {
+  & .resize-left-bottom::before,
+  & .resize-left-bottom {
     left: -.5rem;
     cursor: sw-resize;
   }
 
-  & .resize-right::before,
-  & .resize-right {
+  & .resize-right-bottom::before,
+  & .resize-right-bottom {
     right: -.5rem;
     cursor: se-resize;
   }
+
+  & .resize-right-top,
+  & .resize-left-top {
+    position: absolute;
+    top: -.5rem;
+    width: 1rem;
+    height: 1rem;
+    border: 1px solid #54796d;
+    background: transparent;
+    border-radius: 100%;
+    cursor: resize;
+  }
+
+  & .resize-right-top::before,
+  & .resize-left-top::before {
+    content: '';
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 100%;
+    background-color: #E83FB8;
+    top: -.5rem;
+    position: absolute;
+  }
+  & .resize-left-top::before,
+  & .resize-left-top {
+    left: -.5rem;
+    cursor: nw-resize;
+  }
+
+  & .resize-right-top::before,
+  & .resize-right-top {
+    right: -.5rem;
+    cursor: ne-resize;
+  }
+
 
   &.inline {
     display: inline-block;
@@ -1037,24 +1094,24 @@ function end (e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
-  if(Math.abs(x) > 50 && Math.abs(y) > 50) {
-    const tray = self.crypto.randomUUID()
-    $.teach(tray, (state, payload) => {
-      const newState = {...state}
-      newState.trays.push(payload)
-      newState.trayZ += 1
-      newState.focusedTray = tray
-      newState[payload] = {
-        width: Math.abs(x),
-        height: Math.abs(y),
-        x: invertX ? startX + x : startX,
-        y: invertY ? startY + y : startY,
-        z: newState.trayZ,
-        url: `/app/pro-teleprompter?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
-      }
-      return newState
-    })
-  }
+  const tray = self.crypto.randomUUID()
+  $.teach(tray, (state, payload) => {
+    const width = Math.max(300, Math.abs(x))
+    const height = Math.max(150, Math.abs(y))
+    const newState = {...state}
+    newState.trays.push(payload)
+    newState.trayZ += 1
+    newState.focusedTray = tray
+    newState[payload] = {
+      width,
+      height,
+      x: invertX ? startX + x : startX,
+      y: invertY ? startY + y : startY,
+      z: newState.trayZ,
+      url: `/app/pro-teleprompter?src=/private/${$.link}/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+    }
+    return newState
+  })
 
   $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
 };
