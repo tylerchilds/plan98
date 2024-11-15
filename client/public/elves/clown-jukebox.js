@@ -112,6 +112,9 @@ import("@silly/elf").then((elf) => {
         <div class="input">
           ${ballots}
         </div>
+        <a class="to-tutorial" href="/app/impromptu-stagehand">
+          Back to Tutorial
+        </a>
         <div class="output">
           ${polls}
         </div>
@@ -235,5 +238,8 @@ import("@silly/elf").then((elf) => {
       display: inline-block;
     }
 
+    & .to-tutorial {
+      padding: 1rem;
+    }
   `)
 })

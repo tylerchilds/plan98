@@ -89,19 +89,10 @@ link.draw((target) => {
   }).join('')
 
   return `
-    Un-Employed Un-Conference 
 
-    <div class="horizon-scroll">
-      ${grid}
-    </div>
-
-    <hr>
-
-    ${ proposing ? `
-      <fieldset>
-        <legend>
-          New Session
-        </legend>
+    <details>
+      <summary>Propose Session</summary>
+      ${ proposing ? `
         <form>
           <label class="field">
             <span class="label">Type</span>
@@ -132,18 +123,28 @@ link.draw((target) => {
           <button type="submit">Submit</button>
           <button type="reset">cancel</button>
         </form>
-      </fieldset>
-    ` : `
-      <button data-new>New Session</button>
-    ` }
-
-    <div class="irix-launcher">
-      ${allSessions}
-    </div>
-
-    Related Videos:
-    <a target="_blank" href="https://archive.org/details/26-11_15_simplifying_client-side_web_programming.mp4">Simplifying Client-Side Web Programming</a>
-    <a target="_blank" href="https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today">A Taste of Tomorrow Today</a>
+      ` : `
+        <button data-new>New Session</button>
+      ` }
+    </details>
+    <details>
+      <summary>All Sessions</summary>
+      <div class="irix-launcher">
+        ${allSessions}
+      </div>
+    </details>
+    <details>
+      <summary>Conference Grid</summary>
+      <div class="horizon-scroll">
+        ${grid}
+      </div>
+    </details>
+    <details>
+      <summary>Past Appearances</summary>
+      Related Videos:
+      <a target="_blank" href="https://archive.org/details/26-11_15_simplifying_client-side_web_programming.mp4">Simplifying Client-Side Web Programming</a>
+      <a target="_blank" href="https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today">A Taste of Tomorrow Today</a>
+    </details>
   `
 }, {
   afterUpdate: function(target) {
