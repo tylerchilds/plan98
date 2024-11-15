@@ -1,5 +1,6 @@
 import diffHTML from 'diffhtml'
 import Computer from '@sillonious/computer'
+import shelf_merge from "shelf-merge"
 
 const logs = {}
 
@@ -18,7 +19,6 @@ const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
 const reactiveFunctions = {}
-
 
 function react(link) {
   if(!reactiveFunctions[link]) return
@@ -40,7 +40,7 @@ const store = createStore({}, notify)
 
 
 function update(link, target, compositor, lifeCycle={}) {
-  insight('module:update', link)
+  insight('elf:update', link)
   if(lifeCycle.beforeUpdate) {
     lifeCycle.beforeUpdate.call(this, target)
   }
@@ -54,7 +54,7 @@ function update(link, target, compositor, lifeCycle={}) {
 }
 
 function draw(link, compositor, lifeCycle={}) {
-  insight('module:draw', link)
+  insight('elf:draw', link)
   if(!reactiveFunctions[link]) {
     reactiveFunctions[link] = {}
   }
@@ -67,7 +67,7 @@ function draw(link, compositor, lifeCycle={}) {
 }
 
 function style(link, stylesheet) {
-  insight('module:style', link)
+  insight('elf:style', link)
   const styles = `
     <style type="text/css" data-link="${link}">
       ${stylesheet.replaceAll('&', link)}
@@ -78,23 +78,23 @@ function style(link, stylesheet) {
 }
 
 export function learn(link) {
-  insight('module:learn', link)
+  insight('elf:learn', link)
   return store.get(link) || {}
 }
 
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
-  insight('module:teach', link)
+  insight('elf:teach', link)
   store.set(link, knowledge, nuance)
 }
 
 export function when(link1, type, link2, callback) {
   const link = `${link1} ${link2}`
-  insight('module:when:'+type, link)
+  insight('elf:when:'+type, link)
   listen.call(this, type, link, callback)
 }
 
-export default function module(link, initialState = {}) {
-  insight('module', link)
+export default function elf(link, initialState = {}) {
+  insight('elf', link)
   teach(link, initialState)
 
   return {
@@ -125,7 +125,7 @@ export function listen(type, link, handler = () => null) {
       event.target.matches(link)
     ) {
 
-      insight('module:listen:'+type, link)
+      insight('elf:listen:'+type, link)
       handler.call(this, event);
     }
   };
@@ -176,7 +176,7 @@ function getSubscribers({ target }) {
 }
 
 function dispatchCreate(target) {
-  insight('module:create', target.localName)
+  insight('elf:create', target.localName)
   if(!target.id) target.id = self.crypto.randomUUID()
   target.dispatchEvent(new Event(CREATE_EVENT))
   target.reactive = true
@@ -199,24 +199,19 @@ try {
 }
 
 function createStore(initialState = {}, subscribe = () => null) {
-  let state = {
-    ...initialState
-  };
+  const shelf = [null, 0]
+
+  shelf_merge(shelf, initialState)
 
   return {
     set: function(link, knowledge, nuance) {
-      const wisdom = nuance(state[link] || {}, knowledge);
-
-      state = {
-        ...state,
-        [link]: wisdom
-      };
-
+      const wisdom = nuance(shelf[0][link] || {}, knowledge);
+      shelf_merge(shelf, { [link]: wisdom })
       subscribe(link);
     },
 
     get: function(link) {
-      return state[link];
+      return shelf[0][link];
     }
   }
 }
