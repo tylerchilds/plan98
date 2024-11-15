@@ -37,7 +37,7 @@ function write($, data, merge = (node, data, key) => {
     })
 }
 
-const $ = elf.call({read, write}, 'shared-terminal')
+const $ = elf.call({ read, write }, 'shared-terminal')
 
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')

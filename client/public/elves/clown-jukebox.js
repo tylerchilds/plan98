@@ -109,9 +109,6 @@ import("@silly/elf").then((elf) => {
         <iframe src="/app/draw-term"></iframe>
       </div>
       <div class="foreground ${hidden ? 'hidden':''}">
-        <div class="input">
-          ${ballots}
-        </div>
         <a class="to-tutorial" href="/app/impromptu-stagehand">
           Back to Tutorial
         </a>
@@ -119,6 +116,9 @@ import("@silly/elf").then((elf) => {
           ${polls}
         </div>
         <button data-close class="nonce"></button>
+      </div>
+      <div class="input ${hidden ? 'hidden':''}">
+        ${ballots}
       </div>
     `
   })
@@ -168,17 +168,20 @@ import("@silly/elf").then((elf) => {
     }
 
     & .input {
-      position: sticky;
-      top: 0;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      text-align: center;
       background: lemonchiffon;
-      border-bottom: 1px solid saddlebrown;
+      border-top: 1px solid saddlebrown;
       padding: 1rem;
       white-space: nowrap;
       overflow-x: auto;
+      z-index: 10;
     }
 
     & .output {
-      overflow: auto;
       display: grid;
       gap: 1rem;
       padding: 1rem;
@@ -192,7 +195,9 @@ import("@silly/elf").then((elf) => {
     }
 
     & .foreground {
+      text-align: center;
       overflow: auto;
+      padding-bottom: calc(50% - 5rem);
     }
 
     & .foreground button {
@@ -240,6 +245,7 @@ import("@silly/elf").then((elf) => {
 
     & .to-tutorial {
       padding: 1rem;
+      display: inline-block;
     }
   `)
 })

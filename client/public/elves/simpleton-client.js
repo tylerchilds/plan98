@@ -204,7 +204,7 @@ $.style(`
     resize: none;
     border: none;
     padding: 1rem;
-    line-height: 2rem;
+    line-height: 1.5;
     position: relative;
     z-index: 3;
     background-position-y: -1px;
