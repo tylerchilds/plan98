@@ -275,7 +275,7 @@ $.style(`
     color: rgba(255,255,255,.65);
     padding: 9px;
     height: 2rem;
-    font-size: 1rem;
+    font-size: 2rem;
     transition: color 200ms;
     border-radius: 100%;
   }

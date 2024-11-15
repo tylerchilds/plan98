@@ -37,12 +37,17 @@ $.draw((target) => {
           } else {
             apply_mime_on_update(mimes[mime], target, patches);
           }
-          return target.texty.dataset.value;
+
+          const text = target.texty.dataset.value
+          sync(target, text)
+          return text;
         },
         generate_local_diff_update: (prev_state) => {
-          var patches = diff(prev_state, target.texty.innerHTML);
+          var patches = diff(prev_state, target.texty.value);
           if (patches.length === 0) return null;
-          return { patches, new_state: target.texty.innerHTML };
+          const text = target.texty.value
+          sync(target, text)
+          return { patches, new_state: text };
         },
       });
 
@@ -60,18 +65,36 @@ $.draw((target) => {
       apply_remote_update: ({ state, patches }) => {
         if (state !== undefined) target.texty.value = state;
         else apply_patches_and_update_selection(target.texty, patches);
-        return target.texty.value;
+        const text = target.texty.value
+        sync(target, text)
+        return text;
       },
       generate_local_diff_update: (prev_state) => {
         var patches = diff(prev_state, target.texty.value);
         if (patches.length === 0) return null;
-        return { patches, new_state: target.texty.value };
+        const text = target.texty.value
+        sync(target, text)
+        return { patches, new_state: text };
       },
     });
   }
 
   return
 })
+
+async function sync(target, text) {
+  const root = target.closest($.link) || target.closest('.'+$.link)
+  const { action, script } = root.dataset
+
+  if(script) {
+    const dispatch = (await import(script))[action]
+    if(dispatch) {
+      self.history.pushState({ action, script }, "");
+      await dispatch(target, text)
+    }
+  }
+
+}
 
 $.when('input', '.client', (event) => {
   const adult = event.target.closest($.link)
