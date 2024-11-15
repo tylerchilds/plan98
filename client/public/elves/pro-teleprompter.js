@@ -167,6 +167,60 @@ $.style(`
       padding: 1rem;
     }
 
+  @media screen {
+    & hypertext-quote {
+      position: relative;
+    }
+
+    & hypertext-quote::before {
+      content: '>';
+      background: gold;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      padding: 0 1rem;
+      display: grid;
+      place-items: start;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+      opacity: .25;
+    }
+
+    & hypertext-address::before {
+      content: '#';
+      background: mediumseagreen;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      left: 0;
+      right: 0;
+      padding: 0 1rem;
+      position: absolute;
+      height: 2rem;
+      display: grid;
+      place-items: start;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+      opacity: .25;
+    }
+
+    & hypertext-puppet::before {
+      content: '@';
+      background: dodgerblue;
+      background-image: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5));
+      left: 0;
+      right: 0;
+      padding: 0 1rem;
+      position: absolute;
+      height: 2rem;
+      display: grid;
+      place-items: start;
+      font-size: 1rem;
+      color: rgba(0,0,0,.65);
+      opacity: .25;
+    }
+  }
 `)
 
 customElements.define('pro-teleprompter', class WebComponent extends HTMLElement { constructor() { super() } });

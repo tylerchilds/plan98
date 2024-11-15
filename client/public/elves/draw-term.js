@@ -1,4 +1,4 @@
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 import { innerHTML } from 'diffhtml'
 import natsort from 'natsort'
 import { idx, documents } from './giggle-search.js'
