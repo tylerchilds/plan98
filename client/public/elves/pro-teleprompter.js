@@ -19,10 +19,12 @@ $.draw((target) => {
     <div class="background">
       <simpleton-client src="${target.getAttribute('src')}" data-script="${import.meta.url}" data-action="sync"></simpleton-client>
       <button data-teleprompt class="nonce" aria-label="Teleprompt" data-tooltip="Teleprompt"></button>
+      <a href="/" class="nonce" aria-label="home" data-tooltip="home"></a>
     </div>
     <div class="foreground hidden">
       <div class="script"></div>
       <button data-close class="nonce"></button>
+      <a href="/" class="nonce" aria-label="home" data-tooltip="home"></a>
     </div>
   `
 }, {
@@ -112,10 +114,10 @@ $.style(`
       position: absolute;
       inset: 0;
       padding-top: 3rem;
+      overflow: auto;
     }
 
     & .foreground {
-      overflow: auto;
       background: black;
       color: white;
     }

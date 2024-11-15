@@ -1,7 +1,37 @@
 const tag = 'clown-jukebox'
 
 // the solution i propose solves the technical complexity of the following line of code
+
 customElements.define(tag, class WebComponent extends HTMLElement { constructor() { super() } });
+
+/*
+const playbill = render(`<title-page
+author: tychi
+title: six elves in a trench coae
+
+# silicon valley -day
+
+laying down you close your eyes, in your mind you sit up
+
+you stand and walk across the void, the blank black space of bottomless think
+
+in the distance a spark. it slowly burns and grows, a window to another world
+
+before stepping through the gateway, you remove an artifact from your person
+
+left above the threshold as you climb through, down into the rabbit hole
+
+a million more worlds lay beyond nestled neatly compactly inside this page
+
+what are they called? can we define them? can we tag them?
+
+kingdom phylum class order family species
+
+hyper text markup language element constructor super, utter these words
+
+six elves in a trenchcoat, flee from me, flee from me, let me be, flee from me.
+`)
+*/
 
 import("@silly/elf").then((elf) => {
   const hands = {
@@ -109,9 +139,7 @@ import("@silly/elf").then((elf) => {
         <iframe src="/app/draw-term"></iframe>
       </div>
       <div class="foreground ${hidden ? 'hidden':''}">
-        <a class="to-tutorial" href="/app/impromptu-stagehand">
-          Back to Tutorial
-        </a>
+        <a class="nonce to-tutorial" href="/app/impromptu-stagehand"></a>
         <div class="output">
           ${polls}
         </div>
@@ -123,6 +151,7 @@ import("@silly/elf").then((elf) => {
     `
   })
 
+  clown.when('click', '.show-modal', () => showModal(playbill))
   clown.when('click', '[data-close]', () => clown.teach({ hidden: true }))
 
   clown.when('click', '.vote', (event) => {
@@ -130,6 +159,8 @@ import("@silly/elf").then((elf) => {
     console.log(event)
     clown.teach({ key, count: 1 }, add)
   })
+
+  clown.when('click', '[data-close]', () => clown.teach({ hidden: true }))
 
   function add(state, payload) {
     return {
@@ -144,7 +175,7 @@ import("@silly/elf").then((elf) => {
   clown.style(`
     & {
       display: block;
-      background: dodgerblue;
+      background: #54796d;
       position: relative;
       width: 100%;
       height: 100%;

@@ -1,12 +1,18 @@
 // elf files are the kernel that convert machine code to keyboard
-import elf from '@silly/elf'
+import elf from '@silly/tag'
 
 // link is a variable that bridges human computer interaction
 const link = elf('impromptu-stagehand', {
   schedule: {},
   sessions: [],
   form: {},
-  types: ['apple', 'banana', 'coconut', 'dill pickles', 'eggs', 'french toast', 'grapes']
+  types: ['apple', 'banana', 'coconut', 'dill pickles', 'eggs', 'french toast', 'grapes'],
+  accordions: {
+    propose: false,
+    session: true,
+    grid: false,
+    more: false
+  }
 })
 
 // hours are how many times are available
@@ -22,7 +28,8 @@ link.draw((target) => {
     schedule,
     sessions,
     form,
-    focused
+    focused,
+    accordions
   } = link.learn()
 
   let grid = '<table>'
@@ -89,15 +96,20 @@ link.draw((target) => {
   }).join('')
 
   return `
-
-    <details>
-      <summary>Propose Session</summary>
-      ${ proposing ? `
+    <div style="text-align: center;">
+      <a href="/app/clown-jukebox" class="nonce" data-tooltip="home" aria-label="home"></a>
+    </div>
+    <div class="item">
+      <button class="head" data-accordion="propose">
+        <a href="" class="nonce"></a>
+        Propose Session
+      </button>
+      <div class="body">
         <form>
           <label class="field">
             <span class="label">Type</span>
             <select name="type">
-              <option disabled>The Aforementioned "Any" Type</option>
+              <option>unconference</option>
               ${types.map((type) => {
                 return `
                   <option value="${type}">${type}</option>
@@ -120,31 +132,57 @@ link.draw((target) => {
             <span class="label">Why</span>
             <input name="why" value="${form.why || ''}" placeholder="to streamline co creative processes">
           </label>
-          <button type="submit">Submit</button>
-          <button type="reset">cancel</button>
+          <div class="button-row">
+            <button type="submit">
+              <div class="nonce"></div>
+              Submit
+            </button>
+            <button type="reset">clear</button>
+          </div>
         </form>
-      ` : `
-        <button data-new>New Session</button>
-      ` }
-    </details>
-    <details>
-      <summary>All Sessions</summary>
-      <div class="irix-launcher">
-        ${allSessions}
       </div>
-    </details>
-    <details>
-      <summary>Conference Grid</summary>
-      <div class="horizon-scroll">
-        ${grid}
+    </div>
+    <div class="item">
+      <button class="head" data-accordion="session">
+        <div class="nonce"></div>
+        All Sessions
+      </button>
+      <div class="body">
+        <div class="irix-launcher">
+          ${allSessions}
+        </div>
       </div>
-    </details>
-    <details>
-      <summary>Past Appearances</summary>
-      Related Videos:
-      <a target="_blank" href="https://archive.org/details/26-11_15_simplifying_client-side_web_programming.mp4">Simplifying Client-Side Web Programming</a>
-      <a target="_blank" href="https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today">A Taste of Tomorrow Today</a>
-    </details>
+    </div>
+    <div class="item">
+      <button class="head" data-accordion="grid">
+        <a href="" class="nonce"></a>
+        Conference Grid
+      </button>
+      <div class="body">
+        <div class="horizon-scroll">
+          ${grid}
+        </div>
+      </div>
+    </div>
+    <div class="item">
+      <button class="head" data-accordion="more">
+        <a href="" class="nonce"></a>
+        Past Appearances
+      </button>
+      <div class="body">
+        <div style="padding: 1rem;">
+          Related Videos:
+          <ul>
+            <li>
+              <a target="_blank" href="https://archive.org/details/26-11_15_simplifying_client-side_web_programming.mp4">Simplifying Client-Side Web Programming</a>
+            </li>
+            <li>
+              <a target="_blank" href="https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today">A Taste of Tomorrow Today</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   `
 }, {
   afterUpdate: function(target) {
@@ -155,7 +193,32 @@ link.draw((target) => {
         active.focus()
       }
     }
+
+    {
+      const { accordions } = link.learn()
+      Object
+        .keys(accordions)
+        .map(accordion => {
+          target.querySelector(`[data-accordion="${accordion}"]`).dataset.open = accordions[accordion]
+        })
+    }
   }
+})
+
+link.when('click', '.head', (event) => {
+  const { accordion } = event.target.dataset
+  const { accordions } = link.learn()
+  const open = accordions[accordion]
+
+  link.teach({ [accordion]: !open }, (s, p) => {
+    return {
+      ...s,
+      accordions: {
+        ...s.accordions,
+        ...p
+      }
+    }
+  })
 })
 
 function tooltip(id) {
@@ -175,26 +238,25 @@ function tooltip(id) {
 
 link.when('submit', 'form', (event) => {
   event.preventDefault()
+  link.teach({ error: false })
 
   const { form } = link.learn()
 
-  link.teach(form, (state, payload) => {
-    return {
-      ...state,
-      sessions: [...state.sessions, payload]
-    }
-  })
+  if(form.who && form.why && form.what) {
+    link.teach(form, (state, payload) => {
+      return {
+        ...state,
+        sessions: [...state.sessions, payload]
+      }
+    })
+  } else {
+    link.teach({ error: 'You missed a spot.' })
+  }
 })
 
 link.when('reset', 'form', (event) => {
   link.teach({ form: { who: '', whate: '', why: '' }, proposing: false, focused: null })
 })
-
-
-link.when('click', 'button[data-new]', (event) => {
-  link.teach({ focused: null, proposing: true })
-})
-
 
 link.when('click', 'button[data-insert]', (event) => {
   const { when, where } = event.target.dataset
@@ -211,7 +273,7 @@ link.when('click', '[data-unfocus]', () => {
   link.teach({ focused: null, proposing: true })
 })
 
-link.when('click', '*:not(.active)', (event) => {
+link.when('click', '*:not([data-insert],[data-update],.active)', (event) => {
   const { focused } = link.learn()
   if(focused) {
     link.teach({ focused: null })
@@ -267,10 +329,44 @@ link.when('change', 'select[name="type"]', (event) => {
 
 link.style(`
   & {
-    display: block;
+    display: flex;
     width: 100%;
     height: 100%;
     overflow: auto;
+    flex-direction: column;
+    gap: 1rem;
+    background: #54796d;
+    padding: 1rem;
+  }
+
+  & .item {
+    background: lemonchiffon;
+    color: saddlebrown;
+    positon: relative;
+    bottom: 0;
+  }
+
+  & .head {
+    background: lemonchiffon;
+    color: saddlebrown;
+    display: grid;
+    width: 100%;
+    grid-template-columns: auto 1fr;
+    place-items: center start;
+    gap: .5rem;
+    border: none;
+  }
+
+  & .head .nonce {
+    height: 2rem;
+  }
+
+  & .body {
+    display: none;
+  }
+
+  & [data-open="true"] + .body {
+    display: block;
   }
 
   & .horizon-scroll {
@@ -352,16 +448,9 @@ link.style(`
     border: 0;
   }
 
-  & [data-new] {
-    background: lemonchiffon;
-    border: none;
-    color: saddlebrown;
-    padding: .5rem;
-  }
-
   & form [type="reset"] {
     background: linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.5));
-    background-color: firebrick;
+    background-color: lemonchiffon;
     color: white;
     padding: .5rem;
     float: right;
@@ -369,14 +458,20 @@ link.style(`
 
   & form [type="submit"] {
     background: linear-gradient(rgba(0,0,0,.25),rgba(0,0,0,.5));
-    background-color: dodgerblue;
+    background-color: mediumseagreen;
     color: white;
     padding: .5rem;
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    place-items: center start;
+    gap: .5rem;
   }
 
   & .field input {
     background: lemonchiffon;
     color: saddlebrown;
+    border: none;
+    border-radius: 0;
   }
 
 
@@ -392,5 +487,10 @@ link.style(`
     aspect-ratio: 1;
     min-width: 18ch;
     width: 100%;
+  }
+
+  & .button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 `)

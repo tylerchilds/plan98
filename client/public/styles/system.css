@@ -405,11 +405,14 @@ button {
   border: none;
   border-radius: none;
   max-width: 10rem;
+  max-height: 10rem;
   aspect-ratio: 1;
   width: 100%;
+  height: 100%;
   position: relative;
   min-height: 1rem;
   min-width: 1rem;
+  display: inline-block;
 }
 
 .nonce::before {

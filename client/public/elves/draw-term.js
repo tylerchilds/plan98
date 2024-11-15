@@ -264,7 +264,7 @@ $.draw((target) => {
   }
   return `
     <div class="trays"></div>
-    <div class="cursor"></div>
+    <div class="cursor"><div class="nonce"></div></div>
     <canvas></canvas>
   `
 }, { beforeUpdate, afterUpdate })
@@ -330,7 +330,7 @@ function afterUpdate(target) {
   {
     const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
-    cursor.style = `${isMouseDown ? 'display: block;' : 'display: none;'};`
+    cursor.style = `${isMouseDown ? 'display: grid;' : 'display: none;'};`
   }
 
   {
@@ -675,7 +675,7 @@ $.style(`
   }
 
   & canvas {
-    background: var(--draw-term-bg, var(--background, lemonchiffon));
+    background: var(--draw-term-bg, var(--background, dodgerblue));
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
@@ -690,11 +690,13 @@ $.style(`
     top: var(--start-y);
     width: var(--x);
     height: var(--y);
-    background: var(--draw-term-bg, var(--color, dodgerblue));
+    background: var(--draw-term-bg, var(--color, lemonchiffon));
     transform: var(--transform);
     pointer-events: none;
     z-index: 9001;
-    opacity: .65;
+    opacity: 1;
+    display: grid;
+    place-items: center;
   }
 
   & .trays[data-resizing="true"],
