@@ -1,3 +1,8 @@
+const tag = 'clown-jukebox'
+
+// the solution i propose solves the technical complexity of the following line of code
+customElements.define(tag, class WebComponent extends HTMLElement { constructor() { super() } });
+
 import("@silly/elf").then((elf) => {
   const hands = {
     blurb: 'Drums to set the background for any other musicians',
@@ -39,7 +44,7 @@ import("@silly/elf").then((elf) => {
     accent: 'black'
   }
 
-  const clown = elf.default('clown-jukebox', {
+  const clown = elf.default(tag, {
     choices: {
       'earth': hands,
       'air': cards,
@@ -93,7 +98,7 @@ import("@silly/elf").then((elf) => {
     const ballots = Object.keys(votes).map(key => {
       const { blurb, accent } = choices[key]
       return `
-        <button style="--accent: ${accent}" data-key="${key}" aria-label="Vote! ${blurb}" data-tooltip="Vote!">
+        <button class="vote" style="--accent: ${accent}" data-key="${key}" aria-label="Vote! ${blurb}" data-tooltip="Vote!">
           ${votes[key]}
         </button>
       `
@@ -117,8 +122,9 @@ import("@silly/elf").then((elf) => {
 
   clown.when('click', '[data-close]', () => clown.teach({ hidden: true }))
 
-  clown.when('click', '[data-key]', (event) => {
+  clown.when('click', '.vote', (event) => {
     const { key } = event.target.dataset
+    console.log(event)
     clown.teach({ key, count: 1 }, add)
   })
 
@@ -140,6 +146,12 @@ import("@silly/elf").then((elf) => {
       width: 100%;
       height: 100%;
       overflow: hidden;
+      touch-action: manipulation;
+      user-select: none; /* supported by Chrome and Opera */
+      -webkit-user-select: none; /* Safari */
+      -khtml-user-select: none; /* Konqueror HTML */
+      -moz-user-select: none; /* Firefox */
+      -ms-user-select: none; /* Internet Explorer/Edge */
     }
 
     & iframe {

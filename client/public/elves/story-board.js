@@ -493,15 +493,17 @@ $.style(`
     height: 100%;
     position: relative;
     overflow: hidden;
-  }
-  & canvas {
-    touch-action: none;
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
   }
 
   & .actions {
     z-index: 10;
     background: transparent;
-    border-bottom: 1px solid saddlebrown;
     position: absolute;
     top: 0;
     left: 0;
