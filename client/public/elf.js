@@ -1,6 +1,5 @@
 import diffHTML from 'diffhtml'
 import Computer from '@sillonious/computer'
-import shelf_merge from "shelf-merge"
 
 const logs = {}
 
@@ -19,6 +18,7 @@ const CREATE_EVENT = 'create'
 
 const observableEvents = [CREATE_EVENT]
 const reactiveFunctions = {}
+
 
 function react(link) {
   if(!reactiveFunctions[link]) return
@@ -199,19 +199,25 @@ try {
 }
 
 function createStore(initialState = {}, subscribe = () => null) {
-  const shelf = [null, 0]
-
-  shelf_merge(shelf, initialState)
+  let state = {
+    ...initialState
+  };
 
   return {
     set: function(link, knowledge, nuance) {
-      const wisdom = nuance(shelf[0][link] || {}, knowledge);
-      shelf_merge(shelf, { [link]: wisdom })
+      const wisdom = nuance(state[link] || {}, knowledge);
+
+      state = {
+        ...state,
+        [link]: wisdom
+      };
+
       subscribe(link);
     },
 
     get: function(link) {
-      return shelf[0][link];
+      return state[link];
     }
   }
 }
+
