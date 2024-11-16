@@ -1,4 +1,4 @@
-import tag from '@silly/elf'
+import tag from '@silly/tag'
 import $intro from './plan98-intro.js'
 import $zune from './plan9-zune.js'
 import { innerHTML } from 'diffhtml'
