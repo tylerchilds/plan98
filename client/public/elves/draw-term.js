@@ -1006,8 +1006,8 @@ $.style(`
 $.when('pointerdown', 'canvas', start)
 
 function start(e) {
-  const { grabbing } = $.learn()
-  if(grabbing) return
+  const { grabbing, resizing } = $.learn()
+  if(grabbing || resizing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   let startX, startY, x, y;
@@ -1029,8 +1029,8 @@ $.when('pointermove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { startX, isMouseDown, startY, grabbing } = $.learn()
-  if(grabbing) return
+  const { startX, isMouseDown, startY, grabbing, resizing } = $.learn()
+  if(grabbing || resizing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
   if (!isMouseDown) return
@@ -1057,8 +1057,8 @@ function wake (e) {
 }
 $.when('pointerup', 'canvas', end)
 function end (e) {
-  const { grabbing } = $.learn()
-  if(grabbing) return
+  const { grabbing, resizing } = $.learn()
+  if(grabbing || resizing) return
   const { focusedTray, startX, x, y, invertX, invertY, startY } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
@@ -1115,7 +1115,7 @@ function replaceCursor(target) {
 function launchTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
-  const { url } = this.read($)[tray]
+  const { url } = $.learn()[tray]
 
   window.top.location.href = url
 }
