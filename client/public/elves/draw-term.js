@@ -64,6 +64,7 @@ function render(target) {
           <button class="tray-action tray-toggle" data-tray="${tray}">
             <sl-icon name="${minimized ? 'zoom-in' : 'zoom-out' }"></sl-icon>
           </button>
+          <div class="grabber"></div>
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
@@ -72,21 +73,24 @@ function render(target) {
               </button>
             </div>
           </form>
-          <div class="grabber"></div>
+          <div class="grabber minimizable"></div>
+          <button class="tray-action tray-launch" data-tray="${tray}">
+            <sl-icon name="box-arrow-up-right"></sl-icon>
+          </button>
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
           <iframe src="${url}" title="${url}"></iframe>
         </div>
         <div class="resize-actions">
-          <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
+          <button aria-label="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
           </button>
-          <button aria-label="resize right" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
+          <button aria-label="resize" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
           </button>
 
-          <button aria-label="resize left" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
+          <button aria-label="resize" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
           </button>
-          <button aria-label="resize right" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
+          <button aria-label="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
           </button>
         </div>
       `
@@ -367,25 +371,6 @@ function afterUpdate(target) {
   replaceCursor(target) // first things first
 }
 
-function preventDefault(e) { e.preventDefault() }
-$.when('contextmenu', '.tray-title-bar', preventDefault)
-$.when('pointerdown', '.tray-title-bar', grab)
-$.when('pointerdown', '.tray-resize', resize)
-
-$.when('pointermove', 'canvas', drag)
-$.when('pointermove', '.tray-title-bar', drag)
-$.when('pointermove', '.tray-resize', drag)
-
-$.when('dblclick', '.tray-title-bar', toggleMax)
-$.when('click', '.tray-maxer', toggleMax)
-$.when('pointerup', 'canvas', ungrab)
-$.when('pointerup', 'canvas', unresize)
-$.when('pointerup', '.tray-title-bar', ungrab)
-$.when('pointerup', '.tray-resize', unresize)
-$.when('click', '.tray-close', closeTray)
-$.when('click', '.tray-sync', syncTray)
-$.when('click', '.tray-toggle', toggleMin)
-
 function syncTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
@@ -397,10 +382,6 @@ function syncTray(event) {
       ? buffer
       : '/app/giggle-search?query=' + buffer
 
-
-  // comment out this line to just stay here and refresh the iframe instead
-  window.top.location.href = url
-  //
   event.target.closest('.tray').querySelector('iframe').src = url
   setState(tray, { url, focused: false, minimized: false })
 }
@@ -618,71 +599,59 @@ $.style(`
   & .resize-right-bottom,
   & .resize-left-bottom {
     position: absolute;
-    bottom: -.5rem;
+    bottom: -1rem;
     width: 1rem;
     height: 1rem;
-    border: 1px solid #54796d;
-    background: transparent;
+    border: none;
+    background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
   }
 
-  & .resize-right-bottom::before,
-  & .resize-left-bottom::before {
-    content: '';
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    background-color: #E83FB8;
-    border-radius: 100%;
-    bottom: -.5rem;
-    position: absolute;
-  }
-  & .resize-left-bottom::before,
   & .resize-left-bottom {
-    left: -.5rem;
+    left: -1rem;
     cursor: sw-resize;
   }
 
-  & .resize-right-bottom::before,
   & .resize-right-bottom {
-    right: -.5rem;
+    right: -1rem;
     cursor: se-resize;
   }
 
   & .resize-right-top,
   & .resize-left-top {
     position: absolute;
-    top: -.5rem;
+    top: -1rem;
     width: 1rem;
     height: 1rem;
-    border: 1px solid #54796d;
-    background: transparent;
+    border: none;
+    background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
   }
 
-  & .resize-right-top::before,
-  & .resize-left-top::before {
-    content: '';
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 100%;
-    background-color: #E83FB8;
-    top: -.5rem;
-    position: absolute;
-  }
-  & .resize-left-top::before,
   & .resize-left-top {
-    left: -.5rem;
+    left: -1rem;
     cursor: nw-resize;
   }
 
-  & .resize-right-top::before,
   & .resize-right-top {
-    right: -.5rem;
+    right: -1rem;
     cursor: ne-resize;
+  }
+
+  & .resize-right-bottom,
+  & .resize-left-bottom,
+  & .resize-right-top,
+  & .resize-left-top {
+    opacity: .5;
+  }
+
+  & .resize-right-bottom:hover,
+  & .resize-left-bottom:hover,
+  & .resize-right-top:hover,
+  & .resize-left-top:hover {
+    opacity: 1;
   }
 
 
@@ -856,7 +825,7 @@ $.style(`
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto auto minmax(100px, 1.618fr) 2rem;
+    grid-template-columns: auto auto 2rem minmax(100px, 1.618fr) 2rem auto;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -1142,3 +1111,34 @@ function replaceCursor(target) {
     }
   }
 }
+
+function launchTray(event) {
+  event.preventDefault()
+  const { tray } = event.target.dataset
+  const { url } = this.read($)[tray]
+
+  window.top.location.href = url
+}
+
+function preventDefault(e) { e.preventDefault() }
+$.when('contextmenu', '.tray-title-bar', preventDefault)
+$.when('pointerdown', '.tray-title-bar', grab)
+$.when('pointerdown', '.tray-resize', resize)
+
+$.when('pointermove', 'canvas', drag)
+$.when('pointermove', '.tray-title-bar', drag)
+$.when('pointermove', '.tray-resize', drag)
+
+// ungrab is important to come fairly last so early returns grab grabbing right
+$.when('dblclick', '.tray-title-bar', toggleMax)
+$.when('click', '.tray-maxer', toggleMax)
+$.when('pointerup', 'canvas', ungrab)
+$.when('pointerup', 'canvas', unresize)
+$.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', '.tray-resize', unresize)
+$.when('click', '.tray-close', closeTray)
+$.when('click', '.tray-sync', syncTray)
+$.when('click', '.tray-launch', launchTray)
+$.when('click', '.tray-toggle', toggleMin)
+
+

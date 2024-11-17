@@ -80,34 +80,37 @@ function render(target) {
       node.innerHTML = `
         <button class="tray-wake" data-tray="${tray}"></button>
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
-          <button class="tray-action tray-close" data-tray="${tray}">
+          <button class="tray-action tray-close" data-tray="${tray}" data-tooltip="close">
             <sl-icon name="x-lg"></sl-icon>
           </button>
+          <div class="grabber minimizable" data-tooltip="grab and drag"></div>
           <form class="search minimizable" method="get">
             <div class="input-grid">
               <input placeholder="netdir://" value="${url}" autocomplete="off" name="browser-${self.crypto.randomUUID()}" class="browser" data-tray="${tray}"/>
 
-              <button class="tray-action tray-sync" data-tray="${tray}" tab-index="1" type="submit">
+              <button class="tray-action tray-sync" data-tooltip="call link" data-tray="${tray}" tab-index="1" type="submit">
                 <sl-icon name="telephone"></sl-icon>
               </button>
             </div>
           </form>
-          <div class="grabber minimizable"></div>
-          <div class="grabber"></div>
+          <div class="grabber minimizable" data-tooltip="grab and drag"></div>
+          <button class="tray-action tray-launch" data-tray="${tray}" data-tooltip="launch">
+            <sl-icon name="box-arrow-up-right"></sl-icon>
+          </button>
         </div>
         <div class="suggestions" data-tray="${tray}"></div>
         <div class="tray-body">
           ${drawTray(tray, url)}
         </div>
         <div class="resize-actions">
-          <button aria-label="resize left" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
+          <button aria-label="resize" data-tooltip="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
           </button>
-          <button aria-label="resize right" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
+          <button aria-label="resize" data-tooltip="resize" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
           </button>
 
-          <button aria-label="resize left" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
+          <button aria-label="resize" data-tooltip="resize" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
           </button>
-          <button aria-label="resize right" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
+          <button aria-label="resize" data-tooltip="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
           </button>
         </div>
       `
@@ -413,7 +416,6 @@ $.when('click', '.application', event => {
   })
 
   const path = 'about:blank'
-  console.log(tray, path)
   self.history.pushState({ type: `${$.link}-navigation`, tray, path }, "");
 })
 
@@ -473,8 +475,8 @@ $.draw(function boop(target) {
 
       const { trayZ=1 } = this.read($)
       setState(tray, {
-        width: 300,
-        height: 150,
+        width: vw,
+        height: vh,
         x: 2500 - (vw / 2),
         y: 2500 - (vh / 2),
         z: trayZ+1,
@@ -615,25 +617,6 @@ function subscribe(target) {
   });
 }
 
-function preventDefault(e) { e.preventDefault() }
-$.when('contextmenu', '.tray-title-bar', preventDefault)
-$.when('pointerdown', '.tray-title-bar', grab)
-$.when('pointerdown', '.tray-resize', resize)
-
-$.when('pointermove', 'canvas', drag)
-$.when('pointermove', '.tray-title-bar', drag)
-$.when('pointermove', '.tray-resize', drag)
-
-$.when('dblclick', '.tray-title-bar', toggleMax)
-$.when('click', '.tray-maxer', toggleMax)
-$.when('pointerup', 'canvas', ungrab)
-$.when('pointerup', 'canvas', unresize)
-$.when('pointerup', '.tray-title-bar', ungrab)
-$.when('pointerup', '.tray-resize', unresize)
-$.when('click', '.tray-close', closeTray)
-$.when('click', '.tray-sync', syncTray)
-$.when('click', '.tray-toggle', toggleMin)
-
 function syncTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
@@ -668,9 +651,6 @@ function syncTray(event) {
     iframe.src = url
   }
 
-
-  // comment out this line to just stay here and refresh the iframe instead
-  window.top.location.href = url
   setState(tray, { url, focused: false, minimized: false })
 }
 
@@ -877,71 +857,59 @@ $.style(`
   & .resize-right-bottom,
   & .resize-left-bottom {
     position: absolute;
-    bottom: -.5rem;
+    bottom: -1rem;
     width: 1rem;
     height: 1rem;
-    border: 1px solid #54796d;
-    background: transparent;
+    border: none;
+    background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
   }
 
-  & .resize-right-bottom::before,
-  & .resize-left-bottom::before {
-    content: '';
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    background-color: #E83FB8;
-    border-radius: 100%;
-    bottom: -.5rem;
-    position: absolute;
-  }
-  & .resize-left-bottom::before,
   & .resize-left-bottom {
-    left: -.5rem;
+    left: -1rem;
     cursor: sw-resize;
   }
 
-  & .resize-right-bottom::before,
   & .resize-right-bottom {
-    right: -.5rem;
+    right: -1rem;
     cursor: se-resize;
   }
 
   & .resize-right-top,
   & .resize-left-top {
     position: absolute;
-    top: -.5rem;
+    top: -1rem;
     width: 1rem;
     height: 1rem;
-    border: 1px solid #54796d;
-    background: transparent;
+    border: none;
+    background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
   }
 
-  & .resize-right-top::before,
-  & .resize-left-top::before {
-    content: '';
-    display: block;
-    width: 1rem;
-    height: 1rem;
-    border-radius: 100%;
-    background-color: #E83FB8;
-    top: -.5rem;
-    position: absolute;
-  }
-  & .resize-left-top::before,
   & .resize-left-top {
-    left: -.5rem;
+    left: -1rem;
     cursor: nw-resize;
   }
 
-  & .resize-right-top::before,
   & .resize-right-top {
-    right: -.5rem;
+    right: -1rem;
     cursor: ne-resize;
+  }
+
+  & .resize-right-bottom,
+  & .resize-left-bottom,
+  & .resize-right-top,
+  & .resize-left-top {
+    opacity: .5;
+  }
+
+  & .resize-right-bottom:hover,
+  & .resize-left-bottom:hover,
+  & .resize-right-top:hover,
+  & .resize-left-top:hover {
+    opacity: 1;
   }
 
   &.inline {
@@ -1117,7 +1085,7 @@ $.style(`
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto minmax(100px, 1.618fr) 1fr;
+    grid-template-columns: auto 2rem minmax(100px, 1.618fr) 1fr auto;
     gap: 5px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -1164,13 +1132,6 @@ $.style(`
 
   &:not(.infinite) .tray.maximized {
     transform: translate(0, 0) !important;
- }
-
-  & .tray.maximized {
-    position: absolute;
-    inset: 0;
-    width: 100% !important;
-    height: 100% !important;
   }
 
   & .tray.minimized:not(.maximized) {
@@ -1181,7 +1142,7 @@ $.style(`
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto auto auto 2rem;
+    grid-template-columns: auto 2rem auto auto 2rem;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {
@@ -1467,3 +1428,40 @@ function replaceCursor(target) {
     }
   }
 }
+
+function launchTray(event) {
+  event.preventDefault()
+  const { tray } = event.target.dataset
+  let { buffer, url } = this.read($)[tray]
+  buffer ||= url
+  url = buffer.startsWith('/')
+    ? buffer
+    : buffer.indexOf('://')
+      ? buffer
+      : '/app/giggle-search?query=' + buffer
+
+
+  window.top.location.href = url 
+}
+
+function preventDefault(e) { e.preventDefault() }
+$.when('contextmenu', '.tray-title-bar', preventDefault)
+$.when('pointerdown', '.tray-title-bar', grab)
+$.when('pointerdown', '.tray-resize', resize)
+
+$.when('pointermove', 'canvas', drag)
+$.when('pointermove', '.tray-title-bar', drag)
+$.when('pointermove', '.tray-resize', drag)
+
+$.when('dblclick', '.tray-title-bar', toggleMax)
+$.when('click', '.tray-maxer', toggleMax)
+$.when('pointerup', 'canvas', ungrab)
+$.when('pointerup', 'canvas', unresize)
+$.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', '.tray-resize', unresize)
+$.when('click', '.tray-close', closeTray)
+$.when('click', '.tray-sync', syncTray)
+$.when('click', '.tray-launch', launchTray)
+$.when('click', '.tray-toggle', toggleMin)
+
+
