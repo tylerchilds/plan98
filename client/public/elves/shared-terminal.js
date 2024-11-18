@@ -212,7 +212,7 @@ function drawIrix(tray) {
         <span><sl-icon name="archive"></sl-icon></span>
         <input disabled value="Files" class="app-name">
       </button>
-      <button class="application" data-tray="${tray}" data-href="/app/electric-mail">
+      <button class="application" data-tray="${tray}" data-href="/app/secure-mail">
         <span><sl-icon name="envelope-paper-heart"></sl-icon></span>
 
         <input disabled value="Mail" class="app-name">

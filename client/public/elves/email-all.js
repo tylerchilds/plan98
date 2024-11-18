@@ -21,7 +21,7 @@ async function query(target, key) {
   target.lastKey = key
   $.teach({ loading: true })
   const messages = await fetchTen(key)
-  $.teach({ key, messages, loading: false })
+  $.teach({ messages, loading: false })
 }
 
 function form(key) {
@@ -53,9 +53,10 @@ $.draw(target => {
       dateStyle: 'short',
       timeStyle: 'short',
     }).format(new Date(timestamp))
+    const time = `<span style='white-space: nowrap;'>${formattedTime}</span>`
     return `
       <a href="/app/email-view?id=${id}" target="${target.getAttribute('target')}" name="message" data-index="${index}">
-        <span name="message-timestamp" style="float: right;"><sl-icon name="clock" data-tooltip="${formattedTime}"></sl-icon></span>
+        <span name="message-timestamp" data-tooltip="${time}"><sl-icon name="clock"></sl-icon></span>
         <span name="message-email">${author.email}</span>
         <div name="message-subject">${subject}</div>
       </a>
@@ -65,8 +66,57 @@ $.draw(target => {
   return `
     <div name="message-list">
       ${list}
+      <div class="load-more"></div>
     </div>
   `
+}, {
+  afterUpdate: (target) => {
+    { // recover icons from the virtual dom
+      [...target.querySelectorAll('sl-icon')].map(ogIcon => {
+        const iconParent = ogIcon.parentNode
+        const icon = document.createElement('sl-icon')
+        icon.name = ogIcon.name
+        ogIcon.remove()
+        iconParent.appendChild(icon)
+      })
+    }
+
+
+    const { messages } = $.learn()
+
+    if(!target.observer) {
+      const options = {
+        root: target,
+        rootMargin: "0px",
+        threshold: 0,
+      };
+
+      target.observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(async (entry) => {
+          if(entry.isIntersecting) {
+            const { fetching } = $.learn()
+            if(fetching) return
+            target.observer.unobserve(entry.target);
+            $.teach({ fetching: true})
+
+            const { offset } = $.learn()
+            const messages = await fetchTen(key, offset)
+            $.teach({ offset: offset+10, fetching: false })
+            $.teach({ messages }, (s,p) => {
+              return {
+                ...s,
+                messages: [...s.messages, ...p.messages]
+              }
+            })
+          }
+        });
+      }, options);
+    }
+
+    if(messages) {
+      target.observer.observe(target.querySelector('.load-more'));
+    }
+  }
 })
 
 $.when('change', '[name="key"]', (event) => {
@@ -154,7 +204,7 @@ async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition
   return await data;
 };
 
-async function fetchTen(apikey){
+async function fetchTen(apikey, offset=0){
   const messages = [];
 
   // bail if we don't have our ENV set:
@@ -162,11 +212,13 @@ async function fetchTen(apikey){
     console.log("Please set the apikey");
   }
 
+  $.teach({ offset: offset + 10 })
+  console.log($.learn().offset)
   return await getSession(apikey).then(async(session) => {
     const api_url = session.apiUrl;
     const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
     await inboxIdQuery(apikey, api_url, account_id).then(async (inbox_id) => {
-      await mailboxQuery(apikey, api_url, account_id, inbox_id, 0).then((emails) => {
+      await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
         emails["methodResponses"][1][1]["list"].forEach((email) => {
           const from = email.from[0].email
           const subject = email.subject
@@ -224,7 +276,6 @@ $.style(`
     border: 1px solid rgba(255,255,255,.1);
     display: flex;
     flex-direction: column;
-    height: 100%;
   }
 
   & [name="message"] {
@@ -235,12 +286,26 @@ $.style(`
     padding: .25rem 1rem;
     border-bottom: 1px solid rgba(0,0,0,.25);
     text-decoration: none;
+    overflow: auto;
+    position: relative;
   }
 
   & [name="message-email"] {
     color: rgba(0,0,0,.65);
+    margin-right: 1rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    whitespace: nowrap;
+    display: block;
   }
   & [name="message-timestamp"] {
     color: rgba(0,0,0,.5);
+    position: absolute;
+    top: .5rem;
+    right: 1rem;;
+  }
+
+  & .load-more {
+    transform: translateY(-200px);
   }
 `)

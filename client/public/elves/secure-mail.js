@@ -12,9 +12,7 @@ function render(_target) {
     <div class="panes">
       <div class="list">
         <div class="list-wrapper">
-          <email-all target="email-pain">
-            <a href="/" target="email-pain">try</a>
-          </email-all>
+          <email-all target="email-pain"></email-all>
         </div>
       </div>
       <div class="preview">
@@ -36,7 +34,7 @@ $.style(`
     line-height: 2rem;
     padding: 0 1rem;
     position: absolute;
-    background: #54976d;
+    background: #54796d;
     top: 0;
     left: 0;
     right: 0;
