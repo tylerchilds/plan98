@@ -234,6 +234,8 @@ $.style(`
     display: grid;
     place-items: center;
     overflow: auto;
+    display: block;
+    max-width: 100%;
   }
 
   & .body.centered {

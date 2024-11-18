@@ -95,6 +95,7 @@ const popoverStyles = `
       width: 100%;
       color: rgba(255,255,255,.85);
       padding: .25rem .5rem;
+      background: transparent;
     }
 
     .data-popover button:hover,

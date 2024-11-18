@@ -14,7 +14,7 @@ function headers(apikey){
   }
 }
 
-const $ = module('electric-mail', { loading: true })
+const $ = module('email-all', { loading: true })
 
 async function query(target, key) {
   if(target.lastKey === key) return
@@ -48,14 +48,17 @@ $.draw(target => {
   }
 
   const list = messages.map((message, index) => {
-    const { author, timestamp, subject, textBody } = message
-    console.log(author, timestamp, subject, textBody)
+    const { id, author, timestamp, subject, textBody } = message
+    const formattedTime = new Intl.DateTimeFormat("en-US", {
+      dateStyle: 'short',
+      timeStyle: 'short',
+    }).format(new Date(timestamp))
     return `
-      <button name="message" data-index="${index}">
-        ${author.email}
-        ${timestamp}
-        ${subject}
-      </button>
+      <a href="/app/email-view?id=${id}" target="${target.getAttribute('target')}" name="message" data-index="${index}">
+        <span name="message-timestamp" style="float: right;"><sl-icon name="clock" data-tooltip="${formattedTime}"></sl-icon></span>
+        <span name="message-email">${author.email}</span>
+        <div name="message-subject">${subject}</div>
+      </a>
     `
   }).join('')
 
@@ -174,6 +177,7 @@ async function fetchTen(apikey){
           const textBody = textParts.map(id => email.bodyValues[id].value).join('')
           const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
           messages.push({
+            id: email.id,
             author: {
               email: from,
               photoUrl: 'https://tychi.me/professional-headshot.jpg',
@@ -206,43 +210,37 @@ function escapeHyperText(text = '') {
   )
 }
 
-$.when('click', '[name="message"]', (event) => {
-  const { messages } = $.learn()
-  const message = messages[parseInt(event.target.dataset.index)]
-  if(!message) return
-  showModal(`
-    <div style="width: 100%; height: 100%; background: white; padding: 2rem 1rem; overflow: auto;">
-      ${escapeHyperText(message.textBody)}
-    </div>
-  `)
-})
-
-
 $.style(`
   & {
-    background: #54796d;
     display: block;
     width: 100%;
     height: 100%;
     overflow: auto;
+    background: lemonchiffon;
   }
 
   & [name="message-list"] {
     border-radius: 3px;
     border: 1px solid rgba(255,255,255,.1);
-    padding: 3px;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
+    height: 100%;
   }
 
   & [name="message"] {
     border: none;
     display: block;
     width: 100%;
-    background: lemonchiffon;
-    color: saddlebrown;
-    padding: 8px;
+    color: rgba(0,0,0,.85);
+    padding: .25rem 1rem;
+    border-bottom: 1px solid rgba(0,0,0,.25);
+    text-decoration: none;
+  }
+
+  & [name="message-email"] {
+    color: rgba(0,0,0,.65);
+  }
+  & [name="message-timestamp"] {
+    color: rgba(0,0,0,.5);
   }
 `)

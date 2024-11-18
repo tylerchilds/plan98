@@ -866,6 +866,7 @@ $.style(`
     width: 1rem;
     height: 1rem;
     border: none;
+    padding: 0;
     background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
@@ -884,6 +885,7 @@ $.style(`
   & .resize-right-top,
   & .resize-left-top {
     position: absolute;
+    padding: 0;
     top: -1rem;
     width: 1rem;
     height: 1rem;
@@ -908,6 +910,7 @@ $.style(`
   & .resize-right-top,
   & .resize-left-top {
     opacity: .5;
+    aspect-ratio: 1;
   }
 
   & .resize-right-bottom:hover,
@@ -916,6 +919,19 @@ $.style(`
   & .resize-left-top:hover {
     opacity: 1;
   }
+
+  & .resize-right-bottom:before,
+  & .resize-left-bottom:before,
+  & .resize-right-top:before,
+  & .resize-left-top:before {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    border-radius: 100%;
+    display: block;
+  }
+
+
 
   &.inline {
     display: inline-block;

@@ -603,6 +603,7 @@ $.style(`
     width: 1rem;
     height: 1rem;
     border: none;
+    padding: 0;
     background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
@@ -625,6 +626,7 @@ $.style(`
     width: 1rem;
     height: 1rem;
     border: none;
+    padding: 0;
     background-color: #E83FB8;
     border-radius: 100%;
     cursor: resize;
@@ -881,7 +883,7 @@ $.style(`
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto auto 2rem;
+    grid-template-columns: auto auto 2rem auto;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {

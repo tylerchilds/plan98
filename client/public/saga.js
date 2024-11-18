@@ -151,7 +151,7 @@ export function render(script) {
   if(time !== NORMAL_TIME) times[time]('')
 
   // clearn our compiled hyper media scene
-  const clean = validated(scene)
+  const clean = validated(scene) ? `<xml-html>${scene}</xml-html>` : escapeHyperText(script)
 
   return template(state, clean)
 
@@ -257,7 +257,7 @@ function validated(htmlString){
   const parser = new DOMParser();
   const doc = parser.parseFromString(root, "application/xml");
   const errorNode = doc.querySelector('parsererror');
-  return errorNode ? errorNode.innerHTML : root
+  return errorNode ? false : root
 }
 
 const templates = {
@@ -310,3 +310,16 @@ function screenplay(content) {
     </div>
   `
 }
+
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g,
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
