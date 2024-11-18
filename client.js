@@ -94,6 +94,8 @@ async function page() {
           ${safeEnv('HEAVY_ASSET_CDN_URL')}
           ${safeEnv('PLAN98_HOME')}
           ${safeEnv('PROTOMAPS_API_KEY')}
+
+          ${safeEnv('FASTMAIL_API_KEY')}
         }
       }
     </script>

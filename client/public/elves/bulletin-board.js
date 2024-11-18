@@ -905,6 +905,9 @@ $.style(`
     pointer-events: none !important;
   }
 
+  &[data-mode="${modes.move}"] .workspace shared-terminal .tray-body{
+    background: rgba(0,0,0,.85);
+  }
   &[data-mode="${modes.move}"] .workspace shared-terminal iframe{
     display: none;
   }

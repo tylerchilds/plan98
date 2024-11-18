@@ -273,9 +273,11 @@ $.style(`
     background: black;
     border: none;
     color: rgba(255,255,255,.65);
-    padding: 9px;
+    display: inline-grid;
+    place-items: center;
     height: 2rem;
-    font-size: 2rem;
+    width: 2rem;
+    font-size: 1rem;
     transition: color 200ms;
     border-radius: 100%;
   }

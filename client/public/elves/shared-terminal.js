@@ -210,12 +210,17 @@ function drawIrix(tray) {
     <div class="irix-launcher">
       <button class="application" data-tray="${tray}" data-href="/app/file-system">
         <span><sl-icon name="archive"></sl-icon></span>
-        <input disabled value="All Files" class="app-name">
+        <input disabled value="Files" class="app-name">
       </button>
-      <button class="application" data-tray="${tray}" data-href="/app/sillyz-computer?src=/app/draw-term?src=/app/play-wheel?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
-        <span class="nonce-icon nonce"></span>
+      <button class="application" data-tray="${tray}" data-href="/app/electric-mail">
+        <span><sl-icon name="envelope-paper-heart"></sl-icon></span>
 
-        <input disabled value="Silly Computer" class="app-name">
+        <input disabled value="Mail" class="app-name">
+      </button>
+
+      <button class="application" data-tray="${tray}" data-href="/app/draw-term?src=/app/play-wheel?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
+        <span class="nonce-icon nonce"></span>
+        <input disabled value="Synthia" class="app-name">
       </button>
       <button class="application" data-tray="${tray}" data-href="/app/impromptu-stagehand">
         <span><sl-icon name="person-raised-hand"></sl-icon></span>

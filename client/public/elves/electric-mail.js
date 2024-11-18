@@ -1,44 +1,66 @@
 import module from '@silly/tag'
+import { showModal } from '@plan98/modal'
 
-const $ = module('electric-mail')
+const key = plan98.env.FASTMAIL_API_KEY
+
+const hostname = "api.fastmail.com";
+
+const authUrl = `https://${hostname}/.well-known/jmap`;
+
+function headers(apikey){
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apikey}`,
+  }
+}
+
+
+const $ = module('electric-mail', { loading: true })
 
 async function query(target, key) {
   if(target.lastKey === key) return
   target.lastKey = key
+  $.teach({ loading: true })
   const messages = await fetchTen(key)
-  $.teach({ key, messages })
+  $.teach({ key, messages, loading: false })
 }
 
-const form = (key) => {
+function form(key) {
   return `
     <form>
-      <input name="key" value="${key}" />
+      <input name="key" value="${key || ''}" />
     </form>
   `
 }
 
 $.draw(target => {
-  const { key, messages } = $.learn()
+  const { messages, loading } = $.learn()
   query(target, key)
 
-  if(!messages) {
-    return form(key)
+  if(loading) {
+    return `<loading-spinner></loading-spinner>`
   }
 
-  const list = messages.map((message) => {
+  if(!messages) {
+    return `
+      No messages. Try another key?
+      ${form(key)}
+    `
+  }
+
+  const list = messages.map((message, index) => {
     const { author, timestamp, subject, textBody } = message
     console.log(author, timestamp, subject, textBody)
     return `
-      <div name="message">
+      <button name="message" data-index="${index}">
         ${author.email}
         ${timestamp}
         ${subject}
-      </div>
+      </button>
     `
   }).join('')
 
   return `
-    ${form(key)}
     <div name="message-list">
       ${list}
     </div>
@@ -50,15 +72,7 @@ $.when('change', '[name="key"]', (event) => {
   $.teach({ key: value })
 })
 
-const hostname = "api.fastmail.com";
-
-const authUrl = `https://${hostname}/.well-known/jmap`;
-const headers = (apikey) => ({
-  "Content-Type": "application/json",
-  Authorization: `Bearer ${apikey}`,
-});
-
-const getSession = async (apikey) => {
+async function getSession(apikey) {
   const response = await fetch(authUrl, {
     method: "GET",
     headers: headers(apikey),
@@ -66,7 +80,7 @@ const getSession = async (apikey) => {
   return response.json();
 };
 
-const inboxIdQuery = async (apikey, api_url, account_id) => {
+async function inboxIdQuery(apikey, api_url, account_id) {
   const response = await fetch(api_url, {
     method: "POST",
     headers: headers(apikey),
@@ -97,7 +111,7 @@ const inboxIdQuery = async (apikey, api_url, account_id) => {
   return await inbox_id;
 };
 
-const mailboxQuery = async (apikey, api_url, account_id, inbox_id, startPosition, limit=10) => {
+async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition, limit=10) {
   const response = await fetch(api_url, {
     method: "POST",
     headers: headers(apikey),
@@ -137,6 +151,7 @@ const mailboxQuery = async (apikey, api_url, account_id, inbox_id, startPosition
 
   return await data;
 };
+
 async function fetchTen(apikey){
   const messages = [];
 
@@ -180,19 +195,55 @@ async function fetchTen(apikey){
   });
 }
 
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g,
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+$.when('click', '[name="message"]', (event) => {
+  const { messages } = $.learn()
+  const message = messages[parseInt(event.target.dataset.index)]
+  if(!message) return
+  showModal(`
+    <div style="width: 100%; height: 100%; background: white; padding: 2rem 1rem;">
+      ${escapeHyperText(message.textBody)}
+    </div>
+  `)
+})
+
 
 $.style(`
+  & {
+    background: #54796d;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
+
   & [name="message-list"] {
-    background: rgba(0,0,0,.85);
     border-radius: 3px;
     border: 1px solid rgba(255,255,255,.1);
     padding: 3px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
   }
 
   & [name="message"] {
-    background: black;
-    color: white;
-    margin: 1rem;
+    border: none;
+    display: block;
+    width: 100%;
+    background: lemonchiffon;
+    color: saddlebrown;
     padding: 8px;
   }
 `)
