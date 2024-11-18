@@ -1,0 +1,69 @@
+Animating entry effects - @starting-style and allow-discrete
+
+Animation is a critical component to interactive storytelling. An animation creates a journey, no matter how small, from point A to point B.
+
+In classical animation, an artist will draw one frame at a time and a camera will take a snapshot of each moment of progression. For just one second of animation, 24 frames need to be drawn, captured, and sequenced.
+
+For interactive content such as video games, web apps, and operating systems-- players, visitors, and customers expect there to be a stable 60 frames per second. Anything less than 60 individual images per second is perceptible to people with an eye tuned for it.
+
+# CSS Animations
+
+With CSS, there are two primary properties used for animation: transition and animation. Both properties allow customization based on how long the animation should last (duration), when it should start (delay), and how the in between frames should be "tweened" (easing).
+
+Today, we're going to focus on a couple of aspects that can be utilized with the transition property in CSS: allow-discrete and @starting-style.
+
+Before we go further, we need to take a step back and zoom out.
+
+We know animation is a journey from point A to point B, but what are the technical terms for point A and point B?
+
+# Keyframes
+
+A keyframe is the state of affairs at any moment in time. Given two states, we can calculate the difference between them and animate. This works great for things like numbers, but it doesn't work great for things like words.
+
+For example, there are a myriad of ways to not show a piece of content with CSS. Two of the more popular CSS properties are using opacity (continuous) and display (discrete).
+
+# Opacity
+
+Opacity is continuous and takes a value between 0 and 1, inclusively. An opacity of .5 will be 50% transparent-- you'll be able to see content behind the content. An opacity of 0 is hidden and 1 is entirely visble.
+
+If the opacity of point A is 0 and the opacity point B is 1, with an animation duration of 1000ms, the folowing statements are true.
+
+At 0ms, opacity: 0;
+At 250ms, opacity: .25;
+At 500ms, opacity: .5;
+At 900ms, opacity: .9;
+At 1000ms, opacity: 1;
+
+Writing each intermediate step out would be tedious in code, which is why the CSS engine tweens values on our behalf.
+
+# Display
+
+Display values are discrete and may be defined as: inline, inline-block, flex, grid, inline-flex, inline-grid-- and all those properties will result in visible content.
+
+Display may also be set to none, which will hide the content entirely.
+
+Historically, CSS has not had a way to animate from a point A of display: block to a point B of display: none; or of a point A of display: none; to a point B of display: grid;
+
+Animating between words, or discrete values, is hard. How can we do it?
+
+# allow-discrete
+
+The transition property allows for a constituent property 'transition-behavior', which may be 'allow-discrete', which will allow CSS to animate between words.
+
+To demonstrate this, we'll use one of my favorite tricks in CSS: fading in a loading indicator until the content is ready.
+
+To make this more interesting, we'll create a loading animation that we can load for any custom element that is yet to be defined, that will disappear once the custom element is registered.
+
+# Code and demo
+
+
+
+# @starting-style
+
+In the example, you'll notice the use of @starting-style. This is how we can define the initial keyframe we want to transition from, a new default value we as web authors define for our applications.
+
+How will you use these new CSS tricks? Let us know in the comments.
+
+Thanks for reading and to the future of interactive content across mediums and dimensions!
+
+- Ty from https://sillyz.computer
