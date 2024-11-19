@@ -161,9 +161,7 @@ $.draw((target) => {
       ${author.email}
       ${timestamp}
       ${subject}
-      <div class="mail-body">
-        ${render(textBody)}
-      </div>
+      <div class="mail-body">${render(textBody)}</div>
     `
   }
 
