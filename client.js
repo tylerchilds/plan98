@@ -170,7 +170,12 @@ function contentType(pathname, extension) {
 
 function buildHeaders(parameters, pathname, extension) {
   const debug = parameters.get('debug')
+  const allowOrigin = pathname.endsWith(".css") || pathname.endsWith(".js")
+    ? "*"
+    : req.headers.get("origin") || "null"; // Only allow same origin or 'null' for other resources
+
   let headers = {
+    'Access-Control-Allow-Origin': allowOrigin,
     'Cross-Origin-Resource-Policy': 'same-origin',
     'content-type': contentType(pathname, extension)
   }
