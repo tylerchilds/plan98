@@ -13,7 +13,7 @@ function render(_target) {
       <div>
         <button data-draft>
           <span><sl-icon name="pencil"></sl-icon></span>
-          Drafts
+          Craft
         </button>
       </div>
     </div>

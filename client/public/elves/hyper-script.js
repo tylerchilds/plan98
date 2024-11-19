@@ -220,7 +220,31 @@ $.draw((target) => {
   } else {
     target.innerHTML = perspective
   }
-}, { beforeUpdate })
+}, { beforeUpdate, afterUpdate})
+
+function viewport(entries, observer) {
+  entries.forEach((entry) => {
+    if(entry.isIntersecting) {
+      entry.target.dataset.hidden = 'true'
+    } else {
+      delete event.target.dataset.hidden
+    }
+  });
+}
+
+function afterUpdate(target) {
+  if(!target.observer) {
+    const options = {
+      root: target,
+      rootMargin: "0px",
+      threshold: 0,
+    };
+    target.observer = new IntersectionObserver(viewport, options);
+    [...target.querySelectorAll('xml-html > *')].map((target) => {
+      target.observer.observe(target);
+    })
+  }
+}
 
 function beforeUpdate(target) {
   { // recover icons from the virtual dom
@@ -552,6 +576,10 @@ $.style(`
       width: 100%;
       display: grid;
       grid-template-rows: auto 1fr;
+    }
+
+    & [data-hidden="true"] {
+      visibility: hidden;
     }
 
     & .actions {

@@ -14,21 +14,12 @@ function headers(apikey){
   }
 }
 
-const $ = module('email-all', { loading: true, mailboxes: [] })
+const $ = module('email-new', { loading: true })
 
 async function query(target, key) {
   if(target.lastKey === key) return
   target.lastKey = key
   $.teach({ loading: true })
-
-  await getSession(key).then(async(session) => {
-    const api_url = session.apiUrl;
-    const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
-    $.teach({ api_url, account_id })
-    await inboxIdQuery(key, api_url, account_id).then((mailboxes) => {
-      $.teach({ mailboxes })
-    });
-  })
   const messages = await fetchTen(key)
   $.teach({ messages, loading: false })
 }
@@ -66,14 +57,14 @@ $.draw(target => {
     return `
       <a href="/app/email-view?id=${id}" target="${target.getAttribute('target')}" name="message" data-index="${index}">
         <span name="message-timestamp" data-tooltip="${time}"><sl-icon name="clock"></sl-icon></span>
-        <span name="message-email">${escapeHyperText(author.email)}</span>
-        <div name="message-subject">${escapeHyperText(subject)}</div>
+        <span name="message-email">${author.email}</span>
+        <div name="message-subject">${subject}</div>
       </a>
     `
   }).join('')
+
   return `
     <div name="message-list">
-      ${inboxSelector()}
       ${list}
       <div class="load-more"></div>
     </div>
@@ -89,6 +80,7 @@ $.draw(target => {
         iconParent.appendChild(icon)
       })
     }
+
 
     const { messages } = $.learn()
 
@@ -109,7 +101,7 @@ $.draw(target => {
 
             const { offset } = $.learn()
             const messages = await fetchTen(key, offset)
-            $.teach({ offset: offset+20, fetching: false })
+            $.teach({ offset: offset+10, fetching: false })
             $.teach({ messages }, (s,p) => {
               return {
                 ...s,
@@ -120,38 +112,11 @@ $.draw(target => {
         });
       }, options);
     }
-    const watcher = target.querySelector('.load-more')
-    if(messages && watcher) {
-      target.observer.observe(watcher);
+
+    if(messages) {
+      target.observer.observe(target.querySelector('.load-more'));
     }
   }
-})
-
-function inboxSelector() {
-  const { mailboxes, inbox_id } = $.learn()
-  if(mailboxes.length === 0) return ''
-
-  const options = mailboxes.map((mailbox) => {
-    return `
-      <option value="${mailbox.id}" ${mailbox.id === inbox_id ? 'selected="true"':''}>
-      ${mailbox.name}
-    </option>
-    `
-  }).join('')
-
-  return `
-    <select name="mailbox-selector">
-      ${options}
-    </select>
-  `
-}
-
-
-$.when('change', '[name="mailbox-selector"]', async (event) => {
-  const { value } = event.target
-  $.teach({ inbox_id: value, loading: true })
-  const messages = await fetchTen(key)
-  $.teach({ messages, loading: false })
 })
 
 $.when('change', '[name="key"]', (event) => {
@@ -175,10 +140,10 @@ async function inboxIdQuery(apikey, api_url, account_id) {
       using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
       methodCalls: [
         [
-          "Mailbox/get",
+          "Mailbox/query",
           {
             accountId: account_id,
-            properties: ["id", "name", "role"]
+            filter: { role: "inbox", hasAnyRole: true },
           },
           "a",
         ],
@@ -188,17 +153,17 @@ async function inboxIdQuery(apikey, api_url, account_id) {
 
   const data = await response.json();
 
-  const inbox_id = data.methodResponses[0][1].list[0].id
+  const inbox_id = data["methodResponses"][0][1]["ids"][0];
+
   if (!inbox_id.length) {
     console.error("Could not get an inbox.");
     process.exit(1);
   }
 
-  $.teach({ inbox_id })
-  return data.methodResponses[0][1].list
+  return await inbox_id;
 };
 
-async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition, limit=20) {
+async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition, limit=10) {
   const response = await fetch(api_url, {
     method: "POST",
     headers: headers(apikey),
@@ -240,44 +205,45 @@ async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition
 };
 
 async function fetchTen(apikey, offset=0){
-  const { inbox_id, api_url, account_id } = $.learn()
   const messages = [];
 
   // bail if we don't have our ENV set:
   if (!apikey) {
     console.log("Please set the apikey");
-    return
-  }
-
-  if(!inbox_id) {
-    console.log("No inbox");
   }
 
   $.teach({ offset: offset + 10 })
-  return await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
-    emails["methodResponses"][1][1]["list"].forEach((email) => {
-      const from = email.from[0].email
-      const subject = email.subject
-      const timestamp = email.receivedAt
+  console.log($.learn().offset)
+  return await getSession(apikey).then(async(session) => {
+    const api_url = session.apiUrl;
+    const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
+    await inboxIdQuery(apikey, api_url, account_id).then(async (inbox_id) => {
+      await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
+        emails["methodResponses"][1][1]["list"].forEach((email) => {
+          const from = email.from[0].email
+          const subject = email.subject
+          const timestamp = email.receivedAt
 
-      const textParts = email.textBody.map(x => x.partId)
-      const htmlParts = email.htmlBody.map(x => x.partId)
-      const textBody = textParts.map(id => email.bodyValues[id].value).join('')
-      const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
-      messages.push({
-        id: email.id,
-        author: {
-          email: from,
-          photoUrl: 'https://tychi.me/professional-headshot.jpg',
-          name: from,
-        },
-        subject,
-        timestamp,
-        textBody,
-        htmlBody,
-        content: subject,
-        updated: timestamp
-      })
+          const textParts = email.textBody.map(x => x.partId)
+          const htmlParts = email.htmlBody.map(x => x.partId)
+          const textBody = textParts.map(id => email.bodyValues[id].value).join('')
+          const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
+          messages.push({
+            id: email.id,
+            author: {
+              email: from,
+              photoUrl: 'https://tychi.me/professional-headshot.jpg',
+              name: from,
+            },
+            subject,
+            timestamp,
+            textBody,
+            htmlBody,
+            content: subject,
+            updated: timestamp
+          })
+        });
+      });
     });
 
     return messages
@@ -307,6 +273,7 @@ $.style(`
 
   & [name="message-list"] {
     border-radius: 3px;
+    border: 1px solid rgba(255,255,255,.1);
     display: flex;
     flex-direction: column;
   }
@@ -316,7 +283,7 @@ $.style(`
     display: block;
     width: 100%;
     color: rgba(0,0,0,.85);
-    padding: .25rem .5rem;
+    padding: .25rem 1rem;
     border-bottom: 1px solid rgba(0,0,0,.25);
     text-decoration: none;
     overflow: auto;
@@ -324,33 +291,21 @@ $.style(`
   }
 
   & [name="message-email"] {
-    color: rgba(0,0,0,.5);
-    margin-right: 1.25rem;
+    color: rgba(0,0,0,.65);
+    margin-right: 1rem;
     text-overflow: ellipsis;
     overflow: hidden;
     whitespace: nowrap;
     display: block;
   }
   & [name="message-timestamp"] {
-    color: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.5);
     position: absolute;
     top: .5rem;
-    right: .5rem;;
+    right: 1rem;;
   }
 
   & .load-more {
     transform: translateY(-200px);
-  }
-
-  & select {
-    background: #54796d;
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: none;
-    padding: 0 .5rem;
-    position: sticky;
-    top: 0;
-    height: 2rem;
-    z-index: 2;
   }
 `)

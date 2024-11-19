@@ -57,7 +57,9 @@
 
     "android-init": "deno task package-assets && cd app && npm run tauri android init",
     "android-dev": "deno task package-assets && cd app && npm run tauri android dev",
-    "android-build": "deno task package-assets && cd app && npm run tauri android dev"
+    "android-build": "deno task package-assets && cd app && npm run tauri android dev",
+
+    "chunk-video": "deno run --allow-run --allow-read --allow-write functions/convert.js"
   },
   "imports": {
     "@silly/tag": "./client/public/module.js",
