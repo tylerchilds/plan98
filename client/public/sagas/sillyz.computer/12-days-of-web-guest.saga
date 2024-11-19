@@ -56,8 +56,6 @@ To make this more interesting, we'll create a loading animation that we can load
 
 # Code and demo
 
-
-
 # @starting-style
 
 In the example, you'll notice the use of @starting-style. This is how we can define the initial keyframe we want to transition from, a new default value we as web authors define for our applications.
