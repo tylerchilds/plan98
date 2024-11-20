@@ -1,4 +1,5 @@
 import module from '@silly/tag'
+import 'randomuuid'
 import { doingBusinessAs } from "@sillonious/brand"
 
 self.plan98 ||= { env: {} }

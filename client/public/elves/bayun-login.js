@@ -120,7 +120,7 @@ $.draw((target) => {
   if(step !== parseInt(target.dataset.step)) {
     target.dataset.step = step
     target.dataset.steps = step
-    target.style.setProperty("--progress", `${step+1 / steps.length * 100}%`);
+    target.style.setProperty("--progress", `${step / steps.length * 100}%`);
     target.innerHTML = steps[step](target)
   }
 }, {

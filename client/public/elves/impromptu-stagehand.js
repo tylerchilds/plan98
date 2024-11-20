@@ -86,9 +86,9 @@ link.draw((target) => {
   grid += '</tbody>'
   grid += '</table>'
 
-  const allSessions = sessions.map(({ type, who, when, what, where, why }, id) => {
+  const allSessions = sessions.map(({ uuid, type, who, when, what, where, why }, id) => {
     return `
-      <div class="idea" data-type="${type}" data-tooltip="${tooltip(id)}">
+      <button class="idea" data-uuid="${uuid}" data-type="${type}" data-tooltip="${tooltip(id)}">
         <strong>${what}</strong>
         <em>${when}</em>
         <u>${where}</u>
@@ -100,7 +100,7 @@ link.draw((target) => {
         <ul>
           ${who.split(',').map(x => `<li>${x}</li>`)}
         </ul>
-      </div>
+      </button>
     `
   }).join('')
 
@@ -118,7 +118,7 @@ link.draw((target) => {
           <label class="field">
             <span class="label">Guiness Book of World Records Category</span>
             <select name="type">
-              <option disabled>uncategorized</option>
+              <option>uncategorized</option>
               ${types.map((type) => {
                 return `
                   <option value="${type}">${type}</option>
@@ -219,6 +219,12 @@ link.draw((target) => {
   }
 })
 
+
+link.when('click', '.idea', (event) => {
+  const { uuid } = event.target.dataset
+  window.location.href = `/app/bulletin-board?src=${`/private/${link.link}/${uuid}`}.saga&uuid=${uuid}`
+})
+
 link.when('click', '.head', (event) => {
   const { accordion } = event.target.dataset
   const { accordions } = link.learn()
@@ -257,7 +263,7 @@ link.when('submit', 'form', (event) => {
 
   const { form } = link.learn()
   if(form.who && form.when && form.why && form.what) {
-    link.teach(form, (state, payload) => {
+    link.teach({...form, uuid: self.crypto.randomUUID() }, (state, payload) => {
       return {
         ...state,
         sessions: [...state.sessions, payload]

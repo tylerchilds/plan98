@@ -109,9 +109,15 @@ function drawGroupButton(group) {
 
 $.draw(target => {
   const { sessionId } = getSession()
-  if(!sessionId) return `
-    <comedy-notebook></comedy-notebook>
-  `
+  if(!sessionId) {
+    if(!target.innerHTML) {
+      return `
+        <bayun-wizard src="/app/party-chat"></bayun-wizard>
+      `
+    }
+
+    return
+  }
   getMyGroups()
   getOtherGroups()
   const { myGroups, otherGroups, group='' } = $.learn()
@@ -192,6 +198,7 @@ $.when('click', '[data-party]', () => {
 })
 $.when('click', '[data-logout]', () => {
   clearSession()
+  window.location.href = '/app/bayun-wizard?src=/app/party-chat'
 })
 
 $.style(`
