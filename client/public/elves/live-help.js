@@ -1,15 +1,17 @@
 import module from '@silly/tag'
 
+const token = plan98.env.JITSI_MAGIC_COOKIE
+
 const script = document.createElement('script');
 script.onload = function () {
 	const $ = module('live-help')
 
 	$.draw(target => {
 		if(target.api) return
-		const room = target.getAttribute('src') || target.getAttribute('room')
+		const room = target.getAttribute('room')
 
 		target.api = new JitsiMeetExternalAPI("8x8.vc", {
-			roomName: room || "live-help",
+			roomName: token + '/' + (room || "live-help"),
 			parentNode: target
 		});
 	})
@@ -27,5 +29,5 @@ script.onload = function () {
   `)
 };
 
-script.src = `https://8x8.vc/${'vpaas-magic-cookie-601556760e2e4612a620aad1abd2b1d1'}/external_api.js`;
+script.src = `https://8x8.vc/${token}/external_api.js`;
 document.head.appendChild(script); 

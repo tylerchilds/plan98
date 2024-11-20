@@ -87,11 +87,11 @@ function afterUpdate(target) {
 
   {
     const { mode } = $.learn()
-    const src = target.getAttribute('src')
+    const uuid = target.getAttribute('uuid')
     const camera = target.querySelector('.camera')
     if(!camera.innerHTML && mode === modes.camera) {
       camera.innerHTML = `
-        <live-help src="${src}" class="stack"></live-help>
+        <live-help room="${uuid}" class="stack"></live-help>
       `
     }
   }
