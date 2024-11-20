@@ -429,6 +429,17 @@ button {
   margin: auto;
 }
 
+.nonce:hover,
+.nonce:focus{
+  background-color: #E83FB8;
+}
+
+.nonce:hover::before,
+.nonce:focus::before{
+  background-color: lemonchiffon;
+}
+
+
 .actions {
   z-index: 10;
   background: transparent;

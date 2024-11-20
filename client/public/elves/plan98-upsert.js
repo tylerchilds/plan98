@@ -8,11 +8,16 @@ import { requestScreen } from './plan9-zune.js'
 const $ = module('plan98-upsert', {
   loading: true,
   step: 0,
-  answer1: '',
-  answer2: '',
-  answer3: '',
-  answer4: '',
-  answer5: '',
+  question1: 'Who?',
+  question2: 'What?',
+  question3: 'When?',
+  question4: 'Where?',
+  question5: 'Why?',
+  answer1: 'Chicken poo',
+  answer2: 'Chicken butt',
+  answer3: 'Chicken hen',
+  answer4: 'Chicken hair',
+  answer5: 'Chicken thigh',
   user: {}
 })
 

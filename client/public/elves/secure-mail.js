@@ -4,12 +4,15 @@ const $ = module('secure-mail')
 
 $.draw(render)
 
-function render(_target) {
+function render(target) {
+  const src = target.getAttribute('src') || '/app/email-none?src=/app/draw-term?src=/app/party-chat'
+
   return `
     <div class="hero-bar">
-      <div>
+      <button data-src="${src}">
+        <div style="height: 2rem; width: 2rem;" class="nonce"></div>
         Secure Mail
-      </div>
+      </button>
       <div>
         <button data-draft>
           <span><sl-icon name="pencil"></sl-icon></span>
@@ -24,7 +27,7 @@ function render(_target) {
         </div>
       </div>
       <div class="preview">
-        <iframe name="email-pain" src="/app/email-none">
+        <iframe name="email-pain" src="${src}">
       </div>
     </div>
   `
@@ -36,6 +39,15 @@ $.when('click', '[data-draft]', (event) => {
   iframe.src = '/app/email-new'
 })
 
+$.when('click', '[data-src]', (event) => {
+  const { src } = event.target.dataset
+  const iframe = event.target.closest($.link).querySelector('[name="email-pain"]')
+
+  iframe.src = src
+})
+
+
+
 $.style(`
   & {
     height: 100%;
@@ -46,7 +58,6 @@ $.style(`
   & .hero-bar {
     height: 2rem;
     line-height: 2rem;
-    padding: 0 0 0 1rem;
     position: absolute;
     top: 0;
     left: 0;
@@ -57,10 +68,27 @@ $.style(`
     background: rgba(0,0,0,.85);
   }
 
+  & [data-src] {
+    padding: 0;
+    line-height: 1;
+    font-size: 1rem;
+    line-height: 2rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    color: lemonchiffon;
+    gap: .5rem;
+    margin: 0;
+    transition: background 100ms;
+    border: none;
+    background: transparent;
+    text-align: left;
+    font-weight: bold;
+  }
+
   & [data-draft] {
     float: right;
-    background: dodgerblue;
-    color: rgba(255,255,255,.85);
+    background: lemonchiffon;
+    color: #E83FB8;
     border: none;
     padding: 0 .5rem;
     line-height: 2rem;
@@ -74,7 +102,8 @@ $.style(`
 
   & [data-draft]:hover,
   & [data-draft]:focus {
-    background: dodgerblue;
+    color: lemonchiffon;
+    background: #E83FB8;
   }
 
   & .panes {

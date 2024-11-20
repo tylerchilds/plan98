@@ -16,10 +16,12 @@ const steps = [
     const { questions, answer1 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[1]}
+      <div class="system-prompt">
+        ${questions[1]}
+      </div>
       <label class="field">
         <span class="label">Answer 1</span>
-        <input class="name-pair" name="answer1" value="${answer1}" />
+        <input type="password" class="name-pair" name="answer1" value="${answer1}" />
       </label>
 
       <div class="button-row">
@@ -32,10 +34,12 @@ const steps = [
     const { questions, answer2 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[2]}
+      <div class="system-prompt">
+        ${questions[2]}
+      </div>
       <label class="field">
         <span class="label">Answer 2</span>
-        <input class="name-pair" name="answer2" value="${answer2}" />
+        <input type="password" class="name-pair" name="answer2" value="${answer2}" />
       </label>
 
       <div class="button-row">
@@ -48,10 +52,12 @@ const steps = [
     const { questions, answer3 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[3]}
+      <div class="system-prompt">
+        ${questions[3]}
+      </div>
       <label class="field">
         <span class="label">Answer 3</span>
-        <input class="name-pair" name="answer3" value="${answer3}" />
+        <input type="password" class="name-pair" name="answer3" value="${answer3}" />
       </label>
 
       <div class="button-row">
@@ -64,10 +70,12 @@ const steps = [
     const { questions, answer4 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[4]}
+      <div class="system-prompt">
+        ${questions[4]}
+      </div>
       <label class="field">
         <span class="label">Answer 4</span>
-        <input class="name-pair" name="answer4" value="${answer4}" />
+        <input type="password" class="name-pair" name="answer4" value="${answer4}" />
       </label>
 
       <div class="button-row">
@@ -80,10 +88,12 @@ const steps = [
     const { questions, answer5 } = $.learn()
     return `
       <div class="progress"></div>
-      ${questions[5]}
+      <div class="system-prompt">
+        ${questions[5]}
+      </div>
       <label class="field">
         <span class="label">Answer 5</span>
-        <input class="name-pair" name="answer5" value="${answer5}" />
+        <input type="password" class="name-pair" name="answer5" value="${answer5}" />
       </label>
 
       <div class="button-row">
@@ -110,8 +120,18 @@ $.draw((target) => {
   if(step !== parseInt(target.dataset.step)) {
     target.dataset.step = step
     target.dataset.steps = step
-    target.style.setProperty("--progress", `${step / steps.length * 100}%`);
+    target.style.setProperty("--progress", `${step+1 / steps.length * 100}%`);
     target.innerHTML = steps[step](target)
+  }
+}, {
+  afterUpdate: (target) => {
+    {
+      const { step } = $.learn()
+      const progress = target.querySelector('.progress')
+      if(progress) {
+        progress.innerText = 'Step ' + (step + 1) + ' of ' + steps.length
+      }
+    }
   }
 })
 
@@ -289,29 +309,6 @@ $.style(`
     margin: 1rem auto;
   }
 
-  & .button-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .5rem;
-  }
-
-  & button {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: dodgerblue;
-    text-shadow: 1px 1px rgba(0,0,0,.85);
-    border: none;
-    border-radius: 1rem;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    width: 100%;
-  }
-
-  & button:focus,
-  & button:hover {
-    background-color: rebeccapurple;
-  }
-
   & [data-back] {
     background-color: rgba(99,99,99,.65);
   }
@@ -319,14 +316,5 @@ $.style(`
   & [data-back]:focus,
   & [data-back]:hover {
     background-color: rgba(99,99,99,.35);
-  }
-
-  & .progress {
-    width: var(--progress, 0%);
-    height: 1rem;
-    margin: 1rem auto;
-    border-radius: 1rem;
-    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), lime;
-    min-width: 1rem;
   }
 `)

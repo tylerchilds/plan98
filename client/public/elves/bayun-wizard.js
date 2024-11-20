@@ -5,7 +5,9 @@ import * as focusTrap from 'focus-trap'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
-const tutorial = '000-000.saga'
+
+setCompanyName('sillyz.computer')
+const tutorial = 'identity.saga'
 
 const $ = module('bayun-wizard', {
   activeDialect: '/en-us/',
@@ -56,8 +58,12 @@ export function setupSaga(nextSaga, target, options={}) {
           root.trap.activate()
           root.innerHTML = `
             <div class="wrapper">
-              <div class="nonce" style="margin: 1rem auto; width: 128px;"></div>
-              ${render(saga)}
+              <div class="head">
+                <div class="nonce" style="margin: 1rem auto; width: 128px;"></div>
+              </div>
+              <div class="body"
+                ${render(saga)}
+              </div>
             </div>
           `
         }
@@ -80,7 +86,6 @@ $.draw((target) => {
 })
 
 $.style(`
-
   & {
     display: grid;
     margin: auto;
@@ -93,16 +98,21 @@ $.style(`
     place-items: center;
   }
 
+  & .head {
+    text-align: center;
+  }
+
+  & .body {
+    width: 960px;
+    max-width: 100%;
+  }
+
   & textarea {
     resize: none;
   }
 
   & .wrapper {
     width: 100%;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
     height: auto;
     margin: 1rem auto;
     max-width: 480px;
@@ -125,6 +135,67 @@ $.style(`
   }
 
   &.active {
+  }
+
+  & action-script button,
+  & button {
+    border-radius: 0;
+  }
+
+  & .progress {
+    margin: 1rem auto;
+  }
+
+  & .progress::after {
+    content: '';
+    display: block;
+    width: var(--progress, 0%);
+    height: 1rem;
+    border-radius: 1rem;
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), mediumpurple;
+    min-width: 1rem;
+  }
+
+  & .button-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .5rem;
+  }
+
+  & button {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
+    background-color: dodgerblue;
+    text-shadow: 1px 1px rgba(0,0,0,.85);
+    border: none;
+    border-radius: 0;
+    color: white;
+    transition: background-color 200ms ease-in-out;
+    padding: 1rem;
+    width: 100%;
+  }
+
+  & button:focus,
+  & button:hover {
+    background-color: rebeccapurple;
+  }
+
+
+
+  & .field {
+    border: 1px solid rgb(0,0,0,.15);
+  }
+
+  & .field input {
+    border: none;
+    border-radius: 0;
+    background: white;
+  }
+
+  & .system-prompt {
+    background: lemonchiffon;
+    color: saddlebrown;
+    margin: 1rem 0;
+    padding: 1rem;
   }
 `)
 
@@ -235,7 +306,7 @@ export function login(event) {
 }
 
 export function connected(event) {
-  setupSaga('welcome.saga', event.target)
+  window.location.href = event.target.closest($.link).getAttribute('src') || '/'
 }
 
 export function setSession({ sessionId, companyName, companyEmployeeId }) {
@@ -250,7 +321,7 @@ export function setSessionId(x) {
   state['ls/bayun'].sessionId = x
 }
 export function getSessionId() {
-  return state['ls/bayun'].sessionId
+  return state['ls/bayun'].sessionId || {}
 }
 
 export function setEmail(x) {
@@ -297,7 +368,7 @@ export function getEmployeeId() {
  * */
 
 export function actuallySecure(event) {
-  setupSaga('hard-start.saga', event.target)
+  setupSaga('identity.saga', event.target)
 }
 
 export function begin(event) {

@@ -4,7 +4,7 @@ import { showModal } from './plan98-modal.js'
 import supabase from '@sillonious/database'
 import { render } from '@sillonious/saga'
 import { bayunCore } from '@sillonious/vault'
-import { getSession, clearSession } from './comedy-notebook.js'
+import { getSession, clearSession } from './bayun-wizard.js'
 
 const encryptionPolicy = BayunCore.EncryptionPolicy.GROUP;
 const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;

@@ -1,15 +1,9 @@
 <bayun-feedback
 
-Enter your callsign and either register to be shown the ropes from scratch or log in to be welcomed back.
+# Cyber Security
+
+To access your records, enter your handle and then continue.
 
 <bayun-player
-
-<action-script
-text: Register
-data-action: register
-data-script: /public/elves/bayun-wizard.js
-
-<action-script
-text: Login
-data-action: login
-data-script: /public/elves/bayun-wizard.js
+i18n-register: Register
+i18n-login: Login

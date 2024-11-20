@@ -47,27 +47,8 @@ $.draw(target => {
     `
   }
 
-  const list = messages.map((message, index) => {
-    const { id, author, timestamp, subject, textBody } = message
-    const formattedTime = new Intl.DateTimeFormat("en-US", {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(new Date(timestamp))
-    const time = `<span style='white-space: nowrap;'>${formattedTime}</span>`
-    return `
-      <a href="/app/email-view?id=${id}" target="${target.getAttribute('target')}" name="message" data-index="${index}">
-        <span name="message-timestamp" data-tooltip="${time}"><sl-icon name="clock"></sl-icon></span>
-        <span name="message-email">${author.email}</span>
-        <div name="message-subject">${subject}</div>
-      </a>
-    `
-  }).join('')
-
   return `
-    <div name="message-list">
-      ${list}
-      <div class="load-more"></div>
-    </div>
+    <textarea></textarea>
   `
 }, {
   afterUpdate: (target) => {

@@ -3,7 +3,7 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { BayunCore } from '@sillonious/vault'
-import { getSession, clearSession } from './comedy-notebook.js'
+import { getSession, clearSession } from './bayun-wizard.js'
 import { setRoom, getRoom } from './chat-room.js'
 
 /*

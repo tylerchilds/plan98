@@ -3,7 +3,7 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { bayunCore } from '@sillonious/vault'
-import { getSession, clearSession } from './plan98-wallet.js'
+import { getSession, clearSession } from './bayun-wizard.js'
 import 'gun'
 
 const Gun = window.Gun
@@ -19,22 +19,28 @@ const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
    #
 */
 
-const $ = module('time-team', { jokes: {} })
-state[`ls/${$.link}`] ||= {room: null}
-
-export function setRoom(r) {
-  state[`ls/${$.link}`].room = r
+async function handleBayunErrors(room, error) {
+  const {
+    sessionId,
+  } = getSession()
+  if(error === 'BayunErrorGroupDoesNotExistsForGroupId') {
+    await bayunCore.createGroup(sessionId, room, BayunCore.GroupType.PUBLIC)
+    bayunCore.joinPublicGroup(sessionId, room).catch((e) => {
+      console.error(e)
+    });
+  }
+  console.log("Error caught");
+  console.log(error);
 }
+
+const $ = module('time-team')
 
 export function joinRoom(r) {
   const {
     sessionId,
   } = getSession()
 
-  bayunCore.joinPublicGroup(sessionId, r).catch(error => {
-    console.log("Error caught");
-    console.log(error);
-  });
+  bayunCore.joinPublicGroup(sessionId, r).catch(handleBayunErrors.bind(null, r));
 }
 
 export function getRoom(node) {
@@ -64,9 +70,6 @@ function connect(target) {
   const src = getSrc(event.target)
   gun.get($.link).get(src).map().on(observe(room))
 
-  /*
-  state[`ls/${$.link}`].groupName = null
-  state[`ls/${$.link}`].groupList = null
   bayunCore.getGroupById(sessionId, room)
     .then(result => {
       console.log("Response received for getGroupById.");
@@ -81,15 +84,10 @@ function connect(target) {
         return all
       }, {})
 
-      state[`ls/${$.link}`].groupName = result.groupName
-      state[`ls/${$.link}`].groupList = groupList
+      $.teach({ groupName: result.groupName })
+      $.teach({ groupList: groupList })
     })
-    .catch(error => {
-      console.log("Error caught");
-      console.log(error);
-    });
-
-  */
+    .catch(handleBayunErrors.bind(null, room));
 }
 
 const processedTimestamps = new Set();
@@ -135,11 +133,13 @@ $.when('input', 'textarea', (event) => {
 
 $.draw(target => {
   if(target.getAttribute('shell')) return
-  const { sessionId, companyEmployeeId, companyName } = getSession()
+  const { sessionId } = getSession()
   connect(target)
-  if(!sessionId) return `
-    <bayun-wizard></bayun-wizard>
-  `
+  if(!sessionId) {
+    return !target.innerHTML ? `
+      <bayun-wizard src="/app/time-team"></bayun-wizard>
+    ` : null
+  }
   const { groupList } = state[`ls/${$.link}`]
   const room = getRoom(target)
   if(!room) {
@@ -201,11 +201,14 @@ $.draw(target => {
   `
 
   return view
-}, { afterUpdate })
+}, { beforeUpdate, afterUpdate })
+
+function beforeUpdate(target) {
+  saveCursor(target)
+}
 
 function afterUpdate(target) {
   replaceCursor(target)
-  saveCursor(target)
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -285,8 +288,6 @@ async function send(event) {
   const message = event.target.closest($.link).querySelector('[name="message"]')
   const {
     sessionId,
-    companyName,
-    companyEmployeeId
   } = getSession()
   const room = getRoom(event.target)
 /*
@@ -621,10 +622,7 @@ $.when('click', '[data-join]', async (event) => {
     sessionId,
   } = getSession()
   const room = getRoom(event.target)
-  await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
-    console.log("Error caught");
-    console.log(error);
-  });
+  await bayunCore.joinPublicGroup(sessionId, room).catch(handleBayunErrors.bind(null, room));
 })
 
 $.when('click', '[data-info]', (event) => {
@@ -633,7 +631,7 @@ $.when('click', '[data-info]', (event) => {
     sessionId,
   } = getSession()
 
-  const { groupList, groupName } = state[`ls/${$.link}`]
+  const { groupList, groupName } = $.learn()
 
   const view = Object.keys(groupList).map(company => {
     const items = groupList[company].members.map(unix => {

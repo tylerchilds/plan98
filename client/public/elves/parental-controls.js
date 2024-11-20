@@ -228,6 +228,7 @@ $.draw((target) => {
   target.afterUpdate = scrollSidebar
   const user = social(companyName, companyEmployeeId)
 
+  debugger
   const authState = sessionId
   const avatarHTML = sessionId ? `
     <div data-avatar>
