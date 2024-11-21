@@ -217,7 +217,11 @@ function drawIrix(tray) {
 
         <input disabled value="Mail" class="app-name">
       </button>
+      <button class="application" data-tray="${tray}" data-href="/app/party-chat">
+        <span><sl-icon name="chat"></sl-icon></span>
 
+        <input disabled value="Chat" class="app-name">
+      </button>
       <button class="application" data-tray="${tray}" data-href="/app/draw-term?src=/app/play-wheel?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
         <span class="nonce-icon nonce"></span>
         <input disabled value="Synthia" class="app-name">

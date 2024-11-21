@@ -276,7 +276,7 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const src = event.target.getAttribute('src') || `/app/secure-mail?src=/app/draw-term?src=/app/sillyz-computer?src=/app/bulletin-board?src=${`/private/${$.link}/${new Date().toISOString()}`}.saga&uuid=${self.crypto.randomUUID()}`
+  const src = event.target.getAttribute('src') || `/app/secure-mail?src=/app/draw-term?src=/app/bulletin-board?src=${`/private/${$.link}/${new Date().toISOString()}`}.saga&uuid=${self.crypto.randomUUID()}`
 
   event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
   self.history.pushState({ type: `${$.link}-navigation`, href: window.location.href }, "");
@@ -585,12 +585,7 @@ function handleSuperKey(event) {
   if(self.self !== self.top) {
     self.parent.postMessage({ whisper: 'metaKey' }, "*");
   } else {
-    const isSilly = !!document.body.querySelector('sillyz-computer')
-    if(!isSilly) {
-      const today = new Date().toJSON().slice(0, 10)
-      const node = document.body.querySelector('sillonious-brand') || document.body
-      node.insertAdjacentHTML("beforeend", `<sillyz-computer src="/app/hyper-script?src=/public/sagas/my/${today}.saga"></sillyz-computer>`)
-    }
+    // this is the top for when you want to utilize the meta key for this os
   }
 }
 

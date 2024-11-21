@@ -18,10 +18,9 @@ const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
 
 
 const $ = module('chat-room', { jokes: {} })
-state[`ls/${$.link}`] ||= {room: null}
 
-export function setRoom(r) {
-  state[`ls/${$.link}`].room = r
+function getRoom(target) {
+  return target.closest($.link).getAttribute('room')
 }
 
 export function joinRoom(r) {
@@ -35,10 +34,6 @@ export function joinRoom(r) {
   });
 }
 
-export function getRoom() {
-  return state[`ls/${$.link}`].room
-}
-
 async function connect(target) {
   const {
     sessionId,
@@ -46,8 +41,8 @@ async function connect(target) {
 
   if(!sessionId) return
 
-  const room = getRoom()
-  if(target.subscribedTo === room) return
+  const room = getRoom(target)
+  if(!room || target.subscribedTo === room) return
   target.subscribedTo = room
 
   $.teach({ jokes: [] })
@@ -101,8 +96,7 @@ async function connect(target) {
   )
   .subscribe()
 
-  state[`ls/${$.link}`].groupName = null
-  state[`ls/${$.link}`].groupList = null
+  $.teach({ groupName: null, groupList: null })
   bayunCore.getGroupById(sessionId, room)
     .then(result => {
       console.log("Response received for getGroupById.");
@@ -117,8 +111,10 @@ async function connect(target) {
         return all
       }, {})
 
-      state[`ls/${$.link}`].groupName = result.groupName
-      state[`ls/${$.link}`].groupList = groupList
+      $.teach({
+        groupName: result.groupName,
+        groupList: groupList
+      })
     })
     .catch(error => {
       console.log("Error caught");
@@ -153,10 +149,6 @@ function deleteJoke(state, payload) {
   return newState
 }
 
-$.when('input', 'textarea', (event) => {
-  const room = getRoom()
-})
-
 $.draw(target => {
   if(target.getAttribute('shell')) return
   const { sessionId, companyEmployeeId, companyName } = getSession()
@@ -166,10 +158,10 @@ $.draw(target => {
   `
   const { jokes } = $.learn()
 
-  const { groupList } = state[`ls/${$.link}`]
-  const room = getRoom()
+  const { groupList } = $.learn()
+  const room = target.getAttribute('room')
   if(!room) {
-    return 'Please Consider...'
+    return 'No room selected...'
   }
 
   const actions = groupList && groupList[companyName]?.members.includes(companyEmployeeId) ? `
@@ -199,9 +191,7 @@ $.draw(target => {
           return `
             <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
               <div class="meta" data-tooltip="${created_at}">
-                <quick-media class="avatar" key="${avatar}">
-                  <img src="${avatar}" />
-                </quick-media>
+                <img src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" />
               </div>
               <div class="body">${escapeHyperText(text)}</div>
             </div>
@@ -210,11 +200,11 @@ $.draw(target => {
       </div>
     </div>
     <form class="new-message-form" data-command="enter">
-      <button class="button send" type="submit" data-command="enter">
+      <button class="send" type="submit" data-command="enter">
         <sl-icon name="arrow-up-circle"></sl-icon>
       </button>
       <div class="text-well">
-        <textarea name="message"></textarea>
+        <textarea name="message" placeholder="Say something"></textarea>
       </div>
     </form>
   `
@@ -301,13 +291,15 @@ $.when('click', '.action-accordion', async (event) => {
 })
 
 async function send(event) {
-  const message = event.target.closest($.link).querySelector('[name="message"]')
+  const root = event.target.closest($.link)
+  const message = root.querySelector('[name="message"]')
   const {
     sessionId,
     companyName,
     companyEmployeeId
   } = getSession()
-  const room = getRoom()
+  const room = root.getAttribute('room')
+  if(!room) return
 
   const text = await bayunCore.lockText(sessionId, message.value, encryptionPolicy, keyGenerationPolicy, room);
   message.value = ''
@@ -334,7 +326,6 @@ $.style(`
     grid-template-rows: 1fr auto;
     position: relative;
     height: 100%;
-    color: white;
     font-size: 1rem;
   }
 
@@ -469,24 +460,28 @@ $.style(`
     width: 100%;
     display: block;
     resize: none;
-    border: 1px solid rgba(255,255,255,.65);
     background: rgba(0,0,0,.85);
+    border: none;
     color: rgba(255,255,255,.65);
-    border-radius: .5rem;
-    padding: 8px;
+    border-radius: 0;
+    padding: 8px 2rem 8px 8px;
   }
 
   & .text-well {
     background: rgba(0,0,0,.25);
   }
 
-  & .button.send {
+  & .send {
     position: absolute;
     bottom: 0;
     right: 0;
     padding: .5rem;
-    color: white;
     z-index: 1;
+    border-radius: 0;
+    background-color: lemonchiffon;
+    color: saddlebrown;
+    transition: background-color 200ms ease-in-out;
+    border: none;
   }
 
   & .message {
@@ -505,14 +500,20 @@ $.style(`
 
   & .message.originator {
     margin: 1rem 1rem 1rem 7rem;
-    background: rgba(13,13,13,.85);
+    background: lemonchiffon;
+    color: saddlebrown;
+  }
+
+  & .message.originator .body {
+    margin-left: 0;
+    padding: 8px;
   }
 
   & .meta {
     position: absolute;
     display: grid;
     grid-template-columns: auto 1fr;
-    left: -4rem;
+    left: 0;
   }
 
   & .avatar {
@@ -552,27 +553,19 @@ $.style(`
   }
   & .actions {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 0;
+    left: 0;
+    right: 0;
     text-align: right;
     z-index: 10;
   }
   & .actions button {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: dodgerblue;
-    color: white;
+    background-color: lemonchiffon;;
+    color: saddlebrown;
     border: none;
     line-height: 1rem;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: .5rem;
     font-size: 1rem;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 800;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
     transition: background 200ms ease-in-out;
   }
 
@@ -580,29 +573,18 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background-color: rebeccapurple;
-  }
-
-  & .button {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: dodgerblue;
-    text-shadow: 1px 1px rgba(0,0,0,.85);
-    border: none;
-    border-radius: 1rem;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-  }
-
-  & .button:focus,
-  & .button:hover {
-    background-color: rebeccapurple;
+    background-color: #54796d;
     color: white;
   }
 
-  & quick-media {
+  & .meta img {
     border-radius: 100%;
     overflow: hidden;
+    max-width: 1.5rem;
+  }
+
+  & .originator .meta img {
+    display: none;
   }
 `)
 
@@ -626,7 +608,7 @@ $.when('click', '[data-join]', async (event) => {
   const {
     sessionId,
   } = getSession()
-  const room = getRoom()
+  const room = getRoom(event.target)
   await bayunCore.joinPublicGroup(sessionId, room).catch(error => {
     console.log("Error caught");
     console.log(error);
@@ -634,12 +616,12 @@ $.when('click', '[data-join]', async (event) => {
 })
 
 $.when('click', '[data-info]', (event) => {
-  const room = getRoom()
+  const room = getRoom(event.target)
   const {
     sessionId,
   } = getSession()
 
-  const { groupList, groupName } = state[`ls/${$.link}`]
+  const { groupList, groupName } = $.learn()
 
   const view = Object.keys(groupList).map(company => {
     const items = groupList[company].members.map(unix => {
@@ -688,7 +670,7 @@ $.when('click', '[data-add]', async (event) => {
   const {
     sessionId,
   } = getSession()
-  const room = getRoom()
+  const room = getRoom(event.target)
   const groupMembers = event.target.closest($.link).querySelector('bayun-addmembers').list || []
 
   const addMembersResponse = await bayunCore.addMembersToGroup(sessionId,room,groupMembers);
@@ -718,7 +700,7 @@ $.when('click', '[data-remove]', (event) => {
   const {
     sessionId
   } = getSession()
-  const room = getRoom()
+  const room = getRoom(event.target)
   const { company, unix } = event.target.dataset
 
   bayunCore.removeMemberFromGroup(
@@ -741,7 +723,7 @@ $.when('click', '[data-leave]', (event) => {
   const {
     sessionId
   } = getSession()
-  const room = getRoom()
+  const room = getRoom(event.target)
   bayunCore.leaveGroup(sessionId, room)
     .then(result => {
       console.log("Response received for leaveGroup.");
@@ -757,7 +739,7 @@ $.when('click', '[data-delete]', (event) => {
   const {
     sessionId
   } = getSession()
-  const room = getRoom()
+  const room = getRoom(event.target)
   bayunCore.deleteGroup(sessionId, room)
     .then(result => {
       console.log("Response received for deleteGroup.");
@@ -773,7 +755,7 @@ $.when('click', '.message', (event) => {
 
   const { text } = $.learn().jokes[id]
   showModal(`
-    <div class="full-child-xml-html" style="padding: 0 1rem; background: rgba(200,200,200,1); position: absolute; inset: 0;">
+    <div class="full-child-xml-html" style="padding: 0 1rem; background: white; position: absolute; inset: 0;">
       <div style="margin: 0 auto; max-width: 6in; background: white; height: 100%;">
         ${render(text)}
       </div>

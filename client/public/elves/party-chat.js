@@ -4,7 +4,6 @@ import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { BayunCore } from '@sillonious/vault'
 import { getSession, clearSession } from './bayun-wizard.js'
-import { setRoom, getRoom } from './chat-room.js'
 
 /*
    ^
@@ -51,12 +50,16 @@ export async function getOtherGroups() {
     });
 }
 
+getMyGroups()
+getOtherGroups()
+
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
   const { group } = $.learn()
   const groupType = BayunCore.GroupType.PUBLIC;
   bayunCore.createGroup(sessionId, group, groupType)
     .then(result => {
+      setRoom(result.groupId)
       getMyGroups()
       getOtherGroups()
       $.teach({ group: '' })
@@ -118,8 +121,6 @@ $.draw(target => {
 
     return
   }
-  getMyGroups()
-  getOtherGroups()
   const { myGroups, otherGroups, group='' } = $.learn()
 
   const view = `
@@ -144,7 +145,7 @@ $.draw(target => {
         <button data-logout>Logout</button>
       </div>
       <div class="captains-log">
-        <chat-room></chat-room>
+        <iframe name="chat-frame" src="/app/chat-room"></iframe>
       </div>
     </div>
   `
@@ -162,6 +163,18 @@ function afterUpdate(target) {
     })
   }
 
+  {
+    const { room } = $.learn()
+    const frame = document.querySelector('[name="chat-frame"]')
+    if(frame && room && target.dataset.room !== room) {
+      target.dataset.room = room
+      frame.src = `/app/chat-room?room=${room}`
+    }
+  }
+}
+
+function setRoom(room) {
+  $.teach({ room })
 }
 
 $.when('input', '[data-bind]', event => {
@@ -187,15 +200,9 @@ $.when('click', '[data-zero]', () => {
 
 $.when('click', '.select-group', (event) => {
   const { id } = event.target.dataset
+  setRoom(id)
 })
 
-$.when('click', '[data-party]', () => {
-  showModal(`
-    <sticky-note>
-      <qr-code text="${window.location.href}"></qr-code>
-    </sticky-note>
-  `)
-})
 $.when('click', '[data-logout]', () => {
   clearSession()
   window.location.href = '/app/bayun-wizard?src=/app/party-chat'
@@ -206,7 +213,7 @@ $.style(`
     display: grid;
     position: relative;
     height: 100%;
-    background: black;
+    background: #54796d;
     color: rgba(255,255,255,.65);
     overflow: hidden;
   }
@@ -218,9 +225,9 @@ $.style(`
   & .communicator button {
     position: relative;
     z-index: 2;
-    background: rgba(0,0,0,.85);
+    background: lemonchiffon;
     border: none;
-    color: dodgerblue;
+    color: saddlebrown;
     cursor: pointer;
     height: 2rem;
     border-radius: 1rem;
@@ -339,8 +346,8 @@ $.style(`
 
   & .all-logs button {
     display: block;
-    background: black;
-    color: rgba(255,255,255,.65);
+    background: lemonchiffon;
+    color: saddlebrown;
     font-weight: 400;
     padding: .5rem;
     border: none;

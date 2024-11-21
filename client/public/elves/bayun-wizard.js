@@ -6,6 +6,7 @@ import * as focusTrap from 'focus-trap'
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
+state['ls/bayun'] ||= {}
 setCompanyName('sillyz.computer')
 const tutorial = 'identity.saga'
 

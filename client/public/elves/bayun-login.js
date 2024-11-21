@@ -280,7 +280,9 @@ $.when('click', '[data-connect]', (event) => {
   const successCallback = data => {
     if (data.sessionId) {
       setSessionId(data.sessionId)
-      connected(event)
+      requestIdleCallback(() => {
+        connected(event)
+      })
     }};
 
   const failureCallback = error => {
