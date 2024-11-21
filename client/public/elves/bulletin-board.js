@@ -23,6 +23,7 @@ const modes = {
 }
 
 const $ = module('bulletin-board', {
+  menuOpen: true,
   mode: modes.cursor,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
@@ -242,6 +243,11 @@ function update(target) {
   }
 
   {
+    const bar = target.querySelector('.action-bar')
+    bar.dataset.open = $.learn().menuOpen
+  }
+
+  {
     const { beltOffsetX, beltOffsetY } = $.learn()
     const toolbelt = target.querySelector('.toolbelt-actions')
 
@@ -266,6 +272,41 @@ function mount(target) {
 
   const stars = getStars(target)
   target.innerHTML = `
+    <div class="action-bar">
+      <button data-menu data-tooltip="Menu">
+        <div class="nonce"></div>
+      </button>
+      <button data-mode="draw" class="" data-tooltip="Sketch">
+        <sl-icon name="pencil"></sl-icon>
+      </button>
+      <button data-mode="music" class="" data-tooltip="Sounds">
+        <sl-icon name="music-note"></sl-icon>
+      </button>
+      <button data-mode="note"  data-tooltip="Colocate Notes">
+        <sl-icon name="file-text"></sl-icon>
+      </button>
+      <button data-mode="chat" data-tooltip="Quick Chat">
+        <sl-icon name="chat"></sl-icon>
+      </button>
+      <button data-mode="camera"  data-tooltip="Conference">
+        <sl-icon name="camera-reels"></sl-icon>
+      </button>
+      <button data-mode="map" data-tooltip="Relevant Places">
+        <sl-icon name="compass"></sl-icon>
+      </button>
+      <button data-mode="gallery" data-tooltip="Photo Gallery">
+        <sl-icon name="images"></sl-icon>
+      </button>
+      <button data-mode="calendar"  data-tooltip="Scheduling">
+        <sl-icon name="calendar3"></sl-icon>
+      </button>
+      <button data-mode="collaborate" data-tooltip="Export">
+        <sl-icon name="box-arrow-up-right"></sl-icon>
+      </button>
+      <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
+        <sl-icon name="bug"></sl-icon>
+      </button>
+    </div>
     <!--
     <div class="actions">
       <div class="menu-item">
@@ -320,36 +361,6 @@ function mount(target) {
         </button>
         <button data-mode="move"  data-tooltip="Pan Canvas">
           <sl-icon name="arrows-move"></sl-icon>
-        </button>
-        <button data-mode="draw" class="" data-tooltip="Sketch">
-          <sl-icon name="pencil"></sl-icon>
-        </button>
-        <button data-mode="music" class="" data-tooltip="Sounds">
-          <sl-icon name="music-note"></sl-icon>
-        </button>
-        <button data-mode="note"  data-tooltip="Colocate Notes">
-          <sl-icon name="file-text"></sl-icon>
-        </button>
-        <button data-mode="chat" data-tooltip="Quick Chat">
-          <sl-icon name="chat"></sl-icon>
-        </button>
-        <button data-mode="camera"  data-tooltip="Conference">
-          <sl-icon name="camera-reels"></sl-icon>
-        </button>
-        <button data-mode="map" data-tooltip="Relevant Places">
-          <sl-icon name="compass"></sl-icon>
-        </button>
-        <button data-mode="gallery" data-tooltip="Photo Gallery">
-          <sl-icon name="images"></sl-icon>
-        </button>
-        <button data-mode="calendar"  data-tooltip="Scheduling">
-          <sl-icon name="calendar3"></sl-icon>
-        </button>
-        <button data-mode="collaborate" data-tooltip="Export">
-          <sl-icon name="box-arrow-up-right"></sl-icon>
-        </button>
-        <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
-          <sl-icon name="bug"></sl-icon>
         </button>
         <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
           <sl-icon name="grip-vertical"></sl-icon>
@@ -421,6 +432,11 @@ function drawOnCanvas (target, stroke) {
     context.stroke()
   }
 }
+
+$.when('click', '[data-menu]', function updateMode (event) {
+  const { menuOpen } = $.learn()
+  $.teach({ menuOpen: !menuOpen })
+})
 
 $.when('click', '[data-mode]', function updateMode (event) {
   const { mode } = event.target.dataset
@@ -660,6 +676,11 @@ $.style(`
     background: black;
   }
 
+  & [data-menu] {
+    position: sticky;
+    top: 0;
+  }
+
   &[data-belt="true"] .viewport,
   &[data-belt="true"] .workspace :not(canvas) {
     pointer-events: none;
@@ -694,6 +715,26 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
+  }
+
+  & .action-bar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    max-height: 100%;
+  }
+
+  & .action-bar[data-open="false"] [data-mode] {
+    display: none;
+  }
+
+  & .action-bar button {
+    pointer-events: all;
   }
 
   & .toolbelt-actions {
@@ -797,6 +838,7 @@ $.style(`
     }
   }
 
+  & .action-bar button,
   & .toolbelt-actions button {
     background: black;
     color: rgba(255,255,255,.85);
@@ -817,6 +859,9 @@ $.style(`
     display: inline-flex;
   }
 
+  & .action-bar button:focus,
+  & .action-bar button.active,
+  & .action-bar button:hover,
   & .toolbelt-actions button:focus,
   & .toolbelt-actions button.active,
   & .toolbelt-actions button:hover {
@@ -824,6 +869,7 @@ $.style(`
     background: dodgerblue;
   }
 
+  & .action-bar button.enabled,
   & .toolbelt-actions button.enabled {
     background: black;
     color: dodgerblue;
@@ -941,7 +987,7 @@ $.style(`
     position: absolute;
     inset: 0;
   }
-
+  
   &[data-mode="${modes.note}"] .viewport,
   &[data-mode="${modes.draw}"] .viewport,
   &[data-mode="${modes.music}"] .viewport,
