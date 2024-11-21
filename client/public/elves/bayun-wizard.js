@@ -88,15 +88,13 @@ $.draw((target) => {
 
 $.style(`
   & {
-    display: grid;
+    display: block;
     margin: auto;
-    background: black;
     color: white;
     padding: .5rem;
-    overflow: visible;
+    overflow: auto;
     position: relative;
     height: 100%;
-    place-items: center;
   }
 
   & .head {
@@ -114,10 +112,9 @@ $.style(`
 
   & .wrapper {
     width: 100%;
-    height: auto;
+    margin: 1rem 0;
     margin: 1rem auto;
     max-width: 480px;
-    max-height: 100%;
     background: rgba(255,255,255,1);
     color: rgba(0,0,0,.85);
     overflow: auto;

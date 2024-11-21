@@ -168,6 +168,9 @@ $.draw(target => {
     <button data-info>
       Group Info
     </button>
+    <button data-video>
+      Video Chat
+    </button>
     <button data-leave>
       Leave
     </button>
@@ -329,18 +332,44 @@ $.style(`
     font-size: 1rem;
   }
 
+  & .unix-item {
+    clear: both;
+  }
+
+  & [data-remove] {
+    border: none;
+    border-radius: 0;
+    background: lemonchiffon;
+    color: saddlebrown;
+  }
+
+  & [data-remove]:hover,
+  & [data-remove]:focus {
+    background-color: #E83FB8;
+    color: lemonchiffon;
+  }
+
   &[shell] {
     display: block;
-    color: rgba(0,0,0,.85);
-    background: rgba(255,255,255, .65);
-    backdrop-filter: blur(10px);
-    border-radius: 1rem;
+    background: #54796d;
     padding: 1rem;
     width: 100%;
-    max-width: 320px;
-    max-height: 480px;
     height: 100%;
     overflow: auto;
+  }
+
+  & .admin-grid {
+    background: lemonchiffon;
+    padding: 1rem;
+    color: saddlebrown;
+    display: grid;
+  }
+
+  @media (min-width: 640px) {
+    & .admin-grid {
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
   }
 
   & sticky-note {
@@ -615,6 +644,12 @@ $.when('click', '[data-join]', async (event) => {
   });
 })
 
+$.when('click', '[data-video]', (event) => {
+  const room = getRoom(event.target)
+  showModal(`
+    <iframe src="/app/live-help?room=${room}"></iframe>
+  `)
+})
 $.when('click', '[data-info]', (event) => {
   const room = getRoom(event.target)
   const {
@@ -626,16 +661,19 @@ $.when('click', '[data-info]', (event) => {
   const view = Object.keys(groupList).map(company => {
     const items = groupList[company].members.map(unix => {
     const removeButton = groupList ? `
-          <button data-remove data-unix="${unix}" data-company="${company}">
-            Remove
+          <button data-remove data-unix="${unix}" data-tooltip="Remove" data-company="${company}">
+            <span name="message-timestamp"><sl-icon name="trash"></sl-icon></span>
+            (remove)
           </button>
       ` : `
         hey
       `
       return `
         <div class="unix-item">
+          <span style="float: right;">
+            ${removeButton}
+          </span>
           ${unix}
-          ${removeButton}
         </div>
       `
     }).join('')
@@ -652,16 +690,22 @@ $.when('click', '[data-info]', (event) => {
       <div class="groupName">
         ${groupName}
       </div>
-      Add names below to invite them to the group!
-      <br>
-      <br>
-      <bayun-addmembers></bayun-addmembers>
-      <button class="button" data-add>Invite to Group</button>
-
-      ${view}
-      <button class="button" data-delete disabled>
-        Delete
-      </button>
+      <div class="admin-grid">
+        <div class="invite">
+          Invite to group:<br>
+          <bayun-addmembers></bayun-addmembers>
+          <button class="button" data-add>Invite to Group</button>
+        </div>
+        <div class="manage">
+          Manage group:<br>
+          ${view}
+        </div>
+        <div class="manage">
+          <button class="button" data-delete disabled>
+            Delete
+          </button>
+        </div>
+      </div>
     </chat-room>
   `)
 });

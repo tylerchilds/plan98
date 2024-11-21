@@ -53,3 +53,16 @@ $.when('input', '[name="companyName"]', (event) => {
     .closest($.link)
     .list = list
 })
+
+$.style(`
+  & .field {
+    border: 1px solid rgb(0,0,0,.15);
+    background: white;
+  }
+
+  & .field input {
+    border: none;
+    border-radius: 0;
+    background: white;
+  }
+`)
