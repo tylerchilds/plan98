@@ -16,7 +16,7 @@ $.draw((target) => {
 $.style(`
   & {
     display: grid;
-    background: #54796d;
+    background: var(--chroma-key, #54796d);
     grid-template-areas: "big small";
     grid-template-columns: 1.618fr 1fr;
     height: 100%;

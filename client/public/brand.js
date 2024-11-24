@@ -23,6 +23,27 @@ const emeraldOfNow
   = `/public/cdn/sillyz.computer/index.saga`
 
 export const doingBusinessAs = {
+  'hivelabworks.com': {
+    emote: ';)',
+    logo: '/cdn/hivelabworks.com/title-slide.svg',
+    image: '/cdn/tychi.me/photos/sillyz.JPG',
+    imageDescription: 'A wired collection of silly musical equipment',
+    latitude: '37.769100',
+    longitude: '-122.454583',
+    zoom: 10,
+    tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
+    mascot: 'Silly Sillonious',
+    saga: '/public/sagas/hivelabworks.com/memex.saga',
+    contact: `
+      CTO: (650) 285-8600<br/>
+    `,
+    brandHue: 0,
+    brandRange: 360,
+    color: 'gold',
+    links: [
+      { text: 'Contact', href: '#'}
+    ]
+  },
   'samesame.page': {
     emote: ';)',
     logo: '/cdn/thelanding.page/logo.svg',

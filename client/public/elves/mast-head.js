@@ -21,6 +21,5 @@ $.draw((target) => {
 $.style(`
   & {
     display: block;
-    margin: 2rem 0 0;
   }
 `)

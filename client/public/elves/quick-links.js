@@ -15,11 +15,11 @@ $.draw((target) => {
     links
   } = currentBusiness()
 
-  return links ? links.map(({ title, tag }) => {
+  return links ? links.map(({ href, text }) => {
     return `
-      <button data-tag="${tag}">
-        ${title}
-      </button>
+      <a href="${href}">
+        ${text}
+      </a>
     `
   }).join('') : ''
 })
@@ -31,33 +31,16 @@ $.when('click', '[data-tag]', (event) => {
 
 $.style(`
   & {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    display: block;
     padding: .5rem;
-    text-align: center;
+    text-align: right;
     z-index: 2;
-    pointer-events: none;
   }
 
-  & button {
+  & a {
     display: inline-block;
-    padding: 13px;
-    font-size: 1.5rem;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: goldenrod;
-    border: none;
-    text-decoration: none;
-    color: white;
-    pointer-events: all;
-    border-radius: 1rem;
-  }
-
-  & button:hover,
-  & button:focus {
-    background-color: darkgoldenrod;
-    color: white;
-    box-shadow: 0px 0px 8px 8px rgba(0,0,0,.1);
+    padding: 1rem;
+    font-size: 2rem;
+    line-height: 1;
   }
 `)

@@ -222,6 +222,24 @@ function drawIrix(tray) {
 
         <input disabled value="Chat" class="app-name">
       </button>
+      <button class="application" data-tray="${tray}" data-href="/app/hello-bluesky">
+        <span><sl-icon name="at"></sl-icon></span>
+
+        <input disabled value="Blue Sky" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/owncast-broadcast">
+        <span><sl-icon name="camera-reels"></sl-icon></span>
+
+        <input disabled value="Owncast" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/solid-todolist">
+        <span><sl-icon name="check"></sl-icon></span>
+        <input disabled value="Tim's List" class="app-name">
+      </button>
+      <button class="application" data-tray="${tray}" data-href="/app/e2ee-todolist">
+        <span><sl-icon name="check2-all"></sl-icon></span>
+        <input disabled value="Ty's List" class="app-name">
+      </button>
       <button class="application" data-tray="${tray}" data-href="/app/draw-term?src=/app/play-wheel?src=/app/hyper-script?src=/public/sagas/sillyz.computer/ethnography.saga">
         <span class="nonce-icon nonce"></span>
         <input disabled value="Synthia" class="app-name">
