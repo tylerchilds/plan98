@@ -9,6 +9,7 @@ const strokeRevisory = []
 
 const modes = {
   draw: 'draw',
+  files: 'files',
   music: 'music',
   cursor: 'cursor',
   chat: 'chat',
@@ -148,6 +149,16 @@ function afterUpdate(target) {
     }
   }
 
+  {
+    const { mode } = $.learn()
+    const src = target.getAttribute('src')
+    const files = target.querySelector('.files')
+    if(!files.innerHTML && mode === modes.files) {
+      files.innerHTML = `
+        <iframe src="/app/file-system"></iframe>
+      `
+    }
+  }
 
   {
     const { mode } = $.learn()
@@ -276,6 +287,9 @@ function mount(target) {
       <button data-menu data-tooltip="Menu">
         <div class="nonce"></div>
       </button>
+      <button data-mode="files" class="" data-tooltip="Files">
+        <sl-icon name="archive"></sl-icon>
+      </button>
       <button data-mode="draw" class="" data-tooltip="Sketch">
         <sl-icon name="pencil"></sl-icon>
       </button>
@@ -379,6 +393,7 @@ function mount(target) {
         <div class="map" data-pane="map"></div>
         <div class="gallery" data-pane="gallery"></div>
         <div class="draw" data-pane="draw"></div>
+        <div class="files" data-pane="files"></div>
         <div class="music" data-pane="music"></div>
         <div class="calendar" data-pane="calendar"></div>
         <div class="gaming" data-pane="gaming"></div>
@@ -990,6 +1005,7 @@ $.style(`
   
   &[data-mode="${modes.note}"] .viewport,
   &[data-mode="${modes.draw}"] .viewport,
+  &[data-mode="${modes.files}"] .viewport,
   &[data-mode="${modes.music}"] .viewport,
   &[data-mode="${modes.calendar}"] .viewport,
   &[data-mode="${modes.collaborate}"] .viewport,
@@ -1004,6 +1020,7 @@ $.style(`
 
   &[data-mode="${modes.note}"] [data-pane="${modes.note}"],
   &[data-mode="${modes.draw}"] [data-pane="${modes.draw}"],
+  &[data-mode="${modes.files}"] [data-pane="${modes.files}"],
   &[data-mode="${modes.music}"] [data-pane="${modes.music}"],
   &[data-mode="${modes.calendar}"] [data-pane="${modes.calendar}"],
   &[data-mode="${modes.collaborate}"] [data-pane="${modes.collaborate}"],
