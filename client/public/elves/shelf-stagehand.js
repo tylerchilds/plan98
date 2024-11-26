@@ -1,8 +1,8 @@
 // elf files are the kernel that convert machine code to keyboard
 import elf from '@silly/tag'
+import shelf_merge from "shelf-merge"
 
-// link is a variable that bridges human computer interaction
-const link = elf('impromptu-stagehand', {
+const schema = {
   schedule: {},
   sessions: [],
   form: {},
@@ -12,6 +12,47 @@ const link = elf('impromptu-stagehand', {
     session: true,
     grid: false,
   }
+}
+
+const href = window.location.href
+
+function read(link) {
+  return link.learn().instances[href] || schema
+}
+
+function write(link, data, merge = (key, data) => {
+  co:st shelf = link.learn().instances[href]
+    debugger
+  const change = shelf_merge(shelf, { [key]: data[key] })
+  link.teach({ href, shelf, change }, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [p.href]: p.shelf
+      },
+      changelogs: {
+        ...s.changelogs,
+        [p.href]: [
+          ...s.changelogs[p.href],
+          p.change
+        ]
+      }
+    }
+  })
+}) {
+  Object
+    .keys(data)
+    .forEach(key => {
+      merge(key, data)
+    })
+}
+
+// link is a variable that bridges human computer interaction
+const link = elf.call({ read, write }, 'impromptu-stagehand', {
+  schema,
+  instances: {},
+  changelogs: {}
 })
 
 // hours are how many times are available
@@ -21,15 +62,36 @@ const hours = ['fast', 'pre-breakfast', 'breakfast', 'brunch', 'lunch', 'tea', '
 const circles = ['Winchester Mystery House', 'Mountain View', 'Palo Alto', 'Redwood City', 'San Mateo', 'San Bruno', '4th & King', 'Embarcadero', 'Pierre 35', 'Pier 39']
 
 link.draw((target) => {
+  if(!target.initialized) {
+    target.initialized = true
+    requestIdleCallback(() => {
+      const shelf = [null, 0]
+      const change = shelf_merge(shelf, schema)
+      link.teach({ href, shelf, change }, (s, p) => {
+        return {
+          ...s,
+          instances: {
+            ...s.instances,
+            [p.href]: p.shelf[0]
+          },
+          changelogs: {
+            ...s.changelogs,
+            [p.href]: p.change
+          }
+        }
+      })
+    })
+  }
+
   const {
     types,
-    proposing,
     schedule,
     sessions,
     form,
     focused,
-    accordions
-  } = link.learn()
+  } = read(link)
+
+  if(!schedule && !sessions) return
 
   let grid = '<table>'
   grid += '<thead>'
@@ -88,25 +150,19 @@ link.draw((target) => {
 
   const allSessions = sessions.map(({ uuid, type, who, when, what, where, why }, id) => {
     return `
-      <tr>
-        <td>
-          <button data-launch class="idea" data-uuid="${uuid}" data-type="${type}" data-tooltip="${tooltip(id)}">
-            ${what}
-          </button>
-        </td>
-        <td>
-          ${when}
-        </td>
-        <td>
-          ${where}
-        </td>
-        <td>
+      <button class="idea" data-uuid="${uuid}" data-type="${type}" data-tooltip="${tooltip(id)}">
+        <strong>${what}</strong>
+        <em>${when}</em>
+        <u>${where}</u>
+        <p>
           ${why}
-        </td>
-        <td>
-          ${who.split(',').map(x => `<span>${x}</span>`).join(', ')}
-        </td>
-      </tr>
+        </p>
+
+        <hr>
+        <ul>
+          ${who.split(',').map(x => `<li>${x}</li>`)}
+        </ul>
+      </button>
     `
   }).join('')
 
@@ -187,17 +243,8 @@ link.draw((target) => {
         All Ideas
       </button>
       <div class="body">
-        <div class="horizon-scroll">
-          <table>
-            <tr>
-              <th>What</th>
-              <th>When</th>
-              <th>Where</th>
-              <th>Why</th>
-              <th>Who</th>
-            </tr>
-            ${allSessions}
-          </table>
+        <div class="irix-launcher">
+          ${allSessions}
         </div>
       </div>
     </div>
@@ -216,7 +263,7 @@ link.draw((target) => {
 }, {
   afterUpdate: function(target) {
     {
-      const { focused } = link.learn()
+      const { focused } = read(link)
       if(focused) {
         const active = target.querySelector(`[id="${focused}"]`)
         active.focus()
@@ -224,42 +271,45 @@ link.draw((target) => {
     }
 
     {
-      const { accordions } = link.learn()
-      Object
-        .keys(accordions)
-        .map(accordion => {
-          target.querySelector(`[data-accordion="${accordion}"]`).dataset.open = accordions[accordion]
-        })
+      const { accordions } = read(link)
+      if(accordions) {
+        debugger
+        Object
+          .keys(accordions)
+          .map(accordion => {
+            target.querySelector(`[data-accordion="${accordion}"]`).dataset.open = accordions[accordion]
+          })
+      }
     }
   }
 })
 
 
-link.when('click', '[data-launch]', (event) => {
+link.when('click', '.idea', (event) => {
   const { uuid } = event.target.dataset
   window.location.href = `/app/bulletin-board?src=${`/private/${link.link}/${uuid}`}.saga&uuid=${uuid}`
 })
 
 link.when('click', '.head', (event) => {
   const { accordion } = event.target.dataset
-  const { accordions } = link.learn()
+  const { accordions } = read(link)
   const open = accordions[accordion]
 
-  link.teach({ [accordion]: !open }, (s, p) => {
-    return {
-      ...s,
-      accordions: {
-        ...s.accordions,
-        ...p
-      }
+  const shelf = link.learn().instances[href]
+  const patch = {
+   accordions: {
+      ...shelf.accordions,
+      [accordion]: !open
     }
-  })
+  }
+
+  write(link, patch)
 })
 
 function tooltip(id) {
   const {
     sessions,
-  } = link.learn()
+  } = read(link)
 
   const session = sessions[id]
   if(!session) return
@@ -276,7 +326,7 @@ link.when('submit', 'form', (event) => {
   event.preventDefault()
   link.teach({ error: false })
 
-  const { form } = link.learn()
+  const { form } = read(link)
   if(form.who && form.when && form.why && form.what) {
     link.teach({...form, uuid: self.crypto.randomUUID() }, (state, payload) => {
       return {
@@ -309,7 +359,7 @@ link.when('click', '[data-unfocus]', () => {
 })
 
 link.when('click', '*:not([data-insert],[data-update],.active)', (event) => {
-  const { focused } = link.learn()
+  const { focused } = read(link)
   if(focused) {
     link.teach({ focused: null })
   }
@@ -333,7 +383,7 @@ link.when('input', 'input', (event) => {
 
 link.when('change', 'select.cell', (event) => {
   const { when, where } = event.target.dataset
-  const { sessions } = link.learn()
+  const { sessions } = read(link)
 
   const sessionIndex = sessions.findIndex((_, index) => `${index}` === event.target.value)
   link.teach({ [`${when}-${where}`]: sessionIndex }, (state, payload) => {
@@ -415,6 +465,15 @@ link.style(`
     overflow: auto;
   }
 
+  & .irix-launcher {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    padding: 8px;
+    gap: 8px;
+    justify-items: center;
+  }
+
+
   & table {
     width: 100%;
     table-layout: fixed;
@@ -424,7 +483,6 @@ link.style(`
   & table td {
     height: 3rem;
     width: 18ch;
-    padding: 8px;
   }
 
   & table button {
