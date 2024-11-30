@@ -158,10 +158,10 @@ function mount(target, src) {
       $.teach({ code })
     })
   } else {
-    fetch('/elves/clown-jukebox.js')
+    fetch('/elves/game-cribbage.js')
       .then(res => res.text())
       .then(file => $.teach({
-        code: file + '\n' + "document.body.innerHTML = '<clown-jukebox></clown-jukebox>'"
+        code: file + '\n' + "document.body.innerHTML = '<game-cribbage></game-cribbage>'"
       }))
   }
 
