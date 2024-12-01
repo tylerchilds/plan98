@@ -29,7 +29,7 @@ const oauthConfig = {
   "smugmug": {
     "key": ENVIRONMENT['SMUGMUG_API_KEY'],
     "secret": ENVIRONMENT['SMUGMUG_API_SECRET'],
-    "callback": "http://localhost:3000/api/smugmug/callback"
+    "callback": "http://localhost:3001/api/smugmug/callback"
   }
 }
 
@@ -129,4 +129,4 @@ app.post("/proxy", (req, res) => {
 
 app.use(express.static('client'))
 
-app.listen(3000);
+app.listen(3001);

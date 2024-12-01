@@ -18,6 +18,8 @@ const processConfiguration = {
   reverseBraidmail: false,
   versionControl: true,
   reverseVersionControl: false,
+  solid: true,
+  reverseSolid: false,
   multiplayer: true,
   reverseMultiplayer: false,
   features: {
@@ -101,7 +103,16 @@ const processConfiguration = {
       "cmd": "deno task reverse-version-control",
       "autostart": true
     },
-
+    solid: {
+      "id": "plan98-start-solid",
+      "cmd": "deno task start-solid",
+      "autostart": true
+    },
+    reverseSolid: {
+      "id": "plan98-reverse-solid",
+      "cmd": "deno task reverse-solid",
+      "autostart": true
+    },
     multiplayer: {
       "id": "plan98-start-multiplayer",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",

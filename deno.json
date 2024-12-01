@@ -19,7 +19,7 @@
     "reverse-server": "ssh -N -R 7777:localhost:7777 drive.$USER.me",
 
     "start-identity": "deno run -A identity.js",
-    "reverse-identity": "ssh -N -R 3000:localhost:3000 wallet.$USER.me",
+    "reverse-identity": "ssh -N -R 3001:localhost:3001 wallet.$USER.me",
 
     "start-modules": "cd ../SourceCode/esm.sh && go run main.go --config=config.json --dev",
     "reverse-modules": "ssh -N -R 8080:localhost:8090 esm.$USER.me",
@@ -34,6 +34,10 @@
     "provision-verison-control": "cd server/braid-text && ./provision.sh",
     "start-version-control": "cd server/braid-text/braid-text-master && node server-demo.js",
     "reverse-version-control": "ssh -N -R 8888:localhost:8888 braidmail.$USER.me",
+
+    "provision-solid": "cd server/solid && ./provision.sh",
+    "start-solid": "cd server/solid/CommunitySolidServer-main && npm start",
+    "reverse-version-control": "ssh -N -R 3000:localhost:3000 solid.$USER.me",
 
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
     "reverse-multiplayer": "ssh -N -R 5675:localhost:5675 multiplayer.$USER.me",
