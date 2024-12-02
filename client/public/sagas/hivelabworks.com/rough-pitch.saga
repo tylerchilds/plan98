@@ -1,5 +1,4 @@
-
-Hive Labworks
+# Hive Labworks
 
 Cross Platform
 Cross Work
@@ -35,7 +34,7 @@ Now, let's talk about all the other exciting use cases we're experimenting with 
 
 # Custom Scalable Solutions (css.ceo)
 
-Technical Integrations
+# Micro-Services
 
 runtime: https://docs.deno.com/runtime/
 native apps: https://tauri.app/
@@ -51,5 +50,50 @@ video conferencing: https://meet.jit.si/
 live streaming: https://owncast.online/
 at proto: https://atproto.com/guides/overview (wip)
 activity pub: https://en.wikipedia.org/wiki/ActivityPub (wip)
-
 and more.
+
+# Web Compatibility (Tier 1)
+Firefox
+Chrome
+Safari
+Edge
+Qutebrowser
+
+# App Compatibility (Tier 2)
+Windows
+Mac
+iOS
+Android
+Linux (AppImage or Debian)
+
+# System Compatibility (Tier 3)
+
+FreeBSD: https://www.freebsd.org/
+Alpine: https://www.alpinelinux.org/
+Debian: https://www.debian.org/
+Arch: https://archlinux.org/
+Fedora: https://fedoraproject.org/
+PostMarketOS: https://postmarketos.org/
+
+# Hardware Compatibility (Tier 4)
+
+GPD Win 4: https://www.gpd.hk/gpdwin4
+Frame.work: https://frame.work/
+MacBook Pro M2: https://asahilinux.org/
+System 76 Lemur Pro: https://system76.com/laptops/lemp13/configure
+Rasbperry Pi 400: https://www.raspberrypi.com/products/raspberry-pi-400/
+Raspberry Pi 4: https://www.raspberrypi.com/products/raspberry-pi-4-model-b/
+Raspberry Pi 5: https://www.raspberrypi.com/products/raspberry-pi-5/
+Raspberry Pi Zero 2: https://www.raspberrypi.com/products/raspberry-pi-zero-2-w/ (32-bit only)
+
+# Custom Capable (Tier 5)
+
+Meta Quest 3: https://www.meta.com/quest/quest-3/
+Pixel 5a: https://grapheneos.org/
+Librem 5: https://puri.sm/products/librem-5/
+One Plus 6: https://www.oneplus.com/us/6/specs
+
+# Language Support
+
+English
+(Localization ready, translation tbd)
