@@ -3,7 +3,14 @@ import { render } from '@sillonious/saga'
 import { BskyAgent } from '@atproto/api'
 
 let agent
-const $ = elf('hello-bluesky', {feed: null})
+
+const blueskyCreds = state['ls/blueskyCreds'] || {}
+const $ = elf('hello-bluesky', {
+  feed: null,
+  service: blueskyCreds.service,
+  identifier: blueskyCreds.identifier,
+  password: ''
+})
 
 function fetchTimeline() {
   agent.getTimeline({
@@ -18,36 +25,34 @@ $.when('click', '[data-logout]', (event) => {
   logout()
 })
 
-
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
 
 $.when('submit', 'form', async (event) => {
   event.preventDefault()
-  const { service, identifier, password} = $.learn()
+  const { service, identifier } = $.learn()
+
   state['ls/blueskyCreds'] = {
     service,
     identifier,
-    password
   }
 
   login()
 })
 
-
 async function login() {
-  const blueskyCreds = state['ls/blueskyCreds'] || {}
+  const { service, identifier, password} = $.learn()
 
   if(!blueskyCreds.service) return
 
   agent = new BskyAgent({
-    service: blueskyCreds.service
+    service
   })
 
   await agent.login({
-    identifier: blueskyCreds.identifier,
-    password: blueskyCreds.password
+    identifier,
+    password
   })
 
   $.teach({ authenticated: true })
@@ -59,21 +64,22 @@ async function logout() {
   $.teach({ authenticated: false })
 }
 
-
 function loginForm() {
+  const { service, identifier, password } = $.learn()
+
   return `
     <form method="post">
       <label class="field">
         <span class="label">Service</span>
-        <input data-bind type="text" name="service" placeholder="https://1998.social" required/>
+        <input data-bind value="${service}" type="text" name="service" placeholder="https://1998.social" required/>
       </label>
       <label class="field">
         <span class="label">Identifier</span>
-        <input data-bind type="text" name="identifier" placeholder="tychi.1998.social" required/>
+        <input data-bind value="${identifier}" type="text" name="identifier" placeholder="tychi.1998.social" required/>
       </label>
       <label class="field">
         <span class="label">Password</span>
-        <input data-bind type="password" name="password"  required/>
+        <input data-bind value="${password}" type="password" name="password"  required/>
       </label>
       <button type="submit">
         Connect
@@ -87,9 +93,6 @@ $.draw(target => {
   const blueskyCreds = state['ls/blueskyCreds']
 
   if(!authenticated) {
-    if(blueskyCreds) {
-      login()
-    }
     return loginForm()
   }
 

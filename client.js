@@ -97,6 +97,8 @@ async function page() {
 
           ${safeEnv('FASTMAIL_API_KEY')}
           ${safeEnv('JITSI_MAGIC_COOKIE')}
+
+          ${safeEnv('SOLID_URL')}
         }
       }
     </script>

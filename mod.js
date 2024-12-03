@@ -19,7 +19,7 @@ const processConfiguration = {
   versionControl: true,
   reverseVersionControl: false,
   solid: true,
-  reverseSolid: false,
+  reverseSolid: true,
   activityPub: true,
   reverseActivityPub: false,
   multiplayer: true,

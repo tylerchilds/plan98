@@ -3,9 +3,33 @@ import module from '@silly/tag'
 import * as solidClientAuthentication from '@inrupt/solid-client-authn-browser'
 import SolidFileClient from 'solid-file-client'
 
+import { BayunCore } from '@sillonious/vault'
+export { getSession, clearSession } from './bayun-wizard.js'
+
+/*
+   ^
+  <@>
+  !&{
+   #
+*/
+
+const appId = plan98.env.VAULT_APP_ID; // provided on admin panel
+const appSecret = plan98.env.VAULT_APP_SECRET; // provided on admin panel
+const appSalt = plan98.env.VAULT_APP_SALT; // provided on admin panel
+const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
+const enableFaceRecognition = false;
+const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
+
+const solidURL = plan98.env.SOLID_URL; // provided on admin panel
+
+export const bayunCore = BayunCore.init(appId, appSecret, appSalt,
+  localStorageMode, enableFaceRecognition, baseURL);
+
 const solidFileClient = new SolidFileClient(solidClientAuthentication);
 
 solidFileClient.rdf.setPrefix('schemaorg', 'https://schema.org/');
+
+state['ls/current/solid-user'] ||= { }
 
 const $ = module('solid-user', {
   loading: true,
@@ -89,7 +113,7 @@ async function findUserStorage(url) {
 
 
 function getLoginUrl() {
-  const url = prompt('Introduce your Solid login url');
+  const url = solidURL;
 
   if (!url)
     return null;

@@ -37,7 +37,7 @@
 
     "provision-solid": "cd server/solid && ./provision.sh",
     "start-solid": "cd server/solid/CommunitySolidServer-main && npm start",
-    "reverse-version-control": "ssh -N -R 3000:localhost:3000 solid.$USER.me",
+    "reverse-solid": "ssh -N -R 3000:localhost:3000 pod.$USER.me",
 
     "provision-activity-pub": "cd server/activity-pub && ./provision.sh",
     "start-activity-pub": "cd server/activity-pub/express-activitypub-master && node index.js",
