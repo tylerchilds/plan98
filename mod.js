@@ -20,6 +20,8 @@ const processConfiguration = {
   reverseVersionControl: false,
   solid: true,
   reverseSolid: false,
+  activityPub: true,
+  reverseActivityPub: false,
   multiplayer: true,
   reverseMultiplayer: false,
   features: {
@@ -111,6 +113,16 @@ const processConfiguration = {
     reverseSolid: {
       "id": "plan98-reverse-solid",
       "cmd": "deno task reverse-solid",
+      "autostart": true
+    },
+    activityPub: {
+      "id": "plan98-start-activity-pub",
+      "cmd": "deno task start-activity-pub",
+      "autostart": true
+    },
+    reverseActivityPub: {
+      "id": "plan98-reverse-activity-pub",
+      "cmd": "deno task reverse-activity-pub",
       "autostart": true
     },
     multiplayer: {
