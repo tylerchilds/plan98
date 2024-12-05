@@ -114,9 +114,11 @@ async function markdownSanitizer(md, { endOfHead }) {
   }
   dom.getElementById('main').remove()
   dom.body.insertAdjacentHTML('afterbegin', `
-    <saga-genesis class="markdown">
-      ${marked(md)}
-    </saga-genesis>
+    <scroll-container>
+      <markdown-styles>
+        ${marked(md)}
+      </markdown-styles>
+    </scroll-container>
   `)
   return `<!DOCTYPE html>${dom.documentElement}`
 }
@@ -289,6 +291,17 @@ async function router(request, context) {
   // temporary workaround for go live
   if(pathname === '/weird-variety') {
     const file = await showApp(request, 'weird-variety', business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
+  if(pathname === '/admin') {
+    const file = await showApp(request, 'enterprise-dashboard', business)
 
     if(file) {
       return new Response(file, {
