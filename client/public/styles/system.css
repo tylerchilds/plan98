@@ -152,7 +152,7 @@
   --v-font-crsv: 0.5;
 
   /* cutestrap variables */
-  --border-radius: 4px;
+  --border-radius: 0;
   --color-primary-tint1: hsl(350, 80%, 60%);
   --color-primary: hsl(350, 80%, 45%);
   --color-primary-shade1: hsl(350, 80%, 35%);
