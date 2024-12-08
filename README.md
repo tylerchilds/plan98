@@ -1,4 +1,4 @@
-# The Flying Disk Format
+# The Flying Disk Operating System
 
 ## From Scratch
 
