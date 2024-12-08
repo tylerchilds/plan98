@@ -4,9 +4,9 @@ import { Status } from "https://deno.land/std@0.210.0/http/http_status.ts";
 import * as path from "https://deno.land/std@0.184.0/path/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
 import { walk } from "https://deno.land/std/fs/mod.ts";
-import sortPaths from "npm:sort-paths"
+import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { existsSync } from "https://deno.land/std@0.208.0/fs/exists.ts";
-import { DOMParser } from "npm:linkedom";
+import { DOMParser } from "https://esm.sh/linkedom@0.18.5";
 import { Podcast } from 'npm:podcast';
 import { render } from "@sillonious/saga"
 import { doingBusinessAs } from "@sillonious/brand"
