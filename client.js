@@ -65,6 +65,7 @@ async function page() {
         env: {
           ${safeEnv('PLAN98_USERNAME')}
           ${safeEnv('PLAN98_PASSWORD')}
+          ${safeEnv('PLAN98_API_HOST')}
 
           ${safeEnv('ADYEN_API_KEY')}
           ${safeEnv('ADYEN_MERCHANT_ACCOUNT')}

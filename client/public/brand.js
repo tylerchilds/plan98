@@ -23,6 +23,11 @@ const emeraldOfNow
   = `/public/cdn/sillyz.computer/index.saga`
 
 export const doingBusinessAs = {
+  'livevariety.live': {
+    saga: '/public/sagas/livevariety.live/memex.saga',
+    color: 'firebrick',
+  },
+
   'hivelabworks.com': {
     emote: ';)',
     logo: '/cdn/hivelabworks.com/title-slide.svg',
