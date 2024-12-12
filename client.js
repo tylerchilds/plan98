@@ -113,14 +113,15 @@ async function markdownSanitizer(md, { endOfHead }) {
   if(endOfHead) {
     dom.head.insertAdjacentHTML('beforeend', endOfHead)
   }
-  dom.getElementById('main').remove()
-  dom.body.insertAdjacentHTML('afterbegin', `
+  const main = dom.getElementById('main')
+  main.parentNode.insertAdjacentHTML('afterbegin', `
     <scroll-container>
       <markdown-styles>
         ${marked(md)}
       </markdown-styles>
     </scroll-container>
   `)
+  main.remove()
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 
