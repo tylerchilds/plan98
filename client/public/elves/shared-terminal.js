@@ -1484,7 +1484,11 @@ function launchTray(event) {
       : '/app/giggle-search?query=' + buffer
 
 
-  window.top.location.href = url 
+  if(url === 'about:blank') {
+    window.top.location.href = window.location.href 
+  } else {
+    window.top.location.href = url 
+  }
 }
 
 function preventDefault(e) { e.preventDefault() }

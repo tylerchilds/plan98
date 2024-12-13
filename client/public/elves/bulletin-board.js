@@ -283,44 +283,6 @@ function mount(target) {
 
   const stars = getStars(target)
   target.innerHTML = `
-    <div class="action-bar">
-      <button data-menu data-tooltip="Menu">
-        <div class="nonce"></div>
-      </button>
-      <button data-mode="files" class="" data-tooltip="Files">
-        <sl-icon name="archive"></sl-icon>
-      </button>
-      <button data-mode="draw" class="" data-tooltip="Sketch">
-        <sl-icon name="pencil"></sl-icon>
-      </button>
-      <button data-mode="music" class="" data-tooltip="Sounds">
-        <sl-icon name="music-note"></sl-icon>
-      </button>
-      <button data-mode="note"  data-tooltip="Colocate Notes">
-        <sl-icon name="file-text"></sl-icon>
-      </button>
-      <button data-mode="chat" data-tooltip="Quick Chat">
-        <sl-icon name="chat"></sl-icon>
-      </button>
-      <button data-mode="camera"  data-tooltip="Conference">
-        <sl-icon name="camera-reels"></sl-icon>
-      </button>
-      <button data-mode="map" data-tooltip="Relevant Places">
-        <sl-icon name="compass"></sl-icon>
-      </button>
-      <button data-mode="gallery" data-tooltip="Photo Gallery">
-        <sl-icon name="images"></sl-icon>
-      </button>
-      <button data-mode="calendar"  data-tooltip="Scheduling">
-        <sl-icon name="calendar3"></sl-icon>
-      </button>
-      <button data-mode="collaborate" data-tooltip="Export">
-        <sl-icon name="box-arrow-up-right"></sl-icon>
-      </button>
-      <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
-        <sl-icon name="bug"></sl-icon>
-      </button>
-    </div>
     <!--
     <div class="actions">
       <div class="menu-item">
@@ -367,16 +329,33 @@ function mount(target) {
     -->
     <div class="toolbelt-actions">
       <div class="menu-group">
-        <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
+        <button class="toolbelt-grabber">
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
-        <button data-mode="cursor" data-tooltip="Open Windows">
-          <sl-icon name="cursor"></sl-icon>
+        <button data-menu data-tooltip="Menu" class="toolbelt-actuator">
+          <div class="nonce"></div>
         </button>
-        <button data-mode="move"  data-tooltip="Pan Canvas">
-          <sl-icon name="arrows-move"></sl-icon>
-        </button>
-        <button class="toolbelt-grabber" data-tooltip="Move Toolbelt">
+        <div class="action-bar toolbelt-actuator">
+          <button data-mode="cursor" data-tooltip="Open Windows">
+            <sl-icon name="cursor"></sl-icon>
+          </button>
+          <button data-mode="move"  data-tooltip="Pan Canvas">
+            <sl-icon name="arrows-move"></sl-icon>
+          </button>
+          <button data-mode="map" data-tooltip="Relevant Places">
+            <sl-icon name="compass"></sl-icon>
+          </button>
+          <button data-mode="chat" data-tooltip="Quick Chat">
+            <sl-icon name="chat"></sl-icon>
+          </button>
+          <button data-mode="camera"  data-tooltip="Conference">
+            <sl-icon name="camera-reels"></sl-icon>
+          </button>
+          <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
+            <sl-icon name="bug"></sl-icon>
+          </button>
+        </div>
+        <button class="toolbelt-grabber toolbelt-actuator">
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
       </div>
@@ -623,6 +602,7 @@ function debugToolbelt(event) {
 $.when('pointerdown', '.toolbelt-grabber', grabToolbelt)
 $.when('pointermove', 'canvas', dragToolbelt)
 $.when('pointermove', '.toolbelt-grabber', dragToolbelt)
+$.when('pointermove', '.toolbelt-actuator', dragToolbelt)
 $.when('pointerup', 'canvas', ungrabToolbelt)
 $.when('pointerup', '.toolbelt-grabber', ungrabToolbelt)
 
@@ -691,9 +671,12 @@ $.style(`
     background: black;
   }
 
-  & [data-menu] {
-    position: sticky;
-    top: 0;
+  & .toolbelt-actions button[data-menu] {
+    padding: 0;
+  }
+
+  & .toolbelt-actions button[data-menu] .nonce {
+    width: 3rem;
   }
 
   &[data-belt="true"] .viewport,
@@ -733,24 +716,21 @@ $.style(`
   }
 
   & .action-bar {
-    position: absolute;
-    right: 0;
-    top: 0;
-    pointer-events: none;
-    z-index: 5;
     display: flex;
-    flex-direction: column;
-    overflow: auto;
-    max-height: 100%;
+    gap: 0;
   }
 
   & .action-bar[data-open="false"] [data-mode] {
     display: none;
   }
 
-  & .action-bar button {
-    pointer-events: all;
+  &[data-belt="true"] button[data-menu],
+  &[data-belt="true"] .toolbelt-debugger,
+  &[data-belt="true"] [data-tooltip],
+  &[data-belt="true"] .action-bar {
+    pointer-events: none !important;
   }
+
 
   & .toolbelt-actions {
     z-index: 10;
