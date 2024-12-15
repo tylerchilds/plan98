@@ -26,7 +26,7 @@ $.draw(() => {
       ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.header.saga')}
     </h1>
 
-    <a href="/sagas/sillyz.computer/en-us/about.saga">
+    <a href="/app/silly-wizard?dialect=en-us">
       ${r($, '/public/sagas/sillyz.computer/en-us/saga-about.english.saga')}
     </a>
 

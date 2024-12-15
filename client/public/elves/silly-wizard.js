@@ -69,8 +69,14 @@ export function blankSave(event) {
   }
 }
 
+if(plan98.parameters.get('dialect')) {
+  localStorage.setItem('dialect', plan98.parameters.get('dialect'))
+}
+
+const dialect = localStorage.getItem('dialect') || 'en-us'
+
 const $ = module('silly-wizard', {
-  activeDialect: '/en-us/',
+  activeDialect: dialect,
   cache: {}
 })
 
@@ -82,7 +88,7 @@ export function setupSaga(nextSaga, target, options={}) {
 
   if(!root) return
   const { activeDialect } = $.learn()
-  const key = currentWorkingDirectory + 'sillyz.computer' + activeDialect + nextSaga
+  const key = currentWorkingDirectory + 'sillyz.computer' + '/' + activeDialect + '/' + nextSaga
   root.dataset.lastHtml = target.innerHTML
   root.innerHTML = `<a href="${key}">Loading...</a>`
   fetch(raw+key)
