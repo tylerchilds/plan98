@@ -1,9 +1,5 @@
 #!/bin/sh
 
-git clone https://git.sr.ht/~tychi/backpack
-cd backpack
-./unpack.sh
-
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -26,4 +22,6 @@ cargo build --verbose --release
 
 # ensure a mount point for the thumb drive
 mkdir -p /home/$USER/thumb-drive
+# ensure applications folder
+mkdir -p /home/$USER/Applications
 mkdir -p /home/$USER/.pocketbase/bin
