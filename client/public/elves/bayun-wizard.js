@@ -9,7 +9,7 @@ const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
 state['ls/bayun'] ||= {}
-setCompanyName('hivelabworks.com')
+setCompanyName('sillyz.computer')
 const tutorial = 'identity.saga'
 
 const $ = elf('bayun-wizard', {

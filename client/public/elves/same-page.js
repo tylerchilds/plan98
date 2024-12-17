@@ -5,7 +5,7 @@ const link = elf('same-page', {
 })
 
 function locate(uuid) {
- return `${window.location.origin}/app/bulletin-board?src=${`/private/${link.link}/${uuid}`}.saga`
+ return `${window.location.origin}/app/virtual-machine?src=${`/private/${link.link}/${uuid}`}.saga`
 
 }
 
@@ -47,8 +47,8 @@ link.when('click', '.card', (event) => {
 
 link.when('submit', 'form', (event) => {
   event.preventDefault()
-  const { uuid } = link.learn()
-  const blueprint = locate(uuid)
+  const { value } = event.target.src
+  const blueprint = locate(value)
   window.location.href = blueprint
 })
 

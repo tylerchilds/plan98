@@ -11,7 +11,7 @@ const $ = elf('sillonious-brand', {
 
 const standard = window.plan98 || { host: window.location.host }
 export function currentBusiness(host = standard) {
-  return doingBusinessAs[host] || doingBusinessAs['hivelabworks.com']
+  return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
 }
 
 $.draw((target) => {
@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <iframe src="/sagas/hivelabworks.com/en-us/memex.saga"></iframe>
+    <iframe src="/app/silly-wizard?dialect=en-us"></iframe>
   `
 })
 
