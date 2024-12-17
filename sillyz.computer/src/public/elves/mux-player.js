@@ -1,1 +1,0 @@
-import '@mux/mux-player'

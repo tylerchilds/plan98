@@ -1,8 +1,0 @@
-# Potluck
-
-Welcome! Sign in to start swapping for good!
-
-<action-script
-text: Sign In
-data-action: welcome
-data-script: /public/elves/potluck-wizard.js
