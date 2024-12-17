@@ -1,4 +1,4 @@
-import tag from '@silly/tag'
+import elf from '@silly/elf'
 import lunr from 'lunr'
 
 const Types = {
@@ -83,7 +83,7 @@ function nest(idx, { tree = {}, pathParts = [], subtree = {} }) {
   }).join('')
 }
 
-const $ = tag('giggle-search', {query: ''})
+const $ = elf('giggle-search', {query: ''})
 
 $.draw((target) => {
   const { query, thinking, error, results, ready } = $.learn()

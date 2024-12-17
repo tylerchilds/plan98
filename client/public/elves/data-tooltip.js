@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('data-tooltip')
+const $ = elf('data-tooltip')
 
 $.when('mouseenter', '[data-tooltip]', attack)
 $.when('mouseleave', '[data-tooltip]', release)

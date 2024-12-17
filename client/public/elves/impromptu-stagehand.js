@@ -1,5 +1,5 @@
 // elf files are the kernel that convert machine code to keyboard
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 
 // link is a variable that bridges human computer interaction
 const link = elf('impromptu-stagehand', {

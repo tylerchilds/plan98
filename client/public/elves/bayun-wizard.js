@@ -1,16 +1,18 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
+import { bayunCore } from '@sillonious/vault'
 import { render } from '@sillonious/saga'
 import { doingBusinessAs } from '@sillonious/brand'
 import * as focusTrap from 'focus-trap'
+import { state } from 'statebus'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
 state['ls/bayun'] ||= {}
-setCompanyName('sillyz.computer')
+setCompanyName('hivelabworks.com')
 const tutorial = 'identity.saga'
 
-const $ = module('bayun-wizard', {
+const $ = elf('bayun-wizard', {
   activeDialect: '/en-us/',
   cache: {}
 })
@@ -60,9 +62,9 @@ export function setupSaga(nextSaga, target, options={}) {
           root.innerHTML = `
             <div class="wrapper">
               <div class="head">
-                <div class="nonce" style="margin: 1rem auto; width: 128px;"></div>
+                <div class="nonce" style="margin: 1rem auto;"></div>
               </div>
-              <div class="body"
+              <div class="body">
                 ${render(saga)}
               </div>
             </div>
@@ -142,16 +144,33 @@ $.style(`
 
   & .progress {
     margin: 1rem auto;
+    color: rgba(0,0,0,.5);
+    text-align: right;
+    position: relative;
+    padding-bottom: 1rem;
   }
 
+  & .progress::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 1rem;
+    background: rgba(0,0,0,.15);
+    min-width: 1rem;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+  }
   & .progress::after {
     content: '';
     display: block;
     width: var(--progress, 0%);
     height: 1rem;
-    border-radius: 1rem;
-    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), mediumpurple;
+    background: gold;
     min-width: 1rem;
+    position: absolute;
+    bottom: 0;
+    left: 0;
   }
 
   & .button-row {
@@ -190,10 +209,14 @@ $.style(`
   }
 
   & .system-prompt {
-    background: lemonchiffon;
-    color: saddlebrown;
-    margin: 1rem 0;
+    border: 1px solid gold;
+    color: rgba(0,0,0,.85);
+    margin: 0 0 1rem;
     padding: 1rem;
+  }
+
+  & .action-area {
+    padding: 1rem 0;
   }
 `)
 
@@ -250,6 +273,13 @@ export function clearSession() {
   state['ls/bayun'] = {}
 }
 
+export function logout() {
+  const sessionId = getSessionId()
+  bayunCore.logout(sessionId)
+  state['ls/bayun'] = {}
+}
+
+
 export function getFeedback() {
   return state['ls/bayun'].feedback || []
 }
@@ -304,7 +334,7 @@ export function login(event) {
 }
 
 export function connected(event) {
-  window.location.href = event.target.closest($.link).getAttribute('src') || '/'
+  console.log('logged in good')
 }
 
 export function setSession({ sessionId, companyName, companyEmployeeId }) {

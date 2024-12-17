@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('hypertext-action')
+const $ = elf('hypertext-action')
 
 $.style(`
   & {

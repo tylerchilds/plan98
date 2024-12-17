@@ -1,4 +1,4 @@
-import tag from '@silly/tag'
+import elf from '@silly/elf'
 import * as braid from 'braid-http'
 import { marked } from 'marked'
 import { render } from '@sillonious/saga'
@@ -14,7 +14,7 @@ const mimes = {
   'text/braid': null // default case, handle in draw
 }
 
-const $ = tag('simpleton-client')
+const $ = elf('simpleton-client')
 
 $.draw((target) => {
   const tag = target.getAttribute('tag') || 'textarea'

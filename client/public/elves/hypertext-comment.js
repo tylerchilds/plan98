@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('hypertext-comment')
+const $ = elf('hypertext-comment')
 
 $.style(`
   & {

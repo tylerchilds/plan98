@@ -1,7 +1,7 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { setEmployeeId } from './bayun-wizard.js'
 
-const $ = module('bayun-player')
+const $ = elf('bayun-player')
 
 function t(target, label, fallback) {
   return target.getAttribute('i18n-'+label) || fallback

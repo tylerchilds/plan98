@@ -1,17 +1,17 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import Color from "colorjs.io";
 import { doingBusinessAs as dba } from '@sillonious/brand'
 
 export const doingBusinessAs = dba
 
-const $ = module('sillonious-brand', {
+const $ = elf('sillonious-brand', {
   host: window.location.host,
   council: '6174'
 })
 
 const standard = window.plan98 || { host: window.location.host }
 export function currentBusiness(host = standard) {
-  return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
+  return doingBusinessAs[host] || doingBusinessAs['hivelabworks.com']
 }
 
 $.draw((target) => {
@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <sillyz-computer></sillyz-computer>
+    <iframe src="/sagas/hivelabworks.com/en-us/memex.saga"></iframe>
   `
 })
 

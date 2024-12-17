@@ -1,10 +1,10 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
 const token = plan98.env.JITSI_MAGIC_COOKIE
 
 const script = document.createElement('script');
 script.onload = function () {
-	const $ = module('live-help')
+	const $ = elf('live-help')
 
 	$.draw(target => {
 		if(target.api) return

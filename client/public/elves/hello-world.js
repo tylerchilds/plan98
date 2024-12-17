@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 
 elf('hello-world')
 .draw((_target) => `Hello World`)

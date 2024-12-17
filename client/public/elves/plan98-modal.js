@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
 export const types = {
   news: 'news'
@@ -16,7 +16,7 @@ const strings = {
   'plan98-modal.configs.news.label': 'Information Station!'
 }
 
-const $ = module('plan98-modal', {
+const $ = elf('plan98-modal', {
   label: null,
   children: null,
   isOpen: null,

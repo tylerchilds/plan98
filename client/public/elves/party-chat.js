@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
@@ -22,7 +22,7 @@ const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 const bayunCore = BayunCore.init(appId, appSecret, appSalt,
   localStorageMode, enableFaceRecognition, baseURL);
 
-const $ = module('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
+const $ = elf('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
 
 export async function getMyGroups() {
   const { sessionId } = getSession()
@@ -142,7 +142,6 @@ $.draw(target => {
           ${otherGroups.map(drawGroupButton).join('')}
         </div>
         <button data-party>Invite</button>
-        <button data-logout>Logout</button>
       </div>
       <div class="captains-log">
         <iframe name="chat-frame" src="/app/chat-room"></iframe>
@@ -201,11 +200,6 @@ $.when('click', '[data-zero]', () => {
 $.when('click', '.select-group', (event) => {
   const { id } = event.target.dataset
   setRoom(id)
-})
-
-$.when('click', '[data-logout]', () => {
-  clearSession()
-  window.location.href = '/app/bayun-wizard?src=/app/party-chat'
 })
 
 $.style(`

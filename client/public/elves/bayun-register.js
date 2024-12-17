@@ -1,8 +1,8 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { BayunCore, bayunCore } from '@sillonious/vault'
 import { login, getCompanyName, getEmployeeId, getEmail, setError, setErrors } from './bayun-wizard.js'
 
-const $ = module('bayun-register', {
+const $ = elf('bayun-register', {
   step: 0,
   question1: 'What continent are you from?',
   answer1: '',
@@ -20,180 +20,179 @@ const steps = [
   function step1() {
 
     return `
+      <button data-history>Back</button>
       <div class="progress"></div>
-      Ask us to ask you questions every time you want us to make sure that you are who you claim to be.
-      <div class="button-row">
-        <button data-history>Previous</button>
-        <button data-next>Next</button>
+      <div class="action-area">
+        You will be prompted to submit security questions and answers. You may customize the questions. Once ready, press "Next" to begin.
       </div>
+      <button data-next>Next</button>
     `
   },
   function step2() {
     const { question1 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 1</span>
-        <input class="name-pair" name="question1" value="${question1}" />
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+      <div class="action-area">
+        <label class="field">
+          <span class="label">Question 1</span>
+          <input class="name-pair" name="question1" value="${question1}" />
+        </label>
       </div>
+
+      <button data-next>Next</button>
     `
   },
   function step3() {
     const { question1, answer1 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <div class="system-prompt">
-        ${question1}
+      <div class="action-area">
+        <div class="system-prompt">
+          ${question1}
+        </div>
+        <label class="field">
+          <span class="label">Answer 1</span>
+          <input type="password" class="name-pair" name="answer1" value="${answer1}" />
+        </label>
       </div>
-      <label class="field">
-        <span class="label">Answer 1</span>
-        <input type="password" class="name-pair" name="answer1" value="${answer1}" />
-      </label>
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
+      <button data-next>Next</button>
     `
   },
   function step4() {
     const { question2 } = $.learn()
 
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 2</span>
-        <input class="name-pair" name="question2" value="${question2}" />
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+      <div class="action-area">
+        <label class="field">
+          <span class="label">Question 2</span>
+          <input class="name-pair" name="question2" value="${question2}" />
+        </label>
       </div>
+
+      <button data-next>Next</button>
     `
   },
   function step5() {
     const { question2, answer2 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <div class="system-prompt">
-        ${question2}
+      <div class="action-area">
+        <div class="system-prompt">
+          ${question2}
+        </div>
+        <label class="field">
+          <span class="label">Answer 2</span>
+          <input type="password" class="name-pair" name="answer2" value="${answer2}" />
+        </label>
       </div>
-      <label class="field">
-        <span class="label">Answer 2</span>
-        <input type="password" class="name-pair" name="answer2" value="${answer2}" />
-      </label>
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
+      <button data-next>Next</button>
     `
   },
   function step6() {
     const { question3 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 3</span>
-        <input class="name-pair" name="question3" value="${question3}" />
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+      <div class="action-area">
+        <label class="field">
+          <span class="label">Question 3</span>
+          <input class="name-pair" name="question3" value="${question3}" />
+        </label>
       </div>
+
+      <button data-next>Next</button>
     `
   },
   function step7() {
     const { question3, answer3 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <div class="system-prompt">
-        ${question3}
+      <div class="action-area">
+        <div class="system-prompt">
+          ${question3}
+        </div>
+        <label class="field">
+          <span class="label">Answer 3</span>
+          <input type="password" class="name-pair" name="answer3" value="${answer3}" />
+        </label>
       </div>
-      <label class="field">
-        <span class="label">Answer 3</span>
-        <input type="password" class="name-pair" name="answer3" value="${answer3}" />
-      </label>
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
+      <button data-next>Next</button>
     `
   },
   function step8() {
     const { question4 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 4</span>
-        <input class="name-pair" name="question4" value="${question4}" />
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+      <div class="action-area">
+        <label class="field">
+          <span class="label">Question 4</span>
+          <input class="name-pair" name="question4" value="${question4}" />
+        </label>
       </div>
+      <button data-next>Next</button>
     `
   },
   function step9() {
     const { question4, answer4 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <div class="system-prompt">
-        ${question4}
+      <div class="action-area">
+        <div class="system-prompt">
+          ${question4}
+        </div>
+        <label class="field">
+          <span class="label">Answer 4</span>
+          <input type="password" class="name-pair" name="answer4" value="${answer4}" />
+        </label>
       </div>
-      <label class="field">
-        <span class="label">Answer 4</span>
-        <input type="password" class="name-pair" name="answer4" value="${answer4}" />
-      </label>
 
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
-      </div>
+      <button data-next>Next</button>
     `
   },
   function step10() {
     const { question5 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <label class="field">
-        <span class="label">Question 5</span>
-        <input class="name-pair" name="question5" value="${question5}" />
-      </label>
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-next>Next</button>
+        <div class="action-area">
+        <label class="field">
+          <span class="label">Question 5</span>
+          <input class="name-pair" name="question5" value="${question5}" />
+        </label>
       </div>
+
+      <button data-next>Next</button>
     `
   },
   function step11() {
     const { question5, answer5 } = $.learn()
     return `
+      <button data-back>Back</button>
       <div class="progress"></div>
-      <div class="system-prompt">
-        ${question5}
-      </div>
-      <label class="field">
-        <span class="label">Answer 5</span>
-        <input type="password" class="name-pair" name="answer5" value="${answer5}" />
-      </label>
+      <div class="action-area">
+        <div class="system-prompt">
+          ${question5}
+        </div>
+        <label class="field">
+          <span class="label">Answer 5</span>
+          <input type="password" class="name-pair" name="answer5" value="${answer5}" />
+        </label>
 
-      This was the last answer, check your work by going back or finish registering now!
-
-      <div class="button-row">
-        <button data-back>Back</button>
-        <button data-submit>Register</button>
+        This was the last answer, check your work by going back or finish registering now!
       </div>
+
+      <button data-submit>Register</button>
     `
   }
 ]
@@ -213,7 +212,10 @@ $.draw((target) => {
   afterUpdate: (target) => {
     {
       const { step } = $.learn()
-      target.querySelector('.progress').innerText = 'Step ' + (step + 1) + ' of ' + steps.length
+      const progress = target.querySelector('.progress')
+      if(progress) {
+        progress.innerText = 'Step ' + (step + 1) + ' of ' + steps.length
+      }
     }
   }
 })
@@ -442,12 +444,27 @@ $.style(`
     margin: 1rem auto;
   }
 
+  & [data-history],
   & [data-back] {
-    background-color: rgba(99,99,99,.65);
+    background: transparent;
+    display: inline-block;
+    color: dodgerblue;
+    text-shadow: none;
+    width: auto;
+    padding: .25rem;
   }
 
+  & [data-history]:before,
+  & [data-back]:before {
+    padding-right: .5rem;
+    display: inline-block;
+  }
+
+  & [data-history]:focus,
+  & [data-history]:hover,
   & [data-back]:focus,
   & [data-back]:hover {
-    background-color: rgba(99,99,99,.35);
+    background: dodgerblue;
+    color: white;
   }
 `)

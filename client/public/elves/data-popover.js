@@ -1,5 +1,5 @@
-import module from '@silly/tag'
-const $ = module('data-popover')
+import elf from '@silly/elf'
+const $ = elf('data-popover')
 
 $.when('click', '[data-popover]', pop)
 

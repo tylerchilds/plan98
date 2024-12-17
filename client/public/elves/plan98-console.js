@@ -1,7 +1,7 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import eruda from 'eruda'
 
-const $ = module('plan98-console')
+const $ = elf('plan98-console')
 
 $.draw(container => {
   if(container.initialized) return

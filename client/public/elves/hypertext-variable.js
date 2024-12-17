@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
 const defaults = {
   monospace: '0',
@@ -7,14 +7,14 @@ const defaults = {
   slant: '0',
   cursive: '.5',
 }
-const $ = module('hypertext-variable')
+const $ = elf('hypertext-variable')
 
 const variables = ['size', 'height', 'monospace', 'casual', 'weight', 'slant', 'cursive']
 
 $.draw((target) => {
   if(!target.initialized) {
-    mount(target, variables)
     target.initialized = true
+    mount(target, variables)
   }
 
   const {

@@ -1,4 +1,4 @@
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 import { render } from "@sillonious/saga"
 import { actionScript } from './action-script.js'
 import { hideModal } from '@plan98/modal'
@@ -6,6 +6,7 @@ import lunr from 'lunr'
 import natsort from 'natsort'
 import 'gun'
 import 'gun/sea'
+import { state } from 'statebus'
 
 const Gun = window.Gun
 

@@ -1,9 +1,9 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { doingBusinessAs } from '@sillonious/brand'
 
 const { host } = self.plan98 || { host: window.location.host }
 
-const $ = module('mega-footer')
+const $ = elf('mega-footer')
 
 export function currentBusiness() {
   return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']

@@ -24,7 +24,6 @@ $.draw((target) => {
     <div class="foreground hidden">
       <div class="script"></div>
       <button data-close class="nonce"></button>
-      <a href="/" class="nonce" aria-label="home" data-tooltip="home"></a>
     </div>
   `
 }, {

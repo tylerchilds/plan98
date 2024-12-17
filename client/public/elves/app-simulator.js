@@ -1,6 +1,6 @@
-import tag from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = tag('app-simulator')
+const $ = elf('app-simulator')
 
 $.draw((target) => {
   if(target.querySelector('.device')) return

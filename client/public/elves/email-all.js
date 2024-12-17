@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { showModal } from '@plan98/modal'
 
 const key = plan98.env.FASTMAIL_API_KEY
@@ -14,7 +14,7 @@ function headers(apikey){
   }
 }
 
-const $ = module('email-all', { loading: true, mailboxes: [] })
+const $ = elf('email-all', { loading: true, mailboxes: [] })
 
 async function query(target, key) {
   if(target.lastKey === key) return

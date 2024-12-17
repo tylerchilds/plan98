@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import { render } from '@sillonious/saga'
 
@@ -81,7 +81,7 @@ function countShots(instructions) {
 }
 
 // create a hyper text module
-const $ = module('hyper-script', {
+const $ = elf('hyper-script', {
   // raw text of the file
   file: pitch,
   activePanel: window.location.hash?.split('#')[1] || panels.read,

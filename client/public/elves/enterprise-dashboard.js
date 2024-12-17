@@ -1,6 +1,5 @@
-import module from '@silly/tag'
-import { bayunCore } from '@sillonious/vault'
-import { getCompanies } from './bayun-wizard.js'
+import elf from '@silly/elf'
+import { getSession, logout } from './bayun-wizard.js'
 
 const currentWorkingDirectory = '/sagas/'
 
@@ -16,6 +15,11 @@ const lolol = [
         label: 'Pitch',
         laugh: 'draft-pitch.md'
       },
+      {
+        label: 'Deck',
+        laugh: 'draft-deck.saga'
+      },
+
       {
         label: 'About',
         laugh: 'about.md'
@@ -37,15 +41,55 @@ const lolol = [
         label: 'File System',
         laugh: 'file-system.saga'
       },
+      {
+        label: 'Bulletin Board',
+        laugh: 'bulletin-board.saga'
+      },
+      {
+        label: 'Video Conference',
+        laugh: 'video-conference.saga'
+      },
+      {
+        label: 'Payment Dashboard',
+        laugh: 'payment-dashboard.saga'
+      },
+      {
+        label: 'Quick Chat',
+        laugh: 'quick-chat.saga'
+      },
+      {
+        label: 'Private Notes',
+        laugh: 'private-notes.saga'
+      },
+      {
+        label: 'Calendar',
+        laugh: 'calendar.saga'
+      },
     ]
   },
 
 ]
-const { laugh } = lolol[0].lol[0]
-let lastLaugh = laugh
-let lastSidebar = false
+let laugh = self.location.hash?.split('#')[1]
 
-const $ = module('enterprise-dashboard', {
+laugh ||= lolol[0].lol[0].laugh
+
+let x, y = 0
+lolol.forEach((list, newX) => {
+  const newY = list.lol.findIndex(item => {
+    return item.laugh === laugh
+  })
+
+  if(newY >= 0) {
+    x = newX
+    y = newY
+  }
+})
+
+const lololID = x
+const lolID = y
+console.log(lololID, lolID)
+
+const $ = elf('enterprise-dashboard', {
   content: '...',
   laugh,
   activeDialect: '/en-us/',
@@ -53,22 +97,46 @@ const $ = module('enterprise-dashboard', {
   chatRooms: [],
   sidebar: true,
   avatar: false,
-  lololID: 0,
-  lolID: 0,
+  lololID,
+  lolID,
 })
 
-outLoud(laugh, 0, 0)
+outLoud(laugh, lololID, lolID)
 
 $.draw((target) => {
   const { saga, sidebar } = $.learn()
+  const { sessionId } = getSession()
+
+  if(!sessionId && target.dataset.mode !== 'auth') {
+    target.dataset.mode = 'auth'
+    return `
+      <bayun-wizard></bayun-wizard>
+    `
+  }
+
+  if(sessionId && target.dataset.mode !== 'admin') {
+    target.dataset.mode = 'admin'
+  }
+
+  if(target.dataset.mode === 'auth') {
+    return
+  }
 
   return `
     <div class="header">
       <button data-sidebar>
-        <sl-icon name="layout-sidebar-inset"></sl-icon>
+        <span style="display: grid;">
+          <sl-icon name="layout-sidebar-inset"></sl-icon>
+        </span>
+        <span class="logomark">Hive Labworks</span>
       </button>
-      <span class="logomark">Hive Labworks</span>
+      <div class="admin-actions">
+        <button data-logout>
+          Logout
+        </button>
+      </div>
     </div>
+
     <div class="control ${sidebar ? 'sidebar': ''}" aria-live="assertive">
       <div class="control-tab-list">
         ${lolol.map((x, index) => {
@@ -119,6 +187,8 @@ function lol(laughs, lolol) {
   const { lololID, lolID } = $.learn()
   return laughs.map((y, lol) => {
     const isActive = lololID === lolol && lolID === lol
+    console.log({ lololID, lolol, lolID, lol })
+
     return `
       <button class="control-tab ${isActive ? '-active' : '' }" data-lolol="${lolol}" data-lol="${lol}" data-laugh="${y.laugh}">
         ${y.label}
@@ -139,75 +209,24 @@ $.when('click', '[data-sidebar]', async (event) => {
   $.teach({ sidebar: !sidebar })
 })
 
-export function getSession() {
-  return state['ls/bayun'] || {}
-}
-
-function clearSession() {
-  state['ls/bayun'] = {}
-}
-
-function setSession({ sessionId, companyName, companyEmployeeId }) {
-  state['ls/bayun'] = {
-    sessionId,
-    companyName,
-    companyEmployeeId
-  }
-}
-
-$.when('submit', '.quick-auth', async (event) => {
-  event.preventDefault()
-
-  const companyEmployeeId = event.target.companyEmployeeId.value
-  const companyName = event.target.companyName.value
-  const password = event.target.password.value
-
-  const successCallback = async data => {
-    const {
-      sessionId,
-    } = data
-
-    setSession({ sessionId, companyName, companyEmployeeId })
-    refreshRooms()
-  };
-
-  const failureCallback = error => {
-    $.teach({ error: `${error}` })
-  };
-
-  bayunCore.loginWithPassword(
-    '', //sessionId,
-    companyName,
-    companyEmployeeId,
-    password,
-    true, //autoCreateEmployee,
-    null, // TODO: @bayun, what is?
-    noop.bind('securityQuestionsCallback'),
-    noop.bind('passphraseCallback'),
-    successCallback,
-    failureCallback
-  );
+$.when('click', '[data-logout]', async (event) => {
+  logout()
 })
 
-function noop(){}
-
-$.when('click', '[data-disconnect]', async () => {
-  clearSession()
-})
 
 function outLoud(nextLaugh, lolID, lololID) {
   const { laugh, activeDialect, activeWorld } = $.learn()
   const key = currentWorkingDirectory + activeWorld + activeDialect + nextLaugh
   $.teach({ laugh: nextLaugh, saga: key, lolID, lololID })
+  self.location.hash = nextLaugh
 }
 
 $.style(`
   & {
-    display: grid;
+    display: block;
     height: 100%;
     overflow: hidden;
     position: relative;
-    grid-template-rows: auto 1fr;
   }
 
   & .control-toggle {
@@ -218,13 +237,12 @@ $.style(`
   }
 
   & .control {
-    display: grid;
-    grid-template-columns: 1fr;
-    height: 100%;
+    height: calc(100% - 2rem);
   }
 
   & .control.sidebar {
-    grid-template-columns: 320px auto;
+    display: grid;
+    grid-template-rows: 33% 1fr;
   }
 
   & .control-tab-list {
@@ -235,11 +253,30 @@ $.style(`
     display: flex;
     flex-direction: column;
     overflow: auto;
-    background: rgba(0,0,0,.85);
-    position: relative;
+    background: rgba(233,233,233,.85);
     z-index: 3;
     overflow-x: hidden;
   }
+
+  @media screen and (min-width: 768px) {
+    & .control {
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+    & .control.sidebar {
+      position: relative;
+      grid-template-columns: 320px auto;
+      grid-template-rows: 1fr;
+    }
+
+    & .sidebar .control-tab-list {
+      position: relative;
+      top: 0;
+      max-height: auto;
+    }
+  }
+
+
   & .multiplayer.control-tab-list {
     overflow: hidden;
   }
@@ -248,12 +285,11 @@ $.style(`
     border: 0;
     line-height: 1;
     width: 4rem;
-    color: white;
     display: block;
     width: 100%;
     text-align: left;
     padding: .5rem 1rem;
-    color: white;
+    color: dodgerblue;
     background: transparent;
     transition: background 200ms ease-in-out;
     border: 1px solid transparent;
@@ -266,9 +302,9 @@ $.style(`
   & .control-tab.-active,
   & .control-tab:hover,
   & .control-tab:focus {
-    border-top-color: gold;
-    border-bottom-color: gold;
-    color: gold;
+    border-top-color: dodgerblue;
+    border-bottom-color: dodgerblue;
+    color: dodgerblue;
   }
 
   & .control-toggle .control-tab {
@@ -276,13 +312,12 @@ $.style(`
     border: 0;
     line-height: 1;
     width: 4rem;
-    color: white;
     display: block;
     width: 100%;
     text-align: left;
     padding: .5rem;
-    color: white;
     font-size: 1rem;
+    color: rgb(0,0,0,.65);
     border-radius: 0 1rem 1rem 0;
     transition: background 200ms ease-in-out;
     flex: none;
@@ -290,7 +325,7 @@ $.style(`
 
   & .control-toggle .control-tab:hover,
   & .control-toggle .control-tab:focus {
-    color: white;
+    color: rgb(0,0,0,.65);
   }
 
 
@@ -298,6 +333,7 @@ $.style(`
     overflow: auto;
     position: relative;
     z-index: 2;
+    height: 100%;
   }
 
   & .control-avatar {
@@ -322,7 +358,7 @@ $.style(`
 
   & .heading-label {
     margin-top: 1rem;
-    color: rgba(255,255,255,.5);
+    color: rgb(0,0,0,.65);
     text-align: left;
     font-weight: 600;
     padding: 0 1rem;
@@ -349,7 +385,8 @@ $.style(`
     transition: background 200ms ease-in-out;
     display: inline-grid;
     place-items: center;
-    margin: .4rem 0 0 .4rem;
+    grid-template-columns: auto 1fr;
+    gap: .5rem;
   }
 
   & [data-sidebar]:focus,
@@ -373,12 +410,33 @@ $.style(`
 
   & .header {
     background: black;
-    color: white;
+    color: rgb(0,0,0,.65);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: 0 .5rem;
   }
 
   & .logomark {
     padding: .25rem;
     display: inline-block;
+  }
+
+  & [data-logout] {
+    float: right;
+    border: none;
+    color: gold;
+    background: none;
+    border: 1px solid black;
+  }
+
+  & [data-logout]:hover,
+  & [data-logout]:focus {
+    border-color: gold;
+  }
+
+  & .admin-actions {
+    display: grid;
+    place-content: center end;
   }
 `)
 

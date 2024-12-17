@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('secure-mail')
+const $ = elf('secure-mail')
 
 $.draw(render)
 

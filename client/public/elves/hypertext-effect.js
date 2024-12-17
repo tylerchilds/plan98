@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('hypertext-effect')
+const $ = elf('hypertext-effect')
 
 $.draw((target) => {
   return `

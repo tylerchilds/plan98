@@ -1,11 +1,11 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { render } from '@sillonious/saga'
 import * as focusTrap from 'focus-trap'
 
 const raw = '/public'
 const currentWorkingDirectory = '/sagas/'
 
-const $ = module('action-script', {
+const $ = elf('action-script', {
   activeWorld: plan98.host || 'actuality.network',
   activeDialect: '/en-us/',
 })

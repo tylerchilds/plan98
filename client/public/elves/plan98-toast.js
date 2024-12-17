@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('plan98-toast')
+const $ = elf('plan98-toast')
 
 export default $
 

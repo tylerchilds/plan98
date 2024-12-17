@@ -1,7 +1,7 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { hyperSanitizer } from './hyper-script.js'
 
-const $ = module('hypertext-paradox')
+const $ = elf('hypertext-paradox')
 
 $.draw((target) => {
   init(target)

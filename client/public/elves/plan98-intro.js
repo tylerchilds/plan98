@@ -1,4 +1,4 @@
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 import { render } from "@sillonious/saga"
 import { idx, documents } from './giggle-search.js'
 import { showModal, hideModal } from '@plan98/modal'

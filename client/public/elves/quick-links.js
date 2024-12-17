@@ -1,10 +1,10 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { doingBusinessAs } from '@sillonious/brand'
 import { showModal } from './plan98-modal.js'
 
 const { host } = self.plan98 || { host: window.location.host }
 
-const $ = module('quick-links')
+const $ = elf('quick-links')
 
 export function currentBusiness() {
   return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']

@@ -1,6 +1,6 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 
-const $ = module('boot-loader')
+const $ = elf('boot-loader')
 
 $.draw((target) => {
   if(target.innerHTML) return

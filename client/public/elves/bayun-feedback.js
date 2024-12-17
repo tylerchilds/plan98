@@ -1,7 +1,7 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { getFeedback } from './bayun-wizard.js'
 
-const $ = module('bayun-feedback')
+const $ = elf('bayun-feedback')
 
 $.draw(() => {
   return getFeedback().map(({ message, type }) => {
