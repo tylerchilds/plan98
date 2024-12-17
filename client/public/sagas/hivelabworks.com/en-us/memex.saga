@@ -12,7 +12,3 @@ Hive solves data silos by bridging disconnected teams into secure collaboration 
 # Cross Play
 
 Hive is a real-time game engine for syncronizing individual characters across mediums.
-
-<app-simulator
-class: iphone
-app: sillyz-computer
