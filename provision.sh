@@ -1,5 +1,9 @@
 #!/bin/sh
 
+git clone https://git.sr.ht/~tychi/backpack
+cd backpack
+./unpack.sh
+
 # install rust
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 

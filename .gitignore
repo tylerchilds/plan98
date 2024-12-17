@@ -1,4 +1,5 @@
 backups/
+backpack/
 .env
 app/.envrc
 dist
