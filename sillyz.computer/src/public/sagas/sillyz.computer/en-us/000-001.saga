@@ -1,0 +1,13 @@
+As the red egg hatches, the shaders of the realms fade from black.
+
+Yonder is a desert. Hither is a meadow.
+
+<action-script
+text: Yonder to the desert
+data-action: yonderToTheDesert
+data-script: /public/elves/silly-wizard.js
+
+<action-script
+text: Hither to the meadow.
+data-action: hitherToTheMeadow
+data-script: /public/elves/silly-wizard.js

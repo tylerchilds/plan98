@@ -1,0 +1,15 @@
+{
+  "name": "@sillonious/tag",
+  "version": "0.6.0",
+  "description": "web kernel",
+  "access": "public",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tylerchilds/kickstart.git"
+  },
+  "dependencies": {
+    "diffhtml": "^1.0.0-beta.30",
+    "statebus": "^7.0.22"
+  }
+}

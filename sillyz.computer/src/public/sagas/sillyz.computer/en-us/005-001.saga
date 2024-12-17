@@ -1,0 +1,8 @@
+The indigo shade is a crystal fractal of the mind; piece together your place.
+
+Ahead is the throne room.
+
+<action-script
+text: To the throne room
+data-action: throneRoom
+data-script: /public/elves/silly-wizard.js

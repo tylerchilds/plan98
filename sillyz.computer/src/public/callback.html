@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>:)</title>
+    <style>
+      html, body, main {
+        height: 100%;
+      }
+
+      body > *{
+        position: relative;
+        z-index: 2;
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+      }
+    </style>
+    <script type="module" async>
+      const callback = localStorage.getItem("/callback.html") || '/paper.pocket'
+      const query = window.location.search
+      window.location.href = callback + (callback.includes('?') ? '&' + query.substring(1) : query)
+    </script>
+  </head>
+  <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
+  </body>
+</html>

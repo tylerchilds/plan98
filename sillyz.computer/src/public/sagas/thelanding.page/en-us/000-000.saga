@@ -1,0 +1,13 @@
+# Here 4 business?
+
+If you're not here to talk business, you should probably go back to the playground.
+
+<action-script
+text: Make Money
+data-saga: welcome.saga
+
+<action-script
+text: To The Playground
+data-action: toThePlayground
+data-script: /public/cdn/thelanding.page/game-state.js
+class: secondary

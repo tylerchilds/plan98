@@ -1,0 +1,8 @@
+# Deal!
+
+<qr-pay
+amount: 100000
+description: Cold Call Outreach
+
+{ template
+engine: wrapper

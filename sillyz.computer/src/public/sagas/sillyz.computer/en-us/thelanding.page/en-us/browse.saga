@@ -1,0 +1,14 @@
+# Browse
+
+<purchase-catalog
+data-script: /public/cdn/thelanding.page/game-state.js
+
+<sillonious-action
+action: hostPressesStartStop
+label: View Cart
+saga: totals.saga
+
+<action-script
+text: Leave
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

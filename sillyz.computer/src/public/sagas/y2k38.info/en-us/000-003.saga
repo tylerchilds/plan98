@@ -1,0 +1,11 @@
+We are spinning in a quantum suspension earth magnet from, in, and during 1998.
+
+<action-script
+text: Go somewhere else
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_004
+
+<action-script
+text: What is keeping us alive
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_005

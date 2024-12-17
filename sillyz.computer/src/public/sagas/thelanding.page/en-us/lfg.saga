@@ -1,0 +1,16 @@
+# Let's FUnnING go!
+
+Okay, here's the deal, let's just skip past the dialog, say you pay to win the game. Put up $1,000 right now and get a phone call within five minutes where we plan out next steps.
+
+<action-script
+text: Deal
+data-saga: deal.saga
+class: money
+
+<action-script
+text: No Deal
+data-saga: welcome.saga
+class: secondary
+
+{ template
+engine: wrapper

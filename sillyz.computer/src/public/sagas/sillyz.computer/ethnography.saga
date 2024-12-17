@@ -1,0 +1,604 @@
+<a
+class: nonce
+href: /app/file-system?src=/public/sagas/ccsdesperados
+
+Premise: A time traveler
+Hook: Goes on TV out of order
+Setup: Knows a computer such that exists
+Punchline: is a clown nose
+
+<title-page
+title: Banjolele: The Live Action Re-Telling of the Time Machine
+author: Ty, Mike, Wendy, Allan
+
+# act 1:
+a round of discussion happens
+
+# act 2:
+everyone writes a desired outcome on their ballot
+
+# act 3:
+everyone reads their ballot and someone else must claim it
+
+# act 4:
+everyone partners their new ballot with any ballot that is not their original ballot, stuck back to back
+
+# act 5:
+evaluation of success or failure of each flying disk partnership
+
+Acts may be 1 minute, 1 pomodoro, 1 day, 1 week, 1 year, 1 decade, 1 century, 1 millenia, and so on and so forth until the end of time and the start again.
+
+SHOW TIMES
+
+5 pm
+2.5 hours bar room, cocktail reception
+7:30pm curtain
+10 minute monologue
+15 minute monologue
+10 minute monologue
+10 minute monologue
+10 minute musical performance
+20 page minutes/bumper sketches
+5 minute panel interview
+5 minute panel interview
+5 minute panel interview
+5 minute musical performance
+10 minute jam capture
+9:15 pm curtain, Video Stream Cut
+Yellow Balloon Jam Session until Last Call, Audio Stream Cut
+
+TODO: Brett, when is LAST CALL
+
+# Pre Work
+
+- Install Raspberry Pi next to LOST CHURCH router, authenticate stream from CAJON BARREL STUDIO
+- Three Cameras
+  - STAGE ONE exposition of full STAGE
+  - STAGE TWO close up of center MARK
+  - STAGE THREE Free Hand by CINEMATOGRAPHER
+- ONE VFX RIG
+  - VIRTUAL STAGE by TECHNOLOGIST
+- Microphone stand center stage
+
+CAST
+Ty
+Andi
+Rubi
+Toby
+Mike
+Wendy
+Allan
+Tommi
+Anshul
+
+# Night OF - 5 PM
+
+Bar Is Open for PRE-SALE TOKENS, NO Yellow Balloons
+
+# Doors Open - 7 PM
+
+Yellow Balloons admitted, at door tokens sold until seats are at capacity. standing room admitted without required tokens, tokens optionally purchasable.
+
+# Show Start - STREAM START - 7:30 PM
+
+^ Cold Open
+
+CENTER STAGE, CLOWN is drumming. Once a player with any rhythm has been identified, they get the drum.
+
+CLOWN juggles SACKS. Once three players have been identified, they get the balls and a dance number.
+
+CLOWN juggles STICKS, until GAME OVER.
+
+CLOWN throws card OFF STAGE and chases OUT.
+
+STAGE is left in the hands of the EMERGENCY CLOWNS until show start.
+
+# Show Start
+
+Brett thanks the EMERGENCY CLOWNS for their performance
+Brett makes LOST CHURCH announcements
+Brett introduces Andi Wong
+
+Monologue  by Andi Wong 10 minutes (tie in stories about CLOWNS)
+
+^ A minute passes with no stage activity, no music, no formal direction. COLD STAGE
+
+# Cue Clown Show
+
+It started with utter disorganized chaos
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/000-the-premise/manifest.m3u8
+
+To the library to find information on how to manage a circus
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/001-library-grimaldi/manifest.m3u8
+
+All of the information has been deleted on joseph grimaldi
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/002-library-no-grimaldi/manifest.m3u8
+
+there is no circus in redwood city on november 7th
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/003-fake-circus/manifest.m3u8
+
+the flames have been extinguished
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/004-fake-fire/manifest.m3u8
+
+the circus is still closed
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/005-show-promotoer/manifest.m3u8
+
+the clown magic is gone. on foot we go.
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/006-time-slippage/manifest.m3u8
+
+fast travel is still blocked
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/007-the-setup/manifest.m3u8
+
+the theater portal was a startup grind
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/008-the-flop/manifest.m3u8
+
+the pathways in the square were also offline
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/009-the-square/manifest.m3u8
+
+even a duo performance was not enough to fly through space and time
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/010-the-switch/manifest.m3u8
+
+to get lunch at the sandwich spot
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/011-the-sandwich/manifest.m3u8
+
+shut the cameras off out of respect for the sandwich police
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/011-the-sandwich/manifest.m3u8
+
+^ cue the sandwich police clip from standup
+
+<hls-video
+src: /private/home/tychi/Videos/self-portraits/C0304/manifest.m3u8
+
+
+time to go talk to steve jobs with the iphone 4
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/012-the-iphone-4/manifest.m3u8
+
+and out the other side, thanks guys!
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/013-the-flaming-disk/manifest.m3u8
+
+the library still "knows nothing" of grimaldi and the circus is still offline
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/014-the-library-circus/manifest.m3u8
+
+to the fail safe
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/015-the-lanes/manifest.m3u8
+
+a long walk down memory lane
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/016-the-storage/manifest.m3u8
+
+dave, have you seen steve? the jonathan is still offline and it is messing up my day
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/017-the-strike/manifest.m3u8
+
+allan, have you seen steve? the jonathan is still offline and it is messing up my day
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/018-pool-shot/manifest.m3u8
+
+have any of you seen steve? the jonathan-- oh never mind, back inside.
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/019-the-start/manifest.m3u8
+
+good morning usa it is a today
+
+good morning usa it is a today
+
+good morning usa it is a today
+
+good morning usa it is a today
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown/manifest.m3u8
+
+okay, time to just give up and find grimaldi in the archive myself
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/021-cajon-clown/manifest.m3u8
+
+still no dice, the jonathan is offline and nobody ain't knows nothings of grimaldi
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/022-computer-clown/manifest.m3u8
+
+time to just do it live, just having a normal not at all pretend conversation
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/023-doing-it-live/manifest.m3u8
+
+time to get fast travel back online, the flying disk operating system
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/024-time-machine/manifest.m3u8
+
+the circus is still offline, where is grimaldi, has anyone seen steve? when is the jonathan
+
+<hls-video
+src: /private/home/tychi/Videos/2024-11-08-blox-b-roll/025-the-servers/manifest.m3u8
+
+# Stand-up
+
+# November 7th - 9:00am
+My name is Tyler Childs and I was on a tv show where we learned how to put keywords into everything.
+
+On this TV show, I played Sillyz.Computer, where I pitched an operating system for a gaming studio, Sillyz.Computer, to produce a television series named Sillyz.Computer where the cast makes a stage play named Sillyz.Computer where they interact with a live global crowd through Sillyz.Computer.
+
+I called it The Flying Disk Operating System.
+
+As a standup comedian, you should never try material live on stage for the first time. But I'm not a comedian, I'm a clown. An improvisational artist across mediums and dimensions.
+
+Sillyz.Computer runs on every computer known to man, including man himself. 
+
+In a breakout performance of Sillyz.Computer at dweb camp Sillyz.Computer infected faces with a clown virus.
+
+Paper noses that turned people into two dimensional creatures, which then banded together to save the inter-dimensional underwater night market from artificial intelligence that is only smart because it watches everything on your screen to tell you what it would do if it were in your shoes.
+
+After being unable to find a market for this technology, the creator captive, now lovingly referred to as "Ty from Sillyz.Computer" turned the children's suite for art, music, and coding into a collaboration platform for not just kids.
+
+This disk is called SameSame.Page, where you and your team will be connected to the same space-time continuum across all space-time continuums.
+
+We are currently focused on enterprise applications of SameSame.Page in parallel to releasing Sillyz.Computer as a home entertainment product called the S.H.E.-- Secure Home Entertainment.
+
+sizzle reel runs, running across people, circles, time over time, every type of device, every type of hardware, tron in real life. 
+
+I FIGHT FOR THE USER
+
+I'm proud to present, sillyz computer. a period tracking app for my sister, niece, cousin, wife, mother, daughter, friend, enemy, alien and beyond.
+
+but not just a period tracking app. an entire computing platform to use the period tracking app to track more periods.
+
+that's right, i'm talking sentences. paragraphs. scripts. screenplays. markdown. mark up. somebody call the puppet doctor because soc2 is all it will take to make this hippo, hippa compliant.
+
+now try to forget everything i just said as I put this red nose on my face.
+
+The first clown nose, "You ever have one of those really bad days?" "What is it going to take to break me for me to become an emergency clown?"
+
+The flute, the barrel, and the balls. Who I am and where I'm from. Massachusetts not even being named correctly due to misinformation. Massasoit means Great Sachem and the colonists just thought that was his name because everyone called him that. Massachusetts should be derived from his true name, which has been lost to time despite him warning the pilgrims of an attack against them in time.
+
+My time travel adventure into north beach. Ruby. Toby. Lost Church.
+
+Greatest gamer of all time. The Onion. World of World of Warcraft. Halo, Steve Jobs, Microsoft, 1984, Apple Jonathan
+
+riff on an alternate reality where the mac lost internally to the jonathan and microsoft ceased to exist once DOS was just pages in a book, and the macbook was just a book on the jonathan, the same way sillyz computer is "just" a flying disk.
+
+! hang out in this space with the audience until i get the light or i lose them--
+
+Growing up, Paul Revere, wally, mascots, red sox, Giants, Crazy Crab, Paul Revere's ghost, King Tut's Tomb, life itself as an eternity, two sticky notes stuck back to back and becoming the most important thing in the universe
+
+# Renaissance Faire
+
+@ Jester
+> ye first here ye before ye see me
+
+> when yere see me yere see fer yerself a jingle
+
+> a jingle that can juggle in the jungle
+
+> the jingle harks hark hark hark
+
+> hark hark hark
+
+> hark hark hark
+
+> the ads for the nearest keep that has sponsored me for ads.
+
+> ads ads ads
+
+> hark hark hark
+
+> ads ads ads
+
+> then i tell you, i can hark for you.
+
+> kingdom facilitator, flying disk workshop
+
+^ flourish a card
+
+here. find me in here. we'll put it all together in here. in this.
+
+^ emphasize the sticky note
+
+can i see that for a second?
+
+^ throws the sticky note
+
+I'll be right back, I need to save the world!
+^ chases the sticky note. gets sucked in.
+
+# Scene 3 - The Hub
+
+Allan as Ty and Ty as Allan
+
+@ Allan
+> what'll it be?
+
+@ ty
+> poor man's old fashioned
+
+@ allan
+> what the silly did you just order in my bar?
+
+@ ty
+> i said a well whiskey, bourbon if it's cheaper, with a splash of tripel sec and that's it. simpler than simple syrup.
+
+@ allan
+> are you a comedian?
+
+@ ty
+> i'm thinking about it
+
+@ allan
+> don't quit your day job
+
+@ ty 
+> i would have had never
+
+@ allan
+> anyways, what's a well to do guy like you doing ordering a cheap silly drink like this?
+
+@ ty
+> I think I'm dying
+
+@ allan
+> are you actually dying or do you just have a savior complex from your experience at Television University and you talked to someone that was dying today?
+
+@ ty
+> i talked to someone that was dying today
+
+@ allan
+> there's comedy upstairs, check it out to shake off the vibe you're wearing.
+
+@ ty
+> anyone good?
+
+@ allan
+> there's this palestinian american comic that can't promote his show here for contractual reasons.
+
+@ ty
+> Yeah, that's a premise of a person I never would have been allowed to watch at Television University.
+
+@ allan
+> you should book him for the show you're performing in right now.
+
+@ ty
+> wait, if I'm in a show right now
+
+# Scene 4 - The Time Machine
+
+Mike as Ty and Ty as Mike
+
+@ Ty
+> and that's what I wrote down on my half of the sticky note!
+
+@ Mike
+> Oh, I love that. Can I share my half of the sticky note?
+
+@ Ty
+> I already know I love what's on your side of the sticky note otherwise we never would have been encapsulated in hyper fictionalized reality together.
+
+@ Mike
+> It's this idea that everything should be in sync in real time
+
+@ Ty/Mike
+> in sync in real time
+
+@ ty
+> in sync
+
+@ Mike
+> n'sync
+
+The two sticky notes combine.
+
+@ Ty
+> Silly. Silly silly silly. We don't have the budget for Bye Bye Bye.
+
+@ Mike
+> Dude, we just invented time travel! everyone has the rights to anything. You just sit at the end of time until it shows up and then you bring it back to now! We can consume everything in any space any time!
+
+@ Ty
+> Mike-- that's some dark algorithm... did... did Synthia bite you?
+
+# Scene 5 - The Never  Ending Circus
+
+Wendy as Ty and Ty as Wendy
+
+@ Ty
+> Thanks for letting me volunteer in the time forest Wendy. I have to go save Mike now.
+
+@ Wendy
+> I'm glad you came to camp! What was your name?
+
+@ Ty
+> I'm Ty.
+
+Ty points to his nametag.
+
+@ Wendy
+> and what is it that you do inside of this shared computer network of ours?
+
+@ Ty
+> I'm making a creative suite for kids to do art, music, and coding. But we started with the time travel bit first, to invent time travel, then save the rest of the internet after I mess up the space time-continuum by saving Mike I guess.
+
+@ Wendy
+> Neat! Well, thanks for volunteering. You know, we could always use another volunteer for another night if you want to get in tight with the rest of the internet before you're going to need them.
+
+@ Ty
+> What would I do?
+
+@ Wendy
+> I'm going to need you to be an impromptu stagehand
+
+<impromptu-stagehand
+
+WENDY (10 minutes) - Monologue
+
+@ Ty
+> Oh, hey, Wendy!
+
+@ Wendy
+> Yes, Ty?
+
+@ Ty
+> I have a proposal for quantum disentanglement.
+
+@ Wendy
+> Can you explain what you mean by that?
+
+@ Ty
+> So in California when I evolved from man to clown, the instrument that chose me was a Cajon.
+
+@ Wendy
+> Okay...
+
+@ Ty
+> But in Massachusetts, if I became a clown, the instrument that would have chosen me were to have had been the banjo-lele
+
+@ Wendy
+> The Banjo-lele?
+
+@ Ty
+> Part banjo, part ukelele. $189.99 plus tax, shipping and handling from Jack's Drum Shop. Hyannis, MA, my hometown, right up the road from the bowling alley.
+
+# Scene 6 Redux - Living Impaired
+
+TODO: Collaborate with Toby on re-enacting the four toby sketch, where I don't kill Toby 3, we just write him out of the script even though that means I'll also cease to exist in that reality, which is how I become Ty, Toby without the ob.
+
+# Scene 7 - Community College - War on Clowns
+
+better live renditions of the two war on clowns tracks.
+
+# Scene 8 - Rubi Nicholas
+
+Rubi as Rubi and Ty as Ty
+
+@ Rubi
+> You the guy with the camera?
+
+@ Ty
+> Yeah
+
+@ Rubi
+> Paul said you're making a portfolio. Where do we go when you walk out this door with us?
+
+@ Ty
+> I tried the inter planetary file system one time and doug from pizza my heart became type cast permanently, so at this point only into the giggle and right back to you.
+
+@ Rubi
+> I didn't understand a word you just said, but I'm sure you'll be funny one day. 
+
+@ Ty
+> I already am funny, just not when we first meet.
+
+@ Rubi
+> Oh, I get it. Mentalism. You're a character artist.
+
+@ Ty
+> Rubi, time travel happened. This is not just me. We all get on with a little help from our friends, right?
+
+@ Rubi
+> You're a total clown.
+
+@ Ty
+> Oh god, I hope not. Have you heard what they do to clowns?
+
+@ Rubi
+> Comics get cancelled all the time. You'll be fine.
+
+@ Ty
+> That's not what they do to clowns. When's the last time you saw a red nose, Rubi?
+
+@ Rubi
+> I'm looking at you, Rudolf. I'm from the island of misfit toys too.
+
+Rubi 10 minute set about Disney, False Princes, 1984, Kiss Concerts, Dial-Up, Bulletin Boards
+
+Ty operates subtitles live as STENOGRAPHER
+
+@ Ty
+> Thanks for letting me capture you tonight.
+
+@ Rubi
+> Let's stay in touch.
+
+# Scene 9 - Late Show Host on a Day Time Talk Show
+
+Introduce the Cast Off Stage
+
+# Scene 10 -
+
+Late Show as a Day Time Talk Show
+
+@ Rubi
+> I thought Ty was just a good mentalist.
+
+@ Allan
+> I thought he was only focused on writing and not... Wendy, what is this?
+
+@ Wendy
+> This is the work of an improvisational production technologist. A gamer so competitive, that chose to re-wire the meta in real-time, live on stage as a challenge to entertainment systems everywhere.
+
+# Scene 11 - Mike Q/A
+
+5 minutes of group q/a from the day time panel, 
+
+^ Mike - CAMERA CENTER
+
+# Scene 12 - Allan Q/A
+
+5 minutes of group q/a from the day time panel, 
+
+^ Allan - CAMERA CENTER
+
+# Scene 13 - Wendy Q/A
+
+5 Minutes of group q/a from the day time panel, 
+
+^ Mike - CAMERA CENTER
+
+# Scene 14 - Full Cast Dance Number
+
+# Scene 15 - transition cooldown from
+
+Final transmission
+
+@ Ty
+> Anyways, if i'm not allowed to perform there, might as well get banned for life. Who wants me to juggle fire on the clown stage behind pier 39 right now right now?
+
+<game-over

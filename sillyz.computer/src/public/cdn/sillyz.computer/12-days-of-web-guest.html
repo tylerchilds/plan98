@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <title>@starting-style and transition-behavior: allow-discrete</title>
+    <style>
+      html, body, main, iframe, new-tag {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        border: none;
+        display: block;
+        position: relative;
+      }
+
+      * {
+        transition-property: visibility, opacity;
+        transition-duration: 1000ms;
+        transition-timing-function: ease-in-out;
+        transition-behavior: allow-discrete;
+      }
+
+      @starting-style {
+        * {
+          visibility: hidden;
+          opacity: 0;
+        }
+      }
+
+      new-tag {
+        background: dodgerblue;
+      }
+
+      .hide {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+
+      .reload {
+        transition: opacity 1000ms ease-in-out 15000ms;
+
+        @starting-style {
+          opacity: 0;
+        }
+
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: 100px;
+        text-align: center;
+        height: 2rem;
+        line-height: 2rem;
+      }
+    </style>
+  </head>
+  <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
+    <main id="main">
+      <a class="reload" href="javascript:window.location.href=window.location.href;">
+        reload
+      </a>
+      <new-tag></new-tag>
+    </main>
+    <script>
+      const tag = 'new-tag'
+
+      setTimeout(() => {
+        // a one liner to define a custom element, but not use the api at all
+        // see also: move fast and break things for how we got here, exactly.
+        customElements.define(tag, class WebComponent extends HTMLElement { constructor() { super() } });
+
+        [...document.querySelectorAll(tag)].map(target => target.innerHTML = `
+          <iframe src="https://sillyz.computer"></iframe>
+        `)
+      }, 1000)
+
+      setTimeout(() => {
+        [...document.querySelectorAll(tag)].map(target => target.classList.add('hide'))
+      }, 15000)
+    </script>
+  </body>
+</html>

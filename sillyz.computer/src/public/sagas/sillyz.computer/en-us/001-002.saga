@@ -1,0 +1,9 @@
+Cheddar is money. $40 for the digital edition.
+
+<sillonious-action
+label: I'll pay.
+saga: 001-004.saga
+
+<sillonious-action
+label: No thanks.
+saga: 001-005.saga

@@ -1,0 +1,20 @@
+<bayun-feedback
+
+@ Sally
+> Here's the process. Choose your company, wisely.
+
+<bayun-companies
+
+@ Sully
+> Next up, you will let us know who you are.
+
+@ Shelly
+> If we rememeber you, we'll ask you the question you asked us to ask you.
+
+@ Wally
+> If not, we will walk you through setup step by step.
+
+<action-script
+text: Continue
+data-action: identify
+data-script: /public/elves/wallet-1998.js

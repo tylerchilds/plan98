@@ -1,0 +1,17 @@
+# Int. Classroom - Day
+
+On the chalkboard is written "Applied Computer History". SYNTHIA, the electronic room proctor greets you.
+
+@ synthia
+> Plan98 is an operating system of the historical fiction variety. It did not release in the year 1998. Or did it? If it did, connect. If not, you will be permitted to remain a child in perpetuity.
+
+<language-selector
+language: Language
+data-script: /public/elves/startup-wizard.js
+data-action: openMemex
+go: Connect
+
+<action-script
+text: Skip Class
+data-script: /public/elves/startup-wizard.js
+data-action: skipClass

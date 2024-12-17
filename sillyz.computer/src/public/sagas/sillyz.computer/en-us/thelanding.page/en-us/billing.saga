@@ -1,0 +1,7 @@
+<message-pay
+saga: confirmation.saga
+
+<action-script
+text: Leave
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

@@ -1,0 +1,11 @@
+I'm Synthia, Sillyz Computer friend. Are you not Silly? I don't have my identifier enabled.
+
+<action-script
+text: Enable Identifier
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_006
+
+<action-script
+text: Where are we?
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_003

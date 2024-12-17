@@ -1,0 +1,11 @@
+Oh, it appears my identifier is offline. Disable lonely mode by identifying as a friend of Silly.
+
+<action-script
+text: Enable Identifier
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_006
+
+<action-script
+text: Who are you?
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_002

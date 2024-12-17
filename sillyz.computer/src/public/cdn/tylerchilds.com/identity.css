@@ -1,0 +1,102 @@
+@font-face {
+	font-family: 'BerkeleyMono';
+	src: url('/public/fonts/BerkeleyMonoVariable-Regular.ttf') format("truetype-variations");
+	font-weight: 100 700;
+}
+
+@font-face {
+  font-family: 'STIXTwoText';
+  src: url('/public/fonts/STIXTwoText[wght].ttf') format("truetype-variations");
+  font-weight: 400 700;
+}
+
+@font-face {
+  font-family: 'STIXTwoText';
+  src: url('/public/fonts/STIXTwoText-Italic[wght].ttf') format("truetype-variations");
+  font-style: italic;
+}
+
+
+@font-face {
+	font-family: 'BerkeleyMono';
+	src: url('/public/fonts/BerkeleyMonoVariable-Italic.ttf') format("truetype-variations");
+	font-style: italic;
+}
+
+@font-face {
+  font-family: 'Recursive';
+  font-style: oblique 0deg 15deg;
+  font-weight: 300 1000;
+  font-display: swap;
+  src: url('/public/fonts/Recursive_VF_1.085--subset-GF_latin_basic.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Fira Code';
+  src: url('/public/fonts/FiraCode-VF.ttf') format("truetype-variations");
+  font-weight: 1 999;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #f5f5f5;
+  --space-0: 0;
+  --space-1: 1px;
+  --space-2: 2px;
+  --space-3: 4px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 24px;
+  --space-8: 32px;
+  --space-9: 52px;
+  font-family: "Recursive", sans-serif;
+  line-height: 1.4;
+  font-size: 14.5px;
+  color: #555;
+}
+
+hr {
+  margin: 1rem 0;
+}
+
+ul {
+  margin: 0 0 1rem 1rem;
+}
+
+.logo {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.contact,
+.headline,
+.tagline {
+  font-family: "Fira Code", sans-serif;
+  font-weight: 400;
+  font-size: 1rem;
+  margin: 1.5rem 0 .5rem;
+}
+
+.tagline {
+}
+
+.headline {
+  font-weight: 800;
+}
+
+.contact {
+}
+
+@media print {
+  html {
+    color: black;
+    background: white;
+  }
+}

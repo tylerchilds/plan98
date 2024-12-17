@@ -1,0 +1,20 @@
+body {
+  margin: 0 auto;
+  background-position: scroll;
+  color: rgba(0,0,0,.85);
+}
+
+sillonious-brand > xml-html {
+  overflow: auto;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+@media screen {
+  main > xml-html {
+    min-height: 100%;
+  }
+}

@@ -1,0 +1,8 @@
+# Confirmation
+
+Your order has been confirmed. Thanks for shopping.
+
+<action-script
+text: Close
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

@@ -1,0 +1,67 @@
+html {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+body {
+  margin: 0 auto;
+}
+
+[pathname="/"] #main {
+  padding-top: 25vh;
+  background: white;
+}
+
+main {
+  height: auto;
+}
+
+main xml-html > best-buy {
+  margin: 3rem auto;
+}
+
+main hypertext-action {
+  max-width: 55ch;
+  margin: 4rem auto;
+  font-size: 1.5rem;
+}
+
+main braid-mail {
+  max-width: 55ch;
+  margin: auto;
+}
+
+main stay-tuned {
+  padding: 3rem 0;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+body wizard-journey.active {
+  inset: 0;
+  position: fixed;
+  max-height: 100%;
+  max-width: 100%;
+}
+
+body sillonious-brand {
+  background: black;
+}
+
+body data-tooltip {
+  height: 100%;
+}
+
+body wizard-journey xml-html {
+  height: 100%;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+mast-head img {
+  max-width: 100vmin;
+  max-height: 100vmin;
+  display: block;
+}

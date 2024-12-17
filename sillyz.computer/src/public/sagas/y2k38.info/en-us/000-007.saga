@@ -1,0 +1,7 @@
+@ Synthia
+> First time, welcome... We'll get to your name in a second. Watch this video to find out why you are here...
+
+<action-script
+text: Save 2038
+data-script: /public/elves/startup-wizard.js
+data-action: go_000_008

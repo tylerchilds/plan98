@@ -1,0 +1,13 @@
+Time travelers leave secure messages in mailboxes.
+
+Would you like to become a time traveler?
+
+<action-script
+text: Yes
+data-action: initiation
+data-script: /public/elves/camp-wizard.js
+
+<action-script
+text: No
+data-action: goToMap
+data-script: /public/elves/camp-wizard.js

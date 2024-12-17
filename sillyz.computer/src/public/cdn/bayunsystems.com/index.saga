@@ -1,0 +1,27 @@
+<bayun-wizard
+
+note: register with password should be used primarily for dev and not shipping
+
+<rainbow-action
+html: <a href="register-with-password.saga?world=bayunsystems.com">Register with Password</a>
+
+note: this should be the normal user registration process
+
+<rainbow-action
+html: <a href="register.saga?world=bayunsystems.com">Register</a>
+
+note: this should be the normal user log in
+
+<rainbow-action
+html: <a href="login.saga?world=bayunsystems.com">Log In</a>
+
+note: this should be used for dev and not for shipping
+
+<rainbow-action
+html: <a href="login-with-password.saga?world=bayunsystems.com">Login with Password</a>
+
+<rainbow-action
+html: <a href="change-password.saga?world=bayunsystems.com">Change Password</a>
+
+<rainbow-action
+html: <a href="logout.saga?world=bayunsystems.com">Log Out</a>

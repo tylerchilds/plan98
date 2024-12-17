@@ -1,0 +1,14 @@
+<wizard-feedback
+
+<bayun-question
+index: 0
+placeholder: Who do you want to be every day?
+
+<bayun-answer
+index: 0
+placeholder: I want to be the Jester!
+
+<action-script
+text: Next Question
+data-action: submitQuestion0
+data-script: /public/elves/bayun-wizard.js

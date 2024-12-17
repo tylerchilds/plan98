@@ -1,0 +1,32 @@
+Sillyz.Computer is a creative suite for art, music, and coding.
+
+<iframe
+src: /app/story-board
+title: Art
+
+<iframe
+src: /app/draw-term
+title: Art
+
+<iframe
+src: /app/dial-tone
+title: Music
+
+<iframe
+src: /app/hyper-script
+title: Coding
+
+<iframe
+src: /app/code-module?src=/public/index.html
+title: Coding
+
+<a
+href: /app/sillyz-ocarina
+text: A midi controllable cirlce of fifths
+
+that could be updated to something like
+
+<a
+href: https://www.websynths.com/grooves/
+text: this web audio daw
+

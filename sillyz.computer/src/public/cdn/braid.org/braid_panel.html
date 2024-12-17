@@ -1,0 +1,408 @@
+CTYPE html>
+<html>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      overflow: clip;
+    }
+    input, select {
+        padding: 0;
+        font-size: 11px;
+    }
+  </style>
+  <body
+    style="
+      margin: 0px;
+      width: 100vw;
+      height: 100vh;
+    "
+  >
+    <!-- The Messages -->
+    <div
+      id="messages"
+      style="
+        position: absolute;
+        left: 0px;
+        top: 0px;
+        width: calc(100%);
+        bottom: 0px;
+        overflow-x: clip;
+        overflow-y: clip;
+      "
+    >
+      <!-- Top Checkbox Row -->
+      <div
+        style="background-color: #FBFBFD; border-bottom: 1px solid #EEEFF8; padding: 5px;"
+      >
+        <input style="cursor:pointer" type="checkbox" id="id_raw_messages" />
+        <label style="cursor:pointer" for="id_raw_messages">Display Raw Messages</label>
+      </div>
+
+      <!-- The messages go here -->
+      <div
+        style="width:100%; height: calc(100% - 30px); overflow-y: auto;"
+        id="id_messages"
+      ></div>
+    </div>
+  </body>
+
+  <script>
+    let versions = [];
+    let raw_messages = [];
+
+    let last_version = "";
+    let last_parents = "";
+
+    window.onresize = () => update();
+
+    window.onload = function () {
+      window.addEventListener("message", (event) => {
+        let message = event.data;
+        if (message.cmd === "set") {
+          if (message.versions) versions = message.versions;
+          if (message.version) versions.push(message.version)
+
+          if (message.raw_messages) raw_messages = message.raw_messages;
+          if (message.raw_message) raw_messages.push(message.raw_message)
+
+          update();
+        }
+      });
+
+      parent.postMessage({
+        cmd: "loaded",
+      });
+
+      id_raw_messages.onchange = () => update();
+
+      update();
+    };
+
+    let update_requested = false;
+    function update() {
+      if (!update_requested) {
+        update_requested = true;
+        requestAnimationFrame(() => {
+          update_requested = false;
+          raw_update();
+        });
+      }
+    }
+
+    function raw_update() {
+      let actor_to_color = {};
+      let actor_color_angles = [];
+
+      id_messages.innerHTML = "";
+      if (!id_raw_messages.checked && versions?.length) {
+        id_messages.style.display = "grid";
+        id_messages.style["grid-template-columns"] =
+          "auto auto auto auto auto 1fr";
+        id_messages.style["align-content"] = "start";
+
+        id_messages.append(
+          make_html(
+            `<div style="grid-column: span 2;margin-left:10px;margin-top:10px">Version</div>`
+          )
+        );
+        id_messages.append(
+          make_html(
+            `<div style="grid-column: span 3;margin-top:10px">Range</div>`
+          )
+        );
+        id_messages.append(
+          make_html(`<div style="margin-top:10px">Content</div>`)
+        );
+
+        let time_dag_width = 64;
+        let time_dag_radius = 6;
+
+        let svg_parent = null;
+        let version_circles = {};
+
+        // remove duplicate versions
+        if (true) {
+          let seen = {};
+          let good_versions = [];
+          for (let v of versions) {
+            if (seen[v.version]) continue;
+            seen[v.version] = true;
+            good_versions.push(v);
+          }
+          versions = good_versions;
+        }
+
+        for (let i = 0; i < versions.length; i++) {
+          let v = versions[i];
+          let last = i == versions.length - 1;
+
+          for (let i = 0; i < 6; i++) {
+            id_messages.append(
+              make_html(`<div style="width:10px;height:10px"></div>`)
+            );
+          }
+
+          let actor = v.version.split("-")[0];
+          if (!actor_to_color[actor]) {
+            let angle = get_new_angle(actor_color_angles);
+            actor_color_angles.push(angle);
+            actor_to_color[actor] = angle_to_color(angle);
+          }
+
+          let my_make_html = (s) => {
+            let d = make_html(s);
+            d.style.cursor = "pointer";
+            d.onclick = () => {
+              parent.postMessage({
+                cmd: "show_diff",
+                from_version: !last ? v.version : null,
+              });
+            };
+            return d;
+          };
+
+          let version_circle = my_make_html(`<div style="
+                position: relative;
+                display: block;
+                vertical-align: middle;
+                width: ${time_dag_width}px;
+                height: ${time_dag_radius * 2}px;
+                background-color: transparent;
+                padding-right:10px;"></div>`);
+          version_circles[v.version] = version_circle;
+          id_messages.append(version_circle);
+          if (!svg_parent) svg_parent = version_circle;
+
+          id_messages.append(
+            my_make_html(
+              `<div style="padding-right:10px;color:${actor_to_color[actor]}">${v.version}</div>`
+            )
+          );
+          id_messages.append(
+            my_make_html(
+              `<div><div style="color:black;background:rgb(245,245,245);font-family:monospace;padding-right:10px">${v.patches[0].unit}</div></div>`
+            )
+          );
+          id_messages.append(
+            my_make_html(
+              `<div style="font-family:monospace;padding-right:10px">${
+                v.patches[0].unit == "text"
+                  ? v.patches[0].range.slice(1, -1)
+                  : v.patches[0].range
+              }</div>`
+            )
+          );
+
+          id_messages.append(
+            my_make_html(`<div style="padding-right:10px">=</div>`)
+          );
+
+          let container = my_make_html(
+            `<div style="padding-right:10px"></div>`
+          );
+          if (v.patches[0].content) {
+            let pre = make_html(
+              `<pre style="padding:0px;margin:0px;color:black;background:rgb(245,245,245);font-family:monospace;text-wrap:wrap;"></pre>`
+            );
+            pre.textContent = v.patches[0].content;
+            container.append(pre);
+          } else {
+            container.append(
+              make_html(
+                `<div style="display:inline-block;padding:2px;border-radius:3px;background:rgb(241, 64, 42);color:white;font-size:xx-small;padding-left:3px;padding-right:3px">deleted</div>`
+              )
+            );
+          }
+          id_messages.append(container);
+        }
+        id_messages.append(
+          make_html(`<div style="width:10px;height:10px"></div>`)
+        );
+
+        let v_to_realv = {};
+        let version_ys = {};
+
+        let py = svg_parent.getBoundingClientRect();
+        py = py.y + py.height / 2;
+
+        let actor_to_seq = {};
+        for (let v of versions) {
+          let rect = version_circles[v.version].getBoundingClientRect();
+          let y = rect.y + rect.height / 2 - py;
+
+          version_ys[v.version] = y;
+
+          v_to_realv[v.version] = v.version;
+
+          if (v.version == "root") continue;
+
+          let [actor, seq] = v.version.split("-");
+          seq = 1 * seq;
+          for (let i = actor_to_seq[actor] ?? 0; i < seq; i++) {
+            v_to_realv[actor + "-" + i] = v.version;
+          }
+          actor_to_seq[actor] = seq + 1;
+        }
+
+        let last_x = 0.5;
+        let last_x_shadow_r = 0.25;
+        let version_xs = {};
+        let last_v = null;
+
+        for (let v of versions) {
+          let actor = v.version.split("-")[0];
+          let color = actor_to_color[actor];
+
+          let x = null;
+          if (
+            v.parents.length == 0 ||
+            (v.parents.length == 1 && v_to_realv[v.parents[0]] == last_v)
+          ) {
+            x = last_x;
+          } else {
+            let r = parseInt(v.version[0], 36) / 35;
+            x = last_x + last_x_shadow_r + r * (1 - 2 * last_x_shadow_r);
+            if (x > 1) x -= 1;
+          }
+          version_xs[v.version] = x;
+
+          let y = version_ys[v.version];
+
+          for (let p of v.parents) {
+            p = v_to_realv[p];
+            let h = y - version_ys[p];
+            let px = version_xs[p];
+
+            svg_parent.append(
+              make_html(`<svg height="${h}px" width="${time_dag_width}px" style="pointer-events:none; position: absolute; top: ${
+                y - h + time_dag_radius
+              }px; left: 0px;">
+                    <line x1="${
+                      time_dag_radius +
+                      x * (time_dag_width - 2 * time_dag_radius)
+                    }px" y1="100%" x2="${
+                time_dag_radius + px * (time_dag_width - 2 * time_dag_radius)
+              }px" y2="0%" stroke="${color}" stroke-width="1px" />
+            </svg>`)
+            );
+          }
+
+          last_v = v.version;
+        }
+
+        for (let v of versions) {
+          let actor = v.version.split("-")[0];
+          let color = actor_to_color[actor];
+
+          let x = null;
+          if (
+            v.parents.length == 0 ||
+            (v.parents.length == 1 && v_to_realv[v.parents[0]] == last_v)
+          ) {
+            x = last_x;
+          } else {
+            let r = parseInt(v.version[0], 36) / 35;
+            x = last_x + last_x_shadow_r + r * (1 - 2 * last_x_shadow_r);
+            if (x > 1) x -= 1;
+          }
+          version_xs[v.version] = x;
+
+          let y = version_ys[v.version];
+
+          svg_parent.append(
+            make_html(`<svg height="${time_dag_radius * 2}px" width="${
+              time_dag_radius * 2
+            }px" style="position: absolute; top: ${y}px; left: ${
+              x * (time_dag_width - 2 * time_dag_radius)
+            }px;">
+                    <circle cx="50%" cy="50%" r="50%" stroke-width="0" fill="${color}" />
+            </svg>`)
+          );
+
+          last_v = v.version;
+        }
+
+        // let dd = make_html('<pre></pre>')
+        // dd.textContent = JSON.stringify(v_to_realv, null, 4)
+        // id_messages.append(dd)
+      } else if (id_raw_messages.checked && raw_messages?.length) {
+        id_messages.style.display = "block";
+
+        for (let msg of raw_messages) {
+          let d = document.createElement("pre");
+          d.textContent = msg;
+          //d.style.background = `rgb(41,42,45)`
+          d.style.borderRadius = "3px";
+          d.style.margin = "3px";
+          d.style.padding = "3px";
+          d.style.textWrap = "wrap";
+
+          id_messages.append(d);
+        }
+      } else {
+        let d = document.createElement("div");
+        d.textContent = "nothing to show";
+        d.style.cssText = `margin:10px`;
+        id_messages.append(d);
+      }
+
+      id_messages.scrollTop = id_messages.scrollHeight;
+    }
+
+    function make_html(s) {
+      let d = document.createElement("div");
+      d.innerHTML = s;
+      return d.firstChild;
+    }
+
+    function get_new_angle(angles) {
+      let positions = angles.sort().concat([1]);
+      let best = 0;
+      let biggest = positions[0];
+      for (let i = 0; i < positions.length - 1; i++) {
+        let smaller = positions[i];
+        let bigger = positions[i + 1];
+        if (bigger - smaller > biggest) {
+          best = (bigger + smaller) / 2;
+          biggest = bigger - smaller;
+        }
+      }
+      return best;
+    }
+
+    function angle_to_color(angle) {
+      return `rgb(${angle_to_color_raw(angle).join(",")})`;
+    }
+
+    function angle_to_color_raw(angle) {
+      var t = angle;
+      if (t < 0 || t > 1) t -= Math.floor(t);
+      var n = Math.abs(t - 0.5);
+
+      var h = 360 * t - 100;
+      var s = 1.5 - 1.5 * n;
+      var l = 0.8 - 0.9 * n;
+
+      var kn = 0.017453292519943295;
+
+      t = (h + 120) * kn;
+      n = l;
+      var e = s * n * (1 - n);
+      var r = Math.cos(t);
+      var i = Math.sin(t);
+
+      var $n = -0.14861;
+      var Wn = 1.78277;
+      var Zn = -0.29227;
+      var Qn = -0.90649;
+      var Kn = 1.97294;
+
+      return [
+        255 * (n + e * ($n * r + Wn * i)),
+        255 * (n + e * (Zn * r + Qn * i)),
+        255 * (n + e * (Kn * r)),
+      ];
+    }
+  </script>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="32" height="18" viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="395.575" y1="225.915" x2="395.575" y2="1027.381" id="gradient-0" gradientTransform="matrix(0.090209, -0.995924, 1.115449, 0.077601, -505.469639, 927.547696)">
+      <stop offset="0" style="stop-color: rgb(255, 255, 255);"/>
+      <stop offset="1" style="stop-color: rgb(3, 3, 3);"/>
+    </linearGradient>
+  </defs>
+  <ellipse style="stroke-width: 30px; stroke: rgb(0, 0, 0); fill: rgb(255, 255, 255);" cx="-769.818" cy="-651.108" rx="411.108" ry="411.108" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, 0)" class="cursor-face"/>
+  <ellipse style="stroke: rgb(0, 0, 0); stroke-width: 19px; fill: none;" cx="-900.215" cy="-899.785" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, 0)" class="cursor-mouth"/>
+  <ellipse style="fill: rgb(3, 3, 3);" cx="-780.215" cy="-659.785" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, 0)" class="cursor-eye"/>
+  <ellipse style="fill: rgb(3, 3, 3);" cx="-1019.785" cy="-658.497" rx="60.215" ry="60.215" transform="matrix(-0.9999999999999999, 0, 0, -0.9999999999999999, 0, 0)" class="cursor-eye"/>
+  <path d="M 601.15 563.735 C 497.926 778.172 664.023 949.93 567.194 1020.967 C 470.365 1092.004 -224.007 551.366 -223.946 551.205 C -223.912 551.116 699.549 99.479 955.252 260.87 C 1210.955 422.261 704.374 349.298 601.15 563.735 Z" style="stroke: url('#gradient-0'); stroke-linejoin: bevel; stroke-width: 30px;" transform="matrix(0.8288900256156921, 0.5594111084938049, -0.5594111084938049, 0.8288900256156921, 502.5920715332029, -323.56414794921875)" class="cursor-hat"/>
+</svg>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 1920 1080" xmlns="http://www.w3.org/2000/svg">
+  <ellipse style="fill: rgb(216, 216, 216);" cx="781.289" cy="180" rx="60" ry="60" class="slot" id="slot-0" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="2s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="781.289" cy="900" rx="60" ry="60" id="slot-6" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="8s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="901.29" cy="780" rx="60" ry="60" id="slot-5" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="7s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1021.29" cy="660" rx="60" ry="60" id="slot-4" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="6.05s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="901.29" cy="300" rx="60" ry="60" class="slot" id="slot-1" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="3s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1021.29" cy="420" rx="60" ry="60" class="slot" id="slot-2" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="4.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1141.29" cy="540" rx="60" ry="60" id="slot-3" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="5.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-661.074" cy="-298.069" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="slot-11" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="13s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-540.644" cy="-418.498" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="slot-10" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="12.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-661.074" cy="-779.785" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="slot-7" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="9s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-540.644" cy="-659.356" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="slot-8" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="10.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-420.215" cy="-538.927" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="slot-9" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="10.99s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1141.289" cy="180" rx="60" ry="60" class="slot" id="ellipse-1" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="2s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1141.289" cy="900" rx="60" ry="60" id="ellipse-2" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="8s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1261.29" cy="780" rx="60" ry="60" id="ellipse-3" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="7s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1381.29" cy="660" rx="60" ry="60" id="ellipse-4" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="6.05s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1261.29" cy="300" rx="60" ry="60" class="slot" id="ellipse-5" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="3s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1381.29" cy="420" rx="60" ry="60" class="slot" id="ellipse-6" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" begin="0s" dur="4.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="1501.29" cy="540" rx="60" ry="60" id="ellipse-7" class="slot" transform="matrix(1, 0, 0, 1, 5.684341886080802e-14, 2.842170943040401e-14)">
+    <animate attributeName="fill-opacity" values="0;1" dur="5.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1021.074" cy="-298.069" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="ellipse-8" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="13s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-900.644" cy="-418.498" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="ellipse-9" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="12.02s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-1021.074" cy="-779.785" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="ellipse-10" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="9s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-900.644" cy="-659.356" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="ellipse-11" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="10.03s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse style="fill: rgb(216, 216, 216);" cx="-780.215" cy="-538.927" rx="60.215" ry="60.215" transform="matrix(-1, 0, 0, -1, 5.684341886080802e-14, 2.842170943040401e-14)" id="ellipse-12" class="slot">
+    <animate attributeName="fill-opacity" values="0;1" dur="10.99s" fill="freeze" keyTimes="0; 1" repeatCount="indefinite"/>
+  </ellipse>
+</svg>

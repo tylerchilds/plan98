@@ -1,0 +1,13 @@
+At the start, was it the Argonaut or the Egg? Either way, there were either eight eggs or eight legs.
+
+Will you chase them or will they chase you?
+
+<action-script
+text: Chase Eggs
+data-action: chaseEggs
+data-script: /public/elves/silly-wizard.js
+
+<action-script
+text: Flee Tentacles
+data-action: fleeTentacles
+data-script: /public/elves/silly-wizard.js

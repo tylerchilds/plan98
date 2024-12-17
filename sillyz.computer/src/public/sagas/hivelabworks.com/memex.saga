@@ -1,0 +1,18 @@
+{ template
+engine: thelanding.page
+
+# Cross Platform
+
+Hive connects digital platforms into one experience that runs in and on any device.
+
+# Cross Work
+
+Hive solves data silos by bridging disconnected teams into secure collaboration zones.
+
+# Cross Play
+
+Hive is a real-time game engine for syncronizing individual characters across mediums.
+
+<app-simulator
+class: iphone
+app: sillyz-computer

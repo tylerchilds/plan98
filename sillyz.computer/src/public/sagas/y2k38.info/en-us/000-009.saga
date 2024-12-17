@@ -1,0 +1,5 @@
+Reconnect your goober...
+
+<my-journal
+data-script: /public/elves/startup-wizard.js
+data-action: go_001_000

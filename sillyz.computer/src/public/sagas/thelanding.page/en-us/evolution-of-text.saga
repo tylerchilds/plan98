@@ -1,0 +1,128 @@
+In the beginning was text. And people read. Or they didn't. They usually didn't.
+
+That didn't matter for what came next was hyper text. Less words, more interactions.
+
+Before, reading was imagination. You would mentally parse a chunk of text and try and draw that picture in your mind. Good luck if you suffer from aphantasia.
+
+Hyper text augments the imagination. No longer memorize a chunk of text to then memorize a picture of the extrapolated meaning. Just tap a short description and be physically linked to a permanent manifestation representation affectionately from this point forward dubbed an "object".
+
+Where do objects come from?
+
+People generally imagine them the old fashioned way and then computerificate them with whatever device they happen to have on hand.
+
+In the 1800's, there was only paper to computerificate anything. You could fold paper up and put it in your pocket the same way your mirror computer s-elf pockets your data for your while you're busy in the real world.
+
+1912 is an important year, but we'll get to that later.
+
+The 1970s had a micro computer revolution that meant computers could exist inside of someone home instead of being the size of someone's home.
+
+The 1980s had a music revolution when music computers fit on tool belts instead of being stuck inside the house.
+
+The 1990s had a book revolution when instructions on how to build computers to publish books were no longer strongly regulated by the paper industry.
+
+Some of this is true. The rest is for sure.
+
+Hello World. Hello Plan98. Hello.
+
+The first program a programmer writes to teach a programming language they first programmed is hello world.
+
+To learn any programming language is to learn enough of the dialect of the author to understand how they would convert raw electricity into their native tongue.
+
+My first language is english and I'm from earth, so I say "Hello World." If you were Spanish from Uranus, you would say Hola Urano! I digress.
+
+Can I teach you how I say "Hello World"?
+
+Before we get to the dialect itself, I want to clue you in on the system my system uses to run my software. The entire platform hinges on the "Slash Shell".
+
+To show you hello world, I have an app called hello-world.
+
+I can access this app in my slash shell terminal window with the command
+
+/app/hello-world
+
+<a
+href: /app/hello-world
+text: "Try" "Hello World" "App"
+
+Did you tap the blue words in quotes? You did? That's great! You did it!
+
+You completed a hyper text interaction. And if you're reading this now, it means you figured out how to come back! Or to leave without leaving-- my favorite too!
+
+Okay, so now you've learned how my slash shell draws the hello world app, but I haven't connected it back to the dots of hyper text and our papered history.
+
+Hyper text is defined by putting words between the shape  < and >
+
+Names of these shapes differ by geography. In english, common words to describe the shapes are "carets", "angle brackets", or "chevrons" with "left" and "right" for referring to the "less than sign" or the "greater than sign" for the first and last, respectively.
+
+The words in between the < and > shapes are called tags. In the /app/hello-world slash shell command, hello-world refers to a tag that will go in between the angle brackets to create an element.
+
+An element is the end result of hyper text for converting someone's imagination into the physical manifestation representation of the affectionate object.
+
+(if doing an actual lecture or comedy show, do the anecdote about converting gumballs into an ipod in high school)
+
+When manually writing out hyper text by hand, the hello world app would be spelled the old fashioned way like <hello-world></hello-world>.
+
+Alright, now with basic definitions of both text and hyper text out of the way-- how do we put the actual text "hello world" into the hyper text <hello-world>?
+
+Before we go any further, I need to tell you something. I do speak english and I am from earth. I am not human. I am an elf. Fully. Truly.
+
+I don't call < and > chevrons, carets, or brackets-- angled, square, curly, round, or otherwise! I call them hats! Please don't laugh!
+
+If you've enjoyed my saga so far, you might already know I am personally a left hat elf-- I don't use right hats in my story telling at all!
+
+I say all this to you now as you've come along with me far enough in this journey and to go further-- you were going to find out anyways.
+
+See, the style of the code I use to bind the likes of text and hyper text together-- is a bit elf-ish.
+
+To keep a long spell short, "from within thyself I summon thy elf to draw from string theory the alphabet soup h-e-l-l-o w-o-r-l-d!"
+
+In my elfish code long form, that would be:
+
+<code-module
+src: /public/elves/hello-world.js
+style: height: 18rem;
+
+That's all! Everything from top to bottom on drawing text onto a blank canvas.
+
+This approach taken to the extreme can be used inside of a virtual reality headset in the back of the Internet Archive during a friday lunch community tour, where the platform is self contained within a unix instance in a subspace terminal affixed to the forefront of the face and the graphical representation isn't text, but the entire file system as a folding 3d worlds like the "fictional" computer in Jurassic Park direct to retina.
+
+<iframe
+src: https://archive.org/embed/com.oculus.vrshell-20240927-135405
+width: 640
+height: 480
+frameborder: 0
+webkitallowfullscreen: true
+mozallowfullscreen: true
+allowfullscreen: true
+
+To understand in the entirety that demo is to is to understand there are many hyper text tags. The platform maintainer reserves single word hyper text tags for the system while opening up third party extensibility through custom tags-- fully baked-- custom elements-- hyper text-- with a hypen-- like the hello-world tag we have already now learned.
+
+At this point in time with the hello-world code we have already written, we can summon the text onto this page with a left hat only
+
+<hello-world
+
+like so.
+
+In order to do that, there is code hidden inside of this digital paper that looks for metadata about any custom element that is not defined.
+
+Once the page has the <hello-world><hello-world> element, it will be discovered by the Cascading Selector: `:not(:defined)` and will be added to what is known as the 'CustomElementRegistry', where the string 'hello-world' can be defined in conjunction with a "Web Component".
+
+This is-- at this stage-- too much information that you do not need to know, but about this-- I do need your help.
+
+See, we can simplify this logic further by amending the specification that defines how and why the code works this way at all.
+
+To get you up to speed, this file named sillyz.computer.js inside sillyz.computer powers the genesis block of the generic park Plan98.
+
+In this file, we set the code that looks for the :not(:defined) element on the page and we then define it so that it will become :defined and no longer be :not(:defined). 
+
+<code-module
+src: /public/sillyz.computer.js
+style: height: 18rem;
+
+This is accomplished in the code above by defining whatever the tag name was that was discovered by a :not(:defined) element and then using the same boiler plate web component code.
+
+That code is only necessary to fulfill the requirements in the specification that defines the custom element registry. Were it possible to call `customElements.define` with a single argument, the tag name to be registered, web components as a whole cease to exist in essence.
+
+"Plan98: virtual drives for physical disks"
+
+- Silly

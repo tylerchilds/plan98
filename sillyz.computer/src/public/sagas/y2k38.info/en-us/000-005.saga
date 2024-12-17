@@ -1,0 +1,11 @@
+A collaborative space of the shared imagination
+
+<action-script
+text: Crawl the code space
+data-action: goToCodeSpace
+data-script: /public/elves/startup-wizard.js
+
+<action-script
+text: Go somewhere else
+data-action: go_000_004
+data-script: /public/elves/startup-wizard.js

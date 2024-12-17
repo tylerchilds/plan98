@@ -1,0 +1,22 @@
+{ template
+engine: screenplay
+
+<saga-admin
+
+# The End
+
+@ Silly
+> Game Over
+
+<a
+href: /
+text: Back to start
+
+
+
+
+
+
+
+
+

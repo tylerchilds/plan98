@@ -1,0 +1,15 @@
+<bayun-feedback
+
+Enter your callsign and either register to be shown the ropes from scratch or log in to be welcomed back.
+
+<bayun-player
+
+<action-script
+text: Register
+data-action: register
+data-script: /public/elves/bayun-wizard.js
+
+<action-script
+text: Login
+data-action: login
+data-script: /public/elves/bayun-wizard.js

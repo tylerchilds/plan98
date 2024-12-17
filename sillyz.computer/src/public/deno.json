@@ -1,0 +1,14 @@
+{
+  "name": "@silly/tag",
+  "version": "0.6.0",
+  "exports": "./module.js",
+  "imports": {
+    "@silly/tag": "./module.js",
+    "@sillonious/saga": "./saga.js",
+    "@sillonious/brand": "./brand.js",
+    "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
+    "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+    "statebus": "./_statebus.js",
+    "marked": "https://esm.sh/marked@11.1.0"
+  }
+}

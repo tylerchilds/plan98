@@ -1,0 +1,94 @@
+! Record this Script and embed a video here  with
+
+The JESTER juggles
+
+@ Jester
+> Cool ideas are hard to communicate.
+
+Lighbulb smashes; Baby cries
+
+@ Jester
+> Have you ever wondered where lightbulbs come from?
+
+^ Fade to black
+
+@ Jester (V.O.)
+> Too dark.
+
+Stars begin to blink and emerge. Rainbow colors, pulsing in and out.
+
+@ Jester (V.O.)
+> Fast forward for now
+
+Flash through the Milky Way to the Sol System landing on the dark side of the moon.
+
+@ Jester (V.O.)
+> Before we can possibly understand light, we need to understand dark.
+
+The JESTER lights a MATCH, emerging from the darkness
+
+@ Jester
+> Now, you understand how this match is lit and I'm breathing?
+
+Apollo Missions, Space Craft, Lunar Modules, Space Suits
+
+@ Jester
+> This is pretend. Space is deadly.
+
+Time rewinds, the moon uncrashes from the earth, dissociating a fire planet and a water comet.
+
+@ Jester (V.O.)
+> Nothing is at it first appears, which begs the question what is and is not really real?
+
+The water comet races faster, further back all the way home to the start
+
+^ Space itself fades from black to white
+
+@ Jester (V.O.)
+> Were you there in the beginning?
+
+The Jester walks out from behind a WHITE WALL with a CUE BALL
+
+@ Jester
+> The first creature. God before God.
+
+The Jester holds the CUE BALL up high above, inspecting with one eye
+
+@ Jester
+> After God, the debates began
+
+A CHICKEN and an EGG
+
+@ Jester
+> But we're going back further than that
+
+A Velociraptor
+
+@ Jester
+> Even further back
+
+The Jester holds the CUE BALL up high above, inspecting with one eye
+
+@ Jester
+> The first anything started as simply as everthing else after.
+
+Pills with abbreviated letters, an orange T. a blue A. A green G. A purple C.
+
+@ Jester
+> Deoxyribonucleic Acid
+
+The letters expand Thymine. Guanine. Cytosine. Adenine. Multiplying. Pairing. Stranding.
+
+<action-script
+text: I am Sold
+data-saga: deal.saga
+class: money
+
+<action-script
+text: Wait, start over.
+data-saga: welcome.saga
+class: secondary
+
+
+{ template
+engine: screenplay

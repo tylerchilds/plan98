@@ -1,0 +1,53 @@
+Computer - A mathematics device for people without a mathematics degree
+
+Printed Circuit Board - An insulated silicon material with copper wiring for carrying electrical signals
+
+Chip - A computer component that is mounted onto a printed circuit board to enhance computer capabilities (add core, add wifi, add sound, add video)
+
+Basic Input Output System (BIOS) - The computer code on the computer chip that loads first when a computer is first turned on
+
+Operating System - A contextual framing for how to perceive the computer (windows, mac, linux, android, ios)
+
+Bootloader - The computer code that decides which operating system to use
+
+Program - Computer code used to solve a problem
+
+Process - An instance of a running program
+
+Port - A numbered location in the computer for exhanging messages across processes. (0 - 64738)
+
+Protocol - A structured approach for communicating effectively between two or more parties
+
+Programming Language - A dialect of computer code optimized for general or domain-specific problems.
+
+General-Purpose Language - A programming language that can be used to solve any problems using generic language primitives
+
+Domain-Specific Language - A progamming language that can be used to solve highly specific problems by domain knowledge experts
+
+Library - A collection of computer code to reduce the repetitive nature of programming
+
+Framework - An opinionated collection of libraries for using programming langauges to build products
+
+Product - A physical or digital computer that can be sold
+
+Embedded Computer - A tiny computer in a larger device that is marketed only as the larger device (e.g. a refrigerator)
+
+Mobile Computer - A pocket sized computer, such as a smart phone
+
+Personal Computer - A computer that is in the same room as you and is capable of any form of programming
+
+Cloud Computer - A computer that is not in the same room as you and is optimized for domain specific programming
+
+Application Protocol Interface (API) - A specification for interacting with a program from another program
+
+Software Developer Kit (SDK) - A collection of libraries provided by an entity to allow programmers to interface with the entity
+
+Network - A collection of computers capable of sending and receiving data amongst each other
+
+Router - The computer for coordinating network traffic between machines
+
+Modem - A device for MOdulating digital (binary; 1's and 0's) signals and DEModulating analog (aol phone sounds) signals.
+
+Internet - A collection of networks of computers-- Inter-network
+
+Internet Archive - A library containing all the publicly available information on all types of computers and more

@@ -1,0 +1,15 @@
+# Your funnel? Meet ours.
+
+The funnel we sell is the ride you're on. Step by step, just like a video game. Or as a single scroll in Classic Mode.
+
+<action-script
+text: Sell me, why?
+data-saga: why-funnel.saga
+
+<action-script
+text: I Love It
+data-saga: deal.saga
+class: money
+
+{ template
+engine: wrapper

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Braid Debugger</title>
+    <style>
+      html,body {
+        height: 100%;
+        background: #242424;
+        color: white;
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
+      }
+
+      button * {
+        pointer-events: none;
+      }
+    </style>
+    <link href="/public/styles/system.css" rel="stylesheet">
+    <script type="importmap">
+      {
+        "imports": {
+          "@sillonious/computer": "/sillyz.computer.js",
+          "@silly/tag": "/module.js",
+          "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+          "eruda": "https://esm.sh/eruda@3.0.1",
+          "statebus": "/_statebus.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <simpleton-client></simpleton-client>
+		<braid-child></braid-child>
+    <braid-parent></braid-parent>
+
+    <script src="https://unpkg.com/braid-http/braid-http-client.js"></script>
+    <script src="https://invisible-college.github.io/universal-sync/diffsync.js"></script>
+
+    <script type="module">
+      import Computer from '@sillonious/computer'
+      import module from '@silly/tag'
+      import eruda from 'eruda'
+
+      // initialize lazy components
+      new Computer(window.plan98, { registry: '/modules' })
+
+      const $parent = module('braid-parent')
+			const $child = module('braid-child', { messages: [] })
+
+			$parent.draw(target => {
+				eruda.init({ container: target });
+				eruda.show()
+				eruda.add({
+				name: 'Braid',
+					init($el) {
+						this._$el = $el;
+					},
+					show() {
+						this._$el.show()
+						this._$el.html('<iframe id="braid-panel" title="braid-debugger" src="/cdn/braid.org/braid_panel.html" style="width: 100%; height: 100%; border: none;"></iframe>');
+					},
+					hide() {
+						this._$el.hide()
+						this._$el.html('');
+					},
+					destroy() {}
+				})
+			})
+
+			$child.draw((target) => {
+				const { messages } = $child.learn()
+				
+				return messages.map(({ type, data }) => {
+					return `
+						<div data-type="${type}">
+							<label>${type}</label>
+							<pre>${JSON.stringify(data,null,4)}</pre>
+						</div>
+					`
+				}).join('')
+			})
+
+			$child.style(`
+				& [data-type="SEND"] label {
+					color: red;	
+				}
+
+				& [data-type="RECV"] label {
+					color: blue;	
+				}
+			`)
+
+			window.addEventListener("message", function (event) {
+				$child.teach({ type: 'RECV', data: event.data }, mergeMessage)
+
+				if (event.data.cmd == "loaded") {
+					let msg = {
+						cmd: "set",
+						versions: [
+							{
+								version: "ho-1",
+								parents: [],
+								patches: [{ unit: "json", range: "[1:2]", content: "hum" }],
+							},
+							{
+								version: "hi-2",
+								parents: ["ho-1"],
+								patches: [{ unit: "json", range: "[1:2]", content: "hum" }],
+							},
+						],
+						raw_messages: ["version: ho-1, json[1:2] = hum", "version: hi-2, parents: ho-1, json[1:2] = hum"],
+						headers: { "content-type": "text/plain", "merge-type": "dtt" },
+					};
+
+					$child.teach({ type: 'SEND', data: msg }, mergeMessage)
+
+					setTimeout(() => {	
+						[...document.querySelectorAll($parent.link)].map(target => {
+							const braidPanel = target.shadowRoot.getElementById("braid-panel");
+							braidPanel.contentWindow.postMessage(msg, "*");
+						})
+					}, 1)
+				}
+			});
+
+			function mergeMessage(state, payload) {
+				return {
+					...state,
+					messages: [...state.messages, payload]
+				}
+			}
+		</script>
+  </body>
+</html>

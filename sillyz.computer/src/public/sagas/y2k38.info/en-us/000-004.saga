@@ -1,0 +1,8 @@
+Go somewhere else
+
+<goober-selector
+label: Goober Selector
+go: Go
+data-action: goSomeWhereElse
+data-script: /public/elves/startup-wizard.js
+

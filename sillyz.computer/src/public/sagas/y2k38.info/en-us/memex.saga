@@ -1,0 +1,12 @@
+Everything is a Pet Name
+
+* Domains
+* Tags
+* Function
+* Files
+* Elves
+
+<action-script
+text: Start
+data-script: /public/elves/startup-wizard.js
+data-action: start

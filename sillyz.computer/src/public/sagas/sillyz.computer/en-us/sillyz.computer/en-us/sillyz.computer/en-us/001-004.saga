@@ -1,0 +1,11 @@
+Cool, we're about to go on a little journey.
+
+<action-script
+text: Let's go!
+data-action: upsold
+data-script: /public/cdn/thelanding.page/game-state.js
+
+<action-script
+text: No thanks.
+data-action: ok
+data-script: /public/cdn/thelanding.page/game-state.js

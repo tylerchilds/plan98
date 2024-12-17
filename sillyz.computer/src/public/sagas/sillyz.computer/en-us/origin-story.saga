@@ -1,0 +1,45 @@
+# Interior Computer - Then...
+
+<plan98-welcome
+url: /app/sillyz-ocarina
+
+Sillyz.Computer is a fantasy technology powered by Elves and Sagas.
+
+Elves are rarely seen, but their influence reverberates across the entire system.
+
+Sagas tell the story of why the elves do what they do and how they go about their routines.
+
+Silly is the first elf I met.
+
+Turns out, elves are a fairly serious bunch and Silly was a bit of an outcast.
+
+Together, we became clowns. Him, an elf clown and me, a human clown.
+
+@ Ty
+> Hey. I'm Ty, from inside Sillyz.Computer.
+
+Silly brought me on board his fantasy ship to be the face of his computer. Even though he's not serious like the rest of the elves, his work stands up to elven standards.
+
+Along the way, we've found other clowns to help us on our quest.
+
+He's less lonely now after finding others like him. Sally, Sully, and Shelly are also elf clowns. He's got a bit of a troupe going now in elf world.
+
+For me, it has been a bit of a whirlwind keeping in sync with their clock, since time moves differently in their world.
+
+It has been easier after I met Wally Wollaston-- a half elf, half human clown. He's navigated the liminal space his entire life and gives me advice.
+
+Anyways, we're pretty happy with the progress we've made and are ready for every clown that needs a comedy notebook.
+
+The Silly Paradigm is a lot to absorb, so to make it easier, we've set up a fake quest to prepare clowns for their true calling.
+
+The only choice you need to make now: are you ready to start the quest or would you like to figure out what the journey will entail?
+
+<action-script
+text: Begin Quest
+data-action: quest
+data-script: /public/elves/silly-wizard.js
+
+<action-script
+text: Learn More
+data-action: learn
+data-script: /public/elves/silly-wizard.js

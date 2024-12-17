@@ -1,0 +1,13 @@
+The orange tentacle propels the future and the past, forwards and back.
+
+There's a blue kazoo and an indigo umbrella.
+
+<action-script
+text: Blue Kazoo
+data-action: blueKazoo
+data-script: /public/elves/silly-wizard.js
+
+<action-script
+text: Indigo Umbrella
+data-action: indigoUmbrella
+data-script: /public/elves/silly-wizard.js

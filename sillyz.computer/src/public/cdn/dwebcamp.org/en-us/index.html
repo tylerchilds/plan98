@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>&lt;:-)</title>
+    <style>
+      :not(:defined) {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      :not(:defined)::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        animation: loader 3000ms ease-in-out alternate infinite;
+        width: 3.25in;
+        height: 3.12in;
+        opacity: .5;
+        mix-blend-mode: multiply;
+        margin: auto;
+        background: lemonchiffon;
+      }
+
+      @keyframes loader {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      @media screen {
+        body{ overflow: auto; }
+      }
+    </style>
+    <script async src="/vendor/es-module-shims.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@sillonious/brand": "/public/brand.js",
+          "@sillonious/computer": "/public/sillyz.computer.js",
+          "@silly/tag": "/public/module.js",
+          "@sillonious/saga": "/public/saga.js",
+          "@sillonious/party": "/public/elves/sillonious-party.js",
+          "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
+          "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
+          "focus-trap" : "https://esm.sh/focus-trap",
+          "statebus": "/public/_statebus.js"
+        }
+      }
+    </script>
+  </head>
+  <script>document.write(`<body pathname="${window.location.pathname}">`)</script>
+    <hello-world></hello-world>
+    Right-click to inspect the page or use the floating settings button to kick the proverbially tires.
+    <plan98-console></plan98-console>
+    <script type="module" id="lazy-bootstrap" src="/public/main.js"></script>
+  </body>
+</html>

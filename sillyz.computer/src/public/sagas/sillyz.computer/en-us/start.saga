@@ -1,0 +1,70 @@
+<plan98-welcome
+url: /app/landing-page
+
+# Interior Computer
+
+@ Piet Mondrian
+> I always confine myself to expressing the eternal (closest to the spirit) and I do so in the simplest of external forms, in order to be able to express the inner meaning as lightly veiled as possible.
+
+<sillyz-ocarina
+
+<hyper-browser
+
+@ Me
+> This is you.
+
+@ You
+
+You are a wonderfully complex person with many interests.
+
+@ Steve
+> To keep track of all your favorite things, I'm sure you have a handy, dandy notebook.
+
+@ Joe
+> I too have a handy dandy notebook.
+
+@ Ty
+> Can I show you my handy dandy notebook?
+
+# watch
+what if your life was in your watch?
+
+<app-simulator
+class: timemachine
+app: camp-map
+
+# phone
+
+what if those same apps were on your phone from the store?
+
+<app-simulator
+class: iphone
+app: camp-map
+
+# tablet
+
+what if the app was your entire device?
+
+<app-simulator
+class: ipad
+app: camp-map
+
+# tv
+what if the entire thing was a game?
+
+<app-simulator
+class: tv
+app: camp-map
+
+# embedded
+what if everything was every where?
+
+<camp-map
+
+what will you do, when given Paper&copy;&trade;&hearts;
+
+& Pneumatic Unix
+
+Pneumatic Unix is a philisophical, fantastical, pragmatic flavor that does not rely on the C programming language for the userland at all whatsoever for any reason.
+
+<mind-chaos3d

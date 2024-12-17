@@ -1,0 +1,86 @@
+html {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+body {
+  margin: 0 auto;
+  --theme: white;
+}
+
+[pathname="/"] #main {
+  padding-top: 25vh;
+  background: white;
+}
+
+header {
+  margin: 2rem 0;
+  max-height: 50vh;
+}
+
+main {
+  height: auto;
+  position: relative;
+}
+
+main xml-html > best-buy {
+  margin: 3rem auto;
+}
+
+main braid-mail {
+  max-width: 480px;
+  margin: auto;
+}
+
+main stay-tuned {
+  padding: 3rem 0;
+}
+
+img,
+video {
+  max-width: 100%;
+}
+
+body data-tooltip {
+  height: 100%;
+}
+
+mast-head img {
+  max-width: 100vmin;
+  max-height: 100vmin;
+  display: block;
+}
+
+main > xml-html {
+  font-size: 1.5rem;
+}
+
+main hypertext-action {
+  max-width: 720px;
+  margin: 1rem auto;
+}
+
+main hypertext-address {
+  max-width: 720px;
+}
+main hypertext-address {
+  max-width: 720px;
+  margin: 1rem auto;
+  font-size: 2.5rem;
+  line-height: 1;
+  font-weight: 1000;
+  text-transform: none;
+}
+
+main hypertext-quote {
+  max-width: 480px;
+  margin: 1rem auto;
+}
+
+main qr-pay {
+  padding: 1rem;
+}
+
+main action-script {
+  max-width: 280px;
+  margin: 1rem auto;
+}

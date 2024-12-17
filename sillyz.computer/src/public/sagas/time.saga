@@ -1,0 +1,26 @@
+<plan98-welcome
+tag: sillyz-ocarina
+
+<wizard-journey
+
+# Internal Computer - Day
+
+Sillyz.Computer is a toy to promote literacy and creativity, first launched from the center of the universe.
+
+Imagine this. The vastness of space. A single puddle in it. Swirly, whirly, round and round a water ball.
+
+The Paper Nautilus. A mythical creature, part descendant of sea, part ascendant of space, in alternate realities.
+
+Imagine this. Right here, right now, you are with the Paper Nautilus. Shruken. In the shell. In an egg. You are an embryo.
+
+Do you feel the outward draw of space or do you feel under the sea pressure?
+
+In other words, is the Paper Nautilus a spaceship or a submarine?
+
+<action-script
+text: A Spaceship
+data-saga: space-origin.saga
+
+<action-script
+text: A Submarine
+data-saga: sea-origin.saga
