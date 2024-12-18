@@ -6,19 +6,21 @@ const $ = elf('bayun-feedback')
 $.draw(() => {
   return getFeedback().map(({ message, type }) => {
     return `
-      <div class="feedback ${type}">
-        ${message}
-      </div>
+      <div class="feedback ${type}">${message || ''}</div>
     `
   }).join('<br>')
 })
 
 $.style(`
+  & .feedback:empty {
+    display: none;
+  }
   & .feedback {
     border: 1px solid dodgerblue;
   }
 
   & .error {
-    border-color: orange;
+    border-color: firebrick;
+    padding: 1rem;
   }
 `)

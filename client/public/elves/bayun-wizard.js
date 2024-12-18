@@ -349,7 +349,7 @@ export function setSessionId(x) {
   state['ls/bayun'].sessionId = x
 }
 export function getSessionId() {
-  return state['ls/bayun'].sessionId || {}
+  return state['ls/bayun'].sessionId || null
 }
 
 export function setEmail(x) {
