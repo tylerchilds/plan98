@@ -55,8 +55,8 @@
 
     "package-assets": "cp -r client/public sillyz.computer/src",
 
-    "native-dev": "deno task package-assets && cd sillyz.computer && deno task tauri dev",
-    "native-build": "deno task package-assets && cd sillyz.computer && NO_STRIP=true deno task tauri build --bundles appimage",
+    "native-dev": "deno task package-assets && cd sillyz.computer && tauri dev",
+    "native-build": "deno task package-assets && cd sillyz.computer && NO_STRIP=true tauri build --bundles appimage",
 
     "unix-install": "sudo cp sillyz.computer/src-tauri/target/release/bundle/appimage/sillyz_*.AppImage /home/tychi/Applications/sillyz.AppImage",
 
