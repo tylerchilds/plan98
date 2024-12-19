@@ -111,27 +111,29 @@ $.draw((target) => {
 
 	const scene = celestials().map(component)
 
-	return `
-    <div class="heads-up-display">
-      <div class="preview"></div>
-      <div>
-        <div class="library">
-          ${library(null)}
+  requestIdleCallback(() => {
+    target.innerHTML = `
+      <div class="heads-up-display">
+        <div class="preview"></div>
+        <div>
+          <div class="library">
+            ${library(null)}
+          </div>
         </div>
       </div>
-      <div class="movement">
-        <sillonious-joypro></sillonious-joypro>
-      </div>
-    </div>
-		<a-scene>
-      <a-camera>
-        <a-cursor material="color: white;"></a-cursor>
-        <!-- Or <a-entity cursor></a-entity> -->
-      </a-camera>
-			${scene.join('')}
-      <a-entity class="irix"></a-entity>
-		</a-scene>
-	`
+      <a-scene>
+        <a-entity id="rig" position="0 1.6 0">
+          <a-entity id="camera" camera="active: true" look-controls="true" rotation-reader>
+            <a-cursor material="color: white;"></a-cursor>
+            <a-entity geometry="primitive: sphere; height: 0.2; width: 0.2" position="0 0 -27"
+            material="color: firebrick; opacity: 0.5"></a-entity>
+          </a-entity>
+        </a-entity>
+        ${scene.join('')}
+        <a-entity class="irix"></a-entity>
+      </a-scene>
+    `
+  })
 }, {
   beforeUpdate,
   afterUpdate
@@ -184,7 +186,7 @@ function increment(target) {
           aCylinder({
             x: -10 + (-12 * (i % 10)),
             z: -120 + (-12 * (parseInt(i / 10)) - 5),
-            y: 4,
+            y: 40,
           }, {
             wireframe: posessed(eggs.path),
             color: 'firebrick',
@@ -203,7 +205,7 @@ function increment(target) {
           aBox({
             x: 2 * (i % 10),
             z: -2 * (parseInt(i / 10)) - 5,
-            y: 0,
+            y: 10,
             pitch: 45
           }, {
             wireframe: posessed(eggs.path),
@@ -306,7 +308,8 @@ function afterUpdate(target) {
   }
 
   {
-    preview(target.querySelector('.preview'))
+    const node = target.querySelector('.preview')
+    if(node) preview(node)
   }
 
   {

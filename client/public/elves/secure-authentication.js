@@ -133,17 +133,20 @@ const modes = {
     const companyName = getCompanyName()
 
     return `
-      <div>
-        <bayun-feedback></bayun-feedback>
+      <div class="hud">
+        <div>
+          <bayun-feedback></bayun-feedback>
+        </div>
+        <div>
+          ${companyEmployeeId}@${companyName}
+        </div>
+        <div style="text-align: right;">
+          <button data-disconnect>
+            Disconnect
+          </button>
+        </div>
       </div>
-      <div>
-        ${companyEmployeeId}@${companyName}
-      </div>
-      <div style="text-align: right;">
-        <button data-disconnect>
-          Disconnect
-        </button>
-      </div>
+      <generic-park src="/public/elves"></generic-park>
     `
   }
 }
@@ -499,6 +502,11 @@ $.style(`
     display: block;
     margin: 0 auto;
     height: 100%;
+  }
+
+  & .hud {
+    position: fixed;
+    z-index: 9001;
   }
 
   & hr {

@@ -105,12 +105,13 @@ outLoud(laugh, lololID, lolID)
 
 $.draw((target) => {
   const { saga, sidebar } = $.learn()
+  /*
   const { sessionId } = getSession()
 
   if(!sessionId && target.dataset.mode !== 'auth') {
     target.dataset.mode = 'auth'
     return `
-      <bayun-wizard></bayun-wizard>
+      <secure-authentication></secure-authentication>
     `
   }
 
@@ -121,6 +122,7 @@ $.draw((target) => {
   if(target.dataset.mode === 'auth') {
     return
   }
+  */
 
   return `
     <div class="header">
