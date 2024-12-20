@@ -270,6 +270,7 @@ function source(target) {
 
 function sourceFile(target) {
   const src = source(target)
+  state[$.link] ||= {}
   const data = state[$.link][src] || {}
 
   if(target.initialized) return data

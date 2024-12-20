@@ -532,6 +532,14 @@ $.style(`
   & .synthia-action:focus {
     color: dodgerblue;
   }
+
+  & [name="synthia"]:focus {
+    height: 50vh;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  }
 `)
 
 

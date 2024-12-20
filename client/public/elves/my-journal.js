@@ -554,7 +554,7 @@ $.style(`
   &::before {
     content: '';
     position: absolute;
-    background: var(--image), var(--color, transparent);
+    background: var(--color, transparent);
     background-blend-mode: multiply;
     background-size: cover;
     background-repeat: no-repeat;
