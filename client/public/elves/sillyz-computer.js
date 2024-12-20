@@ -276,7 +276,7 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const src = event.target.getAttribute('src') || `/app/secure-mail?src=/app/draw-term?src=/app/bulletin-board?src=${`/private/${$.link}/${new Date().toISOString()}`}.saga&uuid=${self.crypto.randomUUID()}`
+  const src = event.target.getAttribute('src') || `/app/path-finder?src=${`/private/path-finder/${self.crypto.randomUUID()}`}`
 
   event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
   self.history.pushState({ type: `${$.link}-navigation`, href: window.location.href }, "");

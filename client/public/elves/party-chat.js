@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
@@ -22,7 +22,7 @@ const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 const bayunCore = BayunCore.init(appId, appSecret, appSalt,
   localStorageMode, enableFaceRecognition, baseURL);
 
-const $ = elf('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
+const $ = module('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
 
 export async function getMyGroups() {
   const { sessionId } = getSession()

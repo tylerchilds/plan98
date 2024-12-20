@@ -53,14 +53,15 @@ const skills = [
   'Survival',
   'Thievery',
 ]
+const stock = {
+  character: '',
+  classification: '',
+  ancestry: ''
+}
 
 function read($) {
   const href = window.location.href
-  return $.learn()[href] || {
-    character: 'Origin Wildcloak',
-    classification: 'Bard',
-    ancestry: 'Halfling'
-  }
+  return $.learn()[href] || stock
 }
 
 function write($, data, merge = (node, data, key) => {
@@ -117,14 +118,20 @@ origin.draw(target => {
 
   return `
     <h1>
-      Pathfinder (Second Edition)
+      ${character || '??????'}
     </h1>
+    <h2>
+      ${ancestry || '????'} / ${classification || '?????'}
+    </h2>
     <div class="navigation">
       <a href="${self.location.href}" target="top">
-        Bookmark
+        Permalink
+      </a>
+      <a href="/app/my-journal">
+        Journal
       </a>
       <a href="/app/bulletin-board?src=${target.getAttribute('src') || ''}">
-        Open Inventory
+        Launch
       </a>
     </div>
     <div class="character">
@@ -135,12 +142,14 @@ origin.draw(target => {
       <label class="field">
         <span class="label">Ancestry</span>
         <select data-bind name="ancestry">
+          <option disabled>--select--</option>
           ${ancestryOptions}
         </select>
       </label>
       <label class="field">
         <span class="label">Class</span>
         <select data-bind name="classification">
+          <option disabled>--select--</option>
           ${classOptions}
         </select>
       </label>
@@ -156,17 +165,15 @@ origin.draw(target => {
       ${
         skills.map(skill => {
           return `
+            <span class="label">${skill}</span>
             <div class="skill">
               <div class="skill-value">
-                <label class="field">
-                  <span class="label">${skill}</span>
-                  <input data-bind name="${skill}" value="${read(origin)[skill] || ''}">
-                </label>
+                <input data-bind name="${skill}" value="${read(origin)[skill] || ''}">
               </div>
               <div class="skill-math">
               </div>
               <div class="skill-notes">
-                <textarea name="${skill}-note">${read(origin)[`${skill}-note`] || ''}</textarea>
+                <textarea data-bind name="${skill}-note">${read(origin)[`${skill}-note`] || ''}</textarea>
               </div>
             </div>
           `
@@ -204,6 +211,10 @@ origin.style(`
   & .skill {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  }
+
+  & .skill-value input {
+    max-width: 100%;
   }
 
   & .skill .field {

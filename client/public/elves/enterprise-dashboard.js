@@ -130,7 +130,7 @@ $.draw((target) => {
         <span style="display: grid;">
           <sl-icon name="layout-sidebar-inset"></sl-icon>
         </span>
-        <span class="logomark">Hive Labworks</span>
+        <span class="logomark">Sillyz Enterprise</span>
       </button>
       <div class="admin-actions">
         <button data-logout>

@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import module from '@silly/tag'
 import * as protomapsL from 'protomaps-leaflet'
 import { doingBusinessAs } from './sillonious-brand.js'
 
@@ -54,7 +54,7 @@ function mount(target) {
     */
   return true
 }
-const $ = elf('middle-earth')
+const $ = module('middle-earth')
 
 $.draw((target) => {
   $.learn()

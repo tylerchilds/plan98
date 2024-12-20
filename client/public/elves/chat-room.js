@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import supabase from '@sillonious/database'
@@ -17,7 +17,7 @@ const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
 */
 
 
-const $ = elf('chat-room', { jokes: {} })
+const $ = module('chat-room', { jokes: {} })
 
 function getRoom(target) {
   return target.closest($.link).getAttribute('room')

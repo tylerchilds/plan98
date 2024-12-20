@@ -80,7 +80,7 @@ function render(target) {
       node.innerHTML = `
         <button class="tray-wake" data-tray="${tray}"></button>
         <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
-          <button class="tray-action tray-close" data-tray="${tray}" data-tooltip="close">
+          <button class="tray-action tray-close" data-tray="${tray}">
             <sl-icon name="x-lg"></sl-icon>
           </button>
           <div class="grabber minimizable" data-tooltip="grab and drag"></div>
@@ -1484,7 +1484,11 @@ function launchTray(event) {
       : '/app/giggle-search?query=' + buffer
 
 
-  window.top.location.href = url 
+  if(url === 'about:blank') {
+    window.top.location.href = window.location.href 
+  } else {
+    window.top.location.href = url
+  }
 }
 
 function preventDefault(e) { e.preventDefault() }

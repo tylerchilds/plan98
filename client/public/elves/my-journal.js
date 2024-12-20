@@ -13,6 +13,7 @@ const user = gun.user().recall({ sessionStorage: true })
 const initial = {
   authenticated: false,
   bookmarks: [],
+  tab: 'bookmarks',
   alias: '',
   pass: '',
   href: '',
@@ -55,9 +56,32 @@ function add(timestamp) {
   }
 }
 
+const tabs = {
+  bookmarks: (target) => {
+    return `
+      <div class="book">${zune(target)}</div>
+    `
+  },
+  notes: (target) => {
+    return `
+      <iframe src="/app/private-notes?id=${$.link}"></iframe>
+    `
+  },
+  account: (target) => {
+    return `
+      <button class="button" id="signout" type="submit">
+        Sign Out
+      </button>
+      <button class="button --small" id="factory-reset" type="submit">
+        Factory Reset
+      </button>
+    `
+  },
+}
+
 $.draw(target => {
   const data = $.learn()
-  const {message,bookmarks, authenticated, authorized, alias, pass, href, text} = data
+  const {tab, message,bookmarks, authenticated, authorized, alias, pass, href, text} = data
 
   const empty = `
     <form class="block">
@@ -77,27 +101,21 @@ $.draw(target => {
     </form>
   `
 
-  const halfway = `
-    hi
-  `
-
   const regular = `
-    <div class="actions">
-      <div class="menu-item">
-        <button data-menu-target="me">
-          me
-        </button>
-        <div class="menu-actions" data-menu="me">
-          <button class="button" id="signout" type="submit">
-            Sign Out
-          </button>
-          <button class="button --small" id="factory-reset" type="submit">
-            Factory Reset
-          </button>
-        </div>
-      </div>
+    <div class="tabs">
+      <button ${tabMetadata('bookmarks', tab)}>
+        Bookmarks
+      </button>
+      <button ${tabMetadata('notes', tab)}>
+        Notes
+      </button>
+      <button ${tabMetadata('account', tab)}>
+        Account
+      </button>
     </div>
-    <div class="book">${zune(target)}</div>
+    <div class="active-tab">
+      ${tabs[tab](target)}
+    </div>
   `
 
   const { image, color } = currentBusiness(plan98.host)
@@ -107,18 +125,24 @@ $.draw(target => {
   return `
     <div class="inner">
       ${authenticated
-        ? authorized
-          ? regular
-          : halfway
+        ? regular
         : empty
       }
     </div>
   `
 }, { beforeUpdate, afterUpdate })
 
+function tabMetadata(label, active) {
+  return `data-tab="${label}" ${active === label ? 'class="active"':''}`
+}
+
+$.when('click', '[data-tab]', (event) => {
+  const { tab } = event.target.dataset
+  $.teach({ tab })
+})
+
 function zune(target) {
-  const { hypermedia, safeMode, bookmarks, text, href } = $.learn()
-  const src = hypermedia || target.getAttribute('src')
+  const { safeMode, bookmarks, text, href } = $.learn()
   const myBookmarks = bookmarks.map((timestamp) => elvish($.learn()[timestamp])).join('')
   console.log(myBookmarks)
   const saga = render(`
@@ -192,15 +216,13 @@ text: My Journal
 
   return `
     <div class="zune">
-      ${src ? `<iframe src="${src}"></iframe>`:''}
       <form id="post" class="new-bookmark" method="post">
-        <input class="keyable" placeholder="bookmark" name="text" value="${text}">
+        <input class="keyable" placeholder="label" name="text" value="${text}">
 
-        <input class="keyable" placeholder="link" name="href" value="${href}">
+        <input class="keyable" placeholder="https://" name="href" value="${href}">
         <button type="submit" class="button square" aria-label="bookmark">
           <sl-icon name="journal-bookmark"></sl-icon>
         </button>
-        <button class="nonce" aria-label="new" data-action="new"></button>
       </form>
 
 
@@ -235,7 +257,7 @@ function alphabetical(xmlHTML) {
     const lowerFirst = x.innerText[0].toLowerCase()
     if(!usedLetters[lowerFirst]) {
       usedLetters[lowerFirst] = true
-      tile.innerHTML = `<a class="category" href="#back-to-top">${lowerFirst}</a><a name="${$.link}-${lowerFirst}" class=""></a>`
+      tile.innerHTML = `<a name="${$.link}-${lowerFirst}" class=""></a><a class="category" href="#back-to-top">${lowerFirst}</a>`
     }
 
     x.classList.add('app-action')
@@ -243,6 +265,7 @@ function alphabetical(xmlHTML) {
     node.appendChild(tile)
   });
   return `
+    <a name="back-to-top"></a>
     <div class="categories">
       ${
         Object
@@ -252,7 +275,6 @@ function alphabetical(xmlHTML) {
           .join('')
       }
     </div>
-    <a name="back-to-top"></a>
     ${node.outerHTML}
   `
 }
@@ -298,22 +320,6 @@ function afterUpdate(target) {
     }
   }
 
-  {
-    if(!target.observer) {
-      const options = {
-        root: target,
-        rootMargin: "0px",
-        threshold: 0,
-      };
-
-      target.observer = new IntersectionObserver(intersectionCallback, options);
-    }
-
-    [...target.querySelectorAll('.fake-iframe')].map((node) => {
-      target.observer.observe(node);
-    })
-  }
-
   { // recover icons from the virtual dom
     [...target.querySelectorAll('sl-icon')].map(ogIcon => {
       const iconParent = ogIcon.parentNode
@@ -323,35 +329,7 @@ function afterUpdate(target) {
       iconParent.appendChild(icon)
     })
   }
-
-  {
-    const { hypermedia } = $.learn()
-    if(target.hypermedia !== hypermedia) {
-      target.hypermedia = hypermedia
-      const zune = target.querySelector('.zune')
-
-      if(zune) {
-        zune.scrollTop = 0
-      }
-    }
-  }
-
 }
-
-function intersectionCallback(entries, options) {
-  entries.forEach((entry) => {
-    if(entry.isIntersecting) {
-      const { src,title } = entry.target.dataset
-
-      entry.target.innerHTML = `
-        <iframe src="${src}" title="${title}"></iframe>
-      `
-    } else {
-      entry.target.innerHTML = ''
-    }
-  });
-}
-
 
 function elvish(bookmark) {
   const { href, text } = bookmark
@@ -395,82 +373,6 @@ function rules(anchor) {
   return [...actions, ...thirdPartyActions(anchor)]
 }
 
-function createExternalLinkAction(href) {
-  return {
-    text: 'launch externally',
-    action: 'openExternal',
-    script: import.meta.url,
-    href
-  }
-}
-
-export function openExternal(event) {
-  const { href } = event.target.dataset
-  self.open(href, '_blank')
-  $.teach({ contextActions: null })
-}
-
-function createPlayAction(href) {
-  return {
-    text: 'play now',
-    action: 'playNow',
-    script: import.meta.url,
-    href
-  }
-}
-
-export function playNow(event) {
-  const { href } = event.target.dataset
-
-  const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
-  walkman.src = href
-  walkman.play()
-  $.teach({ audioPlaying: true, currentTrack: href, contextActions: null })
-}
-
-function createPlaylistAction(href) {
-  return {
-    text: 'to playlist',
-    action: 'toPlaylist',
-    script: import.meta.url,
-    href
-  }
-}
-
-export function toPlaylist(event) {
-  const { audioPlaying } = $.learn()
-  const { href } = event.target.dataset
-  state['ls/mp3'].length += 1
-  state['ls/mp3'].list.push(href)
-
-  if(!audioPlaying) {
-    const walkman = event.target.closest($.link).querySelector('[name="walkman"]')
-    walkman.src = href
-    walkman.play()
-  }
-
-  $.teach({ contextActions: null, playlistVisible: true, audioPlaying: true })
-}
-
-$.when('contextmenu','.zune .app-action', promptContext)
-
-function promptContext(event) {
-  event.preventDefault()
-  const actions = rules(event.target)
-
-  if(actions.length > 0) {
-    $.teach({ contextActions: actions })
-  }
-}
-
-export function clearWorkspace(event) {
-  const { workspace } = event.target.dataset
-  $.teach({  [workspace]: null, contextActions: null })
-  requestActionMenu(null)
-}
-
-
-
 let clearWorkspaceTimer
 $.when('touchstart', '.zune .app-action', startClearWatch)
 $.when('touchend', '.zune .app-action', endClearWatch)
@@ -510,16 +412,11 @@ $.when('click', '.zune .app-action', async (event) => {
         }
       })
     } else {
-      $.teach({ hypermedia: event.target.href })
+      window.location.href = event.target.href
     }
   } else {
     $.teach({ longpress: false })
   }
-})
-
-$.when('click', '[data-action="new"]', (event) => {
-  const visibility = 'private' // 'public'
-  window.location.href = `/app/bulletin-board?src=/${visibility}/${$.link}/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
 })
 
 $.when('click', '[data-href]', (event) => {
@@ -639,6 +536,21 @@ $.style(`
     overflow: hidden;
   }
 
+  & .actions {
+    background: white;
+  }
+
+  & .actions button {
+    background: white;
+    color: dodgerblue;
+  }
+
+  & .actions button:hover,
+  & .actions button:focus, {
+    background: dodgerblue;
+    color: white;
+  }
+
   &::before {
     content: '';
     position: absolute;
@@ -649,12 +561,6 @@ $.style(`
     background-position: center;
     inset: 0;
     overflow: hidden;
-  }
-
-  & .book {
-    height: 100%;
-    position: absolute;
-    inset: 0;
   }
 
   & .card {
@@ -696,14 +602,14 @@ $.style(`
     width: 100%;
     max-height: 100%;
     margin: auto;
-    padding: 2rem 0;
     height: 100%;
     display: grid;
+    grid-template-rows: auto 1fr;
   }
 
   & form {
-    background: rgba(0,0,0,.85);
-    color: rgba(255,255,255,85);
+    color: rgba(0,0,0,.85);
+    background: rgba(255,255,255,.85);
     padding: 1rem;
     margin: auto;
     display: flex;
@@ -737,7 +643,8 @@ $.style(`
     padding: .5rem;
     width: 100%;
     background: transparent;
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
+    border: 1px solid rgba(0,0,0,.1);
     height: 2rem;
     padding: 0 .5rem;
   }
@@ -759,9 +666,9 @@ $.style(`
 
   & .new-bookmark {
     display: grid;
-    grid-template-columns: 1fr 1fr 2rem 2rem;
+    grid-template-columns: 1fr 1fr 2rem;
     margin-bottom: 1rem;
-    background: rgba(0,0,0,.85);
+    background: white;
     font-size: 1rem;
   }
 
@@ -774,9 +681,8 @@ $.style(`
     font-weight: 100;
     font-size: 2rem;
     line-height: 1;
-    background: black;
-    background-image: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.95)), linear-gradient(var(--color), var(--accent-color-0));
-    color: rgba(255,255,255,.65);
+    background: white;
+    color: rgba(0,0,0,.65);
     height: 100%;
     overflow-y: auto;
     display: block;
@@ -812,12 +718,12 @@ $.style(`
 
   & .zune a:link,
   & .zune a:visited {
-    color: rgba(255,255,255,.65);
+    color: dodgerblue;
   }
 
   & .zune a:hover,
   & .zune a:focus {
-    color: rgba(255,255,255,1);
+    color: navy;
   }
 
   & .zune a:active {
@@ -838,7 +744,7 @@ $.style(`
     margin: 1rem 0 0;
     display: inline-block;
     padding: 0;
-    border: 1px solid rgba(255,255,255,.65);
+    border: 1px solid rgba(0,0,0,.25);
     line-height: 1;
     aspect-ratio: 1;
     opacity: .65;
@@ -853,6 +759,22 @@ $.style(`
     opacity: 1;
   }
 
+  & .tabs {
+    background: black;
+    display: flex;
+    gap: .5rem;
+    padding: .5rem .5rem 0;
+  }
+
+  & [data-tab] {
+    background: lemonchiffon;
+    border: none;
+    padding: .5rem 1rem;
+    border-radius: .5rem .5rem 0 0;
+  }
+  & [data-tab].active {
+    background: white;
+  }
 
 `)
 
