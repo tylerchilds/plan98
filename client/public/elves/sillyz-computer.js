@@ -38,7 +38,7 @@ $.when('click', '.synthia-clear', (event) => {
   event.preventDefault()
   const node = event.target.closest($.link).querySelector('[name="synthia"]')
 
-  $.teach({ calculation: null, error: false, promptActive: false })
+  $.teach({ calculation: null, error: false })
 })
 
 $.draw(target => {
@@ -185,7 +185,7 @@ function escapeHyperText(text = '') {
 }
 
 function computer(node) {
-  const { promptHeight, calculation, code, promptActive } = $.learn()
+  const { calculation, code } = $.learn()
   innerHTML(node, `
     <div class="suggestion-box">${results(calculation)}</div>
 
@@ -193,13 +193,11 @@ function computer(node) {
       <button data-calculate class="synthia-action">
         <sl-icon name="calculator"></sl-icon>
       </button>
-      <div class="prompt ${promptActive ? 'focused' : ''}" ${ promptHeight ? `style="--prompt-height: ${promptHeight}px;"`:''}>
-        <div class="code-canvas">
-          <textarea rows="1" name="synthia" placeholder="prompt synthia" autocomplete="off">${escapeHyperText(code)||''}</textarea>
-          ${code ? `<button class="synthia-action synthia-clear">
-            <sl-icon name="x-lg"></sl-icon>
-          </button>`:''}
-        </div>
+      <div class="prompt">
+        <textarea rows="1" name="synthia" placeholder="prompt synthia" autocomplete="off">${escapeHyperText(code)||''}</textarea>
+        ${code ? `<button class="synthia-action synthia-clear">
+          <sl-icon name="x-lg"></sl-icon>
+        </button>`:''}
       </div>
       <button data-voice class="synthia-action">
         <sl-icon name="mic"></sl-icon>
@@ -469,15 +467,6 @@ $.style(`
     right: 0;
   }
 
-
-  & .title-bar .prompt {
-    position: relative;
-  }
-
-  & .title-bar .prompt.focused {
-    position: static;
-  }
-
   & .prompt .synthia-clear {
     display: none;
   }
@@ -502,20 +491,6 @@ $.style(`
     opacity: .5;
     transition: opacity 100ms;
   }
-
-  & code-canvas {
-    height: 100%;
-  }
-  & .focused .code-canvas {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: var(--prompt-height);
-    min-height: 28px;
-    max-height: 50vh;
-  }
-
 
   & .title-bar textarea {
     border: 1px solid saddlebrown;
@@ -596,14 +571,3 @@ function encode(url) {
 function decode(encodedUrl) {
   return decodeURIComponent(encodedUrl.replace(/\+/g, '%20'));
 }
-
-$.when('focus', 'textarea', (event) => {
-  $.teach({ promptHeight: event.target.scrollHeight, promptActive: true })
-});
-$.when('input', 'textarea', (event) => {
-  $.teach({ promptHeight: event.target.scrollHeight })
-});
-
-$.when('blur', 'textarea', (event) => {
-  $.teach({ promptActive: false })
-});
