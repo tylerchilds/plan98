@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { user as person, subscribe, save, load } from './my-journal.js'
 import 'gun'
 import 'gun/open'
 const gun = window.Gun(['https://gun.1998.social/gun']);
@@ -20,17 +21,13 @@ function write($, id, data, merge = (node, data, key) => {
     })
 }
 
-$.draw((target) => {
-  if(!target.subscribed) {
-    target.subscribed = true
-    requestIdleCallback(() => {
-      gun.get($.link).get(target.id).open((data) => {
-        $.teach({[target.id]: data})
-      });
-    })
-  }
+function update(id, data) {
+  $.teach({[id]: data})
+}
 
-  const data = read($, target.id)
+$.draw((target) => {
+  subscribe($, target, update)
+  const data = load($, target.id, update)
   const list = Object.keys(data)
   return `
     <button data-new>New Note</button>
@@ -65,12 +62,13 @@ $.when('click', '[data-new]', (event) => {
     id,
     createdAt: new Date().toJSON()
   }
-  write($, root.id, {
+  save($, root.id, {
     [id]: data
   })
-  gun.get($.link).get(root.id).open((data) => {
-    $.teach({[root.id]: data})
-  });
+  const cache = load($, root.id, function callback(id, data) {
+    $.teach({[id]: data})
+  })
+  console.log(cache)
 })
 
 $.when('click', '.preview', (event) => {

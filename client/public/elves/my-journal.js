@@ -3,13 +3,14 @@ import { currentBusiness } from './sillonious-brand.js'
 import { render } from "@sillonious/saga"
 import 'gun'
 import 'gun/sea'
+import 'gun/open'
 import natsort from 'natsort'
 
 const Gun = window.Gun
 
 let bookmark = ''
 const gun = Gun(['https://gun.1998.social/gun']);
-const user = gun.user().recall({ sessionStorage: true })
+export const user = gun.user().recall({ sessionStorage: true })
 const initial = {
   authenticated: false,
   bookmarks: [],
@@ -21,6 +22,39 @@ const initial = {
 }
 
 const $ = module('my-journal', initial)
+
+user.get('alias').once((alias) => {
+  $.teach({ alias })
+});
+
+export function alias() {
+  return $.learn().alias
+}
+
+export function load($, id, callback=()=>null) {
+  user.get($.link).get(id).open((data) => {
+    requestIdleCallback(() => callback(id, data))
+  })
+  return $.learn()[id] || {}
+}
+
+export function save($, id, data, merge = (node, data, key) => {
+  node.get(key).put(data[key])
+}) {
+  Object
+    .keys(data)
+    .forEach(key => {
+      const entry = user.get($.link).get(id)
+      merge(entry, data, key)
+    })
+}
+
+export function subscribe($, target, callback=()=>null) {
+  if(!target.subscribed) {
+    target.subscribed = true
+    load($, target.id, callback)
+  }
+}
 
 export function bookmarks() {
 
@@ -68,13 +102,17 @@ const tabs = {
     `
   },
   account: (target) => {
+    const { alias } = $.learn()
     return `
-      <button class="button" id="signout" type="submit">
-        Sign Out
-      </button>
-      <button class="button --small" id="factory-reset" type="submit">
-        Factory Reset
-      </button>
+      <div class="page">
+        ${alias}
+        <button class="button" id="signout" type="submit">
+          Sign Out
+        </button>
+        <button class="button --small" id="factory-reset" type="submit">
+          Factory Reset
+        </button>
+      </div>
     `
   },
 }
@@ -776,6 +814,9 @@ $.style(`
     background: white;
   }
 
+  & .page {
+    background: white;
+  }
 `)
 
 $.when('click', '*', (event) => {
