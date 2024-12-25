@@ -124,7 +124,7 @@ origin.draw(target => {
       ${ancestry || '????'} / ${classification || '?????'}
     </h2>
     <div class="navigation">
-      <a href="${self.location.href}" target="top">
+      <a href="${self.location.href}">
         Permalink
       </a>
       <a href="/app/my-journal">
