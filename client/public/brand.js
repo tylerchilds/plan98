@@ -137,9 +137,7 @@ export const doingBusinessAs = {
     contact: reverseProxyLookup,
     brandHue: 0,
     brandRange: 360,
-    color: new Color('lch', [50, 75, 55])
-      .display()
-      .toString({format: 'hex'}),
+    color: 'lemonchiffon'
   },
   '1998.social': {
     emote: ':D',

@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <iframe src="/app/silly-wizard?dialect=en-us"></iframe>
+    <iframe src="/app/my-journal?dialect=en-us"></iframe>
   `
 })
 

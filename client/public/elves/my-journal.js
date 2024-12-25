@@ -117,13 +117,23 @@ const tabs = {
   },
 }
 
+$.when('click', '[data-escape]', function escape() {
+  self.dispatchEvent(new KeyboardEvent("keydown",{'key': 'Escape'}));
+})
+
 $.draw(target => {
   const data = $.learn()
   const {tab, message,bookmarks, authenticated, authorized, alias, pass, href, text} = data
 
   const empty = `
+    <button data-escape>
+      Escape
+    </button>
     <form class="block">
-      <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
+      <a href="/app/sillyz-computer">
+        <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
+      </a>
+      For those that would dare to giggle, speak the magic word and follow the nose wherever it goes
       <label class="field">
         <span class="label">Player</span>
         <input class="keyable" name="alias" value="${alias}" placeholder="handle">
@@ -134,8 +144,15 @@ $.draw(target => {
       </label>
       <div class="message">${message||''}</div>
       <button class="button" id="sign-a-panda-in" type="submit">
-        Sign a Panda in
+        Creaupdate
       </button>
+      <hr>
+      <a href="/app/path-finder?id=${new Date().toJSON()}">
+        Play as Guest
+      </a>
+      <a href="#">
+        (coming soon) watch how it was made
+      </a>
     </form>
   `
 

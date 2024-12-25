@@ -4,6 +4,8 @@ const processConfiguration = {
   notorious: 'sillonious',
   client: true,
   reverseClient: false,
+  api: true,
+  reverseApi: false,
   server: true,
   reverseServer: false,
   identity: false,
@@ -33,6 +35,16 @@ const processConfiguration = {
     reverseClient: {
       "id": "plan98-reverse-client",
       "cmd": "deno task reverse-client",
+      "autostart": true
+    },
+    api: {
+      "id": "plan98-start-api",
+      "cmd": "deno task start-api",
+      "autostart": true
+    },
+    reverseApi: {
+      "id": "plan98-reverse-api",
+      "cmd": "deno task reverse-api",
       "autostart": true
     },
     server: {
