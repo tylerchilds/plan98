@@ -1,7 +1,7 @@
 #!/bin/sh
 
-apt update
-apt install \
+sudo apt update
+sudo apt install \
   git \
   vim \
   silversearcher-ag \
@@ -24,4 +24,4 @@ apt install \
 deno task native-build
 deno task unix-install
 
-reboot
+sudo reboot
