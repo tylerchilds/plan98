@@ -4,9 +4,9 @@ apt update
 apt install \
   git \
   vim \
-  kitty \
-  tmux \
   silversearcher-ag \
+  tmux \
+  kitty \
   sway \
   waybar \
   libwebkit2gtk-4.1-dev \

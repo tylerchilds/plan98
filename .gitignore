@@ -1,9 +1,8 @@
 backups/
-backpack/
 .env
 app/.envrc
 dist
-rust-9p-master/
+subsystems/
 cloud.exe
 deno.lock
 npm/
