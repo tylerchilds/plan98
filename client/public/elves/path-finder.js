@@ -60,18 +60,18 @@ const stock = {
 }
 
 function read($) {
-  const href = window.location.href
-  return $.learn()[href] || stock
+  const path = window.location.pathname + window.location.search
+  return $.learn()[path] || stock
 }
 
 function write($, data, merge = (node, data, key) => {
   node.get(key).put(data[key])
 }) {
-  const href = window.location.href
+  const path = window.location.pathname + window.location.search
   Object
     .keys(data)
     .forEach(key => {
-      const entry = gun.get($.link).get(href)
+      const entry = gun.get($.link).get(path)
       merge(entry, data, key)
     })
 }
@@ -80,10 +80,10 @@ const origin = elf('path-finder')
 
 function subscribe(target) {
   target.subscribed = true
-  const href = window.location.href
-  const entry = gun.get(origin.link).get(href)
+  const path = window.location.pathname + window.location.search
+  const entry = gun.get(origin.link).get(path)
   entry.open((data) => {
-    origin.teach({[href]: data})
+    origin.teach({[path]: data})
   });
 }
 
