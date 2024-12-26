@@ -27,4 +27,3 @@ cargo build --verbose --release
 mkdir -p /home/$USER/thumb-drive
 # ensure applications folder
 mkdir -p /home/$USER/Applications
-mkdir -p /home/$USER/.pocketbase/bin
