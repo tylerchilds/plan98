@@ -24,7 +24,7 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 curl -fsSL https://deno.land/x/install/install.sh | sh
 
 # install tauri
-cargo install tauri-cli --version "^2.0.0" --locked --force
+cargo install tauri-cli --version "^2.0.0" --locked
 
 # install nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
