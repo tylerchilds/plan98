@@ -40,6 +40,8 @@ cd subsystems/backpack-main
 # back to start
 cd -
 
+source ~/.bashrc
+
 # ensure a mount point for the thumb drive
 mkdir -p /home/$USER/thumb-drive
 # ensure applications folder

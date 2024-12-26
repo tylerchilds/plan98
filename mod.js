@@ -49,7 +49,7 @@ const processConfiguration = {
     },
     server: {
       "id": "plan98-start-server",
-      "cmd": "plan98client=$(pwd)/client; cd rust-9p-master/example/unpfs && cargo run --release 'tcp!0.0.0.0!8888' $plan98client",
+      "cmd": "deno task start-server",
       "autostart": true
     },
     reverseServer: {

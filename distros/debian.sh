@@ -24,4 +24,3 @@ sudo apt install \
 deno task native-build
 deno task unix-install
 
-sudo reboot
