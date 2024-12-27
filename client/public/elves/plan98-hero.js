@@ -278,6 +278,7 @@ $.draw(() => {
   if(!performing) {
     return `
       <form class="pianola" method="get">
+        <multi-select id="plan98-instruments5" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
         <label class="field">
           <span class="label">Song</span>
           <select name="song-list">
@@ -285,6 +286,7 @@ $.draw(() => {
           </select>
         </label>
         <multi-select id="plan98-instruments" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
+        <multi-select id="plan98-instruments3" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
         <button type="submit">
           Perform
         </button>
@@ -397,6 +399,9 @@ $.when('click', '.octave-up', octaveUp)
 $.when('click', '.octave-down', octaveDown)
 $.when('click', '.pitch-up', pitchUp)
 $.when('click', '.pitch-down', pitchDown)
+$.when('change', 'multi-select', (event) => {
+  console.log('changed', event.target.id)
+})
 
 $.style(`
   & {

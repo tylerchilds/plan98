@@ -53,10 +53,11 @@ $.draw(target => {
   const {
     selections,
     query,
+    focused
   } = getState(target)
 
   return `
-    <div class="field multiple">
+    <div class="field multiple ${focused ? 'focused': ''}">
       <label class="label" for="field-${target.id}">${label}</label>
       <div class="selections">
         ${selections.map((item) => {
@@ -64,7 +65,7 @@ $.draw(target => {
             <span class="tab">
               ${item.option}
               <button data-remove="${item.option}">
-                X
+                x
               </button>
             </span>`
         }).join('')}
@@ -84,7 +85,6 @@ $.draw(target => {
         focused
       } = getState(target)
       const maybies = target.querySelector('.suggestions')
-      console.log({ focused })
       if(focused && maybies) {
         const start = Math.max(suggestIndex - 5, 0)
         const end = Math.min(suggestIndex + 5, suggestions.length)
@@ -102,14 +102,13 @@ $.draw(target => {
               `
             }).join('')}</div>
         `)
-      } else if(maybies) {
-        maybies.innerHTML = null
       }
     }
   }
 })
 
 function defaultMerge(state, payload) {
+  console.log('id', payload.id)
   return {
     ...state,
     [payload.id]: {
@@ -121,12 +120,12 @@ function defaultMerge(state, payload) {
 }
 
 function setState(target, data, merge = defaultMerge) {
-  const id = target.closest($.link)
+  const id = target.closest($.link).id
   $.teach({ data, id }, merge)
 }
 
 function getState(target) {
-  const id = target.closest($.link)
+  const id = target.closest($.link).id
   return $.learn()[id] || emptySelector
 }
 
@@ -201,6 +200,7 @@ $.when('click', '.result', event => {
 })
 
 function addItem(target, item) {
+  target.closest($.link).dispatchEvent(new Event('change'))
   setState(target, item, (state, payload) => {
     return {
       ...state,
@@ -213,6 +213,7 @@ function addItem(target, item) {
 }
 
 function removeItem(target, item) {
+  target.closest($.link).dispatchEvent(new Event('change'))
   setState(target, item, (state, payload) => {
     const index = state[payload.id].selections.findIndex(({option}) => {
       return option === payload.data
@@ -258,6 +259,10 @@ $.when('blur', '.query', event => {
 })
 
 $.style(`
+  & .field.focused {
+    position: relative;
+    z-index: 10;
+  }
 
   & .suggestions {
     display: block;
@@ -288,10 +293,15 @@ $.style(`
     inset: 0;
     height: 300px;
     overflow: auto;
-    z-index: 10;
+    z-index: 100;
     max-height: calc(100vh - 3rem);
     display: flex;
     flex-direction: column;
+    display: none;
+  }
+
+  & .focused .suggestion-box {
+    display: block;
   }
 
   & .suggestion-box .result {
@@ -318,5 +328,15 @@ $.style(`
     background-color: var(--button-color, dodgerblue);
   }
 
-
+  & [data-remove] {
+    background: black;
+    color: white;
+    border: none;
+    aspect-ratio: 1;
+    padding: 2px 8px 8px;
+    display: inline-grid;
+    place-items: center;
+    border-radius: 100%;
+    border: none;
+  }
 `)
