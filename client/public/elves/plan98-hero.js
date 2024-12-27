@@ -278,7 +278,7 @@ $.draw(() => {
   if(!performing) {
     return `
       <form class="pianola" method="get">
-        <multi-select id="plan98-instruments5" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
+        <single-select id="plan98-instruments5" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></single-select>
         <label class="field">
           <span class="label">Song</span>
           <select name="song-list">
