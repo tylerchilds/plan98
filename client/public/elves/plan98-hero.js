@@ -1,9 +1,7 @@
 import elf from "@silly/elf"
-import { innerHTML } from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import Color from "colorjs.io"
-import lunr from 'lunr'
 
 import party, {
   hostPressesStartStop,
@@ -16,21 +14,7 @@ import party, {
   anybodyPressesMode,
 } from '@sillonious/party'
 
-let current
-// load samples / choose 4 random instruments from the list //
-const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 let synths = []
-
-const documents = []
-const idx = lunr(function () {
-  this.ref('instrument')
-  this.field('instrument')
-
-  instruments.map((instrument) => {
-    this.add({ instrument })
-    documents.push({ instrument })
-  })
-})
 
 const $ = elf('plan98-hero', {
   colors: [],
@@ -43,107 +27,7 @@ const $ = elf('plan98-hero', {
   activeRegisters: [],
   activeMotions: [],
   frames: {},
-  selections: [],
-  suggestions: idx.search(''),
-  suggestIndex: null,
   tray: 'banjolele'
-})
-
-function setState(tray, payload) {
-  $.teach(payload, function merge(state) {
-    return {
-      ...state,
-      [tray]: {
-        ...state[tray],
-        ...payload
-      }
-    }
-  })
-}
-
-
-const down = 40;
-const up = 38;
-const enter = 13;
-$.when('keydown', '[name="query"]', event => {
-  const { suggestionsLength, suggestIndex } = $.learn()
-  if(event.keyCode === down) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
-    if(nextIndex >= suggestionsLength -1) return
-    $.teach({ suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === up) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
-    if(nextIndex < 0) return
-    $.teach({ suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === enter && suggestIndex !== null) {
-    event.preventDefault()
-    const { suggestions, suggestIndex } = $.learn()
-    const item = documents.find(y => {
-      return suggestions[suggestIndex].ref === y.instrument
-    })
-
-    if(item) {
-      $.teach(item, (state, payload) => {
-        return {
-          ...state,
-          selections: [...new Set([...state.selections, payload])]
-        }
-      })
-      return
-    }
-  }
-})
-
-$.when('click', '.result', event => {
-  event.preventDefault()
-  const { suggestions } = $.learn()
-
-  const suggestIndex = parseInt(event.target.dataset.index)
-
-  $.teach({
-    suggestIndex
-  })
-
-  const item = documents.find(y => {
-    return suggestions[suggestIndex].ref === y.instrument
-  })
-
-  if(item) {
-    $.teach({
-      preventBlur: true
-    })
-    event.target.closest($.link).querySelector('[name="query"]').focus()
-
-    $.teach(item, (state, payload) => {
-      return {
-        ...state,
-        selections: [...new Set([...state.selections, payload])]
-      }
-    })
-    return
-  }
-})
-
-
-$.when('input', '[name="query"]', (event) => {
-  const { value } = event.target;
-  const { tray } = event.target.dataset
-  setState(tray, { buffer: value })
-
-  const suggestions = idx.search(value)
-  $.teach({
-    suggestions,
-    suggestIndex: null,
-    query: value
-  })
 })
 
 $.when('submit', '.pianola', (event) => {
@@ -160,25 +44,6 @@ $.when('submit', '.pianola', (event) => {
     synths['piano'].triggerAttack("A3");
     $.teach({ performing: true })
   });
-})
-
-$.when('focus', '[name="query"]', event => {
-  const { tray } = event.target.dataset
-  setState(tray, { focused: true })
-})
-
-$.when('blur', '[name="query"]', event => {
-  setTimeout(() => {
-    const { preventBlur } = $.learn()
-
-    if(preventBlur) {
-      $.teach({ preventBlur: false })
-      return
-    }
-
-    const { tray } = event.target.dataset
-    setState(tray, { focused: false })
-  }, 250)
 })
 
 const strumVelocity = 1000
@@ -409,7 +274,7 @@ function queueAttack(synth, i) {
 
 $.teach({ colors: recalculate() })
 $.draw(() => {
-  const { performing, selections, query, tray } = $.learn()
+  const { performing } = $.learn()
   if(!performing) {
     return `
       <form class="pianola" method="get">
@@ -419,16 +284,7 @@ $.draw(() => {
             <option>Sweet Caroline</option>
           </select>
         </label>
-        <label class="field multiple">
-          <span class="label">Selections</span>
-          <div class="selections">
-            ${selections.map((item) => {
-              return `<span class="tab">${item.instrument}</span>`
-            }).join('')}
-          </div>
-          <input placeholder="query" value="${query || ''}" autocomplete="off" name="query" data-tray="${tray}"/>
-          <div class="suggestions"></div>
-        </label>
+        <multi-select id="plan98-instruments" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
         <button type="submit">
           Perform
         </button>
@@ -514,37 +370,6 @@ $.draw(() => {
       }
     </style>
   `
-}, {
-  afterUpdate: (target) => {
-    {
-      const { tray, suggestions, suggestIndex } = $.learn()
-      const {
-        focused
-      } = $.learn()[tray] || {}
-      const maybies = target.querySelector('.suggestions')
-      console.log({ focused })
-      if(focused && maybies) {
-        const start = Math.max(suggestIndex - 5, 0)
-        const end = Math.min(suggestIndex + 5, suggestions.length)
-
-        innerHTML(maybies, `
-          <div class="suggestion-box">${suggestions.slice(start, end).map((x, i) => {
-              const item = documents.find(y => {
-                return x.ref === y.instrument
-              })
-
-              return `
-                <button type="button" class="result ${suggestIndex === i + start ? 'active': ''}" data-tray="${tray}" data-instrument="${item.insrument}" data-index="${i}">
-                    ${item.instrument}
-                </button>
-              `
-            }).join('')}</div>
-        `)
-      } else if(maybies) {
-        maybies.innerHTML = null
-      }
-    }
-  }
 })
 
 function controls() {
@@ -745,62 +570,6 @@ $.style(`
   &.clean .label {
     display: none;
   }
-
-  & .suggestions .result {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .suggestions:not(:empty) {
-    display: block;
-    position: relative;
-    background: var(--green, mediumseagreen);
-    text-align: left;
-  }
-
-  & .suggestion-box:empty {
-    pointer-events: none;
-  }
-  & .suggestion-box {
-    position: absolute;
-    inset: 0;
-    height: 300px;
-    overflow: auto;
-    z-index: 10;
-    max-height: calc(100vh - 3rem);
-    display: flex;
-    flex-direction: column;
-  }
-
-  & .suggestion-box .result {
-    background: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
-    color: var(--button-color, dodgerblue);
-    transition: all 100ms ease-in-out;
-    padding: .5rem;
-    width: 100%;
-    text-align: left;
-    max-width: 100%;
-  }
-
-  & .suggestion-box .result:focus,
-  & .suggestion-box .result:hover {
-    background-color: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    color: white;
-  }
-
-  & .suggestion-box .result.active {
-    color: white;
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    background-color: var(--button-color, dodgerblue);
-  }
-
   & .tab {
     color: white;
     background: dodgerblue;
@@ -809,11 +578,6 @@ $.style(`
     display: inline-block;
     margin: .25rem;
   }
-
-  & .suggestions {
-    display: block;
-  }
-
   & .pianola {
     max-width: 320px;
     width: 100%;
