@@ -1,0 +1,11 @@
+{
+  "options": [
+    "vip",
+    "front row",
+    "general admission",
+    "bar seating",
+    "standing room",
+    "cover",
+    "performer"
+  ]
+}

@@ -30,12 +30,24 @@ const $ = elf('plan98-hero', {
   tray: 'banjolele'
 })
 
+const blankType = {
+  genres: '',
+  ensemble: '',
+  fares: '',
+  instruments: ''
+}
+
 $.when('submit', '.pianola', (event) => {
   event.preventDefault()
+  const {
+    genres, ensemble, instruments, fares
+  } = getState(event.target)
   synths = SampleLibrary.load({
-    instruments: ["piano","harmonium","violin"],
+    instruments: instruments.split(','),
     baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
   });
+
+  console.log(genres, ensemble, instruments, fares)
 
   // waits for instrument sound files to load from /samples/
   Tone.loaded().then(function() {
@@ -272,21 +284,43 @@ function queueAttack(synth, i) {
   }, i * strumVelocity)
 }
 
+$.when('change', '[data-bind]', (event) => {
+  setState(event.target, {[event.target.name]: event.target.value })
+})
+
+function defaultMerge(state, payload) {
+  console.log('id', payload.id)
+  return {
+    ...state,
+    [payload.id]: {
+      ...blankType,
+      ...state[payload.id],
+      ...payload.data
+    }
+  }
+}
+
+function setState(target, data, merge = defaultMerge) {
+  const id = target.closest($.link).id
+  $.teach({ data, id }, merge)
+}
+
+function getState(target) {
+  const id = target.closest($.link).id
+  return $.learn()[id] || blankType
+}
+
 $.teach({ colors: recalculate() })
-$.draw(() => {
+$.draw((target) => {
   const { performing } = $.learn()
+  const { genres, ensemble, fares, instruments } = getState(target)
   if(!performing) {
     return `
       <form class="pianola" method="get">
-        <single-select id="plan98-instruments5" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></single-select>
-        <label class="field">
-          <span class="label">Song</span>
-          <select name="song-list">
-            <option>Sweet Caroline</option>
-          </select>
-        </label>
-        <multi-select id="plan98-instruments" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
-        <multi-select id="plan98-instruments3" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
+        <multi-select data-bind id="plan98-ensemble" value="${ensemble}" name="ensemble" label="Ensemble" options="/cdn/sillyz.computer/ensemble.json"></multi-select>
+        <single-select data-bind id="plan98-tickets" value="${fares}" name="fares" label="Member Benefits" options="/cdn/sillyz.computer/fares.json"></single-select>
+        <multi-select data-bind id="plan98-genres" value="${genres}" name="genres" label="Genres" options="/cdn/sillyz.computer/genres.json"></multi-select>
+        <multi-select data-bind id="plan98-instruments" name="instruments" value="${instruments}" label="Instruments" options="/cdn/sillyz.computer/instruments.json"></multi-select>
         <button type="submit">
           Perform
         </button>
