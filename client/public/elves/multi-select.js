@@ -29,6 +29,7 @@ async function subscribe(target) {
     })
 
     setState(target, {
+      selections: target.value ? target.value.split(',').map(x => ({ option: x })) :[],
       suggestions: target.idx.search('')
     })
   } catch (e) {
@@ -179,7 +180,7 @@ $.when('click', '[data-remove]', event => {
 })
 $.when('click', '.result', event => {
   event.preventDefault()
-  const { suggestions } = getState(event.target)
+  const { selections, suggestions } = getState(event.target)
 
   const suggestIndex = parseInt(event.target.dataset.index)
 
@@ -194,26 +195,37 @@ $.when('click', '.result', event => {
       preventBlur: true
     })
     event.target.closest($.link).querySelector('.query').focus()
-    addItem(event.target, item)
+    const index = selections.findIndex(({option}) => {
+      return option === item.option
+    })
+
+    if(index < 0) {
+      addItem(event.target, item)
+    } else {
+      removeItem(event.target, item.option)
+    }
     return
   }
 })
 
 function addItem(target, item) {
-  target.closest($.link).dispatchEvent(new Event('change'))
+  const node = target.closest($.link)
   setState(target, item, (state, payload) => {
+    const selections = [...new Set([...state[payload.id].selections, payload.data])]
+    node.value = selections.map(x => x.option).join(', ')
     return {
       ...state,
       [payload.id]: {
         ...state[payload.id],
-        selections: [...new Set([...state[payload.id].selections, payload.data])]
+        selections
       }
     }
   })
+  node.dispatchEvent(new Event('change'))
 }
 
 function removeItem(target, item) {
-  target.closest($.link).dispatchEvent(new Event('change'))
+  const node = target.closest($.link)
   setState(target, item, (state, payload) => {
     const index = state[payload.id].selections.findIndex(({option}) => {
       return option === payload.data
@@ -223,6 +235,7 @@ function removeItem(target, item) {
 
     const selections = [...state[payload.id].selections]
     selections.splice(index, 1)
+    node.value = selections.map(x => x.option).join(', ')
     return {
       ...state,
       [payload.id]: {
@@ -231,6 +244,7 @@ function removeItem(target, item) {
       }
     }
   })
+  node.dispatchEvent(new Event('change'))
 }
 
 $.when('input', '.query', (event) => {

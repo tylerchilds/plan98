@@ -29,6 +29,7 @@ async function subscribe(target) {
     })
 
     setState(target, {
+      selection: target.value ? {option: target.value} : null,
       suggestions: target.idx.search('')
     })
   } catch (e) {
@@ -199,8 +200,9 @@ $.when('click', '.result', event => {
 })
 
 function addItem(target, item) {
-  target.closest($.link).dispatchEvent(new Event('change'))
+  const node = target.closest($.link)
   setState(target, item, (state, payload) => {
+    node.value = payload.data.option
     return {
       ...state,
       [payload.id]: {
@@ -209,11 +211,13 @@ function addItem(target, item) {
       }
     }
   })
+  node.dispatchEvent(new Event('change'))
 }
 
 function removeItem(target, item) {
-  target.closest($.link).dispatchEvent(new Event('change'))
+  const node = target.closest($.link)
   setState(target, item, (state, payload) => {
+    node.value = null
     return {
       ...state,
       [payload.id]: {
@@ -222,6 +226,7 @@ function removeItem(target, item) {
       }
     }
   })
+  node.dispatchEvent(new Event('change'))
 }
 
 $.when('input', '.query', (event) => {
