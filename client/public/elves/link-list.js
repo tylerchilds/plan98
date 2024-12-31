@@ -135,7 +135,7 @@ import("@silly/elf").then((elf) => {
 
     return `
       <div class="background">
-        <iframe src="/app/draw-term"></iframe>
+        <iframe src="/app/draw-term?src=/app/play-wheel?src=/app/path-finder"></iframe>
       </div>
       <div class="foreground ${hidden ? 'hidden':''}">
         <a class="nonce to-tutorial" href="/app/live-lineup"></a>

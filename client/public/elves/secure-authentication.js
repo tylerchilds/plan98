@@ -502,6 +502,8 @@ $.style(`
     display: block;
     margin: 0 auto;
     height: 100%;
+    position: relative;
+    z-index: 9002;
   }
 
   & .hud {

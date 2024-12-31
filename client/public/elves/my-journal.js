@@ -1,16 +1,10 @@
 import module from '@silly/tag'
 import { currentBusiness } from './sillonious-brand.js'
 import { render } from "@sillonious/saga"
-import 'gun'
-import 'gun/sea'
-import 'gun/open'
 import natsort from 'natsort'
-
-const Gun = window.Gun
+import { getSession, logout } from './bayun-wizard.js'
 
 let bookmark = ''
-const gun = Gun(['https://gun.1998.social/gun']);
-export const user = gun.user().recall({ sessionStorage: true })
 const initial = {
   authenticated: false,
   bookmarks: [],
@@ -23,30 +17,8 @@ const initial = {
 
 const $ = module('my-journal', initial)
 
-user.get('alias').once((alias) => {
-  $.teach({ alias })
-});
-
 export function alias() {
   return $.learn().alias
-}
-
-export function load($, id, callback=()=>null) {
-  user.get($.link).get(id).open((data) => {
-    requestIdleCallback(() => callback(id, data))
-  })
-  return $.learn()[id] || {}
-}
-
-export function save($, id, data, merge = (node, data, key) => {
-  node.get(key).put(data[key])
-}) {
-  Object
-    .keys(data)
-    .forEach(key => {
-      const entry = user.get($.link).get(id)
-      merge(entry, data, key)
-    })
 }
 
 export function subscribe($, target, callback=()=>null) {
@@ -59,15 +31,6 @@ export function subscribe($, target, callback=()=>null) {
 export function bookmarks() {
 
 }
-
-gun.on('auth', () => {
-  $.teach({ authenticated: true })
-  user.get('journal').map().on(observe);
-
-  [...document.querySelectorAll($.link)].map((x) => {
-    x.dispatchEvent(new Event('connected'))
-  })
-})
 
 const processedTimestamps = new Set();
 function observe(bookmark, timestamp) {
@@ -122,8 +85,24 @@ $.when('click', '[data-escape]', function escape() {
 })
 
 $.draw(target => {
-  const data = $.learn()
-  const {tab, message,bookmarks, authenticated, authorized, alias, pass, href, text} = data
+  const {tab, message,bookmarks, authenticated, authorized, alias, pass, href, text} = $.learn()
+const { sessionId } = getSession()
+
+  if(!sessionId && target.dataset.mode !== 'auth') {
+    target.dataset.mode = 'auth'
+    return `
+      <secure-authentication></secure-authentication>
+    `
+  }
+
+  if(sessionId && target.dataset.mode !== 'admin') {
+    target.dataset.mode = 'admin'
+  }
+
+  if(target.dataset.mode === 'auth') {
+    return
+  }
+
 
   const empty = `
     <button data-escape>
@@ -134,19 +113,10 @@ $.draw(target => {
         <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
       </a>
       For those that would dare to giggle, speak the magic word and follow the nose wherever it goes
-      <label class="field">
-        <span class="label">Player</span>
-        <input class="keyable" name="alias" value="${alias}" placeholder="handle">
-      </label>
-      <label class="field">
-        <span class="label">Password</span>
-        <input class="keyable" name="pass" value="${pass}" type="password" placeholder="passphrase">
-      </label>
-      <div class="message">${message||''}</div>
-      <button class="button" id="sign-a-panda-in" type="submit">
-        Creaupdate
-      </button>
       <hr>
+      <a href="/app/secure-mail?src=/app/link-list?src=/app/play-wheel">
+        Play as Root
+      </a>
       <a href="/app/path-finder?id=${new Date().toJSON()}">
         Play as Guest
       </a>
@@ -352,8 +322,6 @@ function beforeUpdate(target) {
       actionScript(target, action, script)
     }
   }
-
-  saveCursor(target) // first things first
 }
 
 function pages() {
@@ -361,8 +329,6 @@ function pages() {
 }
 
 function afterUpdate(target) {
-  replaceCursor(target) // first things first
-
   { // menu items
     const { activeMenu } = $.learn()
     const currentlyActive = target.querySelector('[data-menu-target].active')
@@ -491,94 +457,6 @@ $.when('input', '.keyable', (event) => {
   const { name, value } = event.target
   $.teach({[name]: value, message: ''})
 })
-
-$.when('click', '#signout', disconnect)
-
-export function disconnect (event) {
-  event.preventDefault()
-  user.leave()
-  $.teach({ authenticated: false });
-
-  [...document.querySelectorAll($.link)].map((x) => {
-    x.dispatchEvent(new Event('disconnected'))
-  })
-}
-
-export function getUser() {
-  const { authenticated } = $.learn()
-  return authenticated ? user : ''
-}
-
-$.when('click', '#sign-a-panda-in', (event) => {
-  event.preventDefault()
-  const { alias, pass } = $.learn()
-  user.create(alias, pass, function createdCallback(ack) {
-    if(ack.err) {
-      $.teach({ message: ack.err })
-    }
-
-    user.auth(alias, pass, function authenticatedCallback(ack) {
-
-      if(ack.err) {
-        $.teach({ message: ack.err })
-      } else {
-        $.teach({ pass: '', message: '' })
-      }
-    })
-  })
-})
-
-$.when('click', '#factory-reset', (event) => {
-  event.preventDefault()
-  obliterate(user.get('journal'))
-  $.teach(initial)
-  disconnect()
-})
-
-function obliterate(node) {
-  node.map().once((child, key) => {
-    if (child) {
-      obliterate(node.get(key));
-    }
-  });
-
-  node.put(null);
-}
-
-$.when('submit', '#post', (event) => {
-  event.preventDefault()
-  const { href, text } = $.learn()
-  bookmark = { href, text }
-  $.teach({ href: '', text: '' })
-  user.get('journal').get(new Date().toISOString()).put(bookmark)
-})
-
-const tags = ['TEXTAREA', 'INPUT']
-let sel = []
-function saveCursor(target) {
-  if(target.contains(document.activeElement)) {
-    target.dataset.paused = document.activeElement.name
-    if(tags.includes(document.activeElement.tagName)) {
-      const textarea = document.activeElement
-      sel = [textarea.selectionStart, textarea.selectionEnd];
-    }
-  } else {
-    target.dataset.paused = null
-  }
-}
-
-function replaceCursor(target) {
-  const paused = target.querySelector(`[name="${target.dataset.paused}"]`)
-  
-  if(paused) {
-    paused.focus()
-
-    if(tags.includes(paused.tagName)) {
-      paused.selectionStart = sel[0];
-      paused.selectionEnd = sel[1];
-    }
-  }
-}
 
 $.style(`
 

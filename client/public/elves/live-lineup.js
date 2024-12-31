@@ -268,7 +268,7 @@ async function fetchPerformers(target) {
     const response = await fetch(plan98.env.PLAN98_API_HOST + '/api/performers', {
       method: "GET",
       headers: {
-        "x-api-key": 'foobar',
+        "x-api-key": plan98.env.PLAN98_API_KEY,
       },
     });
 
@@ -582,3 +582,15 @@ link.style(`
     grid-template-columns: 1fr 1fr;
   }
 `)
+
+// Dynamically load AG Grid CSS
+const cssUrl1 = 'https://esm.sh/jspreadsheet-ce@4.15.0/dist/jspreadsheet.css';
+
+loadCSS(cssUrl1);
+
+function loadCSS(url) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.head.appendChild(link);
+}
