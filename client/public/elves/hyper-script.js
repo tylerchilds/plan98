@@ -64,7 +64,6 @@ const panels = {
   read: 'read',
   // perform to have a guide in real-time
   perform: 'perform',
-  play: 'play',
 }
 
 // define source code related artifacts that should not be displayed
@@ -92,15 +91,13 @@ const $ = elf('hyper-script', {
 $.draw((target) => {
   const { id } = target
   const { activePanel, nextPanel, shotCount, activeShot, lastAction, activeMenu } = $.learn()
-  const { file } = sourceFile(target)
+  const file = sourceFile(target)
 
   if(target.lastPanel !== activePanel) {
     // flush outdated
     target.innerHTML = ''
     target.lastPanel = activePanel
   }
-
-  const play = (state.play || {}).embed
 
   const views = {
     [panels.write]: () => {
@@ -192,8 +189,7 @@ $.draw((target) => {
         <div class="menu-actions" data-menu="view">
           <button class="${activePanel === panels.read ? 'active' : ''}" data-read>Read</button>
           <button class="${activePanel === panels.write ? 'active' : ''}" data-write>Write</button>
-          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Run</button>
-          ${play ? `<button class="${activePanel === panels.play ? 'active' : ''}" data-play>Play</button>` : ''}
+          <button class="${activePanel === panels.perform ? 'active' : ''}" data-perform>Excecute</button>
         </div>
       </div>
       ${navi}
@@ -270,14 +266,13 @@ function source(target) {
 
 function sourceFile(target) {
   const src = source(target)
-  state[$.link] ||= {}
-  const data = state[$.link][src] || {}
 
-  if(target.initialized) return data
+  const file = $.learn()[src]
+  if(target.initialized) return file
   target.initialized = true
 
-  return data.file
-    ? data
+  return file
+    ? file
     : (function initialize() {
       requestIdleCallback(() => {
         let file = pitch
@@ -291,16 +286,17 @@ function sourceFile(target) {
         }).catch((error) => {
           console.error(error)
         }).finally(() => {
-          state[$.link][src] = { file }
+          $.teach({ [src]: file })
         })
       })
-      return data
+      return file
     })()
 }
 
 $.when('input', '[name="typewriter"]', (event) => {
   const src = source(event.target)
-  state[$.link][src] = { file: event.target.value }
+  const file = event.target.value
+  $.teach({ [src]: file })
 })
 
 $.when('click', '[data-read]', (event) => {
@@ -328,7 +324,7 @@ $.when('click', '[data-print]', async (event) => {
   const template = await fetch('/').then(async res => {
     return await res.text()
   })
-  const { file } = sourceFile(event.target)
+  const file = sourceFile(event.target)
   const html = hyperSanitizer(file)
   if(event.target.preview) event.target.preview.close()
   event.target.preview = window.open('', 'PRINT');
@@ -389,27 +385,31 @@ $.when('click', '[data-publish]', (event) => {
 
   $.teach({ thinking: true, activeMenu: null })
 
-  fetch(src, {
-    headers,
-    method: 'POST',
-    body: JSON.stringify({
-      file: state[$.link][src].file,
-      src
+  const file = $.learn()[src]
+
+  if(file) {
+    fetch(src, {
+      headers,
+      method: 'POST',
+      body: JSON.stringify({
+        file,
+        src
+      })
+    }).then((response) => response.text()).then((result) => {
+      try {
+        const data = JSON.parse(result)
+        toast(data.error ? 'Access Denied' : 'Saved!')
+      } catch(e) {
+        toast(result)
+      }
     })
-  }).then((response) => response.text()).then((result) => {
-    try {
-      const data = JSON.parse(result)
-      toast(data.error ? 'Access Denied' : 'Saved!')
-    } catch(e) {
-      toast(result)
-    }
-  })
+  }
 })
 
 
 
 $.when('click', '[data-perform]', (event) => {
-  const { file } = sourceFile(event.target)
+  const file = sourceFile(event.target)
 
   $.teach({
     shotCount: countShots(file),
@@ -503,13 +503,6 @@ $.when('click', '[data-write]', (event) => {
   })
 })
 
-$.when('click', '[data-play]', (event) => {
-  $.teach({
-    nextPanel: panels.play,
-    activeMenu: null,
-  })
-})
-
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
     actor => ({
@@ -526,6 +519,8 @@ $.when('animationend', 'transition', function transition({target}) {
   const { activePanel, nextPanel, backPanel } = $.learn()
   const current = nextPanel ? nextPanel : activePanel
   const previous = activePanel !== backPanel ? backPanel : activePanel
+
+  if(activePanel === current) return
   $.teach({ activePanel: current, backPanel: previous })
   target.scrollTop = '0'
 })
@@ -691,7 +686,6 @@ $.style(`
 
   & [name="stage"] > * {
     grid-area: stage;
-    transition: opacity 100ms;
     margin: 0;
     overflow: auto;
     opacity: 1;
@@ -903,7 +897,7 @@ $.style(`
   }
 
   & transition {
-    animation: &-fade-in ease-in-out 200ms;
+    animation: &-fade-in ease-in-out 1ms;
     display: grid;
     height: 100%;
     place-items: center;
@@ -922,7 +916,7 @@ $.style(`
 
   @keyframes &-fade-in {
     0% {
-      opacity: .5;
+      opacity: 1;
     }
     100% {
       opacity: 1;

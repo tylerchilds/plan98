@@ -17,6 +17,8 @@ const initial = {
 
 const $ = module('my-journal', initial)
 
+$.when('click', '[data-logout]', logout)
+
 export function alias() {
   return $.learn().alias
 }
@@ -108,7 +110,8 @@ const { sessionId } = getSession()
     <button data-escape>
       Escape
     </button>
-    <form class="block">
+    <div class="block">
+      <button data-logout>Sign Off</button>
       <a href="/app/sillyz-computer">
         <img src="/cdn/thelanding.page/giggle.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
       </a>
@@ -123,7 +126,7 @@ const { sessionId } = getSession()
       <a href="#">
         (coming soon) watch how it was made
       </a>
-    </form>
+    </div>
   `
 
   const regular = `
@@ -540,16 +543,13 @@ $.style(`
     grid-template-rows: auto 1fr;
   }
 
-  & form {
+  & .block {
     color: rgba(0,0,0,.85);
     background: rgba(255,255,255,.85);
     padding: 1rem;
     margin: auto;
     display: flex;
     gap: .5rem;
-  }
-
-  & form.block {
     flex-direction: column;
     max-width: 320px;
   }
