@@ -97,6 +97,7 @@ async function page() {
           ${safeEnv('PROTOMAPS_API_KEY')}
 
           ${safeEnv('FASTMAIL_API_KEY')}
+          ${safeEnv('FASTMAIL_USERNAME')}
           ${safeEnv('JITSI_MAGIC_COOKIE')}
 
           ${safeEnv('SOLID_URL')}

@@ -1,54 +1,149 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import { showModal } from '@plan98/modal'
 
 const key = plan98.env.FASTMAIL_API_KEY
+const username = plan98.env.FASTMAIL_USERNAME
 
 const hostname = "api.fastmail.com";
 
 const authUrl = `https://${hostname}/.well-known/jmap`;
 
-function headers(apikey){
+function headers(key){
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${apikey}`,
+    Authorization: `Bearer ${key}`,
   }
 }
 
-const $ = module('email-new', { loading: true })
+const $ = elf('email-new', { to: '', from: '', subject: '', message: '' })
 
-async function query(target, key) {
-  if(target.lastKey === key) return
-  target.lastKey = key
-  $.teach({ loading: true })
-  const messages = await fetchTen(key)
-  $.teach({ messages, loading: false })
-}
+// https://github.com/fastmail/JMAP-Samples/blob/main/javascript/hello-world.js
 
-function form(key) {
-  return `
-    <form>
-      <input name="key" value="${key || ''}" />
-    </form>
-  `
-}
+const getSession = async () => {
+  const response = await fetch(authUrl, {
+    method: "GET",
+    headers: headers(key),
+  });
+  return response.json();
+};
+
+const mailboxQuery = async (apiUrl, accountId) => {
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers(key),
+    body: JSON.stringify({
+      using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
+      methodCalls: [
+        ["Mailbox/query", { accountId, filter: { name: "Drafts" } }, "a"],
+      ],
+    }),
+  });
+  const data = await response.json();
+
+  return await data["methodResponses"][0][1].ids[0];
+};
+
+const identityQuery = async (apiUrl, accountId) => {
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers(key),
+    body: JSON.stringify({
+      using: [
+        "urn:ietf:params:jmap:core",
+        "urn:ietf:params:jmap:mail",
+        "urn:ietf:params:jmap:submission",
+      ],
+      methodCalls: [["Identity/get", { accountId, ids: null }, "a"]],
+    }),
+  });
+  const data = await response.json();
+
+  return await data["methodResponses"][0][1].list.filter(
+    (identity) => identity.email === username
+  )[0].id;
+};
+
+const draftResponse = async (apiUrl, accountId, draftId, identityId) => {
+  const { message, to, from, subject } = $.learn()
+
+  const draftObject = {
+    from: [{ email: from }],
+    to: [{ email: to }],
+    subject,
+    keywords: { $draft: true },
+    mailboxIds: { [draftId]: true },
+    bodyValues: { body: { value: message, charset: "utf-8" } },
+    textBody: [{ partId: "body", type: "text/plain" }],
+  };
+
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers(key),
+    body: JSON.stringify({
+      using: [
+        "urn:ietf:params:jmap:core",
+        "urn:ietf:params:jmap:mail",
+        "urn:ietf:params:jmap:submission",
+      ],
+      methodCalls: [
+        ["Email/set", { accountId, create: { draft: draftObject } }, "a"],
+        [
+          "EmailSubmission/set",
+          {
+            accountId,
+            onSuccessDestroyEmail: ["#sendIt"],
+            create: { sendIt: { emailId: "#draft", identityId } },
+          },
+          "b",
+        ],
+      ],
+    }),
+  });
+
+  const data = await response.json();
+  console.log(JSON.stringify(data, null, 2));
+};
+
+const send = async () => {
+  const session = await getSession();
+  const apiUrl = session.apiUrl;
+  const accountId = session.primaryAccounts["urn:ietf:params:jmap:mail"];
+  const draftId = await mailboxQuery(apiUrl, accountId);
+  const identityId = await identityQuery(apiUrl, accountId);
+  draftResponse(apiUrl, accountId, draftId, identityId);
+};
 
 $.draw(target => {
-  const { messages, loading } = $.learn()
-  query(target, key)
-
-  if(loading) {
-    return `<loading-spinner></loading-spinner>`
-  }
-
-  if(!messages) {
-    return `
-      No messages. Try another key?
-      ${form(key)}
-    `
-  }
+  const { to, from, subject, message } = $.learn()
 
   return `
-    <textarea></textarea>
+    <!--
+    <multi-select data-bind id="email-to" value="${to}" name="email-to" label="To"></multi-select>
+    <multi-select data-bind id="email-cc" value="${from}" name="email-cc" label="Cc"></multi-select>
+    <multi-select data-bind id="email-bcc" value="${subject}" name="email-bcc" label="Bcc"></multi-select>
+    -->
+    <form action="secure-email" method="post">
+      <button type="submit">
+        Send
+      </button>
+      <label class="field">
+        <span class="label">To</span>
+        <input data-bind name="to" value="${escapeHyperText(to)}"/>
+      </label>
+      <label class="field">
+        <span class="label">From</span>
+        <input data-bind name="from" value="${escapeHyperText(from)}"/>
+      </label>
+      <label class="field">
+        <span class="label">Subject</span>
+        <input data-bind name="subject" value="${escapeHyperText(subject)}"/>
+      </label>
+      <label class="field">
+        <span class="label">Message</span>
+        <textarea data-bind name="message">${escapeHyperText(message)}</textarea>
+      </label>
+    </form>
+
   `
 }, {
   afterUpdate: (target) => {
@@ -61,178 +156,11 @@ $.draw(target => {
         iconParent.appendChild(icon)
       })
     }
-
-
-    const { messages } = $.learn()
-
-    if(!target.observer) {
-      const options = {
-        root: target,
-        rootMargin: "0px",
-        threshold: 0,
-      };
-
-      target.observer = new IntersectionObserver((entries, observer) => {
-        entries.forEach(async (entry) => {
-          if(entry.isIntersecting) {
-            const { fetching } = $.learn()
-            if(fetching) return
-            target.observer.unobserve(entry.target);
-            $.teach({ fetching: true})
-
-            const { offset } = $.learn()
-            const messages = await fetchTen(key, offset)
-            $.teach({ offset: offset+10, fetching: false })
-            $.teach({ messages }, (s,p) => {
-              return {
-                ...s,
-                messages: [...s.messages, ...p.messages]
-              }
-            })
-          }
-        });
-      }, options);
-    }
-
-    if(messages) {
-      target.observer.observe(target.querySelector('.load-more'));
-    }
   }
 })
-
-$.when('change', '[name="key"]', (event) => {
-  const { value } = event.target
-  $.teach({ key: value })
-})
-
-async function getSession(apikey) {
-  const response = await fetch(authUrl, {
-    method: "GET",
-    headers: headers(apikey),
-  });
-  return response.json();
-};
-
-async function inboxIdQuery(apikey, api_url, account_id) {
-  const response = await fetch(api_url, {
-    method: "POST",
-    headers: headers(apikey),
-    body: JSON.stringify({
-      using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
-      methodCalls: [
-        [
-          "Mailbox/query",
-          {
-            accountId: account_id,
-            filter: { role: "inbox", hasAnyRole: true },
-          },
-          "a",
-        ],
-      ],
-    }),
-  });
-
-  const data = await response.json();
-
-  const inbox_id = data["methodResponses"][0][1]["ids"][0];
-
-  if (!inbox_id.length) {
-    console.error("Could not get an inbox.");
-    process.exit(1);
-  }
-
-  return await inbox_id;
-};
-
-async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition, limit=10) {
-  const response = await fetch(api_url, {
-    method: "POST",
-    headers: headers(apikey),
-    body: JSON.stringify({
-      using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
-      methodCalls: [
-        [
-          "Email/query",
-          {
-            accountId: account_id,
-            filter: { inMailbox: inbox_id },
-            sort: [{ property: "receivedAt", isAscending: false }],
-            position: startPosition,
-            limit
-          },
-          "a",
-        ],
-        [
-          "Email/get",
-          {
-            accountId: account_id,
-            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'htmlBody', 'textBody'],
-            fetchAllBodyValues: true,
-            "#ids": {
-              resultOf: "a",
-              name: "Email/query",
-              path: "/ids/*",
-            },
-          },
-          "b",
-        ],
-      ],
-    }),
-  });
-
-  const data = await response.json();
-
-  return await data;
-};
-
-async function fetchTen(apikey, offset=0){
-  const messages = [];
-
-  // bail if we don't have our ENV set:
-  if (!apikey) {
-    console.log("Please set the apikey");
-  }
-
-  $.teach({ offset: offset + 10 })
-  console.log($.learn().offset)
-  return await getSession(apikey).then(async(session) => {
-    const api_url = session.apiUrl;
-    const account_id = session.primaryAccounts["urn:ietf:params:jmap:mail"];
-    await inboxIdQuery(apikey, api_url, account_id).then(async (inbox_id) => {
-      await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
-        emails["methodResponses"][1][1]["list"].forEach((email) => {
-          const from = email.from[0].email
-          const subject = email.subject
-          const timestamp = email.receivedAt
-
-          const textParts = email.textBody.map(x => x.partId)
-          const htmlParts = email.htmlBody.map(x => x.partId)
-          const textBody = textParts.map(id => email.bodyValues[id].value).join('')
-          const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
-          messages.push({
-            id: email.id,
-            author: {
-              email: from,
-              photoUrl: 'https://tychi.me/professional-headshot.jpg',
-              name: from,
-            },
-            subject,
-            timestamp,
-            textBody,
-            htmlBody,
-            content: subject,
-            updated: timestamp
-          })
-        });
-      });
-    });
-
-    return messages
-  });
-}
 
 function escapeHyperText(text = '') {
-  return text.replace(/[&<>'"]/g,
+  return text.replace(/[&<>'"]/g, 
     actor => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -242,6 +170,25 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
+
+
+
+$.when('submit', '[action="secure-email"]', (event) => {
+  event.preventDefault()
+  send();
+})
+
+$.when('input', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
+})
+
+$.when('change', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
+})
+
+$.when('change', 'multi-select', (event) => {
+  console.log('changed', event.target.id)
+})
 
 $.style(`
   & {
@@ -284,9 +231,5 @@ $.style(`
     position: absolute;
     top: .5rem;
     right: 1rem;;
-  }
-
-  & .load-more {
-    transform: translateY(-200px);
   }
 `)
