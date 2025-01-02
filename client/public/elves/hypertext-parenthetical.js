@@ -16,13 +16,16 @@ $.style(`
     place-self: center;
     overflow: hidden;
     padding: 0 1rem;
+    white-space: nowrap;
   }
 
   &::before {
     content: '(';
+    display: inline;
   }
 
   &::after {
     content: ')';
+    display: inline;
   }
 `)
