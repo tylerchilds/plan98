@@ -81,7 +81,7 @@ $.draw((target) => {
   }).join('')
 
   const settings = `
-    <play-wheel data-embedded="true" src="${target.getAttribute('src')}">
+    <play-wheel data-embedded="true" src="${target.getAttribute('src') || '/app/hyper-script'}">
       <button class="nonce" data-escape aria-label="To Ethnography"></button>
       <form>
         ${start} ${length} ${reverse}

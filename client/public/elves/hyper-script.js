@@ -293,6 +293,21 @@ function sourceFile(target) {
     })()
 }
 
+self.addEventListener('keydown', (event) => {
+  const { activePanel } = $.learn()
+
+  if(activePanel !== panels.perform) return
+
+  if (event.keyCode==37) {
+    slideBack()
+  }
+  if (event.keyCode==39) {
+    slideNext()
+  }
+})
+
+
+
 $.when('input', '[name="typewriter"]', (event) => {
   const src = source(event.target)
   const file = event.target.value
@@ -419,12 +434,13 @@ $.when('click', '[data-perform]', (event) => {
   })
 })
 
-$.when('click', '[data-back]', (event) => {
+function slideBack (event) {
   const { activeShot } = $.learn()
   if(activeShot === 0) return
   $.teach({ activeShot: activeShot - 1, lastAction: 'back' })
-})
+}
 
+$.when('click', '[data-back]', slideBack)
 
 $.when('change', '[data-shot]', (event) => {
   const { activeShot, shotCount } = $.learn()
@@ -453,11 +469,13 @@ $.when('keydown', '[data-shot]', (event) => {
   }
 })
 
-$.when('click', '[data-next]', (event) => {
+function slideNext (event) {
   const { shotCount, activeShot } = $.learn()
   if(activeShot > shotCount) return
   $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
-})
+}
+
+$.when('click', '[data-next]', slideNext)
 
 function getMotion(html, { active = 0, forwards, start, end }) {
   const wrapper= document.createElement('div');
@@ -572,6 +590,7 @@ $.style(`
       width: 100%;
       display: grid;
       grid-template-rows: auto 1fr;
+      background: #54796d;
     }
 
     & [data-hidden="true"] {
@@ -897,7 +916,7 @@ $.style(`
   }
 
   & transition {
-    animation: &-fade-in ease-in-out 1ms;
+    animation: &-fade-in ease-in-out 100ms;
     display: grid;
     height: 100%;
     place-items: center;
@@ -911,15 +930,15 @@ $.style(`
   }
 
   & transition.out {
-    animation: &-fade-out ease-in-out 1ms;
+    animation: &-fade-out ease-in-out 100ms;
   }
 
   @keyframes &-fade-in {
     0% {
-      opacity: 1;
+      filter: blur(10px);
     }
     100% {
-      opacity: 1;
+      filter: blur(0);
     }
   }
 
@@ -1080,9 +1099,8 @@ $.style(`
 `)
 
 $.when('click', '*', (event) => {
-
-  if(event.target.closest('.menu-item')) {
-    // child of a menu item
+  const { activeMenu } = $.learn()
+  if(event.target.closest('.menu-item') || !activeMenu) {
     return
   }
   $.teach({ activeMenu: null })
