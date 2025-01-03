@@ -4,7 +4,7 @@ import $zune from './plan9-zune.js'
 import { innerHTML } from 'diffhtml'
 import { actionScript } from './action-script.js'
 
-const sillyzPreferred = '/app/my-journal'
+const sillyzPreferred = '/app/hyper-script'
 
 // synthia is eval and must be stopped
 const synthia = eval

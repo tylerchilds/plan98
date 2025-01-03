@@ -1,1 +1,5 @@
-<my-journal
+<draw-term
+src: /app/hyper-script
+background: #54796d
+color: #54796d
+

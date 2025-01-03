@@ -1,0 +1,39 @@
+body {
+    max-width: 65rem;
+    margin: 0 auto;
+}
+
+
+.content__heading {
+    margin-top: 9.6rem;
+}
+
+.content__tagline {
+}
+
+.content--graphic__heading {
+    margin-top: 4.8rem;
+}
+
+.content__subheading {
+    text-align: center;
+    margin-top: 4.8rem;
+}
+
+.content--description-example {
+    grid-template-areas: "title ." "context graphic";
+    grid-template-columns: 38% 62%;
+}
+
+.content--description-example__heading {
+    margin-top: 4.8rem;
+    justify-self: start;
+}
+
+.content--description-example__context {
+    justify-self: start;
+}
+
+.content--description-example__graphic {
+    align-self: center;
+}

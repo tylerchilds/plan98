@@ -130,6 +130,9 @@ origin.draw(target => {
       <a href="/app/my-journal">
         Journal
       </a>
+      <a href="/app/hyper-script">
+        Hyper Script
+      </a>
       <a href="/app/bulletin-board?src=${target.getAttribute('src') || ''}">
         Launch
       </a>

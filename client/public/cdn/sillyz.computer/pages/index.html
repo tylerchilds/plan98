@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>Silly'z Computer</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="/styles/system.css" rel="stylesheet">
+
+    <a rel="me" style="display: none;" href="https://brands.town/@silly"></a>
+<style>
+html {
+  background: var(--theme, var(--wheel-5-3));
+}
+
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 3rem;
+  pointer-events: none;
+  z-index: 200;
+}
+
+body::before{
+  background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255, .5) 15%, transparent);
+	mix-blend-mode: lighten;
+  top: 0;
+}
+body::after {
+  bottom: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,.85), rgba(0,0,0, .5) 15%, transparent);
+	mix-blend-mode: multiply;
+}
+</style>
+    <design-system></design-system>
+  </head>
+  <body>
+    <header>
+      <menu-user></menu-user>
+      <menu-resource model="hypertext" view="fantasy-filesystem"></menu-resource>
+    </header>
+    <main id="main">
+      <tutorial></tutorial>
+      <script type="module" src="/packages/widgets/tutorial.js"></script>
+    </main>
+    <footer>
+      <button class="interface-button bl" data-tooltip="Can I create?">+</button>
+      <chalect-bar
+        class="interface-bar"
+        placement="above"
+        strict="true"
+        src="currentUser#rolodex"
+        options="currentUser#collections"
+      ></chalect-bar>
+      <button class="interface-button br" data-tooltip="Can I remix?">Y</button>
+    </footer>
+    <stay-in-touch></stay-in-touch>
+		<script type="module" src="/packages/tags/design-system.js"></script>
+		<script type="module" src="/packages/widgets/menu-user.js"></script>
+		<script type="module" src="/packages/widgets/menu-resource.js"></script>
+		<script type="module" src="/packages/tags/chalect-bar.js"></script>
+		<script type="module" src="/packages/tags/stay-in-touch.js"></script>
+
+		<script type="module" src="/packages/widgets/fantasy-filesystem.js"></script>
+  </body>
+</html>

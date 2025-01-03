@@ -1,0 +1,128 @@
+html {
+    --black: hsla(180, 0%, 0%, 1);
+    --white: hsla(180, 0%, 100%, 1);
+
+    --red1: hsla(355, 100%, 8%, 1);
+    --red2: hsla(355, 75%, 22%, 1);
+    --red3: hsla(355, 85%, 36%, 1);
+    --red4: hsla(355, 100%, 55%, 1);
+    --red5: hsla(355, 85%, 64%, 1);
+    --red6: hsla(355, 85%, 78%, 1);
+    --red7: hsla(355, 100%, 92%, 1);
+
+
+    --flame1: hsla(15, 100%, 8%, 1);
+    --flame2: hsla(15, 75%, 22%, 1);
+    --flame3: hsla(15, 85%, 36%, 1);
+    --flame4: hsla(15, 95%, 50%, 1);
+    --flame5: hsla(15, 85%, 64%, 1);
+    --flame6: hsla(15, 85%, 78%, 1);
+    --flame7: hsla(15, 100%, 92%, 1);
+
+
+    --orange1: hsla(30, 100%, 8%, 1);
+    --orange2: hsla(30, 75%, 22%, 1);
+    --orange3: hsla(30, 85%, 36%, 1);
+    --orange4: hsla(30, 100%, 50%, 1);
+    --orange5: hsla(30, 85%, 64%, 1);
+    --orange6: hsla(30, 85%, 78%, 1);
+    --orange7: hsla(30, 100%, 92%, 1);
+
+
+    --amber1: hsla(45, 100%, 8%, 1);
+    --amber2: hsla(45, 75%, 22%, 1);
+    --amber3: hsla(45, 85%, 36%, 1);
+    --amber4: hsla(45, 100%, 50%, 1);
+    --amber5: hsla(45, 85%, 64%, 1);
+    --amber6: hsla(45, 85%, 78%, 1);
+    --amber7: hsla(45, 100%, 92%, 1);
+
+
+    --yellow1: hsla(60, 100%, 8%, 1);
+    --yellow2: hsla(60, 75%, 22%, 1);
+    --yellow3: hsla(60, 85%, 36%, 1);
+    --yellow4: hsla(60, 100%, 50%, 1);
+    --yellow5: hsla(60, 85%, 64%, 1);
+    --yellow6: hsla(60, 85%, 78%, 1);
+    --yellow7: hsla(60, 100%, 92%, 1);
+
+
+    --chartruese1: hsla(75, 100%, 8%, 1);
+    --chartruese2: hsla(75, 75%, 22%, 1);
+    --chartruese3: hsla(75, 85%, 36%, 1);
+    --chartruese4: hsla(75, 100%, 50%, 1);
+    --chartruese5: hsla(75, 85%, 64%, 1);
+    --chartruese6: hsla(75, 85%, 78%, 1);
+    --chartruese7: hsla(75, 100%, 92%, 1);
+
+
+    --green1: hsla(120, 100%, 8%, 1);
+    --green2: hsla(120, 75%, 22%, 1);
+    --green3: hsla(120, 85%, 36%, 1);
+    --green4: hsla(120, 100%, 50%, 1);
+    --green5: hsla(120, 85%, 64%, 1);
+    --green6: hsla(120, 85%, 78%, 1);
+    --green7: hsla(120, 100%, 92%, 1);
+
+
+    --teal1: hsla(160, 100%, 8%, 1);
+    --teal2: hsla(160, 75%, 22%, 1);
+    --teal3: hsla(160, 85%, 36%, 1);
+    --teal4: hsla(160, 100%, 50%, 1);
+    --teal5: hsla(160, 85%, 64%, 1);
+    --teal6: hsla(160, 85%, 78%, 1);
+    --teal7: hsla(160, 100%, 92%, 1);
+
+
+    --blue1: hsla(200, 100%, 8%, 1);
+    --blue2: hsla(200, 75%, 22%, 1);
+    --blue3: hsla(200, 85%, 36%, 1);
+    --blue4: hsla(200, 100%, 50%, 1);
+    --blue5: hsla(200, 85%, 64%, 1);
+    --blue6: hsla(200, 85%, 78%, 1);
+    --blue7: hsla(200, 100%, 92%, 1);
+
+
+    --indigo1: hsla(230, 100%, 8%, 1);
+    --indigo2: hsla(230, 75%, 22%, 1);
+    --indigo3: hsla(230, 75%, 36%, 1);
+    --indigo4: hsla(230, 80%, 55%, 1);
+    --indigo5: hsla(230, 65%, 64%, 1);
+    --indigo6: hsla(230, 85%, 78%, 1);
+    --indigo7: hsla(230, 100%, 92%, 1);
+
+
+    --violet1: hsla(270, 100%, 8%, 1);
+    --violet2: hsla(270, 75%, 22%, 1);
+    --violet3: hsla(270, 85%, 36%, 1);
+    --violet4: hsla(270, 100%, 55%, 1);
+    --violet5: hsla(270, 85%, 64%, 1);
+    --violet6: hsla(270, 85%, 78%, 1);
+    --violet7: hsla(270, 100%, 92%, 1);
+
+
+    --fuschia1: hsla(290, 100%, 8%, 1);
+    --fuschia2: hsla(290, 75%, 22%, 1);
+    --fuschia3: hsla(290, 85%, 36%, 1);
+    --fuschia4: hsla(290, 100%, 55%, 1);
+    --fuschia5: hsla(290, 85%, 64%, 1);
+    --fuschia6: hsla(290, 85%, 78%, 1);
+    --fuschia7: hsla(290, 100%, 92%, 1);
+
+    --magenta1: hsla(330, 100%, 8%, 1);
+    --magenta2: hsla(330, 75%, 22%, 1);
+    --magenta3: hsla(330, 85%, 36%, 1);
+    --magenta4: hsla(330, 100%, 55%, 1);
+    --magenta5: hsla(330, 85%, 64%, 1);
+    --magenta6: hsla(330, 85%, 78%, 1);
+    --magenta7: hsla(330, 100%, 92%, 1);
+
+
+    --silver1: hsla(180, 10%, 2%, 1);
+    --silver2: hsla(180, 10%, 18%, 1);
+    --silver3: hsla(180, 10%, 34%, 1);
+    --silver4: hsla(180, 10%, 50%, 1);
+    --silver5: hsla(180, 10%, 66%, 1);
+    --silver6: hsla(180, 10%, 82%, 1);
+    --silver7: hsla(180, 10%, 98%, 1);
+}

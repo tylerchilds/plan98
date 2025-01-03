@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Simplifying Client-Side Web Programming</title>
+        <meta name="viewport" content="width=device-width">
+
+        <link href="/cdn/sillyz.computer/styles/system.css" rel="stylesheet">
+        <link href="/cdn/sillyz.computer/slides/main.css" rel="stylesheet">
+        <link href="/cdn/sillyz.computer/slides/slideshow.css" rel="stylesheet">
+        <link href="/cdn/sillyz.computer/slides/prism.css" rel="stylesheet">
+    </head>
+    <body>
+        <main id="main">
+            <section class="content content--title">
+              <h1 class="content__heading">
+								<variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  Simplifying
+                  <br/>
+                  Client-Side Web
+                  <br/>
+                  Programming
+								</variable-text>
+            </section>
+
+            <section class="content content--list">
+                <h2 class="content__heading">
+                  <variable-text>
+                    0. Agenda
+                  </variable-text>
+                </h2>
+
+                <ol>
+                  <li>
+                    Overview of all client-side frameworks
+                  </li>
+                  <li>
+                    Critique on high overhead tooling
+                  </li>
+                  <li>
+                    Proposal on how to simplify
+                  </li>
+                  <li>
+                    Live demonstration
+                  </li>
+                </ol>
+            </section>
+
+
+            <section class="content content--title">
+                <h2 class="content__heading">
+                  <variable-text>
+                    1. All These Frameworks
+                  </variable-text>
+                </h2>
+                <p class="content__tagline">Assist in building user interfaces</p>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  Render
+                </variable-text>
+              </h1>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  Style
+                </variable-text>
+              </h1>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  On
+                </variable-text>
+              </h1>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  Read
+                </variable-text>
+              </h1>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+                  Write
+                </variable-text>
+              </h1>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+									2. Two Ways
+							</h1>
+              <p class="content__tagline">To build a user interface</p>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+									Low Overhead
+                </variable-text>
+							</h1>
+              <p class="content__tagline">Runs in a web browser</p>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+                <variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+									High Overhead
+                </variable-text>
+							</h1>
+              <p class="content__tagline">Doesn't run in a web browser</p>
+            </section>
+
+            <section class="content content--list">
+                <h2 class="content__heading">
+                  3. Proposal
+                </h2>
+                <ol>
+                  <li>
+                    render
+                  </li>
+                  <li>
+                    style
+                  </li>
+                  <li>
+                    on
+                  </li>
+                  <li>
+                    read
+                  </li>
+                  <li>
+                    write
+                  </li>
+                </ol>
+            </section>
+
+            <section class="content content--psuedo">
+              <variable-text monospace="1" weight="100" slant="-15" casual="0" cursive="0">
+                function
+                <highlighter color="dodgerblue">
+                  <variable-text monospace="1" weight="800" slant="0" casual="1" cursive="0">
+                    (namespace)
+                  </variable-text>
+                </highlighter>
+                {<br/>
+                &nbsp;&nbsp;return {</br>
+                <variable-text monospace="1" weight="500" casual="1" cursive="1">
+                &nbsp;&nbsp;&nbsp;&nbsp;render,<br />
+                &nbsp;&nbsp;&nbsp;&nbsp;style,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;on,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;read,<br/>
+                &nbsp;&nbsp;&nbsp;&nbsp;write<br/>
+                </variable-text>
+                &nbsp;&nbsp;}<br/>
+                }
+              </variable-text>
+            </section>
+
+            <section class="content content--title">
+              <h2 class="content__heading">4. Demo</h2>
+            </section>
+
+
+            <section class="content content--embed">
+              <iframe height="100%" style="width: 100%;" scrolling="no" title="dogstagram" src="https://codepen.io/tylerchilds/embed/YzagJdd?default-tab=html%2Cresult&editable=true&theme-id=light" frameborder="no" loading="lazy" allowtransparency="true" allowfullscreen="true">
+                  See the Pen <a href="https://codepen.io/tylerchilds/pen/YzagJdd">
+                      dogstagram</a> by Tyler Childs (<a href="https://codepen.io/tylerchilds">@tylerchilds</a>)
+                      on <a href="https://codepen.io">CodePen</a>.
+              </iframe>
+            </section>
+            <section class="content content--title">
+              <h2 class="content__heading">
+                <variable-text>
+                  <a href="https://tylerchilds.com/tag" target="_blank">tylerchilds.com/tag</a>
+                </variable-text>
+              </h2>
+            </section>
+
+
+            <section class="content content--title">
+              <h2 class="content__heading">Questions?</h2>
+            </section>
+
+            <section class="content content--title">
+              <h1 class="content__heading">
+								<variable-text monospace="0" casual="1" weight="800" slant="-15" cursive="1">
+									thanks for listening
+								</variable-text>
+							</h1>
+              <p class="content__tagline">I am <a href="https://tychi.me">tychi.me</a>; founder and friend of <a href="https://sillyz.computer">sillyz.computer</a>.</p>
+            </section>
+        </main>
+
+
+        <!--<button id="layout-toggle" class="layout-toggle">
+            Toggle Presentation
+        </button> -->
+        <script src="/cdn/sillyz.computer/slides/fast-slides.js" type="module"></script>
+        <script src="/cdn/sillyz.computer/slides/slide-gamepad.js" type="module"></script>
+        <script src="/cdn/sillyz.computer/packages/tags/variable-text.js" type="module"></script>
+        <script src="/cdn/sillyz.computer/packages/streams/instrument.js" type="module"></script>
+        <script src="/cdn/sillyz.computer/packages/tags/highlighter.js" type="module"></script>
+    </body>
+</html>
