@@ -205,6 +205,9 @@ function computer(node) {
       <button data-camera class="synthia-action">
         <sl-icon name="camera"></sl-icon>
       </button>
+      <button data-video class="synthia-action">
+        <sl-icon name="camera-reels"></sl-icon>
+      </button>
       <button data-gaming class="synthia-action">
         <sl-icon name="joystick"></sl-icon>
       </button>
@@ -244,11 +247,15 @@ $.when('click', '[data-url]', (event) => {
 })
 
 $.when('click', '[data-voice]', (event) => {
-  $.teach({ calculation: { name: 'voice to search coming soon', error: true } })
+  showModal(`<vosk-browser></vosk-browser>`)
 })
 
 $.when('click', '[data-camera]', (event) => {
   showModal(`<pocket-dexterity></pocket-dexterity>`)
+})
+
+$.when('click', '[data-video]', (event) => {
+  showModal(`<live-help room="public-unsafe" class="stack"></live-help>`)
 })
 
 $.when('click', '[data-gaming]', (event) => {
@@ -452,7 +459,7 @@ $.style(`
     color: saddlebrown;
     position: relative;
     display: grid;
-    grid-template-columns: auto 1fr auto auto auto;
+    grid-template-columns: auto 1fr auto auto auto auto;
     background: lemonchiffon;
     gap: 5px;
     touch-action: manipulation;
