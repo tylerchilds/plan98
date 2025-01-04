@@ -101,6 +101,7 @@ async function page() {
           ${safeEnv('JITSI_MAGIC_COOKIE')}
 
           ${safeEnv('SOLID_URL')}
+          ${safeEnv('LIBRE_TRANSLATE_URL')}
         }
       }
     </script>
