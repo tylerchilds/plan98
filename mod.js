@@ -22,6 +22,8 @@ const processConfiguration = {
   reverseVersionControl: false,
   solid: true,
   reverseSolid: true,
+  translate: true,
+  reverseTranslate: false,
   activityPub: true,
   reverseActivityPub: false,
   multiplayer: true,
@@ -125,6 +127,16 @@ const processConfiguration = {
     reverseSolid: {
       "id": "plan98-reverse-solid",
       "cmd": "deno task reverse-solid",
+      "autostart": true
+    },
+    translate: {
+      "id": "plan98-start-translate",
+      "cmd": "deno task start-translate",
+      "autostart": true
+    },
+    reverseTranslate: {
+      "id": "plan98-reverse-translate",
+      "cmd": "deno task reverse-translate",
       "autostart": true
     },
     activityPub: {

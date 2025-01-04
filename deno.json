@@ -47,6 +47,9 @@
     "start-activity-pub": "cd server/activity-pub/express-activitypub-master && node index.js",
     "reverse-activity-pub": "ssh -N -R 3002:localhost:3002 pub.$USER.me",
 
+    "provision-translate": "cd server/libretranslate && ./provision.sh",
+    "start-translate": "cd server/libretranslate && ./start.sh",
+    "reverse-translate": "ssh -N -R 3005:localhost:3005 translate.$USER.me",
 
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
     "reverse-multiplayer": "ssh -N -R 5675:localhost:5675 multiplayer.$USER.me",
