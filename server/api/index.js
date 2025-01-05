@@ -2,6 +2,7 @@ import express from "npm:express";
 import sqlite3 from "npm:sqlite3"; // For SQLite database driver
 import { open } from "npm:sqlite"; // For easier SQLite access with async/await
 import cors from "npm:cors";
+import { createProxyMiddleware } from 'npm:http-proxy-middleware';
 
 const app = express();
 const port = 3003;
@@ -113,6 +114,13 @@ app.get("/api/contacts", async (req, res) => {
     }
 });
 
+app.use(
+  "/translate",
+  createProxyMiddleware({
+    target: "http://localhost:3005", // LibreTranslate server
+    changeOrigin: true, // Needed for virtual hosted sites
+  })
+);
 
 // Start the server
 app.listen(port, () => {

@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import translate from 'translate'
 
 translate.engine = "libre";
-translate.url = plan98.env.LIBRE_TRANSLATE_URL
+translate.url = plan98.env.LIBRE_TRANSLATE_URL + '/translate'
 
 const $ = elf('libre-translate', {
   input:'',
@@ -15,7 +15,7 @@ const $ = elf('libre-translate', {
 
 let languages = []
 async function loadLanguages() {
-  const response = await fetch(plan98.env.PLAN98_API_HOST + '/translate/languages', {
+  const response = await fetch(plan98.env.LIBRE_TRANSLATE_URL + '/languages', {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
