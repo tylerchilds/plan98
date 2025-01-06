@@ -123,6 +123,7 @@ origin.draw(target => {
     <h2>
       ${ancestry || '????'} / ${classification || '?????'}
     </h2>
+    ${classification === 'Bard' ? `<music-walk></music-walk>` : ''}
     <div class="navigation">
       <a href="${self.location.href}">
         Permalink

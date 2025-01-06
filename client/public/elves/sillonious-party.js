@@ -61,6 +61,11 @@ const fantasyController = {
     '/button/11': gamepadButton(11),
     '/button/12': gamepadButton(12),
     '/button/13': gamepadButton(13),
+    '/button/14': gamepadButton(14),
+    '/button/15': gamepadButton(15),
+    '/button/16': gamepadButton(16),
+    '/button/17': gamepadButton(17),
+    '/button/18': gamepadButton(18),
     '/axis/0': gamepadAxis(0),
     '/axis/1': gamepadAxis(1),
   },
@@ -73,23 +78,25 @@ const fantasyController = {
       gamepadButton(3),
     ],
     axes: [
-      gamepadAxis(0),
-      gamepadAxis(1),
+      gamepadButton(12),
+      gamepadButton(13),
+      gamepadButton(14),
+      gamepadButton(15),
     ]
   }
 }
 
-const checkAxisPushed = (player, osc) => {
+export const checkAxisPushed = (player, osc) => {
   const { pushed } = player.osc[osc] || {}
   return pushed
 }
 
-const checkAxisPulled = (player, osc) => {
+export const checkAxisPulled = (player, osc) => {
   const { pulled } = player.osc[osc] || {}
   return pulled
 }
 
-const checkButton = (player, osc) => {
+export const checkButton = (player, osc) => {
   const { value } = player.osc[osc] || {}
   if(!value) return false
   return Math.abs(value) >= DEFAULT_ACTUATION

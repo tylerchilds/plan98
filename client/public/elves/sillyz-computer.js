@@ -247,15 +247,15 @@ $.when('click', '[data-url]', (event) => {
 })
 
 $.when('click', '[data-voice]', (event) => {
-  showModal(`<vosk-browser></vosk-browser>`)
+  window.location.href = '/app/closed-captions'
 })
 
 $.when('click', '[data-camera]', (event) => {
-  showModal(`<pocket-dexterity></pocket-dexterity>`)
+  window.location.href = '/app/pocket-dexterity'
 })
 
 $.when('click', '[data-video]', (event) => {
-  showModal(`<live-help room="public-unsafe" class="stack"></live-help>`)
+  window.location.href = '/app/live-help?room=public-unsafe&class=stack'
 })
 
 $.when('click', '[data-gaming]', (event) => {

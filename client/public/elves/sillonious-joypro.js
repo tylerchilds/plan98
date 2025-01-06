@@ -21,7 +21,7 @@ $.draw(target => {
 })
 
 function renderJoyPro(joypro, seat) {
-  const { throttles, buttons } = joypro
+  const { axes, buttons } = joypro
   const [play,reset,light,mode,...remainingButtons] = buttons.map((button) => {
     return `
       <button
@@ -34,23 +34,23 @@ function renderJoyPro(joypro, seat) {
       </button>
     `
   })
-  const [upDown,leftRight,...remainingThrottles] = throttles.map((throttle) => {
+  const [upDown,leftRight,...remainingAxes] = axes.map((axis) => {
     return `
       <button
         class="nav-item"
-        ${throttle.pushed ? 'data-pushed="true"' : ''}
-        data-index="${throttle.index}"
+        ${axis.pushed ? 'data-pushed="true"' : ''}
+        data-index="${axis.index}"
         data-seat="${seat}"
       >
-        <img src="${throttle.iconAbove || synthia}" alt="button for osc button.icon"/>
+        <img src="${axis.iconAbove || synthia}" alt="button for osc button.icon"/>
       </button>
       <button
         class="nav-item"
-        ${throttle.pulled ? 'data-pulled="true"' : ''}
-        data-index="${throttle.index}"
+        ${axis.pulled ? 'data-pulled="true"' : ''}
+        data-index="${axis.index}"
         data-seat="${seat}"
       >
-        <img src="${throttle.iconBelow || synthia}" alt="button for osc button.icon"/>
+        <img src="${axis.iconBelow || synthia}" alt="button for osc button.icon"/>
       </button>
 
     `
@@ -59,7 +59,7 @@ function renderJoyPro(joypro, seat) {
   return `
     <div class="the-overflow">
       <div class="reality-reality">
-        ${remainingThrottles.join('')}
+        ${remainingAxes.join('')}
       </div>
       <div class="animated-reality">
         ${remainingButtons.join('')}
@@ -84,9 +84,9 @@ function loop() {
   const joypros = players.map(({ gamepad, osc } ) => {
     const buttons = gamepad.buttons
       .sort((a, b) => a.index - b.index)
-    const throttles = gamepad.axes
+    const axes = gamepad.axes
       .sort((a, b) => a.index - b.index)
-    return { buttons, throttles }
+    return { buttons, axes }
   })
 
   $.teach({ joypros })
