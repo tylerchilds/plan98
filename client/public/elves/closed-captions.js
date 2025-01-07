@@ -59,6 +59,7 @@ $.when('click', '[data-load]', (event) => {
 })
 
 async function init(target) {
+  const { realtime } = $.learn()
   const channel = new MessageChannel();
   const model = await Vosk.createModel('/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
@@ -68,26 +69,41 @@ async function init(target) {
   const recognizer = new model.KaldiRecognizer(sampleRate);
   recognizer.setWords(true);
 
-  recognizer.on("result", async (message) => {
-    const result = message.result;
-
-    if(result.text) {
+  if(realtime) {
+    let lastPartial = ''
+    recognizer.on("partialresult", async (message) => {
+      const partial = message.result.partial;
+      if(partial === '') return
       $.teach({
-        caption: result.text
+        caption: partial
       })
 
-      const { to, from } = $.learn()
-      const translated = await translate(result.text, { to, from })
-      $.teach({
-        translated
-      })
-    }
-  });
+      if(partial !== lastPartial) {
+        lastPartial = partial
+        const { to, from } = $.learn()
+        const translated = await translate(partial, { to, from })
+        $.teach({
+          translated
+        })
+      }
+    });
+  } else {
+    recognizer.on("result", async (message) => {
+      const result = message.result;
 
-  recognizer.on("partialresult", async (message) => {
-    const partial = message.result.partial;
-    console.log(partial)
-  });
+      if(result.text) {
+        $.teach({
+          caption: result.text
+        })
+
+        const { to, from } = $.learn()
+        const translated = await translate(result.text, { to, from })
+        $.teach({
+          translated
+        })
+      }
+    });
+  }
 
   const mediaStream = await navigator.mediaDevices.getUserMedia({
     video: false,
