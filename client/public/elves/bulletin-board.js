@@ -351,7 +351,7 @@ function mount(target) {
           <button data-mode="camera"  data-tooltip="Conference">
             <sl-icon name="camera-reels"></sl-icon>
           </button>
-          <button data-href="${window.location.href}" data-tooltip="share">
+          <button data-goto="${window.location.href}" data-tooltip="share">
             <sl-icon name="box-arrow-right-up"></sl-icon>
           </button>
           <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
@@ -435,7 +435,7 @@ $.when('click', '[data-menu]', function updateMode (event) {
   $.teach({ menuOpen: !menuOpen })
 })
 
-$.when('click', '[data-href]', function navigate (event) {
+$.when('click', '[data-goto]', function navigate (event) {
   const { href } = event.target.dataset
   window.top.location.href = href
 })

@@ -122,13 +122,9 @@ $.draw((target) => {
         </div>
       </div>
       <a-scene>
-        <a-entity id="rig" position="0 1.6 0">
-          <a-entity id="camera" camera="active: true" look-controls="true" rotation-reader>
-            <a-cursor material="color: white;"></a-cursor>
-            <a-entity geometry="primitive: sphere; height: 0.2; width: 0.2" position="0 0 -27"
-            material="color: firebrick; opacity: 0.5"></a-entity>
-          </a-entity>
-        </a-entity>
+        <a-camera>
+          <a-cursor material="color: white;"></a-cursor>
+        </a-camera>
         ${scene.join('')}
         <a-entity class="irix"></a-entity>
       </a-scene>

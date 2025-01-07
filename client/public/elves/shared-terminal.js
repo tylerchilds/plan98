@@ -1138,56 +1138,6 @@ $.style(`
     overflow: hidden;
     color: rgba(255,255,255,.65);
   }
-
-  & .application {
-    border: none;
-    border-radius: 0;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 8px;
-    border-radius: 0;
-    background: transparent;
-    padding: 0;
-  }
-
-  & .application .nonce-icon {
-    width: calc(2rem + 3px);
-    height: calc(2rem + 3px);
-  }
-
-  & .application > span {
-    display: flex;
-  }
-  & .application sl-icon {
-    background: lemonchiffon;
-    color: saddlebrown;
-    padding: 8px;
-  }
-
-  & .app-name {
-    border-radius: 0;
-    font-size: .8rem;
-    line-height: 1;
-    border: none;
-    width: auto;
-    display: inline-block;
-    max-width: 100%;
-    width: 100%;
-    color: saddlebrown;
-    background: transparent;
-  }
-
-  & .app-name[disabled] {
-    opacity: 1;
-  }
-
-  & .irix-launcher {
-    display: flex;
-    flex-direction: column;
-    padding: 4px;
-    gap: 4px;
-    justify-items: center;
-  }
 `)
 
 $.when('pointerdown', 'canvas', start)
