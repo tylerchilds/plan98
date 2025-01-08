@@ -15,16 +15,51 @@ const $ = elf('closed-captions', {
   consented: false
 })
 
+let languages = []
+async function loadLanguages() {
+  const response = await fetch(plan98.env.LIBRE_TRANSLATE_URL + '/languages', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  languages = await response.json();
+  $.teach({
+    sourceLanguages: languages.map(x => ({code: x.code, name: x.name})),
+    destinationLanguages: languages[0].targets
+  })
+}
+
+try {
+  loadLanguages()
+} catch (error) {
+  alert('Error submitting form.');
+}
+
+
 $.draw((target) => {
   const {
     consented,
     caption,
-    translated
+    translated,
+    to,
+    destinationLanguages
   } = $.learn()
 
   if(!consented) {
     return `
       <div data-enabled>
+        <label class="field">
+          <span class="label">Destination</span>
+          <select name="to" data-bind>
+            ${destinationLanguages.map(x => {
+              return `
+                <option value="${x}" ${to === x ? 'selected="true"':''}>${x}</option>
+              `
+            }).join('')}
+
+          </select>
+        </label>
         <label class="field">
          <input name="realtime" type="checkbox" />
          <span class="label">Real-time Only</span>
@@ -44,6 +79,15 @@ $.draw((target) => {
       ${translated}
     </div>
   `
+})
+
+$.when('input', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
+})
+
+
+$.when('change', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
 })
 
 $.when('change', '[type="checkbox"]', (event) => {
