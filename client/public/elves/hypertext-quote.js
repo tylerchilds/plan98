@@ -11,7 +11,7 @@ $.style(`
   }
   @media (min-width: 768px) {
     & {
-      margin: 1rem 1in;
+      margin: 1rem auto;
       width: 4in;
     }
   }

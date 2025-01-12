@@ -83,7 +83,7 @@ function countShots(instructions) {
 const $ = elf('hyper-script', {
   // raw text of the file
   file: pitch,
-  activePanel: window.location.hash?.split('#')[1] || panels.read,
+  activePanel: window.location.hash?.split('#')[1] || panels.write,
   activeShot: 0,
   shotCount: countShots(pitch),
 })
@@ -471,7 +471,7 @@ $.when('keydown', '[data-shot]', (event) => {
 
 function slideNext (event) {
   const { shotCount, activeShot } = $.learn()
-  if(activeShot > shotCount) return
+  if(activeShot >= shotCount) return
   $.teach({ activeShot: activeShot + 1, lastAction: 'next' })
 }
 

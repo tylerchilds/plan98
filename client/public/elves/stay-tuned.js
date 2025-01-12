@@ -1,5 +1,5 @@
 import module from '@silly/tag'
-import { createClient } from '@supabase/supabase-js'
+import supabase from '@sillonious/database'
 
 const $ = module('stay-tuned')
 
@@ -10,8 +10,7 @@ $.draw((target) => {
   const { error, success } = $.learn()
 
   if(success) return `
-    <img src="/cdn/tychi.me/photos/professional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
-    <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Your message has been delivered! Thanks for reaching out.</hypertext-highlighter>
+    <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Thanks for wanting to stay in touch. I'll be in touch soon, Ty.</hypertext-highlighter>
   `
 
   const maybeError = !error?'':`
@@ -53,8 +52,8 @@ $.draw((target) => {
           <span style="font-size: 5rem; line-height: 1">Ty</span>
         </hypertext-variable>
       </div>
-      <a href="https://tychi.me">
-        <img src="/cdn/tychi.me/photos/professional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
+      <a href="https://hivelabworks.com">
+        <img src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
       </a>
       Founder, Owner, Operator, Liason @ Sillyz<br/>
       <a href="https://sillyz.computer">
@@ -81,21 +80,20 @@ $.style(`
 
 $.when('submit', 'form', async event => {
   event.preventDefault()
-  const { url, key } = event.target.dataset
-  const supabase = createClient(url, key)
 
   const { name, email, message } = event.target
 
   const values = {
-    name: name.value,
     email: email.value,
-    message: message.value
   }
 
   try {
-    const result = await supabase.from('contacts').insert(values)
-    const response = result.error
-      ? { error: result.error.message }
+    const { data, error } = await supabase
+    .from('contacts')
+    .insert(values)
+
+    const response = error
+      ? { error: error.message }
       : { success: true }
 
     $.teach(response)
