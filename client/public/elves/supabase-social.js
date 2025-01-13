@@ -1,7 +1,7 @@
 import module from '@silly/tag'
 import supabase from '@sillonious/database'
 
-const $ = module('supabase-profile')
+const $ = module('supabase-social')
 
 $.draw((target) => {
   const { error, success } = $.learn()

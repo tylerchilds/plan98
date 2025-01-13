@@ -1,7 +1,8 @@
 import supabase from '@sillonious/database'
 import elf, { state } from '@silly/tag'
 import { showModal } from '@plan98/modal'
-import { disconnect } from './supabase-login.js'
+import { disconnect, $ as $login } from './supabase-login.js'
+
 
 const $ = elf('supabase-logout')
 
@@ -9,6 +10,7 @@ $.draw((target) => {
   const loggedIn = !!state['ls/supabase.auth.token']
 
   return loggedIn ? `
+    ${$login.learn().user.email}
     <button data-logout>
       Disconnect
     </button>

@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import module, { state } from '@silly/tag'
 import supabase from '@sillonious/database'
 
 const $ = module('supabase-updates', { updates: [] })
@@ -26,16 +26,29 @@ function render(update) {
 async function mount(target) {
   if(target.mounted) return
   target.mounted = true
+
+  let userId = target.dataset.user 
+
+  if(!userId) {
+    try {
+      userId = JSON.parse(state['ls/supabase.auth.token']).user.id
+    } catch(_e) {
+      //
+    }
+  }
+
+  if(!userId) return
+
   const { data, error } = await supabase
     .from('updates')
     .select()
+    .eq('user_id', userId); 
 
   if(error) {
     $.teach({ error })
     return
   }
   
-  const userId = JSON.parse(state['ls/supabase.auth.token']).user.id
   supabase.channel('feed-channel')
   .on(
     'postgres_changes',

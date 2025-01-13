@@ -2,7 +2,7 @@ import supabase from '@sillonious/database'
 import elf, { state } from '@silly/tag'
 import { showModal } from '@plan98/modal'
 
-const $ = elf('supabase-login', {
+export const $ = elf('supabase-login', {
   email: '',
   password: '',
   message: '',

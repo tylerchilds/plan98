@@ -6,15 +6,16 @@ const $ = elf('social-network')
 $.draw((target) => {
   const loggedIn = !!state['ls/supabase.auth.token']
   if(loggedIn) {
-    return `
+    target.innerHTML = `
       <supabase-logout></supabase-logout>
       <supabase-profile></supabase-profile>
       <supabase-updates></supabase-updates>
       <supabase-social></supabase-social>
     `
+    return
   }
 
-  return `
+  target.innerHTML = `
     <supabase-login></supabase-login>
   `
 })
