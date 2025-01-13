@@ -1,5 +1,7 @@
 import module, { state } from '@silly/tag'
 import supabase from '@sillonious/database'
+import { $ as $login } from './supabase-login.js'
+import { showModal } from './plan98-modal.js'
 
 const $ = module('supabase-profile', {
   profile: {
@@ -13,25 +15,75 @@ const $ = module('supabase-profile', {
 
 $.draw((target) => {
   mount(target)
-  const { error, success, profile } = $.learn()
-  return `
-    <form method="POST">
-      <input type="file" name="picture" accept="image/*">
-      <img src="${profile.picture || '/cdn/tychi.me/photos/unprofessional-headshot.jpg' }" />
-      <input type="file" name="banner" accept="image/*">
-      <img src="${profile.banner || '/cdn/tychi.me/photos/aurora.JPG' }" />
-      <label class="field">
-        <span class="label">Nickname</span>
-        <input name="nick" value="${escapeHyperText(profile.nick)}"/>
-      </label>
-      <label class="field">
-        <span class="label">Bio</span>
-        <textarea name="bio">${escapeHyperText(profile.bio)}</textarea>
-      </label>
-      <button type="submit">
-        Submit
-      </button>
-    </form>
+  const { error, success, profile, userId, edit } = $.learn()
+  const hero = profile.banner || '/cdn/tychi.me/photos/aurora.JPG'
+
+  if(edit) {
+    return `
+      <div class="hero" style="--background-image: url('${hero}')">
+        <div class="banner"></div>
+      </div>
+      <div class="hero-row">
+        <div class="actions-left">
+          <button data-qr="${window.location.origin}/app/${$.link}?data-user=${userId}">
+            Share
+          </button>
+        </div>
+        <div class="picture">
+          <img  src="${profile.picture || '/cdn/tychi.me/photos/unprofessional-headshot.jpg' }" />
+        </div>
+        <div class="actions-right">
+          <button data-edit>
+            Back
+          </button>
+        </div>
+      </div>
+      <form class="profile" method="POST" action="edit-profile">
+        <div class="nick">
+          <input name="nick" value="${escapeHyperText(profile.nick)}"/>
+        </div>
+        <div class="bio">
+          <textarea name="bio">${escapeHyperText(profile.bio)}</textarea>
+        </div>
+
+        <input type="file" name="picture" accept="image/*">
+        <input type="file" name="banner" accept="image/*">
+
+        <button type="submit">
+          Submit
+        </button>
+      </form>
+    ` 
+  }
+
+  target.innerHTML = `
+    <div class="hero" style="--background-image: url('${hero}')">
+      <div class="banner"></div>
+    </div>
+    <div class="hero-row">
+      <div class="actions-left">
+        <button data-qr="${window.location.origin}/app/${$.link}?data-user=${userId}">
+          Share
+        </button>
+      </div>
+      <div class="picture">
+        <img  src="${profile.picture || '/cdn/tychi.me/photos/unprofessional-headshot.jpg' }" />
+      </div>
+      <div class="actions-right">
+        <button data-edit>
+          Edit
+        </button>
+      </div>
+    </div>
+    <div class="profile">
+      <div class="nick">
+        ${escapeHyperText(profile.nick)}
+      </div>
+      <div class="bio">
+        ${escapeHyperText(profile.bio)}
+      </div>
+    </div>
+    <supabase-updates data-user="${userId}"><supabase-updates>
   `
 })
 
@@ -41,7 +93,7 @@ async function onImageSelection({ target }) {
   const file = target.files && target.files[0];
   if(!file) return
 
-  const userId = target.closest($.link).dataset.user
+  const { userId } = $.learn()
 
   if(!userId) return
   const { data, error } = await supabase
@@ -70,8 +122,6 @@ function mergeProfile(state, payload) {
   }
 }
 
-
-
 async function mount(target) {
   if(target.mounted) return
   target.mounted = true
@@ -81,13 +131,14 @@ async function mount(target) {
   if(!userId) {
     try {
       userId = JSON.parse(state['ls/supabase.auth.token']).user.id
-      target.dataset.user = userId
     } catch(_e) {
       //
     }
   }
 
   if(!userId) return
+
+  $.teach({ userId })
   const { data, error } = await supabase
     .from('profiles')
     .select()
@@ -103,11 +154,101 @@ async function mount(target) {
   $.teach({ profile: data[0] })
 }
 
-
 $.style(`
   & {
     display: block;
   }
+
+  & .profile {
+  }
+
+  & .profile input,
+  & .profile textarea {
+    border: 0;
+    padding: 0;
+    width: 100%;
+  }
+
+  & .profile textarea {
+    width: 100%;
+    resize: none;
+    line-height: 1;
+    color: rgba(0,0,0,.65);
+  }
+
+  & .nick {
+    font-size: 2rem;
+    padding: .5rem 1rem;
+  }
+
+  & .bio {
+    padding: .5rem 1rem;
+    font-size: 1.5rem;
+    color: rgba(0,0,0,.65);
+    line-height: 1;
+  }
+
+  & [data-qr] {
+
+  }
+
+  & [data-edit] {
+
+  }
+
+  & .hero {
+    height: 35vh;
+    min-height: 128px;
+  }
+
+  & .picture {
+    position: relative;
+    top: -64px;
+    border-radius: 2px;
+    aspect-ratio: 1;
+    overflow: hidden;
+    margin-bottom: -64px;
+  }
+
+  & .picture img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  & .hero-row {
+    display: grid;
+    grid-template-columns: 1fr 128px 1fr;
+  }
+
+  & .actions-left {
+    padding: .5rem;
+  }
+
+  & .actions-right {
+    text-align: right;
+    padding: .5rem;
+  }
+
+  & .hero-row button {
+    background: transparent;
+    color: rgba(0,0,0,.65);
+    border: none;
+    border-radius: 0;
+    border: 1px solid rgba(0,0,0,.65);
+    padding: .25rem .5rem;
+    border-radius: 2px;
+  }
+
+  & .hero-row button:hover,
+  & .hero-row button:focus {
+    border: 1px solid rgba(0,0,0,.85);
+    color: rgba(0,0,0,.85);
+    background: rgba(0,0,0,.25);
+  }
+
   & .wrapper{
     display: block;
     max-width: 6in;
@@ -117,9 +258,15 @@ $.style(`
     background: rgba(0,0,0,.85);
     overflow: hidden;
   }
+
+  & .banner {
+    background-image: var(--background-image);
+    background-size: cover;
+    height: 100%;
+  }
 `)
 
-$.when('submit', 'form', async event => {
+$.when('submit', '[action="edit-profile"]', async event => {
   event.preventDefault()
 
   const { nick, bio } = event.target
@@ -142,11 +289,12 @@ $.when('submit', 'form', async event => {
   try {
     const { data, error } = await supabase
       .from('profiles')
-      .insert(values)
+      .upsert([values], { onConflict: 'user_id' })
+      .select()
 
     const response = error
       ? { error: error.message }
-      : { success: true }
+      : { success: true, edit: false, profile: data[0] }
 
     $.teach(response)
   } catch(e) {
@@ -166,4 +314,14 @@ function escapeHyperText(text = '') {
   )
 }
 
+$.when('click', '[data-edit]', (event) => {
+  $.teach({ edit: !$.learn().edit })
+})
+$.when('click', '[data-qr]', (event) => {
+  showModal(`
+    <div style="background: white; height: 100%; display: grid; place-items: center;">
+      <qr-code src="${event.target.dataset.qr}" data-fg="black" data-bg="white" style="width: 240px; height: 240px; max-width: 100%; max-height: 100%;"></qr-code>
+    </div>k
+  `)
+})
 

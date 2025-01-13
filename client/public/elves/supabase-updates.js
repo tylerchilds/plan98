@@ -5,11 +5,11 @@ const $ = module('supabase-updates', { updates: [] })
 
 $.draw((target) => {
   mount(target)
-  const { updates, error, success } = $.learn()
-
+  const { updates, saga, error, success } = $.learn()
+  console.log({ saga })
   return `
-    <form method="POST">
-      <textarea name="saga"></textarea>
+    <form method="POST" action="post-update">
+      <textarea data-bind name="saga" value="${escapeHyperText(saga)}"></textarea>
       <button type="submit">
         Submit
       </button>
@@ -17,6 +17,10 @@ $.draw((target) => {
 
     ${updates.map(render).join('')}
   `
+})
+
+$.when('input', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
 })
 
 function render(update) {
@@ -110,7 +114,7 @@ $.style(`
   }
 `)
 
-$.when('submit', 'form', async event => {
+$.when('submit', '[action="post-update"]', async event => {
   event.preventDefault()
 
   const { saga } = event.target
@@ -127,10 +131,24 @@ $.when('submit', 'form', async event => {
 
     const response = error
       ? { error: error.message }
-      : { success: true }
+      : { success: true, saga: '' }
 
     $.teach(response)
   } catch(e) {
     $.teach({ error: e })
   }
 })
+
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+

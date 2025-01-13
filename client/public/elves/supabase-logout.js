@@ -10,14 +10,18 @@ $.draw((target) => {
   const loggedIn = !!state['ls/supabase.auth.token']
 
   return loggedIn ? `
-    ${$login.learn().user.email}
-    <button data-logout>
-      Disconnect
-    </button>
+    <div>
+      ${$login.learn().user?.email}
+      <button data-logout>
+        Disconnect
+      </button>
+    </div>
   ` : `
-    <a href="/app/supabase-login">
-      Connect
-    </a>
+    <div>
+      <a href="/app/supabase-login">
+        Connect
+      </a>
+    </div>
   `
 })
 
@@ -28,11 +32,30 @@ $.when('click', '[data-logout]', async () => {
 
 $.style(`
   & {
-    max-width: 320px;
-    padding: 1rem;
+    padding: .25rem .5rem;
     display: block;
     margin: auto;
   }
+
+  & button,
+  & a {
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 2px;
+    float: right;
+    border: 1px solid rgba(255,255,255,.65);
+    padding: .25rem .5rem;
+  }
+
+  & a:hover,
+  & a:focus,
+  & button:hover,
+  & button:focus {
+    background: rgba(255,255,255,.25);
+  }
+
+
 
   & *:focus {
     border-color: orange;

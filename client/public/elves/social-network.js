@@ -9,7 +9,6 @@ $.draw((target) => {
     target.innerHTML = `
       <supabase-logout></supabase-logout>
       <supabase-profile></supabase-profile>
-      <supabase-updates></supabase-updates>
       <supabase-social></supabase-social>
     `
     return
@@ -23,9 +22,33 @@ $.draw((target) => {
 $.style(`
   & {
     display: block;
-    padding: 2rem 0;
-    max-width: 320px;
-    margin: auto;
+    position: relative;
+  }
+
+  & supabase-logout {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    color: white;
+  }
+
+  & supabase-logout > * {
+    position: relative;
+    z-index: 3;
+  }
+
+  & supabase-logout::before {
+    height: 4rem;
+    content: '';
+    background: linear-gradient(rgba(0,0,0,.6) 50%, rgba(0,0,0,0));
+    width: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 2;
   }
 
   & .auth {
