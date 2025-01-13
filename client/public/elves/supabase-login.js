@@ -1,11 +1,11 @@
 import supabase from '@sillonious/database'
-import module from '@silly/tag'
+import elf, { state } from '@silly/tag'
 import { showModal } from '@plan98/modal'
 
-const $ = module('supabase-login', {
+const $ = elf('supabase-login', {
   email: '',
   password: '',
-  message: null,
+  message: '',
   connected: false,
   newAccount: true,
   user: null
@@ -14,29 +14,21 @@ const $ = module('supabase-login', {
 
 supabase.auth.onAuthStateChange((event, session) => {
   if (session) {
-    localStorage.setItem('supabase.auth.token', JSON.stringify(session));
+    state['ls/supabase.auth.token'] = JSON.stringify(session)
   } else {
-    localStorage.removeItem('supabase.auth.token');
+    state['ls/supabase.auth.token'] = null
   }
 });
 
-function schedule(x, delay=1) { setTimeout(x, delay) }
-async function mount(target) {
-  if(target.mounted) return
-  target.mounted = true
-  schedule(() => $.teach({ message: null }))
+const savedSession = state['ls/supabase.auth.token']
 
-  const savedSession = localStorage.getItem('supabase.auth.token');
-
-  if (savedSession) {
-    const session = JSON.parse(savedSession);
-    await supabase.auth.setSession(session.access_token);
-    $.teach({ user: session.user })
-  }
+if (savedSession) {
+  const session = JSON.parse(savedSession);
+  await supabase.auth.setSession(session.access_token);
+  $.teach({ user: session.user })
 }
 
 $.draw((target) => {
-  mount(target)
   const {
     message,
     user,
@@ -46,6 +38,9 @@ $.draw((target) => {
   if(!user) {
     return `
       <h2>Authenticate</h2>
+      <p>
+        If you do not have an account yet, please <a href="/app/supabase-register">Register Here</a>
+      </p>
       <div class="message">${message ? message : ''}</div>
       <form method="POST" name="authenticate">
         <label class="field">
@@ -59,16 +54,6 @@ $.draw((target) => {
         <button type="submit">
           Authenticate
         </button>
-
-        <div style="text-align: center">
-          <div>
-          - or -
-          </div>
-
-          <button data-register class="secondary">
-            Register
-          </button>
-        </div>
       </form>
     `
   }
@@ -77,20 +62,10 @@ $.draw((target) => {
     <p>
     Connected as: ${user.email}!
     </p>
-    <weild-organizations></weild-organizations>
     <button data-logout>
       Disconnect
     </button>
   `
-})
-
-$.when('click', '[data-register]', (event) => {
-  event.preventDefault()
-  showModal(`
-    <div style="background: white; padding 1rem;">
-      <weild-registration></weild-registration>
-    </div>
-  `)
 })
 
 $.when('click', '[data-logout]', async () => {
@@ -104,9 +79,9 @@ export async function getUser() {
 
 export async function disconnect() {
   const { error } = await supabase.auth.signOut()
+  state['ls/supabase.auth.token'] = null
   if(!error) {
     $.teach({ user: null })
-    window.location.href = '/'
   }
 }
 
@@ -137,10 +112,7 @@ $.style(`
     max-width: 320px;
     padding: 1rem;
     display: block;
-  }
-
-  & weild-organizations {
-    margin-bottom: 3rem;
+    margin: auto;
   }
 
   & *:focus {
@@ -159,5 +131,18 @@ $.style(`
 
   & [type="submit"] {
     width: 100%;
+    border: none;
+    border-radius: none;
+    background: navy;
+    padding: 1rem;
+    color: white;
+    opacity: .75;
+    transition: opacity 150ms;
   }
+
+  & [type="submit"]:hover,
+  & [type="submit"]:focus {
+    opacity: 1;
+  }
+
 `)

@@ -1,8 +1,8 @@
 import supabase from '@sillonious/database'
-import module from '@silly/tag'
+import elf, { state } from '@silly/tag'
 import { showModal, hideModal } from '@plan98/modal'
 
-const $ = module('supabase-register', {
+const $ = elf('supabase-register', {
   email: '',
   password: '',
   message: null,
@@ -65,7 +65,7 @@ $.when('submit', '[name="register"]', async (event) => {
 
   if(!error) {
     $.teach({
-      message: 'Registration Successful. Confirm your email, then authenticate'
+      message: 'Registration Successful. Confirm your email, then <a href="/app/supabase-login">authenticate</a>'
     })
     return
   }
@@ -80,10 +80,7 @@ $.style(`
     max-width: 320px;
     padding: 1rem;
     display: block;
-  }
-
-  & weild-organizations {
-    margin-bottom: 3rem;
+    margin: auto;
   }
 
   & *:focus {
@@ -102,6 +99,18 @@ $.style(`
 
   & [type="submit"] {
     width: 100%;
+    border: none;
+    border-radius: none;
+    background: navy;
+    padding: 1rem;
+    color: white;
+    opacity: .75;
+    transition: opacity 150ms;
+  }
+
+  & [type="submit"]:hover,
+  & [type="submit"]:focus {
+    opacity: 1;
   }
 
   & .message:not(:empty) {

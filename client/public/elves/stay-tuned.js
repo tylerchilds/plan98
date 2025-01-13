@@ -10,7 +10,7 @@ $.draw((target) => {
   const { error, success } = $.learn()
 
   if(success) return `
-    <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Thanks for wanting to stay in touch. I'll be in touch soon, Ty.</hypertext-highlighter>
+    <hypertext-highlighter color="green" data-tooltip="Seriously, you're the best!">Thanks for connecting. I'll be in touch soon, Ty.</hypertext-highlighter>
   `
 
   const maybeError = !error?'':`
@@ -49,13 +49,13 @@ $.draw((target) => {
       Thanks,<br/>
       <div style="float: left;">
         <hypertext-variable monospace="0" casual="1" weight="100" slant="-15" cursive="1">
-          <span style="font-size: 5rem; line-height: 1">Ty</span>
+          <span style="font-size: 5rem; line-height: 1">ty</span>
         </hypertext-variable>
       </div>
       <a href="https://hivelabworks.com">
         <img src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" style="display: block; width: 10rem; height: 10rem; border-radius: 100%; margin: 1rem 0;" alt="an avatar" />
       </a>
-      Founder, Owner, Operator, Liason @ Sillyz<br/>
+      Founder, Owner, Operator, Liason @ Sillyz Computer, LLC<br/>
       <a href="https://sillyz.computer">
         Sillyz.Computer
       </a>
