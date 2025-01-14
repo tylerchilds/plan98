@@ -9,22 +9,46 @@ $.draw((target) => {
   console.log({ saga })
   return `
     <form method="POST" action="post-update">
-      <textarea data-bind name="saga" value="${escapeHyperText(saga)}"></textarea>
+      <textarea data-bind name="saga" value="${escapeHyperText(saga)}" style="height: ${$.learn().statusHeight}" placeholder="What's up?"></textarea>
       <button type="submit">
-        Submit
+        Post
       </button>
     </form>
 
     ${updates.map(render).join('')}
   `
+}, {
+  afterUpdate: (target) => {
+    {
+      [...target.querySelectorAll('textarea')].map(ta => {
+        ta.style.height = ta.scrollHeight + "px"
+      })
+    }
+  }
 })
+
+
 
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
 
 function render(update) {
-  return update.saga
+  return `
+    <div class="status-update">
+      <div class="status-update-picture">
+        <img src=${update.profiles.picture} />
+      </div>
+      <div>
+        <div class="status-update-nickname">
+          @${update.profiles.nick}
+        </div>
+        <div class="status-update-update">
+          ${update.saga}
+        </div>
+      </div>
+    </div>
+  `
 }
 
 async function mount(target) {
@@ -45,9 +69,11 @@ async function mount(target) {
 
   const { data, error } = await supabase
     .from('updates')
-    .select()
+    .select(`
+      *,
+      profiles (*)
+    `)
     .eq('user_id', userId); 
-
   if(error) {
     $.teach({ error })
     return
@@ -58,7 +84,22 @@ async function mount(target) {
     'postgres_changes',
     { event: '*', schema: 'public', table: 'updates', filter: `user_id=eq.${userId}`  },
     async (payload) => {
-      $.teach(payload.new, mergeUpdate)
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', payload.new.user_id)
+        .single()
+
+      if (profileError) {
+        console.error('Error fetching profile:', profileError)
+        return
+      }
+
+      const record = {
+        ...payload.new,
+        profiles: profileData
+      }
+      $.teach(record, mergeUpdate)
 
       if(payload.eventType === 'DELETE') {
         $.teach({ id: payload.old.id }, deleteUpdate)
@@ -102,7 +143,64 @@ function deleteUpdate(state, payload) {
 $.style(`
   & {
     display: block;
+    max-width: 55ch;
+    margin: auto;
   }
+
+  & .status-update {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .5rem;
+    padding: .5rem 1rem;
+  }
+
+  & .status-update-nickname {
+    color: rgba(0,0,0,.65);
+    font-weight: bold;
+    font-size: .9rem;
+  }
+  & .status-update-picture {
+    position: relative;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  & .status-update-picture img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 48px;
+    height: 48px;
+  }
+
+  & [action="post-update"] {
+    padding: 1rem;
+  }
+
+  & [type="submit"] {
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.6)), mediumseagreen;
+    border-radius: 2px;
+    border: none;
+    color: white;
+    padding: .5rem 1rem;
+    transition: opacity 150ms;
+  }
+
+  & [type="submit"]:hover,
+  & [type="submit"]:focus {
+    background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.8)), mediumseagreen;
+  }
+
+  & textarea {
+    width: 100%;
+    resize: none;
+    margin: .5rem 0;
+    min-height: 4rem;
+  }
+
   & .wrapper{
     display: block;
     max-width: 6in;
@@ -150,5 +248,3 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
-
-

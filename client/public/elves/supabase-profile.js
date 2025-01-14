@@ -7,6 +7,7 @@ const $ = module('supabase-profile', {
   profile: {
     nick: '',
     bio: '',
+    color: '',
     picture: null,
     banner: null
   },
@@ -21,7 +22,7 @@ $.draw((target) => {
   if(edit) {
     return `
       <div class="hero" style="--background-image: url('${hero}')">
-        <div class="banner"></div>
+        <div class="banner" data-modal="<img src='${hero}' />"></div>
       </div>
       <div class="hero-row">
         <div class="actions-left">
@@ -40,25 +41,36 @@ $.draw((target) => {
       </div>
       <form class="profile" method="POST" action="edit-profile">
         <div class="nick">
-          <input name="nick" value="${escapeHyperText(profile.nick)}"/>
+          <input type="text" name="nick" value="${escapeHyperText(profile.nick || '')}"/>
         </div>
-        <div class="bio">
-          <textarea name="bio">${escapeHyperText(profile.bio)}</textarea>
+        <div class="bio"><textarea name="bio">${escapeHyperText(profile.bio || '')}</textarea></div>
+
+        <div class="input-field">
+          Profile Picture<br>
+          <input type="file" name="picture" accept="image/*">
+        </div>
+        <div class="input-field">
+          Banner Image<br>
+          <input type="file" name="banner" accept="image/*">
         </div>
 
-        <input type="file" name="picture" accept="image/*">
-        <input type="file" name="banner" accept="image/*">
+        <label class="field">
+          <span class="label">Color</span>
+          <input name="color" value="${escapeHyperText(profile.color || '')}"/>
+        </label>
 
-        <button type="submit">
-          Submit
-        </button>
+        <div style="text-align: center">
+          <button type="submit">
+            Save
+          </button>
+        </div>
       </form>
     ` 
   }
 
   target.innerHTML = `
     <div class="hero" style="--background-image: url('${hero}')">
-      <div class="banner"></div>
+      <div class="banner" data-modal="<img src='${hero}' />"></div>
     </div>
     <div class="hero-row">
       <div class="actions-left">
@@ -79,12 +91,26 @@ $.draw((target) => {
       <div class="nick">
         ${escapeHyperText(profile.nick)}
       </div>
-      <div class="bio">
-        ${escapeHyperText(profile.bio)}
-      </div>
+      <div class="bio">${escapeHyperText(profile.bio)}</div>
     </div>
     <supabase-updates data-user="${userId}"><supabase-updates>
   `
+}, {
+  beforeUpdate: (target) => {
+    {
+      const { profile } = $.learn()
+      if(profile.color) {
+        target.style = `--profile-color: ${profile.color}`;
+      }
+    }
+  },
+  afterUpdate: (target) => {
+    {
+      [...target.querySelectorAll('textarea')].map(ta => {
+        ta.style.height = ta.scrollHeight + "px"
+      })
+    }
+  }
 })
 
 $.when('change', '[type="file"]', onImageSelection)
@@ -159,14 +185,30 @@ $.style(`
     display: block;
   }
 
+  & [type="submit"] {
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.6)), mediumseagreen;
+    border-radius: 2px;
+    border: none;
+    color: white;
+    padding: .5rem 1rem;
+    transition: opacity 150ms;
+  }
+
+  & [type="submit"]:hover,
+  & [type="submit"]:focus {
+    background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.8)), mediumseagreen;
+  }
+
   & .profile {
   }
 
-  & .profile input,
+  & .profile input[type="text"],
   & .profile textarea {
     border: 0;
     padding: 0;
     width: 100%;
+    outline: 1px solid rgba(0,0,0,.25);
+    outline-offset: 3px;
   }
 
   & .profile textarea {
@@ -174,6 +216,9 @@ $.style(`
     resize: none;
     line-height: 1;
     color: rgba(0,0,0,.65);
+  }
+
+  & [action="edit-profile"] {
   }
 
   & .nick {
@@ -186,6 +231,20 @@ $.style(`
     font-size: 1.5rem;
     color: rgba(0,0,0,.65);
     line-height: 1;
+    white-space: pre-wrap;
+  }
+
+  & .field {
+    padding: .5rem 1rem;
+  }
+
+  & .field input {
+    background: white;
+    border: 1px solid rgba(0,0,0,.25);
+  }
+
+  & .input-field {
+    padding: .5rem 1rem;
   }
 
   & [data-qr] {
@@ -199,6 +258,8 @@ $.style(`
   & .hero {
     height: 35vh;
     min-height: 128px;
+    border-bottom: 2px solid var(--profile-color, white);
+    box-shadow: 0 2px 5px 2px rgba(0,0,0,.25);
   }
 
   & .picture {
@@ -208,6 +269,13 @@ $.style(`
     aspect-ratio: 1;
     overflow: hidden;
     margin-bottom: -64px;
+    box-shadow: 0 3px 7px 3px rgba(0,0,0,.1);
+    transform: scale(1);
+    transition: transform 150ms ease-in-out;
+  }
+
+  & .picture:hover {
+    transform: scale(1.1);
   }
 
   & .picture img {
@@ -216,6 +284,7 @@ $.style(`
     height: 100%;
     margin: 0;
     padding: 0;
+    border: 2px solid var(--profile-color, white);
   }
 
   & .hero-row {
@@ -269,13 +338,14 @@ $.style(`
 $.when('submit', '[action="edit-profile"]', async event => {
   event.preventDefault()
 
-  const { nick, bio } = event.target
+  const { nick, bio, color } = event.target
   const { picture, banner } = $.learn().upload
 
   const values = {
     user_id: JSON.parse(state['ls/supabase.auth.token']).user.id,
     nick: nick.value,
     bio: bio.value,
+    color: color.value,
   }
 
   if(picture) {
@@ -317,11 +387,18 @@ function escapeHyperText(text = '') {
 $.when('click', '[data-edit]', (event) => {
   $.teach({ edit: !$.learn().edit })
 })
+
+$.when('click', '[data-modal]', (event) => {
+  showModal(event.target.dataset.modal)
+})
+
+$.when('click', '.picture img', (event) => {
+  showModal(event.target.outerHTML)
+})
 $.when('click', '[data-qr]', (event) => {
   showModal(`
     <div style="background: white; height: 100%; display: grid; place-items: center;">
       <qr-code src="${event.target.dataset.qr}" data-fg="black" data-bg="white" style="width: 240px; height: 240px; max-width: 100%; max-height: 100%;"></qr-code>
-    </div>k
+    </div>
   `)
 })
-

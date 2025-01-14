@@ -4,7 +4,7 @@ import { showModal } from './plan98-modal.js'
 
 const $ = module('sillonious-gallery')
 
-$.draw(() => {
+$.draw((target) => {
   const {chaosEmerald} = currentSave()
   if(chaosEmerald.filter(x => x).length === 6) {
     return `
@@ -18,7 +18,7 @@ $.draw(() => {
     `
   }
   const superSonic = chaosEmerald.every(x => x) && chaosEmerald.length > 6
-  return superSonic ? `
+  target.innerHTML = superSonic ? `
     <hypertext-action>
       You win!
     </hypertext-action>

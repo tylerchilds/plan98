@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '../elf.js'
 
 export const types = {
   news: 'news'
@@ -44,7 +44,7 @@ $.draw((target) => {
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
-        <button data-close><sl-icon name="x-circle"></sl-icon></button>
+        <button data-close>Back</button>
       </div>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
@@ -167,7 +167,7 @@ $.style(`
   .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
-    background: black;
+    background: white;
     position: fixed;
     top: 0;
     bottom: 0;
@@ -204,7 +204,6 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    overflow-y: auto;
     z-index: 1100;
   }
 
@@ -227,6 +226,8 @@ $.style(`
     width: 100%;
     z-index: 1000;
     opacity: 0;
+    position: absolute;
+    inset: 4rem 0 0;
   }
 
   & .body {
@@ -234,7 +235,6 @@ $.style(`
     display: grid;
     place-items: center;
     overflow: auto;
-    display: block;
     max-width: 100%;
   }
 
@@ -262,23 +262,20 @@ $.style(`
   }
 
   & .action-wrapper {
+    place-self: start;
     pointer-events: none;
     position: absolute;
     top: 0;
     left: 0;
-    right: 0;
-    text-align: right;
-    z-index: 1101;
   }
+
   & [data-close] {
     pointer-events: all;
-    background: black;
+    background: transparent;
     border: none;
-    color: rgba(255,255,255,.65);
-    display: inline-grid;
-    place-items: center;
+    color: dodgerblue;
+    text-decoration: underline;
     height: 2rem;
-    width: 2rem;
     font-size: 1rem;
     transition: color 200ms;
     border-radius: 100%;
@@ -287,7 +284,7 @@ $.style(`
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    color: rgba(255,255,255,1);
+    color: mediumseagreen;
   }
 
   & [data-close] * {
