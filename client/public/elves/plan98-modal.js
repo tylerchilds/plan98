@@ -52,7 +52,7 @@ $.draw((target) => {
           ${body}
         </div>
       </div>
-    </shell>
+    </div>
   `
 })
 
@@ -205,6 +205,7 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 1100;
+    grid-template-rows: auto 1fr;
   }
 
   body.trap-modal & {
@@ -226,8 +227,6 @@ $.style(`
     width: 100%;
     z-index: 1000;
     opacity: 0;
-    position: absolute;
-    inset: 4rem 0 0;
   }
 
   & .body {
@@ -236,6 +235,7 @@ $.style(`
     place-items: center;
     overflow: auto;
     max-width: 100%;
+    background: black;
   }
 
   & .body.centered {
@@ -264,9 +264,6 @@ $.style(`
   & .action-wrapper {
     place-self: start;
     pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
   }
 
   & [data-close] {

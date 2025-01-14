@@ -397,7 +397,7 @@ $.when('click', '.picture img', (event) => {
 })
 $.when('click', '[data-qr]', (event) => {
   showModal(`
-    <div style="background: white; height: 100%; display: grid; place-items: center;">
+    <div style="background: white; width: 100%; height: 100%; display: grid; place-items: center;">
       <qr-code src="${event.target.dataset.qr}" data-fg="black" data-bg="white" style="width: 240px; height: 240px; max-width: 100%; max-height: 100%;"></qr-code>
     </div>
   `)
