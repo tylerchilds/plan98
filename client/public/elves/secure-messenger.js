@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import elf from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
@@ -22,7 +22,11 @@ const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 const bayunCore = BayunCore.init(appId, appSecret, appSalt,
   localStorageMode, enableFaceRecognition, baseURL);
 
-const $ = module('party-chat', { virtual: true, otherGroups: [], myGroups: [] })
+const $ = elf('secure-messenger', {
+  menu: true,
+  otherGroups: [],
+  myGroups: []
+})
 
 export async function getMyGroups() {
   const { sessionId } = getSession()
@@ -82,6 +86,7 @@ $.when('click', '.other-groups button', (event) => {
           console.log("Error caught");
           console.log(error);
     });
+  $.teach({ menu: false })
 })
 
 $.when('click', '.my-groups button', (event) => {
@@ -89,6 +94,7 @@ $.when('click', '.my-groups button', (event) => {
   const { id } = event.target.dataset
 
   activateGroup(sessionId, id)
+  $.teach({ menu: false })
 })
 
 function activateGroup(sessionId, id) {
@@ -105,7 +111,7 @@ function activateGroup(sessionId, id) {
 function drawGroupButton(group) {
   return `
     <button class="select-group" data-id="${group.groupId}">
-      ${group.groupName}
+      ${group.groupName} (${group.groupId})
     </button>
   `
 }
@@ -121,56 +127,46 @@ $.draw(target => {
 
     return
   }
-  const { myGroups, otherGroups, group='' } = $.learn()
+  const { myGroups, otherGroups, group='', menu, room } = $.learn()
 
   const view = `
-    <div class="grid">
+    <div class="grid-layout ${menu?'menu-active':''}">
       <div class="all-logs">
+        <label class="field">
+          <span class="label">Group Name</span>
+          <input data-bind placeholder="(Amigos)" type="text" name="group" value="${group}" />
+        </label>
+        <button data-create>
+          Create Group
+        </button>
+
         <div class="my-groups">
           <div class="subtitle">MY GROUPS</div>
           ${myGroups.map(drawGroupButton).join('')}
         </div>
 
-        <div class="subtitle">NEW GROUP</div>
-        <input data-bind placeholder="New Friends" type="text" name="group" value="${group}" />
-        <button data-create>
-          Create
-        </button>
-
         <div class="other-groups">
           <div class="subtitle">OTHER GROUPS</div>
           ${otherGroups.map(drawGroupButton).join('')}
         </div>
-        <button data-party>Invite</button>
       </div>
       <div class="captains-log">
-        <iframe name="chat-frame" src="/app/chat-room"></iframe>
+        <div class="mobile-back">
+          <button data-back>
+            Back
+          </button>
+        </div>
+        ${room ? `
+          <iframe name="chat-frame" src="/app/secure-chat?room=${room}"></iframe>
+        `: `
+          <iframe name="chat-frame" src="/app/social-network"></iframe>
+        `}
       </div>
     </div>
   `
 
   return view
-}, { afterUpdate })
-
-function afterUpdate(target) {
-  { // recover icons from the virtual dom
-    [...target.querySelectorAll('chat-room')].map(node => {
-      const nodeParent = node.parentNode
-      const newNode = document.createElement('chat-room')
-      node.remove()
-      nodeParent.appendChild(newNode)
-    })
-  }
-
-  {
-    const { room } = $.learn()
-    const frame = document.querySelector('[name="chat-frame"]')
-    if(frame && room && target.dataset.room !== room) {
-      target.dataset.room = room
-      frame.src = `/app/chat-room?room=${room}`
-    }
-  }
-}
+})
 
 function setRoom(room) {
   $.teach({ room })
@@ -183,6 +179,9 @@ $.when('input', '[data-bind]', event => {
 
 
 
+$.when('click', '[data-back]', () => {
+  $.teach({ menu: !$.learn().menu })
+})
 $.when('click', '[data-zero]', () => {
   const { room } = $.learn()
   const { sessionId } = getSession()
@@ -207,43 +206,12 @@ $.style(`
     display: grid;
     position: relative;
     height: 100%;
-    background: #54796d;
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
     overflow: hidden;
   }
 
   & sticky-note {
     place-self: center;
-  }
-
-  & .communicator button {
-    position: relative;
-    z-index: 2;
-    background: lemonchiffon;
-    border: none;
-    color: saddlebrown;
-    cursor: pointer;
-    height: 2rem;
-    border-radius: 1rem;
-    transition: all 100ms;
-    padding: .25rem 1rem;
-  }
-
-  & .communicator button[disabled] {
-    opacity: .5;
-    background: rgba(255,255,255,.5);
-  }
-
-  & .communicator button:hover,
-  & .communicator button:focus {
-    background: linear-gradient(rgba(0,0,0,.85) 80%, dodgerblue);
-    color: white;
-  }
-
-  & .story-chat-form {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    margin-bottom: .5rem;
   }
 
   & .captains-log {
@@ -252,96 +220,64 @@ $.style(`
     max-height: 100%;
     padding: 0;
     overflow: auto;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
-  }
-
-  & .communicator {
-    position: absolute;
-    height: 6rem;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    background: rgba(0,0,0,.85);
-    z-index: 2;
-  }
-  & .story-chat-form,
-  & .story-chat-row {
+    background: white;
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: .5rem;
-    width: 100%;
-    overflow: auto;
+    position: relative;
   }
 
-  & .story-chat-row {
-  }
-
-  & .story-chat-form [type="text"] {
-    grid-column: 1/8;
-  }
-
-  & .story-chat-row > * {
-    flex: 1;
-  }
-
-  & .communicator input {
-    border: 1px solid orange;
-    background: rgba(255,255,255,.15);
-    padding: 0 1rem;
-    color: white;
-    border-radius: 1rem;
-    width: 100%;
-  }
-
-  @media print {
-    & button, & .communicator {
-      display: none;
-
-    }
-    & .captains-log {
-      max-height: initial;
-    }
-    body {
-      overflow: visible !important;
-    }
-  }
-
-  & [name="transport"] {
-    overflow-x: auto;
-    max-width: calc(100vw - 1.5rem - 1px);
-    position: absolute;
-    right: 0;
-    top: 2rem;
-    z-index: 2;
-    overflow: auto;
-  }
-
-  & [name="actions"] {
-    display: inline-flex;
-    justify-content: end;
-    border: 1px solid rgba(255,255,255,.15);
-    gap: .25rem;
-		padding-right: 1rem;
-    border-radius: 1.5rem 0 0 1.5rem;
-  }
-
-  & .grid {
-    display: grid;
-    grid-template-columns: 180px 1fr;
+  & .grid-layout {
     height: 100%;
     max-height: 100vh;
+    display: grid;
+  }
+
+  @media (max-width: 767px) {
+    & .grid-layout {
+      grid-template-areas: "stack";
+    }
+    & .captains-log,
+    & .all-logs {
+      grid-area: stack;
+    }
+
+    & .captains-log {
+      z-index: 1;
+    }
+
+    & .menu-active .all-logs {
+      z-index: 2;
+    }
+
+  }
+
+  @media (min-width: 768px) {
+    & .grid-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+
+    & .mobile-back {
+      display: none;
+    }
+  }
+
+  & .mobile-back {
+    position: absolute;
+    top: 0;
+    left: 0;
   }
 
   & .all-logs {
     overflow-y: auto;
     overflow-x: hidden;
+    background: white;
+    box-shadow: 0 4px 9px 4px rgba(0,0,0,.05);
   }
 
   & .all-logs button {
     display: block;
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: white;
+    color: dodgerblue;
     font-weight: 400;
     padding: .5rem;
     border: none;
@@ -355,7 +291,7 @@ $.style(`
   }
 
   & .subtitle {
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
     font-weight: 800;
     font-size: .8rem;
     margin: 2rem .5rem .5rem;
@@ -363,5 +299,10 @@ $.style(`
 
   & [name="group"] {
     padding: .5rem;
+  }
+
+  & .field {
+    padding: .5rem;
+    margin-bottom: 0;
   }
 `)

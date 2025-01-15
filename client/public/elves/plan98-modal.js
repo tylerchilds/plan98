@@ -44,7 +44,7 @@ $.draw((target) => {
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
-        <button data-close>Back</button>
+        <button data-close>Close</button>
       </div>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
@@ -264,6 +264,9 @@ $.style(`
   & .action-wrapper {
     place-self: start;
     pointer-events: none;
+    display: flex;
+    justify-content: end;
+    width: 100%;
   }
 
   & [data-close] {
@@ -271,7 +274,6 @@ $.style(`
     background: transparent;
     border: none;
     color: dodgerblue;
-    text-decoration: underline;
     height: 2rem;
     font-size: 1rem;
     transition: color 200ms;

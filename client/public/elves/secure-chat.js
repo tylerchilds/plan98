@@ -17,7 +17,7 @@ const keyGenerationPolicy = BayunCore.KeyGenerationPolicy.ENVELOPE;
 */
 
 
-const $ = module('chat-room', { jokes: {} })
+const $ = module('secure-chat', { jokes: {} })
 
 function getRoom(target) {
   return target.closest($.link).getAttribute('room')
@@ -47,14 +47,14 @@ async function connect(target) {
 
   $.teach({ jokes: [] })
   
-  const { data: plan98_group_text, error } = await supabase
-  .from('plan98_group_text')
+  const { data, error } = await supabase
+  .from('chat_history')
   .select("*")
   // Filters
-  .eq('room', room)
+  .eq('room_id', room)
   .range(0, 25)
 
-  plan98_group_text.map(async (row) => {
+  data.map(async (row) => {
     const text = await bayunCore.unlockText(sessionId, row.text)
     const unix = await bayunCore.unlockText(sessionId, row.companyEmployeeId)
     const company = await bayunCore.unlockText(sessionId, row.companyName)
@@ -70,10 +70,10 @@ async function connect(target) {
   supabase.channel('custom-whatever-channel')
   .on(
     'postgres_changes',
-    { event: '*', schema: 'public', table: 'plan98_group_text' },
+    { event: '*', schema: 'public', table: 'chat_history' },
     async (payload) => {
       if (
-        payload.new.room === room
+        payload.new.room_id === room
       ) {
         const text = await bayunCore.unlockText(sessionId, payload.new.text)
         const unix = await bayunCore.unlockText(sessionId, payload.new.companyEmployeeId)
@@ -81,7 +81,7 @@ async function connect(target) {
 
         $.teach({
           id: payload.new.id,
-          room: payload.new.room,
+          room_id: payload.new.room_id,
           created_at: payload.new.created_at,
           text,
           companyName: company,
@@ -154,25 +154,19 @@ $.draw(target => {
   const { sessionId, companyEmployeeId, companyName } = getSession()
   connect(target)
   if(!sessionId) return `
-    <bayun-wizard></bayun-wizard>
+    <secure-authentication></secure-authentication>
   `
   const { jokes } = $.learn()
 
   const { groupList } = $.learn()
   const room = target.getAttribute('room')
   if(!room) {
-    return `<social-network></social-network>`
+    return `<sillyz-computer></sillyz-computer>`
   }
 
   const actions = groupList && groupList[companyName]?.members.includes(companyEmployeeId) ? `
     <button data-info>
       Group Info
-    </button>
-    <button data-video>
-      Video Chat
-    </button>
-    <button data-leave>
-      Leave
     </button>
     ` : `
     <button data-join>
@@ -182,7 +176,7 @@ $.draw(target => {
 
   const view = `
     <div class="actions">
-      ${actions}
+      ${groupList ? actions : ''}
     </div>
 
     <div class="log">
@@ -310,10 +304,11 @@ async function send(event) {
   const unix = await bayunCore.lockText(sessionId, companyEmployeeId, encryptionPolicy, keyGenerationPolicy, room);
 
 
+  const user_id = JSON.parse(state['ls/supabase.auth.token']).user.id
   const { data, error } = await supabase
-  .from('plan98_group_text')
+  .from('chat_history')
   .insert([
-    { room, text, companyName: company, companyEmployeeId: unix },
+    { user_id, room_id: room, text, companyName: company, companyEmployeeId: unix },
   ])
   .select()
 
@@ -339,19 +334,19 @@ $.style(`
   & [data-remove] {
     border: none;
     border-radius: 0;
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: white;
+    color: dodgerblue;
   }
 
   & [data-remove]:hover,
   & [data-remove]:focus {
     background-color: #E83FB8;
-    color: lemonchiffon;
+    color: white;
   }
 
   &[shell] {
     display: block;
-    background: #54796d;
+    background: black;
     padding: 1rem;
     width: 100%;
     height: 100%;
@@ -359,9 +354,9 @@ $.style(`
   }
 
   & .admin-grid {
-    background: lemonchiffon;
+    background: white;
     padding: 1rem;
-    color: saddlebrown;
+    color: dodgerblue;
     display: grid;
   }
 
@@ -380,7 +375,6 @@ $.style(`
     max-height: 100%;
     padding: 6rem 1rem;
     overflow: auto;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0,0,0,.85))
   }
 
   & .log {
@@ -480,11 +474,6 @@ $.style(`
     text-align: left;
   }
 
-  & [data-create] {
-    background: dodgerblue;
-    color: white;
-  }
-
   & textarea {
     width: 100%;
     display: block;
@@ -494,6 +483,12 @@ $.style(`
     color: rgba(255,255,255,.65);
     border-radius: 0;
     padding: 8px 2rem 8px 8px;
+    max-height: 35vh;
+  }
+
+  & .actions {
+    display: flex;
+    justify-content: end;
   }
 
   & .text-well {
@@ -507,8 +502,8 @@ $.style(`
     padding: .5rem;
     z-index: 1;
     border-radius: 0;
-    background-color: lemonchiffon;
-    color: saddlebrown;
+    background-color: white;
+    color: dodgerblue;
     transition: background-color 200ms ease-in-out;
     border: none;
   }
@@ -528,9 +523,9 @@ $.style(`
   }
 
   & .message.originator {
-    margin: 1rem 1rem 1rem 7rem;
-    background: lemonchiffon;
-    color: saddlebrown;
+    margin: 1rem;
+    background: white;
+    color: dodgerblue;
   }
 
   & .message.originator .body {
@@ -589,8 +584,8 @@ $.style(`
     z-index: 10;
   }
   & .actions button {
-    background-color: lemonchiffon;;
-    color: saddlebrown;
+    background-color: white;
+    color: dodgerblue;
     border: none;
     line-height: 1rem;
     padding: .5rem;
@@ -602,7 +597,7 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
-    background-color: #54796d;
+    background-color: dodgerblue;
     color: white;
   }
 
@@ -686,7 +681,7 @@ $.when('click', '[data-info]', (event) => {
   }).join('')
 
   showModal(`
-    <chat-room shell="true">
+    <secure-chat shell="true">
       <div class="groupName">
         ${groupName}
       </div>
@@ -701,12 +696,18 @@ $.when('click', '[data-info]', (event) => {
           ${view}
         </div>
         <div class="manage">
+          <button data-video>
+            Video Chat
+          </button>
+          <button data-leave>
+            Leave
+          </button>
           <button class="button" data-delete disabled>
             Delete
           </button>
         </div>
       </div>
-    </chat-room>
+    </secure-chat>
   `)
 });
 
