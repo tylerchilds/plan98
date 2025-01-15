@@ -3,7 +3,7 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { BayunCore } from '@sillonious/vault'
-import { getSession, clearSession } from './bayun-wizard.js'
+import { getSession, logout } from './bayun-wizard.js'
 
 /*
    ^
@@ -23,7 +23,7 @@ const bayunCore = BayunCore.init(appId, appSecret, appSalt,
   localStorageMode, enableFaceRecognition, baseURL);
 
 const $ = elf('secure-messenger', {
-  menu: true,
+  menu: false,
   otherGroups: [],
   myGroups: []
 })
@@ -53,9 +53,6 @@ export async function getOtherGroups() {
           console.log(error);
     });
 }
-
-getMyGroups()
-getOtherGroups()
 
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
@@ -109,29 +106,43 @@ function activateGroup(sessionId, id) {
 }
 
 function drawGroupButton(group) {
+  const { room } = $.learn()
   return `
-    <button class="select-group" data-id="${group.groupId}">
+    <button class="select-group ${room === group.groupId ? 'active':''}" data-id="${group.groupId}">
       ${group.groupName} (${group.groupId})
     </button>
   `
 }
 
-$.draw(target => {
-  const { sessionId } = getSession()
-  if(!sessionId) {
-    if(!target.innerHTML) {
-      return `
-        <secure-authentication></secure-authentication>
-      `
-    }
+function connect(target) {
+  if(target.connected) return
+  target.connected = true
+  getMyGroups()
+  getOtherGroups()
+}
 
+$.draw(target => {
+  const { sessionId, companyName, companyEmployeeId } = getSession()
+  if(!sessionId) {
+    target.innerHTML = `
+      <secure-authentication></secure-authentication>
+    `
     return
   }
+  connect(target)
   const { myGroups, otherGroups, group='', menu, room } = $.learn()
 
   const view = `
     <div class="grid-layout ${menu?'menu-active':''}">
       <div class="all-logs">
+        <div>
+          Work Profile:
+          ${companyEmployeeId}@${companyName}
+
+          <button data-logout>
+            Logout
+          </button>
+        </div>
         <label class="field">
           <span class="label">Group Name</span>
           <input data-bind placeholder="(Amigos)" type="text" name="group" value="${group}" />
@@ -153,19 +164,35 @@ $.draw(target => {
       <div class="captains-log">
         <div class="mobile-back">
           <button data-back>
-            Back
+            Menu
           </button>
         </div>
         ${room ? `
           <iframe name="chat-frame" src="/app/secure-chat?room=${room}"></iframe>
         `: `
-          <iframe name="chat-frame" src="/app/social-network"></iframe>
+          <div style="padding: 1rem; margin: 3rem auto; max-width: 55ch;">
+            <p>
+              Welcome to the Secure Messenger.
+            </p>
+
+            <p>
+              All chats here are end to end encrypted.
+            </p>
+
+            <p>
+              To get started, press the Menu button and join a chat room.
+            </p>
+          </div>
         `}
       </div>
     </div>
   `
 
   return view
+})
+
+$.when('click', '[data-logout]', () => {
+  logout()
 })
 
 function setRoom(room) {
@@ -208,6 +235,11 @@ $.style(`
     height: 100%;
     color: rgba(0,0,0,.65);
     overflow: hidden;
+  }
+
+  & .select-group.active {
+    color: white;
+    background: dodgerblue;
   }
 
   & sticky-note {

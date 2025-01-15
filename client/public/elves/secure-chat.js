@@ -205,9 +205,14 @@ $.draw(target => {
           return `
             <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
               <div class="meta" data-tooltip="${created_at}">
-                <img src=${profiles.picture} />
+                <div class="message-picture">
+                  <img src=${profiles.picture} />
+                </div>
               </div>
               <div class="body">${escapeHyperText(text)}</div>
+              <button class="launch" data-id="${id}">
+                *
+              </button>
             </div>
           `
         }).join('')}
@@ -529,32 +534,22 @@ $.style(`
     position: relative;
     border: none;
     padding: 3px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: .5rem;
   }
 
   & .message .body {
     white-space: pre-wrap;
     overflow-wrap: break-word;
     vertical-align: top;
-    pointer-events: none;
-    margin-left: 2.5rem;
   }
 
   & .message.originator {
-    margin: 1rem;
-    background: white;
-    color: dodgerblue;
-  }
-
-  & .message.originator .body {
-    margin-left: 0;
-    padding: 8px;
+    color: rgba(0,0,0.9);
   }
 
   & .meta {
-    position: absolute;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    left: 0;
   }
 
   & .avatar {
@@ -563,10 +558,6 @@ $.style(`
     float: left;
     margin: 0 1rem;
     border-radius: 100%;
-  }
-
-  & .message > * {
-    pointer-events: none;
   }
 
   & .originator .avatar {
@@ -618,10 +609,38 @@ $.style(`
     color: white;
   }
 
-  & .meta img {
-    border-radius: 100%;
+  & .message-picture {
+    position: relative;
+    border-radius: 2px;
     overflow: hidden;
-    max-width: 1.5rem;
+  }
+
+  & .message-picture img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+  }
+
+  & .launch {
+    border-radius: 100%;
+    border: 1px solid rgba(0,0,0,.65);
+    color: rgba(0,0,0,.65);
+    background: white;
+    height: 32px;
+    width: 32px;
+    line-height: 1;
+    text-align: center;
+  }
+
+  & .launch:hover,
+  & .launch:focus {
+    border-color: white;
+    color: white;
+    background: dodgerblue;
   }
 `)
 
@@ -808,7 +827,7 @@ $.when('click', '[data-delete]', (event) => {
     console.log(error);
   });
 });
-$.when('click', '.message', (event) => {
+$.when('click', '.launch', (event) => {
   const { id } = event.target.dataset
 
   const { text } = $.learn().jokes[id]
