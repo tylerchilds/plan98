@@ -49,7 +49,10 @@ async function connect(target) {
   
   const { data, error } = await supabase
   .from('chat_history')
-  .select("*")
+  .select(`
+    *,
+    profiles (*)
+  `)
   // Filters
   .eq('room_id', room)
   .range(0, 25)
@@ -61,6 +64,7 @@ async function connect(target) {
     $.teach({
       id: row.id,
       created_at: row.created_at,
+      profiles: row.profiles,
       text,
       companyName: company,
       companyEmployeeId: unix
@@ -79,10 +83,23 @@ async function connect(target) {
         const unix = await bayunCore.unlockText(sessionId, payload.new.companyEmployeeId)
         const company = await bayunCore.unlockText(sessionId, payload.new.companyName)
 
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', payload.new.user_id)
+          .single()
+
+        if (profileError) {
+          console.error('Error fetching profile:', profileError)
+        }
+
+
         $.teach({
           id: payload.new.id,
+          user_id: payload.new.user_id,
           room_id: payload.new.room_id,
           created_at: payload.new.created_at,
+          profiles: profileData,
           text,
           companyName: company,
           companyEmployeeId: unix
@@ -132,6 +149,7 @@ function mergeJoke(state, payload) {
         text: payload.text,
         room: payload.room,
         created_at: payload.created_at,
+        profiles: payload.profiles,
         companyName: payload.companyName,
         companyEmployeeId: payload.companyEmployeeId,
       }
@@ -182,13 +200,12 @@ $.draw(target => {
     <div class="log">
       <div class="content">
         ${Object.keys(jokes).map((id) => {
-          const { created_at, text, companyEmployeeId: unix, companyName: company } = jokes[id]
+          const { created_at, text, profiles, companyEmployeeId: unix, companyName: company } = jokes[id]
           const color = doingBusinessAs[company] ? doingBusinessAs[company].color : 'dodgerblue'
-          const { avatar } = social(company, unix)
           return `
             <div aria-role="button" class="message ${companyName} ${companyEmployeeId === unix && companyName === company ? 'originator' : ''}" style="--business-color: ${color}" data-id="${id}">
               <div class="meta" data-tooltip="${created_at}">
-                <img src="/cdn/tychi.me/photos/unprofessional-headshot.jpg" />
+                <img src=${profiles.picture} />
               </div>
               <div class="body">${escapeHyperText(text)}</div>
             </div>
@@ -605,10 +622,6 @@ $.style(`
     border-radius: 100%;
     overflow: hidden;
     max-width: 1.5rem;
-  }
-
-  & .originator .meta img {
-    display: none;
   }
 `)
 
