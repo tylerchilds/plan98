@@ -8,9 +8,8 @@ const modes = {
   settings: 'settings',
 }
 
-const center = 60
-
-const $ = elf('music-walk', {
+const $ = elf('music-mines', {
+  root: 60,
   samples: {},
   rows: 7,
   columns: 13,
@@ -22,9 +21,8 @@ const $ = elf('music-walk', {
 })
 
 function noteFromGrid(column, row) {
-  const { columns } = $.learn()
-
-  const base = center + 30;
+  const { root, columns } = $.learn()
+  const base = root + 30;
 
   const evenColumn = column % 2 === 0
 
@@ -54,7 +52,7 @@ function load(instrument) {
   })
 }
 
-load('violin')
+load('piano')
 
 // show error message on loading error //
 $.when('change', '.samples', function(event) {
@@ -104,42 +102,37 @@ $.draw((target) => {
     `
   }
 
-  const { finished, x, y, won, boxes, rows, columns } = instances[target.id]
+  const { finished, won, boxes, rows, columns } = instances[target.id]
 
-  function createRow(row, yIndex) {
+  function createRow(row) {
     if(!boxes) return 'no boxes'
-    return [x-1,x,x+1].map((column, xIndex) => {
-      if(column<0||column>=columns||row<0||row>rows) return `<div class="wall ${tilePosition(xIndex,yIndex)}"></div>`
+    return [...Array(columns).keys()].map(column => {
       const box = boxes[`${row}-${column}`] || {}
-      const note = noteFromGrid(column, row)
       return `
-        <div class="tile ${tilePosition(xIndex,yIndex)}" data-id="${target.id}">
-          <button class="
-            cell
-            ${ box.revealed ? 'revealed' : '' }
-            ${ box.flagged ? 'flagged' : '' }
-            ${ box.alive ? 'alive' : '' }
-            "
-            data-row="${row}"
-            data-column="${column}"
-            data-note="${note}"
-          >
-            ${box.revealed ? (box.mimed ? 'x' : box.count ? box.count : ''):'' }
-            ${note}
-          </button>
-        </div>
+        <button class="
+          cell
+          ${ box.revealed ? 'revealed' : '' }
+          ${ box.flagged ? 'flagged' : '' }
+          ${ box.alive ? 'alive' : '' }
+          "
+          data-row="${row}"
+          data-column="${column}"
+          data-note="${noteFromGrid(column, row)}"
+        >
+          ${box.revealed ? (box.mimed ? 'x' : box.count ? box.count : ''):'' }
+        </button>
       `
     }).join('')
   }
 
-  const grid = [y-1,y,y+1].map(createRow).join('')
+  const grid = [...Array(rows).keys()].map(row => createRow(row)).join('')
 
   return `
     <button data-options>
       Options
     </button>
-    <div class="game ${finished ? (won?'won':'lost') : ''}">
-      <div class="grid">
+    <div class="game">
+      <div class="grid ${finished ? (won?'won':'lost') : ''}" style="--rows: ${rows}; --columns: ${columns};">
         ${grid}
       </div>
       ${finished ? (won?`
@@ -166,174 +159,11 @@ $.draw((target) => {
   }
 })
 
-function tilePosition(xIndex, yIndex) {
-  const classes = []
-  
-  if(yIndex === 0) {
-    classes.push('top')
-  } else if(yIndex === 2) {
-    classes.push('bottom')
-  }
-
-  if(xIndex === 0) {
-    classes.push('left')
-  } else if(xIndex === 2) {
-    classes.push('right')
-  }
-
-  if(classes.length === 0) {
-    classes.push('center')
-  }
-
-  return classes.join(' ')
-}
-
 $.when('click', '[data-options]', (event) => {
   const { mode } = $.learn()
   const newMode = mode !== modes.settings ? modes.settings : modes.game
   $.teach({ mode: newMode })
 })
-
-$.when('pointerdown', '.tile', function(e) {
-  $.teach({ tileStartTime: e.timeStamp })
-  let startX, startY;
-  const rectangle = event.target.getBoundingClientRect()
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    startX = e.touches[0].clientX - rectangle.left
-    startY = e.touches[0].clientY - rectangle.top
-  } else {
-    startX = e.clientX - rectangle.left
-    startY = e.clientY -rectangle.top
-  }
-
-  $.teach({
-    tileFirstTouch: {
-      x: startX,
-      y: startY
-    }
-  })
-})
-
-$.when('pointermove', '.tile', function(e){
-  const { tileStartTime, tileFirstTouch, tileGesture } = $.learn()
-  const tileEndTime = e.timeStamp;
-  const tileDuration = tileEndTime - tileStartTime;
-  let lastX, lastY;
-  const rectangle = event.target.getBoundingClientRect()
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    lastX = e.touches[0].clientX - rectangle.left
-    lastY = e.touches[0].clientY - rectangle.top
-  } else {
-    lastX = e.clientX - rectangle.left
-    lastY = e.clientY -rectangle.top
-  }
-
-  const tileLastTouch = {
-    x: lastX,
-    y: lastY
-  }
-
-  const tileDistance = {
-    x: tileLastTouch.x - tileFirstTouch.x,
-    y: tileLastTouch.y - tileFirstTouch.y
-  }
-
-  $.teach({
-    tileEndTime,
-    tileDuration,
-    tileLastTouch,
-    tileDistance
-  })
-
-  switch(tileGesture){
-    case 'scroll':
-      $.teach({
-        gridOffset: {
-          x: 0,
-          y: 1 - (Math.abs(tileDistance.y) / window.innerHeight) * Math.sign(tileDistance.y) * 100
-        }
-      })
-      break;
-    case 'swipe':
-      $.teach({
-        gridOffset: {
-          y: 0,
-          x: 1 - (Math.abs(tileDistance.x) / window.innerWidth) * Math.sign(tileDistance.x) * 100
-        }
-      })
-      break;
-    default:
-      setGesture();
-  }
-})
-
-$.when('pointerup', '.tile', function(e){
-  const { id } = e.target.dataset
-  const { instances, tileDistance, tileGesture, tileLastTouch, tileDuration } = $.learn()
-
-  if(!tileDistance) return
-
-  const { x, y, rows, columns } = instances[id]
-
-  const distance = Math.abs(tileDistance.x);
-  const velocity = distance / tileDuration;
-
-  if(tileGesture === 'scroll') {
-    const distance = Math.abs(tileDistance.y);
-
-    if(distance < 20) return
-
-    if(Math.sign(tileDistance.y)===1) {
-      if(y<=0) return
-      updateInstance({ id }, { y: y - 1 })
-    } else {
-      if(y>=rows-1) return
-      updateInstance({ id }, { y: y + 1 })
-    }
-
-  } else if(tileGesture === 'swipe') {
-    const distance = Math.abs(tileDistance.x);
-
-    if(distance < 20) return
-
-    if(Math.sign(tileDistance.x)===1) {
-      if(x<=0) return
-      updateInstance({ id }, { x: x - 1 })
-    } else {
-      if(x>=columns-1) return
-      updateInstance({ id }, { x: x + 1 })
-    }
-  }
-  /*
-  // close to the left edge
-  if(tileLastTouch.x < 30 && tileDistance.x > 20) return true;
-  // close to the right edge
-  if(tileLastTouch.x > window.innerWidth - 30 && tileDistance.y > 20) return true;
-
-  if(velocity > .5) return true;
-
-
-  return false;
-  */
-  $.teach({ 
-    tileGesture: null,
-    tileDistance: null,
-    tileLastTouch: null,
-    tileFirstTouch: null
-  })
-})
-
-function threshHoldCommand (e){
-}
-
-function setGesture(){
-  const { tileDistance } = $.learn()
-  if(Math.abs(tileDistance.y) > Math.abs(tileDistance.x)){
-    $.teach({ tileGesture: 'scroll' })
-  } else {
-    $.teach({ tileGesture: 'swipe' })
-  }
-}
 
 $.style(`
   & {
@@ -361,7 +191,6 @@ $.style(`
     position: absolute;
     top: 0;
     right: 0;
-    z-index: 10;
   }
 
   & [data-options]:hover,
@@ -373,8 +202,7 @@ $.style(`
 
   & .game,
   & .settings {
-    display: none;
-    height: 100%;
+    display: none
   }
 
   &[data-mode="settings"] .settings {
@@ -397,6 +225,14 @@ $.style(`
     padding: .5rem;
   }
 
+  & .grid {
+    display: inline-grid;
+    grid-template-columns: repeat(var(--columns), 1fr);
+    grid-template-rows: repeat(var(--rows), 1fr);
+    height: 100%;
+    transform-origin: bottom;
+  }
+
   & .won {
     opacity: .85;
     pointer-events: none;
@@ -405,45 +241,6 @@ $.style(`
   & .lost {
     opacity: .5;
     pointer-events: none;
-  }
-
-  & .grid {
-    display: grid;
-    grid-template-areas: 'tile';
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-    height: 100%;
-    transform-origin: bottom;
-  }
-
-  & .tile {
-    grid-area: tile;
-    display: grid;
-    place-content: center;
-    --tile-x: 0;
-    --tile-y: 0;
-    transform: translate(var(--tile-x), var(--tile-y));
-  }
-
-  & .tile.left {
-    --tile-x: -100%;
-  }
-
-  & .tile.right {
-    --tile-x: 100%;
-  }
-
-  & .tile.top {
-    --tile-y: -100%;
-  }
-
-  & .tile.bottom {
-    --tile-y: 100%;
-  }
-
-
-  & .tile.center {
-    z-index: 2;
   }
 
   & .cell {
@@ -752,18 +549,7 @@ function seed(target) {
 
   schedule(() => {
     const id = target.id
-    updateInstance({ id }, {
-      root: 60,
-      x: Math.floor(columns/2),
-      y: Math.floor(rows/2),
-      id,
-      rows,
-      columns,
-      ratio,
-      room,
-      boxes,
-      mimes
-    })
+    updateInstance({ id }, { id, rows, columns, ratio, room, boxes, mimes })
   })
 }
 
