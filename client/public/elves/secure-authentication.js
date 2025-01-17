@@ -455,7 +455,7 @@ function securityQuestions(event) {
 
         bayunCore.validateSecurityQuestions(
           data.sessionId,
-          securityQuestionsAnswersSetup(),
+          securityQuestionsAnswersActivation(),
           authorizeEmployee(event),
           successCallback,
           failureCallback
