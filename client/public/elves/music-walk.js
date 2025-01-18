@@ -157,33 +157,14 @@ $.draw((target) => {
 
   function createRow(row, yIndex) {
     if(!boxes) return 'no boxes'
+
     return [x-1,x,x+1].map((column, xIndex) => {
       if(column<0||column>=columns||row<0||row>rows) return `<div class="wall ${tilePosition(xIndex,yIndex)}"></div>`
       const box = boxes[`${row}-${column}`] || {}
-      const note = noteFromGrid(column, row)
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
       return `
         <div class="tile ${tilePosition(xIndex,yIndex)} ${ box.alive ? 'alive' : '' }" data-id="${target.id}" style="background: var(${color.name})">
-
-          <button data-note="${note}">
-            Play: ${note}
-          </button>
-          ${
-            box.revealed ? `
-              <div class="known">
-                ${box.mimed ? 'x' : box.count || 0 }
-              </div>
-            `:`
-              <button class="
-                cell
-                ${ box.flagged ? 'flagged' : '' }
-                "
-                data-row="${row}"
-                data-column="${column}"
-              >
-              </button>
-            `
-          }
+          Swipe to Navigate
         </div>
       `
     }).join('')
@@ -199,17 +180,8 @@ $.draw((target) => {
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
       </div>
-      ${finished ? (won?`
-        <div class="mini-overlay">
-          You win! Play again?<br>
-          <button data-restart>New Game</button>
-        </div>
-      `:`
-        <div class="mini-overlay">
-          Game over... Try again?<br>
-          <button data-restart>New Game</button>
-        </div>
-      `) : ''}
+      <div class="information">
+      </div>
     </div>
   `
 }, {
@@ -220,12 +192,76 @@ $.draw((target) => {
         target.dataset.mode = mode
       }
     }
+
+    {
+      const { instances } = $.learn()
+      const instance = instances[target.id]
+      const information = target.querySelector('.information')
+      if(information) information.innerHTML = content(instance)
+    }
   }
 })
 
+function content(instance) {
+  const { finished, boxes, won, x, y } = instance
+  if(finished) {
+    return (won?`
+      <div class="mini-overlay">
+        <div class="game-dialog">
+          You win! Play again?
+        </div>
+        <div class="game-actions">
+          <button data-restart>New Game</button>
+        </div>
+      </div>
+    `:`
+      <div class="mini-overlay">
+        <div class="game-dialog">
+          Game over... Try again?
+        </div>
+        <div class="game-actions">
+          <button data-restart>New Game</button>
+        </div>
+      </div>
+    `)
+  }
+  const box = boxes[`${y}-${x}`] || {}
+
+  const note = noteFromGrid(x, y)
+  return `
+    <div class="mini-overlay">
+      <div class="game-dialog">
+        ${box.revealed ? `There are ${box.count} mimes nearby...` : (
+          box.flagged ? `There is suspicion of mimes in the bushes here.`:'Do you know of any mimes here?'
+        )}
+      </div>
+      <div class="game-actions">
+        <button data-note="${note}">
+          Play: ${note}
+        </button>
+        ${box.revealed ?'':`
+          ${box.flagged ? `
+            <button data-flag data-row="${y}" data-column="${x}">
+              False mime suspicion
+            </button>
+          `: `
+            <button data-clear data-row="${y}" data-column="${x}">
+              No Mime
+            </button>
+            <button data-flag data-row="${y}" data-column="${x}">
+              Mime sus
+            </button>
+          `}
+        `}
+      </div>
+    </div>
+  `
+
+}
+
 function tilePosition(xIndex, yIndex) {
   const classes = []
-  
+
   if(yIndex === 0) {
     classes.push('top')
   } else if(yIndex === 2) {
@@ -245,11 +281,12 @@ function tilePosition(xIndex, yIndex) {
   return classes.join(' ')
 }
 
-$.when('click', '[data-options]', (event) => {
+$.when('click', '[data-options]', toggleMode)
+function toggleMode (event) {
   const { mode } = $.learn()
   const newMode = mode !== modes.settings ? modes.settings : modes.game
   $.teach({ mode: newMode })
-})
+}
 
 $.when('pointerdown', '.tile', function(e) {
   $.teach({ tileStartTime: e.timeStamp })
@@ -260,7 +297,7 @@ $.when('pointerdown', '.tile', function(e) {
     startY = e.touches[0].clientY - rectangle.top
   } else {
     startX = e.clientX - rectangle.left
-    startY = e.clientY -rectangle.top
+    startY = e.clientY - rectangle.top
   }
 
   $.teach({
@@ -325,8 +362,8 @@ $.when('pointermove', '.tile', function(e){
   }
 })
 
-$.when('pointerup', '.tile', function(e){
-  const { id } = e.target.dataset
+$.when('pointerup', '.tile', function(event){
+  const { id } = event.target.dataset
   const { instances, tileDistance, tileGesture, tileLastTouch, tileDuration } = $.learn()
 
   if(!tileDistance) return
@@ -334,7 +371,6 @@ $.when('pointerup', '.tile', function(e){
   const { x, y, rows, columns } = instances[id]
 
   const distance = Math.abs(tileDistance.x);
-  const velocity = distance / tileDuration;
 
   if(tileGesture === 'scroll') {
     const distance = Math.abs(tileDistance.y);
@@ -342,11 +378,9 @@ $.when('pointerup', '.tile', function(e){
     if(distance < 20) return
 
     if(Math.sign(tileDistance.y)===1) {
-      if(y<=0) return
-      updateInstance({ id }, { y: y - 1 })
+      slideUp(id)
     } else {
-      if(y>=rows-1) return
-      updateInstance({ id }, { y: y + 1 })
+      slideDown(id)
     }
 
   } else if(tileGesture === 'swipe') {
@@ -355,24 +389,12 @@ $.when('pointerup', '.tile', function(e){
     if(distance < 20) return
 
     if(Math.sign(tileDistance.x)===1) {
-      if(x<=0) return
-      updateInstance({ id }, { x: x - 1 })
+      slideLeft(id)
     } else {
-      if(x>=columns-1) return
-      updateInstance({ id }, { x: x + 1 })
+      slideRight(id)
     }
   }
-  /*
-  // close to the left edge
-  if(tileLastTouch.x < 30 && tileDistance.x > 20) return true;
-  // close to the right edge
-  if(tileLastTouch.x > window.innerWidth - 30 && tileDistance.y > 20) return true;
 
-  if(velocity > .5) return true;
-
-
-  return false;
-  */
   $.teach({ 
     tileGesture: null,
     tileDistance: null,
@@ -381,7 +403,56 @@ $.when('pointerup', '.tile', function(e){
   })
 })
 
-function threshHoldCommand (e){
+self.addEventListener('keydown', (event) => {
+  const node = document.querySelector($.link)
+
+  if(!node && !node.id) return
+  const id = node.id
+
+  if (event.keyCode==37) {
+    slideLeft(id)
+  }
+  if (event.keyCode==38) {
+    slideUp(id)
+  }
+  if (event.keyCode==39) {
+    slideRight(id)
+  }
+  if (event.keyCode==40) {
+    slideDown(id)
+  }
+})
+
+function slideLeft(id) {
+  const { instances } = $.learn()
+  const { x } = instances[id]
+
+  if(x<=0) return
+  updateInstance({ id }, { x: x - 1 })
+}
+
+function slideRight(id) {
+  const { instances } = $.learn()
+  const { x, columns } = instances[id]
+
+  if(x>=columns-1) return
+  updateInstance({ id }, { x: x + 1 })
+}
+
+function slideUp(id) {
+  const { instances } = $.learn()
+  const { y } = instances[id]
+
+  if(y<=0) return
+  updateInstance({ id }, { y: y - 1 })
+}
+
+function slideDown(id) {
+  const { instances } = $.learn()
+  const { y, rows } = instances[id]
+
+  if(y>=rows-1) return
+  updateInstance({ id }, { y: y + 1 })
 }
 
 function setGesture(){
@@ -420,20 +491,19 @@ $.style(`
 
   & [data-options] {
     background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.85);
+    border: 1px solid rgba(255,255,255,.25);
     color: rgba(0,0,0,.65);
-    text-shadow: 1px 1px rgba(255,255,255,.65);
     position: absolute;
     top: 0;
     right: 0;
     z-index: 10;
+    padding: 4px 8px;
   }
 
   & [data-options]:hover,
   & [data-options]:focus {
     background: rgba(255,255,255,.25);
     color: rgba(0,0,0,1);
-    text-shadow: 1px 1px rgba(255,255,255,1);
   }
 
   & .game,
@@ -468,7 +538,7 @@ $.style(`
   }
 
   & .lost {
-    opacity: .5;
+    opacity: 0;
     pointer-events: none;
   }
 
@@ -516,30 +586,40 @@ $.style(`
     z-index: 2;
   }
 
-  & .cell {
-    border: 2px solid rgba(0,0,0,.85);
-    border-left-color: rgba(255,255,255,.85);
-    border-top-color: rgba(255,255,255,.85);
-    background: rgba(128,128,128,.5);
-    color: rgba(0,0,0,1);
-    border-radius: 0;
+  & .information {
+    pointer-events: none;
+    position: absolute;
+    inset: 3px;
     display: grid;
-    place-content: center;
-    padding: 0;
-    min-height: 2rem;
-    aspect-ratio: 1;
+    place-items: end center;
+    z-index: 9001;
   }
 
   & .mini-overlay {
-    position: absolute;
-    background: rgba(255,255,255,.85);
-    color: rgba(0,0,0,.85);
-    padding: 1rem;
-    border-radius: 1rem;
-    margin: 0;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    top: 50%;
+    pointer-events: all;
+    background: rgba(0,0,0,.85);
+    border: 1px solid rgba(255,255,255,.5);
+    color: rgba(255,255,255,.85);
+    border-radius: 2px;
+    width: 100%;
+    max-width: 55ch;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
+  & .game-dialog {
+    padding: 1rem 1rem 0;
+  }
+
+  & .game-actions {
+    padding: .5rem 0;
+  }
+  & .game-actions button {
+    border: none;
+    border-radius: none;
+    background: transparent;
+    color: dodgerblue;
+    padding: .5rem 1rem;
   }
 
   & .flagged::before {
@@ -721,7 +801,8 @@ function loop(time) {
   if(player.os) {
     if(!lastFrame.os) {
       lastFrame.os = true
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+      toggleMode()
+      //document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
     }
   } else {
     lastFrame.os = false
@@ -733,13 +814,14 @@ function loop(time) {
 /*
  Gamer Grid
  */
-$.when('contextmenu', '.cell', (event) => {
+$.when('pointerdown', '[data-flag]', (event) => {
   event.preventDefault()
+  event.stopPropagation()
   const { row, column } = event.target.dataset
   const { boxes, id, rows, columns } = instance(event.target)
   const { flagged } = boxes[`${row}-${column}`]
-  updateBox({ id, x: column, y: row }, { flagged: !flagged })
   victoryCondition(event.target)
+  updateBox({ id, x: column, y: row }, { flagged: !flagged })
 })
 
 $.when('click', '[data-note]', (event) => {
@@ -747,7 +829,8 @@ $.when('click', '[data-note]', (event) => {
   attackRelease(parseInt(note))
 })
 
-$.when('click', '.cell', (event) => {
+$.when('pointerdown', '[data-clear]', (event) => {
+  console.log('clear clicked y tho')
   const { row, column } = event.target.dataset
   const { boxes, id, rows, columns } = instance(event.target)
   const { flagged, mimed, count } = boxes[`${row}-${column}`]
