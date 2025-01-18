@@ -1,4 +1,4 @@
-import elf from '@silly/tag'
+import elf from '@silly/elf'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { checkButton, checkAxis } from './debug-gamepads.js'
@@ -17,9 +17,9 @@ const lightnessStops = [
 const start = 0;
 const length = 360;
 const reverse = false;
-const colors = [...Array(12)].map((_, hueIndex) => {
-  const hueFifths = mod(hueIndex * 7, 12)
-  const step = ((length / 12) * hueFifths)
+const colors = [...Array(13)].map((_, hueIndex) => {
+  const hueFifths = mod(hueIndex * 7, 13)
+  const step = ((length / 13) * hueFifths)
   const hue = reverse
     ? start - step
     : start + step
@@ -85,6 +85,7 @@ function colorFromGrid(column, row) {
 
 
 let current
+let instrument = 'violin'
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
@@ -100,11 +101,13 @@ function load(instrument) {
   })
 }
 
-load('violin')
+load(instrument)
 
 // show error message on loading error //
 $.when('change', '.samples', function(event) {
-  load(instruments[event.target.value]);
+  const { value } = event.target
+  load(instruments[value]);
+  instrument = value
 })
 
 function shuffle(a) {
@@ -127,7 +130,7 @@ $.draw((target) => {
   if(mode === modes.settings) {
     const list = Object.keys(instruments).map((item) => {
       return `
-        <option value="${item}" ${current === instruments[item] ? 'selected="true"':''}>
+        <option value="${item}" ${instrument === instruments[item] ? 'selected="true"':''}>
           ${instruments[item]}
         </option>
       `
@@ -158,22 +161,29 @@ $.draw((target) => {
       if(column<0||column>=columns||row<0||row>rows) return `<div class="wall ${tilePosition(xIndex,yIndex)}"></div>`
       const box = boxes[`${row}-${column}`] || {}
       const note = noteFromGrid(column, row)
-      const color = colorFromGrid(mod(column, columns-1), row)
+      const color = colorFromGrid(mod(column, columns), mod(row, rows))
       return `
-        <div class="tile ${tilePosition(xIndex,yIndex)}" data-id="${target.id}" style="background: var(${color.name})">
-          <button class="
-            cell
-            ${ box.revealed ? 'revealed' : '' }
-            ${ box.flagged ? 'flagged' : '' }
-            ${ box.alive ? 'alive' : '' }
-            "
-            data-row="${row}"
-            data-column="${column}"
-            data-note="${note}"
-          >
-            ${box.revealed ? (box.mimed ? 'x' : box.count ? box.count : ''):'' }
-            ${note}
+        <div class="tile ${tilePosition(xIndex,yIndex)} ${ box.alive ? 'alive' : '' }" data-id="${target.id}" style="background: var(${color.name})">
+
+          <button data-note="${note}">
+            Play: ${note}
           </button>
+          ${
+            box.revealed ? `
+              <div class="known">
+                ${box.mimed ? 'x' : box.count || 0 }
+              </div>
+            `:`
+              <button class="
+                cell
+                ${ box.flagged ? 'flagged' : '' }
+                "
+                data-row="${row}"
+                data-column="${column}"
+              >
+              </button>
+            `
+          }
         </div>
       `
     }).join('')
@@ -395,6 +405,12 @@ $.style(`
     position: relative;
     overflow: hidden;
     transform-style: preserve-3d;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: manipulation;
   }
 
   & .title {
@@ -465,6 +481,10 @@ $.style(`
     transform-origin: bottom;
   }
 
+  & .tile:not(.center) {
+    display: none;
+  }
+
   & .tile {
     grid-area: tile;
     display: grid;
@@ -472,6 +492,7 @@ $.style(`
     --tile-x: 0;
     --tile-y: 0;
     transform: translate(var(--tile-x), var(--tile-y));
+    position: relative;
   }
 
   & .tile.left {
@@ -521,17 +542,17 @@ $.style(`
     top: 50%;
   }
 
-  & .revealed {
-    background: rgba(128,128,128,.85);
-    border: none;
-  }
-
   & .flagged::before {
     content: '%';
   }
 
-  & .alive {
-    background: rgba(128,128,128,.65);
+  & .alive::before {
+    content: '';
+    background: rgba(255,255,255,.15);
+    pointer-events: none;
+    inset: 0;
+    position: absolute;
+    mix-blend-mode: soft-light;
   }
 
 `)
@@ -721,12 +742,17 @@ $.when('contextmenu', '.cell', (event) => {
   victoryCondition(event.target)
 })
 
+$.when('click', '[data-note]', (event) => {
+  const { note } = event.target.dataset
+  attackRelease(parseInt(note))
+})
+
 $.when('click', '.cell', (event) => {
-  const { row, column, note } = event.target.dataset
+  const { row, column } = event.target.dataset
   const { boxes, id, rows, columns } = instance(event.target)
   const { flagged, mimed, count } = boxes[`${row}-${column}`]
-  attackRelease(parseInt(note))
   if(flagged) return
+  victoryCondition(event.target)
   infer(rows, columns, parseInt(row), parseInt(column), boxes)
 
   if(count === 0) {
@@ -739,7 +765,6 @@ $.when('click', '.cell', (event) => {
   } else {
     updateBox({ id, x: column, y: row }, { revealed: true })
   }
-  victoryCondition(event.target)
 })
 
 $.when('click', '[data-restart]', (event) => {
