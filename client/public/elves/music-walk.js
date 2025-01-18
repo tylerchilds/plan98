@@ -2,6 +2,48 @@ import elf from '@silly/tag'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { checkButton, checkAxis } from './debug-gamepads.js'
+import Color from "colorjs.io"
+
+const lightnessStops = [
+  [95, 120],
+  [80, 105],
+  [65, 90],
+  [50, 75],
+  [35, 60],
+  [20, 45],
+  [5, 30],
+]
+
+const start = 0;
+const length = 360;
+const reverse = false;
+const colors = [...Array(12)].map((_, hueIndex) => {
+  const hueFifths = mod(hueIndex * 7, 12)
+  const step = ((length / 12) * hueFifths)
+  const hue = reverse
+    ? start - step
+    : start + step
+
+  return lightnessStops.map(([l, c], i) => {
+    const name = `--wheel-${hueFifths}-${i}`
+    const value = new Color('lch', [l, c, hue])
+      .display()
+      .toString()
+
+    return {
+      name,
+      value,
+      block: hueFifths,
+      inline: i
+    }
+  })
+})
+console.log(colors)
+
+const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
+  ${name}: ${value};
+`).join('')
+
 
 const modes = {
   game: 'game',
@@ -35,6 +77,10 @@ function noteFromGrid(column, row) {
   return evenColumn
     ? base + octave + interval
     : base - 5 + octave + interval + (aboveMedian?12:0)
+}
+
+function colorFromGrid(column, row) {
+  return colors[column][row]
 }
 
 
@@ -112,8 +158,9 @@ $.draw((target) => {
       if(column<0||column>=columns||row<0||row>rows) return `<div class="wall ${tilePosition(xIndex,yIndex)}"></div>`
       const box = boxes[`${row}-${column}`] || {}
       const note = noteFromGrid(column, row)
+      const color = colorFromGrid(mod(column, columns-1), row)
       return `
-        <div class="tile ${tilePosition(xIndex,yIndex)}" data-id="${target.id}">
+        <div class="tile ${tilePosition(xIndex,yIndex)}" data-id="${target.id}" style="background: var(${color.name})">
           <button class="
             cell
             ${ box.revealed ? 'revealed' : '' }
@@ -138,8 +185,8 @@ $.draw((target) => {
     <button data-options>
       Options
     </button>
-    <div class="game ${finished ? (won?'won':'lost') : ''}">
-      <div class="grid">
+    <div class="game" style="${colorVariables}">
+      <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
       </div>
       ${finished ? (won?`
@@ -216,6 +263,7 @@ $.when('pointerdown', '.tile', function(e) {
 
 $.when('pointermove', '.tile', function(e){
   const { tileStartTime, tileFirstTouch, tileGesture } = $.learn()
+  if(!tileFirstTouch) return
   const tileEndTime = e.timeStamp;
   const tileDuration = tileEndTime - tileStartTime;
   let lastX, lastY;
@@ -922,4 +970,6 @@ function instance(target) {
 
 function schedule(x, delay=1) { setTimeout(x, delay) }
 
-
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
