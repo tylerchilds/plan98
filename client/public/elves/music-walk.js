@@ -337,6 +337,7 @@ function setGesture(){
 
 $.style(`
   & {
+    background: lemonchiffon;
     display: block;
     width: 100%;
     height: 100%;
