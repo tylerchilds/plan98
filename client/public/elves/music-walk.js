@@ -203,7 +203,7 @@ $.draw((target) => {
 })
 
 function content(instance) {
-  const { finished, boxes, won, x, y } = instance
+  const { finished, boxes, won, x, y, maxFlags, totalFlags } = instance
   if(finished) {
     return (won?`
       <div class="mini-overlay">
@@ -227,12 +227,16 @@ function content(instance) {
   }
   const box = boxes[`${y}-${x}`] || {}
 
+  const maxxedOut = maxFlags === totalFlags
+
   const note = noteFromGrid(x, y)
   return `
     <div class="mini-overlay">
       <div class="game-dialog">
         ${box.revealed ? `There are ${box.count} mimes nearby...` : (
-          box.flagged ? `There is suspicion of mimes in the bushes here.`:'Do you know of any mimes here?'
+          box.flagged
+            ? `There is suspicion of mimes in the bushes here.`
+            : maxxedOut ? 'If everything is a mime, nothing is a mime.' : 'Do you know of any mimes here?'
         )}
       </div>
       <div class="game-actions">
@@ -248,9 +252,11 @@ function content(instance) {
             <button data-clear data-row="${y}" data-column="${x}">
               No Mime
             </button>
-            <button data-flag data-row="${y}" data-column="${x}">
-              Mime sus
-            </button>
+            ${maxxedOut ? ``: `
+              <button data-flag data-row="${y}" data-column="${x}">
+                Mime sus
+              </button>
+            `}
           `}
         `}
       </div>
@@ -814,14 +820,23 @@ function loop(time) {
 /*
  Gamer Grid
  */
-$.when('pointerdown', '[data-flag]', (event) => {
+$.when('click', '[data-flag]', (event) => {
   event.preventDefault()
   event.stopPropagation()
   const { row, column } = event.target.dataset
-  const { boxes, id, rows, columns } = instance(event.target)
+  const instance = getInstance(event.target)
+  const { boxes, id, totalFlags, maxFlags } = instance
+
+  if(totalFlags === maxFlags) return
   const { flagged } = boxes[`${row}-${column}`]
-  victoryCondition(event.target)
-  updateBox({ id, x: column, y: row }, { flagged: !flagged })
+  const nextFlag = !flagged
+
+  const flagCount = nextFlag ? totalFlags + 1 : totalFlags - 1
+  console.log(flagCount, maxFlags)
+  updateBox({ id, x: column, y: row }, { flagged: nextFlag })
+
+  updateInstance({ id }, { totalFlags: flagCount })
+  victoryCondition(id)
 })
 
 $.when('click', '[data-note]', (event) => {
@@ -829,13 +844,12 @@ $.when('click', '[data-note]', (event) => {
   attackRelease(parseInt(note))
 })
 
-$.when('pointerdown', '[data-clear]', (event) => {
-  console.log('clear clicked y tho')
+$.when('click', '[data-clear]', (event) => {
   const { row, column } = event.target.dataset
-  const { boxes, id, rows, columns } = instance(event.target)
+  const instance = getInstance(event.target)
+  const { boxes, id, rows, columns } = instance
   const { flagged, mimed, count } = boxes[`${row}-${column}`]
   if(flagged) return
-  victoryCondition(event.target)
   infer(rows, columns, parseInt(row), parseInt(column), boxes)
 
   if(count === 0) {
@@ -848,16 +862,29 @@ $.when('pointerdown', '[data-clear]', (event) => {
   } else {
     updateBox({ id, x: column, y: row }, { revealed: true })
   }
+
+  victoryCondition(id)
 })
 
 $.when('click', '[data-restart]', (event) => {
   event.target.closest($.link).seeded = false
-  const { id } = instance(event.target)
+  const { id } = getInstance(event.target)
   updateInstance({ id }, { finished: false, won: null })
 })
 
-function victoryCondition(target) {
-  const { boxes, id, rows, columns } = instance(target)
+function victoryCondition(id) {
+  const { instances } = $.learn()
+  const { boxes } = instances[id]
+  const allMimes = Object.keys(boxes).filter((key) => boxes[key].mimed)
+  const nonMimes = Object.keys(boxes).filter((key) => !boxes[key].mimed)
+
+  console.log(allMimes)
+  const allMimesFlagged = allMimes.every(x => boxes[x].flagged)
+  const nonMimesRevealed = nonMimes.every(x => boxes[x].revealed)
+
+  if(allMimesFlagged || nonMimesRevealed) {
+    updateInstance({ id }, { finished: true, won: true })
+  }
 }
 
 function seed(target) {
@@ -901,7 +928,8 @@ function seed(target) {
       }
     } 
   }
-  for(let i = 0; i < rows * columns * ratio; i++) {
+  const maxFlags = Math.floor(rows * columns * ratio)
+  for(let i = 0; i < maxFlags; i++) {
     ensureRandomMime()
   }
 
@@ -919,7 +947,9 @@ function seed(target) {
       ratio,
       room,
       boxes,
-      mimes
+      mimes,
+      maxFlags,
+      totalFlags: 0
     })
   })
 }
@@ -1071,7 +1101,7 @@ setInterval(() => {
 
 }, 1000)
 
-function instance(target) {
+function getInstance(target) {
   const root = target.closest($.link)
   return $.learn().instances[root.id]
 }
