@@ -153,7 +153,7 @@ $.draw((target) => {
     `
   }
 
-  const { finished, x, y, won, boxes, rows, columns } = instances[target.id]
+  const { finished, x, y, won, boxes, rows, columns, maxFlags, totalFlags } = instances[target.id]
 
   function createRow(row, yIndex) {
     if(!boxes) return 'no boxes'
@@ -164,7 +164,10 @@ $.draw((target) => {
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
       return `
         <div class="tile ${tilePosition(xIndex,yIndex)} ${ box.alive ? 'alive' : '' }" data-id="${target.id}" style="background: var(${color.name})">
-          Swipe to Navigate
+          Elf Hide 'n' Seek<br>
+          Swipe to Navigate<br>
+          Elves: ${maxFlags}<br>
+          Suspicious Rocks: ${totalFlags}
         </div>
       `
     }).join('')
@@ -233,10 +236,10 @@ function content(instance) {
   return `
     <div class="mini-overlay">
       <div class="game-dialog">
-        ${box.revealed ? `There are ${box.count} mimes nearby...` : (
+        ${box.revealed ? `There are ${box.count} rocks  nearby...` : (
           box.flagged
-            ? `There is suspicion of mimes in the bushes here.`
-            : maxxedOut ? 'If everything is a mime, nothing is a mime.' : 'Do you know of any mimes here?'
+            ? `There is belief of elves in the rocks here.`
+            : maxxedOut ? 'If every rock is an elf dwelling, no rocks are elf dwellings.' : 'Do you know of any elves here?'
         )}
       </div>
       <div class="game-actions">
@@ -246,15 +249,15 @@ function content(instance) {
         ${box.revealed ?'':`
           ${box.flagged ? `
             <button data-flag data-row="${y}" data-column="${x}">
-              False mime suspicion
+              False elf suspicion
             </button>
           `: `
             <button data-clear data-row="${y}" data-column="${x}">
-              No Mime
+              No Elves
             </button>
             ${maxxedOut ? ``: `
               <button data-flag data-row="${y}" data-column="${x}">
-                Mime sus
+                Elvish Rocks
               </button>
             `}
           `}
@@ -878,9 +881,10 @@ function victoryCondition(id) {
   const allMimes = Object.keys(boxes).filter((key) => boxes[key].mimed)
   const nonMimes = Object.keys(boxes).filter((key) => !boxes[key].mimed)
 
-  console.log(allMimes)
   const allMimesFlagged = allMimes.every(x => boxes[x].flagged)
   const nonMimesRevealed = nonMimes.every(x => boxes[x].revealed)
+
+  console.log(allMimes)
 
   if(allMimesFlagged || nonMimesRevealed) {
     updateInstance({ id }, { finished: true, won: true })
@@ -893,7 +897,7 @@ function seed(target) {
   const { rows, columns, ratio, room } = $.learn() || {}
 
   const boxes = {}
-  let mimes = {}
+  const mimes = {}
   for(let y = 0; y < rows; y++) {
     for(let x = 0; x < columns; x++) {
       boxes[`${y}-${x}`] = {
