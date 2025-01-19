@@ -60,6 +60,7 @@ const $ = elf('music-walk', {
   tick: 0,
   room: '0001',
   instances: {},
+  instrument: 'violin',
   mode: modes.game
 })
 
@@ -85,7 +86,6 @@ function colorFromGrid(column, row) {
 
 
 let current
-let instrument = 'violin'
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
@@ -95,19 +95,20 @@ function load(instrument) {
     baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
   })
 
+  console.log(current)
   Tone.loaded().then(function() {
     current.release = .5;
     current.toDestination();
   })
 }
 
-load(instrument)
+load($.learn().instrument)
 
 // show error message on loading error //
 $.when('change', '.samples', function(event) {
   const { value } = event.target
   load(instruments[value]);
-  instrument = value
+  $.teach({instrument: value })
 })
 
 function shuffle(a) {
@@ -123,7 +124,7 @@ function shuffle(a) {
 const midiCodes = [...new Array(116)].map((_, i) => i)
 
 $.draw((target) => {
-  const { mode, tick, instances } = $.learn()
+  const { mode, tick, instrument, player, instances } = $.learn()
   seed(target)
   if(!instances[target.id]) return
 
@@ -149,11 +150,21 @@ $.draw((target) => {
             ${list}
           </select>
         </label>
+        <hr>
+
+        ${Object.keys(player).map(key => {
+          return `
+            <div>
+              ${key}: ${player[key]}
+            </div>
+          `
+        }).join('')}
       </div>
     `
   }
 
-  const { finished, x, y, won, boxes, rows, columns, maxFlags, totalFlags } = instances[target.id]
+  const instance = instances[target.id]
+  const { finished, x, y, won, boxes, rows, columns, maxFlags, totalFlags } = instance
 
   function createRow(row, yIndex) {
     if(!boxes) return 'no boxes'
@@ -184,6 +195,7 @@ $.draw((target) => {
         ${grid}
       </div>
       <div class="information">
+        ${content(instance)}
       </div>
     </div>
   `
@@ -194,13 +206,6 @@ $.draw((target) => {
       if(target.dataset.mode !== mode) {
         target.dataset.mode = mode
       }
-    }
-
-    {
-      const { instances } = $.learn()
-      const instance = instances[target.id]
-      const information = target.querySelector('.information')
-      if(information) information.innerHTML = content(instance)
     }
   }
 })
@@ -234,7 +239,7 @@ function content(instance) {
 
   const note = noteFromGrid(x, y)
   return `
-    <div class="mini-overlay">
+    <div class="mini-overlay" key="0011">
       <div class="game-dialog">
         ${box.revealed ? `There are ${box.count} rocks  nearby...` : (
           box.flagged
@@ -242,7 +247,7 @@ function content(instance) {
             : maxxedOut ? 'If every rock is an elf dwelling, no rocks are elf dwellings.' : 'Do you know of any elves here?'
         )}
       </div>
-      <div class="game-actions">
+      <div class="game-actions" key="0010">
         <button data-note="${note}">
           Play: ${note}
         </button>
@@ -661,11 +666,6 @@ function attackRelease(note) {
 }
 
 
-function pointerup(event) {
-  const note = event.target.dataset.note
-  release(note)
-}
-
 function release(note) {
   if(attacking[note]) {
     delete attacking[note]
@@ -674,7 +674,6 @@ function release(note) {
   current.triggerRelease(Tone.Frequency(note, "midi").toNote());
 }
 
-requestAnimationFrame(loop)
 const lastFrame = {
   a: false,
   b: false,
@@ -686,160 +685,152 @@ const lastFrame = {
   right: false,
 }
 
-function loop(time) {
-  const { root } = $.learn()
-  const player = {
-    a: checkButton(0, 0),
-    b: checkButton(0, 1),
-    x: checkButton(0, 3),
-    y: checkButton(0, 2),
-    lb: checkButton(0, 4),
-    rb: checkButton(0, 5),
-    lt: checkButton(0, 6),
-    rt: checkButton(0, 7),
-    select: checkButton(0, 8),
-    start: checkButton(0, 9),
-    ls: checkButton(0, 10),
-    rs: checkButton(0, 11),
-    up: checkButton(0, 12),
-    down: checkButton(0, 13),
-    left: checkButton(0, 14),
-    right: checkButton(0, 15),
-    os: checkButton(0, 16),
-  }
+function gameLoop(time) {
+  const { id } = this
+  const { instances } = $.learn()
+  if(instances[id]) {
+    const { x, y } = instances[id]
+    const root = noteFromGrid(x, y)
+    const player = {
+      a: checkButton(0, 0),
+      b: checkButton(0, 1),
+      x: checkButton(0, 3),
+      y: checkButton(0, 2),
+      lb: checkButton(0, 4),
+      rb: checkButton(0, 5),
+      lt: checkButton(0, 6),
+      rt: checkButton(0, 7),
+      select: checkButton(0, 8),
+      start: checkButton(0, 9),
+      ls: checkButton(0, 10),
+      rs: checkButton(0, 11),
+      up: checkButton(0, 12),
+      down: checkButton(0, 13),
+      left: checkButton(0, 14),
+      right: checkButton(0, 15),
+      os: checkButton(0, 16),
+    }
 
-  if(player.a) {
-    attack(root)
-  } else {
-    release(root)
-  }
+    if(player.a) {
+      attack(root)
+    } else {
+      release(root)
+    }
 
-  if(player.b) {
-    attack(root + 7)
-  } else {
-    release(root + 7)
-  }
+    if(player.b) {
+      attack(root + 7)
+    } else {
+      release(root + 7)
+    }
 
-  if(player.x) {
-    attack(root + 2)
-  } else {
-    release(root + 2)
-  }
+    if(player.x) {
+      attack(root + 2)
+    } else {
+      release(root + 2)
+    }
 
-  if(player.y) {
-    attack(root + 9)
-  } else {
-    release(root + 9)
-  }
+    if(player.y) {
+      attack(root + 9)
+    } else {
+      release(root + 9)
+    }
 
-  if(player.lb) {
-    attack(root + 4)
-  } else {
-    release(root + 4)
-  }
+    if(player.lb) {
+      attack(root + 4)
+    } else {
+      release(root + 4)
+    }
 
-  if(player.rb) {
-    attack(root + 11)
-  } else {
-    release(root + 11)
-  }
+    if(player.rb) {
+      attack(root + 11)
+    } else {
+      release(root + 11)
+    }
 
-  if(player.lt) {
-    attack(root + 6)
-  } else {
-    release(root + 6)
-  }
+    if(player.lt) {
+      attack(root + 6)
+    } else {
+      release(root + 6)
+    }
 
-  if(player.rt) {
-    attack(root + 13)
-  } else {
-    release(root + 13)
-  }
+    if(player.rt) {
+      attack(root + 13)
+    } else {
+      release(root + 13)
+    }
 
-  if(player.up) {
-    if(!lastFrame.up) {
-      lastFrame.up = true
-      console.log('up')
-      if(root < 85) {
-        $.teach({ root: root + 12 })
-      } else {
-        $.teach({ root: 96 })
+    if(player.up) {
+      if(!lastFrame.up) {
+        lastFrame.up = true
+        slideUp(id)
       }
+    } else {
+      lastFrame.up = false
     }
-  } else {
-    lastFrame.up = false
-  }
 
-  if(player.down) {
-    if(!lastFrame.down) {
-      lastFrame.down = true
-      console.log('down')
-      if(root > 35) {
-        $.teach({ root: root - 12 })
-      } else {
-        $.teach({ root: 24 })
+    if(player.down) {
+      if(!lastFrame.down) {
+        lastFrame.down = true
+        slideDown(id)
       }
+    } else {
+      lastFrame.down = false
     }
-  } else {
-    lastFrame.down = false
-  }
 
-  if(player.left) {
-    if(!lastFrame.left) {
-      lastFrame.left = true
-      if(root > 24) {
-        $.teach({ root: root - 1 })
+    if(player.left) {
+      if(!lastFrame.left) {
+        lastFrame.left = true
+        slideLeft(id)
       }
+    } else {
+      lastFrame.left = false
     }
-  } else {
-    lastFrame.left = false
-  }
 
-  if(player.right) {
-    if(!lastFrame.right) {
-      lastFrame.right = true
-
-      if(root < 96) {
-        $.teach({ root: root + 1 })
+    if(player.right) {
+      if(!lastFrame.right) {
+        lastFrame.right = true
+        slideRight(id)
       }
+    } else {
+      lastFrame.right = false
     }
-  } else {
-    lastFrame.right = false
+
+    if(player.os) {
+      if(!lastFrame.os) {
+        lastFrame.os = true
+        toggleMode()
+        //document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+      }
+    } else {
+      lastFrame.os = false
+    }
+
+    $.teach({ player })
   }
 
-  if(player.os) {
-    if(!lastFrame.os) {
-      lastFrame.os = true
-      toggleMode()
-      //document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-    }
-  } else {
-    lastFrame.os = false
-  }
-
-  requestAnimationFrame(loop)
+  requestAnimationFrame(gameLoop.bind(this))
 }
 
 /*
  Gamer Grid
  */
 $.when('click', '[data-flag]', (event) => {
-  event.preventDefault()
-  event.stopPropagation()
-  const { row, column } = event.target.dataset
-  const instance = getInstance(event.target)
-  const { boxes, id, totalFlags, maxFlags } = instance
+  requestIdleCallback(() => {
+    const { row, column } = event.target.dataset
+    const instance = getInstance(event.target)
+    const { boxes, id, totalFlags, maxFlags } = instance
 
-  if(totalFlags === maxFlags) return
-  const { flagged } = boxes[`${row}-${column}`]
-  const nextFlag = !flagged
+    if(totalFlags === maxFlags) return
+    const { flagged } = boxes[`${row}-${column}`]
+    const nextFlag = !flagged
 
-  const flagCount = nextFlag ? totalFlags + 1 : totalFlags - 1
-  console.log(flagCount, maxFlags)
-  updateBox({ id, x: column, y: row }, { flagged: nextFlag })
+    const flagCount = nextFlag ? totalFlags + 1 : totalFlags - 1
+    console.log(flagCount, maxFlags)
+    updateBox({ id, x: column, y: row }, { flagged: nextFlag })
 
-  updateInstance({ id }, { totalFlags: flagCount })
-  victoryCondition(id)
+    updateInstance({ id }, { totalFlags: flagCount })
+    victoryCondition(id)
+  })
 })
 
 $.when('click', '[data-note]', (event) => {
@@ -848,25 +839,27 @@ $.when('click', '[data-note]', (event) => {
 })
 
 $.when('click', '[data-clear]', (event) => {
-  const { row, column } = event.target.dataset
-  const instance = getInstance(event.target)
-  const { boxes, id, rows, columns } = instance
-  const { flagged, mimed, count } = boxes[`${row}-${column}`]
-  if(flagged) return
-  infer(rows, columns, parseInt(row), parseInt(column), boxes)
+  requestIdleCallback(() => {
+    const { row, column } = event.target.dataset
+    const instance = getInstance(event.target)
+    const { boxes, id, rows, columns } = instance
+    const { flagged, mimed, count } = boxes[`${row}-${column}`]
+    if(flagged) return
+    infer(rows, columns, parseInt(row), parseInt(column), boxes)
 
-  if(count === 0) {
-    pow(id, rows, columns, parseInt(row), parseInt(column), boxes)
-  }
+    if(count === 0) {
+      pow(id, rows, columns, parseInt(row), parseInt(column), boxes)
+    }
 
-  if(mimed) {
-    updateBox({ id, x: column, y: row }, { revealed: true })
-    updateInstance({ id }, { finished: true, won: false })
-  } else {
-    updateBox({ id, x: column, y: row }, { revealed: true })
-  }
+    if(mimed) {
+      updateBox({ id, x: column, y: row }, { revealed: true })
+      updateInstance({ id }, { finished: true, won: false })
+    } else {
+      updateBox({ id, x: column, y: row }, { revealed: true })
+    }
 
-  victoryCondition(id)
+    victoryCondition(id)
+  })
 })
 
 $.when('click', '[data-restart]', (event) => {
@@ -939,8 +932,8 @@ function seed(target) {
 
   countMimeula()
 
+  const id = target.id
   schedule(() => {
-    const id = target.id
     updateInstance({ id }, {
       root: 60,
       x: Math.floor(columns/2),
@@ -956,6 +949,8 @@ function seed(target) {
       totalFlags: 0
     })
   })
+
+  requestAnimationFrame(gameLoop.bind({ id }))
 }
 
 function updateInstance({ id }, payload) {
