@@ -3,6 +3,7 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 import Color from "colorjs.io"
+import { consoleShow, consoleHide } from './plan98-console.js'
 
 const lightnessStops = [
   [95, 120],
@@ -121,10 +122,8 @@ function shuffle(a) {
   }
 }
 
-const midiCodes = [...new Array(116)].map((_, i) => i)
-
 $.draw((target) => {
-  const { mode, tick, instrument, player, instances } = $.learn()
+  const { mode, tick, instrument, player, instances, debuggerVisible } = $.learn()
   seed(target)
   if(!instances[target.id]) return
 
@@ -159,6 +158,13 @@ $.draw((target) => {
             </div>
           `
         }).join('')}
+
+        <hr>
+
+        <button class="toolbelt-debugger">
+          ${ debuggerVisible ? 'Hide Debugger' : 'Show Debugger' }
+        </button>
+
       </div>
     `
   }
@@ -314,6 +320,8 @@ $.when('pointerdown', '.tile', function(e) {
     startY = e.clientY - rectangle.top
   }
 
+  console.log('pointerdown', { startX, startY })
+
   $.teach({
     tileFirstTouch: {
       x: startX,
@@ -347,6 +355,8 @@ $.when('pointermove', '.tile', function(e){
     y: tileLastTouch.y - tileFirstTouch.y
   }
 
+  console.log('pointermove', { lastX, lastY, tileDistance })
+
   $.teach({
     tileEndTime,
     tileDuration,
@@ -377,12 +387,23 @@ $.when('pointermove', '.tile', function(e){
 })
 
 $.when('pointerup', '.tile', function(event){
+
   const { id } = event.target.dataset
   const { instances, tileDistance, tileGesture, tileLastTouch, tileDuration } = $.learn()
+
+  $.teach({ 
+    tileGesture: null,
+    tileDistance: null,
+    tileLastTouch: null,
+    tileFirstTouch: null
+  })
+
 
   if(!tileDistance) return
 
   const { x, y, rows, columns } = instances[id]
+
+  console.log('pointerup', { tileDistance })
 
   const distance = Math.abs(tileDistance.x);
 
@@ -408,13 +429,6 @@ $.when('pointerup', '.tile', function(event){
       slideRight(id)
     }
   }
-
-  $.teach({ 
-    tileGesture: null,
-    tileDistance: null,
-    tileLastTouch: null,
-    tileFirstTouch: null
-  })
 })
 
 self.addEventListener('keydown', (event) => {
@@ -528,6 +542,7 @@ $.style(`
 
   &[data-mode="settings"] .settings {
     display: block;
+    overflow: auto;
   }
 
   &[data-mode="game"] .game {
@@ -1110,3 +1125,26 @@ function schedule(x, delay=1) { setTimeout(x, delay) }
 function mod(x, n) {
   return ((x % n) + n) % n;
 }
+
+$.when('click', '.toolbelt-debugger', debugToolbelt)
+
+function debugToolbelt(event) {
+  let console = document.body.querySelector('plan98-console')
+  if(!console) {
+    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
+    console = document.body.querySelector('plan98-console')
+  } else {
+    console.classList.toggle('hidden')
+  }
+
+  if(console.matches('.hidden')) {
+    consoleHide()
+    $.teach({ debuggerVisible: false })
+  } else {
+    consoleShow()
+    $.teach({ debuggerVisible: true })
+  }
+
+  event.target.classList.toggle('enabled')
+}
+
