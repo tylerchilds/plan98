@@ -53,6 +53,11 @@ const skills = [
   'Survival',
   'Thievery',
 ]
+
+const ethics = ["Lawful", "Neutral", "Chaotic"]
+const morals = ["Good", "Neutral", "Evil"]
+const sexes = ["Male", "Female"]
+
 const stock = {
   character: '',
   classification: '',
@@ -158,6 +163,42 @@ origin.draw(target => {
         </select>
       </label>
     </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+      <div>
+        Ethics
+        ${ethics.map(value => {
+          return `
+            <label class="field">
+              <input type="radio" name="ethics" data-option="${value}" />
+              <span class="label">${value}</span>
+            </label>
+          `
+        }).join('')}
+      </div>
+      <div>
+        Morals
+        ${morals.map(value => {
+          return `
+            <label class="field">
+              <input type="radio" name="morals" data-option="${value}" />
+              <span class="label">${value}</span>
+            </label>
+          `
+        }).join('')}
+      </div>
+      <div>
+        Sexes
+        ${sexes.map(value => {
+          return `
+            <label class="field">
+              <input type="checkbox" name="sexes" data-option="${value}" />
+              <span class="label">${value}</span>
+            </label>
+          `
+        }).join('')}
+      </div>
+    </div>
+
 
     <h2>Stats</h2>
     <div class="stats">

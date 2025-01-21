@@ -153,9 +153,9 @@
 
   /* cutestrap variables */
   --border-radius: 0;
-  --color-primary-tint1: hsl(350, 80%, 60%);
-  --color-primary: hsl(350, 80%, 45%);
-  --color-primary-shade1: hsl(350, 80%, 35%);
+  --color-primary-tint1: dodgerblue;
+  --color-primary: mediumseagreen;
+  --color-primary-shade1: mediumpurple;
   --color-accent-tint1: hsl(170, 80%, 60%);
   --color-accent: hsl(170, 80%, 45%);
   --color-accent-shade1: hsl(170, 80%, 35%);
@@ -557,7 +557,7 @@ button {
 	color: var(--color-neutral-shade4);
 	cursor: pointer;
 	display: inline-block;
-	padding-left: 1rem;
+	padding: .25rem 0 0 1.5rem;
 }
 
 .field *:not([type=radio]):not([type=checkbox]) + .label {
@@ -602,7 +602,7 @@ button {
 	color: var(--color-neutral-shade2);
 }
 
-.field--inline {
+.field.-inline {
 	display: inline-block;
 	margin-right: .5rem;
 }
@@ -619,12 +619,12 @@ button {
 	background-color: var(--color-neutral-tint4);
 	border: 2px solid var(--color-neutral-shade1);
 	content: '';
-	height: .5rem;
+	height: 1rem;
 	left: 0;
 	position: absolute;
-	top: .125rem;
+	top: 0rem;
 	transform: translateY(1px);
-	width: .5rem;
+	width: 1rem;
 }
 
 .field [type=checkbox] + .label::after,
@@ -632,12 +632,12 @@ button {
 	background-color: var(--color-primary);
 	border: 2px solid transparent;
 	color: var(--color-neutral-tint4);
-	height: .25rem;
-	left: .125rem;
+	height: .5rem;
+	left: .25rem;
 	position: absolute;
 	top: .25rem;
 	transform: translateY(1px);
-	width: .25rem;
+	width: .5rem;
 }
 
 .field [type=checkbox] + .label::before,
