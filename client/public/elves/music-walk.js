@@ -39,7 +39,6 @@ const colors = [...Array(13)].map((_, hueIndex) => {
     }
   })
 })
-console.log(colors)
 
 const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
   ${name}: ${value};
@@ -96,7 +95,6 @@ function load(instrument) {
     baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
   })
 
-  console.log(current)
   Tone.loaded().then(function() {
     current.release = .5;
     current.toDestination();
@@ -123,7 +121,7 @@ function shuffle(a) {
 }
 
 $.draw((target) => {
-  const { mode, tick, instrument, player, instances, debuggerVisible } = $.learn()
+  const { mode, tick, instrument, player, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
   if(!instances[target.id]) return
 
@@ -171,12 +169,14 @@ $.draw((target) => {
 
   const instance = instances[target.id]
   const { finished, x, y, won, boxes, rows, columns, maxFlags, totalFlags } = instance
+    
 
   function createRow(row, yIndex) {
     if(!boxes) return 'no boxes'
 
     return [x-1,x,x+1].map((column, xIndex) => {
-      if(column<0||column>=columns||row<0||row>rows) return `<div class="wall ${tilePosition(xIndex,yIndex)}"></div>`
+      if((xIndex===0&&yIndex===0)||(xIndex===2&&yIndex===2)||(xIndex===0&&yIndex===2)||(xIndex===2&&yIndex===0)) return ''
+      if(column<0||column>=columns||row<0||row>=rows) return `<div class="tile wall ${tilePosition(xIndex,yIndex)}"></div>`
       const box = boxes[`${row}-${column}`] || {}
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
       return `
@@ -211,6 +211,19 @@ $.draw((target) => {
       const { mode } = $.learn()
       if(target.dataset.mode !== mode) {
         target.dataset.mode = mode
+      }
+    }
+
+    {
+      const { tileGesture, tileDistance } = $.learn()
+
+      if(tileGesture === 'swipe') {
+        target.style.setProperty("--pan-x", `${tileDistance.x}px`);
+      } else if(tileGesture === 'scroll') {
+        target.style.setProperty("--pan-y", `${tileDistance.y}px`);
+      } else {
+        target.style.setProperty("--pan-x", `0`);
+        target.style.setProperty("--pan-y", `0`);
       }
     }
   }
@@ -280,18 +293,32 @@ function content(instance) {
 }
 
 function tilePosition(xIndex, yIndex) {
+  const { tileGesture, tileDistance } = $.learn()
   const classes = []
 
   if(yIndex === 0) {
     classes.push('top')
+
+    if(tileGesture === 'scroll' && Math.sign(tileDistance.y)===1) {
+      classes.push('incoming')
+    }
   } else if(yIndex === 2) {
     classes.push('bottom')
+    if(tileGesture === 'scroll' && Math.sign(tileDistance.y)!==1) {
+      classes.push('incoming')
+    }
   }
 
   if(xIndex === 0) {
     classes.push('left')
+    if(tileGesture === 'swipe' && Math.sign(tileDistance.x)===1) {
+      classes.push('incoming')
+    }
   } else if(xIndex === 2) {
     classes.push('right')
+    if(tileGesture === 'swipe' && Math.sign(tileDistance.x)!==1) {
+      classes.push('incoming')
+    }
   }
 
   if(classes.length === 0) {
@@ -309,6 +336,7 @@ function toggleMode (event) {
 }
 
 $.when('pointerdown', '.tile', function(e) {
+  event.preventDefault()
   $.teach({ tileStartTime: e.timeStamp })
   let startX, startY;
   const rectangle = event.target.getBoundingClientRect()
@@ -320,7 +348,6 @@ $.when('pointerdown', '.tile', function(e) {
     startY = e.clientY - rectangle.top
   }
 
-  console.log('pointerdown', { startX, startY })
 
   $.teach({
     tileFirstTouch: {
@@ -331,12 +358,13 @@ $.when('pointerdown', '.tile', function(e) {
 })
 
 $.when('pointermove', '.tile', function(e){
+  event.preventDefault()
   const { tileStartTime, tileFirstTouch, tileGesture } = $.learn()
   if(!tileFirstTouch) return
   const tileEndTime = e.timeStamp;
   const tileDuration = tileEndTime - tileStartTime;
   let lastX, lastY;
-  const rectangle = event.target.getBoundingClientRect()
+  const rectangle = event.target.closest($.link).getBoundingClientRect()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
     lastX = e.touches[0].clientX - rectangle.left
     lastY = e.touches[0].clientY - rectangle.top
@@ -350,12 +378,11 @@ $.when('pointermove', '.tile', function(e){
     y: lastY
   }
 
+
   const tileDistance = {
     x: tileLastTouch.x - tileFirstTouch.x,
     y: tileLastTouch.y - tileFirstTouch.y
   }
-
-  console.log('pointermove', { lastX, lastY, tileDistance })
 
   $.teach({
     tileEndTime,
@@ -364,53 +391,29 @@ $.when('pointermove', '.tile', function(e){
     tileDistance
   })
 
-  switch(tileGesture){
-    case 'scroll':
-      $.teach({
-        gridOffset: {
-          x: 0,
-          y: 1 - (Math.abs(tileDistance.y) / window.innerHeight) * Math.sign(tileDistance.y) * 100
-        }
-      })
-      break;
-    case 'swipe':
-      $.teach({
-        gridOffset: {
-          y: 0,
-          x: 1 - (Math.abs(tileDistance.x) / window.innerWidth) * Math.sign(tileDistance.x) * 100
-        }
-      })
-      break;
-    default:
-      setGesture();
+  if(!tileGesture) {
+    setGesture();
   }
 })
 
 $.when('pointerup', '.tile', function(event){
-
   const { id } = event.target.dataset
   const { instances, tileDistance, tileGesture, tileLastTouch, tileDuration } = $.learn()
 
-  $.teach({ 
-    tileGesture: null,
-    tileDistance: null,
-    tileLastTouch: null,
-    tileFirstTouch: null
-  })
-
-
-  if(!tileDistance) return
+  if(!tileDistance) {
+    clearPointer()
+    return
+  }
 
   const { x, y, rows, columns } = instances[id]
-
-  console.log('pointerup', { tileDistance })
-
-  const distance = Math.abs(tileDistance.x);
 
   if(tileGesture === 'scroll') {
     const distance = Math.abs(tileDistance.y);
 
-    if(distance < 20) return
+    if(distance < 20) {
+      clearPointer()
+      return
+    }
 
     if(Math.sign(tileDistance.y)===1) {
       slideUp(id)
@@ -421,7 +424,10 @@ $.when('pointerup', '.tile', function(event){
   } else if(tileGesture === 'swipe') {
     const distance = Math.abs(tileDistance.x);
 
-    if(distance < 20) return
+    if(distance < 20) {
+      clearPointer()
+      return
+    }
 
     if(Math.sign(tileDistance.x)===1) {
       slideLeft(id)
@@ -429,7 +435,18 @@ $.when('pointerup', '.tile', function(event){
       slideRight(id)
     }
   }
+
+  clearPointer()
 })
+
+function clearPointer() {
+  $.teach({ 
+    tileGesture: null,
+    tileDistance: null,
+    tileLastTouch: null,
+    tileFirstTouch: null
+  })
+}
 
 self.addEventListener('keydown', (event) => {
   const node = document.querySelector($.link)
@@ -485,7 +502,10 @@ function slideDown(id) {
 
 function setGesture(){
   const { tileDistance } = $.learn()
-  if(Math.abs(tileDistance.y) > Math.abs(tileDistance.x)){
+  const y = Math.abs(tileDistance.y)
+  const x = Math.abs(tileDistance.x)
+  if(x < 5 && y < 5) return
+  if(y > x){
     $.teach({ tileGesture: 'scroll' })
   } else {
     $.teach({ tileGesture: 'swipe' })
@@ -509,7 +529,7 @@ $.style(`
 		-khtml-user-select: none; /* Konqueror HTML */
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
-    touch-action: manipulation;
+    touch-action: none;
   }
 
   & .title {
@@ -578,10 +598,16 @@ $.style(`
     grid-template-rows: 1fr;
     height: 100%;
     transform-origin: bottom;
+    transform: translate(var(--pan-x, 0), var(--pan-y, 0))
   }
 
-  & .tile:not(.center) {
-    display: none;
+  & .tile.incoming,
+  & .tile.center {
+    display: grid;
+  }
+
+  & .tile.wall {
+    background: black;
   }
 
   & .tile {
@@ -592,6 +618,7 @@ $.style(`
     --tile-y: 0;
     transform: translate(var(--tile-x), var(--tile-y));
     position: relative;
+    display: none;
   }
 
   & .tile.left {
