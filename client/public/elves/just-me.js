@@ -84,6 +84,8 @@ const $ = elf('just-me', {
 
 $.draw(() => {
   const { focusedContent, people, filter, creating, contextualize } = $.learn()
+
+  const type = channelTypes.find(x => x.key === people)
   return `
     <div class="filters">
       ${contentTypes.map(x => `
@@ -106,6 +108,12 @@ $.draw(() => {
             </button>
           `).join('')}
         </select>
+        <label for="channel-filter">
+          ${type.label}
+          <span class="iconator">
+            <sl-icon name="chevron-down"></sl-icon>
+          </span>
+        </label>
       </div>
     </div>
     ${people === 'settings' ? `
@@ -197,13 +205,22 @@ function renderCreationForm() {
   return `
     <div class="create-title">
       Create
-      <select name="creation-type">
-        ${contentTypes.map((x,i) => `
-          <option value="${x.key}" ${x.key === creating?'selected':''} ${i===0?'disabled':''}>
-            ${x.label}
-          </button>
-        `).join('')}
-      </select>
+      <div class="selector">
+        <select name="creation-type">
+          ${contentTypes.map((x,i) => `
+            <option value="${x.key}" ${x.key === creating?'selected':''} ${i===0?'disabled':''}>
+              ${x.label}
+            </button>
+          `).join('')}
+        </select>
+        <label for="creation-type">
+          ${type.label}
+          <span class="iconator">
+            <sl-icon name="chevron-down"></sl-icon>
+          </span>
+        </label>
+      </div>
+
     </div>
     <button data-cancel class="creation-action">
       <sl-icon name="x-lg"></sl-icon>
@@ -322,18 +339,65 @@ $.style(`
     display: none;
   }
 
-  & .selector {
+  & .iconator {
+    display: grid;
+    place-content: center;
+  }
+
+  & .people .selector {
     background: dodgerblue;
-    padding: 0 calc(48px + 1rem) 0 .5rem;
+    color: white;
+    padding: 1px calc(48px + 1rem) 1px 1px;
+  }
+
+  & .selector {
+    display: grid;
+    grid-template-areas: 'area';
+  }
+
+  @media (min-width: 500px) {
+    & .selector {
+      display: none;
+    }
+  }
+
+  & .selector label[for],
+  & .selector select[name] {
+    grid-area: area;
+  }
+
+  & .selector label[for] {
+    z-index: 2;
+    pointer-events: none;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .5rem;
+    align-content: center;
+    font-weight: 100;
+    padding: 0 .5rem;
+  }
+
+  & .selector select[name] {
+    font-size: 1rem;
+    width: 100%;
+    padding: .5rem;
+    opacity: 0;
+    z-index: 1;
+  }
+
+  & [for="channel-filter"] {
+    color: white;
   }
 
   & [name="channel-filter"] {
     background: transparent;
     color: white;
     border: none;
-    font-size: 1rem;
-    width: 100%;
-    padding: .5rem;
+  }
+
+  & [name="channel-filter"]:focus + [for="channel-filter"] {
+    outline: 2px solid white;
+    outline-offset: -3px;
   }
 
   @media (min-width: 500px) {
@@ -377,14 +441,16 @@ $.style(`
   }
 
   & .settings {
-    background: black;
+    background: white;
     grid-row: 2;
     grid-column: 1;
   }
 
   @media (min-width: 500px) {
-    grid-row: 1;
-    grid-column: 2 / -1;
+    & .settings {
+      grid-row: 1;
+      grid-column: 2 / -1;
+    }
   }
 
   @media (min-width: 768px) {
@@ -431,6 +497,11 @@ $.style(`
     font-size: 1.5rem;
     font-weight: 100;
     margin-bottom: 1rem;
+    display: flex;
+  }
+
+  & .create-title .selector {
+    display: inline-grid;
   }
 
   & [name="creation-type"] {
