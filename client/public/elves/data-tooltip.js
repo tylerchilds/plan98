@@ -74,8 +74,8 @@ function draw() {
 const tooltipStyles = `
   <style>
     .data-tooltip {
-      background: rgba(0,0,0,.85);
-      color: rgba(255,255,255,.85);
+      background: rgba(255,255,255,.85);
+      color: rgba(0,0,0,.85);
       box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
       display: none;
       left: 0;

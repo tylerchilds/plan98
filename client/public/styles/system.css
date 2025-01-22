@@ -32,6 +32,14 @@
     outline-offset: 3px;
 }
 
+button:-moz-focusring,
+[type="button"]:-moz-focusring,
+[type="reset"]:-moz-focusring,
+[type="submit"]:-moz-focusring {
+  outline: 2px solid gold;
+}
+
+
 :root {
 	--bg: var(--white);
 	--fg: var(--black);
