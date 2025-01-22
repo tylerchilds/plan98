@@ -83,7 +83,7 @@ const $ = elf('just-me', {
 })
 
 $.draw(() => {
-  const { focusedContent, people, filter, creating } = $.learn()
+  const { focusedContent, people, filter, creating, contextualize } = $.learn()
   return `
     <div class="filters">
       ${contentTypes.map(x => `
@@ -113,6 +113,9 @@ $.draw(() => {
         Hello
       </div>
     `: `
+      <button data-contextualize class="contextualize-action">
+        <sl-icon name="info-circle"></sl-icon>
+      </button>
       <div class="content ${creating?'creating':''}">
         ${renderContent()}
         <div class="new-content">
@@ -127,7 +130,7 @@ $.draw(() => {
           `}
         </div>
       </div>
-      <div class="context">
+      <div class="context ${contextualize?'contextualize':''}">
         ${renderContext(focusedContent.id)}
       </div>
     `}
@@ -239,6 +242,11 @@ $.when('click', '[data-create]', (event) => {
   $.teach({ creating: create })
 })
 
+$.when('click', '[data-contextualize]', (event) => {
+  const { contextualize } = $.learn()
+  $.teach({ contextualize: !contextualize })
+})
+
 $.when('click', '[data-cancel]', (event) => {
   $.teach({ creating: null })
 })
@@ -293,6 +301,7 @@ $.style(`
     grid-area: people;
     gap: 1px;
     background: rgba(0,0,0,.025);
+    overflow-y: auto;
   }
 
   & .people :focus {
@@ -315,7 +324,7 @@ $.style(`
 
   & .selector {
     background: dodgerblue;
-    padding: 0 .5rem;
+    padding: 0 calc(48px + 1rem) 0 .5rem;
   }
 
   & [name="channel-filter"] {
@@ -358,7 +367,7 @@ $.style(`
     position: absolute;
     inset: 0;
     padding: 1rem;
-    z-index: 3;
+    z-index: 7;
     background: transparent;
     transition:
       transform 100ms ease-in-out,
@@ -371,6 +380,11 @@ $.style(`
     background: black;
     grid-row: 2;
     grid-column: 1;
+  }
+
+  @media (min-width: 500px) {
+    grid-row: 1;
+    grid-column: 2 / -1;
   }
 
   @media (min-width: 768px) {
@@ -391,6 +405,9 @@ $.style(`
     }
   }
 
+  & .content.creating {
+    z-index: 7;
+  }
   & .content.creating::before {
     content: '';
     inset: 0;
@@ -400,10 +417,15 @@ $.style(`
   }
 
   & .content.creating .new-content {
-    transform: translateY(0);
+    transform: translateY(-36px);
     background: white;
   }
 
+  @media (min-width: 500px) {
+    & .content.creating .new-content {
+      transform: translateY(0);
+    }
+  }
 
   & .create-title {
     font-size: 1.5rem;
@@ -421,19 +443,27 @@ $.style(`
 
   & .context {
     grid-area: content;
-    background: rgba(0,0,0,.15);
+    background-image: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.1)), linear-gradient(aliceblue, aliceblue);
+    transition: 100ms transform ease-in-out;
+    transform: translateX(100%);
+  }
+
+  & .contextualize.context {
+    transform: translateX(0);
+    z-index: 5;
   }
 
   @media (min-width: 1024px) {
     & .context {
       grid-area: context;
+      transform: translateX(0);
     }
   }
 
   & .filters {
     display: flex;
     grid-area: filters;
-    z-index: 4;
+    z-index: 10;
     gap: 1px;
     overflow: auto;
     background: rgba(0,0,0,.075);
@@ -468,6 +498,34 @@ $.style(`
     }
   }
 
+  & .contextualize-action {
+    background: darkorange;
+    color: white;
+    border-radius: 100%;
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-content: center;
+    border: none;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 6;
+    border: 1px solid white;
+  }
+
+  & .contextualize-action:hover,
+  & .contextualize-action:focus {
+    outline: 2px solid white;
+    outline-offset: -4px;
+  }
+  @media (min-width: 1024px) {
+    & .contextualize-action {
+      display: none;
+    }
+  }
+
+
   & .creation-action {
     background: mediumpurple;
     color: white;
@@ -480,12 +538,13 @@ $.style(`
     position: absolute;
     top: 1rem;
     right: 1rem;
+    border: 1px solid white;
   }
 
   & .creation-action:hover,
   & .creation-action:focus {
     outline: 2px solid white;
-    outline-offset: -3px;
+    outline-offset: -4px;
   }
 `)
 

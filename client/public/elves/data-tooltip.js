@@ -9,8 +9,8 @@ $.when('mousedown', '[data-tooltip]', attack)
 $.when('mousemove', '[data-tooltip]', sustain)
 $.when('mouseup', '[data-tooltip]', release)
 
-$.when('touchstart', '[data-tooltip]', attack)
-$.when('touchend', '[data-tooltip]', release)
+$.when('pointerdown', '[data-tooltip]', attack)
+$.when('pointerup', '[data-tooltip]', release)
 
 function attack(event) {
   tooltip(event, event.target.dataset.tooltip)
@@ -48,8 +48,18 @@ function show(event, content) {
   move(event);
 }
 
-function move(event) {
-  const { x, y } = event;
+function move(e) {
+  let x, y
+  const rectangle = event.target.closest($.link).getBoundingClientRect()
+  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+    x = e.touches[0].clientX - rectangle.left
+    y = e.touches[0].clientY - rectangle.top
+  } else {
+    x = e.clientX - rectangle.left
+    y = e.clientY - rectangle.top
+  }
+
+
   node.dataset.x = x;
   node.dataset.y = y;
 
