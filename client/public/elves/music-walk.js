@@ -451,7 +451,7 @@ function clearPointer() {
 self.addEventListener('keydown', (event) => {
   const node = document.querySelector($.link)
 
-  if(!node && !node.id) return
+  if(!node) return
   const id = node.id
 
   if (event.keyCode==37) {
@@ -470,6 +470,8 @@ self.addEventListener('keydown', (event) => {
 
 function slideLeft(id) {
   const { instances } = $.learn()
+
+  if(!instances[id]) return
   const { x } = instances[id]
 
   if(x<=0) return
@@ -478,6 +480,7 @@ function slideLeft(id) {
 
 function slideRight(id) {
   const { instances } = $.learn()
+  if(!instances[id]) return
   const { x, columns } = instances[id]
 
   if(x>=columns-1) return
@@ -486,6 +489,7 @@ function slideRight(id) {
 
 function slideUp(id) {
   const { instances } = $.learn()
+  if(!instances[id]) return
   const { y } = instances[id]
 
   if(y<=0) return
@@ -494,6 +498,7 @@ function slideUp(id) {
 
 function slideDown(id) {
   const { instances } = $.learn()
+  if(!instances[id]) return
   const { y, rows } = instances[id]
 
   if(y>=rows-1) return

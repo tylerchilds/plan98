@@ -13,6 +13,10 @@ const nonce = `<div class="nonce"></div>`
 
 $zune.teach({ menu: false })
 
+showModal(`
+  <hyper-script src="/public/sagas/sillyz.computer/en-us/pitch-deck.saga"></hyper-script>
+`)
+
 const $ = elf('sillyz-computer', {
   code: ``,
   start: false

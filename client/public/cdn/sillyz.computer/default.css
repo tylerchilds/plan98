@@ -18,3 +18,7 @@ video {
     min-height: 100%;
   }
 }
+
+plan98-modal .action-wrapper {
+  background: lemonchiffon;
+}
