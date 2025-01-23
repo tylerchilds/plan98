@@ -122,25 +122,26 @@ $.draw(() => {
       </div>
     `: `
       <button data-contextualize class="contextualize-action">
-        <sl-icon name="info-circle"></sl-icon>
+        <sl-icon name="${contextualize?'x-lg':'info-circle'}"></sl-icon>
       </button>
-      <div class="content ${creating?'creating':''}">
+      <div class="content">
         ${renderContent()}
-        <div class="new-content">
-          ${creating ? `
-            <div key="creating">
-              ${renderCreationForm()}
-            </div>
-          `: `
-            <button data-create="${filter}" class="creation-action">
-              <sl-icon name="plus-lg"></sl-icon>
-            </button>
-          `}
-        </div>
       </div>
       <div class="context ${contextualize?'contextualize':''}">
         ${renderContext(focusedContent.id)}
       </div>
+      <div class="new-content ${creating?'creating':''}">
+        ${creating ? `
+          <div key="creating">
+            ${renderCreationForm()}
+          </div>
+        `: `
+          <button data-create="${filter}" class="creation-action">
+            <sl-icon name="plus-lg"></sl-icon>
+          </button>
+        `}
+      </div>
+
     `}
   `
 }, {
@@ -423,10 +424,11 @@ $.style(`
     background: white;
     z-index: 2;
     position: relative;
+    padding: 1rem;
   }
 
-  & .content .new-content {
-    transform: translateY(calc(100% - 42px - 2rem));
+  & .new-content {
+    transform: translateY(calc(100% - 42px - 42px - 2rem));
     height: 100%;
     position: absolute;
     inset: 0;
@@ -438,12 +440,28 @@ $.style(`
       background 100ms ease-in-out;
     animation: &-fade-in 250ms forwards 1000ms;
     opacity: 0;
+    pointer-events: none;
   }
+
+  @media (min-width: 500px) {
+    & .new-content {
+      left: 180px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    & .new-content {
+      left: 223px;
+      transform: translateY(calc(100% - 42px - 2rem));
+    }
+  }
+
 
   & .settings {
     background: white;
     grid-row: 2;
     grid-column: 1;
+    padding: 1rem;
   }
 
   @media (min-width: 500px) {
@@ -471,24 +489,14 @@ $.style(`
     }
   }
 
-  & .content.creating {
-    z-index: 7;
-  }
-  & .content.creating::before {
-    content: '';
-    inset: 0;
-    background: rgba(255,255,255,.85);
-    z-index: 2;
-    position: absolute;
-  }
-
-  & .content.creating .new-content {
-    transform: translateY(-36px);
+  & .creating.new-content {
+    transform: translateY(0);
     background: white;
+    pointer-events: all;
   }
 
   @media (min-width: 500px) {
-    & .content.creating .new-content {
+    & .creating .new-content {
       transform: translateY(0);
     }
   }
@@ -517,6 +525,7 @@ $.style(`
     background-image: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.1)), linear-gradient(aliceblue, aliceblue);
     transition: 100ms transform ease-in-out;
     transform: translateX(100%);
+    padding: 1rem;
   }
 
   & .contextualize.context {
@@ -610,6 +619,7 @@ $.style(`
     top: 1rem;
     right: 1rem;
     border: 1px solid white;
+    pointer-events: all;
   }
 
   & .creation-action:hover,
