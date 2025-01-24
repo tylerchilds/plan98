@@ -17,7 +17,7 @@ const $ = module('supabase-profile', {
 $.draw((target) => {
   mount(target)
   const { error, success, profile, userId, edit } = $.learn()
-  const hero = profile.banner || '/cdn/tychi.me/photos/aurora.JPG'
+  const hero = profile.banner || '/public/cdn/sillyz.computer/synthia.webp'
 
   if(edit) {
     return `
@@ -79,7 +79,7 @@ $.draw((target) => {
         </button>
       </div>
       <div class="picture">
-        <img  src="${profile.picture || '/cdn/tychi.me/photos/unprofessional-headshot.jpg' }" />
+        <img  src="${profile.picture || '/public/cdn/sillyz.computer/default-picture.png' }" />
       </div>
       <div class="actions-right">
         <button data-edit>

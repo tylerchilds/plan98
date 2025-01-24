@@ -1,3 +1,4 @@
+import supabase from '@sillonious/database'
 import elf from '@silly/elf'
 
 const contentTypes = [
@@ -79,10 +80,31 @@ const channelTypes = [
 const $ = elf('just-me', {
   filter: contentTypes[0].key,
   people: channelTypes[0].key,
-  focusedContent: {}
+  focusedContent: {},
+  session: null
 })
 
-$.draw(() => {
+supabase.auth.onAuthStateChange((event, session) => {
+  if (session) {
+    $.teach({ session })
+  } else {
+    $.teach({ session: null })
+  }
+});
+
+
+$.draw((target) => {
+  const { session } = $.learn()
+
+  if(!session){
+    target.innerHTML = `
+      <div class="full-bleed">
+        <supabase-account></supabase-account>
+      </div>
+    `
+    return
+  }
+
   const { focusedContent, people, filter, creating, contextualize } = $.learn()
 
   const type = channelTypes.find(x => x.key === people)
@@ -118,7 +140,19 @@ $.draw(() => {
     </div>
     ${people === 'settings' ? `
       <div class="settings">
-        Hello
+        <div class="settings-section">
+          <div class="settings-title">Account</div>
+          <div>
+            <supabase-account></supabase-account>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-title">f2f Account</div>
+          <div>
+            <secure-authentication></secure-authentication>
+          </div>
+        </div>
       </div>
     `: `
       <button data-contextualize class="contextualize-action">
@@ -155,13 +189,10 @@ $.draw(() => {
   },
   afterUpdate: (target) => {
     { // recover icons from the virtual dom
-      [...target.querySelectorAll('sl-icon')].map(node => {
-        const nodeParent = node.parentNode
-        const icon = document.createElement('sl-icon')
-        icon.name = node.name
-        node.remove()
-        nodeParent.appendChild(icon)
-      })
+      recoverElves(target, 'sl-icon')
+      recoverElves(target, 'supabase-account')
+      recoverElves(target, 'supabase-updates')
+      recoverElves(target, 'secure-authentication')
     }
 
     {
@@ -172,6 +203,18 @@ $.draw(() => {
     }
   }
 })
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
 
 function scrollSave(target, classifier) {
   const node = target.querySelector('.'+classifier)
@@ -189,6 +232,12 @@ function scrollRecover(target, classifier) {
 
 function renderContent() {
   const { filter, people } = $.learn()
+
+  if(filter === 'short-text') {
+    return `
+      <supabase-updates></supabase-updates>
+    `
+  }
 
   return `
     ${filter}
@@ -313,6 +362,11 @@ $.style(`
     }
   }
 
+  & .full-bleed {
+    position: absolute;
+    inset: 0;
+  }
+
   & .people {
     display: flex;
     flex-direction: column;
@@ -425,6 +479,7 @@ $.style(`
     z-index: 2;
     position: relative;
     padding: 1rem;
+    overflow: auto;
   }
 
   & .new-content {
@@ -462,6 +517,7 @@ $.style(`
     grid-row: 2;
     grid-column: 1;
     padding: 1rem;
+    overflow: auto;
   }
 
   @media (min-width: 500px) {
@@ -501,6 +557,16 @@ $.style(`
     }
   }
 
+  & .settings-section {
+    padding: 1rem;
+    background: rgba(0,0,0,.05);
+    margin: 1rem 0;
+  }
+
+  & .settings-title {
+    margin-bottom: 1rem;
+    font-weight: bold;
+  }
   & .create-title {
     font-size: 1.5rem;
     font-weight: 100;
@@ -526,6 +592,7 @@ $.style(`
     transition: 100ms transform ease-in-out;
     transform: translateX(100%);
     padding: 1rem;
+    overflow: auto;
   }
 
   & .contextualize.context {

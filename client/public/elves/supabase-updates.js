@@ -15,7 +15,9 @@ $.draw((target) => {
       </button>
     </form>
 
-    ${updates.map(render).join('')}
+    <div class="updates">
+      ${updates.map(render).join('')}
+    </div>
   `
 }, {
   afterUpdate: (target) => {
@@ -37,7 +39,7 @@ function render(update) {
   return `
     <div class="status-update">
       <div class="status-update-picture">
-        <img src=${update.profiles.picture} />
+        <img src=${update.profiles.picture || '/public/cdn/sillyz.computer/default-picture.png'} />
       </div>
       <div>
         <div class="status-update-nickname">
@@ -145,6 +147,11 @@ $.style(`
     display: block;
     max-width: 55ch;
     margin: auto;
+  }
+
+  & .updates {
+    display: flex;
+    flex-direction: column-reverse;
   }
 
   & .status-update {
