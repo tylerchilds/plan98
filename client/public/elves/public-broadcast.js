@@ -125,7 +125,7 @@ $.draw((target) => {
     {
       if(!boxes[`${y}:${x}`]) {
         updateBox({ x, y, id: target.id }, {
-          content: `<video src="${randomChannel().url}"></video>`
+          content: `<video src="${randomChannel().url}" playsinline></video>`
         })
       }
     }
@@ -801,7 +801,7 @@ function seed(target) {
   const boxes = {}
   boxes[`${y}:${x}`] = {
     content: `
-      <video src="${randomChannel().url}"></video>
+      <video src="${randomChannel().url}" playsinline></video>
     `,
   }
 
