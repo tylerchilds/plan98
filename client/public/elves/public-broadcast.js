@@ -36,27 +36,31 @@ $.draw((target) => {
   }
   if(!consented) {
     return `
-      <div style="display: grid; place-content: center">
+      <div class="instructions-outer">
         <div class="instructions">
-          <div class="instructions-title">
-            Public Broadcast
+          <div class="instructions-inner">
+            <div class="instructions-title">
+              Public Broadcast
+            </div>
+            <p>
+              Randomly browse public broadcast internet television stations.
+            </p>
+            <div class="instructions-subtitle">
+              How To
+            </div>
+            <p>
+              Touch:<br>Swipe up/down/left/right to switch channels
+            </p>
+            <p>
+              Keyboard:<br>Arrow keys up/down/left/right to switch channels
+            </p>
+            <p>
+              Gamepad:<br>Direcitonal pad up/down/left/right to switch channels
+            </p>
           </div>
-          <p>
-            Randomly browse public broadcast internet television stations.
-          </p>
-          <div class="instructions-subtitle">
-            How To
+          <div class="sticky-foot">
+            <button data-consent>Launch</button>
           </div>
-          <p>
-            Touch:<br>Swipe up/down/left/right to switch channels
-          </p>
-          <p>
-            Keyboard:<br>Arrow keys up/down/left/right to switch channels
-          </p>
-          <p>
-            Gamepad:<br>Direcitonal pad up/down/left/right to switch channels
-          </p>
-          <button data-consent>Launch</button>
         </div>
       </div>
     `
@@ -116,8 +120,8 @@ $.draw((target) => {
       if(active) {
         const video = active.querySelector('video')
         if(video && video.playing) {
-          video.pause()
-          video.playing = false
+          //video.pause()
+          //video.playing = false
         }
       }
     }
@@ -189,36 +193,26 @@ $.draw((target) => {
         if(video && !video.playing) {
 
           target.dataset.error = false
-          const hls = new Hls();
-          hls.on(Hls.Events.ERROR, (event, data) => {
+          if(target.hls) target.hls.destroy()
+          target.hls = new Hls();
+          target.hls.on(Hls.Events.ERROR, (event, data) => {
             const { type, details, fatal } = data;
 
             console.error(`HLS.js Error: Type: ${type}, Details: ${details}, Fatal: ${fatal}`);
 
             if (fatal) {
-              switch (type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                  console.error('Network error. Check your video source or CORS headers.');
-                  // Attempt recovery or notify the user
-                  break;
-
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                  console.error('Media error. Try to recover.');
-                  hls.recoverMediaError();
-                  break;
-
-                default:
-                  console.error('Fatal error. Destroying HLS instance.');
-                  hls.destroy();
-                  break;
+              if(type === Hls.ErrorTypes.MEDIA_ERROR) {
+                console.error('Media error. Try to recover.');
+                target.hls.recoverMediaError();
+              } else {
+                target.hls.destroy();
+                target.dataset.error = true
+                updateBox({ x, y, id: target.id }, null)
               }
-
-              target.dataset.error = true
-              updateBox({ x, y, id: target.id }, null)
             }
           });
-          hls.loadSource(video.src);
-          hls.attachMedia(video);
+          target.hls.loadSource(video.src);
+          target.hls.attachMedia(video);
           video.play()
           video.playing = true
         }
@@ -441,18 +435,23 @@ $.style(`
     touch-action: none;
   }
 
-  & .instructions {
-    position: absolute;
+  & .instructions-outer {
     margin: auto;
-    inset: 1rem;
-    overflow: auto;
-    height: auto;
+    inset: 0;
+    position: absolute;
+  }
+  & .instructions {
+    margin: auto;
+    max-height: 100%;
     max-width: 320px;
-    max-height: calc(100% - 2rem);
     background: white;
     color: rgba(0,0,0,.85);
-    border-radius: 1rem;
-    padding: 1rem;
+    border-radius: 3px;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    display: grid;
+    grid-template-rows: 1fr auto;
   }
 
   & .instructions-title {
@@ -465,6 +464,17 @@ $.style(`
     margin-bottom: 1rem;
   }
 
+  & .instructions-inner {
+    padding: 2rem 1rem 1rem;
+    overflow: auto;
+  }
+
+  & .sticky-foot {
+    padding: 1rem;
+    box-shadow: 0 -2px 2px 2px rgba(0,0,0,.15);
+    border-radius: 0 0 3px 3px;
+  }
+
   & [data-consent] {
     border: none;
     border-radius: 0;
@@ -473,6 +483,13 @@ $.style(`
     padding: 1rem;
     margin: auto;
     display: block;
+    width: 100%;
+    border-radius: 2px;
+  }
+
+  & [data-consent]:hover,
+  & [data-consent]:focus {
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.45)), mediumseagreen;
   }
 
   & :focus {
