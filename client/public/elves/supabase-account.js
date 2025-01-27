@@ -16,14 +16,26 @@ export const $ = elf('supabase-account', {
     picture: null,
     banner: null
   },
-  upload: {}
+  upload: {},
+  session: { user: {} },
 })
 
 
 supabase.auth.onAuthStateChange(async (event, session) => {
   if (session) {
-    state['ls/supabase.auth.token'] = JSON.stringify(session)
+    $.teach({ session })
+  } else {
+    $.teach({ session: null })
+  }
+});
 
+
+async function query(target) {
+  const { session } = $.learn()
+
+  if(target.queried) return
+
+  if(session.user.id) {
     const userId = session.user.id
 
     const { data, error } = await supabase
@@ -38,11 +50,10 @@ supabase.auth.onAuthStateChange(async (event, session) => {
 
     if(!data[0]) return
 
-    $.teach({ userId, profile: data[0] })
-  } else {
-    state['ls/supabase.auth.token'] = null
+    $.teach({ userId, profile: data[0] });
   }
-});
+}
+
 
 const savedSession = state['ls/supabase.auth.token']
 
@@ -106,6 +117,8 @@ $.draw((target) => {
     `
   }
 
+  query(target)
+
   return `
     <div>
       ${user.email}
@@ -142,6 +155,8 @@ $.draw((target) => {
           <input name="color" type="color" value="${escapeHyperText(profile.color || '')}"/>
         </label>
 
+        <div class="message">${message ? message : ''}</div>
+
         <div style="text-align: center">
           <button type="submit">
             Save
@@ -160,6 +175,41 @@ $.draw((target) => {
     }
   }
 })
+
+$.when('change', '[type="file"]', onImageSelection)
+
+async function onImageSelection({ target }) {
+  const file = target.files && target.files[0];
+  if(!file) return
+
+  const { userId } = $.learn()
+
+  if(!userId) return
+  const { data, error } = await supabase
+  .storage
+  .from('same-same')
+  .upload(`${userId}/${file.name}`, file, {
+    cacheControl: '3600',
+    upsert: false
+  })
+
+  const url = `${plan98.env.SUPABASE_URL}/storage/v1/object/public/${data.fullPath}`
+  $.teach({ [target.name]: url }, mergeProfile)
+}
+
+function mergeProfile(state, payload) {
+  return {
+    ...state,
+    profile: {
+      ...state.profile,
+      ...payload
+    },
+    upload: {
+      ...state.upload,
+      ...payload
+    }
+  }
+}
 
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
@@ -239,6 +289,10 @@ $.when('submit', '[name="authenticate"]', async (event) => {
 $.when('submit', '[action="edit-profile"]', async event => {
   event.preventDefault()
 
+  $.teach({
+    message: null
+  })
+
   const { nick, bio, color } = event.target
   const { picture, banner } = $.learn().upload
 
@@ -264,8 +318,8 @@ $.when('submit', '[action="edit-profile"]', async event => {
       .select()
 
     const response = error
-      ? { error: error.message }
-      : { success: true, profile: data[0] }
+      ? { error: true, message: error.message  }
+      : { success: true, message: 'Profile updated successfully', profile: data[0] }
 
     $.teach(response)
   } catch(e) {
