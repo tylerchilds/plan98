@@ -556,17 +556,18 @@ $.style(`
   }
 
   & .app-title {
-    text-align: center;
+    text-align: left;
+    padding: 8px;
   }
 
   & .app-art {
   }
 
   & .app-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: end;
     gap: 1rem;
-    padding: 1rem;
+    padding: 8px;
   }
 
   & .app-actions :first-child {
@@ -589,9 +590,9 @@ $.style(`
 
   & [data-close],
   & [data-open] {
-    border: 1px solid rgba(0,0,0,.25);
-    background: rgba(0,0,0,.05);
-    color: rgba(0,0,0,1);
+    border: none;
+    background: white;
+    color: dodgerblue;
     position: absolute;
     top: 0;
     right: 0;
@@ -603,8 +604,8 @@ $.style(`
   & [data-close]:focus,
   & [data-open]:hover,
   & [data-open]:focus {
-    background: rgba(0,0,0,.5);
-    color: rgba(255,255,255,1);
+    background: dodgerblue;
+    color: white;
   }
 
   & .game,
