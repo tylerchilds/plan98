@@ -4,10 +4,10 @@ const getPost = (id) => {
   return new Promise(resolve => {
     resolve({
       id,
-      img: '/public/cdn/sillyz.computer/default-picture.png',
-      username: 'Silly Elf',
-      message: 'Hello World',
-      timestamp: new Date().toJSON()
+      icon: '/public/cdn/sillyz.computer/default-picture.png',
+      name: 'Silly Elf',
+      content: 'Hello World',
+      published: new Date().toJSON()
     })
   })
 }
@@ -16,19 +16,19 @@ const $ = elf('datapub-post')
 
 $.draw((target) => {
   query(target)
-  const { img, username, message, timestamp } = $.learn()
+  const { icon, name, content, published } = $.learn()
 
-  const date = new Date(timestamp)
+  const date = new Date(published)
   return `
     <div class="picture">
-      <img src="${img}" alt="Profile picture for ${username}" />
+      <img src="${icon}" alt="Profile picture for ${name}" />
     </div>
     <div class="post">
       <div class="post-username">
-        ${username}
+        ${name}
       </div>
       <div class="post-message">
-        ${message}
+        ${content}
       </div>
       <div class="post-date" data-tooltip="${date}">
         ${date.toLocaleString('en-US')}
