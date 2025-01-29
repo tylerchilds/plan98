@@ -102,6 +102,12 @@ $.draw((target) => {
         target.style.setProperty("--pan-y", `0`);
       }
     }
+
+    {
+      if(target.contains(document.activeElement)) {
+        document.activeElement.blur()
+      }
+    }
   }
 })
 
@@ -394,8 +400,6 @@ $.style(`
 
   & .tile {
     grid-area: tile;
-    display: grid;
-    place-content: center;
     --tile-x: 0;
     --tile-y: 0;
     transform: translate(var(--tile-x), var(--tile-y));
@@ -448,6 +452,15 @@ $.style(`
     width: 100%;
     max-width: 320px;
     margin: auto;
+    border: none;
+    border: 1px solid rgba(255,255,255,.2);
+    background: rgba(255,255,255,.15);
+    border-radius: 2px;
+    display: grid;
+    place-content: center;
+    height: 34px;
+    font-size: 16px;
+    color: white;
   }
 
   @media (min-width: 400px) {
