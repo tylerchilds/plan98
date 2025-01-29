@@ -1,1 +1,7 @@
-0:1
+<button
+text: North
+src: '1:-1'
+
+<button
+text: South
+src: '1:1'

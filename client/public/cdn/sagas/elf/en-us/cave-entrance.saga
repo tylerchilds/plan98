@@ -1,0 +1,5 @@
+Cave tunnel diverges, both ways darker, deeper.
+
+<div
+class: action-row
+html: <button src="-1:-1">Leave</button><button src="-2:-2">North</button><button src="-3:-2">West</button>

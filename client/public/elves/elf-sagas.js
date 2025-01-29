@@ -19,6 +19,14 @@ const elfSagas = {
   '-1:0': {
     url: '/public/cdn/sagas/elf/en-us/-1:0.saga'
   },
+
+  '-1:-1': {
+    url: '/public/cdn/sagas/elf/en-us/impass-mountain.saga'
+  },
+
+  '-2:-1': {
+    url: '/public/cdn/sagas/elf/en-us/cave-entrance.saga'
+  }
 }
 
 const $ = elf('elf-sagas', {
@@ -49,8 +57,8 @@ $.draw((target) => {
       if(topLeft || bottomRight || bottomLeft || topRight) {
         return ''
       }
-
-      const saga = sagas[`${row}:${column}`] || {}
+      const key = `${column}:${row}`
+      const saga = sagas[key] || {}
       return `
         <div class="tile ${tilePosition(xIndex,yIndex)}" data-id="${target.id}">
           ${saga.content || ''}
@@ -75,7 +83,7 @@ $.draw((target) => {
       const instance = instances[target.id]
       if(instance) {
         const { x, y, sagas } = instance
-        if(!sagas[`${y}:${x}`]) {
+        if(!sagas[`${x}:${y}`]) {
           updateSaga({ x, y, id: target.id }, { content: `${x}, ${y}` })
         }
       }
@@ -132,6 +140,13 @@ function tilePosition(xIndex, yIndex) {
 
   return classes.join(' ')
 }
+
+$.when('click', '.action-row button', (event) => {
+  const { src } = event.target
+  const { id } = event.target.closest('[data-id]').dataset
+  const [x,y] = src.split(':')
+  slide(id, parseInt(x), parseInt(y))
+})
 
 $.when('pointerdown', '.tile', function(e) {
   event.preventDefault()
@@ -264,6 +279,18 @@ self.addEventListener('keydown', (event) => {
   }
 })
 
+function slide(id, x, y) {
+  const { instances } = $.learn()
+
+  if(!instances[id]) return
+  const { sagas } = instances[id]
+
+  if(!sagas[`${x}:${y}`]) return
+
+  updateInstance({ id }, { x, y })
+}
+
+
 function slideLeft(id) {
   const { instances } = $.learn()
 
@@ -377,6 +404,14 @@ $.style(`
     height: 100%;
   }
 
+  & .tile > * {
+    pointer-events: none;
+  }
+
+  & .tile .action-row button {
+    pointer-events: all;
+  }
+
   & .tile.left {
     --tile-x: -100%;
   }
@@ -396,6 +431,36 @@ $.style(`
   & .tile.center {
     z-index: 2;
   }
+
+  & .action-row {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    gap: .5rem;
+    padding: .5rem;
+  }
+
+  & .action-row button {
+    display: block;
+    width: 100%;
+    max-width: 320px;
+    margin: auto;
+  }
+
+  @media (min-width: 400px) {
+    & .action-row {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
+    }
+
+    & .action-row :last-child {
+      place-self: end;
+    }
+  }
+
 `)
 
 const lastFrame = {

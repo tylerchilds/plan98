@@ -1,1 +1,5 @@
-ok
+You awake in a field
+
+<div
+class: action-row
+html: <button src="0:-1">North</button><button src="1:0">East</button><button src="-1:0">West</button><button src="0:1">South</button>

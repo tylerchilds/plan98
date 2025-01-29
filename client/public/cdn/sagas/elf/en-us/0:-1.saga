@@ -1,1 +1,5 @@
-0:-1
+Impass mountain is west. Not worth.
+
+<div
+class: action-row
+html: <button src="0:-2">North</button><button src="0:0">South</button>
