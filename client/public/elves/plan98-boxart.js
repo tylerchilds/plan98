@@ -16,7 +16,7 @@ $.draw((target) => {
   const subtitle = target.getAttribute('subtitle') || 'Flying Disk Operating System'
 
   if($.learn().started) {
-    return `<slide-os></slide-os>`
+    return `<about-sillyz></about-sillyz>`
   }
 
   return `
@@ -82,7 +82,7 @@ $.style(`
     margin: auto;
     height: 100%;
     position: relative;
-    overflow: hidden;
+    overflow: auto;
   }
 
   &:not([data-started="true"])::before {

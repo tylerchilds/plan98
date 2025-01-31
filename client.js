@@ -315,7 +315,6 @@ async function router(request, context) {
     }
   }
 
-
   if(pathname.startsWith('/app/')) {
     const [app] = pathname.split('/app/')[1].split('/')
     const file = await showApp(request, app, business)
@@ -463,8 +462,19 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
     return new Response(xml, { headers });
   }
 
+  if(pathname === '/about') {
+    const file = await showApp(request, 'about-sillyz', business)
+
+    if(file) {
+      return new Response(file, {
+        headers,
+        status: statusCode
+      })
+    }
+  }
+
   if(pathname === '/plan98/about') {
-    return about(headers, request)
+    return fileSystem(headers, request)
   }
 
   if(pathname === '/plan98/mp3s') {
@@ -598,7 +608,7 @@ async function remix(request, { src, tag, attributes=''}, { endOfHead }) {
 }
 
 
-async function about(headers, request) {
+async function fileSystem(headers, request) {
   const { search } = new URL(request.url);
   const parameters = new URLSearchParams(search)
   const world = parameters.get('world')
