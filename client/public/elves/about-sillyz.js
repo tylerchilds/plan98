@@ -226,12 +226,12 @@ A login component for connecting to an end to end secure system
 * [Secure Authentication: Demo](/app/secure-authentication)
 * [Secure Authentication: Source](/app/code-module?src=/public/elves/secure-authentication.js)
 
-### Secure Email
+### Secure Mail
 
 Email, but only when you have a JMAP compatible account and a way to provide it to the system. Experimental.
 
-* [Secure Email: Demo](/app/secure-email)
-* [Secure Email: Source](/app/code-module?src=/public/elves/secure-email.js)
+* [Secure Mail: Demo](/app/secure-mail)
+* [Secure Mail: Source](/app/code-module?src=/public/elves/secure-mail.js)
 
 ### Main Quest
 
@@ -247,12 +247,12 @@ No operating system is complete without being able to display files of arbitrary
 * [Media Plexer: Demo](/app/media-plexer)
 * [Media Plexer: Source](/app/code-module?src=/public/elves/media-plexer.js)
 
-### Metamask Wallet
+### Wallet Metamask
 
-Metamask is a neat web3 wallet like thing. This is a way to login.
+Wallet Metamask is a neat web3 wallet like thing. This is a way to login.
 
-* [Metamask Wallet: Demo](/app/metamask-wallet)
-* [Metamask Wallet: Source](/app/code-module?src=/public/elves/metamask-wallet.js)
+* [Wallet Metamask: Demo](/app/wallet-metamask)
+* [Wallet Metamask: Source](/app/code-module?src=/public/elves/wallet-metamask.js)
 
 ### Mind Chess
 
@@ -323,7 +323,7 @@ A component for rendering a QR Code
 A payment mechanism through a QR Code
 
 * [QR Pay: Demo](/app/qr-pay)
-* [QR Code: Source](/app/code-module?src=/public/elves/qr-pay.js)
+* [QR Pay: Source](/app/code-module?src=/public/elves/qr-pay.js)
 
 ### Payment Dashbaord
 
