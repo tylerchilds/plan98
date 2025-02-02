@@ -413,7 +413,9 @@ $.when('click', '[data-publish]', (event) => {
     }).then((response) => response.text()).then((result) => {
       try {
         const data = JSON.parse(result)
-        toast(data.error ? 'Access Denied' : 'Saved!')
+        data.error
+          ? toast('Are you even allowed to save, bro?', { type: 'error' })
+          : toast('File saved!', { type: 'success' })
       } catch(e) {
         toast(result)
       }

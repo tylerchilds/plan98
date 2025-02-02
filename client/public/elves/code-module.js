@@ -53,7 +53,9 @@ $.when('click', '.publish', (event) => {
     })
   }).then((response) => response.text()).then((result) => {
     const data = JSON.parse(result)
-    toast(data.error ? 'bad' : 'good')
+    data.error
+      ? toast('Are you even allowed to save, bro?', { type: 'error' })
+      : toast('File saved!', { type: 'success' })
   })
 })
 
