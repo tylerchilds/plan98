@@ -99,6 +99,18 @@ $.draw(() => {
 })
 
 const jsonrpc = {
+  'up': (params) => {
+    const { index, messages } = $.learn()
+    $.teach({
+      index: mod((index - 1), Object.keys(messages).length)
+    })
+  },
+  'down': (params) => {
+    const { index, messages } = $.learn()
+    $.teach({
+      index: mod((index + 1), Object.keys(messages).length)
+    })
+  },
   'a': (params) => {
     const { index, messages } = $.learn()
     $.teach({
@@ -220,6 +232,7 @@ $.style(`
     display: block;
     height: 100%;
     background: black;
+    overflow: auto;
   }
 
   & .message {
@@ -277,3 +290,8 @@ $.style(`
     margin-bottom: 4px;
   }
 `)
+
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
+
