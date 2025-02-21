@@ -113,7 +113,7 @@ function debounceSpam(code, timeout, callback) {
 
 const jsonrpc = {
   'up': (params) => {
-    debounceSpam('up', 250, () => {
+    debounceSpam('up', 150, () => {
       const { index, messages } = $.learn()
       $.teach({
         index: mod((index - 1), Object.keys(messages).length)
@@ -121,7 +121,7 @@ const jsonrpc = {
     })
   },
   'down': (params) => {
-    debounceSpam('down', 250, () => {
+    debounceSpam('down', 150, () => {
       const { index, messages } = $.learn()
       $.teach({
         index: mod((index + 1), Object.keys(messages).length)
@@ -129,7 +129,7 @@ const jsonrpc = {
     })
   },
   'a': (params) => {
-    debounceSpam('a', 250, () => {
+    debounceSpam('a', 150, () => {
       const { index, messages } = $.learn()
       $.teach({
         index: (index + 1) % Object.keys(messages).length
@@ -137,7 +137,7 @@ const jsonrpc = {
     })
   },
   'b': (params) => {
-    debounceSpam('b', 250, () => {
+    debounceSpam('b', 150, () => {
       const { index, messages } = $.learn()
       const id = Object.keys(messages)[index]
       const { state, responses, focusedResponseIndex=0 } = messages[id]
