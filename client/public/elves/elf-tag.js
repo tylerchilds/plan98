@@ -98,42 +98,63 @@ $.draw(() => {
   }
 })
 
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
 const jsonrpc = {
   'up': (params) => {
-    const { index, messages } = $.learn()
-    $.teach({
-      index: mod((index - 1), Object.keys(messages).length)
+    debounceSpam('up', 250, () => {
+      const { index, messages } = $.learn()
+      $.teach({
+        index: mod((index - 1), Object.keys(messages).length)
+      })
     })
   },
   'down': (params) => {
-    const { index, messages } = $.learn()
-    $.teach({
-      index: mod((index + 1), Object.keys(messages).length)
+    debounceSpam('down', 250, () => {
+      const { index, messages } = $.learn()
+      $.teach({
+        index: mod((index + 1), Object.keys(messages).length)
+      })
     })
   },
   'a': (params) => {
-    const { index, messages } = $.learn()
-    $.teach({
-      index: (index + 1) % Object.keys(messages).length
+    debounceSpam('a', 250, () => {
+      const { index, messages } = $.learn()
+      $.teach({
+        index: (index + 1) % Object.keys(messages).length
+      })
     })
   },
   'b': (params) => {
-    const { index, messages } = $.learn()
-    const id = Object.keys(messages)[index]
-    const { state, responses, focusedResponseIndex=0 } = messages[id]
+    debounceSpam('b', 250, () => {
+      const { index, messages } = $.learn()
+      const id = Object.keys(messages)[index]
+      const { state, responses, focusedResponseIndex=0 } = messages[id]
 
-    if(params.type === 'click') {
-      $.teach({ id }, messageResponseIndexReducer)
-    }
+      if(params.type === 'click') {
+        $.teach({ id }, messageResponseIndexReducer)
+      }
 
-    if(params.type === 'hold') {
-      const response = responses[focusedResponseIndex]
-      const newState = state === 'unacknowledged'
-        ? response
-        : 'unacknowledged'
+      if(params.type === 'hold') {
+        const response = responses[focusedResponseIndex]
+        const newState = state === 'unacknowledged'
+          ? response
+          : 'unacknowledged'
 
-      $.teach({ id, newState }, messageStateReducer)
-    }
+        $.teach({ id, newState }, messageStateReducer)
+      }
+    })
   },
 }
 
@@ -232,7 +253,6 @@ $.style(`
     display: block;
     height: 100%;
     background: black;
-    overflow: auto;
   }
 
   & .message {

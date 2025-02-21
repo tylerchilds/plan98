@@ -1,3 +1,4 @@
+import { checkButton, checkAxis } from './debug-gamepads.js'
 import elf from '@silly/elf'
 
 const $ = elf('paper-pocket', {
@@ -5,9 +6,9 @@ const $ = elf('paper-pocket', {
 })
 
 $.draw((target) => {
-  const { rom, light } = $.learn()
+  const { rom, fullScreen } = $.learn()
   return `
-    <div class="watch ${light?'light':''}">
+    <div class="chrome ${fullScreen?'full':''}">
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
@@ -15,7 +16,9 @@ $.draw((target) => {
               PaperPocket
             </button>
           </div>
-          <${rom}></${rom}>
+          <div class="app">
+            <${rom}></${rom}>
+          </div>
           <div class="menu-items">
             <button key="options" class="clear" data-press="options">
               Options
@@ -51,14 +54,33 @@ $.draw((target) => {
   `
 }, {
   beforeUpdate: (target) => {},
-  afterUpdate: (target) => {},
+  afterUpdate: (target) => {
+    {
+      recoverElves(target, 'elf-tag')
+      recoverElves(target, 'sl-icon')
+    }
+
+  },
 })
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
+
 
 const actions = {
   A: (target, type) => {
     const { rom } = $.learn()
     const node = target.querySelector(rom)
-    console.log(rom, type)
     notification(node, 'a', type)
   },
   B: (target, type) => {
@@ -112,14 +134,26 @@ function notification(node, method, type) {
   }
 }
 
+const intervals = {}
+
 $.when('pointerdown', '[data-press]', (event) => {
   const { press } = event.target.dataset
   const action = actions[press]
 
   if(action) {
     action(event.target.closest($.link), 'click')
+
+    intervals[press] = setInterval(() => {
+      action(event.target.closest($.link), 'click')
+    }, 1000/60)
   }
 })
+
+$.when('pointerup', '[data-press]', (event) => {
+  const { press } = event.target.dataset
+  clearInterval(intervals[press])
+})
+
 
 self.addEventListener('keydown', (event) => {
   const node = document.querySelector($.link)
@@ -140,6 +174,116 @@ self.addEventListener('keydown', (event) => {
   }
 })
 
+let lastFrame = {
+  a: false,
+  b: false,
+  x: false,
+  y: false,
+  lb: false,
+  rb: false,
+  lt: false,
+  rt: false,
+  select: false,
+  start: false,
+  ls: false,
+  rs: false,
+  down: false,
+  up: false,
+  left: false,
+  right: false,
+  os: false
+}
+
+function gameLoop(time) {
+  const node = document.querySelector($.link)
+
+  if(node) {
+
+    const player = {
+      a: checkButton(0, 0),
+      b: checkButton(0, 1),
+      x: checkButton(0, 3),
+      y: checkButton(0, 2),
+      lb: checkButton(0, 4),
+      rb: checkButton(0, 5),
+      lt: checkButton(0, 6),
+      rt: checkButton(0, 7),
+      select: checkButton(0, 8),
+      start: checkButton(0, 9),
+      ls: checkButton(0, 10),
+      rs: checkButton(0, 11),
+      up: checkButton(0, 12),
+      down: checkButton(0, 13),
+      left: checkButton(0, 14),
+      right: checkButton(0, 15),
+      os: checkButton(0, 16),
+    }
+
+    if(player.a) {
+      actions.A(node, 'click')
+    }
+
+    if(player.b) {
+      actions.B(node, 'click')
+    }
+
+    if(player.x) {
+      actions.X(node, 'click')
+    }
+
+    if(player.y) {
+      actions.Y(node, 'click')
+    }
+
+    if(player.lb) {
+    }
+
+    if(player.rb) {
+    }
+
+    if(player.lt) {
+    }
+
+    if(player.rt) {
+    }
+
+    if(player.up) {
+      actions.UP(node, 'click')
+    }
+
+    if(player.down) {
+      actions.DOWN(node, 'click')
+    }
+
+    if(player.left) {
+      actions.LEFT(node, 'click')
+    }
+
+    if(player.right) {
+      actions.RIGHT(node, 'click')
+    }
+
+    if(player.os) {
+      if(!lastFrame.os) {
+        toggleMode()
+      }
+    }
+
+    lastFrame = player
+  }
+
+  requestAnimationFrame(gameLoop)
+}
+
+gameLoop()
+
+
+$.when('click', '[data-press="OS"]', toggleMode)
+function toggleMode (event) {
+  const { fullScreen } = $.learn()
+  $.teach({ fullScreen: !fullScreen })
+}
+
 $.style(`
   & {
     display: block;
@@ -153,7 +297,7 @@ $.style(`
     touch-action: none;
   }
 
-  & .watch {
+  & .chrome {
     display: grid;
     height: 100%;
     grid-template-rows: 1fr auto;
@@ -164,12 +308,17 @@ $.style(`
     padding: 16px;
   }
 
+  & .app {
+    overflow: auto;
+  }
+
   & .viewport {
     background: black;
     padding: 0 16px;
     display: grid;
     grid-template-rows: auto 1fr auto;
     max-height: 100%;
+    height: 100%;
   }
 
   & .yellow {
@@ -242,6 +391,21 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
+  & .chrome.full .widget-frame {
+    padding: 0;
+  }
+
+  & .chrome.full .viewport {
+    padding: 0;
+  }
+
+  & .chrome.full .controller {
+    display: none;
+  }
+
+  & .chrome.full .menu-items {
+    display: none;
+  }
 
   & .controller {
     text-align: center;
