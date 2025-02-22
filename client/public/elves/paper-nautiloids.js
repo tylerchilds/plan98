@@ -439,26 +439,6 @@ function clearPointer() {
   })
 }
 
-self.addEventListener('keydown', (event) => {
-  const node = document.querySelector($.link)
-
-  if(!node) return
-  const id = node.id
-
-  if (event.keyCode==37) {
-    slideLeft(id)
-  }
-  if (event.keyCode==38) {
-    slideUp(id)
-  }
-  if (event.keyCode==39) {
-    slideRight(id)
-  }
-  if (event.keyCode==40) {
-    slideDown(id)
-  }
-})
-
 function slideLeft(id) {
   const { instances } = $.learn()
 
@@ -729,7 +709,6 @@ $.when('json-rpc', (event) => {
 })
 
 const spamCache = {}
-const toggleCache = {}
 
 function debounceSpam(code, timeout, callback) {
   if(spamCache[code]) return
@@ -742,6 +721,7 @@ function debounceSpam(code, timeout, callback) {
   }, timeout)
 }
 
+const toggleCache = {}
 function toggleSpam(code, value, callback) {
   if(!toggleCache[code] && value === 1) {
     callback()
@@ -856,7 +836,6 @@ $.when('click', '[data-flag]', (event) => {
     const nextFlag = !flagged
 
     const flagCount = nextFlag ? totalFlags + 1 : totalFlags - 1
-    console.log(flagCount, maxFlags)
     updateBox({ id, x: column, y: row }, { flagged: nextFlag })
 
     updateInstance({ id }, { totalFlags: flagCount })
@@ -907,8 +886,6 @@ function victoryCondition(id) {
 
   const allMimesFlagged = allMimes.every(x => boxes[x].flagged)
   const nonMimesRevealed = nonMimes.every(x => boxes[x].revealed)
-
-  console.log(allMimes)
 
   if(allMimesFlagged || nonMimesRevealed) {
     updateInstance({ id }, { finished: true, won: true })

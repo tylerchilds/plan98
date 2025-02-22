@@ -92,6 +92,26 @@ function standardAction(code) {
   }
 }
 
+const buttons = {
+  a: 0,
+  b: 1,
+  x: 3,
+  y: 2,
+  lb: 4,
+  rb: 5,
+  lt: 6,
+  rt: 7,
+  select: 8,
+  start: 9,
+  ls: 10,
+  rs: 11,
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  os: 16
+}
+
 const actions = {
   a: standardAction('a'),
   b: standardAction('b'),
@@ -133,64 +153,62 @@ $.when('pointerup', '[data-press]', (event) => {
   overrideButton(0, buttons[press], 0)
 })
 
+const keyFlips = {
+  Meta: keyFlipper(0, buttons.os),
+  Enter: keyFlipper(0, buttons.start),
+  Backspace: keyFlipper(0, buttons.select),
+  ArrowUp: keyFlipper(0, buttons.up),
+  w: keyFlipper(0, buttons.up),
+  W: keyFlipper(0, buttons.up),
+  ArrowDown: keyFlipper(0, buttons.down),
+  S: keyFlipper(0, buttons.down),
+  s: keyFlipper(0, buttons.down),
+  ArrowRight: keyFlipper(0, buttons.right),
+  d: keyFlipper(0, buttons.right),
+  D: keyFlipper(0, buttons.right),
+  ArrowLeft: keyFlipper(0, buttons.left),
+  a: keyFlipper(0, buttons.left),
+  A: keyFlipper(0, buttons.left),
+  j: keyFlipper(0, buttons.a),
+  J: keyFlipper(0, buttons.a),
+  k: keyFlipper(0, buttons.b),
+  K: keyFlipper(0, buttons.b),
+  l: keyFlipper(0, buttons.x),
+  L: keyFlipper(0, buttons.x),
+  h: keyFlipper(0, buttons.y),
+  H: keyFlipper(0, buttons.y),
+  u: keyFlipper(0, buttons.lb),
+  U: keyFlipper(0, buttons.lb),
+  i: keyFlipper(0, buttons.rb),
+  I: keyFlipper(0, buttons.rb),
+  y: keyFlipper(0, buttons.lt),
+  Y: keyFlipper(0, buttons.lt),
+  o: keyFlipper(0, buttons.rt),
+  O: keyFlipper(0, buttons.rt),
+  q: keyFlipper(0, buttons.ls),
+  Q: keyFlipper(0, buttons.ls),
+  e: keyFlipper(0, buttons.rs),
+  E: keyFlipper(0, buttons.rs),
+}
+
+function keyFlipper(slot, button) {
+  return (value) => {
+    overrideButton(slot, button, value)
+  }
+}
+
 
 self.addEventListener('keydown', (event) => {
-  const node = document.querySelector($.link)
-
-  if(!node) return
-
-  if (event.keyCode==37) {
-    overrideButton(0, buttons.left, 1)
-  }
-  if (event.keyCode==38) {
-    overrideButton(0, buttons.up, 1)
-  }
-  if (event.keyCode==39) {
-    overrideButton(0, buttons.right, 1)
-  }
-  if (event.keyCode==40) {
-    overrideButton(0, buttons.down, 1)
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](1)
   }
 })
 
 self.addEventListener('keyup', (event) => {
-  const node = document.querySelector($.link)
-
-  if(!node) return
-
-  if (event.keyCode==37) {
-    overrideButton(0, buttons.left, 0)
-  }
-  if (event.keyCode==38) {
-    overrideButton(0, buttons.up, 0)
-  }
-  if (event.keyCode==39) {
-    overrideButton(0, buttons.right, 0)
-  }
-  if (event.keyCode==40) {
-    overrideButton(0, buttons.down, 0)
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](0)
   }
 })
-
-let lastFrame = {
-  a: false,
-  b: false,
-  x: false,
-  y: false,
-  lb: false,
-  rb: false,
-  lt: false,
-  rt: false,
-  select: false,
-  start: false,
-  ls: false,
-  rs: false,
-  down: false,
-  up: false,
-  left: false,
-  right: false,
-  os: false
-}
 
 function standardFire(player, node, code) {
   if(player[code]) {
@@ -204,7 +222,6 @@ function standardFire(player, node, code) {
       value: 0
     })
   }
-
 }
 
 const toggleCache = {}
@@ -214,26 +231,6 @@ function toggleSpam(code, value, callback) {
   }
 
   toggleCache[code] = value
-}
-
-const buttons = {
-  a: 0,
-  b: 1,
-  x: 3,
-  y: 2,
-  lb: 4,
-  rb: 5,
-  lt: 6,
-  rt: 7,
-  select: 8,
-  start: 9,
-  ls: 10,
-  rs: 11,
-  up: 12,
-  down: 13,
-  left: 14,
-  right: 15,
-  os: 16
 }
 
 function player1(code) {
@@ -284,8 +281,6 @@ function gameLoop(time) {
     toggleSpam('os', player.os, () => {
       toggleMode()
     })
-
-    lastFrame = player
   }
 
   requestAnimationFrame(gameLoop)
@@ -293,7 +288,6 @@ function gameLoop(time) {
 
 gameLoop()
 
-$.when('click', '[data-press="os"]', toggleMode)
 function toggleMode (event) {
   const { fullScreen } = $.learn()
   $.teach({ fullScreen: !fullScreen })

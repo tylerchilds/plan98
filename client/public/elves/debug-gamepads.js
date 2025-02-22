@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 const controllers = {};
 
 const initialState = {
-  gamepads: []
+  gamepads: [{buttons:[], axes: []}]
 }
 
 const $ = elf('debug-gamepads', initialState)
