@@ -87,10 +87,15 @@ export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
   store.set(link, knowledge, nuance)
 }
 
-export function when(link1, type, link2, callback) {
-  const link = `${link1} ${link2}`
-  insight('elf:when:'+type, link)
-  listen.call(this, type, link, callback)
+export function when(link, type, arg2, callback) {
+  if(typeof arg2 === 'function') {
+    insight('elf:when:'+type, link)
+    listen.call(this, type, link, arg2)
+  } else {
+    const nested = `${link} ${arg2}`
+    insight('elf:when:'+type, nested)
+    listen.call(this, type, nested, callback)
+  }
 }
 
 export default function elf(link, initialState = {}) {

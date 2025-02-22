@@ -2,6 +2,7 @@ import { checkButton, checkAxis } from './debug-gamepads.js'
 import elf from '@silly/elf'
 
 const $ = elf('paper-pocket', {
+  fullScreen: true,
   rom: 'elf-tag'
 })
 
@@ -12,7 +13,7 @@ $.draw((target) => {
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
-            <button key="os" class="clear" data-press="OS">
+            <button key="os" class="clear" data-press="os">
               PaperPocket
             </button>
           </div>
@@ -20,7 +21,7 @@ $.draw((target) => {
             <${rom}></${rom}>
           </div>
           <div class="menu-items">
-            <button key="options" class="clear" data-press="options">
+            <button key="options" class="clear" data-press="select">
               Options
             </button>
             <button key="start" class="clear" data-press="start">
@@ -32,20 +33,20 @@ $.draw((target) => {
 
       <div class="controller">
         <fieldset class="gamepad-grid" tab-index="1">
-          <button key="a" class="green" data-press="A">A</button>
-          <button key="b" class="red" data-press="B">B</button>
-          <button key="x" class="blue" data-press="X">X</button>
-          <button key="y" class="yellow" data-press="Y">Y</button>
-          <button key="up" class="gray" data-press="UP">
+          <button key="a" class="green" data-press="a">A</button>
+          <button key="b" class="red" data-press="b">B</button>
+          <button key="x" class="blue" data-press="x">X</button>
+          <button key="y" class="yellow" data-press="y">Y</button>
+          <button key="up" class="gray" data-press="up">
             <sl-icon name="caret-up-fill"></sl-icon>
           </button>
-          <button key="down" class="gray" data-press="DOWN">
+          <button key="down" class="gray" data-press="down">
             <sl-icon name="caret-down-fill"></sl-icon>
           </button>
-          <button key="left" class="gray" data-press="LEFT">
+          <button key="left" class="gray" data-press="left">
             <sl-icon name="caret-left-fill"></sl-icon>
           </button>
-          <button key="right" class="gray" data-press="RIGHT">
+          <button key="right" class="gray" data-press="right">
             <sl-icon name="caret-right-fill"></sl-icon>
           </button>
         </fieldset>
@@ -53,13 +54,21 @@ $.draw((target) => {
     </div>
   `
 }, {
-  beforeUpdate: (target) => {},
+  beforeUpdate: (target) => {
+    {
+      if(!target.mounted) {
+        target.mounted = true
+        const rom = target.getAttribute('rom')
+        if(rom) $.teach({ rom })
+      }
+    }
+  },
   afterUpdate: (target) => {
     {
-      recoverElves(target, 'elf-tag')
+      const { rom } = $.learn()
+      recoverElves(target, rom)
       recoverElves(target, 'sl-icon')
     }
-
   },
 })
 
@@ -75,60 +84,40 @@ function recoverElves(target, tag) {
   })
 }
 
-
-
-const actions = {
-  A: (target, type) => {
+function standardAction(code) {
+  return (target, params) => {
     const { rom } = $.learn()
     const node = target.querySelector(rom)
-    notification(node, 'a', type)
-  },
-  B: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'b', type)
-  },
-  X: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'x', type)
-  },
-  Y: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'y', type)
-  },
-  UP: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'up', type)
-  },
-  DOWN: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'down', type)
-  },
-  LEFT: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'left', type)
-  },
-  RIGHT: (target, type) => {
-    const { rom } = $.learn()
-    const node = target.querySelector(rom)
-    notification(node, 'right', type)
-  },
+    notification(node, code, params)
+  }
 }
 
-function notification(node, method, type) {
+const actions = {
+  a: standardAction('a'),
+  b: standardAction('b'),
+  x: standardAction('x'),
+  y: standardAction('y'),
+  lb: standardAction('lb'),
+  rb: standardAction('rb'),
+  lt: standardAction('lt'),
+  rt: standardAction('rt'),
+  ls: standardAction('ls'),
+  rs: standardAction('rs'),
+  select: standardAction('select'),
+  start: standardAction('start'),
+  up: standardAction('up'),
+  down: standardAction('down'),
+  left: standardAction('left'),
+  right: standardAction('right'),
+}
+
+function notification(node, method, params) {
   if(node) {
     node.dispatchEvent(new CustomEvent('json-rpc', {
       detail: {
         jsonrpc: "2.0",
         method: method,
-        params: {
-          type
-        }
+        params
       }
     }))
   }
@@ -141,10 +130,16 @@ $.when('pointerdown', '[data-press]', (event) => {
   const action = actions[press]
 
   if(action) {
-    action(event.target.closest($.link), 'click')
+    action(event.target.closest($.link), {
+      type: 'click',
+      value: 1
+    })
 
     intervals[press] = setInterval(() => {
-      action(event.target.closest($.link), 'click')
+      action(event.target.closest($.link), {
+        type: 'click',
+        value: 1
+      })
     }, 1000/60)
   }
 })
@@ -161,16 +156,28 @@ self.addEventListener('keydown', (event) => {
   if(!node) return
 
   if (event.keyCode==37) {
-    actions.LEFT(node, 'click')
+    actions.left(node, {
+      type: 'click',
+      value: 1
+    })
   }
   if (event.keyCode==38) {
-    actions.UP(node, 'click')
+    actions.up(node,{
+      type: 'click',
+      value: 1
+    })
   }
   if (event.keyCode==39) {
-    actions.RIGHT(node, 'click')
+    actions.right(node, {
+      type: 'click',
+      value: 1
+    })
   }
   if (event.keyCode==40) {
-    actions.DOWN(node, 'click')
+    actions.down(node, {
+      type: 'click',
+      value: 1
+    })
   }
 })
 
@@ -192,6 +199,21 @@ let lastFrame = {
   left: false,
   right: false,
   os: false
+}
+
+function standardFire(player, node, code) {
+  if(player[code]) {
+    actions[code](node, {
+      type: 'click',
+      value: 1
+    })
+  } else {
+    actions[code](node, {
+      type: 'click',
+      value: 0
+    })
+  }
+
 }
 
 function gameLoop(time) {
@@ -219,49 +241,22 @@ function gameLoop(time) {
       os: checkButton(0, 16),
     }
 
-    if(player.a) {
-      actions.A(node, 'click')
-    }
-
-    if(player.b) {
-      actions.B(node, 'click')
-    }
-
-    if(player.x) {
-      actions.X(node, 'click')
-    }
-
-    if(player.y) {
-      actions.Y(node, 'click')
-    }
-
-    if(player.lb) {
-    }
-
-    if(player.rb) {
-    }
-
-    if(player.lt) {
-    }
-
-    if(player.rt) {
-    }
-
-    if(player.up) {
-      actions.UP(node, 'click')
-    }
-
-    if(player.down) {
-      actions.DOWN(node, 'click')
-    }
-
-    if(player.left) {
-      actions.LEFT(node, 'click')
-    }
-
-    if(player.right) {
-      actions.RIGHT(node, 'click')
-    }
+    standardFire(player, node, 'a')
+    standardFire(player, node, 'b')
+    standardFire(player, node, 'x')
+    standardFire(player, node, 'y')
+    standardFire(player, node, 'lb')
+    standardFire(player, node, 'rb')
+    standardFire(player, node, 'lt')
+    standardFire(player, node, 'rt')
+    standardFire(player, node, 'ls')
+    standardFire(player, node, 'select')
+    standardFire(player, node, 'start')
+    standardFire(player, node, 'rs')
+    standardFire(player, node, 'up')
+    standardFire(player, node, 'down')
+    standardFire(player, node, 'left')
+    standardFire(player, node, 'right')
 
     if(player.os) {
       if(!lastFrame.os) {
@@ -277,8 +272,7 @@ function gameLoop(time) {
 
 gameLoop()
 
-
-$.when('click', '[data-press="OS"]', toggleMode)
+$.when('click', '[data-press="os"]', toggleMode)
 function toggleMode (event) {
   const { fullScreen } = $.learn()
   $.teach({ fullScreen: !fullScreen })
@@ -440,39 +434,39 @@ $.style(`
     border-radius: 100%;
   }
 
-  & [data-press="A"] {
+  & [data-press="a"] {
     grid-area: a;
   }
 
-  & [data-press="B"] {
+  & [data-press="b"] {
     grid-area: b;
   }
 
-  & [data-press="X"] {
+  & [data-press="x"] {
     grid-area: x;
     transform: translateX(50%);
   }
 
-  & [data-press="Y"] {
+  & [data-press="y"] {
     grid-area: y;
     transform: translateX(-50%);
   }
 
-  & [data-press="UP"] {
+  & [data-press="up"] {
     grid-area: up;
     transform: translateY(5px);
   }
 
-  & [data-press="LEFT"] {
+  & [data-press="left"] {
     grid-area: left;
     transform: translateX(5px);
   }
 
-  & [data-press="DOWN"] {
+  & [data-press="down"] {
     grid-area: down;
   }
 
-  & [data-press="RIGHT"] {
+  & [data-press="right"] {
     grid-area: right;
     transform: translateX(-5px);
   }

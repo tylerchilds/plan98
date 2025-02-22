@@ -187,7 +187,7 @@ function messageStateReducer(state, payload) {
   }
 }
 
-$.when('json-rpc', '', (event) => {
+$.when('json-rpc', (event) => {
   const { method, params } = event.detail
 
   if(jsonrpc[method]) {
