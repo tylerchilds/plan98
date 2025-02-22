@@ -238,55 +238,67 @@ function player1(code) {
 }
 
 function gameLoop(time) {
-  const node = document.querySelector($.link)
+  const { paused } = $.learn()
 
-  if(node) {
-    const player = {
-      a: player1('a'),
-      b: player1('b'),
-      x: player1('x'),
-      y: player1('y'),
-      lb: player1('lb'),
-      rb: player1('rb'),
-      lt: player1('lt'),
-      rt: player1('rt'),
-      select: player1('select'),
-      start: player1('start'),
-      ls: player1('ls'),
-      rs: player1('rs'),
-      up: player1('up'),
-      down: player1('down'),
-      left: player1('left'),
-      right: player1('right'),
-      os: player1('os'),
+  if(!paused) {
+    const node = document.querySelector($.link)
+
+    if(node) {
+      const player = {
+        a: player1('a'),
+        b: player1('b'),
+        x: player1('x'),
+        y: player1('y'),
+        lb: player1('lb'),
+        rb: player1('rb'),
+        lt: player1('lt'),
+        rt: player1('rt'),
+        select: player1('select'),
+        start: player1('start'),
+        ls: player1('ls'),
+        rs: player1('rs'),
+        up: player1('up'),
+        down: player1('down'),
+        left: player1('left'),
+        right: player1('right'),
+        os: player1('os'),
+      }
+
+      standardFire(player, node, 'a')
+      standardFire(player, node, 'b')
+      standardFire(player, node, 'x')
+      standardFire(player, node, 'y')
+      standardFire(player, node, 'lb')
+      standardFire(player, node, 'rb')
+      standardFire(player, node, 'lt')
+      standardFire(player, node, 'rt')
+      standardFire(player, node, 'ls')
+      standardFire(player, node, 'select')
+      standardFire(player, node, 'start')
+      standardFire(player, node, 'rs')
+      standardFire(player, node, 'up')
+      standardFire(player, node, 'down')
+      standardFire(player, node, 'left')
+      standardFire(player, node, 'right')
+
+      toggleSpam('os', player.os, () => {
+        toggleMode()
+      })
     }
-
-    standardFire(player, node, 'a')
-    standardFire(player, node, 'b')
-    standardFire(player, node, 'x')
-    standardFire(player, node, 'y')
-    standardFire(player, node, 'lb')
-    standardFire(player, node, 'rb')
-    standardFire(player, node, 'lt')
-    standardFire(player, node, 'rt')
-    standardFire(player, node, 'ls')
-    standardFire(player, node, 'select')
-    standardFire(player, node, 'start')
-    standardFire(player, node, 'rs')
-    standardFire(player, node, 'up')
-    standardFire(player, node, 'down')
-    standardFire(player, node, 'left')
-    standardFire(player, node, 'right')
-
-    toggleSpam('os', player.os, () => {
-      toggleMode()
-    })
   }
 
   requestAnimationFrame(gameLoop)
 }
 
 gameLoop()
+
+export function pause() {
+  $.teach({ paused: true })
+}
+
+export function resume() {
+  $.teach({ paused: false })
+}
 
 function toggleMode (event) {
   const { fullScreen } = $.learn()
@@ -380,7 +392,7 @@ $.style(`
     border-radius: none;
     border-radius: 0;
     border: none;
-    padding: 8px 0;
+    padding: 8px 16px;
   }
 
   & .clear:hover,
@@ -488,6 +500,7 @@ $.style(`
 
   & .super-items {
     display: grid;
+    place-items: center;
   }
 
   & .super-items button {
@@ -498,5 +511,6 @@ $.style(`
   & .menu-items {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    place-items: center;
   }
 `)

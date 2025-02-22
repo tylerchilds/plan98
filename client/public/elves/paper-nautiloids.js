@@ -192,9 +192,7 @@ $.draw((target) => {
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
       </div>
-      <div class="information">
-        ${content(instance)}
-      </div>
+      <div class="information"></div>
     </div>
   `
 }, {
@@ -216,6 +214,15 @@ $.draw((target) => {
       } else {
         target.style.setProperty("--pan-x", `0`);
         target.style.setProperty("--pan-y", `0`);
+      }
+    }
+
+    {
+      const info = target.querySelector('.information')
+      if(info) {
+        const { instances } = $.learn()
+        const instance = instances[target.id]
+        info.innerHTML = content(instance)
       }
     }
   }
@@ -1023,84 +1030,6 @@ function pow(id, rows, columns, y, x, boxes) {
     }
   }
 }
-
-function reanimate(id, rows, columns, y, x, boxes) {
-  const minX = Math.max(0, x-1);
-  const maxX = Math.min(x+1, columns-1);
-  const minY = Math.max(0, y-1);
-  const maxY = Math.min(y+1, rows-1);
-
-  const soil = []
-  for(let a = minX; a <= maxX; a++) {
-    for(let b = minY; b <= maxY; b++) {
-      const { alive } = boxes[`${b}-${a}`]
-      if(!alive) {
-        soil.push([b,a])
-      }
-    }
-  }
-
-  if(soil.length === 0) return
-
-  const [b, a] = soil[Math.floor(Math.random() * soil.length)]
-  updateBox({ id, x: a, y: b }, { alive: true })
-}
-
-function life($, id) {
-  const { instances } = $.learn()
-  const { boxes, rows, columns } = instances[id]
-
-  const nextGenXboxes = Object.keys(boxes).reduce((all, box) => {
-    const { alive } = all[box]
-    let [y, x] = box.split('-')
-    y = parseInt(y)
-    x = parseInt(x)
-    const minX = Math.max(0, x-1);
-    const maxX = Math.min(x+1, columns-1);
-    const minY = Math.max(0, y-1);
-    const maxY = Math.min(y+1, rows-1);
-
-    let count = 0
-    for(let a = minX; a <= maxX; a++) {
-      for(let b = minY; b <= maxY; b++) {
-        const { alive } = boxes[`${b}-${a}`]
-        if(alive) {
-          count += 1
-        }
-      }
-    }
-
-    count = alive ? count : count - 1
-
-    if((count >= 2 && count <= 3)) {
-      all[box].alive = true
-    } else if(alive) {
-      all[box].alive = false
-    }
-
-    return all
-  }, boxes)
-
-  updateInstance({ id }, { boxes: nextGenXboxes })
-}
-
-setInterval(() => {
-  const { tick, instances } = $.learn()
-
-  $.teach({ tick: tick+1 })
-
-  Object.keys(instances).map(id => {
-    const { mimes, boxes, rows, columns, finished } = instances[id]
-    if(finished) return
-    Object.keys(mimes).map(box => {
-      const [y, x] = box.split('-')
-      reanimate(id, rows, columns, y, x, boxes)
-    })
-
-    life($, id)
-  })
-
-}, 1000)
 
 function getInstance(target) {
   const root = target.closest($.link)

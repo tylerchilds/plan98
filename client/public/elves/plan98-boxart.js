@@ -13,50 +13,54 @@ const $ = elf('plan98-boxart', { started: false })
 
 $.draw((target) => {
   const title = target.getAttribute('title') || 'Sillyz'
-  const subtitle = target.getAttribute('subtitle') || 'Flying Disk Operating System'
+  const subtitle = target.getAttribute('subtitle') || 'COMPUTER'
 
   if($.learn().started) {
-    return `<about-sillyz></about-sillyz>`
+    return `
+      <paper-pocket rom="paper-nautiloids"></paper-pocket>
+      <synthia-assistant></synthia-assistant>
+    `
   }
 
   return `
-    <div name="square">
-      <section class="layout">
-        <div class="horizon"></div>
-        <div class="land">
-          <div class="elements"></div>
-        </div>
-      </section>
-      <div class="skybox active">
-        <div class="a">
-        </div>
-        <div class="c">
-        </div>
-        <div class="b">
-        </div>
-        <div class="d">
-        </div>
-        <div class="e">
-          <div style="display: grid;place-content: center;">
-            <sticky-note>
-            </sticky-note>
+    <div style="display: grid; height: 100%;">
+      <div name="square">
+        <section class="layout">
+          <div class="horizon"></div>
+          <div class="land">
+            <div class="elements"></div>
           </div>
-        </div>
-        <div class="f">
-          <sillyz-avatar></sillyz-avatar>
-          <div id="foreground">
-            <div id="logo">
-              <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
-                ${title}
-              </hypertext-variable>
-              <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
-                ${subtitle}
-              </hypertext-variable>
+        </section>
+        <div class="skybox active">
+          <div class="a">
+          </div>
+          <div class="c">
+          </div>
+          <div class="b">
+          </div>
+          <div class="d">
+          </div>
+          <div class="e">
+            <div style="display: grid;place-content: center;">
+              <sticky-note>
+              </sticky-note>
             </div>
-            <button class="cta" data-tutorial>
-              <div class="nonce"></div>
-              Start
-            </button>
+          </div>
+          <div class="f">
+            <sillyz-avatar></sillyz-avatar>
+            <div id="foreground">
+              <div id="logo">
+                <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
+                  ${title}
+                </hypertext-variable>
+                <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
+                  ${subtitle}
+                </hypertext-variable>
+              </div>
+              <button class="cta" data-tutorial>
+                Paper Pocket
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -78,7 +82,7 @@ function start(event) {
 
 $.style(`
   & {
-    display: grid;
+    display: block;
     margin: auto;
     height: 100%;
     position: relative;
@@ -93,7 +97,7 @@ $.style(`
   }
   & .cta {
     box-shadow: var(--shadow);
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), mediumseagreen;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), dodgerblue;
     color: white;
     border: none;
     padding: 1rem;
@@ -110,7 +114,7 @@ $.style(`
 
   & .cta:hover,
   & .cta:focus {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), mediumseagreen;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), dodgerblue;
   }
 
   & .reset {
