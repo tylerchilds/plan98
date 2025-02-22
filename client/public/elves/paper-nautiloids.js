@@ -47,6 +47,7 @@ const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
 const modes = {
   game: 'game',
   settings: 'settings',
+  pause: 'pause',
 }
 
 const center = 60
@@ -123,6 +124,12 @@ $.draw((target) => {
   const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
   if(!instances[target.id]) return
+  
+  if(mode === modes.pause) {
+    return `
+      Pause
+    `
+  }
 
   if(mode === modes.settings) {
     const list = Object.keys(instruments).map((item) => {
@@ -134,9 +141,6 @@ $.draw((target) => {
     })
 
     return `
-      <button data-options>
-        Options
-      </button>
       <div class="settings">
         <div class="title">Settings</div>
 
@@ -184,9 +188,6 @@ $.draw((target) => {
   const grid = [y-1,y,y+1].map(createRow).join('')
 
   return `
-    <button data-options>
-      Options
-    </button>
     <div class="game" style="${colorVariables}">
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
@@ -319,12 +320,18 @@ function tilePosition(xIndex, yIndex) {
   return classes.join(' ')
 }
 
-$.when('click', '[data-options]', toggleMode)
-function toggleMode (event) {
+function toggleSettings (event) {
   const { mode } = $.learn()
   const newMode = mode !== modes.settings ? modes.settings : modes.game
   $.teach({ mode: newMode })
 }
+
+function togglePause (event) {
+  const { mode } = $.learn()
+  const newMode = mode !== modes.pause ? modes.pause : modes.game
+  $.teach({ mode: newMode })
+}
+
 
 $.when('pointerdown', '.tile', function(e) {
   event.preventDefault()
@@ -511,23 +518,6 @@ $.style(`
   & .title {
     font-size: 2rem;
     font-weight: bold;
-  }
-
-  & [data-options] {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.25);
-    color: rgba(0,0,0,.65);
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
-    padding: 4px 8px;
-  }
-
-  & [data-options]:hover,
-  & [data-options]:focus {
-    background: rgba(255,255,255,.25);
-    color: rgba(0,0,0,1);
   }
 
   & .game,
@@ -817,9 +807,15 @@ const jsonrpc = {
   },
   'select': (params) => {
     toggleSpam('select', params.value, () => {
-      toggleMode()
+      toggleSettings()
     })
   },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      togglePause()
+    })
+  },
+
 }
 
 /*
