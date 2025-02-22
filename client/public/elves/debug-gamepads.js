@@ -99,16 +99,26 @@ function gatherInputs(gamepad, _index) {
   return { buttons, axes, id: gamepad.id, index: gamepad.index }
 }
 
+const overrides = {}
+
+export function overrideButton(slot, button, value) {
+  overrides[`button:${slot}:${button}`] = value
+}
+
 export function checkButton(slot, button) {
   const { gamepads } = $.learn()
   if(!gamepads[slot]) return
-  return gamepads[slot].buttons[button]
+  return overrides[`button:${slot}:${button}`] || gamepads[slot].buttons[button]
+}
+
+export function overrideAxis(slot, axis, value) {
+  overrides[`axis:${slot}:${button}`] = value
 }
 
 export function checkAxis(slot, axis) {
   const { gamepads } = $.learn()
   if(!gamepads[slot]) return
-  return gamepads[slot].axes[axis]
+  return overrides[`axis:${slot}:${axis}`] ||  gamepads[slot].axes[axis]
 }
 
 

@@ -1,4 +1,4 @@
-import { checkButton, checkAxis } from './debug-gamepads.js'
+import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 import elf from '@silly/elf'
 
 const $ = elf('paper-pocket', {
@@ -7,9 +7,10 @@ const $ = elf('paper-pocket', {
 })
 
 $.draw((target) => {
+  if(target.innerHTML) return
   const { rom, fullScreen } = $.learn()
   return `
-    <div class="chrome ${fullScreen?'full':''}">
+    <div class="chrome" data-full="${fullScreen}">
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
@@ -65,9 +66,8 @@ $.draw((target) => {
   },
   afterUpdate: (target) => {
     {
-      const { rom } = $.learn()
-      recoverElves(target, rom)
-      recoverElves(target, 'sl-icon')
+      const chrome = target.querySelector('.chrome')
+      chrome.dataset.full = $.learn().fullScreen
     }
   },
 })
@@ -123,30 +123,14 @@ function notification(node, method, params) {
   }
 }
 
-const intervals = {}
-
 $.when('pointerdown', '[data-press]', (event) => {
   const { press } = event.target.dataset
-  const action = actions[press]
-
-  if(action) {
-    action(event.target.closest($.link), {
-      type: 'click',
-      value: 1
-    })
-
-    intervals[press] = setInterval(() => {
-      action(event.target.closest($.link), {
-        type: 'click',
-        value: 1
-      })
-    }, 1000/60)
-  }
+  overrideButton(0, buttons[press], 1)
 })
 
 $.when('pointerup', '[data-press]', (event) => {
   const { press } = event.target.dataset
-  clearInterval(intervals[press])
+  overrideButton(0, buttons[press], 0)
 })
 
 
@@ -156,28 +140,35 @@ self.addEventListener('keydown', (event) => {
   if(!node) return
 
   if (event.keyCode==37) {
-    actions.left(node, {
-      type: 'click',
-      value: 1
-    })
+    overrideButton(0, buttons.left, 1)
   }
   if (event.keyCode==38) {
-    actions.up(node,{
-      type: 'click',
-      value: 1
-    })
+    overrideButton(0, buttons.up, 1)
   }
   if (event.keyCode==39) {
-    actions.right(node, {
-      type: 'click',
-      value: 1
-    })
+    overrideButton(0, buttons.right, 1)
   }
   if (event.keyCode==40) {
-    actions.down(node, {
-      type: 'click',
-      value: 1
-    })
+    overrideButton(0, buttons.down, 1)
+  }
+})
+
+self.addEventListener('keyup', (event) => {
+  const node = document.querySelector($.link)
+
+  if(!node) return
+
+  if (event.keyCode==37) {
+    overrideButton(0, buttons.left, 0)
+  }
+  if (event.keyCode==38) {
+    overrideButton(0, buttons.up, 0)
+  }
+  if (event.keyCode==39) {
+    overrideButton(0, buttons.right, 0)
+  }
+  if (event.keyCode==40) {
+    overrideButton(0, buttons.down, 0)
   }
 })
 
@@ -216,29 +207,61 @@ function standardFire(player, node, code) {
 
 }
 
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const buttons = {
+  a: 0,
+  b: 1,
+  x: 3,
+  y: 2,
+  lb: 4,
+  rb: 5,
+  lt: 6,
+  rt: 7,
+  select: 8,
+  start: 9,
+  ls: 10,
+  rs: 11,
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  os: 16
+}
+
+function player1(code) {
+  return checkButton(0, buttons[code])
+}
+
 function gameLoop(time) {
   const node = document.querySelector($.link)
 
   if(node) {
-
     const player = {
-      a: checkButton(0, 0),
-      b: checkButton(0, 1),
-      x: checkButton(0, 3),
-      y: checkButton(0, 2),
-      lb: checkButton(0, 4),
-      rb: checkButton(0, 5),
-      lt: checkButton(0, 6),
-      rt: checkButton(0, 7),
-      select: checkButton(0, 8),
-      start: checkButton(0, 9),
-      ls: checkButton(0, 10),
-      rs: checkButton(0, 11),
-      up: checkButton(0, 12),
-      down: checkButton(0, 13),
-      left: checkButton(0, 14),
-      right: checkButton(0, 15),
-      os: checkButton(0, 16),
+      a: player1('a'),
+      b: player1('b'),
+      x: player1('x'),
+      y: player1('y'),
+      lb: player1('lb'),
+      rb: player1('rb'),
+      lt: player1('lt'),
+      rt: player1('rt'),
+      select: player1('select'),
+      start: player1('start'),
+      ls: player1('ls'),
+      rs: player1('rs'),
+      up: player1('up'),
+      down: player1('down'),
+      left: player1('left'),
+      right: player1('right'),
+      os: player1('os'),
     }
 
     standardFire(player, node, 'a')
@@ -258,11 +281,9 @@ function gameLoop(time) {
     standardFire(player, node, 'left')
     standardFire(player, node, 'right')
 
-    if(player.os) {
-      if(!lastFrame.os) {
-        toggleMode()
-      }
-    }
+    toggleSpam('os', player.os, () => {
+      toggleMode()
+    })
 
     lastFrame = player
   }
@@ -385,19 +406,19 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
-  & .chrome.full .widget-frame {
+  & .chrome[data-full="true"] .widget-frame {
     padding: 0;
   }
 
-  & .chrome.full .viewport {
+  & .chrome[data-full="true"] .viewport {
     padding: 0;
   }
 
-  & .chrome.full .controller {
+  & .chrome[data-full="true"] .controller {
     display: none;
   }
 
-  & .chrome.full .menu-items {
+  & .chrome[data-full="true"] .menu-items {
     display: none;
   }
 
