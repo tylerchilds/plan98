@@ -209,7 +209,19 @@ $.draw((target) => {
 
   return `
     <div class="game" style="${colorVariables}">
-      <div class="scene"></div>
+      <div class="scene">
+         <a-scene vr-mode-ui="enabled: false">
+          <a-entity cursor="rayOrigin: mouse"></a-entity>
+          <a-camera
+            wasd-controls="enabled: false"
+            look-controls="enabled: false"
+            position="${camera.x} ${camera.y} ${camera.z}"
+            rotation="${camera.yaw} ${camera.pitch} ${camera.roll}"
+          ></a-camera>
+          <a-entity class="grid"></a-entity>
+        </a-scene>
+
+      </div>
       <!--
       <div class="information"></div>
       -->
@@ -224,28 +236,17 @@ $.draw((target) => {
       }
     }
 
-      const scene = target.querySelector('.scene')
-      if(scene) {
+      const grid = target.querySelector('.grid')
+      if(grid) {
         const { instances } = $.learn()
 
         const instance = instances[target.id]
         const { y } = instance
 
-        const grid = [y-1,y,y+1].map(createRow(instance)).join('')
+        const nodes = [y-1,y,y+1].map(createRow(instance)).join('')
 
         requestIdleCallback(() => {
-          scene.innerHTML = `
-            <a-scene>
-              <a-entity cursor="rayOrigin: mouse"></a-entity>
-              <a-camera
-                wasd-controls="enabled: false"
-                look-controls="enabled: false"
-                position="${camera.x} ${camera.y} ${camera.z}"
-                rotation="${camera.yaw} ${camera.pitch} ${camera.roll}"
-              ></a-camera>
-              ${grid}
-            </a-scene>
-          `
+          grid.innerHTML = nodes
         })
       }
 
@@ -528,7 +529,6 @@ $.style(`
     position: absolute;
     mix-blend-mode: soft-light;
   }
-
 `)
 
 const attacking = {}
@@ -545,7 +545,6 @@ function attackRelease(note) {
   attacking[note] = true
 }
 
-
 function release(note) {
   if(attacking[note]) {
     delete attacking[note]
@@ -557,15 +556,30 @@ function release(note) {
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
   const { id } = event.target.closest($.link)
-  const { instances } = $.learn()
-  if(instances[id]) {
-    const { x, y } = instances[id]
-    const root = noteFromGrid(x, y)
+  const { instances, mode } = $.learn()
 
-    const more = { root, id }
+  if(mode === modes.game) {
+    if(instances[id]) {
+      const { x, y } = instances[id]
+      const root = noteFromGrid(x, y)
 
-    if(jsonrpc[method]) {
-      jsonrpc[method]({...params, ...more})
+      const more = { root, id }
+
+      if(musicRPC[method]) {
+        musicRPC[method]({...params, ...more})
+      }
+    }
+  }
+
+  if(mode === modes.settings) {
+    if(settingsRPC[method]) {
+      settingsRPC[method](params)
+    }
+  }
+
+  if(mode === modes.settings) {
+    if(pauseRPC[method]) {
+      pauseRPC[method](params)
     }
   }
 })
@@ -598,7 +612,7 @@ function toggleSpam(code, value, callback) {
   toggleCache[code] = value
 }
 
-const jsonrpc = {
+const musicRPC = {
   'a': (params) => {
     if(params.value === 1) {
       attack(params.root)
@@ -693,8 +707,82 @@ const jsonrpc = {
       togglePause()
     })
   },
-
 }
+
+const settingsRPC = {
+  'a': (params) => {
+  },
+  'b': (params) => {
+  },
+  'x': (params) => {
+  },
+  'y': (params) => {
+  },
+  'lb': (params) => {
+  },
+  'rb': (params) => {
+  },
+  'lt': (params) => {
+  },
+  'rt': (params) => {
+  },
+  'up': (params) => {
+  },
+  'down': (params) => {
+  },
+  'left': (params) => {
+  },
+  'right': (params) => {
+  },
+  'select': (params) => {
+    toggleSpam('select', params.value, () => {
+      toggleSettings()
+    })
+  },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      togglePause()
+    })
+  },
+}
+
+const pauseRPC = {
+  'a': (params) => {
+  },
+  'b': (params) => {
+  },
+  'x': (params) => {
+  },
+  'y': (params) => {
+  },
+  'lb': (params) => {
+  },
+  'rb': (params) => {
+  },
+  'lt': (params) => {
+  },
+  'rt': (params) => {
+  },
+  'up': (params) => {
+  },
+  'down': (params) => {
+  },
+  'left': (params) => {
+  },
+  'right': (params) => {
+  },
+  'select': (params) => {
+    toggleSpam('select', params.value, () => {
+      toggleSettings()
+    })
+  },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      togglePause()
+    })
+  },
+}
+
 
 /*
  Gamer Grid

@@ -424,10 +424,6 @@ $.style(`
     display: none;
   }
 
-  & .chrome[data-full="true"] .menu-items {
-    display: none;
-  }
-
   & .controller {
     text-align: center;
   }
