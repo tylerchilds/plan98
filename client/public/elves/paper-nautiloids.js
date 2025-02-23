@@ -1,9 +1,17 @@
 import elf from '@silly/elf'
-import * as Tone from 'tone@next'
-import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import Color from "colorjs.io"
 import { consoleShow, consoleHide } from './plan98-console.js'
-import { setTheme, getTheme } from './paper-pocket.js'
+import {
+  getInstruments,
+  getInstrument,
+  setInstrument,
+  getThemes,
+  setTheme,
+  getTheme,
+  attack,
+  release,
+  attackRelease
+} from './paper-pocket.js'
 import 'aframe'
 
 const orientation = {
@@ -13,12 +21,6 @@ const orientation = {
 const camera = {
 	x: '0', y: '10', z: '10', yaw: '-60', pitch: '0', roll: '0'
 }
-
-let current
-// load samples / choose 4 random instruments from the list //
-const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
-
-const themes = ['firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
 
 const lightnessStops = [
   [95, 120],
@@ -83,13 +85,13 @@ const $ = elf('paper-nautiloids', {
     instrument: {
       label: 'Instrument',
       description: 'The sound of the console.',
-      options: instruments,
-      value: 'violin'
+      options: getInstruments(),
+      value: getInstrument()
     },
     theme: {
       label: 'Theme',
       description: 'The color of the console.',
-      options: themes,
+      options: getThemes(),
       value: getTheme()
     },
   },
@@ -128,27 +130,6 @@ function noteFromGrid(column, row) {
 function colorFromGrid(column, row) {
   return colors[column][row]
 }
-
-function load(instrument) {
-  current = SampleLibrary.load({
-    instruments: instrument,
-    baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
-  })
-
-  Tone.loaded().then(function() {
-    current.release = .5;
-    current.toDestination();
-  })
-}
-
-load($.learn().settings.instrument.value)
-
-// show error message on loading error //
-$.when('change', '.samples', function(event) {
-  const { value } = event.target
-  load(instruments[value]);
-  $.teach({instrument: value })
-})
 
 function draw3d(data) {
 	const {
@@ -260,8 +241,7 @@ $.draw((target) => {
 
     {
       const active = target.querySelector('.setting.focused .option.selected')
-      if(active && active.innerText !== target.optionsKey) {
-        target.optionsKey = active.innerText
+      if(active) {
         active.scrollIntoView()
       }
     }
@@ -677,28 +657,6 @@ $.style(`
 
 `)
 
-const attacking = {}
-
-function attack(note) {
-  if(!current || attacking[note]) return
-  current.triggerAttack(Tone.Frequency(note, "midi").toNote());
-  attacking[note] = true
-}
-
-function attackRelease(note) {
-  if(!current) return
-  current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), '2n');
-  attacking[note] = true
-}
-
-function release(note) {
-  if(attacking[note]) {
-    delete attacking[note]
-  }
-  if(!current) return
-  current.triggerRelease(Tone.Frequency(note, "midi").toNote());
-}
-
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
   const { id } = event.target.closest($.link)
@@ -950,7 +908,7 @@ const sideEffects = {
     setTheme(value)
   },
   instrument: (value) => {
-
+    setInstrument(value)
   }
 }
 

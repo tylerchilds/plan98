@@ -1,11 +1,53 @@
-import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 import elf from '@silly/elf'
+import * as Tone from 'tone@next'
+import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
+import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
+
+let current
+// load samples / choose 4 random instruments from the list //
+const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
+
+const themes = ['firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
+
 
 const $ = elf('paper-pocket', {
   fullScreen: true,
   theme: localStorage.getItem('paper-pocket/theme') || 'lightgray',
+  instrument: localStorage.getItem('paper-pocket/instrument') || 'violin',
   rom: 'elf-tag'
 })
+
+export function getInstruments() {
+  return instruments
+}
+
+export function setInstrument(instrument) {
+  loadInstrument(instrument)
+  localStorage.setItem('paper-pocket/instrument', instrument)
+  $.teach({ instrument })
+}
+
+export function getInstrument() {
+  return $.learn().instrument
+}
+
+function loadInstrument(instrument) {
+  current = SampleLibrary.load({
+    instruments: instrument,
+    baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
+  })
+
+  Tone.loaded().then(function() {
+    current.release = .5;
+    current.toDestination();
+  })
+}
+
+loadInstrument(getInstrument())
+
+export function getThemes() {
+  return themes
+}
 
 export function setTheme(theme) {
   localStorage.setItem('paper-pocket/theme', theme)
@@ -14,6 +56,28 @@ export function setTheme(theme) {
 
 export function getTheme() {
   return $.learn().theme
+}
+
+const attacking = {}
+
+export function attack(note) {
+  if(!current || attacking[note]) return
+  current.triggerAttack(Tone.Frequency(note, "midi").toNote());
+  attacking[note] = true
+}
+
+export function attackRelease(note) {
+  if(!current) return
+  current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), '2n');
+  attacking[note] = true
+}
+
+export function release(note) {
+  if(attacking[note]) {
+    delete attacking[note]
+  }
+  if(!current) return
+  current.triggerRelease(Tone.Frequency(note, "midi").toNote());
 }
 
 
