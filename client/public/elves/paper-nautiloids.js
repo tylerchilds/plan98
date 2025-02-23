@@ -329,7 +329,7 @@ function renderSettings() {
   const list = Object.keys(settings).map((key, i) => {
     const setting = settings[key]
     return `
-      <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-index="${i}">
+      <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
         <div class="setting-label">
           ${setting.label}
         </div>
@@ -357,6 +357,25 @@ function renderSettings() {
     </div>
   `
 }
+
+$.when('click', '.setting', (event) => {
+  const { key } = event.target.dataset
+  $.teach({ settingsKey: key })
+})
+
+$.when('click', '.setting.focused .option', () => {
+  const { value } = event.target.dataset
+
+  const { settingsKey } = $.learn()
+
+  settingsChange(settingsKey, value)
+
+  $.teach({
+    value
+  }, selectedSettingsReducer)
+})
+
+
 
 
 function content(instance) {
@@ -601,6 +620,7 @@ $.style(`
     display: grid;
     gap: 1rem;
     max-width: 100%;
+    width: 100%;
   }
 
   & .setting:not(.focused) > * {
