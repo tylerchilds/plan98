@@ -211,7 +211,10 @@ $.draw((target) => {
     <div class="game" style="${colorVariables}">
       <div class="scene">
          <a-scene vr-mode-ui="enabled: false">
-          <a-entity cursor="rayOrigin: mouse"></a-entity>
+          <a-entity
+            cursor="rayOrigin: mouse"
+            raycaster="near: 0.1; far: 100; objects: .note;"
+          ></a-entity>
           <a-camera
             wasd-controls="enabled: false"
             look-controls="enabled: false"
@@ -577,7 +580,7 @@ $.when('json-rpc', (event) => {
     }
   }
 
-  if(mode === modes.settings) {
+  if(mode === modes.pause) {
     if(pauseRPC[method]) {
       pauseRPC[method](params)
     }
