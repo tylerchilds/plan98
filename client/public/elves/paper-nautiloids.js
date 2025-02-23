@@ -7,7 +7,11 @@ import 'aframe'
 import diffHTML from 'diffhtml'
 
 const orientation = {
-	x: '0', y: '0', z: '0', roll: '0', pitch: '0', yaw: '0'
+	x: '0', y: '0', z: '0', yaw: '0', pitch: '0', roll: '0'
+}
+
+const camera = {
+	x: '0', y: '10', z: '10', yaw: '-60', pitch: '0', roll: '0'
 }
 
 const lightnessStops = [
@@ -206,7 +210,9 @@ $.draw((target) => {
   return `
     <div class="game" style="${colorVariables}">
       <div class="scene"></div>
+      <!--
       <div class="information"></div>
+      -->
     </div>
   `
 }, {
@@ -230,7 +236,13 @@ $.draw((target) => {
         requestIdleCallback(() => {
           scene.innerHTML = `
             <a-scene>
-              <a-camera wasd-controls="enabled: false"></a-camera>
+              <a-entity cursor="rayOrigin: mouse"></a-entity>
+              <a-camera
+                wasd-controls="enabled: false"
+                look-controls="enabled: false"
+                position="${camera.x} ${camera.y} ${camera.z}"
+                rotation="${camera.yaw} ${camera.pitch} ${camera.roll}"
+              ></a-camera>
               ${grid}
             </a-scene>
           `
@@ -257,13 +269,16 @@ function createRow(instance) {
       if(column<0||column>=columns||row<0||row>=rows) {
         return draw3d(
           aBox({
-            x: 2 * (xIndex - 1),
-            z: -2 * (yIndex) - 5,
-            y: 0,
-            pitch: 45
+            x: 5 * (xIndex - 1),
+            z: 5 * (yIndex) - 1,
+            y: 2,
+            pitch: 0
           }, {
             wireframe: true,
             color: 'firebrick',
+            width: 5,
+            depth: 5,
+            height: 5,
           })
         )
       }
@@ -271,13 +286,18 @@ function createRow(instance) {
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
       return draw3d(
         aBox({
-          x: 2 * (xIndex - 1),
-          z: -2 * (yIndex) - 5,
+          x: 5 *(xIndex - 1),
+          z: 5 * (yIndex) - 1,
           y: 0,
-          pitch: 45
+          pitch: 0
         }, {
           wireframe: box.revealed,
           color: color.value,
+          width: 5,
+          depth: 5,
+          'data-x': column,
+          'data-y': row,
+          class: 'note'
         })
       )
 
@@ -400,7 +420,7 @@ function slideDown(id) {
 
 $.style(`
   & {
-    background: lemonchiffon;
+    background: black;
     display: block;
     width: 100%;
     height: 100%;
@@ -548,6 +568,12 @@ $.when('json-rpc', (event) => {
       jsonrpc[method]({...params, ...more})
     }
   }
+})
+
+$.when('click', '.note', (event) => {
+  const { x, y } = event.target.dataset
+  const note = noteFromGrid(parseInt(x), parseInt(y))
+  attackRelease(note)
 })
 
 const spamCache = {}
