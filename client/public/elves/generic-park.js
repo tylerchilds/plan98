@@ -122,7 +122,7 @@ $.draw((target) => {
         </div>
       </div>
       <a-scene>
-        <a-camera>
+        <a-camera rotation="0 0 0" position="0 1.6 0">
           <a-cursor material="color: white;"></a-cursor>
         </a-camera>
         ${scene.join('')}

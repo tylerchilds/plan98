@@ -1,7 +1,6 @@
 import elf from '@silly/elf'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
-import { checkButton, checkAxis } from './debug-gamepads.js'
 import Color from "colorjs.io"
 import { consoleShow, consoleHide } from './plan98-console.js'
 
@@ -48,6 +47,7 @@ const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
 const modes = {
   game: 'game',
   settings: 'settings',
+  pause: 'pause',
 }
 
 const center = 60
@@ -121,9 +121,15 @@ function shuffle(a) {
 }
 
 $.draw((target) => {
-  const { mode, tick, instrument, player, instances, debuggerVisible, tileDistance } = $.learn()
+  const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
   if(!instances[target.id]) return
+  
+  if(mode === modes.pause) {
+    return `
+      Pause
+    `
+  }
 
   if(mode === modes.settings) {
     const list = Object.keys(instruments).map((item) => {
@@ -135,9 +141,6 @@ $.draw((target) => {
     })
 
     return `
-      <button data-options>
-        Options
-      </button>
       <div class="settings">
         <div class="title">Settings</div>
 
@@ -148,14 +151,6 @@ $.draw((target) => {
           </select>
         </label>
         <hr>
-
-        ${Object.keys(player).map(key => {
-          return `
-            <div>
-              ${key}: ${player[key]}
-            </div>
-          `
-        }).join('')}
 
         <hr>
 
@@ -193,16 +188,11 @@ $.draw((target) => {
   const grid = [y-1,y,y+1].map(createRow).join('')
 
   return `
-    <button data-options>
-      Options
-    </button>
     <div class="game" style="${colorVariables}">
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
       </div>
-      <div class="information">
-        ${content(instance)}
-      </div>
+      <div class="information"></div>
     </div>
   `
 }, {
@@ -224,6 +214,15 @@ $.draw((target) => {
       } else {
         target.style.setProperty("--pan-x", `0`);
         target.style.setProperty("--pan-y", `0`);
+      }
+    }
+
+    {
+      const info = target.querySelector('.information')
+      if(info) {
+        const { instances } = $.learn()
+        const instance = instances[target.id]
+        info.innerHTML = content(instance)
       }
     }
   }
@@ -328,12 +327,18 @@ function tilePosition(xIndex, yIndex) {
   return classes.join(' ')
 }
 
-$.when('click', '[data-options]', toggleMode)
-function toggleMode (event) {
+function toggleSettings (event) {
   const { mode } = $.learn()
   const newMode = mode !== modes.settings ? modes.settings : modes.game
   $.teach({ mode: newMode })
 }
+
+function togglePause (event) {
+  const { mode } = $.learn()
+  const newMode = mode !== modes.pause ? modes.pause : modes.game
+  $.teach({ mode: newMode })
+}
+
 
 $.when('pointerdown', '.tile', function(e) {
   event.preventDefault()
@@ -448,26 +453,6 @@ function clearPointer() {
   })
 }
 
-self.addEventListener('keydown', (event) => {
-  const node = document.querySelector($.link)
-
-  if(!node) return
-  const id = node.id
-
-  if (event.keyCode==37) {
-    slideLeft(id)
-  }
-  if (event.keyCode==38) {
-    slideUp(id)
-  }
-  if (event.keyCode==39) {
-    slideRight(id)
-  }
-  if (event.keyCode==40) {
-    slideDown(id)
-  }
-})
-
 function slideLeft(id) {
   const { instances } = $.learn()
 
@@ -540,23 +525,6 @@ $.style(`
   & .title {
     font-size: 2rem;
     font-weight: bold;
-  }
-
-  & [data-options] {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.25);
-    color: rgba(0,0,0,.65);
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
-    padding: 4px 8px;
-  }
-
-  & [data-options]:hover,
-  & [data-options]:focus {
-    background: rgba(255,255,255,.25);
-    color: rgba(0,0,0,1);
   }
 
   & .game,
@@ -721,141 +689,140 @@ function release(note) {
   current.triggerRelease(Tone.Frequency(note, "midi").toNote());
 }
 
-const lastFrame = {
-  a: false,
-  b: false,
-  x: false,
-  y: false,
-  down: false,
-  up: false,
-  left: false,
-  right: false,
-}
-
-function gameLoop(time) {
-  const { id } = this
+$.when('json-rpc', (event) => {
+  const { method, params } = event.detail
+  const { id } = event.target.closest($.link)
   const { instances } = $.learn()
   if(instances[id]) {
     const { x, y } = instances[id]
     const root = noteFromGrid(x, y)
-    const player = {
-      a: checkButton(0, 0),
-      b: checkButton(0, 1),
-      x: checkButton(0, 3),
-      y: checkButton(0, 2),
-      lb: checkButton(0, 4),
-      rb: checkButton(0, 5),
-      lt: checkButton(0, 6),
-      rt: checkButton(0, 7),
-      select: checkButton(0, 8),
-      start: checkButton(0, 9),
-      ls: checkButton(0, 10),
-      rs: checkButton(0, 11),
-      up: checkButton(0, 12),
-      down: checkButton(0, 13),
-      left: checkButton(0, 14),
-      right: checkButton(0, 15),
-      os: checkButton(0, 16),
-    }
 
-    if(player.a) {
-      attack(root)
-    } else {
-      release(root)
-    }
+    const more = { root, id }
 
-    if(player.b) {
-      attack(root + 7)
-    } else {
-      release(root + 7)
+    if(jsonrpc[method]) {
+      jsonrpc[method]({...params, ...more})
     }
+  }
+})
 
-    if(player.x) {
-      attack(root + 2)
-    } else {
-      release(root + 2)
-    }
+const spamCache = {}
 
-    if(player.y) {
-      attack(root + 9)
-    } else {
-      release(root + 9)
-    }
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
 
-    if(player.lb) {
-      attack(root + 4)
-    } else {
-      release(root + 4)
-    }
+  callback()
 
-    if(player.rb) {
-      attack(root + 11)
-    } else {
-      release(root + 11)
-    }
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
 
-    if(player.lt) {
-      attack(root + 6)
-    } else {
-      release(root + 6)
-    }
-
-    if(player.rt) {
-      attack(root + 13)
-    } else {
-      release(root + 13)
-    }
-
-    if(player.up) {
-      if(!lastFrame.up) {
-        lastFrame.up = true
-        slideUp(id)
-      }
-    } else {
-      lastFrame.up = false
-    }
-
-    if(player.down) {
-      if(!lastFrame.down) {
-        lastFrame.down = true
-        slideDown(id)
-      }
-    } else {
-      lastFrame.down = false
-    }
-
-    if(player.left) {
-      if(!lastFrame.left) {
-        lastFrame.left = true
-        slideLeft(id)
-      }
-    } else {
-      lastFrame.left = false
-    }
-
-    if(player.right) {
-      if(!lastFrame.right) {
-        lastFrame.right = true
-        slideRight(id)
-      }
-    } else {
-      lastFrame.right = false
-    }
-
-    if(player.os) {
-      if(!lastFrame.os) {
-        lastFrame.os = true
-        toggleMode()
-        //document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-      }
-    } else {
-      lastFrame.os = false
-    }
-
-    $.teach({ player })
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
   }
 
-  requestAnimationFrame(gameLoop.bind(this))
+  toggleCache[code] = value
+}
+
+const jsonrpc = {
+  'a': (params) => {
+    if(params.value === 1) {
+      attack(params.root)
+    } else {
+      release(params.root)
+    }
+  },
+  'b': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 7)
+    } else {
+      release(params.root + 7)
+    }
+  },
+  'x': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 2)
+    } else {
+      release(params.root + 2)
+    }
+  },
+  'y': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 9)
+    } else {
+      release(params.root + 9)
+    }
+  },
+  'lb': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 4)
+    } else {
+      release(params.root + 4)
+    }
+  },
+  'rb': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 11)
+    } else {
+      release(params.root + 11)
+    }
+  },
+  'lt': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 6)
+    } else {
+      release(params.root + 6)
+    }
+  },
+  'rt': (params) => {
+    if(params.value === 1) {
+      attack(params.root + 13)
+    } else {
+      release(params.root + 13)
+    }
+  },
+  'up': (params) => {
+    if(params.value === 1) {
+      debounceSpam('up', 150, () => {
+        slideUp(params.id)
+      })
+    }
+  },
+  'down': (params) => {
+    if(params.value === 1) {
+      debounceSpam('down', 150, () => {
+        slideDown(params.id)
+      })
+    }
+  },
+  'left': (params) => {
+    if(params.value === 1) {
+      debounceSpam('left', 150, () => {
+        slideLeft(params.id)
+      })
+    }
+  },
+  'right': (params) => {
+    if(params.value === 1) {
+      debounceSpam('right', 150, () => {
+        slideRight(params.id)
+      })
+    }
+  },
+  'select': (params) => {
+    toggleSpam('select', params.value, () => {
+      toggleSettings()
+    })
+  },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      togglePause()
+    })
+  },
+
 }
 
 /*
@@ -872,7 +839,6 @@ $.when('click', '[data-flag]', (event) => {
     const nextFlag = !flagged
 
     const flagCount = nextFlag ? totalFlags + 1 : totalFlags - 1
-    console.log(flagCount, maxFlags)
     updateBox({ id, x: column, y: row }, { flagged: nextFlag })
 
     updateInstance({ id }, { totalFlags: flagCount })
@@ -923,8 +889,6 @@ function victoryCondition(id) {
 
   const allMimesFlagged = allMimes.every(x => boxes[x].flagged)
   const nonMimesRevealed = nonMimes.every(x => boxes[x].revealed)
-
-  console.log(allMimes)
 
   if(allMimesFlagged || nonMimesRevealed) {
     updateInstance({ id }, { finished: true, won: true })
@@ -996,8 +960,6 @@ function seed(target) {
       totalFlags: 0
     })
   })
-
-  requestAnimationFrame(gameLoop.bind({ id }))
 }
 
 function updateInstance({ id }, payload) {
@@ -1068,84 +1030,6 @@ function pow(id, rows, columns, y, x, boxes) {
     }
   }
 }
-
-function reanimate(id, rows, columns, y, x, boxes) {
-  const minX = Math.max(0, x-1);
-  const maxX = Math.min(x+1, columns-1);
-  const minY = Math.max(0, y-1);
-  const maxY = Math.min(y+1, rows-1);
-
-  const soil = []
-  for(let a = minX; a <= maxX; a++) {
-    for(let b = minY; b <= maxY; b++) {
-      const { alive } = boxes[`${b}-${a}`]
-      if(!alive) {
-        soil.push([b,a])
-      }
-    }
-  }
-
-  if(soil.length === 0) return
-
-  const [b, a] = soil[Math.floor(Math.random() * soil.length)]
-  updateBox({ id, x: a, y: b }, { alive: true })
-}
-
-function life($, id) {
-  const { instances } = $.learn()
-  const { boxes, rows, columns } = instances[id]
-
-  const nextGenXboxes = Object.keys(boxes).reduce((all, box) => {
-    const { alive } = all[box]
-    let [y, x] = box.split('-')
-    y = parseInt(y)
-    x = parseInt(x)
-    const minX = Math.max(0, x-1);
-    const maxX = Math.min(x+1, columns-1);
-    const minY = Math.max(0, y-1);
-    const maxY = Math.min(y+1, rows-1);
-
-    let count = 0
-    for(let a = minX; a <= maxX; a++) {
-      for(let b = minY; b <= maxY; b++) {
-        const { alive } = boxes[`${b}-${a}`]
-        if(alive) {
-          count += 1
-        }
-      }
-    }
-
-    count = alive ? count : count - 1
-
-    if((count >= 2 && count <= 3)) {
-      all[box].alive = true
-    } else if(alive) {
-      all[box].alive = false
-    }
-
-    return all
-  }, boxes)
-
-  updateInstance({ id }, { boxes: nextGenXboxes })
-}
-
-setInterval(() => {
-  const { tick, instances } = $.learn()
-
-  $.teach({ tick: tick+1 })
-
-  Object.keys(instances).map(id => {
-    const { mimes, boxes, rows, columns, finished } = instances[id]
-    if(finished) return
-    Object.keys(mimes).map(box => {
-      const [y, x] = box.split('-')
-      reanimate(id, rows, columns, y, x, boxes)
-    })
-
-    life($, id)
-  })
-
-}, 1000)
 
 function getInstance(target) {
   const root = target.closest($.link)
