@@ -3,8 +3,8 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import Color from "colorjs.io"
 import { consoleShow, consoleHide } from './plan98-console.js'
+import { setTheme, getTheme } from './paper-pocket.js'
 import 'aframe'
-import diffHTML from 'diffhtml'
 
 const orientation = {
 	x: '0', y: '0', z: '0', yaw: '0', pitch: '0', roll: '0'
@@ -13,6 +13,12 @@ const orientation = {
 const camera = {
 	x: '0', y: '10', z: '10', yaw: '-60', pitch: '0', roll: '0'
 }
+
+let current
+// load samples / choose 4 random instruments from the list //
+const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
+
+const themes = ['firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
 
 const lightnessStops = [
   [95, 120],
@@ -70,8 +76,37 @@ const $ = elf('paper-nautiloids', {
   tick: 0,
   room: '0001',
   instances: {},
-  instrument: 'violin',
-  mode: modes.game
+  mode: modes.game,
+  settingsKey: 'instrument',
+  pauseKey: 'top',
+  settings: {
+    instrument: {
+      label: 'Instrument',
+      description: 'The sound of the console.',
+      options: instruments,
+      value: 'violin'
+    },
+    theme: {
+      label: 'Theme',
+      description: 'The color of the console.',
+      options: themes,
+      value: getTheme()
+    },
+  },
+  pause: {
+    top: {
+
+    },
+    art: {
+
+    },
+    music: {
+
+    },
+    code: {
+
+    },
+  }
 })
 
 function noteFromGrid(column, row) {
@@ -94,11 +129,6 @@ function colorFromGrid(column, row) {
   return colors[column][row]
 }
 
-
-let current
-// load samples / choose 4 random instruments from the list //
-const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
-
 function load(instrument) {
   current = SampleLibrary.load({
     instruments: instrument,
@@ -111,7 +141,7 @@ function load(instrument) {
   })
 }
 
-load($.learn().instrument)
+load($.learn().settings.instrument.value)
 
 // show error message on loading error //
 $.when('change', '.samples', function(event) {
@@ -162,7 +192,6 @@ function aBox(priority, conflicts) {
 	}
 }
 
-
 $.draw((target) => {
   const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
@@ -175,34 +204,11 @@ $.draw((target) => {
   }
 
   if(mode === modes.settings) {
-    const list = Object.keys(instruments).map((item) => {
-      return `
-        <option value="${item}" ${instrument === instruments[item] ? 'selected="true"':''}>
-          ${instruments[item]}
-        </option>
-      `
-    })
+    return renderSettings()
+  }
 
-    return `
-      <div class="settings">
-        <div class="title">Settings</div>
-
-        <label class="field">
-          <span class="label">Instruments</span>
-          <select class="samples">
-            ${list}
-          </select>
-        </label>
-        <hr>
-
-        <hr>
-
-        <button class="toolbelt-debugger">
-          ${ debuggerVisible ? 'Hide Debugger' : 'Show Debugger' }
-        </button>
-
-      </div>
-    `
+  if(mode === modes.pause) {
+    return renderPause()
   }
 
   if(target.querySelector('.scene')) return
@@ -239,6 +245,28 @@ $.draw((target) => {
       }
     }
 
+    {
+      const { settingsKey } = $.learn()
+
+      if(target.settingsKey !== settingsKey) {
+        target.settingsKey = settingsKey
+        const active = target.querySelector('.setting.focused')
+
+        if(active) {
+          active.scrollIntoView()
+        }
+      }
+    }
+
+    {
+      const active = target.querySelector('.setting.focused .option.selected')
+      if(active && active.innerText !== target.optionsKey) {
+        target.optionsKey = active.innerText
+        active.scrollIntoView()
+      }
+    }
+
+    {
       const grid = target.querySelector('.grid')
       if(grid) {
         const { instances } = $.learn()
@@ -252,6 +280,7 @@ $.draw((target) => {
           grid.innerHTML = nodes
         })
       }
+    }
 
     {
       const info = target.querySelector('.information')
@@ -308,6 +337,47 @@ function createRow(instance) {
     }).join('')
   }
 }
+
+function renderPause() {
+
+
+}
+
+function renderSettings() {
+  const { settings, settingsKey } = $.learn()
+
+  const list = Object.keys(settings).map((key, i) => {
+    const setting = settings[key]
+    return `
+      <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-index="${i}">
+        <div class="setting-label">
+          ${setting.label}
+        </div>
+        <div class="setting-description">
+          ${setting.description}
+        </div>
+        <div class="options-list">
+          <div class="setting-options">
+            ${setting.options.map((x) => {
+              return `
+                <button data-setting="${key}" data-value="${x}" class="option ${setting.value === x?'selected':''}">
+                  ${x}
+                </button>
+              `
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    `
+  }).join('')
+
+  return `
+    <div class="menu-list">
+      ${list}
+    </div>
+  `
+}
+
 
 function content(instance) {
   const { finished, boxes, won, x, y, maxFlags, totalFlags } = instance
@@ -442,6 +512,16 @@ $.style(`
     touch-action: none;
   }
 
+  & .menu-list {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .options-list {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
   & .title {
     font-size: 2rem;
     font-weight: bold;
@@ -532,6 +612,69 @@ $.style(`
     position: absolute;
     mix-blend-mode: soft-light;
   }
+
+  & .setting {
+    display: block;
+    padding: 1rem;
+    background: rgba(255,255,255,.15);
+    color: rgba(255,255,255,.5);
+    display: grid;
+    gap: 1rem;
+    max-width: 100%;
+  }
+
+  & .setting:not(.focused) > * {
+    pointer-events: none;
+  }
+
+  & .setting.focused .message-body {
+    font-weight: bold;
+  }
+
+  & .setting-options {
+    display: flex;
+    gap: 4px;
+    padding-bottom: 8px;
+  }
+
+  & .setting-options .option:not(.selected) {
+    display: none;
+  }
+
+  & .setting.focused {
+    color: black;
+    background: white;
+  }
+
+  & .setting.focused .option {
+    display: block;
+  }
+
+  & .option.selected {
+    display: block;
+  }
+
+  & .setting {
+    padding: 4px 8px;
+    border: none;
+    background: rgba(0,0,0,.85);
+    color: white;
+    display: inline-block;
+    margin-bottom: 4px;
+  }
+
+  & .option {
+    border: none;
+    border-radius: 2px;
+    white-space: nowrap;
+    padding: 4px 8px;
+  }
+
+  & .option.selected {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--theme, black);
+    color: white;
+  }
+
 `)
 
 const attacking = {}
@@ -730,12 +873,65 @@ const settingsRPC = {
   'rt': (params) => {
   },
   'up': (params) => {
+    if(params.value === 1) {
+      debounceSpam('up', 150, () => {
+        const { settingsKey, settings } = $.learn()
+        const keys = Object.keys(settings)
+        const index = mod((keys.indexOf(settingsKey) - 1), keys.length)
+        $.teach({
+          settingsKey: keys[index]
+        })
+      })
+    }
   },
   'down': (params) => {
+    if(params.value === 1) {
+      console.log('why')
+      debounceSpam('down', 150, () => {
+        const { settingsKey, settings } = $.learn()
+        const keys = Object.keys(settings)
+        const index = mod((keys.indexOf(settingsKey) + 1), keys.length)
+        $.teach({
+          settingsKey: keys[index]
+        })
+      })
+    }
   },
   'left': (params) => {
+    if(params.value === 1) {
+      debounceSpam('left', 150, () => {
+        const { settingsKey, settings } = $.learn()
+        const { options, value } = settings[settingsKey]
+
+        const index = options.indexOf(value)
+
+        const nextIndex = mod(index - 1, options.length)
+        const nextValue = options[nextIndex]
+        settingsChange(settingsKey, nextValue)
+
+        $.teach({
+          value: nextValue
+        }, selectedSettingsReducer)
+      })
+    }
   },
   'right': (params) => {
+    if(params.value === 1) {
+      debounceSpam('right', 150, () => {
+        const { settingsKey, settings } = $.learn()
+        const { options, value } = settings[settingsKey]
+
+        const index = options.indexOf(value)
+
+        const nextIndex = mod(index + 1, options.length)
+        const nextValue = options[nextIndex]
+        settingsChange(settingsKey, nextValue)
+
+        $.teach({
+          value: options[nextIndex]
+        }, selectedSettingsReducer)
+      })
+    }
   },
   'select': (params) => {
     toggleSpam('select', params.value, () => {
@@ -747,6 +943,35 @@ const settingsRPC = {
       togglePause()
     })
   },
+}
+
+const sideEffects = {
+  theme: (value) => {
+    setTheme(value)
+  },
+  instrument: (value) => {
+
+  }
+}
+
+function settingsChange(settingsKey, nextValue) {
+  if(sideEffects[settingsKey]) {
+    sideEffects[settingsKey](nextValue)
+  }
+}
+
+function selectedSettingsReducer(state, payload) {
+  const { settingsKey } = state
+  return {
+    ...state,
+    settings: {
+      ...state.settings,
+      [settingsKey]: {
+        ...state.settings[settingsKey],
+        value: payload.value
+      }
+    }
+  }
 }
 
 const pauseRPC = {

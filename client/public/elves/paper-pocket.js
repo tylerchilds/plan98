@@ -3,14 +3,25 @@ import elf from '@silly/elf'
 
 const $ = elf('paper-pocket', {
   fullScreen: true,
+  theme: localStorage.getItem('paper-pocket/theme') || 'lightgray',
   rom: 'elf-tag'
 })
 
+export function setTheme(theme) {
+  localStorage.setItem('paper-pocket/theme', theme)
+  $.teach({ theme })
+}
+
+export function getTheme() {
+  return $.learn().theme
+}
+
+
 $.draw((target) => {
   if(target.innerHTML) return
-  const { rom, fullScreen } = $.learn()
+  const { rom, fullScreen, theme } = $.learn()
   return `
-    <div class="chrome" data-full="${fullScreen}">
+    <div class="chrome" style="--theme: ${theme}" data-full="${fullScreen}">
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
@@ -66,8 +77,10 @@ $.draw((target) => {
   },
   afterUpdate: (target) => {
     {
+      const { theme } = $.learn()
       const chrome = target.querySelector('.chrome')
       chrome.dataset.full = $.learn().fullScreen
+      chrome.style = `--theme: ${theme}`
     }
   },
 })
@@ -309,7 +322,6 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: gold;
     user-select: none; /* supported by Chrome and Opera */
     -webkit-user-select: none; /* Safari */
     -khtml-user-select: none; /* Konqueror HTML */
@@ -319,6 +331,7 @@ $.style(`
   }
 
   & .chrome {
+    background: var(--theme, lightgray);
     display: grid;
     height: 100%;
     grid-template-rows: 1fr auto;
@@ -387,17 +400,18 @@ $.style(`
   }
 
   & .clear {
-    color: rgba(255,255,255,.75);
+    color: var(--theme, lightgray);
     background: transparent;
     border-radius: none;
     border-radius: 0;
     border: none;
     padding: 8px 16px;
+    opacity: .5;
   }
 
   & .clear:hover,
   & .clear:focus {
-    color: rgba(255,255,255,.95);
+    opacity: 1;
   }
 
 
