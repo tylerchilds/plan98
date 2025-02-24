@@ -28,15 +28,15 @@
 
 :focus {
     position: relative;
-    outline: 2px solid gold;
-    outline-offset: -3px;
+    outline: 1px solid var(--theme, dodgerblue);
+    outline-offset: -1px;
 }
 
 button:-moz-focusring,
 [type="button"]:-moz-focusring,
 [type="reset"]:-moz-focusring,
 [type="submit"]:-moz-focusring {
-  outline: 2px solid gold;
+  outline: 2px solid var(--theme, dodgerblue);
 }
 
 
@@ -50,7 +50,7 @@ button:-moz-focusring,
 	--color-link-hover: hsl(230, 80%, 60%);
 	--color-link-active: hsl(350, 60%, 50%);
 
-	--focus-outline: 2px solid gold;
+	--focus-outline: 2px solid var(--theme, dodgerblue);
 	--focus-outline-offset: 2px;
 	--font-family: 'Recursive', 'Avenir', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Verdana', sans-serif;
 	--font-mono: 'BerkeleyMono', 'Monaco', 'Courier New', monospace;

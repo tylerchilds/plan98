@@ -14,7 +14,7 @@ const $ = elf('paper-pocket', {
   fullScreen: true,
   theme: localStorage.getItem('paper-pocket/theme') || 'lightgray',
   instrument: localStorage.getItem('paper-pocket/instrument') || 'violin',
-  rom: 'elf-tag'
+  rom: 'paper-nautiloids'
 })
 
 export function getInstruments() {

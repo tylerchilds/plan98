@@ -85,15 +85,21 @@ const $ = elf('paper-nautiloids', {
   settings: {
     instrument: {
       label: 'Instrument',
-      description: 'The sound of the console.',
+      description: 'The sound of the console',
       options: getInstruments(),
       value: getInstrument()
     },
     theme: {
       label: 'Theme',
-      description: 'The color of the console.',
+      description: 'The color of the console',
       options: getThemes(),
       value: getTheme()
+    },
+    debug: {
+      label: 'Debugger',
+      description: 'Toggle the debugger',
+      options: ['hide', 'show'],
+      value: 'hide'
     },
   },
   pause: {
@@ -769,10 +775,28 @@ $.style(`
     font-weight: bold;
   }
 
+  & .setting-label {
+    color: rgba(255,255,255,.85);
+    font-weight: bold;
+  }
+
+  & .setting-description {
+    color: rgba(255,255,255,.65);
+  }
+
+  & .setting.focused .setting-label {
+    color: rgba(0,0,0,.85);
+    font-weight: bold;
+  }
+
+  & .setting.focused .setting-description {
+    color: rgba(0,0,0,.65);
+  }
+
   & .setting-options {
     display: flex;
     gap: 4px;
-    padding-bottom: 8px;
+    padding: 8px 0;
   }
 
   & .setting-options .option:not(.selected) {
@@ -947,6 +971,7 @@ const musicRPC = {
   },
   'up': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('up', 150, () => {
         slideUp(params.id)
       })
@@ -954,6 +979,7 @@ const musicRPC = {
   },
   'down': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('down', 150, () => {
         slideDown(params.id)
       })
@@ -961,6 +987,7 @@ const musicRPC = {
   },
   'left': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('left', 150, () => {
         slideLeft(params.id)
       })
@@ -968,6 +995,7 @@ const musicRPC = {
   },
   'right': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('right', 150, () => {
         slideRight(params.id)
       })
@@ -1007,6 +1035,7 @@ const settingsRPC = {
   },
   'up': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('up', 150, () => {
         const { settingsKey, settings } = $.learn()
         const keys = Object.keys(settings)
@@ -1019,6 +1048,7 @@ const settingsRPC = {
   },
   'down': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('down', 150, () => {
         const { settingsKey, settings } = $.learn()
         const keys = Object.keys(settings)
@@ -1031,6 +1061,7 @@ const settingsRPC = {
   },
   'left': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('left', 150, () => {
         const { settingsKey, settings } = $.learn()
         const { options, value } = settings[settingsKey]
@@ -1049,6 +1080,7 @@ const settingsRPC = {
   },
   'right': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('right', 150, () => {
         const { settingsKey, settings } = $.learn()
         const { options, value } = settings[settingsKey]
@@ -1083,6 +1115,9 @@ const sideEffects = {
   },
   instrument: (value) => {
     setInstrument(value)
+  },
+  debug: (value) => {
+    setDebugger(value)
   }
 }
 
@@ -1131,6 +1166,7 @@ const pauseRPC = {
   },
   'up': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('up', 150, () => {
         const { pauseKey, pause, pauseIndex } = $.learn()
         const { list } = pause[pauseKey]
@@ -1143,6 +1179,7 @@ const pauseRPC = {
   },
   'down': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('down', 150, () => {
         const { pauseKey, pause, pauseIndex } = $.learn()
         const { list } = pause[pauseKey]
@@ -1155,6 +1192,7 @@ const pauseRPC = {
   },
   'left': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('left', 150, () => {
         const { pauseKey, pause } = $.learn()
         const keys = Object.keys(pause)
@@ -1168,6 +1206,7 @@ const pauseRPC = {
   },
   'right': (params) => {
     if(params.value === 1) {
+      document.activeElement.blur()
       debounceSpam('right', 150, () => {
         const { pauseKey, pause } = $.learn()
         const keys = Object.keys(pause)
@@ -1409,9 +1448,7 @@ function mod(x, n) {
   return ((x % n) + n) % n;
 }
 
-$.when('click', '.toolbelt-debugger', debugToolbelt)
-
-function debugToolbelt(event) {
+function setDebugger(visibility) {
   let console = document.body.querySelector('plan98-console')
   if(!console) {
     document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
@@ -1420,12 +1457,12 @@ function debugToolbelt(event) {
     console.classList.toggle('hidden')
   }
 
-  if(console.matches('.hidden')) {
-    consoleHide()
-    $.teach({ debuggerVisible: false })
-  } else {
+  if(visibility === 'show') {
     consoleShow()
     $.teach({ debuggerVisible: true })
+  } else {
+    consoleHide()
+    $.teach({ debuggerVisible: false })
   }
 
   event.target.classList.toggle('enabled')

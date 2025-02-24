@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <iframe src="/app/hyper-script"></iframe>
+    <paper-pocket></paper-pocket>
   `
 })
 
