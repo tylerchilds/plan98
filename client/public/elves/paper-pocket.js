@@ -220,6 +220,11 @@ function notification(node, method, params) {
   }
 }
 
+$.when('contextmenu', '[data-press]', (event) => {
+  event.preventDefault()
+  return false
+})
+
 $.when('pointerdown', '[data-press]', (event) => {
   const { press } = event.target.dataset
   overrideButton(0, buttons[press], 1)
