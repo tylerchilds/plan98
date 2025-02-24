@@ -105,6 +105,13 @@ export function overrideButton(slot, button, value) {
   overrides[`button:${slot}:${button}`] = value
 }
 
+self.addEventListener('beforeunload', () => {
+  const keys = Object.keys(overrides)
+  keys.forEach((key) => {
+    delete overrides[key]
+  })
+})
+
 export function checkButton(slot, button) {
   const { gamepads } = $.learn()
   if(!gamepads[slot]) return

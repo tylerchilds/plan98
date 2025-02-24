@@ -93,7 +93,7 @@ $.draw(target => {
         <input disabled value="Bulletin Board" class="app-name">
       </button>
       <button class="application" data-tray="${tray}" data-href="/app/dial-tone">
-        <span><sl-icon name="music-note"></<span>sl-icon></span>
+        <span><sl-icon name="music-note"></sl-icon></span>
 
         <input disabled value="Amateur Synth" class="app-name">
       </button>

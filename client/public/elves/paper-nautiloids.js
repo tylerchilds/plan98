@@ -80,7 +80,8 @@ const $ = elf('paper-nautiloids', {
   instances: {},
   mode: modes.game,
   settingsKey: 'instrument',
-  pauseKey: 'top',
+  pauseKey: 'favorites',
+  pauseIndex: 0,
   settings: {
     instrument: {
       label: 'Instrument',
@@ -96,18 +97,113 @@ const $ = elf('paper-nautiloids', {
     },
   },
   pause: {
-    top: {
-
+    favorites: {
+      label: "Favorites",
+      list: [
+        {
+          label: 'Irix Launcher',
+          url: '/app/irix-launcher'
+        },
+        {
+          label: 'Map',
+          url: '/app/middle-earth'
+        },
+        {
+          label: 'Draw Term 98',
+          url: '/app/draw-term'
+        },
+        {
+          label: 'File System',
+          url: '/app/file-system'
+        },
+        {
+          label: 'Sonic &amp; Knuckles',
+          url: '/app/sonic-knuckles'
+        },
+      ]
+    },
+    apps: {
+      label: "Apps",
+      list: [
+        {
+          label: 'Secure Mail',
+          url: '/app/secure-mail'
+        },
+        {
+          label: 'Secure Messenger',
+          url: '/app/secure-messenger'
+        },
+        {
+          label: 'Bulletin Board',
+          url: `/app/bulletin-board?src=/private/boards/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
+        },
+        {
+          label: 'Public TV',
+          url: '/app/public-broadcast'
+        }
+      ]
     },
     art: {
-
+      label: "Art",
+      list: [
+        {
+          label: 'Chalk Board',
+          url: '/app/chalk-board'
+        },
+        {
+          label: 'Paint',
+          url: '/app/paint-app'
+        },
+      ]
     },
     music: {
+      label: "Music",
+      list: [
+        {
+          label: 'Dial Tone',
+          url: '/app/dial-tone'
+        },
+        {
+          label: 'Sillyz Ocarina',
+          url: '/app/sillyz-ocarina'
+        },
+        {
+          label: 'Music Walk',
+          url: '/app/music-walk'
+        },
+      ]
 
     },
     code: {
-
+      label: "Coding",
+      list: [
+        {
+          label: 'Code Module',
+          url: '/app/code-module?src=/public/elves/code-module.js'
+        },
+        {
+          label: 'Hyper Script',
+          url: '/app/hyper-script'
+        },
+        {
+          label: 'Generic Park',
+          url: '/app/generic-park'
+        },
+        {
+          label: 'Collaborative Text',
+          url: `/app/simpleton-client?src=/private/text/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+        }
+      ]
     },
+    templates: {
+      label: "Templates",
+      list: [
+        {
+          label: 'Swipe Swipe',
+          url: '/app/swipe-swipe'
+        },
+      ]
+    }
   }
 })
 
@@ -177,12 +273,6 @@ $.draw((target) => {
   const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
   if(!instances[target.id]) return
-  
-  if(mode === modes.pause) {
-    return `
-      Pause
-    `
-  }
 
   if(mode === modes.settings) {
     return renderSettings()
@@ -197,7 +287,7 @@ $.draw((target) => {
   return `
     <div class="game" style="${colorVariables}">
       <div class="scene">
-         <a-scene vr-mode-ui="enabled: false">
+        <a-scene device-orientation-permission-ui="enabled: false">
           <a-entity
             cursor="rayOrigin: mouse"
             raycaster="near: 0.1; far: 100; objects: .note;"
@@ -245,6 +335,14 @@ $.draw((target) => {
         active.scrollIntoView()
       }
     }
+
+    {
+      const active = target.querySelector('.menu-link.active')
+      if(active) {
+        active.scrollIntoView()
+      }
+    }
+
 
     {
       const grid = target.querySelector('.grid')
@@ -319,7 +417,27 @@ function createRow(instance) {
 }
 
 function renderPause() {
+  const { pause, pauseIndex, pauseKey } = $.learn()
 
+  const { list, label } = pause[pauseKey]
+
+  const items = list.map((item, i) => {
+    const { label, url } = item
+    return `
+      <a href="${url}" class="menu-link ${pauseIndex === i ? 'active':''}">
+        ${label}
+      </button>
+    `
+  }).join('')
+
+  return `
+    <div class="pause-menu">
+      <div class="pause-label">${label}</div>
+      <div class="pause-list">
+        ${items}
+      </div>
+    </div>
+  `
 
 }
 
@@ -441,6 +559,14 @@ function content(instance) {
 
 }
 
+function launchItem(event) {
+  const { pauseKey, pause, pauseIndex } = $.learn()
+  const { list } = pause[pauseKey]
+  const { url } = list[pauseIndex]
+  window.location.href = url
+}
+
+
 function toggleSettings (event) {
   const { mode } = $.learn()
   const newMode = mode !== modes.settings ? modes.settings : modes.game
@@ -511,6 +637,18 @@ $.style(`
     touch-action: none;
   }
 
+  & .pause-menu {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .pause-label {
+    color: rgba(255,255,255,.5);
+    padding: 8px;
+    font-weight: bold;
+  }
+
+
   & .menu-list {
     height: 100%;
     overflow: auto;
@@ -522,7 +660,7 @@ $.style(`
   }
 
   & .title {
-    font-size: 2rem;
+    font-size: 1.5rem;
     font-weight: bold;
   }
 
@@ -675,6 +813,20 @@ $.style(`
     color: white;
   }
 
+  & .menu-link {
+    color: rgba(255,255,255,.85);
+    display: block;
+    text-decoration: none;
+    padding: 4px 8px;
+    line-height: 1;
+    font-size: 2rem;
+    font-weight: 100;
+  }
+
+  & .menu-link.active {
+    font-weight: bold;
+    color: var(--theme, white);
+  }
 `)
 
 $.when('json-rpc', (event) => {
@@ -837,6 +989,9 @@ const settingsRPC = {
   'a': (params) => {
   },
   'b': (params) => {
+    toggleSpam('b', params.value, () => {
+      toggleSettings()
+    })
   },
   'x': (params) => {
   },
@@ -864,7 +1019,6 @@ const settingsRPC = {
   },
   'down': (params) => {
     if(params.value === 1) {
-      console.log('why')
       debounceSpam('down', 150, () => {
         const { settingsKey, settings } = $.learn()
         const keys = Object.keys(settings)
@@ -954,8 +1108,14 @@ function selectedSettingsReducer(state, payload) {
 
 const pauseRPC = {
   'a': (params) => {
+    if(params.value === 1) {
+      launchItem()
+    }
   },
   'b': (params) => {
+    toggleSpam('b', params.value, () => {
+      toggleSettings()
+    })
   },
   'x': (params) => {
   },
@@ -970,12 +1130,54 @@ const pauseRPC = {
   'rt': (params) => {
   },
   'up': (params) => {
+    if(params.value === 1) {
+      debounceSpam('up', 150, () => {
+        const { pauseKey, pause, pauseIndex } = $.learn()
+        const { list } = pause[pauseKey]
+        const index = mod((pauseIndex - 1), list.length)
+        $.teach({
+          pauseIndex: index,
+        })
+      })
+    }
   },
   'down': (params) => {
+    if(params.value === 1) {
+      debounceSpam('down', 150, () => {
+        const { pauseKey, pause, pauseIndex } = $.learn()
+        const { list } = pause[pauseKey]
+        const index = mod((pauseIndex + 1), list.length)
+        $.teach({
+          pauseIndex: index,
+        })
+      })
+    }
   },
   'left': (params) => {
+    if(params.value === 1) {
+      debounceSpam('left', 150, () => {
+        const { pauseKey, pause } = $.learn()
+        const keys = Object.keys(pause)
+        const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
+        $.teach({
+          pauseIndex: 0,
+          pauseKey: keys[index]
+        })
+      })
+    }
   },
   'right': (params) => {
+    if(params.value === 1) {
+      debounceSpam('right', 150, () => {
+        const { pauseKey, pause } = $.learn()
+        const keys = Object.keys(pause)
+        const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
+        $.teach({
+          pauseIndex: 0,
+          pauseKey: keys[index]
+        })
+      })
+    }
   },
   'select': (params) => {
     toggleSpam('select', params.value, () => {
