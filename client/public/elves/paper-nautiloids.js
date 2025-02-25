@@ -338,7 +338,10 @@ $.draw((target) => {
     {
       const active = target.querySelector('.setting.focused .option.selected')
       if(active) {
-        active.scrollIntoView()
+        active.scrollIntoView({
+          block: "nearest",  // Keeps the vertical position as close as possible
+          inline: "center"    // Scrolls only in the inline direction
+        });
       }
     }
 
