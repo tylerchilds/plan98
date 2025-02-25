@@ -14,12 +14,15 @@ import {
 } from './paper-pocket.js'
 import 'aframe'
 
+const gridUnit = 16
+const spatialOffset = 3
+
 const orientation = {
 	x: '0', y: '0', z: '0', yaw: '0', pitch: '0', roll: '0'
 }
 
 const camera = {
-	x: '0', y: '10', z: '10', yaw: '-60', pitch: '0', roll: '0'
+	x: '0', y: gridUnit, z: 8*gridUnit, yaw: '0', pitch: '0', roll: '0'
 }
 
 const lightnessStops = [
@@ -275,6 +278,16 @@ function aBox(priority, conflicts) {
 	}
 }
 
+function aText(priority, conflicts) {
+	return {
+		avatar: 'a-text',
+		...orientation,
+		...position(priority),
+		args: reduceConflicts(conflicts)
+	}
+}
+
+
 $.draw((target) => {
   const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
@@ -361,7 +374,7 @@ $.draw((target) => {
         const instance = instances[target.id]
         const { y } = instance
 
-        const nodes = [y-1,y,y+1].map(createRow(instance)).join('')
+        const nodes = [y-3,y-2,y-1,y,y+1,y+2,y+3].map(createRow(instance)).join('')
 
         requestIdleCallback(() => {
           grid.innerHTML = nodes
@@ -385,41 +398,59 @@ function createRow(instance) {
   return function row(row, yIndex) {
     if(!boxes) return ''
 
-    return [x-1,x,x+1].map((column, xIndex) => {
+    return [x-3,x-2,x-1,x,x+1,x+2,x+3].map((column, xIndex) => {
       if(column<0||column>=columns||row<0||row>=rows) {
         return draw3d(
           aBox({
-            x: 5 * (xIndex - 1),
-            z: 5 * (yIndex) - 1,
-            y: 2,
+            x: gridUnit * (xIndex - 3),
+            z: gridUnit * (yIndex) - 1,
+            y: gridUnit/2,
             pitch: 0
           }, {
             wireframe: true,
             color: 'firebrick',
-            width: 5,
-            depth: 5,
-            height: 5,
+            width: gridUnit,
+            depth: gridUnit,
+            height: gridUnit,
           })
         )
       }
       const box = boxes[`${row}-${column}`] || {}
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
-      return draw3d(
+      const cube = draw3d(
         aBox({
-          x: 5 *(xIndex - 1),
-          z: 5 * (yIndex) - 1,
+          x: gridUnit *(xIndex - 3),
+          z: gridUnit * (yIndex) - 1,
           y: 0,
           pitch: 0
         }, {
           wireframe: box.revealed,
           color: color.value,
-          width: 5,
-          depth: 5,
+          height: gridUnit/4,
+          width: gridUnit,
+          depth: gridUnit,
           'data-x': column,
           'data-y': row,
           class: 'note'
         })
       )
+
+      const note = noteFromGrid(column, row)
+      const text = draw3d(
+        aText({
+          x: gridUnit *(xIndex - 3) - 2,
+          z: gridUnit * (yIndex) - 1 + gridUnit/2,
+          y: gridUnit/4+1,
+        }, {
+          value: note,
+          width: gridUnit*4,
+          height: gridUnit*4,
+          opacity: .5,
+          color: 'white',
+        })
+      )
+
+      return `${cube}${text}`
 
     }).join('')
   }
@@ -613,7 +644,7 @@ function slideUp(id) {
   if(!instances[id]) return
   const { y } = instances[id]
 
-  if(y<=0) return
+  if(y<=-spatialOffset) return
   updateInstance({ id }, { y: y - 1 })
 }
 
@@ -622,7 +653,7 @@ function slideDown(id) {
   if(!instances[id]) return
   const { y, rows } = instances[id]
 
-  if(y>=rows-1) return
+  if(y>=rows-1-spatialOffset) return
   updateInstance({ id }, { y: y + 1 })
 }
 
@@ -864,7 +895,7 @@ $.when('json-rpc', (event) => {
   if(mode === modes.game) {
     if(instances[id]) {
       const { x, y } = instances[id]
-      const root = noteFromGrid(x, y)
+      const root = noteFromGrid(x, y+spatialOffset)
 
       const more = { root, id }
 
@@ -1357,7 +1388,7 @@ function seed(target) {
     updateInstance({ id }, {
       root: 60,
       x: Math.floor(columns/2),
-      y: Math.floor(rows/2),
+      y: Math.floor(rows/2) - spatialOffset,
       id,
       rows,
       columns,
