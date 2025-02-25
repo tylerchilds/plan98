@@ -31,13 +31,16 @@ export function getInstrument() {
   return $.learn().instrument
 }
 
+let ready
 function loadInstrument(instrument) {
+  ready = false
   current = SampleLibrary.load({
     instruments: instrument,
     baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/"
   })
 
   Tone.loaded().then(function() {
+    ready = true
     current.release = .5;
     current.toDestination();
   })
@@ -61,13 +64,13 @@ export function getTheme() {
 const attacking = {}
 
 export function attack(note) {
-  if(!current || attacking[note]) return
+  if(!ready || attacking[note]) return
   current.triggerAttack(Tone.Frequency(note, "midi").toNote());
   attacking[note] = true
 }
 
 export function attackRelease(note) {
-  if(!current) return
+  if(!ready) return
   current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), '2n');
   attacking[note] = true
 }
@@ -76,7 +79,7 @@ export function release(note) {
   if(attacking[note]) {
     delete attacking[note]
   }
-  if(!current) return
+  if(!ready) return
   current.triggerRelease(Tone.Frequency(note, "midi").toNote());
 }
 
