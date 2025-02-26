@@ -233,12 +233,12 @@ $.when('dblclick', '[data-press]', (event) => {
   return false
 })
 
-$.when('pointercancel', '[data-press]', (event) => {
+$.when('touchcancel', '[data-press]', (event) => {
   event.preventDefault()
   return false
 })
 
-$.when('pointerend', '[data-press]', (event) => {
+$.when('touchend', '[data-press]', (event) => {
   event.preventDefault()
   return false
 })
