@@ -337,6 +337,8 @@ $.draw((target) => {
     <div class="game" style="${colorVariables}">
       <div class="scene">
         <a-scene device-orientation-permission-ui="enabled: false">
+          <a-light type="ambient" color="white"></a-light>
+          <a-light type="directional" intensity="0.3"></a-light>
           <a-entity
             cursor="rayOrigin: mouse"
             raycaster="near: 0.1; far: 100; objects: .note;"
@@ -406,7 +408,7 @@ $.draw((target) => {
         const nodes = [y-3,y-2,y-1,y,y+1,y+2,y+3].map(createRow(instance)).join('')
         console.log({ activeNotes })
 
-        requestIdleCallback(() => {
+        requestAnimationFrame(() => {
           grid.innerHTML = nodes
         })
       }
@@ -458,6 +460,7 @@ function createRow(instance) {
           wireframe: box.revealed,
           color: color.value,
           height: gridUnit/4,
+          material: activeNotes[note]?'emissive:#111; metalness:0.5':'',
           width: gridUnit,
           depth: gridUnit,
           'data-x': column,
