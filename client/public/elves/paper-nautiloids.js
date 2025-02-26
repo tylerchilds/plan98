@@ -695,7 +695,7 @@ function slideDown(id) {
 
 $.style(`
   & {
-    background: black;
+    background: linear-gradient(rgba(0,0,0,.75), rgba(255,255,255,.5) 49%, rgba(255,255,255,.6) 50%, rgba(255,255,255,.5) 51%, rgba(255,255,255,.75)), var(--theme, black);
     display: block;
     width: 100%;
     height: 100%;
