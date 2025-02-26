@@ -216,7 +216,10 @@ const $ = elf('paper-nautiloids', {
   }
 })
 
+const manualNotes = {}
+
 function maybe(id, value, note) {
+  if(manualNotes[note]) return
   if(value === 1) {
     yes(id, note)
   } else {
@@ -953,8 +956,14 @@ $.when('json-rpc', (event) => {
 
 $.when('click', '.note', (event) => {
   const { x, y } = event.target.dataset
+  const { id } = event.target.closest($.link)
   const note = noteFromGrid(parseInt(x), parseInt(y))
-  attackRelease(note)
+  mark(id, note)
+  manualNotes[note] = true
+  attackRelease(note, () => {
+    unmark(id, note)
+    delete manualNotes[note]
+  })
 })
 
 const spamCache = {}

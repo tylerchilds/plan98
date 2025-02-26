@@ -69,10 +69,14 @@ export function attack(note) {
   attacking[note] = true
 }
 
-export function attackRelease(note) {
-  if(!ready) return
-  current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), '2n');
-  attacking[note] = true
+export function attackRelease(note, callback) {
+  const time = '2n'
+  if(ready) {
+    current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), time);
+    attacking[note] = true
+  }
+
+  setTimeout(callback, Tone.Time(time).toMilliseconds())
 }
 
 export function release(note) {
