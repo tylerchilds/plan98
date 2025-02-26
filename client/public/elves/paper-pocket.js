@@ -233,6 +233,16 @@ $.when('dblclick', '[data-press]', (event) => {
   return false
 })
 
+$.when('pointercancel', '[data-press]', (event) => {
+  event.preventDefault()
+  return false
+})
+
+$.when('pointerend', '[data-press]', (event) => {
+  event.preventDefault()
+  return false
+})
+
 $.when('pointerdown', '[data-press]', (event) => {
   const { press } = event.target.dataset
   overrideButton(0, buttons[press], 1)
