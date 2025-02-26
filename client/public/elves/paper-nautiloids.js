@@ -216,6 +216,36 @@ const $ = elf('paper-nautiloids', {
   }
 })
 
+function maybe(id, value, note) {
+  if(value === 1) {
+    yes(id, note)
+  } else {
+    no(id, note)
+  }
+}
+
+function yes(id, note) {
+  attack(note)
+  mark(id, note)
+}
+
+function no(id, note) {
+  release(note)
+  unmark(id, note)
+}
+
+function mark(id, note) {
+  updateNote({ id, note }, true)
+}
+
+function unmark(id, note) {
+  const { instances } = $.learn()
+  const { activeNotes } = instances[id]
+  if(activeNotes[note]) {
+    updateNote({ id, note }, false)
+  }
+}
+
 function noteFromGrid(column, row) {
   const { columns } = $.learn()
 
@@ -365,16 +395,16 @@ $.draw((target) => {
       }
     }
 
-
     {
       const grid = target.querySelector('.grid')
       if(grid) {
         const { instances } = $.learn()
 
         const instance = instances[target.id]
-        const { y } = instance
+        const { y, activeNotes } = instance
 
         const nodes = [y-3,y-2,y-1,y,y+1,y+2,y+3].map(createRow(instance)).join('')
+        console.log({ activeNotes })
 
         requestIdleCallback(() => {
           grid.innerHTML = nodes
@@ -394,7 +424,7 @@ $.draw((target) => {
 })
 
 function createRow(instance) {
-  const { x, columns, rows, boxes } = instance
+  const { x, columns, rows, boxes, activeNotes } = instance
   return function row(row, yIndex) {
     if(!boxes) return ''
 
@@ -415,13 +445,14 @@ function createRow(instance) {
           })
         )
       }
+      const note = noteFromGrid(column, row)
       const box = boxes[`${row}-${column}`] || {}
       const color = colorFromGrid(mod(column, columns), mod(row, rows))
       const cube = draw3d(
         aBox({
           x: gridUnit *(xIndex - 3),
           z: gridUnit * (yIndex) - 1,
-          y: 0,
+          y: activeNotes[note] ? - 2 : 0,
           pitch: 0
         }, {
           wireframe: box.revealed,
@@ -435,7 +466,6 @@ function createRow(instance) {
         })
       )
 
-      const note = noteFromGrid(column, row)
       const text = draw3d(
         aText({
           x: gridUnit *(xIndex - 3) - 2,
@@ -948,60 +978,36 @@ function toggleSpam(code, value, callback) {
 
 const musicRPC = {
   'a': (params) => {
-    if(params.value === 1) {
-      attack(params.root)
-    } else {
-      release(params.root)
-    }
+    const note = params.root
+    maybe(params.id, params.value, note)
   },
   'b': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 7)
-    } else {
-      release(params.root + 7)
-    }
+    const note = params.root + 7
+    maybe(params.id, params.value, note)
   },
   'x': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 2)
-    } else {
-      release(params.root + 2)
-    }
+    const note = params.root + 2
+    maybe(params.id, params.value, note)
   },
   'y': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 9)
-    } else {
-      release(params.root + 9)
-    }
+    const note = params.root + 9
+    maybe(params.id, params.value, note)
   },
   'lb': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 4)
-    } else {
-      release(params.root + 4)
-    }
+    const note = params.root + 4
+    maybe(params.id, params.value, note)
   },
   'rb': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 11)
-    } else {
-      release(params.root + 11)
-    }
+    const note = params.root + 11
+    maybe(params.id, params.value, note)
   },
   'lt': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 6)
-    } else {
-      release(params.root + 6)
-    }
+    const note = params.root + 6
+    maybe(params.id, params.value, note)
   },
   'rt': (params) => {
-    if(params.value === 1) {
-      attack(params.root + 13)
-    } else {
-      release(params.root + 13)
-    }
+    const note = params.root + 13
+    maybe(params.id, params.value, note)
   },
   'up': (params) => {
     if(params.value === 1) {
@@ -1395,6 +1401,7 @@ function seed(target) {
       ratio,
       room,
       boxes,
+      activeNotes: {},
       mimes,
       maxFlags,
       totalFlags: 0
@@ -1438,6 +1445,25 @@ function updateBox({ x, y, id }, payload) {
     }
   })
 }
+
+function updateNote({ id, note }, payload) {
+  $.teach(payload, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          activeNotes: {
+            ...s.instances[id].activeNotes,
+            [note]: p
+          }
+        }
+      }
+    }
+  })
+}
+
 
 function infer(rows, columns, y, x, boxes) {
   const minX = Math.max(0, x-1);
