@@ -87,7 +87,7 @@ const $ = elf('paper-nautiloids', {
   tick: 0,
   room: '0001',
   instances: {},
-  mode: modes.game,
+  mode: modes.pause,
   settingsKey: 'instrument',
   pauseKey: 'favorites',
   pauseIndex: 0,
@@ -434,7 +434,6 @@ $.draw((target) => {
         const { y, activeNotes } = instance
 
         const nodes = [y-3,y-2,y-1,y,y+1,y+2,y+3].map(createRow(instance)).join('')
-        console.log({ activeNotes })
 
         requestAnimationFrame(() => {
           grid.innerHTML = nodes
