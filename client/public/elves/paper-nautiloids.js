@@ -73,6 +73,7 @@ const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
 
 const modes = {
   game: 'game',
+  app: 'app',
   settings: 'settings',
   pause: 'pause',
 }
@@ -88,6 +89,7 @@ const $ = elf('paper-nautiloids', {
   room: '0001',
   instances: {},
   mode: modes.pause,
+  backMode: modes.game,
   settingsKey: 'instrument',
   pauseKey: 'favorites',
   pauseIndex: 0,
@@ -134,6 +136,10 @@ const $ = elf('paper-nautiloids', {
     favorites: {
       label: "Favorites",
       list: [
+        {
+          label: 'Paper Nautiloids',
+          mode: modes.game
+        },
         {
           label: 'Irix Launcher',
           url: '/app/irix-launcher'
@@ -359,6 +365,11 @@ $.draw((target) => {
     return renderPause()
   }
 
+  if(mode === modes.app) {
+    return renderApp()
+  }
+
+
   if(target.querySelector('.scene')) return
 
   return `
@@ -516,15 +527,23 @@ function createRow(instance) {
   }
 }
 
+function renderApp() {
+  const { app } = $.learn()
+
+  return `
+    <iframe src="${app}" title="app"></iframe>
+  `
+}
+
 function renderPause() {
   const { pause, pauseIndex, pauseKey } = $.learn()
 
   const { list, label } = pause[pauseKey]
 
   const items = list.map((item, i) => {
-    const { label, url } = item
+    const { label, mode, url } = item
     return `
-      <a href="${url}" class="menu-link ${pauseIndex === i ? 'active':''}">
+      <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${pauseIndex === i ? 'active':''}">
         ${label}
       </button>
     `
@@ -662,21 +681,59 @@ function content(instance) {
 function launchItem(event) {
   const { pauseKey, pause, pauseIndex } = $.learn()
   const { list } = pause[pauseKey]
-  const { url } = list[pauseIndex]
-  window.location.href = url
+  const { url, mode } = list[pauseIndex]
+
+  if(mode) {
+    $.teach({ mode, app: null })
+    return
+  }
+
+  if(url) {
+    $.teach({ mode: 'app', app: url })
+    return
+  }
 }
 
+$.when('click', '.menu-link', (event) => {
+  const { href, mode, index } = event.target.dataset
 
-function toggleSettings (event) {
-  const { mode } = $.learn()
-  const newMode = mode !== modes.settings ? modes.settings : modes.game
-  $.teach({ mode: newMode })
+  const pauseIndex = parseInt(index)
+
+  if(mode) {
+    $.teach({ mode, app: null, pauseIndex })
+    return
+  }
+
+  if(href) {
+    $.teach({ mode: 'app', app: href, pauseIndex })
+    return
+  }
+})
+
+
+function toggleSettings () {
+  const { mode, backMode } = $.learn()
+
+  if(mode !== modes.settings) {
+    $.teach({
+      mode: modes.settings
+    })
+  } else {
+    $.teach({ mode: backMode })
+  }
 }
 
 function togglePause (event) {
-  const { mode } = $.learn()
-  const newMode = mode !== modes.pause ? modes.pause : modes.game
-  $.teach({ mode: newMode })
+  const { mode, backMode } = $.learn()
+
+  if(mode !== modes.pause) {
+    $.teach({
+      mode: modes.pause
+    })
+  } else {
+    $.teach({ mode: backMode })
+  }
+
 }
 
 
@@ -940,6 +997,8 @@ $.style(`
     line-height: 1;
     font-size: 2rem;
     font-weight: 100;
+    background: transparent;
+    border: none;
   }
 
   & .menu-link.active {
@@ -965,6 +1024,13 @@ $.when('json-rpc', (event) => {
       }
     }
   }
+
+  if(mode === modes.app) {
+    if(appRPC[method]) {
+      appRPC[method](params)
+    }
+  }
+
 
   if(mode === modes.settings) {
     if(settingsRPC[method]) {
@@ -1080,15 +1146,57 @@ const musicRPC = {
   },
   'select': (params) => {
     toggleSpam('select', params.value, () => {
+      $.teach({ backMode: modes.game })
       toggleSettings()
     })
   },
   'start': (params) => {
     toggleSpam('start', params.value, () => {
+      $.teach({ backMode: modes.game })
       togglePause()
     })
   },
 }
+
+const appRPC = {
+  'a': (params) => {
+  },
+  'b': (params) => {
+  },
+  'x': (params) => {
+  },
+  'y': (params) => {
+  },
+  'lb': (params) => {
+  },
+  'rb': (params) => {
+  },
+  'lt': (params) => {
+  },
+  'rt': (params) => {
+  },
+  'up': (params) => {
+  },
+  'down': (params) => {
+  },
+  'left': (params) => {
+  },
+  'right': (params) => {
+  },
+  'select': (params) => {
+    toggleSpam('select', params.value, () => {
+      $.teach({ backMode: modes.app })
+      toggleSettings()
+    })
+  },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      $.teach({ backMode: modes.app })
+      togglePause()
+    })
+  },
+}
+
 
 const settingsRPC = {
   'a': (params) => {
