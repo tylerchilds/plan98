@@ -2,6 +2,12 @@ import elf from '@silly/elf'
 import Color from "colorjs.io"
 import { consoleShow, consoleHide } from './plan98-console.js'
 import {
+  getFontSizeOptions,
+  getFontSize,
+  setFontSize,
+  getFontFamilyOptions,
+  getFontFamily,
+  setFontFamily,
   getInstruments,
   getInstrument,
   setInstrument,
@@ -98,6 +104,25 @@ const $ = elf('paper-nautiloids', {
       options: getThemes(),
       value: getTheme()
     },
+    fontSize: {
+      label: 'Font Size',
+      description: 'The size of words and numbers.',
+      options: getFontSizeOptions(),
+      value: getFontSize(),
+    },
+    fontFamily: {
+      label: 'Font Family',
+      description: 'The shapes of the letters.',
+      options: getFontFamilyOptions(),
+      value: getFontFamily(),
+    },
+    invertY: {
+      label: 'Invert Y-Axis',
+      description: 'Up is down, down is up.',
+      options: ['normal','inverted'],
+      value: 'inverted',
+    },
+
     debug: {
       label: 'Debugger',
       description: 'Toggle the debugger',
@@ -695,7 +720,7 @@ function slideDown(id) {
 
 $.style(`
   & {
-    background: linear-gradient(rgba(0,0,0,.75), rgba(255,255,255,.5) 49%, rgba(255,255,255,.6) 50%, rgba(255,255,255,.5) 51%, rgba(255,255,255,.75)), var(--theme, black);
+    background: linear-gradient(rgba(0,0,0,1), rgba(0,0,0,.5) 49%, rgba(255,255,255,.25) 50%, rgba(128,128,128,.25) 51%, rgba(255,255,255,.75)), var(--root-theme, black);
     display: block;
     width: 100%;
     height: 100%;
@@ -716,6 +741,7 @@ $.style(`
   & .pause-menu {
     height: 100%;
     overflow: auto;
+    background: rgba(0,0,0,.85);
   }
 
   & .pause-label {
@@ -903,7 +929,7 @@ $.style(`
   }
 
   & .option.selected {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--theme, black);
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, black);
     color: white;
   }
 
@@ -919,7 +945,7 @@ $.style(`
 
   & .menu-link.active {
     font-weight: bold;
-    color: var(--theme, white);
+    color: var(--root-theme, white);
   }
 `)
 
@@ -1167,6 +1193,12 @@ const sideEffects = {
   },
   instrument: (value) => {
     setInstrument(value)
+  },
+  fontSize: (value) => {
+    setFontSize(value)
+  },
+  fontFamily: (value) => {
+    setFontFamily(value)
   },
   debug: (value) => {
     setDebugger(value)

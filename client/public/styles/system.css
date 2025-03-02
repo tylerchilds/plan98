@@ -52,6 +52,7 @@ button:-moz-focusring,
 
 	--focus-outline: 2px solid var(--theme, dodgerblue);
 	--focus-outline-offset: 2px;
+  --font-size-root: 16px;
 	--font-family: 'Recursive', 'Avenir', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Verdana', sans-serif;
 	--font-mono: 'BerkeleyMono', 'Monaco', 'Courier New', monospace;
 	--font-heading: var(--font-family);
@@ -211,7 +212,7 @@ button:-moz-focusring,
   --rhythm-twelfth: calc((1/12) * var(--rhythm));
   --rhythm-sixteenth: calc((1/16) * var(--rhythm));
   --line-height: 1.5;
-  --font-size: 1.2rem;
+  --font-size: var(--font-size-root);
 }
 
 html {
@@ -227,7 +228,7 @@ body {
 }
 
 body {
-  font-size: var(--font-size);
+  font-size: var(--font-size-root);
   line-height: var(--line-height);
 	font-family: var(--font-body);
   position: relative;

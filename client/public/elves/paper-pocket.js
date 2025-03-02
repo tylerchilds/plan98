@@ -7,15 +7,63 @@ let current
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
-const themes = ['firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
+const themes = ['lightgray', 'firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
 
+const fontSizes = ['tiny', 'small', 'regular', 'large', 'huge']
+const fontSizeMap = {
+  tiny: '10px',
+  small: '13px',
+  regular: '16px',
+  large: '18px',
+  huge: '21px',
+}
+
+const fontFamilies = ['recursive', 'arial', 'verdana', 'helvetica', 'tahoma', 'times new roman', 'georgia', 'garamond', 'palatino']
+const fontFamilyMap = {
+  recursive: "'Recursive', 'Avenir', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Verdana', sans-serif",
+  arial: "'Arial', sans-serif",
+  verdana: "'Verdana', sans-serif",
+  helvetica: "'Helvetica', sans-serif",
+  'times new roman': "'Times New Roman', serif",
+  georgia: "'Georgia', serif",
+  garamond: "'Garamond', serif",
+  palatino: "'Palatino', serif",
+}
 
 const $ = elf('paper-pocket', {
   fullScreen: true,
   theme: localStorage.getItem('paper-pocket/theme') || 'lightgray',
   instrument: localStorage.getItem('paper-pocket/instrument') || 'violin',
+  fontSize: localStorage.getItem('paper-pocket/fontSize') || 'regular',
+  fontFamily: localStorage.getItem('paper-pocket/fontFamily') || 'recursive',
   rom: 'paper-nautiloids'
 })
+
+export function getFontSizeOptions() {
+  return fontSizes
+}
+
+export function setFontSize(fontSize) {
+  localStorage.setItem('paper-pocket/fontSize', fontSize)
+  $.teach({ fontSize })
+}
+
+export function getFontSize() {
+  return $.learn().fontSize || 'regular'
+}
+
+export function getFontFamilyOptions() {
+  return fontFamilies
+}
+
+export function setFontFamily(fontFamily) {
+  localStorage.setItem('paper-pocket/fontFamily', fontFamily)
+  $.teach({ fontFamily })
+}
+
+export function getFontFamily() {
+  return $.learn().fontFamily || 'Recursive'
+}
 
 export function getInstruments() {
   return instruments
@@ -28,7 +76,7 @@ export function setInstrument(instrument) {
 }
 
 export function getInstrument() {
-  return $.learn().instrument
+  return $.learn().instrument || 'violin'
 }
 
 let ready
@@ -148,11 +196,35 @@ $.draw((target) => {
   },
   afterUpdate: (target) => {
     {
-      const { theme } = $.learn()
       const chrome = target.querySelector('.chrome')
       chrome.dataset.full = $.learn().fullScreen
-      chrome.style = `--theme: ${theme}`
     }
+
+    {
+      const { theme } = $.learn()
+      if(target.theme !== theme) {
+        console.log(theme)
+        target.theme = theme
+        document.body.style.setProperty('--root-theme', theme)
+      }
+    }
+
+    {
+      const { fontSize } = $.learn()
+      if(target.fontSize !== fontSize) {
+        target.fontSize = fontSize
+        document.documentElement.style.setProperty('--font-size-root', fontSizeMap[fontSize])
+      }
+    }
+
+    {
+      const { fontFamily } = $.learn()
+      if(target.fontFamily !== fontFamily) {
+        target.fontSize = fontFamily
+        document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
+      }
+    }
+
   },
 })
 
@@ -422,7 +494,7 @@ $.style(`
   }
 
   & .chrome {
-    background: var(--theme, lightgray);
+    background: var(--root-theme, lightgray);
     display: grid;
     height: 100%;
     grid-template-rows: 1fr auto;
@@ -491,7 +563,7 @@ $.style(`
   }
 
   & .clear {
-    color: var(--theme, lightgray);
+    color: var(--root-theme, lightgray);
     background: transparent;
     border-radius: none;
     border-radius: 0;
