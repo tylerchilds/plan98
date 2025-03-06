@@ -1,6 +1,6 @@
 import module from '@silly/tag'
 import { toast } from './plan98-toast.js'
-import { vim } from "@replit/codemirror-vim"
+import { vim, Vim } from "@replit/codemirror-vim"
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
 import { css } from "@codemirror/lang-css";
@@ -41,8 +41,18 @@ $.when('click', '.preview', (event) => {
   const src = event.target.closest($.link).getAttribute('src')
   self.open(src, '_blank')
 })
+
+Vim.defineEx('write', 'w', function(event) {
+  const { file, src } = sourceFile(document.querySelector($.link))
+  saveFile(src, file)
+});
+
 $.when('click', '.publish', (event) => {
   const { file, src } = sourceFile(event.target)
+  saveFile(src, file)
+})
+
+function saveFile(src, file) {
 
   const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
   const headers = {
@@ -65,7 +75,7 @@ $.when('click', '.publish', (event) => {
       ? toast('Are you even allowed to save, bro?', { type: 'error' })
       : toast('File saved!', { type: 'success' })
   })
-})
+}
 
 $.when('change', 'select', (event) => {
   const { value } = event.target
