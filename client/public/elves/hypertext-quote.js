@@ -7,7 +7,7 @@ $.style(`
     display: block;
     place-self: end center;
     padding: 0 1rem;
-    margin: 1rem 0;
+    margin: 1rem 3rem;
   }
   @media (min-width: 768px) {
     & {

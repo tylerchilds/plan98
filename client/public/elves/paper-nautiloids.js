@@ -88,7 +88,7 @@ const $ = elf('paper-nautiloids', {
   tick: 0,
   room: '0001',
   instances: {},
-  mode: modes.pause,
+  mode: modes.game,
   backMode: modes.game,
   settingsKey: 'instrument',
   pauseKey: 'favorites',

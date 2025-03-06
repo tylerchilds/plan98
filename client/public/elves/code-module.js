@@ -10,6 +10,8 @@ import {
 
 const $ = module('code-module')
 
+const cursors = {}
+
 function sourceFile(target) {
   const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
   const data = $.learn()[src] || {}
@@ -22,7 +24,7 @@ function sourceFile(target) {
     : (function initialize() {
       schedule(() => {
         fetch(src).then(res => res.text()).then(file => {
-          $.teach({ [src]: { file, src }})
+          $.teach({ src, [src]: { file, src }})
         })
       })
       return data
@@ -95,20 +97,49 @@ $.draw(target => {
         </div>
     `
 
-    target.innerHTML = stack ? `
-      <div class="actions">
-        ${amp}
-        <select class="select menu-item right">
-          ${stack.split(',').map((filename) => {
-            return `<option value="${filename}" ${filename === src ? 'selected' : ''}>${filename}</option>`
-          }).join('')}
-        </select>
-      </div>
-    `: `
-      <div class="actions">
-        ${amp}
-      </div>
-    `
+    if(stack) {
+      const result = [];
+      const tree = {result};
+
+      stack.split(',').forEach(path => {
+        path.split('/').reduce((r, name, i, a) => {
+          if(!r[name]) {
+            r[name] = {result: []};
+
+            const extension = name.split('.')[1]
+            r.result.push({name, path, extension, children: r[name].result})
+          }
+
+          return r[name];
+        }, tree)
+      })
+      target.innerHTML = `
+        <div class="actions">
+          ${amp}
+        </div>
+        <div class="layout">
+          <div class="sidebar">
+            <div data-resize-sidebar></div>
+            <div class="sidebar-inner">
+              <sl-tree>
+                ${result.map(renderTree).join('')}
+              </sl-tree>
+            </div>
+          </div>
+          <div class="main-column">
+            <div class="editor"></div>
+          </div>
+        </div>
+
+      `
+    } else {
+      target.innerHTML = `
+        <div class="actions">
+          ${amp}
+        </div>
+        <div class="editor"></div>
+      `
+    }
 
     const config = {
       extensions: [
@@ -125,10 +156,67 @@ $.draw(target => {
     })
 
     target.view = new EditorView({
-      parent: target,
+      parent: target.querySelector('.editor'),
       state: target.editorState
     })
   }
+}, {
+  beforeUpdate: (target) => {
+    {
+      const { src } = $.learn()
+      if(target.view && src) {
+
+        cursors[src] = target.view.state.selection.main.head
+      }
+    }
+  },
+  afterUpdate: (target) => {
+    {
+      const data = $.learn()
+      const {file} = data[data.src] || {}
+      if(target.view && file && target.file !== file) {
+        target.file = file
+        target.view.dispatch({
+          changes: { from: 0, to: target.view.state.doc.length, insert: file }
+        });
+      }
+    }
+
+    {
+      const { src } = $.learn()
+      if(target.view && cursors[src]) {
+        target.view.dispatch({
+          selection: { anchor: cursors[src] }
+        });
+      }
+    }
+  }
+})
+
+function renderTree(tree) {
+  return tree.children.length > 0 ? `
+    <sl-tree-item data-directory="true"">
+      ${tree.name || '(root)'}
+      ${ tree.children.map(renderTree).join('')}
+    </sl-tree-item>
+  `:`
+    <sl-tree-item data-path="${tree.path}">
+      ${tree.name || '(root)'}
+    </sl-tree-item>
+  `
+}
+
+$.when('click', 'sl-tree-item[data-directory="true"]', (event) => {
+  event.target.expanded = !event.target.expanded;
+})
+
+$.when('click', 'sl-tree-item[data-path]', (event) => {
+  const { path } = event.target.dataset
+
+  const root = event.target.closest($.link)
+  root.setAttribute('src', path)
+  root.initialized = false
+  sourceFile(root)
 })
 
 function persist(target, $, _flags) {
@@ -158,7 +246,52 @@ $.style(`
     color: black;
     max-width: 100%;
     width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
   }
+
+  & .layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-width, 320px) 1fr;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .main-column {
+    overflow: auto;
+  }
+
+  & .editor {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .sidebar {
+    max-height: 100%;
+    overflow: hidden;
+    position: relative;
+    padding-right: 10px;
+  }
+
+  & .sidebar-inner {
+    overflow: auto;
+    height: 100%;
+    padding: 1rem 1rem 1rem 0;
+  }
+
+  & [data-resize-sidebar] {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--sidebar-width, 320px);
+    transform: translateX(-10px);
+    width: 10px;
+    background: rgba(0,0,0,.15);
+    z-index: 10;
+    cursor: col-resize;
+  }
+
+
 
   & select {
     width: 100%;
@@ -310,4 +443,24 @@ $.when('click', '*', () => {
     active.classList.remove('active')
   }
 })
+
+$.when('pointerdown', '[data-resize-sidebar]', event => {
+  document.addEventListener("pointermove", resizeSidebar, false);
+  document.addEventListener("pointerup", () => {
+    document.removeEventListener("pointermove", resizeSidebar, false);
+  }, false);
+})
+
+function resizeSidebar(event) {
+  let width
+  if (event.touches && event.touches[0] && typeof event.touches[0]["force"] !== "undefined") {
+    width = event.touches[0].clientX
+  } else {
+    width = event.clientX
+  }
+
+  const size = `${width}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--sidebar-width", size);
+}
 
