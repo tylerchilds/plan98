@@ -1,12 +1,18 @@
 import module from '@silly/tag'
 import { toast } from './plan98-toast.js'
 import { vim } from "@replit/codemirror-vim"
+import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
+
+import { gruvboxDark } from '@uiw/codemirror-theme-gruvbox-dark';
+
+import { EditorView } from '@codemirror/view'
+import { EditorState } from '@codemirror/state'
 
 import {
-  EditorState,
-  EditorView,
   basicSetup
-} from "@codemirror/basic-setup"
+} from "codemirror"
 
 const $ = module('code-module')
 
@@ -141,12 +147,49 @@ $.draw(target => {
       `
     }
 
+    const vimKeymap = vim({
+      status: true, // Show Vim status line
+      // Configure Vim to prevent scrolling with special handling
+      // for arrow keys and space in both modes
+      config: {
+        insertModeKeys: {
+          // Map arrow keys in insert mode to prevent scrolling
+          "Up": "goLineUp",
+          "Down": "goLineDown",
+          "Left": "goCharLeft",
+          "Right": "goCharRight" 
+        },
+        normalModeKeys: {
+          // Explicitly map space to do nothing beyond normal Vim behavior
+          "Space": " ",
+          // Map arrow keys in normal mode
+          "Up": "k",
+          "Down": "j",
+          "Left": "h",
+          "Right": "l"
+        }
+      }
+    });
+
+    const preventKeyPropagation = EditorView.domEventHandlers({
+      keydown: (event) => {
+        event.stopPropagation()
+        return false
+      }
+    })
+
     const config = {
       extensions: [
         basicSetup,
+        gruvboxDark,
+        javascript(),
+        html(),
+        css(),
+        vimKeymap,
         EditorView.updateListener.of(
           persist(target, $, {})
-        )
+        ),
+        preventKeyPropagation
       ]
     }
 
@@ -163,19 +206,20 @@ $.draw(target => {
 }, {
   beforeUpdate: (target) => {
     {
+      /*
       const { src } = $.learn()
       if(target.view && src) {
-
-        cursors[src] = target.view.state.selection.main.head
+       cursors[src] = target.view.state.selection.main.head
       }
+      */
     }
   },
   afterUpdate: (target) => {
     {
       const data = $.learn()
       const {file} = data[data.src] || {}
-      if(target.view && file && target.file !== file) {
-        target.file = file
+      if(target.view && file && target.lastSrc !== data.src) {
+        target.lastSrc = data.src
         target.view.dispatch({
           changes: { from: 0, to: target.view.state.doc.length, insert: file }
         });
@@ -183,12 +227,14 @@ $.draw(target => {
     }
 
     {
+      /*
       const { src } = $.learn()
       if(target.view && cursors[src]) {
         target.view.dispatch({
           selection: { anchor: cursors[src] }
         });
       }
+      */
     }
   }
 })
@@ -242,7 +288,6 @@ $.style(`
     max-height: 100%;
     position: relative;
     padding-top: 2rem;
-    background: white;
     color: black;
     max-width: 100%;
     width: 100%;
@@ -271,6 +316,7 @@ $.style(`
     overflow: hidden;
     position: relative;
     padding-right: 10px;
+    background: white;
   }
 
   & .sidebar-inner {
@@ -289,24 +335,6 @@ $.style(`
     background: rgba(0,0,0,.15);
     z-index: 10;
     cursor: col-resize;
-  }
-
-
-
-  & select {
-    width: 100%;
-    max-width: 100%;
-    text-overflow: ellipsis;
-    background: black;
-    color: rgba(255,255,255,.65);
-    border: none;
-    border-radius: 0;
-    padding: 0 .5rem;
-    height: 2rem;
-  }
-
-  & .cm-content {
-    background: rgba(255,255,255,.85);
   }
 
   & .cm-editor {
@@ -395,28 +423,6 @@ $.style(`
 
   & .menu-item.right {
     margin-left: auto;
-  }
-
-  & .cm-editor .cm-gutters {
-    background: black;
-    color: rgba(255,255,255,.65);
-  }
-
-  & .cm-editor .cm-content {
-    color: rgba(0,0,0,.85);
-  }
-
-  & .cm-editor .cm-activeLine {
-    background: black;
-    color: white;
-  }
-
-  & .cm-editor .cm-activeLineGutter {
-    background: black;
-  }
-
-  & .cm-editor .cm-cursor {
-    border-left-color: white;
   }
 `)
 

@@ -96,7 +96,9 @@ document.body.insertAdjacentHTML("beforeend", context)
 let hideListener = (event) => {
   if (event.key === 'Escape') {
 
-  const { isOpen, layer, body } = $.learn()
+  const { isOpen, layer, body, suppressEscape } = $.learn()
+
+    if(suppressEscape) return
     hideModal()
   }
 }

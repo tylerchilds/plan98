@@ -375,7 +375,7 @@ $.draw((target) => {
   return `
     <div class="game" style="${colorVariables}">
       <div class="scene">
-        <a-scene device-orientation-permission-ui="enabled: false">
+        <a-scene keyboard-shortcuts="enterVR: false; exitVR: false;" device-orientation-permission-ui="enabled: false">
           <a-light type="ambient" color="white"></a-light>
           <a-light type="directional" intensity="0.3"></a-light>
           <a-entity

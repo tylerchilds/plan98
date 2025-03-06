@@ -108,6 +108,12 @@
           "@lottiefiles/lottie-player": "https://esm.sh/@lottiefiles/lottie-player@2.0.3",
           "@pyscript/core": "https://pyscript.net/snapshots/2023.11.1.RC3/core.js",
           "@codemirror/basic-setup": "https://esm.sh/@codemirror/basic-setup@0.20.0",
+          "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6.2.3",
+          "@codemirror/lang-html": "https://esm.sh/@codemirror/lang-html@6.4.9",
+          "@codemirror/lang-css": "https://esm.sh/@codemirror/lang-css@6.3.1",
+          "@codemirror/state": "https://esm.sh/@codemirror/state@6.5.2",
+          "@codemirror/view": "https://esm.sh/@codemirror/view@6.36.4",
+          "@uix/codemirror-theme-gruvbox-dark":"https://esm.sh/@uiw/codemirror-theme-gruvbox-dark",
           "@dimforge/rapier2d": "https://cdn.skypack.dev/@dimforge/rapier2d-compat",
           "@dimforge/rapier3d": "https://cdn.skypack.dev/@dimforge/rapier3d-compat",
           "@fullcalendar/core": "https://cdn.skypack.dev/@fullcalendar/core@6.1.15",
@@ -315,26 +321,19 @@
       window.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
           event.preventDefault()
-          const mode = !debug ? debugMode : normalMode
-          mode()
+          if(debug) return
+          debug = true
+          showModal(`
+            <div style="width: 100%; height: 100%; overflow: hidden;">
+              <source-code></source-code>
+            </div>
+          `, { centered: true, onHide: normalMode, suppressEscape: true })
+        }
+
+        function normalMode() {
+          debug = false
         }
       });
-      function normalMode() {
-        if(debug) {
-          debug = false
-          hideModal()
-        }
-      }
-
-      function debugMode() {
-        debug = true
-        showModal(`
-          <div style="width: 100%; height: 100%; overflow: hidden;">
-            <source-code></source-code>
-          </div>
-        `, { centered: true, onHide: normalMode })
-      }
-
     </script>
   </body>
 </html>
