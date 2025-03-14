@@ -272,6 +272,7 @@ $.when('click', 'sl-tree-item[data-path]', (event) => {
   const root = event.target.closest($.link)
   root.setAttribute('src', path)
   root.initialized = false
+  $.teach({ src: path })
   sourceFile(root)
 })
 

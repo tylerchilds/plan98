@@ -21,14 +21,14 @@ import {
 import 'aframe'
 
 const gridUnit = 16
-const spatialOffset = 3
+const spatialOffset = 1
 
 const orientation = {
 	x: '0', y: '0', z: '0', yaw: '0', pitch: '0', roll: '0'
 }
 
 const camera = {
-	x: '0', y: gridUnit, z: 8*gridUnit, yaw: '0', pitch: '0', roll: '0'
+	x: -2 * gridUnit, y: gridUnit + 4, z: 4*gridUnit, yaw: '0', pitch: '0', roll: '0'
 }
 
 const lightnessStops = [
@@ -444,7 +444,7 @@ $.draw((target) => {
         const instance = instances[target.id]
         const { y, activeNotes } = instance
 
-        const nodes = [y-3,y-2,y-1,y,y+1,y+2,y+3].map(createRow(instance)).join('')
+        const nodes = [y-1,y,y+1].map(createRow(instance)).join('')
 
         requestAnimationFrame(() => {
           grid.innerHTML = nodes
@@ -468,7 +468,7 @@ function createRow(instance) {
   return function row(row, yIndex) {
     if(!boxes) return ''
 
-    return [x-3,x-2,x-1,x,x+1,x+2,x+3].map((column, xIndex) => {
+    return [x-1,x,x+1].map((column, xIndex) => {
       if(column<0||column>=columns||row<0||row>=rows) {
         return draw3d(
           aBox({
@@ -1082,6 +1082,7 @@ function toggleSpam(code, value, callback) {
 const musicRPC = {
   'a': (params) => {
     const note = params.root
+
     maybe(params.id, params.value, note)
   },
   'b': (params) => {

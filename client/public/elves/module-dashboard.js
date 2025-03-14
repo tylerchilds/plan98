@@ -68,7 +68,7 @@ function animate() {
     // Request next animation frame
 }
 
-setInterval(animate, 100)
+setInterval(animate, 5000)
 
 function mergeBucket(timestamp) {
   return (state, bucket) => {
