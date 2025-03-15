@@ -77,7 +77,12 @@
     "android-dev": "deno task package-assets && cd sillyz.computer && npm run tauri android dev",
     "android-build": "deno task package-assets && cd sillyz.computer && npm run tauri android dev",
 
-    "chunk-video": "deno run --allow-run --allow-read --allow-write functions/convert.js"
+    "chunk-video": "deno run --allow-run --allow-read --allow-write functions/convert.js",
+
+    "provision-ollama": "cd server/ollama && ./provision.sh",
+    "ollama-deepseek": "ollama run deepseek-r1:1.5b",
+    "ollama-mistral": "ollama run mistral:7b",
+    "ollama-gemma": "ollama run gemma3:1b"
   },
   "imports": {
     "@silly/tag": "./client/public/module.js",

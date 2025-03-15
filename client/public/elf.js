@@ -1,5 +1,4 @@
 import diffHTML from 'diffhtml'
-import Computer from '@sillonious/computer'
 
 const logs = {}
 
@@ -187,6 +186,7 @@ function dispatchCreate(target) {
   target.reactive = true
 }
 
+const registry = '/public/elves'
 function elves() {
   new MutationObserver((mutationsList) => {
     const targets = [...mutationsList]
@@ -194,7 +194,41 @@ function elves() {
       .flatMap(x => x)
     maybeCreateReactive(targets)
   }).observe(document.body, { childList: true, subtree: true });
-  new Computer(self.plan98, { registry: '/public/elves' })
+  modules({ registry })
+  new MutationObserver(() => {
+    modules({ registry })
+  }).observe(document.body, { childList: true, subtree: true });
+
+}
+
+function modules({ registry }) {
+  const tags = new Set(
+    [...document.querySelectorAll(':not(:defined)')]
+    .map(({ tagName }) => tagName.toLowerCase())
+  )
+
+  tags.forEach(async (tag) => {
+    const url = `${registry || '.'}/${tag}.js`
+    const exists = (await fetch(url, { method: 'HEAD' })).ok
+    if(!exists) return
+    let definable = true
+    await import(url).catch((e) => {
+      definable = false
+      console.error(e)
+    })
+    try {
+      definable = definable && document.querySelector(tag) && document.querySelector(tag).matches(':not(:defined)')
+      if(definable) {
+        customElements.define(tag, class WebComponent extends HTMLElement {
+          constructor() {
+            super();
+          }
+        });
+      }
+    } catch(e) {
+      console.log('Error defining module:', tag, e)
+    }
+  })
 }
 
 try {
