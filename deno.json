@@ -80,9 +80,15 @@
     "chunk-video": "deno run --allow-run --allow-read --allow-write functions/convert.js",
 
     "provision-ollama": "cd server/ollama && ./provision.sh",
-    "ollama-deepseek": "ollama run deepseek-r1:1.5b",
-    "ollama-mistral": "ollama run mistral:7b",
-    "ollama-gemma": "ollama run gemma3:1b"
+    "ollama-start-deepseek": "ollama run deepseek-r1:1.5b",
+    "ollama-start-mistral": "ollama run mistral:7b",
+    "ollama-start-gemma": "ollama run gemma3:1b",
+    "ollama-start-llama": "ollama run llama3.2:3b",
+
+    "ollama-stop-deepseek": "ollama stop deepseek-r1:1.5b",
+    "ollama-stop-mistral": "ollama stop mistral:7b",
+    "ollama-stop-gemma": "ollama stop gemma3:1b",
+    "ollama-stop-llama": "ollama stop llama3.2:3b"
   },
   "imports": {
     "@silly/tag": "./client/public/module.js",
