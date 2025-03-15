@@ -155,7 +155,7 @@ function getSubscribers({ target }) {
 
 function dispatchCreate(target) {
   insight('module:create', target.localName)
-  if(!target.id) target.id = sufficientlyUniqueId()
+  if(!target.id) target.id = self.crypto.randomUUID()
   target.dispatchEvent(new Event(CREATE_EVENT))
   target.reactive = true
 }
