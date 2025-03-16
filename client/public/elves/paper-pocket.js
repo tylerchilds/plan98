@@ -117,7 +117,7 @@ export function attack(note) {
   attacking[note] = true
 }
 
-export function attackRelease(note, callback, time='2n') {
+export function attackRelease(note, callback, time='24n') {
   if(ready) {
     current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), time);
     attacking[note] = true

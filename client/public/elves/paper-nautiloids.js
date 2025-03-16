@@ -200,6 +200,10 @@ const $ = elf('paper-nautiloids', {
       label: "Music",
       list: [
         {
+          label: 'Final Boss',
+          url: '/app/final-boss'
+        },
+        {
           label: 'Dial Tone',
           url: '/app/dial-tone'
         },

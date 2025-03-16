@@ -8,7 +8,10 @@ import {
 
 import Color from "colorjs.io"
 
-setInstrument('bass-electric')
+const strumVelocity = 100
+const sustainedDuration = 1000
+
+setInstrument('piano')
 
 const $ = elf('final-boss', {
   colors: [],
@@ -73,7 +76,7 @@ function mod(x, n) {
 }
 
 $.draw((target) => {
-  const { colors, colorVariables, consent } = $.learn()
+  const { root, colors, colorVariables, consent } = $.learn()
 
   if(!consent) {
     return `
@@ -124,6 +127,7 @@ $.draw((target) => {
   }).join('')
 
   return `
+    <div class="root-note">${root}</div>
     <div class="grid">
       <div class="wheel" style="${colorVariables}">
         ${wheel}
@@ -163,6 +167,17 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     touch-action: none;
+    position: relative;
+  }
+
+  & .root-note {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    color: white;
+    font-weight: bold;
+    font-size: 2rem;
+    pointer-events: none;
   }
 
   & [data-escape] {
@@ -337,12 +352,54 @@ function maybe(index, value) {
   }
 }
 
+const majorScales = {
+  '0000': [0, 4, 1], // c major: c - e - g
+  '1000': [1, 5, 2], // g major: g - b - d
+  '0100': [2, 6, 3], // d major: d - f# - a
+  '0001': [3, 7, 4], // a major: a - c# - e
+  '0010': [11, 3, 0], // f major: f - a - c
+}
+
+const minorScales = {
+  '0000': [0, 9, 1], // c minor: c - eb - g
+  '1000': [1, 10, 2], // g minor: g - bb - d
+  '0100': [2, 11, 3], // d minor: d - f - a
+  '0001': [3, 0, 4], // a minor: a - c - e
+  '0010': [11, 8, 0], // f minor: f - ab - c
+}
+
 function strumUp() {
-  console.log(strings)
+  const key = strings.slice(0,4).join('')
+  if(strings[4] === 1) {
+    if(minorScales[key]) {
+      minorScales[key].reverse().map(queueAttack)
+    }
+  } else {
+    if(majorScales[key]) {
+      majorScales[key].reverse().map(queueAttack)
+    }
+  }
 }
 
 function strumDown() {
-  console.log(strings)
+  const key = strings.slice(0,4).join('')
+  if(strings[4] === 1) {
+    if(minorScales[key]) {
+      minorScales[key].map(queueAttack)
+    }
+  } else {
+    if(majorScales[key]) {
+      majorScales[key].map(queueAttack)
+    }
+  }
+}
+
+function queueAttack(shift, i) {
+  setTimeout(() => {
+    const { root } = $.learn()
+    const note = root + shift
+    attackRelease(note, () => null, '1n')
+  }, i * strumVelocity)
 }
 
 const musicRPC = {
@@ -373,7 +430,7 @@ const musicRPC = {
   'up': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('up', 150, () => {
+      debounceSpam('up', 250, () => {
         strumUp()
       })
     }
@@ -381,7 +438,7 @@ const musicRPC = {
   'down': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('down', 150, () => {
+      debounceSpam('down', 250, () => {
         strumDown()
       })
     }
@@ -389,7 +446,7 @@ const musicRPC = {
   'left': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('left', 150, () => {
+      debounceSpam('left', 250, () => {
         slideLeft()
       })
     }
@@ -397,7 +454,7 @@ const musicRPC = {
   'right': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('right', 150, () => {
+      debounceSpam('right', 250, () => {
         slideRight()
       })
     }
