@@ -5,7 +5,8 @@ const $ = elf('final-boss', {
   colors: [],
   start: 0,
   length: 360,
-  reverse: false
+  reverse: false,
+  consent: false
 })
 
 const lightnessStops = [
@@ -62,7 +63,38 @@ function mod(x, n) {
 }
 
 $.draw((target) => {
-  const { colors, colorVariables } = $.learn()
+  const { colors, colorVariables, consent } = $.learn()
+
+  if(!consent) {
+    return `
+      <div class="fake-overlay">
+        <div class="fake-modal">
+          <div class="fake-title">
+            Photosensitive Warning: Read Before Playing!
+          </div>
+          <div class="fake-context">
+            <p>
+              A very small percentage of individuals may experience epileptic seizures when exposed to certain light patterns or flashing lights. Exposure to certain patterns or backgrounds on a computer screen, or while playing video games, may induce an epileptic seizure in these individuals. Certain conditions may induce previously undetected epileptic symptoms even in persons who have no history of prior seizures or epilepsy.
+            </p>
+          <p>
+            If you, or anyone in your family, have an epileptic condition, consult your physician prior to playing. If you experience any of the following symptoms while playing a video or computer game -- dizziness, altered vision, eye or muscle twitches, loss of awareness, disorientation, any involuntary movement, or convulsions -- IMMEDIATELY discontinue use and consult your physician before resuming play.
+          </p>
+
+          </div>
+
+          <div class="fake-actions">
+            <button class="fake-button bad">
+              Decline
+            </button>
+            <button class="fake-button good">
+              Accept
+            </button>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
   const wheel = colors.map((lightness, i) => {
     const steps = lightness.map((x, ii) => {
       const noteAlgorithm = ((ii * 12) + mod(i * 7, 12))
@@ -88,6 +120,14 @@ $.draw((target) => {
       </div>
     </div>
   `
+})
+
+$.when('click', '.fake-button.good', (event) => {
+  $.teach({ consent: true });
+})
+
+$.when('click', '.fake-button.bad', (event) => {
+  window.location.href = 'https://hivelabworks.com'
 })
 
 $.when('pointerenter', '.step', (event) => {
@@ -180,5 +220,55 @@ $.style(`
   & .step:hover,
   & .step:focus {
     opacity: .1;
+  }
+
+  & .fake-overlay {
+    height: 100%;
+    background: linear-gradient(45deg rgba(0,0,0,.15), rgba(0,0,0,.5));
+  }
+
+  & .fake-modal {
+    max-width: 55ch;
+    margin: 0 auto;
+    background: white;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    max-height: 100%;
+  }
+  & .fake-title {
+    background: rgba(0,0,0,.85);
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 1rem;
+    margin 1rem 0;
+    color: rgba(255,255,255,.65);
+  }
+
+  & .fake-context {
+    padding: 0 1rem;
+    margin-bottom: 1rem;
+    color: rgba(0,0,0,.85);
+    max-height: 100%;
+    overflow: auto;
+  }
+  & .fake-actions {
+    display: flex;
+    justify-content: end;
+    padding: 1rem;
+    background: rgba(0,0,0,.25);
+    gap: .5rem;
+  }
+
+  & .fake-button {
+    padding: .5rem 1rem;
+    border: none;
+    background: grey;
+    color: black;
+    border-radius: 1rem;
+  }
+
+  & .fake-button.good {
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.85)), mediumseagreen;
+    color: rgba(255,255,255,.85);
   }
 `)
