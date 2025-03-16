@@ -1,5 +1,14 @@
 import elf from '@silly/elf'
+import {
+  setInstrument,
+  attack,
+  release,
+  attackRelease
+} from './paper-pocket.js'
+
 import Color from "colorjs.io"
+
+setInstrument('bass-electric')
 
 const $ = elf('final-boss', {
   colors: [],
@@ -132,12 +141,12 @@ $.when('click', '.fake-button.bad', (event) => {
 
 $.when('pointerenter', '.step', (event) => {
   const { note } = event.target.dataset
-  console.log('attack', note)
+  attack(note)
 })
 
 $.when('pointerleave', '.step', (event) => {
   const { note } = event.target.dataset
-  console.log('release', note)
+  release(note)
 })
 
 $.style(`

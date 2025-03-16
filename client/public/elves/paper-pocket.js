@@ -31,7 +31,7 @@ const fontFamilyMap = {
 }
 
 const $ = elf('paper-pocket', {
-  fullScreen: true,
+  fullScreen: false,
   theme: localStorage.getItem('paper-pocket/theme') || 'lightgray',
   instrument: localStorage.getItem('paper-pocket/instrument') || 'violin',
   fontSize: localStorage.getItem('paper-pocket/fontSize') || 'regular',
@@ -117,8 +117,7 @@ export function attack(note) {
   attacking[note] = true
 }
 
-export function attackRelease(note, callback) {
-  const time = '2n'
+export function attackRelease(note, callback, time='2n') {
   if(ready) {
     current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), time);
     attacking[note] = true
