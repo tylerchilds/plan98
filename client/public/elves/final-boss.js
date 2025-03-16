@@ -12,6 +12,7 @@ setInstrument('bass-electric')
 
 const $ = elf('final-boss', {
   colors: [],
+  root: 60,
   start: 0,
   length: 360,
   reverse: false,
@@ -130,14 +131,16 @@ $.draw((target) => {
     </div>
   `
 })
-
-$.when('click', '.fake-button.good', (event) => {
+function accept() {
   $.teach({ consent: true });
-})
+}
 
-$.when('click', '.fake-button.bad', (event) => {
+function decline() {
   window.location.href = 'https://hivelabworks.com'
-})
+}
+
+$.when('click', '.fake-button.good', accept)
+$.when('click', '.fake-button.bad', decline)
 
 $.when('pointerenter', '.step', (event) => {
   const { note } = event.target.dataset
@@ -193,11 +196,10 @@ $.style(`
   & .wheel {
     display: grid;
     grid-template-areas: "slot";
-    grid-template-rows: 40vmin;
-    grid-template-columns: 27vmin;
+    grid-template-rows: 50%;
+    grid-template-columns: 7.5%;
     place-content: start center;
-    padding: 0 10vmin;
-    height: 80vmin;
+    height: 100%;
   }
 
   & .wheel::before {
@@ -281,3 +283,179 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 `)
+
+$.when('json-rpc', (event) => {
+  const { method, params } = event.detail
+  const { consent, root } = $.learn()
+
+  if(consent) {
+    const more = { root }
+
+    if(musicRPC[method]) {
+      musicRPC[method]({...params, ...more})
+    }
+  }
+
+  if(!consent) {
+    if(consentRPC[method]) {
+      consentRPC[method](params)
+    }
+  }
+})
+
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const strings = [0,0,0,0,0,0]
+
+function maybe(index, value) {
+  if(value === 1) {
+    if(strings[index] === 1) return
+    strings[index] = value
+  } else {
+    if(strings[index] === 0) return
+    strings[index] = value
+  }
+}
+
+function strumUp() {
+  console.log(strings)
+}
+
+function strumDown() {
+  console.log(strings)
+}
+
+const musicRPC = {
+  'a': (params) => {
+    maybe(0, params.value)
+  },
+  'b': (params) => {
+    maybe(1, params.value)
+  },
+  'x': (params) => {
+    maybe(2, params.value)
+  },
+  'y': (params) => {
+    maybe(3, params.value)
+  },
+  'lb': (params) => {
+    maybe(4, params.value)
+  },
+  'rb': (params) => {
+    maybe(5, params.value)
+  },
+  'lt': (params) => {
+    octaveDown()
+  },
+  'rt': (params) => {
+    octaveUp()
+  },
+  'up': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('up', 150, () => {
+        strumUp()
+      })
+    }
+  },
+  'down': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('down', 150, () => {
+        strumDown()
+      })
+    }
+  },
+  'left': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('left', 150, () => {
+        slideLeft()
+      })
+    }
+  },
+  'right': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('right', 150, () => {
+        slideRight()
+      })
+    }
+  },
+  'select': (params) => {
+    toggleSpam('select', params.value, () => {
+      console.log('select')
+    })
+  },
+  'start': (params) => {
+    toggleSpam('start', params.value, () => {
+      console.log('start')
+    })
+  },
+}
+
+function slideLeft() {
+  const { root } = $.learn()
+
+  if(root < 24) return
+  $.teach({ root: root-1 })
+}
+
+function slideRight() {
+  const { root } = $.learn()
+  if(root>96) return
+  $.teach({ root: root+1 })
+}
+
+function octaveDown() {
+  const { root } = $.learn()
+  const nextRoot = root - 12
+  if(nextRoot<24) {
+    $.teach({ root: 24 })
+  } else {
+    $.teach({ root: nextRoot })
+  }
+}
+
+function octaveUp() {
+  const { root } = $.learn()
+  const nextRoot = root + 12
+  if(nextRoot>96) {
+    $.teach({ root: 96 })
+  } else {
+    $.teach({ root: nextRoot })
+  }
+}
+
+const consentRPC = {
+  'a': (params) => {
+    if(params.value === 1) {
+      accept()
+    }
+  },
+  'b': (params) => {
+    if(params.value === 1) {
+      decline()
+    }
+  },
+}
