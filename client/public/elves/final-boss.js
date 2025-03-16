@@ -9,7 +9,6 @@ import {
 import Color from "colorjs.io"
 
 const strumVelocity = 100
-const sustainedDuration = 1000
 
 setInstrument('piano')
 
@@ -178,6 +177,7 @@ $.style(`
     font-weight: bold;
     font-size: 2rem;
     pointer-events: none;
+    z-index: 2;
   }
 
   & [data-escape] {
@@ -207,14 +207,15 @@ $.style(`
     position: absolute;
     inset: 0;
     margin: auto;
+    height: 50cqmin;
   }
   & .wheel {
     display: grid;
     grid-template-areas: "slot";
-    grid-template-rows: 50%;
-    grid-template-columns: 7.5%;
+    grid-template-rows: 25cqmin;
+    grid-template-columns: 17cqmin;
     place-content: start center;
-    height: 100%;
+    overflow: hidden;
   }
 
   & .wheel::before {
@@ -353,19 +354,33 @@ function maybe(index, value) {
 }
 
 const majorScales = {
-  '0000': [0, 4, 1], // c major: c - e - g
-  '1000': [1, 5, 2], // g major: g - b - d
-  '0100': [2, 6, 3], // d major: d - f# - a
-  '0001': [3, 7, 4], // a major: a - c# - e
-  '0010': [11, 3, 0], // f major: f - a - c
+  '0000': [0, 4, 7], // c major
+  '1010': [1, 5, 8], // c#/db major
+  '1000': [2, 6, 9], // d major
+  '1001': [3, 7, 10], // d#/eb major
+  '0100': [4, 8, 11], // e major
+  '0001': [5, 9, 12], // f major
+  '0110': [6, 10, 13], // f#/gb major
+  '0010': [7, 11, 14], // g major
+  '1101': [8, 12, 15], // g#/ab major
+  '1100': [9, 13, 16], // a major
+  '0111': [10, 14, 17], // a#/bb major
+  '0011': [11, 15, 18], // b major
 }
 
 const minorScales = {
-  '0000': [0, 9, 1], // c minor: c - eb - g
-  '1000': [1, 10, 2], // g minor: g - bb - d
-  '0100': [2, 11, 3], // d minor: d - f - a
-  '0001': [3, 0, 4], // a minor: a - c - e
-  '0010': [11, 8, 0], // f minor: f - ab - c
+  '0000': [0, 3, 7], // c minor
+  '1010': [1, 4, 8], // c#/db minor
+  '1000': [2, 5, 9], // d minor
+  '1001': [3, 6, 10], // d#/eb minor
+  '0100': [4, 7, 11], // e minor
+  '0001': [5, 8, 12], // f minor
+  '0110': [6, 9, 13], // f#/gb minor
+  '0010': [7, 10, 14], // g minor
+  '1101': [8, 11, 15], // g#/ab minor
+  '1100': [9, 12, 16], // a minor
+  '0111': [10, 13, 17], // a#/bb minor
+  '0011': [11, 14, 18], // b minor
 }
 
 function strumUp() {
@@ -429,23 +444,20 @@ const musicRPC = {
   },
   'up': (params) => {
     if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('up', 250, () => {
+      debounceSpam('up', 300, () => {
         strumUp()
       })
     }
   },
   'down': (params) => {
     if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('down', 250, () => {
+      debounceSpam('down', 300, () => {
         strumDown()
       })
     }
   },
   'left': (params) => {
     if(params.value === 1) {
-      document.activeElement.blur()
       debounceSpam('left', 250, () => {
         slideLeft()
       })
@@ -453,7 +465,6 @@ const musicRPC = {
   },
   'right': (params) => {
     if(params.value === 1) {
-      document.activeElement.blur()
       debounceSpam('right', 250, () => {
         slideRight()
       })
