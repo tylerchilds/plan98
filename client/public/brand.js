@@ -133,11 +133,22 @@ export const doingBusinessAs = {
     zoom: 10,
     tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
     mascot: 'Silly Sillonious',
+    markdown: '/public/cdn/sillyz.computer/index.md',
     saga: emeraldOfTime,
     contact: reverseProxyLookup,
     brandHue: 0,
     brandRange: 360,
-    color: 'lemonchiffon'
+    color: 'lemonchiffon',
+    title: 'Sillyz.Computer | Educational Operating Systems',
+    endOfHead: `
+      <meta name="description" content="A re-mixable educational operating system for anyone to control their own digital destiny ">
+      <meta name="robots" content="index, follow">
+      <link rel="canonical" href="https://sillyz.computer">
+      <meta property="og:title" content="Sillyz.Computer | Educational Operating Systems">
+      <meta property="og:description" content="A re-mixable educational operating system for anyone to control their own digital destiny">
+      <meta property="og:image" content="https://sillyz.computer/public/cdn/boxart.svg">
+      <meta property="og:url" content="https://sillyz.computer">
+    `
   },
   '1998.social': {
     emote: ':D',

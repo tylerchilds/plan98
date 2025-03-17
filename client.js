@@ -550,6 +550,19 @@ async function home(request, business) {
     return file
   }
 
+  if(business.markdown) {
+    let file
+    try {
+      const { markdown } = business
+
+      file = await Deno.readTextFile(`./client/${markdown}`)
+      file = await sanitizers['.md'](file, business)
+    } catch (e) {
+      console.error(e + '\n' + pathname + '\n' + e)
+    }
+
+    return file
+  }
 
   if(!business.saga) {
     const dom = await page()

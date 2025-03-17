@@ -18,7 +18,6 @@ $.draw((target) => {
   if($.learn().started) {
     return `
       <paper-pocket rom="paper-nautiloids"></paper-pocket>
-      <synthia-assistant></synthia-assistant>
     `
   }
 
@@ -58,7 +57,7 @@ $.draw((target) => {
                 </hypertext-variable>
               </div>
               <button class="cta" data-tutorial>
-                Paper Pocket
+                Start
               </button>
             </div>
           </div>
@@ -77,7 +76,8 @@ $.draw((target) => {
 $.when('click', '[data-tutorial]', start)
 
 function start(event) {
-  $.teach({ started: true })
+  window.location.href = '/app/paper-pocket?rom=paper-nautiloids'
+  //$.teach({ started: true })
 }
 
 $.style(`
@@ -97,15 +97,15 @@ $.style(`
   }
   & .cta {
     box-shadow: var(--shadow);
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), dodgerblue;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--wheel-2-4, dodgerblue);
     color: white;
     border: none;
     padding: 1rem;
     border-radius: .5rem;
     gap: .5rem;
     display: inline-grid;
-    grid-template-columns: auto 1fr;
     place-items: center;
+    font-weight: bold;
   }
 
   & .cta .nonce {
@@ -114,7 +114,7 @@ $.style(`
 
   & .cta:hover,
   & .cta:focus {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), dodgerblue;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--wheel-2-4, dodgerblue);
   }
 
   & .reset {
