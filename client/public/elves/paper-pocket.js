@@ -36,7 +36,7 @@ const $ = elf('paper-pocket', {
   instrument: localStorage.getItem('paper-pocket/instrument') || 'violin',
   fontSize: localStorage.getItem('paper-pocket/fontSize') || 'regular',
   fontFamily: localStorage.getItem('paper-pocket/fontFamily') || 'recursive',
-  rom: 'paper-nautiloids'
+  rom: 'final-boss'
 })
 
 export function getFontSizeOptions() {

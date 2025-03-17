@@ -387,11 +387,11 @@ function strumUp() {
   const key = strings.slice(0,4).join('')
   if(strings[4] === 1) {
     if(minorScales[key]) {
-      minorScales[key].reverse().map(queueAttack)
+      [...minorScales[key]].reverse().map(queueAttack)
     }
   } else {
     if(majorScales[key]) {
-      majorScales[key].reverse().map(queueAttack)
+      [...majorScales[key]].reverse().map(queueAttack)
     }
   }
 }
