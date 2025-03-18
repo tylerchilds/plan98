@@ -853,17 +853,9 @@ function notification(node, method, params) {
 function launchItem(event) {
   const { pauseKey, pause, pauseIndex } = $.learn()
   const { list } = pause[pauseKey]
-  const { url, mode } = list[pauseIndex]
+  const { url } = list[pauseIndex]
 
-  if(mode) {
-    $.teach({ mode, app: null })
-    return
-  }
-
-  if(url) {
-    $.teach({ mode: 'app', app: url })
-    return
-  }
+  window.location.href = url
 }
 
 $.when('click', '.menu-link', (event) => {
@@ -1501,7 +1493,7 @@ $.style(`
     text-decoration: none;
     padding: 4px 8px;
     line-height: 1;
-    font-size: 2rem;
+    text-align: left;
     font-weight: 100;
     background: transparent;
     border: none;
