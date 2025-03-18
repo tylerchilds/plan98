@@ -2,18 +2,6 @@ import elf from '@silly/elf'
 import Color from "colorjs.io"
 import { consoleShow, consoleHide } from './plan98-console.js'
 import {
-  getFontSizeOptions,
-  getFontSize,
-  setFontSize,
-  getFontFamilyOptions,
-  getFontFamily,
-  setFontFamily,
-  getInstruments,
-  getInstrument,
-  setInstrument,
-  getThemes,
-  setTheme,
-  getTheme,
   attack,
   release,
   attackRelease
@@ -71,13 +59,6 @@ const colorVariables = colors.flatMap(x => x).map(({ name, value }) => `
 `).join('')
 
 
-const modes = {
-  game: 'game',
-  app: 'app',
-  settings: 'settings',
-  pause: 'pause',
-}
-
 const center = 60
 
 const $ = elf('paper-nautiloids', {
@@ -88,167 +69,6 @@ const $ = elf('paper-nautiloids', {
   tick: 0,
   room: '0001',
   instances: {},
-  mode: modes.game,
-  backMode: modes.game,
-  settingsKey: 'instrument',
-  pauseKey: 'favorites',
-  pauseIndex: 0,
-  settings: {
-    instrument: {
-      label: 'Instrument',
-      description: 'The sound of the console',
-      options: getInstruments(),
-      value: getInstrument()
-    },
-    theme: {
-      label: 'Theme',
-      description: 'The color of the console',
-      options: getThemes(),
-      value: getTheme()
-    },
-    fontSize: {
-      label: 'Font Size',
-      description: 'The size of words and numbers.',
-      options: getFontSizeOptions(),
-      value: getFontSize(),
-    },
-    fontFamily: {
-      label: 'Font Family',
-      description: 'The shapes of the letters.',
-      options: getFontFamilyOptions(),
-      value: getFontFamily(),
-    },
-    invertY: {
-      label: 'Invert Y-Axis',
-      description: 'Up is down, down is up.',
-      options: ['normal','inverted'],
-      value: 'inverted',
-    },
-
-    debug: {
-      label: 'Debugger',
-      description: 'Toggle the debugger',
-      options: ['hide', 'show'],
-      value: 'hide'
-    },
-  },
-  pause: {
-    favorites: {
-      label: "Favorites",
-      list: [
-        {
-          label: 'Paper Nautiloids',
-          mode: modes.game
-        },
-        {
-          label: 'Irix Launcher',
-          url: '/app/irix-launcher'
-        },
-        {
-          label: 'Map',
-          url: '/app/middle-earth'
-        },
-        {
-          label: 'Draw Term 98',
-          url: '/app/draw-term'
-        },
-        {
-          label: 'File System',
-          url: '/app/file-system'
-        },
-        {
-          label: 'Sonic &amp; Knuckles',
-          url: '/app/sonic-knuckles'
-        },
-      ]
-    },
-    apps: {
-      label: "Apps",
-      list: [
-        {
-          label: 'Secure Mail',
-          url: '/app/secure-mail'
-        },
-        {
-          label: 'Secure Messenger',
-          url: '/app/secure-messenger'
-        },
-        {
-          label: 'Bulletin Board',
-          url: `/app/bulletin-board?src=/private/boards/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
-        },
-        {
-          label: 'Public TV',
-          url: '/app/public-broadcast'
-        }
-      ]
-    },
-    art: {
-      label: "Art",
-      list: [
-        {
-          label: 'Chalk Board',
-          url: '/app/chalk-board'
-        },
-        {
-          label: 'Paint',
-          url: '/app/paint-app'
-        },
-      ]
-    },
-    music: {
-      label: "Music",
-      list: [
-        {
-          label: 'Final Boss',
-          url: '/app/final-boss'
-        },
-        {
-          label: 'Dial Tone',
-          url: '/app/dial-tone'
-        },
-        {
-          label: 'Sillyz Ocarina',
-          url: '/app/sillyz-ocarina'
-        },
-        {
-          label: 'Music Walk',
-          url: '/app/music-walk'
-        },
-      ]
-
-    },
-    code: {
-      label: "Coding",
-      list: [
-        {
-          label: 'Code Module',
-          url: '/app/code-module?src=/public/elves/code-module.js'
-        },
-        {
-          label: 'Hyper Script',
-          url: '/app/hyper-script'
-        },
-        {
-          label: 'Generic Park',
-          url: '/app/generic-park'
-        },
-        {
-          label: 'Collaborative Text',
-          url: `/app/simpleton-client?src=/private/text/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
-        }
-      ]
-    },
-    templates: {
-      label: "Templates",
-      list: [
-        {
-          label: 'Swipe Swipe',
-          url: '/app/swipe-swipe'
-        },
-      ]
-    }
-  }
 })
 
 const manualNotes = {}
@@ -357,22 +177,9 @@ function aText(priority, conflicts) {
 
 
 $.draw((target) => {
-  const { mode, tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
+  const { tick, instrument, instances, debuggerVisible, tileDistance } = $.learn()
   seed(target)
   if(!instances[target.id]) return
-
-  if(mode === modes.settings) {
-    return renderSettings()
-  }
-
-  if(mode === modes.pause) {
-    return renderPause()
-  }
-
-  if(mode === modes.app) {
-    return renderApp()
-  }
-
 
   if(target.querySelector('.scene')) return
 
@@ -402,44 +209,7 @@ $.draw((target) => {
     </div>
   `
 }, {
-  afterUpdate: (target) => {
-    {
-      const { mode } = $.learn()
-      if(target.dataset.mode !== mode) {
-        target.dataset.mode = mode
-      }
-    }
-
-    {
-      const { settingsKey } = $.learn()
-
-      if(target.settingsKey !== settingsKey) {
-        target.settingsKey = settingsKey
-        const active = target.querySelector('.setting.focused')
-
-        if(active) {
-          active.scrollIntoView()
-        }
-      }
-    }
-
-    {
-      const active = target.querySelector('.setting.focused .option.selected')
-      if(active) {
-        active.scrollIntoView({
-          block: "nearest",  // Keeps the vertical position as close as possible
-          inline: "center"    // Scrolls only in the inline direction
-        });
-      }
-    }
-
-    {
-      const active = target.querySelector('.menu-link.active')
-      if(active) {
-        active.scrollIntoView()
-      }
-    }
-
+  afterUpdate: (target) => { 
     {
       const grid = target.querySelector('.grid')
       if(grid) {
@@ -531,92 +301,6 @@ function createRow(instance) {
   }
 }
 
-function renderApp() {
-  const { app } = $.learn()
-
-  return `
-    <iframe src="${app}" title="app"></iframe>
-  `
-}
-
-function renderPause() {
-  const { pause, pauseIndex, pauseKey } = $.learn()
-
-  const { list, label } = pause[pauseKey]
-
-  const items = list.map((item, i) => {
-    const { label, mode, url } = item
-    return `
-      <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${pauseIndex === i ? 'active':''}">
-        ${label}
-      </button>
-    `
-  }).join('')
-
-  return `
-    <div class="pause-menu">
-      <div class="pause-label">${label}</div>
-      <div class="pause-list">
-        ${items}
-      </div>
-    </div>
-  `
-
-}
-
-function renderSettings() {
-  const { settings, settingsKey } = $.learn()
-
-  const list = Object.keys(settings).map((key, i) => {
-    const setting = settings[key]
-    return `
-      <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
-        <div class="setting-label">
-          ${setting.label}
-        </div>
-        <div class="setting-description">
-          ${setting.description}
-        </div>
-        <div class="options-list">
-          <div class="setting-options">
-            ${setting.options.map((x) => {
-              return `
-                <button data-setting="${key}" data-value="${x}" class="option ${setting.value === x?'selected':''}">
-                  ${x}
-                </button>
-              `
-            }).join('')}
-          </div>
-        </div>
-      </div>
-    `
-  }).join('')
-
-  return `
-    <div class="menu-list">
-      ${list}
-    </div>
-  `
-}
-
-$.when('click', '.setting', (event) => {
-  const { key } = event.target.dataset
-  $.teach({ settingsKey: key })
-})
-
-$.when('click', '.setting.focused .option', () => {
-  const { value } = event.target.dataset
-
-  const { settingsKey } = $.learn()
-
-  settingsChange(settingsKey, value)
-
-  $.teach({
-    value
-  }, selectedSettingsReducer)
-})
-
-
 
 
 function content(instance) {
@@ -682,65 +366,6 @@ function content(instance) {
 
 }
 
-function launchItem(event) {
-  const { pauseKey, pause, pauseIndex } = $.learn()
-  const { list } = pause[pauseKey]
-  const { url, mode } = list[pauseIndex]
-
-  if(mode) {
-    $.teach({ mode, app: null })
-    return
-  }
-
-  if(url) {
-    $.teach({ mode: 'app', app: url })
-    return
-  }
-}
-
-$.when('click', '.menu-link', (event) => {
-  const { href, mode, index } = event.target.dataset
-
-  const pauseIndex = parseInt(index)
-
-  if(mode) {
-    $.teach({ mode, app: null, pauseIndex })
-    return
-  }
-
-  if(href) {
-    $.teach({ mode: 'app', app: href, pauseIndex })
-    return
-  }
-})
-
-
-function toggleSettings () {
-  const { mode, backMode } = $.learn()
-
-  if(mode !== modes.settings) {
-    $.teach({
-      mode: modes.settings
-    })
-  } else {
-    $.teach({ mode: backMode })
-  }
-}
-
-function togglePause (event) {
-  const { mode, backMode } = $.learn()
-
-  if(mode !== modes.pause) {
-    $.teach({
-      mode: modes.pause
-    })
-  } else {
-    $.teach({ mode: backMode })
-  }
-
-}
-
-
 function slideLeft(id) {
   const { instances } = $.learn()
 
@@ -798,59 +423,18 @@ $.style(`
     touch-action: none;
   }
 
-  & .pause-menu {
-    height: 100%;
-    overflow: auto;
-    background: rgba(0,0,0,.85);
-  }
-
-  & .pause-label {
-    color: rgba(255,255,255,.5);
-    padding: 8px;
-    font-weight: bold;
-  }
-
-
-  & .menu-list {
-    height: 100%;
-    overflow: auto;
-  }
-
-  & .options-list {
-    overflow-x: auto;
-    max-width: 100%;
-  }
-
   & .title {
     font-size: 1.5rem;
     font-weight: bold;
   }
 
-  & .game,
-  & .settings {
-    display: none;
+  & .game {
+    display: block;
     height: 100%;
-  }
-
-  &[data-mode="settings"] .settings {
-    display: block;
-    overflow: auto;
-  }
-
-  &[data-mode="game"] .game {
-    display: block;
   }
 
   & .settings {
     padding: 2rem 1rem;
-  }
-
-  & select {
-    background: #54796d;
-    border: 1px solid rgba(255,255,255,.65);
-    border-radius: 0;
-    color: rgba(255,255,255,.65);
-    padding: .5rem;
   }
 
   & .won {
@@ -911,140 +495,21 @@ $.style(`
     position: absolute;
     mix-blend-mode: soft-light;
   }
-
-  & .setting {
-    display: block;
-    padding: 1rem;
-    background: rgba(255,255,255,.15);
-    color: rgba(255,255,255,.5);
-    display: grid;
-    gap: 1rem;
-    max-width: 100%;
-    width: 100%;
-  }
-
-  & .setting:not(.focused) > * {
-    pointer-events: none;
-  }
-
-  & .setting.focused .message-body {
-    font-weight: bold;
-  }
-
-  & .setting-label {
-    color: rgba(255,255,255,.85);
-    font-weight: bold;
-  }
-
-  & .setting-description {
-    color: rgba(255,255,255,.65);
-  }
-
-  & .setting.focused .setting-label {
-    color: rgba(0,0,0,.85);
-    font-weight: bold;
-  }
-
-  & .setting.focused .setting-description {
-    color: rgba(0,0,0,.65);
-  }
-
-  & .setting-options {
-    display: flex;
-    gap: 4px;
-    padding: 8px 0;
-  }
-
-  & .setting-options .option:not(.selected) {
-    display: none;
-  }
-
-  & .setting.focused {
-    color: black;
-    background: white;
-  }
-
-  & .setting.focused .option {
-    display: block;
-  }
-
-  & .option.selected {
-    display: block;
-  }
-
-  & .setting {
-    padding: 4px 8px;
-    border: none;
-    background: rgba(0,0,0,.85);
-    color: white;
-    display: inline-block;
-    margin-bottom: 4px;
-  }
-
-  & .option {
-    border: none;
-    border-radius: 2px;
-    white-space: nowrap;
-    padding: 4px 8px;
-  }
-
-  & .option.selected {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, black);
-    color: white;
-  }
-
-  & .menu-link {
-    color: rgba(255,255,255,.85);
-    display: block;
-    text-decoration: none;
-    padding: 4px 8px;
-    line-height: 1;
-    font-size: 2rem;
-    font-weight: 100;
-    background: transparent;
-    border: none;
-  }
-
-  & .menu-link.active {
-    font-weight: bold;
-    color: var(--root-theme, white);
-  }
 `)
 
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
   const { id } = event.target.closest($.link)
-  const { instances, mode } = $.learn()
+  const { instances } = $.learn()
 
-  if(mode === modes.game) {
-    if(instances[id]) {
-      const { x, y } = instances[id]
-      const root = noteFromGrid(x, y+spatialOffset)
+  if(instances[id]) {
+    const { x, y } = instances[id]
+    const root = noteFromGrid(x, y+spatialOffset)
 
-      const more = { root, id }
+    const more = { root, id }
 
-      if(musicRPC[method]) {
-        musicRPC[method]({...params, ...more})
-      }
-    }
-  }
-
-  if(mode === modes.app) {
-    if(appRPC[method]) {
-      appRPC[method](params)
-    }
-  }
-
-
-  if(mode === modes.settings) {
-    if(settingsRPC[method]) {
-      settingsRPC[method](params)
-    }
-  }
-
-  if(mode === modes.pause) {
-    if(pauseRPC[method]) {
-      pauseRPC[method](params)
+    if(musicRPC[method]) {
+      musicRPC[method]({...params, ...more})
     }
   }
 })
@@ -1148,281 +613,6 @@ const musicRPC = {
         slideRight(params.id)
       })
     }
-  },
-  'select': (params) => {
-    toggleSpam('select', params.value, () => {
-      $.teach({ backMode: modes.game })
-      toggleSettings()
-    })
-  },
-  'start': (params) => {
-    toggleSpam('start', params.value, () => {
-      $.teach({ backMode: modes.game })
-      togglePause()
-    })
-  },
-}
-
-const appRPC = {
-  'a': (params) => {
-  },
-  'b': (params) => {
-  },
-  'x': (params) => {
-  },
-  'y': (params) => {
-  },
-  'lb': (params) => {
-  },
-  'rb': (params) => {
-  },
-  'lt': (params) => {
-  },
-  'rt': (params) => {
-  },
-  'up': (params) => {
-  },
-  'down': (params) => {
-  },
-  'left': (params) => {
-  },
-  'right': (params) => {
-  },
-  'select': (params) => {
-    toggleSpam('select', params.value, () => {
-      $.teach({ backMode: modes.app })
-      toggleSettings()
-    })
-  },
-  'start': (params) => {
-    toggleSpam('start', params.value, () => {
-      $.teach({ backMode: modes.app })
-      togglePause()
-    })
-  },
-}
-
-
-const settingsRPC = {
-  'a': (params) => {
-  },
-  'b': (params) => {
-    toggleSpam('b', params.value, () => {
-      toggleSettings()
-    })
-  },
-  'x': (params) => {
-  },
-  'y': (params) => {
-  },
-  'lb': (params) => {
-  },
-  'rb': (params) => {
-  },
-  'lt': (params) => {
-  },
-  'rt': (params) => {
-  },
-  'up': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('up', 150, () => {
-        const { settingsKey, settings } = $.learn()
-        const keys = Object.keys(settings)
-        const index = mod((keys.indexOf(settingsKey) - 1), keys.length)
-        $.teach({
-          settingsKey: keys[index]
-        })
-      })
-    }
-  },
-  'down': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('down', 150, () => {
-        const { settingsKey, settings } = $.learn()
-        const keys = Object.keys(settings)
-        const index = mod((keys.indexOf(settingsKey) + 1), keys.length)
-        $.teach({
-          settingsKey: keys[index]
-        })
-      })
-    }
-  },
-  'left': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('left', 150, () => {
-        const { settingsKey, settings } = $.learn()
-        const { options, value } = settings[settingsKey]
-
-        const index = options.indexOf(value)
-
-        const nextIndex = mod(index - 1, options.length)
-        const nextValue = options[nextIndex]
-        settingsChange(settingsKey, nextValue)
-
-        $.teach({
-          value: nextValue
-        }, selectedSettingsReducer)
-      })
-    }
-  },
-  'right': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('right', 150, () => {
-        const { settingsKey, settings } = $.learn()
-        const { options, value } = settings[settingsKey]
-
-        const index = options.indexOf(value)
-
-        const nextIndex = mod(index + 1, options.length)
-        const nextValue = options[nextIndex]
-        settingsChange(settingsKey, nextValue)
-
-        $.teach({
-          value: options[nextIndex]
-        }, selectedSettingsReducer)
-      })
-    }
-  },
-  'select': (params) => {
-    toggleSpam('select', params.value, () => {
-      toggleSettings()
-    })
-  },
-  'start': (params) => {
-    toggleSpam('start', params.value, () => {
-      togglePause()
-    })
-  },
-}
-
-const sideEffects = {
-  theme: (value) => {
-    setTheme(value)
-  },
-  instrument: (value) => {
-    setInstrument(value)
-  },
-  fontSize: (value) => {
-    setFontSize(value)
-  },
-  fontFamily: (value) => {
-    setFontFamily(value)
-  },
-  debug: (value) => {
-    setDebugger(value)
-  }
-}
-
-function settingsChange(settingsKey, nextValue) {
-  if(sideEffects[settingsKey]) {
-    sideEffects[settingsKey](nextValue)
-  }
-}
-
-function selectedSettingsReducer(state, payload) {
-  const { settingsKey } = state
-  return {
-    ...state,
-    settings: {
-      ...state.settings,
-      [settingsKey]: {
-        ...state.settings[settingsKey],
-        value: payload.value
-      }
-    }
-  }
-}
-
-const pauseRPC = {
-  'a': (params) => {
-    if(params.value === 1) {
-      launchItem()
-    }
-  },
-  'b': (params) => {
-    toggleSpam('b', params.value, () => {
-      toggleSettings()
-    })
-  },
-  'x': (params) => {
-  },
-  'y': (params) => {
-  },
-  'lb': (params) => {
-  },
-  'rb': (params) => {
-  },
-  'lt': (params) => {
-  },
-  'rt': (params) => {
-  },
-  'up': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('up', 150, () => {
-        const { pauseKey, pause, pauseIndex } = $.learn()
-        const { list } = pause[pauseKey]
-        const index = mod((pauseIndex - 1), list.length)
-        $.teach({
-          pauseIndex: index,
-        })
-      })
-    }
-  },
-  'down': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('down', 150, () => {
-        const { pauseKey, pause, pauseIndex } = $.learn()
-        const { list } = pause[pauseKey]
-        const index = mod((pauseIndex + 1), list.length)
-        $.teach({
-          pauseIndex: index,
-        })
-      })
-    }
-  },
-  'left': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('left', 150, () => {
-        const { pauseKey, pause } = $.learn()
-        const keys = Object.keys(pause)
-        const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
-        $.teach({
-          pauseIndex: 0,
-          pauseKey: keys[index]
-        })
-      })
-    }
-  },
-  'right': (params) => {
-    if(params.value === 1) {
-      document.activeElement.blur()
-      debounceSpam('right', 150, () => {
-        const { pauseKey, pause } = $.learn()
-        const keys = Object.keys(pause)
-        const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
-        $.teach({
-          pauseIndex: 0,
-          pauseKey: keys[index]
-        })
-      })
-    }
-  },
-  'select': (params) => {
-    toggleSpam('select', params.value, () => {
-      toggleSettings()
-    })
-  },
-  'start': (params) => {
-    toggleSpam('start', params.value, () => {
-      togglePause()
-    })
   },
 }
 

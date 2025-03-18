@@ -1,6 +1,5 @@
 import elf from '@silly/elf'
 import {
-  setInstrument,
   attack,
   release,
   attackRelease
@@ -9,8 +8,6 @@ import {
 import Color from "colorjs.io"
 
 const strumVelocity = 100
-
-setInstrument('piano')
 
 const $ = elf('final-boss', {
   colors: [],
