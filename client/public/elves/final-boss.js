@@ -10,6 +10,7 @@ import Color from "colorjs.io"
 const strumVelocity = 150
 
 const $ = elf('final-boss', {
+  activeNotes: [],
   colors: [],
   root: 60,
   start: 0,
@@ -19,13 +20,13 @@ const $ = elf('final-boss', {
 })
 
 const lightnessStops = [
-  [5, 30],
-  [20, 45],
-  [35, 60],
-  [50, 75],
-  [65, 90],
-  [80, 105],
-  [95, 120]
+  [5, 25],
+  [20, 40],
+  [35, 55],
+  [50, 70],
+  [65, 85],
+  [80, 100],
+  [95, 115]
 ]
 
 const initialColors = recalculate()
@@ -72,7 +73,7 @@ function mod(x, n) {
 }
 
 $.draw((target) => {
-  const { root, colors, colorVariables, consent } = $.learn()
+  const { activeNotes, root, colors, colorVariables, consent } = $.learn()
 
   if(!consent) {
     return `
@@ -106,11 +107,11 @@ $.draw((target) => {
 
   const wheel = colors.map((lightness, i) => {
     const steps = lightness.map((x, ii) => {
-      const noteAlgorithm = ((ii * 12) + mod(i * 7, 12))
+      const note = ((ii * 12) + mod(i * 7, 12)) + 24
       return`
         <button
-          class="step"
-          data-note="${noteAlgorithm}"
+          class="step ${activeNotes.includes(note) ? 'active':''}"
+          data-note="${note}"
           style="background: var(${x.name})">
         </button>
       `
@@ -199,6 +200,7 @@ $.style(`
   & .grid {
     position: relative;
     height: 100%;
+    overflow: hidden;
   }
   & .grid > * {
     position: absolute;
@@ -215,15 +217,6 @@ $.style(`
     overflow: hidden;
   }
 
-  & .wheel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(rgba(255,255,255,1), rgba(255,255,255,.5), rgba(0,0,0,.5), rgba(0,0,0,1));
-    pointer-events: none;
-    z-index: 1;
-    mix-blend-mode: plus-lighter;
-  }
   & .group {
     grid-area: slot;
     transform-origin: bottom;
@@ -380,21 +373,28 @@ const minorScales = {
   '0011': [11, 14, 18], // b minor
 }
 
-const activeNotes = []
-
+let readyNotes = []
 function releaseAll() {
-  while(activeNotes.length > 0) {
-    release(activeNotes.pop())
-  }
+  const { activeNotes } = $.learn()
+  readyNotes = []
+  activeNotes.map(release)
+  $.teach({ activeNotes: [] })
 }
+
 
 function queueAttack(shift, i) {
   const { root } = $.learn()
   const note = root + shift
-  activeNotes.push(note)
+  readyNotes.push(note)
   setTimeout(() => {
-    if(activeNotes.includes(note)) {
+    if(readyNotes.includes(note)) {
       attack(note)
+      $.teach(note, (state, payload) => {
+        return {
+          ...state,
+          activeNotes: [...state.activeNotes, payload]
+        }
+      })
     }
   }, i * strumVelocity)
 }
@@ -421,10 +421,10 @@ const musicRPC = {
     maybe(5, params.value)
   },
   'lt': (params) => {
-    octaveDown()
+    //octaveDown()
   },
   'rt': (params) => {
-    octaveUp()
+    //octaveUp()
   },
   'up': (params) => {
     if(params.value === 1) {
@@ -507,14 +507,17 @@ const musicRPC = {
 function slideLeft() {
   const { root } = $.learn()
 
-  if(root < 24) return
-  $.teach({ root: root-1 })
+  const nextRoot = root - 1
+
+  if(nextRoot < 24) return
+  $.teach({ root: nextRoot })
 }
 
 function slideRight() {
   const { root } = $.learn()
-  if(root>96) return
-  $.teach({ root: root+1 })
+  const nextRoot = root + 1
+  if(nextRoot>96) return
+  $.teach({ root: nextRoot })
 }
 
 function octaveDown() {
