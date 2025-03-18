@@ -7,7 +7,7 @@ import {
 
 import Color from "colorjs.io"
 
-const strumVelocity = 100
+const strumVelocity = 150
 
 const $ = elf('final-boss', {
   colors: [],
@@ -359,7 +359,7 @@ const majorScales = {
   '0001': [5, 9, 12], // f major
   '0110': [6, 10, 13], // f#/gb major
   '0010': [7, 11, 14], // g major
-  '1101': [8, 12, 15], // g#/ab major
+  '0101': [8, 12, 15], // g#/ab major
   '1100': [9, 13, 16], // a major
   '0111': [10, 14, 17], // a#/bb major
   '0011': [11, 15, 18], // b major
@@ -374,45 +374,32 @@ const minorScales = {
   '0001': [5, 8, 12], // f minor
   '0110': [6, 9, 13], // f#/gb minor
   '0010': [7, 10, 14], // g minor
-  '1101': [8, 11, 15], // g#/ab minor
+  '0101': [8, 11, 15], // g#/ab minor
   '1100': [9, 12, 16], // a minor
   '0111': [10, 13, 17], // a#/bb minor
   '0011': [11, 14, 18], // b minor
 }
 
-function strumUp() {
-  const key = strings.slice(0,4).join('')
-  if(strings[4] === 1) {
-    if(minorScales[key]) {
-      [...minorScales[key]].reverse().map(queueAttack)
-    }
-  } else {
-    if(majorScales[key]) {
-      [...majorScales[key]].reverse().map(queueAttack)
-    }
-  }
-}
+const activeNotes = []
 
-function strumDown() {
-  const key = strings.slice(0,4).join('')
-  if(strings[4] === 1) {
-    if(minorScales[key]) {
-      minorScales[key].map(queueAttack)
-    }
-  } else {
-    if(majorScales[key]) {
-      majorScales[key].map(queueAttack)
-    }
+function releaseAll() {
+  while(activeNotes.length > 0) {
+    release(activeNotes.pop())
   }
 }
 
 function queueAttack(shift, i) {
+  const { root } = $.learn()
+  const note = root + shift
+  activeNotes.push(note)
   setTimeout(() => {
-    const { root } = $.learn()
-    const note = root + shift
-    attackRelease(note, () => null, '1n')
+    if(activeNotes.includes(note)) {
+      attack(note)
+    }
   }, i * strumVelocity)
 }
+
+let upCache, downCache
 
 const musicRPC = {
   'a': (params) => {
@@ -442,15 +429,53 @@ const musicRPC = {
   'up': (params) => {
     if(params.value === 1) {
       debounceSpam('up', 300, () => {
-        strumUp()
+        const cache = strings.slice(0,5).join('')
+        if(upCache === cache) return
+        upCache = cache
+        releaseAll()
+
+        const key = strings.slice(0,4).join('')
+        if(strings[4] === 1) {
+          if(minorScales[key]) {
+            [...minorScales[key]].reverse().map(queueAttack)
+          }
+        } else {
+          if(majorScales[key]) {
+            [...majorScales[key]].reverse().map(queueAttack)
+          }
+        }
       })
+    } else {
+      if(upCache) {
+        releaseAll()
+        upCache = null
+      }
     }
   },
   'down': (params) => {
     if(params.value === 1) {
       debounceSpam('down', 300, () => {
-        strumDown()
+        const cache = strings.slice(0,5).join('')
+        if(downCache === cache) return
+        downCache = cache
+        releaseAll()
+
+        const key = strings.slice(0,4).join('')
+        if(strings[4] === 1) {
+          if(minorScales[key]) {
+            minorScales[key].map(queueAttack)
+          }
+        } else {
+          if(majorScales[key]) {
+            majorScales[key].map(queueAttack)
+          }
+        }
       })
+    } else {
+      if(downCache) {
+        releaseAll()
+        downCache = null
+      }
     }
   },
   'left': (params) => {
