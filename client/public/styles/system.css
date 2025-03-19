@@ -712,6 +712,14 @@ button {
     padding: 1in 1in 1in 1.5in;
   }
 }
+@media print {
+  .screenplay {
+    max-width: 8.5in;
+    padding: 1in 1in 1in 1.5in;
+  }
+}
+
+
 
 .screenplay xml-html {
   overflow: auto;

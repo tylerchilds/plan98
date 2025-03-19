@@ -101,22 +101,9 @@ const $ = elf('paper-pocket', {
           label: 'Final Boss',
           url: '/app/paper-pocket?rom=final-boss'
         },
-
         {
-          label: 'Irix Launcher',
-          url: '/app/irix-launcher'
-        },
-        {
-          label: 'Map',
-          url: '/app/middle-earth'
-        },
-        {
-          label: 'Draw Term 98',
-          url: '/app/draw-term'
-        },
-        {
-          label: 'File System',
-          url: '/app/file-system'
+          label: 'Silly Script',
+          url: '/app/paper-pocket?rom=silly-script'
         },
         {
           label: 'Sonic &amp; Knuckles',
@@ -127,6 +114,10 @@ const $ = elf('paper-pocket', {
     apps: {
       label: "Apps",
       list: [
+        {
+          label: 'Map',
+          url: '/app/middle-earth'
+        },
         {
           label: 'Secure Mail',
           url: '/app/secure-mail'
@@ -142,7 +133,11 @@ const $ = elf('paper-pocket', {
         {
           label: 'Public TV',
           url: '/app/public-broadcast'
-        }
+        },
+        {
+          label: 'Draw Term 98',
+          url: '/app/draw-term'
+        },
       ]
     },
     art: {
@@ -184,6 +179,10 @@ const $ = elf('paper-pocket', {
       label: "Coding",
       list: [
         {
+          label: 'Irix Launcher',
+          url: '/app/irix-launcher'
+        },
+        {
           label: 'Code Module',
           url: '/app/code-module?src=/public/elves/code-module.js'
         },
@@ -198,7 +197,11 @@ const $ = elf('paper-pocket', {
         {
           label: 'Collaborative Text',
           url: `/app/simpleton-client?src=/private/text/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
-        }
+        },
+        {
+          label: 'File System',
+          url: '/app/file-system'
+        },
       ]
     },
     templates: {
@@ -951,8 +954,8 @@ $.when('pointerup', '[data-press]', (event) => {
 
 const keyFlips = {
   Meta: keyFlipper(0, buttons.os),
-  Enter: keyFlipper(0, buttons.start),
-  Backspace: keyFlipper(0, buttons.select),
+  Alt: keyFlipper(0, buttons.start),
+  Control: keyFlipper(0, buttons.select),
   ArrowUp: keyFlipper(0, buttons.up),
   w: keyFlipper(0, buttons.up),
   W: keyFlipper(0, buttons.up),
