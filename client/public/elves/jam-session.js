@@ -1,5 +1,4 @@
 import elf from '@silly/elf'
-import * as Tone from 'tone@next'
 import {
   quantize,
   attack,
@@ -230,14 +229,13 @@ $.style(`
     border: none;
     width: 100%;
     height: auto;
-    opacity: 1;
-    transition: opacity calc(1000ms / 8);
+    opacity: 0;
   }
 
   & .step.active,
   & .step:hover,
   & .step:focus {
-    opacity: .1;
+    opacity: 1;
   }
 
   & .fake-overlay {

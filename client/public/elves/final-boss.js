@@ -2,12 +2,12 @@ import elf from '@silly/elf'
 import {
   attack,
   release,
-  attackRelease
+  attackRelease,
+  getNoteDuration
 } from './paper-pocket.js'
 
+import * as Tone from 'tone@next'
 import Color from "colorjs.io"
-
-const strumVelocity = 150
 
 const $ = elf('final-boss', {
   activeNotes: [],
@@ -396,7 +396,7 @@ function queueAttack(shift, i) {
         }
       })
     }
-  }, i * strumVelocity)
+  }, i * Tone.Time(getNoteDuration()).toMilliseconds())
 }
 
 let upCache, downCache
@@ -428,7 +428,7 @@ const musicRPC = {
   },
   'up': (params) => {
     if(params.value === 1) {
-      debounceSpam('up', 300, () => {
+      debounceSpam('up', Tone.Time(getNoteDuration()).toMilliseconds(), () => {
         const cache = strings.slice(0,5).join('')
         if(upCache === cache) return
         upCache = cache
@@ -454,7 +454,7 @@ const musicRPC = {
   },
   'down': (params) => {
     if(params.value === 1) {
-      debounceSpam('down', 300, () => {
+      debounceSpam('down', Tone.Time(getNoteDuration()).toMilliseconds(), () => {
         const cache = strings.slice(0,5).join('')
         if(downCache === cache) return
         downCache = cache
