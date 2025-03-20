@@ -4,11 +4,15 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
+Tone.Transport.start();
+
 let current
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
 const themes = ['lightgray', 'firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
+const bpmOptions = ['20', '40', '60', '80', '100', '120', '140', '160', '180', '200', '220', '240', '280', '300', '320', '340', '360']
+const noteDurationOptions = ['4m', '2m', '1m', '1n', '2n', '4n', '8n', '16n', '32n', '64n']
 
 const fontSizes = ['tiny', 'small', 'regular', 'large', 'huge']
 const fontSizeMap = {
@@ -44,6 +48,8 @@ const $ = elf('paper-pocket', {
   instrument: getInstrument(),
   fontSize: getFontSize(),
   fontFamily: getFontFamily(),
+  bpm: getBpm(),
+  noteDuration: getNoteDuration(),
   rom: 'final-boss',
   mode: modes.game,
   backMode: modes.game,
@@ -75,13 +81,24 @@ const $ = elf('paper-pocket', {
       options: getFontFamilyOptions(),
       value: getFontFamily(),
     },
+    bpm: {
+      label: 'Beats per minute',
+      description: 'The aural speed of the console.',
+      options: getBpmOptions(),
+      value: getBpm()
+    },
+    noteDuration: {
+      label: 'Note Duration',
+      description: 'The length of the played notes.',
+      options: getNoteDurationOptions(),
+      value: getNoteDuration()
+    },
     invertY: {
       label: 'Invert Y-Axis',
       description: 'Up is down, down is up.',
       options: ['normal','inverted'],
       value: 'inverted',
     },
-
     debug: {
       label: 'Debugger',
       description: 'Toggle the debugger',
@@ -100,6 +117,10 @@ const $ = elf('paper-pocket', {
         {
           label: 'Final Boss',
           url: '/app/paper-pocket?rom=final-boss'
+        },
+        {
+          label: 'Jam Session',
+          url: '/app/paper-pocket?rom=jam-session'
         },
         {
           label: 'Silly Script',
@@ -257,6 +278,7 @@ export function getInstrument() {
 }
 
 let ready
+
 function loadInstrument(instrument) {
   ready = false
   current = SampleLibrary.load({
@@ -266,9 +288,11 @@ function loadInstrument(instrument) {
 
   Tone.loaded().then(function() {
     ready = true
+    Tone.Transport.bpm.value = parseInt(getBpm())
     current.release = .5;
     current.toDestination();
   })
+
 }
 
 loadInstrument(getInstrument())
@@ -286,6 +310,35 @@ export function getTheme() {
   return localStorage.getItem('paper-pocket/theme') || 'lightgray'
 }
 
+export function getBpmOptions() {
+  return bpmOptions
+}
+
+export function setNoteDuration(duration) {
+  localStorage.setItem('paper-pocket/note-duration', duration)
+  $.teach({ noteDuration: duration })
+}
+
+export function getNoteDuration() {
+  return localStorage.getItem('paper-pocket/note-duration') || '4n'
+}
+
+export function getNoteDurationOptions() {
+  return noteDurationOptions
+}
+
+export function setBpm(bpm) {
+  Tone.Transport.bpm.value = parseInt(bpm)
+  localStorage.setItem('paper-pocket/bpm', bpm)
+  $.teach({ bpm })
+}
+
+export function getBpm() {
+  return localStorage.getItem('paper-pocket/bpm') || 80
+}
+
+
+
 const attacking = {}
 
 export function attack(note) {
@@ -294,7 +347,7 @@ export function attack(note) {
   attacking[note] = true
 }
 
-export function attackRelease(note, callback, time='24n') {
+export function attackRelease(note, callback=()=>null, time='24n') {
   if(ready) {
     current.triggerAttackRelease(Tone.Frequency(note, "midi").toNote(), time);
     attacking[note] = true
@@ -311,6 +364,26 @@ export function release(note) {
   current.triggerRelease(Tone.Frequency(note, "midi").toNote());
 }
 
+const quantizeInterval = "4n"; // Adjust as needed
+
+let latestCallback = null; // Store the most recent callback
+let isScheduled = false; // Prevent duplicate scheduling
+
+// Schedule a repeating event that fires on every 16th note
+Tone.Transport.scheduleRepeat((time) => {
+  if (latestCallback) {
+    latestCallback(time); // Execute the most recent user input
+    latestCallback = null; // Reset after execution
+    isScheduled = false; // Allow new inputs
+  }
+}, quantizeInterval);
+
+export function quantize(callback) {
+  if (!isScheduled) {
+    latestCallback = callback; // Store latest callback
+    isScheduled = true; // Prevent multiple triggers per 16n
+  }
+};
 
 $.draw((target) => {
   if(target.innerHTML) return
@@ -651,6 +724,12 @@ const settingsRPC = {
 const sideEffects = {
   theme: (value) => {
     setTheme(value)
+  },
+  bpm: (value) => {
+    setBpm(value)
+  },
+  noteDuration: (value) => {
+    setNoteDuration(value)
   },
   instrument: (value) => {
     setInstrument(value)
