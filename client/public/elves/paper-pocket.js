@@ -1563,7 +1563,7 @@ $.style(`
   }
 
   & .yellow {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--yellow);
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--yellow);
     color: rgba(255,255,255,.85);
   }
 
@@ -1574,7 +1574,7 @@ $.style(`
   }
 
   & .blue {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--blue);
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--blue);
     color: rgba(255,255,255,.85);
   }
 
@@ -1585,7 +1585,7 @@ $.style(`
   }
 
   & .red {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--red);
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--red);
     color: rgba(255,255,255,.85);
   }
 
@@ -1596,7 +1596,7 @@ $.style(`
   }
 
   & .green {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--green);
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--green);
     color: rgba(255,255,255,.85);
   }
 
@@ -1635,7 +1635,7 @@ $.style(`
     border-radius: none;
     border-radius: 0;
     border: none;
-    padding: 8px 16px;
+    padding: .5rem;
     opacity: 1;
   }
 

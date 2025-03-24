@@ -8,6 +8,75 @@ import {
 
 import Color from "colorjs.io"
 
+const characterMapping = {
+  '00000': [' ', '.'],
+  '10101': ['?', '!'],
+  '11101': ['@', '#'],
+  '10111': [':', ';'],
+  '11111': ['<', '>'],
+  '10110': [',', '"'],
+
+  '10000': ['a', 'A'],
+  '01000': ['e', 'E'],
+  '00100': ['i', 'I'],
+  '00010': ['o', 'O'],
+  '00001': ['u', 'U'],
+
+  '11000': ['t', 'T'],
+  '01100': ['n', 'N'],
+  '00110': ['s', 'S'],
+  '00011': ['h', 'H'],
+  '10010': ['r', 'R'],
+  '01010': ['d', 'D'],
+  '00101': ['l', 'L'],
+  '10100': ['c', 'C'],
+  '01001': ['m', 'M'],
+  '11100': ['w', 'W'],
+  '01110': ['f', 'F'],
+  '00111': ['g', 'G'],
+  '10011': ['y', 'Y'],
+  '11010': ['p', 'P'],
+  '01101': ['b', 'B'],
+
+  '01011': ['v', 'V'],
+  '11001': ['k', 'K'],
+  '11110': ['j', 'J'],
+  '01111': ['x', 'X'],
+  '10001': ['q', 'Q'],
+  '11011': ['z', 'Z']
+}
+
+const majorScales = {
+  '0000': [0], // c major
+  '1001': [1], // c#/db major
+  '1000': [2], // d major
+  '1010': [3], // d#/eb major
+  '0100': [4], // e major
+  '0010': [5], // f major
+  '0101': [6], // f#/gb major
+  '0001': [7], // g major
+  '0110': [8], // g#/ab major
+  '1100': [9], // a major
+  '0111': [10], // a#/bb major
+  '0011': [11], // b major
+}
+
+const minorScales = {
+  '0000': [7], // c minor
+  '1001': [8], // c#/db minor
+  '1000': [9], // d minor
+  '1010': [10], // d#/eb minor
+  '0100': [11], // e minor
+  '0010': [12], // f minor
+  '0101': [13], // f#/gb minor
+  '0001': [14], // g minor
+  '0110': [15], // g#/ab minor
+  '1100': [16], // a minor
+  '0111': [17], // a#/bb minor
+  '0011': [18], // b minor
+}
+
+
 const $ = elf('typing-simulator', {
   activeNotes: [],
   colors: [],
@@ -126,12 +195,21 @@ $.draw((target) => {
         <textarea value="${escapeHyperText(message)}"></textarea>
       </div>
       <div class="typing-bar">
-        Command
+        <div class="active-phrase">
+          The quick brown fox jumped over the lazy dog.
+        </div>
+        <div class="character-chord">
+          ${drawChord('a')}
+        </div>
       </div>
     </div>
   `
 }, {
   afterUpdate(target) {
+    {
+      recoverElves(target, 'sl-icon')
+    }
+
     {
       const { message } = $.learn()
 
@@ -143,6 +221,46 @@ $.draw((target) => {
     }
   }
 })
+
+function drawChord(character) {
+  const chord = Object.keys(characterMapping).find(key => {
+    return characterMapping[key].includes(character)
+  })
+
+  if(chord) {
+    const direction = characterMapping[chord][0] === character ? 'up' : 'down'
+    const buttons = chord.split('').map(x => {
+      const value = parseInt(x)
+
+      return `
+        <div class="chord-key ${value ? 'on':'off'}"></div>
+      `
+    }).join('')
+
+    return `
+      ${buttons}
+      <div class="strum-key">
+        <sl-icon name="arrow-${direction}"></sl-icon>
+      </div>
+    `
+  }
+
+  return '??????'
+}
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
+
 
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
@@ -195,7 +313,7 @@ $.style(`
     color: white;
     font-weight: bold;
     font-size: 1.5rem;
-    padding: 0 1rem;
+    padding: 0 .5rem;
     pointer-events: none;
     z-index: 2;
   }
@@ -223,7 +341,7 @@ $.style(`
     background: rgba(0,0,0,.85);
     font-weight: bold;
     font-size: 1rem;
-    padding: .5rem 1rem;
+    padding: .5rem;
     margin 1rem 0;
     color: rgba(255,255,255,.65);
   }
@@ -242,7 +360,7 @@ $.style(`
     height: 100%;
     width: 100%;
     resize: none;
-    padding: 1rem;
+    padding: .5rem;
     line-height: 1.25;
     font-size: 1.5rem;
   }
@@ -250,6 +368,87 @@ $.style(`
   & .hero-bar {
     display: grid;
     grid-template-columns: 1fr auto;
+  }
+
+  & .typing-bar {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    padding: .5rem;
+  }
+
+  & .active-phrase {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    color: rgba(255,255,255,.65);
+    line-height: 1.5rem;
+  }
+
+  & .active-phrase:first-letter {
+    font-weight: bold;
+    color: white;
+    font-size: 1.5rem;
+  }
+
+  & .character-chord {
+    display: flex;
+    color: white;
+    gap: .25rem;
+  }
+
+  & .strum-key,
+  & .chord-key {
+    height: 1.5rem;
+    width: 1.5rem;
+    border: 2px solid;
+    background: transparent;
+    border-radius: 100%;
+  }
+
+  & .chord-key:nth-child(1) {
+    border-color: var(--green, mediumseagreen);
+  }
+
+  & .chord-key.on:nth-child(1) {
+    background: var(--green, mediumseagreen);
+  }
+
+  & .chord-key:nth-child(2) {
+    border-color: var(--red, firebrick);
+  }
+
+  & .chord-key.on:nth-child(2) {
+    background: var(--red, firebrick);
+  }
+
+  & .chord-key:nth-child(3) {
+    border-color: var(--yellow, gold);
+  }
+
+  & .chord-key.on:nth-child(3) {
+    background: var(--yellow, gold);
+  }
+
+  & .chord-key:nth-child(4) {
+    border-color: var(--blue, dodgerblue);
+  }
+
+  & .chord-key.on:nth-child(4) {
+    background: var(--blue, dodgerblue);
+  }
+
+  & .chord-key:nth-child(5) {
+    border-color: var(--orange, darkorange);
+  }
+
+  & .chord-key.on:nth-child(5) {
+    background: var(--orange, darkorange);
+  }
+
+  & .strum-key {
+    display: grid;
+    place-items: center;
+    border-color: transparent;
   }
 
   & .wheel-wrapper {
@@ -315,13 +514,13 @@ $.style(`
     background: rgba(0,0,0,.85);
     font-weight: bold;
     font-size: 1rem;
-    padding: .5rem 1rem;
+    padding: .5rem;
     margin 1rem 0;
     color: rgba(255,255,255,.65);
   }
 
   & .fake-context {
-    padding: 0 1rem;
+    padding: 0 .5rem;
     margin-bottom: 1rem;
     color: rgba(0,0,0,.85);
     max-height: 100%;
@@ -330,7 +529,7 @@ $.style(`
   & .fake-actions {
     display: flex;
     justify-content: end;
-    padding: 1rem;
+    padding: .5rem;
     background: rgba(0,0,0,.25);
     gap: .5rem;
   }
@@ -400,74 +599,6 @@ function maybe(index, value) {
     if(strings[index] === 0) return
     strings[index] = value
   }
-}
-
-const characterMapping = {
-  '00000': [' ', '.'],
-  '10101': ['?', '!'],
-  '11101': ['@', '#'],
-  '10111': [':', ';'],
-  '11111': ['<', '>'],
-  '10110': [',', '"'],
-
-  '10000': ['a', 'A'],
-  '01000': ['e', 'E'],
-  '00100': ['i', 'I'],
-  '00010': ['o', 'O'],
-  '00001': ['u', 'U'],
-
-  '11000': ['t', 'T'],
-  '01100': ['n', 'N'],
-  '00110': ['s', 'S'],
-  '00011': ['h', 'H'],
-  '10010': ['r', 'R'],
-  '01010': ['d', 'D'],
-  '00101': ['l', 'L'],
-  '10100': ['c', 'C'],
-  '01001': ['m', 'M'],
-  '11100': ['w', 'W'],
-  '01110': ['f', 'F'],
-  '00111': ['g', 'G'],
-  '10011': ['y', 'Y'],
-  '11010': ['p', 'P'],
-  '01101': ['b', 'B'],
-
-  '01011': ['v', 'V'],
-  '11001': ['k', 'K'],
-  '11110': ['j', 'J'],
-  '01111': ['x', 'X'],
-  '10001': ['q', 'Q'],
-  '11011': ['z', 'Z']
-}
-
-const majorScales = {
-  '0000': [0], // c major
-  '1001': [1], // c#/db major
-  '1000': [2], // d major
-  '1010': [3], // d#/eb major
-  '0100': [4], // e major
-  '0010': [5], // f major
-  '0101': [6], // f#/gb major
-  '0001': [7], // g major
-  '0110': [8], // g#/ab major
-  '1100': [9], // a major
-  '0111': [10], // a#/bb major
-  '0011': [11], // b major
-}
-
-const minorScales = {
-  '0000': [7], // c minor
-  '1001': [8], // c#/db minor
-  '1000': [9], // d minor
-  '1010': [10], // d#/eb minor
-  '0100': [11], // e minor
-  '0010': [12], // f minor
-  '0101': [13], // f#/gb minor
-  '0001': [14], // g minor
-  '0110': [15], // g#/ab minor
-  '1100': [16], // a minor
-  '0111': [17], // a#/bb minor
-  '0011': [18], // b minor
 }
 
 function queueAttackRelease(shift, i) {

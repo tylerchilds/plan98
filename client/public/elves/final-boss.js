@@ -258,7 +258,7 @@ $.style(`
     background: rgba(0,0,0,.85);
     font-weight: bold;
     font-size: 1rem;
-    padding: 1rem;
+    padding: .5rem;
     margin 1rem 0;
     color: rgba(255,255,255,.65);
   }
@@ -269,7 +269,7 @@ $.style(`
   }
 
   & .fake-context {
-    padding: 0 1rem;
+    padding: 0 .5rem;
     margin-bottom: 1rem;
     color: rgba(0,0,0,.85);
   }
