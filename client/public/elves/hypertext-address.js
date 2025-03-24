@@ -13,6 +13,7 @@ $.style(`
     display: block;
     text-transform: uppercase;
     margin: 1rem auto;
+    max-width: 6in;
     padding: 0 1rem;
     place-self: start end;
   }

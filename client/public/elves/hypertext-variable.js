@@ -13,8 +13,8 @@ const variables = ['size', 'height', 'monospace', 'casual', 'weight', 'slant', '
 
 $.draw((target) => {
   if(!target.initialized) {
-    target.initialized = true
     mount(target, variables)
+    target.initialized = true
   }
 
   const {

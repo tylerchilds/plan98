@@ -6,6 +6,7 @@ $.style(`
   & {
     display: block;
     padding: 0 1rem;
-    margin: 1rem 0;
+    margin: 1rem auto;
+    max-width: 6in;
   }
 `)

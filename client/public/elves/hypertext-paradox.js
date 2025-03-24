@@ -30,6 +30,8 @@ $.style(`
   & .paradox {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    max-width: 6in;
+    margin: 1rem auto;
   }
 `)
 

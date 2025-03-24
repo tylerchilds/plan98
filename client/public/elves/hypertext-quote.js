@@ -6,14 +6,9 @@ $.style(`
   & {
     display: block;
     place-self: end center;
-    padding: 0 1rem;
-    margin: 1rem 3rem;
-  }
-  @media (min-width: 768px) {
-    & {
-      margin: 1rem auto;
-      width: 4in;
-    }
+    padding: 0 4rem;
+    margin: 1rem auto;
+    max-width: calc(4in + 8rem);
   }
 
   @media print {

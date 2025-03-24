@@ -11,10 +11,11 @@ $.draw((target) => {
 $.style(`
   & {
     display: block;
-    margin: 1rem 0;
+    margin: 1rem auto;
     text-align: right;
     place-self: end;
     overflow: hidden;
     padding: 0 1rem;
+    max-width: 6in;
   }
 `)
