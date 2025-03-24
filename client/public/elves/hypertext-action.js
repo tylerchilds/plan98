@@ -5,7 +5,6 @@ const $ = elf('hypertext-action')
 $.style(`
   & {
     display: block;
-    padding: 0 1rem;
     margin: 1rem auto;
     max-width: 6in;
   }

@@ -18,23 +18,21 @@ const $ = module('code-module')
 
 const cursors = {}
 
+function mount(target) {
+  if(target.initialized) return
+  target.innerHTML = ''
+  target.initialized = true
+
+  const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
+  fetch(src).then(res => res.text()).then(file => {
+    $.teach({ src, [src]: { file, src }})
+  })
+}
+
 function sourceFile(target) {
   const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
   const data = $.learn()[src] || {}
-
-  if(target.initialized) return data
-  target.initialized = true
-
-  return data.file
-    ? data
-    : (function initialize() {
-      schedule(() => {
-        fetch(src).then(res => res.text()).then(file => {
-          $.teach({ src, [src]: { file, src }})
-        })
-      })
-      return data
-    })()
+  return data
 }
 
 $.when('click', '.preview', (event) => {
@@ -89,6 +87,7 @@ $.when('change', 'select', (event) => {
 
 
 $.draw(target => {
+  mount(target)
   const { src, activeMenu } = $.learn()
   const { file } = sourceFile(target)
   const stack = target.getAttribute('stack')
@@ -211,6 +210,10 @@ $.draw(target => {
     target.view = new EditorView({
       parent: target.querySelector('.editor'),
       state: target.editorState
+    })
+
+    requestIdleCallback(() => {
+      target.view.contentDOM.addEventListener("focus", deactivate)
     })
   }
 }, {
@@ -453,13 +456,15 @@ $.when('click', '[data-menu-target]', (event) => {
   event.stopImmediatePropagation()
 })
 
-$.when('click', '*', () => {
+$.when('click', '*', deactivate)
+
+function deactivate(event) {
   $.teach({ activeMenu: null })
-  const active = event.target.querySelector(`[data-menu-target].active`)
+  const active = event.target.closest($.link).querySelector('[data-menu-target].active')
   if(active){
     active.classList.remove('active')
   }
-})
+}
 
 $.when('pointerdown', '[data-resize-sidebar]', event => {
   document.addEventListener("pointermove", resizeSidebar, false);

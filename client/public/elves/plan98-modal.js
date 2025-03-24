@@ -44,7 +44,7 @@ $.draw((target) => {
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
-        <button data-close>Back</button>
+        <button data-close>&#x2718;</button>
       </div>
       <div class="modal">
         <div class="body ${centered ? 'centered': ''}">
@@ -96,9 +96,7 @@ document.body.insertAdjacentHTML("beforeend", context)
 let hideListener = (event) => {
   if (event.key === 'Escape') {
 
-  const { isOpen, layer, body, suppressEscape } = $.learn()
-
-    if(suppressEscape) return
+  const { isOpen, layer, body } = $.learn()
     hideModal()
   }
 }
@@ -195,7 +193,6 @@ $.style(`
 
   & .shell {
     position: fixed;
-    background: var(--image), var(--theme, transparent);
     background-blend-mode: multiply;
     background-size: cover;
     background-repeat: no-repeat;
@@ -207,7 +204,6 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 1100;
-    grid-template-rows: auto 1fr;
   }
 
   body.trap-modal & {
@@ -236,8 +232,8 @@ $.style(`
     display: grid;
     place-items: center;
     overflow: auto;
+    display: block;
     max-width: 100%;
-    background: black;
   }
 
   & .body.centered {
@@ -264,28 +260,30 @@ $.style(`
   }
 
   & .action-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
     place-self: start;
     pointer-events: none;
-    display: flex;
-    justify-content: start;
-    width: 100%;
+    background: #181818;
+    z-index: 2000;
   }
 
   & [data-close] {
+    line-height: 1;
     pointer-events: all;
-    background: transparent;
+    background: black;
     border: none;
-    color: dodgerblue;
-    height: 2rem;
+    color: rgba(255,255,255,.65);
+    padding: .5rem;
     font-size: 1rem;
     transition: color 200ms;
-    border-radius: 100%;
   }
 
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    color: mediumseagreen;
+    color: rgba(255,255,255,.95);
   }
 
   & [data-close] * {

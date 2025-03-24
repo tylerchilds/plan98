@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
@@ -48,33 +49,73 @@ const tutorialModes = {
   about: 'about',
   system: 'system',
   options: 'options',
-  pause: 'pause'
+  pause: 'pause',
+  ready: 'ready',
 }
 
 const tutorialRenderers = {
   [tutorialModes.welcome]: () => {
     return `
-      Welcome!
+# Welcome
+
+Arrow keys (wasd) will move you around. Press right or button A to "Affirm" and continue.
+
+Press X to "eXperience" with the tutorial video.
     `
   },
   [tutorialModes.about]: () => {
     return `
-      The Paper Pocket is a portable operating system. 
+# About
+The Paper Pocket is a living prototype video game console system, portable electrical outlet, computer, music player, VCR, video player, video editor, roommate, camera, alarm clock, toaster, flashlight, strobe light, skateboarder, soccer player, tape player, chef, detective and friend who is owned by YOU!
+
+<div
+style: max-width: 6in; margin: auto;
+html: <a href="https://adventuretime.fandom.com/wiki/BMO" target="_blank">BMO Wiki</a>
+
+@ Finn
+> Hey. That's plagiarism.
     `
   },
   [tutorialModes.system]: () => {
     return `
-      Press 'Paper Pocket' or your specific Operating System key to toggle the in-screen controls.
+# Console
+Press 'PaperPocket' or your "OS" key to toggle the in-screen controls.
     `
   },
   [tutorialModes.options]: () => {
     return `
-      Press 'Options' or ctrl on a keyboard or the select/options button on your gamepad to configure the system.
+# Options
+Press 'Options' or control on a keyboard or the select/options button on your gamepad to configure the system.
+
+To configure the Paper Pocket with more granularity, the code is below.
+
+<code-module
+src: /public/elves/paper-pocket.js
+key: code-1
     `
   },
   [tutorialModes.pause]: () => {
     return `
-      Press 'Start' or alt on a keyboard or the start/pause button on your gamepad to switch applications'
+# Applications
+Press 'Start' or alt/options on a keyboard or the start/pause button on your gamepad to switch applications'
+
+Write your own applications using the SDK provided below.
+
+<code-module
+src: /public/elf.js
+key: code-2
+    `
+  },
+  [tutorialModes.ready]: () => {
+    return `
+# Ready
+Your personal computing device is configured. Reactivate the tutorial from the State menu at any time.
+
+<div
+style: max-width: 6in; margin: auto;
+html: If you think this entire thing is ridiculous. Try and <button data-escape="">ESC</button>ape.
+
+Move right or "A"ffirm to continue.
     `
   },
 }
@@ -564,11 +605,23 @@ $.draw((target) => {
         document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
       }
     }
+
+    {
+      const { mode, tutorialIndex } = $.learn()
+      if(mode === modes.tutorial && target.lastTutorial !== tutorialIndex) {
+        target.lastTutorial = tutorialIndex
+        target.querySelector('.tutorial-window').scrollTo({ top: 0 });
+      }
+    }
+
+    {
+      recoverElves(target, 'code-module')
+    }
   },
 })
 
 function renderMode() {
-  const { mode } = $.learn()
+  const { mode, tutorialIndex } = $.learn()
 
   if(mode === modes.settings) {
     const { settings, settingsKey } = $.learn()
@@ -640,7 +693,9 @@ function renderMode() {
   if(mode === modes.tutorial) {
     return `
       <div class="tutorial-window">
-        ${renderTutorial()}
+        <tutorial${tutorialIndex}>
+          ${renderTutorial()}
+        </tutorial${tutorialIndex}>
       </div>
     `
   }
@@ -650,7 +705,7 @@ function renderTutorial() {
   const { tutorial, tutorialIndex } = $.learn()
 
   const renderer = tutorialRenderers[tutorial[tutorialIndex]]
-  return renderer()
+  return render(renderer())
 }
 
 function recoverElves(target, tag) {
@@ -714,68 +769,60 @@ const settingsRPC = {
   'rt': (params) => {
   },
   'up': (params) => {
-    if(params.value === 1) {
+    toggleSpam('up', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('up', 250, () => {
-        const { settingsKey, settings } = $.learn()
-        const keys = Object.keys(settings)
-        const index = mod((keys.indexOf(settingsKey) - 1), keys.length)
-        $.teach({
-          settingsKey: keys[index]
-        })
+      const { settingsKey, settings } = $.learn()
+      const keys = Object.keys(settings)
+      const index = mod((keys.indexOf(settingsKey) - 1), keys.length)
+      $.teach({
+        settingsKey: keys[index]
       })
-    }
+    })
   },
   'down': (params) => {
-    if(params.value === 1) {
+    toggleSpam('down', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('down', 250, () => {
-        const { settingsKey, settings } = $.learn()
-        const keys = Object.keys(settings)
-        const index = mod((keys.indexOf(settingsKey) + 1), keys.length)
-        $.teach({
-          settingsKey: keys[index]
-        })
+      const { settingsKey, settings } = $.learn()
+      const keys = Object.keys(settings)
+      const index = mod((keys.indexOf(settingsKey) + 1), keys.length)
+      $.teach({
+        settingsKey: keys[index]
       })
-    }
+    })
   },
   'left': (params) => {
-    if(params.value === 1) {
+    toggleSpam('left', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('left', 250, () => {
-        const { settingsKey, settings } = $.learn()
-        const { options, value } = settings[settingsKey]
+      const { settingsKey, settings } = $.learn()
+      const { options, value } = settings[settingsKey]
 
-        const index = options.indexOf(value)
+      const index = options.indexOf(value)
 
-        const nextIndex = mod(index - 1, options.length)
-        const nextValue = options[nextIndex]
-        settingsChange(settingsKey, nextValue)
+      const nextIndex = mod(index - 1, options.length)
+      const nextValue = options[nextIndex]
+      settingsChange(settingsKey, nextValue)
 
-        $.teach({
-          value: nextValue
-        }, selectedSettingsReducer)
-      })
-    }
+      $.teach({
+        value: nextValue
+      }, selectedSettingsReducer)
+    })
   },
   'right': (params) => {
-    if(params.value === 1) {
+    toggleSpam('right', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('right', 250, () => {
-        const { settingsKey, settings } = $.learn()
-        const { options, value } = settings[settingsKey]
+      const { settingsKey, settings } = $.learn()
+      const { options, value } = settings[settingsKey]
 
-        const index = options.indexOf(value)
+      const index = options.indexOf(value)
 
-        const nextIndex = mod(index + 1, options.length)
-        const nextValue = options[nextIndex]
-        settingsChange(settingsKey, nextValue)
+      const nextIndex = mod(index + 1, options.length)
+      const nextValue = options[nextIndex]
+      settingsChange(settingsKey, nextValue)
 
-        $.teach({
-          value: options[nextIndex]
-        }, selectedSettingsReducer)
-      })
-    }
+      $.teach({
+        value: options[nextIndex]
+      }, selectedSettingsReducer)
+    })
   },
 }
 
@@ -847,58 +894,50 @@ const pauseRPC = {
   'rt': (params) => {
   },
   'up': (params) => {
-    if(params.value === 1) {
+    toggleSpam('up', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('up', 250, () => {
-        const { pauseKey, pause, pauseIndex } = $.learn()
-        const { list } = pause[pauseKey]
-        const index = mod((pauseIndex - 1), list.length)
-        $.teach({
-          pauseIndex: index,
-        })
+      const { pauseKey, pause, pauseIndex } = $.learn()
+      const { list } = pause[pauseKey]
+      const index = mod((pauseIndex - 1), list.length)
+      $.teach({
+        pauseIndex: index,
       })
-    }
+    })
   },
   'down': (params) => {
-    if(params.value === 1) {
+    toggleSpam('down', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('down', 250, () => {
-        const { pauseKey, pause, pauseIndex } = $.learn()
-        const { list } = pause[pauseKey]
-        const index = mod((pauseIndex + 1), list.length)
-        $.teach({
-          pauseIndex: index,
-        })
+      const { pauseKey, pause, pauseIndex } = $.learn()
+      const { list } = pause[pauseKey]
+      const index = mod((pauseIndex + 1), list.length)
+      $.teach({
+        pauseIndex: index,
       })
-    }
+    })
   },
   'left': (params) => {
-    if(params.value === 1) {
+    toggleSpam('left', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('left', 250, () => {
-        const { pauseKey, pause } = $.learn()
-        const keys = Object.keys(pause)
-        const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
-        $.teach({
-          pauseIndex: 0,
-          pauseKey: keys[index]
-        })
+      const { pauseKey, pause } = $.learn()
+      const keys = Object.keys(pause)
+      const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
+      $.teach({
+        pauseIndex: 0,
+        pauseKey: keys[index]
       })
-    }
+    })
   },
   'right': (params) => {
-    if(params.value === 1) {
+    toggleSpam('right', params.value, () => {
       document.activeElement.blur()
-      debounceSpam('right', 250, () => {
-        const { pauseKey, pause } = $.learn()
-        const keys = Object.keys(pause)
-        const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
-        $.teach({
-          pauseIndex: 0,
-          pauseKey: keys[index]
-        })
+      const { pauseKey, pause } = $.learn()
+      const keys = Object.keys(pause)
+      const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
+      $.teach({
+        pauseIndex: 0,
+        pauseKey: keys[index]
       })
-    }
+    })
   },
 }
 
@@ -957,10 +996,23 @@ const tutorialRPC = {
       tutorialNext()
     })
   },
-  'up': (params) => {
+  'up': (params, node) => {
+    if(params.value === 1) {
+      const container = node.querySelector('.tutorial-window')
+      if(container) {
+        fakeScrollUp(container, 40)
+      }
+    }
   },
-  'down': (params) => {
+  'down': (params, node) => {
+    if(params.value === 1) {
+      const container = node.querySelector('.tutorial-window')
+      if(container) {
+        fakeScrollDown(container, 40)
+      }
+    }
   },
+
   'left': (params) => {
     toggleSpam('left', params.value, () => {
       tutorialBack()
@@ -978,6 +1030,8 @@ const tutorialRPC = {
 $.when('json-rpc', '.system', (event) => {
   const { method, params } = event.detail
   const { mode } = $.learn()
+
+  const node = event.target.closest($.link)
 
   if(mode === modes.app) {
     if(appRPC[method]) {
@@ -1000,7 +1054,7 @@ $.when('json-rpc', '.system', (event) => {
 
   if(mode === modes.tutorial) {
     if(tutorialRPC[method]) {
-      tutorialRPC[method](params)
+      tutorialRPC[method](params, node)
     }
   }
 })
@@ -1425,6 +1479,20 @@ $.style(`
     display: grid;
     height: 100%;
     grid-template-rows: 1fr auto;
+    position: relative;
+  }
+
+  & .chrome::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+    pointer-events: none;
+    mix-blend-mode: overlay;
   }
 
   & .widget-frame {
@@ -1642,6 +1710,8 @@ $.style(`
       linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       var(--root-theme, lightgray);
+    display: grid;
+    grid-template-rows: auto 1fr;
   }
 
   & .pause-label {
@@ -1742,6 +1812,10 @@ $.style(`
     color: white;
   }
 
+  & .pause-list {
+    overflow-y: visible;
+  }
+
   & .menu-link {
     color: white;
     display: block;
@@ -1757,6 +1831,7 @@ $.style(`
 
   & .menu-link.active {
     color: white;
+    background: linear-gradient(195deg, rgba(0,0,0,0), rgba(0,0,0,.65));
     transform: scale(1.2);
     transform-origin: -16px center;
     font-weight: bold;
@@ -1770,4 +1845,22 @@ $.style(`
   &[data-mode="game"] .system {
     display: none;
   }
+
+  & .tutorial-window hypertext-address {
+    text-transform: none;
+    font-weight: bold;
+    font-size: 2rem;
+  }
 `)
+
+function fakeScrollUp(container, scrollStep=10) {
+  container.scrollBy({ top: -scrollStep, behavior: 'smooth' });
+}
+
+function fakeScrollDown(container, scrollStep=10) {
+  container.scrollBy({ top: scrollStep, behavior: 'smooth' });
+}
+
+$.when('click', '[data-escape]', () => {
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+})

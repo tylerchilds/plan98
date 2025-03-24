@@ -15,7 +15,6 @@ $.style(`
     text-align: center;
     place-self: center;
     overflow: hidden;
-    padding: 0 1rem;
     margin: 0 auto;
     max-width: 6in;
   }
