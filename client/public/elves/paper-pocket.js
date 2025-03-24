@@ -195,6 +195,10 @@ const $ = elf('paper-pocket', {
           mode: modes.tutorial
         },
         {
+          label: 'Typing Simulator',
+          url: '/app/paper-pocket?rom=typing-simulator'
+        },
+        {
           label: 'Paper Nautiloids',
           url: '/app/paper-pocket?rom=paper-nautiloids'
         },
@@ -519,6 +523,13 @@ $.draw((target) => {
           </button>
           <button key="right" class="gray" data-press="right">
             <sl-icon name="caret-right-fill"></sl-icon>
+          </button>
+
+          <button key="lb" class="pastel" data-press="lb">
+            L
+          </button>
+          <button key="rb" class="pastel" data-press="rb">
+            R
           </button>
         </fieldset>
       </div>
@@ -1630,6 +1641,18 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
+  & .pastel {
+    background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.75)), var(--gray);
+    color: rgba(0,0,0,.5);
+  }
+
+  & .pastel:hover,
+  & .pastel:focus {
+    background: linear-gradient(rgba(255,255,255,.1), rgba(255,255,255,.3)), var(--gray);
+    color: rgba(0,0,0,1);
+  }
+
+
   & .chrome[data-full="true"] .widget-frame {
     padding: 0;
   }
@@ -1649,7 +1672,7 @@ $.style(`
     grid-template-columns: 45px 45px 45px 45px 45px;
     grid-template-rows: 45px 45px;
     grid-template-areas:
-      ". y up x ."
+      "lb y up x rb"
       "b left down right a";
     border: none;
     padding: 10px;
@@ -1708,6 +1731,20 @@ $.style(`
   & [data-press="right"] {
     grid-area: right;
     transform: translateX(-5px);
+  }
+
+  & .gamepad-grid button[data-press="lb"] {
+    grid-area: lb;
+    transform: translate(-20px, -10px);
+    height: 35px;
+    width: 35px;
+  }
+
+  & .gamepad-grid button[data-press="rb"] {
+    grid-area: rb;
+    transform: translate(30px, -10px);
+    height: 35px;
+    width: 35px;
   }
 
   & .super-items {

@@ -352,14 +352,14 @@ function maybe(index, value) {
 
 const majorScales = {
   '0000': [0, 4, 7], // c major
-  '1010': [1, 5, 8], // c#/db major
+  '1001': [1, 5, 8], // c#/db major
   '1000': [2, 6, 9], // d major
-  '1001': [3, 7, 10], // d#/eb major
+  '1010': [3, 7, 10], // d#/eb major
   '0100': [4, 8, 11], // e major
-  '0001': [5, 9, 12], // f major
-  '0110': [6, 10, 13], // f#/gb major
-  '0010': [7, 11, 14], // g major
-  '0101': [8, 12, 15], // g#/ab major
+  '0010': [5, 9, 12], // f major
+  '0101': [6, 10, 13], // f#/gb major
+  '0001': [7, 11, 14], // g major
+  '0110': [8, 12, 15], // g#/ab major
   '1100': [9, 13, 16], // a major
   '0111': [10, 14, 17], // a#/bb major
   '0011': [11, 15, 18], // b major
@@ -367,14 +367,14 @@ const majorScales = {
 
 const minorScales = {
   '0000': [0, 3, 7], // c minor
-  '1010': [1, 4, 8], // c#/db minor
+  '1001': [1, 4, 8], // c#/db minor
   '1000': [2, 5, 9], // d minor
-  '1001': [3, 6, 10], // d#/eb minor
+  '1010': [3, 6, 10], // d#/eb minor
   '0100': [4, 7, 11], // e minor
-  '0001': [5, 8, 12], // f minor
-  '0110': [6, 9, 13], // f#/gb minor
-  '0010': [7, 10, 14], // g minor
-  '0101': [8, 11, 15], // g#/ab minor
+  '0010': [5, 8, 12], // f minor
+  '0101': [6, 9, 13], // f#/gb minor
+  '0001': [7, 10, 14], // g minor
+  '0110': [8, 11, 15], // g#/ab minor
   '1100': [9, 12, 16], // a minor
   '0111': [10, 13, 17], // a#/bb minor
   '0011': [11, 14, 18], // b minor
@@ -416,10 +416,10 @@ const musicRPC = {
     maybe(1, params.value)
   },
   'x': (params) => {
-    maybe(2, params.value)
+    maybe(3, params.value)
   },
   'y': (params) => {
-    maybe(3, params.value)
+    maybe(2, params.value)
   },
   'lb': (params) => {
     maybe(4, params.value)
