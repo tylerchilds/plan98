@@ -525,10 +525,10 @@ $.draw((target) => {
             <sl-icon name="caret-right-fill"></sl-icon>
           </button>
 
-          <button key="lb" class="pastel" data-press="lb">
+          <button key="lb" class="orange" data-press="lb">
             L
           </button>
-          <button key="rb" class="pastel" data-press="rb">
+          <button key="rb" class="purple" data-press="rb">
             R
           </button>
         </fieldset>
@@ -1606,6 +1606,28 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
+  & .orange {
+    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.5)), var(--orange);
+    color: rgba(0,0,0,.85);
+  }
+
+  & .orange:hover,
+  & .orange:focus {
+    background: linear-gradient(rgba(255,255,255,.1), rgba(255,255,255,.3)), var(--orange);
+    color: rgba(0,0,0,1);
+  }
+
+  & .purple {
+    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.5)), var(--purple);
+    color: rgba(0,0,0,.85);
+  }
+
+  & .purple:hover,
+  & .purple:focus {
+    background: linear-gradient(rgba(255,255,255,.1), rgba(255,255,255,.3)), var(--purple);
+    color: rgba(0,0,0,1);
+  }
+
   & .clear {
     background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.65)), var(--root-theme, lightgray);
     -webkit-background-clip: text;
@@ -1675,8 +1697,8 @@ $.style(`
       "lb y up x rb"
       "b left down right a";
     border: none;
-    padding: 10px;
-    gap: 10px;
+    padding: 16px;
+    gap: 8px;
   }
 
   & .gamepad-grid:focus {
