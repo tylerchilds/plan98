@@ -84,7 +84,7 @@ Press 'PaperPocket' or your "OS" key to toggle the in-screen controls.
   },
   [tutorialModes.options]: () => {
     return `
-# Options
+# Settings
 Press 'Options' or control on a keyboard or the select/options button on your gamepad to configure the system.
 
 To configure the Paper Pocket with more granularity, the code is below.
@@ -128,9 +128,9 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'paper-nautiloids',
-  mode: modes.tutorial,
-  backMode: modes.tutorial,
+  rom: 'typing-simulator',
+  mode: startMode(),
+  backMode: startMode(),
   settingsKey: 'instrument',
   pauseKey: 'favorites',
   pauseIndex: 0,
@@ -321,6 +321,12 @@ const $ = elf('paper-pocket', {
   }
 })
 
+function startMode() {
+  return localStorage.getItem('paper-pocket/tutorialComplete') === "true"
+    ? modes.game
+    : modes.tutorial
+}
+
 export function getFontSizeOptions() {
   return fontSizes
 }
@@ -487,7 +493,7 @@ $.draw((target) => {
           </div>
           <div class="menu-items">
             <button key="options" class="clear select" data-press="select">
-              Options
+              Settings
             </button>
             <button key="start" class="clear start" data-press="start">
               Start
@@ -955,6 +961,7 @@ function tutorialNext() {
 
   const index = tutorialIndex + 1
   if(index >= tutorial.length) {
+    localStorage.setItem('paper-pocket/tutorialComplete', true)
     $.teach({ mode: modes.game })
   } else {
     $.teach({ tutorialIndex: index })
@@ -963,8 +970,10 @@ function tutorialNext() {
 
 const tutorialRPC = {
   'a': (params) => {
-    toggleSpam('a', params.value, () => {
-      tutorialNext()
+    forceAcknowledge('tutorial-start', params.value, () => {
+      toggleSpam('a', params.value, () => {
+        tutorialNext()
+      })
     })
   },
   'b': (params) => {
@@ -1123,7 +1132,9 @@ function notification(node, method, params) {
 
 const modeEffects = {
   [modes.tutorial]: () => {
-    $.teach({ tutorialIndex: 0 })
+    clearAcknowledge('tutorial-start')
+    localStorage.setItem('paper-pocket/tutorialComplete', false)
+    $.teach({ tutorialIndex: 0, mode: modes.tutorial })
   }
 }
 
@@ -1287,13 +1298,13 @@ function keyFlipper(slot, button) {
 }
 
 
-self.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', (event) => {
   if(keyFlips[event.key]) {
     keyFlips[event.key](1)
   }
 })
 
-self.addEventListener('keyup', (event) => {
+document.addEventListener('keyup', (event) => {
   if(keyFlips[event.key]) {
     keyFlips[event.key](0)
   }
@@ -1338,6 +1349,25 @@ function toggleSpam(code, value, callback) {
 
   toggleCache[code] = value
 }
+
+const forceCache = {}
+
+// essentially make sure the button was released to ensure the screen
+function forceAcknowledge(code, value, callback) {
+  if(value === 0 && !forceCache[code]) {
+    forceCache[code] = 0
+    return
+  }
+  if(forceCache[code] === 1 || (forceCache[code] === 0 && value === 1)) {
+    forceCache[code] = 1
+    callback()
+  }
+}
+
+function clearAcknowledge(code) {
+  delete forceCache[code]
+}
+
 
 function player1(code) {
   return checkButton(0, buttons[code])
@@ -1566,8 +1596,9 @@ $.style(`
   }
 
   & .clear {
-    color: var(--root-theme, lightgray);
-    background: transparent;
+    background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.65)), var(--root-theme, lightgray);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     border-radius: none;
     border-radius: 0;
     border: none;
@@ -1831,11 +1862,11 @@ $.style(`
 
   & .menu-link.active {
     color: white;
-    background: linear-gradient(195deg, rgba(0,0,0,0), rgba(0,0,0,.65));
     transform: scale(1.2);
-    transform-origin: -16px center;
+    transform-origin: left center;
     font-weight: bold;
     opacity: 1;
+    border-left: 2px solid var(--root-theme);
   }
 
   &[data-mode="game"] .game {
