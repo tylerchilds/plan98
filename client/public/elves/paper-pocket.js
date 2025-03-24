@@ -40,6 +40,43 @@ const modes = {
   app: 'app',
   settings: 'settings',
   pause: 'pause',
+  tutorial: 'tutorial',
+}
+
+const tutorialModes = {
+  welcome: 'welcome',
+  about: 'about',
+  system: 'system',
+  options: 'options',
+  pause: 'pause'
+}
+
+const tutorialRenderers = {
+  [tutorialModes.welcome]: () => {
+    return `
+      Welcome!
+    `
+  },
+  [tutorialModes.about]: () => {
+    return `
+      The Paper Pocket is a portable operating system. 
+    `
+  },
+  [tutorialModes.system]: () => {
+    return `
+      Press 'Paper Pocket' or your specific Operating System key to toggle the in-screen controls.
+    `
+  },
+  [tutorialModes.options]: () => {
+    return `
+      Press 'Options' or ctrl on a keyboard or the select/options button on your gamepad to configure the system.
+    `
+  },
+  [tutorialModes.pause]: () => {
+    return `
+      Press 'Start' or alt on a keyboard or the start/pause button on your gamepad to switch applications'
+    `
+  },
 }
 
 const $ = elf('paper-pocket', {
@@ -50,12 +87,14 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'final-boss',
-  mode: modes.game,
-  backMode: modes.game,
+  rom: 'paper-nautiloids',
+  mode: modes.tutorial,
+  backMode: modes.tutorial,
   settingsKey: 'instrument',
   pauseKey: 'favorites',
   pauseIndex: 0,
+  tutorialIndex: 0,
+  tutorial: Object.keys(tutorialModes),
   settings: {
     instrument: {
       label: 'Instrument',
@@ -110,6 +149,10 @@ const $ = elf('paper-pocket', {
     favorites: {
       label: "Favorites",
       list: [
+        {
+          label: 'Tutorial',
+          mode: modes.tutorial
+        },
         {
           label: 'Paper Nautiloids',
           url: '/app/paper-pocket?rom=paper-nautiloids'
@@ -334,7 +377,7 @@ export function setBpm(bpm) {
 }
 
 export function getBpm() {
-  return localStorage.getItem('paper-pocket/bpm') || 80
+  return localStorage.getItem('paper-pocket/bpm') || '80'
 }
 
 
@@ -397,15 +440,15 @@ $.draw((target) => {
               PaperPocket
             </button>
           </div>
-          <div class="menus"></div>
+          <div class="system"></div>
           <div class="game">
             <${rom}></${rom}>
           </div>
           <div class="menu-items">
-            <button key="options" class="clear" data-press="select">
+            <button key="options" class="clear select" data-press="select">
               Options
             </button>
-            <button key="start" class="clear" data-press="start">
+            <button key="start" class="clear start" data-press="start">
               Start
             </button>
           </div>
@@ -453,7 +496,7 @@ $.draw((target) => {
     {
       const { mode } = $.learn()
 
-      const menuNode = target.querySelector('.menus')
+      const menuNode = target.querySelector('.system')
       if(mode !== 'game' && menuNode) {
         diffHTML.innerHTML(menuNode, renderMode())
       }
@@ -593,6 +636,21 @@ function renderMode() {
       <iframe src="${app}" title="app"></iframe>
     `
   }
+
+  if(mode === modes.tutorial) {
+    return `
+      <div class="tutorial-window">
+        ${renderTutorial()}
+      </div>
+    `
+  }
+}
+
+function renderTutorial() {
+  const { tutorial, tutorialIndex } = $.learn()
+
+  const renderer = tutorialRenderers[tutorial[tutorialIndex]]
+  return renderer()
 }
 
 function recoverElves(target, tag) {
@@ -658,7 +716,7 @@ const settingsRPC = {
   'up': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('up', 150, () => {
+      debounceSpam('up', 250, () => {
         const { settingsKey, settings } = $.learn()
         const keys = Object.keys(settings)
         const index = mod((keys.indexOf(settingsKey) - 1), keys.length)
@@ -671,7 +729,7 @@ const settingsRPC = {
   'down': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('down', 150, () => {
+      debounceSpam('down', 250, () => {
         const { settingsKey, settings } = $.learn()
         const keys = Object.keys(settings)
         const index = mod((keys.indexOf(settingsKey) + 1), keys.length)
@@ -684,7 +742,7 @@ const settingsRPC = {
   'left': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('left', 150, () => {
+      debounceSpam('left', 250, () => {
         const { settingsKey, settings } = $.learn()
         const { options, value } = settings[settingsKey]
 
@@ -703,7 +761,7 @@ const settingsRPC = {
   'right': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('right', 150, () => {
+      debounceSpam('right', 250, () => {
         const { settingsKey, settings } = $.learn()
         const { options, value } = settings[settingsKey]
 
@@ -791,7 +849,7 @@ const pauseRPC = {
   'up': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('up', 150, () => {
+      debounceSpam('up', 250, () => {
         const { pauseKey, pause, pauseIndex } = $.learn()
         const { list } = pause[pauseKey]
         const index = mod((pauseIndex - 1), list.length)
@@ -804,7 +862,7 @@ const pauseRPC = {
   'down': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('down', 150, () => {
+      debounceSpam('down', 250, () => {
         const { pauseKey, pause, pauseIndex } = $.learn()
         const { list } = pause[pauseKey]
         const index = mod((pauseIndex + 1), list.length)
@@ -817,7 +875,7 @@ const pauseRPC = {
   'left': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('left', 150, () => {
+      debounceSpam('left', 250, () => {
         const { pauseKey, pause } = $.learn()
         const keys = Object.keys(pause)
         const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
@@ -831,7 +889,7 @@ const pauseRPC = {
   'right': (params) => {
     if(params.value === 1) {
       document.activeElement.blur()
-      debounceSpam('right', 150, () => {
+      debounceSpam('right', 250, () => {
         const { pauseKey, pause } = $.learn()
         const keys = Object.keys(pause)
         const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
@@ -844,7 +902,80 @@ const pauseRPC = {
   },
 }
 
-$.when('json-rpc', '.menus', (event) => {
+function tutorialBack() {
+  const { tutorialIndex } = $.learn()
+  const index = tutorialIndex - 1
+
+  if(index < 0) return
+
+  $.teach({ tutorialIndex: index })
+}
+
+function tutorialNext() {
+  const { tutorial, tutorialIndex } = $.learn()
+
+  const index = tutorialIndex + 1
+  if(index >= tutorial.length) {
+    $.teach({ mode: modes.game })
+  } else {
+    $.teach({ tutorialIndex: index })
+  }
+}
+
+const tutorialRPC = {
+  'a': (params) => {
+    toggleSpam('a', params.value, () => {
+      tutorialNext()
+    })
+  },
+  'b': (params) => {
+    toggleSpam('b', params.value, () => {
+      tutorialBack()
+    })
+  },
+  'x': (params) => {
+  },
+  'y': (params) => {
+  },
+  'lb': (params) => {
+    toggleSpam('lb', params.value, () => {
+      tutorialBack()
+    })
+  },
+  'rb': (params) => {
+    toggleSpam('rb', params.value, () => {
+      tutorialNext()
+    })
+  },
+  'lt': (params) => {
+    toggleSpam('lt', params.value, () => {
+      tutorialBack()
+    })
+  },
+  'rt': (params) => {
+    toggleSpam('rt', params.value, () => {
+      tutorialNext()
+    })
+  },
+  'up': (params) => {
+  },
+  'down': (params) => {
+  },
+  'left': (params) => {
+    toggleSpam('left', params.value, () => {
+      tutorialBack()
+    })
+  },
+  'right': (params) => {
+    toggleSpam('right', params.value, () => {
+      tutorialNext()
+    })
+  },
+}
+
+
+
+$.when('json-rpc', '.system', (event) => {
   const { method, params } = event.detail
   const { mode } = $.learn()
 
@@ -866,9 +997,13 @@ $.when('json-rpc', '.menus', (event) => {
       pauseRPC[method](params)
     }
   }
+
+  if(mode === modes.tutorial) {
+    if(tutorialRPC[method]) {
+      tutorialRPC[method](params)
+    }
+  }
 })
-
-
 
 function standardAction(code) {
   return (target, params) => {
@@ -876,7 +1011,7 @@ function standardAction(code) {
 
     const node = mode === modes.game
       ? target.querySelector(rom)
-      : target.querySelector('.menus')
+      : target.querySelector('.system')
     notification(node, code, params)
   }
 }
@@ -932,12 +1067,32 @@ function notification(node, method, params) {
   }
 }
 
+const modeEffects = {
+  [modes.tutorial]: () => {
+    $.teach({ tutorialIndex: 0 })
+  }
+}
+
+function triggerModeEffects(mode) {
+  if(modeEffects[mode]) {
+    modeEffects[mode]()
+  }
+}
+
 function launchItem(event) {
   const { pauseKey, pause, pauseIndex } = $.learn()
   const { list } = pause[pauseKey]
-  const { url } = list[pauseIndex]
+  const { url, mode } = list[pauseIndex]
 
-  window.location.href = url
+  if(url) {
+    window.location.href = url
+    return
+  }
+
+  if(mode) {
+    triggerModeEffects(mode)
+    $.teach({ mode, app: null })
+  }
 }
 
 $.when('click', '.menu-link', (event) => {
@@ -946,12 +1101,14 @@ $.when('click', '.menu-link', (event) => {
   const pauseIndex = parseInt(index)
 
   if(mode) {
+    triggerModeEffects(mode)
     $.teach({ mode, app: null, pauseIndex })
     return
   }
 
   if(href) {
-    $.teach({ mode: 'app', app: href, pauseIndex })
+    window.location.href = href
+    $.teach({ pauseIndex })
     return
   }
 })
@@ -1271,8 +1428,8 @@ $.style(`
   }
 
   & .widget-frame {
+    pointer-events: all;
     overflow: hidden;
-    padding: 16px;
   }
 
   & .game {
@@ -1281,14 +1438,14 @@ $.style(`
     grid-area: main;
   }
 
-  & .menus {
+  & .system {
     overflow: auto;
     grid-area: main;
+    padding: 0 8px;
   }
 
   & .viewport {
     background: black;
-    padding: 0 16px;
     display: grid;
     grid-template-rows: auto 1fr auto;
     grid-template-areas: "header" "main" "footer";
@@ -1347,14 +1504,21 @@ $.style(`
     border-radius: 0;
     border: none;
     padding: 8px 16px;
-    opacity: .5;
+    opacity: 1;
   }
 
   & .clear:hover,
   & .clear:focus {
-    opacity: 1;
+    filter: brightness(3);
   }
 
+  & .select {
+    place-self: start;
+  }
+
+  & .start {
+    place-self: end;
+  }
 
   & .gray {
     background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--gray);
@@ -1371,15 +1535,13 @@ $.style(`
     padding: 0;
   }
 
-  & .chrome[data-full="true"] .viewport {
-    padding: 0;
-  }
-
   & .chrome[data-full="true"] .controller {
     display: none;
   }
 
   & .controller {
+    pointer-events: none;
+    padding-top: 1rem;
     text-align: center;
   }
 
@@ -1451,7 +1613,7 @@ $.style(`
 
   & .super-items {
     display: grid;
-    place-items: center;
+    place-items: start;
   }
 
   & .super-items button {
@@ -1465,22 +1627,40 @@ $.style(`
     place-items: center;
   }
 
+  & .tutorial-window {
+    height: 100%;
+    overflow: auto;
+    background: white;
+    padding: 8px;
+  }
+
   & .pause-menu {
     height: 100%;
     overflow: auto;
-    background: rgba(0,0,0,.85);
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
   }
 
   & .pause-label {
-    color: rgba(255,255,255,.5);
-    padding: 8px;
-    font-weight: bold;
+    color: rgba(255,255,255,1);
+    background: linear-gradient(335deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme);
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    font-weight: light;
+    font-size: 2rem;
   }
-
 
   & .menu-list {
     height: 100%;
     overflow: auto;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
   }
 
   & .options-list {
@@ -1490,13 +1670,15 @@ $.style(`
 
   & .setting {
     display: block;
-    padding: 1rem;
-    background: rgba(255,255,255,.15);
-    color: rgba(255,255,255,.5);
-    display: grid;
+    padding: 4px 8px;
+    border: none;
+    background: rgba(0,0,0,.15);
+    color: white;
+    display: inline-block;
     gap: 1rem;
     max-width: 100%;
     width: 100%;
+    margin-bottom: 4px;
   }
 
   & .setting:not(.focused) > * {
@@ -1548,15 +1730,6 @@ $.style(`
     display: block;
   }
 
-  & .setting {
-    padding: 4px 8px;
-    border: none;
-    background: rgba(0,0,0,.85);
-    color: white;
-    display: inline-block;
-    margin-bottom: 4px;
-  }
-
   & .option {
     border: none;
     border-radius: 2px;
@@ -1570,23 +1743,31 @@ $.style(`
   }
 
   & .menu-link {
-    color: rgba(255,255,255,.85);
+    color: white;
     display: block;
     text-decoration: none;
     padding: 4px 8px;
     line-height: 1;
     text-align: left;
-    font-weight: 100;
     background: transparent;
     border: none;
+    font-weight: 600;
+    opacity: .65;
   }
 
   & .menu-link.active {
+    color: white;
+    transform: scale(1.2);
+    transform-origin: -16px center;
     font-weight: bold;
-    color: var(--root-theme, white);
+    opacity: 1;
   }
 
   &[data-mode="game"] .game {
     display: block;
+  }
+
+  &[data-mode="game"] .system {
+    display: none;
   }
 `)

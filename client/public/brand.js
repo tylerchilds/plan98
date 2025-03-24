@@ -133,7 +133,7 @@ export const doingBusinessAs = {
     zoom: 10,
     tagline: 'A computer for rewiring devices by transfixing scribbled notes.',
     mascot: 'Silly Sillonious',
-    markdown: '/public/cdn/sillyz.computer/index.md',
+    /*markdown: '/public/cdn/sillyz.computer/index.md',*/
     saga: emeraldOfTime,
     contact: reverseProxyLookup,
     brandHue: 0,

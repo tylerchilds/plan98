@@ -79,17 +79,19 @@ $.draw((target) => {
     return `
       <div class="fake-overlay">
         <div class="fake-modal">
-          <div class="fake-title">
-            Photosensitive Warning: Read Before Playing!
-          </div>
-          <div class="fake-context">
+          <div class="fake-scroll">
+            <div class="fake-title">
+              Photosensitive Warning: Read Before Playing!
+            </div>
+            <div class="fake-context">
+              <p>
+                A very small percentage of individuals may experience epileptic seizures when exposed to certain light patterns or flashing lights. Exposure to certain patterns or backgrounds on a computer screen, or while playing video games, may induce an epileptic seizure in these individuals. Certain conditions may induce previously undetected epileptic symptoms even in persons who have no history of prior seizures or epilepsy.
+              </p>
             <p>
-              A very small percentage of individuals may experience epileptic seizures when exposed to certain light patterns or flashing lights. Exposure to certain patterns or backgrounds on a computer screen, or while playing video games, may induce an epileptic seizure in these individuals. Certain conditions may induce previously undetected epileptic symptoms even in persons who have no history of prior seizures or epilepsy.
+              If you, or anyone in your family, have an epileptic condition, consult your physician prior to playing. If you experience any of the following symptoms while playing a video or computer game -- dizziness, altered vision, eye or muscle twitches, loss of awareness, disorientation, any involuntary movement, or convulsions -- IMMEDIATELY discontinue use and consult your physician before resuming play.
             </p>
-          <p>
-            If you, or anyone in your family, have an epileptic condition, consult your physician prior to playing. If you experience any of the following symptoms while playing a video or computer game -- dizziness, altered vision, eye or muscle twitches, loss of awareness, disorientation, any involuntary movement, or convulsions -- IMMEDIATELY discontinue use and consult your physician before resuming play.
-          </p>
 
+            </div>
           </div>
 
           <div class="fake-actions">
@@ -249,7 +251,7 @@ $.style(`
     margin: 0 auto;
     background: white;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: 1fr auto;
     max-height: 100%;
   }
   & .fake-title {
@@ -261,17 +263,20 @@ $.style(`
     color: rgba(255,255,255,.65);
   }
 
+  & .fake-scroll {
+    max-height: 100%;
+    overflow: auto;
+  }
+
   & .fake-context {
     padding: 0 1rem;
     margin-bottom: 1rem;
     color: rgba(0,0,0,.85);
-    max-height: 100%;
-    overflow: auto;
   }
   & .fake-actions {
     display: flex;
     justify-content: end;
-    padding: 1rem;
+    padding: .5rem;
     background: rgba(0,0,0,.25);
     gap: .5rem;
   }
@@ -294,17 +299,19 @@ $.when('json-rpc', (event) => {
   const { method, params } = event.detail
   const { consent, root } = $.learn()
 
+  const node = event.target.closest($.link)
+
   if(consent) {
     const more = { root }
 
     if(musicRPC[method]) {
-      musicRPC[method]({...params, ...more})
+      musicRPC[method]({...params, ...more}, node)
     }
   }
 
   if(!consent) {
     if(consentRPC[method]) {
-      consentRPC[method](params)
+      consentRPC[method](params, node)
     }
   }
 })
@@ -540,15 +547,49 @@ function octaveUp() {
   }
 }
 
+const consentCache = {}
+
+function forceAcknowledge(code, value, callback) {
+  if(value === 0 && !consentCache[code]) {
+    consentCache[code] = 0
+    return
+  }
+  if(consentCache[code] === 0 && value === 1) {
+    callback()
+  }
+}
+
 const consentRPC = {
   'a': (params) => {
-    if(params.value === 1) {
-      accept()
-    }
+    forceAcknowledge('a', params.value, accept)
   },
   'b': (params) => {
     if(params.value === 1) {
       decline()
     }
   },
+  'up': (params, node) => {
+    if(params.value === 1) {
+      const container = node.querySelector('.fake-scroll')
+      if(container) {
+        fakeScrollUp(container, 40)
+      }
+    }
+  },
+  'down': (params, node) => {
+    if(params.value === 1) {
+      const container = node.querySelector('.fake-scroll')
+      if(container) {
+        fakeScrollDown(container, 40)
+      }
+    }
+  },
+}
+
+function fakeScrollUp(container, scrollStep=10) {
+  container.scrollBy({ top: -scrollStep, behavior: 'smooth' });
+}
+
+function fakeScrollDown(container, scrollStep=10) {
+  container.scrollBy({ top: scrollStep, behavior: 'smooth' });
 }

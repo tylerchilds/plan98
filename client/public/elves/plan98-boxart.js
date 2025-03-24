@@ -135,9 +135,10 @@ $.style(`
     transform-style: preserve-3d;
     width: 100%;
     aspect-ratio: 1;
-    max-width: 100vmin;
-    max-height: 100vmin;
+    max-width: 100cqmin;
+    max-height: 100cqmin;
     place-self: center;
+    overflow: hidden;
   }
 
   & .remix {
@@ -246,6 +247,7 @@ $.style(`
    opacity: 1;
    display: grid;
    grid-template-areas: "stack";
+   overflow: hidden;
  }
 
  & .f > * {
