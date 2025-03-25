@@ -108,7 +108,7 @@ window.addEventListener('keydown', (event) => {
   if(event.keyCode === right || event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (activeShot === null) ? 0 : activeShot + 1
-    if(nextIndex >= shotCount -1) return
+    if(nextIndex > shotCount) return
     $.teach({ activeShot: nextIndex, forwards: false })
     return
   }
@@ -131,7 +131,11 @@ $.style(`
     opacity: 1;
     transition: opacity 100ms ease-in-out;
     position: relative;
-    background: #54796d;
+    background: #00b140;
+  }
+
+  &.blue {
+    background: #0047bb
   }
 
   & .lightbox {
@@ -140,6 +144,13 @@ $.style(`
     left: 0;
     right: 0;
     top: 0;
+    display: grid;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & live-credit {
+    place-self: end;
   }
 
   &.lower-third .lightbox {

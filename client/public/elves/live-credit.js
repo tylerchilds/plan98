@@ -13,11 +13,11 @@ $.style(`
   & {
     background: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));
     display: block;
-    height: 100%;
     padding: 1rem;
     display: flex;
     flex-direction: column;
     animation: &-fade-in 1000ms ease-in-out forwards;
+    width: 100%;
   }
 
   & .piece {
