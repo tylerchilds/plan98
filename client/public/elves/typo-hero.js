@@ -90,6 +90,9 @@ const $ = elf('typo-hero', {
   streak: 0,
   maxStreak: 0,
   duration: 60,
+  summaryCount: 0,
+  readyCount: 0,
+  timeLeft: 0,
   pressedKeys: [0,0,0,0,0,0],
   activeNotes: [],
   colors: [],
@@ -249,9 +252,7 @@ function score(character) {
       })
     } else {
       // we ran out of lines
-      $.teach({
-        mode: modes.summary
-      })
+      endRound()
     }
   } else {
     // the remaining line has more characters
@@ -282,6 +283,7 @@ $.draw((target) => {
     attempts,
     currentLine,
     readyCount,
+    summaryCount,
     timeLeft
   } = $.learn()
 
@@ -370,6 +372,9 @@ $.draw((target) => {
             <span class="summary-label">Keystrokes:</span> <span class="summary-value">${attempts}</span><br/>
             <span class="summary-label">Longest Streak:</span> <span class="summary-value">${maxStreak}</span><br/>
             <span class="summary-label">WPM: <span class="summary-value">${(correct / 5).toFixed()}</span>
+            <div class="timer-overlay">
+              ${summaryCount > 0 ? summaryCount : 'Go'}
+            </div>
           </div>
         </div>
       </div>
@@ -849,7 +854,7 @@ $.style(`
 
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
-  const { mode, root } = $.learn()
+  const { mode, summaryCount, root } = $.learn()
 
   if(mode === modes.game) {
     const more = { root }
@@ -872,7 +877,7 @@ $.when('json-rpc', (event) => {
     }
   }
 
-  if(mode === modes.summary) {
+  if(mode === modes.summary && summaryCount === 0) {
     if(summaryRPC[method]) {
       summaryRPC[method](params)
     }
@@ -1141,12 +1146,35 @@ function startRound() {
   tickDown()
 }
 
+function endRound() {
+  $.teach({
+    mode: modes.summary,
+    summaryCount: 4
+  })
+  summaryCountdown()
+}
+
+function summaryCountdown() {
+  const { summaryCount } = $.learn()
+
+  const nextCount = summaryCount - 1
+
+  if(nextCount < 0) {
+    return
+  }
+
+  setTimeout(() => {
+    $.teach({ summaryCount: nextCount })
+    summaryCountdown()
+  }, 1000)
+}
+
 function tickDown() {
   const { timeLeft } = $.learn()
 
   const nextTime = timeLeft - 1
   if(nextTime < 0) {
-    $.teach({ mode: modes.summary })
+    endRound()
     return
   }
 
