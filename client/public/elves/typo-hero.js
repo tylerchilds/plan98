@@ -14,7 +14,7 @@ const characterMapping = {
   '11101': ['@', '#'],
   '10111': [':', ';'],
   '11111': ['<', '>'],
-  '10110': [',', '"'],
+  '10110': [',', "'"],
 
   '10000': ['a', 'A'],
   '01000': ['e', 'E'],
@@ -76,16 +76,68 @@ const minorScales = {
   '0011': [18], // b minor
 }
 
+const modes = {
+  loading: 'loading',
+  game: 'game',
+  consent: 'consent',
+  summary: 'summary',
+  ready: 'ready',
+  menu: 'menu'
+}
 
-const $ = elf('typing-simulator', {
+
+const $ = elf('typo-hero', {
+  streak: 0,
+  maxStreak: 0,
+  duration: 60,
+  pressedKeys: [0,0,0,0,0,0],
   activeNotes: [],
   colors: [],
   root: 60,
   start: 0,
   length: 360,
   reverse: false,
-  consent: false,
+  mode: modes.consent,
   message: '',
+  menuKey: 'favorites',
+  menuIndex: 0,
+  correct: 0,
+  attempts: 0,
+  currentLine: "",
+  track: 'Untitled',
+  menu: {
+    favorites: {
+      label: "Favorites",
+      list: [
+        {
+          label: 'Wonderwall',
+          url: '/cdn/sillyz.computer/lyrics/wonderwall.txt'
+        },
+        {
+          label: 'Freebird',
+          url: '/cdn/sillyz.computer/lyrics/freebird.txt'
+        },
+        {
+          label: 'Never Gonna Give You Up',
+          url: '/cdn/sillyz.computer/lyrics/never-gonna-give-you-up.txt'
+        },
+        {
+          label: 'Eye of the Tiger',
+          url: '/cdn/sillyz.computer/lyrics/eye-of-the-tiger.txt'
+        },
+      ]
+    },
+    memes: {
+      label: "Memes",
+      list: [
+        {
+          label: 'Freebird',
+          url: '/cdn/sillyz.computer/lyrics/freebird.txt'
+        },
+      ]
+    },
+  }
+
 })
 
 const lightnessStops = [
@@ -150,20 +202,104 @@ function type(character) {
   })
 }
 
+function score(character) {
+  const {
+    currentLine,
+    correct,
+    attempts,
+    lines,
+    line,
+    streak,
+    maxStreak
+  } = $.learn()
+
+  if(currentLine[0] === character) {
+    const newStreak = streak + 1
+    $.teach({
+      streak: newStreak,
+      maxStreak: newStreak > maxStreak ? newStreak : maxStreak,
+      correct: correct + 1,
+      attempts: attempts + 1
+    })
+  } else {
+    $.teach({
+      streak: 0,
+      attempts: attempts + 1
+    })
+  }
+
+  // if line is empty, find next line
+  if(currentLine.length - 1 === 0) {
+    // we're out of characters for the current line
+    let nextLine = line + 1;
+
+    while(nextLine < lines.length) {
+      if(lines[nextLine]) {
+        break;
+      } else {
+        nextLine++
+      }
+    }
+
+    if(nextLine < lines.length) {
+      // we found the next line
+      $.teach({
+        line: nextLine,
+        currentLine: lines[nextLine]
+      })
+    } else {
+      // we ran out of lines
+      $.teach({
+        mode: modes.summary
+      })
+    }
+  } else {
+    // the remaining line has more characters
+    $.teach(null, (state) => {
+      return {
+        ...state,
+        currentLine: state.currentLine.slice(1)
+      }
+    })
+  }
+}
+
+
 $.when('input', 'textarea', (event) => {
   const { value } = event.target
   $.teach({ message: value })
 })
 
 $.draw((target) => {
-  const { root, message, colorVariables, consent } = $.learn()
+  const {
+    root,
+    message,
+    colorVariables,
+    mode,
+    track,
+    maxStreak,
+    correct,
+    attempts,
+    currentLine,
+    readyCount,
+    timeLeft
+  } = $.learn()
 
-  if(!consent) {
+
+  if(mode === modes.loading) {
+    return `
+      <womp>
+        <flying-disk></flying-disk>
+      </womp>
+    `
+  }
+
+  if(mode === modes.consent) {
     return `
       <div class="fake-overlay">
         <div class="fake-modal">
           <div class="fake-title">
-            Typing Simulator
+            Typo Sim
           </div>
           <div class="fake-context">
             <p>
@@ -185,21 +321,80 @@ $.draw((target) => {
     `
   }
 
+  if(mode === modes.menu) {
+    const linedPaper = getLinedPaper(target)
+
+    const { menu, menuIndex, menuKey } = $.learn()
+
+    const { list, label } = menu[menuKey]
+
+    const items = list.map((item, i) => {
+      const { label, mode, url } = item
+      return `
+        <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${menuIndex === i ? 'active':''}">
+          ${label}
+        </button>
+      `
+    }).join('')
+
+    return `
+      <div class="menu-container" style="${colorVariables}">
+        <div class="hero-bar">
+          <div class="app-title">Typo Sim</div>
+          <div class="root-note">${root}</div>
+        </div>
+        <div class="track-menu">
+          <div class="track-label">${label}</div>
+          <div class="track-list" style="background-image: ${linedPaper}">
+            ${items}
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+  if(mode === modes.summary) {
+    const linedPaper = getLinedPaper(target)
+
+    return `
+      <div class="menu-container" style="${colorVariables}">
+        <div class="hero-bar">
+          <div class="app-title">Results</div>
+          <div class="score">${correct} | ${(correct / attempts * 100 || 100).toFixed(1)}%</div>
+        </div>
+        <div class="summary">
+          <div class="summary-title">Score</div>
+          <div class="summary-notes" style="background-image: ${linedPaper}">
+            <span class="summary-label">Track:</span> <span class="summary-value">${track}</span><br/>
+            <span class="summary-label">Correct:</span> <span class="summary-value">${correct}</span><br/>
+            <span class="summary-label">Keystrokes:</span> <span class="summary-value">${attempts}</span><br/>
+            <span class="summary-label">Longest Streak:</span> <span class="summary-value">${maxStreak}</span><br/>
+            <span class="summary-label">WPM: <span class="summary-value">${(correct / 5).toFixed()}</span>
+          </div>
+        </div>
+      </div>
+    `
+  }
+
+
   return `
     <div class="typing-container" style="${colorVariables}">
       <div class="hero-bar">
-        <div class="app-title">Typing Simulator</div>
-        <div class="root-note">${root}</div>
+        <div class="app-title">${track}</div>
+        <div class="score">${correct} | ${(correct / attempts * 100 || 100).toFixed(1)}%</div>
       </div>
       <div class="typing-region">
         <textarea value="${escapeHyperText(message)}"></textarea>
+        <div class="timer-overlay">
+          ${mode === modes.ready ? readyCount : timeLeft}
+        </div>
       </div>
       <div class="typing-bar">
         <div class="active-phrase">
-          The quick brown fox jumped over the lazy dog.
+          ${currentLine}
         </div>
         <div class="character-chord">
-          ${drawChord('a')}
+          ${drawChord(currentLine[0])}
         </div>
       </div>
     </div>
@@ -208,6 +403,7 @@ $.draw((target) => {
   afterUpdate(target) {
     {
       recoverElves(target, 'sl-icon')
+      recoverElves(target, 'flying-disk')
     }
 
     {
@@ -219,6 +415,15 @@ $.draw((target) => {
         text.scrollTop = text.scrollHeight
       }
     }
+
+    {
+      const active = target.querySelector('.menu-link.active')
+      if(active) {
+        active.scrollIntoView()
+      }
+    }
+
+
   }
 })
 
@@ -228,12 +433,15 @@ function drawChord(character) {
   })
 
   if(chord) {
-    const direction = characterMapping[chord][0] === character ? 'up' : 'down'
-    const buttons = chord.split('').map(x => {
+    const direction = characterMapping[chord][0] === character ? 'down' : 'up'
+    const { pressedKeys } = $.learn()
+
+    const cachedButtons = Object.keys(pressedKeys).map(x => pressedKeys[x])
+    const buttons = chord.split('').map((x, index) => {
       const value = parseInt(x)
 
       return `
-        <div class="chord-key ${value ? 'on':'off'}"></div>
+        <div class="chord-key ${value ? 'on':'off'} ${cachedButtons[index] ? 'pressed':''}"></div>
       `
     }).join('')
 
@@ -275,11 +483,12 @@ function escapeHyperText(text = '') {
 }
 
 function accept() {
-  $.teach({ consent: true });
+  $.teach({ mode: modes.menu });
+  clearAcknowledge('consent-a')
 }
 
 function decline() {
-  window.location.href = 'https://hivelabworks.com'
+  console.error('I cannot let you do that Dave.')
 }
 
 $.when('click', '.fake-button.good', accept)
@@ -309,13 +518,16 @@ $.style(`
     position: relative;
   }
 
+  & .score {
+    color: white;
+    font-size: 1.5rem;
+    padding: 0 .5rem;
+  }
   & .root-note {
     color: white;
     font-weight: bold;
     font-size: 1.5rem;
     padding: 0 .5rem;
-    pointer-events: none;
-    z-index: 2;
   }
 
   & [data-escape] {
@@ -346,6 +558,38 @@ $.style(`
     color: rgba(255,255,255,.65);
   }
 
+  & .menu-container {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  & .summary-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--root-theme, lightgray);
+    padding: .5rem;
+  }
+
+  & .summary {
+    height: 100%;
+    background: white;
+  }
+  
+  & .summary-notes {
+    padding: 0 .5rem 3px;
+  }
+
+  & .summary-label {
+    color: rgba(0,0,0,.65);
+  }
+
+  & .summary-value {
+    color: rgba(0,0,0,.85);
+    font-weight: bold;
+  }
+
+
   & .typing-container {
     height: 100%;
     display: grid;
@@ -354,6 +598,21 @@ $.style(`
 
   & .typing-region {
     height: 100%;
+    position: relative;
+  }
+
+  & .timer-overlay {
+    position: absolute;
+    bottom: .5rem;
+    right: .5rem;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    color: rgba(0,0,0,.65);
+    font-weight: bold;
+    font-size: 5rem;
+    text-align: center;
+    overflow: hidden;
+    line-height: 1;
   }
 
   & .typing-region textarea {
@@ -368,12 +627,14 @@ $.style(`
   & .hero-bar {
     display: grid;
     grid-template-columns: 1fr auto;
+    gap: 1rem;
   }
 
   & .typing-bar {
     display: grid;
     grid-template-columns: auto 1fr;
     padding: .5rem;
+    gap: 1rem;
   }
 
   & .active-phrase {
@@ -394,6 +655,7 @@ $.style(`
     display: flex;
     color: white;
     gap: .25rem;
+    justify-content: end;
   }
 
   & .strum-key,
@@ -403,6 +665,16 @@ $.style(`
     border: 2px solid;
     background: transparent;
     border-radius: 100%;
+  }
+
+  & .chord-key {
+    opacity: .65;
+  }
+
+  & .chord-key.pressed {
+    opacity: 1;
+    transform: scale(1.1);
+    filter: blur(2px) contrast(2) brightness(2);
   }
 
   & .chord-key:nth-child(1) {
@@ -546,13 +818,40 @@ $.style(`
     background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.85)), mediumseagreen;
     color: rgba(255,255,255,.85);
   }
+
+  & .track-menu {
+    background: white;
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .track-label {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--root-theme, lightgray);
+    padding: .5rem;
+  }
+
+  & .track-list {
+    padding-bottom: 3px;
+  }
+
+  & .menu-link {
+    color: black;
+  }
+
+  & .menu-link.active {
+    color: black;
+    opacity: 1;
+  }
+
 `)
 
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
-  const { consent, root } = $.learn()
+  const { mode, root } = $.learn()
 
-  if(consent) {
+  if(mode === modes.game) {
     const more = { root }
 
     if(musicRPC[method]) {
@@ -560,11 +859,25 @@ $.when('json-rpc', (event) => {
     }
   }
 
-  if(!consent) {
+  if(mode === modes.menu) {
+    if(menuRPC[method]) {
+      menuRPC[method](params)
+    }
+  }
+
+
+  if(mode === modes.consent) {
     if(consentRPC[method]) {
       consentRPC[method](params)
     }
   }
+
+  if(mode === modes.summary) {
+    if(summaryRPC[method]) {
+      summaryRPC[method](params)
+    }
+  }
+
 })
 
 const spamCache = {}
@@ -595,9 +908,24 @@ function maybe(index, value) {
   if(value === 1) {
     if(strings[index] === 1) return
     strings[index] = value
+    $.teach({ index, value }, pressedReducer)
   } else {
     if(strings[index] === 0) return
     strings[index] = value
+    $.teach({ index, value }, pressedReducer)
+  }
+}
+
+function pressedReducer(state, payload) {
+  return {
+    ...state,
+    pressedKeys: [...state.pressedKeys.map((x, i) => {
+      if(payload.index === i) {
+        return payload.value
+      } else {
+        return x
+      }
+    })]
   }
 }
 
@@ -653,6 +981,7 @@ const musicRPC = {
       const character = characterMapping[key][1]
       if(character) {
         type(character)
+        score(character)
       }
     })
     toggleSpam('strum-up', params.value, () => {
@@ -674,6 +1003,7 @@ const musicRPC = {
       const character = characterMapping[key][0]
       if(character) {
         type(character)
+        score(character)
       }
     })
     toggleSpam('strum-down', params.value, () => {
@@ -702,16 +1032,6 @@ const musicRPC = {
         slideRight()
       })
     }
-  },
-  'select': (params) => {
-    toggleSpam('select', params.value, () => {
-      console.log('select')
-    })
-  },
-  'start': (params) => {
-    toggleSpam('start', params.value, () => {
-      console.log('start')
-    })
   },
 }
 
@@ -764,9 +1084,138 @@ function forceAcknowledge(code, value, callback) {
   }
 }
 
+function clearAcknowledge(code) {
+  delete forceCache[code]
+}
+
+function select(event) {
+  clearAcknowledge('menu-select')
+  const { menuKey, menu, menuIndex } = $.learn()
+  const { list } = menu[menuKey]
+  const song = list[menuIndex]
+
+  $.teach({ mode: modes.loading, track: song.label })
+
+  fetch(song.url)
+    .then((res) => res.text())
+    .then(lyrics => {
+      const lines = lyrics.split('\n')
+      $.teach({
+        streak: 0,
+        maxStreak: 0,
+        message: '',
+        mode: modes.ready,
+        lines,
+        readyCount: 4,
+        currentLine: lines[0],
+        correct: 0,
+        attempts: 0,
+        line: 0
+      })
+
+      readyCountdown()
+    }).catch(e => {
+      console.error(e)
+      $.teach({ modes: modes.menu })
+    })
+}
+
+function readyCountdown() {
+  const { readyCount } = $.learn()
+
+  const nextCount = readyCount - 1
+
+  if(nextCount < 0) {
+    startRound()
+    return
+  }
+
+  setTimeout(() => {
+    $.teach({ readyCount: nextCount })
+    readyCountdown()
+  }, 1000)
+}
+
+function startRound() {
+  $.teach({ timeLeft: 60, mode: modes.game })
+  tickDown()
+}
+
+function tickDown() {
+  const { timeLeft } = $.learn()
+
+  const nextTime = timeLeft - 1
+  if(nextTime < 0) {
+    $.teach({ mode: modes.summary })
+    return
+  }
+
+  setTimeout(() => {
+    $.teach({ timeLeft: nextTime })
+    tickDown()
+  }, 1000)
+}
+
+const menuRPC = {
+  'a': (params) => {
+    forceAcknowledge('menu-select', params.value, select)
+  },
+  'b': (params) => {
+    toggleSpam('b', params.value, () => {
+      $.teach({ mode: modes.consent })
+    })
+  },
+  'up': (params) => {
+    toggleSpam('up', params.value, () => {
+      document.activeElement.blur()
+      const { menuKey, menu, menuIndex } = $.learn()
+      const { list } = menu[menuKey]
+      const index = mod((menuIndex - 1), list.length)
+      $.teach({
+        menuIndex: index,
+      })
+    })
+  },
+  'down': (params) => {
+    toggleSpam('down', params.value, () => {
+      document.activeElement.blur()
+      const { menuKey, menu, menuIndex } = $.learn()
+      const { list } = menu[menuKey]
+      const index = mod((menuIndex + 1), list.length)
+      $.teach({
+        menuIndex: index,
+      })
+    })
+  },
+  'left': (params) => {
+    toggleSpam('left', params.value, () => {
+      document.activeElement.blur()
+      const { menuKey, menu } = $.learn()
+      const keys = Object.keys(menu)
+      const index = mod((keys.indexOf(menuKey) - 1), keys.length)
+      $.teach({
+        menuIndex: 0,
+        menuKey: keys[index]
+      })
+    })
+  },
+  'right': (params) => {
+    toggleSpam('right', params.value, () => {
+      document.activeElement.blur()
+      const { menuKey, menu } = $.learn()
+      const keys = Object.keys(menu)
+      const index = mod((keys.indexOf(menuKey) + 1), keys.length)
+      $.teach({
+        menuIndex: 0,
+        menuKey: keys[index]
+      })
+    })
+  },
+}
+
 const consentRPC = {
   'a': (params) => {
-    forceAcknowledge('a', params.value, accept)
+    forceAcknowledge('consent-a', params.value, accept)
   },
   'b': (params) => {
     if(params.value === 1) {
@@ -774,3 +1223,33 @@ const consentRPC = {
     }
   },
 }
+
+const summaryRPC = {
+  'a': (params) => {
+    forceAcknowledge('summary-confirm', params.value, acknowledgeSummary)
+  },
+}
+
+function acknowledgeSummary() {
+  clearAcknowledge('summary-confirm')
+  $.teach({ mode: modes.menu })
+}
+
+function getLinedPaper(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
+

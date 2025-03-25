@@ -128,7 +128,7 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'typing-simulator',
+  rom: 'typo-hero',
   mode: startMode(),
   backMode: startMode(),
   settingsKey: 'instrument',
@@ -195,8 +195,8 @@ const $ = elf('paper-pocket', {
           mode: modes.tutorial
         },
         {
-          label: 'Typing Simulator',
-          url: '/app/paper-pocket?rom=typing-simulator'
+          label: 'Typo Hero',
+          url: '/app/paper-pocket?rom=typo-hero'
         },
         {
           label: 'Paper Nautiloids',
