@@ -371,7 +371,9 @@ $.draw((target) => {
             <span class="summary-label">Correct:</span> <span class="summary-value">${correct}</span><br/>
             <span class="summary-label">Keystrokes:</span> <span class="summary-value">${attempts}</span><br/>
             <span class="summary-label">Longest Streak:</span> <span class="summary-value">${maxStreak}</span><br/>
-            <span class="summary-label">WPM: <span class="summary-value">${(correct / 5).toFixed()}</span>
+            <span class="summary-label">WPM: <span class="summary-value">${(correct / 5).toFixed()}</span><br/>
+            <br/>
+            ${message}
             <div class="timer-overlay">
               ${summaryCount > 0 ? summaryCount : 'Go'}
             </div>

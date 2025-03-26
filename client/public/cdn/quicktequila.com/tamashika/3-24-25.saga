@@ -108,3 +108,7 @@ src: /public/cdn/quicktequila.com/tamashika/Images/s9.png
 <live-graphic
 position: center
 src: /public/cdn/quicktequila.com/tamashika/Logos/Tamashika-Color.png
+
+<chroma-ratio
+src: https://sillyz.computer/app/paper-pocket?rom=typo-hero
+
