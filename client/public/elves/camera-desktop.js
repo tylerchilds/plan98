@@ -114,7 +114,7 @@ function mountCamera(target) {
   const video = target.querySelector('video')
   navigator.mediaDevices.getUserMedia({
     video: { facingMode: "environment" },
-    audio: true
+    audio: false
   })
     .then(stream => {
       video.srcObject = stream;
