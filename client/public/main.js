@@ -32,3 +32,9 @@ module('#main').draw(target => newpage)
 export function setDatabase(url) {
   localStorage.setItem("plan98.database", 'https://sillonious.pockethost.io')
 }
+
+if(parameters.get('debug') === 'true') {
+  document.body.insertAdjacentHTML('beforeend', `
+    <plan98-console></plan98-console>
+  `)
+}
