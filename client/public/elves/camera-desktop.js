@@ -1,5 +1,5 @@
 import elf from '@silly/elf'
-import { systemMenu } from './paper-pocket.js'
+import { systemMenu, getTheme } from './paper-pocket.js'
 
 const initial = {
   startX: null,
@@ -19,6 +19,58 @@ const initial = {
 
 const $ = elf('camera-desktop', initial)
 
+function renderGroups(tray, systemPane) {
+  const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
+
+  return groups.map((x) => {
+    return `
+      <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}" data-tray=${tray}>
+        ${systemMenu[x.key].label}
+      </button>
+    `
+  }).join('')
+}
+
+function renderApplications(pane) {
+  return pane ? `
+    <div class="application-list">
+      ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
+        return `
+          <button class="app-select" data-url="${url}">
+            <div class="iconography">
+            </div>
+            <span class="app-label">
+              ${label}
+            </span>
+          </button>
+        `
+      }).join('')}
+    </div>
+
+  ` : `
+    <sillyz-computer></sillyz-computer>
+  `
+}
+
+function renderSystemMenu(tray) {
+  const {
+    systemPane
+  } = $.learn()[tray]
+
+
+  return `
+    <div class="system">
+      <div class="groups">
+        ${renderGroups(tray)}
+      </div>
+      <div class="applications">
+        ${renderApplications(systemPane)}
+      </div>
+    </div>
+  `
+
+}
+
 function engine(target) {
   const canvas = target.closest($.link).querySelector('canvas')
   const rectangle = canvas.getBoundingClientRect()
@@ -36,6 +88,7 @@ function render(target) {
     } = $.learn()
     const {
       maximized,
+      systemPane,
       minimized,
       grabbed,
       width,
@@ -64,7 +117,9 @@ function render(target) {
           <div class="grabber"></div>
         </div>
         <div class="tray-body">
-          <iframe src="${url}" title="${url}"></iframe>
+          ${url ? `
+            <iframe src="${url}" title="${url}"></iframe>
+          ` : renderSystemMenu(tray)}
         </div>
         <div class="resize-actions">
           <button aria-label="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
@@ -83,12 +138,19 @@ function render(target) {
 
     node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
 
+    if(systemPane && node.lastPane !== systemPane) {
+      node.lastPane = systemPane
+      const groups = node.querySelector('.groups')
+      const applications = node.querySelector('.applications')
+      groups.innerHTML = renderGroups(tray, systemPane)
+      applications.innerHTML = renderApplications(systemPane)
+    }
+
     if(focusedTray === tray) {
       node.dataset.focused = true
     } else {
       node.dataset.focused = false
     }
-
 
     if(maximized) {
       node.setAttribute('class', 'tray maximized')
@@ -203,6 +265,7 @@ $.draw((target) => {
           newState.focusedTray = tray
           newState.trayZ += 1
           newState[tray] = {
+            systemPane: Object.keys(systemMenu)[0],
             width: 300,
             height: 150,
             x: 0,
@@ -220,15 +283,14 @@ $.draw((target) => {
   return `
     <video disablepictureinpicture></video>
     <div class="desktop">
-    <plan98-console style="position: absolute;"></plan98-console>
       <div class="trays"></div>
-      <div class="zero-state">Welcome to desktop mode. Slice open a window by dragging anywhere and then select your app.</div>
+      <div class="zero-state">Camera Desktop. Slice open a window by dragging anywhere. Snap a photo.</div>
       <div class="cursor"></div>
       <canvas></canvas>
     </div>
     <div class="taskbar">
       <button data-snap>
-        Snap
+        <sl-icon name="camera"></sl-icon>
       </button>
     </div>
   `
@@ -323,21 +385,15 @@ function afterUpdate(target) {
   }
 
   replaceCursor(target) // first things first
-}
 
-function syncTray(event) {
-  event.preventDefault()
-  const { tray } = event.target.dataset
-  let { buffer, url } = $.learn()[tray]
-  buffer ||= url
-  url = buffer.startsWith('/')
-    ? buffer
-    : buffer.indexOf('://')
-      ? buffer
-      : '/app/giggle-search?query=' + buffer
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
+    }
+  }
 
-  event.target.closest('.tray').querySelector('iframe').src = url
-  setState(tray, { url, focused: false, minimized: false })
 }
 
 function toggleMax(event) {
@@ -369,6 +425,28 @@ function toggleMin(event) {
   const { minimized } = $.learn()[tray]
   minimized ? restoreMin(tray) : minimize(tray)
 }
+
+function selectPane(event) {
+  const { pane, tray } = event.target.dataset
+  $.teach(null, (state) => {
+    const newState = {...state} 
+    newState[tray].systemPane = pane
+    return newState
+  })
+
+}
+
+function selectApp(event) {
+  const { x, y } = event
+  const { url } = event.target.dataset
+  newTray({
+    url,
+    x: x > window.innerWidth / 2 ? window.innerWidth - x : x,
+    y: y > window.innerHeight / 2 ? window.innerHeight - y : y,
+  })
+}
+
+
 
 function minimize(tray) {
   $.teach(tray, (state, payload) => {
@@ -555,10 +633,30 @@ $.style(`
   }
 
   & .taskbar {
-    background: rgba(0,0,0,.85);
+    background: rgba(0,0,0,.5);
     z-index: 2;
     padding: .5rem;
   }
+
+  & [data-snap] {
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    display: grid;
+    place-items: center;
+    border: none;
+    margin: auto;
+    font-size: 25px;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    color: white;
+  }
+
+  & [data-snap]:hover,
+  & [data-snap]:focus {
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
 
   & > video {
     pointer-events: none;
@@ -662,9 +760,9 @@ $.style(`
   & .grabber::before {
     content: '';
     box-shadow:
-      0px .2rem 0 1px var(--red),
-      0px .7rem 0 1px var(--orange),
-      0px 1.2rem 0 1px var(--yellow);
+      0px 2px 0 1px var(--red),
+      0px 10px 0 1px var(--orange),
+      0px 18px 0 1px var(--yellow);
     display: block;
     margin: 0;
     opacity: .4;
@@ -763,9 +861,9 @@ $.style(`
   }
   & [data-grabbed="true"] .grabber::before {
     box-shadow:
-      0px .2rem 0 1px var(--purple),
-      0px .7rem 0 1px var(--blue),
-      0px 1.2rem 0 1px var(--green);
+      0px 2px 0 1px var(--purple),
+      0px 10px 0 1px var(--blue),
+      0px 18px 0 1px var(--green);
   }
 
   & .zero-state {
@@ -854,6 +952,9 @@ $.style(`
     height: 100%;
     position: relative;
     z-index: 2;
+    overflow: auto;
+    container-type: inline-size;
+    container-name: tray-body;
   }
 
   & .tray-resize {
@@ -938,32 +1039,95 @@ $.style(`
     background: mediumseagreen;
   }
 
-
-
-  & .input-grid {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    text-align: left;
+  & .system {
+    height: 100%;
   }
 
-  & *:focus {
-    outline: 3px solid var(--underline-color, mediumseagreen);
-  }
-
-  & .hyper-name {
+  & .groups {
     display: flex;
+    overflow: auto;
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), var(--root-theme, mediumseagreen);
+    gap: .5rem;
+    padding: .5rem;
+    max-height: 100%;
+  }
+
+  & .pane-select {
+    background: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.85);
+    border: 0;
+    padding: .5rem 1rem;
+    text-align: left;
+    border-radius: 1rem;
+  }
+
+  & .pane-select.active {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+  }
+
+
+  & .applications {
+  }
+
+  & .application-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    gap: 8px;
+  }
+
+  & .iconography {
+    background: lemonchiffon;
+    aspect-ratio: 1;
+    transform: rotateZ(15deg);
+    margin: 16px;
+  }
+
+  & .app-select {
+    border: none;
+    background: transparent;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    border-radius: 0;
+    padding: .5rem;
+  }
+
+  & .app-label {
+    background: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.85);
+    border: 0;
+    padding: .5rem 1rem;
+    text-align: center;
+    border-radius: 1rem;
+    position: relative;
+    z-index: 2;
+    max-height: 3.5rem;
     overflow: hidden;
   }
 
-  & .file-name {
-    white-space: nowrap;
-    padding-right: 2rem;
+  & .app-label {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
   }
-  & .hyper-sentence {
-    white-space: nowrap;
-    margin-left: auto;
-    overflow: hidden;
-    color: rgba(255,255,255,.65);
+
+
+
+
+  @container tray-body (min-width: 36rem) {
+    & .system {
+      display: grid;
+      grid-template-columns: auto 1fr;
+    }
+
+    & .groups {
+      flex-direction: column;
+    }
+
+
+  }
+
+  & .pane-select {
+    
   }
 
 `)
@@ -1028,27 +1192,37 @@ function end (e) {
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
+  const newX = invertX ? startX + x : startX
+  const newY = invertY ? startY + y : startY
+
+  const width = Math.max(300, Math.abs(x))
+  const height = Math.max(300, Math.abs(y))
+  newTray({
+    systemPane: Object.keys(systemMenu)[0],
+    width,
+    height,
+    x: newX,
+    y: newY
+  })
+  $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+};
+
+function newTray(overrides) {
   const tray = self.crypto.randomUUID()
   $.teach(tray, (state, payload) => {
-    const width = Math.max(300, Math.abs(x))
-    const height = Math.max(150, Math.abs(y))
     const newState = {...state}
     newState.trays.push(payload)
     newState.trayZ += 1
     newState.focusedTray = tray
     newState[payload] = {
-      width,
-      height,
-      x: invertX ? startX + x : startX,
-      y: invertY ? startY + y : startY,
+      width: 300,
+      height: 150,
       z: newState.trayZ,
-      url: `/app/paper-pocket`
+      ...overrides
     }
     return newState
   })
-
-  $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
-};
+}
 
 const tags = ['TEXTAREA', 'INPUT']
 let sel = []
@@ -1088,10 +1262,12 @@ function launchTray(event) {
 function preventDefault(e) { e.preventDefault() }
 $.when('contextmenu', '.tray-title-bar', preventDefault)
 $.when('pointerdown', '.tray-title-bar', grab)
+$.when('pointerdown', '.tray-wake', grab)
 $.when('pointerdown', '.tray-resize', resize)
 
 $.when('pointermove', 'canvas', drag)
 $.when('pointermove', '.tray-title-bar', drag)
+$.when('pointermove', '.tray-wake', drag)
 $.when('pointermove', '.tray-resize', drag)
 
 // ungrab is important to come fairly last so early returns grab grabbing right
@@ -1100,12 +1276,15 @@ $.when('dblclick', '.tray-title-bar', toggleMax)
 $.when('pointerup', 'canvas', ungrab)
 $.when('pointerup', 'canvas', unresize)
 $.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', '.tray-wake', ungrab)
 $.when('pointerup', '.tray-resize', unresize)
 $.when('click', '.tray-close', closeTray)
-$.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-launch', launchTray)
 $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
+
+$.when('click', '.pane-select', selectPane)
+$.when('dblclick', '.app-select', selectApp)
 
 $.when('click', '[data-snap]', (event) => {
   const video = event.target.closest($.link).querySelector('video')

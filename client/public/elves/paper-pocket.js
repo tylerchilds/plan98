@@ -26,6 +26,11 @@ export const systemMenu = {
         url: '/app/paper-pocket?rom=typo-hero'
       },
       {
+        label: 'Camera Desktop',
+        url: '/app/camera-desktop'
+      },
+
+      {
         label: 'Paper Nautiloids',
         url: '/app/paper-pocket?rom=paper-nautiloids'
       },
