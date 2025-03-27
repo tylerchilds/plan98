@@ -1148,6 +1148,11 @@ $.when('click', '[data-snap]', (event) => {
         'Content-Type': 'image/jpeg',
         "Authorization": `Basic ${authorization}`
       }
+  }).then(response => {
+    if (!response.ok) {
+      // Explicitly throw for non-200 responses
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
   }).catch(error => {
     console.warn('Server upload failed, falling back to download', error);
 
