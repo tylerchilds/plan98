@@ -608,7 +608,6 @@ $.draw((target) => {
     {
       const { theme } = $.learn()
       if(target.theme !== theme) {
-        console.log(theme)
         target.theme = theme
         document.body.style.setProperty('--root-theme', theme)
       }

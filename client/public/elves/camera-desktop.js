@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import jsQR from "jsqr";
 import { systemMenu, getTheme } from './paper-pocket.js'
 
 const initial = {
@@ -72,7 +73,7 @@ function renderSystemMenu(tray) {
 }
 
 function engine(target) {
-  const canvas = target.closest($.link).querySelector('canvas')
+  const canvas = target.closest($.link).querySelector('.terminal-canvas')
   const rectangle = canvas.getBoundingClientRect()
 
   return { canvas, rectangle }
@@ -232,6 +233,62 @@ async function getVideoConstraints() {
     };
   }
 }
+
+function scan(target) {
+  const video = target.querySelector('video')
+  const canvasElement = target.querySelector('.qr-canvas')
+  const overlayElement = target.querySelector('.overlay-canvas')
+  const canvas = canvasElement.getContext("2d");
+  const overlay = overlayElement.getContext("2d");
+
+  function drawLine(begin, end, color) {
+    overlay.beginPath();
+    overlay.moveTo(begin.x, begin.y);
+    overlay.lineTo(end.x, end.y);
+    overlay.lineWidth = 4;
+    overlay.strokeStyle = color;
+    overlay.stroke();
+  }
+
+  let lastProcessTime = 0;
+  const PROCESS_INTERVAL = 250;
+
+  function tick() {
+    const now = performance.now();
+    const { scanCode } = $.learn()
+
+    if(scanCode && now - lastProcessTime >= PROCESS_INTERVAL) {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvasElement.height = video.videoHeight;
+        canvasElement.width = video.videoWidth;
+        overlayElement.height = video.videoHeight;
+        overlayElement.width = video.videoWidth;
+        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "attemptBoth",
+        });
+
+        if (code) {
+          drawLine(code.location.topLeftCorner, code.location.topRightCorner, "lemonchiffon");
+          drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "lemonchiffon");
+          drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "lemonchiffon");
+          drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "lemonchiffon");
+
+          $.teach({
+            activeQr: code.data
+          })
+        }
+      }
+
+      lastProcessTime = now;
+    }
+    requestAnimationFrame(tick)
+  }
+
+  requestAnimationFrame(tick)
+}
+
 async function mountCamera(target) {
   if(target.cameraMounted) return
   target.cameraMounted = true
@@ -243,6 +300,7 @@ async function mountCamera(target) {
       // Display video stream in a video element, etc.
       video.playsInline = true
       video.autoplay = true;
+      scan(target)
     })
     .catch(error => {
       console.error('Error accessing video stream:', error);
@@ -282,16 +340,31 @@ $.draw((target) => {
   }
   return `
     <video disablepictureinpicture></video>
+    <canvas class="qr-canvas"></canvas>
+    <canvas class="overlay-canvas"></canvas>
     <div class="desktop">
       <div class="trays"></div>
       <div class="zero-state">Camera Desktop. Slice open a window by dragging anywhere. Snap a photo.</div>
       <div class="cursor"></div>
-      <canvas></canvas>
+      <canvas class="terminal-canvas"></canvas>
     </div>
     <div class="taskbar">
-      <button data-snap>
-        <sl-icon name="camera"></sl-icon>
-      </button>
+      <div class="qr-container">
+        <button class="qr-activate" data-qr=""></button>
+      </div>
+      <div class="left">
+
+      </div>
+      <div class="center">
+        <button data-snap>
+          <sl-icon name="camera"></sl-icon>
+        </button>
+      </div>
+      <div class="right">
+        <button data-scan class="taskbar-button">
+          <sl-icon name="qr-code-scan"></sl-icon>
+        </button>
+      </div>
     </div>
   `
 }, { beforeUpdate, afterUpdate })
@@ -394,6 +467,33 @@ function afterUpdate(target) {
     }
   }
 
+  {
+    const { scanCode } = $.learn()
+
+    if(`${scanCode}` !== target.dataset.scanner) {
+      target.dataset.scanner = `${scanCode}`
+    }
+  }
+
+  {
+    const { activeQr } = $.learn()
+
+    if(activeQr !== target.activeQr) {
+      target.activeQr = activeQr
+      const button = target.querySelector('.qr-activate')
+      const container = target.querySelector('.qr-container')
+
+      if(activeQr) {
+        button.dataset.qr = activeQr;
+        button.innerText = activeQr;
+        container.style.display = 'block'
+      } else {
+        button.dataset.qr = null;
+        button.innerText = '';
+        container.style.display = 'none'
+      }
+    }
+  }
 }
 
 function toggleMax(event) {
@@ -630,12 +730,33 @@ $.style(`
     position: relative;
     overflow: hidden;
     height: 100%;
+    z-index: 4;
+  }
+
+  &[data-scanner="true"] .desktop > * {
+    display: none !important;
+  }
+
+  &[data-scanner="false"] .qr-container {
+    display: none !important;
+  }
+
+  & .qr-container {
+    display: none;
+    padding-bottom: 1rem;
+  }
+  &[data-scanner="true"] .desktop > * {
+    display: none !important;
   }
 
   & .taskbar {
     background: rgba(0,0,0,.5);
-    z-index: 2;
+    z-index: 5;
     padding: .5rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    position: relative;
   }
 
   & [data-snap] {
@@ -657,7 +778,59 @@ $.style(`
     background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 
+  & .taskbar .left,
+  & .taskbar .center,
+  & .taskbar .right {
+    display: flex;
+    align-items: center;
+  }
 
+  & .taskbar-button {
+    padding: 0;
+    width: 35px;
+    height: 35px;
+    border-radius: 100%;
+    display: grid;
+    place-items: center;
+    border: none;
+    font-size: 18px;
+    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.15));
+    color: white;
+  }
+
+  & .taskbar-button:hover,
+  & .taskbar-button:focus {
+    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35));
+  }
+
+  & .qr-container {
+    position: absolute;
+    transform: translateY(-100%);
+    left: 0;
+    right: 0;
+    text-align: center;
+  }
+
+  & .qr-activate {
+    border: none;
+    border-radius: 1rem;
+    padding: .5rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    color: white;
+    margin: auto;
+  }
+
+  & .qr-activate:hover,
+  & .qr-hover:focus {
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
+  &[data-scanner="true"] [data-scan] {
+    background-color: mediumseagreen;
+  }
+
+  & > .overlay-canvas,
+  & > .qr-canvas,
   & > video {
     pointer-events: none;
     position: absolute;
@@ -665,6 +838,18 @@ $.style(`
     height: 100%;
     width: 100%;
     object-fit: cover;
+  }
+
+  & > .qr-canvas {
+    z-index: 1;
+  }
+
+  & > video {
+    z-index: 2;
+  }
+
+  & > .overlay-canvas {
+    z-index: 3;
   }
 
   &.cinema {
@@ -769,13 +954,13 @@ $.style(`
     transform: opacity 100ms ease-in-out;
   }
 
-  & canvas {
+  & .terminal-canvas {
     display: block;
     width: 100%;
     height: 100%;
   }
 
-  & canvas {
+  & .terminal-canvas {
     background-size: cover;
     background-position: cover;
     touch-action: manipulation;
@@ -1132,7 +1317,7 @@ $.style(`
 
 `)
 
-$.when('pointerdown', 'canvas', start)
+$.when('pointerdown', '.terminal-canvas', start)
 
 function start(e) {
   const { grabbing, resizing } = $.learn()
@@ -1154,7 +1339,7 @@ function start(e) {
   $.teach({ startX, startY, isMouseDown: true, x, y })
 }
 
-$.when('pointermove', 'canvas', move)
+$.when('pointermove', '.terminal-canvas', move)
 
 function move (e) {
   e.preventDefault()
@@ -1184,7 +1369,7 @@ function wake (e) {
   $.teach({ trayZ: newZ, focusedTray: tray })
   setState(tray, { z: newZ })
 }
-$.when('pointerup', 'canvas', end)
+$.when('pointerup', '.terminal-canvas', end)
 function end (e) {
   const { grabbing, resizing } = $.learn()
   if(grabbing || resizing) return
@@ -1265,7 +1450,7 @@ $.when('pointerdown', '.tray-title-bar', grab)
 $.when('pointerdown', '.tray-wake', grab)
 $.when('pointerdown', '.tray-resize', resize)
 
-$.when('pointermove', 'canvas', drag)
+$.when('pointermove', '.terminal-canvas', drag)
 $.when('pointermove', '.tray-title-bar', drag)
 $.when('pointermove', '.tray-wake', drag)
 $.when('pointermove', '.tray-resize', drag)
@@ -1273,8 +1458,8 @@ $.when('pointermove', '.tray-resize', drag)
 // ungrab is important to come fairly last so early returns grab grabbing right
 $.when('dblclick', '.tray-title-bar', toggleMax)
 //$.when('click', '.tray-maxer', toggleMax)
-$.when('pointerup', 'canvas', ungrab)
-$.when('pointerup', 'canvas', unresize)
+$.when('pointerup', '.terminal-canvas', ungrab)
+$.when('pointerup', '.terminal-canvas', unresize)
 $.when('pointerup', '.tray-title-bar', ungrab)
 $.when('pointerup', '.tray-wake', ungrab)
 $.when('pointerup', '.tray-resize', unresize)
@@ -1285,6 +1470,25 @@ $.when('click', '.tray-max', toggleMax)
 
 $.when('click', '.pane-select', selectPane)
 $.when('dblclick', '.app-select', selectApp)
+
+$.when('click', '[data-scan]', (event) => {
+  $.teach({ scanCode: !$.learn().scanCode, activeQr: null })
+})
+
+$.when('click', '.qr-activate', (event) => {
+  const { qr } = event.target.dataset
+  newTray({
+    url: qr,
+    width: 300,
+    height: 300,
+    maximized: true,
+    x: 0,
+    y: 0
+  })
+
+  $.teach({ activeQr: null, scanCode: false })
+})
+
 
 $.when('click', '[data-snap]', (event) => {
   const video = event.target.closest($.link).querySelector('video')
