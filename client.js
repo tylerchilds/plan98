@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
 import { readAll } from "https://deno.land/std@0.221.0/io/read_all.ts";
 import { Status } from "https://deno.land/std@0.210.0/http/http_status.ts";
 import * as path from "https://deno.land/std@0.184.0/path/mod.ts";
@@ -13,11 +12,27 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { marked } from "marked"
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 
+const port = Deno.env.get('PLAN98_PORT') || 8000
+
+
 config()
 
 function safeEnv(key) {
   const value = Deno.env.get(key)
   return value ? `${key}: "${value}",` : ''
+}
+
+function LAN_ENVIRONMENT() {
+  try {
+    if(Deno.env.get('PLAN98_LAN') === 'enabled') {
+      const ip = Deno.networkInterfaces().filter(x => x.family === 'IPv4' && x.address !== "127.0.0.1")[0].address
+      return `PLAN98_PEER: "${ip}:${port}",`
+    }
+  } catch(e) {
+    console.error(e)
+  }
+
+  return ''
 }
 
 const terminalHeaders = {
@@ -63,9 +78,13 @@ async function page() {
     <script>
       self.plan98 = {
         env: {
+          ${LAN_ENVIRONMENT()}
+
           ${safeEnv('PLAN98_USERNAME')}
           ${safeEnv('PLAN98_PASSWORD')}
           ${safeEnv('PLAN98_API_HOST')}
+
+          ${safeEnv('PLAN98_LAN')}
 
           ${safeEnv('ADYEN_API_KEY')}
           ${safeEnv('ADYEN_MERCHANT_ACCOUNT')}
@@ -812,8 +831,7 @@ function kids(paths) {
   return root;
 }
 
-serve(router);
-console.log("Listening on http://localhost:8000");
+Deno.serve({ port }, router);
 
 async function createEmailSubscriber(data) {
   const response = await fetch('https://api.buttondown.email/v1/subscribers', {

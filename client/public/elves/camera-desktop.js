@@ -26,7 +26,7 @@ function renderGroups(tray, systemPane) {
 
   return groups.map((x) => {
     return `
-      <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}" data-tray=${tray}>
+      <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}" data-tray="${tray}">
         ${systemMenu[x.key].label}
       </button>
     `
@@ -63,7 +63,7 @@ function renderSystemMenu(tray) {
   return `
     <div class="system">
       <div class="groups">
-        ${renderGroups(tray)}
+        ${renderGroups(tray, systemPane)}
       </div>
       <div class="applications">
         ${renderApplications(systemPane)}

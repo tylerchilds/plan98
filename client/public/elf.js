@@ -1,4 +1,6 @@
 import diffHTML from 'diffhtml'
+// fallback for non-secure lan parties
+import { v4 as uuidv4 } from 'uuid';
 
 const logs = {}
 
@@ -181,7 +183,12 @@ function getSubscribers({ target }) {
 
 function dispatchCreate(target) {
   insight('elf:create', target.localName)
-  if(!target.id) target.id = self.crypto.randomUUID()
+  try {
+    if(!target.id) target.id = self.crypto.randomUUID()
+  } catch(e) {
+    console.error(e)
+    if(!target.id) target.id = uuidv4()
+  }
   target.dispatchEvent(new Event(CREATE_EVENT))
   target.reactive = true
 }
