@@ -220,6 +220,7 @@ $.draw((target) => {
   return `
     <video disablepictureinpicture></video>
     <div class="desktop">
+    <plan98-console style="position: absolute;"></plan98-console>
       <div class="trays"></div>
       <div class="zero-state">Welcome to desktop mode. Slice open a window by dragging anywhere and then select your app.</div>
       <div class="cursor"></div>
