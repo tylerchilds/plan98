@@ -1,5 +1,6 @@
 import elf from '@silly/elf'
-import jsQR from "jsqr";
+// To use Html5Qrcode (more info below)
+import {Html5Qrcode} from "html5-qrcode";
 import { systemMenu, getTheme } from './paper-pocket.js'
 
 const initial = {
@@ -237,21 +238,43 @@ async function getVideoConstraints() {
 function scan(target) {
   const video = target.querySelector('video')
   const canvasElement = target.querySelector('.qr-canvas')
-  const overlayElement = target.querySelector('.overlay-canvas')
   const canvas = canvasElement.getContext("2d");
-  const overlay = overlayElement.getContext("2d");
-
-  function drawLine(begin, end, color) {
-    overlay.beginPath();
-    overlay.moveTo(begin.x, begin.y);
-    overlay.lineTo(end.x, end.y);
-    overlay.lineWidth = 4;
-    overlay.strokeStyle = color;
-    overlay.stroke();
-  }
 
   let lastProcessTime = 0;
   const PROCESS_INTERVAL = 250;
+
+  function scanQR() {
+    // Ensure html5-qrcode is loaded
+    if (typeof Html5Qrcode === 'undefined') {
+        console.error('html5-qrcode library not loaded');
+        return;
+    }
+
+    // Create an instance of Html5Qrcode
+    const html5QrCode = new Html5Qrcode('reader');
+
+    // Convert canvas to a file
+    canvasElement.toBlob(function(blob) {
+      // Create a file from the blob
+      const file = new File(
+        [blob],
+        'canvas-image.png',
+        { type: 'image/png' }
+      );
+
+      // Scan the file
+      html5QrCode.scanFile(file)
+        .then(decodedText => {
+          $.teach({
+            activeQr: decodedText
+          })
+        })
+        .catch(err => {
+            console.error('Error scanning QR code:', err);
+        });
+    }, 'image/png');
+  }
+
 
   function tick() {
     const now = performance.now();
@@ -261,11 +284,10 @@ function scan(target) {
       if (video.readyState === video.HAVE_ENOUGH_DATA) {
         canvasElement.height = video.videoHeight;
         canvasElement.width = video.videoWidth;
-        overlayElement.height = video.videoHeight;
-        overlayElement.width = video.videoWidth;
         canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        scanQR()
+        //const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+        /*const code = jsQR(imageData.data, imageData.width, imageData.height, {
           inversionAttempts: "attemptBoth",
         });
 
@@ -279,6 +301,7 @@ function scan(target) {
             activeQr: code.data
           })
         }
+        */
       }
 
       lastProcessTime = now;
@@ -341,7 +364,6 @@ $.draw((target) => {
   return `
     <video disablepictureinpicture></video>
     <canvas class="qr-canvas"></canvas>
-    <canvas class="overlay-canvas"></canvas>
     <div class="desktop">
       <div class="trays"></div>
       <div class="zero-state">Camera Desktop. Slice open a window by dragging anywhere. Snap a photo.</div>
@@ -366,6 +388,7 @@ $.draw((target) => {
         </button>
       </div>
     </div>
+    <div style="display: none" id="reader"></div>
   `
 }, { beforeUpdate, afterUpdate })
 
@@ -412,6 +435,35 @@ function afterUpdate(target) {
   {
     mountCamera(target)
   }
+
+  {
+    const { scanCode } = $.learn()
+
+    if(`${scanCode}` !== target.dataset.scanner) {
+      target.dataset.scanner = `${scanCode}`
+    }
+  }
+
+  {
+    const { activeQr } = $.learn()
+
+    if(activeQr !== target.activeQr) {
+      target.activeQr = activeQr
+      const button = target.querySelector('.qr-activate')
+      const container = target.querySelector('.qr-container')
+
+      if(activeQr) {
+        button.dataset.qr = activeQr;
+        button.innerText = activeQr;
+        container.style.display = 'block'
+      } else {
+        button.dataset.qr = null;
+        button.innerText = '';
+        container.style.display = 'none'
+      }
+    }
+  }
+
   {
     const { grabbing } = $.learn()
     const trays = target.querySelector('.trays')
@@ -464,34 +516,6 @@ function afterUpdate(target) {
     if(target.theme !== theme) {
       target.theme = theme
       document.body.style.setProperty('--root-theme', theme)
-    }
-  }
-
-  {
-    const { scanCode } = $.learn()
-
-    if(`${scanCode}` !== target.dataset.scanner) {
-      target.dataset.scanner = `${scanCode}`
-    }
-  }
-
-  {
-    const { activeQr } = $.learn()
-
-    if(activeQr !== target.activeQr) {
-      target.activeQr = activeQr
-      const button = target.querySelector('.qr-activate')
-      const container = target.querySelector('.qr-container')
-
-      if(activeQr) {
-        button.dataset.qr = activeQr;
-        button.innerText = activeQr;
-        container.style.display = 'block'
-      } else {
-        button.dataset.qr = null;
-        button.innerText = '';
-        container.style.display = 'none'
-      }
     }
   }
 }
@@ -829,7 +853,6 @@ $.style(`
     background-color: mediumseagreen;
   }
 
-  & > .overlay-canvas,
   & > .qr-canvas,
   & > video {
     pointer-events: none;
@@ -846,10 +869,6 @@ $.style(`
 
   & > video {
     z-index: 2;
-  }
-
-  & > .overlay-canvas {
-    z-index: 3;
   }
 
   &.cinema {
