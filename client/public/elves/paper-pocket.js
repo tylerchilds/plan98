@@ -5,6 +5,152 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
+const modes = {
+  game: 'game',
+  app: 'app',
+  settings: 'settings',
+  pause: 'pause',
+  tutorial: 'tutorial',
+}
+
+export const systemMenu = {
+  favorites: {
+    label: "Favorites",
+    list: [
+      {
+        label: 'Tutorial',
+        mode: modes.tutorial
+      },
+      {
+        label: 'Typo Hero',
+        url: '/app/paper-pocket?rom=typo-hero'
+      },
+      {
+        label: 'Paper Nautiloids',
+        url: '/app/paper-pocket?rom=paper-nautiloids'
+      },
+      {
+        label: 'Final Boss',
+        url: '/app/paper-pocket?rom=final-boss'
+      },
+      {
+        label: 'Jam Session',
+        url: '/app/paper-pocket?rom=jam-session'
+      },
+      {
+        label: 'Silly Script',
+        url: '/app/paper-pocket?rom=silly-script'
+      },
+      {
+        label: 'Sonic &amp; Knuckles',
+        url: '/app/sonic-knuckles'
+      },
+    ]
+  },
+  apps: {
+    label: "Apps",
+    list: [
+      {
+        label: 'Map',
+        url: '/app/middle-earth'
+      },
+      {
+        label: 'Secure Mail',
+        url: '/app/secure-mail'
+      },
+      {
+        label: 'Secure Messenger',
+        url: '/app/secure-messenger'
+      },
+      {
+        label: 'Bulletin Board',
+        url: `/app/bulletin-board?src=/private/boards/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
+      },
+      {
+        label: 'Public TV',
+        url: '/app/public-broadcast'
+      },
+      {
+        label: 'Draw Term 98',
+        url: '/app/draw-term'
+      },
+    ]
+  },
+  art: {
+    label: "Art",
+    list: [
+      {
+        label: 'Chalk Board',
+        url: '/app/chalk-board'
+      },
+      {
+        label: 'Paint',
+        url: '/app/paint-app'
+      },
+    ]
+  },
+  music: {
+    label: "Music",
+    list: [
+      {
+        label: 'Final Boss',
+        url: '/app/final-boss'
+      },
+      {
+        label: 'Dial Tone',
+        url: '/app/dial-tone'
+      },
+      {
+        label: 'Sillyz Ocarina',
+        url: '/app/sillyz-ocarina'
+      },
+      {
+        label: 'Music Walk',
+        url: '/app/music-walk'
+      },
+    ]
+
+  },
+  code: {
+    label: "Coding",
+    list: [
+      {
+        label: 'Irix Launcher',
+        url: '/app/irix-launcher'
+      },
+      {
+        label: 'Code Module',
+        url: '/app/code-module?src=/public/elves/code-module.js'
+      },
+      {
+        label: 'Hyper Script',
+        url: '/app/hyper-script'
+      },
+      {
+        label: 'Generic Park',
+        url: '/app/generic-park'
+      },
+      {
+        label: 'Collaborative Text',
+        url: `/app/simpleton-client?src=/private/text/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
+      },
+      {
+        label: 'File System',
+        url: '/app/file-system'
+      },
+    ]
+  },
+  templates: {
+    label: "Templates",
+    list: [
+      {
+        label: 'Swipe Swipe',
+        url: '/app/swipe-swipe'
+      },
+    ]
+  }
+}
+
 Tone.Transport.start();
 
 let current
@@ -34,14 +180,6 @@ const fontFamilyMap = {
   georgia: "'Georgia', serif",
   garamond: "'Garamond', serif",
   palatino: "'Palatino', serif",
-}
-
-const modes = {
-  game: 'game',
-  app: 'app',
-  settings: 'settings',
-  pause: 'pause',
-  tutorial: 'tutorial',
 }
 
 const tutorialModes = {
@@ -186,143 +324,7 @@ const $ = elf('paper-pocket', {
       value: 'hide'
     },
   },
-  pause: {
-    favorites: {
-      label: "Favorites",
-      list: [
-        {
-          label: 'Tutorial',
-          mode: modes.tutorial
-        },
-        {
-          label: 'Typo Hero',
-          url: '/app/paper-pocket?rom=typo-hero'
-        },
-        {
-          label: 'Paper Nautiloids',
-          url: '/app/paper-pocket?rom=paper-nautiloids'
-        },
-        {
-          label: 'Final Boss',
-          url: '/app/paper-pocket?rom=final-boss'
-        },
-        {
-          label: 'Jam Session',
-          url: '/app/paper-pocket?rom=jam-session'
-        },
-        {
-          label: 'Silly Script',
-          url: '/app/paper-pocket?rom=silly-script'
-        },
-        {
-          label: 'Sonic &amp; Knuckles',
-          url: '/app/sonic-knuckles'
-        },
-      ]
-    },
-    apps: {
-      label: "Apps",
-      list: [
-        {
-          label: 'Map',
-          url: '/app/middle-earth'
-        },
-        {
-          label: 'Secure Mail',
-          url: '/app/secure-mail'
-        },
-        {
-          label: 'Secure Messenger',
-          url: '/app/secure-messenger'
-        },
-        {
-          label: 'Bulletin Board',
-          url: `/app/bulletin-board?src=/private/boards/${self.crypto.randomUUID()}.json&group=${self.crypto.randomUUID()}`
-        },
-        {
-          label: 'Public TV',
-          url: '/app/public-broadcast'
-        },
-        {
-          label: 'Draw Term 98',
-          url: '/app/draw-term'
-        },
-      ]
-    },
-    art: {
-      label: "Art",
-      list: [
-        {
-          label: 'Chalk Board',
-          url: '/app/chalk-board'
-        },
-        {
-          label: 'Paint',
-          url: '/app/paint-app'
-        },
-      ]
-    },
-    music: {
-      label: "Music",
-      list: [
-        {
-          label: 'Final Boss',
-          url: '/app/final-boss'
-        },
-        {
-          label: 'Dial Tone',
-          url: '/app/dial-tone'
-        },
-        {
-          label: 'Sillyz Ocarina',
-          url: '/app/sillyz-ocarina'
-        },
-        {
-          label: 'Music Walk',
-          url: '/app/music-walk'
-        },
-      ]
-
-    },
-    code: {
-      label: "Coding",
-      list: [
-        {
-          label: 'Irix Launcher',
-          url: '/app/irix-launcher'
-        },
-        {
-          label: 'Code Module',
-          url: '/app/code-module?src=/public/elves/code-module.js'
-        },
-        {
-          label: 'Hyper Script',
-          url: '/app/hyper-script'
-        },
-        {
-          label: 'Generic Park',
-          url: '/app/generic-park'
-        },
-        {
-          label: 'Collaborative Text',
-          url: `/app/simpleton-client?src=/private/text/${new Date().toISOString()}/${self.crypto.randomUUID()}.saga`
-        },
-        {
-          label: 'File System',
-          url: '/app/file-system'
-        },
-      ]
-    },
-    templates: {
-      label: "Templates",
-      list: [
-        {
-          label: 'Swipe Swipe',
-          url: '/app/swipe-swipe'
-        },
-      ]
-    }
-  }
+  pause: systemMenu
 })
 
 function startMode() {

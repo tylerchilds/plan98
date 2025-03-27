@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { systemMenu } from './paper-pocket.js'
 
 const initial = {
   startX: null,
@@ -107,15 +108,74 @@ function render(target) {
   }
 }
 
-function mountCamera(target) {
+async function getVideoConstraints() {
+  try {
+    // Attempt to get native camera capabilities
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: "environment" }
+    });
+
+    const track = stream.getVideoTracks()[0];
+    const capabilities = track.getCapabilities();
+
+    // Stop the stream to free up camera resources
+    track.stop();
+
+    // Default constraints if no specific capabilities found
+    const defaultConstraints = {
+      video: {
+        facingMode: "environment",
+        width: { min: 1280, ideal: 1920, max: 3840 },
+        height: { min: 720, ideal: 1080, max: 2160 },
+        aspectRatio: { ideal: 16/9 }
+      },
+      audio: false
+    };
+
+    // If camera capabilities are available, use them
+    if (capabilities.width && capabilities.height) {
+      return {
+        video: {
+          facingMode: "environment",
+          width: {
+            min: capabilities.width.min || 1280,
+            ideal: capabilities.width.max,
+            max: capabilities.width.max
+          },
+          height: {
+            min: capabilities.height.min || 720,
+            ideal: capabilities.height.max,
+            max: capabilities.height.max
+          },
+          aspectRatio: { ideal: capabilities.width.max / capabilities.height.max }
+        },
+        audio: false
+      };
+    }
+
+    // Fallback to default constraints
+    return defaultConstraints;
+  } catch (error) {
+    console.error('Error getting video constraints:', error);
+
+    // Fallback constraints if everything else fails
+    return {
+      video: {
+        facingMode: "environment",
+        width: { min: 1280, ideal: 1920, max: 3840 },
+        height: { min: 720, ideal: 1080, max: 2160 },
+        aspectRatio: { ideal: 16/9 }
+      },
+      audio: false
+    };
+  }
+}
+async function mountCamera(target) {
   if(target.cameraMounted) return
   target.cameraMounted = true
 
   const video = target.querySelector('video')
-  navigator.mediaDevices.getUserMedia({
-    video: { facingMode: "environment" },
-    audio: false
-  })
+  navigator.mediaDevices.getUserMedia(await getVideoConstraints())
     .then(stream => {
       video.srcObject = stream;
       // Display video stream in a video element, etc.
@@ -159,10 +219,17 @@ $.draw((target) => {
   }
   return `
     <video disablepictureinpicture></video>
-    <div class="trays"></div>
-    <div class="zero-state">Welcome to desktop mode. Slice open a window by dragging anywhere and then select your app.</div>
-    <div class="cursor"></div>
-    <canvas></canvas>
+    <div class="desktop">
+      <div class="trays"></div>
+      <div class="zero-state">Welcome to desktop mode. Slice open a window by dragging anywhere and then select your app.</div>
+      <div class="cursor"></div>
+      <canvas></canvas>
+    </div>
+    <div class="taskbar">
+      <button data-snap>
+        Snap
+      </button>
+    </div>
   `
 }, { beforeUpdate, afterUpdate })
 
@@ -475,6 +542,21 @@ $.style(`
     position: relative;
     touch-action: none;
     overflow: hidden;
+    display: grid;
+    height: 100%;
+    grid-template-rows: 1fr auto;
+  }
+
+  & .desktop {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  & .taskbar {
+    background: rgba(0,0,0,.85);
+    z-index: 2;
+    padding: .5rem;
   }
 
   & > video {
@@ -579,16 +661,15 @@ $.style(`
   & .grabber::before {
     content: '';
     box-shadow:
-      0px .2rem 0 .5px var(--red),
-      0px .7rem 0 .5px var(--orange),
-      0px 1.2rem 0 .5px var(--yellow);
+      0px .2rem 0 1px var(--red),
+      0px .7rem 0 1px var(--orange),
+      0px 1.2rem 0 1px var(--yellow);
     display: block;
     margin: 0;
     opacity: .4;
     transform: opacity 100ms ease-in-out;
   }
 
-  &,
   & canvas {
     display: block;
     width: 100%;
@@ -596,7 +677,6 @@ $.style(`
   }
 
   & canvas {
-    background: var(--draw-term-bg, var(--background, dodgerblue));
     background-size: cover;
     background-position: cover;
     touch-action: manipulation;
@@ -682,9 +762,9 @@ $.style(`
   }
   & [data-grabbed="true"] .grabber::before {
     box-shadow:
-      0px .2rem 0 .5px var(--purple),
-      0px .7rem 0 .5px var(--blue),
-      0px 1.2rem 0 .5px var(--green);
+      0px .2rem 0 1px var(--purple),
+      0px .7rem 0 1px var(--blue),
+      0px 1.2rem 0 1px var(--green);
   }
 
   & .zero-state {
@@ -719,8 +799,8 @@ $.style(`
     position: absolute;
     width: var(--width, 160px);
     height: var(--height, 90px);
-    background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
-    padding: 2px;
+    background: black;
+    padding: 1px;
     display: grid;
     grid-template-rows: auto 1fr;
     max-width: 100vw;
@@ -1014,7 +1094,7 @@ $.when('pointermove', '.tray-title-bar', drag)
 $.when('pointermove', '.tray-resize', drag)
 
 // ungrab is important to come fairly last so early returns grab grabbing right
-//$.when('dblclick', '.tray-title-bar', toggleMax)
+$.when('dblclick', '.tray-title-bar', toggleMax)
 //$.when('click', '.tray-maxer', toggleMax)
 $.when('pointerup', 'canvas', ungrab)
 $.when('pointerup', 'canvas', unresize)
@@ -1026,4 +1106,56 @@ $.when('click', '.tray-launch', launchTray)
 $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
 
+$.when('click', '[data-snap]', (event) => {
+  const video = event.target.closest($.link).querySelector('video')
+  // Create a temporary canvas to draw the video frame
+  const canvas = document.createElement('canvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
 
+  // Draw the current video frame on the canvas
+  const context = canvas.getContext('2d');
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  // Get current date and time for filename
+  const now = new Date();
+  const timestamp = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0') + '-' +
+      String(now.getHours()).padStart(2, '0') + '-' +
+      String(now.getMinutes()).padStart(2, '0') + '-' +
+      String(now.getSeconds()).padStart(2, '0');
+
+  // Convert canvas to data URL with JPEG format
+  const dataURL = canvas.toDataURL('image/jpeg');
+
+  const byteCharacters = atob(dataURL.split(',')[1]);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+
+  // Attempt to upload to server
+  fetch(`/private/camera-roll/${timestamp}.jpg`, {
+      method: 'POST',
+      body: blob,
+      headers: {
+        'Content-Type': 'image/jpeg',
+        "Authorization": `Basic ${authorization}`
+      }
+  }).catch(error => {
+    console.warn('Server upload failed, falling back to download', error);
+
+    // Fallback: create a download link
+    const link = document.createElement('a');
+    link.download = `${timestamp}.jpg`;
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+})

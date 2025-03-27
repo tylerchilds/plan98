@@ -250,19 +250,27 @@ async function router(request, context) {
   let statusCode = Status.Success
 
   if(request.method === 'POST') {
-    const data = await request.json()
 
     if(pathname === '/plan98/subscribe') {
+      const data = await request.json()
       return ResponseData({ subscribe: await createEmailSubscriber(data) })
     }
 
     if(pathname === '/plan98/pay-by-link') {
+      const data = await request.json()
       return data.mode === 'CREATE'
         ? ResponseData({ payment: await newPayment(data) })
         : ResponseData({ payment: await getPaymentStatus(data) })
     }
 
+    console.log({ pathname })
+    if(pathname.startsWith('/private/camera-roll')) {
+      console.log('haha')
+      return handleCameraRollSave(request)
+    }
+
     try {
+      const data = await request.json()
       const segments = data.src.split('/')
       const shortPath = segments.slice(0, -1).join('/')
       await Deno.mkdir(`./client/` + shortPath, { recursive: true });
@@ -277,7 +285,6 @@ async function router(request, context) {
         headers: { "content-type": "application/json; charset=utf-8" },
         status: 400
       });
-
     }
   }
 
@@ -532,6 +539,29 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
     status: statusCode
   })
 }
+
+async function handleCameraRollSave(request) {
+  try {
+    const { pathname, host, search } = new URL(request.url);
+    const segments = pathname.split('/')
+    console.log({ segments })
+    const shortPath = segments.slice(0, -1).join('/')
+    console.log({ shortPath })
+    await Deno.mkdir(`./client/` + shortPath, { recursive: true });
+
+    // Read the request body (image data)
+    const imageBuffer = await request.arrayBuffer();
+
+    // Write the file
+    await Deno.writeFile(`./client${pathname}`, new Uint8Array(imageBuffer));
+
+    return new Response('Image saved successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error saving camera roll image:', error);
+    return new Response('Error saving image', { status: 500 });
+  }
+}
+
 
 const byPath = (x) => x.path
 const byName = (x) => x.name
