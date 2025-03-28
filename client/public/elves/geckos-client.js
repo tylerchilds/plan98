@@ -4,7 +4,7 @@ import geckos from '@geckos.io/client'
 // or add a minified version to your index.html file
 // https://github.com/geckosio/geckos.io/tree/master/bundles
 
-const $ = module('geckos-client')
+const $ = module('geckos-client', { messages: [] })
 
 const channel = geckos({ port: 5675 }) // default port is 9208
 
@@ -14,34 +14,29 @@ channel.onConnect(error => {
     return
   }
 
-  // Event: When the client receives a message from the server
-  channel.on('message', data => {
-    console.log('Message from server:', data)
+  channel.on('chat message', data => {
+    console.log(`You got the message ${data}`)
+    $.teach(data, mergeMessage)
   })
 
-  // Event: When the client is disconnected from the server
-  channel.onDisconnect(() => {
-    console.log('Disconnected from server')
-  })
-
-  // Join a room named "test"
-  channel.join('test')
-
-  // Emit a message to the room
-  channel.emit('message', { id: 'player-1', position: { x: 100 }})
+  channel.emit('chat message', 'a short message sent to the server')
 })
 
-$.draw(target => {
-  const data = $.learn()
-  const positions = Object.keys(data).map(id => {
-    const { x } = data[id]
+function mergeMessage(state, payload) {
+  return {
+    ...state,
+    messages: [...state.messages, payload]
+  }
+}
 
+$.draw(target => {
+  const { messages } = $.learn()
+
+  return messages.map(x => {
     return `
-      ${x}px
+      <p>
+        ${x}
+      </p>
     `
   }).join('')
-
-  return `
-    ${positions}
-  `
 })
