@@ -1,22 +1,31 @@
-import module from '@silly/tag'
+import elf from '@silly/elf'
 import QrCreator from 'qr-creator'
 
 // utilize this to hop off the bifrost
 function sleep(D) { return new Promise(x => setTimeout(x,D))}
 
-const $ = module('qr-code')
+const $ = elf('qr-code')
 
 $.draw(target => {
   const codes = $.learn()
   const code = target.getAttribute('src') || target.getAttribute('text')
+  const noLink = target.getAttribute('no-link') === 'true'
   const image = codes[code]
-  const { fg='saddlebrown', bg='lemonchiffon' } = target.dataset
+  const { fg='black', bg='white' } = target.dataset
   generate(target, code, {fg, bg})
-  return image ? `
-    <button class="portal" style="--fg: ${fg}; --bg: ${bg}">
-      ${image}
-    </button>
-  ` : 'loading...'
+  return image ? 
+    noLink
+      ? `
+        <div class="portal" style="--fg: ${fg}; --bg: ${bg}">
+          ${image}
+        </div>
+
+      `
+      : `
+      <a href="${code}" target="_top" class="portal" style="--fg: ${fg}; --bg: ${bg}">
+        ${image}
+      </a>
+    ` : 'loading...'
 })
 
 async function generate(target, code, {fg, bg}) {
@@ -38,12 +47,6 @@ async function generate(target, code, {fg, bg}) {
 
   $.teach({ [code]: `<img src="${dataURL}" alt="code" />`})
 }
-
-$.when('click', '.portal', (event) => {
-  const link = event.target.closest($.link)
-  const code = link.getAttribute('src') || link.getAttribute('text')
-  window.location.href = code
-})
 
 $.style(`
   & {

@@ -264,7 +264,7 @@ Move right or "A"ffirm to continue.
 }
 
 const $ = elf('paper-pocket', {
-  fullScreen: false,
+  fullScreen: getScreenPreference(),
   theme: getTheme(),
   instrument: getInstrument(),
   fontSize: getFontSize(),
@@ -397,6 +397,17 @@ function loadInstrument(instrument) {
 }
 
 loadInstrument(getInstrument())
+
+export function getScreenPreference() {
+  return localStorage.getItem('paper-pocket/screenPreference') || false
+}
+
+export function setScreenPreference(preference) {
+  localStorage.setItem('paper-pocket/screenPreference', preference)
+  $.teach({ fullScreen: preference })
+}
+
+
 
 export function getThemes() {
   return themes
@@ -1506,7 +1517,7 @@ function startFire(value) {
 
 function toggleFullscreen (event) {
   const { fullScreen } = $.learn()
-  $.teach({ fullScreen: !fullScreen })
+  setScreenPreference(!fullScreen)
 }
 
 $.style(`

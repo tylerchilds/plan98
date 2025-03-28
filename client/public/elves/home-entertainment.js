@@ -23,6 +23,12 @@ function mount(target) {
 
   const record = gun.get($.link).get(target.id)
 
+  record.once((data) => {
+    if (!data) {
+      record.put(emptyConsole);
+    }
+  });
+
   record.open((data) => {
     $.teach({[target.id]: data})
   });
@@ -126,8 +132,11 @@ $.draw((target) => {
     <iframe src="${src}" title="${src}"></iframe>
   ` : `
     <div class="zero-state">
-      <qr-code src="${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:''}/app/home-entertainment?id=${target.id}&controller=true" ></qr-code>
-      <span>Or Press The Any Key</span>
+      <qr-code no-link="true" data-fg="saddlebrown" data-bg="lemonchiffon" src="${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/home-entertainment?id=${target.id}&controller=true" ></qr-code>
+      <span>
+        Scan the QR code to surf from another device, otherwise play the
+        <a href="/app/paper-pocket">Paper Pocket</a>
+      </span>
     </div>
   `
 }, {
