@@ -46,34 +46,42 @@ const characterMapping = {
   '11011': ['z', 'Z']
 }
 
-const majorScales = {
-  '0000': [0], // c major
-  '1001': [1], // c#/db major
-  '1000': [2], // d major
-  '1010': [3], // d#/eb major
-  '0100': [4], // e major
-  '0010': [5], // f major
-  '0101': [6], // f#/gb major
-  '0001': [7], // g major
-  '0110': [8], // g#/ab major
-  '1100': [9], // a major
-  '0111': [10], // a#/bb major
-  '0011': [11], // b major
-}
+const scale = {
+  '00000': [0],
+  '10101': [0],
+  '11101': [0],
+  '10111': [0],
+  '11111': [0],
+  '10110': [0],
 
-const minorScales = {
-  '0000': [7], // c minor
-  '1001': [8], // c#/db minor
-  '1000': [9], // d minor
-  '1010': [10], // d#/eb minor
-  '0100': [11], // e minor
-  '0010': [12], // f minor
-  '0101': [13], // f#/gb minor
-  '0001': [14], // g minor
-  '0110': [15], // g#/ab minor
-  '1100': [16], // a minor
-  '0111': [17], // a#/bb minor
-  '0011': [18], // b minor
+  '10000': [7],
+  '01000': [2],
+  '00100': [9],
+  '00010': [4],
+  '00001': [11],
+
+  '11000': [-7],
+  '01100': [-2],
+  '00110': [-9],
+  '00011': [-4],
+  '10010': [-11],
+  '01010': [-6],
+  '00101': [6],
+  '10100': [13],
+  '01001': [-13],
+  '11100': [8],
+  '01110': [-8],
+  '00111': [15],
+  '10011': [-15],
+  '11010': [10],
+  '01101': [-10],
+
+  '01011': [17],
+  '11001': [-17],
+  '11110': [12],
+  '01111': [-12],
+  '10001': [19],
+  '11011': [-19]
 }
 
 const modes = {
@@ -113,6 +121,61 @@ const $ = elf('typo-hero', {
       label: "Favorites",
       list: [
         {
+          label: 'Vowels',
+          url: '/cdn/sillyz.computer/lyrics/vowels.txt'
+        },
+        {
+          label: 'Punctuation',
+          url: '/cdn/sillyz.computer/lyrics/punctuation.txt'
+        },
+        {
+          label: 'Rad Calm',
+          url: '/cdn/sillyz.computer/lyrics/rad-calm.txt'
+        },
+        {
+          label: 'Wolf Guy Pub',
+          url: '/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
+        },
+        {
+          label: 'Wonderwall',
+          url: '/cdn/sillyz.computer/lyrics/wonderwall.txt'
+        },
+      ]
+    },
+    lessons: {
+      label: "Lessons",
+      list: [
+        {
+          label: 'Vowels',
+          url: '/cdn/sillyz.computer/lyrics/vowels.txt'
+        },
+        {
+          label: 'Punctuation',
+          url: '/cdn/sillyz.computer/lyrics/punctuation.txt'
+        },
+        {
+          label: 'Teenage Shred',
+          url: '/cdn/sillyz.computer/lyrics/teenage-shred.txt'
+        },
+        {
+          label: 'Rad Calm',
+          url: '/cdn/sillyz.computer/lyrics/rad-calm.txt'
+        },
+        {
+          label: 'Wolf Guy Pub',
+          url: '/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
+        },
+        {
+          label: 'Viktor Jax Quartz',
+          url: '/cdn/sillyz.computer/lyrics/viktor-jax-quartz.txt'
+        },
+      ]
+    },
+
+    memes: {
+      label: "Memes",
+      list: [
+        {
           label: 'Wonderwall',
           url: '/cdn/sillyz.computer/lyrics/wonderwall.txt'
         },
@@ -128,15 +191,7 @@ const $ = elf('typo-hero', {
           label: 'Eye of the Tiger',
           url: '/cdn/sillyz.computer/lyrics/eye-of-the-tiger.txt'
         },
-      ]
-    },
-    memes: {
-      label: "Memes",
-      list: [
-        {
-          label: 'Freebird',
-          url: '/cdn/sillyz.computer/lyrics/freebird.txt'
-        },
+
       ]
     },
   }
@@ -205,7 +260,7 @@ function type(character) {
   })
 }
 
-function score(character) {
+function score(character, successCallback=()=>null, errorCallback=()=>null) {
   const {
     currentLine,
     correct,
@@ -224,11 +279,13 @@ function score(character) {
       correct: correct + 1,
       attempts: attempts + 1
     })
+    successCallback()
   } else {
     $.teach({
       streak: 0,
       attempts: attempts + 1
     })
+    errorCallback()
   }
 
   // if line is empty, find next line
@@ -443,12 +500,11 @@ function drawChord(character) {
     const direction = characterMapping[chord][0] === character ? 'down' : 'up'
     const { pressedKeys } = $.learn()
 
-    const cachedButtons = Object.keys(pressedKeys).map(x => pressedKeys[x])
     const buttons = chord.split('').map((x, index) => {
       const value = parseInt(x)
 
       return `
-        <div class="chord-key ${value ? 'on':'off'} ${cachedButtons[index] ? 'pressed':''}"></div>
+        <div class="chord-key ${value ? 'on':'off'} ${pressedKeys[index] ? 'pressed':''}"></div>
       `
     }).join('')
 
@@ -988,19 +1044,11 @@ const musicRPC = {
       const character = characterMapping[key][1]
       if(character) {
         type(character)
-        score(character)
-      }
-    })
-    toggleSpam('strum-up', params.value, () => {
-      const key = strings.slice(0,4).join('')
-      if(strings[4] === 1) {
-        if(minorScales[key]) {
-          [...minorScales[key]].map(x => x + 12).reverse().map(queueAttackRelease)
-        }
-      } else {
-        if(majorScales[key]) {
-          [...majorScales[key]].map(x => x + 12).reverse().map(queueAttackRelease)
-        }
+        score(character, () => {
+          if(scale[key]) {
+            [...scale[key]].map(x => x + 12).reverse().map(queueAttackRelease)
+          }
+        })
       }
     })
   },
@@ -1010,19 +1058,11 @@ const musicRPC = {
       const character = characterMapping[key][0]
       if(character) {
         type(character)
-        score(character)
-      }
-    })
-    toggleSpam('strum-down', params.value, () => {
-      const key = strings.slice(0,4).join('')
-      if(strings[4] === 1) {
-        if(minorScales[key]) {
-          minorScales[key].map(queueAttackRelease);
-        }
-      } else {
-        if(majorScales[key]) {
-          majorScales[key].map(queueAttackRelease);
-        }
+        score(character, () => {
+          if(scale[key]) {
+            scale[key].map(queueAttackRelease);
+          }
+        })
       }
     })
   },
