@@ -5,8 +5,8 @@ const io = geckos()
 io.listen(5674) // default port is 9208
 
 const rooms = {};
+const nicknames = {};
 
-console.log('ready')
 
 io.onConnection(channel => {
   let currentRoom = null;
@@ -17,8 +17,7 @@ io.onConnection(channel => {
     io.room(channel.roomId).emit('chat message', data)
   })
 
-  channel.on('joinRoom', roomName => {
-    console.log(`User ${channel.id} joined room: ${roomName}`); // Log room join
+  channel.on('joinRoom', ({ roomName, nickname }) => {
     if (currentRoom) {
       channel.leave(currentRoom);
       if (rooms[currentRoom]) {
@@ -26,7 +25,6 @@ io.onConnection(channel => {
       }
     }
 
-    console.log('joining', roomName)
     currentRoom = roomName;
     channel.join(roomName);
 
@@ -36,11 +34,9 @@ io.onConnection(channel => {
       rooms[roomName].users.push(channel.id);
     }
 
-    console.log(roomName, rooms[roomName])
 
     if (rooms[roomName].messages) {
       rooms[roomName].messages.forEach(message => {
-        console.log('emitting', message)
         channel.emit('chatMessage', message);
       });
     }
@@ -49,15 +45,24 @@ io.onConnection(channel => {
   });
 
   channel.on('chatMessage', message => {
-    console.log(`Received message in ${currentRoom}: ${message}`); // Log message
     if (currentRoom && rooms[currentRoom]) {
       rooms[currentRoom].messages.push(message);
       io.room(currentRoom).emit('chatMessage', message);
     }
   });
 
+  channel.on('setNick', nickname => {
+    if (!nicknames[nickname]) {
+      channel.emit('setNickSuccess', {
+        nickname: nickname,
+        password: crypto.randomUUID()
+      });
+    } else {
+      channel.emit('setNickError', "Nickname taken");
+    }
+  });
+
   channel.on('disconnect', () => {
-    console.log(`User ${channel.id} disconnected`); // Log disconnect
     if (currentRoom && rooms[currentRoom]) {
       rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user !== channel.id);
       io.room(currentRoom).emit('userList', rooms[currentRoom].users);

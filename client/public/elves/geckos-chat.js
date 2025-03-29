@@ -7,7 +7,9 @@ import geckos from '@geckos.io/client'
 const $ = elf('geckos-chat', {
   messages: [],
   participants: [],
-  currentRoom: "general"
+  currentRoom: "general",
+  nickname: localStorage.getItem('multiplayer/nickname'),
+  password: localStorage.getItem('multiplayer/password'),
 })
 
 const channel = geckos({ port: 5674 }) // default port is 9208
@@ -22,6 +24,20 @@ channel.onConnect(error => {
 
   channel.on('chatMessage', message => {
     $.teach(message, mergeMessage)
+  });
+
+  channel.on('setNickSuccess', data => {
+    const { nickname, password } = data
+    debugger
+
+    localStorage.setItem('multiplayer/nickname', nickname)
+    localStorage.setItem('multiplayer/password', password)
+
+    $.teach(data)
+  });
+
+  channel.on('setNickError', error => {
+    console.error(error)
   });
 
   channel.on('userList', participants => {
@@ -53,8 +69,20 @@ $.draw(target => {
     messages,
     participants,
     currentRoom,
-    connected
+    connected,
+    nickname,
+    password
   } = $.learn()
+
+  if(!password) {
+    return `
+      <form method="post" name="nickname">
+        <p>Please choose a nickname</p>
+        <input type="text" data-bind name="nickname" value="${nickname||''}">
+        <button id="sendButton">Send</button>
+      </form>
+    `
+  }
 
   if(!connected) {
     return `
@@ -80,7 +108,7 @@ $.draw(target => {
     <div id="messages">${
       messages.map(x => x).join('')
     }</div>
-    <form>
+    <form method="post" name="send">
       <input type="text" data-bind name="message" value="${message||''}">
       <button id="sendButton">Send</button>
     </form>
@@ -105,7 +133,16 @@ $.when('change', '#roomSelect', (event) => {
   joinRoom(currentRoom)
 });
 
-$.when('submit', 'form',(event) => {
+$.when('submit', '[name="nickname"]',(event) => {
+  event.preventDefault()
+  const nickname = event.target.nickname.value;
+  if (nickname) {
+    console.log('creating')
+    channel.emit('setNick', nickname);
+  }
+});
+
+$.when('submit', '[name="send"]',(event) => {
   event.preventDefault()
   const message = event.target.message.value;
   if (message) {
