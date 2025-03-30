@@ -21,7 +21,7 @@ io.onConnection(channel => {
     if (currentRoom) {
       channel.leave(currentRoom);
       if (rooms[currentRoom]) {
-        rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user !== channel.id);
+        rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user.id !== channel.id);
       }
     }
 
@@ -29,9 +29,15 @@ io.onConnection(channel => {
     channel.join(roomName);
 
     if (!rooms[roomName]) {
-      rooms[roomName] = { messages: [], users: [channel.id] };
+      rooms[roomName] = { messages: [], users: [{
+        id: channel.id,
+        nickname
+      }] };
     } else {
-      rooms[roomName].users.push(channel.id);
+      rooms[roomName].users.push({
+        id: channel.id,
+        nickname
+      });
     }
 
 
@@ -45,9 +51,19 @@ io.onConnection(channel => {
   });
 
   channel.on('chatMessage', message => {
+    console.log(message, currentRoom, rooms[currentRoom])
     if (currentRoom && rooms[currentRoom]) {
       rooms[currentRoom].messages.push(message);
       io.room(currentRoom).emit('chatMessage', message);
+    }
+  });
+
+  channel.on('changeNickname', ({oldNickname, newNickname, password }) => {
+    if (!nicknames[nickname]) {
+      channel.emit('setNickSuccess', {
+        nickname: nickname,
+        password: crypto.randomUUID()
+      });
     }
   });
 
@@ -64,7 +80,7 @@ io.onConnection(channel => {
 
   channel.on('disconnect', () => {
     if (currentRoom && rooms[currentRoom]) {
-      rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user !== channel.id);
+      rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user.id !== channel.id);
       io.room(currentRoom).emit('userList', rooms[currentRoom].users);
     }
   });

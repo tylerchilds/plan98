@@ -167,7 +167,7 @@ $.style(`
   .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;
     content: '';
-    background: white;
+    background: rgba(255,255,255,.5);
     position: fixed;
     top: 0;
     bottom: 0;
@@ -265,25 +265,30 @@ $.style(`
     right: 0;
     place-self: start;
     pointer-events: none;
-    background: #181818;
+    padding: .5rem;
     z-index: 2000;
   }
 
   & [data-close] {
-    line-height: 1;
     pointer-events: all;
-    background: black;
+    background: transparent;
     border: none;
-    color: rgba(255,255,255,.65);
-    padding: .5rem;
-    font-size: 1rem;
+    opacity: .65;
+    height: 2rem;
+    width: 2rem;
+    font-size: 1.25rem;
     transition: color 200ms;
+    background: black;
+    color: white;
+    border-radius: 100%;
+    display: inline-grid;
+    place-content: center;
   }
 
   & [data-close]:hover,
   & [data-close]:focus {
     cursor: pointer;
-    color: rgba(255,255,255,.95);
+    opacity: 1;
   }
 
   & [data-close] * {

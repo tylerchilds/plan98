@@ -38,17 +38,17 @@ $.draw(() => {
   const panelHeader = types[bannerType] ? banner() : ''
 
   return `
-    <div class="shell ${maximized ? 'maximized': ''}" style="--theme: ${theme}; --image: ${image}">
-      <div class="action-wrapper">
-        <button data-close><sl-icon name="x-circle"></sl-icon></button>
-      </div>
+    <div class="shell ${maximized ? 'maximized': ''}">
       <div class="panel">
         <div class="body">
+          <div class="action-wrapper">
+            <button data-close>&#x2718;</button>
+          </div>
           ${panelHeader}
           ${body}
         </div>
       </div>
-    </shell>
+    </div>
   `
 })
 
@@ -96,12 +96,15 @@ export function hidePanel() {
 }
 window.hidePanel = hidePanel
 
+
+$.when('click', '.panel', () => {
+  hidePanel()
+})
 $.when('click', '[data-close]', hidePanel)
 
 $.style(`
   & {
     display: none;
-    pointer-events: none;
   }
 
   @keyframes &-fadein {
@@ -145,23 +148,42 @@ $.style(`
     position: relative;
     min-height: 100px;
     height: 100%;
-    width: 320px;
     max-width: 100%;
     width: 100%;
+    z-index: 900;
   }
+
+  & .panel:before {
+    animation: fadein 250ms ease-in-out forwards;
+    content: '';
+    background: rgba(255,255,255,.5);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    backdrop-filter: blur(10px);
+    z-index: 2;
+  }
+
+
 
   & .body {
     height: 100%;
     max-width: 320px;
     background: white;
-    padding: 2rem 0 .5rem;
+    padding: .5rem;
     position: absolute;
     right: 0;
     pointer-events: all;
     width: 100%;
     overflow: auto;
-  }
-}
+    z-index: 3;
+    box-shadow:
+      -6px 0 6px 6px rgba(0,0,0,.05),
+      -3px 0 3px 3px rgba(0,0,0,.10),
+      -1px 0 1px 1px rgba(0,0,0,.15);
+
   }
 
   & .banner {
@@ -172,12 +194,7 @@ $.style(`
 
   & .action-wrapper {
     pointer-events: none;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
     text-align: right;
-    z-index: 1101;
   }
 
   & [data-close] {
@@ -185,10 +202,15 @@ $.style(`
     background: transparent;
     border: none;
     opacity: .65;
-    padding: 9px;
     height: 2rem;
-    font-size: 1rem;
+    width: 2rem;
+    font-size: 1.25rem;
     transition: color 200ms;
+    background: black;
+    color: white;
+    border-radius: 100%;
+    display: inline-grid;
+    place-content: center;
   }
 
   & [data-close]:hover,
