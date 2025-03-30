@@ -454,7 +454,7 @@ function afterUpdate(target) {
 
       if(activeQr) {
         button.dataset.qr = activeQr;
-        button.innerText = activeQr;
+        button.innerText = new URL(activeQr).hostname;
         container.style.display = 'block'
       } else {
         button.dataset.qr = null;
