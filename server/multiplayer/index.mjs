@@ -5,11 +5,12 @@ const io = geckos()
 io.listen(5674) // default port is 9208
 
 const rooms = {};
+const parties = new Map()
 const nicknames = {};
-
 
 io.onConnection(channel => {
   let currentRoom = null;
+  let currentParty = null;
 
    channel.on('chat message', data => {
     console.log(`got ${data} from "chat message"`)
@@ -78,10 +79,78 @@ io.onConnection(channel => {
     }
   });
 
+
+  /* couch-coop */
+
+  channel.on('joinParty', ({ partyId, slot }) => {
+    if (currentParty) {
+      channel.leave(currentParty);
+      if (parties[currentParty]) {
+        parties[currentParty].players = parties[currentParty].players.filter(user => user.id !== channel.id);
+      }
+    }
+
+    currentParty = partyId;
+    channel.join(currentParty);
+
+    if (!parties.has(partyId)) {
+      parties.set(partyId, {
+        host: null,
+        players: new Array(4).fill(null),
+      })
+    }
+
+    const party = parties.get(partyId)
+
+    if (slot === 'host') {
+      channel.isHost = true
+      party.host = channel
+    } else {
+      channel.slot = slot
+      party.players[slot] = {
+        id: channel.id,
+        gamepad: {}
+      }
+    }
+
+     // Notify host only
+    if (party.host) {
+      party.host.emit('playerList', party.players)
+    }
+  });
+
+  channel.on('gamepadSnapshot', (data) => {
+    if(currentParty && parties.has(currentParty)) {
+      const party = parties.get(currentParty)
+      if (party.host) {
+        party.host.emit('gamepadUpdate', data)
+      }
+    }
+  });
+
   channel.on('disconnect', () => {
     if (currentRoom && rooms[currentRoom]) {
       rooms[currentRoom].users = rooms[currentRoom].users.filter(user => user.id !== channel.id);
       io.room(currentRoom).emit('userList', rooms[currentRoom].users);
+    }
+
+    if(currentParty && parties.has(currentParty)) {
+      const { isHost, slot } = channel
+      const party = parties.get(currentParty)
+
+      if (isHost) {
+        party.host = null
+      } else {
+        party.players[slot] = null
+      }
+
+      if (party.host) {
+        party.host.emit('playerList', party.players)
+      }
+
+      if (!party.host && party.players.every(p => p === null)) {
+        parties.delete(currentParty)
+      }
     }
   });
 });

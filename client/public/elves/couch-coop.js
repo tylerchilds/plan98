@@ -5,61 +5,122 @@ import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
 import geckos from '@geckos.io/client'
 
+let slotIndex
+let rom
+
+const buttons = {
+  a: 0,
+  b: 1,
+  x: 3,
+  y: 2,
+  lb: 4,
+  rb: 5,
+  lt: 6,
+  rt: 7,
+  select: 8,
+  start: 9,
+  ls: 10,
+  rs: 11,
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  os: 16
+}
+
+const spamCache = {}
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const modes = {
+  settings: 'settings',
+  game: 'game'
+}
+
 const $ = elf('couch-coop', {
   booting: true,
   slot: null,
-  slots: ['slot1', 'slot2', 'slot3', 'slot4'],
-  slot1: null,
-  slot2: null,
-  slot3: null,
-  slot4: null
+  slots: [0,1,2,3],
+  0: null,
+  1: null,
+  2: null,
+  3: null
 })
 
 const channel = geckos({ port: 5674 }) // default port is 9208
 
-channel.onConnect(error => {
-  if (error) {
-    console.error(error.message)
-    return
-  }
-
-  $.teach({ connected: true })
-
-  channel.on('chatMessage', message => {
-    $.teach(message, mergeMessage)
+function joinParty(id, slot) {
+  channel.emit('joinParty', {
+    partyId: id,
+    slot
   });
-
-  channel.on('setNickSuccess', data => {
-    const { nickname, password } = data
-
-    localStorage.setItem('multiplayer/nickname', nickname)
-    localStorage.setItem('multiplayer/password', password)
-
-    $.teach(data)
-  });
-
-  channel.on('setNickError', error => {
-    console.error(error)
-  });
-
-  channel.on('userList', participants => {
-    $.teach({
-      participants
-    })
-  });
-  channel.on('error', (error) => {
-    console.error("Geckos Error:", error);
-  })
-})
+}
 
 function mount(target) {
   if(target.mounted) return
   target.mounted = true
 
   if(target.getAttribute('slot')) {
+    const slot = target.getAttribute('slot')
+    slotIndex = parseInt(slot)
+
+    // controller
     $.teach({
-      slot: target.getAttribute('slot')
+      slot
     })
+
+    channel.onConnect(error => {
+      if (error) {
+        console.error(error.message)
+        return
+      }
+
+      joinParty(target.id, slotIndex)
+
+      channel.on('error', (error) => {
+        console.error("Geckos Error:", error);
+      })
+    })
+
+    controllerLoop()
+  } else {
+    // host
+
+    channel.onConnect(error => {
+      if (error) {
+        console.error(error.message)
+        return
+      }
+
+      joinParty(target.id, 'host')
+
+      channel.on('gamepadUpdate', ({ gamepad, slot }) => {
+        $.teach({ [slot]: gamepad })
+      })
+
+      channel.on('error', (error) => {
+        console.error("Geckos Error:", error);
+      })
+    })
+
+    gameLoop.call(target)
   }
 
   /*
@@ -99,7 +160,7 @@ function set(id, data, merge = defaultMerge) {
 $.draw((target) => {
   mount(target)
   const { slot, booting } = $.learn()
-  const rom = target.getAttribute('rom') || 'debug-gamepads'
+  rom = target.getAttribute('rom') || 'multiplayer-template'
 
   if(booting) {
     return `
@@ -144,7 +205,7 @@ function renderController(slot) {
   return `
     <div class="controller">
       <div class="gamepad-top">
-        <button key="a" class="clear" data-press="select">
+        <button key="a" class="clear" data-slot="${slot}" data-press="select">
           <sl-icon name="gear-wide-connected"></sl-icon>
         </button>
         <button key="b" class="clear" data-press="os">
@@ -205,19 +266,10 @@ function renderHud(slot) {
     `
   }
 
-  const { mode } = player
-
-  if(mode === modes.settings) {
-    return `
-      Settings
-    `
-  }
-
-  if(mode === modes.play) {
-    return `
-      show button inputs
-    `
-  }
+  return `
+    <div class="ready-area">
+    </div>
+  `
 }
 
 $.when('contextmenu', (event) => {
@@ -239,6 +291,138 @@ $.when('touchend', (event) => {
   event.preventDefault()
   return false
 })
+
+function notification(node, method, params) {
+  if(node) {
+    node.dispatchEvent(new CustomEvent('json-rpc', {
+      detail: {
+        jsonrpc: "2.0",
+        method: method,
+        params
+      }
+    }))
+  }
+}
+
+$.when('pointerdown', '[data-press]', (event) => {
+  const { press } = event.target.dataset
+  overrideButton(0, buttons[press], 1)
+})
+
+$.when('pointerup', '[data-press]', (event) => {
+  const { press } = event.target.dataset
+  overrideButton(0, buttons[press], 0)
+})
+
+const keyFlips = {
+  Meta: keyFlipper(0, buttons.os),
+  Alt: keyFlipper(0, buttons.start),
+  Control: keyFlipper(0, buttons.select),
+  ArrowUp: keyFlipper(0, buttons.up),
+  w: keyFlipper(0, buttons.up),
+  W: keyFlipper(0, buttons.up),
+  ArrowDown: keyFlipper(0, buttons.down),
+  S: keyFlipper(0, buttons.down),
+  s: keyFlipper(0, buttons.down),
+  ArrowRight: keyFlipper(0, buttons.right),
+  d: keyFlipper(0, buttons.right),
+  D: keyFlipper(0, buttons.right),
+  ArrowLeft: keyFlipper(0, buttons.left),
+  a: keyFlipper(0, buttons.left),
+  A: keyFlipper(0, buttons.left),
+  j: keyFlipper(0, buttons.a),
+  J: keyFlipper(0, buttons.a),
+  k: keyFlipper(0, buttons.b),
+  K: keyFlipper(0, buttons.b),
+  l: keyFlipper(0, buttons.x),
+  L: keyFlipper(0, buttons.x),
+  h: keyFlipper(0, buttons.y),
+  H: keyFlipper(0, buttons.y),
+  u: keyFlipper(0, buttons.lb),
+  U: keyFlipper(0, buttons.lb),
+  i: keyFlipper(0, buttons.rb),
+  I: keyFlipper(0, buttons.rb),
+  y: keyFlipper(0, buttons.lt),
+  Y: keyFlipper(0, buttons.lt),
+  o: keyFlipper(0, buttons.rt),
+  O: keyFlipper(0, buttons.rt),
+  q: keyFlipper(0, buttons.ls),
+  Q: keyFlipper(0, buttons.ls),
+  e: keyFlipper(0, buttons.rs),
+  E: keyFlipper(0, buttons.rs),
+}
+
+function keyFlipper(slot, button) {
+  return (value) => {
+    overrideButton(slot, button, value)
+  }
+}
+
+document.addEventListener('keydown', (event) => {
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](1)
+  }
+})
+
+document.addEventListener('keyup', (event) => {
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](0)
+  }
+})
+
+function gamepadButton(index, code) {
+  return checkButton(index, buttons[code]) || 0
+}
+
+function controllerLoop(time) {
+  const gamepad = {
+    a: gamepadButton(0, 'a'),
+    b: gamepadButton(0, 'b'),
+    x: gamepadButton(0, 'x'),
+    y: gamepadButton(0, 'y'),
+    lb: gamepadButton(0, 'lb'),
+    rb: gamepadButton(0, 'rb'),
+    lt: gamepadButton(0, 'lt'),
+    rt: gamepadButton(0, 'rt'),
+    select: gamepadButton(0, 'select'),
+    start: gamepadButton(0, 'start'),
+    ls: gamepadButton(0, 'ls'),
+    rs: gamepadButton(0, 'rs'),
+    up: gamepadButton(0, 'up'),
+    down: gamepadButton(0, 'down'),
+    left: gamepadButton(0, 'left'),
+    right: gamepadButton(0, 'right'),
+    os: gamepadButton(0, 'os'),
+  }
+
+  toggleSpam('os', gamepad.os, () => {
+    console.log('os toggled')
+  })
+
+  channel.emit('gamepadSnapshot', {
+    gamepad,
+    slot: slotIndex
+  });
+
+  requestAnimationFrame(controllerLoop)
+}
+
+function gameLoop(time) {
+  const game = this.querySelector(rom)
+
+  if(game) {
+    const { slots } = $.learn()
+
+    const frame = slots.map((index) => {
+      return $.learn()[index]
+    })
+
+    notification(game, 'inputFrame', frame)
+  }
+  requestAnimationFrame(gameLoop.bind(this))
+}
+
+
 
 $.style(`
   & {
