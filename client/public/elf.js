@@ -1,6 +1,5 @@
 import diffHTML from 'diffhtml'
 // fallback for non-secure lan parties
-import { v4 as uuidv4 } from 'uuid';
 
 const logs = {}
 
@@ -186,7 +185,6 @@ function dispatchCreate(target) {
   try {
     if(!target.id) target.id = self.crypto.randomUUID()
   } catch(e) {
-    console.error(e)
     if(!target.id) target.id = uuidv4()
   }
   target.dispatchEvent(new Event(CREATE_EVENT))
@@ -267,3 +265,10 @@ function createStore(initialState = {}, subscribe = () => null) {
   }
 }
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
