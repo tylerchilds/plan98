@@ -1,6 +1,8 @@
 import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 
+import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
+
 import geckos from '@geckos.io/client'
 
 const $ = elf('couch-coop', {
@@ -218,6 +220,26 @@ function renderHud(slot) {
   }
 }
 
+$.when('contextmenu', (event) => {
+  event.preventDefault()
+  return false
+})
+
+$.when('dblclick', (event) => {
+  event.preventDefault()
+  return false
+})
+
+$.when('touchcancel', (event) => {
+  event.preventDefault()
+  return false
+})
+
+$.when('touchend', (event) => {
+  event.preventDefault()
+  return false
+})
+
 $.style(`
   & {
     display: block;
@@ -228,8 +250,12 @@ $.style(`
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
-    touch-action: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
+  }
 
+  & * {
+    -webkit-tap-highlight-color: transparent;
   }
 
   & .viewport {

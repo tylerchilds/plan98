@@ -542,13 +542,6 @@ $.draw((target) => {
           <button key="right" class="gray" data-press="right">
             <sl-icon name="caret-right-fill"></sl-icon>
           </button>
-
-          <button key="lb" class="orange" data-press="lb">
-            L
-          </button>
-          <button key="rb" class="purple" data-press="rb">
-            R
-          </button>
         </fieldset>
       </div>
     </div>
@@ -1529,7 +1522,8 @@ $.style(`
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
-    touch-action: none;
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
   }
 
   & .chrome {

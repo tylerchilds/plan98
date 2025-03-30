@@ -135,7 +135,8 @@ export function listen(type, link, handler = () => null) {
     }
   };
 
-  document.addEventListener(type, callback, true);
+  const options = { capture: true, passive: false }
+  document.addEventListener(type, callback, options);
 
   if(observableEvents.includes(type)) {
     observe(link);
@@ -146,7 +147,7 @@ export function listen(type, link, handler = () => null) {
       disregard(link);
     }
 
-    document.removeEventListener(type, callback, true);
+    document.removeEventListener(type, callback, options);
   }
 }
 
