@@ -223,6 +223,13 @@ $.style(`
     display: block;
     height: 100%;
     overflow: hidden;
+    user-select: none; /* supported by Chrome and Opera */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: none;
+
   }
 
   & .viewport {
@@ -521,4 +528,16 @@ $.style(`
     background: rgba(255,255,255,.25);
     opacity: 1;
   }
+
+  & .gray {
+    background: linear-gradient(rgba(255,255,255,.25), rgba(0,0,0,.5)), var(--gray);
+    color: rgba(255,255,255,.85);
+  }
+
+  & .gray:hover,
+  & .gray:focus {
+    background: linear-gradient(rgba(255,255,255,.1), rgba(0,0,0,.5)), var(--gray);
+    color: rgba(255,255,255,1);
+  }
+
 `)
