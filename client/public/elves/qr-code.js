@@ -62,7 +62,7 @@ $.style(`
     display: grid;
     height: 100%;
     width: 100%;
-    place-content: center;
+    place-items: center;
     border: 0;
     background: transparent;
     border-radius: 0;

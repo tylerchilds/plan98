@@ -225,7 +225,7 @@ $.style(`
     overflow: hidden;
     height: 100%;
     display: grid;
-    place-content: center;
+    place-items: center;
     padding: 1rem;
   }
 
@@ -236,7 +236,8 @@ $.style(`
     border-radius: 1rem;
     border: 0;
     background: white;
-    aspect-ratio: 1;
+    width: 100%;
+    display: grid;
     margin: auto;
   }
 
