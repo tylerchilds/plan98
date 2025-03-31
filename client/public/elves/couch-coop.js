@@ -73,7 +73,7 @@ function mount(target) {
       })
     })
 
-    controllerLoop()
+    controllerLoop.call(target)
   } else {
     // host
 
@@ -170,6 +170,10 @@ $.draw((target) => {
         const { slots } = $.learn()
         return slots.map(renderHud.bind(target)).join('')
       }
+    }
+
+    {
+
     }
   }
 })
@@ -367,12 +371,21 @@ function controllerLoop(time) {
     os: gamepadButton(0, 'os'),
   }
 
+  Object.keys(gamepad).forEach(key => {
+    const button = this.querySelector(`[data-press="${key}"]`)
+    if(button) {
+      gamepad[key] === 1
+        ? button.classList.add('active')
+        : button.classList.remove('active')
+    }
+  })
+
   channel.emit('gamepadSnapshot', {
     gamepad,
     slot: slotIndex
   });
 
-  requestAnimationFrame(controllerLoop)
+  requestAnimationFrame(controllerLoop.bind(this))
 }
 
 function gameLoop(time) {
@@ -583,6 +596,7 @@ $.style(`
     opacity: .65;
   }
 
+  & .controller button.active,
   & .controller button:hover,
   & .controller button:focus {
     opacity: 1;
@@ -667,6 +681,7 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & .yellow.active,
   & .yellow:hover,
   & .yellow:focus {
     background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.3)), var(--yellow);
@@ -678,6 +693,7 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & .blue.active,
   & .blue:hover,
   & .blue:focus {
     background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.3)), var(--blue);
@@ -689,6 +705,7 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & .red.active,
   & .red:hover,
   & .red:focus {
     background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.3)), var(--red);
@@ -700,6 +717,7 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & .green.active,
   & .green:hover,
   & .green:focus {
     background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.3)), var(--green);
@@ -711,6 +729,7 @@ $.style(`
     color: rgba(0,0,0,.85);
   }
 
+  & .orange.active,
   & .orange:hover,
   & .orange:focus {
     background: linear-gradient(rgba(255,255,255,.1), rgba(255,255,255,.3)), var(--orange);
@@ -722,6 +741,7 @@ $.style(`
     color: rgba(0,0,0,.85);
   }
 
+  & .purple.active,
   & .purple:hover,
   & .purple:focus {
     background: linear-gradient(rgba(255,255,255,.1), rgba(255,255,255,.3)), var(--purple);
@@ -738,6 +758,7 @@ $.style(`
     opacity: .65;
   }
 
+  & .clear.active,
   & .clear:hover,
   & .clear:focus {
     background: rgba(255,255,255,.25);
@@ -749,6 +770,7 @@ $.style(`
     color: rgba(255,255,255,.85);
   }
 
+  & .gray.active,
   & .gray:hover,
   & .gray:focus {
     background: linear-gradient(rgba(255,255,255,.1), rgba(0,0,0,.5)), var(--gray);
