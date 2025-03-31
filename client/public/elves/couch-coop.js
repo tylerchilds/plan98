@@ -41,7 +41,8 @@ const $ = elf('couch-coop', {
 
 const config = plan98.env.PLAN98_REALTIME ?
   {
-    url: plan98.env.PLAN98_REALTIME
+    url: plan98.env.PLAN98_REALTIME,
+    cors: { origin: '*' }
   } :
   {
     port: 9208
