@@ -119,11 +119,11 @@ io.onConnection(channel => {
     }
   });
 
-  channel.on('gamepadSnapshot', (data) => {
+  channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
     if(currentParty && parties.has(currentParty)) {
       const party = parties.get(currentParty)
       if (party.host) {
-        party.host.emit('gamepadUpdate', data)
+        party.host.emit('gamepadUpdate', { gamepad, slot, id: channel.id })
       }
     }
   });

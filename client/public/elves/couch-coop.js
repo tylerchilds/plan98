@@ -28,32 +28,6 @@ const buttons = {
   os: 16
 }
 
-const spamCache = {}
-function debounceSpam(code, timeout, callback) {
-  if(spamCache[code]) return
-  spamCache[code] = true
-
-  callback()
-
-  setTimeout(() => {
-    spamCache[code] = false
-  }, timeout)
-}
-
-const toggleCache = {}
-function toggleSpam(code, value, callback) {
-  if(!toggleCache[code] && value === 1) {
-    callback()
-  }
-
-  toggleCache[code] = value
-}
-
-const modes = {
-  settings: 'settings',
-  game: 'game'
-}
-
 const $ = elf('couch-coop', {
   booting: true,
   slot: null,
@@ -111,8 +85,8 @@ function mount(target) {
 
       joinParty(target.id, 'host')
 
-      channel.on('gamepadUpdate', ({ gamepad, slot }) => {
-        $.teach({ [slot]: gamepad })
+      channel.on('gamepadUpdate', ({ gamepad, slot, id }) => {
+        $.teach({ [slot]: { id, gamepad } })
       })
 
       channel.on('error', (error) => {
@@ -181,29 +155,28 @@ $.draw((target) => {
       <div class="game">
         <${rom}></${rom}>
       </div>
-      <div class="lower-hud"></div>
+      <div class="lower-hud">
+        <div class="hud-area" data-slot="0"></div>
+        <div class="hud-area" data-slot="1"></div>
+        <div class="hud-area" data-slot="2"></div>
+        <div class="hud-area" data-slot="3"></div>
+      </div>
     </div>
   `
 }, {
   afterUpdate(target) {
     {
-      const hudArea = target.querySelector('.lower-hud')
-
-      if(hudArea) {
-        diffHTML.innerHTML(hudArea, hud(target))
+      if(target.querySelector('.lower-hud')) {
+        const { slots } = $.learn()
+        return slots.map(renderHud.bind(target)).join('')
       }
     }
   }
 })
 
-function hud(target) {
-  const { slots } = $.learn()
-  return slots.map(renderHud.bind(target.id)).join('')
-}
-
 function renderController(slot) {
   return `
-    <div class="controller">
+    <div class="controller" data-slot="${slot}">
       <div class="gamepad-top">
         <button key="a" class="clear" data-slot="${slot}" data-press="select">
           <sl-icon name="gear-wide-connected"></sl-icon>
@@ -255,21 +228,20 @@ function renderController(slot) {
 function renderHud(slot) {
   const player = $.learn()[slot]
 
-  if(!player) {
-    const url = `${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/couch-coop?id=${this}&slot=${slot}&controller=true`
-    return `
-      <div class="ready-area">
-        <button class="show-qr" data-url="${url}">
-          <qr-code no-link="true" src="${url}" ></qr-code>
+  if(this[slot] !== player) {
+    this[slot] = player
+    const hudArea = this.querySelector(`.hud-area[data-slot="${slot}"]`)
+    if(!player) {
+      const url = `${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/couch-coop?id=${this.id}&slot=${slot}&controller=true`
+      hudArea.innerHTML = `
+        <button class="show-qr" data-slot="${slot}" data-url="${url}">
+          <qr-code data-bg="transparent" no-link="true" src="${url}" ></qr-code>
         </button>
-      </div>
-    `
+      `
+    } else {
+      hudArea.innerHTML = ''
+    }
   }
-
-  return `
-    <div class="ready-area">
-    </div>
-  `
 }
 
 $.when('contextmenu', (event) => {
@@ -395,10 +367,6 @@ function controllerLoop(time) {
     os: gamepadButton(0, 'os'),
   }
 
-  toggleSpam('os', gamepad.os, () => {
-    console.log('os toggled')
-  })
-
   channel.emit('gamepadSnapshot', {
     gamepad,
     slot: slotIndex
@@ -435,7 +403,7 @@ $.style(`
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
     -webkit-touch-callout: none;
-    touch-action: manipulation;
+    touch-action: none;
   }
 
   & * {
@@ -443,6 +411,10 @@ $.style(`
   }
 
   & .viewport {
+    height: 100%;
+  }
+
+  & .game {
     height: 100%;
   }
 
@@ -454,9 +426,10 @@ $.style(`
     left: 0;
     right: 0;
     bottom: 0;
+    z-index: 10;
   }
 
-  & .ready-area {
+  & .hud-area {
     text-align: center;
     overflow: hidden;
     height: 100%;
@@ -468,6 +441,22 @@ $.style(`
     padding: 4px;
     border: 0;
     background: white;
+  }
+
+  & .show-qr[data-slot="0"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--green, mediumseagreen);
+  }
+
+  & .show-qr[data-slot="1"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--red, firebrick);
+  }
+
+  & .show-qr[data-slot="2"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
+  }
+
+  & .show-qr[data-slot="3"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--yellow, gold);
   }
 
   & boot {
@@ -510,6 +499,22 @@ $.style(`
     display: grid;
     grid-template-rows: auto 10px 1fr;
     grid-template-areas: "toppad" "leftpad" "rightpad";
+  }
+
+  & .controller[data-slot="0"] {
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--green, mediumseagreen);
+  }
+
+  & .controller[data-slot="1"] {
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--red, firebrick);
+  }
+
+  & .controller[data-slot="2"] {
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--blue, dodgerblue);
+  }
+
+  & .controller[data-slot="3"] {
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--yellow, gold);
   }
 
   @media (min-width: 480px) {
@@ -751,3 +756,20 @@ $.style(`
   }
 
 `)
+
+// Prevent double-tap from triggering share menu on all elements
+document.addEventListener('dblclick', function(event) {
+  event.preventDefault();
+  return false;
+}, { passive: false });
+
+// Additional prevention for specific touch events
+document.addEventListener('touchstart', function(event) {
+  if (event.touches.length > 1) {
+    event.preventDefault();
+  }
+}, { passive: false });
+
+document.addEventListener('gesturestart', function(event) {
+  event.preventDefault();
+}, { passive: false });

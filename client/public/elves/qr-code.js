@@ -25,7 +25,7 @@ $.draw(target => {
       <a href="${code}" target="_top" class="portal" style="--fg: ${fg}; --bg: ${bg}">
         ${image}
       </a>
-    ` : 'loading...'
+    ` : ''
 })
 
 async function generate(target, code, {fg, bg}) {
@@ -53,7 +53,7 @@ $.style(`
     display: block;
     max-height: 100%;
     max-width: 100%;
-    min-width: 120px;
+    width: 100%;
     aspect-ratio: 1;
     position: relative;
     margin: auto;
@@ -68,9 +68,6 @@ $.style(`
     border-radius: 0;
   }
   & img {
-    position: absolute;
-    inset: 0;
     max-height: 100%;
-    margin: auto;
   }
 `)
