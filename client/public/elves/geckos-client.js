@@ -8,7 +8,8 @@ const $ = module('geckos-client', { messages: [] })
 
 const config = plan98.env.PLAN98_REALTIME ?
   {
-    url: plan98.env.PLAN98_REALTIME
+    url: plan98.env.PLAN98_REALTIME,
+    port: 443,
   } :
   {
     port: 9208
