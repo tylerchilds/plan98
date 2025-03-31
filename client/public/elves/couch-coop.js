@@ -43,7 +43,7 @@ const config = plan98.env.PLAN98_REALTIME ?
   {
     url: plan98.env.PLAN98_REALTIME,
     port: 443,
-    //cors: { origin: '*' }
+    cors: { origin: '*' }
   } :
   {
     port: 9208
