@@ -85,6 +85,7 @@ async function page() {
           ${safeEnv('PLAN98_API_HOST')}
 
           ${safeEnv('PLAN98_LAN')}
+          ${safeEnv('PLAN98_REALTIME')}
 
           ${safeEnv('ADYEN_API_KEY')}
           ${safeEnv('ADYEN_MERCHANT_ACCOUNT')}

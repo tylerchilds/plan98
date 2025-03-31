@@ -17,7 +17,15 @@ const $ = elf('geckos-chat', {
   messageHeight: null
 })
 
-const channel = geckos({ port: 5674 }) // default port is 9208
+const config = plan98.env.PLAN98_REALTIME ?
+  {
+    url: plan98.env.PLAN98_REALTIME
+  } :
+  {
+    port: 9208
+  }
+
+const channel = geckos(config) // default port is 9208
 
 channel.onConnect(error => {
   if (error) {

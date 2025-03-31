@@ -2,7 +2,7 @@ import geckos from '@geckos.io/server'
 
 const io = geckos()
 
-io.listen(5674) // default port is 9208
+io.listen(9208) // default port is 9208
 
 const rooms = {};
 const parties = new Map()
