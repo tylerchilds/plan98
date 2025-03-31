@@ -252,6 +252,8 @@ function mergePlayer(index) {
 }
 
 $.draw((target) => {
+  const { partyId } = target.dataset
+
   if(!target.innerHTML) {
     target.innerHTML = `
       <div class="pause-menu"></div>
@@ -300,11 +302,17 @@ $.draw((target) => {
           ${offset=== 0 ? label : offset}
         `)
       } else {
-        return `
-          <div class="slot-ready">
-            Scan and join
+        if(tile.querySelector('qr-code')) return
+        const url = plan98.env.PLAN98_PEER
+          ?`http://${plan98.env.PLAN98_PEER}`
+          :`${window.location.origin}`
+        diffHTML.innerHTML(tile, `
+          <div class="no-player-yet" data-slot="${slot}">
+            <div class="join-code" data-slot="${slot}">
+              <qr-code data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true"></qr-code>
+            </div>
           </div>
-        `
+        `)
       }
     })
   })
@@ -351,5 +359,44 @@ $.style(`
   & .tile {
     height: 100%;
     overflow: hidden;
+  }
+
+  & .no-player-yet {
+    overflow: hidden;
+    height: 100%;
+    display: grid;
+    place-content: center;
+    padding: 1rem;
+  }
+
+  & .join-code {
+    overflow: hidden;
+    height: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
+    border: 0;
+    background: white;
+    aspect-ratio: 1;
+    margin: auto;
+  }
+
+  & qr-code {
+    margin: auto;
+    max-width: 320px;
+  }
+  & .join-code[data-slot="0"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--green, mediumseagreen);
+  }
+
+  & .join-code[data-slot="1"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--red, firebrick);
+  }
+
+  & .join-code[data-slot="2"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
+  }
+
+  & .join-code[data-slot="3"] {
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--yellow, gold);
   }
 `)

@@ -108,38 +108,7 @@ function mount(target) {
     gameLoop.call(target)
   }
 
-  /*
-  const record = gun.get($.link).get(target.id)
-
-  record.once((data) => {
-    if (!data) {
-      record.put(emptyConsole);
-    }
-  });
-
-  record.open((data) => {
-    $.teach({[target.id]: data})
-  });
-
-  */
   $.teach({ booting: false })
-}
-
-function get(id) {
-  return $.learn()[id] || emptyConsole
-}
-
-function defaultMerge(node, data, key) {
-  node.get(key).put(data[key])
-}
-
-function set(id, data, merge = defaultMerge) {
-  const record = gun.get($.link).get(id)
-  Object
-    .keys(data)
-    .forEach(key => {
-      merge(record, data, key)
-    })
 }
 
 $.draw((target) => {
@@ -164,29 +133,10 @@ $.draw((target) => {
   return `
     <div class="viewport">
       <div class="game">
-        <${rom}></${rom}>
-      </div>
-      <div class="lower-hud">
-        <div class="hud-area" data-slot="0"></div>
-        <div class="hud-area" data-slot="1"></div>
-        <div class="hud-area" data-slot="2"></div>
-        <div class="hud-area" data-slot="3"></div>
+        <${rom} data-party-id="${target.id}"></${rom}>
       </div>
     </div>
   `
-}, {
-  afterUpdate(target) {
-    {
-      if(target.querySelector('.lower-hud')) {
-        const { slots } = $.learn()
-        return slots.map(renderHud.bind(target)).join('')
-      }
-    }
-
-    {
-
-    }
-  }
 })
 
 function renderController(slot) {
@@ -238,25 +188,6 @@ function renderController(slot) {
     </div>
 
   `
-}
-
-function renderHud(slot) {
-  const player = $.learn()[slot]
-
-  if(this[slot] !== player) {
-    this[slot] = player
-    const hudArea = this.querySelector(`.hud-area[data-slot="${slot}"]`)
-    if(!player) {
-      const url = `${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/couch-coop?id=${this.id}&slot=${slot}&controller=true`
-      hudArea.innerHTML = `
-        <button class="show-qr" data-slot="${slot}" data-url="${url}">
-          <qr-code data-bg="transparent" no-link="true" src="${url}" ></qr-code>
-        </button>
-      `
-    } else {
-      hudArea.innerHTML = ''
-    }
-  }
 }
 
 $.when('contextmenu', (event) => {
@@ -414,8 +345,6 @@ function gameLoop(time) {
   requestAnimationFrame(gameLoop.bind(this))
 }
 
-
-
 $.style(`
   & {
     display: block;
@@ -440,47 +369,6 @@ $.style(`
 
   & .game {
     height: 100%;
-  }
-
-  & .lower-hud {
-    height: 15%;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 10;
-  }
-
-  & .hud-area {
-    text-align: center;
-    overflow: hidden;
-    height: 100%;
-  }
-
-  & .show-qr {
-    overflow: hidden;
-    height: 100%;
-    padding: 4px;
-    border: 0;
-    background: white;
-  }
-
-  & .show-qr[data-slot="0"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--green, mediumseagreen);
-  }
-
-  & .show-qr[data-slot="1"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--red, firebrick);
-  }
-
-  & .show-qr[data-slot="2"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
-  }
-
-  & .show-qr[data-slot="3"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--yellow, gold);
   }
 
   & boot {
@@ -508,11 +396,6 @@ $.style(`
     gap: 2rem;
     padding: 40px;
     text-align: center;
-  }
-
-  & qr-code {
-    margin: 0 auto;
-    max-width: 100%;
   }
 
   & .controller {
