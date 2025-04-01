@@ -688,25 +688,7 @@ function renderMode() {
   if(mode === modes.pause) {
     const { pause, pauseIndex, pauseKey } = $.learn()
 
-    const { list, label } = pause[pauseKey]
-
-    const items = list.map((item, i) => {
-      const { label, mode, url } = item
-      return `
-        <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${pauseIndex === i ? 'active':''}">
-          ${label}
-        </button>
-      `
-    }).join('')
-
-    return `
-      <div class="pause-menu">
-        <div class="pause-label">${label}</div>
-        <div class="pause-list">
-          ${items}
-        </div>
-      </div>
-    `
+    return renderPauseMenu(pause, pauseIndex, pauseKey)
   }
 
   if(mode === modes.app) {
@@ -726,6 +708,28 @@ function renderMode() {
       </div>
     `
   }
+}
+
+export function renderPauseMenu(menu, pauseIndex, pauseKey) {
+  const { list, label } = menu[pauseKey]
+
+  const items = list.map((item, i) => {
+    const { label, mode, url } = item
+    return `
+      <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${pauseIndex === i ? 'active':''}">
+        ${label}
+      </button>
+    `
+  }).join('')
+
+  return `
+    <div class="pause-menu">
+      <div class="pause-label">${label}</div>
+      <div class="pause-list">
+        ${items}
+      </div>
+    </div>
+  `
 }
 
 function renderTutorial() {

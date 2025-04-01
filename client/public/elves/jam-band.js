@@ -2,8 +2,7 @@ import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
-import { renderSystemMenu } from './home-entertainment.js'
-import { systemMenu } from './paper-pocket.js'
+import { systemMenu, renderPauseMenu } from './paper-pocket.js'
 
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
@@ -85,11 +84,13 @@ const newPlayer = {
 }
 
 const $ = elf('jam-band', {
-  systemPane: Object.keys(systemMenu)[0],
+  pauseKey: Object.keys(systemMenu)[0],
+  pauseIndex: 0,
   mode: romModes.play,
   tiles: [0,1,2,3],
   players: {
   },
+  pauseMenu: systemMenu,
   settings: {
     instrument: {
       label: 'Instrument',
@@ -148,6 +149,71 @@ function settingsChange(settingsKey, slot, nextValue) {
   }
 }
 
+function processPause(frameInputs) {
+  frameInputs.forEach((data, slot) => {
+    if(data) {
+      const { id, gamepad } = data
+
+      toggleSpam('start', gamepad.start, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+
+      toggleSpam('select', gamepad.select, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+
+      toggleSpam('up', gamepad.up, () => {
+        const { pauseKey, pauseMenu, pauseIndex } = $.learn()
+        const { list } = pauseMenu[pauseKey]
+        const index = mod((pauseIndex - 1), list.length)
+        $.teach({
+          pauseIndex: index,
+        })
+      })
+
+      toggleSpam('down', gamepad.down, () => {
+        const { pauseKey, pauseMenu, pauseIndex } = $.learn()
+        const { list } = pauseMenu[pauseKey]
+        const index = mod((pauseIndex + 1), list.length)
+        $.teach({
+          pauseIndex: index,
+        })
+      })
+
+      toggleSpam('left', gamepad.left, () => {
+        const { pauseKey, pauseMenu } = $.learn()
+        const keys = Object.keys(pauseMenu)
+        const index = mod((keys.indexOf(pauseKey) - 1), keys.length)
+        $.teach({
+          pauseIndex: 0,
+          pauseKey: keys[index]
+        })
+      })
+
+      toggleSpam('right', gamepad.right, () => {
+        const { pauseKey, pauseMenu } = $.learn()
+        const keys = Object.keys(pauseMenu)
+        const index = mod((keys.indexOf(pauseKey) + 1), keys.length)
+        $.teach({
+          pauseIndex: 0,
+          pauseKey: keys[index]
+        })
+      })
+
+      toggleSpam('b', gamepad.b, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+    }
+  })
+}
+
+
 function processSettings(players, slot, gamepad) {
   const { settings } = $.learn()
 
@@ -160,10 +226,8 @@ function processSettings(players, slot, gamepad) {
   const data = {}
 
   toggleSpam(slot + 'start', gamepad.start, () => {
-    const { mode } = $.learn()
-    const newMode = mode === romModes.play ? romModes.pause : romModes.play
     $.teach({
-      mode: newMode
+      mode: romModes.pause
     })
   })
 
@@ -225,7 +289,13 @@ function processSettings(players, slot, gamepad) {
 
   toggleSpam(slot+'b', gamepad.b, () => {
     $.teach({
-      mode: romModes.pause
+      mode: romModes.play
+    })
+  })
+
+  toggleSpam(slot+'a', gamepad.b, () => {
+    $.teach({
+      mode: romModes.play
     })
   })
 
@@ -236,9 +306,9 @@ function processSettings(players, slot, gamepad) {
 
 const rpcHandlers = {
   inputFrame(frameInputs) {
-    const { players, romMode } = $.learn()
+    const { players, tiles, mode } = $.learn()
 
-    if(romMode === romModes.pause) {
+    if(mode === romModes.pause) {
       const heldNotes = [...new Set(tiles.flatMap(slot => {
        const {
           activeNotes,
@@ -248,7 +318,7 @@ const rpcHandlers = {
       }))]
 
       console.log(heldNotes)
-      processPause(players, slot, gamepad)
+      processPause(frameInputs)
       return
     }
 
@@ -442,12 +512,12 @@ $.draw((target) => {
       target.dataset.mode = mode
     }
 
-    const pauseMenu = target.querySelector('.pause-menu')
+    const pauseMenuNode = target.querySelector('.pause-menu')
     if(mode === romModes.pause) {
-      diffHTML.innerHTML(pauseMenu, renderPause())
+      diffHTML.innerHTML(pauseMenuNode, renderPause())
       return
     } else {
-      diffHTML.innerHTML(pauseMenu, '')
+      diffHTML.innerHTML(pauseMenuNode, '')
     }
 
     tiles.map((slot) => {
@@ -565,11 +635,11 @@ $.draw((target) => {
 })
 
 function renderPause() {
-  const { systemPane } = $.learn()
+  const { pauseMenu, pauseIndex, pauseKey } = $.learn()
   return `
     <div class="pause-overlay">
       <div class="pause-menu">
-        ${renderSystemMenu(systemPane)}
+        ${renderPauseMenu(pauseMenu, pauseIndex, pauseKey)}
       </div>
     </div>
   `
@@ -620,8 +690,6 @@ $.style(`
     font-weight: light;
     font-size: 2rem;
   }
-
-
 
   &[data-mode="${romModes.pause}"] .pause-menu {
     display: block;
