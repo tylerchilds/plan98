@@ -5,6 +5,13 @@ import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
 import geckos from '@geckos.io/client'
 
+const controllerVariations = [
+  'elegant',
+  'classic',
+  'super',
+  'professional'
+]
+
 let slotIndex
 let rom
 
@@ -37,7 +44,6 @@ const $ = elf('couch-coop', {
   2: null,
   3: null
 })
-
 
 const config = plan98.env.PLAN98_REALTIME ?
   {
@@ -97,7 +103,7 @@ function mount(target) {
       joinParty(target.id, 'host')
 
       channel.on('gamepadUpdate', ({ gamepad, slot, id }) => {
-        $.teach({ [slot]: { id, gamepad } })
+        $.teach({ id, gamepad }, mergeSlot(slot))
       })
 
       channel.on('error', (error) => {
@@ -111,9 +117,23 @@ function mount(target) {
   $.teach({ booting: false })
 }
 
+function mergeSlot(slot) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [slot]: {
+        ...state[slot],
+        ...payload
+      }
+    }
+  }
+}
+
+
 $.draw((target) => {
   mount(target)
   const { slot, booting } = $.learn()
+  const variation = target.getAttribute('variation') || 'super'
   rom = target.getAttribute('rom') || 'multiplayer-template'
 
   if(booting) {
@@ -125,23 +145,24 @@ $.draw((target) => {
   }
 
   if(slot) {
-    if(target.querySelector('.controller')) return
-    return renderController(slot)
+    const controller = target.querySelector('.controller')
+    if(controller) return
+    return renderController(slot, variation)
   }
 
   if(target.querySelector('.viewport')) return
   return `
     <div class="viewport">
       <div class="game">
-        <${rom} data-party-id="${target.id}"></${rom}>
+        <${rom} data-party-id="${target.id}" data-variation="${variation}"></${rom}>
       </div>
     </div>
   `
 })
 
-function renderController(slot) {
+function renderController(slot, variation) {
   return `
-    <div class="controller" data-slot="${slot}">
+    <div class="controller" data-slot="${slot}" data-variation="${variation}">
       <div class="gamepad-top">
         <button key="a" class="clear" data-slot="${slot}" data-press="select">
           <sl-icon name="gear-wide-connected"></sl-icon>
@@ -480,7 +501,7 @@ $.style(`
     width: 45px;
     height: 45px;
     padding: 0;
-    display: grid;
+    display: none;
     place-content: center;
     font-size: 24px;
     border: none;
@@ -494,6 +515,28 @@ $.style(`
   & .controller button:hover,
   & .controller button:focus {
     opacity: 1;
+  }
+
+  & .controller button[data-press="up"],
+  & .controller button[data-press="left"],
+  & .controller button[data-press="right"],
+  & .controller button[data-press="down"],
+  & .controller[data-variation="professional"] button[data-press="rt"],
+  & .controller[data-variation="professional"] button[data-press="rb"],
+  & .controller[data-variation="professional"] button[data-press="lb"],
+  & .controller[data-variation="professional"] button[data-press="lt"],
+  & .controller[data-variation="professional"] button[data-press="y"],
+  & .controller[data-variation="professional"] button[data-press="x"],
+  & .controller[data-variation="professional"] button[data-press="b"],
+  & .controller[data-variation="professional"] button[data-press="a"],
+  & .controller[data-variation="super"] button[data-press="y"],
+  & .controller[data-variation="super"] button[data-press="x"],
+  & .controller[data-variation="super"] button[data-press="b"],
+  & .controller[data-variation="super"] button[data-press="a"],
+  & .controller[data-variation="classic"] button[data-press="b"],
+  & .controller[data-variation="classic"] button[data-press="a"],
+  & .controller[data-variation="elegant"] button[data-press="a"]{
+    display: grid;
   }
 
   & .controller button[data-press="a"] {
