@@ -83,7 +83,7 @@ function renderApplications(systemPane) {
   ` : `Select pane...`
 }
 
-function renderSystemMenu(systemPane) {
+export function renderSystemMenu(systemPane) {
   return `
     <div class="system">
       <div class="groups">

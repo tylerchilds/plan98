@@ -417,11 +417,11 @@ $.style(`
   }
 
   & .controller[data-slot="2"] {
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--blue, dodgerblue);
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--yellow, gold);
   }
 
   & .controller[data-slot="3"] {
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--yellow, gold);
+    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,1)), var(--blue, dodgerblue);
   }
 
   @media (min-width: 480px) {

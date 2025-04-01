@@ -19,7 +19,6 @@ $.draw(target => {
         <div class="portal" style="--fg: ${fg}; --bg: ${bg}">
           ${image}
         </div>
-
       `
       : `
       <a href="${code}" target="_top" class="portal" style="--fg: ${fg}; --bg: ${bg}">
