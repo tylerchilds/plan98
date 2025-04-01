@@ -6,6 +6,8 @@ const $ = elf('about-sillyz')
 $.draw((target) => {
   return marked(`# About Educational Technology
 
+<plan98-boxart></plan98-boxart>
+
 Computers are mysterious, complex creatures. Were they always though? Are they stuck that way forever?
 
 From talking to parents and kids about what they love about computers, there's a reason why we can't quit them and the answer is a silly little three letter word.

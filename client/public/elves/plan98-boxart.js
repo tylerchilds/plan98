@@ -9,20 +9,31 @@ import elf from '@silly/elf'
 </p>
 */
 
-const $ = elf('plan98-boxart', { started: false })
+const $ = elf('plan98-boxart')
 
 $.draw((target) => {
-  const title = target.getAttribute('title') || 'Sillyz'
+  const title = target.getAttribute('title') || 'Sillyz.'
   const subtitle = target.getAttribute('subtitle') || 'COMPUTER'
 
-  if($.learn().started) {
-    return `
-      <paper-pocket rom="paper-nautiloids"></paper-pocket>
-    `
-  }
-
   return `
-    <div style="display: grid; height: 100%;">
+    <div style="display: grid; height: 100%; position: relative;">
+      <footer>
+        <div>
+          <a href="/app/about-sillyz">About</a>
+        </div>
+        <form>
+          <label for="cheat-code">
+            Code
+          </label>
+          <span class="cheat-prefix">
+            #
+          </span>
+          <input name="cheat-code" type="text" />
+          <button type="submit">
+            Enter
+          </button>
+        </form>
+      </footer>
       <div name="square">
         <section class="layout">
           <div class="horizon"></div>
@@ -52,32 +63,35 @@ $.draw((target) => {
                 <hypertext-variable id="vt1" monospace="0" slant="-15" casual="1" cursive="1" weight="800">
                   ${title}
                 </hypertext-variable>
-                <hypertext-variable id="vt3" monospace="1" slant="0" casual="0" cursive="0">
+                <hypertext-variable id="vt3" weight="800" monospace="1" slant="0" casual="0" cursive="0">
                   ${subtitle}
                 </hypertext-variable>
               </div>
-              <button class="cta" data-tutorial>
-                Start
-              </button>
+              <div class="game-modes">
+                <button class="cta spinning-border" data-solo>
+                  <span>Solo</span>
+                </button>
+                <button class="cta light spinning-border" data-coop>
+                  <span>Coop</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   `
-}, {
-  afterUpdate: (target) => {
-    if($.learn().started) {
-      target.dataset.started = 'true'
-    }
-  }
 })
 
-$.when('click', '[data-tutorial]', start)
+$.when('click', '[data-solo]', solo)
+$.when('click', '[data-coop]', coop)
 
-function start(event) {
-  window.location.href = '/app/paper-pocket?rom=paper-nautiloids'
-  //$.teach({ started: true })
+function solo(event) {
+  window.location.href = '/app/paper-pocket'
+}
+
+function coop(event) {
+  window.location.href = '/app/couch-coop'
 }
 
 $.style(`
@@ -95,18 +109,95 @@ $.style(`
     position: absolute;
     inset: 0;
   }
+
+  & .game-modes {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+  }
+
+  & .spinning-border {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black background */
+    backdrop-filter: blur(8px); /* Blur effect for what's behind */
+    -webkit-backdrop-filter: blur(8px); /* For Safari */
+    border-radius: 10px; /* Optional: rounded corners */
+    overflow: hidden; /* Important: ensures content stays within bounds */
+  }
+
+  /* This pseudo-element creates the fixed container for our border */
+  & .spinning-border::before {
+    content: "";
+    position: absolute;
+    inset: 0; /* Shorthand for top, right, bottom, left = 0 */
+    border-radius: inherit;
+    padding: 3px; /* Border width */
+    background-clip: content-box;
+    mask: linear-gradient(#fff 0 0) content-box, 
+          linear-gradient(#fff 0 0);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, 
+                  linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    -webkit-mask-composite: xor;
+    pointer-events: none;
+  }
+
+  /* This creates the rotating gradient that will be masked to just show at the border */
+  & .spinning-border::after {
+    content: "";
+    position: absolute;
+    inset: -50%; /* Make it much larger to ensure full coverage during rotation */
+    background: conic-gradient(
+      var(--green, mediumseagreen),
+      var(--red, firebrick),
+      var(--blue, dodgerblue),
+      var(--yellow, gold),
+      var(--green, mediumseagreen)
+    );
+    animation: spin 10000ms linear infinite;
+    z-index: -1; /* Place it behind the content */
+    pointer-events: none;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  & .cta * {
+    pointer-events: none;
+  }
   & .cta {
     box-shadow: var(--shadow);
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--wheel-2-4, dodgerblue);
+    background: linear-gradient(335deg, rgba(0,0,0,.75), rgba(0,0,0,.55));
     color: white;
     border: none;
-    padding: 1rem;
     border-radius: .5rem;
     gap: .5rem;
     display: inline-grid;
     place-items: center;
     font-weight: bold;
+    padding: 4px;
   }
+
+  & .cta span {
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.5));
+    border-radius: .5rem;
+    font-size: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  & .cta.light span {
+    background: linear-gradient(rgba(255,255,255,.75), rgba(255,255,255,.5));
+    color: rgba(0,0,0,.85);
+    border-radius: .5rem;
+  }
+
+
 
   & .cta .nonce {
     height: 2rem;
@@ -114,7 +205,6 @@ $.style(`
 
   & .cta:hover,
   & .cta:focus {
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--wheel-2-4, dodgerblue);
   }
 
   & .reset {
@@ -208,14 +298,14 @@ $.style(`
 
  & .skybox.active .a {
    animation: pulse ease-in-out 5000ms alternate infinite;
-   background: var(--wheel-5-5);
+   background: linear-gradient(rgba(255,255,255,.45), rgba(0,0,0,.65)), lemonchiffon;
    transform-origin: top;
    transform: rotateX(-60deg) translate(0, 0);
  }
 
  & .skybox.active .b {
    animation: pulse ease-in-out 5000ms alternate infinite;
-   background: var(--wheel-5-4);
+   background: lemonchiffon;
    box-shadow: 0 0 10px 1px rgba(0,0,0,.25) inset;
    transform-origin: right;
    transform: rotateY(-60deg) translate(0, 0);
@@ -223,24 +313,30 @@ $.style(`
 
  & .skybox.active .c {
    animation: pulse ease-in-out 5000ms alternate infinite;
-   background: var(--wheel-5-3);
+   background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.25)), lemonchiffon;
    transform-origin: bottom;
    transform: rotateX(60deg) translate(0, 0);
  }
 
  & .skybox.active .d {
    animation: pulse ease-in-out 5000ms alternate infinite;
-   background: var(--wheel-5-4);
+   background: lemonchiffon;
    box-shadow: 0 0 10px 1px rgba(0,0,0,.25) inset;
    transform-origin: left;
    transform: rotateY(60deg) translate(0, 0);
  }
 
  & .skybox.active .e {
-   animation: e-scale-out-in ease-in-out 5000ms alternate 1, pulse ease-in-out 5000ms alternate infinite;
+   animation: 
+    e-scale-out-in ease-in-out 5000ms alternate 1,
+    pulse ease-in-out 5000ms alternate infinite;
    background: transparent;
    transform: translateZ(-100vmin) scale(1);
    opacity: 1;
+ }
+
+ & .skybox.active sticky-note {
+    animation: &-spin ease-in-out 5000ms alternate infinite;
  }
 
  & .f {
@@ -268,6 +364,15 @@ $.style(`
    100% {
      opacity: 1;
      transform: translateZ(-100vmin) scale(1);
+   }
+ }
+
+ @keyframes &-spin {
+   0% {
+    transform: rotate(-360deg) scale(1);
+   }
+   100% {
+    transform: rotate(360deg) scale(.1);
    }
  }
 
@@ -384,34 +489,6 @@ $.style(`
    z-index: 1;
  }
 
- & .grid-3d {
-   background:
-     linear-gradient(
-     transparent 0%,
-     var(--wheel-0-3) 3%,
-     transparent 6%
-     ),
-   linear-gradient(90deg,
-     transparent 0%,
-     var(--wheel-0-3) 3%,
-     transparent 6%
-     );
-   background-size: 100px 100px;
-   transform: rotateX(60deg);
-   transform-origin: top;
-   width: 100vw;
-   height: 100vh;
-   animation: background3d-walk 5000ms infinite linear;
- }
-
- @keyframes background3d-walk {
-   0% {
-     background-position-y: 0px;
-   }
-   100% {
-     background-position-y: 100px;
-   }
- }
  & #surfer-avatar {
    border: none;
    width: 100%;
@@ -432,7 +509,7 @@ $.style(`
    opacity: 0;
    animation: fade-in 500ms 500ms ease-in forwards, fly-in 1000ms 500ms ease-out forwards;
    color: white;
-   text-shadow: 2px 2px black;
+   text-shadow: 3px 3px black, -1px -1px rgba(0,0,0,.25);
    width: 100%;
 }
 
@@ -461,9 +538,9 @@ $.style(`
   display: block;
   font-size: clamp(1rem, 300%, 10vmin);
   letter-spacing: .25em;
-  font-size: 1.5rem;
+  font-size: 3rem;
   line-height: 1.5;
-  margin: 1rem 0;
+  margin: 0 0 1rem 0;
 }
 
 
@@ -519,5 +596,77 @@ $.style(`
     border-radius: 100%;
   }
 
+
+  & footer {
+    padding: .5rem;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    position: absolute;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .5rem;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    align-items: center;
+  }
+
+  & footer form {
+    display: flex;
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+  }
+
+  & footer a:link,
+  & footer a:visited {
+    text-decoration: none;
+    padding: 4px .5rem;
+    border: 1px solid lemonchiffon;
+    border-radius: 4px;
+    color: lemonchiffon;
+    line-height: 2rem;
+    display: block;
+  }
+
+  & footer a:hover,
+  & footer a:focus {
+    background: lemonchiffon;
+    color: dodgerblue;
+  }
+
+  & footer form label {
+    padding-right: .5rem;
+    color: lemonchiffon;
+    white-space: nowrap;
+  }
+
+  & .cheat-prefix {
+    padding: 4px;
+    border: 1px solid lemonchiffon;
+    border-radius: 4px 0 0 4px;
+    color: lemonchiffon;
+    line-height: 2rem;
+  }
+
+  & [name="cheat-code"] {
+    padding: 4px;
+    border: 1px solid lemonchiffon;
+    color: lemonchiffon;
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    line-height: 2rem;
+    max-width: 100%;
+    width: 100%;
+  }
+
+  & form [type="submit"] {
+    border: 1px solid lemonchiffon;
+    padding: 4px;
+    border-radius: 0 4px 4px 0;
+    background: transparent;
+    color: lemonchiffon;
+    line-height: 2rem;
+  }
 `)
 

@@ -9,6 +9,7 @@ const $ = elf('qr-code')
 $.draw(target => {
   const codes = $.learn()
   const code = target.getAttribute('src') || target.getAttribute('text')
+  const _target = target.getAttribute('target') || "_top"
   const noLink = target.getAttribute('no-link') === 'true'
   const image = codes[code]
   const { fg='black', bg='white' } = target.dataset
@@ -21,7 +22,7 @@ $.draw(target => {
         </div>
       `
       : `
-      <a href="${code}" target="_top" class="portal" style="--fg: ${fg}; --bg: ${bg}">
+      <a href="${code}" target="${_target}" class="portal" style="--fg: ${fg}; --bg: ${bg}">
         ${image}
       </a>
     ` : ''

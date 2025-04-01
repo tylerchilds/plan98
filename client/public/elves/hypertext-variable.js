@@ -47,10 +47,12 @@ $.draw((target) => {
 });
 
 async function mount(target, values) {
-  values.map(x => {
-    $.teach({
-      [x]: target.getAttribute(x) || defaults[x]
-    }, merge(target.id))
+  requestIdleCallback(() => {
+    values.map(x => {
+      $.teach({
+        [x]: target.getAttribute(x) || defaults[x]
+      }, merge(target.id))
+    })
   })
 }
 

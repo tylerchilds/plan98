@@ -53,7 +53,7 @@ function mod(x, n) {
 }
 
 const circle = [
-  { label: 'F', midi: 43 },
+  { label: 'F', midi: 53 },
   { label: 'C', midi: 48 },
   { label: 'G', midi: 55 },
   { label: 'D', midi: 50 },
@@ -485,11 +485,11 @@ const rpcHandlers = {
         }
 
         if(gamepad.lt === 1) {
-          notes.push(root + 24)
+          notes.push(root + 5)
         }
 
         if(gamepad.rt === 1) {
-          notes.push(root - 24)
+          notes.push(root - 5)
         }
 
         const finishedNotes = activeNotes.filter(x => {
@@ -659,7 +659,7 @@ $.draw((target) => {
         diffHTML.innerHTML(tile, `
           <div class="no-player-yet" data-slot="${slot}">
             <div class="join-code" data-slot="${slot}">
-              <qr-code data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=${variation}"></qr-code>
+              <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=${variation}"></qr-code>
             </div>
           </div>
         `)

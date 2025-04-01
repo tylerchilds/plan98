@@ -145,7 +145,7 @@ function mergePlayer(index) {
 }
 
 $.draw((target) => {
-  const { partyId } = target.dataset
+  const { partyId, variation } = target.dataset
 
   if(!target.innerHTML) {
     target.innerHTML = `
@@ -175,7 +175,7 @@ $.draw((target) => {
         diffHTML.innerHTML(tile, `
           <div class="no-player-yet" data-slot="${slot}">
             <div class="join-code" data-slot="${slot}">
-              <qr-code data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true"></qr-code>
+              <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=${variation}"></qr-code>
             </div>
           </div>
         `)

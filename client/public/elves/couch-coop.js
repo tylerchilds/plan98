@@ -9,7 +9,7 @@ const controllerVariations = [
   'elegant',
   'classic',
   'super',
-  'professional'
+  'pro'
 ]
 
 let slotIndex
@@ -134,7 +134,7 @@ $.draw((target) => {
   mount(target)
   const { slot, booting } = $.learn()
   const variation = target.getAttribute('variation') || 'super'
-  rom = target.getAttribute('rom') || 'multiplayer-template'
+  rom = target.getAttribute('rom') || 'jam-band'
 
   if(booting) {
     return `
@@ -521,14 +521,14 @@ $.style(`
   & .controller button[data-press="left"],
   & .controller button[data-press="right"],
   & .controller button[data-press="down"],
-  & .controller[data-variation="professional"] button[data-press="rt"],
-  & .controller[data-variation="professional"] button[data-press="rb"],
-  & .controller[data-variation="professional"] button[data-press="lb"],
-  & .controller[data-variation="professional"] button[data-press="lt"],
-  & .controller[data-variation="professional"] button[data-press="y"],
-  & .controller[data-variation="professional"] button[data-press="x"],
-  & .controller[data-variation="professional"] button[data-press="b"],
-  & .controller[data-variation="professional"] button[data-press="a"],
+  & .controller[data-variation="pro"] button[data-press="rt"],
+  & .controller[data-variation="pro"] button[data-press="rb"],
+  & .controller[data-variation="pro"] button[data-press="lb"],
+  & .controller[data-variation="pro"] button[data-press="lt"],
+  & .controller[data-variation="pro"] button[data-press="y"],
+  & .controller[data-variation="pro"] button[data-press="x"],
+  & .controller[data-variation="pro"] button[data-press="b"],
+  & .controller[data-variation="pro"] button[data-press="a"],
   & .controller[data-variation="super"] button[data-press="y"],
   & .controller[data-variation="super"] button[data-press="x"],
   & .controller[data-variation="super"] button[data-press="b"],
