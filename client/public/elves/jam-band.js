@@ -495,7 +495,7 @@ $.draw((target) => {
 
   if(!target.innerHTML) {
     target.innerHTML = `
-      <div class="pause-menu"></div>
+      <div class="pause-container"></div>
       <div class="split-screen">
         <div class="tile" data-slot="0"></div>
         <div class="tile" data-slot="1"></div>
@@ -512,12 +512,12 @@ $.draw((target) => {
       target.dataset.mode = mode
     }
 
-    const pauseMenuNode = target.querySelector('.pause-menu')
+    const pauseContainer = target.querySelector('.pause-container')
     if(mode === romModes.pause) {
-      diffHTML.innerHTML(pauseMenuNode, renderPause())
+      diffHTML.innerHTML(pauseContainer, renderPause())
       return
     } else {
-      diffHTML.innerHTML(pauseMenuNode, '')
+      diffHTML.innerHTML(pauseContainer, '')
     }
 
     tiles.map((slot) => {
@@ -538,35 +538,33 @@ $.draw((target) => {
           : noteLabels[mod(offsetNoteIndex, noteLabels.length)]
 
         diffHTML.innerHTML(tile, settingsOpen ? `
-          <div class="settings-menu" data-slot="${slot}">
-            <div class="menu-list">
-              ${
-                Object.keys(settings).map((key, i) => {
-                  const setting = settings[key]
-                  return `
-                    <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
-                      <div class="setting-label">
-                        ${setting.label}
-                      </div>
-                      <div class="setting-description">
-                        ${setting.description}
-                      </div>
-                      <div class="options-list">
-                        <div class="setting-options">
-                          ${setting.options.map((x) => {
-                            return `
-                              <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
-                                ${x}
-                              </button>
-                            `
-                          }).join('')}
-                        </div>
+          <div class="menu-list">
+            ${
+              Object.keys(settings).map((key, i) => {
+                const setting = settings[key]
+                return `
+                  <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
+                    <div class="setting-label">
+                      ${setting.label}
+                    </div>
+                    <div class="setting-description">
+                      ${setting.description}
+                    </div>
+                    <div class="options-list">
+                      <div class="setting-options">
+                        ${setting.options.map((x) => {
+                          return `
+                            <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
+                              ${x}
+                            </button>
+                          `
+                        }).join('')}
                       </div>
                     </div>
-                  `
-                }).join('')
-              }
-            </div>
+                  </div>
+                `
+              }).join('')
+            }
           </div>
         `: `
           <div class="player-hud">
@@ -597,50 +595,56 @@ $.draw((target) => {
         `)
       }
     })
+
+    afterUpdate(target)
   })
-}, {
-  afterUpdate(target) {
-    {
-      const { settingsKey } = $.learn()
+})
 
-      if(target.settingsKey !== settingsKey) {
-        target.settingsKey = settingsKey
-        const active = target.querySelector('.setting.focused')
+function afterUpdate(target) {
+  {
+    const { tiles, players } = $.learn()
+    tiles.forEach(slot => {
+      const player = players[slot] || newPlayer
+      const { settingsKey, settingsOpen } = player
+      if(!settingsOpen) return
 
-        if(active) {
-          active.scrollIntoView()
+      {
+        const column = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused .option.selected`)
+        if(column && target[slot + 'column'] !== player[settingsKey]) {
+          target[slot + 'column'] = player[settingsKey]
+          column.scrollIntoView({
+            inline: "center"    // Scrolls only in the inline direction
+          });
         }
       }
-    }
-
-    {
-      const active = target.querySelector('.setting.focused .option.selected')
-      if(active) {
-        active.scrollIntoView({
-          block: "nearest",  // Keeps the vertical position as close as possible
-          inline: "center"    // Scrolls only in the inline direction
-        });
+      {
+         const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
+        if(row && target[slot + 'row'] !== settingsKey) {
+          target[slot + 'row'] = settingsKey
+          row.scrollIntoView({
+            block: "start"
+          })
+        }
       }
-    }
+    })
+  }
 
-    {
-      const active = target.querySelector('.application-list.active')
+  {
+    const { mode } = $.learn()
+    if(mode === romModes.pause) {
+      const active = target.querySelector('.menu-link.active')
       if(active) {
         active.scrollIntoView()
       }
     }
-
-
   }
-})
+}
 
 function renderPause() {
   const { pauseMenu, pauseIndex, pauseKey } = $.learn()
   return `
     <div class="pause-overlay">
-      <div class="pause-menu">
-        ${renderPauseMenu(pauseMenu, pauseIndex, pauseKey)}
-      </div>
+      ${renderPauseMenu(pauseMenu, pauseIndex, pauseKey)}
     </div>
   `
 }
@@ -661,7 +665,7 @@ $.style(`
     color: white;
   }
 
-  & .pause-menu {
+  & .pause-container {
     position: fixed;
     inset: 0;
     background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
@@ -670,28 +674,7 @@ $.style(`
     z-index: 10;
   }
 
-  & .application-list {
-    height: 100%;
-    overflow: auto;
-    background:
-      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      var(--root-theme, lightgray);
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-
-  & .pane-select {
-    color: rgba(255,255,255,1);
-    background: linear-gradient(335deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme);
-    padding: 4px 8px;
-    margin-bottom: 8px;
-    font-weight: light;
-    font-size: 2rem;
-  }
-
-  &[data-mode="${romModes.pause}"] .pause-menu {
+  &[data-mode="${romModes.pause}"] .pause-container {
     display: block;
   }
   & .split-screen {
@@ -808,5 +791,143 @@ $.style(`
   & .join-code[data-slot="3"] {
     background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
   }
+
+
+  & .pause-menu {
+    height: 100%;
+    overflow: auto;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  & .pause-label {
+    color: rgba(255,255,255,1);
+    background: linear-gradient(335deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme);
+    padding: 4px 8px;
+    margin-bottom: 8px;
+    font-weight: light;
+    font-size: 2rem;
+  }
+
+  & .menu-list {
+    height: 100%;
+    overflow: auto;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+  }
+
+  & .options-list {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  & .setting {
+    display: block;
+    padding: 4px 8px;
+    border: none;
+    background: rgba(0,0,0,.15);
+    color: white;
+    display: inline-block;
+    gap: 1rem;
+    max-width: 100%;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  & .setting:not(.focused) > * {
+    pointer-events: none;
+  }
+
+  & .setting.focused .message-body {
+    font-weight: bold;
+  }
+
+  & .setting-label {
+    color: rgba(255,255,255,.85);
+    font-weight: bold;
+  }
+
+  & .setting-description {
+    color: rgba(255,255,255,.65);
+  }
+
+  & .setting.focused .setting-label {
+    color: rgba(0,0,0,.85);
+    font-weight: bold;
+  }
+
+  & .setting.focused .setting-description {
+    color: rgba(0,0,0,.65);
+  }
+
+  & .setting-options {
+    display: flex;
+    gap: 4px;
+    padding: 8px 0;
+  }
+
+  & .setting-options .option:not(.selected) {
+    display: none;
+  }
+
+  & .setting.focused {
+    color: black;
+    background: white;
+  }
+
+  & .setting.focused .option {
+    display: block;
+  }
+
+  & .option.selected {
+    display: block;
+  }
+
+  & .option {
+    border: none;
+    border-radius: 2px;
+    white-space: nowrap;
+    padding: 4px 8px;
+  }
+
+  & .option.selected {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, black);
+    color: white;
+  }
+
+  & .pause-list {
+    overflow-y: visible;
+  }
+
+  & .menu-link {
+    color: white;
+    display: block;
+    text-decoration: none;
+    padding: 4px 8px;
+    line-height: 1;
+    text-align: left;
+    background: transparent;
+    border: none;
+    font-weight: 600;
+    opacity: .65;
+  }
+
+  & .menu-link.active {
+    color: white;
+    transform: scale(1.2);
+    transform-origin: left center;
+    font-weight: bold;
+    opacity: 1;
+    border-left: 2px solid var(--root-theme);
+  }
+
 
 `)
