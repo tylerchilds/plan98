@@ -364,8 +364,6 @@ $.style(`
   & .no-player-yet {
     overflow: hidden;
     height: 100%;
-    display: grid;
-    place-items: center;
     padding: 1rem;
   }
 
@@ -377,13 +375,13 @@ $.style(`
     border: 0;
     background: white;
     width: 100%;
-    display: grid;
-    margin: auto;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
   }
 
   & qr-code {
     margin: auto;
-    max-width: 320px;
   }
   & .join-code[data-slot="0"] {
     background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--green, mediumseagreen);
@@ -394,10 +392,10 @@ $.style(`
   }
 
   & .join-code[data-slot="2"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--yellow, gold);
   }
 
   & .join-code[data-slot="3"] {
-    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--yellow, gold);
+    background: linear-gradient(335deg, rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--blue, dodgerblue);
   }
 `)

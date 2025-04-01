@@ -128,9 +128,13 @@ $.draw((target) => {
     `
   }
 
-  return src ? `
-    <iframe src="${src}" title="${src}"></iframe>
-  ` : `
+  if(src) {
+    return `
+      <iframe src="${src}" title="${src}"></iframe>
+    `
+  }
+
+  target.innerHTML = `
     <div class="zero-state">
       <qr-code no-link="true" data-fg="saddlebrown" data-bg="lemonchiffon" src="${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/home-entertainment?id=${target.id}&controller=true" ></qr-code>
       <span>

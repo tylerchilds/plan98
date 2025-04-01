@@ -59,7 +59,7 @@ $.style(`
     margin: auto;
   }
   & .portal {
-    display: grid;
+    display: flex;
     height: 100%;
     width: 100%;
     place-items: center;
