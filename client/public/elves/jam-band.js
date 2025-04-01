@@ -4,6 +4,8 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { systemMenu, renderPauseMenu } from './paper-pocket.js'
 
+const defaultSystemUrl = '/app/home-entertainment'
+
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
@@ -42,7 +44,8 @@ function loadInstrument(slot, instrument) {
 
 const romModes = {
   pause: 'pause',
-  play: 'play'
+  play: 'play',
+  system: 'system'
 }
 
 function mod(x, n) {
@@ -88,6 +91,7 @@ const $ = elf('jam-band', {
   pauseIndex: 0,
   mode: romModes.play,
   tiles: [0,1,2,3],
+  systemUrl: defaultSystemUrl,
   players: {
   },
   pauseMenu: systemMenu,
@@ -149,10 +153,43 @@ function settingsChange(settingsKey, slot, nextValue) {
   }
 }
 
+function processSystem(frameInputs) {
+  frameInputs.forEach((data, slot) => {
+    if(data) {
+      const { id, gamepad } = data
+      toggleSpam('os', gamepad.os, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+
+      toggleSpam('start', gamepad.start, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+
+      toggleSpam('select', gamepad.select, () => {
+        $.teach({
+          mode: romModes.play
+        })
+      })
+    }
+  })
+}
+
+
 function processPause(frameInputs) {
   frameInputs.forEach((data, slot) => {
     if(data) {
       const { id, gamepad } = data
+
+      toggleSpam('os', gamepad.os, () => {
+        $.teach({
+          mode: romModes.system,
+          systemUrl: defaultSystemUrl
+        })
+      })
 
       toggleSpam('start', gamepad.start, () => {
         $.teach({
@@ -225,7 +262,14 @@ function processSettings(players, slot, gamepad) {
 
   const data = {}
 
-  toggleSpam(slot + 'start', gamepad.start, () => {
+  toggleSpam('os', gamepad.os, () => {
+    $.teach({
+      mode: romModes.system,
+      systemUrl: defaultSystemUrl
+    })
+  })
+
+  toggleSpam('start', gamepad.start, () => {
     $.teach({
       mode: romModes.pause
     })
@@ -304,20 +348,31 @@ function processSettings(players, slot, gamepad) {
   }, mergePlayer(slot))
 }
 
+function releaseAll() {
+  const { tiles, players } = $.learn()
+  const heldNotes = [...new Set(tiles.flatMap(slot => {
+   const {
+      activeNotes,
+    } = players[slot] || newPlayer
+
+    return activeNotes
+  }))]
+
+  console.log(heldNotes)
+}
+
 const rpcHandlers = {
   inputFrame(frameInputs) {
-    const { players, tiles, mode } = $.learn()
+    const { players, mode } = $.learn()
+
+    if(mode === romModes.system) {
+      releaseAll()
+      processSystem(frameInputs)
+      return
+    }
 
     if(mode === romModes.pause) {
-      const heldNotes = [...new Set(tiles.flatMap(slot => {
-       const {
-          activeNotes,
-        } = players[slot] || newPlayer
-
-        return activeNotes
-      }))]
-
-      console.log(heldNotes)
+      releaseAll()
       processPause(frameInputs)
       return
     }
@@ -352,7 +407,7 @@ const rpcHandlers = {
         const root = midi + frequencyOffset
         const notes = []
 
-        toggleSpam(slot + 'start', gamepad.start, () => {
+        toggleSpam('start', gamepad.start, () => {
           const { mode } = $.learn()
           const newMode = mode === romModes.play ? romModes.pause : romModes.play
           $.teach({
@@ -361,7 +416,10 @@ const rpcHandlers = {
         })
 
         toggleSpam('os', gamepad.os, () => {
-          console.log('control the os')
+          $.teach({
+            mode: romModes.system,
+            systemUrl: defaultSystemUrl
+          })
         })
 
         toggleSpam(slot + 'select', gamepad.select, () => {
@@ -415,23 +473,23 @@ const rpcHandlers = {
         }
 
         if(gamepad.y === 1) {
-          notes.push(root - 24)
+          notes.push(root + 2)
         }
 
         if(gamepad.lb === 1) {
-          notes.push(root + 24)
-        }
-
-        if(gamepad.rb === 1) {
           notes.push(root + 7)
         }
 
-        if(gamepad.lt === 1) {
+        if(gamepad.rb === 1) {
           notes.push(root - 7)
         }
 
+        if(gamepad.lt === 1) {
+          notes.push(root + 24)
+        }
+
         if(gamepad.rt === 1) {
-          notes.push(root + 2)
+          notes.push(root - 24)
         }
 
         const finishedNotes = activeNotes.filter(x => {
@@ -495,6 +553,7 @@ $.draw((target) => {
 
   if(!target.innerHTML) {
     target.innerHTML = `
+      <div class="system-container"></div>
       <div class="pause-container"></div>
       <div class="split-screen">
         <div class="tile" data-slot="0"></div>
@@ -503,7 +562,6 @@ $.draw((target) => {
         <div class="tile" data-slot="3"></div>
       </div>
     `
-
   }
   requestAnimationFrame(() => {
     const { mode, tiles, players, settings } = $.learn()
@@ -511,6 +569,18 @@ $.draw((target) => {
     if(target.dataset.mode !== mode) {
       target.dataset.mode = mode
     }
+
+    const systemContainer = target.querySelector('.system-container')
+    if(mode === romModes.system) {
+      const { systemUrl } = $.learn()
+      diffHTML.innerHTML(systemContainer, `
+        <iframe src="${systemUrl}"></iframe>
+      `)
+      return
+    } else {
+      diffHTML.innerHTML(systemContainer, '')
+    }
+
 
     const pauseContainer = target.querySelector('.pause-container')
     if(mode === romModes.pause) {
@@ -649,6 +719,21 @@ function renderPause() {
   `
 }
 
+$.when('click', '.menu-link', (event) => {
+  const { href, index } = event.target.dataset
+
+  const pauseIndex = parseInt(index)
+
+  if(href) {
+    $.teach({
+      pauseIndex,
+      mode: romModes.system,
+      systemUrl: href
+    })
+    return
+  }
+})
+
 $.when('json-rpc', (event) => {
   const { method, params } = event.detail
 
@@ -677,6 +762,20 @@ $.style(`
   &[data-mode="${romModes.pause}"] .pause-container {
     display: block;
   }
+
+  & .system-container {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
+    backdrop-filter: blur(10px);
+    display: none;
+    z-index: 100;
+  }
+
+  &[data-mode="${romModes.system}"] .system-container {
+    display: block;
+  }
+
   & .split-screen {
     height: 100%;
     opacity: 1;

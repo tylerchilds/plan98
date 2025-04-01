@@ -103,11 +103,37 @@ function selectPane(event) {
 }
 
 function selectApp(event) {
+  const { localMode } = $.learn()
   const { url } = event.target.dataset
   const root = event.target.closest($.link)
+
+  if(localMode) {
+    $.teach({ controller: false })
+    sessionStorage.setItem('lastState', JSON.stringify({ clearSrc: true }));
+    self.history.pushState({ clearSrc: true }, "");
+  }
+
   set(root.id, { src: url })
 }
 
+addEventListener("popstate", async (event) => {
+  if(event.state) {
+    const { clearSrc } = event.state
+    if(clearSrc) {
+      $.teach({ src: null, controller: true })
+    }
+  } else {
+    const { clearSrc } = JSON.parse(sessionStorage.getItem('lastState') || '{}');
+    if(clearSrc) {
+      $.teach({ src: null, controller: true })
+    }
+  }
+});
+
+
+$.when('click', '[data-controller]', () => {
+  $.teach({ controller: true, localMode: true })
+})
 $.when('click', '.pane-select', selectPane)
 $.when('click', '.app-select', selectApp)
 
@@ -129,17 +155,21 @@ $.draw((target) => {
   }
 
   if(src) {
-    return `
-      <iframe src="${src}" title="${src}"></iframe>
-    `
+    if(target.src !== src) {
+      target.src = src
+      target.innerHTML = `
+        <iframe src="${src}" title="${src}"></iframe>
+      `
+    }
+    return
   }
 
   target.innerHTML = `
     <div class="zero-state">
       <qr-code no-link="true" data-fg="saddlebrown" data-bg="lemonchiffon" src="${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/home-entertainment?id=${target.id}&controller=true" ></qr-code>
       <span>
-        Scan the QR code to surf from another device, otherwise play the
-        <a href="/app/paper-pocket">Paper Pocket</a>
+        Scan the QR code to surf from another device, otherwise
+        <button data-controller>Click to Control</button>
       </span>
     </div>
   `

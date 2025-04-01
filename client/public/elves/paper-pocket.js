@@ -17,10 +17,12 @@ export const systemMenu = {
   favorites: {
     label: "Favorites",
     list: [
+      /*
       {
         label: 'Tutorial',
         mode: modes.tutorial
       },
+      */
       {
         label: 'Typo Hero',
         url: '/app/paper-pocket?rom=typo-hero'
