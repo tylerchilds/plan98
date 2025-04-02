@@ -4,82 +4,67 @@ import { marked } from 'marked'
 const $ = elf('about-sillyz')
 
 $.draw((target) => {
-  return marked(`# About Educational Technology
+  return marked(`# About
+
+The full system is available in below or [Back on the Homepage](/)
+
+By selecting "Solo", you will load the "Paper Pocket" console.
+By selecting "Coop", you will load the "Couch Coop" set-top box.
+
+If you do nothing, after 15 seconds, the system will enter "Kiosk" mode.
+
+To cancel the kiosk timer, click the timer in the top right or start to enter a cheat code in the bottom right.
+
+At any time, press the Esc key to view the source code of the current experience.
 
 <plan98-boxart></plan98-boxart>
 
-Computers are mysterious, complex creatures. Were they always though? Are they stuck that way forever?
+## Paper Pocket
 
-From talking to parents and kids about what they love about computers, there's a reason why we can't quit them and the answer is a silly little three letter word.
+The Paper Pocket console is a portable entertainment unit that both is a piece of paper and fits inside a piece of paper.
 
-**Fun.**
+### Controls 
 
-I'm Ty and my first computer was a Sega Genesis that I used to play Sonic the Hedgehog in the 90s. After that, I knew I was going to make video games one day.
+To toggle the on screen controls, press the "Paper Pocket" button in the top right OR the OS key on your keyboard or gamepad.
 
-In 2006, I learned how to create games while I was a senior in high school using Macromedia (Adobe) Flash, which was fun for a brief while until the games no longer ran on anything due to how terribly insecure the entire flash platform was-- which is why Steve Jobs never let it run on the iPhone.
+The OS key is the one unique to the manufacturer, e.g. Windows (windows key), Apple (command), Xbox (logo), PlayStation (logo), Nintendo (home).
 
-After that, I began writing JavaScript, which carried me from my humble shoreline roots of Cape Cod, Massachusetts to Silicon Valley, where I worked at Netflix from 2018 to 2022.
+### Settings
 
-August of 2022, I set out to build a game engine that was easy to teach, ran on systems that cost under $100, could fit in your pocket, delivered live music performances, and could serve as my personal computing device to create Silicon Valley grade solutions.
+To change system settings click settings or press the control (ctrl) key on your keyboard. The options/select/back/minus button may be used on a gamepad to trigger this menu.
 
-That took longer than I thought, but along the way an honest clown was made of me as the greatest role I've undertaken, the NPC, "Ty from Sillyz.Computer".
+Settings are automatically updated as they're changed. Up/Down will page through the settings and Left/Right will page through the options for those settings.
 
-## What about the fun part?
+### Start
 
-Right. Right. In my research studies the most fruitful discussions came from these topics:
+To open the start menu to run a different application, click Start or press the alt/option key on your keyboard. The options/select/back/minus button may be used on a gamepad to trigger this menu.
 
-* What was your first computer?
-* What do you love about computers?
-* What do you hate about computers?
-* What do you spend the most time doing with your computer?
-* Have you tried programming? If so, what finally clicked?
+Left/Right will navigate between menus and Up/Down will navigate the items in that menu. Pressing A (or J on a keyboard) will launch that item.
 
-I'll spare the gory details, but all the answers were highly subjective and generational.
+## Couch Coop
 
-The earlier generations said they learned to program using Basic on an Apple device or a Commodore 64.
+Couch Coop by default will load in Host mode, where the current device is controlled by up to four auxiliary devices, by scanning the code or sending them the links to the code.
 
-The middle generation learned with Java, JavaScript, or Python on either the Windows PCs or Macs.
+After scanning one of the codes a controller will load that is linked to that tile of the screen. Experiences themselves can define controller variations using the 'variation' variable, with one of the following keys:
 
-The youngest generation has mostly learned Scratch, primarily on phones or tablets.
+* elegant: A single A button
+* classic: A and B only
+* super: A, B, X, Y
+* pro: A, B, X, Y, LB, RB, LT, RT
 
-The trendline has primarily driven towards more restrictive environments, typically for ease of access on mobile devices, which are generally more locked down, limiting the creative possibilities.
+If you're familiar with the Paper Pocket, the menu controls are the same, except the Settings and Start buttons have been reduced to icons, Gear and Accesibility Person, respectively.
 
-To that end, it is quite amazing what kids are able to accomplish using Scratch on a tablet-- the insecure games I used to write in Flash are now completely secure in Scratch and there's an entire underground of kids creating and sharing games.
+By pressing the OS key (the 3x3 icon in the top middle), the Host will toggle a Kiosk. This can be controlled from within the kiosk itself or an auxillary device by scanning the code.
 
-However, the biggest question I fieled from kids and parents alike was, "How do we build products, like Netflix, using Scratch?" And the sad answer is simply, "You can't."
+## Kiosk Mode
 
-This became a critical pillar of Sillyz.Computer-- What is smallest API that I can design to create actual products, allowing kids to break free from the dead end platforms they've been relegated to?
+Tbd
 
-My sister is 18 years younger than me, a senior in high school at the time of this writing, January 2025. Throughout her life, I've taught her computer things to varying degrees of success.
+## Programming
 
-My biggest failure was in not being able to create a toy that my sister found more fascinating than Roblox. Kids have paid for their college tuition or bought their first car by creating inside the Roblox platform and getting paid in Robux.
+Sillyz.Computer is designed from the ground-up to be entierely remixable. You can either learn the fundamentals and also build from scratch, modify the existing components, or mash them up into your own creations.
 
-## No really, what about the fun part?
-
-Right! Right... While in the current form, Sillyz.Computer is more like digital lego blocks, each discrete demonstration compounds on previous demonstrations to be able to build any digital, or physical application.
-
-While running on Sillyz.Computer proper, you won't be able to make changes to the source code, but you can read it. You may run the code locally on your computer or boot it directly onto a device-- I personally am writing write now on a [frame.work](https://frame.work).
-
-* My home entertainment console is the [GPD Win 4](https://www.gpd.hk/gpdwin4).
-* My favorite demo device is the [Raspberry Pi 500](https://www.raspberrypi.com/products/raspberry-pi-500/).
-* My favorite magic trick is pulling the [Raspberry Pi 5 Compute Module](https://www.raspberrypi.com/products/compute-module-5/) from my signature sticky notes.
-* For just toying around with prototypes, I enjoy the [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
-* When I'm trying to get serious work done, I boot [an expensive Apple MacBook, but running Sillyz.Computer](https://asahilinux.org/)
-* To get cross-platform native applications, I compile out from [Tauri.App](https://tauri.app/)
-
-As you can see, while I might be a Jester, my technology is no joke. If you're reading this right, this platform is the most cross platform system ever devised and I nailed all the original success criteria.
-
-1. a game engine that was easy to teach
-2. ran on systems that cost under $100
-3. could fit in your pocket
-4. delivered live music performances
-5. could serve as my personal computing device to create Silicon Valley grade solutions.
-
-## Getting Started
-
-There is no linear path to learning Sillyz.Computer, however, below is an attempt.
-
-### Hello World
+### Examples
 
 The default first program written in any language is called, "Hello World".
 

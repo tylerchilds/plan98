@@ -517,6 +517,12 @@ $.style(`
     opacity: 1;
   }
 
+  & .controller button[data-press="os"],
+  & .controller button[data-press="select"],
+  & .controller button[data-press="start"] {
+    display: grid;
+  }
+
   & .controller button[data-press="up"],
   & .controller button[data-press="left"],
   & .controller button[data-press="right"],

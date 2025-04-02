@@ -1,12 +1,19 @@
 import geckos from '@geckos.io/server'
+import http from 'http'
+import express from 'express'
+//import {http_server as braidify} from 'braid-http'
 
-const io = geckos()
-
-io.listen(9208) // default port is 9208
-
+const shortCodes = {};
 const rooms = {};
 const parties = new Map()
 const nicknames = {};
+
+const app = express()
+const server = http.createServer(app)
+const io = geckos()
+
+//app.use(braidify)
+io.addServer(server)
 
 io.onConnection(channel => {
   let currentRoom = null;
@@ -154,3 +161,7 @@ io.onConnection(channel => {
     }
   });
 });
+
+// make sure the client uses the same port
+// @geckos.io/client uses the port 9208 by default
+server.listen(9208)

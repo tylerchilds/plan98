@@ -52,7 +52,7 @@
     "reverse-translate": "ssh -N -R 3005:localhost:3005 translate.$USER.me",
 
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
-    "reverse-multiplayer": "ssh -N -R 5675:localhost:5675 multiplayer.$USER.me",
+    "reverse-multiplayer": "ssh -N -R 9208:localhost:9208 multiplayer.$USER.me",
 
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
