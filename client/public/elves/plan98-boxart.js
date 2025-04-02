@@ -55,7 +55,7 @@ $.draw((target) => {
           <button class="cheat-prefix">
             <div class="nonce"></div>
           </button>
-          <input name="cheat-code" placeholder="geckos-chat" type="text" />
+          <input name="cheat-code" placeholder="cool-chat" type="text" />
           <button type="submit">
             Go
           </button>
