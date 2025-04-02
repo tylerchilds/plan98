@@ -352,7 +352,7 @@ function mount(target) {
             <sl-icon name="camera-reels"></sl-icon>
           </button>
           <button data-goto="${window.location.href}" data-tooltip="share">
-            <sl-icon name="box-arrow-right-up"></sl-icon>
+            <sl-icon name="box-arrow-up-right"></sl-icon>
           </button>
           <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
             <sl-icon name="bug"></sl-icon>

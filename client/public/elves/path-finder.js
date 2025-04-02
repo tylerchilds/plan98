@@ -130,7 +130,7 @@ origin.draw(target => {
     </h2>
     ${classification === 'Bard' ? `<music-walk></music-walk>` : ''}
     <div class="navigation">
-      <a href="${self.location.href}">
+      <a href="${self.location.href}" target="_top">
         Permalink
       </a>
       <a href="/app/my-journal">
@@ -163,7 +163,7 @@ origin.draw(target => {
         </select>
       </label>
     </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
         Ethics
         ${ethics.map(value => {
@@ -181,17 +181,6 @@ origin.draw(target => {
           return `
             <label class="field">
               <input type="radio" name="morals" data-option="${value}" />
-              <span class="label">${value}</span>
-            </label>
-          `
-        }).join('')}
-      </div>
-      <div>
-        Sexes
-        ${sexes.map(value => {
-          return `
-            <label class="field">
-              <input type="checkbox" name="sexes" data-option="${value}" />
               <span class="label">${value}</span>
             </label>
           `

@@ -281,7 +281,7 @@ $.when('click', '[data-calculate]', (event) => {
   })
 
 $.when('click', '[data-create]', (event) => {
-  const src = event.target.getAttribute('src') || `/app/just-me`
+  const src = event.target.getAttribute('src') || `/app/path-finder?src=/private/${$.link}/${self.crypto.randomUUID()}`
 
   event.target.closest($.link).outerHTML = `<iframe src="${src}"></iframe>`
   self.history.pushState({ type: `${$.link}-navigation`, href: window.location.href }, "");

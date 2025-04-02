@@ -166,9 +166,12 @@ $.draw((target) => {
 
   target.innerHTML = `
     <div class="zero-state">
+      <span>
+        Scan to surf from another device
+      </span>
       <qr-code no-link="true" data-fg="saddlebrown" data-bg="lemonchiffon" src="${plan98.env.PLAN98_PEER?`http://${plan98.env.PLAN98_PEER}`:window.location.origin}/app/home-entertainment?id=${target.id}&controller=true" ></qr-code>
       <span>
-        Scan the QR code to surf from another device, otherwise
+        Otherwise
         <button data-controller>Click to Control</button>
       </span>
     </div>

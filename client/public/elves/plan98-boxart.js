@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { toast } from './plan98-toast.js'
 
 /*
  <blockquote>
@@ -11,9 +12,38 @@ import elf from '@silly/elf'
 
 const $ = elf('plan98-boxart')
 
+function countdown(target) {
+  if(target.countdown) return
+  target.countdown = true
+
+  $.teach({ timer: 15 })
+  requestIdleCallback(readyCountdown)
+}
+
+function readyCountdown() {
+  const { timer } = $.learn()
+
+  const nextTime = timer - 1
+
+  if(nextTime < 0) {
+    self.location.href = '/app/home-entertainment'
+    return
+  }
+
+  setTimeout(() => {
+    const { diffused } = $.learn()
+    if(diffused) return
+    $.teach({ timer: nextTime })
+    readyCountdown()
+  }, 1000)
+}
+
 $.draw((target) => {
+  countdown(target)
   const title = target.getAttribute('title') || 'Sillyz.'
   const subtitle = target.getAttribute('subtitle') || 'COMPUTER'
+
+  if(target.innerHTML) return
 
   return `
     <div style="display: grid; height: 100%; position: relative;">
@@ -21,16 +51,13 @@ $.draw((target) => {
         <div>
           <a href="/app/about-sillyz">About</a>
         </div>
-        <form>
-          <label for="cheat-code">
-            Code
-          </label>
-          <span class="cheat-prefix">
-            #
-          </span>
-          <input name="cheat-code" type="text" />
+        <form name="enter-cheat">
+          <button class="cheat-prefix">
+            <div class="nonce"></div>
+          </button>
+          <input name="cheat-code" placeholder="home-entertainment" type="text" />
           <button type="submit">
-            Enter
+            Go
           </button>
         </form>
       </footer>
@@ -76,22 +103,62 @@ $.draw((target) => {
                 </button>
               </div>
             </div>
+            <button data-diffuse></button>
           </div>
         </div>
       </div>
     </div>
   `
+}, {
+  afterUpdate(target) {
+    {
+      const { timer, diffused } = $.learn()
+      const bomb = target.querySelector('[data-diffuse]')
+      
+      if(bomb && diffused) {
+        bomb.remove()
+      } else if(bomb) {
+        bomb.innerText = timer
+      }
+    }
+  }
 })
 
+$.when('submit', '[name="enter-cheat"]', async (event) => {
+  event.preventDefault()
+  const cheatCode = event.target['cheat-code'].value
+  const [elf] = cheatCode.split('?')
+  const url = `/public/elves/${elf}.js`
+  const exists = (await fetch(url, { method: 'HEAD' })).ok
+  if(!exists) {
+    toast('Not Found', { type: 'error' })
+    return
+  }
+
+  self.location.href = '/app/' + cheatCode
+
+})
+
+$.when('focus', '[name="cheat-code"]', () => {
+  $.teach({ diffused: true })
+})
+$.when('click', '[data-diffuse]', diffuse)
 $.when('click', '[data-solo]', solo)
 $.when('click', '[data-coop]', coop)
+$.when('click', '.cheat-prefix', () => {
+  self.location.href = "/app/sillyz-computer"
+})
+
+function diffuse(event) {
+  $.teach({ diffused: true })
+}
 
 function solo(event) {
-  window.location.href = '/app/paper-pocket'
+  self.location.href = '/app/paper-pocket'
 }
 
 function coop(event) {
-  window.location.href = '/app/couch-coop'
+  self.location.href = '/app/couch-coop'
 }
 
 $.style(`
@@ -538,7 +605,6 @@ $.style(`
   display: block;
   font-size: clamp(1rem, 300%, 10vmin);
   letter-spacing: .25em;
-  font-size: 3rem;
   line-height: 1.5;
   margin: 0 0 1rem 0;
 }
@@ -604,7 +670,7 @@ $.style(`
     position: absolute;
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: .5rem;
+    gap: 1rem;
     bottom: 0;
     left: 0;
     right: 0;
@@ -616,57 +682,96 @@ $.style(`
     display: flex;
     grid-template-columns: auto auto 1fr auto;
     align-items: center;
+    justify-content: end;
   }
 
   & footer a:link,
   & footer a:visited {
     text-decoration: none;
-    padding: 4px .5rem;
+    padding: 0 1rem;
     border: 1px solid lemonchiffon;
+    background: lemonchiffon;
+    color: dodgerblue;
     border-radius: 4px;
-    color: lemonchiffon;
     line-height: 2rem;
     display: block;
+    font-weight: bold;
   }
 
   & footer a:hover,
   & footer a:focus {
-    background: lemonchiffon;
-    color: dodgerblue;
+    color: lemonchiffon;
+    background: dodgerblue;
   }
 
   & footer form label {
-    padding-right: .5rem;
     color: lemonchiffon;
     white-space: nowrap;
   }
 
   & .cheat-prefix {
-    padding: 4px;
     border: 1px solid lemonchiffon;
     border-radius: 4px 0 0 4px;
     color: lemonchiffon;
-    line-height: 2rem;
+    line-height: 0;
+    border-right: none;
+    padding: 0;
+    background: transparent;
+  }
+
+  & .cheat-prefix .nonce {
+    width: 2rem;
+    height: 2rem;
   }
 
   & [name="cheat-code"] {
-    padding: 4px;
+    padding: 0 4px;
     border: 1px solid lemonchiffon;
     color: lemonchiffon;
+    border-left: none;
     background: transparent;
     color: rgba(255,255,255,.85);
     line-height: 2rem;
-    max-width: 100%;
+    max-width: 280px;
     width: 100%;
   }
 
   & form [type="submit"] {
     border: 1px solid lemonchiffon;
-    padding: 4px;
+    padding: 0 4px;
     border-radius: 0 4px 4px 0;
-    background: transparent;
-    color: lemonchiffon;
+    background: lemonchiffon;
+    color: dodgerblue;
     line-height: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  & form [type="submit"]:hover,
+  & form [type="submit"]:focus {
+    color: lemonchiffon;
+    background: dodgerblue;
+  }
+
+  & [data-diffuse] {
+    position: absolute;
+    top: .75%;
+    right: .75%;
+    display: grid;
+    place-items: center;
+    width: 20vmin;
+    height: 20vmin;
+    border-radius: 100%;
+    font-size: 5vmin;
+    background: rgba(0,0,0,.5);
+    color: rgba(255,255,255,.65);
+    border: none;
+  }
+
+  & [data-diffuse]:hover,
+  & [data-diffuse]:focus {
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
   }
 `)
 

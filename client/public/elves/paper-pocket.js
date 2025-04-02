@@ -28,6 +28,14 @@ export const systemMenu = {
         url: '/app/paper-pocket?rom=typo-hero'
       },
       {
+        label: 'Jam Band',
+        url: '/app/couch-coop?rom=jam-band&variation=pro'
+      },
+      {
+        label: 'Rookie Mistakes',
+        url: '/app/couch-coop?rom=jam-band&variation=elegant'
+      },
+      {
         label: 'Camera Desktop',
         url: '/app/camera-desktop'
       },

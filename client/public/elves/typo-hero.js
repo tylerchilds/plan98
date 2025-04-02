@@ -432,7 +432,7 @@ $.draw((target) => {
             <br/>
             ${message}
             <div class="timer-overlay">
-              ${summaryCount > 0 ? summaryCount : 'Go'}
+              ${summaryCount > 0 ? summaryCount : ''}
             </div>
           </div>
         </div>
@@ -641,6 +641,7 @@ $.style(`
   
   & .summary-notes {
     padding: 0 .5rem 3px;
+    word-break: break-all;
   }
 
   & .summary-label {
@@ -1153,7 +1154,7 @@ function select(event) {
         message: '',
         mode: modes.ready,
         lines,
-        readyCount: 4,
+        readyCount: 3,
         currentLine: lines[0],
         correct: 0,
         attempts: 0,
