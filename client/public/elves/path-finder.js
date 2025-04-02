@@ -133,14 +133,8 @@ origin.draw(target => {
       <a href="${self.location.href}" target="_top">
         Permalink
       </a>
-      <a href="/app/my-journal">
-        Journal
-      </a>
-      <a href="/app/hyper-script">
-        Hyper Script
-      </a>
       <a href="/app/bulletin-board?src=${target.getAttribute('src') || ''}">
-        Launch
+        Campaign Board
       </a>
     </div>
     <div class="character">

@@ -24,6 +24,10 @@ export const systemMenu = {
       },
       */
       {
+        label: 'Geckos Chat',
+        url: '/app/geckos-chat'
+      },
+      {
         label: 'Typo Hero',
         url: '/app/paper-pocket?rom=typo-hero'
       },
@@ -35,11 +39,6 @@ export const systemMenu = {
         label: 'Rookie Mistakes',
         url: '/app/couch-coop?rom=jam-band&variation=elegant'
       },
-      {
-        label: 'Camera Desktop',
-        url: '/app/camera-desktop'
-      },
-
       {
         label: 'Paper Nautiloids',
         url: '/app/paper-pocket?rom=paper-nautiloids'
@@ -129,6 +128,10 @@ export const systemMenu = {
   code: {
     label: "Coding",
     list: [
+      {
+        label: 'Camera Desktop',
+        url: '/app/camera-desktop'
+      },
       {
         label: 'Irix Launcher',
         url: '/app/irix-launcher'

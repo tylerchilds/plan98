@@ -251,7 +251,7 @@ $.when('click', '[data-voice]', (event) => {
 })
 
 $.when('click', '[data-camera]', (event) => {
-  window.location.href = '/app/pocket-dexterity'
+  window.location.href = '/app/camera-desktop'
 })
 
 $.when('click', '[data-video]', (event) => {

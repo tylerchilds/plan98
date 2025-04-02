@@ -109,8 +109,9 @@ function selectApp(event) {
 
   if(localMode) {
     $.teach({ controller: false })
-    sessionStorage.setItem('lastState', JSON.stringify({ clearSrc: true }));
-    self.history.pushState({ clearSrc: true }, "");
+    const homeUndo = { controller: true, id: root.id }
+    sessionStorage.setItem('lastState', JSON.stringify({ homeUndo }));
+    self.history.pushState({ homeUndo }, "");
   }
 
   set(root.id, { src: url })
@@ -118,14 +119,16 @@ function selectApp(event) {
 
 addEventListener("popstate", async (event) => {
   if(event.state) {
-    const { clearSrc } = event.state
-    if(clearSrc) {
-      $.teach({ src: null, controller: true })
+    const { homeUndo } = event.state
+    if(homeUndo) {
+      $.teach(homeUndo)
+      set(homeUndo.id, { src: null })
     }
   } else {
-    const { clearSrc } = JSON.parse(sessionStorage.getItem('lastState') || '{}');
-    if(clearSrc) {
-      $.teach({ src: null, controller: true })
+    const { homeUndo } = JSON.parse(sessionStorage.getItem('lastState') || '{}');
+    if(homeUndo) {
+      $.teach(homeUndo)
+      set(homeUndo.id, { src: null })
     }
   }
 });
@@ -177,6 +180,15 @@ $.draw((target) => {
     </div>
   `
 }, {
+  beforeUpdate(target) {
+    {
+      const { src } = get(target.id)
+
+      if(!src && target.src) {
+        target.src = null
+      }
+    }
+  },
   afterUpdate(target) {
     {
       const theme = getTheme()
@@ -322,5 +334,18 @@ $.style(`
     
   }
 
+  & [data-controller] {
+    border: none;
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), dodgerblue;
+    color: white;
+    padding: .5rem 1rem;
+    margin: 0 .5rem;
+    border-radius: 1rem;
+  }
+
+  & [data-controller]:focus,
+  & [data-controller]:hover{
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), dodgerblue;
+  }
 
 `)

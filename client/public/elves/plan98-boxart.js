@@ -55,7 +55,7 @@ $.draw((target) => {
           <button class="cheat-prefix">
             <div class="nonce"></div>
           </button>
-          <input name="cheat-code" placeholder="home-entertainment" type="text" />
+          <input name="cheat-code" placeholder="geckos-chat" type="text" />
           <button type="submit">
             Go
           </button>
@@ -725,10 +725,11 @@ $.style(`
   }
 
   & [name="cheat-code"] {
-    padding: 0 4px;
+    padding: 0 .5rem;
     border: 1px solid lemonchiffon;
     color: lemonchiffon;
     border-left: none;
+    border-radius: 0;
     background: transparent;
     color: rgba(255,255,255,.85);
     line-height: 2rem;
@@ -766,6 +767,7 @@ $.style(`
     background: rgba(0,0,0,.5);
     color: rgba(255,255,255,.65);
     border: none;
+    font-weight: bold;
   }
 
   & [data-diffuse]:hover,
