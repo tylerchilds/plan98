@@ -186,6 +186,11 @@ function mount(target) {
 
         </div>
       </div>
+      <div class="menu-item">
+        <button data-help>
+          Help
+        </button>
+      </div>
     </div>
 
     ${trayViews}
@@ -239,6 +244,9 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
+$.when('click', '[data-help]', function download (event) {
+  window.location.href = "/app/cool-chat"
+})
 
 $.when('click', '[data-new]', function download (event) {
   strokeHistory = []

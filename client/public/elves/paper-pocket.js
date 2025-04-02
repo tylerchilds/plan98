@@ -24,8 +24,8 @@ export const systemMenu = {
       },
       */
       {
-        label: 'Geckos Chat',
-        url: '/app/geckos-chat'
+        label: 'Cool Chat',
+        url: '/app/cool-chat'
       },
       {
         label: 'Typo Hero',
