@@ -436,8 +436,8 @@ $.when('click', '[data-menu]', function updateMode (event) {
 })
 
 $.when('click', '[data-goto]', function navigate (event) {
-  const { href } = event.target.dataset
-  window.top.location.href = href
+  const { goto } = event.target.dataset
+  window.top.location.href = goto
 })
 
 

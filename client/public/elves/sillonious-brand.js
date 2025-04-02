@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <paper-pocket></paper-pocket>
+    <plan98-boxart></plan98-boxart>
   `
 })
 
