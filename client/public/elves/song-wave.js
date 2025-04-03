@@ -24,6 +24,94 @@ loadInstrument(1, defaultInstruments[1])
 loadInstrument(2, defaultInstruments[2])
 loadInstrument(3, defaultInstruments[3])
 
+const attributes = {
+  'STR': 'Strength',
+  'DEX': 'Dexterity',
+  'CON': 'Constitution',
+  'INT': 'Intelligence',
+  'WIS': 'Wisdom',
+  'CHA': 'Charisma',
+}
+
+const ancestries = [
+  'Dwarf',
+  'Elf',
+  'Gnome',
+  'Halfling',
+  'Human',
+  'Leshy',
+  'Orc',
+]
+
+const classes = [
+  'Bard',
+  'Cleric',
+  'Druid',
+  'Fighter',
+  'Ranger',
+  'Rogue',
+  'Witch',
+  'Wizard',
+]
+
+const ethics = ["Lawful", "Neutral", "Chaotic"]
+const morals = ["Good", "Neutral", "Evil"]
+
+const skills = [
+  'Acrobatics',
+  'Arcana',
+  'Athletics',
+  'Crafting',
+  'Deception',
+  'Diplomacy',
+  'Intimidation',
+  'Lore',
+  'Medicine',
+  'Nature',
+  'Occultism',
+  'Performance',
+  'Religion',
+  'Society',
+  'Stealth',
+  'Survival',
+  'Thievery',
+]
+
+const settings = {
+    instrument: {
+      label: 'Instrument',
+      description: 'What honk are you?',
+      options: instruments,
+    },
+    classy: {
+      label: 'Class',
+      description: 'What make are you?',
+      options: classes
+    },
+    ancestry: {
+      label: 'Ancestry',
+      description: 'What model are you?',
+      options: ancestries
+    },
+    ethics: {
+      label: 'Ethicaleathality',
+      description: 'Your ethical intake to enact reality to the degree of which is',
+      options: ethics
+    },
+    moral: {
+      label: 'Moraleousidacery',
+      description: 'Your moral guideline democracy worldview philosophy engine',
+      options: morals
+    },
+    skill: {
+      label: 'Moraleousidacery',
+      description: 'Your moral guideline democracy worldview philosophy engine',
+      options: skills
+    }
+
+  }
+
+
 function loadInstrument(slot, instrument) {
   playerInstruments[slot] = null
   const synth = SampleLibrary.load({
@@ -78,15 +166,23 @@ function circleInfo(slot) {
 }
 
 const newPlayer = {
+  health: 24,
   settingsOpen: false,
   circleIndex: 1,
   frequencyOffset: 0,
   activeNotes: [],
+  classy: 'Bard',
+  skill: 'Crafting',
+  ancestry: 'Human',
+  ethics: 'Neutral',
+  moral: 'Neutral',
   settingsKey: 'instrument',
   enemies: noteLabels.reduce((enemies, label) => {
-    enemies[label] = ['1']
+    // yeileds { 'Cs': [] }
+    enemies[label] = []
     return enemies
   }, {})
+
 }
 
 const pauseMenu = {
@@ -110,14 +206,8 @@ const $ = elf('song-wave', {
   players: {
   },
   pauseMenu,
-  settings: {
-    instrument: {
-      label: 'Instrument',
-      description: 'Selected sound samples',
-      options: instruments,
-    },
-  }
-})
+  settings
+  })
 
 const spamCache = {}
 function debounceSpam(code, timeout, callback) {
@@ -602,7 +692,13 @@ $.draw((target) => {
           settingsOpen,
           circleIndex,
           activeNotes,
-          frequencyOffset
+          frequencyOffset,
+          ancestry,
+          classy,
+          moral,
+          skill,
+          ethics,
+          health
         } = player
         const { label } = circleInfo(circleIndex)
         const offsetNoteIndex = noteLabels.findIndex(x => x === label) + frequencyOffset
@@ -642,17 +738,16 @@ $.draw((target) => {
             </div>
           `)
         } else {
+          console.log(health)
           diffHTML.innerHTML(tile, `
             <div class="player-hud">
-              <div class="midi-notes">
-                ${activeNotes.map(midi => `
-                  ${midi}
-                `).join('')}
-              </div>
-              <div class="theory-label">
-                ${offsetLabel}
+              <div class="health-label">
+                ${[...new Array(health)].map(() => {
+                  return '<span class="health-tick"></span>'
+                }).join('')}
               </div>
               <div class="instrument-label">
+                ${ancestry} ${classy} ${moral} ${ethics} ${skill}
                 ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
               </div>
             </div>
@@ -769,7 +864,7 @@ function renderEnemies(slot, player) {
       <div class="attack-lane ${x.type}" data-key="${x.key}">
         ${enemiesByType.map(x => {
           return `
-            <div class="enemy-sprite"></div>
+            <div class="enemy-sprite" data-slot="${slot}"></div>
           `
         }).join('')}
       </div>
@@ -814,7 +909,27 @@ function renderPause() {
 }
 
 $.when('animationend', '.enemy-sprite', (event) => {
-  console.log('enemy attacked')
+  const { players } = $.learn()
+  const slot = parseInt(event.target.dataset.slot)
+
+  if(players[slot]) {
+    const { health } = players[slot];
+
+    const nextHealth = health - 1
+
+    if(health === 0) {
+      $.teach({
+        dead: true,
+        health: nextHealth
+      }, mergePlayer(slot))
+    } else {
+      $.teach({
+        health: nextHealth
+      }, mergePlayer(slot))
+    }
+    return
+  }
+  console.error('player not found')
 })
 
 $.when('click', '.menu-link', (event) => {
@@ -904,7 +1019,6 @@ $.style(`
     padding: 1rem;
     gap: .5rem;
     max-width: 100%;
-    width: 180px;
     grid-template-columns: 1fr auto;
     z-index: 110;
   }
@@ -915,6 +1029,16 @@ $.style(`
     font-size: 2rem;
     white-space: nowrap;
     line-height: 1;
+  }
+
+  & .health-label {
+    grid-column: -1 / 1;
+    color: rgba(255,255,255,.85)
+  }
+
+  & .health-tick::before {
+    content: '% ';
+    font-weight: bold;
   }
 
   & .instrument-label {

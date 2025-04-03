@@ -56,7 +56,6 @@ const skills = [
 
 const ethics = ["Lawful", "Neutral", "Chaotic"]
 const morals = ["Good", "Neutral", "Evil"]
-const sexes = ["Male", "Female"]
 
 const stock = {
   character: '',
