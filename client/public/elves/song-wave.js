@@ -166,6 +166,7 @@ function circleInfo(slot) {
 }
 
 const newPlayer = {
+  score: 0,
   health: 24,
   settingsOpen: false,
   circleIndex: 1,
@@ -619,8 +620,45 @@ function attackNotes(slot, notes) {
   const instrument = playerInstruments[slot]
   if(instrument && notes.length > 0) {
     notes.forEach(note => {
+      score(slot, note)
       instrument.synth.triggerAttack(Tone.Frequency(note, "midi").toNote());
     })
+  }
+}
+
+function score(slot, note) {
+  const { players } = $.learn()
+
+  if(players[slot] && !players[slot].dead) {
+    const { enemies, score } = players[slot]
+    const noteLabel = noteLabels[mod(note, noteLabels.length)]
+    const alive = Object.keys(enemies[noteLabel])
+
+    if(alive.length > 0) {
+      const newEnemies = remove(alive[0], noteLabel, enemies)
+      $.teach({
+          score: score+1,
+          enemies: newEnemies,
+        },
+        mergePlayer(slot)
+      )
+    }
+  }
+}
+
+function remove(id, noteLabel, enemies) {
+  const stillAlive = Object.keys(enemies[noteLabel])
+    .filter(x => enemies[noteLabel][id].id )
+    .reduce((newGroup, x) => {
+      if(enemies[noteLabel]) {
+        newGroup[x] = enemies[noteLabel]
+      }
+      return newGroup
+    }, {})
+
+  return {
+    ...enemies,
+    [noteLabel]: stillAlive
   }
 }
 
@@ -696,7 +734,9 @@ $.draw((target) => {
           moral,
           skill,
           ethics,
-          health
+          score,
+          health,
+          dead
         } = player
         const { label } = circleInfo(circleIndex)
         const offsetNoteIndex = noteLabels.findIndex(x => x === label) + frequencyOffset
@@ -743,13 +783,18 @@ $.draw((target) => {
                   return '<span class="health-tick"></span>'
                 }).join('')}
               </div>
+              <div class="score-label">
+                ${score}
+              </div>
               <div class="instrument-label">
                 ${ancestry} ${classy} ${moral} ${ethics} ${skill}
                 ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
               </div>
             </div>
-            <div class="camera" data-slot="${slot}">
+            <div class="camera" data-slot="${slot}" ${dead?'[data-dead]':''}>
               ${renderCamera(slot, player, { offsetLabel })}
+              <div class="game-over">
+              </div>
             </div>
           `)
         }
@@ -854,7 +899,7 @@ function renderUFOs() {
 }
 
 const quantizeInterval = "4n"; // Adjust as needed
-Tone.Transport.bpm.value = 30
+Tone.Transport.bpm.value = 90
 
 let latestCallback = null; // Store the most recent callback
 let isScheduled = false; // Prevent duplicate scheduling
@@ -922,9 +967,9 @@ function enemyLoop() {
 requestAnimationFrame(enemyLoop)
 
 function renderEnemies(slot, player) {
-  const { enemies } = player
+  const { enemies } = player || newPlayer
   return pianoKeys.map(x => {
-    const enemiesByType = enemies[x.key]
+    const enemiesByType = enemies[x.key] || {}
     return `
       <div class="attack-lane ${x.type}" data-key="${x.key}">
         ${Object.keys(enemiesByType).map(x => {
@@ -1096,9 +1141,17 @@ $.style(`
   }
 
   & .health-label {
-    grid-column: -1 / 1;
     color: rgba(255,255,255,.85)
   }
+
+  & .score-label {
+    white-space: nowrap;
+    color: rgba(255,255,255,.5);
+    font-weight: bold;
+    font-size: 2erem;
+    line-height: 1;
+  }
+
 
   & .health-tick::before {
     content: '% ';
@@ -1346,6 +1399,14 @@ $.style(`
   & .camera {
     height: 100%;
     width: 100%;
+  }
+
+  & .camera[data-dead] .game-over {
+    display: none;
+  }
+
+  & .camera[data-dead] .game-over {
+    display: block;
   }
 
   & .skybox {
@@ -1619,9 +1680,19 @@ $.style(`
     content: '';
     width: 100%;
     aspect-ratio: 1;
-    border-radius: 100%;
-    background-color: white;
+    background-color: lemonchiffon;
+    animation: &-floppy ease-in-out 1000ms infinite alternate-reverse;
     display: block;
+  }
+
+  @keyframes &-floppy {
+    0% {
+      transform: rotateZ(-360deg);
+    }
+
+    100% {
+      transform: rotateZ(360deg)
+    }
   }
 
   @keyframes &-enemy-slide {
