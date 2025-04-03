@@ -179,7 +179,7 @@ const newPlayer = {
   settingsKey: 'instrument',
   enemies: noteLabels.reduce((enemies, label) => {
     // yeileds { 'Cs': [] }
-    enemies[label] = []
+    enemies[label] = {}
     return enemies
   }, {})
 
@@ -399,7 +399,6 @@ function processSettings(players, slot, gamepad) {
       const nextValue = options[nextIndex]
       settingsChange(settingsKey, slot, nextValue)
 
-      console.log(settingsKey, nextValue)
       data[settingsKey] = nextValue
     })
   }
@@ -415,7 +414,6 @@ function processSettings(players, slot, gamepad) {
       const nextValue = options[nextIndex]
       settingsChange(settingsKey, slot, nextValue)
 
-      console.log(settingsKey, nextValue)
       data[settingsKey] = nextValue
     })
   }
@@ -738,7 +736,6 @@ $.draw((target) => {
             </div>
           `)
         } else {
-          console.log(health)
           diffHTML.innerHTML(tile, `
             <div class="player-hud">
               <div class="health-label">
@@ -856,13 +853,81 @@ function renderUFOs() {
   }).join('')
 }
 
+const quantizeInterval = "4n"; // Adjust as needed
+Tone.Transport.bpm.value = 80
+
+let latestCallback = null; // Store the most recent callback
+let isScheduled = false; // Prevent duplicate scheduling
+
+// Schedule a repeating event that fires on every 16th note
+Tone.Transport.scheduleRepeat((time) => {
+  if (latestCallback) {
+    latestCallback(time); // Execute the most recent user input
+    latestCallback = null; // Reset after execution
+    isScheduled = false; // Allow new inputs
+  }
+}, quantizeInterval);
+
+export function quantize(callback) {
+  if (!isScheduled) {
+    latestCallback = callback; // Store latest callback
+    isScheduled = true; // Prevent multiple triggers per 16n
+  }
+};
+
+function enemyLoop() {
+  quantize(function setEnemies() {
+    console.log('set enemies')
+    const { players, tiles } = $.learn()
+    const nextNote =  noteLabels[Math.floor(Math.random()*noteLabels.length)]
+    const nextKey = pianoKeys.find(x => x.key === nextNote)
+    let nextID
+    try {
+      nextID = self.crypto.randomUUID()
+    } catch(e) {
+      nextID = uuidv4()
+    }
+
+    tiles.map((slot) => {
+      console.log(slot)
+      if(players[slot]) {
+        const player = players[slot]
+        const { enemies } = player || { enemies: []}
+
+        const lastWave = { ...enemies }
+        const nextWave = {
+          ...lastWave,
+          [nextNote]: {
+            ...lastWave[nextNote],
+            [nextID]: {
+              ...nextKey,
+              id: nextID,
+            }
+          }
+        }
+
+
+        $.teach({
+          enemies: nextWave,
+        },
+          mergePlayer(slot)
+        )
+      }
+    })
+  })
+
+  requestAnimationFrame(enemyLoop)
+}
+
+requestAnimationFrame(enemyLoop)
+
 function renderEnemies(slot, player) {
   const { enemies } = player
   return pianoKeys.map(x => {
     const enemiesByType = enemies[x.key]
     return `
       <div class="attack-lane ${x.type}" data-key="${x.key}">
-        ${enemiesByType.map(x => {
+        ${Object.keys(enemiesByType).map(x => {
           return `
             <div class="enemy-sprite" data-slot="${slot}"></div>
           `
@@ -920,7 +985,6 @@ $.when('animationend', '.enemy-sprite', (event) => {
     if(health === 0) {
       $.teach({
         dead: true,
-        health: nextHealth
       }, mergePlayer(slot))
     } else {
       $.teach({
@@ -1570,3 +1634,11 @@ $.style(`
     }
   }
 `)
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
