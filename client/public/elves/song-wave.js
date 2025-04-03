@@ -648,17 +648,22 @@ function score(slot, note) {
 
 function remove(id, noteLabel, enemies) {
   const stillAlive = Object.keys(enemies[noteLabel])
-    .filter(x => enemies[noteLabel][id].id )
+    .filter(x => enemies[noteLabel][x].id === id)
     .reduce((newGroup, x) => {
-      if(enemies[noteLabel]) {
-        newGroup[x] = enemies[noteLabel]
+      if(!newGroup[noteLabel]) {
+        newGroup[noteLabel] = {}
+      }
+      if(enemies[noteLabel][x].key === noteLabel) {
+        newGroup[noteLabel][x] = enemies[noteLabel][x]
       }
       return newGroup
     }, {})
 
+  console.log({ noteLabel, enemies })
+  console.log({ stillAlive })
   return {
     ...enemies,
-    [noteLabel]: stillAlive
+    [noteLabel]: { ... stillAlive }
   }
 }
 
@@ -744,6 +749,8 @@ $.draw((target) => {
           ? label
           : noteLabels[mod(offsetNoteIndex, noteLabels.length)]
 
+        tile.dataset.dead = dead
+
         if(settingsOpen) {
           diffHTML.innerHTML(tile, `
             <div class="menu-list">
@@ -791,9 +798,10 @@ $.draw((target) => {
                 ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
               </div>
             </div>
-            <div class="camera" data-slot="${slot}" ${dead?'[data-dead]':''}>
+            <div class="camera" data-slot="${slot}">
               ${renderCamera(slot, player, { offsetLabel })}
               <div class="game-over">
+                A one-of-a-kind ${ancestry} of ${moral} moral. And the most ${ethics} ${classy}. From your sheer talent on the ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}, to your passion for ${skill}, you will be remembered. Rest in peace. <strong>Final Score: ${score}</strong><br><br>Play Again?
               </div>
             </div>
           `)
@@ -922,7 +930,6 @@ export function quantize(callback) {
 
 function enemyLoop() {
   quantize(function setEnemies() {
-    console.log('set enemies')
     const { players, tiles } = $.learn()
     const nextNote =  noteLabels[Math.floor(Math.random()*noteLabels.length)]
     const nextKey = pianoKeys.find(x => x.key === nextNote)
@@ -934,7 +941,6 @@ function enemyLoop() {
     }
 
     tiles.map((slot) => {
-      console.log(slot)
       if(players[slot]) {
         const player = players[slot]
         const { enemies } = player || { enemies: []}
@@ -1130,6 +1136,10 @@ $.style(`
     max-width: 100%;
     grid-template-columns: 1fr auto;
     z-index: 110;
+  }
+
+  & .tile[data-dead="true"] .player-hud {
+    display: none;
   }
 
   & .theory-label {
@@ -1399,13 +1409,21 @@ $.style(`
   & .camera {
     height: 100%;
     width: 100%;
+    position: relative;
   }
 
-  & .camera[data-dead] .game-over {
+  & .game-over {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
     display: none;
+    background: rgba(0,0,0,.65);
+    padding: 1rem;
   }
 
-  & .camera[data-dead] .game-over {
+  & [data-dead="true"] .game-over {
     display: block;
   }
 
