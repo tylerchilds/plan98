@@ -112,16 +112,6 @@ const $ = elf('song-wave', {
       description: 'Selected sound samples',
       options: instruments,
     },
-    circleKey: {
-      label: 'Key Signature',
-      description: 'Harmonic root',
-      options: noteLabels,
-    },
-    frequencyOffset: {
-      label: 'Frequency Offset',
-      description: 'Steps up or down from root',
-      options: offsetValues,
-    },
   }
 })
 
@@ -149,12 +139,6 @@ function toggleSpam(code, value, callback) {
 const sideEffects = {
   instrument: (value, slot) => {
     loadInstrument(slot, value)
-  },
-  circleKey: (value, slot) => {
-    const circleIndex = circle.findIndex(x => x.label === value)
-    $.teach({
-      circleIndex
-    }, mergePlayer(slot))
   },
 }
 
@@ -1279,6 +1263,7 @@ $.style(`
   & .piano .natural[data-key] {
     background: white;
     border: 1px solid black;
+    padding: 25%;
   }
 
   & .piano .accidental[data-key] {
@@ -1287,6 +1272,7 @@ $.style(`
     width: 50%;
     border: 1px solid black;
     opacity: 1;
+    padding: 10%;
   }
 
   & .attack-lane[data-key="C"] {
