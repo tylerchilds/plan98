@@ -854,7 +854,7 @@ function renderUFOs() {
 }
 
 const quantizeInterval = "4n"; // Adjust as needed
-Tone.Transport.bpm.value = 80
+Tone.Transport.bpm.value = 30
 
 let latestCallback = null; // Store the most recent callback
 let isScheduled = false; // Prevent duplicate scheduling
