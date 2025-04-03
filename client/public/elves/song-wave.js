@@ -83,6 +83,10 @@ const newPlayer = {
   frequencyOffset: 0,
   activeNotes: [],
   settingsKey: 'instrument',
+  enemies: noteLabels.reduce((enemies, label) => {
+    enemies[label] = ['1']
+    return enemies
+  }, {})
 }
 
 const pauseMenu = {
@@ -721,32 +725,10 @@ function renderCamera(slot, player, data) {
     <div class="skybox">
       <div class="floor">
         <div class="ufo-grid">
-          <div class="attack-lane" data-key="C"></div>
-          <div class="attack-lane accidental" data-key="Cs"></div>
-          <div class="attack-lane" data-key="D"></div>
-          <div class="attack-lane accidental" data-key="Eb"></div>
-          <div class="attack-lane" data-key="E"></div>
-          <div class="attack-lane" data-key="F"></div>
-          <div class="attack-lane accidental" data-key="Fs"></div>
-          <div class="attack-lane" data-key="G"></div>
-          <div class="attack-lane accidental" data-key="Ab"></div>
-          <div class="attack-lane" data-key="A"></div>
-          <div class="attack-lane accidental" data-key="Bb"></div>
-          <div class="attack-lane" data-key="B"></div>
+          ${renderUFOs()}
         </div>
         <div class="wave-grid">
-          <div class="attack-lane" data-key="C"></div>
-          <div class="attack-lane accidental" data-key="Cs"></div>
-          <div class="attack-lane" data-key="D"></div>
-          <div class="attack-lane accidental" data-key="Eb"></div>
-          <div class="attack-lane" data-key="E"></div>
-          <div class="attack-lane" data-key="F"></div>
-          <div class="attack-lane accidental" data-key="Fs"></div>
-          <div class="attack-lane" data-key="G"></div>
-          <div class="attack-lane accidental" data-key="Ab"></div>
-          <div class="attack-lane" data-key="A"></div>
-          <div class="attack-lane accidental" data-key="Bb"></div>
-          <div class="attack-lane" data-key="B"></div>
+          ${renderEnemies(slot, player)}
         </div>
         <div class="piano">
           ${renderPiano(slot, data.offsetLabel)}
@@ -758,18 +740,42 @@ function renderCamera(slot, player, data) {
 
 const pianoKeys = [
   { type: 'natural', key: "C" },
-  { type: 'accidental', key: "Cs" },
   { type: 'natural', key: "D" },
-  { type: 'accidental', key: "Eb" },
   { type: 'natural', key: "E" },
   { type: 'natural', key: "F" },
-  { type: 'accidental', key: "Fs" },
   { type: 'natural', key: "G" },
-  { type: 'accidental', key: "Ab" },
   { type: 'natural', key: "A" },
-  { type: 'accidental', key: "Bb" },
   { type: 'natural', key: "B" },
+  { type: 'accidental', key: "Cs" },
+  { type: 'accidental', key: "Eb" },
+  { type: 'accidental', key: "Fs" },
+  { type: 'accidental', key: "Ab" },
+  { type: 'accidental', key: "Bb" },
 ]
+
+function renderUFOs() {
+  return pianoKeys.map(x => {
+    return `
+      <div class="attack-lane ${x.type}" data-key="${x.key}"></div>
+    `
+  }).join('')
+}
+
+function renderEnemies(slot, player) {
+  const { enemies } = player
+  return pianoKeys.map(x => {
+    const enemiesByType = enemies[x.key]
+    return `
+      <div class="attack-lane ${x.type}" data-key="${x.key}">
+        ${enemiesByType.map(x => {
+          return `
+            <div class="enemy-sprite"></div>
+          `
+        }).join('')}
+      </div>
+    `
+  }).join('')
+}
 
 function renderPiano(slot, offsetLabel) {
   return pianoKeys.map(x => {
@@ -806,6 +812,10 @@ function renderPause() {
     </div>
   `
 }
+
+$.when('animationend', '.enemy-sprite', (event) => {
+  console.log('enemy attacked')
+})
 
 $.when('click', '.menu-link', (event) => {
   const { href, index } = event.target.dataset
@@ -1187,6 +1197,7 @@ $.style(`
   & .wave-grid {
     opacity: .75;
     position: relative;
+    z-index: 4;
   }
 
   & .wave-grid::before{
@@ -1198,7 +1209,7 @@ $.style(`
   }
 
   & .ufo-grid {
-    opacity: 1;
+    opacity: .65;
     transform: rotateX(-15deg) translateY(-50%);
     position: absolute;
     margin: auto;
@@ -1206,10 +1217,6 @@ $.style(`
     right: 0;
     top: -15%;
     height: 30%;
-  }
-
-  & .attack-lane {
-    position: relative;
   }
 
   & .ufo-grid .attack-lane {
@@ -1225,9 +1232,16 @@ $.style(`
     inset: 0;
   }
 
+  & .attack-lane {
+    display: grid;
+    grid-area: lane;
+    position: relative;
+  }
+
+  & .attack-lane.natural {
+  }
 
   & .attack-lane.accidental {
-    z-index: 2;
     width: 50%;
   }
 
@@ -1243,6 +1257,7 @@ $.style(`
     margin: auto;
     transform-origin: bottom;
     transform-style: preserve-3d;
+    z-index: 10;
   }
 
   & .piano [data-key] {
@@ -1396,5 +1411,38 @@ $.style(`
   & .piano [data-key="Bb"] {
     grid-area: B;
     transform: translate(-50%, 0);
+  }
+
+  & .enemy-sprite {
+    grid-area: lane;
+    z-index: 4;
+    transform-style: preserve-3d;
+    position: absolute;
+    inset: calc(100%/7*-1) 0 calc(100%/7);
+    animation: &-enemy-slide 5000ms linear forwards;
+    padding: 0 15%;
+  }
+
+  & .attack-lane.natural .enemy-sprite {
+    padding: 0 33%;
+  }
+
+  & .enemy-sprite::before {
+    content: '';
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 100%;
+    background-color: white;
+    display: block;
+  }
+
+  @keyframes &-enemy-slide {
+    0% {
+      transform: translateY(0);
+    }
+
+    100% {
+      transform: translateY(100%);
+    }
   }
 `)
