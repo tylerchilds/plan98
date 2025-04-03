@@ -59,14 +59,14 @@ const circle = [
   { label: 'A', midi: 57 },
   { label: 'E', midi: 52 },
   { label: 'B', midi: 59 },
-  { label: 'F#', midi: 54 },
-  { label: 'C#', midi: 61 },
+  { label: 'Fs', midi: 54 },
+  { label: 'Cs', midi: 61 },
   { label: 'Ab', midi: 56 },
   { label: 'Eb', midi: 63 },
   { label: 'Bb', midi: 58 },
 ]
 
-const noteLabels = ['C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B']
+const noteLabels = ['C', 'Cs', 'D', 'Eb', 'E', 'F', 'Fs', 'G', 'Ab', 'A', 'Bb', 'B']
 
 const offsetValues = [];
 for (let i = -24; i <= 24; i++) {
@@ -455,18 +455,22 @@ const rpcHandlers = {
 
         if(gamepad.left === 1) {
           debounceSpam(slot + 'left', 200, () => {
-            const nextOffset = frequencyOffset - 1
+            let nextOffset = frequencyOffset - 1
 
-            if(nextOffset < -24) return
+            if(nextOffset <= -24) {
+              nextOffset = 24
+            }
             frequencyOffset = nextOffset
           })
         }
 
         if(gamepad.right === 1) {
           debounceSpam(slot + 'right', 200, () => {
-            const nextOffset = frequencyOffset + 1
+            let nextOffset = frequencyOffset + 1
 
-            if(nextOffset > 24) return
+            if(nextOffset >= 24) {
+              nextOffset = -24
+            }
             frequencyOffset = nextOffset
           })
         }
@@ -618,53 +622,57 @@ $.draw((target) => {
           ? label
           : noteLabels[mod(offsetNoteIndex, noteLabels.length)]
 
-        diffHTML.innerHTML(tile, settingsOpen ? `
-          <div class="menu-list">
-            ${
-              Object.keys(settings).map((key, i) => {
-                const setting = settings[key]
-                return `
-                  <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
-                    <div class="setting-label">
-                      ${setting.label}
-                    </div>
-                    <div class="setting-description">
-                      ${setting.description}
-                    </div>
-                    <div class="options-list">
-                      <div class="setting-options">
-                        ${setting.options.map((x) => {
-                          return `
-                            <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
-                              ${x}
-                            </button>
-                          `
-                        }).join('')}
+        if(settingsOpen) {
+          diffHTML.innerHTML(tile, `
+            <div class="menu-list">
+              ${
+                Object.keys(settings).map((key, i) => {
+                  const setting = settings[key]
+                  return `
+                    <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
+                      <div class="setting-label">
+                        ${setting.label}
+                      </div>
+                      <div class="setting-description">
+                        ${setting.description}
+                      </div>
+                      <div class="options-list">
+                        <div class="setting-options">
+                          ${setting.options.map((x) => {
+                            return `
+                              <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
+                                ${x}
+                              </button>
+                            `
+                          }).join('')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                `
-              }).join('')
-            }
-          </div>
-        `: `
-          <div class="player-hud">
-            <div class="midi-notes">
-              ${activeNotes.map(midi => `
-                ${midi}
-              `).join('')}
+                  `
+                }).join('')
+              }
             </div>
-            <div class="theory-label">
-              ${offsetLabel}
+          `)
+        } else {
+          diffHTML.innerHTML(tile, `
+            <div class="player-hud">
+              <div class="midi-notes">
+                ${activeNotes.map(midi => `
+                  ${midi}
+                `).join('')}
+              </div>
+              <div class="theory-label">
+                ${offsetLabel}
+              </div>
+              <div class="instrument-label">
+                ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
+              </div>
             </div>
-            <div class="instrument-label">
-              ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
+            <div class="camera" data-slot="${slot}">
+              ${renderCamera(slot, player, { offsetLabel })}
             </div>
-          </div>
-          <div class="camera" data-slot="${slot}">
-            ${renderCamera(slot, player)}
-          </div>
-        `)
+          `)
+        }
       } else {
         if(tile.querySelector('qr-code')) return
         const url = plan98.env.PLAN98_PEER
@@ -724,7 +732,7 @@ function afterUpdate(target) {
   }
 }
 
-function renderCamera(slot, player) {
+function renderCamera(slot, player, data) {
   return `
     <div class="skybox">
       <div class="floor">
@@ -757,22 +765,37 @@ function renderCamera(slot, player) {
           <div class="attack-lane" data-key="B"></div>
         </div>
         <div class="piano">
-          <button class="natural" data-key="C"></button>
-          <button class="accidental" data-key="Cs"></button>
-          <button class="natural" data-key="D"></button>
-          <button class="accidental" data-key="Eb"></button>
-          <button class="natural" data-key="E"></button>
-          <button class="natural" data-key="F"></button>
-          <button class="accidental" data-key="Fs"></button>
-          <button class="natural" data-key="G"></button>
-          <button class="accidental" data-key="Ab"></button>
-          <button class="natural" data-key="A"></button>
-          <button class="accidental" data-key="Bb"></button>
-          <button class="natural" data-key="B"></button>
+          ${renderPiano(slot, data.offsetLabel)}
         </div>
       </div>
     </div>
   `
+}
+
+const pianoKeys = [
+  { type: 'natural', key: "C" },
+  { type: 'accidental', key: "Cs" },
+  { type: 'natural', key: "D" },
+  { type: 'accidental', key: "Eb" },
+  { type: 'natural', key: "E" },
+  { type: 'natural', key: "F" },
+  { type: 'accidental', key: "Fs" },
+  { type: 'natural', key: "G" },
+  { type: 'accidental', key: "Ab" },
+  { type: 'natural', key: "A" },
+  { type: 'accidental', key: "Bb" },
+  { type: 'natural', key: "B" },
+]
+
+function renderPiano(slot, offsetLabel) {
+  return pianoKeys.map(x => {
+    return `
+      <button class="${x.type}" data-key="${x.key}">
+        ${x.key === offsetLabel ? `<div class="player-sprite" data-slot="${slot}"></div>`:''}
+      </button>
+
+    `
+  }).join('')
 }
 
 function renderPause() {
@@ -935,6 +958,32 @@ $.style(`
     right: 0;
     background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--blue, dodgerblue);
     border-radius: 1rem 0 0 1rem;
+  }
+
+  & .player-sprite {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+  }
+
+  & .player-sprite[data-slot="0"] {
+    background: var(--green, mediumseagreen);
+    border-radius: 100%;
+  }
+
+  & .player-sprite[data-slot="1"] {
+    background: var(--red, firebrick);
+    border-radius: 100%;
+  }
+
+  & .player-sprite[data-slot="2"] {
+    background: var(--yellow, gold);
+    border-radius: 100%;
+  }
+
+  & .player-sprite[data-slot="3"] {
+    background: var(--blue, dodgerblue);
+    border-radius: 100%;
   }
 
   & .no-player-yet {
@@ -1164,7 +1213,6 @@ $.style(`
     inset: 0;
   }
 
-
   & .ufo-grid {
     opacity: 1;
     transform: rotateX(-15deg) translateY(-50%);
@@ -1220,6 +1268,12 @@ $.style(`
     aspect-ratio: 1;
     z-index: 5;
     opacity: .65;
+    display: grid;
+    place-items: center;
+  }
+
+  & .piano .accidental .player-sprite {
+    opacity: .65;
   }
 
   & .piano .natural[data-key] {
@@ -1232,6 +1286,7 @@ $.style(`
     z-index: 6;
     width: 50%;
     border: 1px solid black;
+    opacity: 1;
   }
 
   & .attack-lane[data-key="C"] {
