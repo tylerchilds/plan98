@@ -2,7 +2,6 @@ import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
-import { systemMenu, renderPauseMenu } from './paper-pocket.js'
 
 const defaultSystemUrl = '/app/home-entertainment'
 
@@ -11,7 +10,7 @@ const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', '
 
 Tone.Transport.start();
 
-const defaultInstruments = ['piano', 'violin', 'saxophone', 'guitar-acoustic']
+const defaultInstruments = ['piano', 'piano', 'piano', 'piano']
 
 const playerInstruments = {
   0: null,
@@ -86,15 +85,27 @@ const newPlayer = {
   settingsKey: 'instrument',
 }
 
-const $ = elf('jam-band', {
-  pauseKey: Object.keys(systemMenu)[0],
+const pauseMenu = {
+  pause: {
+    label: "Pause",
+    list: [
+      {
+        label: 'New Game',
+        action: 'new-game'
+      },
+    ]
+  }
+}
+
+const $ = elf('song-wave', {
+  pauseKey: Object.keys(pauseMenu)[0],
   pauseIndex: 0,
   mode: romModes.play,
   tiles: [0,1,2,3],
   systemUrl: defaultSystemUrl,
   players: {
   },
-  pauseMenu: systemMenu,
+  pauseMenu,
   settings: {
     instrument: {
       label: 'Instrument',
@@ -650,6 +661,9 @@ $.draw((target) => {
               ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
             </div>
           </div>
+          <div class="camera" data-slot="${slot}">
+            ${renderCamera(slot, player)}
+          </div>
         `)
       } else {
         if(tile.querySelector('qr-code')) return
@@ -659,7 +673,7 @@ $.draw((target) => {
         diffHTML.innerHTML(tile, `
           <div class="no-player-yet" data-slot="${slot}">
             <div class="join-code" data-slot="${slot}">
-              <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=${variation}"></qr-code>
+              <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=elegant"></qr-code>
             </div>
           </div>
         `)
@@ -710,11 +724,78 @@ function afterUpdate(target) {
   }
 }
 
+function renderCamera(slot, player) {
+  return `
+    <div class="skybox">
+      <div class="floor">
+        <div class="ufo-grid">
+          <div class="attack-lane" data-key="C"></div>
+          <div class="attack-lane accidental" data-key="Cs"></div>
+          <div class="attack-lane" data-key="D"></div>
+          <div class="attack-lane accidental" data-key="Eb"></div>
+          <div class="attack-lane" data-key="E"></div>
+          <div class="attack-lane" data-key="F"></div>
+          <div class="attack-lane accidental" data-key="Fs"></div>
+          <div class="attack-lane" data-key="G"></div>
+          <div class="attack-lane accidental" data-key="Ab"></div>
+          <div class="attack-lane" data-key="A"></div>
+          <div class="attack-lane accidental" data-key="Bb"></div>
+          <div class="attack-lane" data-key="B"></div>
+        </div>
+        <div class="wave-grid">
+          <div class="attack-lane" data-key="C"></div>
+          <div class="attack-lane accidental" data-key="Cs"></div>
+          <div class="attack-lane" data-key="D"></div>
+          <div class="attack-lane accidental" data-key="Eb"></div>
+          <div class="attack-lane" data-key="E"></div>
+          <div class="attack-lane" data-key="F"></div>
+          <div class="attack-lane accidental" data-key="Fs"></div>
+          <div class="attack-lane" data-key="G"></div>
+          <div class="attack-lane accidental" data-key="Ab"></div>
+          <div class="attack-lane" data-key="A"></div>
+          <div class="attack-lane accidental" data-key="Bb"></div>
+          <div class="attack-lane" data-key="B"></div>
+        </div>
+        <div class="piano">
+          <button class="natural" data-key="C"></button>
+          <button class="accidental" data-key="Cs"></button>
+          <button class="natural" data-key="D"></button>
+          <button class="accidental" data-key="Eb"></button>
+          <button class="natural" data-key="E"></button>
+          <button class="natural" data-key="F"></button>
+          <button class="accidental" data-key="Fs"></button>
+          <button class="natural" data-key="G"></button>
+          <button class="accidental" data-key="Ab"></button>
+          <button class="natural" data-key="A"></button>
+          <button class="accidental" data-key="Bb"></button>
+          <button class="natural" data-key="B"></button>
+        </div>
+      </div>
+    </div>
+  `
+}
+
 function renderPause() {
   const { pauseMenu, pauseIndex, pauseKey } = $.learn()
+  const { list, label } = pauseMenu[pauseKey]
+
+  const items = list.map((item, i) => {
+    const { label, mode, url } = item
+    return `
+      <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${pauseIndex === i ? 'active':''}">
+        ${label}
+      </button>
+    `
+  }).join('')
+
   return `
     <div class="pause-overlay">
-      ${renderPauseMenu(pauseMenu, pauseIndex, pauseKey)}
+      <div class="pause-menu">
+        <div class="pause-label">${label}</div>
+        <div class="pause-list">
+          ${items}
+        </div>
+      </div>
     </div>
   `
 }
@@ -787,6 +868,7 @@ $.style(`
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr;
     grid-template-areas: "first second" "third fourth";
+    gap: .5rem;
   }
 
   & pre {
@@ -807,6 +889,7 @@ $.style(`
     max-width: 100%;
     width: 180px;
     grid-template-columns: 1fr auto;
+    z-index: 110;
   }
 
   & .theory-label {
@@ -841,14 +924,14 @@ $.style(`
   }
 
   & .tile[data-slot="2"] .player-hud {
-    bottom: 1rem;
+    top: 1rem;
     left: 0;
     background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--yellow, gold);
     border-radius: 0 1rem 1rem 0;
   }
 
   & .tile[data-slot="3"] .player-hud {
-    bottom: 1rem;
+    top: 1rem;
     right: 0;
     background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--blue, dodgerblue);
     border-radius: 1rem 0 0 1rem;
@@ -1029,5 +1112,248 @@ $.style(`
     border-left: 2px solid var(--root-theme);
   }
 
+  & .camera {
+    height: 100%;
+    width: 100%;
+  }
 
+  & .skybox {
+    display: grid;
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--blue, dodgerblue);
+    grid-template-areas: 'skybox';
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    z-index: 100;
+    perspective-origin: center;
+    perspective: 500px;
+    transform-style: preserve-3d;
+  }
+
+  & .skybox .floor {
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--green, mediumseagreen);
+    transform-origin: bottom;
+    transform: rotateX(60deg) translate(0, 0);
+    position: relative;
+    margin-left: -50%;
+    margin-right: -50%;
+   transform-style: preserve-3d;
+  }
+
+  & .ufo-grid,
+  & .wave-grid {
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-areas: "C D E F G A B";
+    display: grid;
+    height: 100%;
+    width: 50%;
+    margin: auto;
+  }
+
+  & .wave-grid {
+    opacity: .75;
+    position: relative;
+  }
+
+  & .wave-grid::before{
+    content: '';
+    background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.85));
+    z-index: 2;
+    position: absolute;
+    inset: 0;
+  }
+
+
+  & .ufo-grid {
+    opacity: 1;
+    transform: rotateX(-15deg) translateY(-50%);
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: -15%;
+    height: 30%;
+  }
+
+  & .attack-lane {
+    position: relative;
+  }
+
+  & .ufo-grid .attack-lane {
+    clip-path: polygon(100% 100%, 50% 0%, 0% 100%);
+  }
+
+  & .ufo-grid .attack-lane::before {
+    content: '';
+    background: linear-gradient(rgba(255,255,255,.75), rgba(0,0,0,.25));
+    opacity: .85;
+    z-index: 2;
+    position: absolute;
+    inset: 0;
+  }
+
+
+  & .attack-lane.accidental {
+    z-index: 2;
+    width: 50%;
+  }
+
+  & .piano {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-areas: "C D E F G A B";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 50%;
+    margin: auto;
+    transform-origin: bottom;
+    transform-style: preserve-3d;
+  }
+
+  & .piano [data-key] {
+    border: none;
+    border-radius: 3px;
+    width: 100%;
+    aspect-ratio: 1;
+    z-index: 5;
+    opacity: .65;
+  }
+
+  & .piano .natural[data-key] {
+    background: white;
+    border: 1px solid black;
+  }
+
+  & .piano .accidental[data-key] {
+    background: black;
+    z-index: 6;
+    width: 50%;
+    border: 1px solid black;
+  }
+
+  & .attack-lane[data-key="C"] {
+    background: var(--green, mediumseagreen);
+  }
+
+  & .attack-lane[data-key="Cs"] {
+    background:
+      linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+      linear-gradient(90deg, var(--blue, dodgerblue), var(--green, mediumseagreen));
+  }
+
+  & .attack-lane[data-key="D"] {
+    background: var(--blue, dodgerblue);
+  }
+
+  & .attack-lane[data-key="Eb"] {
+    background:
+      linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+      linear-gradient(90deg, var(--indigo, slateblue), var(--blue, dodgerblue));
+  }
+
+  & .attack-lane[data-key="E"] {
+    background: var(--indigo, slateblue);
+  }
+
+  & .attack-lane[data-key="F"] {
+    background: var(--purple, mediumpurple);
+  }
+
+  & .attack-lane[data-key="Fs"] {
+    background:
+      linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+      linear-gradient(90deg, var(--red, firebrick), var(--purple, mediumpurple));
+  }
+
+  & .attack-lane[data-key="G"] {
+    background: var(--red, firebrick);
+  }
+
+  & .attack-lane[data-key="Ab"] {
+    background: 
+      linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+      linear-gradient(90deg, var(--orange, darkorange), var(--red, firebrick));
+  }
+
+  & .attack-lane[data-key="A"] {
+    background: var(--orange, darkorange);
+  }
+
+  & .attack-lane[data-key="Bb"] {
+    background:
+      linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+      linear-gradient(90deg, var(--yellow, gold), var(--orange, darkorange));
+  }
+
+  & .attack-lane[data-key="B"] {
+    background: var(--yellow, gold);
+  }
+
+  & .attack-lane[data-key="C"],
+  & .piano [data-key="C"] {
+    grid-area: C;
+  }
+
+  & .attack-lane[data-key="Cs"],
+  & .piano [data-key="Cs"] {
+    grid-area: D;
+    transform: translate(-50%, 0);
+  }
+
+  & .attack-lane[data-key="D"],
+  & .piano [data-key="D"] {
+    grid-area: D;
+  }
+
+  & .attack-lane[data-key="Eb"],
+  & .piano [data-key="Eb"] {
+    grid-area: E;
+    transform: translate(-50%, 0);
+  }
+
+  & .attack-lane[data-key="E"],
+  & .piano [data-key="E"] {
+    grid-area: E;
+  }
+
+  & .attack-lane[data-key="F"],
+  & .piano [data-key="F"] {
+    grid-area: F;
+  }
+
+  & .attack-lane[data-key="Fs"],
+  & .piano [data-key="Fs"] {
+    grid-area: G;
+    transform: translate(-50%, 0);
+  }
+
+  & .attack-lane[data-key="G"],
+  & .piano [data-key="G"] {
+    grid-area: G;
+  }
+
+  & .attack-lane[data-key="A"],
+  & .piano [data-key="A"] {
+    grid-area: A;
+  }
+
+  & .attack-lane[data-key="Ab"],
+  & .piano [data-key="Ab"] {
+    grid-area: A;
+    transform: translate(-50%, 0);
+  }
+
+  & .attack-lane[data-key="B"],
+  & .piano [data-key="B"] {
+    grid-area: B;
+  }
+
+  & .attack-lane[data-key="Bb"],
+  & .piano [data-key="Bb"] {
+    grid-area: B;
+    transform: translate(-50%, 0);
+  }
 `)
