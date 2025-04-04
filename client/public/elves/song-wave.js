@@ -1027,7 +1027,7 @@ function renderEnemies(slot, player) {
       <div class="attack-lane ${x.type}" data-key="${x.key}">
         ${Object.keys(enemiesByType).map(id => {
           return `
-            <div class="enemy-sprite" key="${id}" data-slot="${slot}"></div>
+            <div class="enemy-sprite" key="${id}" data-note="${x.key}" data-slot="${slot}"></div>
           `
         }).join('')}
       </div>
@@ -1073,19 +1073,25 @@ function renderPause() {
 
 $.when('animationend', '.enemy-sprite', (event) => {
   const { players } = $.learn()
+  const key = event.target.key
+  const noteLabel = event.target.dataset.note
   const slot = parseInt(event.target.dataset.slot)
 
-  if(players[slot]) {
-    const { health } = players[slot];
 
+  if(players[slot]) {
+    const { health, enemies } = players[slot];
+
+    const newEnemies = remove(enemies[noteLabel][key].id, noteLabel, enemies)
     const nextHealth = health - 1
 
     if(health === 0) {
       $.teach({
+        enemies: newEnemies,
         dead: true,
       }, mergePlayer(slot))
     } else {
       $.teach({
+        enemies: newEnemies,
         health: nextHealth
       }, mergePlayer(slot))
     }
