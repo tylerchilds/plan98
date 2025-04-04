@@ -557,31 +557,31 @@ const rpcHandlers = {
         }
 
         if(gamepad.b === 1) {
-          notes.push(root + 12)
-        }
-
-        if(gamepad.x === 1) {
-          notes.push(root - 12)
-        }
-
-        if(gamepad.y === 1) {
           notes.push(root + 2)
         }
 
+        if(gamepad.x === 1) {
+          notes.push(root - 2)
+        }
+
+        if(gamepad.y === 1) {
+          notes.push(root - 6)
+        }
+
         if(gamepad.lb === 1) {
-          notes.push(root + 7)
+          notes.push(root - 3)
         }
 
         if(gamepad.rb === 1) {
-          notes.push(root - 7)
+          notes.push(root + 3)
         }
 
         if(gamepad.lt === 1) {
-          notes.push(root + 5)
+          notes.push(root - 4)
         }
 
         if(gamepad.rt === 1) {
-          notes.push(root - 5)
+          notes.push(root + 4)
         }
 
         const finishedNotes = activeNotes.filter(x => {
