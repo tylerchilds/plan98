@@ -2,8 +2,7 @@ import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
-
-const defaultSystemUrl = '/app/home-entertainment'
+import { systemMenu, getTheme } from './paper-pocket.js'
 
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
@@ -243,16 +242,17 @@ const pauseMenu = {
 }
 
 const $ = elf('song-wave', {
+  systemKey: Object.keys(systemMenu)[0],
+  systemIndex: 0,
   pauseKey: Object.keys(pauseMenu)[0],
   pauseIndex: 0,
   mode: romModes.play,
   tiles: [0,1,2,3],
-  systemUrl: defaultSystemUrl,
-  players: {
-  },
+  players: {},
   pauseMenu,
+  systemMenu,
   settings
-  })
+})
 
 const spamCache = {}
 function debounceSpam(code, timeout, callback) {
@@ -314,6 +314,45 @@ function processSystem(frameInputs) {
           mode: romModes.play
         })
       })
+
+      toggleSpam(slot+'up', gamepad.up, () => {
+        const { systemKey, systemMenu, systemIndex } = $.learn()
+        const { list } = systemMenu[systemKey]
+        const index = mod((systemIndex - 1), list.length)
+        $.teach({
+          systemIndex: index,
+        })
+      })
+
+      toggleSpam(slot+'down', gamepad.down, () => {
+        const { systemKey, systemMenu, systemIndex } = $.learn()
+        const { list } = systemMenu[systemKey]
+        const index = mod((systemIndex + 1), list.length)
+        $.teach({
+          systemIndex: index,
+        })
+      })
+
+      toggleSpam(slot+'left', gamepad.left, () => {
+        const { systemKey, systemMenu } = $.learn()
+        const keys = Object.keys(systemMenu)
+        const index = mod((keys.indexOf(systemKey) - 1), keys.length)
+        $.teach({
+          systemIndex: 0,
+          systemKey: keys[index]
+        })
+      })
+
+      toggleSpam(slot+'right', gamepad.right, () => {
+        const { systemKey, systemMenu } = $.learn()
+        const keys = Object.keys(systemMenu)
+        const index = mod((keys.indexOf(systemKey) + 1), keys.length)
+        $.teach({
+          systemIndex: 0,
+          systemKey: keys[index]
+        })
+      })
+
     }
   })
 }
@@ -327,7 +366,6 @@ function processPause(frameInputs) {
       toggleSpam(slot+'os', gamepad.os, () => {
         $.teach({
           mode: romModes.system,
-          systemUrl: defaultSystemUrl
         })
       })
 
@@ -405,7 +443,6 @@ function processSettings(players, slot, gamepad) {
   toggleSpam(slot+'os', gamepad.os, () => {
     $.teach({
       mode: romModes.system,
-      systemUrl: defaultSystemUrl
     })
   })
 
@@ -556,7 +593,6 @@ const rpcHandlers = {
         toggleSpam(slot+'os', gamepad.os, () => {
           $.teach({
             mode: romModes.system,
-            systemUrl: defaultSystemUrl
           })
         })
 
@@ -753,13 +789,8 @@ $.draw((target) => {
 
     const systemContainer = target.querySelector('.system-container')
     if(mode === romModes.system) {
-      const { systemUrl } = $.learn()
-      diffHTML.innerHTML(systemContainer, `
-        <iframe src="${systemUrl}"></iframe>
-      `)
+      diffHTML.innerHTML(systemContainer, renderSystem())
       return
-    } else {
-      diffHTML.innerHTML(systemContainer, '')
     }
 
 
@@ -1045,6 +1076,32 @@ function renderPiano(slot, offsetLabel) {
     `
   }).join('')
 }
+
+function renderSystem() {
+  const { systemMenu, systemIndex, systemKey } = $.learn()
+  const { list, label } = systemMenu[systemKey]
+
+  const items = list.map((item, i) => {
+    const { label, mode, url } = item
+    return `
+      <button ${url? `data-href="${url}"`:''} ${mode ? `data-mode="${mode}"`:''} data-index="${i}" class="menu-link ${systemIndex === i ? 'active':''}">
+        ${label}
+      </button>
+    `
+  }).join('')
+
+  return `
+    <div class="pause-overlay">
+      <div class="pause-menu">
+        <div class="pause-label">${label}</div>
+        <div class="pause-list">
+          ${items}
+        </div>
+      </div>
+    </div>
+  `
+}
+
 
 function renderPause() {
   const { pauseMenu, pauseIndex, pauseKey } = $.learn()

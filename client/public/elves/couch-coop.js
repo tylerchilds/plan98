@@ -134,7 +134,7 @@ $.draw((target) => {
   mount(target)
   const { slot, booting } = $.learn()
   const variation = target.getAttribute('variation') || 'super'
-  rom = target.getAttribute('rom') || 'jam-band'
+  rom = target.getAttribute('rom') || 'song-wave'
 
   if(booting) {
     return `
