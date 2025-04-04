@@ -135,8 +135,8 @@ const settings = {
     options: morals
   },
   skill: {
-    label: 'Moraleousidacery',
-    description: 'Your moral guideline democracy worldview philosophy engine',
+    label: 'Skill',
+    description: 'The thing you practice the most',
     options: skills
   },
   bpm: {
@@ -206,9 +206,26 @@ function circleInfo(slot) {
   return circle[mod(slot, circle.length)]
 }
 
+function newEnemies() {
+  return noteLabels.reduce((enemies, label) => {
+    // yeileds { 'Cs': [] }
+    enemies[label] = {}
+    return enemies
+  }, {})
+}
+
+function newScore() {
+  return 0
+}
+
+function newHealth() {
+  return 24
+}
+
 const newPlayer = {
-  score: 0,
-  health: 24,
+  score: newScore(),
+  health: newHealth(),
+  enemies: newEnemies(),
   settingsOpen: false,
   circleIndex: 1,
   frequencyOffset: 0,
@@ -219,12 +236,6 @@ const newPlayer = {
   ethics: 'Neutral',
   moral: 'Neutral',
   settingsKey: 'instrument',
-  enemies: noteLabels.reduce((enemies, label) => {
-    // yeileds { 'Cs': [] }
-    enemies[label] = {}
-    return enemies
-  }, {}),
-
   bpm: '80',
   noteDuration: '4n',
 }
@@ -293,6 +304,53 @@ function settingsChange(settingsKey, slot, nextValue) {
   }
 }
 
+function launchSystemUrl(event) {
+  const { systemKey, systemMenu, systemIndex } = $.learn()
+  const { list } = systemMenu[systemKey]
+  const { url } = list[systemIndex]
+
+  if(url) {
+    self.location.href = url
+  }
+}
+
+const actionEffects = {
+  'new-game': () => {
+    const { players, tiles } = $.learn()
+
+    tiles.map((slot) => {
+      if(players[slot]) {
+        $.teach({
+          dead: false,
+          score: newScore(),
+          health: newHealth(),
+          enemies: newEnemies()
+        }, mergePlayer(slot))
+      }
+    })
+
+    $.teach({
+      mode: romModes.play
+    })
+  }
+}
+
+function triggerActionEffects(mode) {
+  if(actionEffects[mode]) {
+    actionEffects[mode]()
+  }
+}
+
+function launchGameAction(event) {
+  const { pauseKey, pauseMenu, pauseIndex } = $.learn()
+  const { list } = pauseMenu[pauseKey]
+  const { action } = list[pauseIndex]
+
+  if(action) {
+    triggerActionEffects(action)
+  }
+}
+
 function processSystem(frameInputs) {
   frameInputs.forEach((data, slot) => {
     if(data) {
@@ -313,6 +371,10 @@ function processSystem(frameInputs) {
         $.teach({
           mode: romModes.play
         })
+      })
+
+      toggleSpam(slot+'a', gamepad.a, () => {
+        launchSystemUrl()
       })
 
       toggleSpam(slot+'up', gamepad.up, () => {
@@ -379,6 +441,10 @@ function processPause(frameInputs) {
         $.teach({
           mode: romModes.play
         })
+      })
+
+      toggleSpam(slot+'a', gamepad.a, () => {
+        launchGameAction()
       })
 
       toggleSpam(slot+'up', gamepad.up, () => {
@@ -532,8 +598,6 @@ function releaseAll() {
 
     return activeNotes
   }))]
-
-  console.log(heldNotes)
 }
 
 const rpcHandlers = {
@@ -741,9 +805,6 @@ function remove(id, noteLabel, enemies) {
     }
   }
 
-
-  console.log({ noteLabel, enemies })
-  console.log({ stillAlive })
   return {
     ...enemies,
     [noteLabel]: { ... stillAlive }
@@ -939,6 +1000,14 @@ function afterUpdate(target) {
       if(active) {
         active.scrollIntoView()
       }
+    }
+  }
+
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
     }
   }
 }
@@ -1138,19 +1207,21 @@ $.when('animationend', '.enemy-sprite', (event) => {
   if(players[slot]) {
     const { health, enemies } = players[slot];
 
-    const newEnemies = remove(enemies[noteLabel][key].id, noteLabel, enemies)
-    const nextHealth = health - 1
+    if(enemies[noteLabel][key]) {
+      const newEnemies = remove(enemies[noteLabel][key].id, noteLabel, enemies)
+      const nextHealth = health - 1
 
-    if(health === 0) {
-      $.teach({
-        enemies: newEnemies,
-        dead: true,
-      }, mergePlayer(slot))
-    } else {
-      $.teach({
-        enemies: newEnemies,
-        health: nextHealth
-      }, mergePlayer(slot))
+      if(health === 0) {
+        $.teach({
+          enemies: newEnemies,
+          dead: true,
+        }, mergePlayer(slot))
+      } else {
+        $.teach({
+          enemies: newEnemies,
+          health: nextHealth
+        }, mergePlayer(slot))
+      }
     }
     return
   }
@@ -1382,6 +1453,9 @@ $.style(`
   }
 
 
+  & .pause-overlay {
+    height: 100%;
+  }
   & .pause-menu {
     height: 100%;
     overflow: auto;
