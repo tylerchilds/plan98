@@ -77,39 +77,80 @@ const skills = [
   'Thievery',
 ]
 
-const settings = {
-    instrument: {
-      label: 'Instrument',
-      description: 'What honk are you?',
-      options: instruments,
-    },
-    classy: {
-      label: 'Class',
-      description: 'What make are you?',
-      options: classes
-    },
-    ancestry: {
-      label: 'Ancestry',
-      description: 'What model are you?',
-      options: ancestries
-    },
-    ethics: {
-      label: 'Ethicaleathality',
-      description: 'Your ethical intake to enact reality to the degree of which is',
-      options: ethics
-    },
-    moral: {
-      label: 'Moraleousidacery',
-      description: 'Your moral guideline democracy worldview philosophy engine',
-      options: morals
-    },
-    skill: {
-      label: 'Moraleousidacery',
-      description: 'Your moral guideline democracy worldview philosophy engine',
-      options: skills
-    }
+const bpmOptions = ['20', '40', '60', '80', '100', '120', '140', '160', '180', '200', '220', '240', '280', '300', '320', '340', '360']
+const noteDurationOptions = ['4m', '2m', '1m', '1n', '2n', '4n', '8n', '16n', '32n', '64n']
 
-  }
+export function getBpmOptions() {
+  return bpmOptions
+}
+
+export function setNoteDuration(duration) {
+  $.teach({ noteDuration: duration })
+}
+
+export function getNoteDuration() {
+  if(!$) return '4n'
+  return $.learn().notDuration || '4n'
+}
+
+export function getNoteDurationOptions() {
+  return noteDurationOptions
+}
+
+export function setBpm(bpm) {
+  Tone.Transport.bpm.value = parseInt(bpm)
+  $.teach({ bpm })
+}
+
+export function getBpm() {
+  if(!$) return '80'
+  return $.learn().bpm || '80'
+}
+
+
+
+const settings = {
+  instrument: {
+    label: 'Instrument',
+    description: 'What honk are you?',
+    options: instruments,
+  },
+  classy: {
+    label: 'Class',
+    description: 'What make are you?',
+    options: classes
+  },
+  ancestry: {
+    label: 'Ancestry',
+    description: 'What model are you?',
+    options: ancestries
+  },
+  ethics: {
+    label: 'Ethicaleathality',
+    description: 'Your ethical intake to enact reality to the degree of which is',
+    options: ethics
+  },
+  moral: {
+    label: 'Moraleousidacery',
+    description: 'Your moral guideline democracy worldview philosophy engine',
+    options: morals
+  },
+  skill: {
+    label: 'Moraleousidacery',
+    description: 'Your moral guideline democracy worldview philosophy engine',
+    options: skills
+  },
+  bpm: {
+    label: 'Beats per minute',
+    description: 'The score multiplier per note played and speed of the track',
+    options: getBpmOptions(),
+  },
+  noteDuration: {
+    label: 'Note Duration',
+    description: 'TBD, the timing window for critial hits',
+    options: getNoteDurationOptions(),
+  },
+}
 
 
 function loadInstrument(slot, instrument) {
@@ -118,6 +159,7 @@ function loadInstrument(slot, instrument) {
     instruments: instrument,
     baseUrl: (self.plan98.env.HEAVY_ASSET_CDN_URL || '') + "/private/tychi.1998.social/SourceCode/tonejs-instruments/samples/",
     onload() {
+      Tone.Transport.bpm.value = parseInt(getBpm())
       synth.release = .5;
       synth.toDestination();
 
@@ -182,8 +224,10 @@ const newPlayer = {
     // yeileds { 'Cs': [] }
     enemies[label] = {}
     return enemies
-  }, {})
+  }, {}),
 
+  bpm: '80',
+  noteDuration: '4n',
 }
 
 const pauseMenu = {
@@ -234,6 +278,12 @@ function toggleSpam(code, value, callback) {
 const sideEffects = {
   instrument: (value, slot) => {
     loadInstrument(slot, value)
+  },
+  bpm: (value) => {
+    setBpm(value)
+  },
+  noteDuration: (value) => {
+    setNoteDuration(value)
   },
 }
 
@@ -782,13 +832,13 @@ $.draw((target) => {
         } else {
           diffHTML.innerHTML(tile, `
             <div class="player-hud">
+              <div class="score-label">
+                ${score}
+              </div>
               <div class="health-label">
                 ${[...new Array(health)].map(() => {
                   return '<span class="health-tick"></span>'
                 }).join('')}
-              </div>
-              <div class="score-label">
-                ${score}
               </div>
               <div class="instrument-label">
                 ${ancestry} ${classy} ${moral} ${ethics} ${skill}
@@ -1131,7 +1181,7 @@ $.style(`
     padding: 1rem;
     gap: .5rem;
     max-width: 100%;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: 1fr;
     z-index: 110;
   }
 
@@ -1149,6 +1199,7 @@ $.style(`
 
   & .health-label {
     color: rgba(255,255,255,.85)
+    grid-column: -1 / 1;
   }
 
   & .score-label {
@@ -1157,6 +1208,7 @@ $.style(`
     font-weight: bold;
     font-size: 2erem;
     line-height: 1;
+    grid-column: -1 / 1;
   }
 
 
