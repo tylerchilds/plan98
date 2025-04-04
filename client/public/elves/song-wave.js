@@ -248,6 +248,10 @@ const pauseMenu = {
         label: 'New Game',
         action: 'new-game'
       },
+      {
+        label: 'Restart',
+        action: 'restart'
+      },
     ]
   }
 }
@@ -310,7 +314,7 @@ function launchSystemUrl(event) {
   const { url } = list[systemIndex]
 
   if(url) {
-    self.location.href = url
+    $.teach({ systemUrl: url })
   }
 }
 
@@ -322,6 +326,7 @@ const actionEffects = {
       if(players[slot]) {
         $.teach({
           dead: false,
+          settingsOpen: false,
           score: newScore(),
           health: newHealth(),
           enemies: newEnemies()
@@ -331,6 +336,12 @@ const actionEffects = {
 
     $.teach({
       mode: romModes.play
+    })
+  },
+  'restart': () => {
+    $.teach({
+      systemUrl: null,
+      mode: romModes.system
     })
   }
 }
@@ -1147,8 +1158,14 @@ function renderPiano(slot, offsetLabel) {
 }
 
 function renderSystem() {
-  const { systemMenu, systemIndex, systemKey } = $.learn()
+  const { systemUrl, systemMenu, systemIndex, systemKey } = $.learn()
   const { list, label } = systemMenu[systemKey]
+
+  if(systemUrl) {
+    return `
+      <iframe src="${systemUrl}"></iframe>
+    `
+  }
 
   const items = list.map((item, i) => {
     const { label, mode, url } = item
@@ -1160,7 +1177,7 @@ function renderSystem() {
   }).join('')
 
   return `
-    <div class="pause-overlay">
+    <div class="pause-overlay system-overlay">
       <div class="pause-menu">
         <div class="pause-label">${label}</div>
         <div class="pause-list">
@@ -1228,7 +1245,7 @@ $.when('animationend', '.enemy-sprite', (event) => {
   console.error('player not found')
 })
 
-$.when('click', '.menu-link', (event) => {
+$.when('click', '.system-overlay .menu-link', (event) => {
   const { href, index } = event.target.dataset
 
   const pauseIndex = parseInt(index)
@@ -1236,7 +1253,6 @@ $.when('click', '.menu-link', (event) => {
   if(href) {
     $.teach({
       pauseIndex,
-      mode: romModes.system,
       systemUrl: href
     })
     return
