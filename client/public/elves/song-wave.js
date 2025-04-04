@@ -647,17 +647,14 @@ function score(slot, note) {
 }
 
 function remove(id, noteLabel, enemies) {
-  const stillAlive = Object.keys(enemies[noteLabel])
-    .filter(x => enemies[noteLabel][x].id === id)
-    .reduce((newGroup, x) => {
-      if(!newGroup[noteLabel]) {
-        newGroup[noteLabel] = {}
-      }
-      if(enemies[noteLabel][x].key === noteLabel) {
-        newGroup[noteLabel][x] = enemies[noteLabel][x]
-      }
-      return newGroup
-    }, {})
+
+  const stillAlive = {}
+  for(const key in enemies[noteLabel]) {
+    if(enemies[noteLabel][key].id !== id) {
+      stillAlive[key] = enemies[noteLabel][key]
+    }
+  }
+
 
   console.log({ noteLabel, enemies })
   console.log({ stillAlive })
@@ -978,9 +975,9 @@ function renderEnemies(slot, player) {
     const enemiesByType = enemies[x.key] || {}
     return `
       <div class="attack-lane ${x.type}" data-key="${x.key}">
-        ${Object.keys(enemiesByType).map(x => {
+        ${Object.keys(enemiesByType).map(id => {
           return `
-            <div class="enemy-sprite" data-slot="${slot}"></div>
+            <div class="enemy-sprite" key="${id}" data-slot="${slot}"></div>
           `
         }).join('')}
       </div>
