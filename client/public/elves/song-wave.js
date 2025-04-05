@@ -102,8 +102,8 @@ export function setBpm(bpm) {
 }
 
 export function getBpm() {
-  if(!$) return '80'
-  return $.learn().bpm || '80'
+  if(!$) return '20'
+  return $.learn().bpm || '20'
 }
 
 
@@ -236,7 +236,7 @@ const newPlayer = {
   ethics: 'Neutral',
   moral: 'Neutral',
   settingsKey: 'instrument',
-  bpm: '80',
+  bpm: '20',
   noteDuration: '4n',
 }
 
@@ -1065,7 +1065,6 @@ function renderUFOs() {
 }
 
 const quantizeInterval = "4n"; // Adjust as needed
-Tone.Transport.bpm.value = 90
 
 let latestCallback = null; // Store the most recent callback
 let isScheduled = false; // Prevent duplicate scheduling
@@ -1080,6 +1079,7 @@ Tone.Transport.scheduleRepeat((time) => {
 }, quantizeInterval);
 
 export function quantize(callback) {
+  Tone.Transport.bpm.value = getBpm()
   if (!isScheduled) {
     latestCallback = callback; // Store latest callback
     isScheduled = true; // Prevent multiple triggers per 16n
