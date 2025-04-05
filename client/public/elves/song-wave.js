@@ -217,13 +217,15 @@ function newScore() {
   return 0
 }
 
+const MAX_HEALTH = 24
 function newHealth() {
-  return 24
+  return MAX_HEALTH
 }
 
 const newPlayer = {
   score: newScore(),
   health: newHealth(),
+  maxHealth: MAX_HEALTH,
   enemies: newEnemies(),
   settingsOpen: false,
   circleIndex: 1,
@@ -870,7 +872,6 @@ function listenForGamestateSnapshot(target) {
     channel.on('gamestateDownload', (data) => {
       if(!data.elf) return
       const { elf, partyId, snapshot } = data
-        debugger
       if(elf === $.link) {
         $.teach({ [partyId]: { snapshot } })
       }
@@ -977,6 +978,7 @@ function renderTile(tile, slot, player) {
     ethics,
     score,
     instrument,
+    maxHealth,
     health,
     dead
   } = player
@@ -1024,16 +1026,11 @@ function renderTile(tile, slot, player) {
   } else {
     diffHTML.innerHTML(tile, `
       <div class="player-hud">
+        <div class="health-label">
+          <div class="health-bar" style="--health-width: calc(${health} / ${maxHealth} * 100%)"></div>
+        </div>
         <div class="score-label">
           ${score}
-        </div>
-        <div class="health-label">
-          ${[...new Array(health)].map(() => {
-            return '<span class="health-tick"></span>'
-          }).join('')}
-        </div>
-        <div class="instrument-label">
-          ${ancestry} ${classy} ${moral} ${ethics} ${skill} ${instrument}
         </div>
       </div>
       <div class="camera" data-slot="${slot}">
@@ -1304,7 +1301,7 @@ function renderPause() {
   `
 }
 
-$.when('animationend', '.enemy-sprite', (event) => {
+$.when('animationend', '.split-screen .enemy-sprite', (event) => {
   const { players } = $.learn()
   const key = event.target.key
   const noteLabel = event.target.dataset.note
@@ -1371,7 +1368,7 @@ $.style(`
     background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
     backdrop-filter: blur(10px);
     display: none;
-    z-index: 10;
+    z-index: 120;
   }
 
   &[data-mode="${romModes.pause}"] .pause-container {
@@ -1384,7 +1381,7 @@ $.style(`
     background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
     backdrop-filter: blur(10px);
     display: none;
-    z-index: 100;
+    z-index: 120;
   }
 
   &[data-mode="${romModes.system}"] .system-container {
@@ -1395,13 +1392,11 @@ $.style(`
     height: 100%;
     opacity: 1;
     overflow: auto;
-    position: absolute;
     inset: 0;
     z-index: 2;
     display: grid;
     grid-template-rows: 1fr;
     grid-template-columns: 1fr;
-    grid-template-areas: "first second" "third fourth";
     gap: .5rem;
   }
 
@@ -1435,7 +1430,8 @@ $.style(`
     display: grid;
     padding: 1rem;
     gap: .5rem;
-    max-width: 100%;
+    max-width: 320px;
+    width: 100%;
     grid-template-columns: 1fr;
     z-index: 110;
   }
@@ -1455,6 +1451,10 @@ $.style(`
   & .health-label {
     color: rgba(255,255,255,.85)
     grid-column: -1 / 1;
+    background: black;
+    border: 3px solid white;
+    height: 3rem;
+    max-width: 100%;
   }
 
   & .score-label {
@@ -1467,9 +1467,10 @@ $.style(`
   }
 
 
-  & .health-tick::before {
-    content: '% ';
-    font-weight: bold;
+  & .health-bar {
+    background: firebrick;
+    width: var(--health-width);
+    height: 100%;
   }
 
   & .instrument-label {
@@ -1508,6 +1509,15 @@ $.style(`
     background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--blue, dodgerblue);
     border-radius: 1rem 0 0 1rem;
   }
+
+  & .solo-screen .tile .player-hud {
+    left: auto;
+    right: 0;
+    top: 3rem;
+    border-radius: 1rem 0 0 1rem;
+    text-align: right;
+  }
+
 
   & .player-sprite {
     width: 100%;

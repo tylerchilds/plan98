@@ -162,6 +162,36 @@ $.draw((target) => {
       </div>
     </div>
   `
+}, {
+  afterUpdate(target) {
+    {
+      const controller = target.querySelector('.controller')
+      if(controller) {
+        const { hideTouchControls } = $.learn()
+        controller.dataset.hide = hideTouchControls
+      }
+    }
+  }
+})
+
+let touchControls
+newTouchTimeout()
+
+function newTouchTimeout() {
+  if(touchControls) {
+    clearTimeout(touchControls)
+  }
+
+  touchControls = setTimeout(() => {
+    $.teach({ hideTouchControls: true })
+  }, 5000)
+}
+
+
+
+$.when('click', '.touchable, [data-press]', () => {
+  $.teach({ hideTouchControls: false })
+  newTouchTimeout()
 })
 
 function renderController(target, slot, variation) {
@@ -251,6 +281,8 @@ function notification(node, method, params) {
 }
 
 $.when('pointerdown', '[data-press]', (event) => {
+  $.teach({ hideTouchControls: false })
+  newTouchTimeout()
   const { press } = event.target.dataset
   overrideButton(0, buttons[press], 1)
 })
@@ -399,6 +431,7 @@ $.style(`
   }
 
   & .touchable {
+    pointer-events: all;
     position: relative;
     z-index: 5;
   }
@@ -440,13 +473,26 @@ $.style(`
 
   & .controller {
     pointer-events: none;
-    text-align: center;
     background: black;
     height: 100%;
     display: grid;
     grid-template-rows: auto 10px 1fr;
     grid-template-areas: "toppad" "leftpad" "rightpad";
     position: relative;
+  }
+
+  & .controller[data-hide="true"] .touchable {
+    animation: &-hide-buttons 2000ms linear forwards;
+  }
+
+  @keyframes &-hide-buttons {
+    0% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 0;
+    }
   }
 
   & .controller[data-slot="0"] {
@@ -516,7 +562,7 @@ $.style(`
     background: white;
   }
 
-  & .controller button {
+  & .controller [data-press] {
     pointer-events: all;
     width: 45px;
     height: 45px;
@@ -531,15 +577,15 @@ $.style(`
     opacity: .65;
   }
 
-  & .controller button.active,
-  & .controller button:hover,
-  & .controller button:focus {
+  & .controller [data-press].active,
+  & .controller [data-press]:hover,
+  & .controller [data-press]:focus {
     opacity: 1;
   }
 
-  & .controller button[data-press="os"],
-  & .controller button[data-press="select"],
-  & .controller button[data-press="start"] {
+  & .controller [data-press][data-press="os"],
+  & .controller [data-press][data-press="select"],
+  & .controller [data-press][data-press="start"] {
     display: grid;
   }
 

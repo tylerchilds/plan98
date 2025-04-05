@@ -134,7 +134,6 @@ io.onConnection(channel => {
       const party = parties.get(currentParty)
       party.channels.forEach(channel => {
         if(channel) {
-          console.log(data)
           channel.emit('gamestateDownload', data)
         }
       })
