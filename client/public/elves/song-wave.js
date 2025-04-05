@@ -990,10 +990,16 @@ function afterUpdate(target) {
           column.scrollIntoView({
             inline: "center"    // Scrolls only in the inline direction
           });
+          const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
+          if(row) {
+            row.scrollIntoView({
+              block: "start"
+            })
+          }
         }
       }
       {
-         const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
+        const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
         if(row && target[slot + 'row'] !== settingsKey) {
           target[slot + 'row'] = settingsKey
           row.scrollIntoView({
