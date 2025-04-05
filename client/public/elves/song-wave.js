@@ -3,6 +3,7 @@ import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { systemMenu, getTheme } from './paper-pocket.js'
+import { gamestateUplink, channel } from './couch-coop.js'
 
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
@@ -105,8 +106,6 @@ export function getBpm() {
   if(!$) return '20'
   return $.learn().bpm || '20'
 }
-
-
 
 const settings = {
   instrument: {
@@ -861,6 +860,27 @@ function displayByMode(target, state, callback) {
   callback()
 }
 
+function listenForGamestateSnapshot(target) {
+  channel.onConnect(error => {
+    if (error) {
+      console.error(error.message)
+      return
+    }
+
+    channel.on('gamestateDownload', (data) => {
+      if(!data.elf) return
+      const { elf, partyId, snapshot } = data
+        debugger
+      if(elf === $.link) {
+        $.teach({ [partyId]: { snapshot } })
+      }
+    })
+
+    channel.on('error', (error) => {
+      console.error("Geckos Error:", error);
+    })
+  })
+}
 
 
 $.draw((target) => {
@@ -868,6 +888,7 @@ $.draw((target) => {
 
   if(slot && solo === "true") {
     if(!target.innerHTML) {
+      listenForGamestateSnapshot(target)
       target.innerHTML = `
         <div class="system-container"></div>
         <div class="pause-container"></div>
@@ -894,6 +915,8 @@ $.draw((target) => {
           Ready
         `)
       }
+
+      afterPeerUpdate(target)
     })
 
     return
@@ -911,6 +934,7 @@ $.draw((target) => {
       `
     }
     requestAnimationFrame(() => {
+      gamestateUplink({ elf: $.link, partyId, snapshot: $.learn() })
       displayByMode(target, $.learn(), function multiSplit3ps() {
         const { tiles, players } = $.learn()
         tiles.map((slot) => {
@@ -1022,7 +1046,20 @@ function renderTile(tile, slot, player) {
   }
 }
 
+function afterPeerUpdate(target) {
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
+    }
+  }
+}
+
+
 function afterHostUpdate(target) {
+  {
+  }
   {
     const { tiles, players } = $.learn()
     tiles.forEach(slot => {

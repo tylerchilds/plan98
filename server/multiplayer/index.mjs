@@ -104,6 +104,7 @@ io.onConnection(channel => {
       parties.set(partyId, {
         host: null,
         players: new Array(4).fill(null),
+        channels: new Array(4).fill(null),
       })
     }
 
@@ -118,6 +119,8 @@ io.onConnection(channel => {
         id: channel.id,
         gamepad: {}
       }
+      party.channels[slot] = channel
+
     }
 
      // Notify host only
@@ -125,6 +128,19 @@ io.onConnection(channel => {
       party.host.emit('playerList', party.players)
     }
   });
+
+  channel.on('gamestateUpload', (data) => {
+    if(currentParty && parties.has(currentParty)) {
+      const party = parties.get(currentParty)
+      party.channels.forEach(channel => {
+        if(channel) {
+          console.log(data)
+          channel.emit('gamestateDownload', data)
+        }
+      })
+    }
+  });
+
 
   channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
     if(currentParty && parties.has(currentParty)) {
@@ -149,6 +165,7 @@ io.onConnection(channel => {
         party.host = null
       } else {
         party.players[slot] = null
+        party.channels[slot] = null
       }
 
       if (party.host) {

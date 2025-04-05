@@ -55,13 +55,17 @@ const config = plan98.env.PLAN98_REALTIME ?
     port: 9208
   }
 
-const channel = geckos(config) // default port is 9208
+export const channel = geckos(config) // default port is 9208
 
 function joinParty(id, slot) {
   channel.emit('joinParty', {
     partyId: id,
     slot
   });
+}
+
+export function gamestateUplink(data) {
+  channel.emit('gamestateUpload', data)
 }
 
 function mount(target) {
