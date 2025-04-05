@@ -837,145 +837,192 @@ function mergePlayer(slot) {
   }
 }
 
-$.draw((target) => {
-  const { partyId, variation } = target.dataset
-
-  if(!target.innerHTML) {
-    target.innerHTML = `
-      <div class="system-container"></div>
-      <div class="pause-container"></div>
-      <div class="split-screen">
-        <div class="tile" data-slot="0"></div>
-        <div class="tile" data-slot="1"></div>
-        <div class="tile" data-slot="2"></div>
-        <div class="tile" data-slot="3"></div>
-      </div>
-    `
+function displayByMode(target, state, callback) {
+  const { mode } = state
+  if(target.dataset.mode !== mode) {
+    target.dataset.mode = mode
   }
-  requestAnimationFrame(() => {
-    const { mode, tiles, players, settings } = $.learn()
 
-    if(target.dataset.mode !== mode) {
-      target.dataset.mode = mode
+  const systemContainer = target.querySelector('.system-container')
+  if(mode === romModes.system) {
+    diffHTML.innerHTML(systemContainer, renderSystem())
+    return
+  }
+
+
+  const pauseContainer = target.querySelector('.pause-container')
+  if(mode === romModes.pause) {
+    diffHTML.innerHTML(pauseContainer, renderPause())
+    return
+  } else {
+    diffHTML.innerHTML(pauseContainer, '')
+  }
+
+  callback()
+}
+
+
+
+$.draw((target) => {
+  const { partyId, slot, solo, variation } = target.dataset
+
+  if(slot && solo === "true") {
+    if(!target.innerHTML) {
+      target.innerHTML = `
+        <div class="system-container"></div>
+        <div class="pause-container"></div>
+        <div class="solo-screen">
+          <div class="tile" data-slot="${slot}"></div>
+        </div>
+      `
     }
 
-    const systemContainer = target.querySelector('.system-container')
-    if(mode === romModes.system) {
-      diffHTML.innerHTML(systemContainer, renderSystem())
-      return
-    }
+    requestAnimationFrame(() => {
+      const { snapshot } = $.learn()[partyId] || {}
 
-
-    const pauseContainer = target.querySelector('.pause-container')
-    if(mode === romModes.pause) {
-      diffHTML.innerHTML(pauseContainer, renderPause())
-      return
-    } else {
-      diffHTML.innerHTML(pauseContainer, '')
-    }
-
-    tiles.map((slot) => {
       const tile = target.querySelector(`.tile[data-slot="${slot}"]`)
-      if(players[slot]) {
-        const player = players[slot] || newPlayer
-        const {
-          settingsKey,
-          settingsOpen,
-          circleIndex,
-          activeNotes,
-          frequencyOffset,
-          ancestry,
-          classy,
-          moral,
-          skill,
-          ethics,
-          score,
-          health,
-          dead
-        } = player
-        const { label } = circleInfo(circleIndex)
-        const offsetNoteIndex = noteLabels.findIndex(x => x === label) + frequencyOffset
-        const offsetLabel = frequencyOffset=== 0
-          ? label
-          : noteLabels[mod(offsetNoteIndex, noteLabels.length)]
-
-        tile.dataset.dead = dead
-
-        if(settingsOpen) {
-          diffHTML.innerHTML(tile, `
-            <div class="menu-list">
-              ${
-                Object.keys(settings).map((key, i) => {
-                  const setting = settings[key]
-                  return `
-                    <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
-                      <div class="setting-label">
-                        ${setting.label}
-                      </div>
-                      <div class="setting-description">
-                        ${setting.description}
-                      </div>
-                      <div class="options-list">
-                        <div class="setting-options">
-                          ${setting.options.map((x) => {
-                            return `
-                              <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
-                                ${x}
-                              </button>
-                            `
-                          }).join('')}
-                        </div>
-                      </div>
-                    </div>
-                  `
-                }).join('')
-              }
-            </div>
-          `)
-        } else {
-          diffHTML.innerHTML(tile, `
-            <div class="player-hud">
-              <div class="score-label">
-                ${score}
-              </div>
-              <div class="health-label">
-                ${[...new Array(health)].map(() => {
-                  return '<span class="health-tick"></span>'
-                }).join('')}
-              </div>
-              <div class="instrument-label">
-                ${ancestry} ${classy} ${moral} ${ethics} ${skill}
-                ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}
-              </div>
-            </div>
-            <div class="camera" data-slot="${slot}">
-              ${renderCamera(slot, player, { offsetLabel })}
-              <div class="game-over">
-                A one-of-a-kind ${ancestry} of ${moral} moral. And the most ${ethics} ${classy}. From your sheer talent on the ${playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'}, to your passion for ${skill}, you will be remembered. Rest in peace. <strong>Final Score: ${score}</strong><br><br>Play Again?
-              </div>
-            </div>
-          `)
-        }
+      if(snapshot) {
+        displayByMode(target, snapshot, function singleFps() {
+          const { players } = snapshot
+          if(players[slot]) {
+            const player = players[slot] || newPlayer
+            renderTile(tile, parseInt(slot), player)
+          } 
+        })
       } else {
-        if(tile.querySelector('qr-code')) return
-        const url = plan98.env.PLAN98_PEER
-          ?`http://${plan98.env.PLAN98_PEER}`
-          :`${window.location.origin}`
         diffHTML.innerHTML(tile, `
-          <div class="no-player-yet" data-slot="${slot}">
-            <div class="join-code" data-slot="${slot}">
-              <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=elegant"></qr-code>
-            </div>
-          </div>
+          Ready
         `)
       }
     })
 
-    afterUpdate(target)
-  })
+    return
+  } else {
+    if(!target.innerHTML) {
+      target.innerHTML = `
+        <div class="system-container"></div>
+        <div class="pause-container"></div>
+        <div class="split-screen">
+          <div class="tile" data-slot="0"></div>
+          <div class="tile" data-slot="1"></div>
+          <div class="tile" data-slot="2"></div>
+          <div class="tile" data-slot="3"></div>
+        </div>
+      `
+    }
+    requestAnimationFrame(() => {
+      displayByMode(target, $.learn(), function multiSplit3ps() {
+        const { tiles, players } = $.learn()
+        tiles.map((slot) => {
+          const tile = target.querySelector(`.tile[data-slot="${slot}"]`)
+          if(players[slot]) {
+            const player = players[slot] || newPlayer
+            renderTile(tile, slot, player)
+          } else {
+            if(tile.querySelector('qr-code')) return
+            const url = plan98.env.PLAN98_PEER
+              ?`http://${plan98.env.PLAN98_PEER}`
+              :`${window.location.origin}`
+            diffHTML.innerHTML(tile, `
+              <div class="no-player-yet" data-slot="${slot}">
+                <div class="join-code" data-slot="${slot}">
+                  <qr-code target="_blank" data-bg="transparent" src="${url}/app/couch-coop?id=${partyId}&slot=${slot}&controller=true&variation=elegant"></qr-code>
+                </div>
+              </div>
+            `)
+          }
+        })
+      })
+
+      afterHostUpdate(target)
+    })
+  }
 })
 
-function afterUpdate(target) {
+function renderTile(tile, slot, player) {
+  const {
+    settingsKey,
+    settingsOpen,
+    circleIndex,
+    activeNotes,
+    frequencyOffset,
+    ancestry,
+    classy,
+    moral,
+    skill,
+    ethics,
+    score,
+    instrument,
+    health,
+    dead
+  } = player
+
+  //const instrument = playerInstruments[slot] ? playerInstruments[slot].name : 'loading...'
+  const { label } = circleInfo(circleIndex)
+  const offsetNoteIndex = noteLabels.findIndex(x => x === label) + frequencyOffset
+  const offsetLabel = frequencyOffset=== 0
+    ? label
+    : noteLabels[mod(offsetNoteIndex, noteLabels.length)]
+
+  tile.dataset.dead = dead
+
+  if(settingsOpen) {
+    diffHTML.innerHTML(tile, `
+      <div class="menu-list">
+        ${
+          Object.keys(settings).map((key, i) => {
+            const setting = settings[key]
+            return `
+              <div aria-role="button" class="setting ${settingsKey === key ? 'focused':''}" data-key="${key}">
+                <div class="setting-label">
+                  ${setting.label}
+                </div>
+                <div class="setting-description">
+                  ${setting.description}
+                </div>
+                <div class="options-list">
+                  <div class="setting-options">
+                    ${setting.options.map((x) => {
+                      return `
+                        <button data-setting="${key}" data-value="${x}" class="option ${player[key] === x?'selected':''}">
+                          ${x}
+                        </button>
+                      `
+                    }).join('')}
+                  </div>
+                </div>
+              </div>
+            `
+          }).join('')
+        }
+      </div>
+    `)
+  } else {
+    diffHTML.innerHTML(tile, `
+      <div class="player-hud">
+        <div class="score-label">
+          ${score}
+        </div>
+        <div class="health-label">
+          ${[...new Array(health)].map(() => {
+            return '<span class="health-tick"></span>'
+          }).join('')}
+        </div>
+        <div class="instrument-label">
+          ${ancestry} ${classy} ${moral} ${ethics} ${skill} ${instrument}
+        </div>
+      </div>
+      <div class="camera" data-slot="${slot}">
+        ${renderCamera(slot, player, { offsetLabel })}
+        <div class="game-over">
+          A one-of-a-kind ${ancestry} of ${moral} moral. And the most ${ethics} ${classy}. From your sheer talent on the ${instrument}, to your passion for ${skill}, you will be remembered. Rest in peace. <strong>Final Score: ${score}</strong><br><br>Play Again?
+        </div>
+      </div>
+    `)
+  }
+}
+
+function afterHostUpdate(target) {
   {
     const { tiles, players } = $.learn()
     tiles.forEach(slot => {
@@ -1306,6 +1353,21 @@ $.style(`
   &[data-mode="${romModes.system}"] .system-container {
     display: block;
   }
+
+  & .solo-screen {
+    height: 100%;
+    opacity: 1;
+    overflow: auto;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas: "first second" "third fourth";
+    gap: .5rem;
+  }
+
 
   & .split-screen {
     height: 100%;

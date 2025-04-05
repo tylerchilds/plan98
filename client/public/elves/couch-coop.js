@@ -147,7 +147,7 @@ $.draw((target) => {
   if(slot) {
     const controller = target.querySelector('.controller')
     if(controller) return
-    return renderController(slot, variation)
+    return renderController(target, slot, variation)
   }
 
   if(target.querySelector('.viewport')) return
@@ -160,10 +160,13 @@ $.draw((target) => {
   `
 })
 
-function renderController(slot, variation) {
+function renderController(target, slot, variation) {
   return `
     <div class="controller" data-slot="${slot}" data-variation="${variation}">
-      <div class="gamepad-top">
+      <div class="camera">
+        <${rom} data-party-id="${target.id}"  data-slot="${slot}" data-solo="true"></${rom}>
+      </div>
+      <div class="touchable gamepad-top">
         <button key="a" class="clear" data-slot="${slot}" data-press="select">
           <sl-icon name="gear-wide-connected"></sl-icon>
         </button>
@@ -174,7 +177,7 @@ function renderController(slot, variation) {
           <sl-icon name="universal-access-circle"></sl-icon>
         </button>
       </div>
-      <div class="gamepad-left">
+      <div class="touchable gamepad-left">
         <button key="up" class="gray" data-press="up">
           <sl-icon name="caret-up-fill"></sl-icon>
         </button>
@@ -188,7 +191,7 @@ function renderController(slot, variation) {
           <sl-icon name="caret-right-fill"></sl-icon>
         </button>
       </div>
-      <div class="gamepad-right">
+      <div class="touchable gamepad-right">
         <button key="a" class="green" data-press="a">A</button>
         <button key="b" class="red" data-press="b">B</button>
         <button key="x" class="blue" data-press="x">X</button>
@@ -384,6 +387,18 @@ $.style(`
     -webkit-tap-highlight-color: transparent;
   }
 
+  & .camera {
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  & .touchable {
+    position: relative;
+    z-index: 5;
+  }
+
   & .viewport {
     height: 100%;
   }
@@ -427,6 +442,7 @@ $.style(`
     display: grid;
     grid-template-rows: auto 10px 1fr;
     grid-template-areas: "toppad" "leftpad" "rightpad";
+    position: relative;
   }
 
   & .controller[data-slot="0"] {
