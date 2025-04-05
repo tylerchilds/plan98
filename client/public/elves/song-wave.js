@@ -846,14 +846,14 @@ function displayByMode(target, state, callback) {
 
   const systemContainer = target.querySelector('.system-container')
   if(mode === romModes.system) {
-    diffHTML.innerHTML(systemContainer, renderSystem())
+    diffHTML.innerHTML(systemContainer, renderSystem(state))
     return
   }
 
 
   const pauseContainer = target.querySelector('.pause-container')
   if(mode === romModes.pause) {
-    diffHTML.innerHTML(pauseContainer, renderPause())
+    diffHTML.innerHTML(pauseContainer, renderPause(state))
     return
   } else {
     diffHTML.innerHTML(pauseContainer, '')
@@ -905,16 +905,51 @@ $.draw((target) => {
       const tile = target.querySelector(`.tile[data-slot="${slot}"]`)
       if(snapshot) {
         displayByMode(target, snapshot, function singleFps() {
-          const { players } = snapshot
+          const { mode, players } = snapshot
           if(players[slot]) {
             const player = players[slot] || newPlayer
             renderTile(tile, parseInt(slot), player)
-          } 
+
+            {
+              if(mode === romModes.pause) {
+                const active = target.querySelector('.menu-link.active')
+                if(active) {
+                  active.scrollIntoView()
+                }
+              }
+            }
+
+            const { settingsKey, settingsOpen } = player
+            if(!settingsOpen) return
+
+            {
+              const column = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused .option.selected`)
+              if(column && target[slot + 'column'] !== player[settingsKey]) {
+                target[slot + 'column'] = player[settingsKey]
+                column.scrollIntoView({
+                  inline: "center"    // Scrolls only in the inline direction
+                });
+                const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
+                if(row) {
+                  row.scrollIntoView({
+                    block: "start"
+                  })
+                }
+              }
+            }
+            {
+              const row = target.querySelector(`.tile[data-slot="${slot}"] .setting.focused`)
+              if(row && target[slot + 'row'] !== settingsKey) {
+                target[slot + 'row'] = settingsKey
+                row.scrollIntoView({
+                  block: "start"
+                })
+              }
+            }
+          }
         })
       } else {
-        diffHTML.innerHTML(tile, `
-          Ready
-        `)
+        diffHTML.innerHTML(tile, '<flying-disk></flying-disk>')
       }
 
       afterPeerUpdate(target)
@@ -1044,6 +1079,7 @@ function renderTile(tile, slot, player) {
 }
 
 function afterPeerUpdate(target) {
+  
   {
     const theme = getTheme()
     if(target.theme !== theme) {
@@ -1244,8 +1280,8 @@ function renderPiano(slot, offsetLabel) {
   }).join('')
 }
 
-function renderSystem() {
-  const { systemUrl, systemMenu, systemIndex, systemKey } = $.learn()
+function renderSystem(state) {
+  const { systemUrl, systemMenu, systemIndex, systemKey } = state
   const { list, label } = systemMenu[systemKey]
 
   if(systemUrl) {
@@ -1276,8 +1312,8 @@ function renderSystem() {
 }
 
 
-function renderPause() {
-  const { pauseMenu, pauseIndex, pauseKey } = $.learn()
+function renderPause(state) {
+  const { pauseMenu, pauseIndex, pauseKey } = state
   const { list, label } = pauseMenu[pauseKey]
 
   const items = list.map((item, i) => {
