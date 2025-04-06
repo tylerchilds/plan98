@@ -1490,12 +1490,13 @@ $.style(`
   & .tile .player-hud {
     position: absolute;
     display: grid;
-    padding: 1rem;
+    padding: .5rem;
     gap: .5rem;
     max-width: 320px;
     width: 100%;
     grid-template-columns: 1fr;
     z-index: 110;
+    border-radius: 0;
   }
 
   & .tile[data-dead="true"] .player-hud {
@@ -1520,6 +1521,7 @@ $.style(`
   }
 
   & .score-label {
+    text-align: right;
     white-space: nowrap;
     color: rgba(255,255,255,.5);
     font-weight: bold;
@@ -1530,7 +1532,7 @@ $.style(`
 
 
   & .health-bar {
-    background: firebrick;
+    background: var(--slot-color, firebrick);
     width: var(--health-width);
     height: 100%;
   }
@@ -1547,36 +1549,31 @@ $.style(`
   & .tile[data-slot="0"] .player-hud {
     top: 1rem;
     left: 0;
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--green, mediumseagreen);
-    border-radius: 0 1rem 1rem 0;
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--green, mediumseagreen);
   }
 
   & .tile[data-slot="1"] .player-hud {
     top: 1rem;
     right: 0;
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--red, firebrick);
-    border-radius: 1rem 0 0 1rem;
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--red, firebrick);
   }
 
   & .tile[data-slot="2"] .player-hud {
     top: 1rem;
     left: 0;
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--yellow, gold);
-    border-radius: 0 1rem 1rem 0;
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--yellow, gold);
   }
 
   & .tile[data-slot="3"] .player-hud {
     top: 1rem;
     right: 0;
-    background: linear-gradient(335deg, rgba(0,0,0,.85), rgba(0,0,0,.65)), var(--blue, dodgerblue);
-    border-radius: 1rem 0 0 1rem;
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--blue, dodgerblue);
   }
 
   & .solo-screen .tile .player-hud {
     left: auto;
     right: 0;
     top: 3rem;
-    border-radius: 1rem 0 0 1rem;
     text-align: right;
   }
 
