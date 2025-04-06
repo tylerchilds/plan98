@@ -233,6 +233,7 @@ const newPlayer = {
   score: newScore(),
   health: newHealth(),
   maxHealth: MAX_HEALTH,
+  streak: 0,
   enemies: newEnemies(),
   settingsOpen: false,
   circleIndex: 1,
@@ -336,6 +337,7 @@ const actionEffects = {
         $.teach({
           dead: false,
           settingsOpen: false,
+          streak: 0,
           score: newScore(),
           health: newHealth(),
           enemies: newEnemies()
@@ -803,18 +805,21 @@ function score(slot, note) {
   const { players } = $.learn()
 
   if(players[slot] && !players[slot].dead) {
-    const { enemies, score, scoringType } = players[slot]
+    const { enemies, score, streak, scoringType } = players[slot]
     const noteLabel = noteLabels[mod(note, noteLabels.length)]
     const alive = Object.keys(enemies[noteLabel])
 
     if(alive.length > 0) {
       const { bpm } = enemies[noteLabel][alive[0]]
 
-      const nextScore = score + (bpm || 20)
+      const newStreak = streak + 1
+      const streakMultiplier = parseInt(streak / 8 ) + 1
+      const nextScore = score + ((bpm || 20) * streakMultiplier)
       const newEnemies = remove(alive[0], noteLabel, enemies)
       const nextFrame = {
         score: nextScore,
         enemies: newEnemies,
+        streak: newStreak
       }
 
       if(scoringType === 'cooperative') {
@@ -822,6 +827,8 @@ function score(slot, note) {
       } else {
         $.teach(nextFrame, mergePlayer(slot))
       }
+    } else {
+      $.teach({ streak: 0 }, mergePlayer(slot))
     }
   }
 }
