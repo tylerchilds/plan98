@@ -896,6 +896,7 @@ function displayByMode(target, state, callback) {
   callback()
 }
 
+/*
 function listenForGamestateSnapshot(target) {
   channel.onConnect(error => {
     if (error) {
@@ -916,6 +917,7 @@ function listenForGamestateSnapshot(target) {
     })
   })
 }
+*/
 
 
 $.draw((target) => {
@@ -923,7 +925,7 @@ $.draw((target) => {
 
   if(slot && solo === "true") {
     if(!target.innerHTML) {
-      listenForGamestateSnapshot(target)
+      //listenForGamestateSnapshot(target)
       target.innerHTML = `
         <div class="system-container"></div>
         <div class="pause-container"></div>
