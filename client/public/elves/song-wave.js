@@ -1068,7 +1068,7 @@ function renderTile(tile, slot, player) {
           ${score}
         </div>
       </div>
-      <div class="camera" data-slot="${slot}">
+      <div class="perspective" data-slot="${slot}">
         ${renderCamera(slot, player, { offsetLabel })}
         <div class="game-over">
           A one-of-a-kind ${ancestry} of ${moral} moral. And the most ${ethics} ${classy}. From your sheer talent on the ${instrument}, to your passion for ${skill}, you will be remembered. Rest in peace. <strong>Final Score: ${score}</strong><br><br>Play Again?
@@ -1151,13 +1151,13 @@ function renderCamera(slot, player, data) {
     <div class="skybox">
       <div class="floor">
         <div class="ufo-grid">
-          ${renderUFOs()}
+          ${renderUFOs(slot, player, data)}
         </div>
         <div class="wave-grid">
-          ${renderEnemies(slot, player)}
+          ${renderEnemies(slot, player, data)}
         </div>
         <div class="piano">
-          ${renderPiano(slot, data.offsetLabel)}
+          ${renderPiano(slot, player, data)}
         </div>
       </div>
     </div>
@@ -1179,10 +1179,10 @@ const pianoKeys = [
   { type: 'accidental', key: "Bb" },
 ]
 
-function renderUFOs() {
+function renderUFOs(slot, player, data) {
   return pianoKeys.map(x => {
     return `
-      <div class="attack-lane ${x.type}" data-key="${x.key}"></div>
+      <div class="attack-lane ${x.type} ${x.key === data.offsetLabel ?'active-lane':'' }" data-key="${x.key}"></div>
     `
   }).join('')
 }
@@ -1253,12 +1253,12 @@ function enemyLoop() {
 
 requestAnimationFrame(enemyLoop)
 
-function renderEnemies(slot, player) {
+function renderEnemies(slot, player, data={}) {
   const { enemies } = player || newPlayer
   return pianoKeys.map(x => {
     const enemiesByType = enemies[x.key] || {}
     return `
-      <div class="attack-lane ${x.type}" data-key="${x.key}">
+      <div class="attack-lane ${x.type} ${x.key === data.offsetLabel ?'active-lane':'' }" data-key="${x.key}">
         ${Object.keys(enemiesByType).map(id => {
           return `
             <div class="enemy-sprite" key="${id}" data-note="${x.key}" data-slot="${slot}"></div>
@@ -1269,11 +1269,11 @@ function renderEnemies(slot, player) {
   }).join('')
 }
 
-function renderPiano(slot, offsetLabel) {
+function renderPiano(slot, player, data={}) {
   return pianoKeys.map(x => {
     return `
       <button class="${x.type}" data-key="${x.key}">
-        ${x.key === offsetLabel ? `<div class="player-sprite" data-slot="${slot}"></div>`:''}
+        ${x.key === data.offsetLabel ? `<div class="player-sprite" data-slot="${slot}"></div>`:''}
       </button>
 
     `
@@ -1455,7 +1455,7 @@ $.style(`
     margin: 0;
   }
 
-  & .tile {
+  & .split-screen .tile {
     height: 100%;
     overflow: hidden;
     position: relative;
@@ -1565,6 +1565,7 @@ $.style(`
     background: var(--green, mediumseagreen);
     border-radius: 100%;
   }
+
 
   & .player-sprite[data-slot="1"] {
     background: var(--red, firebrick);
@@ -1759,7 +1760,7 @@ $.style(`
     border-left: 2px solid var(--root-theme);
   }
 
-  & .camera {
+  & .perspective {
     height: 100%;
     width: 100%;
     position: relative;
@@ -1794,7 +1795,7 @@ $.style(`
     transform-style: preserve-3d;
   }
 
-  & .skybox .floor {
+  & .split-screen .skybox .floor {
     background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--green, mediumseagreen);
     transform-origin: bottom;
     transform: rotateX(60deg) translate(0, 0);
@@ -1804,13 +1805,33 @@ $.style(`
    transform-style: preserve-3d;
   }
 
-  & .ufo-grid,
-  & .wave-grid {
+  & .solo-screen .skybox .floor {
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--green, mediumseagreen);
+    display: grid;
+    grid-template-areas: 'ground-floor';
+    position: relative;
+   transform-style: preserve-3d;
+  }
+
+  & .solo-screen .skybox .floor > * {
+    grid-area: ground-floor;
+  }
+
+
+  & .split-screen .ufo-grid,
+  & .split-screen .wave-grid {
     grid-template-columns: repeat(7, 1fr);
     grid-template-areas: "C D E F G A B";
     display: grid;
     height: 100%;
     width: 50%;
+    margin: auto;
+  }
+
+  & .solo-screen .ufo-grid,
+  & .solo-screen .wave-grid {
+    height: 100%;
+    width: 100%;
     margin: auto;
   }
 
@@ -1820,7 +1841,7 @@ $.style(`
     z-index: 4;
   }
 
-  & .wave-grid::before{
+  & .split-screen .wave-grid::before{
     content: '';
     background: linear-gradient(rgba(0,0,0,0), rgba(0,0,0,.85));
     z-index: 2;
@@ -1828,7 +1849,7 @@ $.style(`
     inset: 0;
   }
 
-  & .ufo-grid {
+  & .split-screen .ufo-grid {
     opacity: .65;
     transform: rotateX(-15deg) translateY(-50%);
     position: absolute;
@@ -1839,33 +1860,69 @@ $.style(`
     height: 30%;
   }
 
-  & .ufo-grid .attack-lane {
+  & .split-screen .ufo-grid .attack-lane {
     clip-path: polygon(100% 100%, 50% 0%, 0% 100%);
   }
 
-  & .ufo-grid .attack-lane::before {
+  & .split-screen .ufo-grid .attack-lane::before {
     content: '';
     background: linear-gradient(rgba(255,255,255,.75), rgba(0,0,0,.25));
-    opacity: .85;
+    opacity: .5;
     z-index: 2;
     position: absolute;
     inset: 0;
   }
 
-  & .attack-lane {
+  & .split-screen .ufo-grid .active-lane::before {
+    opacity: 1;
+  }
+
+  & .split-screen .attack-lane {
     display: grid;
     grid-area: lane;
     position: relative;
+    opacity: .4;
   }
 
-  & .attack-lane.natural {
+  & .split-screen .attack-lane.active-lane {
+    opacity: .9;
   }
 
-  & .attack-lane.accidental {
+  & .split-screen .attack-lane.accidental.active-lane {
+    //filter: brightness(3);
+    background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), black;
+  }
+
+  & .split-screen .attack-lane.natural {
+  }
+
+  & .split-screen .attack-lane.accidental {
     width: 50%;
   }
 
-  & .piano {
+  & .solo-screen .attack-lane {
+    display: grid;
+    grid-area: lane;
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    opacity: 0;
+  }
+
+  & .solo-screen .attack-lane.active-lane {
+    opacity: 1;
+  }
+
+  & .solo-screen .attack-lane.accidental.active-lane {
+    //filter: brightness(3);
+    background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), black;
+  }
+
+  & .solo-screen .piano {
+    display: none;
+  }
+
+  & .split-screen .piano {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     grid-template-areas: "C D E F G A B";
@@ -1880,7 +1937,7 @@ $.style(`
     z-index: 10;
   }
 
-  & .piano [data-key] {
+  & .split-screen .piano [data-key] {
     border: none;
     border-radius: 3px;
     width: 100%;
@@ -1891,17 +1948,17 @@ $.style(`
     place-items: center;
   }
 
-  & .piano .accidental .player-sprite {
+  & .split-screen .piano .accidental .player-sprite {
     opacity: .65;
   }
 
-  & .piano .natural[data-key] {
+  & .split-screen .piano .natural[data-key] {
     background: white;
     border: 1px solid black;
     padding: 25%;
   }
 
-  & .piano .accidental[data-key] {
+  & .split-screen .piano .accidental[data-key] {
     background: black;
     z-index: 6;
     width: 50%;
@@ -1973,6 +2030,7 @@ $.style(`
     grid-area: C;
   }
 
+
   & .attack-lane[data-key="Cs"],
   & .piano [data-key="Cs"] {
     grid-area: D;
@@ -2033,7 +2091,27 @@ $.style(`
     transform: translate(-50%, 0);
   }
 
-  & .enemy-sprite {
+  & .solo-screen .attack-lane[data-key="Cs"],
+  & .solo-screen .attack-lane[data-key="Eb"],
+  & .solo-screen .attack-lane[data-key="Fs"],
+  & .solo-screen .attack-lane[data-key="Ab"], 
+  & .solo-screen .attack-lane[data-key="Bb"] {
+    transform: translate(0, 0);
+  }
+
+  & .solo-screen .ufo-grid,
+  & .solo-screen .wave-grid {
+    position: relative;
+  }
+
+  & .solo-screen .ufo-grid .attack-lane,
+  & .solo-screen .wave-grid .attack-lane {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle, transparent 0%, var(--wheel-color) 100%);
+  }
+
+  & .split-screen .enemy-sprite {
     grid-area: lane;
     z-index: 4;
     transform-style: preserve-3d;
@@ -2043,11 +2121,11 @@ $.style(`
     padding: 0 15%;
   }
 
-  & .attack-lane.natural .enemy-sprite {
+  & .split-screen .attack-lane.natural .enemy-sprite {
     padding: 0 33%;
   }
 
-  & .enemy-sprite::before {
+  & .split-screen .enemy-sprite::before {
     content: '';
     width: 100%;
     aspect-ratio: 1;
@@ -2075,6 +2153,37 @@ $.style(`
       transform: translateY(100%);
     }
   }
+  
+
+  @keyframes &-enemy-scale {
+    0% {
+      transform: scale(.01);
+    }
+
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  & .solo-screen .enemy-sprite {
+    grid-area: lane;
+    z-index: 4;
+    transform-style: preserve-3d;
+    animation: &-enemy-scale 5000ms ease-in forwards;
+    width: 100vmin;
+    height: 100vmin;
+    margin: auto;
+  }
+
+  & .solo-screen .enemy-sprite::before {
+    content: '';
+    width: 100%;
+    aspect-ratio: 1;
+    background-color: lemonchiffon;
+    animation: &-floppy ease-in-out 1000ms infinite alternate-reverse;
+    display: block;
+  }
+
 `)
 
 function uuidv4() {
