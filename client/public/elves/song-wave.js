@@ -338,6 +338,9 @@ const actionEffects = {
     $.teach({
       mode: romModes.play
     })
+
+    setBpm(bpmOptions[0])
+    difficultyLoop()
   },
   'restart': () => {
     $.teach({
@@ -797,9 +800,12 @@ function score(slot, note) {
     const alive = Object.keys(enemies[noteLabel])
 
     if(alive.length > 0) {
+      const { bpm } = enemies[noteLabel][alive[0]]
+
+      const nextScore = score + (bpm || 20)
       const newEnemies = remove(alive[0], noteLabel, enemies)
       $.teach({
-          score: score+1,
+          score: nextScore,
           enemies: newEnemies,
         },
         mergePlayer(slot)
@@ -1209,6 +1215,25 @@ export function quantize(callback) {
   }
 };
 
+let difficultyTimeout
+
+function difficultyLoop() {
+  if(difficultyTimeout) {
+    clearTimeout(difficultyTimeout)
+  }
+
+  if(parseInt(getBpm() > 350)) {
+    return
+  }
+
+  difficultyTimeout = setTimeout(() => {
+    setBpm(`${parseInt(getBpm()) + 20}`)
+    difficultyLoop()
+  }, 12 * 1000)
+}
+
+difficultyLoop()
+
 function enemyLoop() {
   quantize(function setEnemies() {
     const { players, tiles } = $.learn()
@@ -1233,6 +1258,7 @@ function enemyLoop() {
             ...lastWave[nextNote],
             [nextID]: {
               ...nextKey,
+              bpm: parseInt(getBpm()),
               id: nextID,
             }
           }
@@ -2108,7 +2134,6 @@ $.style(`
   & .solo-screen .wave-grid .attack-lane {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle, transparent 0%, var(--wheel-color) 100%);
   }
 
   & .split-screen .enemy-sprite {
