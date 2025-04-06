@@ -3,7 +3,7 @@ import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { systemMenu, getTheme } from './paper-pocket.js'
-import { gamestateUplink, channel } from './couch-coop.js'
+import { gamestateUplink, gamestateDownlink } from './couch-coop.js'
 
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
@@ -896,28 +896,13 @@ function displayByMode(target, state, callback) {
   callback()
 }
 
-/*
-function listenForGamestateSnapshot(target) {
-  channel.onConnect(error => {
-    if (error) {
-      console.error(error.message)
-      return
-    }
-
-    channel.on('gamestateDownload', (data) => {
-      if(!data.elf) return
-      const { elf, partyId, snapshot } = data
-      if(elf === $.link) {
-        $.teach({ [partyId]: { snapshot } })
-      }
-    })
-
-    channel.on('error', (error) => {
-      console.error("Geckos Error:", error);
-    })
-  })
-}
-*/
+gamestateDownlink((data) => {
+  if(!data.elf) return
+  const { elf, partyId, snapshot } = data
+  if(elf === $.link) {
+    $.teach({ [partyId]: { snapshot } })
+  }
+})
 
 
 $.draw((target) => {

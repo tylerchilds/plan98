@@ -70,6 +70,20 @@ export function gamestateUplink(data) {
   }
 }
 
+const gamestateCallbacks = []
+
+export function gamestateDownlink(callback) {
+  gamestateCallbacks.push(callback)
+}
+
+function notifyGamesOfState(data) {
+  if($.learn().geckosReady) {
+    gamestateCallbacks.forEach(callback => {
+      callback(data)
+    })
+  }
+}
+
 function mount(target) {
   if(target.mounted) return
   target.mounted = true
@@ -86,6 +100,10 @@ function mount(target) {
       $.teach({ geckosReady: true })
 
       joinParty(target.id, slotIndex)
+
+      channel.on('gamestateDownload', (data) => {
+        notifyGamesOfState(data)
+      })
 
       channel.on('error', (error) => {
         console.error("Geckos Error:", error);
