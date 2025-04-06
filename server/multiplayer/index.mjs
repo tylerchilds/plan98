@@ -130,10 +130,12 @@ io.onConnection(channel => {
   });
 
   channel.on('gamestateUpload', (data) => {
+          console.log(data)
     if(currentParty && parties.has(currentParty)) {
       const party = parties.get(currentParty)
       party.channels.forEach(channel => {
         if(channel) {
+          console.log('going')
           channel.emit('gamestateDownload', data)
         }
       })

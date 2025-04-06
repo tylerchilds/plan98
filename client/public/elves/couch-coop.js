@@ -65,7 +65,9 @@ function joinParty(id, slot) {
 }
 
 export function gamestateUplink(data) {
-  channel.emit('gamestateUpload', data)
+  if($.learn().geckosReady) {
+    channel.emit('gamestateUpload', data)
+  }
 }
 
 function mount(target) {
@@ -86,6 +88,7 @@ function mount(target) {
         console.error(error.message)
         return
       }
+      $.teach({ geckosReady: true })
 
       joinParty(target.id, slotIndex)
 
@@ -103,6 +106,7 @@ function mount(target) {
         console.error(error.message)
         return
       }
+      $.teach({ geckosReady: true })
 
       joinParty(target.id, 'host')
 
