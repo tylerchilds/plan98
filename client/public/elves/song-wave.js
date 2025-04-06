@@ -1221,6 +1221,18 @@ function renderUFOs(slot, player, data) {
   }).join('')
 }
 
+const heartSound = new Tone.MembraneSynth({
+  pitchDecay: 0.01,
+  octaves: 1,
+  oscillator: { type: 'sine' },
+  envelope: {
+    attack: 0.001,
+    decay: 0.05,
+    sustain: 0,
+    release: 0.01
+  }
+}).toDestination();
+
 const quantizeInterval = "4n"; // Adjust as needed
 
 let latestCallback = null; // Store the most recent callback
@@ -1263,7 +1275,7 @@ function difficultyLoop() {
 difficultyLoop()
 
 function enemyLoop() {
-  quantize(function setEnemies() {
+  quantize(function setEnemies(time) {
     const { players, tiles } = $.learn()
     const nextNote =  noteLabels[Math.floor(Math.random()*noteLabels.length)]
     const nextKey = pianoKeys.find(x => x.key === nextNote)
@@ -1274,10 +1286,10 @@ function enemyLoop() {
       nextID = uuidv4()
     }
 
-    tiles.map((slot) => {
+    const playerSynopsis = tiles.map((slot) => {
       if(players[slot]) {
         const player = players[slot]
-        const { enemies } = player || { enemies: []}
+        const { dead, enemies } = player || { enemies: []}
 
         const lastWave = { ...enemies }
         const nextWave = {
@@ -1298,8 +1310,21 @@ function enemyLoop() {
         },
           mergePlayer(slot)
         )
+
+        return { dead }
       }
+
+      return null
     })
+
+    const allDead = playerSynopsis.filter(alive => alive !== null).every(({ dead }) => {
+      return dead
+    })
+
+    if(!allDead) {
+      heartSound.volume.value = -15; // Very quiet, adjust as needed
+      heartSound.triggerAttackRelease('C3', '8n', time);
+    }
   })
 
   requestAnimationFrame(enemyLoop)
@@ -1821,6 +1846,7 @@ $.style(`
     height: 100%;
     width: 100%;
     position: relative;
+    overflow: hidden;
   }
 
   & .game-over {
@@ -1850,6 +1876,11 @@ $.style(`
     perspective-origin: center;
     perspective: 500px;
     transform-style: preserve-3d;
+  }
+
+  & .solo-screen .skybox {
+    transform: scale(.5);
+    overflow: visible;
   }
 
   & .split-screen .skybox .floor {
@@ -2217,7 +2248,7 @@ $.style(`
     }
 
     100% {
-      transform: scale(1);
+      transform: scale(2);
     }
   }
 
