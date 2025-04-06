@@ -1487,6 +1487,12 @@ $.style(`
     position: relative;
   }
 
+  & .solo-screen .tile {
+    height: 100%;
+    overflow: auto;
+    position: relative;
+  }
+
   & .tile .player-hud {
     position: absolute;
     display: grid;
