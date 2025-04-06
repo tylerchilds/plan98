@@ -78,11 +78,6 @@ function mount(target) {
     const slot = target.getAttribute('slot')
     slotIndex = parseInt(slot)
 
-    // controller
-    $.teach({
-      slot
-    })
-
     channel.onConnect(error => {
       if (error) {
         console.error(error.message)
@@ -95,6 +90,11 @@ function mount(target) {
       channel.on('error', (error) => {
         console.error("Geckos Error:", error);
       })
+    })
+
+    // controller
+    $.teach({
+      slot
     })
 
     controllerLoop.call(target)
