@@ -8,6 +8,8 @@ import { gamestateUplink, channel } from './couch-coop.js'
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
+const scoringTypes = ['cooperative', 'competitive']
+
 Tone.Transport.start();
 
 const defaultInstruments = ['piano', 'piano', 'piano', 'piano']
@@ -112,6 +114,11 @@ const settings = {
     label: 'Instrument',
     description: 'What honk are you?',
     options: instruments,
+  },
+  scoringType: {
+    label: 'Scoring',
+    description: 'How should the waves be counted, together or separate?',
+    options: scoringTypes,
   },
   classy: {
     label: 'Class',
@@ -231,6 +238,7 @@ const newPlayer = {
   circleIndex: 1,
   frequencyOffset: 0,
   activeNotes: [],
+  scoringType: 'cooperative',
   classy: 'Bard',
   skill: 'Crafting',
   ancestry: 'Human',
@@ -795,7 +803,7 @@ function score(slot, note) {
   const { players } = $.learn()
 
   if(players[slot] && !players[slot].dead) {
-    const { enemies, score } = players[slot]
+    const { enemies, score, scoringType } = players[slot]
     const noteLabel = noteLabels[mod(note, noteLabels.length)]
     const alive = Object.keys(enemies[noteLabel])
 
@@ -804,12 +812,16 @@ function score(slot, note) {
 
       const nextScore = score + (bpm || 20)
       const newEnemies = remove(alive[0], noteLabel, enemies)
-      $.teach({
-          score: nextScore,
-          enemies: newEnemies,
-        },
-        mergePlayer(slot)
-      )
+      const nextFrame = {
+        score: nextScore,
+        enemies: newEnemies,
+      }
+
+      if(scoringType === 'cooperative') {
+        syncBoard(nextFrame)
+      } else {
+        $.teach(nextFrame, mergePlayer(slot))
+      }
     }
   }
 }
@@ -827,6 +839,15 @@ function remove(id, noteLabel, enemies) {
     ...enemies,
     [noteLabel]: { ... stillAlive }
   }
+}
+
+function syncBoard(nextFrame) {
+  const { players, tiles } = $.learn()
+  tiles.map((slot) => {
+    if(players[slot]) {
+      $.teach(nextFrame, mergePlayer(slot))
+    }
+  })
 }
 
 function mergePlayer(slot) {
