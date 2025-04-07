@@ -932,10 +932,23 @@ $.draw((target) => {
             renderTile(tile, parseInt(slot), player)
 
             {
-              if(mode === romModes.pause) {
+              if(mode === romModes.pause || mode === romModes.system) {
                 const active = target.querySelector('.menu-link.active')
                 if(active) {
                   active.scrollIntoView()
+                }
+              }
+            }
+
+            {
+              if(mode === romModes.play) {
+                const active = target.querySelector('.solo-screen .wave-grid .active-lane')
+                if(active && active.dataset.key !== target.lastActiveKey) {
+                  target.lastActiveKey = active.dataset.key
+                  active.scrollIntoView({
+                    block: 'nearest',
+                    inline: 'center'
+                  })
                 }
               }
             }
@@ -1095,6 +1108,7 @@ function renderTile(tile, slot, player) {
           A one-of-a-kind ${ancestry} of ${moral} moral. And the most ${ethics} ${classy}. From your sheer talent on the ${instrument}, to your passion for ${skill}, you will be remembered. Rest in peace. <strong>Final Score: ${score}</strong><br><br>Play Again?
         </div>
       </div>
+      <div class="minimap">${renderMinimap(slot,player, { offsetLabel })}</div>
     `)
   }
 }
@@ -1150,7 +1164,7 @@ function afterHostUpdate(target) {
 
   {
     const { mode } = $.learn()
-    if(mode === romModes.pause) {
+    if(mode === romModes.pause || mode === romModes.system) {
       const active = target.querySelector('.menu-link.active')
       if(active) {
         active.scrollIntoView()
@@ -1187,17 +1201,17 @@ function renderCamera(slot, player, data) {
 
 const pianoKeys = [
   { type: 'natural', key: "C" },
+  { type: 'accidental', key: "Cs" },
   { type: 'natural', key: "D" },
+  { type: 'accidental', key: "Eb" },
   { type: 'natural', key: "E" },
   { type: 'natural', key: "F" },
-  { type: 'natural', key: "G" },
-  { type: 'natural', key: "A" },
-  { type: 'natural', key: "B" },
-  { type: 'accidental', key: "Cs" },
-  { type: 'accidental', key: "Eb" },
   { type: 'accidental', key: "Fs" },
+  { type: 'natural', key: "G" },
   { type: 'accidental', key: "Ab" },
+  { type: 'natural', key: "A" },
   { type: 'accidental', key: "Bb" },
+  { type: 'natural', key: "B" },
 ]
 
 function renderUFOs(slot, player, data) {
@@ -1318,6 +1332,21 @@ function enemyLoop() {
 }
 
 requestAnimationFrame(enemyLoop)
+
+function renderMinimap(slot, player, data={}) {
+  const { enemies } = player || newPlayer
+  return pianoKeys.map(x => {
+    const enemiesByType = enemies[x.key] || {}
+    const enemiesCount = Object.keys(enemiesByType).length
+    return `
+      <div class="attack-lane minimap-cell ${x.type} ${x.key === data.offsetLabel ?'active-cell':'' }" data-key="${x.key}">
+        <div class="enemy-count">${enemiesCount}</div>
+      </div>
+    `
+  }).join('')
+}
+
+
 
 function renderEnemies(slot, player, data={}) {
   const { enemies } = player || newPlayer
@@ -1463,10 +1492,11 @@ $.style(`
     color: white;
     width: 100%;
     height: 100%;
+    position: relative;
   }
 
   & .pause-container {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
     backdrop-filter: blur(10px);
@@ -1479,7 +1509,7 @@ $.style(`
   }
 
   & .system-container {
-    position: fixed;
+    position: absolute;
     inset: 0;
     background: linear-gradient(335deg, rgba(255,255,255, .65), rgba(0,0,0,.65));
     backdrop-filter: blur(10px);
@@ -1546,7 +1576,8 @@ $.style(`
     border-radius: 0;
   }
 
-  & .tile[data-dead="true"] .player-hud {
+  & .tile[data-dead="true"] .player-hud,
+  & .tile[data-dead="true"] .minimap {
     display: none;
   }
 
@@ -1593,28 +1624,40 @@ $.style(`
     line-height: 1;
   }
 
+  & .tile[data-slot="0"] {
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--green, mediumseagreen);
+  }
+
+  & .tile[data-slot="1"] {
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--red, firebrick);
+  }
+
+  & .tile[data-slot="2"] {
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--yellow, gold);
+  }
+
+  & .tile[data-slot="3"] {
+    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--blue, dodgerblue);
+  }
+
   & .tile[data-slot="0"] .player-hud {
     top: 1rem;
     left: 0;
-    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--green, mediumseagreen);
   }
 
   & .tile[data-slot="1"] .player-hud {
     top: 1rem;
     right: 0;
-    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--red, firebrick);
   }
 
   & .tile[data-slot="2"] .player-hud {
     top: 1rem;
     left: 0;
-    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--yellow, gold);
   }
 
   & .tile[data-slot="3"] .player-hud {
     top: 1rem;
     right: 0;
-    --slot-color: linear-gradient(335deg, rgba(0,0,0,.65), rgba(0,0,0,.35)), var(--blue, dodgerblue);
   }
 
   & .solo-screen .tile .player-hud {
@@ -1839,12 +1882,13 @@ $.style(`
 
   & .game-over {
     position: absolute;
+    top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     z-index: 100;
     display: none;
-    background: rgba(0,0,0,.65);
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.45));
     padding: 1rem;
   }
 
@@ -1854,7 +1898,7 @@ $.style(`
 
   & .skybox {
     display: grid;
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--blue, dodgerblue);
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.25)), var(--slot-color, dodgerblue);
     grid-template-areas: 'skybox';
     height: 100%;
     width: 100%;
@@ -1864,15 +1908,11 @@ $.style(`
     perspective-origin: center;
     perspective: 500px;
     transform-style: preserve-3d;
-  }
-
-  & .solo-screen .skybox {
-    transform: scale(.5);
-    overflow: visible;
+    container-name: skybox;
   }
 
   & .split-screen .skybox .floor {
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--green, mediumseagreen);
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.25));
     transform-origin: bottom;
     transform: rotateX(60deg) translate(0, 0);
     position: relative;
@@ -1883,16 +1923,16 @@ $.style(`
 
   & .solo-screen .skybox .floor {
     background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.65)), var(--green, mediumseagreen);
-    display: grid;
-    grid-template-areas: 'ground-floor';
     position: relative;
-   transform-style: preserve-3d;
+    transform-style: preserve-3d;
+    height: 100%;
+    transform: scale(.5);
+    overflow: visible;
   }
 
   & .solo-screen .skybox .floor > * {
     grid-area: ground-floor;
   }
-
 
   & .split-screen .ufo-grid,
   & .split-screen .wave-grid {
@@ -1904,17 +1944,33 @@ $.style(`
     margin: auto;
   }
 
+  & .minimap {
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-areas: "C D E F G A B";
+    display: grid;
+  }
+
   & .solo-screen .ufo-grid,
   & .solo-screen .wave-grid {
     height: 100%;
     width: 100%;
     margin: auto;
+    display: flex;
+    position: absolute;
+    inset: 0;
   }
 
-  & .wave-grid {
+  & .split-screen .wave-grid {
     opacity: .75;
     position: relative;
     z-index: 4;
+  }
+
+  & .solo-screen .ufo-grid {
+    display: none;
+  }
+
+  & .solo-screen .wave-grid {
   }
 
   & .split-screen .wave-grid::before{
@@ -1923,6 +1979,16 @@ $.style(`
     z-index: 2;
     position: absolute;
     inset: 0;
+  }
+
+  & .solo-screen .wave-grid::after{
+    content: '';
+    display: grid;
+    grid-area: lane;
+    opacity: .5;
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
   }
 
   & .split-screen .ufo-grid {
@@ -1965,8 +2031,7 @@ $.style(`
   }
 
   & .split-screen .attack-lane.accidental.active-lane {
-    //filter: brightness(3);
-    background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), black;
+    filter: brightness(2);
   }
 
   & .split-screen .attack-lane.natural {
@@ -1974,15 +2039,16 @@ $.style(`
 
   & .split-screen .attack-lane.accidental {
     width: 50%;
+    z-index: 5;
   }
 
-  & .solo-screen .attack-lane {
+  & .solo-screen .wave-grid .attack-lane {
     display: grid;
     grid-area: lane;
-    position: absolute;
-    inset: 0;
+    opacity: .5;
+    width: 100%;
     height: 100%;
-    opacity: 0;
+    flex-shrink: 0;
   }
 
   & .solo-screen .attack-lane.active-lane {
@@ -1990,8 +2056,7 @@ $.style(`
   }
 
   & .solo-screen .attack-lane.accidental.active-lane {
-    //filter: brightness(3);
-    background: linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)), black;
+    filter: brightness(2);
   }
 
   & .solo-screen .piano {
@@ -2113,6 +2178,16 @@ $.style(`
     transform: translate(-50%, 0);
   }
 
+
+  & .minimap .attack-lane[data-key="Cs"],
+  & .minimap .attack-lane[data-key="Eb"],
+  & .minimap .attack-lane[data-key="Fs"],
+  & .minimap .attack-lane[data-key="Ab"],
+  & .minimap .attack-lane[data-key="Bb"] {
+    transform: translate(-50%, -100%);
+  }
+
+
   & .attack-lane[data-key="D"],
   & .piano [data-key="D"] {
     grid-area: D;
@@ -2167,23 +2242,12 @@ $.style(`
     transform: translate(-50%, 0);
   }
 
-  & .solo-screen .attack-lane[data-key="Cs"],
-  & .solo-screen .attack-lane[data-key="Eb"],
-  & .solo-screen .attack-lane[data-key="Fs"],
-  & .solo-screen .attack-lane[data-key="Ab"], 
-  & .solo-screen .attack-lane[data-key="Bb"] {
+  & .solo-screen .wave-grid .attack-lane[data-key="Cs"],
+  & .solo-screen .wave-grid .attack-lane[data-key="Eb"],
+  & .solo-screen .wave-grid .attack-lane[data-key="Fs"],
+  & .solo-screen .wave-grid .attack-lane[data-key="Ab"], 
+  & .solo-screen .wave-grid .attack-lane[data-key="Bb"] {
     transform: translate(0, 0);
-  }
-
-  & .solo-screen .ufo-grid,
-  & .solo-screen .wave-grid {
-    position: relative;
-  }
-
-  & .solo-screen .ufo-grid .attack-lane,
-  & .solo-screen .wave-grid .attack-lane {
-    position: absolute;
-    inset: 0;
   }
 
   & .split-screen .enemy-sprite {
@@ -2232,11 +2296,11 @@ $.style(`
 
   @keyframes &-enemy-scale {
     0% {
-      transform: scale(.01);
+      transform: scale(.001);
     }
 
     100% {
-      transform: scale(2);
+      transform: scale(1);
     }
   }
 
@@ -2248,6 +2312,8 @@ $.style(`
     width: 100vmin;
     height: 100vmin;
     margin: auto;
+    position: relative;
+    top: -20%;
   }
 
   & .solo-screen .enemy-sprite::before {
@@ -2259,6 +2325,33 @@ $.style(`
     display: block;
   }
 
+  & .split-screen .minimap {
+    display: none;
+  }
+
+  & .solo-screen .minimap {
+    position: absolute;;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    gap: .5rem;
+  }
+
+  & .minimap-cell {
+    background: rgba(0,0,0,.85);
+    color: white;
+    font-size: 1rem;
+    border-radius: 100%;
+    padding: .5rem;
+    display: grid;
+    place-items: center;
+  }
+
+  & .minimap-cell.active-cell {
+    background: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
+  }
 `)
 
 function uuidv4() {
