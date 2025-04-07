@@ -1459,9 +1459,10 @@ $.when('json-rpc', (event) => {
 $.style(`
   & {
     display: block;
-    height: 100%;
     background: black;
     color: white;
+    width: 100%;
+    height: 100%;
   }
 
   & .pause-container {
@@ -1562,7 +1563,7 @@ $.style(`
     grid-column: -1 / 1;
     background: black;
     border: 3px solid white;
-    height: 3rem;
+    height: 5cqh;
     max-width: 100%;
   }
 
@@ -1618,8 +1619,8 @@ $.style(`
 
   & .solo-screen .tile .player-hud {
     left: auto;
-    right: 0;
-    top: 3rem;
+    right: 1cqw;
+    top: 1cqh;
     text-align: right;
   }
 

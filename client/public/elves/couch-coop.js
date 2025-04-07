@@ -450,6 +450,13 @@ $.style(`
     position: absolute;
     inset: 0;
     z-index: 2;
+    display: grid;
+    place-items: center;
+  }
+
+  & .camera > * {
+    height: auto;
+    aspect-ratio: 16 / 9;
   }
 
   & .touchable {
