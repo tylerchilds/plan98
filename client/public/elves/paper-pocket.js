@@ -28,6 +28,10 @@ export const systemMenu = {
         url: '/app/cool-chat'
       },
       {
+        label: 'Song Wave',
+        url: '/app/couch-coop?rom=song-wave'
+      },
+      {
         label: 'Typo Hero',
         url: '/app/paper-pocket?rom=typo-hero'
       },
@@ -284,7 +288,7 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'typo-hero',
+  rom: 'final-boss',
   mode: startMode(),
   backMode: startMode(),
   settingsKey: 'instrument',

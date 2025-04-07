@@ -118,7 +118,7 @@ $.draw((target) => {
       if(bomb && diffused) {
         bomb.remove()
       } else if(bomb) {
-        bomb.innerText = timer
+        bomb.innerText = `Cancel: ${timer} to shuffle`
       }
     }
   }
@@ -756,15 +756,13 @@ $.style(`
 
   & [data-diffuse] {
     position: absolute;
+    left: 0;
+    right: 0;
     top: .75%;
-    right: .75%;
     display: grid;
     place-items: center;
-    width: 20vmin;
-    height: 20vmin;
-    border-radius: 100%;
-    font-size: 5vmin;
-    background: rgba(0,0,0,.5);
+    font-size: 2rem;
+    background: rgba(0,0,0,.65);
     color: rgba(255,255,255,.65);
     border: none;
     font-weight: bold;
