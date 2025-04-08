@@ -118,7 +118,7 @@ $.draw((target) => {
       if(bomb && diffused) {
         bomb.remove()
       } else if(bomb) {
-        bomb.innerText = `Cancel: ${timer} to shuffle`
+        bomb.innerText = `${timer} until boot`
       }
     }
   }
