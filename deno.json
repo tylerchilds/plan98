@@ -9,6 +9,7 @@
     "start-proxy": "caddy run --config Caddyfile",
 
     "start": "deno run -A --unstable mod.js",
+    "start-all": "pup run --config pup.json",
     "compile-client": "deno compile -A --output p98 client.js",
 
     "provision-api": "cd server/api && ./provision.sh",

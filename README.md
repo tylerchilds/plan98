@@ -2,6 +2,10 @@
 
 Paper Pocket + Paper Nautiloids
 
+## Dependencies
+
+pup: `deno run -Ar jsr:@pup/pup setup`
+
 ## From Scratch
 
 First, we need to create a new computer with a literal and metaphorical thumb drive.
