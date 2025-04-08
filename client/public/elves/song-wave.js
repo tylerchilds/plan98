@@ -993,6 +993,9 @@ $.draw((target) => {
   } else {
     if(!target.innerHTML) {
       target.innerHTML = `
+        <div class="newgame-container">
+          Touch the screen or any key to continue.
+        </div>
         <div class="system-container"></div>
         <div class="pause-container"></div>
         <div class="split-screen">
@@ -1506,6 +1509,19 @@ $.style(`
 
   &[data-mode="${romModes.pause}"] .pause-container {
     display: block;
+  }
+
+  & .newgame-container {
+    position: absolute;
+    inset: 0;
+    z-index: 140;
+    background: black;
+    color: white;
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: bold;
+    padding: 1rem;
+    overflow: auto;
   }
 
   & .system-container {
@@ -2361,3 +2377,16 @@ function uuidv4() {
     return v.toString(16);
   });
 }
+
+
+document.addEventListener('keydown', startAudioContext)
+
+function startAudioContext() {
+  document.querySelector('.newgame-container').remove()
+  document.removeEventListener('keydown', startAudioContext)
+}
+
+$.when('pointerdown', '.newgame-container', (event) => {
+  document.removeEventListener('keydown', startAudioContext)
+  event.target.remove()
+})
