@@ -1,0 +1,15 @@
+{
+  "name": "plan98",
+  "processes": [
+    {
+      "id": "plan98-start-client",
+      "cmd": "deno run -A client.js",
+      "autostart": true
+    },
+    {
+      "id": "plan98-start-multiplayer",
+      "cmd": "cd server/multiplayer && npm i && node index.mjs",
+      "autostart": true
+    }
+  ]
+}

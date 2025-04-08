@@ -6,4 +6,5 @@ subsystems/
 cloud.exe
 deno.lock
 npm/
+.pup/
 sillyz.computer/src-tauri/gen
