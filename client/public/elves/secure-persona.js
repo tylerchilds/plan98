@@ -64,22 +64,22 @@ const modes = {
     return `
       <div class="persona-form">
         <div class="persona-title">
-          Create Persona
+          Activate Persona
         </div>
 
         <div class="persona-context">
-          Your moniker is your unique callsign for <strong>${organization}</strong> and cannot be changed once chosen.
+          Your persona is your secure callsign for encrypting data with <strong>${organization}</strong>.
         </div>
         <div>
           <bayun-feedback></bayun-feedback>
         </div>
         <form method="POST" name="insert">
           <label class="field">
-            <span class="label">Moniker</span>
+            <span class="label">Persona</span>
             <input type="text" name="account" required/>
           </label>
           <button class="persona-action" type="submit">
-            Create
+            Activate
           </button>
         </form>
       </div>
@@ -99,7 +99,7 @@ const modes = {
       answer5,
     } = $.learn()
 
-    const moniker = getEmployeeId()
+    const persona = getEmployeeId()
     const organization = getCompanyName()
     return `
       <div class="persona-form">
@@ -108,7 +108,7 @@ const modes = {
         </div>
 
         <div class="persona-context">
-          To establish credentials for <strong>${moniker}@${organization}</strong>, please customize the questionnaire below.
+          To establish credentials for <strong>${persona}@${organization}</strong>, please customize the questionnaire below.
         </div>
         <div>
           <bayun-feedback></bayun-feedback>
@@ -210,7 +210,7 @@ const modes = {
 
     return `
       <div class="persona-title">
-        Authentication Information
+        Secure Persona
       </div>
       <div class="persona-context">
         Session secured as <strong>${companyEmployeeId}@${companyName}</strong> for all friend to friend friendcryption.
@@ -263,11 +263,11 @@ $.when('submit', '[name="insert"]', async (event) => {
   event.preventDefault()
 
   const data = {
-    moniker: event.target.account.value,
+    persona: event.target.account.value,
     organization,
   }
 
-  setEmployeeId(data.moniker)
+  setEmployeeId(data.persona)
   setCompanyName(data.organization)
 
   $.teach({ data })
@@ -315,7 +315,7 @@ async function connect() {
     return
   }
 
-  setEmployeeId(data.moniker)
+  setEmployeeId(data.persona)
   setCompanyName(data.organization)
 
   $.teach({ data })
@@ -711,15 +711,22 @@ $.style(`
   }
 
   & .persona-action {
-    border: none;
     padding: 1rem;
     border-radius: 4px;
-    background: dodgerblue;
-    width: 100%;
     font-weight: bold;
+    margin: 1rem auto;
+    width: 100%;
+    border: none;
     color: white;
-    margin: 1rem 0;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
+
+  & .persona-action:hover,
+  & .persona-action:focus {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
+
 
   & .persona-deactivate {
     background: firebrick;

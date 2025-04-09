@@ -56,8 +56,14 @@ channel.onConnect(error => {
     const { currentRoom } = $.learn()
     if(message.encrypted && currentRoom === rooms.encrypted) {
       const { sessionId } = getSession()
-      const decrypted = await bayunCore.unlockText(sessionId, message.encrypted)
-      message.decrypted = decrypted
+      try {
+
+        const decrypted = await bayunCore.unlockText(sessionId, message.encrypted)
+        message.decrypted = decrypted
+      } catch(e) {
+        console.error(e)
+        message.decrypted = 'failed to decrypt message. are you even authed, bro?'
+      }
     }
 
     $.teach(message, mergeMessage)
@@ -104,14 +110,14 @@ const modeRenderers = {
       newNickname
     } = $.learn()
 
-    const moniker = getEmployeeId()
-    const organization = getCompanyName()
-
     return `
       <div class="settings">
         <div class="settings-area">
           <div class="settings-title">Settings</div>
-          ${moniker}@${organization}
+          <button data-logout class="normal-button">
+            Logout
+          </button>
+          <hr>
           <form method="post" name="change-nickname">
             <p>You may change your nickname with the form below.</p>
             <label class="field" style="grid-area: name;">
@@ -122,9 +128,7 @@ const modeRenderers = {
             <button class="normal-button">Save</button>
           </form>
           <hr>
-          <button data-logout class="normal-button">
-            Logout
-          </button>
+          <secure-persona></secure-persona>
         </div>
       </div>
     `
@@ -240,6 +244,7 @@ function afterUpdate(target) {
 
   { // recover icons from the virtual dom
     recoverElves(target, 'sl-icon')
+    recoverElves(target, 'secure-persona')
   }
 
   {
@@ -399,7 +404,7 @@ async function send(messageText) {
         id: self.crypto.randomUUID(),
         encrypted: encryptedText,
         decrypted: null,
-        author: nickname
+        author: getEmployeeId()
       });
     } else {
       channel.emit('chatMessage', {
