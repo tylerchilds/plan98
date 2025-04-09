@@ -14,10 +14,19 @@ import { bayunCore, BayunCore } from '@sillonious/vault'
 // or add a minified version to your index.html file
 // https://github.com/geckosio/geckos.io/tree/master/bundles
 
+
+const rooms = {
+  general: "General",
+  random: "Random",
+  coding: "Coding",
+  encrypted: "Encrypted",
+}
+
+
 const $ = elf('cool-chat', {
   messages: [],
   participants: [],
-  currentRoom: "general",
+  currentRoom: rooms.general,
   nickname: localStorage.getItem('multiplayer/nickname'),
   password: localStorage.getItem('multiplayer/password'),
   messageText: '',
@@ -82,13 +91,6 @@ function mergeMessage(state, payload) {
     ...state,
     messages: [...state.messages, payload]
   }
-}
-
-const rooms = {
-  general: "General",
-  random: "Random",
-  coding: "Coding",
-  encrypted: "Encrypted",
 }
 
 const modes = {
