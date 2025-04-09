@@ -3,6 +3,13 @@ import { showPanel } from './plan98-panel.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import { getTheme } from './paper-pocket.js'
 import geckos from '@geckos.io/client'
+import {
+  getSession,
+  clearSession,
+  getCompanyName,
+  getEmployeeId
+} from './bayun-wizard.js'
+import { bayunCore, BayunCore } from '@sillonious/vault'
 
 // or add a minified version to your index.html file
 // https://github.com/geckosio/geckos.io/tree/master/bundles
@@ -36,7 +43,14 @@ channel.onConnect(error => {
 
   $.teach({ connected: true })
 
-  channel.on('chatMessage', message => {
+  channel.on('chatMessage', async message => {
+    const { currentRoom } = $.learn()
+    if(message.encrypted && currentRoom === rooms.encrypted) {
+      const { sessionId } = getSession()
+      const decrypted = await bayunCore.unlockText(sessionId, message.encrypted)
+      message.decrypted = decrypted
+    }
+
     $.teach(message, mergeMessage)
   });
 
@@ -73,7 +87,8 @@ function mergeMessage(state, payload) {
 const rooms = {
   general: "General",
   random: "Random",
-  coding: "Coding"
+  coding: "Coding",
+  encrypted: "Encrypted",
 }
 
 const modes = {
@@ -87,10 +102,14 @@ const modeRenderers = {
       newNickname
     } = $.learn()
 
+    const moniker = getEmployeeId()
+    const organization = getCompanyName()
+
     return `
       <div class="settings">
         <div class="settings-area">
           <div class="settings-title">Settings</div>
+          ${moniker}@${organization}
           <form method="post" name="change-nickname">
             <p>You may change your nickname with the form below.</p>
             <label class="field" style="grid-area: name;">
@@ -158,7 +177,7 @@ $.draw(target => {
 
   const log = messages.map((message) => `
     <div class="message">
-      <span class="author">${message.author}:</span> ${message.body}
+      <span class="author">${message.author}:</span> ${message.decrypted}
     </div>
   `).join('')
 
@@ -178,7 +197,7 @@ $.draw(target => {
         </div>
         ${Object.keys(rooms).map(x => {
           return `
-            <button class="room-select ${currentRoom === x ? 'active':''}" data-value="${x}" >${rooms[x]}</button>
+            <button class="room-select ${currentRoom === x ? 'active':''}" data-value="${rooms[x]}" >${rooms[x]}</button>
           `
         }).join('')}
       </div>
@@ -196,7 +215,7 @@ $.draw(target => {
             <textarea
               data-bind
               name="messageText"
-              placeholder="Ask me anything..."
+              placeholder="Say it."
               value="${escapeHyperText(messageText)}"
               ${messageHeight ? `style="height: ${messageHeight}px"`:''}
             ></textarea>
@@ -309,7 +328,7 @@ $.when('click', '.settings', () => {
 
 $.when('click', '.show-settings', (event) => {
   showModal(`
-    <geckos-chat modality="${modes.settings}"></geckos-chat>
+    <cool-chat modality="${modes.settings}"></cool-chat>
   `)
 })
 
@@ -366,14 +385,28 @@ $.when('submit', '[name="send"]',(event) => {
   send(messageText)
 });
 
-function send(messageText) {
+async function send(messageText) {
   if (messageText) {
-    const { nickname } = $.learn()
+    const { currentRoom, nickname } = $.learn()
     console.log(nickname, messageText)
-    channel.emit('chatMessage', {
-      body: messageText,
-      author: nickname
-    });
+    const { sessionId } = getSession()
+
+    if(sessionId && currentRoom === rooms.encrypted) {
+      const encryptedText = await bayunCore.lockText(sessionId, messageText, BayunCore.EncryptionPolicy.Company, BayunCore.KeyGenerationPolicy.Chain, '91');
+      channel.emit('chatMessage', {
+        id: self.crypto.randomUUID(),
+        encrypted: encryptedText,
+        decrypted: null,
+        author: nickname
+      });
+    } else {
+      channel.emit('chatMessage', {
+        id: self.crypto.randomUUID(),
+        decrypted: messageText,
+        author: nickname
+      });
+
+    }
     $.teach({ messageText: '', messageHeight: null })
   }
 }

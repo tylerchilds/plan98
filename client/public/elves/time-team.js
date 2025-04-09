@@ -140,7 +140,7 @@ $.draw(target => {
       <bayun-wizard src="/app/time-team"></bayun-wizard>
     ` : null
   }
-  const { groupList } = state[`ls/${$.link}`]
+  const { groupList } = state[`ls/${$.link}`] || {}
   const room = getRoom(target)
   if(!room) {
     return 'Please Consider...'

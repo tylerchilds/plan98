@@ -3,6 +3,7 @@ import { doingBusinessAs } from "@sillonious/brand"
 import { showModal } from './plan98-modal.js'
 import { render } from '@sillonious/saga'
 import { BayunCore } from '@sillonious/vault'
+import { bayunCore } from '@sillonious/vault'
 import { getSession, logout } from './bayun-wizard.js'
 
 /*
@@ -11,16 +12,6 @@ import { getSession, logout } from './bayun-wizard.js'
   !&{
    #
 */
-
-const appId = plan98.env.VAULT_APP_ID; // provided on admin panel
-const appSecret = plan98.env.VAULT_APP_SECRET; // provided on admin panel
-const appSalt = plan98.env.VAULT_APP_SALT; // provided on admin panel
-const localStorageMode = BayunCore.LocalDataEncryptionMode.EXPLICIT_LOGOUT_MODE;
-const enableFaceRecognition = false;
-const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
-
-const bayunCore = BayunCore.init(appId, appSecret, appSalt,
-  localStorageMode, enableFaceRecognition, baseURL);
 
 const $ = elf('secure-messenger', {
   menu: false,
