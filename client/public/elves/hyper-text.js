@@ -13,10 +13,12 @@ const planets = {
   0: 'Mars',
   1: 'Venus',
   2: 'Earth',
-  3: 'Jupiter',
-  4: 'Saturn',
-  5: 'Neptune',
-  6: 'Uranus',
+  3: 'Mars',
+  4: 'Jupiter',
+  5: 'Saturn',
+  6: 'Neptune',
+  7: 'Uranus',
+  8: 'Pluto',
 }
 
 export function htmlify(greeting, planet) {

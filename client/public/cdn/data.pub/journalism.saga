@@ -1,0 +1,29 @@
+# Int. Computer History Museum - Internet Identity Workshop
+
+A group of people gather in room I during session 1.
+
+@ Ty
+> Can VCs be URIs?
+
+@ Dmitri
+> Yes they can!
+
+<hello-world
+
+<hyper-text
+
+<hyper-text
+data-greeting: morning
+data-planet: 1
+
+<hyper-text
+data-greeting: afternoon
+data-planet: 5
+
+<hyper-text
+data-greeting: evening
+data-planet: 8
+
+<hyper-text
+data-greeting: night
+data-planet: 3
