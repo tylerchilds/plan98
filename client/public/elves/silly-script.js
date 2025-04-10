@@ -676,7 +676,6 @@ $.style(`
   & {
     overflow: auto;
     color: black;
-    line-height: 2rem;
   }
   & .grid {
     height: 100%;
@@ -758,6 +757,10 @@ $.style(`
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     place-content: center;
+  }
+
+  & [name="stage"] > qr-code {
+    padding: 1rem;
   }
 
   & [name="stage"] > * {
@@ -1026,10 +1029,8 @@ $.style(`
   & [name="stage"] hypertext-effect {
     height: auto;
     width: auto;
-    place-self: end start;
     padding: 13px;
-    line-height: 1.3;
-    bottom: 80px;
+    bottom: 0px;
     left: 0px;
     right: 0px;
     position: relative;
@@ -1048,7 +1049,8 @@ $.style(`
   }
 
   & [name="stage"] hypertext-effect {
-    place-self: end start;
+    text-align: center;
+    place-self: end center;
   }
 
   & [name="stage"] hypertext-embodied {

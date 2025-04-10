@@ -22,8 +22,16 @@ Doug smirks.
 > The Agenda for this session is as follows.
 
 > 1. A speed run of hyptertext
-> 2. A brainstorm of all the things that cannot be hypertext
+> 2. A brainstorm of user experience challenges
 > 3. A live coded proof of concept of the most interesting possibility
+
+> Before we begin, let's start with the finale, our call to action.
+
+> We need a Hypertext Package Regsitry.
+
+> Every other mainstream programming language or programming environment has a package registry
+
+debian (apt), arch (yay, pacman), fedora (rpm), javascript (npm, yarn, jsr), python (pip), ruby (gem), java (maven/gradle), rust (cargo), go (go mod), perl (cpan), .net (NuGet), dart (pub), elixir (mix)
 
 @ Ty
 > Let's script the future together, starting now. But first, a speed run of hypertext.
@@ -34,14 +42,14 @@ Hypertext is an interactive media format, originally designed for augmenting hum
 
 Modern hypertext is primarily known as the implementation that powers the World Wide Web.
 
-Hypertext, the vision, exists beyond the one mere example and can be better described as an infinitely fold-able pop-up book.
+Hypertext, the vision, exists beyond the one widely-adopted example of the web and can be better described as an infinitely fold-able pop-up book.
 
 # Basic Hypertext
 
 When you read hypertext, you can drill into words and concepts to uncover more knowledge and understanding of any topic that has been encoded as hypertext.
 
 @ Ty
-> A basic transition from saga to hypertext. First, a heading
+> A basic introduction of hypertext. First, a heading
 
 <code-module
 src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
@@ -65,6 +73,14 @@ src: /public/cdn/sillyz.computer/en-us/tutorials/html/select.html
 <iframe
 src: /public/cdn/sillyz.computer/en-us/tutorials/html/select.html
 
+> a link to the homepage of any website over any protocol
+
+<code-module
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/link.html
+
+<iframe
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/link.html
+
 a sampling of a hypertext function invocation
 
 <code-module
@@ -82,6 +98,14 @@ When you write hypertext, you can define it with JavaScript. The hyper-text from
 <code-module
 src: /public/elves/hyper-text.js
 
+> Reactive data binding
+
+<code-module
+src: /public/elves/hello-nickname.js
+
+
+> simulated iphone dimensions running a game console and game engine
+
 <iframe
 src: /app/app-simulator?app=couch-coop&amp;class=iphone
 
@@ -94,11 +118,15 @@ src: /public/elves/couch-coop.js
 <code-module
 src: /public/elves/song-wave.js
 
+> chat rooms via relay
+
 <iframe
 src: /app/cool-chat
 
 <code-module
 src: /public/elves/cool-chat.js
+
+> local llm chat
 
 <iframe
 src: /app/hello-ollama
@@ -106,12 +134,16 @@ src: /app/hello-ollama
 <code-module
 src: /public/elves/hello-ollama.js
 
+> Braid working group, collaborative text syncronization over hypertext transfer protocol
 
+<qr-code
+src: https://sillyz.computer/app/simpleton-client?src=/sample-collaborative-text.txt
 
+<iframe
+src: /app/simpleton-client?src=/sample-collaborative-text.txt
 
-
-
-
+<iframe
+src: /app/world-map
 
 
 
