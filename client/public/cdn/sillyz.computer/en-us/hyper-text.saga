@@ -1,0 +1,41 @@
+<title-page
+author: Ty
+title: Hyper Text
+
+# Int. Bill Graham Civic Auditorium - December 9, 1968.
+
+An auditorium filled with people perplexed by a man on a stage with unfamiliar objects.
+
+@ Douglas Englebart
+> If in your office, you as an intellectual worker were supplied with a computer display, backed up by a computer that was alive for you all day, and was instantly responsive to every action you had—how much value could you derive from that?
+
+Doug smirks.
+
+@ Douglas Englebart
+> We're going to do our best to show you, rather than tell you about this program.
+
+# Int. Computer History Museum - April 10, 2025
+
+@ Ty
+> Let's script the future together, starting now. But first, a retrospective.
+
+# What is Hypertext and why?
+
+Hypertext is an interactive media format, originally designed for augmenting human memory retrieval, inspired by a hypothetical World War II era device, a "Memex"; MEMory EXpansion.
+
+Modern hypertext is primarily known as the implementation that powers the World Wide Web.
+
+Hypertext, the vision, exists beyond the one mere example and can be better described an infinitely fold-able pop-up book.
+
+When you read hypertext, you can drill into words and concepts to uncover more knowledge and understanding of any topic that has been encoded as hypertext.
+
+# Basic Hypertext
+
+<code-module
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
+
+<iframe
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
+
+@ Alan Kay
+> I wonder what Silicon Valley will do when they finally run out of Doug's ideas.

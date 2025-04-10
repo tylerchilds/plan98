@@ -24,6 +24,10 @@ export const systemMenu = {
       },
       */
       {
+        label: 'Hyper Text',
+        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
+      },
+      {
         label: 'Cool Chat',
         url: '/app/cool-chat'
       },
@@ -516,7 +520,7 @@ export function quantize(callback) {
 
 $.draw((target) => {
   if(target.innerHTML) return
-  const { rom, mode, fullScreen, theme } = $.learn()
+  const { rom, src, mode, fullScreen, theme } = $.learn()
   return `
     <div class="chrome" style="--theme: ${theme}" data-full="${fullScreen}">
       <div class="widget-frame">
@@ -528,7 +532,7 @@ $.draw((target) => {
           </div>
           <div class="system"></div>
           <div class="game">
-            <${rom}></${rom}>
+            <${rom} ${src?`src="${src}"`:''}></${rom}>
           </div>
           <div class="menu-items">
             <button key="options" class="clear select" data-press="select">
@@ -569,7 +573,8 @@ $.draw((target) => {
       if(!target.mounted) {
         target.mounted = true
         const rom = target.getAttribute('rom')
-        if(rom) $.teach({ rom })
+        const src = target.getAttribute('src')
+        if(rom) $.teach({ rom, src })
       }
     }
   },
