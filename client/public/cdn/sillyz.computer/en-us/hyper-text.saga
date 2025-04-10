@@ -1,3 +1,8 @@
+<iiw-40
+
+<qr-code
+src: https://sillyz.computer/paper-pocket
+
 <title-page
 author: Ty
 title: Hyper Text
@@ -100,9 +105,10 @@ src: /public/elves/hyper-text.js
 
 > Reactive data binding
 
+<hello-nickname
+
 <code-module
 src: /public/elves/hello-nickname.js
-
 
 > simulated iphone dimensions running a game console and game engine
 
@@ -145,11 +151,20 @@ src: /app/simpleton-client?src=/sample-collaborative-text.txt
 <iframe
 src: /app/world-map
 
+<iframe
+src: /app/code-module?src=/public/elves/iiw-40.js
 
+<a
+href: /app/iiw-40
+target: _blank
+text: IIW-40
 
+> Let's build a Hypertext Package Registry, together.
 
 @ Alan Kay
 > I wonder what Silicon Valley will do when they finally run out of Doug's ideas.
+
+& memex
 
 <iframe
 src: /app/code-module?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga
@@ -165,8 +180,6 @@ src: /app/code-module?src=/public/elf.js
 
 <iframe
 src: /app/code-module?src=/public/index.html
-
-& memex
 
 <a
 href: /app/paper-pocket?rom=typo-hero
