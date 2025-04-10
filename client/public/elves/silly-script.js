@@ -693,13 +693,6 @@ $.style(`
     padding: 0 .5rem;
     font-size: 1rem;
     line-height: 2rem;
-    --v-font-mono: 1;
-    --v-font-casl: 0;
-    --v-font-wght: 400;
-    --v-font-slnt: 0;
-    --v-font-crsv: 0;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
     transition: background 200ms ease-in-out;
   }
 
@@ -1034,7 +1027,6 @@ $.style(`
     height: auto;
     width: auto;
     place-self: end start;
-    font-size: 40px;
     padding: 13px;
     line-height: 1.3;
     bottom: 80px;
@@ -1071,14 +1063,6 @@ $.style(`
   & [name="stage"] > * {
     height: 100%;
     width: 100%;
-    --v-font-mono: 0;
-    --v-font-casl: 1;
-    --v-font-wght: 800;
-    --v-font-slnt: -15;
-    --v-font-crsv: 1;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
-
   }
 
   & .menu-item {

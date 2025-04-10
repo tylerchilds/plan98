@@ -28,6 +28,10 @@ export const systemMenu = {
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
       },
       {
+        label: 'Kiosk Mode',
+        url: '/app/home-entertainment'
+      },
+      {
         label: 'Cool Chat',
         url: '/app/cool-chat'
       },
@@ -292,7 +296,8 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'final-boss',
+  rom: 'silly-script',
+  src: '/public/cdn/sillyz.computer/en-us/hyper-text.saga',
   mode: startMode(),
   backMode: startMode(),
   settingsKey: 'instrument',

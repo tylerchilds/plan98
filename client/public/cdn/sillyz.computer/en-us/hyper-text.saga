@@ -14,10 +14,19 @@ Doug smirks.
 @ Douglas Englebart
 > We're going to do our best to show you, rather than tell you about this program.
 
+^ Cut and Remixed and Spliced with Computer History Archives
+
 # Int. Computer History Museum - April 10, 2025
 
 @ Ty
-> Let's script the future together, starting now. But first, a retrospective.
+> The Agenda for this session is as follows.
+
+> 1. A speed run of hyptertext
+> 2. A brainstorm of all the things that cannot be hypertext
+> 3. A live coded proof of concept of the most interesting possibility
+
+@ Ty
+> Let's script the future together, starting now. But first, a speed run of hypertext.
 
 # What is Hypertext and why?
 
@@ -25,11 +34,14 @@ Hypertext is an interactive media format, originally designed for augmenting hum
 
 Modern hypertext is primarily known as the implementation that powers the World Wide Web.
 
-Hypertext, the vision, exists beyond the one mere example and can be better described an infinitely fold-able pop-up book.
+Hypertext, the vision, exists beyond the one mere example and can be better described as an infinitely fold-able pop-up book.
+
+# Basic Hypertext
 
 When you read hypertext, you can drill into words and concepts to uncover more knowledge and understanding of any topic that has been encoded as hypertext.
 
-# Basic Hypertext
+@ Ty
+> A basic transition from saga to hypertext. First, a heading
 
 <code-module
 src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
@@ -37,5 +49,93 @@ src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
 <iframe
 src: /public/cdn/sillyz.computer/en-us/tutorials/html/h1.html
 
+> a list
+
+<code-module
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/list.html
+
+<iframe
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/list.html
+
+> a selectbox of options with their values
+
+<code-module
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/select.html
+
+<iframe
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/select.html
+
+a sampling of a hypertext function invocation
+
+<code-module
+src: /public/cdn/sillyz.computer/en-us/tutorials/html/hyper-text.saga
+
+which summons the proper greetings for the proper planets at their moment in time
+
+<iframe
+src: /cdn/sillyz.computer/en-us/tutorials/html/hyper-text.saga
+
+# Basic JavaScript
+
+When you write hypertext, you can define it with JavaScript. The hyper-text from just now is as follows.
+
+<code-module
+src: /public/elves/hyper-text.js
+
+<iframe
+src: /app/app-simulator?app=couch-coop&amp;class=iphone
+
+<code-module
+src: /public/elves/app-simulator.js
+
+<code-module
+src: /public/elves/couch-coop.js
+
+<code-module
+src: /public/elves/song-wave.js
+
+<iframe
+src: /app/cool-chat
+
+<code-module
+src: /public/elves/cool-chat.js
+
+<iframe
+src: /app/hello-ollama
+
+<code-module
+src: /public/elves/hello-ollama.js
+
+
+
+
+
+
+
+
+
+
+
 @ Alan Kay
 > I wonder what Silicon Valley will do when they finally run out of Doug's ideas.
+
+<iframe
+src: /app/code-module?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga
+
+<iframe
+src: /app/code-module?src=/public/elves/paper-pocket.js
+
+<iframe
+src: /app/code-module?src=/public/elves/debug-gamepads.js
+
+<iframe
+src: /app/code-module?src=/public/elf.js
+
+<iframe
+src: /app/code-module?src=/public/index.html
+
+& memex
+
+<a
+href: /app/paper-pocket?rom=typo-hero
+text: &lt;typo-hero
