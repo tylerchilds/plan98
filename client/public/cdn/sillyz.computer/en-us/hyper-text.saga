@@ -1,4 +1,21 @@
-<iiw-40
+<live-graphic
+position: full
+src: /cdn/boxart.svg
+
+<live-graphic
+position: top-left
+src: /cdn/boxart.svg
+
+<live-demo
+src: https://sillyz.computer/app/plan98-boxart
+title: Home Page
+
+
+<live-demo
+src: https://sillyz.computer/app/iiw-40
+title: IIW 40
+
+> the next qr code is the code for this slide deck
 
 <qr-code
 src: https://sillyz.computer/paper-pocket
