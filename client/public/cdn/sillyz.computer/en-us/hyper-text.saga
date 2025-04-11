@@ -1,25 +1,3 @@
-<live-graphic
-position: full
-src: /cdn/boxart.svg
-
-<live-graphic
-position: top-left
-src: /cdn/boxart.svg
-
-<live-demo
-src: https://sillyz.computer/app/plan98-boxart
-title: Home Page
-
-
-<live-demo
-src: https://sillyz.computer/app/iiw-40
-title: IIW 40
-
-> the next qr code is the code for this slide deck
-
-<qr-code
-src: https://sillyz.computer/paper-pocket
-
 <title-page
 author: Ty
 title: Hyper Text
@@ -38,6 +16,29 @@ Doug smirks.
 
 ^ Cut and Remixed and Spliced with Computer History Archives
 
+<live-graphic
+src: /cdn/boxart.svg
+
+<live-demo
+src: https://sillyz.computer/app/plan98-boxart
+title: Home Page
+
+<live-demo
+src: https://sillyz.computer/app/about-sillyz
+title: About Sillyz
+
+<live-demo
+src: https://sillyz.computer/app/paper-pocket
+title: Paper Pocket
+
+<live-demo
+src: https://sillyz.computer/app/couch-coop
+title: Couch Coop
+
+<live-demo
+src: https://sillyz.computer/app/cool-chat
+title: Cool Chat
+
 # Int. Computer History Museum - April 10, 2025
 
 @ Ty
@@ -49,11 +50,19 @@ Doug smirks.
 
 > Before we begin, let's start with the finale, our call to action.
 
-> We need a Hypertext Package Regsitry.
+> We need a Hypertext Marketplace
 
-> Every other mainstream programming language or programming environment has a package registry
+> Every operating system has a marketplace
 
-debian (apt), arch (yay, pacman), fedora (rpm), javascript (npm, yarn, jsr), python (pip), ruby (gem), java (maven/gradle), rust (cargo), go (go mod), perl (cpan), .net (NuGet), dart (pub), elixir (mix)
+Apple: App Store, Windows and Xbox: Microsoft Store, PlayStation Store, Nintendo e-Shop, debian (apt), arch (yay, pacman), fedora (rpm)
+
+> Other programming languages have package registries
+
+javascript (npm, yarn, jsr), python (pip), ruby (gem), java (maven/gradle), rust (cargo), go (go mod), perl (cpan), .net (NuGet), dart (pub), elixir (mix)
+
+> Hypertext has been generally been controlled in this order: by browser vendors, extension authors, library maintainers, end-users
+
+By collapsing the complexity of creating and distributing hypertext then vendors, authors, maintainers and users can become singular every day people, like you.
 
 @ Ty
 > Let's script the future together, starting now. But first, a speed run of hypertext.
@@ -106,12 +115,12 @@ src: /public/cdn/sillyz.computer/en-us/tutorials/html/link.html
 a sampling of a hypertext function invocation
 
 <code-module
-src: /public/cdn/sillyz.computer/en-us/tutorials/html/hyper-text.saga
+src: /public/cdn/sillyz.computer/en-us/tutorials/md/hyper-text.md
 
 which summons the proper greetings for the proper planets at their moment in time
 
 <iframe
-src: /cdn/sillyz.computer/en-us/tutorials/html/hyper-text.saga
+src: /cdn/sillyz.computer/en-us/tutorials/md/hyper-text.md
 
 # Basic JavaScript
 
@@ -197,6 +206,10 @@ src: /app/code-module?src=/public/elf.js
 
 <iframe
 src: /app/code-module?src=/public/index.html
+
+<live-graphic
+position: top-left
+src: /cdn/boxart.svg
 
 <a
 href: /app/paper-pocket?rom=typo-hero
