@@ -20,6 +20,25 @@ const $ = elf('ur-shell', {
   fileSystem: null
 })
 
+window.addEventListener('keydown', (event) => {
+  const { popped, debug } = $.learn()
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    if(debug || popped) return
+    $.teach({ debug:true })
+    showModal(`
+      <div style="width: 100%; height: 100%; overflow: hidden;">
+        <source-code></source-code>
+      </div>
+    `, { centered: true, onHide: normalMode, suppressEscape: true })
+  }
+
+  function normalMode() {
+    $.teach({ debug: false })
+  }
+});
+
+
 $.teach({ body: `Silly, at your service.
 
 Do your thing or click "help" and type "help" and then "enter"`, author: 'assistant' }, mergeMessage)
@@ -96,7 +115,17 @@ function renderModels(model) {
   `).join('')
 }
 
+function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  const src = target.getAttribute('src')
+  if(src) {
+    loadPath(src)
+  }
+}
+
 $.draw((target) => {
+  mount(target)
   const { model, messages, messageText, messageHeight, thinking } = $.learn()
 
   const log = messages.map((message) => `
@@ -398,7 +427,8 @@ function execute(message) {
   }
 
   if(message.startsWith('/')) {
-    $.teach({ body: 'load url', author: 'assistant' }, mergeMessage)
+    $.teach({ body: 'load path', author: 'assistant' }, mergeMessage)
+    loadPath(message)
     return
   }
 
@@ -413,7 +443,18 @@ function execute(message) {
   askLLM(message)
 }
 
+function loadPath(message) {
+  // add some hype to our scene
+  showModal(`<iframe src="${message}"></iframe>`, {
+    blockExit: true,
+    onHide: () => $.teach({ popped: false })
+  })
+
+  $.teach({ popped: true })
+}
+
 const elements = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr"
+
 
 async function loadModule(message) {
   const [firstLine, ...lines] = message.split('\n')
@@ -624,22 +665,4 @@ $.when('keydown', '[name="messageText"]', event => {
     return
   }
 })
-
-window.addEventListener('keydown', (event) => {
-  const { popped, debug } = $.learn()
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    if(debug || popped) return
-    $.teach({ debug:true })
-    showModal(`
-      <div style="width: 100%; height: 100%; overflow: hidden;">
-        <source-code></source-code>
-      </div>
-    `, { centered: true, onHide: normalMode, suppressEscape: true })
-  }
-
-  function normalMode() {
-    $.teach({ debug: false })
-  }
-});
 

@@ -319,5 +319,28 @@
       </main>
     </data-popover>
     </data-tooltip>
+    <script>
+      if (window.self !== window.top) {
+
+        window.addEventListener('keydown', (event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault()
+
+            // Create a new keyboard event for the Escape key
+            const escapeEvent = new KeyboardEvent('keydown', {
+              key: 'Escape',
+              code: 'Escape',
+              keyCode: 27,
+              which: 27,
+              bubbles: true,
+              cancelable: true
+            });
+
+            // Dispatch the event to the parent window
+            window.parent.document.dispatchEvent(escapeEvent);
+          }
+        });
+      }
+    </script>
   </body>
 </html>
