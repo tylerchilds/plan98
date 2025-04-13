@@ -29,6 +29,7 @@ $.draw((target) => {
   const {
     body,
     isOpen,
+    blockExit,
     bannerType,
     maximized,
     centered,
@@ -41,6 +42,7 @@ $.draw((target) => {
 
   return `
     <div
+      data-fixed="${blockExit}"
       class=" shell ${maximized ? 'maximized': ''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
@@ -119,6 +121,7 @@ export function showModal(nextBody, options = {}) {
     layer: nextLayer,
     isOpen: true,
     centered: false,
+    blockExit: true,
     bannerType: null,
     ...options
   })
@@ -294,5 +297,13 @@ $.style(`
 
   & [data-close] * {
     pointer-events: none;
+  }
+
+  & [data-fixed="true"] {
+    background: white;
+  }
+
+  & [data-fixed="true"] [data-close] {
+    display: none;
   }
 `)

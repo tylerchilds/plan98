@@ -1,0 +1,625 @@
+import elf from '@silly/elf'
+import { showModal, hideModal } from '@plan98/modal'
+
+const models = {
+  'deepseek-r1:1.5b': 'Deepseek-r1 1.5b',
+  'gemma3:1b': 'Gemma3 1b',
+  'mistral:7b': 'Mistral 7b',
+  'llama3.2:3b': 'Llama 3.2 3b',
+}
+
+const $ = elf('ur-shell', {
+  messages: [],
+  history: [],
+  historyCursor: null,
+  messageText: '',
+  messageDraft: '',
+  messageHeight: null,
+  cwd: null,
+  fileSystem: null
+})
+
+$.teach({ body: `Silly, at your service.
+
+Do your thing or click "help" and type "help" and then "enter"`, author: 'assistant' }, mergeMessage)
+
+const endpoint = '/plan98/about'
+fetch(window.location.origin + endpoint)
+  .then(res => res.json())
+  .then(({plan98}) => {
+    $.teach({ fileSystem: plan98, cwd: '/' })
+  })
+  .catch(e => console.error(e))
+
+function askLLM(message) {
+  const { model } = $.learn()
+
+  if(!model) {
+    $.teach({ body: 'ask "help" for assistance', author: 'assistant' }, mergeMessage)
+    return
+  }
+  const url = "http://localhost:11434/api/generate";
+  const headers = {
+    "Content-Type": "application/json",
+  }
+
+  $.teach({ thinking: true, messageHeight: null, messageText: '' })
+
+  fetch(url, {
+    headers: headers,
+    method: 'POST',
+    body: JSON.stringify({
+      model,
+      prompt: message,
+      stream: false
+    })
+  }).then((response) => response.text()).then((result) => {
+    const data = JSON.parse(result)
+    $.teach({ thinking: false })
+    $.teach({ body: data.response, author: 'assistant' }, mergeMessage)
+  }).catch(e => {
+    console.error(e)
+  })
+}
+
+function history(state, payload) {
+  return {
+    ...state,
+    history: [
+      ...state.history,
+      payload
+    ]
+  }
+}
+
+
+function mergeMessage(state, payload) {
+  return {
+    ...state,
+    messages: [
+      ...state.messages,
+      payload
+    ]
+  }
+}
+
+$.when('change', 'select', (event) => {
+  const model = event.target.value
+  $.teach({ model, messages: [] })
+})
+
+function renderModels(model) {
+  const keys = Object.keys(models)
+  return keys.map((key) => `
+    <option value="${key}" ${model === key?'selected':''}>${models[key]}</option>
+  `).join('')
+}
+
+$.draw((target) => {
+  const { model, messages, messageText, messageHeight, thinking } = $.learn()
+
+  const log = messages.map((message) => `
+    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
+  `).join('')
+
+  return `
+      <div class="scroll-back">
+        <div class="messages">
+          ${log}
+        </div>
+      </div>
+      <form>
+        ${thinking ? `
+          <div class="loading">
+            <flying-disk></flying-disk>
+          </div>
+        ` : ''}
+        <textarea
+          data-bind
+          name="messageText"
+          placeholder="help"
+          value="${escapeHyperText(messageText)}"
+          ${messageHeight ? `style="height: ${messageHeight}px"`:''}
+        ></textarea>
+      </div>
+    </div>
+  `
+}, {
+  beforeUpdate,
+  afterUpdate
+})
+
+function beforeUpdate(target) {
+  saveCursor(target)
+}
+
+function afterUpdate(target) {
+  replaceCursor(target)
+
+  {
+    const { messages } = $.learn()
+    if(target.lastIndex !== messages.length -1) {
+      target.lastIndex = messages.length - 1
+      const lastChild = target.querySelector('.messages .message:last-child')
+      if(lastChild) {
+        lastChild.scrollIntoView()
+      }
+    }
+  }
+}
+
+let sel = []
+const tags = ['TEXTAREA', 'INPUT']
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.field = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  }
+}
+
+function replaceCursor(target) {
+  const field = target.querySelector(`[name="${target.dataset.field}"]`)
+  
+  if(field) {
+    field.focus()
+
+    if(tags.includes(field.tagName)) {
+      field.selectionStart = sel[0];
+      field.selectionEnd = sel[1];
+    }
+  }
+}
+
+function clearCursor(target) {
+  target.dataset.field = null
+  sel = []
+}
+
+
+$.when('keypress', 'form [name="messageText"]', (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const message = event.target.value
+    execute(message)
+  }
+})
+
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+  const message = event.target.messageText.value
+  execute(message)
+})
+
+const commands = {
+  'echo': (...args) => {
+    return args.join(' ')
+  },
+
+  clear() {
+    $.teach({ messages: [] })
+  },
+
+  cd(path) {
+    const { cwd, fileSystem } = $.learn()
+
+    if(!path) {
+      $.teach({ cwd: '/' })
+      return
+    }
+
+    if(path === '.') {
+      return
+    }
+
+    if(path.startsWith('/')) {
+      const folderNames = path === '/' ? [''] : path.split('/')
+
+      const { error } = folderNames.reduce((tree, name) => {
+        if(tree.error) return tree
+        const subtree = tree.children.find(x => x.name === name)
+        if(subtree) {
+          return subtree
+        } else {
+          return { error: 'Unable to locate ' + path}
+        }
+      }, fileSystem)
+
+      if(error) {
+        return error
+      }
+
+
+      $.teach({ cwd: path })
+      return
+    }
+
+    if(path.startsWith('./')) {
+      const relativePath = path.slice(1)
+      const folderNames = `${cwd}${relativePath}`.split('/')
+
+      const { error } = folderNames.reduce((tree, name) => {
+        if(tree.error) return tree
+        const subtree = tree.children.find(x => x.name === name)
+        if(subtree) {
+          return subtree
+        } else {
+          return { error: 'Unable to locate ' + path}
+        }
+      }, fileSystem)
+
+      if(error) {
+        return error
+      }
+
+      $.teach({ cwd: cwd + relativePath })
+      return
+    }
+
+    if(path.startsWith('../') || path.startsWith('..')) {
+      const relativity = path.split('/').reduce((obj, x) => {
+        if(x === '..') {
+          obj.up.push(x)
+        } else if(x !== '') {
+          obj.down.push(x)
+        }
+        return obj
+      }, { up: [], down: [] })
+      const folderNames = cwd.split('/').slice(0, -relativity.up.length)
+
+      const { error } = [...folderNames, ...relativity.down].reduce((tree, name) => {
+        if(tree.error) return tree
+        const subtree = tree.children.find(x => x.name === name)
+        if(subtree) {
+          return subtree
+        } else {
+          return { error: 'Unable to locate ' + path}
+        }
+      }, fileSystem)
+
+      if(error) {
+        return error
+      }
+
+      $.teach({ cwd: folderNames.join('/') })
+      return
+    }
+
+    const newPath = `${cwd==='/'?cwd: `${cwd}/`}${path}`
+    const folderNames = newPath.split('/')
+    const { error } = folderNames.reduce((tree, name) => {
+      if(tree.error) return tree
+      const subtree = tree.children.find(x => x.name === name)
+      if(subtree) {
+        return subtree
+      } else {
+        return { error: 'Unable to locate ' + path}
+      }
+    }, fileSystem)
+
+    if(error) {
+      return error
+    }
+
+    $.teach({ cwd: newPath })
+  },
+
+
+  ls() {
+    const { cwd, fileSystem } = $.learn()
+    const folderNames = cwd === '/' ? [''] : cwd.split('/')
+
+    const { error, children } = folderNames.reduce((tree, name) => {
+      const subtree = tree.children.find(x => x.name === name)
+      if(subtree) {
+        return subtree
+      } else {
+        return { error: 'Unable to print list current collection' }
+      }
+    }, fileSystem)
+    return error ? error : children.map(x => `${x.name}`).join('\n')
+  },
+
+  pwd() {
+    return $.learn().cwd
+  },
+
+  'printenv': (...args) => {
+    const keys = args.length > 0
+      ? args
+      : Object.keys(plan98.env)
+    return keys.map(key => {
+      return `${key}: ${plan98.env[key]}`
+    }).join('\n')
+  },
+  'help': (...args) => {
+    return `Welcome to ur-shell, the Universal Resource Shell!
+
+Commands:
+
+help
+  display help options
+
+pwd
+  print working directory
+
+ls
+  list stuff
+
+cd path
+  change directory
+
+clear
+  empty the screen
+
+echo
+  re-state the arguments
+
+printenv [...args]
+  display environment variables, none for all or one by one
+
+
+Modes:
+
+/* - load URL
+     example: /app/home-entertainment
+
+<* - load ELF
+     example: <couch-coop
+
+For further assistance, enter <cool-chat
+`
+  }
+}
+
+function execute(message) {
+  if(!message) return
+
+  $.teach(message, history)
+  $.teach({ body: message, author: 'human' }, mergeMessage)
+  $.teach({ historyCursor: null, messageHeight: null, messageText: '', messageDraft: '' })
+
+  if(message.startsWith('<')) {
+    $.teach({ body: 'load module', author: 'assistant' }, mergeMessage)
+    loadModule(message)
+    return
+  }
+
+  if(message.startsWith('/')) {
+    $.teach({ body: 'load url', author: 'assistant' }, mergeMessage)
+    return
+  }
+
+  const [command, ...args] = message.split(' ')
+  if(commands[command]) {
+    const result = commands[command].apply($, args)
+
+    $.teach({ body: result, author: 'assistant' }, mergeMessage)
+    return
+  }
+
+  askLLM(message)
+}
+
+const elements = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr"
+
+async function loadModule(message) {
+  const [firstLine, ...lines] = message.split('\n')
+
+  const elf = firstLine.slice(1)
+  const url = `/public/elves/${elf}.js`
+  const exists = (await fetch(url, { method: 'HEAD' })).ok
+  if(!exists && !elements.includes(elf)) {
+    $.teach({ body: 'ELF not found, ask "help" for assistance', author: 'assistant' }, mergeMessage)
+    return
+  }
+
+  const properties = {}
+
+  try {
+    // loop over our lines one at a time
+    for (const line of lines) {
+      // where in the line is our break
+      const index = line.indexOf(':')
+      // before then is the attribute
+      const key = line.substring(0, index)
+      // after then is the data
+      const value = line.substring(index+1)
+
+      // no data?
+      if(!key) {
+        return
+      }
+
+      properties[key.trim()] = value.trim()
+    }
+    // collect the properties from our actor
+    let innerHTML = ''
+    let innerText = ''
+
+    // convert them into hype attributes
+    const attributes = Object.keys(properties)
+      .map(x => {
+        if(x === 'html') {
+          innerHTML = properties[x]
+          return ''
+        }
+        if(x === 'text') {
+          innerText = properties[x]
+          return ''
+        }
+
+        return `${x}="${properties[x]}" `
+      }).join('')
+
+    // add some hype to our scene
+    showModal(`<${elf} ${attributes}>${innerHTML || innerText}</${elf}>`, {
+      blockExit: true,
+      onHide: () => $.teach({ popped: false })
+    })
+
+    $.teach({ popped: true })
+
+  } catch(e) {
+    $.teach({ body: 'ELF load failed, ask "help" for assistance', author: 'assistant' }, mergeMessage)
+  }
+}
+
+$.style(`
+  & {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)), black;
+  }
+
+  /* scanlines */
+  &::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: rgba(18, 16, 16, 0.05);
+    opacity: 0;
+    z-index: 2;
+    pointer-events: none;
+  }
+  &::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(255, 255, 255, .05) 50%, rgba(0, 0, 0, 0) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 2px, 3px 100%;
+    pointer-events: none;
+  }
+
+  & form textarea {
+    width: 100%;
+    display: block;
+    resize: none;
+    border: none;
+    border-radius: 0;
+    padding: 8px;
+    max-height: 35vh;
+    font-size: 1rem;
+    background: linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)), black;
+    color: rgba(255,255,255,.75);
+  }
+
+  & textarea:focus {
+    outline-offset: -2px;
+    outline-color: transparent;
+  }
+
+  & .scroll-back {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .messages {
+    padding: .5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+  & .message {
+    overflow: auto;
+    position: relative;
+    margin: 0;
+    font-family: 'BerkeleyMono', monospace;
+    opacity: .85;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    max-width: 100%;
+  }
+
+  & .message.-human {
+    color: rgba(255,255,255,.95);
+  }
+
+  & .message.-assistant {
+    background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.35)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+`)
+
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+$.when('input', '[data-bind]', event => {
+  const { name, value } = event.target;
+  $.teach({ [name]: value })
+})
+
+$.when('focus', '[name="messageText"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+
+$.when('input', '[name="messageText"]', (event) => {
+  const { value } = event.target;
+  $.teach({ messageDraft: value, messageHeight: event.target.scrollHeight })
+});
+
+$.when('keydown', '[name="messageText"]', event => {
+  const { history, historyCursor, messageDraft } = $.learn()
+  if(event.key === 'ArrowDown') {
+    event.preventDefault()
+    if(historyCursor === null) return
+    const cursor = historyCursor + 1
+    if(cursor >= history.length) {
+      $.teach({ historyCursor: null, messageText: messageDraft })
+    } else {
+      $.teach({ historyCursor: cursor, messageText: history[cursor] })
+    }
+    return
+  }
+
+  if(event.key === 'ArrowUp') {
+    event.preventDefault()
+    const cursor = (historyCursor === null) ? history.length - 1 : historyCursor - 1
+    if(cursor < 0) return
+    $.teach({ historyCursor: cursor, messageText: history[cursor] })
+    return
+  }
+})
+
+window.addEventListener('keydown', (event) => {
+  const { popped, debug } = $.learn()
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    if(debug || popped) return
+    $.teach({ debug:true })
+    showModal(`
+      <div style="width: 100%; height: 100%; overflow: hidden;">
+        <source-code></source-code>
+      </div>
+    `, { centered: true, onHide: normalMode, suppressEscape: true })
+  }
+
+  function normalMode() {
+    $.teach({ debug: false })
+  }
+});
+

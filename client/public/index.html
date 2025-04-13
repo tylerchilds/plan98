@@ -319,25 +319,5 @@
       </main>
     </data-popover>
     </data-tooltip>
-    <script type="module">
-      import { showModal, hideModal } from '@plan98/modal'
-      let debug = false
-      window.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape') {
-          event.preventDefault()
-          if(debug) return
-          debug = true
-          showModal(`
-            <div style="width: 100%; height: 100%; overflow: hidden;">
-              <source-code></source-code>
-            </div>
-          `, { centered: true, onHide: normalMode, suppressEscape: true })
-        }
-
-        function normalMode() {
-          debug = false
-        }
-      });
-    </script>
   </body>
 </html>
