@@ -1,5 +1,6 @@
 import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
+import { systemMenu, getTheme } from './paper-pocket.js'
 
 const models = {
   'deepseek-r1:1.5b': 'Deepseek-r1 1.5b',
@@ -146,6 +147,15 @@ function afterUpdate(target) {
       }
     }
   }
+
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
+    }
+  }
+
 }
 
 let sel = []
@@ -583,7 +593,17 @@ $.when('input', '[name="messageText"]', (event) => {
 });
 
 $.when('keydown', '[name="messageText"]', event => {
-  const { history, historyCursor, messageDraft } = $.learn()
+  const { history, historyCursor, messageText } = $.learn()
+  if(event.key === 'Tab') {
+    event.preventDefault()
+    const command = Object.keys(commands).find(x => x.startsWith(messageText))
+    if(command) {
+      $.teach({ messageText: command })
+    }
+
+    return
+  }
+
   if(event.key === 'ArrowDown') {
     event.preventDefault()
     if(historyCursor === null) return
