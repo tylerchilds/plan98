@@ -26,7 +26,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/home-entertainment'
+    self.location.href = '/app/ur-shell?src=/app/home-entertainment'
     return
   }
 

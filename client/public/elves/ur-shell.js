@@ -120,7 +120,7 @@ function mount(target) {
   target.mounted = true
   const src = target.getAttribute('src')
   if(src) {
-    loadPath(src)
+    execute(src)
   }
 }
 
@@ -399,6 +399,9 @@ echo
 printenv [...args]
   display environment variables, none for all or one by one
 
+shebang
+  launch the whole #!shebang
+
 
 Modes:
 
@@ -410,6 +413,10 @@ Modes:
 
 For further assistance, enter <cool-chat
 `
+  },
+
+  shebang() {
+    execute('/app/ur-shell?src=/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
   }
 }
 
@@ -628,13 +635,18 @@ $.when('focus', '[name="messageText"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
 });
 
+$.when('keydown', '[name="messageText"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+
+
 $.when('input', '[name="messageText"]', (event) => {
   const { value } = event.target;
   $.teach({ messageDraft: value, messageHeight: event.target.scrollHeight })
 });
 
 $.when('keydown', '[name="messageText"]', event => {
-  const { history, historyCursor, messageText } = $.learn()
+  const { history, historyCursor, messageText, messageDraft } = $.learn()
   if(event.key === 'Tab') {
     event.preventDefault()
     const command = Object.keys(commands).find(x => x.startsWith(messageText))
@@ -646,8 +658,9 @@ $.when('keydown', '[name="messageText"]', event => {
   }
 
   if(event.key === 'ArrowDown') {
-    event.preventDefault()
+    if(!isLastLine(event.target)) return
     if(historyCursor === null) return
+    event.preventDefault()
     const cursor = historyCursor + 1
     if(cursor >= history.length) {
       $.teach({ historyCursor: null, messageText: messageDraft })
@@ -658,6 +671,7 @@ $.when('keydown', '[name="messageText"]', event => {
   }
 
   if(event.key === 'ArrowUp') {
+    if(!isFirstLine(event.target)) return
     event.preventDefault()
     const cursor = (historyCursor === null) ? history.length - 1 : historyCursor - 1
     if(cursor < 0) return
@@ -666,3 +680,16 @@ $.when('keydown', '[name="messageText"]', event => {
   }
 })
 
+function isFirstLine(textarea) {
+  const cursorPosition = textarea.selectionStart;
+  const fullText = textarea.value;
+  const textBeforeCursor = fullText.substring(0, cursorPosition);
+  return !textBeforeCursor.includes('\n');
+}
+
+function isLastLine(textarea) {
+  const cursorPosition = textarea.selectionStart;
+  const fullText = textarea.value;
+  const textAfterCursor = fullText.substring(cursorPosition);
+  return !textAfterCursor.includes('\n');
+}
