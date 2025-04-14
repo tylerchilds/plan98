@@ -181,7 +181,6 @@ function render(target) {
         taskNode.dataset.focused = false
       }
 
-      taskNode.dataset.grabbed = grabbed
       taskNode.persist = true
     }
   }
@@ -596,6 +595,13 @@ $.style(`
     display: grid;
     height: 100%;
     grid-template-rows: 1fr auto;
+    background:
+      linear-gradient(335deg, rgba(255,255,255,.15), rgba(255,255,255,.25), rgba(255,255,255,0), rgba(0,0,0,0), rgba(0,0,0,.35)),
+      radial-gradient(circle at bottom left, rgba(255,255,255,0.2), rgba(0,0,0,.2) 70%),
+      conic-gradient(from 45deg at 25% 75%, rgba(255,255,255,0.2), rgba(0,0,0,0)),
+      repeating-linear-gradient(180deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.1) 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,.1) 20px),
+      repeating-radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0) 10px, rgba(255,255,255,0) 20px),
+      var(--root-theme, mediumseagreen);
   }
 
   & .desktop {
@@ -606,9 +612,12 @@ $.style(`
   }
 
   & .taskbar {
-    background: rgba(0,0,0,.5);
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
+      var(--root-theme, mediumseagreen);
     z-index: 5;
-    padding: .5rem;
+    padding: 2px;
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 1rem;
@@ -764,18 +773,6 @@ $.style(`
     padding: 0 .25rem;
   }
 
-  & .grabber::before {
-    content: '';
-    box-shadow:
-      0px 0px 0 1px var(--red),
-      0px 6px 0 1px var(--orange),
-      0px 12px 0 1px var(--yellow);
-    display: block;
-    margin: 0;
-    opacity: .4;
-    transform: opacity 100ms ease-in-out;
-  }
-
   & .terminal-canvas {
     display: block;
     width: 100%;
@@ -840,7 +837,7 @@ $.style(`
   & .tray-wake:hover,
   & .tray-wake:focus {
     background: rgba(0,0,0,.85);
-    outline: 2px solid mediumseagreen;
+    outline: 2px solid var(--root-theme, mediumseagreen);
     outline-offset: 2px;
   }
 
@@ -863,14 +860,8 @@ $.style(`
 
   & [data-grabbed="true"] {
     transform: scale(1.1);
-    outline: 2px solid var(--green);
+    outline: 2px solid var(--root-theme, mediumseagreen);
     outline-offset: 2px;
-  }
-  & [data-grabbed="true"] .grabber::before {
-    box-shadow:
-      0px 0px 0 1px var(--purple),
-      0px 6px 0 1px var(--blue),
-      0px 12px 0 1px var(--green);
   }
 
   & .trays[data-mousedown="true"] {
@@ -888,12 +879,15 @@ $.style(`
     position: absolute;
     width: var(--width, 160px);
     height: var(--height, 90px);
-    background: black;
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)),
+      var(--root-theme, mediumseagreen);
     padding: 1px;
     display: grid;
     grid-template-rows: auto 1fr;
     max-width: 100vw;
     max-height: 100vh;
+    border-radius: 5px;
   }
 
   & .tray iframe {
@@ -902,7 +896,11 @@ $.style(`
   }
 
   & .tray-title-bar {
-    background: black;
+    border-radius: 4px 4px 0 0;
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
+      var(--root-theme, mediumseagreen);
     z-index: 2;
     padding: 5px 4px;
     font-size: 1rem;
@@ -1026,7 +1024,7 @@ $.style(`
 
   & .tray-max {
     border-radius: 100%;
-    background: mediumseagreen;
+    background: var(--green);
   }
 
   & .system {
@@ -1072,17 +1070,18 @@ $.style(`
   & .iconography {
     background: lemonchiffon;
     aspect-ratio: 1;
-    transform: rotateZ(15deg);
     min-width: 2rem;
   }
 
   & .app-select {
     border: none;
     background: transparent;
-    display: flex;
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    text-align: left;
+    gap: .5rem;
     border-radius: 0;
-    padding: .5rem;
+    padding: 2px;
   }
 
   & .app-label {
@@ -1090,7 +1089,6 @@ $.style(`
     color: rgba(0,0,0,.85);
     border: 0;
     padding: .5rem 0;
-    text-align: center;
     border-radius: 1rem;
     position: relative;
     z-index: 2;
