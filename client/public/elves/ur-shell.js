@@ -531,7 +531,7 @@ $.style(`
     grid-template-rows: 1fr auto;
     height: 100%;
     overflow: hidden;
-    background: linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)), black;
+    background: linear-gradient(335deg, rgba(0,0,0,.8), rgba(0,0,0,.9)), var(--root-theme, mediumseagreen);
   }
 
   /* scanlines */
@@ -571,7 +571,7 @@ $.style(`
     padding: 8px;
     max-height: 35vh;
     font-size: 1rem;
-    background: linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)), black;
+    background: linear-gradient(155deg, rgba(0,0,0,.7), rgba(0,0,0,.8)), var(--root-theme, mediumseagreen);
     color: rgba(255,255,255,.75);
   }
 
@@ -608,7 +608,7 @@ $.style(`
   }
 
   & .message.-assistant {
-    background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.35)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

@@ -6,6 +6,7 @@ const renderers = {
   'saga': sagaRenderer,
   'jpg': iframeRenderer,
   'svg': iframeRenderer,
+  'txt': codeRenderer,
   'css': codeRenderer,
   'json': codeRenderer,
   'js': codeRenderer,

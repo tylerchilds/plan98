@@ -37,7 +37,7 @@ function renderApplications(pane) {
     <div class="application-list">
       ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
         return `
-          <button class="app-select" data-url="${url}">
+          <button class="app-select" data-url="${url}" data-title="${label}">
             <div class="iconography">
             </div>
             <span class="app-label">
@@ -97,6 +97,7 @@ function render(target) {
       x,
       y,
       z,
+      title,
       url,
       focused
     } = $.learn()[tray]
@@ -116,7 +117,8 @@ function render(target) {
             </button>
             <button class="tray-action tray-max" data-tray="${tray}">
             </button>
-            <div class="grabber"></div>
+            <div class="grabber"><span class="tray-title">${title}</span>
+            </div>
           </div>
           <div class="tray-body">
             <iframe src="${url}" title="${url}"></iframe>
@@ -162,13 +164,14 @@ function render(target) {
     }
 
     { //tray logic
-      let taskNode = taskContainer.querySelector(`[data-id="${tray}"]`)
+      let taskNode = taskContainer.querySelector(`[data-tray="${tray}"]`)
       if(!taskNode) {
         taskNode = document.createElement('div')
+        taskNode.classList.add('taskbar-button');
         taskNode.classList.add('task');
-        taskNode.dataset.id = tray
+        taskNode.dataset.tray = tray
         taskNode.innerHTML = `
-          <button class="task-button" data-tray="${tray}">${url}</button>
+          ${title || url}
         `
         taskContainer.appendChild(taskNode)
       }
@@ -208,6 +211,7 @@ $.draw((target) => {
             y: 0,
             z: newState.trayZ,
             url: src,
+            title: 'Welcome',
             maximized: true,
             focused: true
           }
@@ -222,22 +226,20 @@ $.draw((target) => {
       <div class="trays"></div>
       <div class="cursor"></div>
       <canvas class="terminal-canvas"></canvas>
+      <div class="system-menu">
+        ${renderSystemMenu()}
+      </div>
     </div>
     <div class="taskbar">
       <div class="left">
-        <button data-start-menu>
+        <button data-start-menu class="taskbar-button">
           Start
         </button>
-        <div class="system-menu">
-          ${renderSystemMenu()}
-        </div>
       </div>
-      <div class="center">
-        <div class="tasks"></div>
-      </div>
+      <div class="center tasks"></div>
       <div class="right">
-        <button data-settings-menu>
-          Settings
+        <button data-settings-menu class="taskbar-button">
+          <sl-icon name="gear-wide-connected"></sl-icon>
         </button>
       </div>
     </div>
@@ -287,7 +289,23 @@ function beforeUpdate(target) {
   }
 }
 
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
 function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    recoverElves(target, 'sl-icon')
+  }
+
   {
     const { showStart } = $.learn()
 
@@ -407,9 +425,10 @@ function selectPane(event) {
 
 function selectApp(event) {
   const { x, y } = event
-  const { url } = event.target.dataset
+  const { url, title } = event.target.dataset
   newTray({
     url,
+    title,
     x: x > window.innerWidth / 2 ? window.innerWidth - x : x,
     y: y > window.innerHeight / 2 ? window.innerHeight - y : y,
   })
@@ -602,6 +621,13 @@ $.style(`
       repeating-linear-gradient(180deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.1) 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,.1) 20px),
       repeating-radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0) 10px, rgba(255,255,255,0) 20px),
       var(--root-theme, mediumseagreen);
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    overflow-x: auto;
   }
 
   & .desktop {
@@ -617,7 +643,7 @@ $.style(`
       linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
       var(--root-theme, mediumseagreen);
     z-index: 5;
-    padding: 2px;
+    padding: 3px;
     display: grid;
     grid-template-columns: auto 1fr auto;
     gap: 1rem;
@@ -627,12 +653,11 @@ $.style(`
   & .system-menu {
     display: none;
     position: absolute;
-    transform: translateY(-100%);
-    top: 0;
-    left: 0;
-    right: 0;
-    max-height: 80vh;
-    overflow: auto;
+    overflow: hidden;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(10px);
+    inset: 0;
+    z-index: 100;
   }
 
   &[data-menu="true"] .system-menu {
@@ -665,22 +690,96 @@ $.style(`
     align-items: center;
   }
 
+  & .taskbar .center {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    gap: 3px;
+  }
+
   & .taskbar-button {
+    cursor: pointer;
     padding: 0;
-    width: 35px;
-    height: 35px;
-    border-radius: 100%;
+    padding: .5rem;
     display: grid;
     place-items: center;
+    border-radius: 4px;
     border: none;
-    font-size: 18px;
-    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.15));
+    font-size: 1rem;
     color: white;
+    text-shadow: 1px 1px var(--root-theme, mediumseagreen);
+    backdrop-filter: blur(10px) opacity(20%);
+    background: radial-gradient(
+      at center top,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(0, 0, 0, 0.1) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.35);
+    flex-shrink: 1; /* Allow buttons to shrink */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+    max-width: 100%;
   }
 
   & .taskbar-button:hover,
   & .taskbar-button:focus {
-    background: linear-gradient(rgba(255,255,255,.25), rgba(255,255,255,.35));
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.65);
+  }
+
+  & .taskbar-button[data-focused="true"] {
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.65) inset;
+  }
+
+
+  & .taskbar-button[data-start-menu] {
+    font-weight: bold;
+    background: radial-gradient(
+      at center top,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(0, 0, 0, 0.1) 31%
+    ), lemonchiffon;
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    color: var(--root-theme, mediumseagreen);
+    text-shadow: none;
+  }
+
+  & .taskbar-button[data-start-menu]:hover,
+  & .taskbar-button[data-start-menu]:focus {
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), lemonchiffon;
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+  }
+
+  & .taskbar-button[data-settings-menu] {
+    border-radius: 100%;
   }
 
   &.cinema {
@@ -923,6 +1022,7 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     overflow-x: auto;
+    place-items: center;
   }
 
   & .tray-title-bar input {
@@ -974,6 +1074,16 @@ $.style(`
 
   & .tray.minimized .tray-title-bar {
     border-radius: 1rem;
+  }
+
+  & .tray-title {
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(255,255,255,.65);
+  }
+
+  & .tray.minimized .tray-title {
+    display: none;
   }
 
   & .tray.minimized:not(.maximized) {
@@ -1072,6 +1182,7 @@ $.style(`
 
 
   & .applications {
+    overflow: auto;
   }
 
   & .application-list {
@@ -1117,16 +1228,6 @@ $.style(`
   & .pane-select {
     
   }
-
-  & .tasks {
-    display: flex;
-  }
-  & .task {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
 `)
 
 $.when('click', '[data-start-menu]', () => {
@@ -1141,6 +1242,23 @@ function wake (e) {
   $.teach({ trayZ: newZ, focusedTray: tray })
   setState(tray, { z: newZ })
 }
+
+$.when('click', '.task', focusTray)
+function focusTray (e) {
+  const { trayZ } = $.learn()
+  const { tray } = event.target.dataset
+
+  const { z, maximized } = $.learn()[tray]
+
+  if(z === trayZ) {
+    setState(tray, { maximized: !maximized })
+  } else {
+    const newZ = trayZ + 1
+    $.teach({ trayZ: newZ, focusedTray: tray })
+    setState(tray, { z: newZ, minimized: false })
+  }
+}
+
 
 function newTray(overrides) {
   const tray = self.crypto.randomUUID()
