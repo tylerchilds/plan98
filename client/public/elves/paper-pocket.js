@@ -187,7 +187,7 @@ let current
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
-const themes = ['lightgray', 'firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple']
+const themes = ['lightgray', 'firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple', 'lemonchiffon']
 const bpmOptions = ['20', '40', '60', '80', '100', '120', '140', '160', '180', '200', '220', '240', '280', '300', '320', '340', '360']
 const noteDurationOptions = ['4m', '2m', '1m', '1n', '2n', '4n', '8n', '16n', '32n', '64n']
 

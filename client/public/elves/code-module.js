@@ -305,8 +305,6 @@ $.style(`
     color: black;
     max-width: 100%;
     width: 100%;
-    display: grid;
-    grid-template-rows: auto 1fr;
   }
 
   & .layout {

@@ -280,7 +280,9 @@ $.when('click', '[data-view]', (event) => {
 $.when('click', '.interactive-file', (event) => {
   event.preventDefault()
   const { path } = event.target.dataset
-  window.location.href = '/app/media-plexer?src='+path
+  $.teach({ path: '/app/media-plexer?src='+path, view: 'browser' })
+
+  self.history.pushState({ type: `${$.link}-navigation`, path: $.learn().path }, "");
 })
 
 
@@ -288,7 +290,7 @@ $.when('click', '.interactive-directory', (event) => {
   event.preventDefault()
   const { path } = event.target.dataset
   const enclosure = jurassicFrom(path)
-  $.teach({ enclosure })
+  $.teach({ enclosure, view: 'list' })
   self.history.pushState({ type: `${$.link}-navigation`, path }, "");
 })
 
@@ -296,14 +298,16 @@ $.when('click', '.directory-name', (event) => {
   event.preventDefault()
   const { path } = event.target.dataset
   const enclosure = jurassicFrom(path)
-  $.teach({ enclosure })
+  $.teach({ enclosure, view: 'list' })
   self.history.pushState({ type: `${$.link}-navigation`, path }, "");
 })
 
 $.when('click', '.file-name', (event) => {
   event.preventDefault()
   const { path } = event.target.dataset
-  window.location.href = '/app/media-plexer?src='+path
+  $.teach({ path: '/app/media-plexer?src='+path, view: 'browser' })
+
+  self.history.pushState({ type: `${$.link}-navigation`, path: $.learn().path }, "");
 })
 
 addEventListener("popstate", async (event) => {
@@ -369,20 +373,6 @@ function library(target) {
   const start = Math.max(suggestIndex - 5, 0)
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
 
-  const settings = `
-    <file-system data-embedded="true">
-      <button data-view="grid">
-        <span><sl-icon name="grid"></sl-icon></span> Grid
-      </button>
-      <button data-view="list">
-        <span><sl-icon name="list-stars"></sl-icon></span> List
-      </button>
-      <button data-view="game">
-        <span><sl-icon name="joystick"></sl-icon></span> Immersive
-      </button>
-    </file-system>
-  `
-
   const search = `
     <div class="search">
       <button class="action-button" data-back>
@@ -397,9 +387,6 @@ function library(target) {
       <input placeholder="Search..." type="text" value="${path || '/'}" name="search" autocomplete="off" />
       <button class="action-button" data-down>
         <sl-icon name="caret-down-fill"></sl-icon>
-      </button>
-      <button class="action-button" data-popover='${settings}'>
-        <sl-icon name="three-dots-vertical"></sl-icon>
       </button>
     </div>
     <div class="suggestions">
@@ -488,7 +475,7 @@ $.when('click', '.auto-item', event => {
   const index = parseInt(event.target.dataset.index)
   const start = Math.max(suggestIndex - 5, 0)
   suggestIndex = start + index
-  $.teach({ suggestIndex, enclosure })
+  $.teach({ suggestIndex, enclosure, view: 'list' })
 })
 
 
@@ -508,7 +495,6 @@ function jurassicFrom(path) {
       return next
     }, p98)
   } catch(e) {
-    console.error(e)
   }
 
   if(files) {
@@ -547,11 +533,6 @@ $.when('click', '[data-close-context]', (event) => {
   $.teach({ contextActions: null })
 })
 
-$.when('click', '[data-goto]', (event) => {
-  const { goto } = event.target.dataset
-  window.location.href = goto
-})
-
 $.when('click', '[data-back]', (event) => {
   history.back()
 })
@@ -583,6 +564,7 @@ $.style(`
     display: grid;
     height: 100%;
     grid-template-rows: auto 1fr;
+    overflow: hidden;
   }
 
   & .action-button {
@@ -606,7 +588,7 @@ $.style(`
     pointer-events: all;
     position: relative;
     display: grid;
-    grid-template-columns: auto auto auto 1fr auto auto;
+    grid-template-columns: auto auto auto 1fr auto;
     background: black;
   }
 
@@ -739,6 +721,7 @@ $.style(`
 
   & .irix {
     height: 100%;
+    overflow: auto;
   }
 
   & .irix[data-view="grid"] .system-icon {

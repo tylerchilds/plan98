@@ -28,7 +28,7 @@
 
 :focus {
     position: relative;
-    outline: 1px solid var(--theme, dodgerblue);
+    outline: 1px solid var(--root-theme, dodgerblue);
     outline-offset: -1px;
 }
 
@@ -36,7 +36,7 @@ button:-moz-focusring,
 [type="button"]:-moz-focusring,
 [type="reset"]:-moz-focusring,
 [type="submit"]:-moz-focusring {
-  outline: 2px solid var(--theme, dodgerblue);
+  outline: 2px solid var(--root-theme, dodgerblue);
 }
 
 

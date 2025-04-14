@@ -7,6 +7,7 @@ const renderers = {
   'jpg': iframeRenderer,
   'svg': iframeRenderer,
   'css': codeRenderer,
+  'json': codeRenderer,
   'js': codeRenderer,
   'html': codeRenderer,
   'md': markdownRenderer,
