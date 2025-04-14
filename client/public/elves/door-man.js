@@ -1209,4 +1209,4 @@ $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
 
 $.when('click', '.pane-select', selectPane)
-$.when('dblclick', '.app-select', selectApp)
+$.when('click', '.app-select', selectApp)

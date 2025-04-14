@@ -40,7 +40,13 @@ async function buildIndex(target) {
 
   requestIdleCallback(() => {
     const enclosure = jurassicFrom(src)
-    $.teach({ enclosure })
+
+    if(!enclosure.error) {
+      $.teach({ enclosure, view: 'list' })
+    } else {
+      $.teach({ view: 'browser' })
+    }
+
     self.history.pushState({ type: `${$.link}-navigation`, path: src }, "");
   })
 
