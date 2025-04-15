@@ -161,7 +161,7 @@ $.draw(target => {
             <p>Please choose a nickname to begin</p>
             <label class="field" style="grid-area: name;">
               <span class="label">Nickname</span>
-              <input type="text" data-bind name="nickname" value="${nickname||''}">
+              <input type="text" data-bind name="nickname" value="${escapeHyperText(nickname||'')}">
             </label>
 
             <button class="normal-button">Save</button>
@@ -183,7 +183,7 @@ $.draw(target => {
 
   const log = messages.map((message) => `
     <div class="message">
-      <span class="author">${message.author}:</span> ${message.decrypted}
+      <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted)}
     </div>
   `).join('')
 
