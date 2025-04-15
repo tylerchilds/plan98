@@ -1251,7 +1251,7 @@ function focusTray (e) {
   const { z, maximized } = $.learn()[tray]
 
   if(z === trayZ) {
-    setState(tray, { maximized: !maximized })
+    setState(tray, { maximized: !maximized, minimized: false })
   } else {
     const newZ = trayZ + 1
     $.teach({ trayZ: newZ, focusedTray: tray })
