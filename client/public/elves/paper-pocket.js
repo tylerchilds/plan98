@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { consoleShow, consoleHide } from './plan98-console.js'
 import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
@@ -202,6 +203,7 @@ const fontSizeMap = {
 
 const fontFamilies = ['recursive', 'arial', 'verdana', 'helvetica', 'tahoma', 'times new roman', 'georgia', 'garamond', 'palatino']
 const fontFamilyMap = {
+  berkeley: "'BerkeleyMono', monospace",
   recursive: "'Recursive', 'Avenir', 'Avenir Next', 'Helvetica Neue', 'Segoe UI', 'Verdana', sans-serif",
   arial: "'Arial', sans-serif",
   verdana: "'Verdana', sans-serif",
@@ -357,6 +359,8 @@ const $ = elf('paper-pocket', {
   },
   pause: systemMenu
 })
+
+export default $
 
 function startMode() {
   return localStorage.getItem('paper-pocket/tutorialComplete') === "true"
@@ -635,44 +639,47 @@ $.draw((target) => {
       }
     }
 
-
-    {
-      const { theme } = $.learn()
-      if(target.theme !== theme) {
-        target.theme = theme
-        document.body.style.setProperty('--root-theme', theme)
-      }
-    }
-
-    {
-      const { fontSize } = $.learn()
-      if(target.fontSize !== fontSize) {
-        target.fontSize = fontSize
-        document.documentElement.style.setProperty('--font-size-root', fontSizeMap[fontSize])
-      }
-    }
-
-    {
-      const { fontFamily } = $.learn()
-      if(target.fontFamily !== fontFamily) {
-        target.fontSize = fontFamily
-        document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
-      }
-    }
-
-    {
-      const { mode, tutorialIndex } = $.learn()
-      if(mode === modes.tutorial && target.lastTutorial !== tutorialIndex) {
-        target.lastTutorial = tutorialIndex
-        target.querySelector('.tutorial-window').scrollTo({ top: 0 });
-      }
-    }
+    afterUpdateTheme($, target)
 
     {
       recoverElves(target, 'code-module')
     }
   },
 })
+
+export function afterUpdateTheme($, target) {
+  {
+    const { theme } = $.learn()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
+    }
+  }
+
+  {
+    const { fontSize } = $.learn()
+    if(target.fontSize !== fontSize) {
+      target.fontSize = fontSize
+      document.documentElement.style.setProperty('--font-size-root', fontSizeMap[fontSize])
+    }
+  }
+
+  {
+    const { fontFamily } = $.learn()
+    if(target.fontFamily !== fontFamily) {
+      target.fontSize = fontFamily
+      document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
+    }
+  }
+
+  {
+    const { mode, tutorialIndex } = $.learn()
+    if(mode === modes.tutorial && target.lastTutorial !== tutorialIndex) {
+      target.lastTutorial = tutorialIndex
+      target.querySelector('.tutorial-window').scrollTo({ top: 0 });
+    }
+  }
+}
 
 function renderMode() {
   const { mode, tutorialIndex } = $.learn()
@@ -884,7 +891,7 @@ const settingsRPC = {
   },
 }
 
-const sideEffects = {
+export const sideEffects = {
   theme: (value) => {
     setTheme(value)
   },
@@ -907,6 +914,27 @@ const sideEffects = {
     setDebugger(value)
   }
 }
+
+function setDebugger(visibility) {
+  let console = document.body.querySelector('plan98-console')
+  if(!console) {
+    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
+    console = document.body.querySelector('plan98-console')
+  } else {
+    console.classList.toggle('hidden')
+  }
+
+  if(visibility === 'show') {
+    consoleShow()
+    $.teach({ debuggerVisible: true })
+  } else {
+    consoleHide()
+    $.teach({ debuggerVisible: false })
+  }
+
+  event.target.classList.toggle('enabled')
+}
+
 
 function settingsChange(settingsKey, nextValue) {
   if(sideEffects[settingsKey]) {

@@ -854,23 +854,3 @@ function mod(x, n) {
   return ((x % n) + n) % n;
 }
 
-function setDebugger(visibility) {
-  let console = document.body.querySelector('plan98-console')
-  if(!console) {
-    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
-    console = document.body.querySelector('plan98-console')
-  } else {
-    console.classList.toggle('hidden')
-  }
-
-  if(visibility === 'show') {
-    consoleShow()
-    $.teach({ debuggerVisible: true })
-  } else {
-    consoleHide()
-    $.teach({ debuggerVisible: false })
-  }
-
-  event.target.classList.toggle('enabled')
-}
-

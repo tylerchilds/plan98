@@ -1,6 +1,37 @@
 import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
-import { systemMenu, getTheme } from './paper-pocket.js'
+import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
+
+// helper for system settings
+console.log(Object.keys(sideEffects).map((key) => {
+  return [key, sideEffects[key], $paperPocket.learn().settings[key]]
+}))
+
+const defaultPath = {}
+const paperPocketPath = Object.keys(sideEffects)
+  .filter(key => {
+    return $paperPocket.learn().settings[key]
+  }).reduce((path, key) => {
+    path[key] = sideEffects[key]
+    return path
+  }, defaultPath)
+
+const paperPocketHelp = `Congratulations on your purchase of your new Paper Pocket!
+
+You have options. To configure your settings, try the following:
+\n` + Object.keys(paperPocketPath).map(key => {
+  const { label, description, options, value } = $paperPocket.learn().settings[key]
+  return `${key}
+
+  ${label}
+  ${description}
+  ${options.join(' ')}
+`}).join('\n') + `
+explore deeper? run help
+`
+
+
+
 
 const models = {
   'deepseek-r1:1.5b': 'Deepseek-r1 1.5b',
@@ -39,7 +70,12 @@ window.addEventListener('keydown', (event) => {
 });
 
 
-$.teach({ body: `Silly, at your service.
+$.teach({ body: paperPocketHelp + `
+xox
+xoo
+oxx
+
+Silly, at your service.
 
 Do your thing or click "help" and type "help" and then "enter"`, author: 'assistant' }, mergeMessage)
 
@@ -178,6 +214,9 @@ function afterUpdate(target) {
   }
 
   {
+    afterUpdateTheme($paperPocket, target)
+  }
+  {
     const theme = getTheme()
     if(target.theme !== theme) {
       target.theme = theme
@@ -232,7 +271,9 @@ $.when('submit', 'form', (event) => {
   execute(message)
 })
 
+
 const commands = {
+  ...paperPocketPath,
   'echo': (...args) => {
     return args.join(' ')
   },
@@ -376,7 +417,9 @@ const commands = {
   'help': (...args) => {
     return `Welcome to ur-shell, the Universal Resource Shell!
 
-Commands:
+${paperPocketHelp}
+
+plan98 commands
 
 help
   display help options
@@ -595,7 +638,6 @@ $.style(`
     overflow: auto;
     position: relative;
     margin: 0;
-    font-family: 'BerkeleyMono', monospace;
     opacity: .85;
     white-space: pre-wrap;
     overflow-wrap: break-word;
