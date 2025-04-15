@@ -17,7 +17,10 @@ function renderModels(model) {
 
 
 const $ = elf('mobile-device', {
-  model: 'phone'
+  model: 'phone',
+  studio: false,
+  home: false,
+  src: '/app/file-surf'
 })
 
 $.when('change', 'select', (event) => {
@@ -33,34 +36,58 @@ function mount(target) {
   if(model) {
     $.teach({ model })
   }
+
+  const studio = target.getAttribute('studio')
+  if(studio === "true") {
+    $.teach({ studio })
+  }
+
+  const src = target.getAttribute('src')
+  if(src) {
+    $.teach({ src })
+  }
+
 }
 
 $.draw((target) => {
   mount(target)
-  const { model } = $.learn()
+  const { home, studio, model, src } = $.learn()
 
-  const src = target.getAttribute('src') || '/app/file-surf'
-
-  return `
-    <div class="header">
-      <div class="model-selector">
-        <div class="model-view">
-          ${models[model] || 'No model'}
+  return studio ? `
+    <div class="studio">
+      <div class="header">
+        <div class="model-selector">
+          <div class="model-view">
+            ${models[model] || 'No model'}
+          </div>
+          <select>
+            <option disabled selected>Select a model</option>
+            ${renderModels(model)}
+          </select>
         </div>
-        <select>
-          <option disabled selected>Select a model</option>
-          ${renderModels(model)}
-        </select>
       </div>
-    </div>
-    <div class="body">
-      <div class="space ${model}">
-        <div class="device">
-          <iframe src="${src}"></iframe>
-          <div class="chin">
-            <button class="home"></button>
+      <div class="body">
+        <div class="space ${model}">
+          <div class="device">
+            <div class="screen">
+              <div class="home-menu">${home?homeMenu():''}</div>
+              <iframe src="${src}"></iframe>
+            </div>
+            <div class="chin">
+              <button class="home"></button>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  ` : `
+    <div class="device">
+      <div class="screen">
+        <div class="home-menu">${home?homeMenu():''}</div>
+        <iframe src="${src}"></iframe>
+      </div>
+      <div class="chin">
+        <button class="home"></button>
       </div>
     </div>
   `
@@ -76,8 +103,110 @@ $.draw((target) => {
   }
 })
 
+function homeMenu() {
+  const { systemPane } = $.learn()
+
+  if(systemPane) {
+    return renderApplications(systemPane)
+  } else {
+    return renderGroups(systemPane)
+  }
+}
+
+function renderGroups(systemPane) {
+  const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
+
+  return `
+    <groups class="groups-list">
+      ${groups.map((x) => {
+        return `
+          <div>
+            <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
+              ${systemMenu[x.key].label}
+            </button>
+          </div>
+        `
+      }).join('')}
+
+      <button class="to-settings">
+        Settings
+      </button>
+    </groups>
+  `
+}
+
+function renderApplications(pane) {
+  return `
+    <apps class="application-list">
+      <div>
+        <button class="to-groups">
+          Back
+        </button>
+      </div>
+
+      ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
+        return `
+          <div>
+            <button class="app-select" data-url="${url}" data-title="${label}">
+              <div class="iconography">
+              </div>
+              <span class="app-label">
+                ${label}
+              </span>
+            </button>
+          </div>
+        `
+      }).join('')}
+    </apps>
+  `
+}
+
+$.when('click', '.app-select', selectApp)
+$.when('click', '.pane-select', selectPane)
+$.when('click', '.to-groups', back)
+
+function back() {
+  $.teach({ systemPane: null })
+}
+
+function selectPane(event) {
+  const { pane } = event.target.dataset
+  $.teach({ systemPane: pane })
+}
+
+function selectApp(event) {
+  const { url } = event.target.dataset
+
+  $.teach({ src: url, home: false })
+}
+
+$.when('click', '.home', (event) => {
+  $.teach({ home: !$.learn().home })
+})
+
 $.style(`
   & {
+    display: block;
+    height: 100%;
+  }
+
+  & .screen {
+    position: relative;
+    overflow: hidden;
+  }
+
+  & .home-menu:empty {
+    display: none;
+  }
+
+  & .home-menu {
+    position: absolute;
+    inset: 0;
+    background: black;
+    overflow: auto;
+  }
+
+  & .studio {
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
@@ -106,11 +235,9 @@ $.style(`
   }
 
   & .device {
-    width: 320px;
-    height: 480px;
-    border-radius: 5px;
+    width: 100%;
+    height: 100%;
     overflow: hidden;
-    border: 5px solid rgba(0,0,0,.65);
     box-sizing: content-box;
     margin: auto;
     display: grid;
@@ -152,6 +279,11 @@ $.style(`
 
   & .tv.space {
     width: calc(1920px + 4rem);
+  }
+
+  & .space .device {
+    border-radius: 5px;
+    border: 5px solid rgba(0,0,0,.65);
   }
 
 
@@ -201,4 +333,59 @@ $.style(`
 
   & select option {
   }
+
+  & .to-settings,
+  & .to-groups,
+  & .pane-select,
+  & .app-select {
+    font-weight: 100;
+    color: rgba(255,255,255,.65);
+    font-size: 2rem;
+    line-height: 1;
+    background: transparent;
+    border: none;
+    border-radius: none;
+    display: inline-block;
+    text-align: left;
+    padding: .5rem 0;
+  }
+
+  & .to-settings:hover,
+  & .to-settings:focus,
+  & .to-groups:hover,
+  & .to-groups:focus,
+  & .pane-select:hover,
+  & .app-select:hover,
+  & .pane-select:focus,
+  & .app-select:focus {
+    color: rgba(255,255,255,1);
+  }
+
+  & .groups-list,
+  & .application-list {
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+  }
+
+  & .to-settings,
+  & .to-groups {
+    font-weight: bold;
+    background: linear-gradient(155deg, rgba(255,255,255,0), rgba(255,255,255,.15)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+  }
+
+  & .to-settings:hover,
+  & .to-settings:focus,
+  & .to-groups:hover,
+  & .to-groups:focus {
+    font-weight: bold;
+    background: linear-gradient(155deg, rgba(255,255,255,.15), rgba(255,255,255,.35)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.5rem;
+  }
+
 `)
