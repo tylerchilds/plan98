@@ -7,7 +7,7 @@ console.log(Object.keys(sideEffects).map((key) => {
 }))
 
 const defaultPath = {}
-const settingsMenuTypeSchema = Object.keys(sideEffects)
+const settingsMenuTypeSchema = () => Object.keys(sideEffects)
   .filter(key => {
     return $paperPocket.learn().settings[key]
   }).reduce((path, key) => {
@@ -43,8 +43,8 @@ const $ = elf('mobile-device', {
 
 $.when('change', '[data-bind]', (event) => {
   const { name, value } = event.target
-  if(settingsMenuTypeSchema[name]) {
-    settingsMenuTypeSchema[name](value)
+  if(settingsMenuTypeSchema()[name]) {
+    settingsMenuTypeSchema()[name](value)
   }
   $.teach({ [name]: value })
 })
@@ -126,21 +126,14 @@ $.draw((target) => {
     {
       afterUpdateTheme($paperPocket, target)
     }
-
-    {
-      const theme = getTheme()
-      if(target.theme !== theme) {
-        target.theme = theme
-        document.body.style.setProperty('--root-theme', theme)
-      }
-    }
   }
 })
 
 function settingsMenu() {
   const cardOptions = Object
-      .keys(settingsMenuTypeSchema).map(key => {
-    const { label, description, options, value } = $paperPocket.learn().settings[key]
+      .keys(settingsMenuTypeSchema()).map(key => {
+    const { label, description, options } = $paperPocket.learn().settings[key]
+    const value = $paperPocket.learn()[key]
     return `
       <div class="settings-card">
         <div class="selectbox-label">
