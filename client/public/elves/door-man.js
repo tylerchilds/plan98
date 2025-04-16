@@ -1,5 +1,5 @@
 import elf from '@silly/elf'
-import { systemMenu, getTheme } from './paper-pocket.js'
+import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 
 const initial = {
   systemPane: Object.keys(systemMenu)[0],
@@ -13,6 +13,7 @@ const initial = {
   trayZ: 3,
   focusedTray: null,
   trays: [],
+  showSettings: false,
   profile: {
     banner: null
   }
@@ -229,16 +230,15 @@ $.draw((target) => {
       <div class="system-menu">
         ${renderSystemMenu()}
       </div>
+      <div class="settings-menu"></div>
     </div>
     <div class="taskbar">
       <div class="left">
-        <button data-start-menu class="taskbar-button">
-          Start
-        </button>
+        <button data-start-menu class="taskbar-button"></button>
       </div>
       <div class="center tasks"></div>
       <div class="right">
-        <button data-settings-menu class="taskbar-button">
+        <button data-settings-menu class="to-settings taskbar-button">
           <sl-icon name="gear-wide-connected"></sl-icon>
         </button>
       </div>
@@ -307,6 +307,10 @@ function afterUpdate(target) {
   }
 
   {
+    afterUpdateTheme($paperPocket, target)
+  }
+
+  {
     const { showStart } = $.learn()
 
     if(target.startState !== showStart) {
@@ -326,6 +330,18 @@ function afterUpdate(target) {
       applications.innerHTML = renderApplications(systemPane)
     }
 
+  }
+
+  {
+    const { showSettings } = $.learn()
+    const menu = target.querySelector('.settings-menu')
+
+    if(showSettings && target.showSettings !== showSettings) {
+      target.lastPane = showSettings
+      menu.innerHTML = settingsMenu()
+    } else if(menu.innerHTML) {
+      menu.innerHTML = ''
+    }
   }
 
   {
@@ -386,6 +402,21 @@ function afterUpdate(target) {
       document.body.style.setProperty('--root-theme', theme)
     }
   }
+}
+
+
+function settingsMenu() {
+  return `
+    <div class="faux-mobile">
+      <iframe src="/app/mobile-device?settings=true"></iframe>
+    </div>
+  `
+}
+
+$.when('click', '.to-settings', toSettings)
+
+function toSettings() {
+  $.teach({ showSettings: !$.learn().showSettings })
 }
 
 function toggleMax(event) {
@@ -754,6 +785,9 @@ $.style(`
 
   & .taskbar-button[data-start-menu] {
     font-weight: bold;
+    aspect-ratio: 1;
+    height: 2rem;
+    width: auto;
     background: radial-gradient(
       at center top,
       rgba(255, 255, 255, 0.5) 0%,
@@ -764,7 +798,30 @@ $.style(`
     background-position: center -50%;
     color: var(--root-theme, mediumseagreen);
     text-shadow: none;
+    border-radius: 0;
+    animation: &-spin ease-in-out 5000ms alternate infinite;
   }
+
+  @keyframes &-spin {
+    0% {
+      transform: rotate(-360deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes &-marquee-track {
+    0% {
+      transform: translateX(20px);
+    }
+
+    100% {
+      transform: translateX(calc(-50%));
+    }
+  }
+
+
 
   & .taskbar-button[data-start-menu]:hover,
   & .taskbar-button[data-start-menu]:focus {
@@ -1228,10 +1285,46 @@ $.style(`
   & .pane-select {
     
   }
+
+  & .settings-menu:empty {
+    display: none;
+  }
+
+  & .settings-menu {
+    position: absolute;
+    inset: 0;
+    background: black;
+    overflow: auto;
+    z-index: 2;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    gap: .5rem;
+    z-index: 200;
+  }
+
+  & .faux-mobile {
+    max-width: 320px;
+    max-height: 480px;
+    width: 100%;
+    height: 100%;
+    border-radius: 1rem;
+    border: 5px solid var(--root-theme, mediumseagreen);
+    overflow: hidden;
+    position: absolute;
+    right: .5rem;
+    bottom: .5rem;
+  }
+
 `)
 
 $.when('click', '[data-start-menu]', () => {
-  $.teach({ showStart: !$.learn().showStart })
+  $.teach({ showStart: !$.learn().showStart, showSettings: false })
 })
 
 $.when('click', '.tray-wake', wake)

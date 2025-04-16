@@ -63,6 +63,13 @@ function mount(target) {
     $.teach({ studio })
   }
 
+  const settings = target.getAttribute('settings')
+  if(settings === "true") {
+    $.teach({ showSettings: true })
+  }
+
+
+
   const src = target.getAttribute('src')
   if(src) {
     $.teach({ src })
@@ -209,8 +216,6 @@ function renderApplications(pane) {
         return `
           <div>
             <button class="app-select" data-url="${url}" data-title="${label}">
-              <div class="iconography">
-              </div>
               <span class="app-label">
                 ${label}
               </span>
@@ -281,22 +286,20 @@ $.style(`
     inset: 0;
     background: black;
     overflow: auto;
-    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    gap: .5rem;
+    z-index: 200;
+  }
+
+  & .settings-card {
+    backdrop-filter: blur(10px);
     background:
       linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       var(--root-theme, lightgray);
-    display: flex;
-    flex-direction: column;
-    padding: .5rem;
-    gap: .5rem;
-  }
-
-  & .settings-card {
-    border: 1px solid rgba(255,255,255,.2);
-    backdrop-filter: blur(10px);
-    background: rgba(0,0,0,.75);
     padding: .5rem;
     color: rgba(255,255,255,.85);
   }
@@ -413,13 +416,16 @@ $.style(`
   & .selectbox-selector {
     position: relative;
     display: inline-block;
-    background: black;
     border: 1px solid rgba(255,255,255,.65);
     color: rgba(255,255,255,.85);
     border-radius: 3px;
-    position: sticky;
-    top: 0;
-    left: 0;
+
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.85), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.85), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+    float: right;
   }
 
   & .selectbox-view {
@@ -442,10 +448,11 @@ $.style(`
   & .pane-select,
   & .app-select {
     font-weight: 100;
-    color: rgba(255,255,255,.65);
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
     font-size: 2rem;
     line-height: 1;
-    background: transparent;
     border: none;
     border-radius: none;
     display: inline-block;
@@ -461,6 +468,9 @@ $.style(`
   & .app-select:hover,
   & .pane-select:focus,
   & .app-select:focus {
+    background: transparent;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
     color: rgba(255,255,255,1);
   }
 
