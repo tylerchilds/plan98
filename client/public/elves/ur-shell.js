@@ -459,7 +459,7 @@ For further assistance, enter <cool-chat
   },
 
   shebang() {
-    execute('/app/ur-shell?src=/app/door-man?src=/app/mobile-device?studio=true&src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
+    execute('/app/ur-shell?src=/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
   }
 }
 

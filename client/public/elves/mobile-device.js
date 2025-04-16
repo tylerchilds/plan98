@@ -1,5 +1,22 @@
 import elf from '@silly/elf'
-import { systemMenu, getTheme } from './paper-pocket.js'
+import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
+
+// helper for system settings
+console.log(Object.keys(sideEffects).map((key) => {
+  return [key, sideEffects[key], $paperPocket.learn().settings[key]]
+}))
+
+const defaultPath = {}
+const settingsMenuTypeSchema = Object.keys(sideEffects)
+  .filter(key => {
+    return $paperPocket.learn().settings[key]
+  }).reduce((path, key) => {
+    path[key] = {
+      ...sideEffects[key]
+    }
+    path[key] = sideEffects[key]
+    return path
+  }, defaultPath)
 
 const models = {
   'watch': 'Watch',
@@ -19,13 +36,17 @@ function renderModels(model) {
 const $ = elf('mobile-device', {
   model: 'phone',
   studio: false,
-  home: false,
+  showHome: false,
+  showSettings: false,
   src: '/app/file-surf'
 })
 
-$.when('change', 'select', (event) => {
-  const model = event.target.value
-  $.teach({ model })
+$.when('change', '[data-bind]', (event) => {
+  const { name, value } = event.target
+  if(settingsMenuTypeSchema[name]) {
+    settingsMenuTypeSchema[name](value)
+  }
+  $.teach({ [name]: value })
 })
 
 function mount(target) {
@@ -51,16 +72,16 @@ function mount(target) {
 
 $.draw((target) => {
   mount(target)
-  const { home, studio, model, src } = $.learn()
+  const { showHome, showSettings, studio, model, src } = $.learn()
 
   return studio ? `
     <div class="studio">
       <div class="header">
-        <div class="model-selector">
-          <div class="model-view">
+        <div class="selectbox-selector">
+          <div class="selectbox-view">
             ${models[model] || 'No model'}
           </div>
-          <select>
+          <select data-bind name="model">
             <option disabled selected>Select a model</option>
             ${renderModels(model)}
           </select>
@@ -70,7 +91,8 @@ $.draw((target) => {
         <div class="space ${model}">
           <div class="device">
             <div class="screen">
-              <div class="home-menu">${home?homeMenu():''}</div>
+              <div class="home-menu">${showHome?homeMenu():''}</div>
+              <div class="settings-menu">${showSettings?settingsMenu():''}</div>
               <iframe src="${src}"></iframe>
             </div>
             <div class="chin">
@@ -83,7 +105,8 @@ $.draw((target) => {
   ` : `
     <div class="device">
       <div class="screen">
-        <div class="home-menu">${home?homeMenu():''}</div>
+        <div class="home-menu">${showHome?homeMenu():''}</div>
+        <div class="settings-menu">${showSettings?settingsMenu():''}</div>
         <iframe src="${src}"></iframe>
       </div>
       <div class="chin">
@@ -94,6 +117,10 @@ $.draw((target) => {
 }, {
   afterUpdate(target) {
     {
+      afterUpdateTheme($paperPocket, target)
+    }
+
+    {
       const theme = getTheme()
       if(target.theme !== theme) {
         target.theme = theme
@@ -102,6 +129,40 @@ $.draw((target) => {
     }
   }
 })
+
+function settingsMenu() {
+  const cardOptions = Object
+      .keys(settingsMenuTypeSchema).map(key => {
+    const { label, description, options, value } = $paperPocket.learn().settings[key]
+    return `
+      <div class="settings-card">
+        <div class="selectbox-label">
+          ${label}
+        </div>
+        <div class="selectbox-description">
+          ${description}
+        </div>
+        <div class="selectbox-selector">
+          <div class="selectbox-view">
+            ${value}
+          </div>
+          <select data-bind name="${key}">
+            <option disabled selected>${label}</option>
+            ${options.map(option => {
+              return `
+                <option ${option === value?'selected':''}>${option}</option>
+              `
+            }).join('')}
+          </select>
+        </div>
+    </div>
+    `
+  }).join('')
+
+  return `
+    ${cardOptions}
+  `
+}
 
 function homeMenu() {
   const { systemPane } = $.learn()
@@ -164,6 +225,11 @@ function renderApplications(pane) {
 $.when('click', '.app-select', selectApp)
 $.when('click', '.pane-select', selectPane)
 $.when('click', '.to-groups', back)
+$.when('click', '.to-settings', toSettings)
+
+function toSettings() {
+  $.teach({ showSettings: true })
+}
 
 function back() {
   $.teach({ systemPane: null })
@@ -177,11 +243,11 @@ function selectPane(event) {
 function selectApp(event) {
   const { url } = event.target.dataset
 
-  $.teach({ src: url, home: false })
+  $.teach({ src: url, showHome: false })
 }
 
 $.when('click', '.home', (event) => {
-  $.teach({ home: !$.learn().home })
+  $.teach({ showHome: !$.learn().showHome, showSettings: false })
 })
 
 $.style(`
@@ -204,6 +270,43 @@ $.style(`
     inset: 0;
     background: black;
     overflow: auto;
+  }
+
+  & .settings-menu:empty {
+    display: none;
+  }
+
+  & .settings-menu {
+    position: absolute;
+    inset: 0;
+    background: black;
+    overflow: auto;
+    z-index: 2;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
+    display: flex;
+    flex-direction: column;
+    padding: .5rem;
+    gap: .5rem;
+  }
+
+  & .settings-card {
+    border: 1px solid rgba(255,255,255,.2);
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,.75);
+    padding: .5rem;
+    color: rgba(255,255,255,.85);
+  }
+
+  & .selectbox-label {
+    color: rgba(255,255,255,.65);
+    font-weight: bold;
+  }
+
+  & .selectbox-description {
   }
 
   & .studio {
@@ -307,7 +410,7 @@ $.style(`
     height: 1080px;
   }
 
-  & .model-selector {
+  & .selectbox-selector {
     position: relative;
     display: inline-block;
     background: black;
@@ -319,7 +422,7 @@ $.style(`
     left: 0;
   }
 
-  & .model-view {
+  & .selectbox-view {
     position: absolute;
     inset: 0;
     pointer-events: none;
