@@ -29,6 +29,10 @@ export const systemMenu = {
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
       },
       {
+        label: 'Tamashika',
+        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
+      },
+      {
         label: 'Kiosk Mode',
         url: '/app/home-entertainment'
       },
