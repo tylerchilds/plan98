@@ -1,4 +1,50 @@
 import diffHTML from 'diffhtml'
+import geckos from '@geckos.io/client'
+
+const config = plan98.env.PLAN98_REALTIME ?
+  {
+    url: plan98.env.PLAN98_REALTIME,
+    port: 443,
+    cors: { origin: '*' }
+  } :
+  {
+    port: 9208
+  }
+
+export const channel = geckos(config) // default port is 9208
+
+function linkState(id) {
+  channel.emit('linkState', {
+    linkStateId: id,
+  });
+}
+
+const uploadCallbacks = []
+
+export function stateUpload(callback) {
+  uploadCallbacks.push(callback)
+}
+
+function notifyUploaders(link, knowledge, nuance) {
+  uploadCallbacks.forEach(callback => {
+    callback(link, knowledge, nuance)
+  })
+}
+
+
+const downloadCallbacks = []
+
+export function stateDownload(callback) {
+  downloadCallbacks.push(callback)
+}
+
+function notifyDownloaders(data) {
+  downloadCallbacks.forEach(callback => {
+    callback(data)
+  })
+}
+
+
 // fallback for non-secure lan parties
 
 const logs = {}
@@ -53,6 +99,52 @@ function update(link, target, compositor, lifeCycle={}) {
   }
 }
 
+const middleware = [
+  udpSync
+]
+
+function udpSync(target) {
+  if(target['udpSync']) return
+  target['udpSync'] = true
+
+  channel.onConnect(error => {
+    if (error) {
+      console.error(error.message)
+      return
+    }
+
+    linkState(target.id)
+
+    channel.on('stateDownload', (data) => {
+      notifyDownloaders(data)
+    })
+
+    stateUpload(udpUpload)
+    stateDownload(udpDownload)
+
+    function udpDownload(data) {
+      if(!data.link) return
+      const { link, knowledge, stringifiedNuance } = data
+      store.set(link, knowledge, createFunctionFromString(stringifiedNuance))
+    }
+
+    function udpUpload(link, knowledge, nuance) {
+      const data = {
+        link,
+        knowledge,
+        stringifiedNuance: nuance.toString()
+      }
+      channel.emit('stateUpload', { linkStateId: target.id, data })
+    }
+
+    channel.on('error', (error) => {
+      console.error("Geckos Error:", error);
+    })
+  })
+} 
+
+
+
 function draw(link, compositor, lifeCycle={}) {
   insight('plan98:draw', link)
   if(!reactiveFunctions[link]) {
@@ -60,6 +152,7 @@ function draw(link, compositor, lifeCycle={}) {
   }
 
   listen(CREATE_EVENT, link, (event) => {
+    middleware.forEach(x => x(event.target))
     const draw = update.bind(this, link, event.target, compositor, lifeCycle)
     reactiveFunctions[link][event.target.id] = draw
     draw()
@@ -85,6 +178,7 @@ export function learn(link) {
 export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
   insight('plan98:teach', link)
   store.set(link, knowledge, nuance)
+  notifyUploaders(link, knowledge, nuance)
 }
 
 export function when(link, type, arg2, callback) {
@@ -98,7 +192,7 @@ export function when(link, type, arg2, callback) {
   }
 }
 
-export default function plan98(link, initialState = {}) {
+export default function elf(link, initialState = {}) {
   insight('plan98', link)
   teach(link, initialState)
 

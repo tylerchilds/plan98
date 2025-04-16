@@ -140,6 +140,40 @@ io.onConnection(channel => {
     }
   });
 
+  const ids = []
+  channel.on('stateUpload', ({ linkStateId, data }) => {
+    if(ids.has(linkStateId)) {
+      const party = ids.get(linkStateId)
+      party.channels.forEach(channel => {
+        if(channel) {
+          channel.emit('stateDownload', data)
+        }
+      })
+    }
+  });
+
+  channel.on('linkState', ({ linkStateId }) => {
+    channel.join(linkStateId);
+
+    if (!ids.has(linkStateId)) {
+      ids.set(linkStateId, {
+        players: [],
+        channels: [],
+      })
+    }
+
+    const party = ids.get(linkStateId)
+
+    party.players.push({
+      id: channel.id,
+      gamepad: {}
+    })
+    party.channels.push(channel)
+
+    party.channels.forEach(channel => {
+      channel.emit('playerList', party.players)
+    })
+  });
 
   channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
     if(currentParty && parties.has(currentParty)) {
