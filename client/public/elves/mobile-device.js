@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 
 // helper for system settings

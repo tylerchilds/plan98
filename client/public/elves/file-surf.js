@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import { innerHTML } from 'diffhtml'
 import { hideModal } from '@plan98/modal'
 import natsort from 'natsort'

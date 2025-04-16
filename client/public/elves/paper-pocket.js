@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import { consoleShow, consoleHide } from './plan98-console.js'
 import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
@@ -27,6 +27,10 @@ export const systemMenu = {
       {
         label: 'Hyper Text',
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
+      },
+      {
+        label: 'Tamashika',
+        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
       },
       {
         label: 'Kiosk Mode',
