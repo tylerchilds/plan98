@@ -27,7 +27,6 @@ You have options. To configure your settings, try the following:
   ${description}
   ${options.join(' ')}
 `}).join('\n') + `
-explore deeper? run help
 `
 
 

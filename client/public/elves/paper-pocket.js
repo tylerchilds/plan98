@@ -18,12 +18,6 @@ export const systemMenu = {
   favorites: {
     label: "Favorites",
     list: [
-      /*
-      {
-        label: 'Tutorial',
-        mode: modes.tutorial
-      },
-      */
       {
         label: 'Hyper Text',
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
@@ -41,36 +35,37 @@ export const systemMenu = {
         url: '/app/couch-coop?rom=song-wave'
       },
       {
-        label: 'Typo Hero',
-        url: '/app/paper-pocket?rom=typo-hero'
-      },
-      {
-        label: 'Jam Band',
-        url: '/app/couch-coop?rom=jam-band&variation=pro'
-      },
-      {
-        label: 'Rookie Mistakes',
-        url: '/app/couch-coop?rom=jam-band&variation=elegant'
-      },
-      {
-        label: 'Paper Nautiloids',
-        url: '/app/paper-pocket?rom=paper-nautiloids'
-      },
-      {
         label: 'Final Boss',
         url: '/app/paper-pocket?rom=final-boss'
       },
       {
-        label: 'Jam Session',
-        url: '/app/paper-pocket?rom=jam-session'
+        label: 'File Surf',
+        url: '/app/file-surf'
       },
       {
-        label: 'Silly Script',
-        url: '/app/paper-pocket?rom=silly-script'
+        label: 'Mobile Device',
+        url: '/app/mobile-device'
       },
       {
-        label: 'Sonic &amp; Knuckles',
-        url: '/app/sonic-knuckles'
+        label: 'Door Man',
+        url: '/app/door-man'
+      },
+      {
+        label: 'UR Shell',
+        url: '/app/ur-shell'
+      },
+    ]
+  },
+  office: {
+    label: "Office",
+    list: [
+      {
+        label: 'Secure Mail',
+        url: '/app/secure-mail'
+      },
+      {
+        label: 'Cool Chat',
+        url: '/app/cool-chat'
       },
     ]
   },
@@ -79,11 +74,7 @@ export const systemMenu = {
     list: [
       {
         label: 'Map',
-        url: '/app/middle-earth'
-      },
-      {
-        label: 'Secure Mail',
-        url: '/app/secure-mail'
+        url: '/app/world-map'
       },
       {
         label: 'Secure Messenger',
@@ -114,6 +105,10 @@ export const systemMenu = {
         label: 'Paint',
         url: '/app/paint-app'
       },
+      {
+        label: 'Silly Script',
+        url: '/app/paper-pocket?rom=silly-script'
+      },
     ]
   },
   music: {
@@ -122,6 +117,10 @@ export const systemMenu = {
       {
         label: 'Final Boss',
         url: '/app/final-boss'
+      },
+      {
+        label: 'Jam Session',
+        url: '/app/paper-pocket?rom=jam-session'
       },
       {
         label: 'Dial Tone',
@@ -135,8 +134,19 @@ export const systemMenu = {
         label: 'Music Walk',
         url: '/app/music-walk'
       },
+      {
+        label: 'Jam Band',
+        url: '/app/couch-coop?rom=jam-band&variation=pro'
+      },
+      {
+        label: 'Rookie Mistakes',
+        url: '/app/couch-coop?rom=jam-band&variation=elegant'
+      },
+      {
+        label: 'Paper Nautiloids',
+        url: '/app/paper-pocket?rom=paper-nautiloids'
+      },
     ]
-
   },
   code: {
     label: "Coding",
@@ -169,6 +179,10 @@ export const systemMenu = {
         label: 'File System',
         url: '/app/file-system'
       },
+      {
+        label: 'UR Shell',
+        url: '/app/ur-shell'
+      },
     ]
   },
   games: {
@@ -178,7 +192,29 @@ export const systemMenu = {
         label: 'Tamashika',
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
       },
+      {
+        label: 'Typo Hero',
+        url: '/app/paper-pocket?rom=typo-hero'
+      },
+      {
+        label: 'Sonic &amp; Knuckles',
+        url: '/app/sonic-knuckles'
+      },
     ]
+  },
+  unfinished: {
+    label: "Unfinished",
+    list: [
+      {
+        label: 'Tamashika',
+        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
+      },
+      {
+        label: 'Typo Hero',
+        url: '/app/paper-pocket?rom=typo-hero'
+      },
+    ]
+
   },
   templates: {
     label: "Templates",
@@ -904,20 +940,20 @@ export const sideEffects = {
   theme: (value) => {
     setTheme(value)
   },
-  bpm: (value) => {
-    setBpm(value)
-  },
-  noteDuration: (value) => {
-    setNoteDuration(value)
-  },
-  instrument: (value) => {
-    setInstrument(value)
-  },
   fontSize: (value) => {
     setFontSize(value)
   },
   fontFamily: (value) => {
     setFontFamily(value)
+  },
+  instrument: (value) => {
+    setInstrument(value)
+  },
+  bpm: (value) => {
+    setBpm(value)
+  },
+  noteDuration: (value) => {
+    setNoteDuration(value)
   },
   debug: (value) => {
     setDebugger(value)

@@ -408,7 +408,7 @@ function afterUpdate(target) {
 function settingsMenu() {
   return `
     <div class="faux-mobile">
-      <iframe src="/app/mobile-device?settings=true"></iframe>
+      <iframe src="/app/mobile-device?settings=true&src=/app/paper-pocket"></iframe>
     </div>
   `
 }
