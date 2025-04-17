@@ -5,7 +5,6 @@ const config = plan98.env.PLAN98_REALTIME ?
   {
     url: plan98.env.PLAN98_REALTIME,
     port: 443,
-    cors: { origin: '*' }
   } :
   {
     port: 9208
@@ -103,7 +102,7 @@ const middleware = [
   udpSync
 ]
 
-function udpSync(target) {
+function udpSync(link, target) {
   if(target['udpSync']) return
   target['udpSync'] = true
 
@@ -115,6 +114,18 @@ function udpSync(target) {
 
     linkState(target.id)
 
+    channel.on('stateCache', ({ linkStateId, data }) => {
+      store.set(link, data, (state, payload) => {
+        return {
+          ...state,
+          [linkStateId]: {
+            ...state[linkStateId],
+            ...payload
+          }
+        }
+      })
+    })
+
     channel.on('stateDownload', (data) => {
       notifyDownloaders(data)
     })
@@ -124,15 +135,26 @@ function udpSync(target) {
 
     function udpDownload(data) {
       if(!data.link) return
-      const { link, knowledge, stringifiedNuance } = data
-      store.set(link, knowledge, createFunctionFromString(stringifiedNuance))
+      const { link, knowledge, serializedNuance } = data
+      
+      const merge = typeof serializedNuance === 'object'
+        ? objectFunction(serializedNuance)
+        : stringFunction(serializedNuance)
+      store.set(link, knowledge, merge)
     }
 
     function udpUpload(link, knowledge, nuance) {
+      const serializedNuance = typeof nuance === 'function'
+        ? nuance.toString()
+        : {
+          mergeHandler: nuance.mergeHandler.toString(),
+          parameters: nuance.parameters || []
+        }
+
       const data = {
         link,
         knowledge,
-        stringifiedNuance: nuance.toString()
+        serializedNuance
       }
       channel.emit('stateUpload', { linkStateId: target.id, data })
     }
@@ -144,6 +166,13 @@ function udpSync(target) {
 } 
 
 
+function objectFunction({ mergeHandler, parameters }) {
+  return stringFunction(mergeHandler).call(null, parameters)
+}
+
+function stringFunction(s) {
+  return new Function('return ' + s)()
+}
 
 function draw(link, compositor, lifeCycle={}) {
   insight('plan98:draw', link)
@@ -152,7 +181,7 @@ function draw(link, compositor, lifeCycle={}) {
   }
 
   listen(CREATE_EVENT, link, (event) => {
-    middleware.forEach(x => x(event.target))
+    middleware.forEach(x => x(link, event.target))
     const draw = update.bind(this, link, event.target, compositor, lifeCycle)
     reactiveFunctions[link][event.target.id] = draw
     draw()
@@ -344,7 +373,11 @@ function createStore(initialState = {}, subscribe = () => null) {
 
   return {
     set: function(link, knowledge, nuance) {
-      const wisdom = nuance(state[link] || {}, knowledge);
+
+      const merge = typeof nuance === 'function'
+        ? nuance
+        : nuance.mergeHandler.apply(null, nuance.parameters)
+      const wisdom = merge(state[link] || {}, knowledge);
 
       state = {
         ...state,

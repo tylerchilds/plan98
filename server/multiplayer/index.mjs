@@ -140,18 +140,16 @@ io.onConnection(channel => {
     }
   });
 
-  const ids = []
-  channel.on('stateUpload', ({ linkStateId, data }) => {
-    if(ids.has(linkStateId)) {
-      const party = ids.get(linkStateId)
-      party.channels.forEach(channel => {
-        if(channel) {
-          channel.emit('stateDownload', data)
-        }
-      })
+  channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
+    if(currentParty && parties.has(currentParty)) {
+      const party = parties.get(currentParty)
+      if (party.host) {
+        party.host.emit('gamepadUpdate', { gamepad, slot, id: channel.id })
+      }
     }
   });
 
+  const ids = new Map()
   channel.on('linkState', ({ linkStateId }) => {
     channel.join(linkStateId);
 
@@ -159,6 +157,7 @@ io.onConnection(channel => {
       ids.set(linkStateId, {
         players: [],
         channels: [],
+        data: {}
       })
     }
 
@@ -170,19 +169,20 @@ io.onConnection(channel => {
     })
     party.channels.push(channel)
 
-    party.channels.forEach(channel => {
-      channel.emit('playerList', party.players)
-    })
+    channel.emit('stateCache', { linkStateId, data: party.data })
   });
 
-  channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
-    if(currentParty && parties.has(currentParty)) {
-      const party = parties.get(currentParty)
-      if (party.host) {
-        party.host.emit('gamepadUpdate', { gamepad, slot, id: channel.id })
-      }
+  channel.on('stateUpload', ({ linkStateId, data }) => {
+    if(ids.has(linkStateId)) {
+      const party = ids.get(linkStateId)
+      party.channels.forEach(channel => {
+        if(channel) {
+          channel.emit('stateDownload', data)
+        }
+      })
     }
   });
+
 
   channel.on('disconnect', () => {
     if (currentRoom && rooms[currentRoom]) {
