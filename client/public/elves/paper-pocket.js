@@ -680,7 +680,11 @@ export function afterUpdateTheme($, target) {
     const { mode, tutorialIndex } = $.learn()
     if(mode === modes.tutorial && target.lastTutorial !== tutorialIndex) {
       target.lastTutorial = tutorialIndex
-      target.querySelector('.tutorial-window').scrollTo({ top: 0 });
+      const tutorial = target.querySelector('.tutorial-window')
+
+      if(tutorial) {
+        tutorial.scrollTo({ top: 0 });
+      }
     }
   }
 }

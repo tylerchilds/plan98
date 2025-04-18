@@ -12,9 +12,10 @@ const config = plan98.env.PLAN98_REALTIME ?
 
 export const channel = geckos(config) // default port is 9208
 
-function linkState(id) {
+function linkState(table, id) {
   channel.emit('linkState', {
-    linkStateId: id,
+    table,
+    id,
   });
 }
 
@@ -112,18 +113,17 @@ function udpSync(link, target) {
       return
     }
 
-    linkState(target.id)
+    linkState(link, target.id)
 
-    channel.on('stateCache', ({ linkStateId, data }) => {
-      store.set(link, data, (state, payload) => {
-        return {
-          ...state,
-          [linkStateId]: {
-            ...state[linkStateId],
+    channel.on('stateCache', ({ table, id, data }) => {
+      if(data && target.id === id) {
+        store.set(table, data, (state, payload) => {
+          return {
+            ...state,
             ...payload
           }
-        }
-      })
+        })
+      }
     })
 
     channel.on('stateDownload', (data) => {
@@ -135,15 +135,15 @@ function udpSync(link, target) {
 
     function udpDownload(data) {
       if(!data.link) return
-      const { link, knowledge, serializedNuance } = data
+      const { table, knowledge, serializedNuance } = data
       
       const merge = typeof serializedNuance === 'object'
         ? objectFunction(serializedNuance)
         : stringFunction(serializedNuance)
-      store.set(link, knowledge, merge)
+      store.set(table, knowledge, merge)
     }
 
-    function udpUpload(link, knowledge, nuance) {
+    function udpUpload(table, knowledge, nuance) {
       const serializedNuance = typeof nuance === 'function'
         ? nuance.toString()
         : {
@@ -152,11 +152,11 @@ function udpSync(link, target) {
         }
 
       const data = {
-        link,
+        table,
         knowledge,
         serializedNuance
       }
-      channel.emit('stateUpload', { linkStateId: target.id, data })
+      channel.emit('stateUpload', { id: target.id, data })
     }
 
     channel.on('error', (error) => {
