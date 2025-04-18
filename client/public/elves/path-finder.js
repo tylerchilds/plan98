@@ -1,8 +1,4 @@
-import elf from '@silly/elf'
-
-import 'gun'
-import 'gun/open'
-const gun = window.Gun(['https://gun.1998.social/gun']);
+import elf from '@plan98/elf'
 
 const attributes = {
   'STR': 'Strength',
@@ -13,7 +9,7 @@ const attributes = {
   'CHA': 'Charisma',
 }
 
-const ancestries = [
+const ancestriesList = [
   'Dwarf',
   'Elf',
   'Gnome',
@@ -23,7 +19,7 @@ const ancestries = [
   'Orc',
 ]
 
-const classes = [
+const classesList = [
   'Bard',
   'Cleric',
   'Druid',
@@ -34,7 +30,7 @@ const classes = [
   'Wizard',
 ]
 
-const skills = [
+const skillsList = [
   'Acrobatics',
   'Arcana',
   'Athletics',
@@ -54,8 +50,8 @@ const skills = [
   'Thievery',
 ]
 
-const ethics = ["Lawful", "Neutral", "Chaotic"]
-const morals = ["Good", "Neutral", "Evil"]
+const ethicsList = ["Lawful", "Neutral", "Chaotic"]
+const modalsList = ["Good", "Neutral", "Evil"]
 
 const stock = {
   character: '',
@@ -63,46 +59,23 @@ const stock = {
   ancestry: ''
 }
 
-function read($) {
-  const path = window.location.pathname + window.location.search
-  return $.learn()[path] || stock
-}
-
-function write($, data, merge = (node, data, key) => {
-  node.get(key).put(data[key])
-}) {
-  const path = window.location.pathname + window.location.search
-  Object
-    .keys(data)
-    .forEach(key => {
-      const entry = gun.get($.link).get(path)
-      merge(entry, data, key)
-    })
-}
-
 const origin = elf('path-finder')
 
-function subscribe(target) {
-  target.subscribed = true
-  const path = window.location.pathname + window.location.search
-  const entry = gun.get(origin.link).get(path)
-  entry.open((data) => {
-    origin.teach({[path]: data})
-  });
+function getState(target) {
+  return origin.learn()[target.id] || stock
 }
 
 origin.draw(target => {
-  if(!target.subscribed) subscribe(target)
-  const { character, ancestry, classification } = read(origin)
-  console.log(character, ancestry, classification)
-  const ancestryOptions = ancestries.map((x) => {
+  const { character, ancestry, classification, ethics, morals } = getState(target)
+  console.log(character, ancestry, classification, ethics, morals)
+  const ancestryOptions = ancestriesList.map((x) => {
     return `
       <option value="${x}" ${x === ancestry ? 'selected="true"':''}>
         ${x}
       </option>
     `
   }).join('')
-  const classOptions = classes.map((y) => {
+  const classOptions = classesList.map((y) => {
     return `
       <option value="${y}" ${y === classification ? 'selected="true"':''}>
         ${y}
@@ -114,7 +87,7 @@ origin.draw(target => {
     return `
       <label class="field">
         <span class="label" data-tooltip="${attributes[x]}">${x}</span>
-        <input data-bind name="${x}" value="${read(origin)[x] || ''}">
+        <input data-bind name="${x}" value="${getState(target)[x] || ''}">
       </label>
     `
   }).join('')
@@ -159,10 +132,10 @@ origin.draw(target => {
     <div style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
         Ethics
-        ${ethics.map(value => {
+        ${ethicsList.map(value => {
           return `
             <label class="field">
-              <input type="radio" name="ethics" data-option="${value}" />
+              <input data-bind type="radio" name="ethics" value="${value}" data-option="${value}" ${ethics === value ? 'checked="true"':''} />
               <span class="label">${value}</span>
             </label>
           `
@@ -170,10 +143,10 @@ origin.draw(target => {
       </div>
       <div>
         Morals
-        ${morals.map(value => {
+        ${modalsList.map(value => {
           return `
             <label class="field">
-              <input type="radio" name="morals" data-option="${value}" />
+              <input data-bind type="radio" name="morals" value="${value}" data-option="${value}" ${morals === value ? 'checked="true"':''} />
               <span class="label">${value}</span>
             </label>
           `
@@ -190,17 +163,17 @@ origin.draw(target => {
     <h3>Skills</h3>
     <div class="skills">
       ${
-        skills.map(skill => {
+        skillsList.map(skill => {
           return `
             <span class="label">${skill}</span>
             <div class="skill">
               <div class="skill-value">
-                <input data-bind name="${skill}" value="${read(origin)[skill] || ''}">
+                <input data-bind name="${skill}" value="${getState(target)[skill] || ''}">
               </div>
               <div class="skill-math">
               </div>
               <div class="skill-notes">
-                <textarea data-bind name="${skill}-note">${read(origin)[`${skill}-note`] || ''}</textarea>
+                <textarea data-bind name="${skill}-note">${getState(target)[`${skill}-note`] || ''}</textarea>
               </div>
             </div>
           `
@@ -210,12 +183,34 @@ origin.draw(target => {
   `
 })
 
+function setState(id, payload) {
+  origin.teach(payload, {
+    mergeHandler: mergeBy,
+    parameters: [id]
+  })
+}
+
+function mergeBy(id) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [id]: {
+        ...state[id],
+        ...payload
+      }
+    }
+  }
+}
+
+
 origin.when('input', '[data-bind]', (event) => {
-  write(origin, {[event.target.name]: event.target.value })
+  const { id } = event.target.closest(origin.link)
+  setState(id, { [event.target.name]: event.target.value  })
 })
 
 origin.when('change', '[data-bind]', (event) => {
-  write(origin, {[event.target.name]: event.target.value })
+  const { id } = event.target.closest(origin.link)
+  setState(id, { [event.target.name]: event.target.value  })
 })
 
 origin.style(`
