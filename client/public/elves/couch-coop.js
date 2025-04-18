@@ -212,8 +212,8 @@ function newTouchTimeout() {
 */
 
 $.when('click', '.touchable, [data-press]', () => {
-  $.teach({ hideTouchControls: false })
-  newTouchTimeout()
+  //$.teach({ hideTouchControls: false })
+  //newTouchTimeout()
 })
 
 function renderController(target, slot, variation) {
@@ -304,7 +304,7 @@ function notification(node, method, params) {
 
 $.when('pointerdown', '[data-press]', (event) => {
   $.teach({ hideTouchControls: false })
-  newTouchTimeout()
+  //newTouchTimeout()
   const { press } = event.target.dataset
   overrideButton(0, buttons[press], 1)
 })

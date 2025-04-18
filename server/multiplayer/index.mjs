@@ -169,7 +169,6 @@ io.onConnection(channel => {
 
     party.channels.push(channel)
 
-    console.log(party.store.get(table))
     channel.emit('stateCache', {
       table,
       id,

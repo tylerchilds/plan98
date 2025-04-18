@@ -353,7 +353,7 @@ $.style(`
     border-radius: 100%;
     padding: .5rem;
     border: none;
-    background: linear-gradient(rgba(255,255,255,.5), rgba(0,0,0,.5))var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(255,255,255,.5), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 
   & .home::before {
@@ -362,6 +362,7 @@ $.style(`
     width: 1rem;
     height: 1rem;
     border: 3px solid var(--root-theme, mediumseagreen);
+    background: lemonchiffon;
   }
 
   & .watch.space {
@@ -409,9 +410,7 @@ $.style(`
   & .selectbox-selector {
     position: relative;
     display: inline-block;
-    border: 1px solid rgba(255,255,255,.65);
     color: rgba(255,255,255,.85);
-    border-radius: 3px;
 
     background:
       linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),

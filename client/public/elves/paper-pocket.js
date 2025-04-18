@@ -20,7 +20,7 @@ export const systemMenu = {
     list: [
       {
         label: 'Hyper Text',
-        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga'
+        url: '/app/file-surf?src=/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script'
       },
       {
         label: 'Tamashika',

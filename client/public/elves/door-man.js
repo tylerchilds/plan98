@@ -199,7 +199,7 @@ $.draw((target) => {
   const src = target.getAttribute('src')
   if(src) {
     requestIdleCallback(() => {
-      if(tray) {
+      if(src) {
         $.teach(self.crypto.randomUUID(), (state, payload) => {
           const tray = payload
           const newState = {...state}
@@ -409,7 +409,7 @@ function afterUpdate(target) {
 function settingsMenu() {
   return `
     <div class="faux-mobile">
-      <iframe src="/app/mobile-device?settings=true&src=/app/paper-pocket"></iframe>
+      <iframe src="/app/mobile-device?settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
     </div>
   `
 }
