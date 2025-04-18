@@ -2,7 +2,11 @@ import geckos from '@geckos.io/server'
 import http from 'http'
 import express from 'express'
 //import {http_server as braidify} from 'braid-http'
+
+import braid_text from 'braid-text'
 import createStore from './storage.mjs'
+
+console.log('version???')
 
 function notify(namespace, state) {
   //console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
@@ -17,6 +21,21 @@ const ids = new Map()
 const app = express()
 const server = http.createServer(app)
 const io = geckos()
+
+function auth(req, res, next) {
+  if (req.method == "PUT" || req.method == "POST" || req.method == "PATCH") {
+
+    if (!req.headers.cookie?.split(/;/).map(x => x.trim()).some(x => x === 'fuzzydoodle')) {
+        console.log("Blocked PUT:", { cookie: req.headers.cookie })
+        res.statusCode = 401
+        return res.end()
+    }
+  }
+
+  next()
+}
+app.use(auth)
+app.use(braid_text.serve)
 
 //app.use(braidify)
 io.addServer(server)

@@ -8,3 +8,5 @@ deno.lock
 npm/
 .pup/
 sillyz.computer/src-tauri/gen
+
+server/multiplayer/braid-text-db/
