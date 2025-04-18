@@ -339,7 +339,7 @@ function afterUpdate(target) {
 
     if(showSettings && target.showSettings !== showSettings) {
       target.lastPane = showSettings
-      menu.innerHTML = settingsMenu()
+      menu.innerHTML = settingsMenu(target)
     } else if(menu.innerHTML) {
       menu.innerHTML = ''
     }
@@ -406,10 +406,10 @@ function afterUpdate(target) {
 }
 
 
-function settingsMenu() {
+function settingsMenu(target) {
   return `
     <div class="faux-mobile">
-      <iframe src="/app/mobile-device?settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
+      <iframe src="/app/mobile-device?id=did:${target.id}settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
     </div>
   `
 }
