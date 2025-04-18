@@ -16,6 +16,7 @@ function linkState(table, id) {
   channel.emit('linkState', {
     table,
     id,
+    data: learn(table)
   });
 }
 
@@ -134,7 +135,7 @@ function udpSync(link, target) {
     stateDownload(udpDownload)
 
     function udpDownload(data) {
-      if(!data.link) return
+      if(!data.table) return
       const { table, knowledge, serializedNuance } = data
       
       const merge = typeof serializedNuance === 'object'
@@ -165,9 +166,8 @@ function udpSync(link, target) {
   })
 } 
 
-
 function objectFunction({ mergeHandler, parameters }) {
-  return stringFunction(mergeHandler).call(null, parameters)
+  return stringFunction(mergeHandler).apply(null, parameters)
 }
 
 function stringFunction(s) {

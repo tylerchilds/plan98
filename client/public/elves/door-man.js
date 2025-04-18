@@ -13,7 +13,7 @@ const initial = {
   isMouseDown: false,
   trayZ: 3,
   focusedTray: null,
-  trays: [],
+  trays: {},
   showSettings: false,
   profile: {
     banner: null
@@ -90,6 +90,9 @@ function render(target) {
       suggestIndex,
       focusedTray
     } = $.learn()
+    
+    const data = $.learn()[tray]
+    if(!data) return
     const {
       maximized,
       minimized,
@@ -102,7 +105,7 @@ function render(target) {
       title,
       url,
       focused
-    } = $.learn()[tray]
+    } = data
 
     { //tray logic
       let trayNode = trayContainer.querySelector(`[data-id="${tray}"]`)
@@ -196,14 +199,11 @@ $.draw((target) => {
   const src = target.getAttribute('src')
   if(src) {
     requestIdleCallback(() => {
-      const tray = $.learn().trays[0]
       if(tray) {
-        setState(tray, { url, focused: false, minimized: false })
-      } else {
         $.teach(self.crypto.randomUUID(), (state, payload) => {
           const tray = payload
           const newState = {...state}
-          newState.trays.push(tray)
+          newState.trays[tray] = true
           newState.focusedTray = tray
           newState.trayZ += 1
           newState[tray] = {
@@ -366,7 +366,7 @@ function afterUpdate(target) {
 
   {
     const { trays } = $.learn()
-    trays.map(render(target))
+    Object.keys(trays).map(render(target))
   }
 
   {
@@ -492,10 +492,9 @@ function closeTray(event) {
   const { tray } = event.target.dataset
   $.teach(tray, (state, payload) => {
     const newState = {...state} 
-    const trayIndex = state.trays.indexOf(payload)
 
-    if(trayIndex >= 0) {
-      newState.trays.splice(trayIndex, 1)
+    if(newState.trays[payload]) {
+      delete newState.trays[payload]
       delete newState[payload]
     }
 
@@ -625,9 +624,15 @@ function unresize({ target }) {
   grabOffsetY = undefined
 }
 
-
 function setState(tray, payload) {
-  $.teach(payload, function merge(state) {
+  $.teach(payload, {
+    mergeHandler: mergeTray,
+    parameters: [tray]
+  })
+}
+
+function mergeTray(tray) {
+  return (state, payload) => {
     return {
       ...state,
       [tray]: {
@@ -635,7 +640,7 @@ function setState(tray, payload) {
         ...payload
       }
     }
-  })
+  }
 }
 
 $.style(`
@@ -1356,9 +1361,17 @@ function focusTray (e) {
 
 function newTray(overrides) {
   const tray = self.crypto.randomUUID()
-  $.teach(tray, (state, payload) => {
+  $.teach(tray, {
+    mergeHandler: mergeNewTray,
+    parameters: [tray, overrides]
+  })
+}
+
+function mergeNewTray(tray, overrides) {
+  return (state, payload) => {
     const newState = {...state}
-    newState.trays.push(payload)
+    newState.trays ||= {}
+    newState.trays[payload] = true
     newState.trayZ += 1
     newState.focusedTray = tray
     newState[payload] = {
@@ -1368,7 +1381,7 @@ function newTray(overrides) {
       ...overrides
     }
     return newState
-  })
+  }
 }
 
 const tags = ['TEXTAREA', 'INPUT']

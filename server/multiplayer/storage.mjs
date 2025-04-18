@@ -20,7 +20,6 @@ export default function createStore(initialState = {}, notify = () => null) {
     },
 
     get: function(link) {
-      console.log('get', link, state[link])
       return state[link];
     }
   }

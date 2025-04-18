@@ -5,7 +5,7 @@ import express from 'express'
 import createStore from './storage.mjs'
 
 function notify(namespace, state) {
-  console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
+  //console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
 }
 
 const shortCodes = {};
@@ -155,13 +155,13 @@ io.onConnection(channel => {
     }
   });
 
-  channel.on('linkState', ({ table, id }) => {
+  channel.on('linkState', ({ table, id, data }) => {
     channel.join(id);
 
     if (!ids.has(id)) {
       ids.set(id, {
         channels: [],
-        store: createStore({}, notify.bind(id))
+        store: createStore(data || {}, notify.bind(id))
       })
     }
 
@@ -169,6 +169,7 @@ io.onConnection(channel => {
 
     party.channels.push(channel)
 
+    console.log(party.store.get(table))
     channel.emit('stateCache', {
       table,
       id,
@@ -227,7 +228,7 @@ io.onConnection(channel => {
 });
 
 function objectFunction({ mergeHandler, parameters }) {
-  return stringFunction(mergeHandler).call(null, parameters)
+  return stringFunction(mergeHandler).apply(null, parameters)
 }
 
 function stringFunction(s) {

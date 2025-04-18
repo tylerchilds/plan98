@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 
 import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
@@ -196,6 +196,7 @@ $.draw((target) => {
   }
 })
 
+/*
 let touchControls
 newTouchTimeout()
 
@@ -208,8 +209,7 @@ function newTouchTimeout() {
     $.teach({ hideTouchControls: true })
   }, 5000)
 }
-
-
+*/
 
 $.when('click', '.touchable, [data-press]', () => {
   $.teach({ hideTouchControls: false })
@@ -603,13 +603,13 @@ $.style(`
     border-radius: 0;
     font-weight: bold;
     border-radius: 100%;
-    opacity: .65;
+    opacity: .25;
   }
 
   & .controller [data-press].active,
   & .controller [data-press]:hover,
   & .controller [data-press]:focus {
-    opacity: 1;
+    opacity: .65;
   }
 
   & .controller [data-press][data-press="os"],
