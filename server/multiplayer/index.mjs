@@ -22,6 +22,24 @@ const app = express()
 const server = http.createServer(app)
 const io = geckos()
 
+// FREE THE CORS!
+function free_the_cors (req, res, next) {
+  res.setHeader('Range-Request-Allow-Methods', 'PATCH, PUT')
+  res.setHeader('Range-Request-Allow-Units', 'json')
+  var free_the_cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "OPTIONS, HEAD, GET, PUT, UNSUBSCRIBE",
+    "Access-Control-Allow-Headers": "subscribe, peer, version, parents, merge-type, content-type, patches, cache-control"
+  }
+  Object.entries(free_the_cors).forEach(x => res.setHeader(x[0], x[1]))
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200)
+    res.end()
+  } else
+    next()
+}
+app.use(free_the_cors)
+
 function auth(req, res, next) {
   if (req.method == "PUT" || req.method == "POST" || req.method == "PATCH") {
 
@@ -188,6 +206,7 @@ io.onConnection(channel => {
 
     party.channels.push(channel)
 
+    console.log(party.store.get(table))
     channel.emit('stateCache', {
       table,
       id,
