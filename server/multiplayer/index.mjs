@@ -2,11 +2,17 @@ import geckos from '@geckos.io/server'
 import http from 'http'
 import express from 'express'
 //import {http_server as braidify} from 'braid-http'
+import createStore from './storage.mjs'
+
+function notify(namespace, state) {
+  //console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
+}
 
 const shortCodes = {};
 const rooms = {};
 const parties = new Map()
 const nicknames = {};
+const ids = new Map()
 
 const app = express()
 const server = http.createServer(app)
@@ -140,12 +146,55 @@ io.onConnection(channel => {
     }
   });
 
-
   channel.on('gamepadSnapshot', ({ gamepad, slot }) => {
     if(currentParty && parties.has(currentParty)) {
       const party = parties.get(currentParty)
       if (party.host) {
         party.host.emit('gamepadUpdate', { gamepad, slot, id: channel.id })
+      }
+    }
+  });
+
+  channel.on('linkState', ({ table, id, data }) => {
+    channel.join(id);
+
+    if (!ids.has(id)) {
+      ids.set(id, {
+        channels: [],
+        store: createStore(data || {}, notify.bind(id))
+      })
+    }
+
+    const party = ids.get(id)
+
+    party.channels.push(channel)
+
+    console.log(party.store.get(table))
+    channel.emit('stateCache', {
+      table,
+      id,
+      data: party.store.get(table)
+    })
+  });
+
+  channel.on('stateUpload', ({ id, data }) => {
+    if(ids.has(id)) {
+      const party = ids.get(id)
+      party.channels.forEach(channel => {
+        if(channel) {
+          channel.emit('stateDownload', data)
+        }
+      })
+
+      try {
+        const { table, knowledge, serializedNuance } = data
+        const merge = typeof serializedNuance === 'object'
+          ? objectFunction(serializedNuance)
+          : stringFunction(serializedNuance)
+
+        party.store.set(table, knowledge, merge)
+      } catch(e) {
+        console.error(e)
       }
     }
   });
@@ -177,6 +226,14 @@ io.onConnection(channel => {
     }
   });
 });
+
+function objectFunction({ mergeHandler, parameters }) {
+  return stringFunction(mergeHandler).apply(null, parameters)
+}
+
+function stringFunction(s) {
+  return new Function('return ' + s)()
+}
 
 // make sure the client uses the same port
 // @geckos.io/client uses the port 9208 by default
