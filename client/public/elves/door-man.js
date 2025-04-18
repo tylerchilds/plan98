@@ -793,7 +793,7 @@ $.style(`
     font-weight: bold;
     aspect-ratio: 1;
     height: 2rem;
-    width: auto;
+    width: 2rem;
     background: radial-gradient(
       at center top,
       rgba(255, 255, 255, 0.5) 0%,
