@@ -1384,6 +1384,86 @@ function mergeNewTray(tray, overrides) {
   }
 }
 
+$.when('pointerdown', 'canvas', start)
+
+function start(e) {
+  e.preventDefault()
+  const { grabbing } = $.learn()
+  if(grabbing) return
+  const { canvas, rectangle } = engine(e.target)
+  const context = canvas.getContext('2d')
+  let startX, startY, x, y;
+  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+    startX = e.touches[0].clientX - rectangle.left
+    startY = e.touches[0].clientY - rectangle.top
+  } else {
+    startX = e.clientX - rectangle.left
+    startY = e.clientY -rectangle.top
+  }
+
+  x = 0
+  y = 0
+
+  $.teach({ startX, startY, isMouseDown: true, x, y })
+}
+
+$.when('pointermove', 'canvas', move)
+
+function move (e) {
+  e.preventDefault()
+  const { startX, isMouseDown, startY, grabbing } = $.learn()
+  if(grabbing) return
+  const { canvas, rectangle } = engine(e.target)
+  const context = canvas.getContext('2d')
+  if (!isMouseDown) return
+
+  let x, y
+  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+    x = e.touches[0].clientX - startX - rectangle.left
+    y = e.touches[0].clientY - startY - rectangle.top
+  } else {
+    x = e.clientX - startX - rectangle.left
+    y = e.clientY - startY - rectangle.top
+  }
+  $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
+}
+
+$.when('pointerup', 'canvas', end)
+function end (e) {
+  e.preventDefault()
+  const { grabbing } = $.learn()
+  if(grabbing) return
+  const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = $.learn()
+  const { canvas, rectangle } = engine(e.target)
+  const context = canvas.getContext('2d')
+
+  const tray = self.crypto.randomUUID()
+  const width = Math.max(300, Math.abs(x))
+  const height = Math.max(150, Math.abs(y))
+  setState(tray, {
+    width,
+    height,
+    x: invertX ? startX + x : startX,
+    y: invertY ? startY + y : startY,
+    z: trayZ + 1,
+    title: 'hEllo',
+    url: `/app/file-surf`
+  })
+
+
+  $.teach(tray, (state, payload) => {
+    return {
+      ...state,
+      trays: {
+        ...state.trays,
+        [payload]: true
+      }
+    }
+  })
+
+  $.teach({ focusedTray: tray, startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+};
+
 const tags = ['TEXTAREA', 'INPUT']
 let sel = []
 function saveCursor(target) {

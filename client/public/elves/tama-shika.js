@@ -1,13 +1,9 @@
-import elf from '@silly/elf'
-import { innerHTML } from 'diffhtml'
-import natsort from 'natsort'
-import { idx, documents } from './giggle-search.js'
+import elf from '@plan98/elf'
 
-import 'gun'
-import 'gun/open'
-const gun = window.Gun(['https://gun.1998.social/gun']);
+import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 
 const initial = {
+  systemPane: Object.keys(systemMenu)[0],
   startX: null,
   startY: null,
   x: null,
@@ -15,47 +11,88 @@ const initial = {
   invertX: false,
   invertY: false,
   isMouseDown: false,
-  suggestions: [],
   trayZ: 3,
   focusedTray: null,
+  trays: {},
+  showSettings: false,
+  profile: {
+    banner: null
+  }
 }
 
-function read($) {
-  const href = window.location.href
-  return $.learn()[href] || {}
+const $ = elf('tama-shika', initial)
+
+function renderGroups(systemPane) {
+  const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
+
+  return groups.map((x) => {
+    return `
+      <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
+        ${systemMenu[x.key].label}
+      </button>
+    `
+  }).join('')
 }
 
-function write($, data, merge = (node, data, key) => {
-  node.get(key).put(data[key])
-}) {
-  const href = window.location.href
-  Object
-    .keys(data)
-    .forEach(key => {
-      const entry = gun.get($.link).get(href)
-      merge(entry, data, key)
-    })
+function renderApplications(pane) {
+  return pane ? `
+    <div class="application-list">
+      ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
+        return `
+          <button class="app-select" data-url="${url}" data-title="${label}">
+            <div class="iconography">
+            </div>
+            <span class="app-label">
+              ${label}
+            </span>
+          </button>
+        `
+      }).join('')}
+    </div>
+
+  ` : `
+    <sillyz-computer></sillyz-computer>
+  `
 }
 
-const $ = elf.call({ read, write }, 'tama-shika')
+function renderSystemMenu() {
+  const {
+    systemPane
+  } = $.learn()
+
+
+  return `
+    <div class="system">
+      <div class="groups">
+        ${renderGroups(systemPane)}
+      </div>
+      <div class="applications">
+        ${renderApplications(systemPane)}
+      </div>
+    </div>
+  `
+
+}
 
 function engine(target) {
-  const canvas = target.closest($.link).querySelector('canvas')
+  const canvas = target.closest($.link).querySelector('.terminal-canvas')
   const rectangle = canvas.getBoundingClientRect()
 
   return { canvas, rectangle }
 }
 
 function render(target) {
-  const container = target.querySelector('.trays')
-  return (tray) => {
-    const data = this.read($)[tray]
-    if(!data) return
+  const trayContainer = target.querySelector('.trays')
+  const taskContainer = target.querySelector('.tasks')
+  return function runtime(tray) {
     const {
-      suggestions=[],
+      suggestions,
       suggestIndex,
       focusedTray
-    } = this.read($)
+    } = $.learn()
+    
+    const data = $.learn()[tray]
+    if(!data) return
     const {
       maximized,
       minimized,
@@ -65,296 +102,150 @@ function render(target) {
       x,
       y,
       z,
+      title,
       url,
       focused
     } = data
 
-    const start = Math.max(suggestIndex - 5, 0)
-    const end = Math.min(suggestIndex + 5, suggestions.length - 1)
+    { //tray logic
+      let trayNode = trayContainer.querySelector(`[data-id="${tray}"]`)
+      if(!trayNode) {
+        trayNode = document.createElement('div')
+        trayNode.classList.add('tray');
+        trayNode.dataset.id = tray
+        trayNode.innerHTML = `
+          <button class="tray-wake" data-tray="${tray}"></button>
+          <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
+            <button class="tray-action tray-close" data-tray="${tray}">
+            </button>
+            <button class="tray-action tray-min " data-tray="${tray}">
+            </button>
+            <button class="tray-action tray-max" data-tray="${tray}">
+            </button>
+            <div class="grabber"><span class="tray-title">${title}</span>
+            </div>
+          </div>
+          <div class="tray-body">
+            <iframe src="${url}" title="${url}"></iframe>
+          </div>
+          <div class="resize-actions">
+            <button aria-label="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
+            </button>
+            <button aria-label="resize" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
+            </button>
 
-    let node = container.querySelector(`[data-id="${tray}"]`)
-    if(!node) {
-      node = document.createElement('div')
-      node.classList.add('tray');
-      node.dataset.id = tray
-      node.innerHTML = `
-        <button class="tray-wake" data-tray="${tray}"></button>
-        <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
-          <button class="tray-action tray-close" data-tray="${tray}">
-            <sl-icon name="x-lg"></sl-icon>
-          </button>
-          <div class="grabber minimizable" data-tooltip="grab and drag"></div>
-        </div>
-        <div class="suggestions" data-tray="${tray}"></div>
-        <div class="tray-body">
-          ${drawTray(tray, url)}
-        </div>
-        <div class="resize-actions">
-          <button aria-label="resize" data-tooltip="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
-          </button>
-          <button aria-label="resize" data-tooltip="resize" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
-          </button>
-
-          <button aria-label="resize" data-tooltip="resize" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
-          </button>
-          <button aria-label="resize" data-tooltip="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
-          </button>
-        </div>
-      `
-      container.appendChild(node)
-    }
-
-    node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
-
-    if(focusedTray === tray) {
-      node.dataset.focused = true
-    } else {
-      node.dataset.focused = false
-    }
-
-    if(maximized) {
-      node.setAttribute('class', 'tray maximized')
-    } else {
-      node.setAttribute('class', 'tray')
-    }
-    if(minimized) {
-      node.classList.add('minimized')
-    } else {
-    }
-
-    const maybies = node.querySelector('.suggestions')
-    if(focused) {
-      innerHTML(maybies, `
-        <div class="suggestion-box">${suggestions.slice(start, end).map((x, i) => {
-            const item = documents.find(y => {
-              return x.ref === y.path
-            })
-
-            return `
-              <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
-                <div class="hyper-name">
-                  <span class="file-name">
-                    ${item.name}
-                  </span>
-                  <span class="hyper-sentence">
-                    ${item.path.split('/').reverse().slice(1,-1).join(' ')}
-                  </span>
-                </div>
-              </button>
-            `
-          }).join('')}</div>
-      `)
-    } else {
-      maybies.innerHTML = null
-    }
-
-    if(node.dataset.url !== url) {
-      node.dataset.url = url
-      const trayBody = node.querySelector('.tray-body')
-      const irix = node.querySelector('irix-launcher')
-
-      const iframe = node.querySelector('iframe')
-      if(url !== 'about:blank' && !iframe) {
-        if(irix) {
-          irix.remove()
-        }
-        trayBody.insertAdjacentHTML('beforeend', `
-          <iframe src="${url}" title="${url}"></iframe>
-        `)
-      } else if(url === 'about:blank') {
-        if(iframe) {
-          iframe.remove()
-        }
-
-        if(!irix) {
-          trayBody.insertAdjacentHTML('beforeend', `
-            <iframe src="/app/ur-shell"></iframe>
-          `)
-        }
+            <button aria-label="resize" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
+            </button>
+            <button aria-label="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
+            </button>
+          </div>
+        `
+        trayContainer.appendChild(trayNode)
       }
 
-      if(iframe) {
-        iframe.src = url
+      trayNode.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
+
+      if(focusedTray === tray) {
+        trayNode.dataset.focused = true
+      } else {
+        trayNode.dataset.focused = false
       }
 
-      const browser = node.querySelector('.browser')
-      if(browser) {
-        browser.value = url
+      if(maximized) {
+        trayNode.setAttribute('class', 'tray maximized')
+      } else if(minimized) {
+        trayNode.setAttribute('class', 'tray minimized')
+      } else {
+        trayNode.setAttribute('class', 'tray')
       }
+
+      if(trayNode.dataset.url !== url) {
+        trayNode.dataset.url = url
+        trayNode.querySelector('iframe').src = url
+      }
+
+      trayNode.dataset.grabbed = grabbed
+      trayNode.persist = true
     }
 
-    node.dataset.grabbed = grabbed
-    node.persist = true
+    { //tray logic
+      let taskNode = taskContainer.querySelector(`[data-tray="${tray}"]`)
+      if(!taskNode) {
+        taskNode = document.createElement('div')
+        taskNode.classList.add('taskbar-button');
+        taskNode.classList.add('task');
+        taskNode.dataset.tray = tray
+        taskNode.innerHTML = `
+          ${title || url}
+        `
+        taskContainer.appendChild(taskNode)
+      }
+
+      taskNode.style = ``
+
+      if(focusedTray === tray) {
+        taskNode.dataset.focused = true
+      } else {
+        taskNode.dataset.focused = false
+      }
+
+      taskNode.persist = true
+    }
   }
 }
 
-function drawTray(tray, url) {
-  return url === 'about:blank' ? drawIrix(tray) : `
-    <iframe src="${url}" title="${url}"></iframe>
-  `
-}
-
-function drawIrix(tray) {
-  return `
-    <ur-shell data-tray="${tray}"></ur-shell>
-  `
-}
-
-
-const down = 40;
-const up = 38;
-const enter = 13;
-$.when('keydown', '.browser', event => {
-  const { suggestionsLength=0, suggestIndex } = $.learn()
-  if(event.keyCode === down) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
-    if(nextIndex >= suggestionsLength -1) return
-    write($, { suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === up) {
-    event.preventDefault()
-    const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
-    if(nextIndex < 0) return
-    write($, { suggestIndex: nextIndex })
-    return
-  }
-
-  if(event.keyCode === enter && suggestIndex !== null) {
-    event.preventDefault()
-    const { suggestions=[], suggestIndex } = $.learn($)
-    const item = documents.find(y => {
-      if(!suggestions[suggestIndex]) return false
-      return suggestions[suggestIndex].ref === y.path
-    })
-
-    if(item) {
-      const { tray } = event.target.dataset
-      const url = '/app/media-plexer?src=' +item.path
-      document.activeElement.blur()
-      setState(tray, { url, focused: false })
-      return
-    }
-  }
-})
-
-$.when('click', '.auto-item', event => {
-  event.preventDefault()
-  const { tray } = event.target.closest('[data-tray]').dataset
-  const { path } = event.target.dataset
-
-  const url = '/app/media-plexer?src=' + path
-  document.activeElement.blur()
-  setState(tray, { url, focused: true })
-  write($, {
-    suggestIndex: parseInt(event.target.dataset.index)
-  })
-})
-
-$.when('click', '.application', event => {
-  event.preventDefault()
-  const { tray } = event.target.closest('[data-tray]').dataset
-  const { href } = event.target.dataset
-
-  document.activeElement.blur()
-  setState(tray, { url: href, focused: true })
-  write($, {
-    suggestIndex: parseInt(event.target.dataset.index)
-  })
-
-  const path = 'about:blank'
-  self.history.pushState({ type: `${$.link}-navigation`, tray, path }, "");
-})
-
-addEventListener("popstate", async (event) => {
-  const { type, path, tray } = event.state || {}
-  console.log(tray, path, type)
-  if(type === `${$.link}-navigation`) {
-    setState(tray, { url: path })
-  }
-});
-
-$.when('input', '.browser', (event) => {
-  const { value } = event.target;
-  const { tray } = event.target.dataset
-  setState(tray, { buffer: value })
-
-  const sort = natsort();
-  const suggestions = idx.search(value).sort((a,b) => sort(a.ref, b.ref))
-  write($, {
-    suggestions,
-    suggestIndex: null,
-  })
-})
-
-$.when('submit', '.search', (event) => {
-  event.preventDefault()
-  const { tray } = event.target.dataset
-  const { buffer } = this.read($)[tray]
-  const url = buffer.indexOf('://') ? buffer : '/app/giggle-search?query=' + buffer
-  setState(tray, { url, focused: false })
-})
-
-$.when('focus', '.browser', event => {
-  const { tray } = event.target.dataset
-  setState(tray, { focused: true })
-})
-
-$.when('blur', '.browser', event => {
-  setTimeout(() => {
-    const { tray } = event.target.dataset
-    setState(tray, { focused: false })
-  }, 250)
-})
-
-
-$.draw(function boop(target) {
-  if(!target.subscribed) subscribe(target)
+$.draw((target) => {
   if(target.innerHTML) return
   const src = target.getAttribute('src')
-
   if(src) {
     requestIdleCallback(() => {
-      const tray = self.crypto.randomUUID()
-
-      let vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
-      let vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0)
-
-      const { trayZ=1 } = this.read($)
-      setState(tray, {
-        width: vw,
-        height: vh,
-        x: 2500 - (vw / 2),
-        y: 2500 - (vh / 2),
-        z: trayZ+1,
-        url: src,
-        maximized: true,
-        focused: true
-      })
-
-      write($, {
-        focusedTray: tray,
-        trayZ: trayZ + 1
-      })
-      write($, {
-        trays: tray
-      }, function mergeTrays(node, data, key) {
-        const edge = node.get(key)
-        edge.get(data[key]).put(true)
-      })
+      if(src) {
+        $.teach(self.crypto.randomUUID(), (state, payload) => {
+          const tray = payload
+          const newState = {...state}
+          newState.trays[tray] = true
+          newState.focusedTray = tray
+          newState.trayZ += 1
+          newState[tray] = {
+            width: 300,
+            height: 150,
+            x: 0,
+            y: 0,
+            z: newState.trayZ,
+            url: src,
+            title: 'Welcome',
+            maximized: true,
+            focused: true
+          }
+          return newState
+        })
+      }
     })
   }
+
   return `
-    <div class="trays"></div>
-    <div class="cursor"></div>
-    <canvas></canvas>
+    <div class="desktop">
+      <div class="trays"></div>
+      <div class="cursor"></div>
+      <canvas class="terminal-canvas"></canvas>
+      <div class="system-menu">
+        ${renderSystemMenu()}
+      </div>
+      <div class="settings-menu"></div>
+    </div>
+    <div class="taskbar">
+      <div class="left">
+        <button data-start-menu class="taskbar-button"></button>
+      </div>
+      <div class="center tasks"></div>
+      <div class="right">
+        <button data-settings-menu class="to-settings taskbar-button">
+          <sl-icon name="gear-wide-connected"></sl-icon>
+        </button>
+      </div>
+    </div>
   `
-}, {
-  beforeUpdate,
-  afterUpdate
-})
+}, { beforeUpdate, afterUpdate })
 
 function beforeUpdate(target) {
   saveCursor(target) // first things first
@@ -367,7 +258,16 @@ function beforeUpdate(target) {
   }
 
   {
-    const { startX, startY, x, y, invertX, invertY } = this.read($)
+    const { profile } = $.learn()
+
+    if(profile.banner && target.banner !== profile.banner) {
+      target.banner = profile.banner
+      target.setAttribute('background', `url('${profile.banner}')`)
+    }
+  }
+
+  {
+    const { startX, startY, x, y, invertX, invertY } = $.learn()
     const background = target.getAttribute('background')
     const color = target.getAttribute('color')
     
@@ -377,60 +277,103 @@ function beforeUpdate(target) {
   {
     [...(target.querySelectorAll('.tray') || [])].map(x => {
       x.persist = false
-    })
+    });
+
+    [...(target.querySelectorAll('.task') || [])].map(x => {
+      x.persist = false
+    });
   }
 
   {
-    const { isMouseDown } = this.read($)
+    const { isMouseDown } = $.learn()
     target.dataset.mouse = isMouseDown
   }
 }
 
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
 function afterUpdate(target) {
+  { // recover icons from the virtual dom
+    recoverElves(target, 'sl-icon')
+  }
+
   {
-    const { grabbing } = this.read($)
+    afterUpdateTheme($paperPocket, target)
+  }
+
+  {
+    const { showStart } = $.learn()
+
+    if(target.startState !== showStart) {
+      target.startState = showStart
+      target.dataset.menu = showStart
+    }
+  }
+
+  {
+    const { systemPane } = $.learn()
+
+    if(systemPane && target.lastPane !== systemPane) {
+      target.lastPane = systemPane
+      const groups = target.querySelector('.groups')
+      const applications = target.querySelector('.applications')
+      groups.innerHTML = renderGroups(systemPane)
+      applications.innerHTML = renderApplications(systemPane)
+    }
+
+  }
+
+  {
+    const { showSettings } = $.learn()
+    const menu = target.querySelector('.settings-menu')
+
+    if(showSettings && target.showSettings !== showSettings) {
+      target.lastPane = showSettings
+      menu.innerHTML = settingsMenu(target)
+    } else if(menu.innerHTML) {
+      menu.innerHTML = ''
+    }
+  }
+
+  {
+    const { grabbing } = $.learn()
     const trays = target.querySelector('.trays')
     trays.dataset.grabbing = !!grabbing
   }
 
   {
-    const { resizing } = this.read($)
+    const { resizing } = $.learn()
     const trays = target.querySelector('.trays')
     trays.dataset.resizing = !!resizing
   }
 
-  { // scroll suggestions
-    const list = target.querySelector('.suggestion-box')
-    if(list) {
-      list.scrollTop = target.dataset.scrollpos
-    }
-  }
-
-  { // scroll item into view
-    const activeItem = target.querySelector('.suggestion-box .active')
-    if(activeItem) {
-      activeItem.scrollIntoView({block: "nearest", inline: "nearest"})
-    }
-  }
 
   {
-    const { isMouseDown } = this.read($)
+    const { isMouseDown } = $.learn()
     const cursor = target.querySelector('.cursor')
-    cursor.style = `${isMouseDown ? 'display: block;' : 'display: none;'};`
+    cursor.style = `${isMouseDown ? 'display: grid;' : 'display: none;'};`
   }
 
   {
-    const { trays } = this.read($)
-    if(trays) { 
-      Object.keys(trays).map(render.call(this, target))
-    }
+    const { trays } = $.learn()
+    Object.keys(trays).map(render(target))
   }
 
   {
-    const { trays } = this.read($)
-    if(target.matches('.inline') && trays) {
+    if(target.matches('.inline')) {
+      const { trays } = $.learn()
       const somethingMaxed = trays.some(x => {
-        const tray = this.read($)[x]
+        const tray = $.learn()[x]
         return tray.maximized
       })
 
@@ -444,117 +387,118 @@ function afterUpdate(target) {
   {
     [...(target.querySelectorAll('.tray') || [])].filter(x => {
       return !x.persist
-    }).map(x => x.remove())
+    }).map(x => x.remove());
+    [...(target.querySelectorAll('.task') || [])].filter(x => {
+      return !x.persist
+    }).map(x => x.remove());
+
   }
 
   replaceCursor(target) // first things first
-}
 
-function subscribe(target) {
-  target.subscribed = true
-  const href = window.location.href
-  const entry = gun.get($.link).get(href)
-  /*
-  entry.once(data => {
-    if(!data) {
-      entry.put(initial)
-    }
-  })
-  */
-  entry.open((data) => {
-    $.teach({[href]: data})
-  });
-}
-
-function syncTray(event) {
-  event.preventDefault()
-  const { tray } = event.target.dataset
-  let { buffer, url } = this.read($)[tray]
-  buffer ||= url
-  url = buffer.startsWith('/')
-    ? buffer
-    : buffer.indexOf('://')
-      ? buffer
-      : '/app/giggle-search?query=' + buffer
-
-  const irix = event.target.closest('.tray').querySelector('.irix-launcher')
-  const iframe = event.target.closest('.tray').querySelector('iframe')
-  if(url !== 'about:blank' && !iframe) {
-    if(irix) {
-      irix.remove()
-    }
-    trayBody.insertAdjacentHTML('beforeend', `
-      <iframe src="${url}" title="${url}"></iframe>
-    `)
-  } else if(url === 'about:blank') {
-    if(iframe) {
-      iframe.remove()
-    }
-
-    if(!irix) {
-      trayBody.insertAdjacentHTML('beforeend', drawIrix(tray))
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
     }
   }
+}
 
-  if(iframe) {
-    iframe.src = url
-  }
 
-  setState(tray, { url, focused: false, minimized: false })
+function settingsMenu(target) {
+  return `
+    <div class="faux-mobile">
+      <iframe src="/app/mobile-device?id=did:${target.id}settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
+    </div>
+  `
+}
+
+$.when('click', '.to-settings', toSettings)
+
+function toSettings() {
+  $.teach({ showSettings: !$.learn().showSettings })
 }
 
 function toggleMax(event) {
   const tray = event.target.closest('.tray').dataset.id
-  const { maximized } = this.read($)[tray]
+  const { maximized } = $.learn()[tray]
   maximized ? restoreMax(tray) : maximize(tray)
 }
 
 function maximize(tray) {
-  setState(tray, {
-    maximized: true,
-    minimized: false
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].maximized = true
+    newState[payload].minimized = false
+    return newState
   })
 }
 
 // restore a pane
 function restoreMax(tray) {
-  setState(tray, {
-    maximized: false,
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].maximized = false
+    return newState
   })
 }
 
 function toggleMin(event) {
   const tray = event.target.closest('.tray').dataset.id
-  const { minimized } = this.read($)[tray]
+  const { minimized } = $.learn()[tray]
   minimized ? restoreMin(tray) : minimize(tray)
 }
 
+function selectPane(event) {
+  const { pane } = event.target.dataset
+  $.teach({ systemPane: pane })
+}
+
+function selectApp(event) {
+  const { x, y } = event
+  const { url, title } = event.target.dataset
+  newTray({
+    url,
+    title,
+    x: x > window.innerWidth / 2 ? window.innerWidth - x : x,
+    y: y > window.innerHeight / 2 ? window.innerHeight - y : y,
+  })
+
+  $.teach({ showStart: false })
+}
+
+
+
 function minimize(tray) {
-  setState(tray, {
-    minimized: true,
-    maximized: false
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].minimized = true
+    newState[payload].maximized = false
+    return newState
   })
 }
 
 // restore a pane
 function restoreMin(tray) {
-  setState(tray, {
-    minimized: false,
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
+    newState[payload].minimized = false
+    return newState
   })
 }
 
 function closeTray(event) {
   const { tray } = event.target.dataset
+  $.teach(tray, (state, payload) => {
+    const newState = {...state} 
 
-  write($, {
-    trays: tray
-  }, function mergeTrays(node, data, key) {
-    const edge = node.get(key)
-    edge.get(data[key]).put(null)
-  })
+    if(newState.trays[payload]) {
+      delete newState.trays[payload]
+      delete newState[payload]
+    }
 
-  write($, tray, function merge(node, tray) {
-    node.get(tray).put(null)
+    return newState
   })
 }
 
@@ -565,24 +509,26 @@ function grab(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  const { trayZ=1 } = this.read($)
+  const { trayZ } = $.learn()
   const newZ = trayZ + 1
-  write($, { trayZ: newZ, focusedTray: tray })
-  setState(tray, { z: newZ, grabbed: true })
-  write($, { grabbing: tray })
-  grabOffsetX = offsetX
-  grabOffsetY = offsetY
+  $.teach({ trayZ: newZ, focusedTray: tray })
+  setState(tray, { z: newZ })
+  grabTimeout = setTimeout(() => {
+    setState(tray, { grabbed: true })
+    $.teach({ grabbing: tray })
+    grabOffsetX = offsetX
+    grabOffsetY = offsetY
+  }, 100)
 }
 
 // drag a pane
 let lastX, lastY;
 function drag(event) {
-  event.preventDefault()
   let { target, clientX, clientY } = event
-  const { grabbing, resizing } = read($)
+  const { grabbing, resizing } = $.learn()
   const tray = grabbing || resizing
   if(!tray) return
-  const { grabbed, resize, x, y, width, height } = this.read($)[tray]
+  const { grabbed, resize, x, y, width, height } = $.learn()[tray]
 
   const panX = getComputedStyle(event.target).getPropertyValue("--pan-x") || 0;
   const panY = getComputedStyle(event.target).getPropertyValue("--pan-y") || 0;
@@ -626,6 +572,7 @@ function drag(event) {
           width: width - movementX
         })
       }
+
     }
   } else {
     if(grabbed) {
@@ -643,12 +590,11 @@ function drag(event) {
 
 // release a pane
 function ungrab(event) {
-  event.preventDefault()
   clearTimeout(grabTimeout)
-  const tray = this.read($).grabbing
+  const tray = $.learn().grabbing
   if(!tray) return
   setState(tray, { grabbed: false })
-  write($, { grabbing: null })
+  $.teach({ grabbing: null })
   lastX = undefined;
   lastY = undefined;
   grabOffsetX = undefined
@@ -660,29 +606,41 @@ function resize(event) {
   event.preventDefault()
   const { offsetX, offsetY } = event
   const { tray } = event.target.dataset
-  const { trayZ=1 } = this.read($)
+  const { trayZ } = $.learn()
   const newZ = trayZ + 1
-  write($, { resizing: tray, trayZ: newZ, focusedTray: tray })
+  $.teach({ resizing: tray, trayZ: newZ, focusedTray: tray })
   setState(tray, { resize: event.target.dataset.direction, z: newZ })
   grabOffsetX = offsetX
   grabOffsetY = offsetY
 }
 function unresize({ target }) {
-  const tray = this.read($).resizing
+  const tray = $.learn().resizing
   if(!tray) return
   setState(tray, { resize: null })
-  write($, { resizing: null })
+  $.teach({ resizing: null })
   lastX = undefined;
   lastY = undefined;
   grabOffsetX = undefined
   grabOffsetY = undefined
 }
 
-
 function setState(tray, payload) {
-  write($, payload, function merge(node, data, key) {
-    node.get(tray).get(key).put(data[key])
+  $.teach(payload, {
+    mergeHandler: mergeTray,
+    parameters: [tray]
   })
+}
+
+function mergeTray(tray) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [tray]: {
+        ...state[tray],
+        ...payload
+      }
+    }
+  }
 }
 
 $.style(`
@@ -690,12 +648,201 @@ $.style(`
     position: relative;
     touch-action: none;
     overflow: hidden;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none; 
-     -khtml-user-select: none;
-       -moz-user-select: none;
-        -ms-user-select: none;
-            user-select: none;
+    display: grid;
+    height: 100%;
+    grid-template-rows: 1fr auto;
+    background:
+      linear-gradient(335deg, rgba(255,255,255,.15), rgba(255,255,255,.25), rgba(255,255,255,0), rgba(0,0,0,0), rgba(0,0,0,.35)),
+      radial-gradient(circle at bottom left, rgba(255,255,255,0.2), rgba(0,0,0,.2) 70%),
+      conic-gradient(from 45deg at 25% 75%, rgba(255,255,255,0.2), rgba(0,0,0,0)),
+      repeating-linear-gradient(180deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.1) 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,.1) 20px),
+      repeating-radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0) 10px, rgba(255,255,255,0) 20px),
+      var(--root-theme, mediumseagreen);
+    touch-action: manipulation;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    overflow-x: auto;
+  }
+
+  & .desktop {
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+    z-index: 4;
+  }
+
+  & .taskbar {
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
+      var(--root-theme, mediumseagreen);
+    z-index: 5;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1rem;
+    position: relative;
+  }
+
+  & .system-menu {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(10px);
+    inset: 0;
+    z-index: 100;
+  }
+
+  &[data-menu="true"] .system-menu {
+    display: block;
+  }
+
+  & [data-snap] {
+    padding: 0;
+    width: 50px;
+    height: 50px;
+    border-radius: 100%;
+    display: grid;
+    place-items: center;
+    border: none;
+    margin: auto;
+    font-size: 25px;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    color: white;
+  }
+
+  & [data-snap]:hover,
+  & [data-snap]:focus {
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
+  & .taskbar .left,
+  & .taskbar .center,
+  & .taskbar .right {
+    display: flex;
+    align-items: center;
+  }
+
+  & .taskbar .center {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+    gap: 3px;
+  }
+
+  & .taskbar-button {
+    cursor: pointer;
+    padding: 0;
+    padding: .5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    border: none;
+    font-size: 1rem;
+    color: white;
+    text-shadow: 1px 1px var(--root-theme, mediumseagreen);
+    backdrop-filter: blur(10px) opacity(20%);
+    background: radial-gradient(
+      at center top,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(0, 0, 0, 0.1) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.35);
+    flex-shrink: 1; /* Allow buttons to shrink */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1;
+    max-width: 100%;
+  }
+
+  & .taskbar-button:hover,
+  & .taskbar-button:focus {
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.65);
+  }
+
+  & .taskbar-button[data-focused="true"] {
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), var(--root-theme, mediumseagreen);
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    box-shadow: 1px 1px 1px 0 rgba(0,0,0,.65) inset;
+  }
+
+
+  & .taskbar-button[data-start-menu] {
+    font-weight: bold;
+    aspect-ratio: 1;
+    height: 2rem;
+    width: auto;
+    background: radial-gradient(
+      at center top,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(0, 0, 0, 0.1) 31%
+    ), lemonchiffon;
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+    color: var(--root-theme, mediumseagreen);
+    text-shadow: none;
+    border-radius: 0;
+    animation: &-spin ease-in-out 5000ms alternate infinite;
+  }
+
+  @keyframes &-spin {
+    0% {
+      transform: rotate(-360deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes &-marquee-track {
+    0% {
+      transform: translateX(20px);
+    }
+
+    100% {
+      transform: translateX(calc(-50%));
+    }
+  }
+
+
+
+  & .taskbar-button[data-start-menu]:hover,
+  & .taskbar-button[data-start-menu]:focus {
+    background: radial-gradient(
+      at center bottom,
+      rgba(0, 0, 0, 0.5) 0%,
+      rgba(255, 255, 255, 0.25) 31%
+    ), lemonchiffon;
+    background-repeat: no-repeat;
+    background-size: 300% 100%;
+    background-position: center -50%;
+  }
+
+  & .taskbar-button[data-settings-menu] {
+    border-radius: 100%;
   }
 
   &.cinema {
@@ -706,75 +853,64 @@ $.style(`
   & .resize-right-bottom,
   & .resize-left-bottom {
     position: absolute;
-    bottom: -1rem;
-    width: 1rem;
-    height: 1rem;
+    bottom: -5px;
+    width: 30px;
+    height: 30px;
     border: none;
     padding: 0;
-    background-color: #E83FB8;
-    border-radius: 100%;
+    background-color: #333333;
     cursor: resize;
   }
 
   & .resize-left-bottom {
-    left: -1rem;
+    left: -5px;
     cursor: sw-resize;
+    border-radius: 0 0 0 4px;
   }
 
   & .resize-right-bottom {
-    right: -1rem;
+    right: -5px;
     cursor: se-resize;
+    border-radius: 0 0 4px 0;
   }
 
   & .resize-right-top,
   & .resize-left-top {
     position: absolute;
-    padding: 0;
-    top: -1rem;
-    width: 1rem;
-    height: 1rem;
+    top: -5px;
+    width: 30px;
+    height: 30px;
     border: none;
-    background-color: #E83FB8;
-    border-radius: 100%;
+    padding: 0;
+    background-color: #333333;
     cursor: resize;
   }
 
   & .resize-left-top {
-    left: -1rem;
+    left: -5px;
     cursor: nw-resize;
+    border-radius: 4px 0 0 0;
   }
 
   & .resize-right-top {
-    right: -1rem;
+    right: -5px;
     cursor: ne-resize;
+    border-radius: 0 4px 0 0;
   }
 
   & .resize-right-bottom,
   & .resize-left-bottom,
   & .resize-right-top,
   & .resize-left-top {
-    opacity: .5;
-    aspect-ratio: 1;
+    opacity: 0;
   }
 
   & .resize-right-bottom:hover,
   & .resize-left-bottom:hover,
   & .resize-right-top:hover,
   & .resize-left-top:hover {
-    opacity: 1;
+    opacity: .5;
   }
-
-  & .resize-right-bottom:before,
-  & .resize-left-bottom:before,
-  & .resize-right-top:before,
-  & .resize-left-top:before {
-    content: '';
-    width: 1rem;
-    height: 1rem;
-    border-radius: 100%;
-    display: block;
-  }
-
 
 
   &.inline {
@@ -803,27 +939,15 @@ $.style(`
     padding: 0 .25rem;
   }
 
-  & .grabber::before {
-    content: '';
-    box-shadow:
-      0px .2rem 0 .5px var(--red),
-      0px .7rem 0 .5px var(--orange),
-      0px 1.2rem 0 .5px var(--yellow);
-    display: block;
-    margin: 0;
-    opacity: .4;
-    transform: opacity 100ms ease-in-out;
-  }
-
-  &,
-  & canvas {
+  & .terminal-canvas {
     display: block;
     width: 100%;
     height: 100%;
   }
 
-  & canvas {
-    background: #0047bb;
+  & .terminal-canvas {
+    background-size: cover;
+    background-position: cover;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
@@ -838,11 +962,13 @@ $.style(`
     top: var(--start-y);
     width: var(--x);
     height: var(--y);
-    background: var(--draw-term-bg, var(--color, dodgerblue));
+    background: var(--draw-term-bg, var(--color, lemonchiffon));
     transform: var(--transform);
     pointer-events: none;
     z-index: 9001;
-    opacity: .65;
+    opacity: 1;
+    display: grid;
+    place-items: center;
   }
 
   & .trays[data-resizing="true"],
@@ -877,7 +1003,7 @@ $.style(`
   & .tray-wake:hover,
   & .tray-wake:focus {
     background: rgba(0,0,0,.85);
-    outline: 2px solid mediumseagreen;
+    outline: 2px solid var(--root-theme, mediumseagreen);
     outline-offset: 2px;
   }
 
@@ -894,25 +1020,14 @@ $.style(`
     pointer-events: none !important;
   }
 
-
-  & [data-grabbing="true"] iframe {
-    display: none !important;
-  }
-
   & .grabber {
     pointer-events: none;
   }
 
   & [data-grabbed="true"] {
     transform: scale(1.1);
-    outline: 2px solid var(--green);
+    outline: 2px solid var(--root-theme, mediumseagreen);
     outline-offset: 2px;
-  }
-  & [data-grabbed="true"] .grabber::before {
-    box-shadow:
-      0px .2rem 0 .5px var(--purple),
-      0px .7rem 0 .5px var(--blue),
-      0px 1.2rem 0 .5px var(--green);
   }
 
   & .trays[data-mousedown="true"] {
@@ -930,12 +1045,17 @@ $.style(`
     position: absolute;
     width: var(--width, 160px);
     height: var(--height, 90px);
-    background: linear-gradient(25deg, rgba(0,0,0,.65), rgba(0,0,0,.85));
-    padding: 2px;
+    background:
+      linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)),
+      var(--root-theme, mediumseagreen);
     display: grid;
-    grid-template-rows: 2rem 0 1fr;
+    grid-template-rows: auto 1fr;
     max-width: 100vw;
     max-height: 100vh;
+    border-radius: 5px;
+    box-shadow: 0 0 1px 2px rgba(0,0,0,.4);
+    box-shadow: 0 0 2px 4px rgba(0,0,0,.2);
+    box-shadow: 0 0 4px 8px rgba(0,0,0,.1);
   }
 
   & .tray iframe {
@@ -944,14 +1064,20 @@ $.style(`
   }
 
   & .tray-title-bar {
+    border-radius: 4px 4px 0 0;
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
+      var(--root-theme, mediumseagreen);
+    z-index: 2;
     padding: 5px 4px;
     font-size: 1rem;
     line-height: 1;
     color: white;
     position: relative;
     display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 5px;
+    grid-template-columns: auto auto auto 1fr;
+    gap: 6px;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
@@ -959,13 +1085,7 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-
-  & [data-resizing="true"] .tray-title-bar,
-  & [data-grabbing="true"] .tray-title-bar {
-    overflow-x: hidden;
+    place-items: center;
   }
 
   & .tray-title-bar input {
@@ -984,11 +1104,15 @@ $.style(`
   }
 
   & .tray-body {
+    border-radius: 0 0 4px 4px;
     background: white;
     color: black;
     height: 100%;
     position: relative;
+    z-index: 2;
     overflow: auto;
+    container-type: inline-size;
+    container-name: tray-body;
   }
 
   & .tray-resize {
@@ -997,17 +1121,43 @@ $.style(`
 
   &:not(.infinite) .tray.maximized {
     transform: translate(0, 0) !important;
+ }
+
+  & .tray.maximized {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  & .tray.maximized .tray-title-bar,
+  & .tray.maximized .tray-body {
+    border-radius: 0;
+  }
+
+  & .tray.minimized .tray-title-bar {
+    border-radius: 1rem;
+  }
+
+  & .tray-title {
+    font-size: 12px;
+    line-height: 1;
+    color: rgba(255,255,255,.65);
+  }
+
+  & .tray.minimized .tray-title {
+    display: none;
   }
 
   & .tray.minimized:not(.maximized) {
     width: auto;
     height: auto;
-    grid-template-rows: auto auto 0 0;
+    grid-template-rows: auto 0 0;
     border-radius: 1rem;
   }
 
   & .tray.minimized:not(.maximized) .tray-title-bar {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: auto auto auto 2rem;
   }
 
   & .tray.minimized:not(.maximized) .minimizable {
@@ -1026,12 +1176,13 @@ $.style(`
     border: none;
     border-radius: 0;
     color: white;
-    padding: 3px 5px;
+    padding: 0;
     opacity: .65;
     transition: opacity 100ms;
-    border-radius: 100%;
     display: grid;
     place-items: center;
+    width: 12px;
+    height: 12px;
   }
 
   & .tray-action:hover,
@@ -1046,94 +1197,198 @@ $.style(`
     margin-left: auto;
   }
 
-  & .input-grid {
+  & .tray-close {
+    border-radius: 100%;
+    background: firebrick;
+  }
+
+  & .tray-min {
+    border-radius: 100%;
+    background: gold;
+  }
+
+  & .tray-max {
+    border-radius: 100%;
+    background: var(--green);
+  }
+
+  & .system {
+    height: 100%;
     display: grid;
-    grid-template-columns: 1fr auto;
-    text-align: left;
+    grid-template-columns: auto 1fr;
   }
 
-  & *:focus {
-    outline: 3px solid var(--underline-color, mediumseagreen);
-  }
-
-  & .suggestions .auto-item {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .suggestions:not(:empty) {
-    display: block;
-    position: relative;
-    background: var(--green, mediumseagreen);
-    text-align: left;
-  }
-
-  & .suggestion-box:empty {
-    pointer-events: none;
-  }
-  & .suggestion-box {
-    position: absolute;
-    inset: 0;
-    height: 300px;
+  & .groups {
+    display: flex;
+    flex-direction: column-reverse;
     overflow: auto;
-    z-index: 10;
-    max-height: calc(100vh - 3rem);
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), var(--root-theme, mediumseagreen);
+    gap: .5rem;
+    padding: .5rem;
+    max-height: 100%;
+    justify-content: end;
+  }
+
+  & .pane-select {
+    background: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.85);
+    border: 0;
+    padding: .5rem 1rem;
+    text-align: left;
+    border-radius: 1rem;
+  }
+
+  & .pane-select.active {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+  }
+
+
+  & .applications {
+    overflow: auto;
+  }
+
+  & .application-list {
     display: flex;
     flex-direction: column;
   }
 
-  & .suggestion-box .auto-item {
-    background: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
-    color: var(--button-color, dodgerblue);
-    transition: all 100ms ease-in-out;
-    padding: .5rem;
-    width: 100%;
+  & .iconography {
+    background: lemonchiffon;
+    aspect-ratio: 1;
+    min-width: 2rem;
+  }
+
+  & .app-select {
+    border: none;
+    background: transparent;
+    display: grid;
+    grid-template-columns: auto 1fr;
     text-align: left;
-    max-width: 100%;
+    gap: .5rem;
+    border-radius: 0;
+    padding: 2px;
   }
 
-  & .suggestion-box .auto-item:focus,
-  & .suggestion-box .auto-item:hover {
-    background-color: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    color: white;
+  & .app-label {
+    background: rgba(0,0,0,.25);
+    color: rgba(0,0,0,.85);
+    border: 0;
+    padding: .5rem 0;
+    border-radius: 1rem;
+    position: relative;
+    z-index: 2;
+    max-height: 3.5rem;
+    overflow: hidden;
   }
 
-  & .suggestion-box .auto-item.active {
-    color: white;
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    background-color: var(--button-color, dodgerblue);
+  & .app-label {
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  & .hyper-name {
+  & .pane-select {
+    
+  }
+
+  & .settings-menu:empty {
+    display: none;
+  }
+
+  & .settings-menu {
+    position: absolute;
+    inset: 0;
+    background: black;
+    overflow: auto;
+    z-index: 2;
+    background:
+      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--root-theme, lightgray);
     display: flex;
-    overflow: hidden;
+    flex-direction: column;
+    padding: .5rem;
+    gap: .5rem;
+    z-index: 200;
   }
 
-  & .file-name {
-    white-space: nowrap;
-    padding-right: 2rem;
+  & .faux-mobile {
+    max-width: 320px;
+    max-height: 480px;
+    width: 100%;
+    height: 100%;
+    border-radius: 1rem;
+    border: 5px solid var(--root-theme, mediumseagreen);
+    overflow: hidden;
+    position: absolute;
+    right: .5rem;
+    bottom: .5rem;
   }
 
-  & .hyper-sentence {
-    white-space: nowrap;
-    margin-left: auto;
-    overflow: hidden;
-    color: rgba(255,255,255,.65);
-  }
 `)
+
+$.when('click', '[data-start-menu]', () => {
+  $.teach({ showStart: !$.learn().showStart, showSettings: false })
+})
+
+$.when('click', '.tray-wake', wake)
+function wake (e) {
+  const { trayZ } = $.learn()
+  const newZ = trayZ + 1
+  const { tray } = event.target.dataset
+  $.teach({ trayZ: newZ, focusedTray: tray })
+  setState(tray, { z: newZ })
+}
+
+$.when('click', '.task', focusTray)
+function focusTray (e) {
+  const { trayZ } = $.learn()
+  const { tray } = event.target.dataset
+
+  const { z, maximized } = $.learn()[tray]
+
+  if(z === trayZ) {
+    setState(tray, { maximized: !maximized, minimized: false })
+  } else {
+    const newZ = trayZ + 1
+    $.teach({ trayZ: newZ, focusedTray: tray })
+    setState(tray, { z: newZ, minimized: false })
+  }
+}
+
+
+function newTray(overrides) {
+  const tray = self.crypto.randomUUID()
+  $.teach(tray, {
+    mergeHandler: mergeNewTray,
+    parameters: [tray, overrides]
+  })
+}
+
+function mergeNewTray(tray, overrides) {
+  return (state, payload) => {
+    const newState = {...state}
+    newState.trays ||= {}
+    newState.trays[payload] = true
+    newState.trayZ += 1
+    newState.focusedTray = tray
+    newState[payload] = {
+      width: 300,
+      height: 150,
+      z: newState.trayZ,
+      ...overrides
+    }
+    return newState
+  }
+}
 
 $.when('pointerdown', 'canvas', start)
 
 function start(e) {
   e.preventDefault()
-  const { grabbing } = this.read($)
+  const { grabbing } = $.learn()
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
@@ -1149,14 +1404,14 @@ function start(e) {
   x = 0
   y = 0
 
-  write($, { startX, startY, isMouseDown: true, x, y })
+  $.teach({ startX, startY, isMouseDown: true, x, y })
 }
 
 $.when('pointermove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { startX, isMouseDown, startY, grabbing } = this.read($)
+  const { startX, isMouseDown, startY, grabbing } = $.learn()
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
@@ -1170,39 +1425,19 @@ function move (e) {
     x = e.clientX - startX - rectangle.left
     y = e.clientY - startY - rectangle.top
   }
-  write($, { x, y, invertX: x < 0, invertY: y < 0 })
+  $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
 }
 
-$.when('click', '.tray-wake', wake)
-function wake (event) {
-  event.preventDefault()
-  const { trayZ=1 } = this.read($)
-  const newZ = trayZ + 1
-  const { tray } = event.target.dataset
-  write($, { trayZ: newZ, focusedTray: tray })
-  setState(tray, { z: newZ })
-}
 $.when('pointerup', 'canvas', end)
 function end (e) {
   e.preventDefault()
-  const { grabbing } = this.read($)
+  const { grabbing } = $.learn()
   if(grabbing) return
-  const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = this.read($)
+  const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = $.learn()
   const { canvas, rectangle } = engine(e.target)
   const context = canvas.getContext('2d')
 
   const tray = self.crypto.randomUUID()
-  write($, {
-    focusedTray: tray
-  })
-
-  write($, {
-    trays: tray
-  }, function mergeTrays(node, data, key) {
-    const edge = node.get(key)
-    edge.get(data[key]).put(true)
-  })
-
   const width = Math.max(300, Math.abs(x))
   const height = Math.max(150, Math.abs(y))
   setState(tray, {
@@ -1211,10 +1446,22 @@ function end (e) {
     x: invertX ? startX + x : startX,
     y: invertY ? startY + y : startY,
     z: trayZ + 1,
-    url: `about:blank`
+    title: 'hEllo',
+    url: `/app/ur-shell`
   })
 
-  write($, { startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+
+  $.teach(tray, (state, payload) => {
+    return {
+      ...state,
+      trays: {
+        ...state.trays,
+        [payload]: true
+      }
+    }
+  })
+
+  $.teach({ focusedTray: tray, startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
 };
 
 const tags = ['TEXTAREA', 'INPUT']
@@ -1247,40 +1494,34 @@ function replaceCursor(target) {
 function launchTray(event) {
   event.preventDefault()
   const { tray } = event.target.dataset
-  let { buffer, url } = this.read($)[tray]
-  buffer ||= url
-  url = buffer.startsWith('/')
-    ? buffer
-    : buffer.indexOf('://')
-      ? buffer
-      : '/app/giggle-search?query=' + buffer
+  const { url } = $.learn()[tray]
 
-
-  if(url === 'about:blank') {
-    window.top.location.href = window.location.href 
-  } else {
-    window.top.location.href = url
-  }
+  window.top.location.href = url
 }
 
 function preventDefault(e) { e.preventDefault() }
 $.when('contextmenu', '.tray-title-bar', preventDefault)
 $.when('pointerdown', '.tray-title-bar', grab)
+$.when('pointerdown', '.tray-wake', grab)
 $.when('pointerdown', '.tray-resize', resize)
 
-$.when('pointermove', 'canvas', drag)
+$.when('pointermove', '.terminal-canvas', drag)
 $.when('pointermove', '.tray-title-bar', drag)
+$.when('pointermove', '.tray-wake', drag)
 $.when('pointermove', '.tray-resize', drag)
 
+// ungrab is important to come fairly last so early returns grab grabbing right
 $.when('dblclick', '.tray-title-bar', toggleMax)
-$.when('click', '.tray-maxer', toggleMax)
-$.when('pointerup', 'canvas', ungrab)
-$.when('pointerup', 'canvas', unresize)
+//$.when('click', '.tray-maxer', toggleMax)
+$.when('pointerup', '.terminal-canvas', ungrab)
+$.when('pointerup', '.terminal-canvas', unresize)
 $.when('pointerup', '.tray-title-bar', ungrab)
+$.when('pointerup', '.tray-wake', ungrab)
 $.when('pointerup', '.tray-resize', unresize)
 $.when('click', '.tray-close', closeTray)
-$.when('click', '.tray-sync', syncTray)
 $.when('click', '.tray-launch', launchTray)
-$.when('click', '.tray-toggle', toggleMin)
+$.when('click', '.tray-min', toggleMin)
+$.when('click', '.tray-max', toggleMax)
 
-
+$.when('click', '.pane-select', selectPane)
+$.when('click', '.app-select', selectApp)
