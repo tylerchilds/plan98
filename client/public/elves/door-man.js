@@ -303,10 +303,6 @@ function recoverElves(target, tag) {
 }
 
 function afterUpdate(target) {
-  { // recover icons from the virtual dom
-    recoverElves(target, 'sl-icon')
-  }
-
   {
     afterUpdateTheme($paperPocket, target)
   }

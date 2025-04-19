@@ -1,6 +1,13 @@
 import diffHTML from 'diffhtml'
 import geckos from '@geckos.io/client'
 
+let PLAN98_NODE_ID
+try {
+  PLAN98_NODE_ID = self.crypto.randomUUID()
+} catch(e) {
+  PLAN98_NODE_ID = uuidv4()
+}
+
 const config = plan98.env.PLAN98_REALTIME ?
   {
     url: plan98.env.PLAN98_REALTIME,
@@ -105,6 +112,7 @@ const middleware = [
 ]
 
 function udpSync(link, target) {
+  if(target.getAttribute('offline') === 'true') return
   if(target['udpSync']) return
   target['udpSync'] = true
 
@@ -136,8 +144,15 @@ function udpSync(link, target) {
 
     function udpDownload(data) {
       if(!data.table) return
-      const { table, knowledge, serializedNuance } = data
-      
+      const {
+        __plan98_sender_id,
+        table,
+        knowledge,
+        serializedNuance
+      } = data
+
+      if(__plan98_sender_id === PLAN98_NODE_ID) return
+
       const merge = typeof serializedNuance === 'object'
         ? objectFunction(serializedNuance)
         : stringFunction(serializedNuance)
@@ -153,6 +168,7 @@ function udpSync(link, target) {
         }
 
       const data = {
+        __plan98_sender_id: PLAN98_NODE_ID,
         table,
         knowledge,
         serializedNuance

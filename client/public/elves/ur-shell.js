@@ -69,12 +69,7 @@ window.addEventListener('keydown', (event) => {
 });
 
 
-$.teach({ body: paperPocketHelp + `
-xox
-xoo
-oxx
-
-Silly, at your service.
+$.teach({ body: `Silly, at your service.
 
 Do your thing or click "help" and type "help" and then "enter"`, author: 'assistant' }, mergeMessage)
 
