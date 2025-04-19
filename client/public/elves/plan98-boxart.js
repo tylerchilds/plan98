@@ -118,7 +118,7 @@ $.draw((target) => {
       if(bomb && diffused) {
         bomb.remove()
       } else if(bomb) {
-        bomb.innerText = `${timer} until boot`
+        bomb.innerText = `Kiosk mode in ${timer}`
       }
     }
   }
@@ -148,6 +148,19 @@ $.when('click', '[data-coop]', coop)
 $.when('click', '.cheat-prefix', () => {
   self.location.href = "/app/sillyz-computer"
 })
+
+const unbind = $.when('click', '*', (event) => {
+  diffuse()
+  unbind()
+})
+
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    diffuse()
+  }
+});
+
 
 function diffuse(event) {
   $.teach({ diffused: true })

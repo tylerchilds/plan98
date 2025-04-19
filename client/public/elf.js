@@ -90,11 +90,11 @@ export function teach(link, knowledge, nuance = (s, p) => ({...s,...p})) {
 export function when(link, type, arg2, callback) {
   if(typeof arg2 === 'function') {
     insight('elf:when:'+type, link)
-    listen.call(this, type, link, arg2)
+    return listen.call(this, type, link, arg2)
   } else {
     const nested = `${link} ${arg2}`
     insight('elf:when:'+type, nested)
-    listen.call(this, type, nested, callback)
+    return listen.call(this, type, nested, callback)
   }
 }
 

@@ -149,8 +149,11 @@ function mount(target) {
   if(target.mounted) return
   target.mounted = true
   const src = target.getAttribute('src')
+  const rom = target.getAttribute('rom')
   if(src) {
     execute(src)
+  } else if(rom) {
+    execute('<'+rom)
   }
 }
 
