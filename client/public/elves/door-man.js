@@ -654,7 +654,6 @@ $.style(`
       repeating-linear-gradient(180deg, rgba(0,0,0,0.05) 0px, rgba(0,0,0,0.1) 10px, rgba(255,255,255,0.05) 10px, rgba(255,255,255,.1) 20px),
       repeating-radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0) 10px, rgba(255,255,255,0) 20px),
       var(--root-theme, mediumseagreen);
-    touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
