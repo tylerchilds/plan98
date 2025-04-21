@@ -36,7 +36,7 @@ function renderModels(model) {
 const $ = elf('mobile-device', {
   model: 'phone',
   studio: false,
-  showHome: false,
+  showHome: true,
   showSettings: false,
   src: '/app/file-surf'
 })
@@ -252,6 +252,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
+    width: 100%;
   }
 
   & .screen {
@@ -418,11 +419,10 @@ $.style(`
       linear-gradient(-65deg, rgba(0,0,0,.85), rgba(0,0,0,.5)),
       var(--root-theme, lightgray);
     float: right;
+    max-width: 100%;
   }
 
   & .selectbox-view {
-    position: absolute;
-    inset: 0;
     pointer-events: none;
     padding: .5rem;
   }
@@ -430,6 +430,12 @@ $.style(`
   & select {
     opacity: 0;
     padding: .5rem;
+    position: absolute;
+    inset: 0;
+  }
+
+  & select:focus {
+    position: absolute;
   }
 
   & select option {
@@ -440,7 +446,7 @@ $.style(`
   & .pane-select,
   & .app-select {
     font-weight: 100;
-    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.25)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-size: 2rem;

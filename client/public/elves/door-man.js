@@ -231,7 +231,9 @@ $.draw((target) => {
       <div class="system-menu">
         ${renderSystemMenu()}
       </div>
-      <div class="settings-menu"></div>
+      <div class="settings-menu">
+        ${settingsMenu(target)}
+      </div>
     </div>
     <div class="taskbar">
       <div class="left">
@@ -331,13 +333,9 @@ function afterUpdate(target) {
 
   {
     const { showSettings } = $.learn()
-    const menu = target.querySelector('.settings-menu')
 
-    if(showSettings && target.showSettings !== showSettings) {
-      target.lastPane = showSettings
-      menu.innerHTML = settingsMenu(target)
-    } else if(menu.innerHTML) {
-      menu.innerHTML = ''
+    if(showSettings !== target.dataset.showSettings) {
+      target.dataset.showSettings = showSettings
     }
   }
 
@@ -405,7 +403,7 @@ function afterUpdate(target) {
 function settingsMenu(target) {
   return `
     <div class="faux-mobile">
-      <iframe src="/app/mobile-device?id=did:${target.id}settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
+      <iframe src="/app/mobile-device?id=did:${target.id}&settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
     </div>
   `
 }
@@ -943,7 +941,7 @@ $.style(`
   & .terminal-canvas {
     background-size: cover;
     background-position: cover;
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
@@ -1073,7 +1071,7 @@ $.style(`
     display: grid;
     grid-template-columns: auto auto auto 1fr;
     gap: 6px;
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
@@ -1307,7 +1305,14 @@ $.style(`
     padding: .5rem;
     gap: .5rem;
     z-index: 200;
+    display: none;
   }
+
+  &[data-show-settings="true"] .settings-menu {
+    display: grid;
+    place-items: end;
+  }
+
 
   & .faux-mobile {
     max-width: 320px;
@@ -1317,7 +1322,6 @@ $.style(`
     border-radius: 1rem;
     border: 5px solid var(--root-theme, mediumseagreen);
     overflow: hidden;
-    position: absolute;
     right: .5rem;
     bottom: .5rem;
   }
