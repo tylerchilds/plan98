@@ -14,7 +14,7 @@ const shortCodes = {};
 const rooms = {};
 const parties = new Map()
 const nicknames = {};
-const ids = new Map()
+const tables = new Map()
 
 const app = express()
 const server = http.createServer(app)
@@ -191,20 +191,20 @@ io.onConnection(channel => {
   });
 
   channel.on('linkState', ({ table, id, data }) => {
-    channel.join(id);
+    const room = `${table}/${id}`
+    channel.join(room);
 
-    if (!ids.has(id)) {
-      ids.set(id, {
+    if (!tables.has(room)) {
+      tables.set(room, {
         channels: [],
-        store: createStore(data || {}, notify.bind(id))
+        store: createStore(data || {}, notify.bind(room))
       })
     }
 
-    const party = ids.get(id)
+    const party = tables.get(room)
 
     party.channels.push(channel)
 
-    console.log(party.store.get(table))
     channel.emit('stateCache', {
       table,
       id,
@@ -213,8 +213,11 @@ io.onConnection(channel => {
   });
 
   channel.on('stateUpload', ({ id, data }) => {
-    if(ids.has(id)) {
-      const party = ids.get(id)
+    const { table, knowledge, serializedNuance } = data
+
+    const room = `${table}/${id}`
+    if(tables.has(room)) {
+      const party = tables.get(room)
       party.channels.forEach(channel => {
         if(channel) {
           channel.emit('stateDownload', data)
@@ -222,7 +225,6 @@ io.onConnection(channel => {
       })
 
       try {
-        const { table, knowledge, serializedNuance } = data
         const merge = typeof serializedNuance === 'object'
           ? objectFunction(serializedNuance)
           : stringFunction(serializedNuance)
