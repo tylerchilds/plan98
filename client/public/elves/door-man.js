@@ -416,8 +416,7 @@ function afterUpdate(target) {
 function settingsMenu(target) {
   return `
     <div class="faux-mobile">
-      <!--<mobile-device id="did:${target.id}" settings="true" src="/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></mobile-device>-->
-      <iframe src="/app/mobile-device?id=did:${target.id}&settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
+      <mobile-device id="did:${target.id}" settings="true" src="/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></mobile-device>
     </div>
   `
 }
