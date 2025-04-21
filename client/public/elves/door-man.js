@@ -468,7 +468,9 @@ function closeSystemMenu(event) {
   $.teach({ showStart: false })
 }
 
-
+function closeSettingsMenu(event) {
+  $.teach({ showSettings: false })
+}
 
 function minimize(tray) {
   $.teach(tray, (state, payload) => {
@@ -1364,9 +1366,10 @@ function focusTray (e) {
 
   if(z === trayZ) {
     setState(tray, { maximized: !maximized, minimized: false })
+    $.teach({ showStart: false })
   } else {
     const newZ = trayZ + 1
-    $.teach({ trayZ: newZ, focusedTray: tray })
+    $.teach({ trayZ: newZ, focusedTray: tray, showStart: false })
     setState(tray, { z: newZ, minimized: false })
   }
 }
@@ -1447,34 +1450,39 @@ function end (e) {
   const { grabbing } = $.learn()
   if(grabbing) return
   const { focusedTray, trayZ=1, startX, x, y, invertX, invertY, startY } = $.learn()
-  const { canvas, rectangle } = engine(e.target)
-  const context = canvas.getContext('2d')
 
-  const tray = self.crypto.randomUUID()
-  const width = Math.max(300, Math.abs(x))
-  const height = Math.max(150, Math.abs(y))
-  setState(tray, {
-    width,
-    height,
-    x: invertX ? startX + x : startX,
-    y: invertY ? startY + y : startY,
-    z: trayZ + 1,
-    title: 'hEllo',
-    url: `/app/file-surf`
-  })
+  if(Math.abs(x) > 50 && Math.abs(y) > 50) {
+    const { canvas, rectangle } = engine(e.target)
+    const context = canvas.getContext('2d')
+
+    const tray = self.crypto.randomUUID()
+    const width = Math.max(300, Math.abs(x))
+    const height = Math.max(150, Math.abs(y))
+    setState(tray, {
+      width,
+      height,
+      x: invertX ? startX + x : startX,
+      y: invertY ? startY + y : startY,
+      z: trayZ + 1,
+      title: 'File Surf',
+      url: `/app/file-surf`
+    })
 
 
-  $.teach(tray, (state, payload) => {
-    return {
-      ...state,
-      trays: {
-        ...state.trays,
-        [payload]: true
+    $.teach(tray, (state, payload) => {
+      return {
+        ...state,
+        trays: {
+          ...state.trays,
+          [payload]: true
+        }
       }
-    }
-  })
+    })
 
-  $.teach({ focusedTray: tray, startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+    $.teach({ focusedTray: tray, startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+  } else {
+    $.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+  }
 };
 
 const tags = ['TEXTAREA', 'INPUT']
@@ -1537,5 +1545,6 @@ $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
 
 $.when('click', '.system-menu', closeSystemMenu)
+$.when('click', '.settings-menu', closeSettingsMenu)
 $.when('click', '.pane-select', selectPane)
 $.when('click', '.app-select', selectApp)
