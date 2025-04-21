@@ -99,7 +99,7 @@ $.draw((target) => {
           <div class="device">
             <div class="screen">
               <div class="home-menu">${showHome?homeMenu():''}</div>
-              <div class="settings-menu">${showSettings?settingsMenu():''}</div>
+              <div class="mobile-settings-menu">${showSettings?settingsMenu():''}</div>
               <iframe src="${src}"></iframe>
             </div>
             <div class="chin">
@@ -113,7 +113,7 @@ $.draw((target) => {
     <div class="device">
       <div class="screen">
         <div class="home-menu">${showHome?homeMenu():''}</div>
-        <div class="settings-menu">${showSettings?settingsMenu():''}</div>
+        <div class="mobile-settings-menu">${showSettings?settingsMenu():''}</div>
         <iframe src="${src}"></iframe>
       </div>
       <div class="chin">
@@ -178,11 +178,11 @@ function renderGroups(systemPane) {
   const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
 
   return `
-    <groups class="groups-list">
+    <groups class="mobile-groups-list">
       ${groups.map((x) => {
         return `
           <div>
-            <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
+            <button class="mobile-pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
               ${systemMenu[x.key].label}
             </button>
           </div>
@@ -198,7 +198,7 @@ function renderGroups(systemPane) {
 
 function renderApplications(pane) {
   return `
-    <apps class="application-list">
+    <apps class="mobile-application-list">
       <div>
         <button class="to-groups">
           Back
@@ -208,8 +208,8 @@ function renderApplications(pane) {
       ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
         return `
           <div>
-            <button class="app-select" data-url="${url}" data-title="${label}">
-              <span class="app-label">
+            <button class="mobile-app-select" data-url="${url}" data-title="${label}">
+              <span class="mobile-app-label">
                 ${label}
               </span>
             </button>
@@ -220,8 +220,8 @@ function renderApplications(pane) {
   `
 }
 
-$.when('click', '.app-select', selectApp)
-$.when('click', '.pane-select', selectPane)
+$.when('click', '.mobile-app-select', selectApp)
+$.when('click', '.mobile-pane-select', selectPane)
 $.when('click', '.to-groups', back)
 $.when('click', '.to-settings', toSettings)
 
@@ -271,11 +271,11 @@ $.style(`
     overflow: auto;
   }
 
-  & .settings-menu:empty {
+  & .mobile-settings-menu:empty {
     display: none;
   }
 
-  & .settings-menu {
+  & .mobile-settings-menu {
     position: absolute;
     inset: 0;
     background: black;
@@ -443,8 +443,8 @@ $.style(`
 
   & .to-settings,
   & .to-groups,
-  & .pane-select,
-  & .app-select {
+  & .mobile-pane-select,
+  & .mobile-app-select {
     font-weight: 100;
     background: linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.25)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
@@ -462,18 +462,18 @@ $.style(`
   & .to-settings:focus,
   & .to-groups:hover,
   & .to-groups:focus,
-  & .pane-select:hover,
-  & .app-select:hover,
-  & .pane-select:focus,
-  & .app-select:focus {
+  & .mobile-pane-select:hover,
+  & .mobile-app-select:hover,
+  & .mobile-pane-select:focus,
+  & .mobile-app-select:focus {
     background: transparent;
     -webkit-background-clip: initial;
     -webkit-text-fill-color: initial;
     color: rgba(255,255,255,1);
   }
 
-  & .groups-list,
-  & .application-list {
+  & .mobile-groups-list,
+  & .mobile-application-list {
     display: flex;
     flex-direction: column;
     padding: .5rem;
@@ -500,3 +500,12 @@ $.style(`
   }
 
 `)
+
+$.when('json-rpc', (event) => {
+  const { method, params } = event.detail
+
+  if(method === 'pushState') {
+    $.teach({ ...params })
+  }
+})
+

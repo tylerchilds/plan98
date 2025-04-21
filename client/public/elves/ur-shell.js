@@ -39,6 +39,8 @@ const models = {
   'llama3.2:3b': 'Llama 3.2 3b',
 }
 
+let fileSystem = null
+
 const $ = elf('ur-shell', {
   messages: [],
   history: [],
@@ -47,8 +49,8 @@ const $ = elf('ur-shell', {
   messageDraft: '',
   messageHeight: null,
   cwd: null,
-  fileSystem: null
 })
+
 
 window.addEventListener('keydown', (event) => {
   const { popped, debug } = $.learn()
@@ -77,7 +79,8 @@ const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
   .then(res => res.json())
   .then(({plan98}) => {
-    $.teach({ fileSystem: plan98, cwd: '/' })
+    fileSystem = plan98
+    $.teach({ cwd: '/' })
   })
   .catch(e => console.error(e))
 
@@ -280,7 +283,7 @@ const commands = {
   },
 
   cd(path) {
-    const { cwd, fileSystem } = $.learn()
+    const { cwd } = $.learn()
 
     if(!path) {
       $.teach({ cwd: '/' })
@@ -385,7 +388,7 @@ const commands = {
 
 
   ls() {
-    const { cwd, fileSystem } = $.learn()
+    const { cwd } = $.learn()
     const folderNames = cwd === '/' ? [''] : cwd.split('/')
 
     const { error, children } = folderNames.reduce((tree, name) => {

@@ -1,4 +1,5 @@
 import elf from '@plan98/elf'
+import diffHTML from 'diffhtml'
 
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 
@@ -114,7 +115,7 @@ function render(target) {
         trayNode = document.createElement('div')
         trayNode.classList.add('tray');
         trayNode.dataset.id = tray
-        trayNode.innerHTML = `
+        diffHTML.innerHTML(trayNode, `
           <button class="tray-wake" data-tray="${tray}"></button>
           <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
             <button class="tray-action tray-close" data-tray="${tray}">
@@ -140,7 +141,7 @@ function render(target) {
             <button aria-label="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
             </button>
           </div>
-        `
+        `)
         trayContainer.appendChild(trayNode)
       }
 
@@ -176,9 +177,9 @@ function render(target) {
         taskNode.classList.add('taskbar-button');
         taskNode.classList.add('task');
         taskNode.dataset.tray = tray
-        taskNode.innerHTML = `
+        diffHTML.innerHTML(taskNode, `
           ${title || url}
-        `
+        `)
         taskContainer.appendChild(taskNode)
       }
 
@@ -326,17 +327,28 @@ function afterUpdate(target) {
       target.lastPane = systemPane
       const groups = target.querySelector('.groups')
       const applications = target.querySelector('.applications')
-      groups.innerHTML = renderGroups(systemPane)
-      applications.innerHTML = renderApplications(systemPane)
+      diffHTML.innerHTML(groups, renderGroups(systemPane))
+      diffHTML.innerHTML(applications, renderApplications(systemPane))
     }
-
   }
 
   {
     const { showSettings } = $.learn()
+    const device = target.querySelector('.settings-menu mobile-device')
 
-    if(showSettings !== target.dataset.showSettings) {
+    if(`${showSettings}` !== target.dataset.showSettings) {
       target.dataset.showSettings = showSettings
+
+      if(device && showSettings) {
+        device.dispatchEvent(new CustomEvent('json-rpc', {
+          detail: {
+            jsonrpc: "2.0",
+            method: 'pushState',
+            params: { showSettings: true, showHome: false, systemPane: null  }
+          }
+        }))
+      }
+
     }
   }
 
@@ -404,7 +416,7 @@ function afterUpdate(target) {
 function settingsMenu(target) {
   return `
     <div class="faux-mobile">
-      <iframe src="/app/mobile-device?id=did:${target.id}&settings=true&src=/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></iframe>
+      <mobile-device id="did:${target.id}" settings="true" src="/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></mobile-device>
     </div>
   `
 }
