@@ -25,13 +25,17 @@ const $ = elf('door-man', initial)
 function renderGroups(systemPane) {
   const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
 
-  return groups.map((x) => {
-    return `
-      <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
-        ${systemMenu[x.key].label}
-      </button>
-    `
-  }).join('')
+  return `
+    <div class="group-list">
+      ${groups.map((x) => {
+        return `
+          <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
+            ${systemMenu[x.key].label}
+          </button>
+        `
+      }).join('')}
+    </div>
+  `
 }
 
 function renderApplications(pane) {
@@ -49,10 +53,7 @@ function renderApplications(pane) {
         `
       }).join('')}
     </div>
-
-  ` : `
-    <sillyz-computer></sillyz-computer>
-  `
+  ` : ``
 }
 
 function renderSystemMenu() {
@@ -445,6 +446,7 @@ function toggleMin(event) {
 }
 
 function selectPane(event) {
+  event.stopPropagation()
   const { pane } = event.target.dataset
   $.teach({ systemPane: pane })
 }
@@ -459,6 +461,10 @@ function selectApp(event) {
     y: y > window.innerHeight / 2 ? window.innerHeight - y : y,
   })
 
+  $.teach({ showStart: false })
+}
+
+function closeSystemMenu(event) {
   $.teach({ showStart: false })
 }
 
@@ -684,14 +690,15 @@ $.style(`
     display: none;
     position: absolute;
     overflow: hidden;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(10px);
     inset: 0;
     z-index: 100;
+    background: rgba(255,255,255,.25);
+    backdrop-filter: blur(2px);
   }
 
   &[data-menu="true"] .system-menu {
-    display: block;
+    display: grid;
+    place-items: end start;
   }
 
   & [data-snap] {
@@ -1206,17 +1213,20 @@ $.style(`
   }
 
   & .system {
-    height: 100%;
     display: grid;
     grid-template-columns: auto 1fr;
+    border: 3px solid var(--root-theme, mediumseagreen);
+    border-left: 0;
+    border-bottom: 0;
+    border-top-right-radius: 1rem;
+    overflow: hidden;
+    height: 100%;
+    max-height: 80%;
   }
 
   & .groups {
-    display: flex;
-    flex-direction: column-reverse;
-    overflow: auto;
+    overflow: hidden;
     background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), var(--root-theme, mediumseagreen);
-    gap: .5rem;
     padding: .5rem;
     max-height: 100%;
     justify-content: end;
@@ -1224,7 +1234,7 @@ $.style(`
 
   & .pane-select {
     background: rgba(0,0,0,.25);
-    color: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
     border: 0;
     padding: .5rem 1rem;
     text-align: left;
@@ -1232,18 +1242,24 @@ $.style(`
   }
 
   & .pane-select.active {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
     color: rgba(255,255,255,.85);
   }
 
-
-  & .applications {
+  & .group-list,
+  & .application-list {
+    gap: .5rem;
+    display: flex;
+    flex-direction: column-reverse;
     overflow: auto;
+    height: 100%;
   }
 
-  & .application-list {
-    display: flex;
-    flex-direction: column;
+  & .applications {
+    overflow: hidden;
+    padding: .5rem;
+    background: rgba(255,255,255,.75);
+    backdrop-filter: blur(10px);
   }
 
   & .iconography {
@@ -1260,15 +1276,13 @@ $.style(`
     text-align: left;
     gap: .5rem;
     border-radius: 0;
-    padding: 2px;
+    align-items: center;
   }
 
   & .app-label {
     background: rgba(0,0,0,.25);
     color: rgba(0,0,0,.85);
     border: 0;
-    padding: .5rem 0;
-    border-radius: 1rem;
     position: relative;
     z-index: 2;
     max-height: 3.5rem;
@@ -1522,5 +1536,6 @@ $.when('click', '.tray-launch', launchTray)
 $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
 
+$.when('click', '.system-menu', closeSystemMenu)
 $.when('click', '.pane-select', selectPane)
 $.when('click', '.app-select', selectApp)
