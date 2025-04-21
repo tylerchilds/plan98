@@ -189,7 +189,7 @@ function renderGroups(systemPane) {
         `
       }).join('')}
 
-      <button class="to-settings">
+      <button class="mobile-to-settings">
         Settings
       </button>
     </groups>
@@ -200,7 +200,7 @@ function renderApplications(pane) {
   return `
     <apps class="mobile-application-list">
       <div>
-        <button class="to-groups">
+        <button class="mobile-to-groups">
           Back
         </button>
       </div>
@@ -222,8 +222,8 @@ function renderApplications(pane) {
 
 $.when('click', '.mobile-app-select', selectApp)
 $.when('click', '.mobile-pane-select', selectPane)
-$.when('click', '.to-groups', back)
-$.when('click', '.to-settings', toSettings)
+$.when('click', '.mobile-to-groups', back)
+$.when('click', '.mobile-to-settings', toSettings)
 
 function toSettings() {
   $.teach({ showSettings: true })
@@ -441,8 +441,8 @@ $.style(`
   & select option {
   }
 
-  & .to-settings,
-  & .to-groups,
+  & .mobile-to-settings,
+  & .mobile-to-groups,
   & .mobile-pane-select,
   & .mobile-app-select {
     font-weight: 100;
@@ -458,10 +458,10 @@ $.style(`
     padding: .5rem 0;
   }
 
-  & .to-settings:hover,
-  & .to-settings:focus,
-  & .to-groups:hover,
-  & .to-groups:focus,
+  & .mobile-to-settings:hover,
+  & .mobile-to-settings:focus,
+  & .mobile-to-groups:hover,
+  & .mobile-to-groups:focus,
   & .mobile-pane-select:hover,
   & .mobile-app-select:hover,
   & .mobile-pane-select:focus,
@@ -479,8 +479,8 @@ $.style(`
     padding: .5rem;
   }
 
-  & .to-settings,
-  & .to-groups {
+  & .mobile-to-settings,
+  & .mobile-to-groups {
     font-weight: bold;
     background: linear-gradient(155deg, rgba(255,255,255,0), rgba(255,255,255,.15)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
@@ -488,10 +488,10 @@ $.style(`
     font-size: 1.5rem;
   }
 
-  & .to-settings:hover,
-  & .to-settings:focus,
-  & .to-groups:hover,
-  & .to-groups:focus {
+  & .mobile-to-settings:hover,
+  & .mobile-to-settings:focus,
+  & .mobile-to-groups:hover,
+  & .mobile-to-groups:focus {
     font-weight: bold;
     background: linear-gradient(155deg, rgba(255,255,255,.15), rgba(255,255,255,.35)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;

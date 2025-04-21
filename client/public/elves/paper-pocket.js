@@ -346,6 +346,7 @@ const $ = elf('paper-pocket', {
   fontSize: getFontSize(),
   fontFamily: getFontFamily(),
   bpm: getBpm(),
+  debuggerVisible: false,
   noteDuration: getNoteDuration(),
   rom: 'silly-script',
   src: '/public/cdn/sillyz.computer/en-us/hyper-text.saga',
@@ -399,11 +400,11 @@ const $ = elf('paper-pocket', {
       options: ['normal','inverted'],
       value: 'inverted',
     },
-    debug: {
+    debuggerVisible: {
       label: 'Debugger',
       description: 'Toggle the debugger',
-      options: ['hide', 'show'],
-      value: 'hide'
+      options: [false, true],
+      value: false
     },
   },
   pause: systemMenu
@@ -963,7 +964,7 @@ export const sideEffects = {
   noteDuration: (value) => {
     setNoteDuration(value)
   },
-  debug: (value) => {
+  debuggerVisible: (value) => {
     setDebugger(value)
   }
 }
@@ -977,7 +978,7 @@ function setDebugger(visibility) {
     console.classList.toggle('hidden')
   }
 
-  if(visibility === 'show') {
+  if(visibility) {
     consoleShow()
     $.teach({ debuggerVisible: true })
   } else {
