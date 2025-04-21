@@ -6,8 +6,6 @@ import express from 'express'
 import braid_text from 'braid-text'
 import createStore from './storage.mjs'
 
-console.log('version???')
-
 function notify(namespace, state) {
   //console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
 }
