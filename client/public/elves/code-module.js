@@ -301,7 +301,6 @@ $.style(`
     max-height: 100%;
     position: relative;
     padding-top: 2rem;
-    color: black;
     max-width: 100%;
     width: 100%;
   }
@@ -439,6 +438,10 @@ $.style(`
 
   & .menu-item.right {
     margin-left: auto;
+  }
+
+  .cm-vim-panel input {
+    color: white;
   }
 `)
 
