@@ -748,8 +748,7 @@ $.style(`
     top: 0;
     left: 0;
     display: grid;
-    align-items: center;
-    justify-content: center;
+    place-items: center;
     grid-template-areas: 'stage';
     width: 100%;
     height: 100%;
@@ -769,7 +768,6 @@ $.style(`
     overflow: auto;
     opacity: 1;
     z-index: 2;
-    height: auto;
     max-height: 100%;
   }
 
@@ -1062,7 +1060,7 @@ $.style(`
     place-self: end center;
   }
 
-  & [name="stage"] > * {
+  & [name="stage"] > iframe {
     height: 100%;
     width: 100%;
   }

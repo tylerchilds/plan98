@@ -1,0 +1,40 @@
+# The Six Modalities of Computing
+
+<ol
+html: <li>Remote</li><li>Multiplayer</li><li>Gaming</li><li>Mobile</li><li>Desktop</li><li>Shell</li>
+
+# Remote
+
+<new-session
+rom: remote-control
+id: a1
+
+# Multiplayer
+
+<new-session
+rom: couch-coop
+id: b2
+
+# Gaming
+
+<new-session
+rom: paper-pocket
+id: c3
+
+# Mobile
+
+<new-session
+rom: mobile-device
+id: d4
+
+# Desktop
+
+<new-session
+rom: door-man
+id: e5
+
+# Shell
+
+<new-session
+rom: ur-shell
+id: f6

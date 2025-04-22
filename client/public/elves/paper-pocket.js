@@ -20,7 +20,11 @@ export const systemMenu = {
     list: [
       {
         label: 'Hyper Text',
-        url: '/app/file-surf?src=/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script'
+        url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=silly-script'
+      },
+      {
+        label: 'Six Modalities',
+        url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/six-modalities.saga&rom=silly-script'
       },
       {
         label: 'Tamashika',
@@ -348,8 +352,7 @@ const $ = elf('paper-pocket', {
   bpm: getBpm(),
   debuggerVisible: false,
   noteDuration: getNoteDuration(),
-  rom: 'silly-script',
-  src: '/public/cdn/sillyz.computer/en-us/hyper-text.saga',
+  rom: 'final-boss',
   mode: startMode(),
   backMode: startMode(),
   settingsKey: 'instrument',
