@@ -483,7 +483,6 @@ button {
   left: 0;
   bottom: 0;
   transform: translateY(100%);
-  background: #54796d;
 }
 
 .actions [data-menu-target].active + .menu-actions {
@@ -525,7 +524,6 @@ button {
 .actions button.active,
 .actions button:hover {
   color: #fff;
-  background: #54796d;
 }
 
 .toolbelt-actions {

@@ -20,7 +20,6 @@ const cursors = {}
 
 function mount(target) {
   if(target.initialized) return
-  target.innerHTML = ''
   target.initialized = true
 
   const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
@@ -92,24 +91,24 @@ $.draw(target => {
   const { file } = sourceFile(target)
   const stack = target.getAttribute('stack')
 
-  if(file && !target.view) {
+  if(!target.innerHTML) {
     const amp = `
-        <div class="menu-item">
-          <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
-            File
-          </button>
-          <div class="menu-actions" data-menu="file">
-            <button class="publish">Save</button>
-          </div>
+      <div class="menu-item">
+        <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+          File
+        </button>
+        <div class="menu-actions" data-menu="file">
+          <button class="publish">Save</button>
         </div>
-        <div class="menu-item">
-          <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
-            View
-          </button>
-          <div class="menu-actions" data-menu="file">
-            <button class="preview" data-src="${src}">Raw</button>
-          </div>
+      </div>
+      <div class="menu-item">
+        <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+          View
+        </button>
+        <div class="menu-actions" data-menu="file">
+          <button class="preview" data-src="${src}">Raw</button>
         </div>
+      </div>
     `
 
     if(stack) {
@@ -136,9 +135,7 @@ $.draw(target => {
           <div class="sidebar">
             <div data-resize-sidebar></div>
             <div class="sidebar-inner">
-              <sl-tree>
-                ${result.map(renderTree).join('')}
-              </sl-tree>
+              ${result.map(renderTree).join('')}
             </div>
           </div>
           <div class="main-column">
@@ -155,7 +152,9 @@ $.draw(target => {
         <div class="editor"></div>
       `
     }
+  }
 
+  if(file && !target.view) {
     const vimKeymap = vim({
       status: true, // Show Vim status line
       // Configure Vim to prevent scrolling with special handling
@@ -254,22 +253,22 @@ $.draw(target => {
 
 function renderTree(tree) {
   return tree.children.length > 0 ? `
-    <sl-tree-item data-directory="true"">
-      ${tree.name || '(root)'}
+    <plan98-tree data-directory="true" ${!tree.name ? 'data-expanded="true"':''}>
+      ${tree.name || ''}/
       ${ tree.children.map(renderTree).join('')}
-    </sl-tree-item>
+    </plan98-tree>
   `:`
-    <sl-tree-item data-path="${tree.path}">
-      ${tree.name || '(root)'}
-    </sl-tree-item>
+    <plan98-tree data-path="${tree.path}">
+      ${tree.name || '(no name)'}
+    </plan98-tree>
   `
 }
 
-$.when('click', 'sl-tree-item[data-directory="true"]', (event) => {
+$.when('click', 'plan98-tree[data-directory="true"]', (event) => {
   event.target.expanded = !event.target.expanded;
 })
 
-$.when('click', 'sl-tree-item[data-path]', (event) => {
+$.when('click', 'plan98-tree[data-path]', (event) => {
   const { path } = event.target.dataset
 
   const root = event.target.closest($.link)
@@ -321,6 +320,7 @@ $.style(`
   & .editor {
     height: 100%;
     overflow: auto;
+    font-size: 1rem;
   }
 
   & .sidebar {
@@ -328,7 +328,8 @@ $.style(`
     overflow: hidden;
     position: relative;
     padding-right: 10px;
-    background: white;
+    background: #282828;
+    color: #ebdbb2;
   }
 
   & .sidebar-inner {
@@ -338,13 +339,18 @@ $.style(`
   }
 
   & [data-resize-sidebar] {
+		user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
     position: absolute;
     top: 0;
     bottom: 0;
     left: var(--sidebar-width, 320px);
     transform: translateX(-10px);
     width: 10px;
-    background: rgba(0,0,0,.15);
+    background: #403c31;
     z-index: 10;
     cursor: col-resize;
   }
@@ -363,8 +369,8 @@ $.style(`
 
   & .actions {
     z-index: 10;
-    background: black;
-    border-bottom: 1px solid rgba(255,255,255,.25);
+    background: #7c6f64;
+    border-bottom: 1px solid #403c31;
     position: absolute;
     top: 0;
     left: 0;
@@ -374,10 +380,9 @@ $.style(`
   }
 
   & .actions button {
-    background: black;
-    color: rgba(255,255,255,.85);
+    background: #7c6f64;
+    color: #282828;
     border: none;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     height: 2rem;
     font-size: 1rem;
     --v-font-mono: 1;
@@ -394,8 +399,8 @@ $.style(`
   & .joke-actions button:focus,
   & .actions button:hover,
   & .joke-actions button:hover {
-    color: #fff;
-    background: #54796d;
+    color: #ebdbb2;
+    background: #403c31;
   }
 
   & [name="navi"] {
@@ -421,7 +426,6 @@ $.style(`
     left: 0;
     bottom: 0;
     transform: translateY(100%);
-    background: #54796d;
   }
 
   & [data-menu-target].active + .menu-actions {
