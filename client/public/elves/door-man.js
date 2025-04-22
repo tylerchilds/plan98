@@ -1084,14 +1084,14 @@ $.style(`
       linear-gradient(rgba(255,255,255,.15) 1%, rgba(255,255,255,.45) 10%, rgba(255,255,255,0) 50%, rgba(0,0,0,0) 70%, rgba(0,0,0,.45)),
       var(--root-theme, mediumseagreen);
     z-index: 2;
-    padding: 5px 4px;
+    padding: .5rem;
     font-size: 1rem;
     line-height: 1;
     color: white;
     position: relative;
     display: grid;
     grid-template-columns: auto auto auto 1fr;
-    gap: 6px;
+    gap: .5rem;
     touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
@@ -1154,7 +1154,6 @@ $.style(`
   }
 
   & .tray-title {
-    font-size: 12px;
     line-height: 1;
     color: rgba(255,255,255,.65);
   }
@@ -1195,8 +1194,8 @@ $.style(`
     transition: opacity 100ms;
     display: grid;
     place-items: center;
-    width: 12px;
-    height: 12px;
+    width: 1rem;
+    height: 1rem;
   }
 
   & .tray-action:hover,
@@ -1476,8 +1475,8 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      title: 'File Surf',
-      url: `/app/file-surf`
+      title: 'Applications',
+      url: `/app/remote-control?controller=true`
     })
 
 

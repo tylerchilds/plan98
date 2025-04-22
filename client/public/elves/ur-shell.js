@@ -449,7 +449,7 @@ shebang
 Modes:
 
 /* - load URL
-     example: /app/home-entertainment
+     example: /app/remote-control
 
 <* - load ELF
      example: <couch-coop

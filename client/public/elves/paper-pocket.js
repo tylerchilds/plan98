@@ -27,8 +27,8 @@ export const systemMenu = {
         url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
       },
       {
-        label: 'Kiosk Mode',
-        url: '/app/home-entertainment'
+        label: 'Remote Control',
+        url: '/app/remote-control'
       },
       {
         label: 'Cool Chat',

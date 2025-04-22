@@ -4,7 +4,7 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { systemMenu, renderPauseMenu } from './paper-pocket.js'
 
-const defaultSystemUrl = '/app/home-entertainment'
+const defaultSystemUrl = '/app/remote-control'
 
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']

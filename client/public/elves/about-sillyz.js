@@ -34,7 +34,7 @@ People and computers grew up side by side. Innovations span time and space. The 
   * [Couch Coop](/app/couch-coop)
 
 * **Remote** A system for launching applications from another device by QR code.
-  * [Home Entertainment](/app/home-entertainment)
+  * [Remote Control](/app/remote-control)
 
 ### Shell
 
