@@ -8,18 +8,47 @@ $.draw((target) => {
 
 The full system is available in below or [Back on the Homepage](/)
 
-By selecting "Solo", you will load the "Paper Pocket" console.
-By selecting "Coop", you will load the "Couch Coop" set-top box.
+If you do nothing, after 15 seconds, the desktop will launch with the Remote modality as the welcome screen.
 
-If you do nothing, after 15 seconds, the system will enter "Kiosk" mode.
+To cancel the kiosk timer, click anywhere. To continue, click play. Cheat codes in the bottom right.
 
-To cancel the kiosk timer, click the timer in the top right or start to enter a cheat code in the bottom right.
+<plan98-boxart diffused="true"></plan98-boxart>
 
-At any time, press the Esc key to view the source code of the current experience.
+## The Six Modalities
 
-<plan98-boxart></plan98-boxart>
+People and computers grew up side by side. Innovations span time and space. The essence of computer experience has been distilled into:
 
-## Paper Pocket
+* **Shell** A command line for typing and invoking artifacts within the system as words.
+  * [Your Shell](/app/ur-shell)
+
+* **Desktop** A environment with a menu to launch and multi-task applications.
+  * [Door Manager](/app/door-man)
+
+* **Mobile** A minimal device with a single button for a single application at a time.
+  * [Mobile Device](/app/mobile-device)
+
+* **Gaming** A trans-dimensional hand-held or home-console for playing and writing games.
+  * [Paper Pocket](/app/paper-pocket)
+
+* **Multiplayer** An engine for synchronizing game state across people and computers.
+  * [Couch Coop](/app/couch-coop)
+
+* **Remote** A system for launching applications from another device by QR code.
+  * [Home Entertainment](/app/home-entertainment)
+
+### Shell
+
+(TBD)
+
+### Desktop
+
+(TBD)
+
+### Mobile
+
+(TBD)
+
+### Gaming
 
 The Paper Pocket console is a portable entertainment unit that both is a piece of paper and fits inside a piece of paper.
 
@@ -41,7 +70,7 @@ To open the start menu to run a different application, click Start or press the 
 
 Left/Right will navigate between menus and Up/Down will navigate the items in that menu. Pressing A (or J on a keyboard) will launch that item.
 
-## Couch Coop
+## Multiplayer
 
 Couch Coop by default will load in Host mode, where the current device is controlled by up to four auxiliary devices, by scanning the code or sending them the links to the code.
 

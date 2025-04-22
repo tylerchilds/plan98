@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <ur-shell></ur-shell>
+    <plan98-boxart></plan98-boxart>
   `
 })
 

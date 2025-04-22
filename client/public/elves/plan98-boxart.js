@@ -15,6 +15,10 @@ const $ = elf('plan98-boxart')
 function countdown(target) {
   if(target.countdown) return
   target.countdown = true
+  if(target.getAttribute('diffused') === 'true') {
+    $.teach({ diffused: true })
+    return
+  }
 
   $.teach({ timer: 15 })
   requestIdleCallback(readyCountdown)
@@ -49,12 +53,9 @@ $.draw((target) => {
     <div style="display: grid; height: 100%; position: relative;">
       <footer>
         <div>
-          <a href="/app/about-sillyz">About</a>
+          <a href="/app/about-sillyz">Help</a>
         </div>
         <form name="enter-cheat">
-          <button class="cheat-prefix">
-            <div class="nonce"></div>
-          </button>
           <input name="cheat-code" placeholder="cool-chat" type="text" />
           <button type="submit">
             Go
@@ -95,15 +96,11 @@ $.draw((target) => {
                 </hypertext-variable>
               </div>
               <div class="game-modes">
-                <button class="cta spinning-border" data-solo>
-                  <span>Solo</span>
-                </button>
-                <button class="cta light spinning-border" data-coop>
-                  <span>Coop</span>
+                <button class="cta spinning-border" data-start>
+                  <span class="cta-inner">Play</span>
                 </button>
               </div>
             </div>
-            <button data-diffuse></button>
           </div>
         </div>
       </div>
@@ -113,12 +110,12 @@ $.draw((target) => {
   afterUpdate(target) {
     {
       const { timer, diffused } = $.learn()
-      const bomb = target.querySelector('[data-diffuse]')
+      const start = target.querySelector('[data-start] .cta-inner')
       
-      if(bomb && diffused) {
-        bomb.remove()
-      } else if(bomb) {
-        bomb.innerText = `Kiosk mode in ${timer}`
+      if(start && !diffused) {
+        start.innerText = `Play (${timer})`
+      } else if(start) {
+        start.innerText = `Play`
       }
     }
   }
@@ -142,9 +139,7 @@ $.when('submit', '[name="enter-cheat"]', async (event) => {
 $.when('focus', '[name="cheat-code"]', () => {
   $.teach({ diffused: true })
 })
-$.when('click', '[data-diffuse]', diffuse)
-$.when('click', '[data-solo]', solo)
-$.when('click', '[data-coop]', coop)
+$.when('click', '[data-start]', start)
 $.when('click', '.cheat-prefix', () => {
   self.location.href = "/app/sillyz-computer"
 })
@@ -166,12 +161,8 @@ function diffuse(event) {
   $.teach({ diffused: true })
 }
 
-function solo(event) {
-  self.location.href = '/app/paper-pocket'
-}
-
-function coop(event) {
-  self.location.href = '/app/couch-coop'
+function start(event) {
+  self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/home-entertainment'
 }
 
 $.style(`
@@ -209,7 +200,7 @@ $.style(`
   & .spinning-border::before {
     content: "";
     position: absolute;
-    inset: 0; /* Shorthand for top, right, bottom, left = 0 */
+    inset: -100%; /* Shorthand for top, right, bottom, left = 0 */
     border-radius: inherit;
     padding: 3px; /* Border width */
     background-clip: content-box;
@@ -226,7 +217,7 @@ $.style(`
   & .spinning-border::after {
     content: "";
     position: absolute;
-    inset: -50%; /* Make it much larger to ensure full coverage during rotation */
+    inset: -100%;
     background: conic-gradient(
       var(--green, mediumseagreen),
       var(--red, firebrick),
@@ -740,9 +731,8 @@ $.style(`
   & [name="cheat-code"] {
     padding: 0 .5rem;
     border: 1px solid lemonchiffon;
+    border-radius: 4px 0 0 4px;
     color: lemonchiffon;
-    border-left: none;
-    border-radius: 0;
     background: transparent;
     color: rgba(255,255,255,.85);
     line-height: 2rem;
