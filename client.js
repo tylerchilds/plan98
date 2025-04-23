@@ -122,6 +122,7 @@ async function page() {
 
           ${safeEnv('SOLID_URL')}
           ${safeEnv('LIBRE_TRANSLATE_URL')}
+          ${safeEnv('ROWS_N_COLUMNS_LICENSE_KEY')}
         }
       }
     </script>
