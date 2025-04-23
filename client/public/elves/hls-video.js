@@ -29,4 +29,8 @@ $.style(`
     place-content: center;
     height: 100%;
   }
+
+  & video {
+    margin: auto;
+  }
 `)

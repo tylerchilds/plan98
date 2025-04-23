@@ -756,6 +756,7 @@ $.style(`
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     place-content: center;
+    container-type: normal;
   }
 
   & [name="stage"] > qr-code {
