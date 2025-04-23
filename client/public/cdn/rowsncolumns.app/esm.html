@@ -1,0 +1,42 @@
+<link rel="stylesheet" href="https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet/dist/spreadsheet.min.css">
+
+<div id="root"></div>
+
+<script type="module">
+  // Manually register konva shapes
+  import Konva from 'https://registry.rowsncolumns.app/konva/lib/Core.js';
+  import { Konva as KonvaFull}  from 'https://registry.rowsncolumns.app/konva/lib/_FullInternals.js';
+  // Register konva
+  Object.assign(Konva, KonvaFull)
+</script>
+
+
+<script type="module">  
+  import React from "https://registry.rowsncolumns.app/react";
+  import { jsx } from "https://registry.rowsncolumns.app/react/jsx-runtime";
+  import { createRoot } from "https://registry.rowsncolumns.app/react-dom/client";
+  import { CanvasGrid } from "https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet?deps=react@19";
+
+  const root = document.getElementById("root");
+
+  const App = () => {
+    return jsx(React.StrictMode, {
+      children: [
+        jsx("div", {
+          style: { height: 300, width: 800, display: "flex", position: 'relative' },
+          children: jsx(CanvasGrid, {
+            rowCount: 10,
+            columnCount: 10,
+            sheetId: 1,
+            licenseKey: 'evaluation-license'
+          }),
+        }),
+      ],
+    });
+  };
+
+  if (root) {
+    createRoot(root).render(jsx(App, {}));
+  }
+
+</script>
