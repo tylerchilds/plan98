@@ -33,7 +33,7 @@ $.draw(target => {
   createRoot(target).render(jsx(App, {}));
 })
 
-const cssUrl1 = 'https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet/dist/spreadsheet.min.css';
+const cssUrl1 = 'https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet@7.0.8/dist/spreadsheet.min.css';
 
 loadCSS(cssUrl1);
 
