@@ -35,6 +35,8 @@ $.style(`
     display: block;
     height: 100%;
     width: 100%;
+    min-height: 480px;
+    position: relative;
   }
 
   & .zero-state {
@@ -45,6 +47,13 @@ $.style(`
     gap: 2rem;
     padding: 40px;
     text-align: center;
+    position: absolute;
+    inset: 0;
+  }
+
+  & iframe {
+    position: absolute;
+    inset: 0;
   }
 
   & qr-code {
