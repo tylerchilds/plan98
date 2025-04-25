@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 
 import Konva from 'konva';
 import { Konva as KonvaFull}  from 'konva-full';
@@ -125,7 +125,10 @@ $.draw(target => {
     }
 
     function appendPatches(id, payload) {
-      $.teach(payload, mergePatchesById(id))
+      $.teach(payload, {
+        mergeHandler: mergePatchesById,
+        parameters: [id]
+      })
     }
 
     function mergePatchesById(id) {
