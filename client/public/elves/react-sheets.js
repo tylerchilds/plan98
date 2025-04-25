@@ -80,6 +80,17 @@ import {
 
 Object.assign(Konva, KonvaFull)
 
+const cssUrl1 = 'https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet@7.0.8/dist/spreadsheet.min.css';
+
+loadCSS(cssUrl1);
+
+function loadCSS(url) {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.head.appendChild(link);
+}
+
 const $ = elf('react-sheets')
 
 $.draw(target => {
@@ -108,6 +119,32 @@ $.draw(target => {
     const [namedRanges, onChangeNamedRanges] = useState([]);
     const locale = "en-GB";
     const currency = "USD";
+
+    function onChangeHistory(patches) {
+      appendPatches(target.id, patches)
+    }
+
+    function appendPatches(id, payload) {
+      $.teach(payload, mergePatchesById(id))
+    }
+
+    function mergePatchesById(id) {
+      return (state, payload) => {
+
+        const data = state[id] || { patches: [] }
+        return {
+          ...state,
+          [id]: {
+            ...data,
+            patches: [
+              ...data.patches,
+              payload
+            ]
+          }
+        }
+      }
+    }
+
 
     const {
       activeCell,
@@ -226,6 +263,7 @@ $.draw(target => {
       onChangeTheme,
       onChangeConditionalFormats,
       onChangeProtectedRanges,
+      onChangeHistory
     });
 
     // Charts module
@@ -746,6 +784,12 @@ $.draw(target => {
   };
 
   createRoot(target).render(jsx(App, {}));
+}, {
+  beforeUpdate(target) {
+    const data = $.learn()[target.id] || {}
+
+    console.log('All Patches', data.patches)
+  }
 })
 
 $.style(`
@@ -755,13 +799,4 @@ $.style(`
     width: 100%;
   }
 `)
-const cssUrl1 = 'https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet/dist/spreadsheet.min.css';
 
-loadCSS(cssUrl1);
-
-function loadCSS(url) {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = url;
-  document.head.appendChild(link);
-}
