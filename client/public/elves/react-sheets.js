@@ -1,11 +1,11 @@
 import elf from '@silly/elf'
-import Konva from 'https://registry.rowsncolumns.app/konva/lib/Core.js';
-import { Konva as KonvaFull}  from 'https://registry.rowsncolumns.app/konva/lib/_FullInternals.js';
+import Konva from 'konva';
+import { Konva as KonvaFull}  from 'konva-full';
 
-import React from "https://registry.rowsncolumns.app/react";
-import { jsx } from "https://registry.rowsncolumns.app/react/jsx-runtime";
-import { createRoot } from "https://registry.rowsncolumns.app/react-dom/client";
-import { CanvasGrid } from "https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet?deps=react@19";
+import React from "react";
+import { jsx } from "jsx-runtime";
+import { createRoot } from "react-dom/client";
+import { CanvasGrid } from "@rowsncolumns/spreadsheet";
 
 Object.assign(Konva, KonvaFull)
 
