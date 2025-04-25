@@ -1,11 +1,82 @@
 import elf from '@silly/elf'
+
 import Konva from 'konva';
 import { Konva as KonvaFull}  from 'konva-full';
 
-import React from "react";
+import React, {
+  useMemo,
+  useState,
+} from "react";
 import { jsx } from "jsx-runtime";
 import { createRoot } from "react-dom/client";
-import { CanvasGrid } from "@rowsncolumns/spreadsheet";
+
+// Import from URLs instead of packages
+import { useCharts } from "@rowsncolumns/charts";
+import {
+  functionDescriptions,
+  functions,
+} from "@rowsncolumns/functions";
+import { MagnifyingGlassIcon } from "@rowsncolumns/icons";
+
+// Main spreadsheet imports
+import {
+  BackgroundColorSelector,
+  BorderSelector,
+  BottomBar,
+  ButtonBold,
+  ButtonDecreaseDecimal,
+  ButtonFormatCurrency,
+  ButtonFormatPercent,
+  ButtonIncreaseDecimal,
+  ButtonInsertImage,
+  ButtonItalic,
+  ButtonRedo,
+  ButtonStrikethrough,
+  ButtonSwitchColorMode,
+  ButtonUnderline,
+  ButtonUndo,
+  CanvasGrid,
+  DEFAULT_FONT_SIZE_PT,
+  defaultSpreadsheetTheme,
+  FontFamilySelector,
+  FontSizeSelector,
+  FormulaBar,
+  FormulaBarInput,
+  FormulaBarLabel,
+  MergeCellsSelector,
+  NewSheetButton,
+  RangeSelector,
+  ScaleSelector,
+  SheetStatus,
+  SheetSwitcher,
+  SheetTabs,
+  SpreadsheetProvider,
+  TableStyleSelector,
+  TextColorSelector,
+  TextFormatSelector,
+  TextHorizontalAlignSelector,
+  TextVerticalAlignSelector,
+  TextWrapSelector,
+  ThemeSelector,
+  Toolbar,
+  ToolbarSeparator,
+} from "@rowsncolumns/spreadsheet";
+
+// State management imports
+import {
+  DeleteSheetConfirmation,
+  NamedRangeEditor,
+  pattern_currency_decimal,
+  pattern_percent_decimal,
+  TableEditor,
+  useSearch,
+  useSpreadsheetState,
+} from "@rowsncolumns/spreadsheet-state";
+
+import {
+  IconButton,
+  Separator,
+} from "@rowsncolumns/ui";
 
 Object.assign(Konva, KonvaFull)
 
@@ -13,18 +84,662 @@ const $ = elf('react-sheets')
 
 $.draw(target => {
   if(target.innerHTML) return
+  // Mock data for initial sheets
+  const initialSheets = [
+    {
+      sheetId: 1,
+      title: "Sheet 1",
+      rowCount: 100,
+      columnCount: 26,
+    },
+  ];
+
+  const SpreadsheetWithState = () => {
+    const [sheets, onChangeSheets] = useState(initialSheets);
+    const [sheetData, onChangeSheetData] = useState({});
+    const [scale, onChangeScale] = useState(1);
+    const [theme, onChangeTheme] = useState(defaultSpreadsheetTheme);
+    const [conditionalFormats, onChangeConditionalFormats] = useState([]);
+    const [protectedRanges, onChangeProtectedRanges] = useState([]);
+    const [colorMode, onChangeColorMode] = useState();
+    const [charts, onChangeCharts] = useState([]);
+    const [embeds, onChangeEmbeds] = useState([]);
+    const [tables, onChangeTables] = useState([]);
+    const [namedRanges, onChangeNamedRanges] = useState([]);
+    const locale = "en-GB";
+    const currency = "USD";
+
+    const {
+      activeCell,
+      activeSheetId,
+      selections,
+      rowCount,
+      getDataRowCount,
+      columnCount,
+      frozenColumnCount,
+      frozenRowCount,
+      rowMetadata,
+      columnMetadata,
+      merges,
+      bandedRanges,
+      spreadsheetColors,
+      canRedo,
+      canUndo,
+      onUndo,
+      onRedo,
+      getCellData,
+      getSheetName,
+      getEffectiveFormat,
+      onRequestCalculate,
+      onChangeActiveCell,
+      onChangeActiveSheet,
+      onSelectNextSheet,
+      onSelectPreviousSheet,
+      onChangeSelections,
+      onChange,
+      onChangeBatch,
+      onDelete,
+      onChangeFormatting,
+      onRepeatFormatting,
+      onClearFormatting,
+      onUnMergeCells,
+      onMergeCells,
+      onResize,
+      onChangeBorder,
+      onChangeDecimals,
+      onChangeSheetTabColor,
+      onRenameSheet,
+      onRequestDeleteSheet,
+      onDeleteSheet,
+      onShowSheet,
+      onHideSheet,
+      onProtectSheet,
+      onUnProtectSheet,
+      onMoveSheet,
+      onCreateNewSheet,
+      onDuplicateSheet,
+      onHideColumn,
+      onShowColumn,
+      onHideRow,
+      onShowRow,
+      onFill,
+      onFillRange,
+      onMoveEmbed,
+      onResizeEmbed,
+      onDeleteEmbed,
+      onDeleteRow,
+      onDeleteColumn,
+      onDeleteCellsShiftUp,
+      onDeleteCellsShiftLeft,
+      onInsertCellsShiftRight,
+      onInsertCellsShiftDown,
+      onInsertRow,
+      onInsertColumn,
+      onMoveColumns,
+      onMoveRows,
+      onMoveSelection,
+      onSortColumn,
+      onSortTable,
+      onFilterTable,
+      onResizeTable,
+      onCopy,
+      onPaste,
+      onCreateTable,
+      onRequestEditTable,
+      onUpdateTable,
+      onDragOver,
+      onDrop,
+      onInsertFile,
+      onFreezeColumn,
+      onFreezeRow,
+      onChangeSpreadsheetTheme,
+      onUpdateNote,
+      onSortRange,
+      onProtectRange,
+      onUnProtectRange,
+      onRequestDefineNamedRange,
+      onRequestUpdateNamedRange,
+      onCreateNamedRange,
+      onUpdateNamedRange,
+      onDeleteNamedRange,
+      getSeriesValuesFromRange,
+      getDomainValuesFromRange,
+      getNonEmptyColumnCount,
+      getNonEmptyRowCount,
+      createHistory,
+      enqueueCalculation,
+    } = useSpreadsheetState({
+      sheets,
+      sheetData,
+      tables,
+      functions,
+      namedRanges,
+      theme,
+      colorMode,
+      locale,
+      onChangeSheets,
+      onChangeSheetData,
+      onChangeEmbeds,
+      onChangeCharts,
+      onChangeTables,
+      onChangeNamedRanges,
+      onChangeTheme,
+      onChangeConditionalFormats,
+      onChangeProtectedRanges,
+    });
+
+    // Charts module
+    const { onDeleteChart, onMoveChart, onResizeChart } = useCharts({
+      onChangeCharts,
+      createHistory,
+    });
+
+    const {
+      onSearch,
+      onResetSearch,
+      onFocusNextResult,
+      onFocusPreviousResult,
+      hasNextResult,
+      hasPreviousResult,
+      borderStyles,
+      isSearchActive,
+      onRequestSearch,
+      currentResult,
+      totalResults,
+      searchQuery,
+    } = useSearch({
+      getCellData,
+      sheetId: activeSheetId,
+      getNonEmptyColumnCount,
+      getNonEmptyRowCount,
+    });
+
+    const currentCellFormat = useMemo(
+      () =>
+      getEffectiveFormat(
+        activeSheetId,
+        activeCell.rowIndex,
+        activeCell.columnIndex
+      ),
+      [activeSheetId, activeCell, getEffectiveFormat]
+    );
+
+    // Convert the JSX div to jsx function
+    return jsx("div", {
+      className: "flex flex-1 flex-col h-full",
+      children: [
+        // Toolbar
+        jsx(Toolbar, {
+          children: [
+            jsx(ButtonUndo, { onClick: onUndo, disabled: !canUndo }),
+            jsx(ButtonRedo, { onClick: onRedo, disabled: !canRedo }),
+            jsx(ToolbarSeparator, {}),
+            jsx(ScaleSelector, { value: scale, onChange: onChangeScale }),
+            jsx(ToolbarSeparator, {}),
+
+            jsx(ButtonFormatCurrency, {
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "numberFormat",
+                  {
+                    type: "CURRENCY",
+                    pattern: pattern_currency_decimal,
+                  }
+                );
+              },
+            }),
+            jsx(ButtonFormatPercent, {
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "numberFormat",
+                  {
+                    type: "PERCENT",
+                    pattern: pattern_percent_decimal,
+                  }
+                );
+              },
+            }),
+            jsx(ButtonDecreaseDecimal, {
+              onClick: () =>
+              onChangeDecimals(
+                activeSheetId,
+                activeCell,
+                selections,
+                "decrement"
+              ),
+            }),
+            jsx(ButtonIncreaseDecimal, {
+              onClick: () =>
+              onChangeDecimals(
+                activeSheetId,
+                activeCell,
+                selections,
+                "increment"
+              ),
+            }),
+            jsx(TextFormatSelector, {
+              locale: locale,
+              currency: currency,
+              onChangeFormatting: (type, value) =>
+              onChangeFormatting(
+                activeSheetId,
+                activeCell,
+                selections,
+                type,
+                value
+              ),
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(FontFamilySelector, {
+              value: currentCellFormat?.textFormat?.fontFamily,
+              theme: theme,
+              onChange: (value) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    fontFamily: value,
+                  }
+                );
+              },
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(FontSizeSelector, {
+              value:
+              currentCellFormat?.textFormat?.fontSize ?? DEFAULT_FONT_SIZE_PT,
+              onChange: (value) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    fontSize: Number(value),
+                  }
+                );
+              },
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(ButtonBold, {
+              isActive: currentCellFormat?.textFormat?.bold,
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    bold: !currentCellFormat?.textFormat?.bold,
+                  }
+                );
+              },
+            }),
+            jsx(ButtonItalic, {
+              isActive: currentCellFormat?.textFormat?.italic,
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    italic: !currentCellFormat?.textFormat?.italic,
+                  }
+                );
+              },
+            }),
+            jsx(ButtonUnderline, {
+              isActive: currentCellFormat?.textFormat?.underline,
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    underline: !currentCellFormat?.textFormat?.underline,
+                  }
+                );
+              },
+            }),
+            jsx(ButtonStrikethrough, {
+              isActive: currentCellFormat?.textFormat?.strikethrough,
+              onClick: () => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    strikethrough:
+                    !currentCellFormat?.textFormat?.strikethrough,
+                  }
+                );
+              },
+            }),
+            jsx(TextColorSelector, {
+              color: currentCellFormat?.textFormat?.color,
+              theme: theme,
+              onChange: (color) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "textFormat",
+                  {
+                    color,
+                  }
+                );
+              },
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(BackgroundColorSelector, {
+              color: currentCellFormat?.backgroundColor,
+              theme: theme,
+              onChange: (color) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "backgroundColor",
+                  color
+                );
+              },
+            }),
+
+            jsx(BorderSelector, {
+              borders: currentCellFormat?.borders,
+              onChange: (location, color, style) =>
+              onChangeBorder(
+                activeSheetId,
+                activeCell,
+                selections,
+                location,
+                color,
+                style
+              ),
+              theme: theme,
+            }),
+            jsx(MergeCellsSelector, {
+              activeCell: activeCell,
+              selections: selections,
+              sheetId: activeSheetId,
+              merges: merges,
+              onUnMerge: onUnMergeCells,
+              onMerge: onMergeCells,
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(TextHorizontalAlignSelector, {
+              value: currentCellFormat?.horizontalAlignment,
+              onChange: (value) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "horizontalAlignment",
+                  value
+                );
+              },
+            }),
+            jsx(TextVerticalAlignSelector, {
+              value: currentCellFormat?.verticalAlignment,
+              onChange: (value) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "verticalAlignment",
+                  value
+                );
+              },
+            }),
+            jsx(TextWrapSelector, {
+              value: currentCellFormat?.wrapStrategy,
+              onChange: (value) => {
+                onChangeFormatting(
+                  activeSheetId,
+                  activeCell,
+                  selections,
+                  "wrapStrategy",
+                  value
+                );
+              },
+            }),
+            jsx(ToolbarSeparator, {}),
+
+            jsx(ButtonInsertImage, { onInsertFile: onInsertFile }),
+
+            jsx(TableStyleSelector, {
+              theme: theme,
+              tables: tables,
+              activeCell: activeCell,
+              selections: selections,
+              sheetId: activeSheetId,
+              onCreateTable: onCreateTable,
+              onUpdateTable: onUpdateTable,
+            }),
+            jsx(ToolbarSeparator, {}),
+            jsx(ThemeSelector, {
+              theme: theme,
+              onChangeTheme: onChangeSpreadsheetTheme,
+            }),
+            jsx(ButtonSwitchColorMode, {
+              colorMode: colorMode,
+              onClick: () =>
+              onChangeColorMode((prev) =>
+                prev === "dark" ? "light" : "dark"
+              ),
+            }),
+
+            jsx(IconButton, {
+              onClick: onRequestSearch,
+              children: jsx(MagnifyingGlassIcon, {}),
+            }),
+          ],
+        }),
+
+        // Formula Bar
+        jsx(FormulaBar, {
+          children: [
+            jsx(RangeSelector, {
+              selections: selections,
+              activeCell: activeCell,
+              onChangeActiveCell: onChangeActiveCell,
+              onChangeSelections: onChangeSelections,
+              sheets: sheets,
+              rowCount: rowCount,
+              columnCount: columnCount,
+              onChangeActiveSheet: onChangeActiveSheet,
+              onRequestDefineNamedRange: onRequestDefineNamedRange,
+              onRequestUpdateNamedRange: onRequestUpdateNamedRange,
+              onDeleteNamedRange: onDeleteNamedRange,
+              namedRanges: namedRanges,
+              tables: tables,
+              sheetId: activeSheetId,
+              merges: merges,
+            }),
+            jsx(Separator, { orientation: "vertical" }),
+            jsx(FormulaBarLabel, { children: "fx" }),
+            jsx(FormulaBarInput, {
+              sheetId: activeSheetId,
+              activeCell: activeCell,
+              functionDescriptions: functionDescriptions,
+            }),
+          ],
+        }),
+
+        // Canvas Grid
+        jsx(CanvasGrid, {
+          ...spreadsheetColors,
+          scale: scale,
+          conditionalFormats: conditionalFormats,
+          sheetId: activeSheetId,
+          rowCount: rowCount,
+          getDataRowCount: getDataRowCount,
+          columnCount: columnCount,
+          frozenColumnCount: frozenColumnCount,
+          frozenRowCount: frozenRowCount,
+          rowMetadata: rowMetadata,
+          columnMetadata: columnMetadata,
+          activeCell: activeCell,
+          selections: selections,
+          theme: theme,
+          merges: merges,
+          charts: charts,
+          embeds: embeds,
+          tables: tables,
+          protectedRanges: protectedRanges,
+          bandedRanges: bandedRanges,
+          functionDescriptions: functionDescriptions,
+          getSheetName: getSheetName,
+          getCellData: getCellData,
+          onChangeActiveCell: onChangeActiveCell,
+          onChangeSelections: onChangeSelections,
+          onChangeActiveSheet: onChangeActiveSheet,
+          onRequestCalculate: onRequestCalculate,
+          onSelectNextSheet: onSelectNextSheet,
+          onSelectPreviousSheet: onSelectPreviousSheet,
+          onChangeFormatting: onChangeFormatting,
+          onRepeatFormatting: onRepeatFormatting,
+          onHideColumn: onHideColumn,
+          onShowColumn: onShowColumn,
+          onHideRow: onHideRow,
+          onShowRow: onShowRow,
+          onDelete: onDelete,
+          onClearContents: onDelete,
+          onFill: onFill,
+          onFillRange: onFillRange,
+          onResize: onResize,
+          onMoveChart: onMoveChart,
+          onMoveEmbed: onMoveEmbed,
+          onResizeChart: onResizeChart,
+          onDeleteChart: onDeleteChart,
+          onResizeEmbed: onResizeEmbed,
+          onDeleteEmbed: onDeleteEmbed,
+          onDeleteRow: onDeleteRow,
+          onDeleteColumn: onDeleteColumn,
+          onDeleteCellsShiftUp: onDeleteCellsShiftUp,
+          onDeleteCellsShiftLeft: onDeleteCellsShiftLeft,
+          onInsertCellsShiftRight: onInsertCellsShiftRight,
+          onInsertCellsShiftDown: onInsertCellsShiftDown,
+          onInsertRow: onInsertRow,
+          onInsertColumn: onInsertColumn,
+          onMoveColumns: onMoveColumns,
+          onMoveRows: onMoveRows,
+          onMoveSelection: onMoveSelection,
+          onCreateNewSheet: onCreateNewSheet,
+          onChange: onChange,
+          onChangeBatch: onChangeBatch,
+          onUndo: onUndo,
+          onRedo: onRedo,
+          onSortColumn: onSortColumn,
+          onSortTable: onSortTable,
+          onFilterTable: onFilterTable,
+          onResizeTable: onResizeTable,
+          onClearFormatting: onClearFormatting,
+          onCopy: onCopy,
+          onPaste: onPaste,
+          onDragOver: onDragOver,
+          onDrop: onDrop,
+          onCreateTable: onCreateTable,
+          onRequestEditTable: onRequestEditTable,
+          onRequestDefineNamedRange: onRequestDefineNamedRange,
+          onFreezeColumn: onFreezeColumn,
+          onFreezeRow: onFreezeRow,
+          onUpdateNote: onUpdateNote,
+          onSortRange: onSortRange,
+          onProtectRange: onProtectRange,
+          onUnProtectRange: onUnProtectRange,
+          namedRanges: namedRanges,
+          licenseKey:
+          "examples-personal-4149-12be-c879-ca36-5714-7185-71ac-9ab5-909e-90f9-4108-45bb-d606-d17a-1b79-6c65",
+        }),
+
+        // Bottom Bar
+        jsx(BottomBar, {
+          children: [
+            jsx(NewSheetButton, { onClick: onCreateNewSheet }),
+
+            jsx(SheetSwitcher, {
+              sheets: sheets,
+              activeSheetId: activeSheetId,
+              onChangeActiveSheet: onChangeActiveSheet,
+              onShowSheet: onShowSheet,
+            }),
+
+            jsx(SheetTabs, {
+              sheets: sheets,
+              protectedRanges: protectedRanges,
+              activeSheetId: activeSheetId,
+              theme: theme,
+              onChangeActiveSheet: onChangeActiveSheet,
+              onRenameSheet: onRenameSheet,
+              onChangeSheetTabColor: onChangeSheetTabColor,
+              onDeleteSheet: onRequestDeleteSheet,
+              onHideSheet: onHideSheet,
+              onMoveSheet: onMoveSheet,
+              onProtectSheet: onProtectSheet,
+              onUnProtectSheet: onUnProtectSheet,
+              onDuplicateSheet: onDuplicateSheet,
+            }),
+
+            jsx(SheetStatus, {
+              sheetId: activeSheetId,
+              activeCell: activeCell,
+              selections: selections,
+              onRequestCalculate: onRequestCalculate,
+              rowCount: rowCount,
+              columnCount: columnCount,
+              merges: merges,
+            }),
+          ],
+        }),
+
+        // Editors
+        jsx(TableEditor, {
+          sheetId: activeSheetId,
+          onSubmit: onUpdateTable,
+          theme: theme,
+        }),
+        jsx(DeleteSheetConfirmation, {
+          sheetId: activeSheetId,
+          onDeleteSheet: onDeleteSheet,
+        }),
+        jsx(NamedRangeEditor, {
+          sheetId: activeSheetId,
+          onCreateNamedRange: onCreateNamedRange,
+          onUpdateNamedRange: onUpdateNamedRange,
+        }),
+      ],
+    });
+  };
+
+
+  // Wrap with SpreadsheetProvider
+  const SpreadsheetWithStateProvider = () =>
+    jsx(SpreadsheetProvider, {
+      children: jsx(SpreadsheetWithState, {}),
+    });
 
   const App = () => {
     return jsx(React.StrictMode, {
       children: [
         jsx("div", {
-          style: { height: 300, width: 800, display: "flex", position: 'relative' },
-          children: jsx(CanvasGrid, {
-            rowCount: 10,
-            columnCount: 10,
-            sheetId: 1,
-            licenseKey: plan98.env.ROWS_N_COLUMNS_LICENSE_KEY
-          }),
+          style: {
+            height: "100%",
+            width: "100%",
+            display: "flex",
+            position: "relative",
+          },
+          children: jsx(SpreadsheetWithStateProvider, {}),
         }),
       ],
     });
@@ -33,6 +748,13 @@ $.draw(target => {
   createRoot(target).render(jsx(App, {}));
 })
 
+$.style(`
+  & {
+    display; block;
+    height: 100%;
+    width: 100%;
+  }
+`)
 const cssUrl1 = 'https://registry.rowsncolumns.app/@rowsncolumns/spreadsheet@7.0.8/dist/spreadsheet.min.css';
 
 loadCSS(cssUrl1);
