@@ -14,11 +14,37 @@ const blueskyCreds = {
   moniker: localStorage.getItem('blue-sky/moniker') || defaultCreds.moniker
 }
 
+const modes = {
+  me: 'me',
+  home: 'home',
+  alerts: 'alerts',
+  settings: 'settings',
+}
+
+const navigation = {
+  [modes.me]: {
+    icon: '',
+    label: 'My Profile'
+  },
+  [modes.home]: {
+    icon: '',
+    label: 'Home'
+  },
+  [modes.alerts]: {
+    icon: '',
+    label: 'Alerts'
+  },
+  [modes.settings]: {
+    icon: '',
+    label: 'Settings'
+  },
+}
+
 const $ = elf('blue-sky', {
-  feed: null,
   service: blueskyCreds.service,
   moniker: blueskyCreds.moniker,
-  password: ''
+  password: '',
+  mode: modes.home,
 })
 
 // Resume a session from stored data
@@ -42,14 +68,93 @@ function resumeSession() {
 
 resumeSession()
 
-function fetchTimeline() {
+const cursors = {}
+async function fetchMyTimeline() {
+  const cursor = cursors.myTimeline
+  const response = await agent.getAuthorFeed({
+    cursor,
+    actor: agent.session?.handle, // Or agent.session?.did
+    limit: 20
+  });
+
+  if (response.success) {
+    const { feed, cursor } = response.data;
+    cursors.myTimeline = cursor
+    $.teach(feed, mergeFeed('myTimeline'))
+  } else {
+    console.error('Failed to fetch your posts:', response.error);
+  }
+}
+
+function fetchHomeTimeline() {
+  const cursor = cursors.homeTimeline || ''
   agent.getTimeline({
-    cursor: "",
+    cursor,
     limit: 30,
   }).then(({ data }) => {
-    $.teach({ feed: data.feed })
+    const { feed, cursor } = data
+    cursors.homeTimeline = cursor
+    $.teach(feed, mergeFeed('homeTimeline'))
   });
 }
+
+function mergeFeed(feed) {
+  return (state, payload) => {
+    const all = state[feed] || []
+    return {
+      ...state,
+      [feed]: [...all, ...payload]
+    }
+  }
+}
+
+function fetchAlerts() {
+  const cursor = cursors.alerts || ''
+  agent.listNotifications({
+    cursor,
+    limit: 20 // Optional: number of notifications to retrieve
+  }).then(({ data }) => {
+    const { notifications, cursor } = data
+    cursors.alerts = cursor
+    $.teach(notifications, mergeFeed('alerts'))
+  })
+}
+
+async function fetchProfile() {
+  try {
+    // Assuming you have your handle stored in a variable called 'myHandle'
+    const response = await agent.getProfile({
+      actor: agent.session?.handle, // Or agent.session?.did if you have that
+    });
+
+    if (response.success) {
+      const profile = response.data;
+      $.teach({ profile })
+      fetchMyTimeline()
+    } else {
+      console.error('Failed to fetch profile:', response.error);
+    }
+  } catch (error) {
+    console.error('An error occurred while fetching your profile:', error);
+  }
+}
+
+$.when('click', '[data-mode]', (event) => {
+
+  const { mode } = event.target.dataset
+  if(modes[mode]) {
+    $.teach({ mode })
+  }
+})
+
+$.when('click', '[data-draft]', (event) => {
+  $.teach({ drafting: true })
+})
+
+$.when('click', '[data-mode-error]', (event) => {
+  $.teach({ mode: modes.home })
+})
+
 
 $.when('click', '[data-logout]', (event) => {
   logout()
@@ -97,8 +202,6 @@ async function login() {
     console.error('Login failed:', error)
     return false
   }
-
-
 }
 
 async function logout() {
@@ -139,23 +242,91 @@ function loginForm() {
   `
 }
 
-$.draw(target => {
-  const { feed, authenticated } = $.learn()
+const modeRenderers = {
+  [modes.me]: (target) => {
+    const { profile } = $.learn()
 
-  if(!authenticated) {
-    return loginForm()
-  }
+    if(!profile) {
+      fetchProfile()
+      return `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `
+    }
 
-  if(authenticated && !feed) {
-    fetchTimeline()
-    return
-  }
+    const {
+      avatar,
+      banner,
+      createdAt,
+      displayName,
+      handle,
+      description,
+      followersCount,
+      followsCount,
+      postsCount
+    } = profile
 
-  const view = `
-    <div class="log">
-      <button data-logout>logout</button>
-      <div class="content">
-        ${feed.map(({ post }) => {
+    const { myTimeline } = $.learn()
+
+    return `
+      <button class="new-post" data-draft>
+        New
+      </button>
+      <div class="profile">
+        <div class="hero">
+          <img src="${banner}" />
+        </div>
+        <div class="profile-columns">
+          <div class="profile-information">
+            <img src="${avatar}" />
+            ${displayName}
+            ${handle}
+            ${followersCount}
+            ${followsCount}
+            ${postsCount}
+            ${description}
+            ${createdAt}
+          </div>
+          <div class="profile-actions">
+            <button>
+              Edit Profile
+            </button>
+          </div>
+        </div>
+        <div class="profile-feed">
+          ${myTimeline ? myTimeline.map(({ post }) => {
+            return `
+              <div aria-role="button" class="message">
+                <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="meta" data-tooltip='${post.author.handle}'>
+                  <img src="${post.author.avatar}" class="avatar" />
+                  ${post.author.displayName}
+                </a>
+                <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                <div class="body">${escapeHyperText(post.record.text)}</div>
+              </div>
+            `
+          }).join('') : ''}
+        </div>
+      </div>
+    `
+
+  },
+  [modes.home]: (target) => {
+    const { homeTimeline } = $.learn()
+
+    if(!homeTimeline) {
+      fetchHomeTimeline()
+      return `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `
+    }
+
+    return `
+      <div class="feed">
+        ${homeTimeline.map(({ post }) => {
           return `
             <div aria-role="button" class="message">
               <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="meta" data-tooltip='${post.author.handle}'>
@@ -168,15 +339,110 @@ $.draw(target => {
           `
         }).join('')}
       </div>
-    </div>
-    <form class="send-form" data-command="enter">
-      <button data-tooltip="send" class="button send" type="submit" data-command="enter">
-        <sl-icon name="arrow-up"></sl-icon>
+      <button class="new-post" data-draft>
+        New
       </button>
-      <div class="text-well">
-        <textarea name="message" placeholder="Today..."></textarea>
+    `
+  },
+  [modes.alerts]: (target) => {
+    const { alerts } = $.learn()
+
+    if(!alerts) {
+      fetchAlerts()
+      return `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `
+    }
+
+    return `
+      <div class="alerts">
+        ${alerts.map((alert) => {
+          return `
+            <div aria-role="button" class="message">
+              <a href="https://bsky.app/profile/${alert.author.handle}" target="_blank" class="meta" data-tooltip='${alert.author.handle}'>
+                <img src="${alert.author.avatar}" class="avatar" />
+                ${alert.author.displayName}
+              </a>
+              <sl-relative-time date="${alert.indexedAt}" format="long"></sl-relative-time>
+              <div class="body">${alert.reason}</div>
+            </div>
+          `
+        }).join('')}
       </div>
-    </form>
+    `
+  },
+  [modes.settings]: (target) => {
+    return `
+      <button data-logout>logout</button>
+    `
+  },
+}
+
+function non() {
+  return `
+    You're lost.
+    <button data-mode-error>
+      Return Home
+    </button>
+  `
+}
+
+function renderByMode(target) {
+  const { mode } = $.learn()
+
+  return (modeRenderers[mode] || non)(target)
+}
+
+function postOverlay(target) {
+  const { drafting }  = $.learn()
+
+  if(!drafting) return
+
+  return `
+    <div class="post-overlay">
+      <form class="send-form" data-command="enter">
+        <button data-tooltip="send" class="button send" type="submit" data-command="enter">
+          <sl-icon name="arrow-up"></sl-icon>
+        </button>
+        <div class="text-well">
+          <textarea name="message" placeholder="Today..."></textarea>
+        </div>
+      </form>
+    </div>
+  `
+}
+
+$.draw(target => {
+  const { authenticated } = $.learn()
+
+  if(!authenticated) {
+    return loginForm()
+  }
+
+  const view = `
+    <div class="app">
+      <div class="sidebar">
+        ${Object.keys(navigation).map((key) => {
+          const { icon, label } = navigation[key]
+          return `
+            <button data-mode="${key}">
+              <span class="navigation-icon">
+                ${icon}
+              </span>
+              <span class="navigation-label">
+                ${label}
+              </span>
+            </button>
+          `
+        }).join('')}
+      </div>
+      <div class="content">
+        ${renderByMode(target)}
+      </div>
+      ${postOverlay(target) || ''}
+    </div>
   `
 
   return view
@@ -194,3 +460,39 @@ function escapeHyperText(text = '') {
   )
 }
 
+$.style(`
+  & {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  & .app {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    overflow: hidden;
+    height: 100%;
+  }
+
+  & .post-overlay {
+    position: absolute;
+    inset: 0;
+  }
+
+  & .content {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .sidebar {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .new-post {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+  }
+`)
