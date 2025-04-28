@@ -1,5 +1,6 @@
 import elf from "@silly/elf"
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
+import { showModal, hideModal } from './plan98-modal.js'
 
 import { BskyAgent } from '@atproto/api'
 
@@ -17,6 +18,7 @@ const blueskyCreds = {
 
 const modes = {
   me: 'me',
+  profile: 'profile',
   timeline: 'timeline',
   alerts: 'alerts',
   settings: 'settings',
@@ -24,19 +26,19 @@ const modes = {
 
 const navigation = {
   [modes.me]: {
-    icon: '',
+    icon: '<blue-sky view="avatar"></blue-sky>',
     label: 'Profile'
   },
   [modes.timeline]: {
-    icon: '',
+    icon: '<sl-icon name="cup-hot"></sl-icon>',
     label: 'Timeline'
   },
   [modes.alerts]: {
-    icon: '',
+    icon: '<sl-icon name="bell"></sl-icon>',
     label: 'Alerts'
   },
   [modes.settings]: {
-    icon: '',
+    icon: '<sl-icon name="gear-wide-connected"></sl-icon>',
     label: 'Settings'
   },
 }
@@ -46,12 +48,15 @@ const $ = elf('blue-sky', {
   moniker: blueskyCreds.moniker,
   password: '',
   mode: modes.timeline,
+  draft: '',
+  draftHeight: null
 })
 
 // Resume a session from stored data
-function resumeSession() {
+async function resumeSession() {
   const savedSession = localStorage.getItem('blue-sky/session')
   if (savedSession) {
+    $.teach({ loading: true })
     const { service } = $.learn()
     try {
       agent = new BskyAgent({
@@ -59,9 +64,11 @@ function resumeSession() {
       })
 
       const sessionData = JSON.parse(savedSession)
-      agent.resumeSession(sessionData)
-      $.teach({ authenticated: true })
+      await agent.resumeSession(sessionData)
+      $.teach({ authenticated: true, loading: false  })
+      fetchProfile(agent.session?.handle)
     } catch (error) {
+      $.teach({ authenticated: false, loading: false  })
       console.error('Failed to resume session:', error)
     }
   }
@@ -84,6 +91,25 @@ async function fetchMyTimeline() {
     const { feed, cursor } = response.data;
     cursors.myTimeline = cursor || EOF
     $.teach(feed, mergeFeed('myTimeline'))
+  } else {
+    console.error('Failed to fetch your posts:', response.error);
+  }
+}
+
+async function fetchActiveTimeline(reset) {
+  const cursor = !reset ? cursors.activeTimeline : ''
+  if(cursor === EOF) return
+  const { activeHandle } = $.learn()
+  const response = await agent.getAuthorFeed({
+    cursor,
+    actor: activeHandle, // Or agent.session?.did
+    limit: 20
+  });
+
+  if (response.success) {
+    const { feed, cursor } = response.data;
+    cursors.activeTimeline = cursor || EOF
+    $.teach(feed, mergeFeed('activeTimeline'))
   } else {
     console.error('Failed to fetch your posts:', response.error);
   }
@@ -125,17 +151,16 @@ function fetchAlerts() {
   })
 }
 
-async function fetchProfile() {
+async function fetchProfile(handle) {
   try {
     // Assuming you have your handle stored in a variable called 'myHandle'
     const response = await agent.getProfile({
-      actor: agent.session?.handle, // Or agent.session?.did if you have that
+      actor: handle, // Or agent.session?.did if you have that
     });
 
     if (response.success) {
       const profile = response.data;
-      $.teach({ profile })
-      fetchMyTimeline()
+      $.teach({ [handle]: profile })
     } else {
       console.error('Failed to fetch profile:', response.error);
     }
@@ -158,6 +183,12 @@ function loadMore(target) {
     return
   }
 
+  if(feed === 'activeTimeline') {
+    fetchActiveTimeline()
+    return
+  }
+
+
   if(feed === 'alerts') {
     fetchAlerts()
     return
@@ -172,8 +203,12 @@ $.when('click', '[data-mode]', (event) => {
   }
 })
 
-$.when('click', '[data-draft]', (event) => {
-  $.teach({ drafting: true })
+$.when('click', '.new-post', (event) => {
+  showModal(`
+    <blue-sky view="${views.post}"></blue-sky>
+  `, {
+    transparent: true
+  })
 })
 
 $.when('click', '[data-mode-error]', (event) => {
@@ -185,11 +220,41 @@ $.when('click', '[data-logout]', (event) => {
   logout()
 })
 
+$.when('click', '[data-handle]', (event) => {
+  event.preventDefault()
+  const { handle } = event.target.dataset
+  $.teach({ activeHandle: handle, mode: modes.profile, activeTimeline: [] })
+
+  fetchActiveTimeline()
+  fetchProfile(handle)
+})
+
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
 
-$.when('submit', 'form', async (event) => {
+$.when('click', '[data-cancel-draft]', () => {
+  $.teach({ draft: '', draftHeight: null })
+  hideModal()
+})
+
+$.when('submit', '[action="post"]', async (event) => {
+  event.preventDefault()
+  const { draft } = $.learn()
+
+  const response = await agent.post({
+    text: draft,
+    createdAt: new Date().toISOString()
+  })
+
+  if(response.validationStatus) {
+    $.teach({ draft: '' })
+    hideModal()
+  }
+})
+
+
+$.when('submit', '[action="login"]', async (event) => {
   event.preventDefault()
   const { service, moniker } = $.learn()
 
@@ -214,14 +279,13 @@ async function login() {
       password
     })
 
-    console.log(data)
-
      // Save session data for persistence
     if (success) {
       const sessionData = agent.session
       localStorage.setItem('blue-sky/session', JSON.stringify(sessionData))
 
-      $.teach({ authenticated: true })
+      $.teach({ authenticated: true, mode: modes.timeline })
+      fetchProfile(agent.session?.handle)
     }
   } catch (error) {
     console.error('Login failed:', error)
@@ -247,39 +311,130 @@ function loginForm() {
   const { service, moniker, password } = $.learn()
 
   return `
-    <form method="post">
-      <label class="field">
-        <span class="label">Service</span>
-        <input data-bind value="${service}" type="text" name="service" placeholder="https://1998.social" required/>
-      </label>
-      <label class="field">
-        <span class="label">Handle</span>
-        <input data-bind value="${moniker}" type="text" name="moniker" placeholder="tychi.1998.social" required/>
-      </label>
-      <label class="field">
-        <span class="label">Password</span>
-        <input data-bind value="${password}" type="password" name="password"  required/>
-      </label>
-      <button type="submit">
-        Connect
-      </button>
-    </form>
+    <div class="form-card">
+      <div class="card-title">
+        Bluesky
+      </div>
+      <div class="card-description">
+        Use your Bluesky account credentials to connect<br/><a href="https://bsky.social/about" target="_blank">Learn More</a>
+      </div>
+      <form action="login" method="post">
+        <label class="field">
+          <span class="label">Service</span>
+          <input data-bind value="${service}" type="text" name="service" placeholder="https://1998.social" required/>
+        </label>
+        <label class="field">
+          <span class="label">Handle</span>
+          <input data-bind value="${moniker}" type="text" name="moniker" placeholder="tychi.1998.social" required/>
+        </label>
+        <label class="field">
+          <span class="label">Password</span>
+          <input data-bind value="${password}" type="password" name="password"  required/>
+        </label>
+        <button class="standard-button" type="submit">
+          Connect
+        </button>
+      </form>
+    </div>
   `
+}
+
+function renderProfile(profile, timeline) {
+  if(!profile) {
+    return `
+      <loading>
+        <flying-disk></flying-disk>
+      </loading>
+    `
+  }
+
+  const {
+    avatar,
+    banner,
+    createdAt,
+    displayName,
+    handle,
+    description,
+    followersCount,
+    followsCount,
+    postsCount
+  } = profile
+
+  return `
+    <div class="profile">
+      <div class="hero">
+        <img src="${banner}" />
+      </div>
+      <div class="profile-information">
+        <div class="profile-gutter">
+          <div class="profile-picture">
+            <img src="${avatar}" class="profile-avatar" />
+          </div>
+        </div>
+        <div class="profile-content">
+          <div class="profile-stats">
+            <div class="stat">
+              <div class="stat-value">
+                ${followersCount}
+              </div>
+              <div class="stat-label">
+                Followers
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">
+                ${followsCount}
+              </div>
+              <div class="stat-label">
+                Following
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">
+                ${postsCount}
+              </div>
+              <div class="stat-label">
+                Posts
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="profile-contact">
+          <div class="profile-displayname">
+            ${displayName}
+          </div>
+          <div class="profile-handle">
+            @${handle}
+          </div>
+          <div class="profile-description">${description}</div>
+          <div class="profile-since">
+            since: <sl-format-date date="${createdAt}" month="long" year="numeric"></sl-format-date>
+          </div>
+        </div>
+      </div>
+      <div class="feed">
+        ${timeline ? timeline.map(renderPost).join('') : ''}
+      </div>
+      <div class="load-more" data-feed="${handle === agent.session?.handle?'myTimeline':'activeTimeline'}"></div>
+    </div>
+  `
+
 }
 
 function renderPost({ post }) {
   return `
     <div class="post">
       <div class="post-gutter">
-        <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-handle">
-            ${post.author.displayName}
-          </a>
+          <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <span class="post-handle">
+            @${post.author.handle}
+          </span>
           <span class="post-timestamp">
             <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
           </span>
@@ -294,16 +449,13 @@ function renderNotification(post) {
   return `
     <div class="post">
       <div class="post-gutter">
-        <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-handle">
-            ${post.author.displayName}
-          </a>
-          ·
+          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
         </div>
         <div class="body">${escapeHyperText(post.reason)}</div>
@@ -315,96 +467,32 @@ function renderNotification(post) {
 
 const modeRenderers = {
   [modes.me]: (target) => {
-    const { profile } = $.learn()
-
-    if(!profile) {
-      fetchProfile()
-      return `
-        <loading>
-          <flying-disk></flying-disk>
-        </loading>
-      `
-    }
-
-    const {
-      avatar,
-      banner,
-      createdAt,
-      displayName,
-      handle,
-      description,
-      followersCount,
-      followsCount,
-      postsCount
-    } = profile
+    const profile = $.learn()[agent.session?.handle]
 
     const { myTimeline } = $.learn()
 
     return `
-      <button class="new-post" data-draft>
-        New
+      <button class="new-post">
+        <sl-icon name="plus-lg"></sl-icon>
       </button>
-      <div class="profile">
-        <div class="hero">
-          <img src="${banner}" />
-        </div>
-        <div class="profile-information">
-          <div class="profile-gutter">
-            <div class="profile-picture">
-              <img src="${avatar}" class="profile-avatar" />
-            </div>
-          </div>
-          <div class="profile-content">
-            <div class="profile-stats">
-              <div class="stat">
-                <div class="stat-value">
-                  ${followersCount}
-                </div>
-                <div class="stat-label">
-                  Followers
-                </div>
-              </div>
-              <div class="stat">
-                <div class="stat-value">
-                  ${followsCount}
-                </div>
-                <div class="stat-label">
-                  Following
-                </div>
-              </div>
-              <div class="stat">
-                <div class="stat-value">
-                  ${postsCount}
-                </div>
-                <div class="stat-label">
-                  Posts
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="profile-contact">
-            <div class="profile-displayname">
-              ${displayName}
-            </div>
-            <div class="profile-handle">
-              ${handle}
-            </div>
-            <div class="profile-description">
-              ${description}
-            </div>
-            <div class="profile-since">
-              since: <sl-format-date date="${createdAt}" month="long" year="numeric"></sl-format-date>
-            </div>
-          </div>
-        </div>
-        <div class="feed">
-          ${myTimeline ? myTimeline.map(renderPost).join('') : ''}
-        </div>
-        <div class="load-more" data-feed="myTimeline"></div>
-      </div>
-    `
-
+      ${renderProfile(profile, myTimeline)}
+     `
   },
+  [modes.profile]: (target) => {
+    const { activeHandle } = $.learn()
+
+    const profile = $.learn()[activeHandle]
+
+    const { activeTimeline } = $.learn()
+
+    return `
+      <button class="new-post">
+        <sl-icon name="plus-lg"></sl-icon>
+      </button>
+      ${renderProfile(profile, activeTimeline)}
+     `
+  },
+
   [modes.timeline]: (target) => {
     const { homeTimeline } = $.learn()
 
@@ -418,13 +506,13 @@ const modeRenderers = {
     }
 
     return `
+      <button class="new-post" data-draft>
+        <sl-icon name="plus-lg"></sl-icon>
+      </button>
       <div class="feed">
         ${homeTimeline.map(renderPost).join('')}
       </div>
       <div class="load-more" data-feed="homeTimeline"></div>
-      <button class="new-post" data-draft>
-        New
-      </button>
     `
   },
   [modes.alerts]: (target) => {
@@ -448,7 +536,10 @@ const modeRenderers = {
   },
   [modes.settings]: (target) => {
     return `
-      <button data-logout>logout</button>
+      <div class="settings-section">
+        To disconnect this client, click<br/>
+        <button data-logout class="standard-button">Logout</button>
+      </div>
     `
   },
 }
@@ -468,39 +559,92 @@ function renderByMode(target) {
   return (modeRenderers[mode] || non)(target)
 }
 
-function postOverlay(target) {
-  const { drafting }  = $.learn()
+const views = {
+  post: 'post',
+  avatar: 'avatar',
+}
 
-  if(!drafting) return
+const viewRenderers = {
+  [views.avatar]: (target) => {
+    const profile = $.learn()[agent.session?.handle]
 
-  return `
-    <div class="post-overlay">
-      <form class="send-form" data-command="enter">
-        <button data-tooltip="send" class="button send" type="submit" data-command="enter">
-          <sl-icon name="arrow-up"></sl-icon>
-        </button>
-        <div class="text-well">
-          <textarea name="message" placeholder="Today..."></textarea>
+    const {
+      avatar
+    } = profile || {}
+
+    return avatar ? `
+      <img src="${avatar}" class="solo-avatar" />
+    ` : `
+      <sl-icon name="person-fill"></sl-icon>
+    `
+  },
+  [views.post]: (target) => {
+    const {
+      draft,
+      draftHeight
+    } = $.learn()
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="post" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+                Cancel
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Post
+              </button>
+            </div>
+            <div class="text-well">
+              <textarea
+                class="draft-content"
+                data-bind
+                name="draft"
+                placeholder="Sup, yo?"
+                value="${escapeHyperText(draft)}"
+                ${draftHeight ? `style="height: ${draftHeight}px"`:''}
+              ></textarea>
+            </div>
+            <div class="draft-footer">
+              <div style="place-self: end">
+                ${300 - draft.length}
+              </div>
+            </div>
+          </form>
         </div>
-      </form>
-    </div>
-  `
+      </div>
+    `
+  }
 }
 
 $.draw(target => {
-  const { authenticated, mode } = $.learn()
+  const view = target.getAttribute('view')
+  const { authenticated, mode, loading } = $.learn()
+
+  if(loading) {
+    return `
+      <loading>
+        <flying-disk></flying-disk>
+      </loading>
+    `
+  }
 
   if(!authenticated) {
     return loginForm()
   }
 
-  const view = `
+  if(viewRenderers[view]) {
+    return viewRenderers[view](target)
+  }
+
+  return `
     <div class="app">
       <div class="sidebar">
         ${Object.keys(navigation).map((key) => {
           const { icon, label } = navigation[key]
           return `
-            <button data-mode="${key}" class="tab ${mode === key ? 'active':''}">
+            <button data-mode="${key}" class="navigation ${mode === key ? 'active':''}">
               <span class="navigation-icon">
                 ${icon}
               </span>
@@ -514,22 +658,21 @@ $.draw(target => {
       <div class="content">
         ${renderByMode(target)}
       </div>
-      ${postOverlay(target) || ''}
     </div>
   `
-
-  return view
 }, {
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
+      recoverElves(target, 'sl-icon')
     }
 
     {
       const { mode } = $.learn()
-      if(target.mode !== mode) {
+      const content = target.querySelector('.content')
+      if(content && target.mode !== mode) {
         target.mode = mode
-        target.querySelector('.content').scrollTop = 0
+        content.scrollTop = 0
       }
     }
 
@@ -561,6 +704,19 @@ $.draw(target => {
   }
 })
 
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
+
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
     actor => ({
@@ -581,8 +737,12 @@ $.style(`
     height: 100%;
     background:
       linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.5), rgba(0,0,0,.5), var(--root-theme, mediumseagreen)),
       var(--root-theme, mediumseagreen);
+  }
+
+  &[view] {
+    background: transparent;
   }
 
   & .app {
@@ -609,7 +769,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: 1px;
-    background: rgba(0,0,0,.65);
+    background: rgba(0,0,0,.25);
   }
 
   & .sidebar button {
@@ -625,6 +785,27 @@ $.style(`
     position: absolute;
     right: 1rem;
     bottom: 1rem;
+    padding: .5rem;
+    border: 2px solid var(--root-theme, mediumseagreen);
+    background: rgba(0,0,0,.65);
+    border-radius: 100%;
+    color: rgba(255,255,255,.85);
+    display: grid;
+    place-content: center;
+    font-size: 2rem;
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    z-index: 5;
+  }
+
+  & .new-post:hover,
+  & .new-post:focus {
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
+      var(--root-theme, mediumseagreen);
   }
 
   & .feed {
@@ -646,18 +827,74 @@ $.style(`
     overflow: hidden;
   }
 
+  & .post-displayname {
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    font-weight: bold;
+  }
+
+  & .post-handle {
+    color: rgba(0,0,0,.65);
+  }
   & .post-timestamp {
     color: rgba(0,0,0,.45);
-    float: right;
+    white-space: nowrap;
   }
 
-  & .sidebar .tab {
+  & .draft-template {
+    display: grid;
+    grid-template-rows: 1fr auto 1fr;
+    gap: .5rem;
+  }
+
+  & .draft-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  & .draft-footer {
+    display: grid;
+  }
+
+  & .draft-content {
+    width: 100%;
+    resize: none;
+    border: 1px solid rgba(0,0,0,.15);
+    padding: .5rem;
+  }
+
+  & .sidebar .navigation {
     background: rgba(0,0,0,.85);
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    align-items: center;
+    gap: .5rem;
   }
 
-  & .sidebar .tab.active {
+  & .sidebar .navigation.active {
     color: rgba(0,0,0,.85);
     background: var(--root-theme, mediumseagreen);
+  }
+
+  & .navigation-icon {
+    border-radius: 100%;
+    overflow: hidden;
+    text-align: center;
+    height: 24px;
+    display: grid;
+    place-content: center;
+  }
+
+  @media (max-width: 36rem) {
+
+    & .sidebar .navigation {
+      grid-template-columns: 24px;
+    }
+    & .navigation-label {
+      display: none;
+    }
   }
 
   & .profile-information {
@@ -716,7 +953,7 @@ $.style(`
   }
 
   & .profile-description {
-    
+    white-space: preserve;
   }
 
   & .profile-since {
@@ -726,4 +963,54 @@ $.style(`
   & .load-more {
     transform: translateY(-200px);
   }
+
+  & .overlay-background {
+    padding: 2rem 0;
+    height: 100%;
+    background: rgba(0,0,0,.15);
+    backdrop-filter: blur(2px);
+  }
+
+  & .form-card {
+    background: white;
+    max-width: 55ch;
+    margin: 0 auto;
+    padding: .5rem;
+
+    box-shadow:
+      0 0 6px 6px rgba(0,0,0,.05),
+      0 0 3px 3px rgba(0,0,0,.10),
+      0 0 1px 1px rgba(0,0,0,.15);
+  }
+
+  & .card-title {
+    color: rgba(0,0,0,.65);
+    font-weight: bold;
+    font-size: 2rem;
+  }
+
+  & .card-description {
+    margin-bottom: 1rem;
+  }
+
+  & .settings-section {
+    padding: 1rem;
+  }
 `)
+
+$.when('input', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
+})
+
+$.when('click', '.overlay-background', () => {
+  hideModal()
+})
+
+$.when('focus', '[name="draft"]', (event) => {
+  $.teach({ draftHeight: event.target.scrollHeight })
+});
+
+$.when('input', '[name="draft"]', (event) => {
+  $.teach({ draftHeight: event.target.scrollHeight })
+});
+

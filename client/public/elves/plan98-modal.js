@@ -30,6 +30,7 @@ $.draw((target) => {
     body,
     isOpen,
     blockExit,
+    transparent,
     bannerType,
     maximized,
     centered,
@@ -43,7 +44,7 @@ $.draw((target) => {
   return `
     <div
       data-fixed="${blockExit}"
-      class=" shell ${maximized ? 'maximized': ''}"
+      class=" shell ${maximized ? 'maximized': ''} ${transparent ? 'transparent':''}"
       style="--theme: ${theme}; --image: ${image}">
       <div class="action-wrapper">
         <button data-close>&#x2718;</button>
@@ -107,6 +108,9 @@ let onHide
 export function showModal(nextBody, options = {}) {
   onHide = options.onHide
   document.body.classList.add('trap-modal')
+  options.transparent
+    ? document.body.classList.add('transparent-modal')
+    : document.body.classList.remove('transparent-modal')
   self.addEventListener('keydown', hideListener);
 
   const { isOpen, layer, body } = $.learn()
@@ -178,6 +182,10 @@ $.style(`
     left: 0;
     backdrop-filter: blur(10px);
     z-index: 900;
+  }
+
+  .trap-modal.transparent-modal .modal-overlay:before {
+    content: none;
   }
 
   .modal-overlay {
@@ -301,6 +309,10 @@ $.style(`
 
   & [data-fixed="true"] {
     background: white;
+  }
+
+  .transparent-modal & [data-fixed="true"] {
+    background: transparent;
   }
 
   & [data-fixed="true"] [data-close] {
