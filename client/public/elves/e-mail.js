@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 
 const $ = elf('e-mail', {
   sidebar: true
@@ -6,6 +7,10 @@ const $ = elf('e-mail', {
 
 $.draw(render, {
   afterUpdate(target) {
+    {
+      afterUpdateTheme($paperPocket, target)
+    }
+
     {
       const { emailId='none' } = $.learn()
       if(emailId !== target.emailId) {
@@ -86,6 +91,17 @@ $.style(`
     position: relative;
     overflow: hidden;
     grid-template-rows: auto 1fr;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10000;
+    background: var(--root-theme, transparent);
+    mix-blend-mode: soft-light;
+    opacity: .5;
   }
 
   & .hero-bar {
@@ -169,7 +185,6 @@ $.style(`
     top: 0;
     bottom: 0;
     z-index: 25;
-    padding-right: 10px;
     display: grid;
     grid-template-rows: 1fr auto;
   }
@@ -221,6 +236,7 @@ $.style(`
   & .content-area {
     position: relative;
     overflow: hidden;
+    background: white;
   }
 
   & .preview {
@@ -229,11 +245,16 @@ $.style(`
   }
 
   & [data-resize-sidebar] {
+		user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
     position: absolute;
     top: 0;
     bottom: 0;
     left: clamp(240px, var(--sidebar-width, 320px), 100%);
-    transform: translateX(-20px);
+    transform: translateX(-10px);
     width: 10px;
     background: rgba(0,0,0,.05);
     z-index: 10;

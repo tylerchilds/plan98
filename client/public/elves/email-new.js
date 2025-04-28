@@ -183,6 +183,12 @@ $.draw(target => {
     <multi-select data-bind id="email-bcc" value="${subject}" name="email-bcc" label="Bcc"></multi-select>
     -->
     <form action="secure-email" method="post">
+      <div style="display: flex; position: sticky; top: 0; z-index: 10;">
+        <button class="send-button" type="submit">
+          <span><sl-icon name="send"></sl-icon></span>
+          Send
+        </button>
+      </div>
       <div class="fields">
         <label class="field">
           <span class="label">From</span>
@@ -196,13 +202,6 @@ $.draw(target => {
           <span class="label">Subject</span>
           <input data-bind name="subject" value="${escapeHyperText(subject)}"/>
         </label>
-        <div style="display: flex; position: sticky; top: 0; z-index: 10;">
-          <button class="send-button" type="submit">
-            <span><sl-icon name="send"></sl-icon></span>
-            Send
-          </button>
-        </div>
-
         <label class="field">
           <span class="label">Message</span>
           <textarea data-bind name="message" ${messageHeight ? `style="height: ${messageHeight}px; overflow: hidden;"`:''}>${escapeHyperText(message)}</textarea>
@@ -275,6 +274,7 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
+    background: white;
   }
 
   & .fields {

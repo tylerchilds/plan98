@@ -307,6 +307,7 @@ $.style(`
     display: block;
     height: 100%;
     padding: 1rem;
+    background: white;
   }
 
   & .mail-body {
