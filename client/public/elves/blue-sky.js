@@ -1,4 +1,5 @@
 import elf from "@silly/elf"
+import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 
 import { BskyAgent } from '@atproto/api'
 
@@ -16,7 +17,7 @@ const blueskyCreds = {
 
 const modes = {
   me: 'me',
-  home: 'home',
+  timeline: 'timeline',
   alerts: 'alerts',
   settings: 'settings',
 }
@@ -24,11 +25,11 @@ const modes = {
 const navigation = {
   [modes.me]: {
     icon: '',
-    label: 'My Profile'
+    label: 'Profile'
   },
-  [modes.home]: {
+  [modes.timeline]: {
     icon: '',
-    label: 'Home'
+    label: 'Timeline'
   },
   [modes.alerts]: {
     icon: '',
@@ -44,7 +45,7 @@ const $ = elf('blue-sky', {
   service: blueskyCreds.service,
   moniker: blueskyCreds.moniker,
   password: '',
-  mode: modes.home,
+  mode: modes.timeline,
 })
 
 // Resume a session from stored data
@@ -152,7 +153,7 @@ $.when('click', '[data-draft]', (event) => {
 })
 
 $.when('click', '[data-mode-error]', (event) => {
-  $.teach({ mode: modes.home })
+  $.teach({ mode: modes.timeline })
 })
 
 
@@ -242,6 +243,52 @@ function loginForm() {
   `
 }
 
+function renderPost({ post }) {
+  return `
+    <div class="post">
+      <div class="post-gutter">
+        <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-avatar">
+          <img src="${post.author.avatar}" class="avatar" />
+        </a>
+      </div>
+      <div class="post-content">
+        <div class="post-meta">
+          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-handle">
+            ${post.author.displayName}
+          </a>
+          <span class="post-timestamp">
+            <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+          </span>
+        </div>
+        <div class="body">${escapeHyperText(post.record.text)}</div>
+      </div>
+    </div>
+  `
+}
+
+function renderNotification(post) {
+  return `
+    <div class="post">
+      <div class="post-gutter">
+        <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-avatar">
+          <img src="${post.author.avatar}" class="avatar" />
+        </a>
+      </div>
+      <div class="post-content">
+        <div class="post-meta">
+          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-handle">
+            ${post.author.displayName}
+          </a>
+          ·
+          <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
+        </div>
+        <div class="body">${escapeHyperText(post.reason)}</div>
+      </div>
+    </div>
+  `
+}
+
+
 const modeRenderers = {
   [modes.me]: (target) => {
     const { profile } = $.learn()
@@ -277,42 +324,63 @@ const modeRenderers = {
         <div class="hero">
           <img src="${banner}" />
         </div>
-        <div class="profile-columns">
-          <div class="profile-information">
-            <img src="${avatar}" />
-            ${displayName}
-            ${handle}
-            ${followersCount}
-            ${followsCount}
-            ${postsCount}
-            ${description}
-            ${createdAt}
+        <div class="profile-information">
+          <div class="profile-gutter">
+            <div class="profile-picture">
+              <img src="${avatar}" class="profile-avatar" />
+            </div>
           </div>
-          <div class="profile-actions">
-            <button>
-              Edit Profile
-            </button>
+          <div class="profile-content">
+            <div class="profile-stats">
+              <div class="stat">
+                <div class="stat-value">
+                  ${followersCount}
+                </div>
+                <div class="stat-label">
+                  Followers
+                </div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">
+                  ${followsCount}
+                </div>
+                <div class="stat-label">
+                  Following
+                </div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">
+                  ${postsCount}
+                </div>
+                <div class="stat-label">
+                  Posts
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="profile-contact">
+            <div class="profile-displayname">
+              ${displayName}
+            </div>
+            <div class="profile-handle">
+              ${handle}
+            </div>
+            <div class="profile-description">
+              ${description}
+            </div>
+            <div class="profile-since">
+              since: <sl-format-date date="${createdAt}" month="long" year="numeric"></sl-format-date>
+            </div>
           </div>
         </div>
-        <div class="profile-feed">
-          ${myTimeline ? myTimeline.map(({ post }) => {
-            return `
-              <div aria-role="button" class="message">
-                <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="meta" data-tooltip='${post.author.handle}'>
-                  <img src="${post.author.avatar}" class="avatar" />
-                  ${post.author.displayName}
-                </a>
-                <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
-                <div class="body">${escapeHyperText(post.record.text)}</div>
-              </div>
-            `
-          }).join('') : ''}
+        <div class="feed">
+          ${myTimeline ? myTimeline.map(renderPost).join('') : ''}
         </div>
       </div>
     `
 
   },
-  [modes.home]: (target) => {
+  [modes.timeline]: (target) => {
     const { homeTimeline } = $.learn()
 
     if(!homeTimeline) {
@@ -326,18 +394,7 @@ const modeRenderers = {
 
     return `
       <div class="feed">
-        ${homeTimeline.map(({ post }) => {
-          return `
-            <div aria-role="button" class="message">
-              <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="meta" data-tooltip='${post.author.handle}'>
-                <img src="${post.author.avatar}" class="avatar" />
-                ${post.author.displayName}
-              </a>
-              <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
-              <div class="body">${escapeHyperText(post.record.text)}</div>
-            </div>
-          `
-        }).join('')}
+        ${homeTimeline.map(renderPost).join('')}
       </div>
       <button class="new-post" data-draft>
         New
@@ -357,19 +414,8 @@ const modeRenderers = {
     }
 
     return `
-      <div class="alerts">
-        ${alerts.map((alert) => {
-          return `
-            <div aria-role="button" class="message">
-              <a href="https://bsky.app/profile/${alert.author.handle}" target="_blank" class="meta" data-tooltip='${alert.author.handle}'>
-                <img src="${alert.author.avatar}" class="avatar" />
-                ${alert.author.displayName}
-              </a>
-              <sl-relative-time date="${alert.indexedAt}" format="long"></sl-relative-time>
-              <div class="body">${alert.reason}</div>
-            </div>
-          `
-        }).join('')}
+      <div class="feed">
+        ${alerts.map(renderNotification).join('')}
       </div>
     `
   },
@@ -415,7 +461,7 @@ function postOverlay(target) {
 }
 
 $.draw(target => {
-  const { authenticated } = $.learn()
+  const { authenticated, mode } = $.learn()
 
   if(!authenticated) {
     return loginForm()
@@ -427,7 +473,7 @@ $.draw(target => {
         ${Object.keys(navigation).map((key) => {
           const { icon, label } = navigation[key]
           return `
-            <button data-mode="${key}">
+            <button data-mode="${key}" class="tab ${mode === key ? 'active':''}">
               <span class="navigation-icon">
                 ${icon}
               </span>
@@ -446,6 +492,12 @@ $.draw(target => {
   `
 
   return view
+}, {
+  afterUpdate(target) {
+    {
+      afterUpdateTheme($paperPocket, target)
+    }
+  }
 })
 
 function escapeHyperText(text = '') {
@@ -466,6 +518,10 @@ $.style(`
     display: block;
     overflow: hidden;
     height: 100%;
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
   }
 
   & .app {
@@ -473,6 +529,8 @@ $.style(`
     grid-template-columns: auto 1fr;
     overflow: hidden;
     height: 100%;
+    max-width: 48rem;
+    margin: 0 auto;
   }
 
   & .post-overlay {
@@ -483,16 +541,124 @@ $.style(`
   & .content {
     height: 100%;
     overflow: auto;
+    background: rgba(255,255,255,.65);
   }
 
   & .sidebar {
     display: flex;
     flex-direction: column;
+    gap: 1px;
+    background: rgba(0,0,0,.65);
+  }
+
+  & .sidebar button {
+    text-align: left;
+    padding: .5rem;
+    border-radius: 0;
+    border: none;
+    color: var(--root-theme, mediumseagreen);
+    background: none;
   }
 
   & .new-post {
     position: absolute;
     right: 1rem;
     bottom: 1rem;
+  }
+
+  & .feed {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .post {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: .5rem;
+    border-bottom: 1px solid rgba(0,0,0,.15);
+    padding: .5rem;
+  }
+
+  & .post-avatar {
+    border-radius: 100%;
+    display: block;
+    overflow: hidden;
+  }
+
+  & .post-timestamp {
+    color: rgba(0,0,0,.45);
+    float: right;
+  }
+
+  & .sidebar .tab {
+    background: rgba(0,0,0,.85);
+  }
+
+  & .sidebar .tab.active {
+    color: rgba(0,0,0,.85);
+    background: var(--root-theme, mediumseagreen);
+  }
+
+  & .profile-information {
+    display: grid;
+    grid-template-columns: 132px 1fr;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    position: relative;
+    padding: .5rem 1rem;
+  }
+
+  & .profile-picture {
+    position: absolute;
+    top: -66px;
+  }
+
+  & .profile-avatar {
+    border-radius: 100%;
+    border: 2px solid rgba(0,0,0,.25);
+    width: 128px;
+    height: 128px;
+  }
+
+  & .profile-contact {
+    grid-column: -1 / 1;
+    padding: 1rem 0 0;
+  }
+
+  & .profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  & .stat {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  & .stat-value {
+    font-weight: bold;
+  }
+
+  & .stat-label {
+    color: rgba(255,255,255,.65);
+  }
+
+  & .profile-displayname {
+    font-size: 2rem;
+    font-weight: bold;
+    color: rgba(255,255,255,1);
+  }
+
+  & .profile-handle {
+    color: rgba(255,255,255,.45);
+  }
+
+  & .profile-description {
+    
+  }
+
+  & .profile-since {
+    color: rgba(255,255,255,.65);
   }
 `)
