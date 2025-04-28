@@ -70,8 +70,10 @@ function resumeSession() {
 resumeSession()
 
 const cursors = {}
+const EOF = 'END_OF_FEED'
 async function fetchMyTimeline() {
   const cursor = cursors.myTimeline
+  if(cursor === EOF) return
   const response = await agent.getAuthorFeed({
     cursor,
     actor: agent.session?.handle, // Or agent.session?.did
@@ -80,7 +82,7 @@ async function fetchMyTimeline() {
 
   if (response.success) {
     const { feed, cursor } = response.data;
-    cursors.myTimeline = cursor
+    cursors.myTimeline = cursor || EOF
     $.teach(feed, mergeFeed('myTimeline'))
   } else {
     console.error('Failed to fetch your posts:', response.error);
@@ -89,12 +91,13 @@ async function fetchMyTimeline() {
 
 function fetchHomeTimeline() {
   const cursor = cursors.homeTimeline || ''
+  if(cursor === EOF) return
   agent.getTimeline({
     cursor,
     limit: 30,
   }).then(({ data }) => {
     const { feed, cursor } = data
-    cursors.homeTimeline = cursor
+    cursors.homeTimeline = cursor || EOF
     $.teach(feed, mergeFeed('homeTimeline'))
   });
 }
@@ -111,12 +114,13 @@ function mergeFeed(feed) {
 
 function fetchAlerts() {
   const cursor = cursors.alerts || ''
+  if(cursor === EOF) return
   agent.listNotifications({
     cursor,
     limit: 20 // Optional: number of notifications to retrieve
   }).then(({ data }) => {
     const { notifications, cursor } = data
-    cursors.alerts = cursor
+    cursors.alerts = cursor || EOF
     $.teach(notifications, mergeFeed('alerts'))
   })
 }
@@ -137,6 +141,26 @@ async function fetchProfile() {
     }
   } catch (error) {
     console.error('An error occurred while fetching your profile:', error);
+  }
+}
+
+function loadMore(target) {
+  const { feed } = target.dataset
+  if(!feed) return
+
+  if(feed === 'homeTimeline') {
+    fetchHomeTimeline()
+    return
+  }
+
+  if(feed === 'myTimeline') {
+    fetchMyTimeline()
+    return
+  }
+
+  if(feed === 'alerts') {
+    fetchAlerts()
+    return
   }
 }
 
@@ -376,6 +400,7 @@ const modeRenderers = {
         <div class="feed">
           ${myTimeline ? myTimeline.map(renderPost).join('') : ''}
         </div>
+        <div class="load-more" data-feed="myTimeline"></div>
       </div>
     `
 
@@ -396,6 +421,7 @@ const modeRenderers = {
       <div class="feed">
         ${homeTimeline.map(renderPost).join('')}
       </div>
+      <div class="load-more" data-feed="homeTimeline"></div>
       <button class="new-post" data-draft>
         New
       </button>
@@ -417,6 +443,7 @@ const modeRenderers = {
       <div class="feed">
         ${alerts.map(renderNotification).join('')}
       </div>
+      <div class="load-more" data-feed="alerts"></div>
     `
   },
   [modes.settings]: (target) => {
@@ -496,6 +523,40 @@ $.draw(target => {
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
+    }
+
+    {
+      const { mode } = $.learn()
+      if(target.mode !== mode) {
+        target.mode = mode
+        target.querySelector('.content').scrollTop = 0
+      }
+    }
+
+    {
+      const { mode } = $.learn()
+      const watcher = target.querySelector('.load-more')
+      if(watcher && target.observerMode !== mode) {
+        target.observerMode = mode
+
+        if(target.observer) {
+          target.observer.disconnect()
+        }
+
+        target.observer = new IntersectionObserver((entries, observer) => {
+          entries.forEach(async (entry) => {
+            if(entry.isIntersecting) {
+              loadMore(entry.target)
+            }
+          });
+        }, {
+          root: target.querySelector('.content'),
+          rootMargin: '0px',
+          threshold: 0,
+        });
+
+        target.observer.observe(target.querySelector('.load-more'))
+      }
     }
   }
 })
@@ -660,5 +721,9 @@ $.style(`
 
   & .profile-since {
     color: rgba(255,255,255,.65);
+  }
+
+  & .load-more {
+    transform: translateY(-200px);
   }
 `)
