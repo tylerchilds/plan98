@@ -15,7 +15,13 @@ function headers(key){
   }
 }
 
-const $ = elf('email-new', { to: '', from: '', subject: '', message: '' })
+const $ = elf('email-new', {
+  to: '',
+  from: '',
+  subject: '',
+  message: '',
+  messageHeight: null
+})
 
 // https://github.com/fastmail/JMAP-Samples/blob/main/javascript/hello-world.js
 
@@ -63,11 +69,64 @@ const identityQuery = async (apiUrl, accountId) => {
   )[0].id;
 };
 
+/* open ticket with the fastmail team
+const contactsQuery = async (apiUrl, accountId) => {
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers(key),
+    body: JSON.stringify({
+      using: [
+        "urn:ietf:params:jmap:core",
+        "urn:ietf:params:jmap:contacts"
+      ],
+      methodCalls: [
+        ["Contact/query", {
+          accountId,
+          filter: { hasEmail: true },
+          sort: [{ property: "lastName" }]
+        }, "a"],
+      ],
+    }),
+  });
+  const data = await response.json();
+
+  // Get the IDs of contacts returned by the query
+  const contactIds = data["methodResponses"][0][1].ids;
+
+  // Now fetch the actual contact data for these IDs
+  return getContactsData(apiUrl, accountId, contactIds);
+};
+
+const getContactsData = async (apiUrl, accountId, contactIds) => {
+  const response = await fetch(apiUrl, {
+    method: "POST",
+    headers: headers(key),
+    body: JSON.stringify({
+      using: [
+        "urn:ietf:params:jmap:core",
+        "urn:ietf:params:jmap:contacts"
+      ],
+      methodCalls: [
+        ["Contact/get", {
+          accountId,
+          ids: contactIds,
+          properties: ["firstName", "lastName", "emails"]
+        }, "b"],
+      ],
+    }),
+  });
+  const data = await response.json();
+
+  // Return the list of contacts with their data
+  return data["methodResponses"][0][1].list;
+};
+*/
+
 const draftResponse = async (apiUrl, accountId, draftId, identityId) => {
   const { message, to, from, subject } = $.learn()
 
   const draftObject = {
-    from: [{ email: from }],
+    from: [{ email: username }],
     to: [{ email: to }],
     subject,
     keywords: { $draft: true },
@@ -114,7 +173,8 @@ const send = async () => {
 };
 
 $.draw(target => {
-  const { to, from, subject, message } = $.learn()
+  mount(target)
+  const { to, from, subject, message, messageHeight } = $.learn()
 
   return `
     <!--
@@ -123,25 +183,31 @@ $.draw(target => {
     <multi-select data-bind id="email-bcc" value="${subject}" name="email-bcc" label="Bcc"></multi-select>
     -->
     <form action="secure-email" method="post">
-      <button type="submit">
-        Send
-      </button>
-      <label class="field">
-        <span class="label">To</span>
-        <input data-bind name="to" value="${escapeHyperText(to)}"/>
-      </label>
-      <label class="field">
-        <span class="label">From</span>
-        <input data-bind name="from" value="${escapeHyperText(from)}"/>
-      </label>
-      <label class="field">
-        <span class="label">Subject</span>
-        <input data-bind name="subject" value="${escapeHyperText(subject)}"/>
-      </label>
-      <label class="field">
-        <span class="label">Message</span>
-        <textarea data-bind name="message">${escapeHyperText(message)}</textarea>
-      </label>
+      <div class="fields">
+        <label class="field">
+          <span class="label">From</span>
+          <input data-bind name="from" disabled value="${escapeHyperText(from) || username}"/>
+        </label>
+        <label class="field">
+          <span class="label">To</span>
+          <input data-bind name="to" value="${escapeHyperText(to)}"/>
+        </label>
+        <label class="field">
+          <span class="label">Subject</span>
+          <input data-bind name="subject" value="${escapeHyperText(subject)}"/>
+        </label>
+        <div style="display: flex; position: sticky; top: 0; z-index: 10;">
+          <button class="send-button" type="submit">
+            <span><sl-icon name="send"></sl-icon></span>
+            Send
+          </button>
+        </div>
+
+        <label class="field">
+          <span class="label">Message</span>
+          <textarea data-bind name="message" ${messageHeight ? `style="height: ${messageHeight}px; overflow: hidden;"`:''}>${escapeHyperText(message)}</textarea>
+        </label>
+      </div>
     </form>
 
   `
@@ -158,6 +224,19 @@ $.draw(target => {
     }
   }
 })
+async function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+
+  const session = await getSession();
+  const apiUrl = session.apiUrl;
+  const accountId = session.primaryAccounts["urn:ietf:params:jmap:mail"];
+
+/*
+  const contacts = await contactsQuery(apiUrl, accountId)
+  debugger
+*/
+}
 
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
@@ -196,7 +275,44 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
-    background: lemonchiffon;
+  }
+
+  & .fields {
+    padding: 1rem;
+  }
+
+  & .field {
+    margin-bottom: .5rem;
+  }
+
+  & .field .label {
+    padding: .25rem .5rem;
+    color: rgba(0,0,0,.5);
+    font-weight: bold;
+  }
+
+  & .field input {
+    padding: .25rem .5rem;
+    border-radius: 0;
+    border-left-color: transparent;
+    border-right-color: transparent;
+    border-top-color: transparent;
+    border-bottom-color: rgba(0,0,0,.15);
+    margin-bottom: 0;
+  }
+
+  & .field textarea {
+    resize: none;
+    border: none;
+    display: block;
+    width: 100%;
+    border-radius: 0;
+    color: rgba(0,0,0,.85);
+    padding: .25rem .5rem;
+    border-bottom: 1px solid rgba(0,0,0,.15);
+    text-decoration: none;
+    overflow: auto;
+    position: relative;
   }
 
   & [name="message-list"] {
@@ -204,18 +320,6 @@ $.style(`
     border: 1px solid rgba(255,255,255,.1);
     display: flex;
     flex-direction: column;
-  }
-
-  & [name="message"] {
-    border: none;
-    display: block;
-    width: 100%;
-    color: rgba(0,0,0,.85);
-    padding: .25rem 1rem;
-    border-bottom: 1px solid rgba(0,0,0,.25);
-    text-decoration: none;
-    overflow: auto;
-    position: relative;
   }
 
   & [name="message-email"] {
@@ -232,4 +336,36 @@ $.style(`
     top: .5rem;
     right: 1rem;;
   }
+
+  & .send-button {
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)), var(--root-theme, dodgerblue);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 0 .5rem;
+    line-height: 2rem;
+    font-size: 1rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .5rem;
+    margin: 0;
+    transition: background 100ms;
+    margin-left: auto;
+    position: sticky;
+    top: 0;
+  }
+
+  & .send-button:hover,
+  & .send-button:focus {
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, dodgerblue);
+  }
 `)
+
+$.when('focus', '[name="message"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+
+$.when('input', '[name="message"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+

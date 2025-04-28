@@ -14,12 +14,11 @@ function headers(apikey){
   }
 }
 
-const $ = elf('email-all', { loading: true, mailboxes: [] })
+const $ = elf('email-all', { mailboxes: [] })
 
 async function query(target, key) {
   if(target.lastKey === key) return
   target.lastKey = key
-  $.teach({ loading: true })
 
   await getSession(key).then(async(session) => {
     const api_url = session.apiUrl;
@@ -30,7 +29,7 @@ async function query(target, key) {
     });
   })
   const messages = await fetchTen(key)
-  $.teach({ messages, loading: false })
+  $.teach({ messages })
 }
 
 function form(key) {
@@ -41,41 +40,58 @@ function form(key) {
   `
 }
 
-$.draw(target => {
-  const { messages, loading } = $.learn()
-  query(target, key)
+function formatDate(date) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-  if(loading) {
-    return `<loading-spinner></loading-spinner>`
+  // Check if the date is today
+  if (date.getTime() >= today.getTime() && date.getTime() < today.getTime() + 24 * 60 * 60 * 1000) {
+    // Format as HH:MM for today
+    const hours = date.getHours().toString().padStart(2, '0');
+    const minutes = date.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
+  } else {
+    // Format as MM/DD for past dates
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${month}/${day}`;
   }
+}
+
+
+$.draw(target => {
+  const { messages } = $.learn()
+  query(target, key)
 
   if(!messages) {
     return `
-      No messages. Try another key?
-      ${form(key)}
+      <div>
+        <flying-disk></flying-disk>
+      </div>
     `
   }
 
   const list = messages.map((message, index) => {
-    const { id, author, timestamp, subject, textBody } = message
-    const formattedTime = new Intl.DateTimeFormat("en-US", {
-      dateStyle: 'short',
-      timeStyle: 'short',
-    }).format(new Date(timestamp))
-    const time = `<span style='white-space: nowrap;'>${formattedTime}</span>`
+    const { id, author, timestamp, subject, preview } = message
+    const time = `<span style='white-space: nowrap;'>${formatDate(new Date(timestamp))}</span>`
     return `
-      <a href="/app/email-view?id=${id}" target="${target.getAttribute('target')}" name="message" data-index="${index}">
-        <span name="message-timestamp" data-tooltip="${time}"><sl-icon name="clock"></sl-icon></span>
-        <span name="message-email">${escapeHyperText(author.email)}</span>
+      <button class="email" name="message" data-id="${id}" data-index="${index}">
+        <div class="meta-grid">
+          <span name="message-email">${escapeHyperText(author.name || author.email)}</span>
+          <span name="message-timestamp">${time}</span>
+        </div>
         <div name="message-subject">${escapeHyperText(subject)}</div>
-      </a>
+        <div name="message-body">
+          ${escapeHyperText(preview)}
+        </div>
+      </button>
     `
   }).join('')
-  return `
-    <div name="message-list">
+  target.innerHTML = `
+    <div name="message-list" key="list">
       ${inboxSelector()}
       ${list}
-      <div class="load-more"></div>
+      <flying-disk class="load-more"></flying-disk>
     </div>
   `
 }, {
@@ -127,6 +143,15 @@ $.draw(target => {
   }
 })
 
+$.when('click', '.email', (event) => {
+  event.preventDefault()
+  const root = event.target.closest($.link)
+  const { id } = event.target.dataset
+  root.dispatchEvent(new CustomEvent('picked', {
+    detail: { emailId: id }
+  }))
+})
+
 function inboxSelector() {
   const { mailboxes, inbox_id } = $.learn()
   if(mailboxes.length === 0) return ''
@@ -149,9 +174,9 @@ function inboxSelector() {
 
 $.when('change', '[name="mailbox-selector"]', async (event) => {
   const { value } = event.target
-  $.teach({ inbox_id: value, loading: true })
+  $.teach({ inbox_id: value })
   const messages = await fetchTen(key)
-  $.teach({ messages, loading: false })
+  $.teach({ messages })
 })
 
 $.when('change', '[name="key"]', (event) => {
@@ -220,7 +245,7 @@ async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition
           "Email/get",
           {
             accountId: account_id,
-            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'htmlBody', 'textBody'],
+            properties: ["id", "from", "subject", "receivedAt", 'bodyValues', 'htmlBody', 'textBody', 'preview'],
             fetchAllBodyValues: true,
             "#ids": {
               resultOf: "a",
@@ -256,10 +281,9 @@ async function fetchTen(apikey, offset=0){
   $.teach({ offset: offset + 10 })
   return await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
     emails["methodResponses"][1][1]["list"].forEach((email) => {
-      const from = email.from[0].email
+      const from = (email.from || [])[0] || {}
       const subject = email.subject
       const timestamp = email.receivedAt
-
       const textParts = email.textBody.map(x => x.partId)
       const htmlParts = email.htmlBody.map(x => x.partId)
       const textBody = textParts.map(id => email.bodyValues[id].value).join('')
@@ -267,10 +291,11 @@ async function fetchTen(apikey, offset=0){
       messages.push({
         id: email.id,
         author: {
-          email: from,
+          email: from.email,
           photoUrl: 'https://tychi.me/professional-headshot.jpg',
-          name: from,
+          name: from.name,
         },
+        preview: email.preview,
         subject,
         timestamp,
         textBody,
@@ -302,7 +327,13 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
-    background: lemonchiffon;
+    background: rgba(255,255,255,.85);
+    padding-right: 10px;
+  }
+
+  & .email {
+    text-align: left;
+    oveflow: hidden;
   }
 
   & [name="message-list"] {
@@ -313,7 +344,9 @@ $.style(`
 
   & [name="message"] {
     border: none;
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
     width: 100%;
     color: rgba(0,0,0,.85);
     padding: .25rem .5rem;
@@ -321,29 +354,39 @@ $.style(`
     text-decoration: none;
     overflow: auto;
     position: relative;
+    background: #d9d9d9;
   }
 
-  & [name="message-email"] {
-    color: rgba(0,0,0,.5);
-    margin-right: 1.25rem;
+  & .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  & [name="message-body"] {
+    height: 2.5rem;
+    overflow: hidden;
+    line-height: 1.25rem;
+  }
+  & [name="message-subject"] {
     text-overflow: ellipsis;
     overflow: hidden;
-    whitespace: nowrap;
+    white-space: nowrap;
+    font-weight: bold;
+    color: rgba(0,0,0,.65);
+  }
+  & [name="message-email"] {
+    color: rgba(0,0,0,.5);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
     display: block;
   }
   & [name="message-timestamp"] {
     color: rgba(0,0,0,.25);
-    position: absolute;
-    top: .5rem;
-    right: .5rem;;
   }
 
-  & .load-more {
-    transform: translateY(-200px);
-  }
-
-  & select {
-    background: #54796d;
+  & [name="mailbox-selector"] {
+    background: #4b4b4b;
     color: rgba(255,255,255,.85);
     border: none;
     border-radius: none;
