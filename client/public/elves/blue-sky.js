@@ -64,8 +64,9 @@ async function resumeSession() {
       })
 
       const sessionData = JSON.parse(savedSession)
-      await agent.resumeSession(sessionData)
-      $.teach({ authenticated: true, loading: false  })
+
+      const { success, data } = await agent.resumeSession(sessionData)
+      $.teach({ authenticated: true, loading: false, session: { data } })
       fetchProfile(agent.session?.handle)
     } catch (error) {
       $.teach({ authenticated: false, loading: false  })
@@ -203,6 +204,113 @@ $.when('click', '[data-mode]', (event) => {
   }
 })
 
+const actionHandlers = {
+  like: async (cid, uri, state) => {
+
+    try {
+      // Create the like record
+      const record = {
+        $type: 'app.bsky.feed.like',
+        subject: {
+          uri,
+          cid
+        },
+        createdAt: new Date().toISOString()
+      };
+
+      if(state) {
+        const deleteResult  = await agent.api.com.atproto.repo.deleteRecord({
+          repo: agent.session.did,
+          collection: 'app.bsky.feed.like',
+          rkey: state.split('/').pop(), // Extract the rkey from the URI
+        });
+
+        if (deleteResult.success) {
+          $.teach({ cid }, (state, payload) => {
+            const { mode } = state
+            const keys = {
+              [modes.me]: 'myTimeline',
+              [modes.timeline]: 'homeTimeline',
+              [modes.profile]: 'activeTimeline',
+            }
+
+            if(!keys[mode]) return { ...state }
+            return {
+              ...state,
+              [keys[mode]]: [
+                ...state[keys[mode]].map((data) => {
+                  if(data.post.cid === payload.cid) {
+                    delete data.post.viewer.like
+                    data.post.likeCount -= 1
+                  }
+                  return data
+                })
+              ]
+            }
+          })
+        } else {
+          console.error('Failed to unlike post:', deleteResult.error);
+        }
+      } else {
+        // Send the like request using the com.atproto.repo.createRecord method
+        const response = await agent.api.com.atproto.repo.createRecord({
+          repo: agent.session.did,
+          collection: 'app.bsky.feed.like',
+          record
+        });
+
+        if(response.success) {
+          $.teach({ cid, uri: response.data.uri }, (state, payload) => {
+            const { mode } = state
+            const keys = {
+              [modes.me]: 'myTimeline',
+              [modes.timeline]: 'homeTimeline',
+              [modes.profile]: 'activeTimeline',
+            }
+
+            if(!keys[mode]) return { ...state }
+            return {
+              ...state,
+              [keys[mode]]: [
+                ...state[keys[mode]].map((data) => {
+                  if(data.post.cid === payload.cid) {
+                    data.post.viewer.like = payload.uri
+                    data.post.likeCount += 1
+                  }
+                  return data
+                })
+              ]
+            }
+          })
+        }
+
+        console.log('Successfully liked post:', response);
+        return response;
+      }
+    } catch (error) {
+      console.error('Error liking post:', error);
+      throw error;
+    }
+  },
+  repost: () => {
+
+  },
+  reply: () => {
+
+  }
+
+}
+
+$.when('click', '[data-action]', (event) => {
+  const { action, state, cid, uri } = event.target.dataset
+
+  if(actionHandlers[action]) {
+    actionHandlers[action](cid, uri, state)
+  }
+})
+
+
+
 $.when('click', '.new-post', (event) => {
   showModal(`
     <blue-sky view="${views.createPost}"></blue-sky>
@@ -284,7 +392,7 @@ async function login() {
       const sessionData = agent.session
       localStorage.setItem('blue-sky/session', JSON.stringify(sessionData))
 
-      $.teach({ authenticated: true, mode: modes.timeline })
+      $.teach({ authenticated: true, mode: modes.timeline, session: { data } })
       fetchProfile(agent.session?.handle)
     }
   } catch (error) {
@@ -596,7 +704,7 @@ function renderImagesEmbed(embed) {
   embed.images.forEach(image => {
     imagesHtml += `
       <div class="post-image">
-        <img src="${image.fullsize}" alt="${image.alt || ''}" 
+        <img src="${image.fullsize}" alt="${escapeHyperText(image.alt || '')}" 
           loading="lazy" class="post-image-content" />
       </div>
     `;
@@ -694,12 +802,14 @@ function renderRecordWithMediaEmbed(embed) {
 // the above was claude
 
 const postTypeRenderers = {
-  'app.bsky.feed.post': (post) => {
+  'app.bsky.feed.post': ({ post, viewer }) => {
     const {
       likeCount,
       replyCount,
       repostCount,
       record,
+      cid,
+      uri
     } = post;
 
     const {
@@ -713,21 +823,37 @@ const postTypeRenderers = {
       </div>
       ${renderEmbed(post.embed)}
       <div class="post-footer">
-        <div class="footer-action">
-          ${replyCount}
+        <div class="post-action-container">
+          <button data-action="reply" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+            ${replyCount}
+            <span>
+              <sl-icon name="reply"></sl-icon>
+            </span>
+          </button>
         </div>
-        <div class="footer-action">
-          ${likeCount}
+        <div class="post-action-container">
+          <button data-action="like" ${post.viewer.like ? `data-state="${post.viewer.like}"`:''} data-cid="${cid}" data-uri="${uri}" class="footer-action">
+            ${likeCount}
+            <span>
+              <sl-icon name="heart"></sl-icon>
+            </span>
+          </button>
         </div>
-        <div class="footer-action">
-          ${repostCount}
+        <div class="post-action-container">
+          <button data-action="repost" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+            ${repostCount}
+            <span>
+              <sl-icon name="chat-left-quote"></sl-icon>
+            </span>
+          </button>
         </div>
       </div>
     `;
   }
 };
 
-function renderPost({ post }) {
+function renderPost(data) {
+  const { post } = data
   return `
     <div class="post">
       <div class="post-gutter">
@@ -747,7 +873,7 @@ function renderPost({ post }) {
         </div>
         <div class="body">${
           postTypeRenderers[post.record.$type]
-            ?postTypeRenderers[post.record.$type](post)
+            ?postTypeRenderers[post.record.$type](data)
             :escapeHyperText(post.record.text)
         }</div>
       </div>
@@ -991,6 +1117,7 @@ $.draw(target => {
     {
       afterUpdateTheme($paperPocket, target)
       recoverElves(target, 'sl-icon')
+      recoverElves(target, 'blue-sky')
     }
 
     {
@@ -1170,6 +1297,11 @@ $.style(`
     white-space: nowrap;
   }
 
+  & .post-footer {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
   & .draft-template {
     display: grid;
     grid-template-rows: 1fr auto 1fr;
@@ -1326,6 +1458,22 @@ $.style(`
 
   & [data-actor] > * {
     pointer-events: none;
+  }
+
+  & .post-action-container {
+    text-align: center;
+  }
+
+  & .footer-action {
+    display: inline-grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  & .footer-action span {
+    font-size: .75em;
+    place-self: end;
   }
 `)
 
