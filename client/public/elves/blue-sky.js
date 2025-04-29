@@ -225,7 +225,7 @@ $.when('click', '[data-handle]', (event) => {
   const { handle } = event.target.dataset
   $.teach({ activeHandle: handle, mode: modes.profile, activeTimeline: [] })
 
-  fetchActiveTimeline()
+  fetchActiveTimeline(true)
   fetchProfile(handle)
 })
 
@@ -413,12 +413,18 @@ function renderProfile(profile, timeline) {
         </div>
       </div>
       <div class="feed">
-        ${timeline ? timeline.map(renderPost).join('') : ''}
+        ${timeline ? renderTimeline(timeline) : ''}
       </div>
       <div class="load-more" data-feed="${handle === agent.session?.handle?'myTimeline':'activeTimeline'}"></div>
     </div>
   `
 
+}
+
+function renderTimeline(timeline) {
+  return `
+    ${timeline.map(renderPost).join('')}
+  `
 }
 
 function renderPost({ post }) {
@@ -455,7 +461,7 @@ function renderNotification(post) {
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="https://bsky.app/profile/${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
         </div>
         <div class="body">${escapeHyperText(post.reason)}</div>
@@ -677,10 +683,11 @@ $.draw(target => {
     }
 
     {
-      const { mode } = $.learn()
+      const { mode, activeHandler } = $.learn()
       const watcher = target.querySelector('.load-more')
-      if(watcher && target.observerMode !== mode) {
+      if(watcher && (target.observerMode !== mode || target.lastActiveHandler === activeHandler)) {
         target.observerMode = mode
+        target.lastActiveHandler = activeHandler
 
         if(target.observer) {
           target.observer.disconnect()
@@ -995,6 +1002,10 @@ $.style(`
 
   & .settings-section {
     padding: 1rem;
+  }
+
+  & [data-handle] > * {
+    pointer-events: none;
   }
 `)
 
