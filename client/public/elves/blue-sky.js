@@ -99,10 +99,10 @@ async function fetchMyTimeline() {
 async function fetchActiveTimeline(reset) {
   const cursor = !reset ? cursors.activeTimeline : ''
   if(cursor === EOF) return
-  const { activeHandle } = $.learn()
+  const { activeActor } = $.learn()
   const response = await agent.getAuthorFeed({
     cursor,
-    actor: activeHandle, // Or agent.session?.did
+    actor: activeActor, // Or agent.session?.did
     limit: 20
   });
 
@@ -151,16 +151,16 @@ function fetchAlerts() {
   })
 }
 
-async function fetchProfile(handle) {
+async function fetchProfile(actor) {
   try {
     // Assuming you have your handle stored in a variable called 'myHandle'
     const response = await agent.getProfile({
-      actor: handle, // Or agent.session?.did if you have that
+      actor: actor, // Or agent.session?.did if you have that
     });
 
     if (response.success) {
       const profile = response.data;
-      $.teach({ [handle]: profile })
+      $.teach({ [actor]: profile })
     } else {
       console.error('Failed to fetch profile:', response.error);
     }
@@ -205,7 +205,7 @@ $.when('click', '[data-mode]', (event) => {
 
 $.when('click', '.new-post', (event) => {
   showModal(`
-    <blue-sky view="${views.post}"></blue-sky>
+    <blue-sky view="${views.createPost}"></blue-sky>
   `, {
     transparent: true
   })
@@ -220,13 +220,13 @@ $.when('click', '[data-logout]', (event) => {
   logout()
 })
 
-$.when('click', '[data-handle]', (event) => {
+$.when('click', '[data-actor]', (event) => {
   event.preventDefault()
-  const { handle } = event.target.dataset
-  $.teach({ activeHandle: handle, mode: modes.profile, activeTimeline: [] })
+  const { actor } = event.target.dataset
+  $.teach({ activeActor: actor, mode: modes.profile, activeTimeline: [] })
 
   fetchActiveTimeline(true)
-  fetchProfile(handle)
+  fetchProfile(actor)
 })
 
 $.when('input', '[data-bind]', (event) => {
@@ -427,17 +427,317 @@ function renderTimeline(timeline) {
   `
 }
 
+// the below is claude
+
+/**
+ * Process text with facets to create HTML with links, mentions, etc.
+ * @param {string} text - The post text content
+ * @param {Array} facets - Array of facet objects with byte ranges and features
+ * @returns {string} HTML with facets applied
+ */
+function processTextWithFacets(text, facets) {
+  if (!facets || !facets.length) {
+    return escapeHyperText(text);
+  }
+
+  // Step 1: Create a map of positions to facet info
+  const markers = [];
+  facets.forEach(facet => {
+    const { byteStart, byteEnd } = facet.index;
+
+    // We'll mark where facets start and end
+    markers.push({
+      position: byteStart,
+      type: 'start',
+      facet
+    });
+
+    markers.push({
+      position: byteEnd,
+      type: 'end',
+      facet
+    });
+  });
+
+  // Sort markers by position (ascending)
+  markers.sort((a, b) => a.position - b.position);
+
+  // Step 2: Generate tokens to mark facet positions
+  // We'll use these tokens as placeholders that won't be affected by HTML escaping
+  const openTokens = new Map();  // Maps facet to its opening token
+  const closeTokens = new Map(); // Maps facet to its closing token
+
+  facets.forEach((facet, index) => {
+    // Generate unique tokens for this facet
+    const openToken = `__FACET_OPEN_${index}__`;
+    const closeToken = `__FACET_CLOSE_${index}__`;
+
+    openTokens.set(facet, openToken);
+    closeTokens.set(facet, closeToken);
+  });
+
+  // Step 3: Insert tokens into the text
+  let tokenizedText = '';
+  let lastPos = 0;
+
+  markers.forEach(marker => {
+    // Add text segment before this marker
+    tokenizedText += text.substring(lastPos, marker.position);
+
+    // Add the appropriate token
+    if (marker.type === 'start') {
+      tokenizedText += openTokens.get(marker.facet);
+    } else {
+      tokenizedText += closeTokens.get(marker.facet);
+    }
+
+    lastPos = marker.position;
+  });
+
+  // Add remaining text
+  tokenizedText += text.substring(lastPos);
+
+  // Step 4: Escape the entire text with tokens
+  const escapedText = escapeHyperText(tokenizedText);
+
+  // Step 5: Replace tokens with actual HTML tags
+  let resultHtml = escapedText;
+
+  facets.forEach((facet, index) => {
+    const openToken = openTokens.get(facet);
+    const closeToken = closeTokens.get(facet);
+
+    // Get the HTML to use for this facet type
+    let openHtml = '';
+    let closeHtml = '';
+
+    if (facet.features && facet.features.length > 0) {
+      const feature = facet.features[0];
+
+      if (feature.$type === 'app.bsky.richtext.facet#mention') {
+        openHtml = `<a href="/app/blue-sky?did=${feature.did}" data-actor="${feature.did}" target="_blank">`;
+        closeHtml = '</a>';
+      }
+      else if (feature.$type === 'app.bsky.richtext.facet#link') {
+        openHtml = `<a href="${feature.uri}" target="_blank" rel="noopener noreferrer" class="link">`;
+        closeHtml = '</a>';
+      }
+      else if (feature.$type === 'app.bsky.richtext.facet#tag') {
+        // Get tag without # for search query
+        const tagName = text.substring(facet.index.byteStart, facet.index.byteEnd).replace(/^#/, '');
+        openHtml = `<a href="/search?q=${encodeURIComponent(tagName)}" class="hashtag">`;
+        closeHtml = '</a>';
+      }
+    }
+
+    // Replace tokens with HTML
+    resultHtml = resultHtml.replace(openToken, openHtml);
+    resultHtml = resultHtml.replace(closeToken, closeHtml);
+  });
+
+  return resultHtml;
+}
+
+/**
+ * Render the appropriate embed for a post
+ * @param {Object} embed - The embed object from the post
+ * @returns {string} HTML for the embed content
+ */
+function renderEmbed(embed) {
+  if (!embed) return '';
+
+  // Handle different embed types
+  switch (embed.$type) {
+    case 'app.bsky.embed.video#view':
+      return renderVideoEmbed(embed)
+    case 'app.bsky.embed.images#view':
+      return renderImagesEmbed(embed);
+
+    case 'app.bsky.embed.external#view':
+      return renderExternalEmbed(embed);
+
+    case 'app.bsky.embed.record#view':
+      return renderRecordEmbed(embed);
+
+    case 'app.bsky.embed.recordWithMedia#view':
+      return renderRecordWithMediaEmbed(embed);
+
+    default:
+      return ''; // Unknown embed type
+  }
+}
+
+/**
+ * Render images embed
+ * @param {Object} embed - The images embed object
+ * @returns {string} HTML for the images
+ */
+function renderVideoEmbed(embed) {
+  if (!embed.playlist) return '';
+
+  return `
+    <div class="post-video">
+      <hls-video src="${embed.playlist}"></hls-video>
+    </div>
+  `
+}
+
+
+/**
+ * Render images embed
+ * @param {Object} embed - The images embed object
+ * @returns {string} HTML for the images
+ */
+function renderImagesEmbed(embed) {
+  if (!embed.images || !embed.images.length) return '';
+
+  let imagesHtml = '<div class="post-images">';
+
+  embed.images.forEach(image => {
+    imagesHtml += `
+      <div class="post-image">
+        <img src="${image.fullsize}" alt="${image.alt || ''}" 
+          loading="lazy" class="post-image-content" />
+      </div>
+    `;
+  });
+
+  imagesHtml += '</div>';
+  return imagesHtml;
+}
+
+/**
+ * Render external link embed
+ * @param {Object} embed - The external embed object
+ * @returns {string} HTML for the external link preview
+ */
+function renderExternalEmbed(embed) {
+  const external = embed.external;
+  if (!external) return '';
+
+  return `
+    <a href="${external.uri}" target="_blank" rel="noopener noreferrer" class="external-embed">
+      ${external.thumb ? `<img src="${external.thumb}" alt="" class="external-thumb" />` : ''}
+      <div class="external-content">
+        <div class="external-title">${escapeHyperText(external.title || '')}</div>
+        ${external.description ? `<div class="external-description">${escapeHyperText(external.description)}</div>` : ''}
+        <div class="external-uri">${new URL(external.uri).hostname}</div>
+      </div>
+    </a>
+  `;
+}
+
+/**
+ * Render record embed (quote post)
+ * @param {Object} embed - The record embed object
+ * @returns {string} HTML for the quoted post
+ */
+function renderRecordEmbed(embed) {
+  const record = embed.record;
+  if (!record) return '';
+
+  if (record.notFound) {
+    return '<div class="quoted-post not-found">Post not found</div>';
+  }
+
+  if (record.blocked) {
+    return '<div class="quoted-post blocked">Post from a blocked account</div>';
+  }
+
+  if (!record.value) {
+    return '<div class="quoted-post error">Unable to display this post</div>';
+  }
+
+  const author = record.author;
+  const content = record.value;
+
+  return `
+    <div class="quoted-post">
+      <div class="quoted-header">
+        <img src="${author.avatar || '/default-avatar.png'}" class="quoted-avatar" alt="" />
+        <div class="quoted-name">${escapeHyperText(author.displayName || author.handle)}</div>
+        <div class="quoted-handle">@${author.handle}</div>
+      </div>
+      <div class="quoted-content">
+        ${escapeHyperText(content.text || '')}
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Render record with media embed
+ * @param {Object} embed - The recordWithMedia embed object
+ * @returns {string} HTML for the record with media
+ */
+function renderRecordWithMediaEmbed(embed) {
+  let html = '';
+
+  // First render the record
+  if (embed.record) {
+    html += renderRecordEmbed({ record: embed.record });
+  }
+
+  // Then render the media based on its type
+  if (embed.media) {
+    if (embed.media.$type === 'app.bsky.embed.images') {
+      html += renderImagesEmbed({ images: embed.media.images });
+    } else if (embed.media.$type === 'app.bsky.embed.external') {
+      html += renderExternalEmbed({ external: embed.media.external });
+    }
+  }
+
+  return html;
+}
+
+
+// the above was claude
+
+const postTypeRenderers = {
+  'app.bsky.feed.post': (post) => {
+    const {
+      likeCount,
+      replyCount,
+      repostCount,
+      record,
+    } = post;
+
+    const {
+      text,
+      facets
+    } = record;
+
+    return `
+      <div class="post-text">
+        ${processTextWithFacets(text, facets)}
+      </div>
+      ${renderEmbed(post.embed)}
+      <div class="post-footer">
+        <div class="footer-action">
+          ${replyCount}
+        </div>
+        <div class="footer-action">
+          ${likeCount}
+        </div>
+        <div class="footer-action">
+          ${repostCount}
+        </div>
+      </div>
+    `;
+  }
+};
+
 function renderPost({ post }) {
   return `
     <div class="post">
       <div class="post-gutter">
-        <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <span class="post-handle">
             @${post.author.handle}
           </span>
@@ -445,7 +745,11 @@ function renderPost({ post }) {
             <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
           </span>
         </div>
-        <div class="body">${escapeHyperText(post.record.text)}</div>
+        <div class="body">${
+          postTypeRenderers[post.record.$type]
+            ?postTypeRenderers[post.record.$type](post)
+            :escapeHyperText(post.record.text)
+        }</div>
       </div>
     </div>
   `
@@ -455,13 +759,13 @@ function renderNotification(post) {
   return `
     <div class="post">
       <div class="post-gutter">
-        <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/bluesky?profile=${post.author.handle}" data-handle="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
         </div>
         <div class="body">${escapeHyperText(post.reason)}</div>
@@ -485,9 +789,9 @@ const modeRenderers = {
      `
   },
   [modes.profile]: (target) => {
-    const { activeHandle } = $.learn()
+    const { activeActor } = $.learn()
 
-    const profile = $.learn()[activeHandle]
+    const profile = $.learn()[activeActor]
 
     const { activeTimeline } = $.learn()
 
@@ -566,7 +870,7 @@ function renderByMode(target) {
 }
 
 const views = {
-  post: 'post',
+  createPost: 'createPost',
   avatar: 'avatar',
 }
 
@@ -584,7 +888,7 @@ const viewRenderers = {
       <sl-icon name="person-fill"></sl-icon>
     `
   },
-  [views.post]: (target) => {
+  [views.createPost]: (target) => {
     const {
       draft,
       draftHeight
@@ -625,6 +929,22 @@ const viewRenderers = {
 }
 
 $.draw(target => {
+  if(!target.mounted) {
+    target.mounted = true
+    const did = target.getAttribute('did')
+    const handle = target.getAttribute('handle')
+    const actor = did || handle
+
+    if(actor) {
+      $.teach({
+        activeActor: actor,
+        mode: modes.profile,
+        activeTimeline: []
+      })
+      fetchActiveTimeline(true)
+      fetchProfile(actor)
+    }
+  }
   const view = target.getAttribute('view')
   const { authenticated, mode, loading } = $.learn()
 
@@ -683,11 +1003,11 @@ $.draw(target => {
     }
 
     {
-      const { mode, activeHandler } = $.learn()
+      const { mode, activeActor } = $.learn()
       const watcher = target.querySelector('.load-more')
-      if(watcher && (target.observerMode !== mode || target.lastActiveHandler === activeHandler)) {
+      if(watcher && (target.observerMode !== mode || target.lastActiveActor === activeActor)) {
         target.observerMode = mode
-        target.lastActiveHandler = activeHandler
+        target.lastActiveActor = activeActor
 
         if(target.observer) {
           target.observer.disconnect()
@@ -1004,7 +1324,7 @@ $.style(`
     padding: 1rem;
   }
 
-  & [data-handle] > * {
+  & [data-actor] > * {
     pointer-events: none;
   }
 `)
