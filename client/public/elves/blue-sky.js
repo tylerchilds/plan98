@@ -725,12 +725,7 @@ function renderExternalEmbed(embed) {
 
   return `
     <a href="${external.uri}" target="_blank" rel="noopener noreferrer" class="external-embed">
-      ${external.thumb ? `<img src="${external.thumb}" alt="" class="external-thumb" />` : ''}
-      <div class="external-content">
-        <div class="external-title">${escapeHyperText(external.title || '')}</div>
-        ${external.description ? `<div class="external-description">${escapeHyperText(external.description)}</div>` : ''}
-        <div class="external-uri">${new URL(external.uri).hostname}</div>
-      </div>
+      ${external.uri ? `<img src="${external.uri}" alt="${external.description ? `${escapeHyperText(external.description)}` : ''}" class="external-thumb" />` : ''}
     </a>
   `;
 }
@@ -760,16 +755,30 @@ function renderRecordEmbed(embed) {
   const content = record.value;
 
   return `
-    <div class="quoted-post">
-      <div class="quoted-header">
-        <img src="${author.avatar || '/default-avatar.png'}" class="quoted-avatar" alt="" />
-        <div class="quoted-name">${escapeHyperText(author.displayName || author.handle)}</div>
-        <div class="quoted-handle">@${author.handle}</div>
+    <div class="post -quoted">
+      <div class="post-gutter">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+          <img src="${author.avatar}" class="avatar" />
+        </a>
       </div>
-      <div class="quoted-content">
-        ${escapeHyperText(content.text || '')}
+      <div class="post-content">
+        <div class="post-meta">
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <span class="post-handle">
+            @${author.handle}
+          </span>
+          <span class="post-timestamp">
+            <sl-relative-time date="${record.createdAt}" format="long"></sl-relative-time>
+          </span>
+        </div>
+        <div class="body">${
+          postTypeRenderers[record.$type]
+            ?postTypeRenderers[record.$type](embed)
+            :escapeHyperText(content.text)
+        }</div>
       </div>
     </div>
+
   `;
 }
 
@@ -832,6 +841,14 @@ const postTypeRenderers = {
           </button>
         </div>
         <div class="post-action-container">
+          <button data-action="repost" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+            ${repostCount}
+            <span>
+              <sl-icon name="recycle"></sl-icon>
+            </span>
+          </button>
+        </div>
+        <div class="post-action-container">
           <button data-action="like" ${post.viewer.like ? `data-state="${post.viewer.like}"`:''} data-cid="${cid}" data-uri="${uri}" class="footer-action">
             ${likeCount}
             <span>
@@ -839,22 +856,53 @@ const postTypeRenderers = {
             </span>
           </button>
         </div>
-        <div class="post-action-container">
-          <button data-action="repost" data-cid="${cid}" data-uri="${uri}" class="footer-action">
-            ${repostCount}
-            <span>
-              <sl-icon name="chat-left-quote"></sl-icon>
-            </span>
-          </button>
-        </div>
       </div>
+    `;
+  },
+  'app.bsky.embed.record#viewRecord': (data) => {
+    const {
+      value,
+      embed,
+      cid,
+      uri
+    } = data.record;
+
+    const {
+      text,
+      facets
+    } = value;
+
+    return `
+      <div class="post-text">
+        ${processTextWithFacets(text, facets)}
+      </div>
+      ${renderEmbed(embed)}
     `;
   }
 };
 
+const reasonTypeRenderers = {
+  'app.bsky.feed.defs#reasonRepost': (data) => {
+    const { by } = data.reason
+    const {
+      handle,
+      displayName
+    } = by
+    return `
+      <div class="post-reason">
+        Reposted by
+        <a href="/app/blue-sky?handle=${handle}" data-actor="${handle}" target="_blank">
+          ${displayName}
+        </a>
+      </div>
+    `
+  }
+}
+
 function renderPost(data) {
-  const { post } = data
+  const { post, reason } = data
   return `
+    ${ reason && reasonTypeRenderers[reason.$type] ? reasonTypeRenderers[reason.$type](data) : ''}
     <div class="post">
       <div class="post-gutter">
         <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
@@ -1272,6 +1320,13 @@ $.style(`
     grid-template-columns: 42px 1fr;
     gap: .5rem;
     border-bottom: 1px solid rgba(0,0,0,.15);
+    padding: .5rem 1rem;
+  }
+
+  & .post.-quoted {
+    border: none;
+    border-radius: 1rem;
+    background: rgba(255,255,255,.65);
     padding: .5rem;
   }
 
@@ -1300,6 +1355,7 @@ $.style(`
   & .post-footer {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    margin-top: .5rem;
   }
 
   & .draft-template {
@@ -1469,11 +1525,64 @@ $.style(`
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: .5rem;
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    border: none;
+    border-radius: 0;
+    color: rgba(0,0,0,.65);
+    opacity: .5;
+  }
+
+  & .footer-action:hover,
+  & .footer-action:focus {
+    background: linear-gradient(135deg, rgba(0,0,0,.05), rgba(0,0,0,.35)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--root-theme, mediumseagreen);
+    opacity: 1;
   }
 
   & .footer-action span {
     font-size: .75em;
     place-self: end;
+  }
+
+  & .post-reason {
+    padding: .5rem 1rem 0;
+    font-size: .75em;
+    font-weight: bold;
+    opacity: .65;
+  }
+
+  & .post-text {
+    margin-bottom: .5rem;
+  }
+
+  & .post-image {
+    max-height: 300px;
+  }
+
+  & .post-image img {
+    object-fit: contain;
+    max-height: 300px;
+    margin: auto;
+    display: block;
+  }
+
+  & .post-video {
+    max-height: 300px;
+  }
+
+  & .post-video hls-video {
+    max-height: 300px;
+    overflow: hidden;
+    background: transparent;
+  }
+  
+  & .post-video hls-video video {
+    max-height: 300px;
+    object-fit: contain;
   }
 `)
 
