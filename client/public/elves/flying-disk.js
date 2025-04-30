@@ -45,7 +45,7 @@ $.style(`
       transform: translateX(0)
     }
     100% {
-      transform: translateX(100%);
+      transform: translateX(calc(100% - 1rem));
     }
   }
 

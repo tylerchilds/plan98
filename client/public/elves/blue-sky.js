@@ -1,9 +1,21 @@
 import elf from "@silly/elf"
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { showModal, hideModal } from './plan98-modal.js'
+import { popover } from './data-popover.js'
 import TLDs from 'tlds'
 
 import { BskyAgent } from '@atproto/api'
+
+const views = {
+  createPost: 'createPost',
+  replyPost: 'replyPost',
+  quotePost: 'quotePost',
+  postMenu: 'postMenu',
+  post: 'post',
+  avatar: 'avatar',
+  shareModal: 'shareModal',
+  confirmDelete: 'confirmDelete',
+}
 
 let agent
 
@@ -178,6 +190,21 @@ async function fetchProfile(actor) {
   }
 }
 
+async function fetchPost(uri, cid) {
+  try {
+    const response = await agent.getPostThread({ uri });
+
+    if (response.success) {
+      $.teach({ [cid]: response.data.thread })
+    } else {
+      console.error(`Failed to fetch post with URI: ${uri}`, response.error);
+    }
+  } catch (error) {
+    console.error(`An error occurred while fetching post with URI: ${uri}`, error);
+    return null;
+  }
+}
+
 function loadMore(target) {
   const { feed } = target.dataset
   if(!feed) return
@@ -238,10 +265,17 @@ const actionHandlers = {
           $.teach({ cid }, (state, payload) => {
             const { mode } = state
             if(!timelinesByMode[mode]) return { ...state }
+            const record = { ...(state[payload.cid] || { post: { viewer: {}, likeCount: 0 }}) }
+
+            if(!record) return { ...state }
+            delete record.post.viewer.like
+            record.post.likeCount -= 1
+
             return {
               ...state,
+              [payload.cid]: record,
               [timelinesByMode[mode]]: [
-                ...state[timelinesByMode[mode]].map((data) => {
+                ...(state[timelinesByMode[mode]] || []).map((data) => {
                   if(data.post.cid === payload.cid) {
                     delete data.post.viewer.like
                     data.post.likeCount -= 1
@@ -266,10 +300,16 @@ const actionHandlers = {
           $.teach({ cid, uri: response.data.uri }, (state, payload) => {
             const { mode } = state
             if(!timelinesByMode[mode]) return { ...state }
+            const record = { ...(state[payload.cid] || { post: { viewer: {}, likeCount: 0 }}) }
+
+            if(!record) return { ...state }
+            record.post.viewer.like = payload.uri
+            record.post.likeCount += 1
             return {
               ...state,
+              [payload.cid]: record,
               [timelinesByMode[mode]]: [
-                ...state[timelinesByMode[mode]].map((data) => {
+                ...(state[timelinesByMode[mode]] || []).map((data) => {
                   if(data.post.cid === payload.cid) {
                     data.post.viewer.like = payload.uri
                     data.post.likeCount += 1
@@ -300,11 +340,15 @@ const actionHandlers = {
       transparent: true
     })
 
-    const timeline = timelinesByMode[mode]
+    let draftContext = $.learn()[cid] || {}
 
-    const draftContext = $.learn()[timeline].find(data => {
-      return data.post.cid === cid
-    })
+    if(!draftContext.post) {
+      const timeline = timelinesByMode[mode]
+
+      draftContext = $.learn()[timeline].find(data => {
+        return data.post.cid === cid
+      })
+    }
     $.teach({ draftContext })
   },
   quote: async (target, { cid, uri }) => {
@@ -318,11 +362,16 @@ const actionHandlers = {
       transparent: true
     })
 
-    const timeline = timelinesByMode[mode]
+    let draftContext = $.learn()[cid] || {}
 
-    const draftContext = $.learn()[timeline].find(data => {
-      return data.post.cid === cid
-    })
+    if(!draftContext.post) {
+      const timeline = timelinesByMode[mode]
+
+      draftContext = $.learn()[timeline].find(data => {
+        return data.post.cid === cid
+      })
+    }
+
     $.teach({ draftContext })
   },
 }
@@ -371,6 +420,67 @@ $.when('click', '[data-cancel-draft]', () => {
   $.teach({ draft: '', draftHeight: null })
   hideModal()
 })
+
+$.when('click', '[data-cancel-modal]', () => {
+  hideModal()
+})
+
+
+$.when('submit', '[action="copyLink"]', async (event) => {
+  event.preventDefault()
+  const { mode } = $.learn()
+  const cid = event.target.getAttribute('cid')
+  const uri = event.target.getAttribute('uri')
+
+  let record = $.learn()[cid] || {}
+
+  if(!record.post) {
+    const timeline = timelinesByMode[mode]
+    
+    if(!timeline) return
+
+    record = $.learn()[timeline].find(data => {
+      return data.post.cid === cid
+    })
+  }
+
+  const url = window.location.href+'/app/blue-sky?view='+views.post+'&cid='+record.post.cid+'&uri='+record.post.uri
+
+  alert(url)
+})
+
+$.when('submit', '[action="confirmDelete"]', async (event) => {
+  event.preventDefault()
+  const { mode } = $.learn()
+  const cid = event.target.getAttribute('cid')
+  const uri = event.target.getAttribute('uri')
+
+  let record = $.learn()[cid] || {}
+
+  if(!record.post) {
+    const timeline = timelinesByMode[mode]
+    
+    if(!timeline) return
+
+    record = $.learn()[timeline].find(data => {
+      return data.post.cid === cid
+    })
+  }
+
+  try {
+    await agent.com.atproto.repo.deleteRecord({
+      repo: agent.session?.did,
+      collection: 'app.bsky.feed.post',          // Collection
+      rkey: uri.split('/').pop()
+    })
+
+    console.log('Post deleted successfully')
+  } catch (error) {
+    console.error('Error deleting post:', error)
+  }
+})
+
+
 
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
@@ -980,6 +1090,13 @@ const postTypeRenderers = {
             </span>
           </button>
         </div>
+        <div class="post-action-container">
+          <button class="footer-action" data-popover="<blue-sky view='${views.postMenu}' cid='${cid}' uri='${uri}'></blue-sky>" style="grid-template-columns: 1fr;">
+            <span>
+              <sl-icon name="three-dots"></sl-icon>
+            </span>
+          </button>
+        </div>
       </div>
     `;
   },
@@ -1167,13 +1284,6 @@ function renderByMode(target) {
   return (modeRenderers[mode] || non)(target)
 }
 
-const views = {
-  createPost: 'createPost',
-  replyPost: 'replyPost',
-  quotePost: 'quotePost',
-  avatar: 'avatar',
-}
-
 const viewRenderers = {
   [views.avatar]: (target) => {
     const profile = $.learn()[agent.session?.handle]
@@ -1354,18 +1464,239 @@ const viewRenderers = {
         </div>
       </div>
     `
-  }
+  },
+
+  [views.postMenu]: (target) => {
+    const { mode } = $.learn()
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+
+    let record = $.learn()[cid] || {}
+
+    if(!record.post) {
+      const timeline = timelinesByMode[mode]
+
+      if(!timeline) return 
+
+      record = $.learn()[timeline].find(data => {
+        return data.post.cid === cid
+      })
+    }
+
+    const actions = [
+      {
+        label: 'Copy Link',
+        icon: '<sl-icon name="upload"></sl-icon>',
+        action: 'copyLink'
+      }
+    ]
+
+    if(record.post.author.did === agent.session?.did) {
+      actions.push({
+        label: 'Delete post',
+        icon: '<sl-icon name="trash"></sl-icon>',
+        action: 'deletePost'
+      })
+    }
+
+    return actions.map(action => {
+      return `
+        <action-script data-action="${action.action}" data-script="${action.script||import.meta.url}" data-cid="${cid}" data-uri="${uri}">
+          <div style="display: grid; gap: .5rem; grid-template-columns: 1fr auto; align-items: center;">
+            ${action.label}
+            <span>
+              ${action.icon}
+            </span>
+          </div>
+        </action-script>
+      `
+    }).join('')
+
+
+
+  },
+  [views.shareModal]: (target) => {
+    const { mode } = $.learn()
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+
+
+    let record = $.learn()[cid] || {}
+
+    if(!record.post) {
+      const timeline = timelinesByMode[mode]
+
+      if(!timeline) return 
+
+      record = $.learn()[timeline].find(data => {
+        return data.post.cid === cid
+      })
+    }
+
+    const { post } = record
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="copyLink" cid="${cid}" uri="${uri}" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+                Cancel
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Copy Link
+              </button>
+            </div>
+            <div class="post -quoted">
+              <div class="post-gutter">
+                <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                  <img src="${post.author.avatar}" class="avatar" />
+                </a>
+              </div>
+              <div class="post-content">
+                <div class="post-meta">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                  <span class="post-handle">
+                    @${post.author.handle}
+                  </span>
+                  <span class="post-timestamp">
+                    <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                  </span>
+                </div>
+                <div class="body">${
+                  postTypeRenderers[post.record.$type]
+                    ?postTypeRenderers[post.record.$type](record)
+                    :escapeHyperText(post.record.text)
+                }</div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+
+  [views.confirmDelete]: (target) => {
+    const { mode } = $.learn()
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+
+    let record = $.learn()[cid] || {}
+
+    if(!record.post) {
+      const timeline = timelinesByMode[mode]
+      
+      if(!timeline) return
+
+      record = $.learn()[timeline].find(data => {
+        return data.post.cid === cid
+      })
+    }
+
+    const { post } = record
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="confirmDelete" cid="${cid}" uri="${uri}" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+                Cancel
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Delete
+              </button>
+            </div>
+            <div>
+              <div class="card-instructions">
+                By pressing "Delete", you confirm your intent to delete the following post:
+              </div>
+              <div class="post -quoted">
+                <div class="post-gutter">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                    <img src="${post.author.avatar}" class="avatar" />
+                  </a>
+                </div>
+                <div class="post-content">
+                  <div class="post-meta">
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <span class="post-handle">
+                      @${post.author.handle}
+                    </span>
+                    <span class="post-timestamp">
+                      <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                    </span>
+                  </div>
+                  <div class="body">${
+                    postTypeRenderers[post.record.$type]
+                      ?postTypeRenderers[post.record.$type](record)
+                      :escapeHyperText(post.record.text)
+                  }</div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+
+  },
+
+  [views.post]: (target) => {
+    const { mode } = $.learn()
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+    const record = $.learn()[cid] || {}
+
+    if(!record.post) {
+      return `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `
+    }
+
+    return renderPost(record)
+  },
 
 }
 
+export function deletePost(event, target) {
+  popover()
+  const { cid, uri } = target.dataset
+  showModal(`
+    <blue-sky view="${views.confirmDelete}"  cid="${cid}" uri="${uri}"></blue-sky>
+  `, {
+    transparent: true
+  })
+}
+
+export function copyLink(event, target) {
+  popover()
+  const { cid, uri } = target.dataset
+  showModal(`
+    <blue-sky view="${views.shareModal}"  cid="${cid}" uri="${uri}"></blue-sky>
+  `, {
+    transparent: true
+  })
+
+
+}
+
+
 $.draw(target => {
+  const view = target.getAttribute('view')
+  const uri = target.getAttribute('uri')
+  const cid = target.getAttribute('cid')
+  const did = target.getAttribute('did')
+  const handle = target.getAttribute('handle')
+  const actor = did || handle
+
   if(!target.mounted) {
     target.mounted = true
-    const did = target.getAttribute('did')
-    const handle = target.getAttribute('handle')
-    const actor = did || handle
-
-    if(actor) {
+    if(view === views.post) {
+      fetchPost(uri, cid)
+    } else if(actor) {
       $.teach({
         activeActor: actor,
         mode: modes.profile,
@@ -1375,7 +1706,6 @@ $.draw(target => {
       fetchProfile(actor)
     }
   }
-  const view = target.getAttribute('view')
   const { authenticated, mode, loading } = $.learn()
 
   if(loading) {
@@ -1738,7 +2068,7 @@ $.style(`
 
   & .post-footer {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     margin-top: .5rem;
   }
 
@@ -1968,6 +2298,11 @@ $.style(`
     max-height: 300px;
     object-fit: contain;
   }
+
+  & .card-instructions {
+    margin: 1rem 0;
+    color: rgba(0,0,0,.65);
+  }
 `)
 
 $.when('input', '[data-bind]', (event) => {
@@ -1985,4 +2320,3 @@ $.when('focus', '[name="draft"]', (event) => {
 $.when('input', '[name="draft"]', (event) => {
   $.teach({ draftHeight: event.target.scrollHeight })
 });
-

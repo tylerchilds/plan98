@@ -166,6 +166,10 @@ $.style(`
     position: relative;
   }
 
+  & button > * {
+    pointer-events: none;
+  }
+
   & button:focus,
   & button:hover {
     background-color: rebeccapurple;

@@ -31,17 +31,18 @@ const node = document.createElement('div');
 node.classList.add('data-popover')
 document.body.appendChild(node);
 
-export function popover(event, content) {
+export function popover(event, content, options={}) {
   switch(arguments.length) {
+    case 3:
     case 2:
-      show(event, content);
+      show(event, content, options);
       break;
     default:
       hide();
   }
 }
 
-function show(event, content) {
+function show(event, content, options={}) {
   node.classList.add('active');
   node.innerHTML = content;
 
@@ -52,6 +53,13 @@ function show(event, content) {
 
   node.style.setProperty("--x", x + 'px');
   node.style.setProperty("--y", y + 'px');
+
+  if(options.top) {
+    node.style.setProperty("top", options.top + 'px');
+  }
+  if(options.left) {
+    node.style.setProperty("left", options.left + 'px');
+  }
 }
 
 function hide() {
@@ -66,7 +74,7 @@ const popoverStyles = `
       box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
       display: none;
       left: 0;
-      padding: .25rem .5rem;
+      padding: 0;
       position: fixed;
       opacity: 0;
       transform-origin: right bottom;
@@ -77,7 +85,6 @@ const popoverStyles = `
       transition: opacity 100ms ease-in-out;
       top: 0;
       white-space: break-work;
-      max-width: 200px;
       z-index: -1;
     }
 
@@ -100,6 +107,29 @@ const popoverStyles = `
 
     .data-popover button:hover,
     .data-popover button:focus {
+    }
+
+    .data-popover action-script {
+      margin: 0;
+      padding: 0;
+    }
+
+    .data-popover hr {
+      border: none;
+      height: 1px;
+      background: rgba(255,255,255,.25);
+      margin: 2px 0;
+    }
+
+    .data-popover action-script button {
+      padding: .5rem;
+      border-radius: 0;
+      text-decoration: left;
+    }
+
+    .data-popover action-script button:hover,
+    .data-popover action-script button:focus {
+      background: #1c1c1c;
     }
 
   </style>
