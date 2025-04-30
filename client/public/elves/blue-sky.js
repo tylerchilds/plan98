@@ -1495,6 +1495,8 @@ const viewRenderers = {
       record = timeline.find(data => {
         return data.post.cid === cid
       })
+
+      if(!record) return
     }
 
     const actions = [
@@ -1541,6 +1543,8 @@ const viewRenderers = {
       record = timeline.find(data => {
         return data.post.cid === cid
       })
+
+      if(!record) return
     }
 
     const { post } = record
