@@ -1745,6 +1745,7 @@ $.draw(target => {
       afterUpdateTheme($paperPocket, target)
       recoverElves(target, 'sl-icon')
       recoverElves(target, 'blue-sky')
+      recoverElves(target, 'hls-video')
     }
 
     {
