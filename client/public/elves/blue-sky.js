@@ -447,22 +447,43 @@ $.when('submit', '[action="quote"]', async (event) => {
       cid: draftContext.post.cid,
     }
   }
-  const response = await agent.post({
-    text: draft,
-    facets,
-    embed: {
-      $type: "app.bsky.embed.record",
-      record: {
-        uri: draftContext.post.uri,
-        cid: draftContext.post.cid
-      }
-    },
-    createdAt: new Date().toISOString()
-  });
 
-  if(response.validationStatus) {
-    $.teach({ draft: '' })
-    hideModal()
+  if(draft) {
+    const response = await agent.post({
+      text: draft,
+      facets,
+      embed: {
+        $type: "app.bsky.embed.record",
+        record: {
+          uri: draftContext.post.uri,
+          cid: draftContext.post.cid
+        }
+      },
+
+      createdAt: new Date().toISOString()
+    });
+
+    if(response.validationStatus) {
+      $.teach({ draft: '' })
+      hideModal()
+    }
+  } else {
+    const repost = await agent.com.atproto.repo.createRecord({
+      repo: agent.session?.did,
+      collection: 'app.bsky.feed.repost',
+      record: {
+        subject: {
+          uri: draftContext.post.uri,
+          cid: draftContext.post.cid
+        },
+        createdAt: new Date().toISOString(),
+      },
+    });
+
+    if(repost.success) {
+      $.teach({ draft: '' })
+      hideModal()
+    }
   }
 })
 
