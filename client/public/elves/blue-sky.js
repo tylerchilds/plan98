@@ -32,6 +32,7 @@ const blueskyCreds = {
 const modes = {
   me: 'me',
   profile: 'profile',
+  post: 'post',
   timeline: 'timeline',
   alerts: 'alerts',
   settings: 'settings',
@@ -264,7 +265,6 @@ const actionHandlers = {
         if (deleteResult.success) {
           $.teach({ cid }, (state, payload) => {
             const { mode } = state
-            if(!timelinesByMode[mode]) return { ...state }
             const record = { ...(state[payload.cid] || { post: { viewer: {}, likeCount: 0 }}) }
 
             if(!record) return { ...state }
@@ -299,7 +299,6 @@ const actionHandlers = {
         if(response.success) {
           $.teach({ cid, uri: response.data.uri }, (state, payload) => {
             const { mode } = state
-            if(!timelinesByMode[mode]) return { ...state }
             const record = { ...(state[payload.cid] || { post: { viewer: {}, likeCount: 0 }}) }
 
             if(!record) return { ...state }
@@ -332,8 +331,6 @@ const actionHandlers = {
   reply: async (target, { cid, uri }) => {
     const { mode } = $.learn()
 
-    if(!timelinesByMode[mode]) return
-
     showModal(`
       <blue-sky view="${views.replyPost}"></blue-sky>
     `, {
@@ -343,6 +340,7 @@ const actionHandlers = {
     let draftContext = $.learn()[cid] || {}
 
     if(!draftContext.post) {
+      if(!timelinesByMode[mode]) return
       const timeline = timelinesByMode[mode]
 
       draftContext = $.learn()[timeline].find(data => {
@@ -354,8 +352,6 @@ const actionHandlers = {
   quote: async (target, { cid, uri }) => {
     const { mode } = $.learn()
 
-    if(!timelinesByMode[mode]) return
-
     showModal(`
       <blue-sky view="${views.quotePost}"></blue-sky>
     `, {
@@ -365,6 +361,7 @@ const actionHandlers = {
     let draftContext = $.learn()[cid] || {}
 
     if(!draftContext.post) {
+      if(!timelinesByMode[mode]) return
       const timeline = timelinesByMode[mode]
 
       draftContext = $.learn()[timeline].find(data => {
@@ -436,7 +433,7 @@ $.when('submit', '[action="copyLink"]', async (event) => {
 
   if(!record.post) {
     const timeline = timelinesByMode[mode]
-    
+
     if(!timeline) return
 
     record = $.learn()[timeline].find(data => {
@@ -444,7 +441,7 @@ $.when('submit', '[action="copyLink"]', async (event) => {
     })
   }
 
-  const url = window.location.href+'/app/blue-sky?view='+views.post+'&cid='+record.post.cid+'&uri='+record.post.uri
+  const url = window.location.origin+'/app/blue-sky?view='+views.post+'&cid='+record.post.cid+'&uri='+record.post.uri
 
   alert(url)
 })
@@ -700,7 +697,8 @@ function renderProfile(profile, timeline) {
     description,
     followersCount,
     followsCount,
-    postsCount
+    postsCount,
+    viewer
   } = profile
 
   return `
@@ -960,7 +958,7 @@ function renderExternalEmbed(embed) {
 
   return `
     <a href="${external.uri}" target="_blank" rel="noopener noreferrer" class="external-embed">
-      ${external.uri ? `<img src="${external.uri}" alt="${external.description ? `${escapeHyperText(external.description)}` : ''}" class="external-thumb" />` : ''}
+      ${external.title}
     </a>
   `;
 }
@@ -1203,6 +1201,22 @@ const modeRenderers = {
       ${renderProfile(profile, myTimeline)}
      `
   },
+  [modes.post]: (target) => {
+    const { mode } = $.learn()
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+    const record = $.learn()[cid] || {}
+
+    if(!record.post) {
+      return `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `
+    }
+
+    return renderPost(record)
+  },
   [modes.profile]: (target) => {
     const { activeActor } = $.learn()
 
@@ -1358,6 +1372,15 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
+              <textarea
+                class="draft-content"
+                data-bind
+                name="draft"
+                placeholder="Write your reply"
+                value="${escapeHyperText(draft)}"
+                ${draftHeight ? `style="height: ${draftHeight}px"`:''}
+              ></textarea>
+
               <div class="post -quoted">
                 <div class="post-gutter">
                   <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
@@ -1381,15 +1404,6 @@ const viewRenderers = {
                   }</div>
                 </div>
               </div>
-
-              <textarea
-                class="draft-content"
-                data-bind
-                name="draft"
-                placeholder="Write your reply"
-                value="${escapeHyperText(draft)}"
-                ${draftHeight ? `style="height: ${draftHeight}px"`:''}
-              ></textarea>
             </div>
             <div class="draft-footer">
               <div style="place-self: end">
@@ -1474,24 +1488,24 @@ const viewRenderers = {
     let record = $.learn()[cid] || {}
 
     if(!record.post) {
-      const timeline = timelinesByMode[mode]
+      const timeline = $.learn()[timelinesByMode[mode]]
 
       if(!timeline) return 
 
-      record = $.learn()[timeline].find(data => {
+      record = timeline.find(data => {
         return data.post.cid === cid
       })
     }
 
     const actions = [
       {
-        label: 'Copy Link',
+        label: 'Share Menu',
         icon: '<sl-icon name="upload"></sl-icon>',
-        action: 'copyLink'
+        action: 'shareMenu'
       }
     ]
 
-    if(record.post.author.did === agent.session?.did) {
+    if(record.post?.author.did === agent.session?.did) {
       actions.push({
         label: 'Delete post',
         icon: '<sl-icon name="trash"></sl-icon>',
@@ -1511,24 +1525,20 @@ const viewRenderers = {
         </action-script>
       `
     }).join('')
-
-
-
   },
   [views.shareModal]: (target) => {
     const { mode } = $.learn()
     const cid = target.getAttribute('cid')
     const uri = target.getAttribute('uri')
 
-
     let record = $.learn()[cid] || {}
 
     if(!record.post) {
-      const timeline = timelinesByMode[mode]
+      const timeline = $.learn()[timelinesByMode[mode]]
 
       if(!timeline) return 
 
-      record = $.learn()[timeline].find(data => {
+      record = timeline.find(data => {
         return data.post.cid === cid
       })
     }
@@ -1547,27 +1557,29 @@ const viewRenderers = {
                 Copy Link
               </button>
             </div>
-            <div class="post -quoted">
-              <div class="post-gutter">
-                <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
-                  <img src="${post.author.avatar}" class="avatar" />
-                </a>
-              </div>
-              <div class="post-content">
-                <div class="post-meta">
-                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
-                  <span class="post-handle">
-                    @${post.author.handle}
-                  </span>
-                  <span class="post-timestamp">
-                    <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
-                  </span>
+            <div class="text-well">
+              <div class="post -quoted">
+                <div class="post-gutter">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                    <img src="${post.author.avatar}" class="avatar" />
+                  </a>
                 </div>
-                <div class="body">${
-                  postTypeRenderers[post.record.$type]
-                    ?postTypeRenderers[post.record.$type](record)
-                    :escapeHyperText(post.record.text)
-                }</div>
+                <div class="post-content">
+                  <div class="post-meta">
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <span class="post-handle">
+                      @${post.author.handle}
+                    </span>
+                    <span class="post-timestamp">
+                      <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                    </span>
+                  </div>
+                  <div class="body">${
+                    postTypeRenderers[post.record.$type]
+                      ?postTypeRenderers[post.record.$type](record)
+                      :escapeHyperText(post.record.text)
+                  }</div>
+                </div>
               </div>
             </div>
           </form>
@@ -1585,7 +1597,7 @@ const viewRenderers = {
 
     if(!record.post) {
       const timeline = timelinesByMode[mode]
-      
+
       if(!timeline) return
 
       record = $.learn()[timeline].find(data => {
@@ -1607,7 +1619,7 @@ const viewRenderers = {
                 Delete
               </button>
             </div>
-            <div>
+            <div class="text-well">
               <div class="card-instructions">
                 By pressing "Delete", you confirm your intent to delete the following post:
               </div>
@@ -1641,24 +1653,6 @@ const viewRenderers = {
     `
 
   },
-
-  [views.post]: (target) => {
-    const { mode } = $.learn()
-    const cid = target.getAttribute('cid')
-    const uri = target.getAttribute('uri')
-    const record = $.learn()[cid] || {}
-
-    if(!record.post) {
-      return `
-        <loading>
-          <flying-disk></flying-disk>
-        </loading>
-      `
-    }
-
-    return renderPost(record)
-  },
-
 }
 
 export function deletePost(event, target) {
@@ -1671,7 +1665,7 @@ export function deletePost(event, target) {
   })
 }
 
-export function copyLink(event, target) {
+export function shareMenu(event, target) {
   popover()
   const { cid, uri } = target.dataset
   showModal(`
@@ -1679,8 +1673,6 @@ export function copyLink(event, target) {
   `, {
     transparent: true
   })
-
-
 }
 
 
@@ -1695,6 +1687,7 @@ $.draw(target => {
   if(!target.mounted) {
     target.mounted = true
     if(view === views.post) {
+      $.teach({ mode: modes.post })
       fetchPost(uri, cid)
     } else if(actor) {
       $.teach({
@@ -1953,10 +1946,6 @@ $.style(`
       var(--root-theme, mediumseagreen);
   }
 
-  &[view] {
-    background: transparent;
-  }
-
   & .app {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -1986,11 +1975,14 @@ $.style(`
 
   & .sidebar button {
     text-align: left;
-    padding: .5rem;
+    padding: 0 1rem;
     border-radius: 0;
     border: none;
     color: var(--root-theme, mediumseagreen);
     background: none;
+    height: 3rem;
+    display: grid;
+    place-content: center;
   }
 
   & .new-post {
@@ -2036,7 +2028,11 @@ $.style(`
   & .post.-quoted {
     border: none;
     border-radius: 1rem;
-    background: rgba(255,255,255,.65);
+    background:
+      linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
     padding: .5rem;
   }
 
@@ -2074,8 +2070,10 @@ $.style(`
 
   & .draft-template {
     display: grid;
-    grid-template-rows: 1fr auto 1fr;
+    grid-template-rows: auto 1fr auto;
     gap: .5rem;
+    overflow: hidden;
+    max-height: 100%;
   }
 
   & .draft-header {
@@ -2097,7 +2095,7 @@ $.style(`
   & .sidebar .navigation {
     background: rgba(0,0,0,.85);
     display: grid;
-    grid-template-columns: 24px 1fr;
+    grid-template-columns: 2rem 1fr;
     align-items: center;
     gap: .5rem;
   }
@@ -2111,7 +2109,7 @@ $.style(`
     border-radius: 100%;
     overflow: hidden;
     text-align: center;
-    height: 24px;
+    height: 2rem;
     display: grid;
     place-content: center;
   }
@@ -2119,7 +2117,11 @@ $.style(`
   @media (max-width: 36rem) {
 
     & .sidebar .navigation {
-      grid-template-columns: 24px;
+      grid-template-columns: 2rem;
+    }
+
+    & .sidebar button {
+      width: 3rem;
     }
     & .navigation-label {
       display: none;
@@ -2198,9 +2200,11 @@ $.style(`
     height: 100%;
     background: rgba(0,0,0,.15);
     backdrop-filter: blur(2px);
+    overflow: hidden;
   }
 
   & .form-card {
+    display: grid;
     background: white;
     max-width: 55ch;
     margin: 0 auto;
@@ -2210,6 +2214,9 @@ $.style(`
       0 0 6px 6px rgba(0,0,0,.05),
       0 0 3px 3px rgba(0,0,0,.10),
       0 0 1px 1px rgba(0,0,0,.15);
+
+    height: 100%;
+    overflow: hidden;
   }
 
   & .card-title {
@@ -2302,6 +2309,13 @@ $.style(`
   & .card-instructions {
     margin: 1rem 0;
     color: rgba(0,0,0,.65);
+  }
+
+  & .text-well {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: auto;
   }
 `)
 

@@ -14,16 +14,17 @@ function pop(event) {
     release()
   }
 
-  $.teach({ popped: !popped })
 }
 
 function attack (e, x) {
   popover(e, x)
+  $.teach({ popped: true })
 }
 
 
 function release () {
   popover()
+  $.teach({ popped: false })
 }
 
 // initialize popover

@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { consoleShow, consoleHide } from './plan98-console.js'
 import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
@@ -720,7 +720,7 @@ export function afterUpdateTheme($, target) {
   {
     const { fontFamily } = $.learn()
     if(target.fontFamily !== fontFamily) {
-      target.fontSize = fontFamily
+      target.fontFamily = fontFamily
       document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
     }
   }
