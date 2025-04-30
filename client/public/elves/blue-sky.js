@@ -1,6 +1,7 @@
 import elf from "@silly/elf"
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { showModal, hideModal } from './plan98-modal.js'
+import TLDs from 'tlds'
 
 import { BskyAgent } from '@atproto/api'
 
@@ -42,6 +43,13 @@ const navigation = {
     label: 'Settings'
   },
 }
+const timelinesByMode = {
+  [modes.me]: 'myTimeline',
+  [modes.timeline]: 'homeTimeline',
+  [modes.profile]: 'activeTimeline',
+}
+
+
 
 const $ = elf('blue-sky', {
   service: blueskyCreds.service,
@@ -205,7 +213,8 @@ $.when('click', '[data-mode]', (event) => {
 })
 
 const actionHandlers = {
-  like: async (cid, uri, state) => {
+  like: async (target, { cid, uri }) => {
+    const { state } = target.dataset
 
     try {
       // Create the like record
@@ -228,17 +237,11 @@ const actionHandlers = {
         if (deleteResult.success) {
           $.teach({ cid }, (state, payload) => {
             const { mode } = state
-            const keys = {
-              [modes.me]: 'myTimeline',
-              [modes.timeline]: 'homeTimeline',
-              [modes.profile]: 'activeTimeline',
-            }
-
-            if(!keys[mode]) return { ...state }
+            if(!timelinesByMode[mode]) return { ...state }
             return {
               ...state,
-              [keys[mode]]: [
-                ...state[keys[mode]].map((data) => {
+              [timelinesByMode[mode]]: [
+                ...state[timelinesByMode[mode]].map((data) => {
                   if(data.post.cid === payload.cid) {
                     delete data.post.viewer.like
                     data.post.likeCount -= 1
@@ -262,17 +265,11 @@ const actionHandlers = {
         if(response.success) {
           $.teach({ cid, uri: response.data.uri }, (state, payload) => {
             const { mode } = state
-            const keys = {
-              [modes.me]: 'myTimeline',
-              [modes.timeline]: 'homeTimeline',
-              [modes.profile]: 'activeTimeline',
-            }
-
-            if(!keys[mode]) return { ...state }
+            if(!timelinesByMode[mode]) return { ...state }
             return {
               ...state,
-              [keys[mode]]: [
-                ...state[keys[mode]].map((data) => {
+              [timelinesByMode[mode]]: [
+                ...state[timelinesByMode[mode]].map((data) => {
                   if(data.post.cid === payload.cid) {
                     data.post.viewer.like = payload.uri
                     data.post.likeCount += 1
@@ -292,20 +289,49 @@ const actionHandlers = {
       throw error;
     }
   },
-  repost: () => {
+  reply: async (target, { cid, uri }) => {
+    const { mode } = $.learn()
 
+    if(!timelinesByMode[mode]) return
+
+    showModal(`
+      <blue-sky view="${views.replyPost}"></blue-sky>
+    `, {
+      transparent: true
+    })
+
+    const timeline = timelinesByMode[mode]
+
+    const draftContext = $.learn()[timeline].find(data => {
+      return data.post.cid === cid
+    })
+    $.teach({ draftContext })
   },
-  reply: () => {
+  quote: async (target, { cid, uri }) => {
+    const { mode } = $.learn()
 
-  }
+    if(!timelinesByMode[mode]) return
 
+    showModal(`
+      <blue-sky view="${views.quotePost}"></blue-sky>
+    `, {
+      transparent: true
+    })
+
+    const timeline = timelinesByMode[mode]
+
+    const draftContext = $.learn()[timeline].find(data => {
+      return data.post.cid === cid
+    })
+    $.teach({ draftContext })
+  },
 }
 
 $.when('click', '[data-action]', (event) => {
-  const { action, state, cid, uri } = event.target.dataset
+  const { action, cid, uri } = event.target.dataset
 
   if(actionHandlers[action]) {
-    actionHandlers[action](cid, uri, state)
+    actionHandlers[action](event.target, { cid, uri })
   }
 })
 
@@ -350,8 +376,11 @@ $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
   const { draft } = $.learn()
 
+  const facets = await detectFacets(draft)
+
   const response = await agent.post({
     text: draft,
+    facets,
     createdAt: new Date().toISOString()
   })
 
@@ -361,6 +390,81 @@ $.when('submit', '[action="post"]', async (event) => {
   }
 })
 
+$.when('submit', '[action="reply"]', async (event) => {
+  event.preventDefault()
+  const { draft, draftContext } = $.learn()
+
+  const facets = await detectFacets(draft)
+
+  const reply = draftContext.reply ? {
+    root: draftContext.reply.root,
+    parent: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    }
+  } : {
+    root: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    },
+    parent: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    }
+  }
+  const response = await agent.post({
+    text: draft,
+    facets,
+    reply,
+    createdAt: new Date().toISOString()
+  });
+
+  if(response.validationStatus) {
+    $.teach({ draft: '' })
+    hideModal()
+  }
+})
+
+$.when('submit', '[action="quote"]', async (event) => {
+  event.preventDefault()
+  const { draft, draftContext } = $.learn()
+
+  const facets = await detectFacets(draft)
+
+  const reply = draftContext.reply ? {
+    root: draftContext.reply.root,
+    parent: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    }
+  } : {
+    root: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    },
+    parent: {
+      uri: draftContext.post.uri,
+      cid: draftContext.post.cid,
+    }
+  }
+  const response = await agent.post({
+    text: draft,
+    facets,
+    embed: {
+      $type: "app.bsky.embed.record",
+      record: {
+        uri: draftContext.post.uri,
+        cid: draftContext.post.cid
+      }
+    },
+    createdAt: new Date().toISOString()
+  });
+
+  if(response.validationStatus) {
+    $.teach({ draft: '' })
+    hideModal()
+  }
+})
 
 $.when('submit', '[action="login"]', async (event) => {
   event.preventDefault()
@@ -778,7 +882,6 @@ function renderRecordEmbed(embed) {
         }</div>
       </div>
     </div>
-
   `;
 }
 
@@ -841,7 +944,7 @@ const postTypeRenderers = {
           </button>
         </div>
         <div class="post-action-container">
-          <button data-action="repost" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+          <button data-action="quote" data-cid="${cid}" data-uri="${uri}" class="footer-action">
             ${repostCount}
             <span>
               <sl-icon name="recycle"></sl-icon>
@@ -1045,6 +1148,8 @@ function renderByMode(target) {
 
 const views = {
   createPost: 'createPost',
+  replyPost: 'replyPost',
+  quotePost: 'quotePost',
   avatar: 'avatar',
 }
 
@@ -1085,7 +1190,7 @@ const viewRenderers = {
                 class="draft-content"
                 data-bind
                 name="draft"
-                placeholder="Sup, yo?"
+                placeholder="What's good?"
                 value="${escapeHyperText(draft)}"
                 ${draftHeight ? `style="height: ${draftHeight}px"`:''}
               ></textarea>
@@ -1099,7 +1204,137 @@ const viewRenderers = {
         </div>
       </div>
     `
+  },
+  [views.replyPost]: (target) => {
+    const {
+      draft,
+      draftHeight,
+      draftContext
+    } = $.learn()
+
+    const { post } = draftContext
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="reply" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+                Cancel
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Reply
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="post -quoted">
+                <div class="post-gutter">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                    <img src="${post.author.avatar}" class="avatar" />
+                  </a>
+                </div>
+                <div class="post-content">
+                  <div class="post-meta">
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <span class="post-handle">
+                      @${post.author.handle}
+                    </span>
+                    <span class="post-timestamp">
+                      <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                    </span>
+                  </div>
+                  <div class="body">${
+                    postTypeRenderers[post.record.$type]
+                      ?postTypeRenderers[post.record.$type](draftContext)
+                      :escapeHyperText(post.record.text)
+                  }</div>
+                </div>
+              </div>
+
+              <textarea
+                class="draft-content"
+                data-bind
+                name="draft"
+                placeholder="Write your reply"
+                value="${escapeHyperText(draft)}"
+                ${draftHeight ? `style="height: ${draftHeight}px"`:''}
+              ></textarea>
+            </div>
+            <div class="draft-footer">
+              <div style="place-self: end">
+                ${300 - draft.length}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+  [views.quotePost]: (target) => {
+    const {
+      draft,
+      draftHeight,
+      draftContext
+    } = $.learn()
+
+    const { post } = draftContext
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="quote" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+                Cancel
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Quote
+              </button>
+            </div>
+            <div class="text-well">
+              <textarea
+                class="draft-content"
+                data-bind
+                name="draft"
+                placeholder="What about it?"
+                value="${escapeHyperText(draft)}"
+                ${draftHeight ? `style="height: ${draftHeight}px"`:''}
+              ></textarea>
+              <div class="post -quoted">
+                <div class="post-gutter">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                    <img src="${post.author.avatar}" class="avatar" />
+                  </a>
+                </div>
+                <div class="post-content">
+                  <div class="post-meta">
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <span class="post-handle">
+                      @${post.author.handle}
+                    </span>
+                    <span class="post-timestamp">
+                      <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+                    </span>
+                  </div>
+                  <div class="body">${
+                    postTypeRenderers[post.record.$type]
+                      ?postTypeRenderers[post.record.$type](draftContext)
+                      :escapeHyperText(post.record.text)
+                  }</div>
+                </div>
+              </div>
+            </div>
+            <div class="draft-footer">
+              <div style="place-self: end">
+                ${300 - draft.length}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    `
   }
+
 }
 
 $.draw(target => {
@@ -1231,6 +1466,130 @@ function escapeHyperText(text = '') {
   )
 }
 
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+
+class UnicodeString {
+  constructor(utf16) {
+    this.utf16 = utf16
+    this.utf8 = encoder.encode(utf16)
+  }
+
+  // helper to convert utf16 code-unit offsets to utf8 code-unit offsets
+  utf16IndexToUtf8Index(i) {
+    return encoder.encode(this.utf16.slice(0, i)).byteLength
+  }
+}
+
+async function detectFacets(draft) {
+  const text = new UnicodeString(draft)
+  let match
+  const facets = []
+  {
+    // mentions
+    const re = /(^|\s|\()(@)([a-zA-Z0-9.-]+)(\b)/g
+    while ((match = re.exec(text.utf16))) {
+      const handle = match[3]
+      if (!isValidDomain(handle) && !handle.endsWith('.test')) {
+        continue // probably not a handle
+      }
+
+      const resolveResponse = await agent.resolveHandle({ handle });
+
+      const start = text.utf16.indexOf(match[3], match.index) - 1
+      facets.push({
+        $type: 'app.bsky.richtext.facet',
+        index: {
+          byteStart: text.utf16IndexToUtf8Index(start),
+          byteEnd: text.utf16IndexToUtf8Index(start + match[3].length + 1),
+        },
+        features: [
+          {
+            $type: 'app.bsky.richtext.facet#mention',
+            did: resolveResponse.data.did, // must be resolved afterwards
+          },
+        ],
+      })
+    }
+  }
+  {
+    // links
+    const re =
+      /(^|\s|\()((https?:\/\/[\S]+)|((?<domain>[a-z][a-z0-9]*(\.[a-z0-9]+)+)[\S]*))/gim
+    while ((match = re.exec(text.utf16))) {
+      let uri = match[2]
+      if (!uri.startsWith('http')) {
+        const domain = match.groups?.domain
+        if (!domain || !isValidDomain(domain)) {
+          continue
+        }
+        uri = `https://${uri}`
+      }
+      const start = text.utf16.indexOf(match[2], match.index)
+      const index = { start, end: start + match[2].length }
+      // strip ending puncuation
+      if (/[.,;!?]$/.test(uri)) {
+        uri = uri.slice(0, -1)
+        index.end--
+      }
+      if (/[)]$/.test(uri) && !uri.includes('(')) {
+        uri = uri.slice(0, -1)
+        index.end--
+      }
+      facets.push({
+        index: {
+          byteStart: text.utf16IndexToUtf8Index(index.start),
+          byteEnd: text.utf16IndexToUtf8Index(index.end),
+        },
+        features: [
+          {
+            $type: 'app.bsky.richtext.facet#link',
+            uri,
+          },
+        ],
+      })
+    }
+  }
+  {
+    const re = /(?:^|\s)(#[^\d\s]\S*)(?=\s)?/g
+    while ((match = re.exec(text.utf16))) {
+      let [tag] = match
+      const hasLeadingSpace = /^\s/.test(tag)
+
+      tag = tag.trim().replace(/\p{P}+$/gu, '') // strip ending punctuation
+
+      // inclusive of #, max of 64 chars
+      if (tag.length > 66) continue
+
+      const index = match.index + (hasLeadingSpace ? 1 : 0)
+
+      facets.push({
+        index: {
+          byteStart: text.utf16IndexToUtf8Index(index),
+          byteEnd: text.utf16IndexToUtf8Index(index + tag.length), // inclusive of last char
+        },
+        features: [
+          {
+            $type: 'app.bsky.richtext.facet#tag',
+            tag: tag.replace(/^#/, ''),
+          },
+        ],
+      })
+    }
+  }
+  return facets.length > 0 ? facets : undefined
+}
+
+function isValidDomain(str) {
+  return !!TLDs.find((tld) => {
+    const i = str.lastIndexOf(tld)
+    if (i === -1) {
+      return false
+    }
+    return str.charAt(i - 1) === '.' && i === str.length - tld.length
+  })
+}
+
 $.style(`
   & {
     position: relative;
@@ -1328,6 +1687,10 @@ $.style(`
     border-radius: 1rem;
     background: rgba(255,255,255,.65);
     padding: .5rem;
+  }
+
+  & .post.-quoted .post-footer {
+    display: none;
   }
 
   & .post-avatar {
