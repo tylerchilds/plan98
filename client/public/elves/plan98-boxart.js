@@ -53,7 +53,7 @@ $.draw((target) => {
     <div style="display: grid; height: 100%; position: relative;">
       <footer>
         <div>
-          <a href="/app/about-sillyz">Help</a>
+          <a href="/cdn/sillyz.computer/index.md">Help</a>
         </div>
         <form name="enter-cheat">
           <input name="cheat-code" placeholder="cool-chat" type="text" />

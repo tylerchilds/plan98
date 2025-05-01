@@ -1,14 +1,25 @@
+# Portfolio/Pitch
+
+The graphic below is an operating system. That's the pitch. That's my portfolio.
+
+An OS for everywhere.
+===
+
 <iframe src="/app/door-man" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
 
-# Portfolio/Pitch
+For a quick overview of the modalities and their intersections,
+
+[Computer Modalities: Table of Contents](http://localhost:8000/cdn/sillyz.computer/en-us/six-modalities/index.md)
+
+# About
 
 Ty loves technology and is passionate about the intersection of fun and practical applications, especially as it pertains to educational accessibility.
 
-Below is a reverse chronological summary of Plan98 (the Operating System he built), why, and software he architected and implemented at various levels of the computer stack.
+Below is a reverse chronological summary of Plan98 (codename for the Operating System), why, and software he architected and implemented at various levels of the computer stack.
 
 # Vision
 
-Make computers fun, convenient, and practical from a personal perspective.
+Make computers fun and practical from a personal, professional, and portable perspective, as easy as pulling paper from your pocket.
 
 # Competitive Landscape Analysis
 
@@ -20,17 +31,44 @@ April 30, 2025
 2.938 T USD : MICROSOFT  
 1.988 T USD : AMAZON  
 1.953 T USD : GOOGLE  
+1.461 T USD : META  
 
 Each add value to core infrastructure with Brand Trust and Intellectual Property
 
-* Apple sells hardware on custom/stable Unix, same as Sony, Nintendo, Netflix
-* Amazon sells Servers, same as Web Services from Apple, Google and Microsoft
-* Microsoft sells Software Integrity, same as Google Play and Apple App Store
-* Google sells HTTP/HTML, same as Web Browsers by Microsoft and Apple
+* Apple sells hardware on custom/stable Unix, same as Sony, Nintendo, Netflix, Amazon
+* Amazon sells Services, same as Apple iCloud, Google Cloud Platform, and Microsoft Azure
+* Microsoft sells Software Integrity, same as Google Play, Apple App Store, Nintendo eShop, Sony PlayStation Store
+* Google sells Web Browsing, same as Microsoft Edge and Apple Safari
+* Meta sells Social Trust, same as Apple iMessage, Google Calendar/Mail, Microsoft LinkedIn/GitHub
 
-Like Apple, Microsoft, Amazon, Google-- Plan98 is a platform for powering marketplaces.
+Like Apple, Microsoft, Amazon, Google, Meta-- Plan98 is a platform for powering marketplaces.
 
 Don't build an economy. Build the system that is used to build economies.
+
+Deep Technology Architecture
+===
+
+Apple, Microsoft, Amazon, Google, Meta are vertically integrated flywheels.
+
+* Computers deliver value by processing commands.
+* Commands are described through languages
+* Languages build libraries
+* Libraries build products
+* Products build communities
+* Communities build loyalty
+* Loyalty drives Life-Time Value
+
+That's win, win (7 wins total)
+
+In traditional business, value is adding 40% commission on top of any good or service.
+
+By owning the hardware, the languages, the libraries, the products, the communities, the loyalty, the life-time value-- you become a flywheel.
+
+Meta is the youngest company to join these ranks and their status is precisely a result in that they do not depend on the other four-- by getting into hardware, they maintained full-grip on their flywheel.
+
+I chose to build a flywheel without the other five.
+
+Below you will find the software component parts. To know how to use them or compose them, you'll want to talk to me directly.
 
 2025
 ===
@@ -77,7 +115,7 @@ An SDK/Game Engine/Console for connecting physical interfaces for system control
 Couch Coop
 ---
 
-A batteries included game client and game server for raw frame state access
+A multiplayer game client and game server for streaming gamepad and frame state
 
 * [Demo](/app/couch-coop?rom=song-wave)
 * [Remix Link](/app/code-module?src=/public/elves/paper-pocket.js)
@@ -108,7 +146,7 @@ Switch applications with a single button to browse or immerse in experiences
 * [Demo](/app/mobile-device)
 * [Remix Link](/app/code-module?src=/public/elves/mobile-device.js)
 
-Hello Ollama
+LLM Chat
 ---
 
 A minimal chat interface for connecting with an LLM in a secure environment
@@ -133,6 +171,22 @@ A production-connected end-to-end encryption zero-liability authorization module
 
 * [Demo](/app/secure-persona)
 * [Source Code](/app/code-module?src=/public/elves/secure-persona.js)
+
+E-mail
+---
+
+An e-mail integration using the JMAP protocol for inbox and outbox functionality
+
+* [Demo](/app/e-mail)
+* [Source Code](/app/code-module?src=/public/elves/e-mail.js)
+
+Generic Park
+---
+
+Jurassic Park inspired Irix inspired hypertext based 3D file system game world
+
+* [Demo](/app/generic-park?src=/public/elves)
+* [Source Code](/app/code-module?src=/public/elves/generic-park.js)
 
 Plan98 Components
 ---
@@ -170,7 +224,7 @@ Hypertext attributes for launching higher-order hypertext tags
 A Taste of Tomorrow Today
 ---
 
-Moderated a panel with a mathematician, scientist, and SoLiD contributor and consultant
+Moderated a panel on personal data storage around sharing and collaboration
 
 * [A Taste of Tomorrow Today](https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today)
 
@@ -179,7 +233,7 @@ Code Module
 
 The ability to edit local files from inside the browser runtime
 
-* [Self-Referential](/app/code-module?src=/public/elves/code-module.js)
+* [Self-Referential: Edit the Editor](/app/code-module?src=/public/elves/code-module.js)
 
 Saga Syntax
 ---
