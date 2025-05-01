@@ -14,6 +14,10 @@ For a quick overview of the modalities and their intersections,
 
 # About
 
+* [email@tychi.me](mailto:email@tychi.me)
+* California, USA
+* Software Architect and Clown
+
 Ty loves technology and is passionate about the intersection of fun and practical applications, especially as it pertains to educational accessibility.
 
 Below is a reverse chronological summary of Plan98 (codename for the Operating System), why, and software he architected and implemented at various levels of the computer stack.
@@ -22,7 +26,8 @@ Below is a reverse chronological summary of Plan98 (codename for the Operating S
 
 Make computers fun and practical from a personal, professional, and portable perspective, as easy as pulling paper from your pocket.
 
-# Competitive Landscape Analysis
+Competitive Landscape Analysis
+---
 
 Market Cap
 
