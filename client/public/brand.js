@@ -20,7 +20,7 @@ const emeraldOfSelf
 const emeraldOfSecurity
   = `/public/sagas/sillyz.computer/${language}/security.saga`
 const emeraldOfNow
-  = `/public/cdn/sillyz.computer/index.saga`
+  = `/public/cdn/sillyz.computer/index.md`
 
 export const doingBusinessAs = {
   'livevariety.live': {
@@ -308,7 +308,7 @@ export const doingBusinessAs = {
     zoom: 13,
     tagline: 'A pop-up book.',
     mascot: 'AN0051610',
-    saga: emeraldOfNow,
+    markdown: emeraldOfNow,
     contact: 'Golden Gate Bifrost',
     brandHue: 55,
     brandRange: 360,

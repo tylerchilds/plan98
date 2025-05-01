@@ -1,411 +1,252 @@
-<plan98-boxart></plan98-boxart>
+<iframe src="/app/door-man" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
 
-# About Educational Technology
+# Portfolio/Pitch
 
-Computers are mysterious, complex creatures. Were they always though? Are they stuck that way forever?
+Ty loves technology and is passionate about the intersection of fun and practical applications, especially as it pertains to educational accessibility.
 
-From talking to parents and kids about what they love about computers, there's a reason why we can't quit them and the answer is a silly little three letter word.
+Below is a reverse chronological summary of Plan98 (the Operating System he built), why, and software he architected and implemented at various levels of the computer stack.
 
-**Fun.**
+# Vision
 
-I'm Ty and my first computer was a Sega Genesis that I used to play Sonic the Hedgehog in the 90s. After that, I knew I was going to make video games one day.
+Make computers fun, convenient, and practical from a personal perspective.
 
-In 2006, I learned how to create games while I was a senior in high school using Macromedia (Adobe) Flash, which was fun for a brief while until the games no longer ran on anything due to how terribly insecure the entire flash platform was-- which is why Steve Jobs never let it run on the iPhone.
+# Competitive Landscape Analysis
 
-After that, I began writing JavaScript, which carried me from my humble shoreline roots of Cape Cod, Massachusetts to Silicon Valley, where I worked at Netflix from 2018 to 2022.
+Market Cap
 
-August of 2022, I set out to build a game engine that was easy to teach, ran on systems that cost under $100, could fit in your pocket, delivered live music performances, and could serve as my personal computing device to create Silicon Valley grade solutions.
+April 30, 2025
 
-That took longer than I thought, but along the way an honest clown was made of me as the greatest role I've undertaken, the NPC, "Ty from Sillyz.Computer".
+3.192 T USD : APPLE  
+2.938 T USD : MICROSOFT  
+1.988 T USD : AMAZON  
+1.953 T USD : GOOGLE  
 
-## What about the fun part?
+Each add value to core infrastructure with Brand Trust and Intellectual Property
 
-Right. Right. In my research studies the most fruitful discussions came from these topics:
+* Apple sells hardware on custom/stable Unix, same as Sony, Nintendo, Netflix
+* Amazon sells Servers, same as Web Services from Apple, Google and Microsoft
+* Microsoft sells Software Integrity, same as Google Play and Apple App Store
+* Google sells HTTP/HTML, same as Web Browsers by Microsoft and Apple
 
-* What was your first computer?
-* What do you love about computers?
-* What do you hate about computers?
-* What do you spend the most time doing with your computer?
-* Have you tried programming? If so, what finally clicked?
+Like Apple, Microsoft, Amazon, Google-- Plan98 is a platform for powering marketplaces.
 
-I'll spare the gory details, but all the answers were highly subjective and generational.
+Don't build an economy. Build the system that is used to build economies.
 
-The earlier generations said they learned to program using Basic on an Apple device or a Commodore 64.
+2025
+===
 
-The middle generation learned with Java, JavaScript, or Python on either the Windows PCs or Macs.
+@plan98/blue-sky
+---
 
-The youngest generation has mostly learned Scratch, primarily on phones or tablets.
+An app as custom hypertext tag to connect to peers over the AT Protocol
 
-The trendline has primarily driven towards more restrictive environments, typically for ease of access on mobile devices, which are generally more locked down, limiting the creative possibilities.
+* [Full Screen](/app/blue-sky)
+* [Mobile Mockup](/app/mobile-device?studio=true&src=/app/blue-sky)
+* [Desktop Mockup](/app/door-man?src=/app/blue-sky)
+* [Remix Link](/app/code-module?src=/public/elves/blue-sky.js)
 
-To that end, it is quite amazing what kids are able to accomplish using Scratch on a tablet-- the insecure games I used to write in Flash are now completely secure in Scratch and there's an entire underground of kids creating and sharing games.
+@plan98/elf
+---
 
-However, the biggest question I fieled from kids and parents alike was, "How do we build products, like Netflix, using Scratch?" And the sad answer is simply, "You can't."
+A networked mutliplayer kernel for synchronizing user experiences across peers
 
-This became a critical pillar of Sillyz.Computer-- What is smallest API that I can design to create actual products, allowing kids to break free from the dead end platforms they've been relegated to?
+NOTE: To use these, have peers scan the QR code to join the same room.
 
-My sister is 18 years younger than me, a senior in high school at the time of this writing, January 2025. Throughout her life, I've taught her computer things to varying degrees of success.
+* [Kernel Code](/app/code-module?src=/public/plan98.js)
+* [GH057 in $H3LL](/app/new-session?rom=ur-shell)
+* [Virtual Desktop](/app/new-session?rom=door-man)
+* [Mobile Mirror](/app/new-session?rom=mobile-device)
+* [Remote Control](/app/new-session?rom=remote-control)
 
-My biggest failure was in not being able to create a toy that my sister found more fascinating than Roblox. Kids have paid for their college tuition or bought their first car by creating inside the Roblox platform and getting paid in Robux.
+Unified Resource Shell
+---
 
-## No really, what about the fun part?
+An interactive text based environment for issuing commands with precision
 
-Right! Right... While in the current form, Sillyz.Computer is more like digital lego blocks, each discrete demonstration compounds on previous demonstrations to be able to build any digital, or physical application.
+* [Full Screen](/app/ur-shell)
+* [Remix Link](/app/code-module?src=/public/elves/ur-shell.js)
 
-While running on Sillyz.Computer proper, you won't be able to make changes to the source code, but you can read it. You may run the code locally on your computer or boot it directly onto a device-- I personally am writing write now on a [frame.work](https://frame.work).
+Paper Pocket
+---
 
-* My home entertainment console is the [GPD Win 4](https://www.gpd.hk/gpdwin4).
-* My favorite demo device is the [Raspberry Pi 500](https://www.raspberrypi.com/products/raspberry-pi-500/).
-* My favorite magic trick is pulling the [Raspberry Pi 5 Compute Module](https://www.raspberrypi.com/products/compute-module-5/) from my signature sticky notes.
-* For just toying around with prototypes, I enjoy the [Raspberry Pi 5](https://www.raspberrypi.com/products/raspberry-pi-5/)
-* When I'm trying to get serious work done, I boot [an expensive Apple MacBook, but running Sillyz.Computer](https://asahilinux.org/)
-* To get cross-platform native applications, I compile out from [Tauri.App](https://tauri.app/)
+An SDK/Game Engine/Console for connecting physical interfaces for system control
 
-As you can see, while I might be a Jester, my technology is no joke. If you're reading this right, this platform is the most cross platform system ever devised and I nailed all the original success criteria.
+* [Demo](/app/paper-pocket?rom=final-boss)
+* [Remix Link](/app/code-module?src=/public/elves/paper-pocket.js)
 
-1. a game engine that was easy to teach
-2. ran on systems that cost under $100
-3. could fit in your pocket
-4. delivered live music performances
-5. could serve as my personal computing device to create Silicon Valley grade solutions.
+Couch Coop
+---
 
-## Getting Started
+A batteries included game client and game server for raw frame state access
 
-There is no linear path to learning Sillyz.Computer, however, below is an attempt.
+* [Demo](/app/couch-coop?rom=song-wave)
+* [Remix Link](/app/code-module?src=/public/elves/paper-pocket.js)
 
-### Hello World
+Cool Chat
+---
 
-The default first program written in any language is called, "Hello World".
+A chat application that uses UDP and WebRTC for message passing
 
-The goal of the project is render the text, Hello World to the screen.
+* [Full Screen](/app/cool-chat)
+* [Mobile Mockup](/app/mobile-device?src=/app/cool-chat)
+* [Desktop Mockup](/app/door-man?src=/app/cool-chat)
+* [Remix Link](/app/code-module?src=/public/elves/cool-chat.js)
 
-* [Hello World: Demo](/app/hello-world)
-* [Hello World: Source](/app/code-module?src=/public/elves/hello-world.js)
+Door Manager
+---
 
-### Hello Nickname
+Multitask with dynamically positionable panels of interactive hyper media
 
-After getting text rendered, the next step is getting data synchronized when it changes.
+* [Demo](/app/door-man)
+* [Remix Link](/app/code-module?src=/public/elves/door-man.js)
 
-Hello Nickname is a simple program to demonstrate the concept of "Two-Way Data Binding"
+Mobile Device
+---
 
-* [Hello Nickname: Demo](/app/hello-nickname)
-* [Hello Nickname: Source](/app/code-module?src=/public/elves/hello-nickname.js)
+Switch applications with a single button to browse or immerse in experiences
 
-### About Sillyz
+* [Demo](/app/mobile-device)
+* [Remix Link](/app/code-module?src=/public/elves/mobile-device.js)
 
-A little bit meta, but this is the source code for the component you're currently viewing. Don't fall in.
+Hello Ollama
+---
 
-* [About Sillyz: Demo](/app/about-sillyz)
-* [About Sillyz: Source](/app/code-module?src=/public/elves/about-sillyz.js)
+A minimal chat interface for connecting with an LLM in a secure environment
 
+* [Demo](/app/hello-ollama)
+* [Remix Link](/app/code-module?src=/public/elves/hello-ollama.js)
 
-### Mine Sweeper
+Hive Labworks
+---
 
-One of the most popular games of the Windows Era was Minesweeper. This software was purchased for who knows how much, but at this point the game is often relegated to an interview question to prove you can code.
+An customizable platform for briding communications across organizations, devices, and ai securely
 
-People write this program for free every day just in the hopes of landing a gig at a tech company. Trust me, I did it. That's how I made it out to California.
+* [Hive Labworks](https://hivelabworks.com)
 
-This is a flavor of the game, that also layers on Conways Game of Life for a pretty visualization-- also a technical interview question.
+2024
+===
 
-* [Minesweeper: Demo](/app/mine-sweeper)
-* [Minesweeper: Source](/app/code-module?src=/public/elves/mine-sweeper.js)
+Secure Persona
+---
 
-### Dial Tone
+A production-connected end-to-end encryption zero-liability authorization module
 
-Dial Tone was an intial experiment in exploring relational music space. The notes on the right increase the frequency, the left will decrease it. Change the instrument. The center instrument is the root key and can be played all day without going anywhere.
+* [Demo](/app/secure-persona)
+* [Source Code](/app/code-module?src=/public/elves/secure-persona.js)
 
-The end goal has yet to be actualized, where individuals can claim a sequence of midi tones to be rung.
+Plan98 Components
+---
 
-* [Dial Tone: Demo](/app/dial-tone)
-* [Dial Tone: Source](/app/code-module?src=/public/elves/dial-tone.js)
+Composable components as a system design architecture for design systems
 
-### Music Walk
+* [Plan98 Modal](/app/code-module?src=/public/elves/plan98-modal.js)
+* [Plan98 Panel](/app/code-module?src=/public/elves/plan98-panel.js)
+* [Plan98 Console](/app/code-module?src=/public/elves/plan98-console.js)
+* [Plan98 Boxart](/app/code-module?src=/public/elves/plan98-boxart.js)
+* [Plan98 Toast](/app/code-module?src=/public/elves/plan98-toast.js)
 
-The music walk effectively combines mine-sweeper and dial-tone, allowing for an electric violin, but only if you really know what you're doing.
+Real-time Music Synthesizers
+---
 
-* [Music Walk: Demo](/app/music-walk)
-* [Music Walk: Source](/app/code-module?src=/public/elves/music-walk.js)
+Turn existing computers and accessories into actuators for musical performance
 
-### Solid Todolist
+* [Dial Tone](/app/dial-tone)
+* [Music Walk](/app/music-walk)
+* [Paper Nautiloids](/app/paper-pocket?rom=paper-nautiloids)
+* [Final Boss](/app/paper-pocket?rom=final-boss)
+* [Song Wave](/app/couch-coop?rom=song-wave)
 
-Sir Tim Berners-Lee created the World Wide Web. Tim and I share a vision where individuals are in control of their Personal Online Data. Tim has created an implementation with his World Wide Web Consortium and now runs an enterprise business on his passion project, Solid-- Socially Linked Data.
+2023
+===
 
-Solid Todolist is an intial experiment in backing a Todo List with Tim's system.
+Data Attribute Components
+---
 
-* [Solid Todolist: Demo](/app/solid-todolist)
-* [Solid Todolist: Source](/app/code-module?src=/public/elves/solid-todolist.js)
+Hypertext attributes for launching higher-order hypertext tags
 
-### File System
+* [Tooltip](/app/code-module?src=/public/elves/data-tooltip.js)
+* [Popover](/app/code-module?src=/public/elves/data-popover.js)
 
-The file system component is a work in progress, but the general idea is to be able to browse a collection of files.
+A Taste of Tomorrow Today
+---
 
-* [File System: Demo](/app/file-system)
-* [File System: Source](/app/code-module?src=/public/elves/file-system.js)
+Moderated a panel with a mathematician, scientist, and SoLiD contributor and consultant
 
-### Generic Park
+* [A Taste of Tomorrow Today](https://archive.org/details/amphi_day1_1730_a_taste_of_tomorrow_today)
 
-Generic Park is a spin on the visual file system as scene in the film Jurassic Park. That technology was real and it was called Irix.
+Code Module
+---
 
-Generic Park is also real and is a 3d visualization of the file-system component. You can actually reach Generic Park from within any directory in the File System, did you find out how?
+The ability to edit local files from inside the browser runtime
 
-* [Generic Park: Demo](/app/generic-park?src=/public/elves)
-* [Generic Park: Source](/app/code-module?src=/public/elves/generic-park.js)
+* [Self-Referential](/app/code-module?src=/public/elves/code-module.js)
 
-### Irix Launcher
+Saga Syntax
+---
 
-Every operating system needs a top level place to start programs from. This is the launcher embedded in the bulletin board.
+A unified syntax for playwrights and their screenplays
 
-* [Irix Launcher: Demo](/app/irix-launcher)
-* [Irix Launcher: Source](/app/code-module?src=/public/elves/irix-launcher.js)
+# Int. Living Room
+Someone reading in a chair, a book on thinking in screenplays
+@ That Character
+> Wow! Neat, I always wanted to write a screenplay!
 
-### Bulletin Board
+* [Hyper Script Editor](/app/hyper-script?src=/public/cdn/sillyz.computer/index.md)
+* [Parser](/app/code-module?src=/public/saga.js)
 
-A re-imagination of the classic bulletin board system while spinning the more popular infinite canvas collaboration space of modern times.
+Story Board
+---
 
-* [Bulletin Board: Demo](/app/bulletin-board)
-* [Bulletin Board: Source](/app/code-module?src=/public/elves/bulletin-board.js)
+A quick sketching application with Apple Pencil pressure sensitivity
 
-### Game Over
+* [Demo](/app/story-board)
 
-Every game needs a game over screen. This one is just weird.
+2022
+===
 
-* [Game Over: Demo](/app/game-over)
-* [Game Over: Source](/app/code-module?src=/public/elves/game-over.js)
+Circle of Fifths
+---
 
-### Hello Bluesky
+An interactive visualization of a music theory concept with piano fifths
 
-Bluesky is like Twitter (formerly X), but open. Sillyz is the everything app, sorry Elon.
+* [Demo](/app/sillyz-ocarina)
 
-You can connect to your bluesky account from here, but this demo is pretty basic beyond signing in and connecting to your feed.
+2021
+===
 
-* [Hello Bluesky: Demo](/app/hello-bluesky)
-* [Hello Bluesky: Source](/app/code-module?src=/public/elves/hello-bluesky.js)
+Tag
+---
 
-### Hyper Script
+A helper function for creating closures around custom hypertext elements
 
-Back in college I needed a way to
+* [Source Code](https://github.com/tylerchilds/tag)
 
-1. Write a screenplay
-2. Print it in the correct format
-3. Pitch it while leaving it all on the floor.
+2019
+===
 
-Hyper Script is personally my goto component any time I need to flex my creative muscles as it runs primarily on humanity and humility.
+Backpack
+---
 
-* [Hyper Script: Demo](/app/hyper-script)
-* [Hyper Script: Source](/app/code-module?src=/public/elves/hyper-script.js)
+Personal dotfiles to get a full devkit on any system with sh (bourne-shell)
 
-### Impromptu Stagehand
+* [Dotfiles](https://git.sr.ht/~tychi/backpack)
 
-in an alternate reality, i ran unconferences. this was the tool i used to organize to defend against the villians that controlled the pen and paper.
+2016
+===
 
-* [Impromptu Stagehand: demo](/app/impromptu-stagehand)
-* [Impromptu Stagehand: source](/app/code-module?src=/public/elves/impromptu-stagehand.js)
+Cutestrap
+---
 
-### Clown Jukebox
+A tiny CSS framework-as-a-design-system-documentation-generator obsessed with vertical rhythm
 
-As a street clown, my primary role is in giving the audience what they want. This was a proof of concept I devised to let the audience disengage from reality by tripping into their phone until I learned how to read a room.
+* [Legacy Docs](https://www.cutestrap.com/legacy/v1)
 
-* [Clown Jukebox: demo](/app/clown-jukebox)
-* [Clown Jukebox: source](/app/code-module?src=/public/elves/clown-jukebox.js)
+2008
+===
 
-### Just Me
+tylerchilds.com
+---
 
-A social network for just me. Go away. Sorry. Well, stay if you'd like.
+Ty first established a professional domain name in 2008 to claim a web presence and demonstrate technical capabilities
 
-* [Just Me: Demo](/app/just-me)
-* [Just Me: Source](/app/code-module?src=/public/elves/just-me.js)
-
-### Secure Authentication
-
-A login component for connecting to an end to end secure system
-
-* [Secure Authentication: Demo](/app/secure-authentication)
-* [Secure Authentication: Source](/app/code-module?src=/public/elves/secure-authentication.js)
-
-### Secure Mail
-
-Email, but only when you have a JMAP compatible account and a way to provide it to the system. Experimental.
-
-* [Secure Mail: Demo](/app/secure-mail)
-* [Secure Mail: Source](/app/code-module?src=/public/elves/secure-mail.js)
-
-### Main Quest
-
-The Havok Physics engine is the premier game engine and has been for the past two decades. Have fun, kids.
-
-* [Main Quest: Demo](/app/main-quest)
-* [Main Quest: Source](/app/code-module?src=/public/elves/main-quest.js)
-
-### Media Plexer
-
-No operating system is complete without being able to display files of arbitrary types. Static media in, hyper media out.
-
-* [Media Plexer: Demo](/app/media-plexer)
-* [Media Plexer: Source](/app/code-module?src=/public/elves/media-plexer.js)
-
-### Wallet Metamask
-
-Wallet Metamask is a neat web3 wallet like thing. This is a way to login.
-
-* [Wallet Metamask: Demo](/app/wallet-metamask)
-* [Wallet Metamask: Source](/app/code-module?src=/public/elves/wallet-metamask.js)
-
-### Mind Chess
-
-Mind Chess is better without looking at the board and just doing the moves, but I'm not that hardcore.
-
-* [Mind Chess: Demo](/app/mind-chess)
-* [Mind Chess: Source](/app/code-module?src=/public/elves/mind-chess.js)
-
-### MLB Teams
-
-MLB Teams is an introduction to the Postgres database platform. This runs in the browser, so you don't need a command line to get started.
-
-* [MLB Teams: Demo](/app/mlb-teams)
-* [MLB Teams: Source](/app/code-module?src=/public/elves/mlb-teams.js)
-
-### My Journal
-
-A minimal starting point for creating a journal backed by gundb
-
-* [My Journal: Demo](/app/my-journal)
-* [My Journal: Source](/app/code-module?src=/public/elves/my-journal.js)
-
-### Paint App
-
-A re-write of the MS paint program by a third party, mostly just a pass-through embed.
-
-* [Paint App: Demo](/app/paint-app)
-* [Paint App: Source](/app/code-module?src=/public/elves/paint-app.js)
-
-### Live Help
-
-A video conferencing tool, but right here and not in an app that will spy on you, like Zoom or Skype or Teams. Is Teams just a re-brand of Skype? Whatever, this is better.
-
-* [Live Help: Demo](/app/live-help?room=about)
-* [Live Help: Source](/app/code-module?src=/public/elves/live-help.js)
-
-### Path Finder
-
-Path Finder is like Dungeons and Dragons, but with an open license. This is the foundation of a character sheet.
-
-* [Path Finder: Demo](/app/path-finder)
-* [Path Finder: Source](/app/code-module?src=/public/elves/path-finder.js)
-
-### Debug Gamepads
-
-A gamepad debugger
-
-* [Debug Gamepads: Demo](/app/debug-gamepads)
-* [Debug Gamepads: Source](/app/code-module?src=/public/elves/debug-gamepads.js)
-
-### Pro Teleprompter
-
-A tiny repl for being able to flip the switch from source code to running system
-
-* [Pro Teleprompter: Demo](/app/pro-teleprompter)
-* [Pro Teleprompter: Source](/app/code-module?src=/public/elves/pro-teleprompter.js)
-
-
-### QR Code
-
-A component for rendering a QR Code
-
-* [QR Code: Demo](/app/qr-code?src=/)
-* [QR Code: Source](/app/code-module?src=/public/elves/qr-code.js)
-
-### QR Pay
-
-A payment mechanism through a QR Code
-
-* [QR Pay: Demo](/app/qr-pay)
-* [QR Pay: Source](/app/code-module?src=/public/elves/qr-pay.js)
-
-### Payment Dashbaord
-
-A way to create and view pay by link invoices
-
-* [Payment Dashboard: Demo](/app/payment-dashboard)
-* [Payment Dashboard: Source](/app/code-module?src=/public/elves/payment-dashboard.js)
-
-### Sonic Knuckles
-
-Going full circle back to my first computer, this is that, but if you also have the legal rights and the rom, you can play it here.
-
-* [Sonic Knuckles: Demo](/app/sonic-knuckles)
-* [Sonic Knuckles: Source](/app/code-module?src=/public/elves/sonic-knuckles.js)
-
-### Silly Wizard
-
-A text based adventure with a time travel twist.
-
-* [Silly Wizard: Demo](/app/silly-wizard)
-* [Silly Wizard: Source](/app/code-module?src=/public/elves/silly-wizard.js)
-
-### Sillyz Ocarina
-
-A synthesizer based on the circle of fifths
-
-* [Sillyz Ocarina: Demo](/app/sillyz-ocarina)
-* [Sillyz Ocarina: Source](/app/code-module?src=/public/elves/sillyz-ocarina.js)
-
-### Swipe Swipe
-
-A generic component for a swipe based infinite grid
-
-* [Swipe Swipe: Demo](/app/swipe-swipe)
-* [Swipe Swipe: Source](/app/code-module?src=/public/elves/swipe-swipe.js)
-
-### Public Broadcast
-
-A channel surfer based on swipe swipe. Connect a gamepad, swipe, or use arrow keys
-
-* [Public Broadcast: Demo](/app/public-broadcast)
-* [Public Broadcast: Source](/app/code-module?src=/public/elves/public-broadcast.js)
-
-### Vosk Browser
-
-In browser voice regognition
-
-* [Vosk Browser: Demo](/app/vosk-browser)
-* [Vosk Browser: Source](/app/code-module?src=/public/elves/vosk-browser.js)
-
-### App Simulator
-
-A component for rendering components at dimensions of other devices.
-
-* [App Simulator: Demo](/app/app-simulator?app=plan98-boxart&class=iphone)
-* [App Simulator: Source](/app/code-module?src=/public/elves/app-simulator.js)
-
-### Code Module
-
-By now, you probably realized the source code link was a source code component and the source code component could be remixed from within itself.
-
-If not, sorry to break it to you. If so, be careful, eh?
-
-* [Code Module: demo](/app/clown-jukebox)
-* [Code Module: source](/app/code-module?src=/public/elves/clown-jukebox.js)
-
-## Learn to Draw in Style and When to Teach them.
-
-The mantra for the API and SDK. There are no widgets, apps, operating systems. Everything is an elf. An elf is what runs when a computer boots.
-
-By now you can see, mathematically, a computer can be anything. A computer program is a computer. The elves power all things, the ultimate being of all systems.
-
-Learn to Draw in Style and When to Teach them.
-
-Learn-- Get the latest State
-
-Draw-- Update when State changes
-
-Style-- Make it pretty
-
-When-- Something happens you should do something
-
-Teach-- Set state
-
-That's all there is to it, you can either read code or you can't. Keep trying until you avoid the game over in this so called life.
-
-Good luck.
-
-[View all elves here](https://github.com/tylerchilds/plan98/tree/plan98/client/public/elves)
+* [Resume Website](https://tylerchilds.com)
