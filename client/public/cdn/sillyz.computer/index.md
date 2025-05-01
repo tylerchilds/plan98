@@ -9,7 +9,8 @@ An OS for everywhere.
 
 For a quick overview of the modalities and their intersections,
 
-[Computer Modalities: Table of Contents](http://localhost:8000/cdn/sillyz.computer/en-us/six-modalities/index.md)
+* [Computer Modalities](http://localhost:8000/cdn/sillyz.computer/en-us/six-modalities/index.md)
+* [Résumé](https://tylerchilds.com)
 
 # About
 
@@ -50,7 +51,7 @@ Deep Technology Architecture
 
 Apple, Microsoft, Amazon, Google, Meta are vertically integrated flywheels.
 
-* Computers deliver value by processing commands.
+* Computers deliver value by processing commands
 * Commands are described through languages
 * Languages build libraries
 * Libraries build products
@@ -68,7 +69,15 @@ Meta is the youngest company to join these ranks and their status is precisely a
 
 I chose to build a flywheel without the other five.
 
-Below you will find the software component parts. To know how to use them or compose them, you'll want to talk to me directly.
+# Pretext
+
+Below you will find software component parts. To know how to use them or compose them, you'll want to deal with me directly.
+
+[email@tychi.me](mailto:email@tychi.me)
+
+Some are languages, some are libraries, some are products, some connect to communities.
+
+In general, the applications and components higher up depend on assumptions and implementations further down.
 
 2025
 ===
@@ -303,4 +312,4 @@ tylerchilds.com
 
 Ty first established a professional domain name in 2008 to claim a web presence and demonstrate technical capabilities
 
-* [Resume Website](https://tylerchilds.com)
+* [Résumé Website](https://tylerchilds.com)

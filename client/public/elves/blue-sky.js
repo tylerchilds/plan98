@@ -855,19 +855,24 @@ function processTextWithFacets(text, facets) {
     if (facet.features && facet.features.length > 0) {
       const feature = facet.features[0];
 
-      if (feature.$type === 'app.bsky.richtext.facet#mention') {
-        openHtml = `<a href="/app/blue-sky?did=${feature.did}" data-actor="${feature.did}" target="_blank">`;
-        closeHtml = '</a>';
-      }
-      else if (feature.$type === 'app.bsky.richtext.facet#link') {
-        openHtml = `<a href="${feature.uri}" target="_blank" rel="noopener noreferrer" class="link">`;
-        closeHtml = '</a>';
-      }
-      else if (feature.$type === 'app.bsky.richtext.facet#tag') {
-        // Get tag without # for search query
-        const tagName = text.substring(facet.index.byteStart, facet.index.byteEnd).replace(/^#/, '');
-        openHtml = `<a href="/search?q=${encodeURIComponent(tagName)}" class="hashtag">`;
-        closeHtml = '</a>';
+      try {
+        if (feature.$type === 'app.bsky.richtext.facet#mention') {
+          openHtml = `<a href="/app/blue-sky?did=${feature.did}" data-actor="${feature.did}" target="_blank">`;
+          closeHtml = '</a>';
+        }
+        else if (feature.$type === 'app.bsky.richtext.facet#link') {
+          openHtml = `<a href="${feature.uri}" target="_blank" rel="noopener noreferrer" class="link">`;
+          closeHtml = '</a>';
+        }
+        else if (feature.$type === 'app.bsky.richtext.facet#tag') {
+          // Get tag without # for search query
+          const tagName = text.substring(facet.index.byteStart, facet.index.byteEnd).replace(/^#/, '');
+          openHtml = `<a href="/search?q=${encodeURIComponent(tagName)}" class="hashtag">`;
+          closeHtml = '</a>';
+        }
+      } catch(e) {
+        console.error(e)
+        console.log('^^^ for: ', { facet, feature })
       }
     }
 
