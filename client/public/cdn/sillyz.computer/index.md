@@ -9,8 +9,8 @@ An OS for everywhere.
 
 For a quick overview of the modalities and their intersections,
 
-* [Computer Modalities](http://localhost:8000/cdn/sillyz.computer/en-us/six-modalities/index.md)
-* [Résumé](https://tylerchilds.com)
+* [Computer Modalities](/cdn/sillyz.computer/en-us/six-modalities/index.md)
+* [Résumé](/?world=tylerchilds.com)
 
 # About
 

@@ -651,7 +651,7 @@ function loginForm() {
   const { service, moniker, password } = $.learn()
 
   return `
-    <div class="form-card">
+    <div class="login-card">
       <div class="card-title">
         Bluesky
       </div>
@@ -2050,6 +2050,10 @@ $.style(`
     display: none;
   }
 
+  & .post-content {
+    overflow: hidden;
+  }
+
   & .post-avatar {
     border-radius: 100%;
     display: block;
@@ -2147,9 +2151,19 @@ $.style(`
     padding: .5rem 1rem;
   }
 
+  @media (max-width: 36rem) {
+    & .profile-information {
+      grid-template-columns: 1fr;
+    }
+  }
+
   & .profile-picture {
     position: absolute;
     top: -66px;
+  }
+
+  & .profile-gutter {
+    min-height: 66px;
   }
 
   & .profile-avatar {
@@ -2228,6 +2242,22 @@ $.style(`
     height: 100%;
     overflow: hidden;
   }
+
+  & .login-card {
+    display: block;
+    background: white;
+    max-width: 55ch;
+    margin: 0 auto;
+    padding: .5rem;
+
+    box-shadow:
+      0 0 6px 6px rgba(0,0,0,.05),
+      0 0 3px 3px rgba(0,0,0,.10),
+      0 0 1px 1px rgba(0,0,0,.15);
+    overflow: hidden;
+  }
+
+
 
   & .card-title {
     color: rgba(0,0,0,.65);
