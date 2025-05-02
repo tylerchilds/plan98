@@ -1,4 +1,5 @@
 import elf from "@silly/elf"
+import { innerHTML } from 'diffhtml'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import { popover } from './data-popover.js'
@@ -61,8 +62,6 @@ const timelinesByMode = {
   [modes.timeline]: 'homeTimeline',
   [modes.profile]: 'activeTimeline',
 }
-
-
 
 const $ = elf('blue-sky', {
   service: blueskyCreds.service,
@@ -703,7 +702,7 @@ function loginForm() {
   `
 }
 
-function renderProfile(profile, timeline) {
+function renderProfile(profile) {
   if(!profile) {
     return `
       <loading>
@@ -777,16 +776,13 @@ function renderProfile(profile, timeline) {
           </div>
         </div>
       </div>
-      <div class="feed">
-        ${timeline ? renderTimeline(timeline) : ''}
-      </div>
-      <div class="load-more" data-feed="${handle === agent.session?.handle?'myTimeline':'activeTimeline'}"></div>
     </div>
   `
 
 }
 
 function renderTimeline(timeline) {
+  if(!timeline) return ''
   return `
     ${timeline.map(renderPost).join('')}
   `
@@ -1244,68 +1240,78 @@ function renderNotification(post) {
 
 
 const modeRenderers = {
-  [modes.me]: (target) => {
+  [modes.me]: (root, container) => {
     const profile = $.learn()[agent.session?.handle]
 
     const { myTimeline } = $.learn()
 
-    return `
+    innerHTML(container, `
       <button class="new-post">
         <sl-icon name="plus-lg"></sl-icon>
       </button>
-      ${renderProfile(profile, myTimeline)}
-     `
+      ${renderProfile(profile)}
+      <div class="feed">
+        ${renderTimeline(myTimeline)}
+      </div>
+      <div class="load-more" data-feed="myTimeline"></div>
+    `)
   },
-  [modes.post]: (target) => {
+  [modes.post]: (root, container) => {
     let { mode, cid, uri } = $.learn()
-    cid = cid || target.getAttribute('cid')
-    uri = uri || target.getAttribute('uri')
+    cid = cid || root.getAttribute('cid')
+    uri = uri || root.getAttribute('uri')
     const record = $.learn()[cid] || {}
 
     if(!record.post) {
-      return `
+      innerHTML(container, `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `
+      `)
+      return
     }
 
-    return `
+    innerHTML(container, `
       ${record.parent?renderParent(record.parent):''}
       <div class="active-context">
         ${renderPost(record)}
       </div>
       ${record.replies?renderTimeline(record.replies):''}
-    `
+    `)
   },
-  [modes.profile]: (target) => {
+  [modes.profile]: (root, container) => {
     const { activeActor } = $.learn()
 
     const profile = $.learn()[activeActor]
 
     const { activeTimeline } = $.learn()
 
-    return `
+    innerHTML(container, `
       <button class="new-post">
         <sl-icon name="plus-lg"></sl-icon>
       </button>
-      ${renderProfile(profile, activeTimeline)}
-     `
+      ${renderProfile(profile)}
+      <div class="feed">
+        ${renderTimeline(activeTimeline)}
+      </div>
+      <div class="load-more" data-feed="activeTimeline"></div>
+     `)
   },
 
-  [modes.timeline]: (target) => {
+  [modes.timeline]: (root, container) => {
     const { homeTimeline } = $.learn()
 
     if(!homeTimeline) {
       fetchHomeTimeline()
-      return `
+      innerHTML(container, `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `
+      `)
+      return
     }
 
-    return `
+    innerHTML(container, `
       <button class="new-post" data-draft>
         <sl-icon name="plus-lg"></sl-icon>
       </button>
@@ -1313,34 +1319,35 @@ const modeRenderers = {
         ${homeTimeline.map(renderPost).join('')}
       </div>
       <div class="load-more" data-feed="homeTimeline"></div>
-    `
+    `)
   },
-  [modes.alerts]: (target) => {
+  [modes.alerts]: (root, container) => {
     const { alerts } = $.learn()
 
     if(!alerts) {
       fetchAlerts()
-      return `
+      innerHTML(container, `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `
+      `)
+      return
     }
 
-    return `
+    innerHTML(container, `
       <div class="feed">
         ${alerts.map(renderNotification).join('')}
       </div>
       <div class="load-more" data-feed="alerts"></div>
-    `
+    `)
   },
-  [modes.settings]: (target) => {
-    return `
+  [modes.settings]: (root, container) => {
+    innerHTML(container, `
       <div class="settings-section">
         To disconnect this client, click<br/>
         <button data-logout class="standard-button">Logout</button>
       </div>
-    `
+    `)
   },
 }
 
@@ -1353,10 +1360,10 @@ function non() {
   `
 }
 
-function renderByMode(target) {
+function renderByMode(root, container) {
   const { mode } = $.learn()
 
-  return (modeRenderers[mode] || non)(target)
+  return (modeRenderers[mode] || non)(root, container)
 }
 
 const viewRenderers = {
@@ -1786,33 +1793,21 @@ $.draw(target => {
     return viewRenderers[view](target)
   }
 
-  return `
-    <div class="app">
-      <div class="sidebar">
-        ${Object.keys(navigation).map((key) => {
-          const { icon, label } = navigation[key]
-          return `
-            <button data-mode="${key}" class="navigation ${mode === key ? 'active':''}">
-              <span class="navigation-icon">
-                ${icon}
-              </span>
-              <span class="navigation-label">
-                ${label}
-              </span>
+  if(!target.querySelector('.app')) {
+    return `
+      <div class="app">
+        <div class="sidebar"></div>
+        <div class="content">
+          <div class="action-bar">
+            <button data-back>
+              Back
             </button>
-          `
-        }).join('')}
-      </div>
-      <div class="content">
-        <div class="action-bar">
-          <button data-back>
-            Back
-          </button>
+          </div>
+          <div class="dynamic-region"></div>
         </div>
-        ${renderByMode(target)}
       </div>
-    </div>
-  `
+    `
+  }
 }, {
   afterUpdate(target) {
     {
@@ -1825,9 +1820,36 @@ $.draw(target => {
     {
       const { mode } = $.learn()
       const content = target.querySelector('.content')
+      const sidebar = target.querySelector('.sidebar')
       if(content && target.mode !== mode) {
         target.mode = mode
         content.scrollTop = 0
+
+        if(sidebar) {
+          const navHTML = Object.keys(navigation).map((key) => {
+            const { icon, label } = navigation[key]
+            return `
+              <button data-mode="${key}" class="navigation ${mode === key ? 'active':''}">
+                <span class="navigation-icon">
+                  ${icon}
+                </span>
+                <span class="navigation-label">
+                  ${label}
+                </span>
+              </button>
+            `
+          }).join('')
+
+          innerHTML(sidebar, navHTML)
+        }
+      }
+    }
+
+    {
+      const region = target.querySelector('.dynamic-region')
+
+      if(region) {
+        renderByMode(target, region)
       }
     }
 
