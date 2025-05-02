@@ -193,6 +193,7 @@ async function fetchProfile(actor) {
 
 async function fetchPost(uri, cid) {
   try {
+    $.teach({ cid, uri })
     const response = await agent.getPostThread({ uri });
 
     if (response.success) {
@@ -232,11 +233,21 @@ function loadMore(target) {
   }
 }
 
-$.when('click', '[data-mode]', (event) => {
+const modeSideEffects = {
+  [modes.post]: (event) => {
+    const { cid, uri } = event.target.dataset
+    fetchPost(uri, cid)
+  }
+}
 
+$.when('click', '[data-mode]', (event) => {
   const { mode } = event.target.dataset
   if(modes[mode]) {
     $.teach({ mode })
+
+    if(modeSideEffects[mode]) {
+      modeSideEffects[mode](event)
+    }
   }
 })
 
@@ -993,7 +1004,7 @@ function renderRecordEmbed(embed) {
   const content = record.value;
 
   return `
-    <div class="post -quoted">
+    <button class="post -quoted" data-mode="${views.post}" data-cid="${record.cid}" data-uri="${record.uri}">
       <div class="post-gutter">
         <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
           <img src="${author.avatar}" class="avatar" />
@@ -1006,7 +1017,7 @@ function renderRecordEmbed(embed) {
             @${author.handle}
           </span>
           <span class="post-timestamp">
-            <sl-relative-time date="${record.createdAt}" format="long"></sl-relative-time>
+            <sl-relative-time date="${record.indexedAt}" format="long"></sl-relative-time>
           </span>
         </div>
         <div class="body">${
@@ -1015,7 +1026,7 @@ function renderRecordEmbed(embed) {
             :escapeHyperText(content.text)
         }</div>
       </div>
-    </div>
+    </button>
   `;
 }
 
@@ -1143,11 +1154,34 @@ const reasonTypeRenderers = {
   }
 }
 
-function renderPost(data) {
-  const { post, reason } = data
+function renderParent(record) {
   return `
-    ${ reason && reasonTypeRenderers[reason.$type] ? reasonTypeRenderers[reason.$type](data) : ''}
-    <div class="post">
+    ${record.parent?renderParent(record.parent):''}
+    <div class="parent-context">
+      ${renderPost(record)}
+    </div>
+  `
+}
+
+const customPostTypeRenderer = {
+  'app.bsky.feed.defs#blockedPost': (record) => {
+    return `
+      <div class="post">
+        <div class="post-gutter">
+        </div>
+        <div class="post-content">
+          Blocked Post
+        </div>
+      </div>
+    `
+  }
+}
+
+function renderPost(record) {
+  const { post, reason, $type } = record
+  return customPostTypeRenderer[$type] ? customPostTypeRenderer[$type](record) : `
+    ${ reason && reasonTypeRenderers[reason.$type] ? reasonTypeRenderers[reason.$type](record) : ''}
+    <div class="post" aria-role="button" data-mode="${views.post}" data-cid="${post.cid}" data-uri="${post.uri}">
       <div class="post-gutter">
         <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
@@ -1165,7 +1199,7 @@ function renderPost(data) {
         </div>
         <div class="body">${
           postTypeRenderers[post.record.$type]
-            ?postTypeRenderers[post.record.$type](data)
+            ?postTypeRenderers[post.record.$type](record)
             :escapeHyperText(post.record.text)
         }</div>
       </div>
@@ -1207,9 +1241,9 @@ const modeRenderers = {
      `
   },
   [modes.post]: (target) => {
-    const { mode } = $.learn()
-    const cid = target.getAttribute('cid')
-    const uri = target.getAttribute('uri')
+    let { mode, cid, uri } = $.learn()
+    cid = cid || target.getAttribute('cid')
+    uri = uri || target.getAttribute('uri')
     const record = $.learn()[cid] || {}
 
     if(!record.post) {
@@ -1220,7 +1254,13 @@ const modeRenderers = {
       `
     }
 
-    return renderPost(record)
+    return `
+      ${record.parent?renderParent(record.parent):''}
+      <div class="active-context">
+        ${renderPost(record)}
+      </div>
+      ${record.replies?renderTimeline(record.replies):''}
+    `
   },
   [modes.profile]: (target) => {
     const { activeActor } = $.learn()
@@ -2033,6 +2073,8 @@ $.style(`
     gap: .5rem;
     border-bottom: 1px solid rgba(0,0,0,.15);
     padding: .5rem 1rem;
+    text-align: left;
+    line-height: 1.3;
   }
 
   & .post.-quoted {
@@ -2058,6 +2100,28 @@ $.style(`
     border-radius: 100%;
     display: block;
     overflow: hidden;
+    position: relative;
+    z-index: 2;
+  }
+
+  & .post-gutter {
+    position: relative;
+  }
+  & .parent-context .post-gutter::before {
+    content: '';
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: -2rem;
+    width: 3px;
+    background: rgba(0,0,0,.25);
+    margin: 0 auto;
+    position: absolute;
+    z-index: 1;
+  }
+
+  & .active-context .post {
+    background: rgba(255,255,255,.5);
   }
 
   & .post-displayname {
@@ -2307,6 +2371,15 @@ $.style(`
   & .footer-action span {
     font-size: .75em;
     place-self: end;
+  }
+
+  & .post[aria-role="button"] *:not(a, button) {
+    pointer-events: none;
+  }
+
+  & .post[aria-role="button"] a,
+  & .post[aria-role="button"] button {
+    pointer-events: all;
   }
 
   & .post-reason {
