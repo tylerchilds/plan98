@@ -193,7 +193,6 @@ async function fetchProfile(actor) {
 
 async function fetchPost(uri, cid) {
   try {
-    $.teach({ cid, uri })
     const response = await agent.getPostThread({ uri });
 
     if (response.success) {
@@ -235,19 +234,28 @@ function loadMore(target) {
 
 const modeSideEffects = {
   [modes.post]: (event) => {
-    const { cid, uri } = event.target.dataset
+    const { cid, uri } = $.learn()
     fetchPost(uri, cid)
   }
 }
 
-$.when('click', '[data-mode]', (event) => {
-  const { mode } = event.target.dataset
-  if(modes[mode]) {
-    $.teach({ mode })
+function navigatePost(data) {
+  const { mode, cid, uri } = data
+  $.teach({ mode, cid, uri })
 
-    if(modeSideEffects[mode]) {
-      modeSideEffects[mode](event)
-    }
+  if(modeSideEffects[mode]) {
+    modeSideEffects[mode](event)
+  }
+}
+
+$.when('click', '[data-mode]', (event) => {
+  const { mode, cid, uri } = event.target.dataset
+  if(modes[mode]) {
+
+    const viewPost = { mode, cid, uri }
+
+    saveHistory({ type: 'viewPost', viewPost })
+    navigatePost(viewPost)
   }
 })
 
@@ -414,11 +422,16 @@ $.when('click', '[data-logout]', (event) => {
 $.when('click', '[data-actor]', (event) => {
   event.preventDefault()
   const { actor } = event.target.dataset
-  $.teach({ activeActor: actor, mode: modes.profile, activeTimeline: [] })
 
+  saveHistory({ type: 'actor', actor })
+  navigateActor(actor)
+})
+
+function navigateActor(actor) {
+  $.teach({ activeActor: actor, mode: modes.profile, activeTimeline: [] })
   fetchActiveTimeline(true)
   fetchProfile(actor)
-})
+}
 
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
@@ -997,6 +1010,9 @@ function renderRecordEmbed(embed) {
   }
 
   if (!record.value) {
+    if(record.record.value) {
+      return renderRecordEmbed(record)
+    }
     return '<div class="quoted-post error">Unable to display this post</div>';
   }
 
@@ -1736,16 +1752,20 @@ $.draw(target => {
   if(!target.mounted) {
     target.mounted = true
     if(view === views.post) {
-      $.teach({ mode: modes.post })
       fetchPost(uri, cid)
+      const viewPost = { mode: modes.post, cid, uri }
+
+      saveHistory({ type: 'viewPost', viewPost })
+      navigatePost(viewData)
     } else if(actor) {
-      $.teach({
-        activeActor: actor,
-        mode: modes.profile,
-        activeTimeline: []
-      })
-      fetchActiveTimeline(true)
-      fetchProfile(actor)
+
+      saveHistory({ type: 'actor', actor })
+      navigateActor(actor)
+    } else if(!view) {
+      self.history.replaceState({
+        type: `${$.link}-navigation`,
+        patch: { type: 'home', home: true }
+      }, "");
     }
   }
   const { authenticated, mode, loading } = $.learn()
@@ -1784,6 +1804,11 @@ $.draw(target => {
         }).join('')}
       </div>
       <div class="content">
+        <div class="action-bar">
+          <button data-back>
+            Back
+          </button>
+        </div>
         ${renderByMode(target)}
       </div>
     </div>
@@ -2373,12 +2398,14 @@ $.style(`
     place-self: end;
   }
 
-  & .post[aria-role="button"] *:not(a, button) {
+  & .post[aria-role="button"] *:not(a, button, img, video) {
     pointer-events: none;
   }
 
   & .post[aria-role="button"] a,
-  & .post[aria-role="button"] button {
+  & .post[aria-role="button"] button,
+  & .post[aria-role="button"] img,
+  & .post[aria-role="button"] video {
     pointer-events: all;
   }
 
@@ -2430,6 +2457,28 @@ $.style(`
     gap: 1rem;
     overflow: auto;
   }
+
+  & .action-bar {
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(2px);
+    padding: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  & [data-back] {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    padding: 4px;
+    color: rgba(255,255,255,.65);
+  }
+
+  & [data-back]:hover,
+  & [data-back]:focus, {
+    color: rgba(255,255,255,.85);
+  }
 `)
 
 $.when('input', '[data-bind]', (event) => {
@@ -2446,4 +2495,42 @@ $.when('focus', '[name="draft"]', (event) => {
 
 $.when('input', '[name="draft"]', (event) => {
   $.teach({ draftHeight: event.target.scrollHeight })
+});
+
+$.when('click', '[data-back]', (event) => {
+  history.back()
+})
+
+function navigateHome(bool) {
+  if(bool) {
+    $.teach({ mode: modes.timeline })
+  } else {
+    $.teach({ mode: modes.me })
+  }
+}
+
+function saveHistory(patch) {
+  self.history.pushState({
+    type: `${$.link}-navigation`,
+    patch
+  }, "");
+}
+
+function restoreHistory(patch) {
+  patchHandlers[patch.type]
+    ? patchHandlers[patch.type](patch[patch.type])
+    : ''
+}
+
+const patchHandlers = {
+  actor: navigateActor,
+  viewPost: navigatePost,
+  home: navigateHome,
+}
+
+addEventListener("popstate", async (event) => {
+  const { type, patch } = event.state || {}
+  if(type === `${$.link}-navigation`) {
+    restoreHistory(patch)
+  }
 });
