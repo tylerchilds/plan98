@@ -13,6 +13,7 @@ const views = {
   quotePost: 'quotePost',
   postMenu: 'postMenu',
   post: 'post',
+  notification: 'notification',
   avatar: 'avatar',
   shareModal: 'shareModal',
   confirmDelete: 'confirmDelete',
@@ -36,6 +37,8 @@ const modes = {
   post: 'post',
   timeline: 'timeline',
   alerts: 'alerts',
+  search: 'search',
+  backpack: 'backpack',
   settings: 'settings',
 }
 
@@ -51,6 +54,14 @@ const navigation = {
   [modes.alerts]: {
     icon: '<sl-icon name="bell"></sl-icon>',
     label: 'Alerts'
+  },
+  [modes.search]: {
+    icon: '<sl-icon name="search"></sl-icon>',
+    label: 'Search'
+  },
+  [modes.backpack]: {
+    icon: '<sl-icon name="backpack"></sl-icon>',
+    label: 'Backpack'
   },
   [modes.settings]: {
     icon: '<sl-icon name="gear-wide-connected"></sl-icon>',
@@ -70,6 +81,8 @@ const $ = elf('blue-sky', {
   mode: modes.timeline,
   draft: '',
   draftHeight: null
+}, {
+  secure: true
 })
 
 // Resume a session from stored data
@@ -159,6 +172,28 @@ function mergeFeed(feed) {
   }
 }
 
+function fetchSearchResults() {
+  const cursor = cursors.search || ''
+  if(cursor === EOF) return
+ agent.api.app.bsky.feed.searchPosts({
+    q: 'hashtag',       // The search query string
+    limit: 30    // Optional: number of results (default: 25, max: 100)
+  }).then(({ data }) => {
+    const { posts, cursor } = data
+    cursors.search = cursor || EOF
+    $.teach(posts, mergeFeed('searchResults'))
+  });
+
+  agent.listNotifications({
+    cursor,
+    limit: 20 // Optional: number of notifications to retrieve
+  }).then(({ data }) => {
+    const { notifications, cursor } = data
+    cursors.alerts = cursor || EOF
+    $.teach(notifications, mergeFeed('alerts'))
+  })
+}
+
 function fetchAlerts() {
   const cursor = cursors.alerts || ''
   if(cursor === EOF) return
@@ -191,6 +226,7 @@ async function fetchProfile(actor) {
 }
 
 async function fetchPost(uri, cid) {
+  if($.learn()[cid]) return
   try {
     const response = await agent.getPostThread({ uri });
 
@@ -1108,14 +1144,16 @@ const postTypeRenderers = {
             </span>
           </button>
         </div>
-        <div class="post-action-container">
-          <button data-action="like" ${post.viewer.like ? `data-state="${post.viewer.like}"`:''} data-cid="${cid}" data-uri="${uri}" class="footer-action">
-            ${likeCount}
-            <span>
-              <sl-icon name="heart"></sl-icon>
-            </span>
-          </button>
-        </div>
+        ${post.viewer?`
+          <div class="post-action-container">
+            <button data-action="like" ${post.viewer.like ? `data-state="${post.viewer.like}"`:''} data-cid="${cid}" data-uri="${uri}" class="footer-action">
+              ${likeCount}
+              <span>
+                <sl-icon name="heart"></sl-icon>
+              </span>
+            </button>
+          </div>
+        `:''}
         <div class="post-action-container">
           <button class="footer-action" data-popover="<blue-sky view='${views.postMenu}' cid='${cid}' uri='${uri}'></blue-sky>" style="grid-template-columns: 1fr;">
             <span>
@@ -1219,9 +1257,83 @@ function renderPost(record) {
   `
 }
 
+const notificationReasonRenderers = {
+  mention(post) {
+    return `
+      <div class="notification-reason">
+        Mentioned you
+      </div>
+      <blue-sky view="${views.notification}" cid="${post.cid}" uri="${post.uri}"></blue-sky>
+    `
+  },
+
+  reply(post) {
+    return `
+      <div class="notification-reason">
+        Replied here
+      </div>
+      <blue-sky view="${views.notification}" cid="${post.cid}" uri="${post.uri}"></blue-sky>
+    `
+  },
+  quote(post) {
+    return `
+      <div class="notification-reason">
+        Quoted that
+      </div>
+      <blue-sky view="${views.notification}" cid="${post.cid}" uri="${post.uri}"></blue-sky>
+    `
+  },
+  like(post) {
+    const { handle, displayName } = post.author
+    return `
+      <div class="notification-reason">
+        Liked this
+      </div>
+      <blue-sky view="${views.notification}" cid="${post.record.subject.cid}" uri="${post.record.subject.uri}"></blue-sky>
+    `
+  },
+  follow(post) {
+    return `
+      <div class="notification-reason">
+        Follows you
+      </div>
+    `
+  }
+
+}
+
 function renderNotification(post) {
+  const { author, cid, uri } = post
+
   return `
-    <div class="post">
+    <div class="post" data-mode="${views.post}" data-cid="${cid}" data-uri="${uri}">
+      <div class="post-gutter">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+          <img src="${author.avatar}" class="avatar" />
+        </a>
+      </div>
+      <div class="post-content">
+        <div class="post-meta">
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <span class="post-handle">
+            @${author.handle}
+          </span>
+          <span class="post-timestamp">
+            <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
+          </span>
+        </div>
+        <div class="body">
+          ${(notificationReasonRenderers[post.reason]||((post) => post.reason))(post)}
+        </div>
+      </div>
+    </div>
+  `
+}
+
+
+function renderSearchResult(post) {
+  return `
+    <div class="post" aria-role="button" data-mode="${views.post}" data-cid="${post.cid}" data-uri="${post.uri}">
       <div class="post-gutter">
         <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
@@ -1230,9 +1342,18 @@ function renderNotification(post) {
       <div class="post-content">
         <div class="post-meta">
           <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
-          <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
+          <span class="post-handle">
+            @${post.author.handle}
+          </span>
+          <span class="post-timestamp">
+            <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
+          </span>
         </div>
-        <div class="body">${escapeHyperText(post.reason)}</div>
+        <div class="body">${
+          postTypeRenderers[post.record.$type]
+            ?postTypeRenderers[post.record.$type]({ post })
+            :escapeHyperText(post.record.text)
+        }</div>
       </div>
     </div>
   `
@@ -1341,6 +1462,35 @@ const modeRenderers = {
       <div class="load-more" data-feed="alerts"></div>
     `)
   },
+  [modes.search]: (root, container) => {
+    const { searchResults } = $.learn()
+
+    if(!searchResults) {
+      fetchSearchResults()
+      innerHTML(container, `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `)
+      return
+    }
+
+    innerHTML(container, `
+      <div class="feed">
+        ${searchResults.map(renderSearchResult).join('')}
+      </div>
+      <div class="load-more" data-feed="searchResults"></div>
+    `)
+
+  },
+  [modes.backpack]: (root, container) => {
+    innerHTML(container, `
+      <div class="operating-system">
+        <iframe src="/app/plan98-backpack"></iframe>
+      </div>
+    `)
+
+  },
   [modes.settings]: (root, container) => {
     innerHTML(container, `
       <div class="settings-section">
@@ -1416,6 +1566,22 @@ const viewRenderers = {
           </form>
         </div>
       </div>
+    `
+  },
+  [views.notification]: (target) => {
+    const cid = target.getAttribute('cid')
+    const uri = target.getAttribute('uri')
+    const record = $.learn()[cid]
+
+    if(record) {
+      return `
+        <div class="notification-context">
+          ${renderPost(record)}
+        </div>
+      `
+    }
+    return `
+      <a href="/app/blue-sky?view=${views.post}&cid=${cid}&uri=${uri}">your post</a>
     `
   },
   [views.replyPost]: (target) => {
@@ -1758,12 +1924,14 @@ $.draw(target => {
 
   if(!target.mounted) {
     target.mounted = true
-    if(view === views.post) {
+    if(view === views.notification) {
+      fetchPost(uri, cid)
+    } else if(view === views.post) {
       fetchPost(uri, cid)
       const viewPost = { mode: modes.post, cid, uri }
 
       saveHistory({ type: 'viewPost', viewPost })
-      navigatePost(viewData)
+      navigatePost(viewPost)
     } else if(actor) {
 
       saveHistory({ type: 'actor', actor })
@@ -2043,6 +2211,10 @@ $.style(`
       var(--root-theme, mediumseagreen);
   }
 
+  & [view=${views.notification}] {
+    background: transparent;
+  }
+
   & .app {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -2059,8 +2231,15 @@ $.style(`
 
   & .content {
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background: rgba(255,255,255,.65);
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  & .dynamic-region {
+    height: 100%;
+    overflow: auto;
   }
 
   & .sidebar {
@@ -2114,11 +2293,24 @@ $.style(`
     flex-direction: column;
   }
 
+  & .operating-system {
+    height: 100%;
+  }
+
+  & .operating-system iframe {
+    height: 100%;
+    width: 100%;
+    display: block;
+    border: 0;
+  }
+
   & .post {
     display: grid;
     grid-template-columns: 42px 1fr;
     gap: .5rem;
+    border: none;
     border-bottom: 1px solid rgba(0,0,0,.15);
+    background: transparent;
     padding: .5rem 1rem;
     text-align: left;
     line-height: 1.3;
@@ -2141,6 +2333,9 @@ $.style(`
 
   & .post-content {
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
   }
 
   & .post-avatar {
@@ -2169,6 +2364,20 @@ $.style(`
 
   & .active-context .post {
     background: rgba(255,255,255,.5);
+  }
+
+  & .notification-context {
+    padding-top: .5rem;
+  }
+  & .notification-context .post {
+    background: rgba(255,255,255,.5);
+    border: none;
+    padding: .5rem;
+    border-radius: 1rem;
+  }
+
+  & .notification-context .post-footer {
+    display: none;
   }
 
   & .post-displayname {
@@ -2500,6 +2709,11 @@ $.style(`
   & [data-back]:hover,
   & [data-back]:focus, {
     color: rgba(255,255,255,.85);
+  }
+
+  & .notification-reason {
+    font-weight: bold;
+    color: rgba(0,0,0,.65);
   }
 `)
 
