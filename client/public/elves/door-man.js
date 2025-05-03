@@ -1475,8 +1475,8 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      title: 'Applications',
-      url: `/app/remote-control?controller=true`
+      title: 'Backpack',
+      url: `/app/plan98-backpack`
     })
 
 
