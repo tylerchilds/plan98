@@ -291,8 +291,6 @@ $.style(`
     background:
       linear-gradient(155deg, rgba(255,255,255,.75), rgba(255,255,255,.5)),
       var(--root-theme, mediumseagreen);
-    display: flex;
-    white-space: nowrap;
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;

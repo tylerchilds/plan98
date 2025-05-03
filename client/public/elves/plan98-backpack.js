@@ -4,6 +4,13 @@ const $ = elf('plan98-backpack')
 
 $.draw((target) => {
   return `
+    <hypertext-highlighter color="gold">
+      <a href="/app/remote-control">
+        Remote
+      </a>
+    </hypertext-highlighter>
+
+
     <hypertext-highlighter color="dodgerblue">
       <a href="/app/ur-shell">
         Shell
