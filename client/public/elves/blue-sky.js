@@ -1116,9 +1116,7 @@ function renderExternalEmbed(embed) {
   if (!external) return '';
 
   return `
-    <a href="${external.uri}" target="_blank" rel="noopener noreferrer" class="external-embed">
-      ${external.title}
-    </a>
+    <media-plexer src="${external.uri}" alt="${external.title}"></media-plexer>
   `;
 }
 
@@ -2924,6 +2922,7 @@ $.style(`
 
   & .post-image {
     max-height: 300px;
+    background: black;
   }
 
   & .post-image img {
