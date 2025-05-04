@@ -942,3 +942,10 @@ sillonious-brand > xml-html {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.standard-input {
+  border: 1px solid rgba(0,0,0,.15);
+  border-radius: 3px;
+  color: rgba(0,0,0,.85);
+  padding: .5rem;
+}

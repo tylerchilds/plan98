@@ -77,6 +77,7 @@ const timelinesByMode = {
 const $ = elf('blue-sky', {
   service: blueskyCreds.service,
   moniker: blueskyCreds.moniker,
+  searchQuery: {},
   password: '',
   mode: modes.timeline,
   draft: '',
@@ -172,26 +173,26 @@ function mergeFeed(feed) {
   }
 }
 
-function fetchSearchResults() {
-  const cursor = cursors.search || ''
-  if(cursor === EOF) return
- agent.api.app.bsky.feed.searchPosts({
-    q: 'hashtag',       // The search query string
-    limit: 30    // Optional: number of results (default: 25, max: 100)
-  }).then(({ data }) => {
-    const { posts, cursor } = data
-    cursors.search = cursor || EOF
-    $.teach(posts, mergeFeed('searchResults'))
-  });
+function searchValidate(query) {
+  if(!query.q) return false
 
-  agent.listNotifications({
-    cursor,
-    limit: 20 // Optional: number of notifications to retrieve
-  }).then(({ data }) => {
-    const { notifications, cursor } = data
-    cursors.alerts = cursor || EOF
-    $.teach(notifications, mergeFeed('alerts'))
-  })
+  return true
+}
+
+function fetchSearchResults(reset) {
+  const cursor = !reset ? cursors.search : ''
+  if(cursor === EOF) return
+  const { searchQuery } = $.learn()
+  if(searchValidate(searchQuery)) {
+    agent.api.app.bsky.feed.searchPosts({
+      ...searchQuery,
+      cursor
+    }).then(({ data }) => {
+      const { posts, cursor } = data
+      cursors.search = cursor || EOF
+      $.teach(posts, mergeFeed('searchResults'))
+    });
+  }
 }
 
 function fetchAlerts() {
@@ -263,6 +264,11 @@ function loadMore(target) {
 
   if(feed === 'alerts') {
     fetchAlerts()
+    return
+  }
+
+  if(feed === 'searchResults') {
+    fetchSearchResults()
     return
   }
 }
@@ -479,6 +485,33 @@ $.when('click', '[data-cancel-draft]', () => {
 
 $.when('click', '[data-cancel-modal]', () => {
   hideModal()
+})
+
+$.when('submit', '[action="search"]', async (event) => {
+  event.preventDefault()
+  const form = event.target
+  const nodes = {
+    q: form.q,
+    sort: form.sort,
+    since: form.since,       // The search query string
+    until: form.until,       // The search query string
+    mentions: form.mentions,       // The search query string
+    author: form.author,       // The search query string
+    lang: form.lang,       // The search query string
+    domain: form.domain,       // The search query string
+    url: form.url,       // The search query string
+    tag: form.tag,       // The search query string
+    limit: form.limit,       // The search query string
+  }
+
+  const searchQuery = Object.keys(nodes).reduce((query, key) => {
+    if(nodes[key] && nodes[key].value) {
+      query[key] = nodes[key].value
+    }
+    return query
+  }, {})
+
+  $.teach({ searchQuery, searchResults: null })
 })
 
 
@@ -1463,25 +1496,95 @@ const modeRenderers = {
     `)
   },
   [modes.search]: (root, container) => {
-    const { searchResults } = $.learn()
+    const { searchResults, advancedSearch } = $.learn()
 
     if(!searchResults) {
-      fetchSearchResults()
-      innerHTML(container, `
-        <loading>
-          <flying-disk></flying-disk>
-        </loading>
-      `)
-      return
+      fetchSearchResults(true)
     }
 
     innerHTML(container, `
+      <form action="search" class="search-form">
+        <div class="basic-search">
+          <div class="row-1fr-auto">
+            <input placeholder="joyful" name="q" class="standard-input">
+            <button type="submit" class="standard-button">
+              Search
+            </button>
+          </div>
+        </div>
+        <div class="search-divider">
+          <button class="toggle-advanced">
+            Toggle Advanced Search
+          </button>
+        </div>
+        <div class="advanced-search ${advancedSearch?'active':''}">
+          <div class="row-1fr-1fr">
+            <label class="field">
+              <span class="label">Sort</span>
+              <input name="sort" value="latest">
+            </label>
+            <label class="field">
+              <span class="label">limit</span>
+              <input name="limit">
+            </label>
+          </div>
+
+          <div class="row-1fr-1fr">
+            <label class="field">
+              <span class="label">Since</span>
+              <input name="since">
+            </label>
+
+            <label class="field">
+              <span class="label">Until</span>
+              <input name="until">
+            </label>
+          </div>
+
+          <div class="row-1fr-1fr">
+            <label class="field">
+              <span class="label">@ Mentions</span>
+              <input name="mentions">
+            </label>
+            <label class="field">
+              <span class="label"># Tags</span>
+              <input name="tag">
+            </label>
+          </div>
+
+          <div class="row-1fr-1fr">
+            <label class="field">
+              <span class="label">Author</span>
+              <input name="author">
+            </label>
+
+            <label class="field">
+              <span class="label">Lang</span>
+              <input name="lang">
+            </label>
+          </div>
+
+          <div class="row-1fr-1fr">
+            <label class="field">
+              <span class="label">domain</span>
+              <input name="domain">
+            </label>
+
+            <label class="field">
+              <span class="label">url</span>
+              <input name="url">
+            </label>
+          </div>
+        </div>
+      </form>
       <div class="feed">
-        ${searchResults.map(renderSearchResult).join('')}
+        ${searchResults
+          ? searchResults.map(renderSearchResult).join('')
+          : ''
+        }
       </div>
       <div class="load-more" data-feed="searchResults"></div>
     `)
-
   },
   [modes.backpack]: (root, container) => {
     innerHTML(container, `
@@ -1978,75 +2081,77 @@ $.draw(target => {
   }
 }, {
   afterUpdate(target) {
-    {
-      afterUpdateTheme($paperPocket, target)
-      recoverElves(target, 'sl-icon')
-      recoverElves(target, 'blue-sky')
-      recoverElves(target, 'hls-video')
-    }
+    requestAnimationFrame((timestamp) => {
+      {
+        afterUpdateTheme($paperPocket, target)
+        recoverElves(target, 'sl-icon')
+        recoverElves(target, 'blue-sky')
+        recoverElves(target, 'hls-video')
+      }
 
-    {
-      const { mode } = $.learn()
-      const content = target.querySelector('.content')
-      const sidebar = target.querySelector('.sidebar')
-      if(content && target.mode !== mode) {
-        target.mode = mode
-        content.scrollTop = 0
+      {
+        const { mode } = $.learn()
+        const content = target.querySelector('.content')
+        const sidebar = target.querySelector('.sidebar')
+        if(content && target.mode !== mode) {
+          target.mode = mode
+          content.scrollTop = 0
 
-        if(sidebar) {
-          const navHTML = Object.keys(navigation).map((key) => {
-            const { icon, label } = navigation[key]
-            return `
-              <button data-mode="${key}" class="navigation ${mode === key ? 'active':''}">
-                <span class="navigation-icon">
-                  ${icon}
-                </span>
-                <span class="navigation-label">
-                  ${label}
-                </span>
-              </button>
-            `
-          }).join('')
+          if(sidebar) {
+            const navHTML = Object.keys(navigation).map((key) => {
+              const { icon, label } = navigation[key]
+              return `
+                <button data-mode="${key}" class="navigation ${mode === key ? 'active':''}">
+                  <span class="navigation-icon">
+                    ${icon}
+                  </span>
+                  <span class="navigation-label">
+                    ${label}
+                  </span>
+                </button>
+              `
+            }).join('')
 
-          innerHTML(sidebar, navHTML)
+            innerHTML(sidebar, navHTML)
+          }
         }
       }
-    }
 
-    {
-      const region = target.querySelector('.dynamic-region')
+      {
+        const region = target.querySelector('.dynamic-region')
 
-      if(region) {
-        renderByMode(target, region)
-      }
-    }
-
-    {
-      const { mode, activeActor } = $.learn()
-      const watcher = target.querySelector('.load-more')
-      if(watcher && (target.observerMode !== mode || target.lastActiveActor === activeActor)) {
-        target.observerMode = mode
-        target.lastActiveActor = activeActor
-
-        if(target.observer) {
-          target.observer.disconnect()
+        if(region) {
+          renderByMode(target, region)
         }
+      }
 
-        target.observer = new IntersectionObserver((entries, observer) => {
-          entries.forEach(async (entry) => {
-            if(entry.isIntersecting) {
-              loadMore(entry.target)
-            }
+      {
+        const { mode, activeActor } = $.learn()
+        const watcher = target.querySelector('.load-more')
+        if(watcher && (target.observerMode !== mode || target.lastActiveActor === activeActor)) {
+          target.observerMode = mode
+          target.lastActiveActor = activeActor
+
+          if(target.observer) {
+            target.observer.disconnect()
+          }
+
+          target.observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(async (entry) => {
+              if(entry.isIntersecting) {
+                loadMore(entry.target)
+              }
+            });
+          }, {
+            root: target.querySelector('.content'),
+            rootMargin: '0px',
+            threshold: 0,
           });
-        }, {
-          root: target.querySelector('.content'),
-          rootMargin: '0px',
-          threshold: 0,
-        });
 
-        target.observer.observe(target.querySelector('.load-more'))
+          target.observer.observe(target.querySelector('.load-more'))
+        }
       }
-    }
+    })
   }
 })
 
@@ -2715,10 +2820,75 @@ $.style(`
     font-weight: bold;
     color: rgba(0,0,0,.65);
   }
+
+  & .search-form {
+    background:
+      linear-gradient(rgba(255,255,255,.15), rgba(255,255,255,.15)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    max-height: 100%;
+    overflow: auto;
+  }
+
+  & .basic-search {
+    background: rgba(0,0,0,.85);
+    padding: .5rem;
+  }
+
+  & .advanced-search {
+    padding: .5rem;
+    display: none;
+    background: rgba(255,255,255,.85);
+  }
+
+  & .advanced-search.active {
+    display: block;
+  }
+
+  & .row-1fr-auto {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr auto;
+  }
+
+  & .row-auto-1fr {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: auto 1fr;
+  }
+
+  & .row-1fr-1fr {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  & .search-divider { 
+    text-align: center;
+  }
+
+  & .toggle-advanced {
+    width: 100%;
+    border-radius: 0;
+    background: transparent;
+    padding: .5rem;
+    text-align: center;
+    border: none;
+    color: rgba(255,255,255,.85);
+    font-weight: bold;
+  }
 `)
 
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
+})
+
+$.when('click', '.toggle-advanced', () => {
+  $.teach({ advancedSearch: !$.learn().advancedSearch })
 })
 
 $.when('click', '.overlay-background', () => {
