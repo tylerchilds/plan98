@@ -1392,6 +1392,7 @@ function renderSearchResult(post) {
   `
 }
 
+const countCache = {}
 
 const modeRenderers = {
   [modes.me]: (root, container) => {
@@ -1456,6 +1457,7 @@ const modeRenderers = {
     const { homeTimeline } = $.learn()
 
     if(!homeTimeline) {
+      countCache[modes.timeline] = 0
       fetchHomeTimeline()
       innerHTML(container, `
         <loading>
@@ -1465,20 +1467,33 @@ const modeRenderers = {
       return
     }
 
-    innerHTML(container, `
+    const feed = container.querySelector(`.feed.${modes.timeline}`)
+
+    if(feed) {
+      if(homeTimeline.length === countCache[modes.timeline]) return
+      const newPosts = homeTimeline.slice(countCache[modes.timeline])
+      countCache[modes.timeline] = homeTimeline.length
+      const newHTML = newPosts.map(renderPost).join('')
+      feed.insertAdjacentHTML('beforeend', newHTML)
+      return
+    }
+
+    countCache[modes.timeline] = homeTimeline.length
+    container.innerHTML = `
       <button class="new-post" data-draft>
         <sl-icon name="plus-lg"></sl-icon>
       </button>
-      <div class="feed">
+      <div class="feed ${modes.timeline}">
         ${homeTimeline.map(renderPost).join('')}
       </div>
       <div class="load-more" data-feed="homeTimeline"></div>
-    `)
+    `
   },
   [modes.alerts]: (root, container) => {
     const { alerts } = $.learn()
 
     if(!alerts) {
+      countCache[modes.alerts] = 0
       fetchAlerts()
       innerHTML(container, `
         <loading>
@@ -1488,12 +1503,23 @@ const modeRenderers = {
       return
     }
 
-    innerHTML(container, `
-      <div class="feed">
+    const feed = container.querySelector(`.feed.${modes.alerts}`)
+
+    if(feed) {
+      if(alerts.length === countCache[modes.alerts]) return
+      const newAlerts = alerts.slice(countCache[modes.alerts])
+      countCache[modes.alerts] = alerts.length
+      const newNotifications = newAlerts.map(renderNotification).join('')
+      feed.insertAdjacentHTML('beforeend', newNotifications)
+      return
+    }
+    countCache[modes.alerts] = alerts.length
+    container.innerHTML = `
+      <div class="feed ${modes.alerts}">
         ${alerts.map(renderNotification).join('')}
       </div>
       <div class="load-more" data-feed="alerts"></div>
-    `)
+    `
   },
   [modes.search]: (root, container) => {
     const { searchResults, advancedSearch } = $.learn()
@@ -2084,9 +2110,9 @@ $.draw(target => {
     requestAnimationFrame((timestamp) => {
       {
         afterUpdateTheme($paperPocket, target)
-        recoverElves(target, 'sl-icon')
-        recoverElves(target, 'blue-sky')
-        recoverElves(target, 'hls-video')
+        //recoverElves(target, 'sl-icon')
+        //recoverElves(target, 'blue-sky')
+        //recoverElves(target, 'hls-video')
       }
 
       {
@@ -2454,7 +2480,7 @@ $.style(`
   & .post-gutter {
     position: relative;
   }
-  & .parent-context .post-gutter::before {
+  & .parent-context > .post > .post-gutter::before {
     content: '';
     top: 0;
     left: 0;
