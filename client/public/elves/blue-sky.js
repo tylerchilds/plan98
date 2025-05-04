@@ -3,6 +3,7 @@ import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import { popover } from './data-popover.js'
 import TLDs from 'tlds'
+import GraphemeSplitter from 'grapheme-splitter'
 
 import { BskyAgent } from '@atproto/api'
 
@@ -874,60 +875,104 @@ function renderTimeline(timeline) {
 
 // the below is claude
 
-/**
- * Process text with facets to create HTML with links, mentions, etc.
- * @param {string} text - The post text content
- * @param {Array} facets - Array of facet objects with byte ranges and features
- * @returns {string} HTML with facets applied
- */
 function processTextWithFacets(text, facets) {
   if (!facets || !facets.length) {
     return escapeHyperText(text);
   }
 
-  // Step 1: Create a map of positions to facet info
+  // Initialize GraphemeSplitter for correct Unicode handling
+  const splitter = new GraphemeSplitter();
+
+  // Split text into graphemes (visual characters, including emoji)
+  const graphemes = splitter.splitGraphemes(text);
+
+  // Build a mapping from byte offsets to grapheme indices
+  const byteToGraphemeMap = new Map();
+  let bytePos = 0;
+
+  // For each grapheme, store its starting byte position
+  graphemes.forEach((grapheme, index) => {
+    byteToGraphemeMap.set(bytePos, index);
+    bytePos += new TextEncoder().encode(grapheme).length;
+  });
+  // Add the end position
+  byteToGraphemeMap.set(bytePos, graphemes.length);
+
+  // Helper function to find the closest grapheme index for a byte position
+  function findGraphemeIndex(bytePosition) {
+    // Exact match
+    if (byteToGraphemeMap.has(bytePosition)) {
+      return byteToGraphemeMap.get(bytePosition);
+    }
+
+    // Find the closest match
+    let closestPos = 0;
+    for (const [bytePos, graphemeIdx] of byteToGraphemeMap.entries()) {
+      if (bytePos <= bytePosition && bytePos > closestPos) {
+        closestPos = bytePos;
+      }
+    }
+    return byteToGraphemeMap.get(closestPos);
+  }
+
+  // Step 1: Create a map of grapheme positions to facet info
   const markers = [];
   facets.forEach(facet => {
     const { byteStart, byteEnd } = facet.index;
 
-    // We'll mark where facets start and end
+    // Convert byte positions to grapheme indices
+    const graphemeStart = findGraphemeIndex(byteStart);
+    const graphemeEnd = findGraphemeIndex(byteEnd);
+
+    // Mark where facets start and end using grapheme indices
     markers.push({
-      position: byteStart,
+      position: graphemeStart,
       type: 'start',
-      facet
+      facet,
+      originalBytePos: byteStart
     });
 
     markers.push({
-      position: byteEnd,
+      position: graphemeEnd,
       type: 'end',
-      facet
+      facet,
+      originalBytePos: byteEnd
     });
   });
 
   // Sort markers by position (ascending)
-  markers.sort((a, b) => a.position - b.position);
+  markers.sort((a, b) => {
+    // First by grapheme position
+    if (a.position !== b.position) {
+      return a.position - b.position;
+    }
+    // If same position, 'end' markers come before 'start' markers (for nested tags)
+    if (a.type !== b.type) {
+      return a.type === 'end' ? -1 : 1;
+    }
+    // If still tied, use original byte position
+    return a.originalBytePos - b.originalBytePos;
+  });
 
   // Step 2: Generate tokens to mark facet positions
-  // We'll use these tokens as placeholders that won't be affected by HTML escaping
   const openTokens = new Map();  // Maps facet to its opening token
   const closeTokens = new Map(); // Maps facet to its closing token
-
   facets.forEach((facet, index) => {
     // Generate unique tokens for this facet
     const openToken = `__FACET_OPEN_${index}__`;
     const closeToken = `__FACET_CLOSE_${index}__`;
-
     openTokens.set(facet, openToken);
     closeTokens.set(facet, closeToken);
   });
 
-  // Step 3: Insert tokens into the text
+  // Step 3: Insert tokens into the text based on grapheme positions
   let tokenizedText = '';
   let lastPos = 0;
 
   markers.forEach(marker => {
-    // Add text segment before this marker
-    tokenizedText += text.substring(lastPos, marker.position);
+    // Add graphemes before this marker
+    const segment = graphemes.slice(lastPos, marker.position).join('');
+    tokenizedText += segment;
 
     // Add the appropriate token
     if (marker.type === 'start') {
@@ -939,8 +984,8 @@ function processTextWithFacets(text, facets) {
     lastPos = marker.position;
   });
 
-  // Add remaining text
-  tokenizedText += text.substring(lastPos);
+  // Add remaining graphemes
+  tokenizedText += graphemes.slice(lastPos).join('');
 
   // Step 4: Escape the entire text with tokens
   const escapedText = escapeHyperText(tokenizedText);
@@ -969,14 +1014,19 @@ function processTextWithFacets(text, facets) {
           closeHtml = '</a>';
         }
         else if (feature.$type === 'app.bsky.richtext.facet#tag') {
-          // Get tag without # for search query
-          const tagName = text.substring(facet.index.byteStart, facet.index.byteEnd).replace(/^#/, '');
+          // Extract the actual tag content from between the tokens in the escaped HTML
+          // This ensures we get the correct content even with emoji
+          const tagRegex = new RegExp(`${openToken}(.*?)${closeToken}`);
+          const match = tagRegex.exec(resultHtml);
+          const tagContent = match ? match[1] : '';
+          const tagName = tagContent.replace(/^#/, '');
+
           openHtml = `<a href="/app/blue-sky?view=${views.search}&q=${encodeURIComponent(tagName)}" data-q="${encodeURIComponent(tagName)}" class="hashtag">`;
           closeHtml = '</a>';
         }
       } catch(e) {
-        console.error(e)
-        console.log('^^^ for: ', { facet, feature })
+        console.error(e);
+        console.log('^^^ for: ', { facet, feature });
       }
     }
 
