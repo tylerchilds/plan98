@@ -12,6 +12,7 @@ const views = {
   quotePost: 'quotePost',
   postMenu: 'postMenu',
   post: 'post',
+  search: 'search',
   notification: 'notification',
   avatar: 'avatar',
   shareModal: 'shareModal',
@@ -287,6 +288,21 @@ function navigatePost(data) {
     modeSideEffects[mode](event)
   }
 }
+
+$.when('click', '[data-q]', (event) => {
+  event.preventDefault()
+  const { q } = event.target.dataset
+
+  const searchTag = { searchQuery: { q }, searchResults: null }
+  saveHistory({ type: 'searchTag', searchTag })
+  navigateSearch(searchTag)
+})
+
+function navigateSearch(data) {
+  const { searchQuery, searchResults } = data
+  $.teach({ mode: modes.search, searchQuery, searchResults })
+}
+
 
 $.when('click', '[data-mode]', (event) => {
   const { mode, cid, uri } = event.target.dataset
@@ -955,7 +971,7 @@ function processTextWithFacets(text, facets) {
         else if (feature.$type === 'app.bsky.richtext.facet#tag') {
           // Get tag without # for search query
           const tagName = text.substring(facet.index.byteStart, facet.index.byteEnd).replace(/^#/, '');
-          openHtml = `<a href="/search?q=${encodeURIComponent(tagName)}" class="hashtag">`;
+          openHtml = `<a href="/app/blue-sky?view=${views.search}&q=${encodeURIComponent(tagName)}" data-q="${encodeURIComponent(tagName)}" class="hashtag">`;
           closeHtml = '</a>';
         }
       } catch(e) {
@@ -2119,6 +2135,7 @@ export function shareMenu(event, target) {
 
 $.draw(target => {
   const view = target.getAttribute('view')
+  const query = target.getAttribute('query')
   const uri = target.getAttribute('uri')
   const cid = target.getAttribute('cid')
   const did = target.getAttribute('did')
@@ -2132,11 +2149,13 @@ $.draw(target => {
     } else if(view === views.post) {
       fetchPost(uri, cid)
       const viewPost = { mode: modes.post, cid, uri }
-
       saveHistory({ type: 'viewPost', viewPost })
       navigatePost(viewPost)
+    } else if(view === views.search) {
+      const searchTag = { searchQuery: { q: target.getAttribute('q') }, searchResults: null }
+      saveHistory({ type: 'searchTag', searchTag })
+      navigateSearch(searchTag)
     } else if(actor) {
-
       saveHistory({ type: 'actor', actor })
       navigateActor(actor)
     } else if(!view) {
@@ -3029,6 +3048,7 @@ function restoreHistory(patch) {
 const patchHandlers = {
   actor: navigateActor,
   viewPost: navigatePost,
+  searchTag: navigateSearch,
   home: navigateHome,
 }
 
