@@ -1438,11 +1438,11 @@ const modeRenderers = {
     const record = $.learn()[cid] || {}
 
     if(!record.post) {
-      innerHTML(container, `
+      container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `)
+      `
       return
     }
 
@@ -1688,7 +1688,6 @@ const modeRenderers = {
         <iframe src="/app/plan98-backpack"></iframe>
       </div>
     `
-
   },
   [modes.settings]: (root, container) => {
     container.innerHTML = `
@@ -2213,7 +2212,7 @@ $.draw(target => {
               `
             }).join('')
 
-            innerHTML(sidebar, navHTML)
+            sidebar.innerHTML = navHTML
           }
         }
       }
