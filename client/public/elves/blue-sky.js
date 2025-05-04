@@ -1397,19 +1397,39 @@ const countCache = {}
 const modeRenderers = {
   [modes.me]: (root, container) => {
     const profile = $.learn()[agent.session?.handle]
-
     const { myTimeline } = $.learn()
 
-    innerHTML(container, `
+    if(!profile) {
+      countCache[modes.me] = 0
+      innerHTML(container, `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `)
+      return
+    }
+
+    const feed = container.querySelector(`.feed.${modes.me}`)
+
+    if(feed) {
+      if(myTimeline.length === countCache[modes.me]) return
+      const newPosts = myTimeline.slice(countCache[modes.me])
+      countCache[modes.me] = myTimeline.length
+      const newHTML = newPosts.map(renderPost).join('')
+      feed.insertAdjacentHTML('beforeend', newHTML)
+      return
+    }
+
+    container.innerHTML = `
       <button class="new-post">
         <sl-icon name="plus-lg"></sl-icon>
       </button>
       ${renderProfile(profile)}
-      <div class="feed">
+      <div class="feed ${modes.me}">
         ${renderTimeline(myTimeline)}
       </div>
       <div class="load-more" data-feed="myTimeline"></div>
-    `)
+    `
   },
   [modes.post]: (root, container) => {
     let { mode, cid, uri } = $.learn()
@@ -1426,31 +1446,58 @@ const modeRenderers = {
       return
     }
 
-    innerHTML(container, `
+    const active = container.querySelector(`.active-context`)
+
+    if(active && container.cid === cid) {
+      return
+    }
+
+    container.cid = cid
+
+    container.innerHTML = `
       ${record.parent?renderParent(record.parent):''}
       <div class="active-context">
         ${renderPost(record)}
       </div>
       ${record.replies?renderTimeline(record.replies):''}
-    `)
+    `
   },
   [modes.profile]: (root, container) => {
-    const { activeActor } = $.learn()
+    const { activeActor, activeTimeline } = $.learn()
 
     const profile = $.learn()[activeActor]
 
-    const { activeTimeline } = $.learn()
+    if(!profile) {
+      innerHTML(container, `
+        <loading>
+          <flying-disk></flying-disk>
+        </loading>
+      `)
+      return
+    }
 
-    innerHTML(container, `
+    const feed = container.querySelector(`.feed.${modes.profile}`)
+
+    if(feed) {
+      if(activeTimeline.length === countCache[modes.profile]) return
+      const newPosts = activeTimeline.slice(countCache[modes.profile])
+      countCache[modes.profile] = activeTimeline.length
+      const newHTML = newPosts.map(renderPost).join('')
+      feed.insertAdjacentHTML('beforeend', newHTML)
+      return
+    }
+
+    countCache[modes.profile] = 0
+    container.innerHTML = `
       <button class="new-post">
         <sl-icon name="plus-lg"></sl-icon>
       </button>
       ${renderProfile(profile)}
-      <div class="feed">
+      <div class="feed ${modes.profile}">
         ${renderTimeline(activeTimeline)}
       </div>
       <div class="load-more" data-feed="activeTimeline"></div>
-     `)
+    `
   },
 
   [modes.timeline]: (root, container) => {
@@ -1528,6 +1575,29 @@ const modeRenderers = {
       fetchSearchResults(true)
     }
 
+    const feed = container.querySelector(`.feed.${modes.search}`)
+    const form = container.querySelector(`.search-form`)
+
+    if(form) {
+      const advancedForm = container.querySelector(`.advanced-search`)
+      if(advancedForm && advancedSearch) {
+        advancedForm.classList.add('active')
+      } else if(advancedForm) {
+        advancedForm.classList.remove('active')
+      }
+    }
+
+    if(feed && searchResults) {
+      if(searchResults.length === countCache[modes.search]) return
+      const newPosts = searchResults.slice(countCache[modes.search])
+      countCache[modes.search] = searchResults.length
+      const newHTML = newPosts.map(renderSearchResult).join('')
+      feed.insertAdjacentHTML('beforeend', newHTML)
+      return
+    }
+
+    if(searchResults && form) return
+
     innerHTML(container, `
       <form action="search" class="search-form">
         <div class="basic-search">
@@ -1603,7 +1673,7 @@ const modeRenderers = {
           </div>
         </div>
       </form>
-      <div class="feed">
+      <div class="feed ${modes.search}">
         ${searchResults
           ? searchResults.map(renderSearchResult).join('')
           : ''
@@ -1613,20 +1683,25 @@ const modeRenderers = {
     `)
   },
   [modes.backpack]: (root, container) => {
-    innerHTML(container, `
+    container.innerHTML = `
       <div class="operating-system">
         <iframe src="/app/plan98-backpack"></iframe>
       </div>
-    `)
+    `
 
   },
   [modes.settings]: (root, container) => {
-    innerHTML(container, `
+    container.innerHTML = `
       <div class="settings-section">
         To disconnect this client, click<br/>
         <button data-logout class="standard-button">Logout</button>
       </div>
-    `)
+
+      <div class="settings-section">
+        To remix this code:
+        <code-module src="${new URL(import.meta.url).pathname}"></code-module>
+      </div>
+    `
   },
 }
 
@@ -2724,8 +2799,8 @@ $.style(`
     padding: 1rem;
   }
 
-  & [data-actor] > * {
-    pointer-events: none;
+  & [data-actor] * {
+    pointer-events: none !important;
   }
 
   & .post-action-container {
@@ -2913,7 +2988,8 @@ $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
 
-$.when('click', '.toggle-advanced', () => {
+$.when('click', '.toggle-advanced', (event) => {
+  event.preventDefault()
   $.teach({ advancedSearch: !$.learn().advancedSearch })
 })
 
