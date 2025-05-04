@@ -1,5 +1,4 @@
 import elf from "@silly/elf"
-import { innerHTML } from 'diffhtml'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import { popover } from './data-popover.js'
@@ -1401,11 +1400,11 @@ const modeRenderers = {
 
     if(!profile) {
       countCache[modes.me] = 0
-      innerHTML(container, `
+      container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `)
+      `
       return
     }
 
@@ -1468,11 +1467,11 @@ const modeRenderers = {
     const profile = $.learn()[activeActor]
 
     if(!profile) {
-      innerHTML(container, `
+      container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `)
+      `
       return
     }
 
@@ -1506,11 +1505,11 @@ const modeRenderers = {
     if(!homeTimeline) {
       countCache[modes.timeline] = 0
       fetchHomeTimeline()
-      innerHTML(container, `
+      container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `)
+      `
       return
     }
 
@@ -1542,11 +1541,11 @@ const modeRenderers = {
     if(!alerts) {
       countCache[modes.alerts] = 0
       fetchAlerts()
-      innerHTML(container, `
+      container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
         </loading>
-      `)
+      `
       return
     }
 
@@ -1569,7 +1568,7 @@ const modeRenderers = {
     `
   },
   [modes.search]: (root, container) => {
-    const { searchResults, advancedSearch } = $.learn()
+    const { searchResults, advancedSearch, searchQuery } = $.learn()
 
     if(!searchResults) {
       fetchSearchResults(true)
@@ -1597,12 +1596,12 @@ const modeRenderers = {
     }
 
     if(searchResults && form) return
-
-    innerHTML(container, `
+    countCache[modes.search] = 0
+    container.innerHTML = `
       <form action="search" class="search-form">
         <div class="basic-search">
           <div class="row-1fr-auto">
-            <input placeholder="joyful" name="q" class="standard-input">
+            <input placeholder="joyful" name="q" value="${searchQuery.q || ''}" class="standard-input">
             <button type="submit" class="standard-button">
               Search
             </button>
@@ -1617,58 +1616,58 @@ const modeRenderers = {
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">Sort</span>
-              <input name="sort" value="latest">
+              <input name="sort" value="${searchQuery.sort || 'top'}" value="latest">
             </label>
             <label class="field">
               <span class="label">limit</span>
-              <input name="limit">
+              <input name="limit" value="${searchQuery.limit || ''}">
             </label>
           </div>
 
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">Since</span>
-              <input name="since">
+              <input name="since" value="${searchQuery.since || ''}">
             </label>
 
             <label class="field">
               <span class="label">Until</span>
-              <input name="until">
+              <input name="until" value="${searchQuery.until || ''}">
             </label>
           </div>
 
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">@ Mentions</span>
-              <input name="mentions">
+              <input name="mentions" value="${searchQuery.mentions || ''}">
             </label>
             <label class="field">
               <span class="label"># Tags</span>
-              <input name="tag">
+              <input name="tag" value="${searchQuery.tag || ''}">
             </label>
           </div>
 
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">Author</span>
-              <input name="author">
+              <input name="author" value="${searchQuery.author || ''}">
             </label>
 
             <label class="field">
               <span class="label">Lang</span>
-              <input name="lang">
+              <input name="lang" value="${searchQuery.lang || ''}">
             </label>
           </div>
 
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">domain</span>
-              <input name="domain">
+              <input name="domain" value="${searchQuery.domain || ''}">
             </label>
 
             <label class="field">
               <span class="label">url</span>
-              <input name="url">
+              <input name="url" value="${searchQuery.url || ''}">
             </label>
           </div>
         </div>
@@ -1680,7 +1679,7 @@ const modeRenderers = {
         }
       </div>
       <div class="load-more" data-feed="searchResults"></div>
-    `)
+    `
   },
   [modes.backpack]: (root, container) => {
     container.innerHTML = `
@@ -1697,7 +1696,8 @@ const modeRenderers = {
       </div>
 
       <div class="settings-section">
-        To remix this code:
+        <strong>Author's note:</strong><br>
+        Probably a flamewar, but. You don't quit vim. You embed it.<br><br>
         <code-module src="${new URL(import.meta.url).pathname}"></code-module>
       </div>
     `
@@ -2184,9 +2184,6 @@ $.draw(target => {
     requestAnimationFrame((timestamp) => {
       {
         afterUpdateTheme($paperPocket, target)
-        //recoverElves(target, 'sl-icon')
-        //recoverElves(target, 'blue-sky')
-        //recoverElves(target, 'hls-video')
       }
 
       {

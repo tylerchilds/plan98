@@ -10,7 +10,6 @@ $.draw((target) => {
       </a>
     </hypertext-highlighter>
 
-
     <hypertext-highlighter color="dodgerblue">
       <a href="/app/ur-shell">
         Shell
@@ -40,16 +39,50 @@ $.draw((target) => {
         Music
       </a>
     </hypertext-highlighter>
+
+    <br>
+    <br>
+    <a href="/cdn/sillyz.computer/en-us/six-modalities/index.md">
+      Help (Instructional Videos)
+    </a>
   `
+}, {
+  beforeUpdate(target) {
+    target.style.fontSize = '2rem';
+  }, afterUpdate(target) {
+    const lines = getLines(target)
+    target.style.backgroundImage = lines
+  }
 })
+
+function getLines(target) {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+
+  const rhythm = parseFloat(getComputedStyle(target).getPropertyValue('line-height'));
+  canvas.height = rhythm;
+  canvas.width = rhythm;
+
+  ctx.fillStyle = 'transparent';
+  ctx.fillRect(0, 0, rhythm, rhythm);
+
+  ctx.fillStyle = 'dodgerblue';
+  ctx.fillRect(0, rhythm - (rhythm), rhythm, 1);
+
+  return `url(${canvas.toDataURL()}`;
+}
+
 
 $.style(`
   & {
-    display: inline-block;
+    display: block;
+    height: 100%;
   }
 
   & a {
     display: inline-block;
-    padding: .5rem;
+    padding: 0 .5rem;
+    margin: 0 .5rem;
+    text-decoration: none;
   }
 `)
