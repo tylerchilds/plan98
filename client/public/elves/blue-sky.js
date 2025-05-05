@@ -1256,9 +1256,7 @@ const postTypeRenderers = {
     } = record;
 
     return `
-      <div class="post-text">
-        ${processTextWithFacets(text, facets)}
-      </div>
+      <div class="post-text">${processTextWithFacets(text, facets)}</div>
       ${renderEmbed(post.embed)}
       <div class="post-footer">
         <div class="post-action-container">
@@ -1311,9 +1309,7 @@ const postTypeRenderers = {
     } = value;
 
     return `
-      <div class="post-text">
-        ${processTextWithFacets(text, facets)}
-      </div>
+      <div class="post-text">${processTextWithFacets(text, facets)}</div>
       ${renderEmbed(embed)}
     `;
   }
@@ -1408,6 +1404,15 @@ const notificationReasonRenderers = {
       <blue-sky view="${views.notification}" cid="${post.cid}" uri="${post.uri}"></blue-sky>
     `
   },
+  repost(post) {
+    return `
+      <div class="notification-reason">
+        Reposted verbatim
+      </div>
+      <blue-sky view="${views.notification}" cid="${post.record.subject.cid}" uri="${post.record.subject.uri}"></blue-sky>
+    `
+  },
+
   quote(post) {
     return `
       <div class="notification-reason">
@@ -2959,6 +2964,7 @@ $.style(`
 
   & .post-text {
     margin-bottom: .5rem;
+    white-space: preserve;
   }
 
   & .post-image {
