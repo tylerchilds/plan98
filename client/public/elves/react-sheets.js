@@ -700,8 +700,7 @@ $.draw(target => {
           onProtectRange: onProtectRange,
           onUnProtectRange: onUnProtectRange,
           namedRanges: namedRanges,
-          licenseKey:
-          "examples-personal-4149-12be-c879-ca36-5714-7185-71ac-9ab5-909e-90f9-4108-45bb-d606-d17a-1b79-6c65",
+          licenseKey: plan98.env.ROWS_N_COLUMNS_LICENSE_KEY
         }),
 
         // Bottom Bar

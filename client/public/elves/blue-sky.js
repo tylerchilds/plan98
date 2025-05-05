@@ -247,6 +247,15 @@ async function fetchPost(uri, cid) {
   }
 }
 
+function hideFeedItem(target) {
+  target.classList.remove('feed-item-visible')
+}
+
+
+function showFeedItem(target) {
+  target.classList.add('feed-item-visible')
+}
+
 function loadMore(target) {
   const { feed } = target.dataset
   if(!feed) return
@@ -1123,7 +1132,7 @@ function renderExternalEmbed(embed) {
   if (!external) return '';
 
   return `
-    <media-plexer src="${external.uri}" alt="${external.title}"></media-plexer>
+    <a href="${external.uri}">${external.uri || external.title}</a>
   `;
 }
 
@@ -1723,6 +1732,9 @@ const modeRenderers = {
           </button>
         </div>
         <div class="advanced-search ${advancedSearch?'active':''}">
+          <div>
+            Advanced fields map to the <a target="_blank" href="https://docs.bsky.app/docs/api/app-bsky-feed-search-posts">searchPosts endpoint</a>
+          </div>
           <div class="row-1fr-1fr">
             <label class="field">
               <span class="label">Sort</span>
@@ -2300,11 +2312,11 @@ $.draw(target => {
 
       {
         const { mode } = $.learn()
-        const content = target.querySelector('.content')
+        const scrollable = target.querySelector('.dynamic-region')
         const sidebar = target.querySelector('.sidebar')
-        if(content && target.mode !== mode) {
+        if(scrollable && target.mode !== mode) {
           target.mode = mode
-          content.scrollTop = 0
+          scrollable.scrollTop = 0
 
           if(sidebar) {
             const navHTML = Object.keys(navigation).map((key) => {
@@ -2341,11 +2353,11 @@ $.draw(target => {
           target.observerMode = mode
           target.lastActiveActor = activeActor
 
-          if(target.observer) {
-            target.observer.disconnect()
+          if(target.loaderObserver) {
+            target.loaderObserver.disconnect()
           }
 
-          target.observer = new IntersectionObserver((entries, observer) => {
+          target.loaderObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(async (entry) => {
               if(entry.isIntersecting) {
                 loadMore(entry.target)
@@ -2357,7 +2369,33 @@ $.draw(target => {
             threshold: 0,
           });
 
-          target.observer.observe(target.querySelector('.load-more'))
+          target.loaderObserver.observe(target.querySelector('.load-more'))
+
+          const feed = target.querySelector('.feed')
+
+          if(feed) {
+            if(target.feedObserver) {
+              target.feedObserver.disconnect()
+            }
+
+            target.feedObserver = new IntersectionObserver((entries, observer) => {
+              entries.forEach(async (entry) => {
+                if(entry.isIntersecting) {
+                  showFeedItem(entry.target)
+                } else {
+                  hideFeedItem(entry.target)
+                }
+              });
+            }, {
+              root: target.querySelector('.content'),
+              rootMargin: '0px',
+              threshold: 0,
+            });
+
+            [...target.querySelectorAll('.feed > *')].map(x => {
+              target.feedObserver.observe(x)
+            })
+          }
         }
       }
     })
@@ -2640,6 +2678,14 @@ $.style(`
       linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
       var(--root-theme, mediumseagreen);
     padding: .5rem;
+  }
+
+  & .feed > * {
+    visibility: hidden;
+  }
+
+  & .feed .feed-item-visible {
+    visibility: visible;
   }
 
   & .post.-quoted .post-footer {
