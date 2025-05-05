@@ -22,6 +22,10 @@ const views = {
 
 let agent
 
+export function getAgent() {
+  return agent
+}
+
 const defaultCreds = {
   service: 'https://1998.social',
   moniker: 'tychi.1998.social'
@@ -853,7 +857,7 @@ function renderProfile(profile) {
             ${displayName}
           </div>
           <div class="profile-handle">
-            @${handle}
+            ${handle}
           </div>
           <div class="profile-description">${description}</div>
           <div class="profile-since">
@@ -1062,6 +1066,9 @@ function renderEmbed(embed) {
     case 'app.bsky.embed.recordWithMedia#view':
       return renderRecordWithMediaEmbed(embed);
 
+    case 'app.bsky.graph.defs#starterPackViewBasic':
+      return renderStarterPackBasicEmbed(embed);
+
     default:
       return ''; // Unknown embed type
   }
@@ -1138,8 +1145,8 @@ function renderRecordEmbed(embed) {
   }
 
   if (!record.value) {
-    if(record.record.value) {
-      return renderRecordEmbed(record)
+    if(record.record) {
+      return renderEmbed(record)
     }
     return '<div class="quoted-post error">Unable to display this post</div>';
   }
@@ -1158,7 +1165,7 @@ function renderRecordEmbed(embed) {
         <div class="post-meta">
           <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
           <span class="post-handle">
-            @${author.handle}
+            ${author.handle}
           </span>
           <span class="post-timestamp">
             <sl-relative-time date="${record.indexedAt}" format="long"></sl-relative-time>
@@ -1169,6 +1176,36 @@ function renderRecordEmbed(embed) {
             ?postTypeRenderers[record.$type](embed)
             :escapeHyperText(content.text)
         }</div>
+      </div>
+    </button>
+  `;
+}
+
+function renderStarterPackBasicEmbed(embed) {
+  const record = embed.record;
+  if (!record) return '';
+
+  const author = embed.creator;
+  const { name, description } = record;
+
+  return `
+    <button class="post -quoted" data-mode="${views.post}" data-cid="${record.cid}" data-uri="${record.uri}">
+      <div class="post-gutter">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+          <img src="${author.avatar}" class="avatar" />
+        </a>
+      </div>
+      <div class="post-content">
+        <div class="post-meta">
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <span class="post-handle">
+            ${author.handle}
+          </span>
+          <span class="post-timestamp">
+            <sl-relative-time date="${record.indexedAt}" format="long"></sl-relative-time>
+          </span>
+        </div>
+        <div class="body">${name} ${description}</div>
       </div>
     </button>
   `;
@@ -1292,7 +1329,7 @@ const reasonTypeRenderers = {
     return `
       <div class="post-reason">
         Reposted by
-        <a href="/app/blue-sky?handle=${handle}" data-actor="${handle}" target="_blank">
+        <a class="post-displayname" href="/app/blue-sky?handle=${handle}" data-actor="${handle}" target="_blank">
           ${displayName}
         </a>
       </div>
@@ -1337,7 +1374,7 @@ function renderPost(record) {
         <div class="post-meta">
           <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <span class="post-handle">
-            @${post.author.handle}
+            ${post.author.handle}
           </span>
           <span class="post-timestamp">
             <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -1412,7 +1449,7 @@ function renderNotification(post) {
         <div class="post-meta">
           <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
           <span class="post-handle">
-            @${author.handle}
+            ${author.handle}
           </span>
           <span class="post-timestamp">
             <sl-relative-time date="${post.indexedAt}" format="long"></sl-relative-time>
@@ -1439,7 +1476,7 @@ function renderSearchResult(post) {
         <div class="post-meta">
           <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <span class="post-handle">
-            @${post.author.handle}
+            ${post.author.handle}
           </span>
           <span class="post-timestamp">
             <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -1640,6 +1677,7 @@ const modeRenderers = {
 
     const feed = container.querySelector(`.feed.${modes.search}`)
     const form = container.querySelector(`.search-form`)
+    const discovery = container.querySelector(`bluesky-discovery`)
 
     if(form) {
       const advancedForm = container.querySelector(`.advanced-search`)
@@ -1651,6 +1689,9 @@ const modeRenderers = {
     }
 
     if(feed && searchResults) {
+      if(discovery) {
+        discovery.remove()
+      }
       if(searchResults.length === countCache[modes.search]) return
       const newPosts = searchResults.slice(countCache[modes.search])
       countCache[modes.search] = searchResults.length
@@ -1736,12 +1777,11 @@ const modeRenderers = {
           </div>
         </div>
       </form>
-      <div class="feed ${modes.search}">
-        ${searchResults
+      <div class="feed ${modes.search}">${
+        searchResults
           ? searchResults.map(renderSearchResult).join('')
-          : ''
-        }
-      </div>
+          : '<bluesky-discovery></bluesky-discovery>'
+      }</div>
       <div class="load-more" data-feed="searchResults"></div>
     `
   },
@@ -1892,7 +1932,7 @@ const viewRenderers = {
                   <div class="post-meta">
                     <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
-                      @${post.author.handle}
+                      ${post.author.handle}
                     </span>
                     <span class="post-timestamp">
                       <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -1956,7 +1996,7 @@ const viewRenderers = {
                   <div class="post-meta">
                     <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
-                      @${post.author.handle}
+                      ${post.author.handle}
                     </span>
                     <span class="post-timestamp">
                       <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -2073,7 +2113,7 @@ const viewRenderers = {
                   <div class="post-meta">
                     <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
-                      @${post.author.handle}
+                      ${post.author.handle}
                     </span>
                     <span class="post-timestamp">
                       <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -2138,7 +2178,7 @@ const viewRenderers = {
                   <div class="post-meta">
                     <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
-                      @${post.author.handle}
+                      ${post.author.handle}
                     </span>
                     <span class="post-timestamp">
                       <sl-relative-time date="${post.record.createdAt}" format="long"></sl-relative-time>
@@ -2580,6 +2620,7 @@ $.style(`
     border: none;
     border-bottom: 1px solid rgba(0,0,0,.15);
     background: transparent;
+    color: rgba(0,0,0,.85);
     padding: .5rem 1rem;
     text-align: left;
     line-height: 1.3;
@@ -2934,6 +2975,7 @@ $.style(`
 
   & .post-video {
     max-height: 300px;
+    background: black;
   }
 
   & .post-video hls-video {
