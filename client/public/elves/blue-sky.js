@@ -497,7 +497,31 @@ $.when('click', '[data-actor]', (event) => {
   navigateActor(actor)
 })
 
-function navigateActor(actor) {
+$.when('click', '[data-unfollow]', async (event) => {
+  event.preventDefault()
+  const { following, handle, did } = event.target.dataset
+
+  await agent.deleteFollow(following)
+  fetchProfile(did)
+})
+
+$.when('click', '[data-follow]', async (event) => {
+  event.preventDefault()
+  const { did, handle } = event.target.dataset
+
+  await agent.follow(did)
+  fetchProfile(did)
+})
+
+async function navigateActor(handleOrDid) {
+  let actor = handleOrDid
+  if(!handleOrDid.startsWith('did:')) {
+    const { data, success } = await agent.resolveHandle({ handle: handleOrDid });
+
+    if(success) {
+      actor = data.did
+    }
+  }
   $.teach({ activeActor: actor, mode: modes.profile, activeTimeline: [] })
   fetchActiveTimeline(true)
   fetchProfile(actor)
@@ -1132,7 +1156,7 @@ function renderExternalEmbed(embed) {
   if (!external) return '';
 
   return `
-    <a href="${external.uri}">${external.uri || external.title}</a>
+    <a target="_blank" href="${external.uri}">${external.uri || external.title}</a>
   `;
 }
 
@@ -1166,13 +1190,13 @@ function renderRecordEmbed(embed) {
   return `
     <button class="post -quoted" data-mode="${views.post}" data-cid="${record.cid}" data-uri="${record.uri}">
       <div class="post-gutter">
-        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-avatar">
           <img src="${author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-displayname">${author.displayName}</a>
           <span class="post-handle">
             ${author.handle}
           </span>
@@ -1200,13 +1224,13 @@ function renderStarterPackBasicEmbed(embed) {
   return `
     <button class="post -quoted" data-mode="${views.post}" data-cid="${record.cid}" data-uri="${record.uri}">
       <div class="post-gutter">
-        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-avatar">
           <img src="${author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-displayname">${author.displayName}</a>
           <span class="post-handle">
             ${author.handle}
           </span>
@@ -1329,12 +1353,13 @@ const reasonTypeRenderers = {
     const { by } = data.reason
     const {
       handle,
+      did,
       displayName
     } = by
     return `
       <div class="post-reason">
         Reposted by
-        <a class="post-displayname" href="/app/blue-sky?handle=${handle}" data-actor="${handle}" target="_blank">
+        <a class="post-displayname" href="/app/blue-sky?handle=${handle}" data-actor="${did}" target="_blank">
           ${displayName}
         </a>
       </div>
@@ -1371,13 +1396,13 @@ function renderPost(record) {
     ${ reason && reasonTypeRenderers[reason.$type] ? reasonTypeRenderers[reason.$type](record) : ''}
     <div class="post" aria-role="button" data-mode="${views.post}" data-cid="${post.cid}" data-uri="${post.uri}">
       <div class="post-gutter">
-        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <span class="post-handle">
             ${post.author.handle}
           </span>
@@ -1455,13 +1480,13 @@ function renderNotification(post) {
   return `
     <div class="post" data-mode="${views.post}" data-cid="${cid}" data-uri="${uri}">
       <div class="post-gutter">
-        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-avatar">
           <img src="${author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.handle}" target="_blank" class="post-displayname">${author.displayName}</a>
+          <a href="/app/blue-sky?handle=${author.handle}" data-actor="${author.did}" target="_blank" class="post-displayname">${author.displayName}</a>
           <span class="post-handle">
             ${author.handle}
           </span>
@@ -1482,13 +1507,13 @@ function renderSearchResult(post) {
   return `
     <div class="post" aria-role="button" data-mode="${views.post}" data-cid="${post.cid}" data-uri="${post.uri}">
       <div class="post-gutter">
-        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+        <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
           <img src="${post.author.avatar}" class="avatar" />
         </a>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+          <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
           <span class="post-handle">
             ${post.author.handle}
           </span>
@@ -1834,6 +1859,48 @@ function non() {
   `
 }
 
+const modeActionRenderers = {
+  [modes.me]: (root, container) => {
+    container.innerHTML = `
+      <div class="action-area">
+        <button class="standard-button" data-edit-profile>
+          Edit Profile
+        </button>
+      </div>
+    `
+  },
+  [modes.profile]: (root, container) => {
+    const { activeActor } = $.learn()
+
+    const profile = $.learn()[activeActor]
+
+    if(!profile) return
+    const { following } = profile.viewer
+    container.innerHTML = `
+      <div class="action-area">
+        ${ following 
+          ? `
+            <button class="standard-button" data-unfollow data-following="${following}" data-handle="${profile.handle}" data-did="${profile.did}">
+              Unfollow
+            </button>
+          ` : `
+            <button class="standard-button" data-follow data-handle="${profile.handle}" data-did="${profile.did}">
+              Follow
+            </button>
+          `
+        }
+      </div>
+    `
+  },
+}
+
+function renderActionsByMode(root, container) {
+  const { mode } = $.learn()
+  return (
+    modeActionRenderers[mode] || ((_,c) => c.innerHTML = '')
+  )(root, container)
+}
+
 function renderByMode(root, container) {
   const { mode } = $.learn()
 
@@ -1941,13 +2008,13 @@ const viewRenderers = {
 
               <div class="post -quoted">
                 <div class="post-gutter">
-                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
                     <img src="${post.author.avatar}" class="avatar" />
                   </a>
                 </div>
                 <div class="post-content">
                   <div class="post-meta">
-                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
                       ${post.author.handle}
                     </span>
@@ -2005,13 +2072,13 @@ const viewRenderers = {
               ></textarea>
               <div class="post -quoted">
                 <div class="post-gutter">
-                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
                     <img src="${post.author.avatar}" class="avatar" />
                   </a>
                 </div>
                 <div class="post-content">
                   <div class="post-meta">
-                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
                       ${post.author.handle}
                     </span>
@@ -2122,13 +2189,13 @@ const viewRenderers = {
             <div class="text-well">
               <div class="post -quoted">
                 <div class="post-gutter">
-                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
                     <img src="${post.author.avatar}" class="avatar" />
                   </a>
                 </div>
                 <div class="post-content">
                   <div class="post-meta">
-                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
                       ${post.author.handle}
                     </span>
@@ -2187,13 +2254,13 @@ const viewRenderers = {
               </div>
               <div class="post -quoted">
                 <div class="post-gutter">
-                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-avatar">
+                  <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-avatar">
                     <img src="${post.author.avatar}" class="avatar" />
                   </a>
                 </div>
                 <div class="post-content">
                   <div class="post-meta">
-                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.handle}" target="_blank" class="post-displayname">${post.author.displayName}</a>
+                    <a href="/app/blue-sky?handle=${post.author.handle}" data-actor="${post.author.did}" target="_blank" class="post-displayname">${post.author.displayName}</a>
                     <span class="post-handle">
                       ${post.author.handle}
                     </span>
@@ -2297,6 +2364,7 @@ $.draw(target => {
             <button data-back>
               Back
             </button>
+            <div class="mode-actions"></div>
           </div>
           <div class="dynamic-region"></div>
         </div>
@@ -2347,9 +2415,17 @@ $.draw(target => {
       }
 
       {
+        const region = target.querySelector('.mode-actions')
+
+        if(region) {
+          renderActionsByMode(target, region)
+        }
+      }
+
+      {
         const { mode, activeActor } = $.learn()
         const watcher = target.querySelector('.load-more')
-        if(watcher && (target.observerMode !== mode || target.lastActiveActor === activeActor)) {
+        if(watcher) {
           target.observerMode = mode
           target.lastActiveActor = activeActor
 
@@ -2823,6 +2899,11 @@ $.style(`
     }
   }
 
+  & .hero {
+    min-height: 66px;
+    position: relative;
+  }
+
   & .profile-information {
     display: grid;
     grid-template-columns: 132px 1fr;
@@ -3060,6 +3141,8 @@ $.style(`
     position: sticky;
     top: 0;
     z-index: 10;
+    display: grid;
+    grid-template-columns: auto 1fr;
   }
 
   & [data-back] {
@@ -3073,6 +3156,11 @@ $.style(`
   & [data-back]:hover,
   & [data-back]:focus, {
     color: rgba(255,255,255,.85);
+  }
+
+  & .action-bar .standard-button {
+    padding: 4px 8px;
+    font-size: 1rem;
   }
 
   & .notification-reason {
@@ -3139,6 +3227,10 @@ $.style(`
     border: none;
     color: rgba(255,255,255,.85);
     font-weight: bold;
+  }
+
+  & .action-area {
+    text-align: right;
   }
 `)
 
