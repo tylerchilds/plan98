@@ -116,11 +116,17 @@ async function resumeSession() {
 
 resumeSession()
 
+const loading = {}
 const cursors = {}
 const EOF = 'END_OF_FEED'
-async function fetchMyTimeline() {
-  const cursor = cursors.myTimeline
-  if(cursor === EOF) return
+async function fetchMyTimeline(reset) {
+  const cursor = !reset ? cursors.myTimeline : ''
+  if(reset) {
+    $.teach({ myTimeline: [] })
+  }
+  if(cursor === EOF || loading.myTimeline) return
+
+  loading.myTimeline = true
   const response = await agent.getAuthorFeed({
     cursor,
     actor: agent.session?.handle, // Or agent.session?.did
@@ -134,11 +140,17 @@ async function fetchMyTimeline() {
   } else {
     console.error('Failed to fetch your posts:', response.error);
   }
+
+  loading.myTimeline = false
 }
 
 async function fetchActiveTimeline(reset) {
   const cursor = !reset ? cursors.activeTimeline : ''
-  if(cursor === EOF) return
+  if(reset) {
+    $.teach({ activeTimeline: [] })
+  }
+  if(cursor === EOF || loading.activeTimeline) return
+  loading.activeTimeline = true
   const { activeActor } = $.learn()
   const response = await agent.getAuthorFeed({
     cursor,
@@ -153,11 +165,17 @@ async function fetchActiveTimeline(reset) {
   } else {
     console.error('Failed to fetch your posts:', response.error);
   }
+
+  loading.activeTimeline = false
 }
 
-function fetchHomeTimeline() {
-  const cursor = cursors.homeTimeline || ''
-  if(cursor === EOF) return
+function fetchHomeTimeline(reset) {
+  const cursor = !reset ? cursors.homeTimeline : ''
+  if(reset) {
+    $.teach({ homeTimeline: [] })
+  }
+  if(cursor === EOF || loading.homeTimeline) return
+  loading.homeTimeline = true
   agent.getTimeline({
     cursor,
     limit: 30,
@@ -165,7 +183,9 @@ function fetchHomeTimeline() {
     const { feed, cursor } = data
     cursors.homeTimeline = cursor || EOF
     $.teach(feed, mergeFeed('homeTimeline'))
-  });
+  }).finally(() => {
+    loading.homeTimeline = false
+  })
 }
 
 function mergeFeed(feed) {
@@ -186,9 +206,10 @@ function searchValidate(query) {
 
 function fetchSearchResults(reset) {
   const cursor = !reset ? cursors.search : ''
-  if(cursor === EOF) return
+  if(cursor === EOF || loading.search) return
   const { searchQuery } = $.learn()
   if(searchValidate(searchQuery)) {
+    loading.search = true
     agent.api.app.bsky.feed.searchPosts({
       ...searchQuery,
       cursor
@@ -196,13 +217,16 @@ function fetchSearchResults(reset) {
       const { posts, cursor } = data
       cursors.search = cursor || EOF
       $.teach(posts, mergeFeed('searchResults'))
-    });
+    }).finally(() => {
+      loading.search = false
+    })
   }
 }
 
 function fetchAlerts() {
   const cursor = cursors.alerts || ''
-  if(cursor === EOF) return
+  if(cursor === EOF || loading.alerts) return
+  loading.alerts = true
   agent.listNotifications({
     cursor,
     limit: 20 // Optional: number of notifications to retrieve
@@ -210,6 +234,8 @@ function fetchAlerts() {
     const { notifications, cursor } = data
     cursors.alerts = cursor || EOF
     $.teach(notifications, mergeFeed('alerts'))
+  }).finally(() => {
+    loading.alerts = false
   })
 }
 
@@ -522,7 +548,7 @@ async function navigateActor(handleOrDid) {
       actor = data.did
     }
   }
-  $.teach({ activeActor: actor, mode: modes.profile, activeTimeline: [] })
+  $.teach({ activeActor: actor, mode: modes.profile })
   fetchActiveTimeline(true)
   fetchProfile(actor)
 }
@@ -1644,7 +1670,8 @@ const modeRenderers = {
 
     if(!homeTimeline) {
       countCache[modes.timeline] = 0
-      fetchHomeTimeline()
+
+      fetchHomeTimeline(true)
       container.innerHTML = `
         <loading>
           <flying-disk></flying-disk>
