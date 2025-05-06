@@ -39,7 +39,8 @@ $.draw((target) => {
     getSuggestedFeeds()
   }
   const { feeds, actors } = $.learn()
-  return `
+
+  target.innerHTML = `
     ${actors.map(renderActor).join('')}
     ${feeds.map(renderFeed).join('')}
   `
