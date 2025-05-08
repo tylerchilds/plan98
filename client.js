@@ -284,10 +284,12 @@ async function router(request, context) {
         : ResponseData({ payment: await getPaymentStatus(data) })
     }
 
-    console.log({ pathname })
     if(pathname.startsWith('/private/camera-roll')) {
-      console.log('haha')
       return handleCameraRollSave(request)
+    }
+
+    if(pathname.startsWith('/private/time-machine')) {
+      return handleTimeMachineSave(request)
     }
 
     try {
@@ -561,6 +563,28 @@ xml = xml.replace(/<\?xml version="1.0" encoding="UTF-8"\?>/, `$&\n${stylesheetP
   })
 }
 
+async function handleTimeMachineSave(request) {
+  try {
+    const { pathname, host, search } = new URL(request.url);
+    const segments = pathname.split('/')
+    console.log({ segments })
+    const shortPath = segments.slice(0, -1).join('/')
+    await Deno.mkdir(`./client/` + shortPath, { recursive: true });
+
+    // Read the request body (image data)
+    const imageBuffer = await request.arrayBuffer();
+
+    // Write the file
+    await Deno.writeFile(`./client${pathname}`, new Uint8Array(imageBuffer));
+
+    return new Response('Time Machine saved successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error saving camera roll image:', error);
+    return new Response('Error saving image', { status: 500 });
+  }
+}
+
+
 async function handleCameraRollSave(request) {
   try {
     const { pathname, host, search } = new URL(request.url);
@@ -687,7 +711,7 @@ async function fileSystem(headers, request) {
   } else {
     let paths = []
 
-    const currentPath = Deno.cwd() + '/client'
+    const currentPath = Deno.cwd() + '/client' + (parameters.get('cwd') || '')
     const files = walk(currentPath, {
       skip: [
         /\.git/,
@@ -701,7 +725,6 @@ async function fileSystem(headers, request) {
       ],
       includeDirs: true,
     })
-
 
     for await(const file of files) {
       const { name } = file

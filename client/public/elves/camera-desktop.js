@@ -1522,12 +1522,7 @@ $.when('click', '[data-snap]', (event) => {
 
   // Get current date and time for filename
   const now = new Date();
-  const timestamp = now.getFullYear() + '-' +
-      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-      String(now.getDate()).padStart(2, '0') + '-' +
-      String(now.getHours()).padStart(2, '0') + '-' +
-      String(now.getMinutes()).padStart(2, '0') + '-' +
-      String(now.getSeconds()).padStart(2, '0');
+  const timestamp = now.toJSON()
 
   // Convert canvas to data URL with JPEG format
   const dataURL = canvas.toDataURL('image/jpeg');
