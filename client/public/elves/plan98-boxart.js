@@ -30,7 +30,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/remote-control'
+    self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/blue-sky'
     return
   }
 
@@ -162,7 +162,7 @@ function diffuse(event) {
 }
 
 function start(event) {
-  self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/remote-control'
+  self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/blue-sky'
 }
 
 $.style(`

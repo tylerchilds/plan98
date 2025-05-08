@@ -1,10 +1,16 @@
 import elf from '@silly/elf'
+import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
+
+const eventTypes = {
+  journal: 'journal'
+}
 
 const views = {
   wallet: 'wallet',
   create: 'create',
+  [eventTypes.journal]: eventTypes.journal
 }
 
 const bucketKeys = {
@@ -29,13 +35,11 @@ const tomorrow = new Date(today + 1);
 const thisWeek = new Date(today + 7);
 const lastWeek = new Date(today - 7)
 
-const eventTypes = {
-  journal: 'journal'
-}
-
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 const newDraft = {
+  body: '',
+  type: eventTypes.journal,
   year: today.getFullYear(),
   month: today.getMonth(),
   day: today.getDate(),
@@ -77,23 +81,28 @@ async function query(target) {
       }))
     )
 
-    const buckets = events.reduce((all, event) => {
-      const [timestamp] = event.handle.name.split('.json')
-
-      if(today.toDateString() === new Date(timestamp).toDateString()) {
-        all[bucketKeys.today][timestamp] = event
-      }
-
-      return all
-    }, emptyBuckets)
-    $.teach(buckets, mergeEvents)
+    $.teach(events, mergeEvents)
   } catch(e) {
     console.error(e)
   }
 }
 
 function mergeEvents(state, payload) {
-  const buckets = Object.keys(payload).reduce((buckets, key) => {
+  const sorted = payload.reduce((all, event) => {
+    const [timestamp] = event.handle.name.split('.json')
+
+    if(today.toDateString() === new Date(timestamp).toDateString()) {
+      all[bucketKeys.today][timestamp] = {
+        spaceKey: bucketKeys.today,
+        timeKey: timestamp,
+        ...event
+      }
+    }
+
+    return all
+  }, emptyBuckets)
+
+  const buckets = Object.keys(sorted).reduce((buckets, key) => {
     if(!buckets[key]) {
       buckets[key] = { ...(state.buckets[key] || {}) }
     }
@@ -108,6 +117,17 @@ function mergeEvents(state, payload) {
     }
   }
 }
+
+function typeSelector(selected) {
+  return `
+    <select name="type" data-bind="draft">
+      ${Object.keys(eventTypes).map((key) => `
+        <option value="${key}" ${key===selected?'selected':''}>${key}</option>
+      `)}
+    </select>
+  `
+}
+
 
 const years = []
 
@@ -128,8 +148,8 @@ function yearSelector(selected) {
 function monthSelector(selected) {
   return `
     <select name="month" data-bind="draft">
-      ${months.map((value, index) => `
-        <option value="${index}" ${index===selected?'selected':''}>${value}</option>
+      ${months.map((_value, index) => `
+        <option value="${index}" ${index===selected?'selected':''}>${index+1}</option>
       `)}
     </select>
   `
@@ -195,10 +215,11 @@ const viewRenderers = {
                 Cancel
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body">
               <a href="/app/blue-sky">Bluesky</a>
             </div>
             <div class="draft-footer">
+              :)
             </div>
           </form>
         </div>
@@ -212,7 +233,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="post" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
               <button class="standard-button" style="place-self: end;" type="submit">
@@ -220,20 +241,64 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
+              <textarea
+                name="body"
+                data-bind="draft"
+                placeholder="Say it, don't spray it."
+                value="${escapeHyperText(draft.body)}"
+              ></textarea>
             </div>
             <div class="draft-footer">
               <div class="time-form">
-                ${monthSelector(draft.month)}
-                ${daySelector(draft.day, draft.month, draft.year)}
-                <span>,</span>
-                ${yearSelector(draft.year)}
-                <span>·</span>
-                ${hourSelector(draft.hour)}
-                <span>:</span>
-                ${minuteSelector(draft.minute)}
+                <div class="time-form-section">
+                  ${typeSelector(draft.type)}
+                </div>
+                <div class="time-form-section">
+                  ${yearSelector(draft.year)}
+                  /
+                  ${monthSelector(draft.month)}
+                  /
+                  ${daySelector(draft.day, draft.month, draft.year)}
+                </div>
+                <div class="time-form-section">
+                  @
+                  ${hourSelector(draft.hour)}
+                  <span>:</span>
+                  ${minuteSelector(draft.minute)}
+                </div>
               </div>
             </div>
           </form>
+        </div>
+      </div>
+    `
+  },
+  [views.journal]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="textarea">
+                ${event.data.text}
+              </div>
+            </div>
+            <div class="draft-footer">
+              :)
+            </div>
+          </form>
+
         </div>
       </div>
     `
@@ -323,9 +388,13 @@ $.draw((target)=> {
 })
 
 const eventRenderers = {
-  [eventTypes.journal]: function (data) {
+  [eventTypes.journal]: function (event) {
+    const [firstLine, secondLine] = event.data.text.split('\n')
     return `
-      ${data}
+      <button class="view-event" data-show="${eventTypes.journal}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${firstLine}
+        ${secondLine}
+      </button>
     `
   }
 }
@@ -333,10 +402,12 @@ const eventRenderers = {
 function renderBucket(key) {
   const { buckets } = $.learn()
   return Object.keys(buckets[bucketKeys.today]).map(key => {
-    const { data } = buckets[bucketKeys.today][key]
+    const event = buckets[bucketKeys.today][key]
     return `
       <div class="event">
-        ${eventRenderers[key] ? eventRenderers(data) : JSON.stringify(data)}
+        ${eventRenderers[event.data.type]
+          ? eventRenderers[event.data.type](event)
+          : JSON.stringify(event.data)}
       </div>
     `
   }).join('')
@@ -347,43 +418,53 @@ $.when('click', '[data-future-toggle]', (event) => {
   $.teach({ futureEnabled: !$.learn().futureEnabled })
 })
 
+$.when('submit', '[action="edit"]', async (event) => {
+  event.preventDefault()
+})
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
   // Get current date and time for filename
   const { draft } = $.learn()
-  const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute);
 
-  const postData = { type: eventTypes.journal, text: 'hey' }
-  const timestamp = now.toJSON()
+  if(draft.body) {
+    const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute);
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+    const postData = { type: eventTypes.journal, text: draft.body }
+    const timestamp = now.toJSON()
 
-  // Attempt to upload to server
-  fetch(`/private/time-machine/${timestamp}.json`, {
-      method: 'POST',
-      body: JSON.stringify(postData),
-      headers: {
-        'Content-Type': 'image/jpeg',
-        "Authorization": `Basic ${authorization}`
+    const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+
+    // Attempt to upload to server
+    fetch(`/private/time-machine/${timestamp}.json`, {
+        method: 'POST',
+        body: JSON.stringify(postData),
+        headers: {
+          'Content-Type': 'image/jpeg',
+          "Authorization": `Basic ${authorization}`
+        }
+    }).then(response => {
+      if (!response.ok) {
+        // Explicitly throw for non-200 responses
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
-  }).then(response => {
-    if (!response.ok) {
-      // Explicitly throw for non-200 responses
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-  }).catch(error => {
-    console.warn('Server upload failed, falling back to download', error);
+    }).catch(error => {
+      console.warn('Server upload failed, falling back to download', error);
 
-    // Fallback: create a download link
-    const link = document.createElement('a');
-    link.download = `${timestamp}.jpg`;
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
+      // Fallback: create a download link
+      const link = document.createElement('a');
+      link.download = `${timestamp}.jpg`;
+      link.href = dataURL;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
 
-  hideModal()
+    hideModal()
+    toast('Created!', { type: 'success' })
+    $.teach({ draft: newDraft })
+  } else {
+    toast('Incomplete information, please try again.', { type: 'error' })
+  }
 })
 
 
@@ -421,6 +502,16 @@ $.when('click', '[data-create]', (event) => {
     document.body.removeChild(link);
   });
 })
+
+$.when('click', '[data-show]', (event) => {
+  const { show, space, time } = event.target.dataset
+  showModal(`
+    <time-machine view="${views[show]}" data-space="${space}" data-time="${time}"></time-machine>
+  `, {
+    transparent: true
+  })
+})
+
 
 $.when('click', '[data-new]', (event) => {
   showModal(`
@@ -474,6 +565,7 @@ $.style(`
     color: rgba(0,0,0,.65);
     text-transform: uppercase;
     font-weight: 100;
+    margin-bottom: 1rem;
   }
 
   & .era-events {
@@ -487,15 +579,23 @@ $.style(`
   & .now {
     padding: 3rem 1rem;
     text-align: center;
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
   }
 
   & .now-date {
     font-size: 3rem;
     font-weight: bold;
+    color: rgba(255,255,255,.65);
   }
+
 
   & .now-time {
     font-size: 2rem;
+    color: rgba(255,255,255,.45);
   }
 
   & .future-toggle-wrapper {
@@ -520,11 +620,41 @@ $.style(`
   }
 
   & .overlay-background {
-    padding: 2rem 0;
+    padding: 2rem 0 0;
     height: 100%;
     background: rgba(0,0,0,.15);
     backdrop-filter: blur(2px);
     overflow: hidden;
+  }
+
+  & .draft-header {
+    background: rgba(0,0,0,.1);
+    padding: .5rem;
+  }
+
+  & .draft-body {
+    padding: .5rem;
+  }
+
+  & .draft-footer {
+    padding: .5rem;
+    background:
+      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    display: flex;
+    align-items: end;
+    justify-content: end;
+  }
+
+  & .draft-footer select {
+    color: white;
+    background: rgba(0,0,0,.85);
+    border: none;
+    border-radius: 3px;
+    padding: 0 .5rem;
   }
 
   & .form-card {
@@ -532,7 +662,6 @@ $.style(`
     background: white;
     max-width: 55ch;
     margin: 0 auto;
-    padding: .5rem;
 
     box-shadow:
       0 0 6px 6px rgba(0,0,0,.05),
@@ -546,9 +675,18 @@ $.style(`
   & .draft-template {
     display: grid;
     grid-template-rows: auto 1fr auto;
-    gap: .5rem;
     overflow: hidden;
     max-height: 100%;
+  }
+
+  & .text-well .textarea,
+  & .text-well textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: .5rem;
+    overflow: auto;
   }
 
   & .draft-header {
@@ -569,12 +707,45 @@ $.style(`
 
   & .time-form {
     display: flex;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  & .time-form-section {
+    display: flex;
     gap: .25rem;
   }
+
+
+  & .view-event {
+    border: none;
+    border-radius: 3px;
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.45) 20%, rgba(0,0,0,.26)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    padding: .5rem;
+    font-weight: bold;
+    display: block;
+    text-align: left;
+    width: 100%;
+  }
+
+  & .view-event:hover,
+  & .view-event:focus {
+    color: rgba(255,255,255,.85);
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
+      var(--root-theme, mediumseagreen);
+  }
+
 
 `)
 
 $.when('click', '[data-cancel-draft]', () => {
+  $.teach({ draft: newDraft })
   hideModal()
 })
 
@@ -618,4 +789,14 @@ $.when('input', '[data-bind]', (event) => {
   })
 })
 
-
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}

@@ -943,6 +943,14 @@ sillonious-brand > xml-html {
   -webkit-text-fill-color: transparent;
 }
 
+.standard-button.-outlined {
+  border: 1px solid var(--root-theme, mediumseagreen);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+
 .standard-input {
   border: 1px solid rgba(0,0,0,.15);
   border-radius: 3px;
