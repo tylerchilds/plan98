@@ -85,7 +85,7 @@ async function query(target) {
 
     if(!handles) return
 
-    const paths = handles.map(x => `/private/tommi-space/${x.name}`)
+    const paths = handles.map(x => `/private/time-machine/${x.name}`)
     const events = await Promise.all(
       paths.map((x, i) => fetch(x).then(res => res.json()).then(data => {
         return {
