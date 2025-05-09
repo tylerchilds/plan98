@@ -3,6 +3,19 @@ import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 
+function sync(target) {
+  if(target.synced) return
+  target.synced = true
+
+  fetch('/cdn/tommi.space/activities.json')
+    .then(res => res.json())
+    .then(data => {
+      $.teach({ activities: data })
+    })
+}
+
+
+
 const eventTypes = {
   journal: 'journal'
 }
@@ -48,7 +61,8 @@ const newDraft = {
 }
 
 // dear diary
-const $ = elf('time-machine', {
+const $ = elf('tommi-space', {
+  activities: [],
   now: new Date(),
   buckets: emptyBuckets,
   draft: newDraft
@@ -71,7 +85,7 @@ async function query(target) {
 
     if(!handles) return
 
-    const paths = handles.map(x => `/private/time-machine/${x.name}`)
+    const paths = handles.map(x => `/private/tommi-space/${x.name}`)
     const events = await Promise.all(
       paths.map((x, i) => fetch(x).then(res => res.json()).then(data => {
         return {
@@ -206,6 +220,7 @@ function minuteSelector(selected) {
 
 const viewRenderers = {
   [views.wallet]: (target) => {
+    const { activities, activeTag } = $.learn()
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -219,6 +234,47 @@ const viewRenderers = {
               <a href="/app/plan98-backpack">Backpack</a>
               <a href="/app/blue-sky">Bluesky</a>
               <a href="/app/e-mail">E-mail</a>
+
+              <div class="section">
+                <div class="section-header">Activities</div>
+                  <div class="activities">
+                    ${
+                      activities.filter(x => {
+                        return activeTag 
+                            ? x?.tags?.includes(activeTag)
+                            : true
+                      }).map(x => {
+                        const { tags=[] } = x
+                        return `
+                          <div class="activity">
+                            <div class="activity-title">
+                              <a href="${x.url}">${x.title}</a>
+                            </div>
+                            <div class="activity-description">
+                              ${x.description}
+                            </div>
+                            <div class="tags">
+                              ${tags.map(x => {
+                                return `
+                                  <button class="standard-button" data-tag="${x}">
+                                    ${x}
+                                  </button>
+                                `
+                              }).join('')}
+                            </div>
+                            <div class="location">
+                              ${x.city}, ${x.country}
+                            </div>
+                            <div class="map">
+                              ${x.longitude}, ${x.latitude}
+                            </div>
+                          </div>
+                        `
+                      }).join('')
+                    }
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="draft-footer">
               :)
@@ -314,8 +370,9 @@ $.draw((target)=> {
     return viewRenderers[view](target)
   }
 
+  sync(target)
   query(target)
-  const { now, futureEnabled, buckets } = $.learn()
+  const { now, futureEnabled, activities, buckets } = $.learn()
   return `
     <div class="banner-bar">
       <div class="left-bar">
@@ -383,9 +440,24 @@ $.draw((target)=> {
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
+      //recoverElves(target, 'code-module')
     }
   }
 })
+
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
 
 const eventRenderers = {
   [eventTypes.journal]: function (event) {
@@ -417,6 +489,11 @@ function renderBucket(key) {
   }).join('')
 }
 
+$.when('click', '[data-tag]', (event) => {
+  event.preventDefault()
+  const { tag } = event.target.dataset
+  $.teach({ activeTag: tag})
+})
 
 $.when('click', '[data-future-toggle]', (event) => {
   $.teach({ futureEnabled: !$.learn().futureEnabled })
@@ -510,7 +587,7 @@ $.when('click', '[data-create]', (event) => {
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
   showModal(`
-    <time-machine view="${views[show]}" data-space="${space}" data-time="${time}"></time-machine>
+    <tommi-space view="${views[show]}" data-space="${space}" data-time="${time}"></tommi-space>
   `, {
     transparent: true
   })
@@ -519,7 +596,7 @@ $.when('click', '[data-show]', (event) => {
 
 $.when('click', '[data-new]', (event) => {
   showModal(`
-    <time-machine view="${views.create}"></time-machine>
+    <tommi-space view="${views.create}"></tommi-space>
   `, {
     transparent: true
   })
@@ -527,7 +604,7 @@ $.when('click', '[data-new]', (event) => {
 
 $.when('click', '[data-wallet]', (event) => {
   showModal(`
-    <time-machine view="${views.wallet}"></time-machine>
+    <tommi-space view="${views.wallet}"></tommi-space>
   `, {
     transparent: true
   })
@@ -540,6 +617,11 @@ $.style(`
     display: block;
     height: 100%;
     overflow: auto;
+  }
+
+  & .section-header {
+    font-size: 4rem;
+    font-weight: 1000;
   }
 
   & .banner-bar {
@@ -753,6 +835,26 @@ $.style(`
 
   & .journal-preview-2 {
     color: rgba(0,0,0,.35);
+  }
+
+  & .activities {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  & .activity {
+    padding: 1rem;
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.95) 20%, rgba(255,255,255,.85)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,.85);
+  }
+
+  & .activity-title {
+    font-size: 2rem;
+    font-weight: 1000;
   }
 `)
 
