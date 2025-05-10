@@ -610,15 +610,9 @@ const eventRenderers = {
     `
   },
   [eventTypes.tommi]: function (event) {
-    const [firstLine='', secondLine=''] = event.data.text.split('\n')
     return `
       <button class="view-event" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <div class="journal-preview-1">
-          ${firstLine}
-        </div>
-        <div class="journal-preview-2">
-          ${secondLine}
-        </div>
+        ${event.data.title}
       </button>
     `
   }
