@@ -17,7 +17,7 @@ const bucketKeys = {
   today: 'today',
   yesterday: 'yesterday',
   tomorrow: 'tomorrow',
-  thisWeek: 'thisWeek',
+  nextWeek: 'nextWeek',
   lastWeek: 'lastWeek'
 }
 
@@ -32,8 +32,13 @@ const emptyBuckets = {
 const today = new Date();
 const yesterday = new Date(today - 1);
 const tomorrow = new Date(today + 1);
-const thisWeek = new Date(today + 7);
+const nextWeek = new Date(today + 7);
 const lastWeek = new Date(today - 7)
+
+tomorrow.setDate(today.getDate() + 1)
+yesterday.setDate(today.getDate() - 1)
+nextWeek.setDate(today.getDay()+7)
+lastWeek.setDate(today.getDay() - today.getDay()+7)
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
@@ -87,34 +92,73 @@ async function query(target) {
   }
 }
 
-function mergeEvents(state, payload) {
-  const sorted = payload.reduce((all, event) => {
-    const [timestamp] = event.handle.name.split('.json')
+const bucketPairs = [
+  [today, bucketKeys.today],
+  [tomorrow, bucketKeys.tomorrow],
+  [yesterday, bucketKeys.yesterday],
+  [lastWeek, bucketKeys.lastWeek],
+  [nextWeek, bucketKeys.nextWeek],
+]
 
+function indexDate(timeKey) {
+  return timeKey.split('T')[0]
+}
+
+
+function mergeEvents(state, payload) {
+  const buckets = payload.reduce((buckets, event) => {
+    const [timeKey] = event.handle.name.split('.json')
+    let index = bucketPairs.findIndex(([date, key]) => {
+      console.log(key, timeKey, date.toDateString(), new Date(timeKey).toDateString())
+      return date.toDateString() === new Date(timeKey).toDateString()
+    })
+
+    const spaceKey = index > -1 ? bucketPairs[index][1] : indexDate(timeKey)
+
+    console.log(spaceKey)
+
+    if(!buckets[spaceKey]) {
+      buckets[spaceKey] = {}
+    }
+
+    buckets[spaceKey][timeKey] = {
+      spaceKey,
+      timeKey,
+      ...event
+    }
+
+    return buckets
+
+    /*
+    const [timestamp] = event.handle.name.split('.json')
     if(today.toDateString() === new Date(timestamp).toDateString()) {
       all[bucketKeys.today][timestamp] = {
         spaceKey: bucketKeys.today,
         timeKey: timestamp,
         ...event
       }
+
+      return all
     }
 
-    return all
-  }, emptyBuckets)
 
   const buckets = Object.keys(sorted).reduce((buckets, key) => {
     if(!buckets[key]) {
       buckets[key] = { ...(state.buckets[key] || {}) }
     }
-    buckets[key] = { ...buckets[key], ...payload[key] }
+    buckets[key] = [payload.key] = { ...buckets[key], ...payload[key] }
     return buckets
   }, {})
+
+    return all
+    */
+  }, {
+    ...emptyBuckets,
+    ...state.buckets,
+  })
   return {
     ...state,
-    buckets: {
-      ...state.buckets,
-      ...buckets
-    }
+    buckets,
   }
 }
 
@@ -338,13 +382,19 @@ $.draw((target)=> {
     <div class="the-future ${futureEnabled?'visible':'hidden'}">
       <div class="era">
         <div class="era-label">
-          This Week
+          Next Week
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.nextWeek)}
         </div>
       </div>
 
       <div class="era">
         <div class="era-label">
           Tomorrow
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.tomorrow)}
         </div>
       </div>
     </div>
@@ -363,7 +413,7 @@ $.draw((target)=> {
         Today
       </div>
       <div class="era-events">
-        ${renderBucket(buckets.today)}
+        ${renderBucket(bucketKeys.today)}
       </div>
     </div>
 
@@ -371,11 +421,17 @@ $.draw((target)=> {
       <div class="era-label">
         Yesterday
       </div>
+      <div class="era-events">
+        ${renderBucket(bucketKeys.yesterday)}
+      </div>
     </div>
 
     <div class="era">
       <div class="era-label">
         Last Week
+      </div>
+      <div class="era-events">
+        ${renderBucket(bucketKeys.lastWeek)}
       </div>
     </div>
   `
@@ -403,10 +459,10 @@ const eventRenderers = {
   }
 }
 
-function renderBucket(key) {
+function renderBucket(spaceKey) {
   const { buckets } = $.learn()
-  return Object.keys(buckets[bucketKeys.today]).map(key => {
-    const event = buckets[bucketKeys.today][key]
+  return Object.keys(buckets[spaceKey]).map(key => {
+    const event = buckets[spaceKey][key]
     return `
       <div class="event">
         ${eventRenderers[event.data.type]
