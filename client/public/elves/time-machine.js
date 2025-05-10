@@ -382,6 +382,7 @@ const viewRenderers = {
             <div class="draft-footer">
               <div class="time-form">
                 <div class="time-form-section">
+                  .
                   ${typeSelector(draft.type)}
                 </div>
                 <div class="time-form-section">
