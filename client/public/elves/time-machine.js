@@ -3,16 +3,6 @@ import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 
-const eventTypes = {
-  journal: 'journal'
-}
-
-const views = {
-  wallet: 'wallet',
-  create: 'create',
-  [eventTypes.journal]: eventTypes.journal
-}
-
 const bucketKeys = {
   today: 'today',
   yesterday: 'yesterday',
@@ -40,28 +30,61 @@ yesterday.setDate(today.getDate() - 1)
 nextWeek.setDate(today.getDay()+7)
 lastWeek.setDate(today.getDay() - today.getDay()+7)
 
+const eventTypes = {
+  journal: 'journal',
+  tommi: 'tommi',
+}
+
+const views = {
+  wallet: 'wallet',
+  create: 'create',
+  [eventTypes.journal]: eventTypes.journal,
+  [eventTypes.tommi]: eventTypes.tommi
+}
+
+const schemas = {
+  [eventTypes.tommi]: {
+    type: eventTypes.tommi,
+    year: today.getFullYear(),
+    month: today.getMonth(),
+    day: today.getDate(),
+    hour: today.getHours(),
+    minute: today.getMinutes(),
+    url: null,
+    title: null,
+    description: null,
+    tags: [],
+    city: null,
+    country: null,
+    longitude: null,
+    latitude: null,
+  },
+  [eventTypes.journal]: {
+    body: '',
+    type: eventTypes.journal,
+    year: today.getFullYear(),
+    month: today.getMonth(),
+    day: today.getDate(),
+    hour: today.getHours(),
+    minute: today.getMinutes(),
+  }
+}
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-const newDraft = {
-  body: '',
-  type: eventTypes.journal,
-  year: today.getFullYear(),
-  month: today.getMonth(),
-  day: today.getDate(),
-  hour: today.getHours(),
-  minute: today.getMinutes(),
+function newDraft(type) {
+  return schemas[type] || {}
 }
 
 // dear diary
 const $ = elf('time-machine', {
   now: new Date(),
   buckets: emptyBuckets,
-  draft: newDraft
+  draft: newDraft(eventTypes.journal)
 })
 
 setInterval(() => {
   $.teach({ now: new Date() })
-}, 1000)
+}, 1000 * 60)
 
 async function query(target) {
   if(target.queried) return
@@ -109,13 +132,10 @@ function mergeEvents(state, payload) {
   const buckets = payload.reduce((buckets, event) => {
     const [timeKey] = event.handle.name.split('.json')
     let index = bucketPairs.findIndex(([date, key]) => {
-      console.log(key, timeKey, date.toDateString(), new Date(timeKey).toDateString())
       return date.toDateString() === new Date(timeKey).toDateString()
     })
 
     const spaceKey = index > -1 ? bucketPairs[index][1] : indexDate(timeKey)
-
-    console.log(spaceKey)
 
     if(!buckets[spaceKey]) {
       buckets[spaceKey] = {}
@@ -162,6 +182,73 @@ function mergeEvents(state, payload) {
   }
 }
 
+const creationForms = {
+  [eventTypes.journal]: (draft) => {
+    return `
+      <textarea
+        name="body"
+        data-bind="draft"
+        placeholder="Say it, don't spray it."
+        value="${escapeHyperText(draft.body)}"
+      ></textarea>
+    `
+  },
+  [eventTypes.tommi]: (draft) => {
+
+    const x = {
+      ...schemas[views.tommi],
+      ...draft,
+    }
+
+
+    return `
+      <label class="field">
+        <span class="label">Title</span>
+        <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+      </label>
+
+      <label class="field">
+        <span class="label">URL</span>
+        <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+      </label>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+      </label>
+
+      ${x.tags.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+
+      <label class="field">
+        <span class="label">City</span>
+        <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" required/>
+      </label>
+
+      <label class="field">
+        <span class="label">Country</span>
+        <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" required/>
+      </label>
+      <label class="field">
+        <span class="label">Longitude</span>
+        <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" required/>
+      </label>
+      <label class="field">
+        <span class="label">Latitude</span>
+        <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" required/>
+      </label>
+    `
+  }
+}
+
+function renderCreationFormByType(draft) {
+  return creationForms[draft.type] ? creationForms[draft.type](draft) : ''
+}
+
 function typeSelector(selected) {
   return `
     <select name="type" data-bind="draft">
@@ -172,6 +259,9 @@ function typeSelector(selected) {
   `
 }
 
+$.when('changed', '[name="type"]', (event) => {
+  $.teach({ draft: newDraft(event.target.value) })
+})
 
 const years = []
 
@@ -287,12 +377,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
-              <textarea
-                name="body"
-                data-bind="draft"
-                placeholder="Say it, don't spray it."
-                value="${escapeHyperText(draft.body)}"
-              ></textarea>
+              ${renderCreationFormByType(draft)}
             </div>
             <div class="draft-footer">
               <div class="time-form">
@@ -323,6 +408,12 @@ const viewRenderers = {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.journal],
+      ...event.data,
+    }
+
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -336,7 +427,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
-              <div class="textarea">${escapeHyperText(event.data.text)}</div>
+              <div class="textarea">${escapeHyperText(x.text)}</div>
             </div>
             <div class="draft-footer">
               :)
@@ -346,7 +437,68 @@ const viewRenderers = {
         </div>
       </div>
     `
+  },
+  [views.tommi]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.tommi],
+      ...event.data,
+    }
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button class="standard-button" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="section">
+                <div class="section-header">Activities</div>
+                  <div class="activities">
+                    <div class="activity">
+                      <div class="activity-title">
+                        <a href="${x.url || ''}">${x.title || x.url}</a>
+                      </div>
+                      <div class="activity-description">
+                        ${x.description || ''}
+                      </div>
+                      <div class="tags">
+                        ${x.tags.map(x => {
+                          return `
+                            <button class="standard-button" data-tag="${x}">
+                              ${x}
+                            </button>
+                          `
+                        }).join('')}
+                      </div>
+                      <div class="location">
+                        ${x.city || ''}, ${x.country || ''}
+                      </div>
+                      <div class="map">
+                        ${x.longitude || ''}, ${x.latitude || ''}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            </div>
+            <div class="draft-footer">
+              :)
+            </div>
+          </form>
+        </div>
+      </div>
+    `
   }
+
 }
 
 
@@ -456,7 +608,21 @@ const eventRenderers = {
         </div>
       </button>
     `
+  },
+  [eventTypes.tommi]: function (event) {
+    const [firstLine='', secondLine=''] = event.data.text.split('\n')
+    return `
+      <button class="view-event" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <div class="journal-preview-1">
+          ${firstLine}
+        </div>
+        <div class="journal-preview-2">
+          ${secondLine}
+        </div>
+      </button>
+    `
   }
+
 }
 
 function renderBucket(spaceKey) {
@@ -486,10 +652,9 @@ $.when('submit', '[action="post"]', async (event) => {
   // Get current date and time for filename
   const { draft } = $.learn()
 
-  if(draft.body) {
+  if(draft) {
     const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute);
 
-    const postData = { type: eventTypes.journal, text: draft.body }
     const timestamp = now.toJSON()
 
     const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
@@ -497,7 +662,7 @@ $.when('submit', '[action="post"]', async (event) => {
     // Attempt to upload to server
     fetch(`/private/time-machine/${timestamp}.json`, {
         method: 'POST',
-        body: JSON.stringify(postData),
+        body: JSON.stringify(draft),
         headers: {
           'Content-Type': 'image/jpeg',
           "Authorization": `Basic ${authorization}`
@@ -521,7 +686,7 @@ $.when('submit', '[action="post"]', async (event) => {
 
     hideModal()
     toast('Created!', { type: 'success' })
-    $.teach({ draft: newDraft })
+    $.teach({ draft: newDraft(draft.type) })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
@@ -740,6 +905,12 @@ $.style(`
     max-height: 100%;
   }
 
+  & .text-well {
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+  }
+
   & .text-well .textarea,
   & .text-well textarea {
     width: 100%;
@@ -747,7 +918,6 @@ $.style(`
     resize: none;
     border: none;
     padding: .5rem;
-    overflow: auto;
     white-space: preserve;
   }
 
@@ -813,7 +983,7 @@ $.style(`
 `)
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ draft: newDraft })
+  $.teach({ draft: newDraft($.learn().draft.type) })
   hideModal()
 })
 
@@ -831,12 +1001,10 @@ function formatDate(date) {
   return date.toLocaleString('en-US', options);
 }
 
-function formatTime(date) {
-  const options = {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  };
+function formatTime(date, options = {
+  hour: '2-digit',
+  minute: '2-digit',
+}) {
 
   return date.toLocaleString('en-US', options);
 }
@@ -858,6 +1026,7 @@ $.when('input', '[data-bind]', (event) => {
 })
 
 function escapeHyperText(text = '') {
+  if(!text) return ''
   return text.replace(/[&<>'"]/g, 
     actor => ({
       '&': '&amp;',
