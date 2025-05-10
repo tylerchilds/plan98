@@ -10,12 +10,9 @@ $.draw((target) => {
     const { body, type } = $.learn()[id]
 
     return `
-      <div class="toast-message ${type}" key="${id}">
+      <button class="toast-message ${type}" key="${id}" data-close="${id}">
         ${body}
-        <button class="toast-close" data-close="${id}">
-          <sl-icon name="x-lg"></sl-icon>
-        </button>
-      </div>
+      </button>
     `
   }).join('')
 
@@ -97,7 +94,7 @@ $.style(`
     background: white;
     border: 2px solid var(--toast-color);
     border-radius: 3px;
-    padding: 1rem 3rem 1rem 1rem;
+    padding: 1rem;
     font-size: 1.2rem;
     line-height: 1;
     position: relative;
@@ -120,27 +117,5 @@ $.style(`
 
   & .toast-message.info {
     --toast-color: dodgerblue;
-  }
-
-  & .toast-close {
-    background: transparent;
-    border: none;
-    color: var(--toast-color);
-    display: grid;
-    place-content: center;
-    padding: 3px 5px 0;
-    opacity: .65;
-    transition: opacity 100ms;
-    margin-left: .5rem;
-    aspect-ratio: 1;
-    position: absolute;
-    top: .5rem;
-    right: .5rem;
-  }
-
-  & .toast-close:hover,
-  & .toast-close:focus {
-    border-color: rgba(0,0,0,1);
-    color: rgba(0,0,0,1);
   }
 `)

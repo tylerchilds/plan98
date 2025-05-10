@@ -60,7 +60,7 @@ const schemas = {
     latitude: null,
   },
   [eventTypes.journal]: {
-    body: '',
+    text: '',
     type: eventTypes.journal,
     year: today.getFullYear(),
     month: today.getMonth(),
@@ -79,18 +79,21 @@ function newDraft(type) {
 const $ = elf('time-machine', {
   now: new Date(),
   buckets: emptyBuckets,
-  draft: newDraft(eventTypes.journal)
+  draft: newDraft(eventTypes.journal),
+  context: null
 })
 
 setInterval(() => {
   $.teach({ now: new Date() })
 }, 1000 * 60)
 
-async function query(target) {
+function query(target) {
   if(target.queried) return
   target.queried = true
+  fate()
+}
 
-
+async function fate() {
   const { plan98 } = await fetch(`/plan98/about?cwd=/private/time-machine`)
     .then(res => res.json()).catch(console.error)
 
@@ -100,6 +103,7 @@ async function query(target) {
     if(!handles) return
 
     const paths = handles.map(x => `/private/time-machine/${x.name}`)
+
     const events = await Promise.all(
       paths.map((x, i) => fetch(x).then(res => res.json()).then(data => {
         return {
@@ -148,30 +152,6 @@ function mergeEvents(state, payload) {
     }
 
     return buckets
-
-    /*
-    const [timestamp] = event.handle.name.split('.json')
-    if(today.toDateString() === new Date(timestamp).toDateString()) {
-      all[bucketKeys.today][timestamp] = {
-        spaceKey: bucketKeys.today,
-        timeKey: timestamp,
-        ...event
-      }
-
-      return all
-    }
-
-
-  const buckets = Object.keys(sorted).reduce((buckets, key) => {
-    if(!buckets[key]) {
-      buckets[key] = { ...(state.buckets[key] || {}) }
-    }
-    buckets[key] = [payload.key] = { ...buckets[key], ...payload[key] }
-    return buckets
-  }, {})
-
-    return all
-    */
   }, {
     ...emptyBuckets,
     ...state.buckets,
@@ -183,70 +163,85 @@ function mergeEvents(state, payload) {
 }
 
 const creationForms = {
-  [eventTypes.journal]: (draft) => {
+  [eventTypes.journal]: function(draft) {
     return `
-      <textarea
-        name="body"
-        data-bind="draft"
-        placeholder="Say it, don't spray it."
-        value="${escapeHyperText(draft.body)}"
-      ></textarea>
+      <div class="tychi-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <textarea
+          name="text"
+          data-bind="draft"
+          placeholder="Say it, don't spray it."
+          value="${escapeHyperText(draft.text)}"
+        ></textarea>
+      </div>
     `
   },
-  [eventTypes.tommi]: (draft) => {
+  [eventTypes.tommi]: function(draft) {
 
     const x = {
       ...schemas[views.tommi],
       ...draft,
     }
 
-
     return `
-      <label class="field">
-        <span class="label">Title</span>
-        <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
-      </label>
+      <div class="tommi-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Title</span>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+          </label>
 
-      <label class="field">
-        <span class="label">URL</span>
-        <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
-      </label>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
-      </label>
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+          </label>
+        </div>
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+        </label>
 
-      ${x.tags.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
+        ${x.tags.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
 
-      <label class="field">
-        <span class="label">City</span>
-        <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" required/>
-      </label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">City</span>
+            <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" required/>
+          </label>
 
-      <label class="field">
-        <span class="label">Country</span>
-        <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" required/>
-      </label>
-      <label class="field">
-        <span class="label">Longitude</span>
-        <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" required/>
-      </label>
-      <label class="field">
-        <span class="label">Latitude</span>
-        <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" required/>
-      </label>
+          <label class="field">
+            <span class="label">Country</span>
+            <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" required/>
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Longitude</span>
+            <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" required/>
+          </label>
+          <label class="field">
+            <span class="label">Latitude</span>
+            <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" required/>
+          </label>
+        </div>
+      </div>
     `
   }
 }
 
 function renderCreationFormByType(draft) {
-  return creationForms[draft.type] ? creationForms[draft.type](draft) : ''
+  return creationForms[draft.type] ? creationForms[draft.type].call(this, draft) : ''
 }
 
 function typeSelector(selected) {
@@ -337,7 +332,6 @@ function minuteSelector(selected) {
   `
 }
 
-
 const viewRenderers = {
   [views.wallet]: (target) => {
     return `
@@ -363,7 +357,7 @@ const viewRenderers = {
     `
   },
   [views.create]: (target) => {
-    const { draft } = $.learn()
+    const { draft, context } = $.learn()
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -377,7 +371,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
-              ${renderCreationFormByType(draft)}
+              ${renderCreationFormByType.call(context, draft)}
             </div>
             <div class="draft-footer">
               <div class="time-form">
@@ -423,7 +417,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -455,41 +449,34 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
             <div class="text-well">
-              <div class="section">
-                <div class="section-header">Activities</div>
-                  <div class="activities">
-                    <div class="activity">
-                      <div class="activity-title">
-                        <a href="${x.url || ''}">${x.title || x.url}</a>
-                      </div>
-                      <div class="activity-description">
-                        ${x.description || ''}
-                      </div>
-                      <div class="tags">
-                        ${x.tags.map(x => {
-                          return `
-                            <button class="standard-button" data-tag="${x}">
-                              ${x}
-                            </button>
-                          `
-                        }).join('')}
-                      </div>
-                      <div class="location">
-                        ${x.city || ''}, ${x.country || ''}
-                      </div>
-                      <div class="map">
-                        ${x.longitude || ''}, ${x.latitude || ''}
-                      </div>
-                    </div>
-                  </div>
+              <div class="tommi">
+                <div class="tommi-title">
+                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+                </div>
+                <div class="tommi-description">
+                  ${x.description || ''}
+                </div>
+                <div class="tags">
+                  ${x.tags.map(x => {
+                    return `
+                      <button class="standard-button" data-tag="${x}">
+                        ${x}
+                      </button>
+                    `
+                  }).join('')}
+                </div>
+                <div class="location">
+                  ${x.city || ''}, ${x.country || ''}
+                </div>
+                <div class="map">
+                  ${x.longitude || ''}, ${x.latitude || ''}
                 </div>
               </div>
-            </div>
             </div>
             <div class="draft-footer">
               :)
@@ -598,7 +585,11 @@ $.draw((target)=> {
 
 const eventRenderers = {
   [eventTypes.journal]: function (event) {
-    const [firstLine='', secondLine=''] = event.data.text.split('\n')
+    const data = {
+      ...schemas[views.journal],
+      ...event.data
+    }
+    const [firstLine='', secondLine=''] = data.text.split('\n')
     return `
       <button class="view-event" data-show="${eventTypes.journal}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <div class="journal-preview-1">
@@ -611,9 +602,13 @@ const eventRenderers = {
     `
   },
   [eventTypes.tommi]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
     return `
       <button class="view-event" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        ${event.data.title}
+        ${data.title}
       </button>
     `
   }
@@ -645,21 +640,25 @@ $.when('submit', '[action="edit"]', async (event) => {
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
   // Get current date and time for filename
-  const { draft } = $.learn()
+  const { draft, context } = $.learn()
 
   if(draft) {
     const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute);
-
     const timestamp = now.toJSON()
+    let path = `/${timestamp}.json`
+
+    if(context) {
+      path = context.path
+    }
 
     const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
 
     // Attempt to upload to server
-    fetch(`/private/time-machine/${timestamp}.json`, {
+    fetch(`/private/time-machine${path}`, {
         method: 'POST',
         body: JSON.stringify(draft),
         headers: {
-          'Content-Type': 'image/jpeg',
+          "Content-Type": "application/json",
           "Authorization": `Basic ${authorization}`
         }
     }).then(response => {
@@ -667,6 +666,7 @@ $.when('submit', '[action="post"]', async (event) => {
         // Explicitly throw for non-200 responses
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+      fate()
     }).catch(error => {
       console.warn('Server upload failed, falling back to download', error);
 
@@ -681,46 +681,19 @@ $.when('submit', '[action="post"]', async (event) => {
 
     hideModal()
     toast('Created!', { type: 'success' })
-    $.teach({ draft: newDraft(draft.type) })
+    $.teach({ draft: newDraft(draft.type), content: null })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
 })
 
+$.when('click', '[data-view]', (event) => {
+  event.preventDefault()
+  const { view, space, time } = event.target.dataset
+  event.target.closest($.link).setAttribute('view', view)
 
-$.when('click', '[data-create]', (event) => {
-  // Get current date and time for filename
-  const now = new Date();
-  const timestamp = now.toJSON()
-
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
-  // Attempt to upload to server
-  fetch(`/private/time-machine/${timestamp}.json`, {
-      method: 'POST',
-      body: JSON.stringify({
-        hello: 'world'
-      }),
-      headers: {
-        'Content-Type': 'image/jpeg',
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
-    if (!response.ok) {
-      // Explicitly throw for non-200 responses
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-  }).catch(error => {
-    console.warn('Server upload failed, falling back to download', error);
-
-    // Fallback: create a download link
-    const link = document.createElement('a');
-    link.download = `${timestamp}.jpg`;
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
+  const h = $.learn().buckets[space][time] || { data: {} }
+  $.teach({ draft: h.data, context: h.handle })
 })
 
 $.when('click', '[data-show]', (event) => {
@@ -758,10 +731,21 @@ $.style(`
     overflow: auto;
   }
 
+  & .edit-banner {
+    background: lemonchiffon;
+    color: saddlebrown;
+    text-align: right;
+    padding: .5rem;
+  }
+
+  & .edit-banner:empty {
+    display: none;
+  }
+
   & .banner-bar {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    padding: .5rem 1rem;
+    padding: .5rem;
     position: sticky;
     top: 0;
     left: 0;
@@ -901,19 +885,29 @@ $.style(`
   }
 
   & .text-well {
-    overflow: auto;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    position: relative;
   }
 
-  & .text-well .textarea,
-  & .text-well textarea {
-    width: 100%;
-    height: 100%;
-    resize: none;
-    border: none;
+  & .text-well .textarea {
     padding: .5rem;
     white-space: preserve;
+    overflow: auto;
+  }
+
+  & .text-well textarea {
+    padding: .5rem;
+    resize: none;
+    border: none;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .text-well .edit-banner:empty + textarea {
+    grid-row: -1 / 1;
   }
 
   & .draft-header {
@@ -968,6 +962,27 @@ $.style(`
     color: rgba(0,0,0,.85);
   }
 
+  & .view-event[data-show="${eventTypes.journal}"] {
+    background: lemonchiffon;
+    color: saddlebrown;
+  }
+
+  & .view-event[data-show="${eventTypes.journal}"]:hover,
+  & .view-event[data-show="${eventTypes.journal}"]:focus {
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.75) 20%, rgba(255,255,255,.45)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,.85);
+  }
+
+
+  & .view-event[data-show="${eventTypes.tommi}"] {
+
+  }
+
+
+
   & .journal-preview-1 {
     color: rgba(0,0,0,.65);
   }
@@ -975,10 +990,37 @@ $.style(`
   & .journal-preview-2 {
     color: rgba(0,0,0,.35);
   }
+
+  & .tommi {
+    padding: .5rem;
+  }
+
+  & .tommi .tommi-title {
+    font-size: 2rem;
+    font-weight: 1000;
+  }
+
+  & .tommi .tommi-description {
+    color: rgba(0,0,0,.65);
+    font-size: 1.5rem;
+  }
+
+  & .tommi-form {
+    padding: .5rem;
+    overflow: auto;
+    height: 100%;
+  }
+
+  & .tychi-form {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
 `)
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ draft: newDraft($.learn().draft.type) })
+  $.teach({ draft: newDraft($.learn().draft.type), context: null })
   hideModal()
 })
 
