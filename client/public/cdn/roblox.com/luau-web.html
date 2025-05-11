@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Luau in JavaScript</title>
+  </head>
+  <body>
+    <div id="output"></div>
+    <script>
+      var Module = {
+        'print': function (msg) { output(msg) }
+      };
+
+      function output(text) {
+        document.getElementById('output').insertAdjacentHTML('beforeend', `
+          <div>
+            ${text}
+          </div>
+        `)
+      }
+
+      function executeScript(script) {
+        var err = Module.ccall('executeScript', 'string', ['string'], [script]);
+        if (err) {
+            output('Error:' + err.replace('stdin:', ''));
+        }
+      }
+      Module.onRuntimeInitialized = () => {
+        executeScript('print(2+2)')
+        executeScript('print("Hello World!")')
+        executeScript('print(2*2)')
+        executeScript('print(2/2)')
+      }
+    </script>
+    <script src="/public/cdn/roblox.com/Luau.Web.js"></script>
+  </body>
+</html>
