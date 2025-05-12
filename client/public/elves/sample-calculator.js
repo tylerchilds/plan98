@@ -1,14 +1,14 @@
 import elf from '@silly/elf'
 
-const $ = elf('dumb-calculator', {
+const $ = elf('sample-calculator', {
   expression: '2*3+4'
 })
 
 $.draw((target) => {
   const { expression, solution } = $.learn()
-  return solution ? 'Dumb Solution: '+ solution : `
+  return solution ? 'Solution: '+ solution : `
     <button>
-      Dumb Calculate: ${expression}
+      Calculate: ${expression}
     </button>
   `
 })

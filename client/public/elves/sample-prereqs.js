@@ -1,6 +1,6 @@
 import elf from '@silly/elf'
 
-const $ = elf('dumb-prereqs', {
+const $ = elf('sample-prereqs', {
   expression: [[1, 0], [0, 2], [2, 1]]
 })
 

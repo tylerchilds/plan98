@@ -1,8 +1,7 @@
 import elf from '@plan98/elf'
 
 const data = {
-  input: `
-print("Hello, World from Luau!")
+  input: `print("Hello, World from Luau!")
 
 -- You can add more Luau code here
 local message = "The answer is: "
@@ -14,8 +13,7 @@ local function greet(name)
     return "Hello, " .. name .. "!"
 end
 
-print(greet("Luau User"))
-  `,
+print(greet("Luau User"))`,
   output: []
 }
 
@@ -53,19 +51,14 @@ script.onload = function () {
   Module.onRuntimeInitialized = () => {
     init(Module)
   }
-    /*
-    executeScript('print(2+2)')
-    executeScript('print("Hello World!")')
-    executeScript('print(2*2)')
-    executeScript('print(2/2)')
-    */
 }
 
 function render(target) {
   const { input, output } = $.learn()
   return `
     <div class="action-bar">
-      <button data-run>Run</button>
+      <button style="float: right;" data-run class="standard-button">Run</button>
+      <div class="title">Luau Repl</div>
     </div>
     <div class="input">
       <textarea
@@ -76,7 +69,13 @@ function render(target) {
       ></textarea>
     </div>
     <div class="output">
-      <div class="textarea">${escapeHyperText(output.join('\n'))}</div>
+      <div class="textarea">${output.map(x => {
+        return `
+          <div>
+            ${escapeHyperText(x)}
+          </div>
+        `
+      }).join('')}</div>
     </div>
   `
 }
@@ -112,3 +111,52 @@ function escapeHyperText(text = '') {
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
+
+$.style(`
+  & {
+    display: grid;
+    grid-template-rows: auto 1fr 1fr;
+    grid-template-columns: 1fr;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .action-bar {
+    background: rgba(0,0,0,1);
+    padding: .5rem;
+  }
+
+  & .title {
+    color: rgba(255,255,255,.85);
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+
+  & .input textarea {
+    border: none;
+    height: 100%;
+    width: 100%;
+    resize: none;
+    background: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
+    padding: .5rem;
+  }
+
+  & .output {
+    height: 100%;
+    overflow: auto;
+    padding: .5rem;
+  }
+
+  @media (min-width: 36rem) {
+    & {
+      display: grid;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    & .action-bar {
+      grid-column: -1 / 1;
+    }
+  }
+`)
