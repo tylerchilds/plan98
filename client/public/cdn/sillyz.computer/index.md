@@ -1,9 +1,12 @@
+<plan98-hero></plan98-hero>
+
 # Portfolio/Pitch
 
 The graphic below is an operating system. That's the pitch. That's my portfolio.
 
-An OS for everywhere.
-===
+### An OS for everywhere.
+
+[View Full Screen](/app/ur-shell?src=/app/door-man?src=/app/blue-sky)
 
 <iframe src="/app/door-man" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
 

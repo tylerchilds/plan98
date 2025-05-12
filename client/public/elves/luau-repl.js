@@ -36,7 +36,10 @@ export function haveLuau(program) {
 
   const err = Module.ccall('executeScript', 'string', ['string'], [program]);
   if (err) {
-    log('Error:' + err.replace('stdin:', ''));
+    const err2 = Module.ccall('executeScript', 'string', ['string'], ['return ' + program]);
+    if(err2) {
+      log('Error:' + err.replace('stdin:', ''));
+    }
   }
 
   return $.learn().output.slice(output.length)
