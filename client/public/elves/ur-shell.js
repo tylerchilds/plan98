@@ -271,11 +271,47 @@ $.when('submit', 'form', (event) => {
   execute(message)
 })
 
+const imports = {}
+
+const modalities = {
+  luau(program) {
+    if(program === 'exit') {
+      $.teach({ modality: null })
+    return 'Exiting Luau modality.'
+    }
+    if(imports.haveLuau) {
+      const logs = imports.haveLuau(program)
+
+      return logs.join('\n')
+    }
+  }
+}
 
 const commands = {
   ...paperPocketPath,
   'echo': (...args) => {
     return args.join(' ')
+  },
+
+  luau(...args) {
+    import('./luau-repl.js').then((module) => {
+      imports.haveLuau = module.haveLuau
+      const $luau = module.default
+
+      function load() {
+        if($luau.learn().ready) {
+          $.teach({ modality: 'luau' })
+        } else {
+          requestAnimationFrame(load)
+        }
+      }
+
+      requestAnimationFrame(load)
+    }).catch(e => {
+      console.error(e)
+    })
+
+    return 'Entering Luau modality; please wait.'
   },
 
   clear() {
@@ -439,6 +475,10 @@ clear
 echo
   re-state the arguments
 
+luau
+  start repl powered by the luau language
+
+
 printenv [...args]
   display environment variables, none for all or one by one
 
@@ -482,10 +522,17 @@ function execute(message) {
     return
   }
 
+  const { modality } = $.learn()
+
+  if(modalities[modality]) {
+    const result = modalities[modality](message)
+    $.teach({ body: result, author: 'assistant' }, mergeMessage)
+    return
+  }
+
   const [command, ...args] = message.split(' ')
   if(commands[command]) {
     const result = commands[command].apply($, args)
-
     $.teach({ body: result, author: 'assistant' }, mergeMessage)
     return
   }

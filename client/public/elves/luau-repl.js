@@ -18,23 +18,7 @@ print(greet("Luau User"))`,
 }
 
 const $ = elf('luau-repl', data)
-
-function init(Module) {
-  function executeScript(script) {
-    var err = Module.ccall('executeScript', 'string', ['string'], [script]);
-    if (err) {
-        log('Error:' + err.replace('stdin:', ''));
-    }
-  }
-
-  $.draw(render, { beforeUpdate, afterUpdate })
-  $.when('click', '[data-run]', run)
-
-  function run() {
-    const { input } = $.learn()
-    executeScript(input)
-  }
-}
+export default $
 
 window.Module = {
   print: function (msg) { log(msg) }
@@ -43,13 +27,36 @@ function log(text) {
   $.teach(text, mergeOutput)
 }
 
+export function haveLuau(program) {
+  const { ready, output } = $.learn()
+
+  if(!ready) {
+    return 'Luau not yet ready, please wait'
+  }
+
+  const err = Module.ccall('executeScript', 'string', ['string'], [program]);
+  if (err) {
+    log('Error:' + err.replace('stdin:', ''));
+  }
+
+  return $.learn().output.slice(output.length)
+}
+
+function run() {
+  const { input } = $.learn()
+  console.log(haveLuau(input))
+}
+
+$.when('click', '[data-run]', run)
+
 const script = document.createElement('script');
 script.src = '/public/cdn/roblox.com/Luau.Web.js'
 document.head.appendChild(script); 
 
 script.onload = function () {
   Module.onRuntimeInitialized = () => {
-    init(Module)
+    $.teach({ ready: true })
+    $.draw(render, { beforeUpdate, afterUpdate })
   }
 }
 
