@@ -2156,6 +2156,11 @@ const viewRenderers = {
         label: 'Share Menu',
         icon: '<sl-icon name="upload"></sl-icon>',
         action: 'shareMenu'
+      },
+      {
+        label: 'Sandbox',
+        icon: '<sl-icon name="box-seam"></sl-icon>',
+        action: 'luau'
       }
     ]
 
@@ -2330,6 +2335,56 @@ export function shareMenu(event, target) {
     transparent: true
   })
 }
+
+export function luau(event, target) {
+  const { cid, uri } = target.dataset
+  popover()
+
+  const { mode } = $.learn()
+
+  let record = $.learn()[cid] || {}
+
+  if(!record.post) {
+    const timeline = $.learn()[timelinesByMode[mode]]
+
+    if(!timeline) return 
+
+    record = timeline.find(data => {
+      return data.post.cid === cid
+    })
+
+    if(!record) return
+  }
+
+  const { post } = record
+
+  import('./luau-repl.js').then((module) => {
+    const $luau = module.default
+
+    function load() {
+      if($luau.learn().ready) {
+        try {
+          const logs = module.haveLuau(post.record.text)
+          showModal(`
+            <div style="background: white; white-space: preserve; font-family: 'BerkeleyMono', monospace; padding: 1rem;">${logs.join('\n')}</div>
+          `, {
+            blockExit: false
+          })
+        } catch(e) {
+          console.error(e)
+        }
+
+      } else {
+        requestAnimationFrame(load)
+      }
+    }
+
+    requestAnimationFrame(load)
+  }).catch(e => {
+    console.error(e)
+  })
+}
+
 
 
 $.draw(target => {
