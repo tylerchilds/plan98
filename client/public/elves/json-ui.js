@@ -165,6 +165,7 @@ const typeMerger = {
       if(!key) {
         return { ...state }
       }
+    debugger
       return {
         ...state,
         [key]: value
@@ -172,6 +173,7 @@ const typeMerger = {
   },
   'array': (state, key, value) => {
       const newState = [...state]
+    debugger
       if(!key) {
         return newState
       }
@@ -219,17 +221,17 @@ function type(value) {
 }
 
 function updatePath(state, { path, value }) {
-  const newState = typeMerger[type(state)](state, null)
+  const newState = typeMerger[type(state)](state)
   const segments = path.split('/').filter(x => x)
   if(segments.length > 0) {
     newState.json = segments.reduce((json, key, i) => {
-      if(i === path.length) {
-        debugger
+      if(i === segments.length - 1) {
         json[key] = value
       } else {
         json[key] = typeMerger[type(json)](json, key, value)
       }
-      return json
+        debugger
+      return json[key]
     }, newState.json)
 
   } else {
