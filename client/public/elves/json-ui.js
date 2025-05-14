@@ -28,10 +28,11 @@ const $ = elf('json-ui', {
   }
 })
 
+
 $.draw((target) => {
   const { json } = $.learn()
   console.log(json)
-  return render.call('/', json)
+  return render.call('', json)
 })
 
 function render(json) {
@@ -71,7 +72,7 @@ function renderUndefined(string) {
 
 function undefinedBehavior() {
   return `
-    <button data-path="${this}">
+    <button data-path="${escapeHyperText(this)}">
       +
     </button>
   `
@@ -83,12 +84,24 @@ function renderObject(object) {
     <div class="object">{
       ${Object.keys(object).length > 0 ? Object.keys(object).map((key) => {
         return `
-          <input data-bind="${this}" name="${key}" value="${key}">
-          ${render(object[key])}
+          <div class="property">
+            <div class="key">
+              <input data-path="${escapeHyperText(this)}" name="${escapeHyperText(key)}" value="${escapeHyperText(key)}">
+            </div>
+            <div class="value">
+              ${render.call(`${this}/${key}`, object[key])}
+            </div>
+          </div>
         `
       }).join(''): ''} 
-      <input name="__key" value="${newKey}">
-      ${undefinedBehavior.call(`${this}/${newKey}`)}
+      <div class="property" data-path="${this}" >
+        <div class="key">
+          <input data-path="${escapeHyperText(this)}" name="__key" value="${escapeHyperText(newKey)}">
+        </div>
+        <div class="value">
+          ${undefinedBehavior.call(`${this}/${newKey}`)}
+        </div>
+      </div>
     }</div>
   `
 }
@@ -98,7 +111,9 @@ function renderArray(array) {
     <div class="array">[
       ${array.map((key, index) => {
         return `
-          ${render(key)}
+          <div class="item"
+            ${render.call(`${this}/${index}`, key)}
+          </div>
         `
       }).join('')} 
       ${undefinedBehavior.call(`${this}/${array.length}`)}
@@ -109,19 +124,19 @@ function renderArray(array) {
 
 function renderBoolean(bool) {
   return `
-    <input type="checkbox" data-path="${this}" data-type="boolean" />
+    <input type="checkbox" ${bool?'checked':''} data-path="${escapeHyperText(this)}" data-type="boolean" />
   `
 }
 
 function renderString(string) {
   return `
-    <input type="text" data-path="${this}" data-type="string" value="${string}" />
+    <input type="text" data-path="${escapeHyperText(this)}" data-type="string" value="${string}" />
   `
 }
 
 function renderNumber(bool) {
   return `
-    <input type="number" data-path="${this}" data-type="number" />
+    <input type="number" data-path="${escapeHyperText(this)}" data-type="number" />
   `
 }
 
@@ -164,6 +179,12 @@ const typeMerger = {
       newState[key] = value
       return newState
   },
+  'string': (newState, key, value) => {
+    return newState + value
+  },
+  'number': (newState, key, value) => {
+    return newState + value
+  },
   'boolean': (newState, key, value) => {
     return newState
   }
@@ -198,11 +219,12 @@ function type(value) {
 }
 
 function updatePath(state, { path, value }) {
-  const newState = { ...state }
+  const newState = typeMerger[type(state)](state, null)
   const segments = path.split('/').filter(x => x)
   if(segments.length > 0) {
     newState.json = segments.reduce((json, key, i) => {
       if(i === path.length) {
+        debugger
         json[key] = value
       } else {
         json[key] = typeMerger[type(json)](json, key, value)
@@ -216,16 +238,35 @@ function updatePath(state, { path, value }) {
   return newState
 }
 
-$.when('click', '[data-define]', (event) => {
-  const { define } = event.target.dataset
-
-  console.log(define)
-})
-
 $.style(`
   & {
     display: block;
     height: 100%;
-    white-space: preserve;
+  }
+
+  & .property {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding-left: 1rem;
+    max-width: 240px;
+  }
+
+  & .item {
+    padding-left: 1rem;
+    max-width: 120px;
   }
 `)
+
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+
