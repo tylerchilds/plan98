@@ -291,7 +291,7 @@ const modalities = {
     return 'Exiting JS modality.'
     }
     if(imports.runJs) {
-      return await imports.runJs(program)
+      return JSON.stringify(await imports.runJs(program), '', 2)
     }
   }
 
@@ -321,7 +321,7 @@ const commands = {
       console.error(e)
     })
 
-    return 'Entering Luau modality; please wait.'
+    return 'Entering Luau modality'
   },
   js(...args) {
     import('./js-repl.js').then((module) => {
@@ -331,7 +331,7 @@ const commands = {
       console.error(e)
     })
 
-    return 'Entering JS modality; please wait.'
+    return 'Entering JS modality'
   },
 
 

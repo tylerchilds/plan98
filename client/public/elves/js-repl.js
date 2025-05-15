@@ -48,7 +48,7 @@ export async function runJs(program) {
     const error = vm.dump(result.error)
     result.error.dispose()
     vm.dispose()
-    return "Failed: " + JSON.stringify(error, '', 2)
+    return error
   } else {
     const data = vm.dump(result.value)
     result.value.dispose()
