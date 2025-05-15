@@ -165,7 +165,7 @@ $.draw((target) => {
   const { model, messages, messageText, messageHeight, thinking } = $.learn()
 
   const log = messages.map((message) => `
-    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
+    <div class="message -${message.author}">${escapeHyperText(`${message.body}`)}</div>
   `).join('')
 
   return `
@@ -284,7 +284,17 @@ const modalities = {
 
       return logs.join('\n')
     }
+  },
+  async js(program) {
+    if(program === 'exit') {
+      $.teach({ modality: null })
+    return 'Exiting JS modality.'
+    }
+    if(imports.runJs) {
+      return await imports.runJs(program)
+    }
   }
+
 }
 
 const commands = {
@@ -313,6 +323,18 @@ const commands = {
 
     return 'Entering Luau modality; please wait.'
   },
+  js(...args) {
+    import('./js-repl.js').then((module) => {
+      imports.runJs = module.runJs
+      $.teach({ modality: 'js' })
+    }).catch(e => {
+      console.error(e)
+    })
+
+    return 'Entering JS modality; please wait.'
+  },
+
+
 
   clear() {
     $.teach({ messages: [] })
@@ -503,7 +525,7 @@ For further assistance, enter <cool-chat
   }
 }
 
-function execute(message) {
+async function execute(message) {
   if(!message) return
 
   $.teach(message, history)
@@ -525,7 +547,7 @@ function execute(message) {
   const { modality } = $.learn()
 
   if(modalities[modality]) {
-    const result = modalities[modality](message)
+    const result = await modalities[modality](message)
     $.teach({ body: result, author: 'assistant' }, mergeMessage)
     return
   }

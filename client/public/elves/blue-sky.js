@@ -2158,9 +2158,14 @@ const viewRenderers = {
         action: 'shareMenu'
       },
       {
-        label: 'Sandbox',
+        label: 'Luau Sandbox',
         icon: '<sl-icon name="box-seam"></sl-icon>',
         action: 'luau'
+      },
+      {
+        label: 'JS Sandbox',
+        icon: '<sl-icon name="filetype-js"></sl-icon>',
+        action: 'runJs'
       }
     ]
 
@@ -2380,6 +2385,40 @@ export function luau(event, target) {
     }
 
     requestAnimationFrame(load)
+  }).catch(e => {
+    console.error(e)
+  })
+}
+
+export function runJs(event, target) {
+  const { cid, uri } = target.dataset
+  popover()
+
+  const { mode } = $.learn()
+
+  let record = $.learn()[cid] || {}
+
+  if(!record.post) {
+    const timeline = $.learn()[timelinesByMode[mode]]
+
+    if(!timeline) return 
+
+    record = timeline.find(data => {
+      return data.post.cid === cid
+    })
+
+    if(!record) return
+  }
+
+  const { post } = record
+
+  import('./js-repl.js').then(async (module) => {
+    const output = await module.runJs(post.record.text)
+    showModal(`
+      <div style="background: white; white-space: preserve; font-family: 'BerkeleyMono', monospace; padding: 1rem;">${output}</div>
+    `, {
+      blockExit: false
+    })
   }).catch(e => {
     console.error(e)
   })
