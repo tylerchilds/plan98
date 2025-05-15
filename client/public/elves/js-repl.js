@@ -24,7 +24,129 @@ async function main() {
 main()
 
 const data = {
-  input: `function hello() { return 'world' } hello()`,
+  input: `
+/*
+ * Congratulations, you've found java's crypt!
+ *
+ * this is a text based adventure game that is won by code.
+ *
+ */
+
+// a function is a block of code that can be re-used
+function hello() {
+  return 'world'
+}
+
+// say hello from wherever in the world
+hello()
+
+// values
+const a = 2;
+const b = 3;
+const c = 4;
+
+const target = {
+  score: 0
+}
+
+function score(x, count) {
+  if(count) {
+    x.score += count
+  }
+
+  return x.score
+}
+
+function formula(x, y, z) {
+  return x * y + z
+}
+
+const views = {
+  north: (target) => {
+    return 'Forest blocks all directions. Except a beach to the SOUTH. And the WAFFLES above.'
+  },
+  south: (target) => {
+    return 'Ocean blocks all directions. Except a meadow to the NORTH. And the WAFFLES above.'
+  },
+  waffles: (target) => {
+    return 'You win. WAFFLES. (total score: ' + score(target) + ')'
+  }
+}
+
+const commands = {
+  north: (target) => {
+  },
+  south: (target) => {
+  },
+  waffles: (target) => {
+    score(target, 1)
+  }
+}
+
+function turn(command) {
+  if(commands[command]) {
+    history(command)
+    commands[command](target)
+  }
+}
+
+let activeView = 'north'
+function view(newView) {
+  if(newView) {
+    turn(newView)
+    activeView = newView
+  }
+  return activeView
+}
+
+function print() {
+  return views[view()] ? views[view()](target) : error('Invalid View')
+}
+
+function error(message) {
+  return message
+}
+
+let past = []
+function history(now) {
+  if(now) {
+    past.push(now)
+  }
+
+  return past
+}
+
+function map() {
+  return {
+    key: hello(),
+    value: formula(a,b,c),
+    history: history(),
+    view: view(),
+    print: print(),
+    score: score(target),
+    actions: ['north', 'south', 'waffles'],
+    import: {
+      meta: {
+        url: "${import.meta.url}"
+      }
+    }
+  }
+}
+
+map()
+view('south')
+view('north')
+map()
+view('waffles')
+view('waffles')
+view('waffles')
+view('waffles')
+view('waffles')
+view('waffles')
+map()
+view('waffles')
+map()
+  `,
   output: null
 }
 
@@ -64,16 +186,25 @@ async function run() {
 }
 
 $.when('click', '[data-run]', run)
+$.when('click', '[data-edit]', () => $.teach({ output: null }))
 
 $.draw(render, { beforeUpdate, afterUpdate })
 
 function render(target) {
   const { input, output } = $.learn()
-  return `
-    <div class="action-bar">
+  return output ? `
+    <div2 class="action-bar">
+      <button style="float: right;" data-edit class="standard-button">Edit</button>
+      <div class="title">JS Repl</div>
+    </div2>
+    <div class="output">
+      <div class="textarea">${JSON.stringify(output, '', 2) || ''}</div>
+    </div>
+  ` : `
+    <div3 class="action-bar">
       <button style="float: right;" data-run class="standard-button">Run</button>
       <div class="title">JS Repl</div>
-    </div>
+    </div3>
     <div class="input">
       <textarea
         name="input"
@@ -81,9 +212,6 @@ function render(target) {
         placeholder="Say it, don't spray it."
         value="${escapeHyperText(input)}"
       ></textarea>
-    </div>
-    <div class="output">
-      <div class="textarea">${output || ''}</div>
     </div>
   `
 }
@@ -123,7 +251,7 @@ $.when('input', '[data-bind]', (event) => {
 $.style(`
   & {
     display: grid;
-    grid-template-rows: auto 1fr 1fr;
+    grid-template-rows: auto 1fr;
     grid-template-columns: 1fr;
     height: 100%;
     overflow: hidden;
@@ -132,6 +260,7 @@ $.style(`
   & .action-bar {
     background: rgba(0,0,0,1);
     padding: .5rem;
+    display: block;
   }
 
   & .title {
@@ -148,12 +277,17 @@ $.style(`
     background: rgba(0,0,0,.85);
     color: rgba(255,255,255,.85);
     padding: .5rem;
+    border-radius: 0;
   }
 
   & .output {
     height: 100%;
     overflow: auto;
     padding: .5rem;
+  }
+
+  & .output .textarea {
+    white-space: preserve;
   }
 
   @media (min-width: 36rem) {
