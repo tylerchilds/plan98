@@ -192,26 +192,22 @@ $.draw(render, { beforeUpdate, afterUpdate })
 
 function render(target) {
   const { input, output } = $.learn()
-  return output ? `
-    <div2 class="action-bar">
-      <button style="float: right;" data-edit class="standard-button">Edit</button>
+  return `
+    <div class="action-bar">
+      <button style="float: right; margin-left: 1rem;" data-run class="standard-button">Run</button>
+      <button style="float: right;" data-edit class="standard-button -outlined hide-full">Edit</button>
       <div class="title">JS Repl</div>
-    </div2>
-    <div class="output">
-      <div class="textarea">${JSON.stringify(output, '', 2) || ''}</div>
     </div>
-  ` : `
-    <div3 class="action-bar">
-      <button style="float: right;" data-run class="standard-button">Run</button>
-      <div class="title">JS Repl</div>
-    </div3>
-    <div class="input">
+    <div class="input ${output?'invisible':'visible'}">
       <textarea
         name="input"
         data-bind="input"
         placeholder="Say it, don't spray it."
         value="${escapeHyperText(input)}"
       ></textarea>
+    </div>
+    <div class="output ${output?'visible':'invisible'}">
+      <div class="textarea">${output?JSON.stringify(output, '', 2) : ''}</div>
     </div>
   `
 }
@@ -290,6 +286,10 @@ $.style(`
     white-space: preserve;
   }
 
+  & .invisible {
+    display: none;
+  }
+
   @media (min-width: 36rem) {
     & {
       display: grid;
@@ -299,6 +299,14 @@ $.style(`
 
     & .action-bar {
       grid-column: -1 / 1;
+    }
+
+    & .invisible {
+      display: block;
+    }
+
+    & .hide-full {
+      display: none;
     }
   }
 `)
