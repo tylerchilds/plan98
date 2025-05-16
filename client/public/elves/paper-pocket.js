@@ -23,16 +23,16 @@ export const systemMenu = {
         url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=silly-script'
       },
       {
+        label: 'Blue Sky',
+        url: '/app/blue-sky'
+      },
+      {
         label: 'Six Modalities',
         url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/six-modalities.saga&rom=silly-script'
       },
       {
-        label: 'Tamashika',
-        url: '/app/paper-pocket?rom=silly-script&src=/public/cdn/quicktequila.com/tamashika/3-24-25.saga'
-      },
-      {
-        label: 'Remote Control',
-        url: '/app/remote-control'
+        label: "Java's Crypt",
+        url: '/app/js-repl'
       },
       {
         label: 'Cool Chat',
@@ -45,22 +45,6 @@ export const systemMenu = {
       {
         label: 'Final Boss',
         url: '/app/paper-pocket?rom=final-boss'
-      },
-      {
-        label: 'File Surf',
-        url: '/app/file-surf'
-      },
-      {
-        label: 'Mobile Device',
-        url: '/app/mobile-device'
-      },
-      {
-        label: 'Door Man',
-        url: '/app/door-man'
-      },
-      {
-        label: 'UR Shell',
-        url: '/app/ur-shell'
       },
     ]
   },

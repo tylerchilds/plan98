@@ -33,23 +33,50 @@ lastWeek.setDate(today.getDay() - today.getDay()+7)
 const eventTypes = {
   journal: 'journal',
   tommi: 'tommi',
+  gallery: 'gallery',
+  photo: 'photo',
+  archive: 'archive',
 }
 
 const views = {
   wallet: 'wallet',
   create: 'create',
   [eventTypes.journal]: eventTypes.journal,
-  [eventTypes.tommi]: eventTypes.tommi
+  [eventTypes.tommi]: eventTypes.tommi,
+  [eventTypes.gallery]: eventTypes.gallery,
+  [eventTypes.photo]: eventTypes.photo,
+  [eventTypes.archive]: eventTypes.archive,
+  edge: 'edge'
 }
 
-const schemas = {
-  [eventTypes.tommi]: {
-    type: eventTypes.tommi,
+function timeFields() {
+  return {
     year: today.getFullYear(),
     month: today.getMonth(),
     day: today.getDate(),
     hour: today.getHours(),
     minute: today.getMinutes(),
+  }
+}
+
+const schemas = {
+  [eventTypes.archive]: {
+    ...timeFields(),
+    type: eventTypes.archive,
+    title: null,
+    url: null,
+    description: null,
+    tags: [],
+    creator: null,
+    collection: null,
+    testItem: false,
+    language: null,
+    license: null,
+    more: {}
+  },
+  [eventTypes.tommi]: {
+    ...timeFields(),
+    type: eventTypes.tommi,
     url: null,
     title: null,
     description: null,
@@ -60,15 +87,26 @@ const schemas = {
     latitude: null,
   },
   [eventTypes.journal]: {
-    text: '',
+    ...timeFields(),
     type: eventTypes.journal,
-    year: today.getFullYear(),
-    month: today.getMonth(),
-    day: today.getDate(),
-    hour: today.getHours(),
-    minute: today.getMinutes(),
-  }
+    text: '',
+  },
+  [eventTypes.gallery]: {
+    ...timeFields(),
+    type: eventTypes.gallery,
+    title: null,
+    description: null,
+    tags: [],
+  },
+  [eventTypes.photo]: {
+    ...timeFields(),
+    type: eventTypes.gallery,
+    title: null,
+    description: null,
+    tags: [],
+  },
 }
+
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 function newDraft(type) {
@@ -178,6 +216,42 @@ const creationForms = {
       </div>
     `
   },
+  [eventTypes.photo]: function(draft) {
+    return `
+      <div class="photo-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+        </label>
+
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+        </label>
+      </div>
+    `
+  },
+  [eventTypes.gallery]: function(draft) {
+    return `
+      <div class="gallery-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+        </label>
+
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+        </label>
+      </div>
+    `
+  },
   [eventTypes.tommi]: function(draft) {
 
     const x = {
@@ -206,7 +280,7 @@ const creationForms = {
           <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
         </label>
 
-        ${x.tags.map(x => {
+        ${x.tags?.map(x => {
           return `
             <button class="standard-button" data-tag="${x}">
               ${x}
@@ -237,7 +311,68 @@ const creationForms = {
         </div>
       </div>
     `
+  },
+  [eventTypes.archive]: function(draft) {
+
+    const x = {
+      ...schemas[views.archive],
+      ...draft,
+    }
+
+    return `
+      <div class="archive-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Title</span>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+          </label>
+
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+          </label>
+        </div>
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+        </label>
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Creator</span>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" required/>
+          </label>
+
+          <label class="field">
+            <span class="label">Collection</span>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" required/>
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Language</span>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" required/>
+          </label>
+          <label class="field">
+            <span class="label">License</span>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" required/>
+          </label>
+        </div>
+      </div>
+    `
   }
+
 }
 
 function renderCreationFormByType(draft) {
@@ -367,7 +502,7 @@ const viewRenderers = {
                 Cancel
               </button>
               <button class="standard-button" style="place-self: end;" type="submit">
-                Post
+                Save
               </button>
             </div>
             <div class="text-well">
@@ -462,7 +597,7 @@ const viewRenderers = {
                   ${x.description || ''}
                 </div>
                 <div class="tags">
-                  ${x.tags.map(x => {
+                  ${x.tags?.map(x => {
                     return `
                       <button class="standard-button" data-tag="${x}">
                         ${x}
@@ -477,6 +612,95 @@ const viewRenderers = {
                   ${x.longitude || ''}, ${x.latitude || ''}
                 </div>
               </div>
+            </div>
+            <div class="draft-footer">
+              :)
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+  [views.archive]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.archive],
+      ...event.data,
+    }
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="tommi">
+                <div class="tommi-title">
+                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+                </div>
+                <div class="tommi-description">
+                  ${x.description || ''}
+                </div>
+                <div class="tags">
+                  ${x.tags?.map(x => {
+                    return `
+                      <button class="standard-button" data-tag="${x}">
+                        ${x}
+                      </button>
+                    `
+                  }).join('')}
+                </div>
+                <div class="creator">
+                  ${x.creator || ''}
+                </div>
+                <div class="collection">
+                  ${x.collection || ''}
+                </div>
+                <div class="language">
+                  ${x.language || ''}
+                </div>
+                <div class="license">
+                  ${x.license || ''}
+                </div>
+              </div>
+            </div>
+            <div class="draft-footer">
+              :)
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+
+  edge: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="raw-json">${
+                JSON.stringify(event.data, '', 2)
+              }</div>
             </div>
             <div class="draft-footer">
               :)
@@ -503,7 +727,7 @@ $.draw((target)=> {
   return `
     <div class="banner-bar">
       <div class="left-bar">
-        <button class="standard-button" data-new>
+        <button class="standard-button -outlined" data-new>
           New
         </button>
       </div>
@@ -611,8 +835,18 @@ const eventRenderers = {
         ${data.title}
       </button>
     `
+  },
+  edge: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="edge" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
   }
-
 }
 
 function renderBucket(spaceKey) {
@@ -621,9 +855,11 @@ function renderBucket(spaceKey) {
     const event = buckets[spaceKey][key]
     return `
       <div class="event">
-        ${eventRenderers[event.data.type]
-          ? eventRenderers[event.data.type](event)
-          : JSON.stringify(event.data)}
+        ${
+          eventRenderers[event.data.type]
+            ? eventRenderers[event.data.type](event)
+            : eventRenderers.edge(event)
+        }
       </div>
     `
   }).join('')
@@ -884,6 +1120,11 @@ $.style(`
     max-height: 100%;
   }
 
+  & .raw-json {
+    white-space: preserve;
+    padding: .5rem;
+  }
+
   & .text-well {
     width: 100%;
     height: 100%;
@@ -1003,6 +1244,24 @@ $.style(`
   & .tommi .tommi-description {
     color: rgba(0,0,0,.65);
     font-size: 1.5rem;
+  }
+
+  & .gallery-form {
+    padding: .5rem;
+    overflow: auto;
+    height: 100%;
+  }
+
+  & .archive-form {
+    padding: .5rem;
+    overflow: auto;
+    height: 100%;
+  }
+
+  & .photo-form {
+    padding: .5rem;
+    overflow: auto;
+    height: 100%;
   }
 
   & .tommi-form {
