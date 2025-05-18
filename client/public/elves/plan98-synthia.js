@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import diffHTML from 'diffhtml'
 const $ = elf('plan98-synthia')
 
