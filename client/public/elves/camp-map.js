@@ -1,7 +1,6 @@
 import tag from '@silly/tag'
 import { bayunCore } from '@sillonious/vault'
 import { getSession, getCompanies, setSession, clearSession } from './bayun-wizard.js'
-import { social, setRoom, getRoom } from './chat-room.js'
 
 const companies = getCompanies().map((company) => {
   return `
@@ -113,12 +112,10 @@ $.when('click', '[data-sidebar]', async (event) => {
 
 $.draw((target) => {
   const { sessionId, companyName, companyEmployeeId } = getSession()
-  const user = social(companyName, companyEmployeeId)
   const { sidebar } = $.learn()
   const authState = sessionId
   const avatarHTML = authState ? `
     <div data-avatar>
-      <quick-media key="${user.avatar}"></quick-media>
     </div>
   ` : `
     <img data-avatar src="/cdn/tychi.me/photos/professional-headshot.jpg" alt="" />
@@ -178,11 +175,6 @@ $.draw((target) => {
     sidebar
       ? target.querySelector('.control').classList.add('sidebar')
       : target.querySelector('.control').classList.remove('sidebar')
-    return
-  }
-
-  if(user !== lastUser && target.querySelector('[data-avatar]')) {
-    lastUser = user.company + user.unix
     return
   }
 

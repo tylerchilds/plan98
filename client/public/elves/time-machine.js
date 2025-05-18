@@ -36,6 +36,7 @@ const eventTypes = {
   gallery: 'gallery',
   photo: 'photo',
   archive: 'archive',
+  dwebcamp: 'dwebcamp'
 }
 
 const views = {
@@ -46,6 +47,7 @@ const views = {
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.photo]: eventTypes.photo,
   [eventTypes.archive]: eventTypes.archive,
+  [eventTypes.dwebcamp]: eventTypes.dwebcamp,
   edge: 'edge'
 }
 
@@ -105,6 +107,23 @@ const schemas = {
     description: null,
     tags: [],
   },
+  [eventTypes.dwebcamp]: {
+    ...timeFields(),
+    type: eventTypes.dwebcamp,
+    location: null,
+    locations: ['Wayback Wheel', 'Hackers Hall', 'Migration Library', 'Treehouse', 'Cultivation Station', 'Access to Knowledge Amphitheater', 'Campfire', 'Stages', 'AI Think Tank', 'Art Barn', 'Volunteers HQ', 'Nest', 'Impact Island', 'Heartwood Chapel', 'Lightning Salon', 'Tea Tent', 'Redwood Cathedral'],
+    title: null,
+    url: null,
+    description: null,
+    tags: [],
+    creator: null,
+    collection: null,
+    testItem: false,
+    language: null,
+    license: null,
+    more: {}
+  },
+
 }
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -115,6 +134,7 @@ function newDraft(type) {
 
 // dear diary
 const $ = elf('time-machine', {
+  cards: [],
   now: new Date(),
   buckets: emptyBuckets,
   draft: newDraft(eventTypes.journal),
@@ -371,6 +391,80 @@ const creationForms = {
         </div>
       </div>
     `
+  },
+  [eventTypes.dwebcamp]: function(draft) {
+
+    const x = {
+      ...schemas[views.dwebcamp],
+      ...draft,
+    }
+
+    return `
+      <div class="dwebcamp-form">
+        <div class="edit-banner">${this?`
+          Editing: ${this.name}
+        `:''}</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Title</span>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+          </label>
+
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+          </label>
+        </div>
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+        </label>
+        <label class="field">
+          <span class="label">Location</span>
+          <select data-bind="draft" name="location">
+            <option disabled>--Select--</option>
+            ${x.locations.map((location, i) => `
+              <option value="${location}" ${location === x.location?'selected':''}>
+                ${x.locations[i]}
+              </button>
+            `).join('')}
+
+          </select>
+
+        </label>
+
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Creator</span>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" required/>
+          </label>
+
+          <label class="field">
+            <span class="label">Collection</span>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" required/>
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Language</span>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" required/>
+          </label>
+          <label class="field">
+            <span class="label">License</span>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" required/>
+          </label>
+        </div>
+      </div>
+    `
   }
 
 }
@@ -472,21 +566,19 @@ const viewRenderers = {
     return `
       <div class="overlay-background">
         <div class="form-card">
-          <form action="post" method="post" class="draft-template">
+          <div class="draft-template">
             <div class="draft-header">
               <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
                 Cancel
               </button>
             </div>
             <div class="draft-body">
-              <a href="/app/plan98-backpack">Backpack</a>
-              <a href="/app/blue-sky">Bluesky</a>
-              <a href="/app/e-mail">E-mail</a>
+              <my-wallet></my-wallet>
             </div>
             <div class="draft-footer">
               :)
             </div>
-          </form>
+          </div>
         </div>
       </div>
     `
@@ -511,7 +603,7 @@ const viewRenderers = {
             <div class="draft-footer">
               <div class="time-form">
                 <div class="time-form-section">
-                  .
+                  $
                   ${typeSelector(draft.type)}
                 </div>
                 <div class="time-form-section">
@@ -680,6 +772,70 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.dwebcamp]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.dwebcamp],
+      ...event.data,
+    }
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="text-well">
+              <div class="tommi">
+                <div class="tommi-title">
+                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+                </div>
+                <div class="tommi-location">
+                  ${x.location || ''}
+                </div>
+                <div class="tommi-description">
+                  ${x.description || ''}
+                </div>
+                <div class="tags">
+                  ${x.tags?.map(x => {
+                    return `
+                      <button class="standard-button" data-tag="${x}">
+                        ${x}
+                      </button>
+                    `
+                  }).join('')}
+                </div>
+                <div class="creator">
+                  ${x.creator || ''}
+                </div>
+                <div class="collection">
+                  ${x.collection || ''}
+                </div>
+                <div class="language">
+                  ${x.language || ''}
+                </div>
+                <div class="license">
+                  ${x.license || ''}
+                </div>
+              </div>
+            </div>
+            <div class="draft-footer">
+              :)
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+
+
 
   edge: (target) => {
     const { space, time } = target.dataset
@@ -716,7 +872,16 @@ const viewRenderers = {
 
 // you are my diary
 $.draw((target)=> {
+  const { cards } = $.learn()
   const view = target.getAttribute('view')
+
+  if(cards.length === 0) {
+    return `
+      <div2 class="anonymous">
+        <my-wallet></my-wallet>
+      </div2>
+    `
+  }
 
   if(viewRenderers[view]) {
     return viewRenderers[view](target)
@@ -832,6 +997,28 @@ const eventRenderers = {
     }
     return `
       <button class="view-event" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
+  [eventTypes.archive]: function (event) {
+    const data = {
+      ...schemas[views.archive],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.archive}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
+  [eventTypes.dwebcamp]: function (event) {
+    const data = {
+      ...schemas[views.dwebcamp],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.dwebcamp}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -1276,6 +1463,11 @@ $.style(`
     grid-template-rows: auto 1fr;
   }
 
+  & .dwebcamp-form {
+    height: 100%;
+    padding: .5rem;
+    overflow: auto;
+  }
 `)
 
 $.when('click', '[data-cancel-draft]', () => {
@@ -1333,3 +1525,9 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
+
+$.when('json-rpc', 'my-wallet', (event) => {
+  if(event.detail.method === 'updated') {
+    $.teach({ cards: event.detail.params.cards })
+  }
+})
