@@ -9,6 +9,7 @@ $.draw(() => {
         <div class="circle">
           <div class="iris">
             <div class="pupil">
+              <div class="nose"></div>
             </div>
           </div>
         </div>
@@ -27,10 +28,12 @@ $.style(`
     grid-template-rows: 1fr;
     aspect-ratio: 1;
     margin: auto;
-    background: rgba(255,255,255,.85);
     max-width: 100%;
     min-height: 48px;
     min-width: 48px;
+    background: black;
+    border-radius: 100%;
+    overflow: hidden;
   }
 
   & .crop {
@@ -38,7 +41,7 @@ $.style(`
     grid-area: spot;
     height: 100%;
     padding: 10%;
-    background: rgba(0,0,0,.35);
+    background: black;
     border-radius: 100%;
   }
 
@@ -48,22 +51,22 @@ $.style(`
     background: 
       radial-gradient(circle at center,
         rgba(255,255,255,1) 0%,
-        rgba(255,255,255,1) 35%,
-        var(--red, firebrick) 35%,
-        var(--red, firebrick) 40%,
-        var(--orange, darkorange) 40%,
-        var(--orange, darkorange) 45%,
-        var(--yellow, gold) 45%,
-        var(--yellow, gold) 50%,
-        var(--green, mediumseagreen) 50%,
-        var(--green, mediumseagreen) 55%,
-        var(--blue, dodgerblue) 55%,
-        var(--blue, dodgerblue) 60%,
-        var(--indigo, slateblue) 60%,
-        var(--indigo, slateblue) 65%,
-        var(--violet, mediumpurple) 65%,
-        var(--violet, mediumpurple) 70%,
-        rgba(0,0,0,1) 70%,
+        rgba(255,255,255,1) 32%,
+        var(--red, firebrick) 33%,
+        var(--red, firebrick) 37%,
+        var(--orange, darkorange) 38%,
+        var(--orange, darkorange) 42%,
+        var(--yellow, gold) 43%,
+        var(--yellow, gold) 47%,
+        var(--green, mediumseagreen) 48%,
+        var(--green, mediumseagreen) 52%,
+        var(--blue, dodgerblue) 53%,
+        var(--blue, dodgerblue) 57%,
+        var(--indigo, slateblue) 58%,
+        var(--indigo, slateblue) 62%,
+        var(--violet, mediumpurple) 63%,
+        var(--violet, mediumpurple) 67%,
+        rgba(0,0,0,1) 68%,
         rgba(0,0,0,1) 100%);
   }
 
@@ -86,9 +89,9 @@ $.style(`
     padding: 20%;
     height: 100%;
     background: black;
+    display: grid;
+    place-content: center;
   }
-
-
 
   & .toppings {
     display: flex;
@@ -100,5 +103,11 @@ $.style(`
     background-color: var(--color);
     width: 100%;
     height: 100%;
+  }
+
+  & .nose {
+    width: 1px;
+    height: 1px;
+    background: white;
   }
 `)
