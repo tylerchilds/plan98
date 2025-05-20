@@ -1,4 +1,5 @@
 import elf from '@plan98/elf'
+import { synthia, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia')
 
 document.addEventListener("selectionchange", () => {
@@ -30,6 +31,7 @@ document.body.appendChild(context)
 $.draw(() => {
   const { rect, activated, selectedText } = $.learn()
   if(self.self === self.top) {
+    const operation = escapeHyperText(selectedText || '')
     return selectedText ? `
       <div class="activator-bar">
         <button class="synthia">
@@ -39,56 +41,13 @@ $.draw(() => {
       ${activated ? `
         <div class="result activated">
           <div class="result-card">
-            <div class="search-bar">
-              <input class="search-input" value="${selectedText}" />
-              <button class="standard-button">
-                <sl-icon name="search"></sl-icon>
-              </button>
-            </div>
-            <div class="ok">
-              manage clipboard
-              save to journal
-              share to bluesky
-            </div>
-
-            <div class="oooo">
-              Bounce to search
-            </div>
-
-            <div class="ahh">
-              Bounce to models
-            </div>
-
-            <div class="ahha">
-              matching applications
-            </div>
-
-            <div class="ED">
-              matching files
-            </div>
-
-            <div class="av -banner" style="cover">
-              <div>
-                <div class="av-title">Final Boss</div>
-                <div class="av-description">The end has come and it is time to face the music</div>
-              </div>
-              <div class="av-cta">
-                <button data-href="/app/paper-pocket?rom=final-boss">
-                  Play
-                </button>
-              </div>
-            </div>
+            ${synthia(operation)}
           </div>
         </div>
       ` : `
         <div class="result">
           <div class="result-card">
-            <div class="search-bar">
-              <input class="search-input" value="${selectedText}" />
-              <button>
-                <sl-icon name="search"></sl-icon>
-              </button>
-            </div>
+            ${synthia(operation)}
           </div>
         </div>
       `}
@@ -100,6 +59,8 @@ $.draw(() => {
       recoverElves(target, 'sl-icon')
       recoverElves(target, 'plan98-icon')
     }
+
+    afterUpdateTheme(null, target)
   }
 })
 
@@ -187,3 +148,21 @@ function recoverElves(target, tag) {
   })
 }
 
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+$.when('json-rpc', 'paper-pocket', (event) => {
+  const { method, params } = event.detail
+  if(method === 'updated') {
+    $.teach({ systemUpdated: new Date().toJSON() })
+  }
+})

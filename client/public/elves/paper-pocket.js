@@ -626,6 +626,11 @@ $.draw((target) => {
   },
   afterUpdate: (target) => {
     {
+      if(target.getAttribute('static') === 'true') {
+        return
+      }
+    }
+    {
       const chrome = target.querySelector('.chrome')
       chrome.dataset.full = $.learn().fullScreen
     }
@@ -684,9 +689,10 @@ $.draw((target) => {
   },
 })
 
-export function afterUpdateTheme($, target) {
+export function afterUpdateTheme(scope, target) {
+  const s = scope || $
   {
-    const { theme } = $.learn()
+    const { theme } = s.learn()
     if(target.theme !== theme) {
       target.theme = theme
       document.body.style.setProperty('--root-theme', theme)
@@ -694,7 +700,7 @@ export function afterUpdateTheme($, target) {
   }
 
   {
-    const { fontSize } = $.learn()
+    const { fontSize } = s.learn()
     if(target.fontSize !== fontSize) {
       target.fontSize = fontSize
       document.documentElement.style.setProperty('--font-size-root', fontSizeMap[fontSize])
@@ -702,7 +708,7 @@ export function afterUpdateTheme($, target) {
   }
 
   {
-    const { fontFamily } = $.learn()
+    const { fontFamily } = s.learn()
     if(target.fontFamily !== fontFamily) {
       target.fontFamily = fontFamily
       document.documentElement.style.setProperty('--font-family', fontFamilyMap[fontFamily])
@@ -710,7 +716,7 @@ export function afterUpdateTheme($, target) {
   }
 
   {
-    const { mode, tutorialIndex } = $.learn()
+    const { mode, tutorialIndex } = s.learn()
     if(mode === modes.tutorial && target.lastTutorial !== tutorialIndex) {
       target.lastTutorial = tutorialIndex
       const tutorial = target.querySelector('.tutorial-window')
@@ -955,6 +961,152 @@ export const sideEffects = {
     setDebugger(value)
   }
 }
+
+const defaultPath = {}
+const settingsMenuTypeSchema = () => Object.keys(sideEffects)
+  .filter(key => {
+    return $.learn().settings[key]
+  }).reduce((path, key) => {
+    path[key] = {
+      ...sideEffects[key]
+    }
+    path[key] = sideEffects[key]
+    return path
+  }, defaultPath)
+
+function settingsMenu() {
+  const cardOptions = Object
+      .keys(settingsMenuTypeSchema()).map(key => {
+    const { label, description, options } = $.learn().settings[key]
+    const value = $.learn()[key]
+    return `
+      <div class="settings-card">
+        <div class="settings-human">
+          <div class="selectbox-label">
+            ${label}
+          </div>
+          <div class="selectbox-description">
+            ${description}
+          </div>
+        </div>
+        <div class="selectbox-selector">
+          <div class="standard-button selectbox-view">
+            ${value}
+          </div>
+          <select data-settings name="${key}">
+            <option disabled selected>${label}</option>
+            ${options.map(option => {
+              return `
+                <option ${option === value?'selected':''}>${option}</option>
+              `
+            }).join('')}
+          </select>
+        </div>
+    </div>
+    `
+  }).join('')
+
+  return `
+    ${cardOptions}
+  `
+}
+
+$.when('change', '[data-settings]', (event) => {
+  const { name, value } = event.target
+  if(settingsMenuTypeSchema()[name]) {
+    settingsMenuTypeSchema()[name](value)
+  }
+  $.teach({ [name]: value })
+  const console = event.target.closest($.link)
+  console.dispatchEvent(new CustomEvent('json-rpc', {
+    detail: {
+      jsonrpc: "2.0",
+      method: 'updated',
+    }
+  }))
+})
+
+export function synthia(operation) {
+  return `
+    <paper-pocket static="true">
+      <div class="search-bar">
+        <input class="search-input" value="${operation}" />
+        <button class="standard-button">
+          <sl-icon name="search"></sl-icon>
+        </button>
+      </div>
+      <div class="quick-actions">
+        <button>
+          manage clipboard
+        </button>
+        <button>
+          save to journal
+        </button>
+        <button>
+          share to bluesky
+        </button>
+      </div>
+
+      <div class="oooo">
+        Bounce to search
+      </div>
+
+      <div class="ahh">
+        Bounce to models
+      </div>
+
+      <div class="ahha">
+        matching applications
+      </div>
+
+      <div class="ED">
+        matching files
+      </div>
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">Final Boss</div>
+          <div class="av-description">The end has come and it is time to face the music</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/paper-pocket?rom=final-boss">
+            Play
+          </a>
+        </div>
+      </div>
+
+      <div class="mega-footer">
+        ${Object.keys(systemMenu).map((key) => {
+          const { list, label } = systemMenu[key]
+          return `
+            <div class="mega-footer-section">
+              <div class="mega-footer-title">
+                ${label}
+              </div>
+              <div class="mega-footer-list">
+                ${list.map(({ label, url }) => {
+                  return `
+                    <div class="mega-footer-item">
+                      <a class="mega-footer-link standard-button" href="${url}" target="_blank">
+                        ${label}
+                      </a>
+                    </div>
+                  `
+                }).join('')}
+              </div>
+            </div>
+          `
+        }).join('')}
+      </div>
+
+      <div class="settings-footer">
+        ${settingsMenu()}
+      </div>
+    </div>
+  `
+}
+
+
 
 function setDebugger(visibility) {
   let console = document.body.querySelector('plan98-console')
@@ -2052,6 +2204,67 @@ $.style(`
     font-weight: bold;
     font-size: 2rem;
   }
+
+  & .settings-footer {
+    padding: .5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: .5rem;
+  }
+
+  & .settings-card {
+    backdrop-filter: blur(10px);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    background: rgba(0,0,0,.85);
+    border-radius: .5rem;
+    padding: .5rem;
+    color: rgba(255,255,255,.85);
+  }
+
+  & .settings-human {
+    margin-bottom: 1rem;
+  }
+
+  & .selectbox-label {
+    color: rgba(255,255,255,.65);
+    font-weight: bold;
+  }
+
+  & .selectbox-description {
+  }
+
+
+  & .selectbox-selector {
+    position: relative;
+    display: inline-block;
+    color: rgba(0,0,0,.65);
+    margin-top: auto;
+    background: rgba(255,255,255,.85);
+    border-radius: .5rem;
+    max-width: 100%;
+  }
+
+  & .selectbox-view {
+    pointer-events: none;
+    padding: .5rem;
+  }
+
+  & .selectbox-selector select {
+    opacity: 0;
+    padding: .5rem;
+    position: absolute;
+    inset: 0;
+  }
+
+  & select:focus {
+    position: absolute;
+  }
+
+  & select option {
+  }
+
 `)
 
 function fakeScrollUp(container, scrollStep=10) {
@@ -2065,3 +2278,4 @@ function fakeScrollDown(container, scrollStep=10) {
 $.when('click', '[data-escape]', () => {
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
 })
+

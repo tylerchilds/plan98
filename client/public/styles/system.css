@@ -958,3 +958,71 @@ sillonious-brand > xml-html {
   color: rgba(0,0,0,.85);
   padding: .5rem;
 }
+
+.mega-footer {
+}
+
+.mega-footer-section {
+  padding: 0 .5rem;
+}
+
+.mega-footer-title {
+  padding: .5rem;
+  font-weight: bold;
+}
+
+.mega-footer-list {
+  background: rgba(0,0,0,.15);
+  overflow: auto;
+  white-space: nowrap;
+  padding: .5rem;
+  border-radius: .5rem;
+}
+
+.mega-footer-item {
+  display: inline-block;
+}
+
+.mega-footer-link:link {
+  display: inline-block;
+}
+.mega-footer-link:link,
+.mega-footer-link:visited,
+.mega-footer-link:hover,
+.mega-footer-link:focus,
+.mega-footer-link:active {
+  text-decoration: none;
+  color: white;
+}
+
+.av {
+  background: rgba(0,0,0,.85);
+  color: rgba(255,255,255,.65);
+  padding: .5rem;gT
+}
+
+.av.-banner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: .5rem;
+}
+
+.av-link-button:link,
+.av-link-button:visited,
+.av-link-button:hover,
+.av-link-button:focus {
+  text-decoration: none;
+  color: white;
+}
+
+.av-cta {
+  place-self: center;
+}
+
+.av-title {
+  font-weight: 1000;
+}
+
+.av-description {
+  font-weight: 100;
+}

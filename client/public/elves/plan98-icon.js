@@ -108,6 +108,6 @@ $.style(`
   & .nose {
     width: 1px;
     height: 1px;
-    background: white;
+    background: lemonchiffon;
   }
 `)
