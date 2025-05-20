@@ -1035,6 +1035,7 @@ export function synthia(operation) {
           <sl-icon name="search"></sl-icon>
         </button>
       </div>
+      <!--
       <div class="quick-actions">
         <button>
           manage clipboard
@@ -1062,6 +1063,7 @@ export function synthia(operation) {
       <div class="ED">
         matching files
       </div>
+      -->
 
       <div class="av -banner">
         <div class="av-copy">
