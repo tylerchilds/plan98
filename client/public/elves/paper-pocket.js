@@ -1095,21 +1095,47 @@ export function ai(operation) {
         </button>
       </div>
 
-      <div class="llm-grid">
+      <div class="repl-grid">
         <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button -smol" target="_blank" href="/app/js-repl?q=${encodeURIComponent(operation)}">
+              Run
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">js</div>
+          </div>
+        </div>
+
+
+        <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button -smol" target="_blank" href="/app/luau-repl?q=${encodeURIComponent(operation)}">
+              Run
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">luau</div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="llm-grid">
+        <div class="av -snapshot">
           <div class="av-cta">
             <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
               Ask
             </a>
           </div>
-          <div class="av-copy">
+          <div class="av-snapshot">
             <div class="av-title">Llama 3.2 3b</div>
             <div class="av-description">From the meta/facebook group</div>
           </div>
         </div>
 
 
-        <div class="av -chip">
+        <div class="av -snapshot">
           <div class="av-cta">
             <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
               Ask
@@ -1121,7 +1147,7 @@ export function ai(operation) {
           </div>
         </div>
 
-        <div class="av -chip">
+        <div class="av -snapshot">
           <div class="av-cta">
             <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
               Ask
@@ -1133,7 +1159,7 @@ export function ai(operation) {
           </div>
         </div>
 
-        <div class="av -chip">
+        <div class="av -snapshot">
           <div class="av-cta">
             <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
               Ask
@@ -2304,6 +2330,13 @@ $.style(`
     text-transform: none;
     font-weight: bold;
     font-size: 2rem;
+  }
+
+  & .repl-grid {
+    display: flex;
+    padding: .5rem;
+    gap: .5rem;
+    flex-wrap: wrap;
   }
 
   & .llm-grid {

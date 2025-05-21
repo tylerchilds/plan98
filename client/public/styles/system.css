@@ -1013,12 +1013,22 @@ sillonious-brand > xml-html {
   gap: .5rem;
 }
 
-.av.-chip {
+.av.-snapshot {
   color: rgba(0,0,0,.65);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: .5rem;
 }
+
+.av.-chip {
+  color: rgba(0,0,0,.65);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .5rem;
+  background: rgba(255,255,255,.85);
+  border-radius: .5rem;
+}
+
 
 .av-link-button:link,
 .av-link-button:visited,
