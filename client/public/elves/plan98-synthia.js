@@ -1,6 +1,6 @@
 import elf from '@plan98/elf'
-import { synthia, afterUpdateTheme } from './paper-pocket.js'
-const $ = elf('plan98-synthia')
+import { ai, afterUpdateTheme } from './paper-pocket.js'
+const $ = elf('plan98-synthia', { synthia: {} })
 
 document.addEventListener("selectionchange", () => {
   const selection = window.getSelection();
@@ -21,7 +21,7 @@ document.addEventListener('pointerdown', function(event) {
   const { rect, activated, selectedText } = $.learn()
   if(!activated && !selectedText) return
   if (!event.target.closest('plan98-synthia .synthia, plan98-synthia .result')) {
-    $.teach({ selectedText: null, activated: false })
+    $.teach({ selectedText: null, activated: false, synthia: {} })
   }
 });
 
@@ -29,9 +29,9 @@ const context = document.createElement('plan98-synthia')
 document.body.appendChild(context)
 
 $.draw(() => {
-  const { rect, activated, selectedText } = $.learn()
+  const { rect, activated, synthia, selectedText } = $.learn()
   if(self.self === self.top) {
-    const operation = escapeHyperText(selectedText || '')
+    const operation = escapeHyperText(synthia.prompt || selectedText || '')
     return selectedText ? `
       <div class="activator-bar">
         <button class="synthia">
@@ -41,13 +41,13 @@ $.draw(() => {
       ${activated ? `
         <div class="result activated">
           <div class="result-card">
-            ${synthia(operation)}
+            ${ai(operation)}
           </div>
         </div>
       ` : `
         <div class="result">
           <div class="result-card">
-            ${synthia(operation)}
+            ${ai(operation)}
           </div>
         </div>
       `}
@@ -63,6 +63,13 @@ $.draw(() => {
     afterUpdateTheme(null, target)
   }
 })
+
+$.when('click', 'paper-pocket [data-search]', (event) => {
+  const { selectedText, synthia } = $.learn()
+  const search = escapeHyperText(synthia.prompt || selectedText || '')
+  alert(search)
+})
+
 
 $.when('click', '.synthia', (event) => {
   $.teach({ activated: !$.learn().activated })
@@ -91,10 +98,14 @@ $.style(`
   & .result-card {
     box-shadow: var(--shadow);
     background: rgba(255,255,255,.65);
-    backdrop-filter: blur(3px);
+    backdrop-filter: blur(8px);
     height: 100%;
     border-radius: .5rem .5rem 0 0;
     position: relative;
+    overflow: auto;
+  }
+
+  & paper-pocket {
     overflow: auto;
   }
 
@@ -126,6 +137,7 @@ $.style(`
     position: sticky;
     top: 0;
     box-shadow: 0 1px 1px 1px rgba(0,0,0,.15);
+    z-index: 10;
   }
 
   & .search-input {
@@ -133,6 +145,14 @@ $.style(`
     padding: .25rem .5rem;
     border-radius: .5rem;
     border: 1px solid rgba(0,0,0,.15);
+  }
+
+  & .share-actions {
+    display: flex;
+    padding: .5rem;
+    gap: .5rem;
+    flex-wrap: wrap;
+    background: white;
   }
 `)
 
@@ -166,3 +186,20 @@ $.when('json-rpc', 'paper-pocket', (event) => {
     $.teach({ systemUpdated: new Date().toJSON() })
   }
 })
+
+$.when('input', '[data-bind]', (event) => {
+  const { bind } = event.target.dataset
+  $.teach({
+    name: event.target.name,
+    value: event.target.value
+  }, (state, payload) => {
+    return {
+      ...state,
+      [bind]: {
+        ...state[bind],
+        [payload.name]: payload.value
+      }
+    }
+  })
+})
+

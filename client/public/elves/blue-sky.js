@@ -2493,6 +2493,26 @@ $.draw(target => {
     `
   }
 }, {
+  beforeUpdate(target) {
+    { // convert a query string to new post
+      const q = target.getAttribute('q')
+      const view = target.getAttribute('view')
+      if(!target.initialized) {
+        target.initialized = true
+        if(q && view !== views.createPost) {
+          showModal(`
+            <blue-sky view="${views.createPost}" q="${q}"></blue-sky>
+          `, {
+            transparent: true
+          })
+        } else if(q) {
+          $.teach({
+            draft: decodeURIComponent(q)
+          })
+        }
+      }
+    }
+  },
   afterUpdate(target) {
     requestAnimationFrame((timestamp) => {
       {

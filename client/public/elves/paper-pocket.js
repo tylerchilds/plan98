@@ -1026,28 +1026,29 @@ $.when('change', '[data-settings]', (event) => {
   }))
 })
 
-export function synthia(operation) {
+export function ai(operation) {
   return `
     <paper-pocket static="true">
+      <div class="share-actions">
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
+          manage clipboard
+        </a>
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
+          save to time machine
+        </a>
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
+          share to bluesky
+        </a>
+      </div>
+
+
       <div class="search-bar">
-        <input class="search-input" value="${operation}" />
-        <button class="standard-button">
+        <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
+        <button class="standard-button" data-search>
           <sl-icon name="search"></sl-icon>
         </button>
       </div>
       <!--
-      <div class="quick-actions">
-        <button>
-          manage clipboard
-        </button>
-        <button>
-          save to journal
-        </button>
-        <button>
-          share to bluesky
-        </button>
-      </div>
-
       <div class="oooo">
         Bounce to search
       </div>
@@ -1064,18 +1065,6 @@ export function synthia(operation) {
         matching files
       </div>
       -->
-
-      <div class="av -banner">
-        <div class="av-copy">
-          <div class="av-title">Final Boss</div>
-          <div class="av-description">The end has come and it is time to face the music</div>
-        </div>
-        <div class="av-cta">
-          <a class="av-link-button standard-button" target="_blank" href="/app/paper-pocket?rom=final-boss">
-            Play
-          </a>
-        </div>
-      </div>
 
       <div class="mega-footer">
         ${Object.keys(systemMenu).map((key) => {
@@ -1103,6 +1092,18 @@ export function synthia(operation) {
 
       <div class="settings-footer">
         ${settingsMenu()}
+      </div>
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">Final Boss</div>
+          <div class="av-description">The end has come and it is time to face the music</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/paper-pocket?rom=final-boss">
+            Play
+          </a>
+        </div>
       </div>
     </div>
   `

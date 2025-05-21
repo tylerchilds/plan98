@@ -950,7 +950,11 @@ sillonious-brand > xml-html {
   -webkit-text-fill-color: transparent;
 }
 
-
+.standard-button.-smol {
+  padding: 0 4px;
+  font-size: 1rem;
+  font-weight: normal;
+}
 
 .standard-input {
   border: 1px solid rgba(0,0,0,.15);
@@ -964,11 +968,13 @@ sillonious-brand > xml-html {
 
 .mega-footer-section {
   padding: 0 .5rem;
+  background: rgba(0,0,0,.85);
 }
 
 .mega-footer-title {
-  padding: .5rem;
+  padding: .5rem 0;
   font-weight: bold;
+  color: rgba(255,255,255,.65);
 }
 
 .mega-footer-list {
@@ -1013,6 +1019,7 @@ sillonious-brand > xml-html {
 .av-link-button:focus {
   text-decoration: none;
   color: white;
+  white-space: nowrap;
 }
 
 .av-cta {

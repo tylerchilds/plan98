@@ -58,6 +58,7 @@ function timeFields() {
     day: today.getDate(),
     hour: today.getHours(),
     minute: today.getMinutes(),
+    second: today.getSeconds(),
   }
 }
 
@@ -875,6 +876,7 @@ $.draw((target)=> {
   const { cards } = $.learn()
   const view = target.getAttribute('view')
 
+  /*
   if(cards.length === 0) {
     return `
       <div2 class="anonymous">
@@ -882,6 +884,7 @@ $.draw((target)=> {
       </div2>
     `
   }
+  */
 
   if(viewRenderers[view]) {
     return viewRenderers[view](target)
@@ -965,6 +968,33 @@ $.draw((target)=> {
     </div>
   `
 }, {
+  beforeUpdate(target) {
+    const q = target.getAttribute('q')
+    const view = target.getAttribute('view')
+    if(!target.initialized) {
+      target.initialized = true
+      if(q && view !== views.create) {
+        showModal(`
+          <time-machine view="${views.create}" q="${q}"></time-machine>
+        `, {
+          transparent: true
+        })
+      } else if(q) {
+        $.teach({
+          type: eventTypes.journal,
+          text: decodeURIComponent(q)
+        }, (state, payload) => {
+          return {
+            ...state,
+            draft: {
+              ...state.draft,
+              ...payload
+            }
+          }
+        })
+      }
+    }
+  },
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
@@ -1066,7 +1096,7 @@ $.when('submit', '[action="post"]', async (event) => {
   const { draft, context } = $.learn()
 
   if(draft) {
-    const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute);
+    const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
     const timestamp = now.toJSON()
     let path = `/${timestamp}.json`
 
@@ -1173,6 +1203,8 @@ $.style(`
     top: 0;
     left: 0;
     right: 0;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(10px);
   }
 
   & .left-area {
