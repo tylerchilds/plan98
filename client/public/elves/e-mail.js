@@ -6,6 +6,19 @@ const $ = elf('e-mail', {
 })
 
 $.draw(render, {
+  beforeUpdate(target) {
+    { // convert a query string to new post
+      const q = target.getAttribute('q')
+      if(!target.initialized) {
+        target.initialized = true
+
+        if(q) {
+          const message = decodeURIComponent(q)
+          $.teach({ messageText: message })
+        }
+      }
+    }
+  },
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
@@ -15,10 +28,11 @@ $.draw(render, {
       const { emailId='none' } = $.learn()
       if(emailId !== target.emailId) {
         target.emailId = emailId
+        const q = target.getAttribute('q')
         const preview = target.querySelector('.preview')
         if(emailId === 'none') {
           preview.innerHTML = `
-            <email-new></email-new>
+            <email-new ${q?`q="${q}"`:''}></email-new>
           `
         } else {
           preview.innerHTML = `

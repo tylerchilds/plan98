@@ -236,6 +236,22 @@ $.draw(target => {
 })
 
 function beforeUpdate(target) {
+  { // convert a query string to new post
+    const q = target.getAttribute('q')
+    const room = target.getAttribute('room')
+    if(!target.initialized) {
+      target.initialized = true
+
+      $.teach({ currentRoom: rooms[room] ? rooms[room] : rooms.random })
+
+      if(q) {
+        const message = decodeURIComponent(q)
+        $.teach({ messageText: message })
+      }
+    }
+  }
+
+
   saveCursor(target)
 }
 

@@ -211,6 +211,20 @@ $.draw(target => {
 
   `
 }, {
+  beforeUpdate(target) {
+    { // convert a query string to new post
+      const q = target.getAttribute('q')
+      if(!target.initialized) {
+        target.initialized = true
+
+        if(q) {
+          const message = decodeURIComponent(q)
+          $.teach({ message })
+        }
+      }
+    }
+  },
+
   afterUpdate: (target) => {
     { // recover icons from the virtual dom
       [...target.querySelectorAll('sl-icon')].map(ogIcon => {

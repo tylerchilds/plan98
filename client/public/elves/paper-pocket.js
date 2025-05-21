@@ -1078,16 +1078,21 @@ export function ai(operation) {
     <paper-pocket static="true">
       <div class="share-actions">
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
-          add to clipboard
+          clipboard
         </a>
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
-          save to log
+          journal
+        </a>
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/e-mail?q=${encodeURIComponent(operation)}">
+          email
         </a>
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
-          share to bluesky
+          bluesky
+        </a>
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
+          chat
         </a>
       </div>
-
       <div class="search-bar">
         <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
         <button class="standard-button" data-search="${encodeURIComponent(operation)}">

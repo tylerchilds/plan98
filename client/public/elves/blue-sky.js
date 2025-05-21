@@ -2415,7 +2415,7 @@ export function runJs(event, target) {
   import('./js-repl.js').then(async (module) => {
     const output = await module.runJs(post.record.text)
     showModal(`
-      <div style="background: white; white-space: preserve; font-family: 'BerkeleyMono', monospace; padding: 1rem;">${output}</div>
+      <div style="background: white; white-space: preserve; font-family: 'BerkeleyMono', monospace; padding: 1rem;">${JSON.stringify(output, '', 2)}</div>
     `, {
       blockExit: false
     })

@@ -2,6 +2,10 @@ import elf from '@plan98/elf'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia', { synthia: {} })
 
+export function launch() {
+  $.teach({ visible: true, activated: true })
+}
+
 document.addEventListener("selectionchange", () => {
   const selection = window.getSelection();
   const selectedText = selection.toString().trim();
@@ -14,14 +18,14 @@ document.addEventListener("selectionchange", () => {
   const range = selection.getRangeAt(0);
   const rect = range.getBoundingClientRect();
 
-  $.teach({ selectedText, rect: { ...rect } })
+  $.teach({ synthia: { prompt: selectedText }, visible: !!selectedText, rect: { ...rect } })
 });
 
 document.addEventListener('pointerdown', function(event) {
-  const { rect, activated, selectedText } = $.learn()
-  if(!activated && !selectedText) return
+  const { rect, activated, visible } = $.learn()
+  if(!activated && !visible) return
   if (!event.target.closest('plan98-synthia .synthia, plan98-synthia .result')) {
-    $.teach({ selectedText: null, activated: false, synthia: {} })
+    $.teach({ visible: false, activated: false, synthia: {} })
   }
 });
 
@@ -29,10 +33,10 @@ const context = document.createElement('plan98-synthia')
 document.body.appendChild(context)
 
 $.draw(() => {
-  const { rect, activated, synthia, selectedText } = $.learn()
+  const { rect, visible, activated, synthia } = $.learn()
   if(self.self === self.top) {
-    const operation = escapeHyperText(synthia.prompt || selectedText || '')
-    return selectedText ? `
+    const operation = escapeHyperText(synthia.prompt || '')
+    return visible ? `
       <div class="activator-bar">
         <button class="synthia">
           <plan98-icon></plan98-icon>

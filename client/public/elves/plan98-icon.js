@@ -118,6 +118,6 @@ $.style(`
     content: '';
     width: 1px;
     height: 1px;
-    background: black
+    background-color: #E83FB8;
   }
 `)

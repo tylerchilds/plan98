@@ -286,8 +286,8 @@ async function fetchTen(apikey, offset=0){
       const timestamp = email.receivedAt
       const textParts = email.textBody.map(x => x.partId)
       const htmlParts = email.htmlBody.map(x => x.partId)
-      const textBody = textParts.map(id => email.bodyValues[id].value).join('')
-      const htmlBody = htmlParts.map(id => email.bodyValues[id].value).join('')
+      const textBody = textParts.map(id => email.bodyValues[id] ? email.bodyValues[id].value : '(missing part)').join('')
+      const htmlBody = htmlParts.map(id => email.bodyValues[id] ? email.bodyValues[id].value : '(missing part)').join('')
       messages.push({
         id: email.id,
         author: {

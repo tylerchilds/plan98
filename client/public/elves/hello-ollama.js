@@ -157,7 +157,7 @@ function beforeUpdate(target) {
 
       if(q) {
         const message = decodeURIComponent(q)
-        send(message)
+        $.teach({ messageText: message })
       }
     }
   }

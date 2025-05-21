@@ -2,6 +2,7 @@ import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
+import { launch } from './plan98-synthia.js'
 
 const bucketKeys = {
   today: 'today',
@@ -1168,14 +1169,8 @@ $.when('click', '[data-new]', (event) => {
 })
 
 $.when('click', '[data-wallet]', (event) => {
-  showModal(`
-    <time-machine view="${views.wallet}"></time-machine>
-  `, {
-    transparent: true
-  })
+  launch()
 })
-
-
 
 $.style(`
   & {
