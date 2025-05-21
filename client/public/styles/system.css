@@ -964,11 +964,18 @@ sillonious-brand > xml-html {
 }
 
 .mega-footer {
+  background: rgba(0,0,0,.85);
+}
+
+.mega-footer-header {
+  font-size: 1.5rem;
+  padding: 1rem .5rem 0;
+  font-weight: bold;
+  color: rgba(255,255,255,.85);
 }
 
 .mega-footer-section {
   padding: 0 .5rem;
-  background: rgba(0,0,0,.85);
 }
 
 .mega-footer-title {

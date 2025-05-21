@@ -1173,14 +1173,6 @@ export function ai(operation) {
       </div>
 
       <!--
-      <div class="oooo">
-        Bounce to search
-      </div>
-
-      <div class="ahh">
-        Bounce to models
-      </div>
-
       <div class="ahha">
         matching applications
       </div>
@@ -1191,6 +1183,7 @@ export function ai(operation) {
       -->
 
       <div class="mega-footer">
+        <div class="mega-footer-header">Applications</div>
         ${Object.keys(systemMenu).map((key) => {
           const { list, label } = systemMenu[key]
           return `
@@ -1214,6 +1207,7 @@ export function ai(operation) {
         }).join('')}
       </div>
 
+      <div class="synthia-header">Settings</div>
       <div class="settings-footer">
         ${settingsMenu()}
       </div>
@@ -2354,6 +2348,13 @@ $.style(`
     gap: .5rem;
   }
 
+  & .synthia-header {
+    font-size: 1.5rem;
+    padding: 1rem .5rem 0;
+    font-weight: bold;
+    color: rgba(0,0,0,.65);
+  }
+
   & .settings-card {
     backdrop-filter: blur(10px);
     display: flex;
@@ -2370,11 +2371,11 @@ $.style(`
   }
 
   & .selectbox-label {
-    color: rgba(255,255,255,.65);
     font-weight: bold;
   }
 
   & .selectbox-description {
+    color: rgba(255,255,255,.65);
   }
 
 

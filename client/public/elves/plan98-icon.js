@@ -106,8 +106,18 @@ $.style(`
   }
 
   & .nose {
+    width: 3px;
+    height: 3px;
+    background: lemonchiffon;
+    position: relative;
+    display: grid;
+    place-content: center;
+  }
+
+  & .nose::before {
+    content: '';
     width: 1px;
     height: 1px;
-    background: lemonchiffon;
+    background: black
   }
 `)
