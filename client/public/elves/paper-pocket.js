@@ -219,6 +219,25 @@ export const systemMenu = {
   }
 }
 
+const searchEngines = ['google', 'archive', 'wikipedia', 'duckduckgo', 'yahoo']
+
+const searchEngineMap = {
+  google: {
+    url: 'https://google.com?q='
+  },
+  archive: {
+    url: 'https://archive.org/search?query='
+  },
+  wikipedia: {
+    url: 'https://en.wikipedia.org/wiki/'
+  },
+  duckduckgo: {
+    url: 'https://lite.duckduckgo.com/?q=esrach%20terems'
+  },
+  yahoo: {
+    url: 'https://search.yahoo.com/search?p='
+  },
+}
 Tone.Transport.start();
 
 let current
@@ -331,6 +350,7 @@ const $ = elf('paper-pocket', {
   fullScreen: getScreenPreference(),
   theme: getTheme(),
   instrument: getInstrument(),
+  searchEngine: getSearchEngine(),
   fontSize: getFontSize(),
   fontFamily: getFontFamily(),
   bpm: getBpm(),
@@ -345,6 +365,12 @@ const $ = elf('paper-pocket', {
   tutorialIndex: 0,
   tutorial: Object.keys(tutorialModes),
   settings: {
+    searchEngine: {
+      label: 'Search Engine',
+      description: 'The search engine of the console',
+      options: getSearchEngines(),
+      value: getSearchEngine()
+    },
     instrument: {
       label: 'Instrument',
       description: 'The sound of the console',
@@ -443,6 +469,24 @@ export function setInstrument(instrument) {
 
 export function getInstrument() {
   return localStorage.getItem('paper-pocket/instrument') || 'violin'
+}
+
+export function getSearchEngines() {
+  return searchEngines
+}
+
+export function setSearchEngine(searchEngine) {
+  localStorage.setItem('paper-pocket/searchEngine', searchEngine)
+  $.teach({ searchEngine })
+}
+
+export function getSearchEngine() {
+  return localStorage.getItem('paper-pocket/searchEngine') || 'wikipedia'
+}
+
+export function getSearchEngineConfig() {
+  const key = getSearchEngine()
+  return searchEngineMap[key] || {}
 }
 
 let ready
@@ -942,6 +986,9 @@ export const sideEffects = {
   theme: (value) => {
     setTheme(value)
   },
+  searchEngine: (value) => {
+    setSearchEngine(value)
+  },
   fontSize: (value) => {
     setFontSize(value)
   },
@@ -1043,57 +1090,59 @@ export function ai(operation) {
 
       <div class="search-bar">
         <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
-        <button class="standard-button" data-search>
+        <button class="standard-button" data-search="${encodeURIComponent(operation)}">
           <sl-icon name="search"></sl-icon>
         </button>
       </div>
 
-      <div class="av -banner">
-        <div class="av-copy">
-          <div class="av-title">Llama 3.2 3b</div>
-          <div class="av-description">From the meta/facebook group</div>
+      <div class="llm-grid">
+        <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
+              Ask
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">Llama 3.2 3b</div>
+            <div class="av-description">From the meta/facebook group</div>
+          </div>
         </div>
-        <div class="av-cta">
-          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
-            Query
-          </a>
-        </div>
-      </div>
 
 
-      <div class="av -banner">
-        <div class="av-copy">
-          <div class="av-title">gemma3</div>
-          <div class="av-description">the model code named gemma3:1b</div>
+        <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
+              Ask
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">gemma3</div>
+            <div class="av-description">the model code named gemma3:1b</div>
+          </div>
         </div>
-        <div class="av-cta">
-          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
-            Query
-          </a>
-        </div>
-      </div>
 
-      <div class="av -banner">
-        <div class="av-copy">
-          <div class="av-title">Mistral 7b</div>
-          <div class="av-description">The 7b mistral series line of models</div>
+        <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
+              Ask
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">Mistral 7b</div>
+            <div class="av-description">The 7b mistral series line of models</div>
+          </div>
         </div>
-        <div class="av-cta">
-          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
-            Query
-          </a>
-        </div>
-      </div>
 
-      <div class="av -banner">
-        <div class="av-copy">
-          <div class="av-title">Deepseek</div>
-          <div class="av-description">Deepseek-r1 1.5b</div>
-        </div>
-        <div class="av-cta">
-          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
-            Query
-          </a>
+        <div class="av -chip">
+          <div class="av-cta">
+            <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
+              Ask
+            </a>
+          </div>
+          <div class="av-copy">
+            <div class="av-title">Deepseek</div>
+            <div class="av-description">Deepseek-r1 1.5b</div>
+          </div>
         </div>
       </div>
 
@@ -2255,6 +2304,14 @@ $.style(`
     text-transform: none;
     font-weight: bold;
     font-size: 2rem;
+  }
+
+  & .llm-grid {
+    padding: .5rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: .5rem;
+    background: rgba(255,255,255,.65);
   }
 
   & .settings-footer {

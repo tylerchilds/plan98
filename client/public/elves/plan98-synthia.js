@@ -1,5 +1,5 @@
 import elf from '@plan98/elf'
-import { ai, afterUpdateTheme } from './paper-pocket.js'
+import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia', { synthia: {} })
 
 document.addEventListener("selectionchange", () => {
@@ -67,9 +67,12 @@ $.draw(() => {
 $.when('click', 'paper-pocket [data-search]', (event) => {
   const { selectedText, synthia } = $.learn()
   const search = escapeHyperText(synthia.prompt || selectedText || '')
-  alert(search)
-})
+  const config = getSearchEngineConfig()
 
+  if(config.url) {
+    self.open(config.url + search, '_blank')
+  }
+})
 
 $.when('click', '.synthia', (event) => {
   $.teach({ activated: !$.learn().activated })
@@ -152,7 +155,7 @@ $.style(`
     padding: .5rem;
     gap: .5rem;
     flex-wrap: wrap;
-    background: white;
+    background: rgba(224,224,224,.85);
   }
 `)
 

@@ -1002,14 +1002,21 @@ sillonious-brand > xml-html {
 }
 
 .av {
-  background: rgba(0,0,0,.85);
-  color: rgba(255,255,255,.65);
   padding: .5rem;gT
 }
 
 .av.-banner {
   display: grid;
   grid-template-columns: 1fr auto;
+  background: rgba(0,0,0,.85);
+  color: rgba(255,255,255,.65);
+  gap: .5rem;
+}
+
+.av.-chip {
+  color: rgba(0,0,0,.65);
+  display: grid;
+  grid-template-columns: auto 1fr;
   gap: .5rem;
 }
 
@@ -1020,9 +1027,10 @@ sillonious-brand > xml-html {
   text-decoration: none;
   color: white;
   white-space: nowrap;
+  display: inline-block;
 }
 
-.av-cta {
+.av.-banner .av-cta {
   place-self: center;
 }
 
