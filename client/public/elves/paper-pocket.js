@@ -1031,16 +1031,15 @@ export function ai(operation) {
     <paper-pocket static="true">
       <div class="share-actions">
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
-          manage clipboard
+          add to clipboard
         </a>
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
-          save to time machine
+          save to log
         </a>
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
           share to bluesky
         </a>
       </div>
-
 
       <div class="search-bar">
         <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
@@ -1048,6 +1047,56 @@ export function ai(operation) {
           <sl-icon name="search"></sl-icon>
         </button>
       </div>
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">Llama 3.2 3b</div>
+          <div class="av-description">From the meta/facebook group</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
+            Query
+          </a>
+        </div>
+      </div>
+
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">gemma3</div>
+          <div class="av-description">the model code named gemma3:1b</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
+            Query
+          </a>
+        </div>
+      </div>
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">Mistral 7b</div>
+          <div class="av-description">The 7b mistral series line of models</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
+            Query
+          </a>
+        </div>
+      </div>
+
+      <div class="av -banner">
+        <div class="av-copy">
+          <div class="av-title">Deepseek</div>
+          <div class="av-description">Deepseek-r1 1.5b</div>
+        </div>
+        <div class="av-cta">
+          <a class="av-link-button standard-button" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
+            Query
+          </a>
+        </div>
+      </div>
+
       <!--
       <div class="oooo">
         Bounce to search

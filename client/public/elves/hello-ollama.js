@@ -145,6 +145,23 @@ $.draw((target) => {
 })
 
 function beforeUpdate(target) {
+  { // convert a query string to new post
+    const q = target.getAttribute('q')
+    const model = target.getAttribute('model')
+    if(!target.initialized) {
+      target.initialized = true
+
+      if(models[model]) {
+        $.teach({ model })
+      }
+
+      if(q) {
+        const message = decodeURIComponent(q)
+        send(message)
+      }
+    }
+  }
+
   saveCursor(target)
 }
 
