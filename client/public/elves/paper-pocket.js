@@ -1092,6 +1092,9 @@ export function ai(operation) {
         <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
           chat
         </a>
+        <a class="av-link-button standard-button -outlined -smol" target="_blank" href="/app/ur-shell?q=${encodeURIComponent(operation)}">
+          shell
+        </a>
       </div>
       <div class="search-bar">
         <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />

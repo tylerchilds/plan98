@@ -196,6 +196,18 @@ $.draw((target) => {
 })
 
 function beforeUpdate(target) {
+  { // convert a query string to new post
+    const q = target.getAttribute('q')
+    if(!target.initialized) {
+      target.initialized = true
+
+      if(q) {
+        const message = decodeURIComponent(q)
+        $.teach({ messageText: message })
+      }
+    }
+  }
+
   saveCursor(target)
 }
 
