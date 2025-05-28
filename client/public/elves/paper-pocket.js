@@ -354,7 +354,6 @@ const $ = elf('paper-pocket', {
   fontSize: getFontSize(),
   fontFamily: getFontFamily(),
   bpm: getBpm(),
-  debuggerVisible: false,
   noteDuration: getNoteDuration(),
   rom: 'final-boss',
   mode: startMode(),
@@ -412,12 +411,6 @@ const $ = elf('paper-pocket', {
       description: 'Up is down, down is up.',
       options: ['normal','inverted'],
       value: 'inverted',
-    },
-    debuggerVisible: {
-      label: 'Debugger',
-      description: 'Toggle the debugger',
-      options: [false, true],
-      value: false
     },
   },
   pause: systemMenu
@@ -984,29 +977,33 @@ const settingsRPC = {
 
 export const sideEffects = {
   theme: (value) => {
+    if(!value) return
     setTheme(value)
   },
   searchEngine: (value) => {
+    if(!value) return
     setSearchEngine(value)
   },
   fontSize: (value) => {
+    if(!value) return
     setFontSize(value)
   },
   fontFamily: (value) => {
+    if(!value) return
     setFontFamily(value)
   },
   instrument: (value) => {
+    if(!value) return
     setInstrument(value)
   },
   bpm: (value) => {
+    if(!value) return
     setBpm(value)
   },
   noteDuration: (value) => {
+    if(!value) return
     setNoteDuration(value)
   },
-  debuggerVisible: (value) => {
-    setDebugger(value)
-  }
 }
 
 const defaultPath = {}
@@ -1234,29 +1231,6 @@ export function ai(operation) {
     </div>
   `
 }
-
-
-
-function setDebugger(visibility) {
-  let console = document.body.querySelector('plan98-console')
-  if(!console) {
-    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
-    console = document.body.querySelector('plan98-console')
-  } else {
-    console.classList.toggle('hidden')
-  }
-
-  if(visibility) {
-    consoleShow()
-    $.teach({ debuggerVisible: true })
-  } else {
-    consoleHide()
-    $.teach({ debuggerVisible: false })
-  }
-
-  event.target.classList.toggle('enabled')
-}
-
 
 function settingsChange(settingsKey, nextValue) {
   if(sideEffects[settingsKey]) {
@@ -2337,7 +2311,7 @@ $.style(`
   & .repl-grid {
     display: flex;
     padding: .5rem;
-    gap: .5rem;
+    gap: 1rem;
     flex-wrap: wrap;
   }
 

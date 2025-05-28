@@ -16,21 +16,20 @@ const paperPocketPath = Object.keys(sideEffects)
     return path
   }, defaultPath)
 
-const paperPocketHelp = `Congratulations on your purchase of your new Paper Pocket!
+const paperPocketHelp = () => {
+  return `Congratulations on your purchase of your new Paper Pocket!
 
 You have options. To configure your settings, try the following:
 \n` + Object.keys(paperPocketPath).map(key => {
-  const { label, description, options, value } = $paperPocket.learn().settings[key]
+  const { label, description, options, value: _value } = $paperPocket.learn().settings[key]
+  const value = $paperPocket.learn()[key]
   return `${key}
 
-  ${label}
+  ${label}: ${value}
   ${description}
   ${options.join(' ')}
-`}).join('\n') + `
-`
-
-
-
+`}).join('\n')
+}
 
 const models = {
   'deepseek-r1:1.5b': 'Deepseek-r1 1.5b',
@@ -73,7 +72,10 @@ window.addEventListener('keydown', (event) => {
 
 $.teach({ body: `Silly, at your service.
 
-Do your thing or click "help" and type "help" and then "enter"`, author: 'assistant' }, mergeMessage)
+    Do your thing or click "help" and type "help" and then press the "return" key on your typewriter.
+
+Signed,
+  Wally.`, author: 'assistant' }, mergeMessage)
 
 const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
@@ -165,7 +167,7 @@ $.draw((target) => {
   const { model, messages, messageText, messageHeight, thinking } = $.learn()
 
   const log = messages.map((message) => `
-    <div class="message -${message.author}">${escapeHyperText(`${message.body}`)}</div>
+    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
   `).join('')
 
   return `
@@ -314,6 +316,9 @@ const commands = {
   'echo': (...args) => {
     return args.join(' ')
   },
+  'error': (...args) => {
+    throw new Error(args.map(x => JSON.stringify(x)).join(' '))
+  },
 
   luau(...args) {
     import('./luau-repl.js').then((module) => {
@@ -350,6 +355,7 @@ const commands = {
 
   clear() {
     $.teach({ messages: [] })
+    return ' '
   },
 
   cd(path) {
@@ -485,9 +491,10 @@ const commands = {
     }).join('\n')
   },
   'help': (...args) => {
+    const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
 
-${paperPocketHelp}
+${help}
 
 plan98 commands
 
@@ -511,6 +518,9 @@ echo
 
 luau
   start repl powered by the luau language
+
+error
+  throw an error-- like echo, but for debugging the system
 
 
 printenv [...args]
@@ -566,8 +576,13 @@ async function execute(message) {
 
   const [command, ...args] = message.split(' ')
   if(commands[command]) {
-    const result = commands[command].apply($, args)
-    $.teach({ body: result, author: 'assistant' }, mergeMessage)
+    try {
+      const result = commands[command].apply($, args)
+      $.teach({ body: result || 'Success!', author: 'assistant' }, mergeMessage)
+    } catch(e) {
+      $.teach({ body: `Error. Inspect Logs.<br><a href="${window.location.origin + window.location.pathname}?q=${message}&debug=true">Reload in debug mode</a>`, author: 'assistant' }, mergeMessage)
+      console.error(e)
+    }
     return
   }
 
@@ -728,6 +743,21 @@ $.style(`
 
   & .message.-human {
     color: rgba(255,255,255,.95);
+  }
+
+  & .message a:link,
+  & .message a:visited {
+    background: linear-gradient(180deg, rgba(0,0,0,.8), var(--root-theme, mediumseagreen), rgba(255,255,255,.8)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-decoration: none;
+    border-bottom: 1px solid var(--root-theme, mediumseagreen);
+  }
+  & .message a:hover,
+  & .message a:focus {
+    background: linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.7)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   & .message.-assistant {

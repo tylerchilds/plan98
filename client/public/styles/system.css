@@ -965,11 +965,12 @@ sillonious-brand > xml-html {
 
 .mega-footer {
   background: rgba(0,0,0,.85);
+  padding: 1rem 0;
 }
 
 .mega-footer-header {
   font-size: 1.5rem;
-  padding: 1rem .5rem 0;
+  padding: 0 .5rem;
   font-weight: bold;
   color: rgba(255,255,255,.85);
 }
@@ -985,11 +986,8 @@ sillonious-brand > xml-html {
 }
 
 .mega-footer-list {
-  background: rgba(0,0,0,.15);
   overflow: auto;
   white-space: nowrap;
-  padding: .5rem;
-  border-radius: .5rem;
 }
 
 .mega-footer-item {
@@ -1008,16 +1006,13 @@ sillonious-brand > xml-html {
   color: white;
 }
 
-.av {
-  padding: .5rem;gT
-}
-
 .av.-banner {
   display: grid;
   grid-template-columns: 1fr auto;
   background: rgba(0,0,0,.85);
   color: rgba(255,255,255,.65);
   gap: .5rem;
+  padding: .5rem;
 }
 
 .av.-snapshot {
@@ -1031,8 +1026,7 @@ sillonious-brand > xml-html {
   color: rgba(0,0,0,.65);
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: .5rem;
-  background: rgba(255,255,255,.85);
+  gap: .25rem;
   border-radius: .5rem;
 }
 

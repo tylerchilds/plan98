@@ -19,11 +19,9 @@ $.draw(() => {
       <div class="color" style="--color: rgba(255, 255, 255,.65)"></div>
       <div class="color" style="--color: rgba(255, 255, 255,.5)"></div>
       <div class="color" style="--color: rgba(255, 255, 255,.35)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.15)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.05)"></div>
+      <div class="color" style="--color: rgba(255, 255, 255,.2)"></div>
       <div class="color" style="--color: transparent"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.05)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.15)"></div>
+      <div class="color" style="--color: rgba(0, 0, 0,.2)"></div>
       <div class="color" style="--color: rgba(0, 0, 0,.35)"></div>
       <div class="color" style="--color: rgba(0, 0, 0,.5)"></div>
       <div class="color" style="--color: rgba(0, 0, 0,.65)"></div>

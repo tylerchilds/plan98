@@ -8,14 +8,17 @@ $.draw(container => {
   container.initialized = true
   eruda.init({ container });
 
+  let console = eruda.get('console');
+  console.config.set('catchGlobalErr', true);
+
   eruda.add({
-    name: 'Silly',
+    name: 'Plan98',
     init($el) {
       this._$el = $el;
     },
     show() {
       this._$el.show()
-      this._$el.html('<integrated-development></integrated-development');
+      this._$el.html('<source-code></source-code');
     },
     hide() {
       this._$el.hide()

@@ -2,6 +2,7 @@ import module from '@silly/tag'
 import 'randomuuid'
 import { doingBusinessAs } from "@sillonious/brand"
 import './elves/plan98-synthia.js'
+import './elves/plan98-console.js'
 
 self.plan98 ||= { env: {} }
 
