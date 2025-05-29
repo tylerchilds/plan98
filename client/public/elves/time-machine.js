@@ -30,7 +30,6 @@ const today = new Date();
 const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
 const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
-const aCouplaDaysOut = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
 const thisWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
@@ -683,7 +682,7 @@ const viewRenderers = {
               <div class="textarea">${escapeHyperText(x.text)}</div>
             </div>
             <div class="draft-footer">
-              ${new Date(x.year, x.month, x.day, x.minute, x.second).toJSON()}
+              ${stamp(x)}
             </div>
           </form>
 
@@ -1578,6 +1577,10 @@ function formatTime(date, options = {
 }) {
 
   return date.toLocaleString('en-US', options);
+}
+
+function stamp(date) {
+  return `${formatDate(date)} ${formatTime(date)}`
 }
 
 $.when('input', '[data-bind]', (event) => {

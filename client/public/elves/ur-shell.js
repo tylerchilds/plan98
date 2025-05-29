@@ -316,6 +316,10 @@ const commands = {
   'echo': (...args) => {
     return args.join(' ')
   },
+  'color': () => {
+    loadModule('<plan98-palette')
+    return 'Success!'
+  },
   'error': (...args) => {
     throw new Error(args.map(x => JSON.stringify(x)).join(' '))
   },

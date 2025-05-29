@@ -2,45 +2,54 @@ import elf from '@plan98/elf'
 import {
   attack,
   release,
-  attackRelease,
-  getNoteDuration
+  setTheme,
 } from './paper-pocket.js'
 
 const midiRange = [...new Array(128)].map((x, i) => i)
 
-const synths = {}
+export const colors = [
+  "firebrick",
+  "darkorange",
+  "gold",
+  "mediumseagreen",
+  "dodgerblue",
+  "slateblue",
+  "mediumpurple",
+  "sienna",
+]
+
+export const toppings = [
+  "rgba(0, 0, 0,1)",
+  "rgba(0, 0, 0,.95)",
+  "rgba(0, 0, 0,.875)",
+  "rgba(0, 0, 0,.775)",
+  "rgba(0, 0, 0,.65)",
+  "rgba(0, 0, 0,.5)",
+  "rgba(0, 0, 0,.35)",
+  "rgba(0, 0, 0,.2)",
+  "transparent",
+  "rgba(255, 255, 255,.2)",
+  "rgba(255, 255, 255,.35)",
+  "rgba(255, 255, 255,.5)",
+  "rgba(255, 255, 255,.65)",
+  "rgba(255, 255, 255,.85)",
+  "rgba(255, 255, 255,.95)",
+  "rgba(255, 255, 255,1)",
+]
 
 const $ = elf('plan98-palette')
 
 $.draw((target) => {
   return `
     <div class="colors">
-      <div class="color" style="--color: var(--red, firebrick)"></div>
-      <div class="color" style="--color: var(--orange, darkorange)"></div>
-      <div class="color" style="--color: var(--yellow, gold)"></div>
-      <div class="color" style="--color: var(--green, mediumseagreen)"></div>
-      <div class="color" style="--color: var(--blue, dodgerblue)"></div>
-      <div class="color" style="--color: var(--indigo, slateblue)"></div>
-      <div class="color" style="--color: var(--violet, mediumpurple)"></div>
-      <div class="color" style="--color: var(--gray, dimgray)"></div>
+      ${colors.map((color) => `
+        <div class="color" style="--color: ${color}"></div>
+      `).join('')}
     </div>
     <div class="toppings">
-      <div class="color" style="--color: rgba(0, 0, 0,1)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.95)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.875)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.775)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.65)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.5)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.35)"></div>
-      <div class="color" style="--color: rgba(0, 0, 0,.2)"></div>
-      <div class="color" style="--color: transparent"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.2)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.35)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.5)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.65)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.85)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,.95)"></div>
-      <div class="color" style="--color: rgba(255, 255, 255,1)"></div>
+      ${toppings.map((color) => `
+        <div class="color" style="--color: ${color}"></div>
+      `).join('')}
     </div>
     <div class="tabs">
       ${midiRange.map(renderNote).join('')}
@@ -48,9 +57,15 @@ $.draw((target) => {
   `
 })
 
-function renderNote(midi) {
+function mod(x, n) {
+  return ((x % n) + n) % n;
+}
+
+function renderNote(midi, i) {
+  const color = colors[mod(i, colors.length)]
+  const topping = toppings[mod(Math.floor(i / colors.length), toppings.length)]
   return `
-    <button aria-label="${midi}" data-midi="${midi}">${midi}</button>
+    <button data-mix aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}">${midi}</button>
   `
 }
 
@@ -66,14 +81,66 @@ function queueRelease (event) {
   release(midi)
 }
 
-$.when('mouseenter', '[data-midi]', queueAttack)
-$.when('mouseleave', '[data-midi]', queueRelease)
+function mixColors(color1, color2) {
+    const parseColor = (colorStr) => {
+        // Create a temporary div to let the browser parse the color
+        const div = document.createElement('div');
+        div.style.color = colorStr;
+        div.style.display = 'none'; // Keep it off-screen
+        document.body.appendChild(div);
+
+        const computedColor = getComputedStyle(div).color;
+        document.body.removeChild(div);
+
+        // Regex to parse rgba(r, g, b, a) or rgb(r, g, b)
+        const match = computedColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+
+        if (match) {
+            return {
+                r: parseInt(match[1]),
+                g: parseInt(match[2]),
+                b: parseInt(match[3]),
+                a: parseFloat(match[4] || 1) // Default alpha to 1 if not specified (for rgb() inputs)
+            };
+        }
+        console.error("Could not parse color string:", colorStr);
+        return { r: 0, g: 0, b: 0, a: 1 }; // Default to black on error
+    };
+
+    const c1 = parseColor(color1); // Foreground color (black)
+    const c2 = parseColor(color2); // Background color (dodgerblue)
+
+    // Ensure we have valid parsed colors
+    if (!c1 || !c2) {
+        return 'rgba(0,0,0,1)'; // Return a default or error color
+    }
+
+    // Alpha Composite Formula (C_fg is color1, C_bg is color2)
+    const aOut = c1.a + c2.a * (1 - c1.a);
+
+    // To avoid division by zero if aOut is 0 (both colors fully transparent)
+    if (aOut === 0) {
+        return 'rgba(0,0,0,0)'; // Fully transparent black
+    }
+
+    const rOut = (c1.r * c1.a + c2.r * c2.a * (1 - c1.a)) / aOut;
+    const gOut = (c1.g * c1.a + c2.g * c2.a * (1 - c1.a)) / aOut;
+    const bOut = (c1.b * c1.a + c2.b * c2.a * (1 - c1.a)) / aOut;
+
+    return `rgba(${Math.round(rOut)}, ${Math.round(gOut)}, ${Math.round(bOut)}, ${aOut.toFixed(4)})`;
+}
 
 $.when('mousedown', '[data-midi]', queueAttack)
 $.when('mouseup', '[data-midi]', queueRelease)
 
 $.when('touchstart', '[data-midi]', queueAttack)
 $.when('touchend', '[data-midi]', queueRelease)
+
+$.when('pointerup', '[data-mix]', () => {
+  const { topping, color } = event.target.dataset
+  setTheme(mixColors(topping, color))
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+})
 
 $.style(`
   & {
