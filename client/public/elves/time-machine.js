@@ -5,35 +5,39 @@ import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
 
 const bucketKeys = {
-  today: 'today',
+  past: 'past',
+  lastWeek: 'lastWeek',
   yesterday: 'yesterday',
+  today: 'today',
   tomorrow: 'tomorrow',
+  thisWeek: 'thisWeek',
   nextWeek: 'nextWeek',
-  lastWeek: 'lastWeek'
+  future: 'future',
 }
 
 const emptyBuckets = {
+  [bucketKeys.past]: {},
+  [bucketKeys.lastWeek]: {},
+  [bucketKeys.yesterday]: {},
   [bucketKeys.today]: {},
   [bucketKeys.tomorrow]: {},
-  [bucketKeys.yesterday]: {},
-  [bucketKeys.lastWeek]: {},
-  [bucketKeys.nextWeek]: {}
+  [bucketKeys.thisWeek]: {},
+  [bucketKeys.nextWeek]: {},
+  [bucketKeys.future]: {},
 }
 
 const today = new Date();
-const yesterday = new Date(today - 1);
-const tomorrow = new Date(today + 1);
-const nextWeek = new Date(today + 7);
-const lastWeek = new Date(today - 7)
-
-tomorrow.setDate(today.getDate() + 1)
-yesterday.setDate(today.getDate() - 1)
-nextWeek.setDate(today.getDay()+7)
-lastWeek.setDate(today.getDay() - today.getDay()+7)
+const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
+const aCouplaDaysOut = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
+const thisWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
 const eventTypes = {
   journal: 'journal',
   tommi: 'tommi',
+  instrument: 'instrument',
   gallery: 'gallery',
   photo: 'photo',
   archive: 'archive',
@@ -45,6 +49,7 @@ const views = {
   create: 'create',
   [eventTypes.journal]: eventTypes.journal,
   [eventTypes.tommi]: eventTypes.tommi,
+  [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.photo]: eventTypes.photo,
   [eventTypes.archive]: eventTypes.archive,
@@ -90,6 +95,11 @@ const schemas = {
     longitude: null,
     latitude: null,
   },
+  [eventTypes.instrument]: {
+    ...timeFields(),
+    type: eventTypes.instrument,
+  },
+
   [eventTypes.journal]: {
     ...timeFields(),
     type: eventTypes.journal,
@@ -179,46 +189,65 @@ async function fate() {
   }
 }
 
-const bucketPairs = [
-  [today, bucketKeys.today],
-  [tomorrow, bucketKeys.tomorrow],
-  [yesterday, bucketKeys.yesterday],
-  [lastWeek, bucketKeys.lastWeek],
-  [nextWeek, bucketKeys.nextWeek],
-]
-
-function indexDate(timeKey) {
-  return timeKey.split('T')[0]
-}
-
-
 function mergeEvents(state, payload) {
-  const buckets = payload.reduce((buckets, event) => {
-    const [timeKey] = event.handle.name.split('.json')
-    let index = bucketPairs.findIndex(([date, key]) => {
-      return date.toDateString() === new Date(timeKey).toDateString()
-    })
+  const buckets = {
+    past: {},
+    lastWeek: {},
+    yesterday: {},
+    today: {},
+    tomorrow: {},
+    thisWeek: {},
+    nextWeek: {},
+    future: {}
+  };
 
-    const spaceKey = index > -1 ? bucketPairs[index][1] : indexDate(timeKey)
+  payload.forEach(file => {
+    try {
+      const [timeKey] = file.handle.name.split('.json')
+      const fileDate = new Date(timeKey);
+      const fileDateOnly = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate());
 
-    if(!buckets[spaceKey]) {
-      buckets[spaceKey] = {}
+      if (fileDateOnly.getTime() < lastWeek.getTime()) {
+        const spaceKey = bucketKeys.past
+        buckets[bucketKeys.past][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() < yesterday.getTime()) {
+        const spaceKey = bucketKeys.lastWeek
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() < today.getTime()) {
+        const spaceKey = bucketKeys.yesterday
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() < tomorrow.getTime()) {
+        const spaceKey = bucketKeys.today
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() > nextWeek.getTime()) {
+        const spaceKey = bucketKeys.future
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() < aCouplaDaysOut.getTime()) {
+        const spaceKey = bucketKeys.tomorrow
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() <= thisWeek.getTime()) {
+        const spaceKey = bucketKeys.thisWeek
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else if (fileDateOnly.getTime() <= nextWeek.getTime()) {
+        const spaceKey = bucketKeys.nextWeek
+        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      }
+    } catch (_e) {
+      console.warn(`Skipping invalid filename: ${file.handle.name}`);
     }
+  });
 
-    buckets[spaceKey][timeKey] = {
-      spaceKey,
-      timeKey,
-      ...event
-    }
-
-    return buckets
-  }, {
-    ...emptyBuckets,
-    ...state.buckets,
-  })
   return {
     ...state,
     buckets,
+  }
+}
+
+function timeMachine(spaceKey, timeKey, file) {
+  return {
+    spaceKey,
+    timeKey,
+    ...file
   }
 }
 
@@ -654,7 +683,7 @@ const viewRenderers = {
               <div class="textarea">${escapeHyperText(x.text)}</div>
             </div>
             <div class="draft-footer">
-              :)
+              ${new Date(x.year, x.month, x.day, x.minute, x.second).toJSON()}
             </div>
           </form>
 
@@ -892,7 +921,7 @@ $.draw((target)=> {
   }
 
   query(target)
-  const { now, futureEnabled, buckets } = $.learn()
+  const { now, pastEnabled, buckets } = $.learn()
   return `
     <div class="banner-bar">
       <div class="left-bar">
@@ -907,27 +936,35 @@ $.draw((target)=> {
       </div>
     </div>
 
-    <div class="future-toggle-wrapper">
-      <button class="link-button" data-future-toggle>
-        ${futureEnabled?'Hide Future':'View Future'}
+    <div class="past-toggle-wrapper">
+      <button class="link-button" data-past-toggle>
+        ${pastEnabled?'Hide Past':'View Past'}
       </button>
     </div>
-    <div class="the-future ${futureEnabled?'visible':'hidden'}">
+    <div class="the-past ${pastEnabled?'visible':'hidden'}">
       <div class="era">
         <div class="era-label">
-          Next Week
+          Past
         </div>
         <div class="era-events">
-          ${renderBucket(bucketKeys.nextWeek)}
+          ${renderBucket(bucketKeys.past)}
         </div>
       </div>
 
       <div class="era">
         <div class="era-label">
-          Tomorrow
+          Last Week
         </div>
         <div class="era-events">
-          ${renderBucket(bucketKeys.tomorrow)}
+          ${renderBucket(bucketKeys.lastWeek)}
+        </div>
+      </div>
+      <div class="era">
+        <div class="era-label">
+          Yesterday
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.yesterday)}
         </div>
       </div>
     </div>
@@ -952,21 +989,40 @@ $.draw((target)=> {
 
     <div class="era">
       <div class="era-label">
-        Yesterday
+        Tomorrow
       </div>
       <div class="era-events">
-        ${renderBucket(bucketKeys.yesterday)}
+        ${renderBucket(bucketKeys.tomorrow)}
       </div>
     </div>
 
     <div class="era">
       <div class="era-label">
-        Last Week
+        This Week
       </div>
       <div class="era-events">
-        ${renderBucket(bucketKeys.lastWeek)}
+        ${renderBucket(bucketKeys.thisWeek)}
       </div>
     </div>
+
+    <div class="era">
+      <div class="era-label">
+        Next Week
+      </div>
+      <div class="era-events">
+        ${renderBucket(bucketKeys.nextWeek)}
+      </div>
+    </div>
+
+    <div class="era">
+      <div class="era-label">
+        Future
+      </div>
+      <div class="era-events">
+        ${renderBucket(bucketKeys.future)}
+      </div>
+    </div>
+
   `
 }, {
   beforeUpdate(target) {
@@ -1084,8 +1140,8 @@ function renderBucket(spaceKey) {
 }
 
 
-$.when('click', '[data-future-toggle]', (event) => {
-  $.teach({ futureEnabled: !$.learn().futureEnabled })
+$.when('click', '[data-past-toggle]', (event) => {
+  $.teach({ pastEnabled: !$.learn().pastEnabled })
 })
 
 $.when('submit', '[action="edit"]', async (event) => {
@@ -1252,16 +1308,16 @@ $.style(`
     color: rgba(255,255,255,.45);
   }
 
-  & .future-toggle-wrapper {
+  & .past-toggle-wrapper {
     text-align: center;
     padding: 1rem;
   }
 
-  & .the-future.visible {
+  & .the-past.visible {
     display: block;
   }
 
-  & .the-future.hidden {
+  & .the-past.hidden {
     display: none;
   }
 
