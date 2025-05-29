@@ -208,21 +208,18 @@ function mergeEvents(state, payload) {
       const fileDateOnly = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate());
 
       if (fileDateOnly.getTime() < lastWeek.getTime()) {
-        const spaceKey = bucketKeys.past
-        buckets[bucketKeys.past][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < yesterday.getTime()) {
         const spaceKey = bucketKeys.lastWeek
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < today.getTime()) {
+      } else if (fileDateOnly.getTime() < yesterday.getTime()) {
         const spaceKey = bucketKeys.yesterday
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < tomorrow.getTime()) {
+      } else if (fileDateOnly.getTime() < today.getTime()) {
         const spaceKey = bucketKeys.today
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
       } else if (fileDateOnly.getTime() > nextWeek.getTime()) {
         const spaceKey = bucketKeys.future
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < aCouplaDaysOut.getTime()) {
+      } else if (fileDateOnly.getTime() < tomorrow.getTime()) {
         const spaceKey = bucketKeys.tomorrow
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
       } else if (fileDateOnly.getTime() <= thisWeek.getTime()) {
@@ -231,6 +228,9 @@ function mergeEvents(state, payload) {
       } else if (fileDateOnly.getTime() <= nextWeek.getTime()) {
         const spaceKey = bucketKeys.nextWeek
         buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
+      } else {
+        const spaceKey = bucketKeys.past
+        buckets[bucketKeys.past][timeKey] = timeMachine(spaceKey, timeKey, file);
       }
     } catch (_e) {
       console.warn(`Skipping invalid filename: ${file.handle.name}`);
