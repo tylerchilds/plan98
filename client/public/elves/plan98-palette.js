@@ -196,6 +196,7 @@ $.style(`
     display: grid;
     place-content: end;
     color: white;
+    padding: 0;
     text-shadow:
       0 0 3px rgba(0,0,0,.15),
       0 0 2px rgba(0,0,0,.25),
@@ -213,6 +214,9 @@ $.style(`
   }
 
   & .tabs [data-midi] span {
+    pointer-events: none;
     position: absolute;
+    bottom: 0;
+    right: 0;
   }
 `)

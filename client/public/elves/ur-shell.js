@@ -382,6 +382,9 @@ const commands = {
       return `${key}: ${plan98.env[key]}`
     }).join('\n')
   },
+  'exit': () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+  },
   'help': (...args) => {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
@@ -390,6 +393,9 @@ plan98 commands
 
 help
   display help options
+
+exit
+  quit playing around and go outside
 
 color
   launch the color and sound palette
