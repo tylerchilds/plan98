@@ -649,10 +649,10 @@ echo
   re-state the arguments
 
 <code>luau</code>
-  start repl powered by the luau language
+  start repl powered by the Luae language from Roblox
 
 <code>js</code>
-  start repl powered by the JavaScript language
+  start repl powered by the JavaScript language from bellard
 
 <code>error</code>
   throw an error-- like echo, but for debugging the system
