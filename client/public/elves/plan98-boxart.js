@@ -30,7 +30,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/blue-sky'
+    self.location.href = '/app/ur-shell?command=color'
     return
   }
 
@@ -44,8 +44,8 @@ function readyCountdown() {
 
 $.draw((target) => {
   countdown(target)
-  const title = target.getAttribute('title') || 'Sillyz.'
-  const subtitle = target.getAttribute('subtitle') || 'COMPUTER'
+  const title = target.getAttribute('title') || 'Plan98'
+  const subtitle = target.getAttribute('subtitle') || 'REBOOT YOUR SELF'
 
   if(target.innerHTML) return
 
@@ -64,7 +64,9 @@ $.draw((target) => {
       </footer>
       <div name="square">
         <section class="layout">
-          <div class="horizon"></div>
+          <div class="horizon">
+            <plan98-icon></plan98-icon>
+          </div>
           <div class="land">
             <div class="elements"></div>
           </div>
@@ -97,7 +99,7 @@ $.draw((target) => {
               </div>
               <div class="game-modes">
                 <button class="cta spinning-border" data-start>
-                  <span class="cta-inner">Play</span>
+                  <span class="cta-inner">Boot</span>
                 </button>
               </div>
             </div>
@@ -113,9 +115,9 @@ $.draw((target) => {
       const start = target.querySelector('[data-start] .cta-inner')
       
       if(start && !diffused) {
-        start.innerText = `Play (${timer})`
+        start.innerText = `Boot (${timer})`
       } else if(start) {
-        start.innerText = `Play`
+        start.innerText = `Boot`
       }
     }
   }
@@ -162,7 +164,7 @@ function diffuse(event) {
 }
 
 function start(event) {
-  self.location.href = '/app/ur-shell?src=/app/door-man?src=/app/blue-sky'
+  self.location.href = '/app/ur-shell?command=color'
 }
 
 $.style(`
@@ -219,11 +221,14 @@ $.style(`
     position: absolute;
     inset: -100%;
     background: conic-gradient(
-      var(--green, mediumseagreen),
       var(--red, firebrick),
-      var(--blue, dodgerblue),
+      var(--orange, darkorange),
       var(--yellow, gold),
-      var(--green, mediumseagreen)
+      var(--green, mediumseagreen),
+      var(--blue, dodgerblue),
+      var(--indigo, slateblue),
+      var(--violet, mediumpurple),
+      var(--red, firebrick)
     );
     animation: spin 10000ms linear infinite;
     z-index: -1; /* Place it behind the content */
@@ -521,7 +526,7 @@ $.style(`
  }
  & .horizon {
    grid-area: 1 / 1 / -1 / -1;
-   background: url('/cdn/boxart.svg');
+   /*background: url('/cdn/boxart.svg');*/
    background-size: cover;
    position: relative;
    z-index: 1;
@@ -608,7 +613,6 @@ $.style(`
 & #logo #vt3 {
   display: block;
   font-size: clamp(1rem, 300%, 10vmin);
-  letter-spacing: .25em;
   line-height: 1.5;
   margin: 0 0 1rem 0;
 }

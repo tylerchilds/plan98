@@ -950,6 +950,11 @@ sillonious-brand > xml-html {
   -webkit-text-fill-color: transparent;
 }
 
+.standard-button.-small {
+  padding: .25rem .5rem;
+  font-size: 1rem;
+}
+
 .standard-button.-smol {
   padding: 0 4px;
   font-size: 1rem;

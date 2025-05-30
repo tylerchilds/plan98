@@ -17,10 +17,7 @@ const paperPocketPath = Object.keys(sideEffects)
   }, defaultPath)
 
 const paperPocketHelp = () => {
-  return `Congratulations on your purchase of your new Paper Pocket!
-
-You have options. To configure your settings, try the following:
-\n` + Object.keys(paperPocketPath).map(key => {
+  return Object.keys(paperPocketPath).map(key => {
   const { label, description, options, value: _value } = $paperPocket.learn().settings[key]
   const value = $paperPocket.learn()[key]
   return `${key}
@@ -150,143 +147,6 @@ function renderModels(model) {
   `).join('')
 }
 
-function mount(target) {
-  if(target.mounted) return
-  target.mounted = true
-  const src = target.getAttribute('src')
-  const rom = target.getAttribute('rom')
-  if(src) {
-    execute(src)
-  } else if(rom) {
-    execute('<'+rom)
-  }
-}
-
-$.draw((target) => {
-  mount(target)
-  const { model, messages, messageText, messageHeight, thinking } = $.learn()
-
-  const log = messages.map((message) => `
-    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
-  `).join('')
-
-  return `
-      <div class="scroll-back">
-        <div class="messages">
-          ${log}
-        </div>
-      </div>
-      <form>
-        ${thinking ? `
-          <div class="loading">
-            <flying-disk></flying-disk>
-          </div>
-        ` : ''}
-        <textarea
-          data-bind
-          name="messageText"
-          placeholder="help"
-          value="${escapeHyperText(messageText)}"
-          ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-        ></textarea>
-      </div>
-    </div>
-  `
-}, {
-  beforeUpdate,
-  afterUpdate
-})
-
-function beforeUpdate(target) {
-  { // convert a query string to new post
-    const q = target.getAttribute('q')
-    if(!target.initialized) {
-      target.initialized = true
-
-      if(q) {
-        const message = decodeURIComponent(q)
-        $.teach({ messageText: message })
-      }
-    }
-  }
-
-  saveCursor(target)
-}
-
-function afterUpdate(target) {
-  replaceCursor(target)
-
-  {
-    const { messages } = $.learn()
-    if(target.lastIndex !== messages.length -1) {
-      target.lastIndex = messages.length - 1
-      const lastChild = target.querySelector('.messages .message:last-child')
-      if(lastChild) {
-        lastChild.scrollIntoView()
-      }
-    }
-  }
-
-  {
-    afterUpdateTheme($paperPocket, target)
-  }
-  {
-    const theme = getTheme()
-    if(target.theme !== theme) {
-      target.theme = theme
-      document.body.style.setProperty('--root-theme', theme)
-    }
-  }
-
-}
-
-let sel = []
-const tags = ['TEXTAREA', 'INPUT']
-function saveCursor(target) {
-  if(target.contains(document.activeElement)) {
-    target.dataset.field = document.activeElement.name
-    if(tags.includes(document.activeElement.tagName)) {
-      const textarea = document.activeElement
-      sel = [textarea.selectionStart, textarea.selectionEnd];
-    }
-  }
-}
-
-function replaceCursor(target) {
-  const field = target.querySelector(`[name="${target.dataset.field}"]`)
-  
-  if(field) {
-    field.focus()
-
-    if(tags.includes(field.tagName)) {
-      field.selectionStart = sel[0];
-      field.selectionEnd = sel[1];
-    }
-  }
-}
-
-function clearCursor(target) {
-  target.dataset.field = null
-  sel = []
-}
-
-
-$.when('keypress', 'form [name="messageText"]', (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    const message = event.target.value
-    execute(message)
-  }
-})
-
-$.when('submit', 'form', (event) => {
-  event.preventDefault()
-  const message = event.target.messageText.value
-  execute(message)
-})
-
-const imports = {}
-
 const modalities = {
   luau(program) {
     if(program === 'exit') {
@@ -318,6 +178,34 @@ const commands = {
   },
   'color': () => {
     loadModule('<plan98-palette')
+    return 'Success!'
+  },
+  'journal': () => {
+    loadPath('/app/time-machine')
+    return 'Success!'
+  },
+  'desktop': () => {
+    loadPath('/app/door-man')
+    return 'Success!'
+  },
+  'mobile': () => {
+    loadPath('/app/mobile-device')
+    return 'Success!'
+  },
+  'music': () => {
+    loadPath('/app/paper-pocket')
+    return 'Success!'
+  },
+  'gaming': () => {
+    loadPath('/app/couch-coop')
+    return 'Success!'
+  },
+  'kiosk': () => {
+    loadPath('/app/remote-control')
+    return 'Success!'
+  },
+  'bluesky': () => {
+    loadPath('/app/blue-sky')
     return 'Success!'
   },
   'error': (...args) => {
@@ -498,12 +386,34 @@ const commands = {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
 
-${help}
-
 plan98 commands
 
 help
   display help options
+
+color
+  launch the color and sound palette
+
+journal
+  launch the journal app
+
+desktop
+  launch the desktop app
+
+mobile
+  launch the mobile app
+
+music
+  launch the music app
+
+gaming
+  launch the gaming app
+
+kiosk
+  launch the kiosk app
+
+bluesky
+  launch the bluesky app
 
 pwd
   print working directory
@@ -542,6 +452,8 @@ Modes:
 <* - load ELF
      example: <couch-coop
 
+${help}
+
 For further assistance, enter <cool-chat
 `
   },
@@ -550,6 +462,148 @@ For further assistance, enter <cool-chat
     execute('/app/ur-shell?src=/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
   }
 }
+
+
+
+function mount(target) {
+  if(target.mounted) return
+  target.mounted = true
+  const command = target.getAttribute('command')
+  const src = target.getAttribute('src')
+  const rom = target.getAttribute('rom')
+  if(command) {
+    execute(command)
+  } else if(src) {
+    execute(src)
+  } else if(rom) {
+    execute('<'+rom)
+  }
+}
+
+$.draw((target) => {
+  mount(target)
+  const { model, messages, messageText, messageHeight, thinking } = $.learn()
+
+  const log = messages.map((message) => `
+    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
+  `).join('')
+
+  return `
+      <div class="scroll-back">
+        <div class="messages">
+          ${log}
+        </div>
+      </div>
+      <form>
+        ${thinking ? `
+          <div class="loading">
+            <flying-disk></flying-disk>
+          </div>
+        ` : ''}
+        <textarea
+          data-bind
+          name="messageText"
+          placeholder="help"
+          value="${escapeHyperText(messageText)}"
+          ${messageHeight ? `style="height: ${messageHeight}px"`:''}
+        ></textarea>
+      </div>
+    </div>
+  `
+}, {
+  beforeUpdate,
+  afterUpdate
+})
+
+function beforeUpdate(target) {
+  { // convert a query string to new post
+    const q = target.getAttribute('q')
+    if(!target.initialized) {
+      target.initialized = true
+
+      if(q) {
+        const message = decodeURIComponent(q)
+        $.teach({ messageText: message })
+      }
+    }
+  }
+
+  saveCursor(target)
+}
+
+function afterUpdate(target) {
+  replaceCursor(target)
+
+  {
+    const { messages } = $.learn()
+    if(target.lastIndex !== messages.length -1) {
+      target.lastIndex = messages.length - 1
+      const lastChild = target.querySelector('.messages .message:last-child')
+      if(lastChild) {
+        lastChild.scrollIntoView()
+      }
+    }
+  }
+
+  {
+    afterUpdateTheme($paperPocket, target)
+  }
+  {
+    const theme = getTheme()
+    if(target.theme !== theme) {
+      target.theme = theme
+      document.body.style.setProperty('--root-theme', theme)
+    }
+  }
+
+}
+
+let sel = []
+const tags = ['TEXTAREA', 'INPUT']
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.field = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  }
+}
+
+function replaceCursor(target) {
+  const field = target.querySelector(`[name="${target.dataset.field}"]`)
+  
+  if(field) {
+    field.focus()
+
+    if(tags.includes(field.tagName)) {
+      field.selectionStart = sel[0];
+      field.selectionEnd = sel[1];
+    }
+  }
+}
+
+function clearCursor(target) {
+  target.dataset.field = null
+  sel = []
+}
+
+
+$.when('keypress', 'form [name="messageText"]', (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const message = event.target.value
+    execute(message)
+  }
+})
+
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+  const message = event.target.messageText.value
+  execute(message)
+})
+
+const imports = {}
 
 async function execute(message) {
   if(!message) return

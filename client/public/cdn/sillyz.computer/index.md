@@ -1,14 +1,12 @@
-<plan98-hero></plan98-hero>
+<plan98-icon style="width: 128px; height: 128px;"></plan98-icon>
 
-# Portfolio/Pitch
+# About
 
-The graphic below is an operating system. That's the pitch. That's my portfolio.
+The graphic below is an operating system.
 
-### An OS for everywhere.
+<iframe src="/app/ur-shell?command=color" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
 
-[View Full Screen](/app/ur-shell?src=/app/door-man?src=/app/blue-sky)
-
-<iframe src="/app/door-man" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
+[View Full Screen](/app/ur-shell?command=color)
 
 For a quick overview of the modalities and their intersections,
 

@@ -620,10 +620,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="post" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
-              <button class="standard-button" style="place-self: end;" type="submit">
+              <button class="standard-button -small" style="place-self: end;" type="submit">
                 Save
               </button>
             </div>
@@ -671,10 +671,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -703,10 +703,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -736,7 +736,7 @@ const viewRenderers = {
               </div>
             </div>
             <div class="draft-footer">
-              :)
+              ${stamp(x)}
             </div>
           </form>
         </div>
@@ -756,10 +756,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -795,7 +795,7 @@ const viewRenderers = {
               </div>
             </div>
             <div class="draft-footer">
-              :)
+              ${stamp(x)}
             </div>
           </form>
         </div>
@@ -815,10 +815,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -857,7 +857,7 @@ const viewRenderers = {
               </div>
             </div>
             <div class="draft-footer">
-              :)
+              ${stamp(x)}
             </div>
           </form>
         </div>
@@ -876,10 +876,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
                 Edit
               </button>
             </div>
@@ -889,7 +889,7 @@ const viewRenderers = {
               }</div>
             </div>
             <div class="draft-footer">
-              :)
+              ${stamp(x)}
             </div>
           </form>
         </div>
@@ -1232,6 +1232,7 @@ $.style(`
     display: block;
     height: 100%;
     overflow: auto;
+    background: white;
   }
 
   & .edit-banner {
@@ -1579,8 +1580,9 @@ function formatTime(date, options = {
   return date.toLocaleString('en-US', options);
 }
 
-function stamp(date) {
-  return `${formatDate(date)} ${formatTime(date)}`
+function stamp(x) {
+  const date = new Date(x.year, x.month, x.day, x.hour, x.minute)
+  return `${formatDate(date)} @ ${formatTime(date)}`
 }
 
 $.when('input', '[data-bind]', (event) => {

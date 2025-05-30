@@ -65,7 +65,7 @@ function renderNote(midi, i) {
   const color = colors[mod(i, colors.length)]
   const topping = toppings[mod(Math.floor(i / colors.length), toppings.length)]
   return `
-    <button data-mix aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}">${midi}</button>
+    <button aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}">${midi}</button>
   `
 }
 
@@ -73,6 +73,8 @@ function queueAttack(event) {
   event.preventDefault()
   const { midi } = event.target.dataset
   attack(midi)
+
+  setTimeout(() => release(midi), 5000)
 }
 
 function queueRelease (event) {
@@ -136,10 +138,19 @@ $.when('mouseup', '[data-midi]', queueRelease)
 $.when('touchstart', '[data-midi]', queueAttack)
 $.when('touchend', '[data-midi]', queueRelease)
 
-$.when('pointerup', '[data-mix]', () => {
-  const { topping, color } = event.target.dataset
-  setTheme(mixColors(topping, color))
-  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+let activeMidi
+$.when('pointerdown', '[data-midi]', (event) => {
+  activeMidi = event.target.dataset.midi
+})
+
+$.when('pointerup', '[data-midi]', () => {
+  const { midi } = event.target.dataset
+  if(activeMidi === midi) {
+    release(midi)
+    const { topping, color } = event.target.dataset
+    setTheme(mixColors(topping, color))
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+  }
 })
 
 $.style(`
@@ -196,6 +207,7 @@ $.style(`
 
   & .tabs [data-midi]:hover,
   & .tabs [data-midi]:focus {
+    background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,0));
     opacity: 1;
   }
 `)
