@@ -548,7 +548,8 @@ function afterUpdate(target) {
       target.lastIndex = messages.length - 1
       const lastChild = target.querySelector('.messages .message:last-child')
       if(lastChild) {
-        lastChild.scrollIntoView()
+        const children = [...document.querySelector('.messages').children]
+        document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
       }
     }
   }

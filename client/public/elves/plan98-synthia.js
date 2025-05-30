@@ -34,29 +34,27 @@ document.body.appendChild(context)
 
 $.draw(() => {
   const { rect, visible, activated, synthia } = $.learn()
-  if(self.self === self.top) {
-    const operation = escapeHyperText(synthia.prompt || '')
-    return visible ? `
-      <div class="activator-bar">
-        <button class="synthia">
-          <plan98-icon></plan98-icon>
-        </button>
+  const operation = escapeHyperText(synthia.prompt || '')
+  return visible ? `
+    <div class="activator-bar">
+      <button class="synthia">
+        <plan98-icon></plan98-icon>
+      </button>
+    </div>
+    ${activated ? `
+      <div class="result activated">
+        <div class="result-card">
+          ${ai(operation)}
+        </div>
       </div>
-      ${activated ? `
-        <div class="result activated">
-          <div class="result-card">
-            ${ai(operation)}
-          </div>
+    ` : `
+      <div class="result">
+        <div class="result-card">
+          ${ai(operation)}
         </div>
-      ` : `
-        <div class="result">
-          <div class="result-card">
-            ${ai(operation)}
-          </div>
-        </div>
-      `}
-    `: '<div></div>'
-  }
+      </div>
+    `}
+  `: '<div></div>'
 }, {
   afterUpdate(target) {
     { // recover icons from the virtual dom
