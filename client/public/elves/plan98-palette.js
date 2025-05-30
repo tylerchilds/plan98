@@ -65,7 +65,7 @@ function renderNote(midi, i) {
   const color = colors[mod(i, colors.length)]
   const topping = toppings[mod(Math.floor(i / colors.length), toppings.length)]
   return `
-    <button aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}">${midi}</button>
+    <button aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}"><span>${midi}</span></button>
   `
 }
 
@@ -190,6 +190,7 @@ $.style(`
   }
 
   & .tabs [data-midi] {
+    position: relative;
     border: 0;
     background: transparent;
     display: grid;
@@ -209,5 +210,9 @@ $.style(`
   & .tabs [data-midi]:focus {
     background: linear-gradient(135deg, rgba(255,255,255,.25), rgba(255,255,255,0));
     opacity: 1;
+  }
+
+  & .tabs [data-midi] span {
+    position: absolute;
   }
 `)
