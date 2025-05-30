@@ -223,7 +223,7 @@ const searchEngines = ['google', 'archive', 'wikipedia', 'duckduckgo', 'yahoo']
 
 const searchEngineMap = {
   google: {
-    url: 'https://google.com?q='
+    url: 'https://google.com/search?q='
   },
   archive: {
     url: 'https://archive.org/search?query='

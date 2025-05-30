@@ -389,7 +389,7 @@ const commands = {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
 
-plan98 commands
+PLAN98
 
 help
   display help options
@@ -457,6 +457,8 @@ Modes:
 
 <* - load ELF
      example: <couch-coop
+
+PAPER POCKET
 
 ${help}
 
