@@ -102,8 +102,7 @@ $.style(`
 
   & .result-card {
     box-shadow: var(--shadow);
-    background: rgba(255,255,255,.65);
-    backdrop-filter: blur(8px);
+    background: rgba(255,255,255,1);
     height: 100%;
     border-radius: .5rem .5rem 0 0;
     position: relative;
@@ -112,6 +111,7 @@ $.style(`
 
   & paper-pocket {
     overflow: auto;
+    background: rgba(0,0,0,.1);
   }
 
   & .result.activated {
@@ -157,7 +157,7 @@ $.style(`
     padding: .5rem;
     gap: .5rem;
     flex-wrap: wrap;
-    background: rgba(224,224,224,.85);
+    background: rgba(0,0,0,.1);
   }
 `)
 

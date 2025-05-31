@@ -1034,7 +1034,7 @@ function settingsMenu() {
           </div>
         </div>
         <div class="selectbox-selector">
-          <div class="standard-button selectbox-view">
+          <div class="old-button selectbox-view">
             ${value}
           </div>
           <select data-settings name="${key}">
@@ -1200,7 +1200,7 @@ export function ai(operation) {
                 ${list.map(({ label, url }) => {
                   return `
                     <div class="mega-footer-item">
-                      <a class="mega-footer-link standard-button" href="${url}" target="_blank">
+                      <a class="mega-footer-link" href="${url}" target="_blank">
                         ${label}
                       </a>
                     </div>
@@ -2342,10 +2342,9 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    background: rgba(0,0,0,.85);
-    border-radius: .5rem;
     padding: .5rem;
-    color: rgba(255,255,255,.85);
+    background: lemonchiffon;
+    box-shadow: 1px 1px 1px 1px rgba(0,0,0,.1);
   }
 
   & .settings-human {
@@ -2357,7 +2356,6 @@ $.style(`
   }
 
   & .selectbox-description {
-    color: rgba(255,255,255,.65);
   }
 
 

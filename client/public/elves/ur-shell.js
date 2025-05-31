@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 
@@ -240,7 +240,9 @@ const commands = {
       console.error(e)
     })
 
-    return 'Entering JS modality'
+    return `(function calculate(expression) {
+  return 10
+})('2*3+4')`
   },
 
 

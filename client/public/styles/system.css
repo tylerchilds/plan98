@@ -968,8 +968,39 @@ sillonious-brand > xml-html {
   padding: .5rem;
 }
 
+.old-button,
+.old-button:link,
+.old-button:visited {
+  background: rgba(0,0,0,.1);
+  border: 2px solid;
+  border-top-color: rgba(255,255,255,.5);
+  border-left-color: rgba(255,255,255,.5);
+  border-bottom-color: rgba(0,0,0,.5);
+  border-right-color: rgba(0,0,0,.5);
+  text-decoration: none;
+  padding: .25rem;
+  color: dodgerblue;
+}
+
+.old-button:hover,
+.old-button:focus {
+  color: mediumseagreen;
+}
+
+.old-button:active {
+  text-decoration: none;
+  padding: .25rem;
+  color: firebrick;
+  background: rgba(0,0,0,.8);
+  border-bottom-color: rgba(255,255,255,.5);
+  border-right-color: rgba(255,255,255,.5);
+  border-top-color: rgba(0,0,0,.5);
+  border-left-color: rgba(0,0,0,.5);
+}
+
+
+
 .mega-footer {
-  background: rgba(0,0,0,.85);
   padding: 1rem 0;
 }
 
@@ -977,7 +1008,6 @@ sillonious-brand > xml-html {
   font-size: 1.5rem;
   padding: 0 .5rem;
   font-weight: bold;
-  color: rgba(255,255,255,.85);
 }
 
 .mega-footer-section {
@@ -985,14 +1015,16 @@ sillonious-brand > xml-html {
 }
 
 .mega-footer-title {
-  padding: .5rem 0;
+  padding: .5rem 0 0;
   font-weight: bold;
-  color: rgba(255,255,255,.65);
 }
 
 .mega-footer-list {
   overflow: auto;
-  white-space: nowrap;
+  flex-wrap: wrap;
+  display: flex;
+  gap: .25rem;
+  padding: 0 0 .5rem;
 }
 
 .mega-footer-item {
@@ -1003,12 +1035,32 @@ sillonious-brand > xml-html {
   display: inline-block;
 }
 .mega-footer-link:link,
-.mega-footer-link:visited,
+.mega-footer-link:visited {
+  background: rgba(0,0,0,.1);
+  border: 2px solid;
+  border-top-color: rgba(255,255,255,.5);
+  border-left-color: rgba(255,255,255,.5);
+  border-bottom-color: rgba(0,0,0,.5);
+  border-right-color: rgba(0,0,0,.5);
+  text-decoration: none;
+  padding: .25rem;
+  color: dodgerblue;
+}
+
 .mega-footer-link:hover,
-.mega-footer-link:focus,
+.mega-footer-link:focus {
+  color: mediumseagreen;
+}
+
 .mega-footer-link:active {
   text-decoration: none;
-  color: white;
+  padding: .25rem;
+  color: firebrick;
+  background: rgba(0,0,0,.8);
+  border-bottom-color: rgba(255,255,255,.5);
+  border-right-color: rgba(255,255,255,.5);
+  border-top-color: rgba(0,0,0,.5);
+  border-left-color: rgba(0,0,0,.5);
 }
 
 .av.-banner {
