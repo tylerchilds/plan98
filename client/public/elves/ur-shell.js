@@ -180,6 +180,14 @@ const commands = {
     loadModule('<plan98-palette')
     return 'Success!'
   },
+  'sillyz': () => {
+    loadPath('/app/sillyz-computer')
+    return 'Success!'
+  },
+  'tv': () => {
+    loadPath('/app/tiniest-violin')
+    return 'Success!'
+  },
   'journal': () => {
     loadPath('/app/time-machine')
     return 'Success!'
@@ -422,6 +430,11 @@ kiosk
 
 bluesky
   launch the bluesky app
+
+tv
+  the tiniest violin
+
+
 
 pwd
   print working directory

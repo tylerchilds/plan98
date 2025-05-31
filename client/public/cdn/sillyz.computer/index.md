@@ -52,6 +52,12 @@ Like Apple, Microsoft, Amazon, Google, Meta-- Plan98 is a platform for powering 
 
 Don't build an economy. Build the system that is used to build economies.
 
+For example, the success of Microsoft is due in large part to the Start menu. The technology they use to power that functionality matters. How fast it is will affect the entire globe.
+
+That's where I compete.
+
+<img src="/cdn/sillyz.computer/smoking-gun.jpg" />
+
 Deep Technology Architecture
 ===
 

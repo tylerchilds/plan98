@@ -143,13 +143,16 @@ $.when('pointerdown', '[data-midi]', (event) => {
   activeMidi = event.target.dataset.midi
 })
 
-$.when('pointerup', '[data-midi]', () => {
+$.when('pointerup', '[data-midi]', (event) => {
   const { midi } = event.target.dataset
+  const target = event.target.closest($.link)
   if(activeMidi === midi) {
     release(midi)
     const { topping, color } = event.target.dataset
     setTheme(mixColors(topping, color))
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+    if(target.getAttribute('escape') !== 'disabled') {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+    }
   }
 })
 
