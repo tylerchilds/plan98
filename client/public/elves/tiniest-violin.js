@@ -34,6 +34,13 @@ $.style(`
     background: black;
     grid-template-rows: auto 1fr auto;
     text-align: center;
+    user-select: none; /* supported by Chrome and Opera */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    -webkit-touch-callout: none;
+    touch-action: manipulation;
   }
 
   & .violin-title {

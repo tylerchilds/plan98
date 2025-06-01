@@ -605,7 +605,7 @@ $.draw((target) => {
   if(target.innerHTML) return
   const { rom, src, mode, fullScreen, theme } = $.learn()
   return `
-    <div class="chrome" style="--theme: ${theme}" data-full="${fullScreen}">
+    <div class="chrome" style="--theme: ${theme}" data-headless="${target.getAttribute("headless")}" data-full="${fullScreen}">
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
@@ -2046,6 +2046,22 @@ $.style(`
   }
 
   & .chrome[data-full="true"] .controller {
+    display: none;
+  }
+
+  & .chrome[data-headless="true"] .widget-frame {
+    padding: 0;
+  }
+
+  & .chrome[data-headless="true"] .controller {
+    display: none;
+  }
+
+  & .chrome[data-headless="true"] .super-items {
+    display: none;
+  }
+
+  & .chrome[data-headless="true"] .menu-items {
     display: none;
   }
 

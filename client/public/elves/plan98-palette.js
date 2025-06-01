@@ -18,7 +18,7 @@ export const colors = [
   "sienna",
 ]
 
-export const toppings = [
+export const light = [
   "rgba(0, 0, 0,1)",
   "rgba(0, 0, 0,.95)",
   "rgba(0, 0, 0,.875)",
@@ -37,6 +37,10 @@ export const toppings = [
   "rgba(255, 255, 255,1)",
 ]
 
+export const matrix = colors.map(color => {
+  return light.map(rgba => mixColors(rgba, color))
+})
+
 const $ = elf('plan98-palette')
 
 $.draw((target) => {
@@ -46,8 +50,8 @@ $.draw((target) => {
         <div class="color" style="--color: ${color}"></div>
       `).join('')}
     </div>
-    <div class="toppings">
-      ${toppings.map((color) => `
+    <div class="light">
+      ${light.map((color) => `
         <div class="color" style="--color: ${color}"></div>
       `).join('')}
     </div>
@@ -63,7 +67,7 @@ function mod(x, n) {
 
 function renderNote(midi, i) {
   const color = colors[mod(i, colors.length)]
-  const topping = toppings[mod(Math.floor(i / colors.length), toppings.length)]
+  const topping = light[mod(Math.floor(i / colors.length), light.length)]
   return `
     <button aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}"><span>${midi}</span></button>
   `
@@ -172,7 +176,7 @@ $.style(`
     height: 100%;
   }
 
-  & .toppings {
+  & .light {
     display: flex;
     grid-area: spot;
     height: 100%;
