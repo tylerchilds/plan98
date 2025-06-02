@@ -3,7 +3,8 @@ import {
   attack,
   release,
   attackRelease,
-  getNoteDuration
+  getNoteDuration,
+  setTheme
 } from './paper-pocket.js'
 import { colors as paletteColors, light, matrix } from './plan98-palette.js'
 
@@ -106,6 +107,7 @@ $.draw((target) => {
         <button
           class="step ${activeNotes.includes(note) ? 'active':''}"
           data-note="${note}"
+          data-value="${x.value}"
           data-color="${x.color}"
           data-light="${x.light}"
           style="background: ${x.value}">
@@ -149,6 +151,12 @@ $.when('pointerleave', '.step', (event) => {
   const { note } = event.target.dataset
   release(note)
 })
+
+$.when('click', '.step', (event) => {
+  const { value } = event.target.dataset
+  setTheme(value)
+})
+
 
 $.style(`
   & {
@@ -354,36 +362,42 @@ function maybe(index, value) {
 }
 
 const majorScales = {
-  '0000': [0, 4, 7], // c major
-  '1001': [1, 5, 8], // c#/db major
-  '1000': [2, 6, 9], // d major
-  '1010': [3, 7, 10], // d#/eb major
-  '0100': [4, 8, 11], // e major
-  '0010': [5, 9, 12], // f major
-  '0101': [6, 10, 13], // f#/gb major
-  '0001': [7, 11, 14], // g major
-  '0110': [8, 12, 15], // g#/ab major
-  '1100': [9, 13, 16], // a major
-  '0111': [10, 14, 17], // a#/bb major
-  '0011': [11, 15, 18], // b major
+  '0000': [-12, 0, 4, 7, 12], // c major
+  '1001': [-11, 1, 5, 8, 13], // c#/db major
+  '1000': [-10, 2, 6, 9, 14], // d major
+  '1010': [-9, 3, 7, 10, 15], // d#/eb major
+  '0100': [-8, 4, 8, 11, 16], // e major
+  '0010': [-7, 5, 9, 12, 17], // f major
+  '0101': [-6, 6, 10, 13, 18], // f#/gb major
+  '0001': [-5, 7, 11, 14, 19], // g major
+  '0110': [-4, 8, 12, 15, 20], // g#/ab major
+  '1100': [-3, 9, 13, 16, 21], // a major
+  '0111': [-2, 10, 14, 17, 22], // a#/bb major
+  '0011': [-1, 11, 15, 18, 23], // b major
 }
 
 const minorScales = {
-  '0000': [0, 3, 7], // c minor
-  '1001': [1, 4, 8], // c#/db minor
-  '1000': [2, 5, 9], // d minor
-  '1010': [3, 6, 10], // d#/eb minor
-  '0100': [4, 7, 11], // e minor
-  '0010': [5, 8, 12], // f minor
-  '0101': [6, 9, 13], // f#/gb minor
-  '0001': [7, 10, 14], // g minor
-  '0110': [8, 11, 15], // g#/ab minor
-  '1100': [9, 12, 16], // a minor
-  '0111': [10, 13, 17], // a#/bb minor
-  '0011': [11, 14, 18], // b minor
+  '0000': [-12, 0, 3, 7, 12], // c minor
+  '1001': [-11, 1, 4, 8, 13], // c#/db minor
+  '1000': [-10, 2, 5, 9, 14], // d minor
+  '1010': [-9, 3, 6, 10, 15], // d#/eb minor
+  '0100': [-8, 4, 7, 11, 16], // e minor
+  '0010': [-7, 5, 8, 12, 17], // f minor
+  '0101': [-6, 6, 9, 13, 18], // f#/gb minor
+  '0001': [-5, 7, 10, 14, 19], // g minor
+  '0110': [-4, 8, 11, 15, 20], // g#/ab minor
+  '1100': [-3, 9, 12, 16, 21], // a minor
+  '0111': [-2, 10, 13, 17, 22], // a#/bb minor
+  '0011': [-1, 11, 14, 18, 23], // b minor
 }
 
 const playing = {}
+
+function releaseAll() {
+  const { activeNotes } = $.learn()
+  activeNotes.map(release)
+  $.teach({ activeNotes: [] })
+}
 
 function queueAttack(shift, i) {
   const { root } = $.learn()
@@ -445,6 +459,7 @@ const musicRPC = {
       debounceSpam('up', Tone.Time(getNoteDuration()).toMilliseconds(), () => {
         const cache = strings.slice(0,5).join('')
         if(upCache === cache) return
+        releaseAll()
         upCache = cache
 
         const key = strings.slice(0,4).join('')
@@ -460,6 +475,7 @@ const musicRPC = {
       })
     } else {
       if(upCache) {
+        releaseAll()
         upCache = null
       }
     }
@@ -469,6 +485,7 @@ const musicRPC = {
       debounceSpam('down', Tone.Time(getNoteDuration()).toMilliseconds(), () => {
         const cache = strings.slice(0,5).join('')
         if(downCache === cache) return
+        releaseAll()
         downCache = cache
 
         const key = strings.slice(0,4).join('')
@@ -484,6 +501,7 @@ const musicRPC = {
       })
     } else {
       if(downCache) {
+        releaseAll()
         downCache = null
       }
     }
