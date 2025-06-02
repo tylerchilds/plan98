@@ -15,7 +15,7 @@ export const colors = [
   "dodgerblue",
   "slateblue",
   "mediumpurple",
-  "sienna",
+  "dimgray",
 ]
 
 export const light = [
@@ -38,7 +38,13 @@ export const light = [
 ]
 
 export const matrix = colors.map(color => {
-  return light.map(rgba => mixColors(rgba, color))
+  return light.map(l => {
+    return {
+      rgba: mixColors(l, color),
+      light: l,
+      color: color,
+    }
+  })
 })
 
 const $ = elf('plan98-palette')

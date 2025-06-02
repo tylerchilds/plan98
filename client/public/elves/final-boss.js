@@ -36,23 +36,23 @@ function recalculate() {
   const length = c.length * l.length
 
   for(let i = 0; i < length; i++) {
-    const x = Math.floor(i / c.length)
-    const y = mod(i, light.length - 1)
+    const x = i % c.length
+    const y = Math.floor(i / c.length)
 
-    const value = matrix[mod(x, matrix.length)][y]
+    const data = matrix[mod(x, matrix.length)][y]
 
     const wheelIndex = mod(i, wheel.length)
     const hueFifths = mod(wheelIndex * 7, 12)
     const name = `--wheel-${hueFifths}-${y}`
 
-    const data = {
+    wheel[wheelIndex].push({
       name,
-      value,
+      value: data.rgba,
+      color: data.color,
+      light: data.light,
       block: hueFifths,
       inline: i
-    }
-
-    wheel[wheelIndex].push(data)
+    })
   }
 
   $.teach({ colorVariables: print(wheel) })
@@ -101,18 +101,20 @@ $.draw((target) => {
 
   const wheel = colors.map((lightness, i) => {
     const steps = lightness.map((x, ii) => {
-      const note = ((ii * 12) + mod(i * 7, 12))
+      const note = ((ii * 12) + mod(i, 12))
       return`
         <button
           class="step ${activeNotes.includes(note) ? 'active':''}"
           data-note="${note}"
+          data-color="${x.color}"
+          data-light="${x.light}"
           style="background: ${x.value}">
           <div class="active-indicator"></div>
         </button>
       `
     }).join('')
     return `
-      <div class="group" style="transform: rotate(${i * 30}deg)">
+      <div class="group" style="transform: rotate(${i * 7 * 30}deg)">
         ${steps}
       </div>
     `
