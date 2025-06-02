@@ -15,7 +15,7 @@ export const colors = [
   "dodgerblue",
   "slateblue",
   "mediumpurple",
-  "dimgray",
+  "sienna",
 ]
 
 export const light = [
