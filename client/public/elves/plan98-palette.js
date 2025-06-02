@@ -2,9 +2,12 @@ import elf from '@plan98/elf'
 import {
   attack,
   release,
+  attackRelease,
   setTheme,
 } from './paper-pocket.js'
 
+const center = 60
+const spatialOffset = 1
 const midiRange = [...new Array(128)].map((x, i) => i)
 
 export const colors = [
@@ -47,9 +50,68 @@ export const matrix = colors.map(color => {
   })
 })
 
-const $ = elf('plan98-palette')
+const $ = elf('plan98-palette', {
+  rows: 8,
+  columns: 16,
+  instances: {},
+})
+
+const manualNotes = {}
+
+function maybe(id, value, note) {
+  if(manualNotes[note]) return
+  if(value === 1) {
+    yes(id, note)
+  } else {
+    no(id, note)
+  }
+}
+
+function yes(id, note) {
+  attack(note)
+  mark(id, note)
+}
+
+function no(id, note) {
+  release(note)
+  unmark(id, note)
+}
+
+function mark(id, note) {
+  updateNote({ id, note }, true)
+}
+
+function unmark(id, note) {
+  const { instances } = $.learn()
+  const { activeNotes } = instances[id]
+  if(activeNotes[note]) {
+    updateNote({ id, note }, false)
+  }
+}
+
+function noteFromGrid(column, row) {
+  const { columns } = $.learn()
+
+  const base = center + 30;
+
+  const evenColumn = column % 2 === 0
+
+  const aboveMedian = column > parseInt(columns / 2)
+  const octave = row * -12
+  const interval = (parseInt(column / 2) * 2)
+
+  return evenColumn
+    ? base + octave + interval
+    : base - 5 + octave + interval + (aboveMedian?12:0)
+}
+
+function colorFromGrid(column, row) {
+  return colors[column][row]
+}
 
 $.draw((target) => {
+  if(target.innerHTML) return
+  seed(target)
   return `
     <div class="colors">
       ${colors.map((color) => `
@@ -166,6 +228,133 @@ $.when('pointerup', '[data-midi]', (event) => {
   }
 })
 
+function slideLeft(id) {
+  const { instances } = $.learn()
+
+  if(!instances[id]) return
+  const { x } = instances[id]
+
+  if(x<=0) return
+  updateInstance({ id }, { x: x - 1 })
+}
+
+function slideRight(id) {
+  const { instances } = $.learn()
+  if(!instances[id]) return
+  const { x, columns } = instances[id]
+
+  if(x>=columns-1) return
+  updateInstance({ id }, { x: x + 1 })
+}
+
+function slideUp(id) {
+  const { instances } = $.learn()
+  if(!instances[id]) return
+  const { y } = instances[id]
+
+  if(y<=-spatialOffset) return
+  updateInstance({ id }, { y: y - 1 })
+}
+
+function slideDown(id) {
+  const { instances } = $.learn()
+  if(!instances[id]) return
+  const { y, rows } = instances[id]
+
+  if(y>=rows-1-spatialOffset) return
+  updateInstance({ id }, { y: y + 1 })
+}
+
+function seed(target) {
+  if(target.seeded) return
+  target.seeded = true
+  const { rows, columns } = $.learn() || {}
+
+  const boxes = {}
+  for(let y = 0; y < rows; y++) {
+    for(let x = 0; x < columns; x++) {
+      boxes[`${y}-${x}`] = {
+        x,
+        y
+      }
+    }
+  }
+
+  const id = target.id
+  requestAnimationFrame(() => {
+    updateInstance({ id }, {
+      root: 60,
+      x: Math.floor(columns/2),
+      y: Math.floor(rows/2) - spatialOffset,
+      id,
+      rows,
+      columns,
+      boxes,
+      activeNotes: {},
+    })
+  })
+}
+
+
+function updateInstance({ id }, payload) {
+  $.teach({...payload}, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          ...p
+        }
+      }
+    }
+  })
+}
+
+function updateBox({ x, y, id }, payload) {
+  $.teach({...payload}, (s, p) => {
+    const key = `${y}-${x}`
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          boxes: {
+            ...s.instances[id].boxes,
+            [key]: {
+              ...s.instances[id].boxes[key],
+              ...p
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+function updateNote({ id, note }, payload) {
+  $.teach(payload, (s, p) => {
+    return {
+      ...s,
+      instances: {
+        ...s.instances,
+        [id]: {
+          ...s.instances[id],
+          activeNotes: {
+            ...s.instances[id].activeNotes,
+            [note]: p
+          }
+        }
+      }
+    }
+  })
+}
+
+
+
+
+
 $.style(`
   & {
     position: relative;
@@ -233,3 +422,122 @@ $.style(`
     right: 0;
   }
 `)
+
+$.when('json-rpc', (event) => {
+  const { method, params } = event.detail
+  const { id } = event.target.closest($.link)
+  const { instances } = $.learn()
+
+  if(instances[id]) {
+    const { x, y } = instances[id]
+    const root = noteFromGrid(x, y+spatialOffset)
+
+    const more = { root, id }
+
+    if(musicRPC[method]) {
+      musicRPC[method]({...params, ...more})
+    }
+  }
+})
+
+$.when('click', '.note', (event) => {
+  const { x, y } = event.target.dataset
+  const { id } = event.target.closest($.link)
+  const note = noteFromGrid(parseInt(x), parseInt(y))
+  mark(id, note)
+  manualNotes[note] = true
+  attackRelease(note, () => {
+    unmark(id, note)
+    delete manualNotes[note]
+  })
+})
+
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const musicRPC = {
+  'a': (params) => {
+    const note = params.root
+
+    maybe(params.id, params.value, note)
+  },
+  'b': (params) => {
+    const note = params.root + 7
+    maybe(params.id, params.value, note)
+  },
+  'x': (params) => {
+    const note = params.root + 2
+    maybe(params.id, params.value, note)
+  },
+  'y': (params) => {
+    const note = params.root + 9
+    maybe(params.id, params.value, note)
+  },
+  'lb': (params) => {
+    const note = params.root + 4
+    maybe(params.id, params.value, note)
+  },
+  'rb': (params) => {
+    const note = params.root + 11
+    maybe(params.id, params.value, note)
+  },
+  'lt': (params) => {
+    const note = params.root + 6
+    maybe(params.id, params.value, note)
+  },
+  'rt': (params) => {
+    const note = params.root + 13
+    maybe(params.id, params.value, note)
+  },
+  'up': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('up', 150, () => {
+        slideUp(params.id)
+      })
+    }
+  },
+  'down': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('down', 150, () => {
+        slideDown(params.id)
+      })
+    }
+  },
+  'left': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('left', 150, () => {
+        slideLeft(params.id)
+      })
+    }
+  },
+  'right': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('right', 150, () => {
+        slideRight(params.id)
+      })
+    }
+  },
+}
