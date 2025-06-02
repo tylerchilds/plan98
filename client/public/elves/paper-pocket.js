@@ -111,6 +111,10 @@ export const systemMenu = {
         url: '/app/final-boss'
       },
       {
+        label: 'GDC 2025',
+        url: '/app/gdc-2025'
+      },
+      {
         label: 'Jam Session',
         url: '/app/paper-pocket?rom=jam-session'
       },

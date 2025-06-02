@@ -5,12 +5,11 @@ import {
   attackRelease,
   getNoteDuration
 } from './paper-pocket.js'
-import { colors as paletteColors, light, matrix } from './plan98-palette.js'
 
 import * as Tone from 'tone@next'
 import Color from "colorjs.io"
 
-const $ = elf('final-boss', {
+const $ = elf('gdc-2025', {
   activeNotes: [],
   colors: [],
   root: 60,
@@ -20,44 +19,53 @@ const $ = elf('final-boss', {
   consent: false
 })
 
+const lightnessStops = [
+  [5, 25],
+  [20, 40],
+  [35, 55],
+  [50, 70],
+  [65, 85],
+  [80, 100],
+  [95, 115]
+]
+
 const initialColors = recalculate()
 $.teach({ colors: initialColors, colorVariables: print(initialColors) })
 
 function print(colors) {
-  return colors.flatMap(x => x).map(({ value }) => `
+  return colors.flatMap(x => x).map(({ name, value }) => `
     ${name}: ${value};
   `).join('')
 }
 
 function recalculate() {
-  const wheel = [...Array(12)].map(() => [])
-  const c = paletteColors
-  const l = light
-  const length = c.length * l.length
+  const { start, length, reverse } = $.learn()
 
-  for(let i = 0; i < length; i++) {
-    const x = i % c.length
-    const y = Math.floor(i / c.length)
+  const colors = [...Array(12)].map((_, hueIndex) => {
+    const hueFifths = mod(hueIndex * 7, 12)
+    const step = ((length / 12) * hueFifths)
+    const hue = reverse
+      ? start - step
+      : start + step
 
-    const data = matrix[mod(x, matrix.length)][y]
+    return lightnessStops.map(([l, c], i) => {
+      const name = `--wheel-${hueFifths}-${i}`
+      const value = new Color('lch', [l, c, hue])
+        .display()
+        .toString()
 
-    const wheelIndex = mod(i, wheel.length)
-    const hueFifths = mod(wheelIndex * 7, 12)
-    const name = `--wheel-${hueFifths}-${y}`
-
-    wheel[wheelIndex].push({
-      name,
-      value: data.rgba,
-      color: data.color,
-      light: data.light,
-      block: hueFifths,
-      inline: i
+      return {
+        name,
+        value,
+        block: hueFifths,
+        inline: i
+      }
     })
-  }
+  })
 
-  $.teach({ colorVariables: print(wheel) })
+  $.teach({ colorVariables: print(colors) })
 
-  return wheel
+  return colors
 }
 
 function mod(x, n) {
@@ -101,20 +109,17 @@ $.draw((target) => {
 
   const wheel = colors.map((lightness, i) => {
     const steps = lightness.map((x, ii) => {
-      const note = ((ii * 12) + mod(i, 12))
+      const note = ((ii * 12) + mod(i * 7, 12)) + 24
       return`
         <button
           class="step ${activeNotes.includes(note) ? 'active':''}"
           data-note="${note}"
-          data-color="${x.color}"
-          data-light="${x.light}"
-          style="background: ${x.value}">
-          <div class="active-indicator"></div>
+          style="background: var(${x.name})">
         </button>
       `
     }).join('')
     return `
-      <div class="group" style="transform: rotate(${i * 7 * 30}deg)">
+      <div class="group" style="transform: rotate(${i * 30}deg)">
         ${steps}
       </div>
     `
@@ -142,7 +147,7 @@ $.when('click', '.fake-button.bad', decline)
 
 $.when('pointerenter', '.step', (event) => {
   const { note } = event.target.dataset
-  attackRelease(note)
+  attack(note)
 })
 
 $.when('pointerleave', '.step', (event) => {
@@ -203,13 +208,13 @@ $.style(`
     position: absolute;
     inset: 0;
     margin: auto;
-    height: 100cqmin;
+    height: 50cqmin;
   }
   & .wheel {
     display: grid;
     grid-template-areas: "slot";
-    grid-template-rows: 50cqmin;
-    grid-template-columns: 34cqmin;
+    grid-template-rows: 25cqmin;
+    grid-template-columns: 17cqmin;
     place-content: start center;
     overflow: hidden;
   }
@@ -219,7 +224,7 @@ $.style(`
     transform-origin: bottom;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: repeat(11, 1fr);
+    grid-template-rows: repeat(7, 1fr);
     clip-path: polygon(10% 0%, 50% 100%, 90% 0%);
   }
   & .step {
@@ -227,21 +232,13 @@ $.style(`
     width: 100%;
     height: auto;
     opacity: 1;
-    position: relative;
-  }
-
-  & .step.active .active-indicator,
-  & .step:hover .active-indicator,
-  & .step:focus .active-indicator {
-    opacity: 1;
-  }
-
-  & .active-indicator {
-    opacity: 0;
     transition: opacity calc(1000ms / 8);
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(rgba(255,255,255,.5) 33%, transparent 33%, transparent 67%, rgba(0,0,0,.5) 67%);
+  }
+
+  & .step.active,
+  & .step:hover,
+  & .step:focus {
+    opacity: .1;
   }
 
   & .fake-overlay {
@@ -383,33 +380,29 @@ const minorScales = {
   '0011': [11, 14, 18], // b minor
 }
 
-const playing = {}
+let readyNotes = []
+function releaseAll() {
+  const { activeNotes } = $.learn()
+  readyNotes = []
+  activeNotes.map(release)
+  $.teach({ activeNotes: [] })
+}
+
 
 function queueAttack(shift, i) {
   const { root } = $.learn()
   const note = root + shift
+  readyNotes.push(note)
   setTimeout(() => {
-    if(!playing[note]) {
-      playing[note] = 0
+    if(readyNotes.includes(note)) {
+      attack(note)
+      $.teach(note, (state, payload) => {
+        return {
+          ...state,
+          activeNotes: [...state.activeNotes, payload]
+        }
+      })
     }
-    playing[note] += 1
-    attackRelease(note, () => {
-      playing[note] -= 1
-      if(!playing[note]) {
-        $.teach(note, (state, payload) => {
-          return {
-            ...state,
-            activeNotes: [...state.activeNotes].filter(x => x !== payload)
-          }
-        })
-      }
-    }, '4m')
-    $.teach(note, (state, payload) => {
-      return {
-        ...state,
-        activeNotes: [...state.activeNotes, payload]
-      }
-    })
   }, i * Tone.Time(getNoteDuration()).toMilliseconds())
 }
 
@@ -446,6 +439,7 @@ const musicRPC = {
         const cache = strings.slice(0,5).join('')
         if(upCache === cache) return
         upCache = cache
+        releaseAll()
 
         const key = strings.slice(0,4).join('')
         if(strings[4] === 1) {
@@ -460,6 +454,7 @@ const musicRPC = {
       })
     } else {
       if(upCache) {
+        releaseAll()
         upCache = null
       }
     }
@@ -470,6 +465,7 @@ const musicRPC = {
         const cache = strings.slice(0,5).join('')
         if(downCache === cache) return
         downCache = cache
+        releaseAll()
 
         const key = strings.slice(0,4).join('')
         if(strings[4] === 1) {
@@ -484,6 +480,7 @@ const musicRPC = {
       })
     } else {
       if(downCache) {
+        releaseAll()
         downCache = null
       }
     }
@@ -514,25 +511,40 @@ const musicRPC = {
   },
 }
 
-let nextRhythm = 1
-const algoRhythm = [1,5,7,9]
-
 function slideLeft() {
   const { root } = $.learn()
 
-  const nextRoot = root - algoRhythm[nextRhythm]
-  nextRhythm = mod(nextRhythm - 1, algoRhythm.length)
+  const nextRoot = root - 1
 
-  if(nextRoot < 0) return
+  if(nextRoot < 24) return
   $.teach({ root: nextRoot })
 }
 
 function slideRight() {
   const { root } = $.learn()
-  const nextRoot = root + algoRhythm[nextRhythm]
-  nextRhythm = mod(nextRhythm - 1, algoRhythm.length)
-  if(nextRoot>127) return
+  const nextRoot = root + 1
+  if(nextRoot>96) return
   $.teach({ root: nextRoot })
+}
+
+function octaveDown() {
+  const { root } = $.learn()
+  const nextRoot = root - 12
+  if(nextRoot<24) {
+    $.teach({ root: 24 })
+  } else {
+    $.teach({ root: nextRoot })
+  }
+}
+
+function octaveUp() {
+  const { root } = $.learn()
+  const nextRoot = root + 12
+  if(nextRoot>96) {
+    $.teach({ root: 96 })
+  } else {
+    $.teach({ root: nextRoot })
+  }
 }
 
 const consentCache = {}
