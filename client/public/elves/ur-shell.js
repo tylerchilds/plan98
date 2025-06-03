@@ -657,9 +657,10 @@ async function execute(message) {
   }
 
   const [command, ...args] = message.split(' ')
-  if(commands[command]) {
+  const program = commands[command] || commands[command.toLowerCase()]
+  if(program) {
     try {
-      const result = commands[command].apply($, args)
+      const result = program.apply($, args)
       $.teach({ body: result || 'Success!', author: 'assistant' }, mergeMessage)
     } catch(e) {
       $.teach({ body: `Error. Inspect Logs.<br><a href="${window.location.origin + window.location.pathname}?q=${message}&debug=true">Reload in debug mode</a>`, author: 'assistant' }, mergeMessage)

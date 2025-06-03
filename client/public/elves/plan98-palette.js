@@ -7,7 +7,7 @@ import {
 } from './paper-pocket.js'
 
 const center = 60
-const spatialOffset = 1
+const spatialOffset = 0
 const midiRange = [...new Array(128)].map((x, i) => i)
 
 export const colors = [
@@ -90,19 +90,8 @@ function unmark(id, note) {
 }
 
 function noteFromGrid(column, row) {
-  const { columns } = $.learn()
-
-  const base = center + 30;
-
-  const evenColumn = column % 2 === 0
-
-  const aboveMedian = column > parseInt(columns / 2)
-  const octave = row * -12
-  const interval = (parseInt(column / 2) * 2)
-
-  return evenColumn
-    ? base + octave + interval
-    : base - 5 + octave + interval + (aboveMedian?12:0)
+  const { rows } = $.learn()
+  return column * rows + row
 }
 
 function colorFromGrid(column, row) {
@@ -127,6 +116,46 @@ $.draw((target) => {
       ${midiRange.map(renderNote).join('')}
     </div>
   `
+}, {
+  afterUpdate(target) {
+    const { instances } = $.learn()
+    const { x, y, activeNotes } = instances[target.id] || {activeNotes:{}}
+
+    {
+      if(target.lastX !== x || target.lastY !== y) {
+        target.lastX = x
+        target.lastY = y
+        let active = target.querySelector('.tabs .root-note')
+        if(active) {
+          active.classList.remove('root-note')
+        }
+
+        active = target.querySelector(`.tabs [data-x="${x}"][data-y="${y}"]`)
+
+        if(active) {
+          active.classList.add('root-note')
+        }
+      }
+    }
+
+    {
+      const activeTabs = [...target.querySelectorAll('.tabs .playing')]
+
+      const leaving = activeTabs
+        .filter(x => !activeNotes[x.dataset.midi])
+      const entering = Object.keys(activeNotes)
+        .filter(x => activeNotes[x])
+        .map(x => target.querySelector(`[data-midi="${x}"]`))
+
+      if(leaving.length > 0) {
+        leaving.map(x => x.classList.remove('playing'))
+      }
+
+      if(entering.length > 0) {
+        [...entering].map(x => x.classList.add('playing'))
+      }
+    }
+  }
 })
 
 function mod(x, n) {
@@ -134,25 +163,34 @@ function mod(x, n) {
 }
 
 function renderNote(midi, i) {
+  const { rows, columns } = $.learn()
   const color = colors[mod(i, colors.length)]
   const topping = light[mod(Math.floor(i / colors.length), light.length)]
+  const x = Math.floor(i / rows)
+  const y = mod(i, rows)
   return `
-    <button aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}"><span>${midi}</span></button>
+    <button data-x="${x}" data-y="${y}" aria-label="${midi}" data-midi="${midi}" data-color="${color}" data-topping="${topping}"><span>${midi}</span></button>
   `
 }
 
 function queueAttack(event) {
   event.preventDefault()
   const { midi } = event.target.dataset
+  const { id } = event.target.closest($.link)
   attack(midi)
 
-  setTimeout(() => release(midi), 5000)
+  setTimeout(() => {
+    release(midi)
+    unmark(id, midi)
+  }, 5000)
 }
 
 function queueRelease (event) {
   event.preventDefault()
   const { midi } = event.target.dataset
+  const { id } = event.target.closest($.link)
   release(midi)
+  unmark(id, midi)
 }
 
 function mixColors(color1, color2) {
@@ -284,8 +322,8 @@ function seed(target) {
   requestAnimationFrame(() => {
     updateInstance({ id }, {
       root: 60,
-      x: Math.floor(columns/2),
-      y: Math.floor(rows/2) - spatialOffset,
+      x: Math.floor(columns/2) - 1,
+      y: Math.floor(rows/2),
       id,
       rows,
       columns,
@@ -421,6 +459,22 @@ $.style(`
     bottom: 0;
     right: 0;
   }
+
+  & .tabs .root-note {
+    opacity: 1;
+  }
+
+  & .tabs .playing {
+    opacity: 1;
+  }
+
+  & .tabs .playing::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(rgba(255,255,255,.5) 33%, transparent 33%, transparent 67%, rgba(0,0,0,.5) 67%);
+  }
 `)
 
 $.when('json-rpc', (event) => {
@@ -430,7 +484,8 @@ $.when('json-rpc', (event) => {
 
   if(instances[id]) {
     const { x, y } = instances[id]
-    const root = noteFromGrid(x, y+spatialOffset)
+    const root = noteFromGrid(x, y)
+    console.log(root)
 
     const more = { root, id }
 
