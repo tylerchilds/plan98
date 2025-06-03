@@ -461,7 +461,7 @@ $.style(`
   }
 
   & .tabs .root-note {
-    opacity: 1;
+    /*opacity: 1;*/
   }
 
   & .tabs .playing {
