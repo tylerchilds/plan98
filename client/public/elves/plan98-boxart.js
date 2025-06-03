@@ -30,7 +30,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/ur-shell?command=color'
+    self.location.href = '/app/ur-shell?rom=sketch-pad'
     return
   }
 
@@ -164,7 +164,7 @@ function diffuse(event) {
 }
 
 function start(event) {
-  self.location.href = '/app/ur-shell?command=color'
+  self.location.href = '/app/ur-shell?rom=sketch-pad'
 }
 
 $.style(`

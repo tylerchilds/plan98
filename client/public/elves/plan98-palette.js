@@ -259,7 +259,14 @@ $.when('pointerup', '[data-midi]', (event) => {
   if(activeMidi === midi) {
     release(midi)
     const { topping, color } = event.target.dataset
-    setTheme(mixColors(topping, color))
+    const newColor = mixColors(topping, color)
+    setTheme(newColor)
+
+    const root = event.target.closest($.link)
+    root.dispatchEvent(new CustomEvent('input', {
+      detail: { color: newColor }
+    }))
+
     if(target.getAttribute('escape') !== 'disabled') {
       document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
     }

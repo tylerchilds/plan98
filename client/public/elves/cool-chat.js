@@ -206,6 +206,9 @@ $.draw(target => {
             <button class="room-select ${currentRoom === x ? 'active':''}" data-value="${rooms[x]}" >${rooms[x]}</button>
           `
         }).join('')}
+        <button class="room-select" data-help>
+          More Help
+        </button>
       </div>
       <div class="chat-area">
         <div class="scroll-back">
@@ -336,6 +339,11 @@ function mount(target) {
   const { currentRoom } = $.learn()
   joinRoom(currentRoom)
 }
+
+$.when('click', '[data-help]', function (event) {
+  window.location.href = "/cdn/sillyz.computer/index.md"
+})
+
 
 $.when('click', '[data-logout]', () => {
   hideModal()

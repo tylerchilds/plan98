@@ -180,6 +180,10 @@ const commands = {
     loadModule('<plan98-palette')
     return 'Success!'
   },
+  'draw': () => {
+    window.location.href = '/app/sketch-pad'
+    return 'Success!'
+  },
   'sillyz': () => {
     loadPath('/app/sillyz-computer')
     return 'Success!'
@@ -409,6 +413,9 @@ exit
 
 color
   launch the color and sound palette
+
+draw
+  launch the drawing app
 
 journal
   launch the journal app
@@ -672,7 +679,7 @@ async function execute(message) {
   askLLM(message)
 }
 
-function loadPath(message) {
+export function loadPath(message) {
   // add some hype to our scene
   showModal(`<iframe src="${message}"></iframe>`, {
     blockExit: true,
@@ -685,7 +692,7 @@ function loadPath(message) {
 const elements = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr"
 
 
-async function loadModule(message) {
+export async function loadModule(message) {
   const [firstLine, ...lines] = message.split('\n')
 
   const elf = firstLine.slice(1)

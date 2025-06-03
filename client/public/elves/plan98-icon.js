@@ -119,5 +119,6 @@ $.style(`
     width: 1px;
     height: 1px;
     background-color: #E83FB8;
+    border-radius: 100%;
   }
 `)
