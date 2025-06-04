@@ -96,7 +96,7 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
-          <button data-stroke-color>Color</button>
+          <button data-stroke-color><span class="color-sample"></span>Color</button>
           <button data-drawer="size">Size</button>
           <div data-pocket="size">
             ${thicknoids.map(x => `
@@ -571,6 +571,15 @@ $.style(`
 
   &[data-overlay="color"] .drop-down {
     display: none;
+  }
+
+  & .color-sample {
+    width: .85rem;
+    height: .85rem;
+    background: var(--active-color, saddlebrown);
+    border-radius: 100%;
+    display: inline-block;
+    margin-right: .5rem;
   }
 `)
 
