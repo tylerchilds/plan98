@@ -37,6 +37,7 @@ const eventTypes = {
   journal: 'journal',
   tommi: 'tommi',
   instrument: 'instrument',
+  sketch: 'sketch',
   gallery: 'gallery',
   photo: 'photo',
   archive: 'archive',
@@ -49,6 +50,7 @@ const views = {
   [eventTypes.journal]: eventTypes.journal,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.instrument]: eventTypes.instrument,
+  [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.photo]: eventTypes.photo,
   [eventTypes.archive]: eventTypes.archive,
@@ -98,7 +100,10 @@ const schemas = {
     ...timeFields(),
     type: eventTypes.instrument,
   },
-
+  [eventTypes.sketch]: {
+    ...timeFields(),
+    type: eventTypes.sketch,
+  },
   [eventTypes.journal]: {
     ...timeFields(),
     type: eventTypes.journal,
@@ -1146,48 +1151,44 @@ $.when('click', '[data-past-toggle]', (event) => {
 $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
 })
+
+export function save(draft, context) {
+  const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
+  const timestamp = now.toJSON()
+  let path = `/${timestamp}.json`
+
+  if(context) {
+    path = context.path
+  }
+
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+
+  // Attempt to upload to server
+  fetch(`/private/time-machine${path}`, {
+      method: 'POST',
+      body: JSON.stringify(draft),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${authorization}`
+      }
+  }).then(response => {
+    if (!response.ok) {
+      // Explicitly throw for non-200 responses
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    fate()
+  }).catch(error => {
+    console.warn(error);
+  });
+}
+
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
   // Get current date and time for filename
   const { draft, context } = $.learn()
 
   if(draft) {
-    const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
-    const timestamp = now.toJSON()
-    let path = `/${timestamp}.json`
-
-    if(context) {
-      path = context.path
-    }
-
-    const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
-    // Attempt to upload to server
-    fetch(`/private/time-machine${path}`, {
-        method: 'POST',
-        body: JSON.stringify(draft),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Basic ${authorization}`
-        }
-    }).then(response => {
-      if (!response.ok) {
-        // Explicitly throw for non-200 responses
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      fate()
-    }).catch(error => {
-      console.warn('Server upload failed, falling back to download', error);
-
-      // Fallback: create a download link
-      const link = document.createElement('a');
-      link.download = `${timestamp}.jpg`;
-      link.href = dataURL;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-
+    save(draft, context)
     hideModal()
     toast('Created!', { type: 'success' })
     $.teach({ draft: newDraft(draft.type), content: null })

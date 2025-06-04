@@ -288,6 +288,10 @@ async function router(request, context) {
       return handleCameraRollSave(request)
     }
 
+    if(pathname.startsWith('/private/sketch-pad')) {
+      return handleSketchPadSave(request)
+    }
+
     if(pathname.startsWith('/private/time-machine')) {
       return handleTimeMachineSave(request)
     }
@@ -606,6 +610,29 @@ async function handleCameraRollSave(request) {
     return new Response('Error saving image', { status: 500 });
   }
 }
+
+async function handleSketchPadSave(request) {
+  try {
+    const { pathname, host, search } = new URL(request.url);
+    const segments = pathname.split('/')
+    console.log({ segments })
+    const shortPath = segments.slice(0, -1).join('/')
+    console.log({ shortPath })
+    await Deno.mkdir(`./client/` + shortPath, { recursive: true });
+
+    // Read the request body (image data)
+    const imageBuffer = await request.arrayBuffer();
+
+    // Write the file
+    await Deno.writeFile(`./client${pathname}`, new Uint8Array(imageBuffer));
+
+    return new Response('Image saved successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error saving sketch pad image:', error);
+    return new Response('Error saving image', { status: 500 });
+  }
+}
+
 
 
 const byPath = (x) => x.path

@@ -1,5 +1,7 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
+import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
+import { save } from './time-machine.js'
 
 let lineWidth = 0
 let isMousedown = false
@@ -110,7 +112,7 @@ function mount(target) {
             Help
           </button>
           <button data-download>Download</button>
-          <!--<button data-save>Save</button>-->
+          <button data-save>Save</button>
           <!--<button data-save-as>Save As</button>-->
           <button data-new>New</button>
         </div>
@@ -205,7 +207,54 @@ $.when('click', '[data-journal]', function  (event) {
   window.location.href = '/app/time-machine'
 })
 
+$.when('click', '[data-save]', function (event) {
+  const { canvas } = engine(event.target)
+  // Get current date and time for filename
+  const now = new Date();
+  const timestamp = now.toJSON()
 
+  // Convert canvas to data URL with JPEG format
+  const dataURL = canvas.toDataURL('image/jpeg');
+
+  const byteCharacters = atob(dataURL.split(',')[1]);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+  const blob = new Blob([byteArray], { type: 'image/jpeg' });
+
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+
+  // Attempt to upload to server
+  fetch(`/private/${$.link}/${timestamp}.jpg`, {
+      method: 'POST',
+      body: blob,
+      headers: {
+        'Content-Type': 'image/jpeg',
+        "Authorization": `Basic ${authorization}`
+      }
+  }).then(response => {
+    if (!response.ok) {
+      // Explicitly throw for non-200 responses
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    toast('Saved!', { type: 'success' })
+  }).catch(error => {
+    console.warn('Server upload failed, falling back to download', error);
+
+    // Fallback: create a download link
+    const link = document.createElement('a');
+    link.download = `${timestamp}.jpg`;
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  $.teach({ activeMenu: null })
+})
 
 $.when('click', '[data-new]', function (event) {
   strokeHistory = []
@@ -379,15 +428,20 @@ const paneByTarget = (target) => {
 
 
 function setState(tray, payload) {
-  $.teach(payload, function merge(state) {
-    return {
-      ...state,
-      [tray]: {
-        ...state[tray],
-        ...payload
-      }
-    }
+  $.teach(payload, {
+    mergeHandler: mergeByTray,
+    parameters: [tray]
   })
+}
+
+function mergeByTray(state) {
+  return {
+    ...state,
+    [tray]: {
+      ...state[tray],
+      ...payload
+    }
+  }
 }
 
 $.when('mousedown', '.tray-title-bar', grab)
