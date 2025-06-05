@@ -59,13 +59,14 @@ const views = {
 }
 
 function timeFields() {
+  const now = new Date();
   return {
-    year: today.getFullYear(),
-    month: today.getMonth(),
-    day: today.getDate(),
-    hour: today.getHours(),
-    minute: today.getMinutes(),
-    second: today.getSeconds(),
+    year: now.getFullYear(),
+    month: now.getMonth(),
+    day: now.getDate(),
+    hour: now.getHours(),
+    minute: now.getMinutes(),
+    second: now.getSeconds(),
   }
 }
 
@@ -103,6 +104,7 @@ const schemas = {
   [eventTypes.sketch]: {
     ...timeFields(),
     type: eventTypes.sketch,
+    title: null,
   },
   [eventTypes.journal]: {
     ...timeFields(),
@@ -1092,6 +1094,18 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.sketch]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event" data-show="${eventTypes.sketch}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <img src="${data.src}" alt="${data.title}">
+      </button>
+    `
+  },
   [eventTypes.archive]: function (event) {
     const data = {
       ...schemas[views.archive],
@@ -1152,11 +1166,20 @@ $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
 })
 
+
+export function saveSketch(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.sketch,
+  }, context)
+}
+
 export function save(draft, context) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
   const timestamp = now.toJSON()
   let path = `/${timestamp}.json`
-
   if(context) {
     path = context.path
   }

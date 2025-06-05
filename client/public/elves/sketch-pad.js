@@ -1,7 +1,7 @@
 import elf from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
-import { save } from './time-machine.js'
+import { saveSketch } from './time-machine.js'
 
 let lineWidth = 0
 let isMousedown = false
@@ -226,8 +226,10 @@ $.when('click', '[data-save]', function (event) {
 
   const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
 
+  const src = `/private/${$.link}/${timestamp}.jpg`
+
   // Attempt to upload to server
-  fetch(`/private/${$.link}/${timestamp}.jpg`, {
+  fetch(src, {
       method: 'POST',
       body: blob,
       headers: {
@@ -239,6 +241,8 @@ $.when('click', '[data-save]', function (event) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    saveSketch({ src })
 
     toast('Saved!', { type: 'success' })
   }).catch(error => {
@@ -264,9 +268,15 @@ $.when('click', '[data-new]', function (event) {
 
 $.when('click', '[data-download]', function (event) {
   const { canvas } = engine(event.target)
-  
-  const data = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-  window.location.href = data
+  const now = new Date();
+  const timestamp = now.toJSON()
+  const dataURL = canvas.toDataURL('image/jpeg');
+  const link = document.createElement('a');
+  link.download = `${timestamp}.jpg`;
+  link.href = dataURL;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
   $.teach({ activeMenu: null })
 })
 
