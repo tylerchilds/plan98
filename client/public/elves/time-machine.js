@@ -697,6 +697,77 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.sketch]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.sketch],
+      ...event.data,
+    }
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="photo-well">
+              <img src="${x.src}" />
+              <div class="title">${escapeHyperText(x.title)}</div>
+            </div>
+            <div class="draft-footer">
+              ${stamp(x)}
+            </div>
+          </form>
+
+        </div>
+      </div>
+    `
+  },
+  [views.photo]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.photo],
+      ...event.data,
+    }
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="photo-well">
+              <img src="${x.src}" />
+              <div class="title">${escapeHyperText(x.title)}</div>
+            </div>
+            <div class="draft-footer">
+              ${stamp(x)}
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+
+
   [views.tommi]: (target) => {
     const { space, time } = target.dataset
 
@@ -1106,6 +1177,19 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.photo]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event" data-show="${eventTypes.photo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <img src="${data.src}" alt="${data.title}">
+      </button>
+    `
+  },
+
   [eventTypes.archive]: function (event) {
     const data = {
       ...schemas[views.archive],
@@ -1166,6 +1250,14 @@ $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
 })
 
+export function savePhoto(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.photo,
+  }, context)
+}
 
 export function saveSketch(draft, context) {
   save({
@@ -1417,6 +1509,30 @@ $.style(`
   & .raw-json {
     white-space: preserve;
     padding: .5rem;
+  }
+
+  & .photo-well {
+    overflow: hidden;
+    text-align: center;
+    background: black;
+    display: grid;
+    place-content: center;
+    position: relative;
+  }
+
+  & .photo-well .title {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    padding: .5rem;
+    color: white;
+    background: linear-gradient(transparent, rgba(0,0,0,.85));
+    text-align: left;
+    text-shadow:
+      0 0 3px rgba(0,0,0,.15),
+      0 0 2px rgba(0,0,0,.25),
+      1px 1px rgba(0,0,0,.45);
   }
 
   & .text-well {

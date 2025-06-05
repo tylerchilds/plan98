@@ -2,6 +2,7 @@ import elf from '@silly/elf'
 // To use Html5Qrcode (more info below)
 import {Html5Qrcode} from "html5-qrcode";
 import { systemMenu, getTheme } from './paper-pocket.js'
+import { savePhoto } from './time-machine.js'
 
 const initial = {
   startX: null,
@@ -1537,8 +1538,10 @@ $.when('click', '[data-snap]', (event) => {
 
   const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
 
+  const src = `/private/camera-roll/${timestamp}.jpg`
+
   // Attempt to upload to server
-  fetch(`/private/camera-roll/${timestamp}.jpg`, {
+  fetch(src, {
       method: 'POST',
       body: blob,
       headers: {
@@ -1550,6 +1553,8 @@ $.when('click', '[data-snap]', (event) => {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+
+    savePhoto({ src })
   }).catch(error => {
     console.warn('Server upload failed, falling back to download', error);
 
