@@ -15,7 +15,7 @@ const $ = elf('sketch-pad', {
   background: 'lemonchiffon',
   color: 'saddlebrown',
   drawer: 'size',
-  thickness: 1
+  thickness: 4
 })
 
 function engine(target) {

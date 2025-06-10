@@ -928,6 +928,7 @@ sillonious-brand > xml-html {
   color: rgba(255,255,255,.85);
   padding: .5rem;
   font-weight: bold;
+  position: relative;
 }
 
 .standard-button:hover,
@@ -967,6 +968,20 @@ sillonious-brand > xml-html {
   color: rgba(0,0,0,.85);
   padding: .5rem;
 }
+
+
+.old-button::after,
+.standard-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10000;
+  background: var(--root-theme, transparent);
+  mix-blend-mode: soft-light;
+  opacity: .75;
+}
+
 
 .old-button,
 .old-button:link,

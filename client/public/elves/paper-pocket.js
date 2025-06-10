@@ -48,6 +48,24 @@ export const systemMenu = {
       },
     ]
   },
+  deeplinks: {
+    label: "Deeplinks",
+    list: [
+      {
+        label: 'Tamashika',
+        url: 'steam://rungameid/2996080'
+      },
+      {
+        label: 'Tamashika (Demo)',
+        url: 'steam://rungameid/3788220'
+      },
+      {
+        label: 'Stardew Valley',
+        url: 'steam://rungameid/413150'
+      },
+    ]
+  },
+
   office: {
     label: "Office",
     list: [
@@ -1038,7 +1056,7 @@ function settingsMenu() {
           </div>
         </div>
         <div class="selectbox-selector">
-          <div class="old-button selectbox-view">
+          <div class="standard-button selectbox-view">
             ${value}
           </div>
           <select data-settings name="${key}">
@@ -1204,7 +1222,7 @@ export function ai(operation) {
                 ${list.map(({ label, url }) => {
                   return `
                     <div class="mega-footer-item">
-                      <a class="mega-footer-link" href="${url}" target="_blank">
+                      <a class="mega-footer-link standard-button" href="${url}" target="_blank">
                         ${label}
                       </a>
                     </div>
@@ -2358,13 +2376,9 @@ $.style(`
   }
 
   & .settings-card {
-    backdrop-filter: blur(10px);
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding: .5rem;
-    background: lemonchiffon;
-    box-shadow: 1px 1px 1px 1px rgba(0,0,0,.1);
   }
 
   & .settings-human {
@@ -2378,15 +2392,8 @@ $.style(`
   & .selectbox-description {
   }
 
-
   & .selectbox-selector {
     position: relative;
-    display: inline-block;
-    color: rgba(0,0,0,.65);
-    margin-top: auto;
-    background: rgba(255,255,255,.85);
-    border-radius: .5rem;
-    max-width: 100%;
   }
 
   & .selectbox-view {
@@ -2421,4 +2428,16 @@ function fakeScrollDown(container, scrollStep=10) {
 $.when('click', '[data-escape]', () => {
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
 })
+
+
+export function replaceElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.replaceWith(newNode)
+  })
+}
+
 

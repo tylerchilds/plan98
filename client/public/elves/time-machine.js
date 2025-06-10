@@ -1,7 +1,7 @@
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
-import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
+import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
 
 const bucketKeys = {
@@ -1000,17 +1000,13 @@ $.draw((target)=> {
   query(target)
   const { now, pastEnabled, buckets } = $.learn()
   return `
-    <div class="banner-bar">
-      <div class="left-bar">
-        <button class="standard-button -outlined" data-new>
-          New
-        </button>
-      </div>
-      <div class="right-area">
-        <button class="standard-button" data-wallet>
-          You
-        </button>
-      </div>
+    <button class="create-item" data-new>
+      <sl-icon name="plus-lg"></sl-icon>
+    </button>
+    <div class="wallet-header">
+      <button data-wallet>
+        <plan98-icon></plan98-icon>
+      </button>
     </div>
 
     <div class="past-toggle-wrapper">
@@ -1020,8 +1016,10 @@ $.draw((target)=> {
     </div>
     <div class="the-past ${pastEnabled?'visible':'hidden'}">
       <div class="era">
-        <div class="era-label">
-          Past
+        <div class="era-header">
+          <div class="era-label">
+            Past
+          </div>
         </div>
         <div class="era-events">
           ${renderBucket(bucketKeys.past)}
@@ -1029,16 +1027,20 @@ $.draw((target)=> {
       </div>
 
       <div class="era">
-        <div class="era-label">
-          Last Week
+        <div class="era-header">
+          <div class="era-label">
+            Last Week
+          </div>
         </div>
         <div class="era-events">
           ${renderBucket(bucketKeys.lastWeek)}
         </div>
       </div>
       <div class="era">
-        <div class="era-label">
-          Yesterday
+        <div class="era-header">
+          <div class="era-label">
+            Yesterday
+          </div>
         </div>
         <div class="era-events">
           ${renderBucket(bucketKeys.yesterday)}
@@ -1056,8 +1058,10 @@ $.draw((target)=> {
     </div>
 
     <div class="era">
-      <div class="era-label">
-        Today
+      <div class="era-header">
+        <div class="era-label">
+          Today
+        </div>
       </div>
       <div class="era-events">
         ${renderBucket(bucketKeys.today)}
@@ -1065,8 +1069,10 @@ $.draw((target)=> {
     </div>
 
     <div class="era">
-      <div class="era-label">
-        Tomorrow
+      <div class="era-header">
+        <div class="era-label">
+          Tomorrow
+        </div>
       </div>
       <div class="era-events">
         ${renderBucket(bucketKeys.tomorrow)}
@@ -1074,17 +1080,20 @@ $.draw((target)=> {
     </div>
 
     <div class="era">
-      <div class="era-label">
-        This Week
-      </div>
+      <div class="era-header">
+        <div class="era-label">
+          This Week
+        </div>
       <div class="era-events">
         ${renderBucket(bucketKeys.thisWeek)}
       </div>
     </div>
 
     <div class="era">
-      <div class="era-label">
-        Next Week
+      <div class="era-header">
+        <div class="era-label">
+          Next Week
+        </div>
       </div>
       <div class="era-events">
         ${renderBucket(bucketKeys.nextWeek)}
@@ -1092,8 +1101,10 @@ $.draw((target)=> {
     </div>
 
     <div class="era">
-      <div class="era-label">
-        Future
+      <div class="era-header">
+        <div class="era-label">
+          Future
+        </div>
       </div>
       <div class="era-events">
         ${renderBucket(bucketKeys.future)}
@@ -1132,6 +1143,11 @@ $.draw((target)=> {
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
+    }
+
+    {
+      replaceElves(target, 'plan98-icon')
+      replaceElves(target, 'sl-icon')
     }
   }
 })
@@ -1349,6 +1365,22 @@ $.style(`
     height: 100%;
     overflow: auto;
     background: white;
+    position: relative;
+  }
+
+  & .wallet-header {
+    text-align: center;
+  }
+
+  & [data-wallet] {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  & [data-wallet]:hover,
+  & [data-wallet]:focus, {
+    background: transparent;
   }
 
   & .edit-banner {
@@ -1362,40 +1394,60 @@ $.style(`
     display: none;
   }
 
-  & .banner-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: .5rem;
-    position: sticky;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: rgba(255,255,255,.85);
-    backdrop-filter: blur(10px);
-  }
-
-  & .left-area {
-
-  }
-
-  & .right-area {
-    text-align: right;
-  }
-
   & .era {
     padding: 1rem;
   }
 
-  & .era-label {
+  & .create-item {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    font-size: 2rem;
+    border: none;
+    border-radius: 3px;
+    border: 1px solid var(--root-theme, mediumseagreen);
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    padding: .5rem;
+    font-weight: bold;
+    border-radius: 100%;
+    display: grid;
+    place-content: center;
+  }
+
+  & .create-item:hover,
+  & .create-item:focus {
+    color: rgba(255,255,255,.85);
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
+      var(--root-theme, mediumseagreen);
+  }
+
+  & .era-header {
+    position: sticky;
+    top: 0;
+    padding: .5rem;
     text-align: center;
+  }
+
+  & .era-label {
     color: rgba(0,0,0,.65);
+    background: rgba(255,255,255,.65);
     text-transform: uppercase;
     font-weight: 100;
     margin-bottom: 1rem;
+    margin: 0 auto;
+    padding: .5rem 1rem;
+    border-radius: 1rem;
+    display: inline-block;
   }
 
   & .era-events {
-    max-width: 55ch;
+    max-width: 90ch;
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -1443,15 +1495,28 @@ $.style(`
     text-decoration: underline;
     border: none;
     cursor: pointer;
+    padding: .5rem 1rem;
   }
 
   & .overlay-background {
-    padding: 2rem 0 0;
+    padding: 1rem 0 0;
     height: 100%;
     background: rgba(0,0,0,.15);
     backdrop-filter: blur(2px);
     overflow: hidden;
   }
+
+  .overlay-background::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 10000;
+    background: var(--root-theme, transparent);
+    mix-blend-mode: soft-light;
+    opacity: .75;
+  }
+
 
   & .draft-header {
     background: rgba(0,0,0,.1);
@@ -1487,7 +1552,7 @@ $.style(`
   & .form-card {
     display: grid;
     background: white;
-    max-width: 55ch;
+    max-width: 90ch;
     margin: 0 auto;
 
     box-shadow:
