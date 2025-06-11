@@ -1,8 +1,8 @@
-<plan98-icon style="width: 128px; height: 128px;"></plan98-icon>
+<action-script class="discreet" data-action="launch" data-script="/public/elves/plan98-synthia.js"><plan98-icon style="width: 128px; height: 128px;"></plan98-icon></action-script>
 
-# About
+# Plan98
 
-The graphic below is an operating system.
+The graphic below is an operating system. So is the graphic above. Which came first, the circle or the square?
 
 <iframe src="/app/ur-shell?command=color" style="max-width: 100%; aspect-ratio: 4 / 3;"></iframe>
 
@@ -11,22 +11,24 @@ The graphic below is an operating system.
 For a quick overview of the modalities and their intersections,
 
 * [Computer Modalities](/cdn/sillyz.computer/en-us/six-modalities/index.md)
-* [Résumé](/?world=tylerchilds.com)
+
+# Vision
+
+Make personal computers practical from a playful, professional, and portable perspectives.
+
+Like pulling paper from your pocket at pertinent points.
 
 # About
+
+Ty is passionate about the intersection of fun and practical technological applications.
 
 * [email@tychi.me](mailto:email@tychi.me)
 * California, USA
 * Software Architect and Clown
+* [Résumé](/?world=tylerchilds.com)
 
-Ty loves technology and is passionate about the intersection of fun and practical applications, especially as it pertains to educational accessibility.
 
-Below is a reverse chronological summary of Plan98 (codename for the Operating System), why, and software he architected and implemented at various levels of the computer stack.
-
-# Vision
-
-Make computers fun and practical from a personal, professional, and portable perspective, as easy as pulling paper from your pocket.
-
+Below is a reverse chronological summary of Plan98 software he architected.
 Competitive Landscape Analysis
 ---
 
@@ -71,25 +73,17 @@ Apple, Microsoft, Amazon, Google, Meta are vertically integrated flywheels.
 * Communities build loyalty
 * Loyalty drives Life-Time Value
 
-That's win, win (7 wins total)
-
-In traditional business, value is adding 40% commission on top of any good or service.
-
 By owning the hardware, the languages, the libraries, the products, the communities, the loyalty, the life-time value-- you become a flywheel.
 
 Meta is the youngest company to join these ranks and their status is precisely a result in that they do not depend on the other four-- by getting into hardware, they maintained full-grip on their flywheel.
 
-I chose to build a flywheel without the other five.
-
 # Pretext
 
-Below you will find software component parts. To know how to use them or compose them, you'll want to deal with me directly.
+Below you will find software component parts. Contact me for questions.
 
 [email@tychi.me](mailto:email@tychi.me)
 
-Some are languages, some are libraries, some are products, some connect to communities.
-
-In general, the applications and components higher up depend on assumptions and implementations further down.
+In general, the applications and components recently depend on assumptions and implementations further back in time.
 
 2025
 ===

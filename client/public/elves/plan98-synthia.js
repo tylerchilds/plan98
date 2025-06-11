@@ -29,6 +29,15 @@ document.addEventListener('pointerdown', function(event) {
   }
 });
 
+document.addEventListener('pointerup', function(event) {
+  const { selectedText, activated, visible } = $.learn()
+  if(activated && selectedText) {
+    $.teach({ activated: true })
+  }
+});
+
+
+
 const context = document.createElement('plan98-synthia')
 document.body.appendChild(context)
 
@@ -72,7 +81,7 @@ $.when('click', 'paper-pocket [data-search]', (event) => {
   const config = getSearchEngineConfig()
 
   if(config.url) {
-    self.open(config.url + search, '_blank')
+    self.open(config.url + search)
   }
 })
 

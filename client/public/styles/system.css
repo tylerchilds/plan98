@@ -922,8 +922,8 @@ sillonious-brand > xml-html {
   border-radius: 3px;
   border: 1px solid var(--root-theme, mediumseagreen);
   background:
-    linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-    linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+    linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.45) 20%, rgba(0,0,0,.75)),
+    linear-gradient(-65deg, rgba(255,255,255,.5), rgba(255,255,255,.15)),
     var(--root-theme, mediumseagreen);
   color: rgba(255,255,255,.85);
   padding: .5rem;
@@ -1004,7 +1004,6 @@ sillonious-brand > xml-html {
 
 .old-button:active {
   text-decoration: none;
-  padding: .25rem;
   color: firebrick;
   background: rgba(0,0,0,.8);
   border-bottom-color: rgba(255,255,255,.5);
@@ -1069,7 +1068,6 @@ sillonious-brand > xml-html {
 
 .mega-footer-link:active {
   text-decoration: none;
-  padding: .25rem;
   background: rgba(0,0,0,.4);
   border-bottom-color: rgba(255,255,255,.5);
   border-right-color: rgba(255,255,255,.5);
@@ -1118,6 +1116,10 @@ sillonious-brand > xml-html {
 
 .av-title {
   font-weight: 1000;
+}
+
+.av.-chip .av-title {
+  font-weight: 100;
 }
 
 .av-description {

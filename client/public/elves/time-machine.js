@@ -267,7 +267,7 @@ const creationForms = {
         <textarea
           name="text"
           data-bind="draft"
-          placeholder="Say it, don't spray it."
+          placeholder="This is a space for you."
           value="${escapeHyperText(draft.text)}"
         ></textarea>
       </div>
@@ -1003,114 +1003,115 @@ $.draw((target)=> {
     <button class="create-item" data-new>
       <sl-icon name="plus-lg"></sl-icon>
     </button>
-    <div class="wallet-header">
-      <button data-wallet>
-        <plan98-icon></plan98-icon>
-      </button>
-    </div>
+    <div class="time-feed-nom-nom-nom-nom">
+      <div class="wallet-header">
+        <button data-wallet>
+          <plan98-icon></plan98-icon>
+        </button>
+      </div>
 
-    <div class="past-toggle-wrapper">
-      <button class="link-button" data-past-toggle>
-        ${pastEnabled?'Hide Past':'View Past'}
-      </button>
-    </div>
-    <div class="the-past ${pastEnabled?'visible':'hidden'}">
+      <div class="past-toggle-wrapper">
+        <button class="link-button" data-past-toggle>
+          ${pastEnabled?'Hide Past':'View Past'}
+        </button>
+      </div>
+      <div class="the-past ${pastEnabled?'visible':'hidden'}">
+        <div class="era">
+          <div class="era-header">
+            <div class="era-label">
+              Past
+            </div>
+          </div>
+          <div class="era-events">
+            ${renderBucket(bucketKeys.past)}
+          </div>
+        </div>
+
+        <div class="era">
+          <div class="era-header">
+            <div class="era-label">
+              Last Week
+            </div>
+          </div>
+          <div class="era-events">
+            ${renderBucket(bucketKeys.lastWeek)}
+          </div>
+        </div>
+        <div class="era">
+          <div class="era-header">
+            <div class="era-label">
+              Yesterday
+            </div>
+          </div>
+          <div class="era-events">
+            ${renderBucket(bucketKeys.yesterday)}
+          </div>
+        </div>
+      </div>
+
+      <div class="now">
+        <div class="now-date">
+          ${formatDate(now)}
+        </div>
+        <div class="now-time">
+          ${formatTime(now)}
+        </div>
+      </div>
+
       <div class="era">
         <div class="era-header">
           <div class="era-label">
-            Past
+            Today
           </div>
         </div>
         <div class="era-events">
-          ${renderBucket(bucketKeys.past)}
+          ${renderBucket(bucketKeys.today)}
         </div>
       </div>
 
       <div class="era">
         <div class="era-header">
           <div class="era-label">
-            Last Week
+            Tomorrow
           </div>
         </div>
         <div class="era-events">
-          ${renderBucket(bucketKeys.lastWeek)}
+          ${renderBucket(bucketKeys.tomorrow)}
         </div>
       </div>
+
       <div class="era">
         <div class="era-header">
           <div class="era-label">
-            Yesterday
+            This Week
+          </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.thisWeek)}
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-header">
+          <div class="era-label">
+            Next Week
           </div>
         </div>
         <div class="era-events">
-          ${renderBucket(bucketKeys.yesterday)}
+          ${renderBucket(bucketKeys.nextWeek)}
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-header">
+          <div class="era-label">
+            Future
+          </div>
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.future)}
         </div>
       </div>
     </div>
-
-    <div class="now">
-      <div class="now-date">
-        ${formatDate(now)}
-      </div>
-      <div class="now-time">
-        ${formatTime(now)}
-      </div>
-    </div>
-
-    <div class="era">
-      <div class="era-header">
-        <div class="era-label">
-          Today
-        </div>
-      </div>
-      <div class="era-events">
-        ${renderBucket(bucketKeys.today)}
-      </div>
-    </div>
-
-    <div class="era">
-      <div class="era-header">
-        <div class="era-label">
-          Tomorrow
-        </div>
-      </div>
-      <div class="era-events">
-        ${renderBucket(bucketKeys.tomorrow)}
-      </div>
-    </div>
-
-    <div class="era">
-      <div class="era-header">
-        <div class="era-label">
-          This Week
-        </div>
-      <div class="era-events">
-        ${renderBucket(bucketKeys.thisWeek)}
-      </div>
-    </div>
-
-    <div class="era">
-      <div class="era-header">
-        <div class="era-label">
-          Next Week
-        </div>
-      </div>
-      <div class="era-events">
-        ${renderBucket(bucketKeys.nextWeek)}
-      </div>
-    </div>
-
-    <div class="era">
-      <div class="era-header">
-        <div class="era-label">
-          Future
-        </div>
-      </div>
-      <div class="era-events">
-        ${renderBucket(bucketKeys.future)}
-      </div>
-    </div>
-
   `
 }, {
   beforeUpdate(target) {
@@ -1363,9 +1364,14 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background: white;
     position: relative;
+  }
+
+  & .time-feed-nom-nom-nom-nom {
+    height: 100%;
+    overflow: auto;
   }
 
   & .wallet-header {
@@ -1399,7 +1405,7 @@ $.style(`
   }
 
   & .create-item {
-    position: fixed;
+    position: absolute;
     bottom: 2rem;
     right: 2rem;
     font-size: 2rem;

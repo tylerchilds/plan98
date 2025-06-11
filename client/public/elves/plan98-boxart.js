@@ -1,5 +1,6 @@
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
+import { launch } from './plan98-synthia.js'
 
 /*
  <blockquote>
@@ -42,6 +43,10 @@ function readyCountdown() {
   }, 1000)
 }
 
+$.when('click', '[data-wallet]', (event) => {
+  launch()
+})
+
 $.draw((target) => {
   countdown(target)
   const title = target.getAttribute('title') || 'Plan98'
@@ -50,6 +55,11 @@ $.draw((target) => {
   if(target.innerHTML) return
 
   return `
+    <div class="wallet-header">
+      <button data-wallet>
+        <plan98-icon></plan98-icon>
+      </button>
+    </div>
     <div style="display: grid; height: 100%; position: relative;">
       <footer>
         <div>
@@ -779,6 +789,25 @@ $.style(`
   & [data-diffuse]:focus {
     background: rgba(0,0,0,.85);
     color: rgba(255,255,255,.85);
+  }
+  & .wallet-header {
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+  }
+
+  & [data-wallet] {
+    border: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  & [data-wallet]:hover,
+  & [data-wallet]:focus, {
+    background: transparent;
   }
 `)
 

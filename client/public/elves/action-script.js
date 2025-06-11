@@ -192,6 +192,15 @@ $.style(`
   &.money button:hover {
     background-color: rebeccapurple;
   }
+
+  &.discreet button,
+  &.discreet button:hover,
+  &.discreet button:focus {
+    border-radius: 0 !important;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+  }
 `)
 
 

@@ -108,6 +108,10 @@ export const systemMenu = {
     label: "Art",
     list: [
       {
+        label: 'Sketch Pad',
+        url: '/app/sketch-pad'
+      },
+      {
         label: 'Chalk Board',
         url: '/app/chalk-board'
       },
@@ -259,6 +263,9 @@ const searchEngineMap = {
   yahoo: {
     url: 'https://search.yahoo.com/search?p='
   },
+  jeeves: {
+    url: 'https://www.ask.com/web?q='
+  }
 }
 Tone.Transport.start();
 
@@ -1123,6 +1130,20 @@ export function ai(operation) {
       </div>
 
       <div class="repl-grid">
+        ${Object.keys(searchEngineMap).map(key => {
+          return `
+            <div class="av -chip">
+              <div class="av-cta">
+                <a class="av-link-button standard-button -smol" target="_blank" href="${searchEngineMap[key].url}${encodeURIComponent(operation)}">
+                  Ask
+                </a>
+              </div>
+              <div class="av-copy">
+                <div class="av-title">${key}</div>
+              </div>
+            </div>
+          `
+        }).join('')}
         <div class="av -chip">
           <div class="av-cta">
             <a class="av-link-button standard-button -smol" target="_blank" href="/app/js-repl?q=${encodeURIComponent(operation)}">
@@ -1146,7 +1167,6 @@ export function ai(operation) {
           </div>
         </div>
       </div>
-
 
       <div class="llm-grid">
         <div class="av -snapshot">
@@ -1222,7 +1242,7 @@ export function ai(operation) {
                 ${list.map(({ label, url }) => {
                   return `
                     <div class="mega-footer-item">
-                      <a class="mega-footer-link standard-button" href="${url}" target="_blank">
+                      <a class="mega-footer-link standard-button" href="${url}">
                         ${label}
                       </a>
                     </div>
@@ -1238,7 +1258,6 @@ export function ai(operation) {
       <div class="settings-footer">
         ${settingsMenu()}
       </div>
-
       <div class="av -banner">
         <div class="av-copy">
           <div class="av-title">Final Boss</div>
@@ -2362,10 +2381,10 @@ $.style(`
   }
 
   & .settings-footer {
-    padding: .5rem;
+    padding: 1rem .5rem;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: .5rem;
+    gap: 1rem;
   }
 
   & .synthia-header {
