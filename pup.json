@@ -10,6 +10,11 @@
       "id": "plan98-start-multiplayer",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",
       "autostart": true
+    },
+    {
+      "id": "plan98-start-was",
+      "cmd": "cd server/was/wallet-attached-storage-server-main && npm run dev",
+      "autostart": true
     }
   ]
 }
