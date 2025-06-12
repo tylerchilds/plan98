@@ -13,7 +13,7 @@
     },
     {
       "id": "plan98-start-was",
-      "cmd": "cd server/was/wallet-attached-storage-server-main && npm run dev",
+      "cmd": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE npm run dev",
       "autostart": true
     }
   ]

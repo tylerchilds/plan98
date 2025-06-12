@@ -84,6 +84,8 @@ async function page() {
           ${safeEnv('PLAN98_PASSWORD')}
           ${safeEnv('PLAN98_API_HOST')}
 
+          ${safeEnv('PLAN98_WAS_HOST')}
+
           ${safeEnv('PLAN98_LAN')}
           ${safeEnv('PLAN98_REALTIME')}
 
