@@ -15,14 +15,15 @@ document.addEventListener("selectionchange", () => {
     return;
   }
 
-  const range = selection.getRangeAt(0);
-  const rect = range.getBoundingClientRect();
-
-  $.teach({ synthia: { prompt: selectedText }, visible: !!selectedText, rect: { ...rect } })
+  try {
+    $.teach({ synthia: { prompt: selectedText }, visible: !!selectedText })
+  } catch(e) {
+    console.warn(e)
+  }
 });
 
 document.addEventListener('pointerdown', function(event) {
-  const { rect, activated, visible } = $.learn()
+  const { activated, visible } = $.learn()
   if(!activated && !visible) return
   if (!event.target.closest('plan98-synthia .synthia, plan98-synthia .result')) {
     $.teach({ visible: false, activated: false, synthia: {} })
@@ -42,7 +43,7 @@ const context = document.createElement('plan98-synthia')
 document.body.appendChild(context)
 
 $.draw(() => {
-  const { rect, visible, activated, synthia } = $.learn()
+  const { visible, activated, synthia } = $.learn()
   const operation = escapeHyperText(synthia.prompt || '')
   return visible ? `
     <div class="activator-bar">
