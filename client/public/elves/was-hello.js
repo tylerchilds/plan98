@@ -3,21 +3,33 @@ import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import elf from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 
-async function publish() {
+const credentials = localStorage.getItem('was/signer')
+
+let signer
+if(credentials) {
+  signer = await Ed25519Signer.fromJSON(credentials)
+} else {
+  // This signer can create cryptographic signatures
+  signer = await Ed25519Signer.generate()
+  localStorage.setItem('was/signer', JSON.stringify(signer.toJSON()))
+}
+
+async function publish(spaceId) {
   const { host } = $.learn()
   const storageId = host
   const storageUrl = new URL(storageId)
   const storage = new StorageClient(storageUrl)
 
-  // This signer can create cryptographic signatures
-  const signer = await Ed25519Signer.generate()
-
   // create the space with signer so all requests get signed by it
-  const space = storage.space({ signer })
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${spaceId}`
+  })
 
 
   const spaceObject = {
     controller: signer.controller,
+
   }
   const spaceObjectBlob = new Blob(
     [JSON.stringify(spaceObject)],
@@ -95,7 +107,7 @@ $.draw((target) => {
 
 $.when('submit', '[action="test-publish"]', async (event) => {
   event.preventDefault()
-  publish()
+  publish(event.target.closest($.link).id)
 })
 
 $.when('input', '[data-bind]', (event) => {
