@@ -3,18 +3,55 @@ import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 
-const credentials = localStorage.getItem('was/signer')
+const $ = elf('was-hello', {
+  loading: true,
+  host: plan98.env.PLAN98_WAS_HOST,
+  home: ''
+})
 
 let signer
-if(credentials) {
-  signer = await Ed25519Signer.fromJSON(credentials)
-} else {
-  // This signer can create cryptographic signatures
-  signer = await Ed25519Signer.generate()
-  localStorage.setItem('was/signer', JSON.stringify(signer.toJSON()))
+async function init(target) {
+  if(target.initialized) return
+  target.initialized = true
+
+  const { host } = $.learn()
+  const credentials = localStorage.getItem('was/signer')
+
+  if(credentials) {
+    signer = await Ed25519Signer.fromJSON(credentials)
+  } else {
+    // This signer can create cryptographic signatures
+    signer = await Ed25519Signer.generate()
+    localStorage.setItem('was/signer', JSON.stringify(signer.toJSON()))
+  }
+  const storageId = host
+  const storageUrl = new URL(storageId)
+  const storage = new StorageClient(storageUrl)
+
+  // create the space with signer so all requests get signed by it
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${target.id}`
+  })
+
+  const resource = space.resource(target.getAttribute('src') || '/tmp')
+  const response = await resource.get()
+    .then(res => {
+      if(res.status === 200) {
+        const indexUrl = new URL(resource.path, storageUrl)
+        $.teach({ home: indexUrl.toString() })
+      }
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
+      toast(e.message, { type: 'error' })
+    })
+
+  $.teach({ loading: false })
 }
 
-async function publish(spaceId) {
+async function publish(spaceId, src) {
   const { host } = $.learn()
   const storageId = host
   const storageUrl = new URL(storageId)
@@ -25,7 +62,6 @@ async function publish(spaceId) {
     signer,
     id: `urn:uuid:${spaceId}`
   })
-
 
   const spaceObject = {
     controller: signer.controller,
@@ -63,9 +99,9 @@ async function publish(spaceId) {
 
   if(!responseToGetSpace) return
 
-  const index = space.resource('/hello/world')
+  const resource = space.resource(src)
   const blobForIndex = new Blob(['<!doctype html><h1>Hello WAS!</h1>'], { type: 'text/html' })
-  const responseToPutIndex = await index.put(blobForIndex, { signer })
+  const responseToPutIndex = await resource.put(blobForIndex, { signer })
     .then(res => {
       console.debug({ res })
       toast(JSON.stringify(res), { type: 'success' })
@@ -78,18 +114,22 @@ async function publish(spaceId) {
 
   if(!responseToPutIndex) return
 
-  const indexUrl = new URL(index.path, storageUrl)
+  const indexUrl = new URL(resource.path, storageUrl)
   $.teach({ home: indexUrl.toString() })
 }
 
-
-const $ = elf('was-hello', {
-  host: plan98.env.PLAN98_WAS_HOST,
-  home: ''
-})
-
 $.draw((target) => {
-  const { host, home } = $.learn()
+  init(target)
+  const { host, home, loading } = $.learn()
+
+  if(loading) {
+    return `
+      <div style="width: 100%; height: 100%;">
+        <flying-disk></flying-disk>
+      </div>
+    `
+  }
+
   return home ? `
     <iframe src="${home}"></iframe>
   ` : `
@@ -106,8 +146,9 @@ $.draw((target) => {
 })
 
 $.when('submit', '[action="test-publish"]', async (event) => {
+  const root = event.target.closest($.link)
   event.preventDefault()
-  publish(event.target.closest($.link).id)
+  publish(root.id, root.getAttribute('src') || '/tmp')
 })
 
 $.when('input', '[data-bind]', (event) => {
@@ -126,6 +167,11 @@ $.style(`
     width: 100%;
     height: 100%;
     border: 0;
+  }
+
+  & flying-disk {
+    width: 100%;
+    height: 100%;
   }
 `)
 
