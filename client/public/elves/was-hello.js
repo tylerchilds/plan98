@@ -1,6 +1,6 @@
 import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 
 const credentials = localStorage.getItem('was/signer')
