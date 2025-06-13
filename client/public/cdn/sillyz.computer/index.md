@@ -8,15 +8,15 @@ The graphic below is an operating system. So is the graphic above. Which came fi
 
 [View Full Screen](/app/ur-shell?command=color)
 
-For a quick overview of the modalities and their intersections,
-
-* [Computer Modalities](/cdn/sillyz.computer/en-us/six-modalities/index.md)
+For a quick overview of the modalities and their intersections dig into the [Computer Modalities](/cdn/sillyz.computer/en-us/six-modalities/index.md)
 
 # Vision
 
 Make personal computers practical from a playful, professional, and portable perspectives.
 
 Like pulling paper from your pocket at pertinent points.
+
+For a concrete demonstration, highlight any text on this page and then engage the all seeing eye.
 
 # About
 
@@ -28,8 +28,7 @@ Ty is passionate about the intersection of fun and practical technological appli
 * [Résumé](/?world=tylerchilds.com)
 
 
-Below is a reverse chronological summary of Plan98 software he architected.
-Competitive Landscape Analysis
+Competitive Landscape
 ---
 
 Market Cap
