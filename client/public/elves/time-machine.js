@@ -257,13 +257,24 @@ function timeMachine(spaceKey, timeKey, file) {
   }
 }
 
+function editBanner(context) {
+  return `
+    <div class="edit-banner">${context?`
+      <button data-destroy="${context.path}">
+        Delete
+      </button>
+      <span class="edit-label">
+        Editing: ${context.name}
+      </span>
+    `:''}</div>
+  `
+}
+
 const creationForms = {
   [eventTypes.journal]: function(draft) {
     return `
       <div class="tychi-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        ${editBanner(this)}
         <textarea
           name="text"
           data-bind="draft"
@@ -275,10 +286,9 @@ const creationForms = {
   },
   [eventTypes.photo]: function(draft) {
     return `
+      ${editBanner(this)}
       <div class="photo-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        <plan98-camera></plan98-camera>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
@@ -291,12 +301,28 @@ const creationForms = {
       </div>
     `
   },
+  [eventTypes.sketch]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="photo-form">
+        <sketch-pad></sketch-pad>
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+        </label>
+
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+        </label>
+      </div>
+    `
+  },
+
   [eventTypes.gallery]: function(draft) {
     return `
       <div class="gallery-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        ${editBanner(this)}
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
@@ -318,9 +344,7 @@ const creationForms = {
 
     return `
       <div class="tommi-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        ${editBanner(this)}
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
@@ -378,9 +402,7 @@ const creationForms = {
 
     return `
       <div class="archive-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        ${editBanner(this)}
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
@@ -438,9 +460,7 @@ const creationForms = {
 
     return `
       <div class="dwebcamp-form">
-        <div class="edit-banner">${this?`
-          Editing: ${this.name}
-        `:''}</div>
+        ${editBanner(this)}
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
@@ -503,7 +523,6 @@ const creationForms = {
       </div>
     `
   }
-
 }
 
 function renderCreationFormByType(draft) {
@@ -1147,6 +1166,8 @@ $.draw((target)=> {
     }
 
     {
+      replaceElves(target, 'sketch-pad')
+      replaceElves(target, 'plan98-camera')
       replaceElves(target, 'plan98-icon')
       replaceElves(target, 'sl-icon')
     }
@@ -1314,6 +1335,11 @@ export function save(draft, context) {
   });
 }
 
+$.when('click', '[data-destroy]', async (event) => {
+  event.preventDefault()
+  const { destroy } = event.target.dataset
+})
+
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
   // Get current date and time for filename
@@ -1367,6 +1393,7 @@ $.style(`
     overflow: hidden;
     background: white;
     position: relative;
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
   }
 
   & .time-feed-nom-nom-nom-nom {
@@ -1376,6 +1403,23 @@ $.style(`
 
   & .wallet-header {
     text-align: center;
+  }
+
+  & [data-destroy] {
+    cursor: pointer;
+    color: firebrick;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+
+  & [data-destroy] {
+    background: firebrick;
+    color: white;
+    display: grid;
+    padding: .25rem;
+    line-height: 1;
+    place-content: center;
   }
 
   & [data-wallet] {
@@ -1394,6 +1438,15 @@ $.style(`
     color: saddlebrown;
     text-align: right;
     padding: .5rem;
+    grid-template-columns: auto 1fr;
+    display: grid;
+    gap: .5rem;
+    overflow: hidden;
+  }
+
+  & .edit-label {
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   & .edit-banner:empty {
@@ -1422,6 +1475,7 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-content: center;
+    z-index: 2;
   }
 
   & .create-item:hover,
@@ -1441,14 +1495,13 @@ $.style(`
   }
 
   & .era-label {
-    color: rgba(0,0,0,.65);
-    background: rgba(255,255,255,.65);
+    color: white;
+    background: black;
     text-transform: uppercase;
     font-weight: 100;
     margin-bottom: 1rem;
     margin: 0 auto;
     padding: .5rem 1rem;
-    border-radius: 1rem;
     display: inline-block;
   }
 
@@ -1511,18 +1564,6 @@ $.style(`
     backdrop-filter: blur(2px);
     overflow: hidden;
   }
-
-  .overlay-background::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 10000;
-    background: var(--root-theme, transparent);
-    mix-blend-mode: soft-light;
-    opacity: .75;
-  }
-
 
   & .draft-header {
     background: rgba(0,0,0,.1);
@@ -1606,6 +1647,10 @@ $.style(`
       1px 1px rgba(0,0,0,.45);
   }
 
+  & [data-destroy] {
+    display: grid;
+  }
+
   & .text-well {
     width: 100%;
     height: 100%;
@@ -1659,28 +1704,34 @@ $.style(`
     gap: .25rem;
   }
 
+  & .event {
+    text-align: center;
+  }
 
   & .view-event {
-    border: none;
+    border: 2px solid black;
+    background: linear-gradient(rgba(0,0,0,.05),rgba(0,0,0,.05)), white;
     border-radius: 3px;
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.95) 20%, rgba(255,255,255,.85)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
     color: rgba(0,0,0,.85);
     padding: .5rem;
     font-weight: bold;
-    display: block;
+    display: inline-block;
     text-align: left;
+  }
+
+  & .view-event img,
+  & .view-event video {
+    max-width: 300px;
+    max-height: 300px;
     width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
   }
 
   & .view-event:hover,
   & .view-event:focus {
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.75) 20%, rgba(255,255,255,.45)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
+    background: var(--root-theme, mediumseagreen);
     color: rgba(0,0,0,.85);
   }
 

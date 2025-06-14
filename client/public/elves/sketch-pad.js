@@ -180,10 +180,12 @@ $.when('input', 'plan98-palette', (event) => {
 })
 
 $.when('click', '[data-help]', function  (event) {
+  event.preventDefault()
   window.location.href = "/app/cool-chat"
 })
 
 $.when('click', '[data-stroke-color]', function  (event) {
+  event.preventDefault()
   $.teach({
     overlay: overlays.color,
     activeMenu: null,
@@ -191,11 +193,13 @@ $.when('click', '[data-stroke-color]', function  (event) {
 })
 
 $.when('click', '[data-drawer]', function  (event) {
+  event.preventDefault()
   const { drawer } = event.target.dataset
   $.teach({ drawer: drawer === $.learn().drawer ?null:drawer })
 })
 
 $.when('click', '[data-thickness]', function  (event) {
+  event.preventDefault()
   $.teach({
     activeMenu: null,
     thickness: parseInt(event.target.dataset.thickness) || 1
@@ -204,10 +208,12 @@ $.when('click', '[data-thickness]', function  (event) {
 
 
 $.when('click', '[data-journal]', function  (event) {
+  event.preventDefault()
   window.location.href = '/app/time-machine'
 })
 
 $.when('click', '[data-save]', function (event) {
+  event.preventDefault()
   const { canvas } = engine(event.target)
   // Get current date and time for filename
   const now = new Date();
@@ -261,12 +267,14 @@ $.when('click', '[data-save]', function (event) {
 })
 
 $.when('click', '[data-new]', function (event) {
+  event.preventDefault()
   strokeHistory = []
   redraw(event)
   $.teach({ activeMenu: null })
 })
 
 $.when('click', '[data-download]', function (event) {
+  event.preventDefault()
   const { canvas } = engine(event.target)
   const now = new Date();
   const timestamp = now.toJSON()
@@ -285,6 +293,7 @@ $.when('click', '[data-download]', function (event) {
  * @return {void}
  */
 $.when('click', '[data-undo]', function undoDraw (event) {
+  event.preventDefault()
   if(strokeHistory.length === 0) {
     return
   }
@@ -314,6 +323,7 @@ function redraw(event) {
 }
 
 $.when('click', '[data-redo]', function redoDraw (event) {
+  event.preventDefault()
   if(strokeRevisory.length === 0) return
 
   const stroke = strokeRevisory.shift()
@@ -462,6 +472,7 @@ $.when('input', '.picker', setColor)
 $.when('click', '.tray-close', closeTray)
 
 function setColor(event) {
+  event.preventDefault()
   const { target } = event.target.dataset
   const { value } = event.target
 
@@ -470,6 +481,7 @@ function setColor(event) {
 }
 
 function closeTray(event) {
+  event.preventDefault()
   const { tray } = event.target.dataset
   setState(tray, { visible: false })
 }
@@ -657,6 +669,7 @@ $.when('pointerdown', '*', (event) => {
 })
 
 $.when('click', '[data-menu-target]', (event) => {
+  event.preventDefault()
   const { activeMenu } = $.learn()
   const { menuTarget } = event.target.dataset
   $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
