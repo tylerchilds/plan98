@@ -1030,7 +1030,7 @@ $.draw((target)=> {
       </div>
 
       <div class="past-toggle-wrapper">
-        <button class="link-button" data-past-toggle>
+        <button class="standard-button" data-past-toggle>
           ${pastEnabled?'Hide Past':'View Past'}
         </button>
       </div>
@@ -1335,10 +1335,29 @@ export function save(draft, context) {
   });
 }
 
-$.when('click', '[data-destroy]', async (event) => {
-  event.preventDefault()
-  const { destroy } = event.target.dataset
-})
+export function destroy(context) {
+  if(!context) return
+
+  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
+
+  // Attempt to upload to server
+  fetch(`/private/time-machine${context.path}`, {
+      method: 'DELETE',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Basic ${authorization}`
+      }
+  }).then(response => {
+    if (!response.ok) {
+      // Explicitly throw for non-200 responses
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    fate()
+  }).catch(error => {
+    console.warn(error);
+  });
+}
+
 
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
@@ -1354,6 +1373,18 @@ $.when('submit', '[action="post"]', async (event) => {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
 })
+
+$.when('click', '[data-destroy]', async (event) => {
+  event.preventDefault()
+  try {
+    destroy({ path: event.target.dataset.destroy })
+    hideModal()
+    toast('Destroyed!', { type: 'success' })
+  } catch(e) {
+    toast('Error!' + e.message, { type: 'error' })
+  }
+})
+
 
 $.when('click', '[data-view]', (event) => {
   event.preventDefault()
@@ -1492,6 +1523,7 @@ $.style(`
     top: 0;
     padding: .5rem;
     text-align: center;
+    z-index: 1;
   }
 
   & .era-label {
@@ -1709,14 +1741,16 @@ $.style(`
   }
 
   & .view-event {
-    border: 2px solid black;
-    background: linear-gradient(rgba(0,0,0,.05),rgba(0,0,0,.05)), white;
+    border: 1px solid black;
+    background: white;
     border-radius: 3px;
     color: rgba(0,0,0,.85);
     padding: .5rem;
     font-weight: bold;
     display: inline-block;
     text-align: left;
+    transform: scale(.95);
+    transition: transform ease-in-out 100ms;
   }
 
   & .view-event img,
@@ -1731,8 +1765,8 @@ $.style(`
 
   & .view-event:hover,
   & .view-event:focus {
-    background: var(--root-theme, mediumseagreen);
     color: rgba(0,0,0,.85);
+    transform: scale(1);
   }
 
   & .view-event[data-show="${eventTypes.journal}"] {

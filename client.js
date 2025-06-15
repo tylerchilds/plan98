@@ -272,6 +272,20 @@ async function router(request, context) {
   let file
   let statusCode = Status.Success
 
+  if(request.method === 'DELETE') {
+    if(pathname.startsWith('/private/camera-roll')) {
+      return handleCameraRollDestroy(request)
+    }
+
+    if(pathname.startsWith('/private/sketch-pad')) {
+      return handleSketchPadDestroy(request)
+    }
+
+    if(pathname.startsWith('/private/time-machine')) {
+      return handleTimeMachineDestroy(request)
+    }
+  }
+
   if(request.method === 'POST') {
 
     if(pathname === '/plan98/subscribe') {
@@ -635,7 +649,44 @@ async function handleSketchPadSave(request) {
   }
 }
 
+async function handleTimeMachineDestroy(request) {
+  try {
+    const { pathname } = new URL(request.url);
+    // Delete the file
+    await Deno.remove(`./client${pathname}`);
 
+    return new Response('Time machine log deleted successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error deleting time machine log:', error);
+    return new Response('Error saving time machine log', { status: 500 });
+  }
+}
+
+async function handleCameraRollDestroy(request) {
+  try {
+    const { pathname } = new URL(request.url);
+    // Delete the file
+    await Deno.remove(`./client${pathname}`);
+
+    return new Response('Picture deleted successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error deleting picturee:', error);
+    return new Response('Error deleting picture', { status: 500 });
+  }
+}
+
+async function handleSketchPadDestroy(request) {
+  try {
+    const { pathname } = new URL(request.url);
+    // Delete the file
+    await Deno.remove(`./client${pathname}`);
+
+    return new Response('Sketch deleted successfully', { status: 200 });
+  } catch (error) {
+    console.error('Error deleting sketch:', error);
+    return new Response('Error deleting sketch', { status: 500 });
+  }
+}
 
 const byPath = (x) => x.path
 const byName = (x) => x.name
