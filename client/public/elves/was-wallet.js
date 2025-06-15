@@ -60,7 +60,16 @@ function unshiftKey(state, payload) {
 $.when('click', '[data-select]', (event) => {
   const id = event.target.dataset.select
   $.teach({ activeKeyId: id })
+  $.teach(id, prioritizeKeyById)
 })
+
+function prioritizeKeyById(state, payload) {
+  const key = state.keys.find(x => x.id === payload)
+  return {
+    ...state,
+    keys: [key, ...state.keys.filter(x => x.id !== payload)]
+  }
+}
 
 $.style(`
   & {
