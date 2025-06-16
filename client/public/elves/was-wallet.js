@@ -1,6 +1,6 @@
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
-import elf from '@plan98/elf'
+import elf, { subscribe } from '@silly/elf'
 
 const bios = {
   'bluesky': '/app/blue-sky',
@@ -14,9 +14,53 @@ const bios = {
   'boxart': '/app/plan98-boxart',
 }
 
-const $ = elf('was-wallet', {
+const defaultState = {
   keycards: []
+}
+
+const link = 'was-wallet'
+
+const initialState = localStorage.getItem(link)
+  ? JSON.parse(localStorage.getItem(link))
+  : defaultState
+
+const $ = elf(link, initialState)
+
+const methods = {
+  importKeycard: 'import-keycard'
+}
+
+const methodHandlers = {
+  [methods.importKeycard]: (payload) => {
+    const { keycard } = payload.params
+    if(keycard) {
+      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+    }
+  }
+}
+
+function insertKeycard(state, payload) {
+  if(state.keycards.find(x => x.id === payload.id)) {
+    return pasteToKeycard(state, payload)
+  } else {
+    return unshiftKeycard(state, payload)
+  }
+}
+
+subscribe((link) => {
+  if(link === $.link) {
+    localStorage.setItem(`${$.link}`, JSON.stringify($.learn()))
+  }
 })
+
+export async function getSigner() {
+  const { keycards } = $.learn()
+
+  if(keycards.length === 0) {
+    return null
+  }
+  return await Ed25519Signer.fromJSON(JSON.stringify(keycards[0].asJSON))
+}
 
 async function newKeycard() {
   const id = self.crypto.randomUUID()
@@ -54,7 +98,7 @@ $.draw((target) => {
         <input data-bind=${editId} name="name" value="${escapeHyperText(active.name) || ''}" />
       </label>
       <label class="field">
-        <span class="label">src</span>
+        <span class="label">app</span>
         <select data-bind="${editId}" name="src">
           <option disabled>--Select--</option>
           ${Object.keys(bios).map((x) => `
@@ -123,7 +167,25 @@ $.draw((target) => {
       </div>
     </footer>
   `
+}, {
+  beforeUpdate(target) {
+    if(!target.initialized) {
+      target.initialized = true
+      const data = target.getAttribute('data')
+      if(data) {
+        const payload = JSON.parse(atob(data))
+        jsonRPC(payload)
+      }
+    }
+  }
 })
+
+function jsonRPC(payload) {
+  const handler = methodHandlers[payload.method]
+  if(handler) {
+    handler(payload)
+  }
+}
 
 function render(keycard) {
   const { activeKeycardId } = $.learn()
@@ -133,7 +195,9 @@ function render(keycard) {
         ${keycard.name}
       </span>
       <span class="keycard-id">${keycard.id.split('-').join('<br>')}</span>
-      <span></span>
+      <span class="keycard-src">
+        ${keycard.src}
+      </span>
     </button>
   `
 }
@@ -176,16 +240,28 @@ $.when('click', '[data-launch]', (event) => {
 })
 
 $.when('click', '[data-export]', (event) => {
+  const { keycards } = $.learn()
   const id = event.target.dataset.export
-  showModal(`
-    <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
-      <div style="padding: 51px; height: 100%; display: flex;">
-        <qr-code src="${window.location.origin}/app/hello-world" no-link="true" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+  const keycard = keycards.find(x => x.id === id)
+  if(keycard) {
+    const encoded = btoa(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method: methods.importKeycard,
+        params: { type: 'keycard', keycard }
+      })
+    )
+
+    showModal(`
+      <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
+        <div style="padding: 51px; height: 100%; display: flex;">
+          <qr-code src="${window.location.origin}/app/was-wallet?data=${encoded}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+        </div>
       </div>
-    </div>
-  `, {
-    blockExit: false
-  })
+    `, {
+      blockExit: false
+    })
+  }
 })
 
 $.when('click', '[data-remix]', (event) => {
@@ -348,4 +424,3 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
-
