@@ -10,6 +10,8 @@ const bios = {
   'gaming': '/app/couch-coop',
   'music': '/app/paper-pocket?headless=true',
   'shell': '/app/ur-shell',
+  'sketch': '/app/sketch-pad',
+  'script': '/app/hyper-script',
   'journal': '/app/time-machine',
   'boxart': '/app/plan98-boxart',
 }
@@ -19,9 +21,9 @@ const defaultState = {
 }
 
 const link = 'was-wallet'
-
-const initialState = localStorage.getItem(link)
-  ? JSON.parse(localStorage.getItem(link))
+const existingState = JSON.parse(localStorage.getItem(link))
+const initialState = existingState
+  ? existingState
   : defaultState
 
 const $ = elf(link, initialState)
@@ -62,7 +64,7 @@ export async function getSigner() {
   return await Ed25519Signer.fromJSON(JSON.stringify(keycards[0].asJSON))
 }
 
-async function newKeycard() {
+async function newKeycard(overrides={}) {
   const id = self.crypto.randomUUID()
   const signer = await Ed25519Signer.generate({ id })
   return {
@@ -70,7 +72,8 @@ async function newKeycard() {
     src: '/app/blue-sky',
     name: 'Keycard',
     asJSON: signer.toJSON(),
-    at: new Date().toJSON()
+    at: new Date().toJSON(),
+    ...overrides
   }
 }
 
@@ -176,6 +179,11 @@ $.draw((target) => {
         const payload = JSON.parse(atob(data))
         jsonRPC(payload)
       }
+
+      const { keycards } = $.learn()
+      if(keycards.length === 0) {
+        seed()
+      }
     }
   }
 })
@@ -185,6 +193,21 @@ function jsonRPC(payload) {
   if(handler) {
     handler(payload)
   }
+}
+
+async function seed() {
+  Promise.all([
+    newKeycard({ name: 'silly', src: '/app/sketch-pad' }),
+    newKeycard({ name: 'sally', src: '/app/time-machine' }),
+    newKeycard({ name: 'sully', src: '/app/couch-coop' }),
+    newKeycard({ name: 'shelly', src: '/app/ur-shell' }),
+    newKeycard({ name: 'sunny', src: '/app/paper-pocket?headless=true' }),
+    newKeycard({ name: 'wally', src: '/app/hyper-script' }),
+  ]).then(agents => {
+    agents.forEach(keycard => {
+      $.teach(keycard, pushKeycard)
+    })
+  })
 }
 
 function render(keycard) {
@@ -207,6 +230,13 @@ $.when('click', '[data-create]', async (event) => {
   $.teach(keycard, unshiftKeycard)
   $.teach({ activeKeycardId: keycard.id })
 })
+
+function pushKeycard(state, payload) {
+  return {
+    ...state,
+    keycards: [...state.keycards, payload]
+  }
+}
 
 function unshiftKeycard(state, payload) {
   return {

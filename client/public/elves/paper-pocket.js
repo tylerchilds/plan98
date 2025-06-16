@@ -19,6 +19,10 @@ export const systemMenu = {
     label: "Favorites",
     list: [
       {
+        label: 'Wallet',
+        url: '/app/was-wallet'
+      },
+      {
         label: 'Hyper Text',
         url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=silly-script'
       },

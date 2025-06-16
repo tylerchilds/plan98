@@ -108,6 +108,7 @@ function mount(target) {
           <button data-undo>Undo</button>
           <button data-redo>Redo</button>
           <button data-journal>Journal</button>
+          <button data-wallet>Wallet</button>
           <button data-help>
             Help
           </button>
@@ -211,6 +212,12 @@ $.when('click', '[data-journal]', function  (event) {
   event.preventDefault()
   window.location.href = '/app/time-machine'
 })
+
+$.when('click', '[data-wallet]', function  (event) {
+  event.preventDefault()
+  window.location.href = '/app/was-wallet'
+})
+
 
 $.when('click', '[data-save]', function (event) {
   event.preventDefault()
