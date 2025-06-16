@@ -1,6 +1,6 @@
 import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 
 const $ = elf('was-hello', {
@@ -13,6 +13,10 @@ let signer
 async function init(target) {
   if (target.initialized) return
   target.initialized = true
+
+  if(target.getAttribute('host')) {
+    $.teach({ host: target.getAttribute('host') })
+  }
 
   const { host } = $.learn()
   const credentials = localStorage.getItem('was/signer')
