@@ -8,7 +8,7 @@ const bios = {
   'mobile': '/app/mobile-device',
   'remote': '/app/remote-control',
   'gaming': '/app/couch-coop',
-  'music': '/app/paper-pocket&headless=true',
+  'music': '/app/paper-pocket?headless=true',
   'shell': '/app/ur-shell',
   'journal': '/app/time-machine',
   'boxart': '/app/plan98-boxart',
