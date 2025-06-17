@@ -81,7 +81,7 @@ export async function getSigner() {
 export function getStorage() {
   const { host, storageUrl } = $.learn()
 
-  return new StorageClient(storageUrl)
+  return new StorageClient(new URL(host))
 }
 
 async function newKeycard(overrides={}) {
@@ -112,14 +112,10 @@ async function provisionPlan98(signer, keycard) {
     id: `urn:uuid:${keycard.id}`
   })
 
-  console.log(signer.controller, signer.toJSON())
+  console.log(keycard.id, signer.controller, signer.toJSON())
 
-  const linkset = space.resource(`linkset`)
-  const ok = await space.get({ signer })
-  debugger
   const spaceObject = {
     controller: signer.controller,
-    link: linkset.path,
   }
   const spaceObjectBlob = new Blob(
     [JSON.stringify(spaceObject)],
@@ -299,17 +295,17 @@ $.draw((target) => {
 
       if(keycard) {
         const storage = getStorage()
-        const signer = getSigner()
-        const space = storage.space({
-          signer,
-          id: `urn:uuid:${keycard.id}`
-        })
+        const signer = getSigner().then(signer => {
+          const space = storage.space({
+            signer,
+            id: `urn:uuid:${keycard.id}`
+          })
 
-        /*
-        getPlan98Config({ space, signer }).then((config) => {
-          console.log({ config })
+          getPlan98Config({ space, signer }).then((config) => {
+            console.log({ config })
+          })
+
         })
-        */
       }
     }
   }
@@ -536,8 +532,9 @@ $.style(`
 
   & .keyring {
     padding: .5rem;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
     gap: .5rem;
     overflow: auto;
     place-items: center;
