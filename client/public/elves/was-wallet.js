@@ -115,7 +115,6 @@ async function provisionPlan98(signer, keycard) {
   console.log(signer.controller, signer.toJSON())
 
   const linkset = space.resource(`linkset`)
-  /*
   const ok = await space.get({ signer })
   debugger
   const spaceObject = {
@@ -144,7 +143,6 @@ async function provisionPlan98(signer, keycard) {
     }
   })
   if (!responseToPutSpace) return
-  */
   
   const responseToPutConfig = await putPlan98Config({space, signer}, keycard).catch(console.error)
 
