@@ -1,3 +1,4 @@
+import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
@@ -17,6 +18,8 @@ const bios = {
 }
 
 const defaultState = {
+  host: plan98.env.PLAN98_WAS_HOST,
+  storageUrl: new URL(plan98.env.PLAN98_WAS_HOST),
   keycards: []
 }
 
@@ -55,26 +58,130 @@ subscribe((link) => {
   }
 })
 
-export async function getSigner() {
+export function getKeycard() {
   const { keycards } = $.learn()
 
   if(keycards.length === 0) {
     return null
   }
-  return await Ed25519Signer.fromJSON(JSON.stringify(keycards[0].asJSON))
+
+  return keycards[0]
+}
+
+export async function getSigner() {
+  const keycard = getKeycard()
+
+  if(!keycard) {
+    return null
+  }
+
+  return await Ed25519Signer.fromJSON(JSON.stringify(keycard.asJSON))
+}
+
+export function getStorage() {
+  const { host, storageUrl } = $.learn()
+
+  return new StorageClient(storageUrl)
 }
 
 async function newKeycard(overrides={}) {
   const id = self.crypto.randomUUID()
-  const signer = await Ed25519Signer.generate({ id })
-  return {
+  const signer = await Ed25519Signer.generate()
+
+  const keycard = {
     id,
     src: '/app/blue-sky',
     name: 'Keycard',
-    asJSON: signer.toJSON(),
     at: new Date().toJSON(),
     ...overrides
   }
+
+  await provisionPlan98(signer, keycard).catch(console.error)
+
+  return {
+    ...keycard,
+    asJSON: signer.toJSON(),
+  }
+}
+
+async function provisionPlan98(signer, keycard) {
+  const storage = getStorage()
+
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+  console.log(signer.controller, signer.toJSON())
+
+  const linkset = space.resource(`linkset`)
+  /*
+  const ok = await space.get({ signer })
+  debugger
+  const spaceObject = {
+    controller: signer.controller,
+    link: linkset.path,
+  }
+  const spaceObjectBlob = new Blob(
+    [JSON.stringify(spaceObject)],
+    { type: 'application/json' },
+  )
+
+  // send PUT request to update the space
+  const responseToPutSpace = await space.put(spaceObjectBlob)
+    .then(res => {
+      console.debug({ res })
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
+    })
+
+  if (!responseToPutSpace.ok) throw new Error(
+    `Failed to put space: ${responseToPutSpace.status} ${responseToPutSpace.statusText}`, {
+    cause: {
+      responseToPutSpace
+    }
+  })
+  if (!responseToPutSpace) return
+  */
+  
+  const responseToPutConfig = await putPlan98Config({space, signer}, keycard).catch(console.error)
+
+  if (!responseToPutConfig.ok) throw new Error(`Failed to put config: ${responseToPutConfig.status} ${responseToPutConfig.statusText}`, {
+    cause: {
+      responseToPutConfig
+    }
+  })
+
+  if (!responseToPutConfig) return
+  const json = await getPlan98Config({space, signer}).catch(console.error)
+  console.log({json})
+}
+
+export async function putPlan98Config({ space, signer }, keycard) {
+  const config = space.resource('/.plan98/config.json')
+  const blobForConfig = new Blob([JSON.stringify(keycard)], { type: 'application/json' })
+  return await config.put(blobForConfig, { signer })
+    .then(res => {
+      console.debug({ res })
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
+    })
+}
+
+export async function getPlan98Config({space, signer}) {
+  const config = space.resource('/.plan98/config.json')
+
+  return await config.get({ signer })
+    .then(async res => {
+      return await res.json()
+    })
+    .catch(e => {
+      console.debug(e)
+    })
 }
 
 $.draw((target) => {
@@ -183,6 +290,28 @@ $.draw((target) => {
       const { keycards } = $.learn()
       if(keycards.length === 0) {
         seed()
+      }
+
+      if(target.getAttribute('host')) {
+        const host = target.getAttribute('host')
+        $.teach({ host, storageUrl: new URL(host) })
+      }
+
+      const keycard = getKeycard()
+
+      if(keycard) {
+        const storage = getStorage()
+        const signer = getSigner()
+        const space = storage.space({
+          signer,
+          id: `urn:uuid:${keycard.id}`
+        })
+
+        /*
+        getPlan98Config({ space, signer }).then((config) => {
+          console.log({ config })
+        })
+        */
       }
     }
   }
@@ -313,11 +442,23 @@ $.when('click', '[data-cancel]', (event) => {
   $.teach({ editId: null })
 })
 
-$.when('click', '[data-save]', (event) => {
+$.when('click', '[data-save]', async (event) => {
   const id = event.target.dataset.save
   $.teach({ editId: null })
   const claim = $.learn()[id]
   $.teach({ id, ...claim }, pasteToKeycard)
+
+  const keycard = $.learn().keycards.find(x => x.id === id)
+
+  if(keycard) {
+    const cleanKeycard = {
+      ...keycard
+    }
+
+    delete cleanKeycard.asJSON
+
+    const json = await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
+  }
 })
 
 function pasteToKeycard(state, payload) {
