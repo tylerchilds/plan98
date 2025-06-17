@@ -3,6 +3,15 @@ import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 
+const Types = {
+  File: {
+    type: 'File',
+  },
+  Directory: {
+    type: 'Directory',
+  },
+}
+
 const bios = {
   'bluesky': '/app/blue-sky',
   'desktop': '/app/door-man',
@@ -18,15 +27,13 @@ const bios = {
 }
 
 const defaultState = {
-  host: plan98.env.PLAN98_WAS_HOST,
-  storageUrl: new URL(plan98.env.PLAN98_WAS_HOST),
   keycards: []
 }
 
 const link = 'was-wallet'
 const existingState = JSON.parse(localStorage.getItem(link))
 const initialState = existingState
-  ? existingState
+  ? { ...defaultState, ...existingState }
   : defaultState
 
 const $ = elf(link, initialState)
@@ -54,7 +61,8 @@ function insertKeycard(state, payload) {
 
 subscribe((link) => {
   if(link === $.link) {
-    localStorage.setItem(`${$.link}`, JSON.stringify($.learn()))
+    const { keycards } = $.learn()
+    localStorage.setItem(`${$.link}`, JSON.stringify({ keycards }))
   }
 })
 
@@ -79,9 +87,11 @@ export async function getSigner() {
 }
 
 export function getStorage() {
-  const { host, storageUrl } = $.learn()
+  const keycard = getKeycard()
 
-  return new StorageClient(new URL(host))
+  if(!keycard) return null
+
+  return new StorageClient(new URL(keycard.host || plan98.env.PLAN98_WAS_HOST))
 }
 
 async function newKeycard(overrides={}) {
@@ -92,6 +102,7 @@ async function newKeycard(overrides={}) {
     id,
     src: '/app/blue-sky',
     name: 'Keycard',
+    host: plan98.env.PLAN98_WAS_HOST,
     at: new Date().toJSON(),
     ...overrides
   }
@@ -178,8 +189,128 @@ export async function getPlan98Config({space, signer}) {
     })
 }
 
+function uploadRecursive(context, { tree = {}, pathParts = [], subtree = {} }) {
+
+  if(!subtree.children) return ''
+  return subtree.children.map((child, index) => {
+    const { name, type, extension } = child
+    const currentPathParts = [...pathParts, name]
+    const currentPath = currentPathParts.join('/') || '/'
+
+    if(type === Types.File.type) {
+      queueUpload(context, currentPath)
+    }
+
+    if(type === Types.Directory.type) {
+      uploadRecursive(context, { tree, pathParts: currentPathParts, subtree: child })
+    }
+
+    return '-'
+  }).join('')
+}
+
+export async function backupPlan98(context) {
+  const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
+    .then(res => res.json())
+
+  uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
+}
+
+let queue = []
+let uploading = false
+function queueUpload(context, path) {
+  queue.push({
+    path,
+    error: false,
+    done: false
+  })
+
+  process(context)
+}
+
+function process(context) {
+  if(uploading) return
+
+  if(queue.length > 0) {
+    $.teach([...queue], (state, payload) => {
+      return {
+        ...state,
+        uploadQueue: [...state.uploadQueue, ...payload]
+      }
+    })
+    queue = []
+  }
+
+  const { uploadQueue, uploadCursor } = $.learn()
+
+  const item = uploadQueue[uploadCursor]
+
+  if(!item) return
+  uploading = true
+  fetch(item.path).then(async (response) => {
+    const contentType = response.headers.get('content-type');
+    const blob = await response.blob();
+
+    const resource = context.space.resource(context.cwd + item.path)
+    const typedBlob = new Blob([blob], { type: contentType })
+    resource.put(typedBlob, { signer: context.signer })
+      .then(res => {
+        console.debug({ res })
+        return res
+      })
+      .catch(e => {
+        uploadQueue[uploadCursor].error = true
+        console.debug(e)
+      })
+      .finally(() => {
+        uploadQueue[uploadCursor].done = true
+        $.teach({ uploadCursor: uploadCursor + 1 })
+        if(uploadQueue[uploadCursor]) {
+          uploading = false
+          process(context)
+        }
+      })
+  }).catch((error) => {
+    console.error(error)
+    uploadQueue[uploadCursor].error = true
+    uploadQueue[uploadCursor].done = true
+    $.teach({ uploadCursor: uploadCursor + 1 })
+    if(uploadQueue[uploadCursor]) {
+      uploading = false
+      process(context)
+    }
+  })
+}
+
+$.when('click', '[data-backup]', async (event) => {
+  const keycard = getKeycard()
+
+  if(keycard) {
+    getSigner().then(signer => {
+      const storage = getStorage()
+      const space = storage.space({
+        signer,
+        id: `urn:uuid:${keycard.id}`
+      })
+
+      $.teach({ uploadQueue: [], uploadCursor: 0 })
+      uploading = false
+      backupPlan98({ space, signer, cwd: event.target.dataset.backup || '' })
+    })
+  }
+})
+
+function renderQueue(item) {
+  return `
+    <div class="${item.error?'error':item.done?'done':''}">
+      ${item.path}
+    </div>
+  `
+}
+
+
 $.draw((target) => {
-  const { editId, keycards } = $.learn()
+  const { editId, keycards, uploadQueue=[] } = $.learn()
 
   const [active, ...row] = keycards
   return editId ? `
@@ -202,7 +333,11 @@ $.draw((target) => {
         <input data-bind=${editId} name="name" value="${escapeHyperText(active.name) || ''}" />
       </label>
       <label class="field">
-        <span class="label">app</span>
+        <span class="label">host</span>
+        <input data-bind=${editId} name="host" value="${escapeHyperText(active.host || plan98.env.PLAN98_WAS_HOST) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">launch</span>
         <select data-bind="${editId}" name="src">
           <option disabled>--Select--</option>
           ${Object.keys(bios).map((x) => `
@@ -212,6 +347,12 @@ $.draw((target) => {
           `).join('')}
         </select>
       </label>
+      <button data-backup="/public">
+        Full Backup
+      </button>
+      <div class="file-tree">
+        ${uploadQueue.map(renderQueue).join('')}
+      </div>
     </div>
     <footer style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
@@ -286,16 +427,11 @@ $.draw((target) => {
         seed()
       }
 
-      if(target.getAttribute('host')) {
-        const host = target.getAttribute('host')
-        $.teach({ host, storageUrl: new URL(host) })
-      }
-
       const keycard = getKeycard()
 
       if(keycard) {
-        const storage = getStorage()
-        const signer = getSigner().then(signer => {
+        getSigner().then(signer => {
+          const storage = getStorage()
           const space = storage.space({
             signer,
             id: `urn:uuid:${keycard.id}`
@@ -304,7 +440,6 @@ $.draw((target) => {
           getPlan98Config({ space, signer }).then((config) => {
             console.log({ config })
           })
-
         })
       }
     }
@@ -347,6 +482,8 @@ function render(keycard) {
     </button>
   `
 }
+
+
 
 $.when('click', '[data-create]', async (event) => {
   const keycard = await newKeycard().catch(console.error)
