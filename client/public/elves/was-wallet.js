@@ -418,8 +418,8 @@ $.draw((target) => {
           `).join('')}
         </select>
       </label>
-      <button data-backup="/public">
-        Archive: /public
+      <button data-backup="/public/elves">
+        Archive: /public/elves
       </button>
       ${uploadQueue[uploadCursor] ? `
         <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
@@ -451,8 +451,8 @@ $.draw((target) => {
       </div>
     </header>
     <section class="wallet">
-      <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
-        ${active?`
+      ${active?`
+        <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
           <div class="active-keycard">
             ${render(active)}
             <div class="keycard-actions">
@@ -470,8 +470,8 @@ $.draw((target) => {
               </button>
             </div>
           </div>
-        `:''}
-      </div>
+        </div>
+      `:''}
       <div class="keyring">
         ${row.map(render).join('')}
       </div>
