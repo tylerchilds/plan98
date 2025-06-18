@@ -378,6 +378,8 @@ function renderQueue(item) {
 $.draw((target) => {
   const { editId, keycards, uploadQueue=[], uploadCursor } = $.learn()
 
+  const draft = $.learn()[editId] || {}
+
   const [active, ...row] = keycards
   return editId ? `
      <header style="display: grid; grid-template-columns: 1fr 1fr;">
@@ -394,13 +396,16 @@ $.draw((target) => {
     </header>
     <div class="keycard-form">
       ${editId}
+      <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
+        <plan98-palette name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+      </div>
       <label class="field">
         <span class="label">name</span>
-        <input data-bind=${editId} name="name" value="${escapeHyperText(active.name) || ''}" />
+        <input data-bind="${editId}" name="name" value="${escapeHyperText(active.name) || ''}" />
       </label>
       <label class="field">
         <span class="label">host</span>
-        <input data-bind=${editId} name="host" value="${escapeHyperText(active.host || plan98.env.PLAN98_WAS_HOST) || ''}" />
+        <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || plan98.env.PLAN98_WAS_HOST) || ''}" />
       </label>
       <label class="field">
         <span class="label">launch</span>
@@ -446,7 +451,7 @@ $.draw((target) => {
       </div>
     </header>
     <section class="wallet">
-      <div class="lightbox">
+      <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
         ${active?`
           <div class="active-keycard">
             ${render(active)}
@@ -513,6 +518,11 @@ $.draw((target) => {
         })
       }
     }
+  },
+  afterUpdate(target) {
+    {
+      replaceElves(target, 'plan98-palette')
+    }
   }
 })
 
@@ -541,7 +551,7 @@ async function seed() {
 function render(keycard) {
   const { activeKeycardId } = $.learn()
   return `
-    <button data-select="${keycard.id}" class="keycard ${activeKeycardId === keycard.id?'active':''}">
+    <button data-select="${keycard.id}" class="keycard ${activeKeycardId === keycard.id?'active':''}" style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
       <span class="keycard-name">
         ${keycard.name}
       </span>
@@ -728,7 +738,11 @@ $.style(`
     padding: 3rem;
     display: grid;
     grid-template-rows: 1fr auto;
-    background: black;
+    background:
+      linear-gradient(335deg, var(--lightbox-color), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--lightbox-color);
     place-content: center;
   }
 
@@ -758,11 +772,17 @@ $.style(`
     max-width: 280px;
     opacity: .65;
     display: grid;
-    place-content: end start;
+    place-content: end end;
     padding: .5rem;
     text-align: left;
-    border: 2px solid rgba(255,255,255,.25);
-    background: black;
+    border-radius: .5rem;
+    border: 0;
+    text-align: right;
+    background:
+      linear-gradient(155deg, var(--keycard-theme, var(--root-theme, mediumseagreen)), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(145deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(115deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--keycard-theme, var(--root-theme, mediumseagreen));
     color: rgba(255,255,255,.85);
     word-break: break-all;
   }
@@ -770,7 +790,6 @@ $.style(`
   & .keycard:hover,
   & .keycard:focus,
   & .keycard.active {
-    border: 2px solid rgba(255,255,255,.65);
     opacity: 1;
   }
 
@@ -788,7 +807,7 @@ $.style(`
 
   & .loader-bar {
     position: relative;
-    background: var(--root-theme, mediumseagreen);
+    background: var(--keycard-theme, var(--root-theme, mediumseagreen));
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
     text-align: right;
     padding: .5rem;
@@ -808,16 +827,21 @@ $.style(`
     width: var(--progress);
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--keycard-theme, var(--root-theme, mediumseagreen));
   }
 `)
 
-$.when('input', '[data-bind]', (event) => {
+$.when('input', 'plan98-palette', (event) => {
   const { bind } = event.target.dataset
+  const { color } = event.detail
   $.teach({
-    name: event.target.name,
-    value: event.target.value
-  }, (state, payload) => {
+    name: event.target.getAttribute('name'),
+    value: color
+  }, namespace(bind))
+})
+
+function namespace(bind) {
+  return (state, payload) => {
     return {
       ...state,
       [bind]: {
@@ -825,7 +849,15 @@ $.when('input', '[data-bind]', (event) => {
         [payload.name]: payload.value
       }
     }
-  })
+  }
+}
+
+$.when('input', '[data-bind]', (event) => {
+  const { bind } = event.target.dataset
+  $.teach({
+    name: event.target.name,
+    value: event.target.value
+  }, namespace(bind))
 })
 
 function escapeHyperText(text = '') {
@@ -839,3 +871,15 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
+
+export function replaceElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.replaceWith(newNode)
+  })
+}
+
+
