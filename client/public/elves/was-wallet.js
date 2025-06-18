@@ -228,7 +228,6 @@ export async function del(src) {
 
     return await resource.delete()
       .then(res => {
-        debugger
         console.debug({ res })
         return res
       })

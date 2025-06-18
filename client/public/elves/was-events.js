@@ -3,6 +3,7 @@ import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
+import { get, del, put } from './was-wallet.js'
 
 const bucketKeys = {
   past: 'past',
@@ -151,7 +152,7 @@ function newDraft(type) {
 }
 
 // dear diary
-const $ = elf('time-machine', {
+const $ = elf('was-events', {
   cards: [],
   now: new Date(),
   buckets: emptyBuckets,
@@ -170,6 +171,10 @@ function query(target) {
 }
 
 async function fate() {
+  const res = await get(`time-machine`).then(res => {
+    debugger
+  })
+  /*
   const { plan98 } = await fetch(`/plan98/about?cwd=/private/time-machine`)
     .then(res => res.json()).catch(console.error)
 
@@ -193,6 +198,7 @@ async function fate() {
   } catch(e) {
     console.error(e)
   }
+  */
 }
 
 function mergeEvents(state, payload) {
@@ -1140,7 +1146,7 @@ $.draw((target)=> {
       target.initialized = true
       if(q && view !== views.create) {
         showModal(`
-          <time-machine view="${views.create}" q="${q}"></time-machine>
+          <was-events view="${views.create}" q="${q}"></was-events>
         `, {
           transparent: true
         })
@@ -1314,17 +1320,8 @@ export function save(draft, context) {
     path = context.path
   }
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
   // Attempt to upload to server
-  fetch(`/private/time-machine${path}`, {
-      method: 'POST',
-      body: JSON.stringify(draft),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
+  put(`/private/time-machine${path}`, JSON.stringify(draft), { type: 'application/json' }).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1338,16 +1335,8 @@ export function save(draft, context) {
 export function destroy(context) {
   if(!context) return
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
   // Attempt to upload to server
-  fetch(`/private/time-machine${context.path}`, {
-      method: 'DELETE',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
+  del(`/private/time-machine${context.path}`).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1361,10 +1350,12 @@ export function destroy(context) {
 
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
+  debugger
   // Get current date and time for filename
   const { draft, context } = $.learn()
 
   if(draft) {
+    debugger
     save(draft, context)
     hideModal()
     toast('Created!', { type: 'success' })
@@ -1398,7 +1389,7 @@ $.when('click', '[data-view]', (event) => {
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
   showModal(`
-    <time-machine view="${views[show]}" data-space="${space}" data-time="${time}"></time-machine>
+    <was-events view="${views[show]}" data-space="${space}" data-time="${time}"></was-events>
   `, {
     transparent: true
   })
@@ -1407,7 +1398,7 @@ $.when('click', '[data-show]', (event) => {
 
 $.when('click', '[data-new]', (event) => {
   showModal(`
-    <time-machine view="${views.create}"></time-machine>
+    <was-events view="${views.create}"></was-events>
   `, {
     transparent: true
   })
