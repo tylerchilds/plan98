@@ -188,7 +188,7 @@ export async function get(src) {
   }
 }
 
-export async function put(src, file) {
+export async function put(src, file, config={ type: 'text/plain' }) {
   const keycard = getKeycard()
   if(keycard) {
     const signer = await getSigner()
@@ -201,7 +201,7 @@ export async function put(src, file) {
 
     const resource = space.resource(src)
 
-    const typedBlob = new Blob([file], { type: 'text/plain' })
+    const typedBlob = new Blob([file], config)
     return await resource.put(typedBlob, { signer })
       .then(res => {
         console.debug({ res })
@@ -212,6 +212,32 @@ export async function put(src, file) {
       })
   }
 }
+
+export async function del(src) {
+  const keycard = getKeycard()
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    return await resource.delete()
+      .then(res => {
+        debugger
+        console.debug({ res })
+        return res
+      })
+      .catch(e => {
+        console.debug(e)
+      })
+  }
+}
+
 
 export async function putPlan98Config({ space, signer }, keycard) {
   const config = space.resource('/.plan98/config.json')

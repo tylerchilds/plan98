@@ -3,6 +3,7 @@ import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
+import { get, put } from './was-wallet.js'
 
 const bucketKeys = {
   past: 'past',
@@ -1314,17 +1315,8 @@ export function save(draft, context) {
     path = context.path
   }
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
   // Attempt to upload to server
-  fetch(`/private/time-machine${path}`, {
-      method: 'POST',
-      body: JSON.stringify(draft),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
+  put(`/private/time-machine${path}`, JSON.stringify(draft), { type: 'application/json' }).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1338,20 +1330,13 @@ export function save(draft, context) {
 export function destroy(context) {
   if(!context) return
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
   // Attempt to upload to server
-  fetch(`/private/time-machine${context.path}`, {
-      method: 'DELETE',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
+  del(`/private/time-machine${context.path}`).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
     }
+    debugger
     fate()
   }).catch(error => {
     console.warn(error);
