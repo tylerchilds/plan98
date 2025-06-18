@@ -2,6 +2,7 @@ import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
+import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
 const Types = {
   File: {
@@ -25,6 +26,18 @@ const bios = {
   'journal': '/app/time-machine',
   'boxart': '/app/plan98-boxart',
 }
+
+const defaultPath = {}
+const settingsMenuTypeSchema = () => Object.keys(sideEffects)
+  .filter(key => {
+    return $paperPocket.learn().settings[key]
+  }).reduce((path, key) => {
+    path[key] = {
+      ...sideEffects[key]
+    }
+    path[key] = sideEffects[key]
+    return path
+  }, defaultPath)
 
 const defaultState = {
   keycards: []
@@ -421,9 +434,6 @@ $.draw((target) => {
     </header>
     <div class="keycard-form">
       ${editId}
-      <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
-        <plan98-palette name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
-      </div>
       <label class="field">
         <span class="label">name</span>
         <input data-bind="${editId}" name="name" value="${escapeHyperText(active.name) || ''}" />
@@ -443,6 +453,17 @@ $.draw((target) => {
           `).join('')}
         </select>
       </label>
+
+
+      <hr>
+
+      <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
+        <plan98-palette name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+      </div>
+      ${settingsMenu(editId)}
+
+      <hr>
+
       <button data-backup="/public/elves">
         Archive: /public/elves
       </button>
@@ -546,10 +567,52 @@ $.draw((target) => {
   },
   afterUpdate(target) {
     {
+      afterUpdateTheme($paperPocket, target)
+    }
+
+    {
       replaceElves(target, 'plan98-palette')
     }
   }
 })
+
+
+function settingsMenu(editId) {
+  const cardOptions = Object
+      .keys(settingsMenuTypeSchema()).map(key => {
+    const { label, description, options } = $paperPocket.learn().settings[key]
+    const draft = ($.learn()[$.learn()?.editId])
+    const value = (draft ? draft[key] : null) || getKeycard()[key] || $paperPocket.learn()[key]
+    return `
+      <div class="settings-card">
+        <div class="selectbox-label">
+          ${label}
+        </div>
+        <div class="selectbox-description">
+          ${description}
+        </div>
+        <div class="selectbox-selector">
+          <div class="selectbox-view">
+            ${value}
+          </div>
+          <select data-bind="${editId}" name="${key}">
+            <option disabled selected>${label}</option>
+            ${options.map(option => {
+              return `
+                <option ${option === value?'selected':''}>${option}</option>
+              `
+            }).join('')}
+          </select>
+        </div>
+    </div>
+    `
+  }).join('')
+
+  return `
+    ${cardOptions}
+  `
+}
+
 
 function jsonRPC(payload) {
   const handler = methodHandlers[payload.method]
@@ -854,6 +917,45 @@ $.style(`
     inset: 0;
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--keycard-theme, var(--root-theme, mediumseagreen));
   }
+
+  & .settings-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .settings-human {
+    margin-bottom: 1rem;
+  }
+
+  & .selectbox-label {
+    font-weight: bold;
+  }
+
+  & .selectbox-description {
+  }
+
+  & .selectbox-selector {
+    position: relative;
+  }
+
+  & .selectbox-view {
+    pointer-events: none;
+    padding: .5rem;
+  }
+
+  & .selectbox-selector select {
+    opacity: 0;
+    padding: .5rem;
+    position: absolute;
+    inset: 0;
+  }
+
+  & select:focus {
+    position: absolute;
+  }
+
+  & select option {
+  }
 `)
 
 $.when('input', 'plan98-palette', (event) => {
@@ -879,9 +981,17 @@ function namespace(bind) {
 
 $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
+
+  const name = event.target.name
+  const value = event.target.value
+
+  if(settingsMenuTypeSchema()[name]) {
+    settingsMenuTypeSchema()[name](value)
+  }
+
   $.teach({
-    name: event.target.name,
-    value: event.target.value
+    name,
+    value
   }, namespace(bind))
 })
 
