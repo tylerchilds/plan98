@@ -123,8 +123,10 @@ async function provisionPlan98(signer, keycard) {
 
   console.log(keycard.id, signer.controller, signer.toJSON())
 
+  const linkset = space.resource(`linkset`)
   const spaceObject = {
     controller: signer.controller,
+    link: linkset.path,
   }
   const spaceObjectBlob = new Blob(
     [JSON.stringify(spaceObject)],
@@ -652,6 +654,14 @@ $.when('click', '[data-save]', async (event) => {
     }
 
     delete cleanKeycard.asJSON
+
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
 
     const json = await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
   }
