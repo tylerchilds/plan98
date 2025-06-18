@@ -86,9 +86,7 @@ export async function getSigner() {
   return await Ed25519Signer.fromJSON(JSON.stringify(keycard.asJSON))
 }
 
-export function getStorage() {
-  const keycard = getKeycard()
-
+export function getStorage(keycard=getKeycard()) {
   if(!keycard) return null
 
   return new StorageClient(new URL(keycard.host || plan98.env.PLAN98_WAS_HOST))
@@ -116,7 +114,7 @@ async function newKeycard(overrides={}) {
 }
 
 async function provisionPlan98(signer, keycard) {
-  const storage = getStorage()
+  const storage = getStorage(keycard)
 
   const space = storage.space({
     signer,
@@ -162,6 +160,55 @@ async function provisionPlan98(signer, keycard) {
   if (!responseToPutConfig) return
   const json = await getPlan98Config({space, signer}).catch(console.error)
   console.log({json})
+}
+
+export async function get(src) {
+  const keycard = getKeycard()
+
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    return await resource.get({ signer })
+      .then(async res => {
+        return (await res.blob()).text()
+      })
+      .catch(e => {
+        console.debug(e)
+      })
+  }
+}
+
+export async function put(src, file) {
+  const keycard = getKeycard()
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    const typedBlob = new Blob([file], { type: 'text/plain' })
+    return await resource.put(typedBlob, { signer })
+      .then(res => {
+        console.debug({ res })
+        return res
+      })
+      .catch(e => {
+        console.debug(e)
+      })
+  }
 }
 
 export async function putPlan98Config({ space, signer }, keycard) {
@@ -220,7 +267,7 @@ let queue = []
 let uploading = false
 function queueUpload(context, path) {
   queue.push({
-    path,
+    path: context.cwd + path,
     error: false,
     done: false
   })
@@ -251,7 +298,7 @@ function process(context) {
     const contentType = response.headers.get('content-type');
     const blob = await response.blob();
 
-    const resource = context.space.resource(context.cwd + item.path)
+    const resource = context.space.resource(item.path)
     const typedBlob = new Blob([blob], { type: contentType })
     resource.put(typedBlob, { signer: context.signer })
       .then(res => {
@@ -259,11 +306,11 @@ function process(context) {
         return res
       })
       .catch(e => {
-        uploadQueue[uploadCursor].error = true
+        $.teach({ error: true }, updateQueueAt(uploadCursor))
         console.debug(e)
       })
       .finally(() => {
-        uploadQueue[uploadCursor].done = true
+        $.teach({ done: true }, updateQueueAt(uploadCursor))
         $.teach({ uploadCursor: uploadCursor + 1 })
         if(uploadQueue[uploadCursor]) {
           uploading = false
@@ -272,14 +319,31 @@ function process(context) {
       })
   }).catch((error) => {
     console.error(error)
-    uploadQueue[uploadCursor].error = true
-    uploadQueue[uploadCursor].done = true
+    $.teach({ error: true, done: true }, updateQueueAt(uploadCursor))
     $.teach({ uploadCursor: uploadCursor + 1 })
     if(uploadQueue[uploadCursor]) {
       uploading = false
       process(context)
     }
   })
+}
+
+function updateQueueAt(index) {
+  return (state, payload) => {
+    return {
+      ...state,
+      uploadQueue: state.uploadQueue.map((x, i) => {
+        if(i === index) {
+          return {
+            ...x,
+            ...payload
+          }
+        }
+
+        return x
+      })
+    }
+  }
 }
 
 $.when('click', '[data-backup]', async (event) => {
@@ -302,7 +366,7 @@ $.when('click', '[data-backup]', async (event) => {
 
 function renderQueue(item) {
   return `
-    <div class="${item.error?'error':item.done?'done':''}">
+    <div class="file ${item.error?'error':item.done?'done':''}">
       ${item.path}
     </div>
   `
@@ -310,7 +374,7 @@ function renderQueue(item) {
 
 
 $.draw((target) => {
-  const { editId, keycards, uploadQueue=[] } = $.learn()
+  const { editId, keycards, uploadQueue=[], uploadCursor } = $.learn()
 
   const [active, ...row] = keycards
   return editId ? `
@@ -348,11 +412,15 @@ $.draw((target) => {
         </select>
       </label>
       <button data-backup="/public">
-        Full Backup
+        Archive: /public
       </button>
-      <div class="file-tree">
-        ${uploadQueue.map(renderQueue).join('')}
-      </div>
+      ${uploadQueue[uploadCursor] ? `
+        <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
+          <span class="loader-status">
+            ${renderQueue(uploadQueue[uploadCursor])}
+          </span>
+        </div>
+      `:''}
     </div>
     <footer style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
@@ -475,15 +543,12 @@ function render(keycard) {
       <span class="keycard-name">
         ${keycard.name}
       </span>
-      <span class="keycard-id">${keycard.id.split('-').join('<br>')}</span>
-      <span class="keycard-src">
-        ${keycard.src}
+      <span class="keycard-host">
+        ${keycard.host}
       </span>
     </button>
   `
 }
-
-
 
 $.when('click', '[data-create]', async (event) => {
   const keycard = await newKeycard().catch(console.error)
@@ -697,6 +762,43 @@ $.style(`
   & .keycard.active {
     border: 2px solid rgba(255,255,255,.65);
     opacity: 1;
+  }
+
+  & .file {
+
+  }
+
+  & .error {
+    color: firebrick;
+  }
+
+  & .done {
+    color: mediumseagreen;
+  }
+
+  & .loader-bar {
+    position: relative;
+    background: var(--root-theme, mediumseagreen);
+    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    text-align: right;
+    padding: .5rem;
+    border-radius: .5rem;
+    overflow: hidden;
+  }
+
+  & .loader-status {
+    position: relative;
+    z-index: 2;
+    color: rgba(255,255,255,.85);
+    opacity: 0.95;
+  }
+
+  & .loader-bar::after {
+    content: '';
+    width: var(--progress);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 `)
 
