@@ -501,6 +501,10 @@ $.draw((target) => {
       <button data-backup="/public">
         Publish: /public
       </button>
+      <button data-backup="/private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown">
+        Publish: Video
+      </button>
+
       ${uploadQueue[uploadCursor] ? `
         <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
           <span class="loader-status">

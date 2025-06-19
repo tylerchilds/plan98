@@ -25,7 +25,8 @@ function mount(target) {
   target.initialized = true
 
   const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
-  get(src).then(file => {
+  get(src).then(async blob => {
+    const file = await blob.text()
     $.teach({ src, [src]: { file, src }})
   })
 }
