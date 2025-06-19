@@ -173,6 +173,8 @@ function query(target) {
 async function fate() {
   const res = await get(`time-machine`).then(res => {
     debugger
+  }).catch((error) => {
+    debugger
   })
   /*
   const { plan98 } = await fetch(`/plan98/about?cwd=/private/time-machine`)

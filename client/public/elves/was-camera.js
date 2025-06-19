@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 // To use Html5Qrcode (more info below)
 import {Html5Qrcode} from "html5-qrcode";
 import { systemMenu, getTheme } from './paper-pocket.js'
-import { savePhoto } from './time-machine.js'
+import { savePhoto } from './was-events.js'
 import { get, put } from './was-wallet.js'
 
 const initial = {
