@@ -173,8 +173,9 @@ async function provisionPlan98(signer, keycard) {
   })
 
   if (!responseToPutConfig) return
-  const json = await getPlan98Config({space, signer}).catch(console.error)
-  console.log({json})
+  const keycardMetadata = await getPlan98Config({space, signer}).catch(console.error)
+
+  $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
 }
 
 export async function get(src) {
@@ -458,7 +459,7 @@ $.draw((target) => {
       <hr>
 
       <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
-        <plan98-palette name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+        <plan98-palette local="true" name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
       </div>
       ${settingsMenu(editId)}
 
@@ -558,8 +559,8 @@ $.draw((target) => {
             id: `urn:uuid:${keycard.id}`
           })
 
-          getPlan98Config({ space, signer }).then((config) => {
-            console.log({ config })
+          getPlan98Config({ space, signer }).then((keycardMetadata) => {
+            $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
           })
         })
       }
@@ -584,27 +585,20 @@ function settingsMenu(editId) {
     const draft = ($.learn()[$.learn()?.editId])
     const value = (draft ? draft[key] : null) || getKeycard()[key] || $paperPocket.learn()[key]
     return `
-      <div class="settings-card">
-        <div class="selectbox-label">
+      <label class="field">
+        <span class="label" data-tooltip="${description}">
           ${label}
-        </div>
-        <div class="selectbox-description">
-          ${description}
-        </div>
-        <div class="selectbox-selector">
-          <div class="selectbox-view">
-            ${value}
-          </div>
-          <select data-bind="${editId}" name="${key}">
-            <option disabled selected>${label}</option>
-            ${options.map(option => {
-              return `
-                <option ${option === value?'selected':''}>${option}</option>
-              `
-            }).join('')}
-          </select>
-        </div>
-    </div>
+        </span>
+        <select data-bind="${editId}" name="${key}">
+          <option disabled>${label}</option>
+          ${options.map(option => {
+            return `
+              <option ${option === value?'selected':''}>${option}</option>
+            `
+          }).join('')}
+        </select>
+      </label>
+
     `
   }).join('')
 
@@ -703,7 +697,13 @@ $.when('click', '[data-export]', (event) => {
       JSON.stringify({
         jsonrpc: "2.0",
         method: methods.importKeycard,
-        params: { type: 'keycard', keycard }
+        params: {
+          type: 'keycard',
+          keycard: {
+            asJSON: keycard.asJSON,
+            id: keycard.id,
+          }
+        }
       })
     )
 
@@ -917,45 +917,6 @@ $.style(`
     inset: 0;
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--keycard-theme, var(--root-theme, mediumseagreen));
   }
-
-  & .settings-card {
-    display: flex;
-    flex-direction: column;
-  }
-
-  & .settings-human {
-    margin-bottom: 1rem;
-  }
-
-  & .selectbox-label {
-    font-weight: bold;
-  }
-
-  & .selectbox-description {
-  }
-
-  & .selectbox-selector {
-    position: relative;
-  }
-
-  & .selectbox-view {
-    pointer-events: none;
-    padding: .5rem;
-  }
-
-  & .selectbox-selector select {
-    opacity: 0;
-    padding: .5rem;
-    position: absolute;
-    inset: 0;
-  }
-
-  & select:focus {
-    position: absolute;
-  }
-
-  & select option {
-  }
 `)
 
 $.when('input', 'plan98-palette', (event) => {
@@ -984,10 +945,6 @@ $.when('input', '[data-bind]', (event) => {
 
   const name = event.target.name
   const value = event.target.value
-
-  if(settingsMenuTypeSchema()[name]) {
-    settingsMenuTypeSchema()[name](value)
-  }
 
   $.teach({
     name,

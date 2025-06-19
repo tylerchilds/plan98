@@ -256,11 +256,14 @@ $.when('pointerdown', '[data-midi]', (event) => {
 $.when('pointerup', '[data-midi]', (event) => {
   const { midi } = event.target.dataset
   const target = event.target.closest($.link)
+  const local = target.getAttribute('local') === 'true'
   if(activeMidi === midi) {
     release(midi)
     const { topping, color } = event.target.dataset
     const newColor = mixColors(topping, color)
-    setTheme(newColor)
+    if(!local) {
+      setTheme(newColor)
+    }
 
     const root = event.target.closest($.link)
     root.dispatchEvent(new CustomEvent('input', {
