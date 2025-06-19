@@ -278,30 +278,67 @@ export async function getPlan98Config({space, signer}) {
 }
 
 function uploadRecursive(context, { tree = {}, pathParts = [], subtree = {} }) {
+  const files = []
+  if(subtree.children) {
+    subtree.children.map((child, index) => {
+      const { name, type, extension } = child
+      const currentPathParts = [...pathParts, name]
+      const currentPath = currentPathParts.join('/') || '/'
 
-  if(!subtree.children) return ''
-  return subtree.children.map((child, index) => {
-    const { name, type, extension } = child
-    const currentPathParts = [...pathParts, name]
-    const currentPath = currentPathParts.join('/') || '/'
+      if(type === Types.File.type) {
+        files.push((context.cwd || '') + currentPath)
+        queueUpload(context, currentPath)
+      }
 
-    if(type === Types.File.type) {
-      queueUpload(context, currentPath)
-    }
-
-    if(type === Types.Directory.type) {
-      uploadRecursive(context, { tree, pathParts: currentPathParts, subtree: child })
-    }
-
-    return '-'
-  }).join('')
+      if(type === Types.Directory.type) {
+        const moreFiles = uploadRecursive(context, { tree, pathParts: currentPathParts, subtree: child })
+        files.push(...moreFiles)
+      }
+    })
+  }
+  return files
 }
 
 export async function backupPlan98(context) {
   const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
     .then(res => res.json())
 
-  uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
+  const filesOnly = uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
+
+  const aclAllowingPublicReads = context.space.resource('policy/published')
+  {
+    const policy = { type: 'PublicCanRead' }
+    const policyBlob = new Blob([JSON.stringify(policy)], { type: 'application/json' })
+    const responseToPutPolicy = await aclAllowingPublicReads.put(policyBlob, { signer: context.signer })
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to put policy: ${res.status} ${res.statusText}`, { cause: { res } })
+        return res
+      })
+      .catch(e => {
+        console.error(e)
+        toast(e.message, { type: 'error' })
+      })
+  }
+
+  const publicPaths = filesOnly.map(path => ({
+    "anchor": context.space.resource(path).path,
+    "acl": [
+      {
+        "href": aclAllowingPublicReads.path,
+      }
+    ]
+  }))
+
+  const linkset = context.space.resource(`linkset`)
+  {
+    const linksetObject = {
+      "linkset": publicPaths
+    };
+    const linksetBlob = new Blob([JSON.stringify(linksetObject)], { type: 'application/linkset+json' })
+    const response = await linkset.put(linksetBlob, { signer: context.signer })
+    if (!response.ok) throw new Error(`Failed to put linkset: ${response.status} ${response.statusText}`, { cause: { response } });
+  }
+
 }
 
 let queue = []
@@ -465,8 +502,8 @@ $.draw((target) => {
 
       <hr>
 
-      <button data-backup="/public/elves">
-        Archive: /public/elves
+      <button data-backup="/public">
+        Publish: /public
       </button>
       ${uploadQueue[uploadCursor] ? `
         <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
