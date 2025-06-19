@@ -495,9 +495,11 @@ $.draw((target) => {
 
       <hr>
 
+      <!--
       <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
         <plan98-palette local="true" name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
       </div>
+      -->
       ${settingsMenu(editId)}
 
       <hr>
