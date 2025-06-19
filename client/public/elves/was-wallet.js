@@ -722,7 +722,7 @@ $.when('click', '[data-export]', (event) => {
 $.when('click', '[data-remix]', (event) => {
   showModal(`
     <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
-      <code-module src="/public/elves/was-wallet.js"></code-module>
+      <was-code src="/public/elves/was-wallet.js"></was-code>
     </div>
   `, {
     blockExit: false
