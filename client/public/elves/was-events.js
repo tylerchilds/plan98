@@ -1314,6 +1314,15 @@ export function saveSketch(draft, context) {
   }, context)
 }
 
+export function saveAudio(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.audio,
+  }, context)
+}
+
 export function save(draft, context) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
   const timestamp = now.toJSON()
