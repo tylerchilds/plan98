@@ -1187,6 +1187,7 @@ $.draw((target)=> {
       replaceElves(target, 'sketch-pad')
       replaceElves(target, 'plan98-camera')
       replaceElves(target, 'plan98-icon')
+      replaceElves(target, 'was-image')
       replaceElves(target, 'sl-icon')
     }
   }
