@@ -40,8 +40,7 @@ $.draw((target) => {
 
   if(!isOpen) return ' '
   const modalHeader = types[bannerType] ? banner() : ''
-
-  return `
+  target.innerHTML = `
     <div
       data-fixed="${blockExit}"
       class=" shell ${maximized ? 'maximized': ''} ${transparent ? 'transparent':''}"
