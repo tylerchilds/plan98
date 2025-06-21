@@ -180,6 +180,10 @@ const commands = {
     loadModule('<plan98-palette')
     return 'Success!'
   },
+  'wallet': () => {
+    loadPath('/app/plan98-wallet')
+    return 'Success!'
+  },
   'draw': () => {
     window.location.href = '/app/sketch-pad'
     return 'Success!'
@@ -413,6 +417,9 @@ exit
 
 color
   launch the color and sound palette
+
+wallet
+  launch the wallet to access keycards
 
 draw
   launch the drawing app

@@ -40,7 +40,9 @@ const eventTypes = {
   instrument: 'instrument',
   sketch: 'sketch',
   gallery: 'gallery',
-  photo: 'photo',
+  image: 'image',
+  audio: 'audio',
+  video: 'video',
   archive: 'archive',
   dwebcamp: 'dwebcamp'
 }
@@ -53,7 +55,7 @@ const views = {
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
-  [eventTypes.photo]: eventTypes.photo,
+  [eventTypes.image]: eventTypes.image,
   [eventTypes.archive]: eventTypes.archive,
   [eventTypes.dwebcamp]: eventTypes.dwebcamp,
   edge: 'edge'
@@ -113,7 +115,7 @@ const schemas = {
     description: null,
     tags: [],
   },
-  [eventTypes.photo]: {
+  [eventTypes.image]: {
     type: eventTypes.gallery,
     title: null,
     description: null,
@@ -301,19 +303,19 @@ const creationForms = {
       </div>
     `
   },
-  [eventTypes.photo]: function(draft) {
+  [eventTypes.image]: function(draft) {
     return `
       ${editBanner(this)}
-      <div class="photo-form">
+      <div class="image-form">
         <plan98-camera></plan98-camera>
         <label class="field">
           <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
         </label>
 
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
         </label>
       </div>
     `
@@ -321,16 +323,16 @@ const creationForms = {
   [eventTypes.sketch]: function(draft) {
     return `
       ${editBanner(this)}
-      <div class="photo-form">
+      <div class="image-form">
         <plan98-pad></plan98-pad>
         <label class="field">
           <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
         </label>
 
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
         </label>
       </div>
     `
@@ -342,12 +344,12 @@ const creationForms = {
         ${editBanner(this)}
         <label class="field">
           <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
         </label>
 
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
         </label>
       </div>
     `
@@ -365,17 +367,17 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text"/>
           </label>
 
           <label class="field">
             <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
           </label>
         </div>
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
         </label>
 
         ${x.tags?.map(x => {
@@ -389,22 +391,22 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">City</span>
-            <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" required/>
+            <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
           </label>
 
           <label class="field">
             <span class="label">Country</span>
-            <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" required/>
+            <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
           </label>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Longitude</span>
-            <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" required/>
+            <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
           </label>
           <label class="field">
             <span class="label">Latitude</span>
-            <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" required/>
+            <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
           </label>
         </div>
       </div>
@@ -423,17 +425,17 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" />
           </label>
 
           <label class="field">
             <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
           </label>
         </div>
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
         </label>
 
         ${x.tags?.map(x => {
@@ -447,22 +449,22 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Creator</span>
-            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" required/>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
           </label>
 
           <label class="field">
             <span class="label">Collection</span>
-            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" required/>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
           </label>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Language</span>
-            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" required/>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
           </label>
           <label class="field">
             <span class="label">License</span>
-            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" required/>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
           </label>
         </div>
       </div>
@@ -481,17 +483,17 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" required/>
+            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" />
           </label>
 
           <label class="field">
             <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" required/>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
           </label>
         </div>
         <label class="field">
           <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" required/>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
         </label>
         <label class="field">
           <span class="label">Location</span>
@@ -519,22 +521,22 @@ const creationForms = {
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Creator</span>
-            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" required/>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
           </label>
 
           <label class="field">
             <span class="label">Collection</span>
-            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" required/>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
           </label>
         </div>
         <div style="display: grid; grid-template-columns: 1fr 1fr;">
           <label class="field">
             <span class="label">Language</span>
-            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" required/>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
           </label>
           <label class="field">
             <span class="label">License</span>
-            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" required/>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
           </label>
         </div>
       </div>
@@ -755,7 +757,7 @@ const viewRenderers = {
                 Edit
               </button>
             </div>
-            <div class="photo-well">
+            <div class="image-well">
 
               <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
@@ -769,13 +771,13 @@ const viewRenderers = {
       </div>
     `
   },
-  [views.photo]: (target) => {
+  [views.image]: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.photo],
+      ...schemas[views.image],
       ...event.data,
     }
 
@@ -791,7 +793,7 @@ const viewRenderers = {
                 Edit
               </button>
             </div>
-            <div class="photo-well">
+            <div class="image-well">
               <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -1234,14 +1236,14 @@ const eventRenderers = {
       </button>
     `
   },
-  [eventTypes.photo]: function (event) {
+  [eventTypes.image]: function (event) {
     const data = {
       ...schemas[views.tommi],
       ...event.data
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.photo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event" data-show="${eventTypes.image}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
@@ -1312,7 +1314,7 @@ export function savePhoto(draft, context) {
     title: 'Untitled',
     ...timeFields(),
     ...draft,
-    type: eventTypes.photo,
+    type: eventTypes.image,
   }, context)
 }
 
@@ -1333,6 +1335,16 @@ export function saveAudio(draft, context) {
     type: eventTypes.audio,
   }, context)
 }
+
+export function saveVideo(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.video,
+  }, context)
+}
+
 
 export function save(draft, context) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
@@ -1675,7 +1687,7 @@ $.style(`
     padding: .5rem;
   }
 
-  & .photo-well {
+  & .image-well {
     overflow: hidden;
     text-align: center;
     background: black;
@@ -1684,7 +1696,7 @@ $.style(`
     position: relative;
   }
 
-  & .photo-well .title {
+  & .image-well .title {
     position: absolute;
     left: 0;
     bottom: 0;
@@ -1844,7 +1856,7 @@ $.style(`
     height: 100%;
   }
 
-  & .photo-form {
+  & .image-form {
     padding: .5rem;
     overflow: auto;
     height: 100%;

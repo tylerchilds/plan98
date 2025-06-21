@@ -758,8 +758,10 @@ $.when('click', '[data-export]', (event) => {
         params: {
           type: 'keycard',
           keycard: {
-            asJSON: keycard.asJSON,
             id: keycard.id,
+            name: keycard.name,
+            asJSON: keycard.asJSON,
+            host: keycard.host,
           }
         }
       })
