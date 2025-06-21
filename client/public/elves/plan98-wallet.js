@@ -134,8 +134,6 @@ async function provisionPlan98(signer, keycard) {
     id: `urn:uuid:${keycard.id}`
   })
 
-  console.log(keycard.id, signer.controller, signer.toJSON())
-
   const linkset = space.resource(`linkset`)
   const spaceObject = {
     controller: signer.controller,
@@ -820,6 +818,8 @@ $.when('click', '[data-save]', async (event) => {
       signer,
       id: `urn:uuid:${keycard.id}`
     })
+
+    await provisionPlan98(signer, keycard).catch(console.error)
 
     const json = await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
   }
