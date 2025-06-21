@@ -3,6 +3,7 @@ import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
+import { getKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 
 const bucketKeys = {
   past: 'past',
@@ -72,7 +73,6 @@ function timeFields() {
 
 const schemas = {
   [eventTypes.archive]: {
-    ...timeFields(),
     type: eventTypes.archive,
     title: null,
     url: null,
@@ -86,7 +86,6 @@ const schemas = {
     more: {}
   },
   [eventTypes.tommi]: {
-    ...timeFields(),
     type: eventTypes.tommi,
     url: null,
     title: null,
@@ -98,35 +97,29 @@ const schemas = {
     latitude: null,
   },
   [eventTypes.instrument]: {
-    ...timeFields(),
     type: eventTypes.instrument,
   },
   [eventTypes.sketch]: {
-    ...timeFields(),
     type: eventTypes.sketch,
     title: null,
   },
   [eventTypes.journal]: {
-    ...timeFields(),
     type: eventTypes.journal,
     text: '',
   },
   [eventTypes.gallery]: {
-    ...timeFields(),
     type: eventTypes.gallery,
     title: null,
     description: null,
     tags: [],
   },
   [eventTypes.photo]: {
-    ...timeFields(),
     type: eventTypes.gallery,
     title: null,
     description: null,
     tags: [],
   },
   [eventTypes.dwebcamp]: {
-    ...timeFields(),
     type: eventTypes.dwebcamp,
     location: null,
     locations: ['Wayback Wheel', 'Hackers Hall', 'Migration Library', 'Treehouse', 'Cultivation Station', 'Access to Knowledge Amphitheater', 'Campfire', 'Stages', 'AI Think Tank', 'Art Barn', 'Volunteers HQ', 'Nest', 'Impact Island', 'Heartwood Chapel', 'Lightning Salon', 'Tea Tent', 'Redwood Cathedral'],
@@ -147,7 +140,10 @@ const schemas = {
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
 function newDraft(type) {
-  return schemas[type] || {}
+  return {
+    ...(schemas[type] || {}),
+    ...timeFields()
+  }
 }
 
 // dear diary
@@ -170,29 +166,50 @@ function query(target) {
 }
 
 async function fate() {
+  const signer = await getSigner()
+  const storage = getStorage()
+  const keycard = getKeycard()
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+  async function addData(response) {
+    try {
+      const data = await response.text()
+      const { paths } = JSON.parse(data)
+      if(!paths) return
+
+      const resources = paths.map(x => space.resource(x))
+
+      const events = await Promise.all(
+        resources.map((resource, i) => resource.get({ signer }).then(res => res.json()).then(data => {
+          const parts = paths[i].split('/')
+          const name = parts[parts.length - 1]
+          return {
+            handle: { path: resources[i].path, name },
+            data
+          }
+        }))
+      )
+
+      $.teach(events, mergeEvents)
+    } catch(e) {
+      console.error(e)
+    }
+  }
+
+
+  const res = await get(`time-machine`).then(addData).catch(async (error) => {
+    await touch('time-machine')
+    get('time-machine').then(addData)
+  })
+  /*
   const { plan98 } = await fetch(`/plan98/about?cwd=/private/time-machine`)
     .then(res => res.json()).catch(console.error)
+    */
 
-  try {
-    const handles = plan98.children[0].children
 
-    if(!handles) return
-
-    const paths = handles.map(x => `/private/time-machine/${x.name}`)
-
-    const events = await Promise.all(
-      paths.map((x, i) => fetch(x).then(res => res.json()).then(data => {
-        return {
-          handle: handles[i],
-          data
-        }
-      }))
-    )
-
-    $.teach(events, mergeEvents)
-  } catch(e) {
-    console.error(e)
-  }
 }
 
 function mergeEvents(state, payload) {
@@ -305,7 +322,7 @@ const creationForms = {
     return `
       ${editBanner(this)}
       <div class="photo-form">
-        <sketch-pad></sketch-pad>
+        <plan98-pad></plan98-pad>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text" required/>
@@ -739,7 +756,8 @@ const viewRenderers = {
               </button>
             </div>
             <div class="photo-well">
-              <img src="${x.src}" />
+
+              <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
             <div class="draft-footer">
@@ -774,7 +792,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="photo-well">
-              <img src="${x.src}" />
+              <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
             <div class="draft-footer">
@@ -1211,7 +1229,7 @@ const eventRenderers = {
 
     return `
       <button class="view-event" data-show="${eventTypes.sketch}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <img src="${data.src}" alt="${data.title}">
+        <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
   },
@@ -1223,7 +1241,7 @@ const eventRenderers = {
 
     return `
       <button class="view-event" data-show="${eventTypes.photo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <img src="${data.src}" alt="${data.title}">
+        <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
   },
@@ -1306,6 +1324,15 @@ export function saveSketch(draft, context) {
   }, context)
 }
 
+export function saveAudio(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.audio,
+  }, context)
+}
+
 export function save(draft, context) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
   const timestamp = now.toJSON()
@@ -1314,40 +1341,33 @@ export function save(draft, context) {
     path = context.path
   }
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
+  const filePath = `/private/time-machine${path}`
   // Attempt to upload to server
-  fetch(`/private/time-machine${path}`, {
-      method: 'POST',
-      body: JSON.stringify(draft),
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
-    if (!response.ok) {
-      // Explicitly throw for non-200 responses
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+  put(filePath, JSON.stringify(draft), { type: 'application/json' }).then(response => {
     fate()
   }).catch(error => {
     console.warn(error);
   });
+
+  appendPath(filePath)
+}
+
+function appendPath(path) {
+  get('time-machine').then(async response => {
+    const obj = await response.text().then(str => JSON.parse(str))
+    const paths = [...(obj.paths || [])]
+    paths.push(path)
+    put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' }).then(() => {
+      fate()
+    })
+  })
 }
 
 export function destroy(context) {
   if(!context) return
 
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
-
   // Attempt to upload to server
-  fetch(`/private/time-machine${context.path}`, {
-      method: 'DELETE',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
+  del(`/private/time-machine${context.path}`).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -1424,7 +1444,6 @@ $.style(`
     overflow: hidden;
     background: white;
     position: relative;
-    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
   }
 
   & .time-feed-nom-nom-nom-nom {
@@ -1527,8 +1546,8 @@ $.style(`
   }
 
   & .era-label {
-    color: white;
-    background: black;
+    color: rgba(0,0,0,.65);
+    background: white;
     text-transform: uppercase;
     font-weight: 100;
     margin-bottom: 1rem;

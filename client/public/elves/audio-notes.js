@@ -2,8 +2,8 @@ import elf from '@silly/elf'
 import Vosk from 'vosk-browser'
 import translate from 'translate'
 import { innerHTML } from 'diffhtml'
-import { saveAudio } from './was-events.js'
-import { get, put } from './was-wallet.js'
+import { saveAudio } from './time-machine.js'
+import { get, put } from './plan98-wallet.js'
 
 translate.engine = "libre";
 translate.url = plan98.env.LIBRE_TRANSLATE_URL + '/translate'

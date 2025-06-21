@@ -2,112 +2,13 @@ import elf from '@silly/elf'
 // To use Html5Qrcode (more info below)
 import {Html5Qrcode} from "html5-qrcode";
 import { systemMenu, getTheme } from './paper-pocket.js'
-import { savePhoto } from './was-events.js'
-import { get, put } from './was-wallet.js'
+import { savePhoto } from './time-machine.js'
+import { get, put } from './plan98-wallet.js'
 
 const initial = {
 }
 
 const $ = elf('was-camera', initial)
-
-function engine(target) {
-  const canvas = target.closest($.link).querySelector('.terminal-canvas')
-  const rectangle = canvas.getBoundingClientRect()
-
-  return { canvas, rectangle }
-}
-
-function render(target) {
-  const container = target.querySelector('.trays')
-  return function runtime(tray) {
-    const {
-      suggestions,
-      suggestIndex,
-      focusedTray
-    } = $.learn()
-    const {
-      maximized,
-      systemPane,
-      minimized,
-      grabbed,
-      width,
-      height,
-      x,
-      y,
-      z,
-      url,
-      focused
-    } = $.learn()[tray]
-
-    let node = container.querySelector(`[data-id="${tray}"]`)
-    if(!node) {
-      node = document.createElement('div')
-      node.classList.add('tray');
-      node.dataset.id = tray
-      node.innerHTML = `
-        <button class="tray-wake" data-tray="${tray}"></button>
-        <div class="tray-title-bar" data-tray="${tray}" data-url="${url}">
-          <button class="tray-action tray-close" data-tray="${tray}">
-          </button>
-          <button class="tray-action tray-min " data-tray="${tray}">
-          </button>
-          <button class="tray-action tray-max" data-tray="${tray}">
-          </button>
-          <div class="grabber"></div>
-        </div>
-        <div class="tray-body">
-          ${url ? `
-            <iframe src="${url}" title="${url}"></iframe>
-          ` : renderSystemMenu(tray)}
-        </div>
-        <div class="resize-actions">
-          <button aria-label="resize" data-direction="sw" class="tray-resize minimizable resize-left-bottom" data-tray="${tray}">
-          </button>
-          <button aria-label="resize" data-direction="se" class="tray-resize minimizable resize-right-bottom" data-tray="${tray}">
-          </button>
-
-          <button aria-label="resize" data-direction="nw" class="tray-resize minimizable resize-left-top" data-tray="${tray}">
-          </button>
-          <button aria-label="resize" data-direction="ne" class="tray-resize minimizable resize-right-top" data-tray="${tray}">
-          </button>
-        </div>
-      `
-      container.appendChild(node)
-    }
-
-    node.style = `--width: ${width}px; --height: ${height}px;--x: ${x}px; --y: ${y}px; --z: ${z}; transform: translate(var(--x), var(--y)); z-index: var(--z);`
-
-    if(systemPane && node.lastPane !== systemPane) {
-      node.lastPane = systemPane
-      const groups = node.querySelector('.groups')
-      const applications = node.querySelector('.applications')
-      groups.innerHTML = renderGroups(tray, systemPane)
-      applications.innerHTML = renderApplications(systemPane)
-    }
-
-    if(focusedTray === tray) {
-      node.dataset.focused = true
-    } else {
-      node.dataset.focused = false
-    }
-
-    if(maximized) {
-      node.setAttribute('class', 'tray maximized')
-    } else if(minimized) {
-      node.setAttribute('class', 'tray minimized')
-    } else {
-      node.setAttribute('class', 'tray')
-    }
-
-    if(node.dataset.url !== url) {
-      node.dataset.url = url
-      node.querySelector('iframe').src = url
-    }
-
-    node.dataset.grabbed = grabbed
-    node.persist = true
-  }
-}
 
 async function getVideoConstraints() {
   try {
@@ -811,13 +712,12 @@ $.when('click', '[data-snap]', (event) => {
   const src = `/private/camera-roll/${timestamp}.jpg`
 
   // Attempt to upload to server
-  put(src, byteArray, { type: 'image/jpeg' }).then(response => {
-    if (!response.ok) {
-      // Explicitly throw for non-200 responses
-      throw new Error(`HTTP error! status: ${response.status}`);
+  put(src, byteArray, { type: 'image/jpeg' }).then(res => {
+    if(res.ok) {
+      savePhoto({ src })
+    } else {
+      throw new Error('Upload failed')
     }
-
-    savePhoto({ src })
   }).catch(error => {
     console.warn('Server upload failed, falling back to download', error);
 

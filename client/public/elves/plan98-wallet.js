@@ -1,394 +1,1035 @@
-import module from '@silly/tag'
-import { render } from '@sillonious/saga'
-import { doingBusinessAs } from '@sillonious/brand'
-import { link as feedbackChannelLink } from './feedback-channel.js';
-import { actionScript } from './action-script.js'
-import { getUser } from './plan98-reconnect.js'
+import { StorageClient } from "@wallet.storage/fetch-client";
+import { Ed25519Signer } from "@did.coop/did-key-ed25519"
+import { showModal } from './plan98-modal.js'
+import elf, { subscribe } from '@silly/elf'
+import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
-const raw = '/public'
-const currentWorkingDirectory = '/sagas/'
-const tutorial = 'wallet.saga'
+const Types = {
+  File: {
+    type: 'File',
+  },
+  Directory: {
+    type: 'Directory',
+  },
+}
 
-const $ = module('plan98-wallet', {
-  cache: {}
+const bios = {
+  'bluesky': '/app/blue-sky',
+  'desktop': '/app/door-man',
+  'mobile': '/app/mobile-device',
+  'remote': '/app/remote-control',
+  'gaming': '/app/couch-coop',
+  'music': '/app/paper-pocket?headless=true',
+  'shell': '/app/ur-shell',
+  'sketch': '/app/sketch-pad',
+  'script': '/app/hyper-script',
+  'journal': '/app/time-machine',
+  'boxart': '/app/plan98-boxart',
+}
+
+const defaultPath = {}
+const settingsMenuTypeSchema = () => Object.keys(sideEffects)
+  .filter(key => {
+    return $paperPocket.learn().settings[key]
+  }).reduce((path, key) => {
+    path[key] = {
+      ...sideEffects[key]
+    }
+    path[key] = sideEffects[key]
+    return path
+  }, defaultPath)
+
+const defaultState = {
+  keycards: []
+}
+
+const link = 'plan98-wallet'
+const existingState = JSON.parse(localStorage.getItem(link))
+const initialState = existingState
+  ? { ...defaultState, ...existingState }
+  : defaultState
+
+const $ = elf(link, initialState)
+
+const methods = {
+  importKeycard: 'import-keycard'
+}
+
+const methodHandlers = {
+  [methods.importKeycard]: (payload) => {
+    const { keycard } = payload.params
+    if(keycard) {
+      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+    }
+  }
+}
+
+function insertKeycard(state, payload) {
+  if(state.keycards.find(x => x.id === payload.id)) {
+    return pasteToKeycard(state, payload)
+  } else {
+    return unshiftKeycard(state, payload)
+  }
+}
+
+subscribe((link) => {
+  if(link === $.link) {
+    const { keycards } = $.learn()
+    localStorage.setItem(`${$.link}`, JSON.stringify({ keycards }))
+  }
 })
-$.when('click', '.action-script', actionScript)
 
-const accountKey = `ls/${$.link}/account`
+export function getKeycard() {
+  const { keycards } = $.learn()
 
-const hashFunctions = {
-  '#challenge': challenge
+  if(keycards.length === 0) {
+    return null
+  }
+
+  return keycards[0]
 }
 
-export function getList() {
-  return state['ls/wallet-1998/list'] || []
+export async function getSigner() {
+  const keycard = getKeycard()
+
+  if(!keycard) {
+    return null
+  }
+
+  return await Ed25519Signer.fromJSON(JSON.stringify(keycard.asJSON))
 }
 
-export function challenge() {
-  return 'provisioned.saga'
+export function getStorage(keycard=getKeycard()) {
+  if(!keycard) return null
+
+  return new StorageClient(new URL(keycard.host || plan98.env.PLAN98_WAS_HOST))
 }
 
-export function setupSaga(nextSaga, target, options={}) {
-  softReset()
-  const root = target === self
-    ? document.querySelector($.link)
-    : target.closest($.link) || document.querySelector($.link) || target.closest('xml-html') || document.body
-  const activeDialect = state['ls/xx-yy'] || 'en-us'
-  const identifier = currentWorkingDirectory + '1998.social/' + activeDialect + '/'+nextSaga
+async function newKeycard(overrides={}) {
+  const id = self.crypto.randomUUID()
+  const signer = await Ed25519Signer.generate()
 
-  root.dataset.lastHtml = target.innerHTML
-  fetch(raw+identifier)
-    .then(async response => {
-      if(response.status === 404) {
-        target.innerHTML = target.dataset.lastHtml
-        return
-      }
-      if(!root) window.location.href = identifier + window.location.search
-      const saga = await response.text()
+  const keycard = {
+    id,
+    src: '/app/blue-sky',
+    name: 'Keycard',
+    host: plan98.env.PLAN98_WAS_HOST,
+    at: new Date().toJSON(),
+    ...overrides
+  }
 
-      $.teach(
-        { [identifier]: saga },
-        (state, payload) => {
-          return {
-            ...state,
-            identifier,
-            cache: {
-              ...state.cache,
-              ...payload
-            }
-          }
-        }
-      )
-      showSaga(root, saga)
+  await provisionPlan98(signer, keycard).catch(console.error)
+
+  return {
+    ...keycard,
+    asJSON: signer.toJSON(),
+  }
+}
+
+async function provisionPlan98(signer, keycard) {
+  const storage = getStorage(keycard)
+
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+  console.log(keycard.id, signer.controller, signer.toJSON())
+
+  const linkset = space.resource(`linkset`)
+  const spaceObject = {
+    controller: signer.controller,
+    link: linkset.path,
+  }
+  const spaceObjectBlob = new Blob(
+    [JSON.stringify(spaceObject)],
+    { type: 'application/json' },
+  )
+
+  // send PUT request to update the space
+  const responseToPutSpace = await space.put(spaceObjectBlob)
+    .then(res => {
+      console.debug({ res })
+      return res
     })
     .catch(e => {
-      console.error(e)
+      console.debug(e)
+    })
+
+  if (!responseToPutSpace.ok) throw new Error(
+    `Failed to put space: ${responseToPutSpace.status} ${responseToPutSpace.statusText}`, {
+    cause: {
+      responseToPutSpace
+    }
+  })
+  if (!responseToPutSpace) return
+  
+  const responseToPutConfig = await putPlan98Config({space, signer}, keycard).catch(console.error)
+
+  if (!responseToPutConfig.ok) throw new Error(`Failed to put config: ${responseToPutConfig.status} ${responseToPutConfig.statusText}`, {
+    cause: {
+      responseToPutConfig
+    }
+  })
+
+  if (!responseToPutConfig) return
+  const keycardMetadata = await getPlan98Config({space, signer}).catch(console.error)
+
+  $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+}
+
+export async function get(src) {
+  const keycard = getKeycard()
+
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    return await resource.get({ signer })
+      .then(async res => {
+        if(res.status !== 200) {
+          throw new Error('Not a 200')
+        }
+        return (await res.blob())
+      })
+  }
+}
+
+export async function touch(src, config={ type: 'application/json' }) {
+  const keycard = getKeycard()
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    const typedBlob = new Blob([JSON.stringify({})], config)
+    return await resource.put(typedBlob, { signer })
+      .then(res => {
+        console.debug({ res })
+        return res
+      })
+  }
+}
+
+window.touch = touch
+
+export async function put(src, file, config={ type: 'text/plain' }) {
+  const keycard = getKeycard()
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    const typedBlob = new Blob([file], config)
+    return await resource.put(typedBlob, { signer })
+      .then(res => {
+        return res
+      })
+  }
+}
+
+
+
+export async function del(src) {
+  const keycard = getKeycard()
+  if(keycard) {
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const resource = space.resource(src)
+
+    return await resource.delete()
+      .then(res => {
+        console.debug({ res })
+        return res
+      })
+  }
+}
+
+
+export async function putPlan98Config({ space, signer }, keycard) {
+  const config = space.resource('/.plan98/config.json')
+  const blobForConfig = new Blob([JSON.stringify(keycard)], { type: 'application/json' })
+  return await config.put(blobForConfig, { signer })
+    .then(res => {
+      console.debug({ res })
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
     })
 }
 
-function showSaga(root, saga) {
-  schedule(() => {
-    root.innerHTML = `
-      <div class="siri">
-        <div>
-          <button data-history-back>
-            back
-          </button>
-        </div>
-        ${render(saga)}
-      </div>
-    `
+export async function getPlan98Config({space, signer}) {
+  const config = space.resource('/.plan98/config.json')
+
+  return await config.get({ signer })
+    .then(async res => {
+      return await res.json()
+    })
+    .catch(e => {
+      console.debug(e)
+    })
+}
+
+function uploadRecursive(context, { tree = {}, pathParts = [], subtree = {} }) {
+  const files = []
+  if(subtree.children) {
+    subtree.children.map((child, index) => {
+      const { name, type, extension } = child
+      const currentPathParts = [...pathParts, name]
+      const currentPath = currentPathParts.join('/') || '/'
+
+      if(type === Types.File.type) {
+        files.push((context.cwd || '') + currentPath)
+        queueUpload(context, currentPath)
+      }
+
+      if(type === Types.Directory.type) {
+        const moreFiles = uploadRecursive(context, { tree, pathParts: currentPathParts, subtree: child })
+        files.push(...moreFiles)
+      }
+    })
+  }
+  return files
+}
+
+export async function backupPlan98(context) {
+  const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
+    .then(res => res.json())
+
+  const filesOnly = uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
+
+  const aclAllowingPublicReads = context.space.resource('policy/published')
+  {
+    const policy = { type: 'PublicCanRead' }
+    const policyBlob = new Blob([JSON.stringify(policy)], { type: 'application/json' })
+    const responseToPutPolicy = await aclAllowingPublicReads.put(policyBlob, { signer: context.signer })
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to put policy: ${res.status} ${res.statusText}`, { cause: { res } })
+        return res
+      })
+      .catch(e => {
+        console.error(e)
+        toast(e.message, { type: 'error' })
+      })
+  }
+
+  const publicPaths = filesOnly.map(path => ({
+    "anchor": context.space.resource(path).path,
+    "acl": [
+      {
+        "href": aclAllowingPublicReads.path,
+      }
+    ]
+  }))
+
+  const linkset = context.space.resource(`linkset`)
+  {
+    const linksetObject = {
+      "linkset": publicPaths
+    };
+    const linksetBlob = new Blob([JSON.stringify(linksetObject)], { type: 'application/linkset+json' })
+    const response = await linkset.put(linksetBlob, { signer: context.signer })
+    if (!response.ok) throw new Error(`Failed to put linkset: ${response.status} ${response.statusText}`, { cause: { response } });
+  }
+
+}
+
+let queue = []
+let uploading = false
+function queueUpload(context, path) {
+  queue.push({
+    path: context.cwd + path,
+    error: false,
+    done: false
+  })
+
+  process(context)
+}
+
+function process(context) {
+  if(uploading) return
+
+  if(queue.length > 0) {
+    $.teach([...queue], (state, payload) => {
+      return {
+        ...state,
+        uploadQueue: [...state.uploadQueue, ...payload]
+      }
+    })
+    queue = []
+  }
+
+  const { uploadQueue, uploadCursor } = $.learn()
+
+  const item = uploadQueue[uploadCursor]
+
+  if(!item) return
+  uploading = true
+  fetch(item.path).then(async (response) => {
+    const contentType = response.headers.get('content-type');
+    const blob = await response.blob();
+
+    const resource = context.space.resource(item.path)
+    const typedBlob = new Blob([blob], { type: contentType })
+    resource.put(typedBlob, { signer: context.signer })
+      .then(res => {
+        console.debug({ res })
+        return res
+      })
+      .catch(e => {
+        $.teach({ error: true }, updateQueueAt(uploadCursor))
+        console.debug(e)
+      })
+      .finally(() => {
+        $.teach({ done: true }, updateQueueAt(uploadCursor))
+        $.teach({ uploadCursor: uploadCursor + 1 })
+        if(uploadQueue[uploadCursor]) {
+          uploading = false
+          process(context)
+        }
+      })
+  }).catch((error) => {
+    console.error(error)
+    $.teach({ error: true, done: true }, updateQueueAt(uploadCursor))
+    $.teach({ uploadCursor: uploadCursor + 1 })
+    if(uploadQueue[uploadCursor]) {
+      uploading = false
+      process(context)
+    }
   })
 }
 
-function createContext(actions) {
-  const list = actions.map((data) => {
-    const attributes = Object.keys(data).map(key => {
-      return `data-${key}="${data[key]}"`
-    }).join(' ')
-    return `
-      <div>
-        <button class="action-script" ${attributes}>
-          ${data.text}
-        </button>
-      </div>
-    `
-  }).join('')
+function updateQueueAt(index) {
+  return (state, payload) => {
+    return {
+      ...state,
+      uploadQueue: state.uploadQueue.map((x, i) => {
+        if(i === index) {
+          return {
+            ...x,
+            ...payload
+          }
+        }
 
+        return x
+      })
+    }
+  }
+}
+
+$.when('click', '[data-backup]', async (event) => {
+  const keycard = getKeycard()
+
+  if(keycard) {
+    getSigner().then(signer => {
+      const storage = getStorage()
+      const space = storage.space({
+        signer,
+        id: `urn:uuid:${keycard.id}`
+      })
+
+      $.teach({ uploadQueue: [], uploadCursor: 0 })
+      uploading = false
+      backupPlan98({ space, signer, cwd: event.target.dataset.backup || '' })
+    })
+  }
+})
+
+function renderQueue(item) {
   return `
-    <div>
-      <button data-close-context> 
-        back
-      </button>
+    <div class="file ${item.error?'error':item.done?'done':''}">
+      ${item.path}
     </div>
-    ${list}
   `
 }
 
 
-$.when('click', '[data-history-back]', (event) => {
-  if(event.target.closest('plan98-modal')) {
-    hideModal()
-  } else {
-    history.back()
-  }
-})
-
-async function mount(target) {
-  if(target.mounted) return
-  target.mounted = true
-  const user = await getUser().catch(e => console.error(e))
-  if(!user) {
-    window.location.href = '/?world=sillyz.computer'
-  }
-
-  if(!user.error) {
-    $.teach({ ...user })
-  }
-}
-
 $.draw((target) => {
-  mount(target)
-  const { identifier, cache } = $.learn()
+  const { editId, keycards, uploadQueue=[], uploadCursor } = $.learn()
 
-  const content = cache[identifier]
+  const draft = $.learn()[editId] || {}
 
-  let start = tutorial
-  const hash = target.getAttribute('hash') || window.location.hash
-  if(hashFunctions[hash]) {
-    const result = hashFunctions[hash]()
-    start = result ? result : start
+  const [active, ...row] = keycards
+  return editId ? `
+     <header style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div>
+        <button data-cancel>
+          Cancel
+        </button>
+      </div>
+      <div style="text-align: right;">
+        <button data-save="${editId}">
+          Save
+        </button>
+      </div>
+    </header>
+    <div class="keycard-form">
+      ${editId}
+      <label class="field">
+        <span class="label">name</span>
+        <input data-bind="${editId}" name="name" value="${escapeHyperText(active.name) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">host</span>
+        <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || plan98.env.PLAN98_WAS_HOST) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">launch</span>
+        <select data-bind="${editId}" name="src">
+          <option disabled>--Select--</option>
+          ${Object.keys(bios).map((x) => `
+            <option value="${bios[x]}" ${bios[x] === active.src?'selected':''}>
+              ${x}
+            </button>
+          `).join('')}
+        </select>
+      </label>
+
+
+      <hr>
+
+      <!--
+      <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
+        <plan98-palette local="true" name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+      </div>
+      -->
+      ${settingsMenu(editId)}
+
+      <hr>
+
+      <button data-backup="/public">
+        Publish: /public
+      </button>
+      <button data-backup="/private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown">
+        Publish: Video
+      </button>
+
+      ${uploadQueue[uploadCursor] ? `
+        <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
+          <span class="loader-status">
+            ${renderQueue(uploadQueue[uploadCursor])}
+          </span>
+        </div>
+      `:''}
+    </div>
+    <footer style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div>
+        Powered by <a href="https://plan98.org">Plan98</a>
+      </div>
+      <div style="text-align: right;">
+        <button data-remix>
+          Remix
+        </button>
+      </div>
+    </footer>
+  ` : `
+    <header style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div>
+        Wallet
+      </div>
+      <div style="text-align: right;">
+        <button data-create>
+          New Keycard
+        </button>
+      </div>
+    </header>
+    <section class="wallet">
+      ${active?`
+        <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
+          <div class="active-keycard">
+            ${render(active)}
+            <div class="keycard-actions">
+              <button data-launch="${active.id}">
+                Launch
+              </button>
+              <button data-export="${active.id}">
+                Export
+              </button>
+              <button data-edit="${active.id}">
+                Edit
+              </button>
+              <button data-delete="${active.id}">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      `:''}
+      <div class="keyring">
+        ${row.map(render).join('')}
+      </div>
+    </section>
+    <footer style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div>
+        Powered by <a href="https://plan98.org">Plan98</a>
+      </div>
+      <div style="text-align: right;">
+        <button data-remix>
+          Remix
+        </button>
+      </div>
+    </footer>
+  `
+}, {
+  beforeUpdate(target) {
+    if(!target.initialized) {
+      target.initialized = true
+      const data = target.getAttribute('data')
+      if(data) {
+        const payload = JSON.parse(atob(data))
+        jsonRPC(payload)
+      }
+
+      const { keycards } = $.learn()
+      if(keycards.length === 0) {
+        seed()
+      }
+
+      const keycard = getKeycard()
+
+      if(keycard) {
+        getSigner().then(signer => {
+          const storage = getStorage()
+          const space = storage.space({
+            signer,
+            id: `urn:uuid:${keycard.id}`
+          })
+
+          getPlan98Config({ space, signer }).then((keycardMetadata) => {
+            $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+          })
+        })
+      }
+    }
+  },
+  afterUpdate(target) {
+    {
+      afterUpdateTheme($paperPocket, target)
+    }
   }
-  if(!content) {
-    setupSaga(start, target)
-  }
-
-  showSaga(target, content)
 })
 
-$.style(`
-  & {
-    display: block;
-    background: black;
-    color: rgba(255,255,255,.65);
-    margin: auto;
-    overflow: auto;
-    position: relative;
-    height: 100%;
-    width: 100%;
-  }
 
-  & [data-back] {
-    padding: 1rem;
-    display: inline-block;
-    text-decoration: none;
-  }
+function settingsMenu(editId) {
+  const cardOptions = Object
+      .keys(settingsMenuTypeSchema()).map(key => {
+    const { label, description, options } = $paperPocket.learn().settings[key]
+    const draft = ($.learn()[$.learn()?.editId])
+    const value = (draft ? draft[key] : null) || getKeycard()[key] || $paperPocket.learn()[key]
+    return `
+      <label class="field">
+        <span class="label" data-tooltip="${description}">
+          ${label}
+        </span>
+        <select data-bind="${editId}" name="${key}">
+          <option disabled>${label}</option>
+          ${options.map(option => {
+            return `
+              <option ${option === value?'selected':''}>${option}</option>
+            `
+          }).join('')}
+        </select>
+      </label>
 
-  @media print {
-    & [data-back] {
-      display: none;
-    }
-  }
+    `
+  }).join('')
 
-  & .paper {
-    width: 100%;
-    height: 100%;
-  }
-
-  & textarea {
-    resize: none;
-  }
-
-  @keyframes &-fade-in {
-    0% {
-      opacity: 0;
-      transform: scale(1.1);
-    }
-    100% {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  &.active {
-  }
-
-  & .siri {
-    display: flex;
-    flex-direction: column;
-    padding: 3rem 1rem;
-    overflow: auto;
-  }
-
-  & .siri button {
-    font-weight: 100;
-    color: rgba(255,255,255,.65);
-    font-size: 2rem;
-    background: transparent;
-    border: none;
-    border-radius: none;
-    display: inline-block;
-    margin: 1rem 0;
-    text-align: left;
-  }
-
-  & .siri button:hover,
-  & .siri button:focus {
-    color: rgba(255,255,255,1);
-  }
-
-  & .zune .tile {
-    page-break-inside: avoid;
-    page-break-after: avoid;
-  }
-
-  & .app-action {
-    margin: 1rem 0;
-    display: block;
-  }
-
-  & .siri [data-logout],
-  & .siri [data-disconnect] {
-    font-size: 1.5rem;
-  }
-
-`)
-
-function schedule(x) { setTimeout(x, 1) }
-
-/*
- * Bayun State Machine
- *
- * a saga is a view at a particular moment in time
- *
- * when determining the state of a patron's patronage, considerations:
- *
- */
-export function getSession() {
-  return state[accountKey] || {}
+  return `
+    ${cardOptions}
+  `
 }
 
-export function setActiveAccount(email) {
-  state['ls/bayun'] = getSession()
-}
 
-export function clearSession() {
-  state[accountKey] = {}
-}
-
-export function getFeedback() {
-  return state[accountKey].feedback || []
-}
-
-export function softReset() {
-  if(!state[accountKey]) {
-    state[accountKey] = {}
+function jsonRPC(payload) {
+  const handler = methodHandlers[payload.method]
+  if(handler) {
+    handler(payload)
   }
-  state[accountKey].feedback = []
 }
 
-export function setError(error) {
-  state[feedbackChannelLink].feedback = [
-    { message: `${error}`, type: 'error'}
-  ]
-}
-
-export function setErrors(errors) {
-  state[feedbackChannelLink].feedback = errors.map((error) => {
-    return { message: `${error}`, type: 'error'}
+async function seed() {
+  Promise.all([
+    newKeycard({ name: 'silly', src: '/app/sketch-pad' }),
+    newKeycard({ name: 'sally', src: '/app/time-machine' }),
+    newKeycard({ name: 'sully', src: '/app/couch-coop' }),
+    newKeycard({ name: 'shelly', src: '/app/ur-shell' }),
+    newKeycard({ name: 'sunny', src: '/app/paper-pocket?headless=true' }),
+    newKeycard({ name: 'wally', src: '/app/hyper-script' }),
+  ]).then(agents => {
+    agents.forEach(keycard => {
+      $.teach(keycard, pushKeycard)
+    })
   })
 }
 
-/*
- *
- * companyName: the party to which they subscribe
- * <bayun-companies
- * */
-
-export function identify(event) {
-  if(!getCompanyName()) {
-    setError('Select a company')
-    return
-  }
-  setupSaga('identity.saga', event.target)
+function render(keycard) {
+  const { activeKeycardId } = $.learn()
+  return `
+    <button data-select="${keycard.id}" class="keycard ${activeKeycardId === keycard.id?'active':''}" style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
+      <span class="keycard-name">
+        ${keycard.name}
+      </span>
+      <span class="keycard-host">
+        ${keycard.host}
+      </span>
+    </button>
+  `
 }
 
-export function register(event) {
-  if(!getEmployeeId()) {
-    setError('enter an employee id')
-    return
-  }
-  setupSaga('register.saga', event.target)
-}
+$.when('click', '[data-create]', async (event) => {
+  const keycard = await newKeycard().catch(console.error)
+  $.teach(keycard, unshiftKeycard)
+  $.teach({ activeKeycardId: keycard.id })
+})
 
-export function login(event) {
-  if(!getEmployeeId()) {
-    setError('Enter an employee Id')
-    return
-  }
-  setupSaga('login.saga', event.target)
-}
-
-export function connected(event) {
-  setupSaga('welcome.saga', event.target)
-}
-
-export function setSession({ sessionId, companyName, companyEmployeeId }) {
-  state[accountKey] = {
-    sessionId,
-    companyName,
-    companyEmployeeId
+function pushKeycard(state, payload) {
+  return {
+    ...state,
+    keycards: [...state.keycards, payload]
   }
 }
 
-export function setSessionId(x) {
-  state[accountKey].sessionId = x
-}
-export function getSessionId() {
-  return state[accountKey].sessionId
-}
-
-export function getCompanies() {
-  return Object.keys(doingBusinessAs)
+function unshiftKeycard(state, payload) {
+  return {
+    ...state,
+    keycards: [payload, ...state.keycards]
+  }
 }
 
-export function setEmail(x) {
-  state[accountKey].email = x
-}
-export function getEmail() {
-  return state[accountKey].email
-}
+$.when('click', '[data-select]', (event) => {
+  const id = event.target.dataset.select
+  $.teach({ activeKeycardId: id })
+  $.teach(id, prioritizeKeycardById)
+})
 
-export function setAuthenticatedAt(x) {
-  state[accountKey].authenticatedAt = x.toISOString()
-}
-export function getAuthenticatedAt() {
-  return state[accountKey].authenticatedAt
-}
-
-export function setCompanyName(x) {
-  state[accountKey].companyName = x
-}
-export function getCompanyName() {
-  return state[accountKey].companyName
-}
-
-export function setEmployeeId(x) {
-  state[accountKey].companyEmployeeId = x
-}
-export function getEmployeeId() {
-  return state[accountKey].companyEmployeeId
+function prioritizeKeycardById(state, payload) {
+  const keycard = state.keycards.find(x => x.id === payload)
+  return {
+    ...state,
+    keycards: [keycard, ...state.keycards.filter(x => x.id !== payload)]
+  }
 }
 
 
-/*
- *
- * when unknown, the patron will accept the challenge question challenge.
- *
- * in turn, the system will say "Ask yourself a question that you will answer immediately following and also from now until eternity." five times, awaiting the question entry and answers
- *
- * after, they will be asked if they would like to authenticate again or skip for now
- *
- * if they skip, they will be admitted access to the rooms of the party as invited
- *
- * if they
- *
- *
- *
- * */
+$.when('click', '[data-launch]', (event) => {
+  const id = event.target.dataset.launch
+  const keycard = $.learn().keycards.find(x => x.id === id)
 
-export function actuallySecure(event) {
-  setupSaga('hard-start.saga', event.target)
+  if(keycard) {
+    self.location.href = keycard.src
+  }
+})
+
+$.when('click', '[data-export]', (event) => {
+  const { keycards } = $.learn()
+  const id = event.target.dataset.export
+  const keycard = keycards.find(x => x.id === id)
+  if(keycard) {
+    const encoded = btoa(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method: methods.importKeycard,
+        params: {
+          type: 'keycard',
+          keycard: {
+            asJSON: keycard.asJSON,
+            id: keycard.id,
+          }
+        }
+      })
+    )
+
+    showModal(`
+      <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
+        <div style="padding: 51px; height: 100%; display: flex;">
+          <qr-code src="${window.location.origin}/app/plan98-wallet?data=${encoded}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+        </div>
+      </div>
+    `, {
+      blockExit: false
+    })
+  }
+})
+
+$.when('click', '[data-remix]', (event) => {
+  showModal(`
+    <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
+      <was-code src="/public/elves/plan98-wallet.js"></was-code>
+    </div>
+  `, {
+    blockExit: false
+  })
+})
+
+$.when('click', '[data-edit]', (event) => {
+  const id = event.target.dataset.edit
+  $.teach({ editId: id })
+})
+
+$.when('click', '[data-cancel]', (event) => {
+  $.teach({ editId: null })
+})
+
+$.when('click', '[data-save]', async (event) => {
+  const id = event.target.dataset.save
+  $.teach({ editId: null })
+  const claim = $.learn()[id]
+  $.teach({ id, ...claim }, pasteToKeycard)
+
+  const keycard = $.learn().keycards.find(x => x.id === id)
+
+  if(keycard) {
+    const cleanKeycard = {
+      ...keycard
+    }
+
+    delete cleanKeycard.asJSON
+
+    const signer = await getSigner()
+    const storage = getStorage()
+
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const json = await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
+  }
+})
+
+function pasteToKeycard(state, payload) {
+  return {
+    ...state,
+    keycards: state.keycards.map(x => {
+      if(x.id !== payload.id) {
+        return x
+      }
+
+      return {
+        ...x,
+        ...payload
+      }
+    })
+  }
 }
 
-export function begin(event) {
-  setupSaga('hard-question0.saga', event.target)
+$.when('click', '[data-delete]', (event) => {
+  const id = event.target.dataset.delete
+  $.teach(id, deleteKeycardById)
+})
+
+function deleteKeycardById(state, payload) {
+  return {
+    ...state,
+    keycards: [...state.keycards.filter(x => x.id !== payload)]
+  }
 }
 
-export function save0(event) {
-  setupSaga('hard-question1.saga', event.target)
+
+$.style(`
+  & {
+    display: grid;
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    background: black;
+  }
+
+  & header {
+    background: rgba(255,255,255,.15);
+    color: rgba(255,255,255,.85);
+    padding: .5rem;
+  }
+
+  & footer {
+    background: rgba(255,255,255,.85);
+    padding: .5rem;
+  }
+
+  & .active-keycard {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 1rem;
+  }
+
+  & .lightbox {
+    padding: 3rem;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    background:
+      linear-gradient(335deg, var(--lightbox-color), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--lightbox-color);
+    place-content: center;
+  }
+
+  & .wallet {
+    overflow: auto;
+  }
+
+  & .keycard-form {
+    overflow: auto;
+    background: white;
+    padding: .5rem;
+  }
+
+  & .keyring {
+    padding: .5rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    gap: .5rem;
+    overflow: auto;
+    place-items: center;
+  }
+
+  & .keycard {
+    aspect-ratio: 1.66/1;
+    width: 100%;
+    max-width: 280px;
+    opacity: .65;
+    display: grid;
+    place-content: end end;
+    padding: .5rem;
+    text-align: left;
+    border-radius: .5rem;
+    border: 0;
+    text-align: right;
+    background:
+      linear-gradient(155deg, var(--keycard-theme, var(--root-theme, mediumseagreen)), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(145deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      linear-gradient(115deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
+      var(--keycard-theme, var(--root-theme, mediumseagreen));
+    color: rgba(255,255,255,.85);
+    word-break: break-all;
+  }
+
+  & .keycard:hover,
+  & .keycard:focus,
+  & .keycard.active {
+    opacity: 1;
+  }
+
+  & .file {
+
+  }
+
+  & .error {
+    color: firebrick;
+  }
+
+  & .done {
+    color: mediumseagreen;
+  }
+
+  & .loader-bar {
+    position: relative;
+    background: var(--keycard-theme, var(--root-theme, mediumseagreen));
+    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    text-align: right;
+    padding: .5rem;
+    border-radius: .5rem;
+    overflow: hidden;
+  }
+
+  & .loader-status {
+    position: relative;
+    z-index: 2;
+    color: rgba(255,255,255,.85);
+    opacity: 0.95;
+  }
+
+  & .loader-bar::after {
+    content: '';
+    width: var(--progress);
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--keycard-theme, var(--root-theme, mediumseagreen));
+  }
+`)
+
+$.when('input', 'plan98-palette', (event) => {
+  const { bind } = event.target.dataset
+  const { color } = event.detail
+  $.teach({
+    name: event.target.getAttribute('name'),
+    value: color
+  }, namespace(bind))
+})
+
+function namespace(bind) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [bind]: {
+        ...state[bind],
+        [payload.name]: payload.value
+      }
+    }
+  }
 }
 
-export function kickTheTires(event) {
-  setupSaga('soft-start.saga', event.target)
+$.when('input', '[data-bind]', (event) => {
+  const { bind } = event.target.dataset
+
+  const name = event.target.name
+  const value = event.target.value
+
+  $.teach({
+    name,
+    value
+  }, namespace(bind))
+})
+
+function escapeHyperText(text = '') {
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
 }
+
+export function replaceElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.replaceWith(newNode)
+  })
+}
+
+

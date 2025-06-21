@@ -215,7 +215,7 @@ $.when('click', '[data-journal]', function  (event) {
 
 $.when('click', '[data-wallet]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/was-wallet'
+  window.location.href = '/app/plan98-wallet'
 })
 
 

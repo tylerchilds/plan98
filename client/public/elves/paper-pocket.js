@@ -20,7 +20,7 @@ export const systemMenu = {
     list: [
       {
         label: 'Wallet',
-        url: '/app/was-wallet'
+        url: '/app/plan98-wallet'
       },
       {
         label: 'Hyper Text',

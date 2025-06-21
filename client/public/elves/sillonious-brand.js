@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <plan98-boxart></plan98-boxart>
+    <plan98-wallet></plan98-wallet>
   `
 })
 

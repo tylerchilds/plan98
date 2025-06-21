@@ -14,7 +14,7 @@ import {
   basicSetup
 } from "codemirror"
 
-import { get, put } from './was-wallet.js'
+import { get, put } from './plan98-wallet.js'
 
 const $ = module('was-code')
 

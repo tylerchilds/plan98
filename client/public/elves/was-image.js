@@ -1,5 +1,5 @@
 import elf from '@silly/elf'
-import { get } from './was-wallet.js'
+import { get } from './plan98-wallet.js'
 
 const $ = elf('was-image')
 
