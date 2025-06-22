@@ -1,12 +1,12 @@
 import elf from '@silly/elf'
 import { get } from './plan98-wallet.js'
 
-const $ = elf('was-audio')
+const $ = elf('was-video')
 
 $.draw((target) => {
   if(target.innerHTML) return
   return `
-    <audio controls="true"></audio>
+    <video controls="true"></video>
   `
 }, {
   afterUpdate(target) {
@@ -16,9 +16,9 @@ $.draw((target) => {
         const src = target.getAttribute('src')
         if(src) {
           get(src).then(blob => {
-            const data = new Blob([blob], { type: 'audio/mp3' });
-            const audio = target.querySelector('audio')
-            audio.src = URL.createObjectURL(data);
+            const data = new Blob([blob], { type: 'video/webm' });
+            const video = target.querySelector('video')
+            video.src = URL.createObjectURL(data);
             target.ready = true
           })
         }
@@ -26,3 +26,16 @@ $.draw((target) => {
     }
   }
 })
+
+$.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  & video {
+    width: 100%;
+    height: 100%;
+  }
+`)

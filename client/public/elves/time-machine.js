@@ -56,6 +56,8 @@ const views = {
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
+  [eventTypes.audio]: eventTypes.video,
+  [eventTypes.video]: eventTypes.audio,
   [eventTypes.archive]: eventTypes.archive,
   [eventTypes.dwebcamp]: eventTypes.dwebcamp,
   edge: 'edge'
@@ -307,7 +309,6 @@ const creationForms = {
     return `
       ${editBanner(this)}
       <div class="image-form">
-        <plan98-camera></plan98-camera>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
@@ -324,7 +325,6 @@ const creationForms = {
     return `
       ${editBanner(this)}
       <div class="image-form">
-        <plan98-pad></plan98-pad>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
@@ -337,7 +337,38 @@ const creationForms = {
       </div>
     `
   },
+  [eventTypes.audio]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="audio-form">
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
+        </label>
 
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+        </label>
+      </div>
+    `
+  },
+  [eventTypes.video]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="video-form">
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
+        </label>
+
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+        </label>
+      </div>
+    `
+  },
   [eventTypes.gallery]: function(draft) {
     return `
       <div class="gallery-form">
@@ -758,7 +789,6 @@ const viewRenderers = {
               </button>
             </div>
             <div class="image-well">
-
               <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -805,6 +835,75 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.video]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.video],
+      ...event.data,
+    }
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="image-well">
+              <was-video src="${x.src}"></was-video>
+              <div class="title">${escapeHyperText(x.title)}</div>
+            </div>
+            <div class="draft-footer">
+              ${stamp(x)}
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+  [views.audio]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.audio],
+      ...event.data,
+    }
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="image-well">
+              <was-audio src="${x.src}"></was-audio>
+              <div class="title">${escapeHyperText(x.title)}</div>
+            </div>
+            <div class="draft-footer">
+              ${stamp(x)}
+            </div>
+          </form>
+        </div>
+      </div>
+    `
+  },
+
 
 
   [views.tommi]: (target) => {
@@ -1190,6 +1289,8 @@ $.draw((target)=> {
       replaceElves(target, 'plan98-camera')
       replaceElves(target, 'plan98-icon')
       replaceElves(target, 'was-image')
+      replaceElves(target, 'was-audio')
+      replaceElves(target, 'was-video')
       replaceElves(target, 'sl-icon')
     }
   }
@@ -1248,6 +1349,31 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.audio]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event" data-show="${eventTypes.audio}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        Audio: ${data.title}
+      </button>
+    `
+  },
+  [eventTypes.video]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event" data-show="${eventTypes.video}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        Video: ${data.title}
+      </button>
+    `
+  },
+
 
   [eventTypes.archive]: function (event) {
     const data = {
@@ -1553,14 +1679,12 @@ $.style(`
   & .era-header {
     position: sticky;
     top: 0;
-    padding: .5rem;
     text-align: center;
-    z-index: 1;
+    z-index: 21;
   }
 
   & .era-label {
-    color: rgba(0,0,0,.65);
-    background: white;
+    color: rgba(0,0,0,.85);
     text-transform: uppercase;
     font-weight: 100;
     margin-bottom: 1rem;
@@ -1578,25 +1702,31 @@ $.style(`
   }
 
   & .now {
-    padding: 3rem 1rem;
+    padding: .5rem;
     text-align: center;
     background:
-      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
+      linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)),
       linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
       var(--root-theme, mediumseagreen);
+    position: sticky;
+    top: 0;
+    bottom: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   & .now-date {
-    font-size: 3rem;
     font-weight: bold;
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
+    place-self: start;
   }
 
 
   & .now-time {
-    font-size: 2rem;
-    color: rgba(255,255,255,.45);
+    color: rgba(0,0,0,.45);
+    place-self: end;
   }
 
   & .past-toggle-wrapper {
@@ -1769,11 +1899,10 @@ $.style(`
   }
 
   & .event {
-    text-align: center;
   }
 
   & .view-event {
-    border: 1px solid black;
+    border: none;
     background: white;
     border-radius: 3px;
     color: rgba(0,0,0,.85);
