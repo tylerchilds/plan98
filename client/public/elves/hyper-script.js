@@ -257,10 +257,9 @@ export function hyperSanitizer(script) {
 
 function source(target) {
   const head = target.closest($.link)
-  const today = new Date().toJSON().slice(0, 10)
   const explicit = head.getAttribute('src')
   const remote = head.getAttribute('remote') || ''
-  const implicit = `/public/journal/${today}.saga`
+  const implicit = `/public/404.saga`
   return `${remote}${explicit || implicit}`
 }
 

@@ -11,7 +11,8 @@ $.draw(() => `
     <plan98-palette escape="disabled"></plan98-palette>
   </div>
   <div class="violin-actions">
-    <button data-full>Zoom</button>
+    <button data-full class="action">Zoom</button>
+    <button data-quit class="action">Quit</button>
   </div>
 `)
 
@@ -26,6 +27,11 @@ $.when('click', '[data-full]', (event) => {
     delete target.dataset.full
   }
 })
+
+$.when('click', '[data-quit]', (event) => {
+  window.location.href = '/app/sketch-pad'
+})
+
 
 $.style(`
   & {
@@ -45,6 +51,8 @@ $.style(`
 
   & .violin-title {
     color: rgba(255,255,255,.85);
+    padding: .5rem;
+    font-weight: bold;
   }
 
   & .violin-case {
@@ -65,11 +73,29 @@ $.style(`
     height: 100%;
   }
 
+  & .violin-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
   & [data-full] {
+    place-self: start;
+  }
+
+  & [data-quit] {
+    place-self: end;
+  }
+
+  & .action {
     border: none;
     border-radius: 0;
     background: transparent;
     color: white;
     text-decoration: underline;
+    padding: .5rem;
+  }
+
+  & .action: {
+    text-decoration: none;
   }
 `)

@@ -636,9 +636,9 @@ export function quantize(callback) {
 
 $.draw((target) => {
   if(target.innerHTML) return
-  const { rom, src, mode, fullScreen, theme } = $.learn()
+  const { rom, src, mode, fullScreen, theme, headless } = $.learn()
   return `
-    <div class="chrome" style="--theme: ${theme}" data-headless="${target.getAttribute("headless")}" data-full="${fullScreen}">
+    <div class="chrome" style="--theme: ${theme}" data-headless="${headless}" data-full="${fullScreen}">
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
@@ -686,11 +686,23 @@ $.draw((target) => {
 }, {
   beforeUpdate: (target) => {
     {
+      const headless = (target.getAttribute("headless") || "").toLowerCase() === 'true'
+      const chrome = target.querySelector('.chrome')
+      if(headless) {
+        target.setAttribute("headless", 'false')
+        $.teach({ headless: true })
+      } else if(!$.learn().headless && chrome && chrome.dataset.headless === 'true') {
+        delete chrome.dataset.headless
+      }
+
       if(!target.mounted) {
         target.mounted = true
         const rom = target.getAttribute('rom')
         const src = target.getAttribute('src')
-        if(rom) $.teach({ rom, src })
+        if(rom) {
+          $.teach({ rom, src })
+        }
+
       }
     }
   },
@@ -1911,6 +1923,7 @@ function startFire(value) {
 function toggleFullscreen (event) {
   const { fullScreen } = $.learn()
   setScreenPreference(!fullScreen)
+  $.teach({ headless: false })
 }
 
 $.style(`

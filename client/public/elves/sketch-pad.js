@@ -2,6 +2,7 @@ import elf from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { saveSketch } from './time-machine.js'
+import { get, put } from './plan98-wallet.js'
 
 let lineWidth = 0
 let isMousedown = false
@@ -105,16 +106,16 @@ function mount(target) {
               <button data-thickness="${x}">${x}</button>
             `).join('')}
           </div>
-          <button data-undo>Undo</button>
-          <button data-redo>Redo</button>
-          <button data-journal>Journal</button>
-          <button data-wallet>Wallet</button>
+          <hr>
+          <button data-save>Save</button>
           <button data-help>
             Help
           </button>
-          <button data-download>Download</button>
-          <button data-save>Save</button>
-          <!--<button data-save-as>Save As</button>-->
+          <button data-journal>Quit</button>
+          <hr>
+          <button data-undo>Undo</button>
+          <button data-redo>Redo</button>
+          <hr>
           <button data-new>New</button>
         </div>
       </div>
@@ -213,9 +214,9 @@ $.when('click', '[data-journal]', function  (event) {
   window.location.href = '/app/time-machine'
 })
 
-$.when('click', '[data-wallet]', function  (event) {
+$.when('click', '[data-violion]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/plan98-wallet'
+  window.location.href = '/app/tiniest-violin'
 })
 
 
@@ -235,29 +236,16 @@ $.when('click', '[data-save]', function (event) {
       byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
   const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], { type: 'image/jpeg' });
-
-  const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
 
   const src = `/private/${$.link}/${timestamp}.jpg`
 
   // Attempt to upload to server
-  fetch(src, {
-      method: 'POST',
-      body: blob,
-      headers: {
-        'Content-Type': 'image/jpeg',
-        "Authorization": `Basic ${authorization}`
-      }
-  }).then(response => {
-    if (!response.ok) {
-      // Explicitly throw for non-200 responses
-      throw new Error(`HTTP error! status: ${response.status}`);
+  put(src, byteArray, { type: 'image/jpeg' }).then(res => {
+    if(res.ok) {
+      saveSketch({ src })
+    } else {
+      throw new Error('Upload failed')
     }
-
-    saveSketch({ src })
-
-    toast('Saved!', { type: 'success' })
   }).catch(error => {
     console.warn('Server upload failed, falling back to download', error);
 
@@ -545,6 +533,11 @@ $.style(`
     transition: opacity 1000ms ease-in-out;
   }
 
+  & hr {
+    border-top: 1px solid rgba(255,255,255, .15);
+    margin: .25rem 0;
+  }
+
   & .drop-down {
     z-index: 10;
     background: var(--active-color, black);
@@ -607,6 +600,7 @@ $.style(`
     top: 40px;
     left: 40px;
     max-height: calc(100vh - 40px);
+    max-width: calc(100vw - 40px);
     overflow: auto;
   }
 
@@ -633,6 +627,8 @@ $.style(`
   }
   &[data-drawer="size"] [data-pocket="size"] {
     display: flex;
+    max-width: 100%;
+    overflow-x: auto;
   }
 
   ${thicknoids.map(x => `

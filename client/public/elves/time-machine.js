@@ -1664,7 +1664,7 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-content: center;
-    z-index: 2;
+    z-index: 23;
   }
 
   & .create-item:hover,
