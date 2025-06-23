@@ -16,7 +16,7 @@ $.draw((target) => {
         const src = target.getAttribute('src')
         if(src) {
           get(src).then(blob => {
-            const data = new Blob([blob], { type: 'audio/mp3' });
+            const data = new Blob([blob], { type: blob.type });
             const audio = target.querySelector('audio')
             audio.src = URL.createObjectURL(data);
             target.ready = true

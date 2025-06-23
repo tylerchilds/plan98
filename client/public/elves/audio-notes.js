@@ -84,21 +84,26 @@ $.draw((target) => null, {
     partialContainer.innerHTML = partial
     resultContainer.innerHTML = result
     translateContainer.innerHTML = translated
-    microphoneContainer.innerHTML = recording ? '<button data-stop>Stop</button>' : '<button data-record>Record</button>'
+    microphoneContainer.innerHTML = recording
+      ? '<button data-stop>Stop</button>'
+      : '<button data-record>Record</button>'
   }
 })
 
 let mediaRecorder;
 let audioChunks = [];
 
-const mimeTypes = [
-  'audio/mp4',
-  'audio/mp4; codecs=mp4a.40.2',
-  'audio/aac',
-  'audio/wav',
-  'audio/webm; codecs=opus',
-  'audio/webm'
-];
+const extensions = {
+  'audio/mp4': 'm4a',
+  'audio/mp4; codecs=mp4a.40.2': 'm4a',
+  'audio/aac': 'aac',
+  'audio/wav': 'wav',
+  'audio/webm; codecs=opus': 'webm',
+  'audio/webm': 'webm'
+}
+
+
+const mimeTypes = Object.keys(extensions)
 
 const supportedAudioType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
 
@@ -149,7 +154,7 @@ $.when('click', '[data-record]', async (event) => {
       //root.mediaStream.getTracks().forEach(track => track.stop());
       const now = new Date();
       const timestamp = now.toJSON()
-      const src = `/private/audio-notes/${timestamp}.webm`
+      const src = `/private/audio-notes/${timestamp}.${extensions[supportedAudioType]}`
 
       // Attempt to upload to server
       put(src, audioBlob, { type: supportedAudioType }).then(response => {

@@ -96,13 +96,15 @@ $.draw((target) => null, {
 let mediaRecorder;
 let audioChunks = [];
 
-const videoMimeTypes = [
-  'video/mp4;codecs=avc1',
-  'video/mp4',
-  'video/webm; codecs="vp8,opus"', // Fallback for other browsers
-  'video/webm'
-];
+const extensions = {
+  'video/mp4;codecs=avc1': 'mp4',
+  'video/mp4': 'mp4',
+  'video/webm;codecs=vp8,opus': 'webm', // Fallback for other browsers
+  'video/webm': 'webm'
+}
 
+
+const videoMimeTypes = Object.keys(extensions)
 const supportedVideoType = videoMimeTypes.find(type =>
   MediaRecorder.isTypeSupported(type)
 );
@@ -154,7 +156,7 @@ $.when('click', '[data-record]', async (event) => {
       //root.mediaStream.getTracks().forEach(track => track.stop());
       const now = new Date();
       const timestamp = now.toJSON()
-      const src = `/private/video-notes/${timestamp}.webm`
+      const src = `/private/video-notes/${timestamp}.${extensions[supportedVideoType]}`
 
       // Attempt to upload to server
       put(src, videoBlob, { type: supportedVideoType }).then(response => {

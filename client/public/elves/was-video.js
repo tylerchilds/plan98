@@ -16,7 +16,7 @@ $.draw((target) => {
         const src = target.getAttribute('src')
         if(src) {
           get(src).then(blob => {
-            const data = new Blob([blob], { type: 'video/webm' });
+            const data = new Blob([blob], { type: blob.type });
             const video = target.querySelector('video')
             video.src = URL.createObjectURL(data);
             target.ready = true
