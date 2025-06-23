@@ -25,12 +25,15 @@ async function loadLanguages() {
     headers: {
       'Content-Type': 'application/json',
     },
-  });
-  languages = await response.json();
-  $.teach({
-    sourceLanguages: languages.map(x => ({code: x.code, name: x.name})),
-    destinationLanguages: languages[0].targets
-  })
+  }).catch(console.error);
+
+  const languages = await response.json().catch(console.error)
+  if(languages) {
+    $.teach({
+      sourceLanguages: languages.map(x => ({code: x.code, name: x.name})),
+      destinationLanguages: languages[0].targets
+    })
+  }
 }
 
 try {
@@ -166,16 +169,7 @@ $.when('click', '[data-record]', async (event) => {
         saveAudio({ src })
       }).catch(error => {
         console.warn('Server upload failed, falling back to download', error);
-
-        // Fallback: create a download link
-        const link = document.createElement('a');
-        link.download = `${timestamp}.jpg`;
-        link.href = dataURL;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
       });
-
     };
 
     // Start recording
@@ -244,7 +238,7 @@ async function init(target) {
         })
 
         const { to, from } = $.learn()
-        const translated = await translate(result.text, { to, from })
+        const translated = await translate(result.text, { to, from }).catch(console.error)
         $.teach({
           translated
         })
