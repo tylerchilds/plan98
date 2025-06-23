@@ -97,7 +97,7 @@ let mediaRecorder;
 let audioChunks = [];
 
 const videoMimeTypes = [
-  'video/mp4; codecs="avc1.42E01E,mp4a.40.2"',
+  'video/mp4;codecs=avc1',
   'video/mp4',
   'video/webm; codecs="vp8,opus"', // Fallback for other browsers
   'video/webm'
