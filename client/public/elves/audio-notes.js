@@ -91,7 +91,22 @@ $.draw((target) => null, {
 let mediaRecorder;
 let audioChunks = [];
 
+const mimeTypes = [
+  'audio/mp4',
+  'audio/mp4; codecs=mp4a.40.2',
+  'audio/aac',
+  'audio/wav',
+  'audio/webm; codecs=opus',
+  'audio/webm'
+];
+
+const supportedAudioType = mimeTypes.find(type => MediaRecorder.isTypeSupported(type));
+
 $.when('click', '[data-record]', async (event) => {
+  if (!supportedAudioType) {
+    return
+  }
+
   try {
     const root = event.target.closest($.link)
     $.teach({ recording: true })
@@ -113,7 +128,7 @@ $.when('click', '[data-record]', async (event) => {
     // Event handler for when recording stops
     mediaRecorder.onstop = () => {
       // Combine all audio chunks into a single Blob
-      const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+      const audioBlob = new Blob(audioChunks, { type: supportedAudioType });
       audioChunks = []; // Clear chunks for next recording
 
       // Create a URL for the Blob and set it as the audio source
@@ -137,7 +152,7 @@ $.when('click', '[data-record]', async (event) => {
       const src = `/private/audio-notes/${timestamp}.webm`
 
       // Attempt to upload to server
-      put(src, audioBlob, { type: 'audio/webm; codecs=opus' }).then(response => {
+      put(src, audioBlob, { type: supportedAudioType }).then(response => {
         if (!response.ok) {
           // Explicitly throw for non-200 responses
           throw new Error(`HTTP error! status: ${response.status}`);
