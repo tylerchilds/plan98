@@ -27,8 +27,6 @@ async function getVideoConstraints() {
     const defaultConstraints = {
       video: {
         facingMode: "environment",
-        width: { min: 1280, ideal: 1920, max: 3840 },
-        height: { min: 720, ideal: 1080, max: 2160 },
         aspectRatio: { ideal: 16/9 }
       },
       audio: false
@@ -39,16 +37,6 @@ async function getVideoConstraints() {
       return {
         video: {
           facingMode: "environment",
-          width: {
-            min: capabilities.width.min || 1280,
-            ideal: capabilities.width.max,
-            max: capabilities.width.max
-          },
-          height: {
-            min: capabilities.height.min || 720,
-            ideal: capabilities.height.max,
-            max: capabilities.height.max
-          },
           aspectRatio: { ideal: capabilities.width.max / capabilities.height.max }
         },
         audio: false
@@ -64,8 +52,6 @@ async function getVideoConstraints() {
     return {
       video: {
         facingMode: "environment",
-        width: { min: 1280, ideal: 1920, max: 3840 },
-        height: { min: 720, ideal: 1080, max: 2160 },
         aspectRatio: { ideal: 16/9 }
       },
       audio: false

@@ -4,6 +4,8 @@ import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
+const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
+
 const Types = {
   File: {
     type: 'File',
@@ -102,7 +104,7 @@ export async function getSigner() {
 export function getStorage(keycard=getKeycard()) {
   if(!keycard) return null
 
-  return new StorageClient(new URL(keycard.host || plan98.env.PLAN98_WAS_HOST))
+  return new StorageClient(new URL(keycard.host || walletDefaultHost))
 }
 
 async function newKeycard(overrides={}) {
@@ -113,7 +115,7 @@ async function newKeycard(overrides={}) {
     id,
     src: '/app/blue-sky',
     name: 'Keycard',
-    host: plan98.env.PLAN98_WAS_HOST,
+    host: walletDefaultHost,
     at: new Date().toJSON(),
     ...overrides
   }
@@ -495,7 +497,7 @@ $.draw((target) => {
       </label>
       <label class="field">
         <span class="label">host</span>
-        <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || plan98.env.PLAN98_WAS_HOST) || ''}" />
+        <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || walletDefaultHost) || ''}" />
       </label>
       <label class="field">
         <span class="label">launch</span>

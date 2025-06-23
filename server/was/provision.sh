@@ -12,6 +12,9 @@ cd wallet-attached-storage-server-main
 # Run npm install
 npm install
 
+# fix apple silicon :D
+npm rebuild better-sqlite3
+
 # Run deno task start-server
 
 # CORS_ALLOWED_ORIGINS='["http://localhost:8081"]' npm run dev
