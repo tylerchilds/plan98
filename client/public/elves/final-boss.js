@@ -136,7 +136,7 @@ function accept() {
 }
 
 function decline() {
-  window.location.href = 'https://hivelabworks.com'
+  window.location.href = '/app/ur-shell'
 }
 
 $.when('click', '.fake-button.good', accept)
