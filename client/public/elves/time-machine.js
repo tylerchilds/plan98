@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
@@ -152,6 +153,10 @@ function newDraft(type) {
 // dear diary
 const $ = elf('time-machine', {
   cards: [],
+  grabbing: false,
+  sidebar: false,
+  space: null,
+  time: null,
   now: new Date(),
   buckets: emptyBuckets,
   draft: newDraft(eventTypes.note),
@@ -1116,16 +1121,76 @@ const viewRenderers = {
 
 }
 
+function patch(target) {
+  const { space, time, now, buckets, view, draft, grabbing, sidebar } = $.learn()
+
+  {
+    const button = target.querySelector('[data-dom="create-button"]')
+    if(draft.type !== button.dataset.tooltip) {
+      button.dataset.tooltip = draft.type
+    }
+  }
+
+  {
+    const realm = target.querySelector('[data-dom="realm"]')
+    if(realm.dataset.grabbing !== grabbing.toString()) {
+      realm.dataset.grabbing = grabbing
+    }
+    if(realm.dataset.sidebar !== sidebar.toString()) {
+      realm.dataset.sidebar = sidebar
+    }
+  }
+
+  {
+    if(now !== target.now) {
+      target.now = now
+      const date = target.querySelector('[data-dom="date"]')
+      const time = target.querySelector('[data-dom="time"]')
+      date.innerHTML = formatDate(now)
+      time.innerHTML = formatTime(now)
+    }
+  }
+
+  {
+    for(const key in bucketKeys) {
+      const events = Object.keys(buckets[key])
+      if(target[key] !== events.length) {
+        target[key] = events.length
+        const node = target.querySelector(`[data-dom="${key}"]`)
+        if(node) {
+          const html = renderBucket(key)
+          node.innerHTML = html
+        }
+      }
+    }
+  }
+
+  {
+    if(
+      target.view !== view ||
+      target.dataset.space !== space ||
+      target.dataset.time !== time
+    ) {
+      target.view === view
+      target.dataset.space = space
+      target.dataset.time = time
+
+      const content = target.querySelector('[data-dom="content"]')
+      const html = viewRenderers[view] ? viewRenderers[view](target) : '' 
+      content.innerHTML=  html
+    }
+  }
+}
+
 
 // you are my diary
 $.draw((target)=> {
-  const { grabbing, sidebar } = $.learn()
-
   query(target)
-  const { now, view, buckets, draft } = $.learn()
+  if(target.innerHTML) return
+
   return `
     <div class="creation-container">
-      <button class="create-item" data-new data-tooltip="${draft.type}">
+      <button data-dom="create-button" class="create-item" data-new>
         <sl-icon name="plus-lg"></sl-icon>
       </button>
       <div class="menu-item">
@@ -1143,14 +1208,10 @@ $.draw((target)=> {
         </div>
       </div>
     </div>
-    <div class="chat-realm">
+    <div data-dom="realm" class="chat-realm">
       <div class="now" style="display: flex; justify-content: end; gap: .5rem;">
-        <div class="now-date">
-          ${formatDate(now)}
-        </div>
-        <div class="now-time">
-          ${formatTime(now)}
-        </div>
+        <div data-dom="date" class="now-date"></div>
+        <div data-dom="time" class="now-time"></div>
       </div>
 
       <div class="chat-sidebar">
@@ -1163,9 +1224,7 @@ $.draw((target)=> {
                   Past
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.past)}
-              </div>
+              <div data-dom="${bucketKeys.past}" class="era-events"></div>
             </div>
 
             <div class="era">
@@ -1174,9 +1233,7 @@ $.draw((target)=> {
                   Last Week
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.lastWeek)}
-              </div>
+              <div data-dom="${bucketKeys.lastWeek}" class="era-events"></div>
             </div>
             <div class="era">
               <div class="era-header">
@@ -1184,9 +1241,7 @@ $.draw((target)=> {
                   Yesterday
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.yesterday)}
-              </div>
+              <div data-dom="${bucketKeys.yesterday}" class="era-events"></div>
             </div>
             <div class="era the-present">
               <div class="era-header">
@@ -1194,9 +1249,7 @@ $.draw((target)=> {
                   Today
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.today)}
-              </div>
+              <div data-dom="${bucketKeys.today}" class="era-events"></div>
             </div>
 
             <div class="era">
@@ -1205,9 +1258,7 @@ $.draw((target)=> {
                   Tomorrow
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.tomorrow)}
-              </div>
+              <div data-dom="${bucketKeys.tomorrow}" class="era-events"></div>
             </div>
 
             <div class="era">
@@ -1216,9 +1267,7 @@ $.draw((target)=> {
                   This Week
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.thisWeek)}
-              </div>
+              <div data-dom="${bucketKeys.thisWeek}" class="era-events"></div>
             </div>
 
             <div class="era">
@@ -1227,9 +1276,7 @@ $.draw((target)=> {
                   Next Week
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.nextWeek)}
-              </div>
+              <div data-dom="${bucketKeys.nextWeek}" class="era-events"></div>
             </div>
 
             <div class="era">
@@ -1238,16 +1285,18 @@ $.draw((target)=> {
                   Future
                 </div>
               </div>
-              <div class="era-events">
-                ${renderBucket(bucketKeys.future)}
-              </div>
+              <div data-dom="${bucketKeys.future}" class="era-events"></div>
             </div>
           </div>
         </div>
+        <div class="chat-footer">
+          <button class="action-icon show-preferences">
+            <sl-icon name="sliders"></sl-icon>
+          </button>
+          <button class="action-button show-preferences">Preferences</button>
+        </div>
       </div>
-      <div class="content-area">
-        ${viewRenderers[view] ? viewRenderers[view](target) : '' }
-      </div>
+      <div data-dom="content" class="content-area"></div>
     </div>
   `
 }, {
@@ -1277,6 +1326,10 @@ $.draw((target)=> {
   },
   afterUpdate(target) {
     {
+      patch(target)
+    }
+
+    {
       afterUpdateTheme($paperPocket, target)
     }
 
@@ -1290,17 +1343,6 @@ $.draw((target)=> {
       if(activeItem) {
         activeItem.classList.add('active')
       }
-    }
-
-
-    {
-      replaceElves(target, 'sketch-pad')
-      replaceElves(target, 'plan98-camera')
-      replaceElves(target, 'plan98-icon')
-      replaceElves(target, 'was-image')
-      replaceElves(target, 'was-audio')
-      replaceElves(target, 'was-video')
-      replaceElves(target, 'sl-icon')
     }
   }
 })
@@ -1566,12 +1608,8 @@ $.when('click', '[data-view]', (event) => {
 
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
-  const root = event.target.closest($.link)
 
-  root.dataset.space = space
-  root.dataset.time = time
-
-  $.teach({ view: views[show] })
+  $.teach({ view: views[show], space, time })
 })
 
 
@@ -2141,9 +2179,11 @@ function paint() {
     background: white;
     position: relative;
     z-index: 21;
+    display: grid;
+    grid-template-rows: 1fr auto;
   }
 
-  & .show-sidebar .chat-sidebar {
+  & [data-sidebar="true"] .chat-sidebar {
     position; absolute;
     left: 0;
     display: block;
@@ -2158,26 +2198,23 @@ function paint() {
     grid-template-rows: 1fr auto;
   }
 
-  & .show-sidebar .chat-sidebar-inner {
+  & [data-sidebar="true"] .chat-sidebar-inner {
     display: block;
   }
 
   & .chat-footer {
     padding: .5rem;
-    position: absolute;
-    bottom: 0;
-    z-index: 100;
   }
 
   & .chat-footer .action-button {
     display: none;
     width: 100%;
   }
-  & .show-sidebar .chat-footer .action-button {
+  & [data-sidebar="true"] .chat-footer .action-button {
     display: block;
   }
 
-  & .show-sidebar .chat-footer .action-icon {
+  & [data-sidebar="true"] .chat-footer .action-icon {
     display: none;
   }
 
@@ -2187,8 +2224,47 @@ function paint() {
 
 
 
-  & .show-sidebar .chat-footer {
+  & [data-sidebar="true"] .chat-footer {
     position: relative;
+  }
+
+  &  [data-resize-sidebar] {
+    display: none;
+  }
+  & [data-sidebar="true"] [data-resize-sidebar] {
+    position: absolute;
+    display: block;
+    top: 0;
+    bottom: 0;
+    left: clamp(240px, var(--sidebar-width, 320px), 100%);
+    transform: translateX(-10px);
+    width: 10px;
+    background: rgba(255,255,255,.05);
+    z-index: 10;
+    cursor: col-resize;
+  }
+
+  & .chat-realm[data-sidebar="true"] {
+    grid-template-columns: 1fr;
+  }
+  & .chat-realm[data-sidebar="true"] .profile-actions {
+    padding: .5rem .5rem .5rem calc(34px + 1.5rem);
+    flex-direction: row;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+  }
+
+  @media (min-width: 48rem) {
+    & .chat-realm[data-sidebar="true"] {
+      grid-template-columns: clamp(240px, var(--sidebar-width, 320px), 100%) 1fr;
+    }
+
+    & .chat-sidebar {
+      position: relative !important;
+    }
   }
 `
 }
@@ -2271,7 +2347,7 @@ $.when('click', '[data-menu-target]', (event) => {
   const { activeMenu } = $.learn()
   const { menuTarget } = event.target.dataset
   const same = activeMenu === menuTarget
-  $.teach({ activeMenu: same ? null : menuTarget, sidebar: same })
+  $.teach({ activeMenu: same ? null : menuTarget })
   event.stopImmediatePropagation()
 })
 
