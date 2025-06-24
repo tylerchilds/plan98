@@ -1,6 +1,5 @@
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
-import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 
@@ -34,7 +33,7 @@ const thisWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
 const eventTypes = {
-  journal: 'journal',
+  note: 'note',
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
@@ -49,7 +48,7 @@ const eventTypes = {
 const views = {
   wallet: 'wallet',
   create: 'create',
-  [eventTypes.journal]: eventTypes.journal,
+  [eventTypes.note]: eventTypes.note,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
@@ -106,8 +105,8 @@ const schemas = {
     type: eventTypes.sketch,
     title: null,
   },
-  [eventTypes.journal]: {
-    type: eventTypes.journal,
+  [eventTypes.note]: {
+    type: eventTypes.note,
     text: '',
   },
   [eventTypes.gallery]: {
@@ -154,9 +153,11 @@ const $ = elf('time-machine', {
   cards: [],
   now: new Date(),
   buckets: emptyBuckets,
-  draft: newDraft(eventTypes.journal),
+  draft: newDraft(eventTypes.note),
   context: null
 })
+
+$.style(paint())
 
 setInterval(() => {
   $.teach({ now: new Date() })
@@ -291,7 +292,7 @@ function editBanner(context) {
 }
 
 const creationForms = {
-  [eventTypes.journal]: function(draft) {
+  [eventTypes.note]: function(draft) {
     return `
       <div class="tychi-form">
         ${editBanner(this)}
@@ -731,13 +732,13 @@ const viewRenderers = {
       </div>
     `
   },
-  [views.journal]: (target) => {
+  [views.note]: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.journal],
+      ...schemas[views.note],
       ...event.data,
     }
 
@@ -1117,25 +1118,10 @@ const viewRenderers = {
 
 // you are my diary
 $.draw((target)=> {
-  const { cards } = $.learn()
-  const view = target.getAttribute('view')
-
-  /*
-  if(cards.length === 0) {
-    return `
-      <div2 class="anonymous">
-        <my-wallet></my-wallet>
-      </div2>
-    `
-  }
-  */
-
-  if(viewRenderers[view]) {
-    return viewRenderers[view](target)
-  }
+  const { grabbing, sidebar } = $.learn()
 
   query(target)
-  const { now, buckets, draft } = $.learn()
+  const { now, view, buckets, draft } = $.learn()
   return `
     <div class="creation-container">
       <button class="create-item" data-new data-tooltip="${draft.type}">
@@ -1150,15 +1136,14 @@ $.draw((target)=> {
           <button data-new="${eventTypes.audio}">Audio</button>
           <button data-new="${eventTypes.image}">Image</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
-          <button data-new="${eventTypes.journal}">Journal</button>
+          <button data-new="${eventTypes.note}">Note</button>
           <hr>
-          <button data-journal>Quit</button>
+          <button data-note>Quit</button>
         </div>
       </div>
     </div>
-
-    <div class="time-feed-nom-nom-nom-nom">
-      <div class="now">
+    <div class="chat-realm">
+      <div class="now" style="display: flex; justify-content: end; gap: .5rem;">
         <div class="now-date">
           ${formatDate(now)}
         </div>
@@ -1167,90 +1152,100 @@ $.draw((target)=> {
         </div>
       </div>
 
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Past
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.past)}
-        </div>
-      </div>
+      <div class="chat-sidebar">
+        <div data-resize-sidebar></div>
+        <div class="chat-sidebar-inner">
+          <div class="time-feed-nom-nom-nom-nom">
+             <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Past
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.past)}
+              </div>
+            </div>
 
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Last Week
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.lastWeek)}
-        </div>
-      </div>
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Yesterday
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.yesterday)}
-        </div>
-      </div>
-      <div class="era the-present">
-        <div class="era-header">
-          <div class="era-label">
-            Today
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.today)}
-        </div>
-      </div>
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Last Week
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.lastWeek)}
+              </div>
+            </div>
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Yesterday
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.yesterday)}
+              </div>
+            </div>
+            <div class="era the-present">
+              <div class="era-header">
+                <div class="era-label">
+                  Today
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.today)}
+              </div>
+            </div>
 
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Tomorrow
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Tomorrow
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.tomorrow)}
+              </div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  This Week
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.thisWeek)}
+              </div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Next Week
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.nextWeek)}
+              </div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Future
+                </div>
+              </div>
+              <div class="era-events">
+                ${renderBucket(bucketKeys.future)}
+              </div>
+            </div>
           </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.tomorrow)}
         </div>
       </div>
-
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            This Week
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.thisWeek)}
-        </div>
-      </div>
-
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Next Week
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.nextWeek)}
-        </div>
-      </div>
-
-      <div class="era">
-        <div class="era-header">
-          <div class="era-label">
-            Future
-          </div>
-        </div>
-        <div class="era-events">
-          ${renderBucket(bucketKeys.future)}
-        </div>
+      <div class="content-area">
+        ${viewRenderers[view] ? viewRenderers[view](target) : '' }
       </div>
     </div>
   `
@@ -1260,15 +1255,10 @@ $.draw((target)=> {
     const view = target.getAttribute('view')
     if(!target.initialized) {
       target.initialized = true
-      if(q && view !== views.create) {
-        showModal(`
-          <time-machine view="${views.create}" q="${q}"></time-machine>
-        `, {
-          transparent: true
-        })
-      } else if(q) {
+      if(q) {
+        $.teach({ view: views.create })
         $.teach({
-          type: eventTypes.journal,
+          type: eventTypes.note,
           text: decodeURIComponent(q)
         }, (state, payload) => {
           return {
@@ -1279,6 +1269,8 @@ $.draw((target)=> {
             }
           }
         })
+      } else if(view) {
+        $.teach({ view })
       }
     }
   },
@@ -1313,18 +1305,18 @@ $.draw((target)=> {
 })
 
 const eventRenderers = {
-  [eventTypes.journal]: function (event) {
+  [eventTypes.note]: function (event) {
     const data = {
-      ...schemas[views.journal],
+      ...schemas[views.note],
       ...event.data
     }
     const [firstLine='', secondLine=''] = data.text.split('\n')
     return `
-      <button class="view-event" data-show="${eventTypes.journal}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <div class="journal-preview-1">
+      <button class="view-event" data-show="${eventTypes.note}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <div class="note-preview-1">
           ${firstLine}
         </div>
-        <div class="journal-preview-2">
+        <div class="note-preview-2">
           ${secondLine}
         </div>
       </button>
@@ -1538,7 +1530,6 @@ $.when('submit', '[action="post"]', async (event) => {
 
   if(draft) {
     save(draft, context)
-    hideModal()
     toast('Created!', { type: 'success' })
     $.teach({ draft: newDraft(draft.type), content: null })
   } else {
@@ -1550,7 +1541,6 @@ $.when('click', '[data-destroy]', async (event) => {
   event.preventDefault()
   try {
     destroy({ path: event.target.dataset.destroy })
-    hideModal()
     toast('Destroyed!', { type: 'success' })
   } catch(e) {
     toast('Error!' + e.message, { type: 'error' })
@@ -1569,11 +1559,12 @@ $.when('click', '[data-view]', (event) => {
 
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
-  showModal(`
-    <time-machine view="${views[show]}" data-space="${space}" data-time="${time}"></time-machine>
-  `, {
-    transparent: true
-  })
+  const root = event.target.closest($.link)
+
+  root.dataset.space = space
+  root.dataset.time = time
+
+  $.teach({ view: views[show] })
 })
 
 
@@ -1587,20 +1578,30 @@ $.when('click', '[data-new]', (event) => {
     }, bound('draft'))
   }
 
-  showModal(`
-    <time-machine view="${views.create}"></time-machine>
-  `, {
-    transparent: true
-  })
+  $.teach({ view: views.create })
 })
 
-$.style(`
+function paint() {
+  return `
   & {
     display: block;
     height: 100%;
     overflow: hidden;
-    background: white;
     position: relative;
+    animation: &-fade-in 1000ms ease-in-out 1000ms forwards;
+    background: black;
+    opacity: 0;
+  }
+
+  @keyframes &-fade-in {
+    0% {
+      opacity: 0;
+      background: black;
+    }
+    100% {
+      opacity: 1;
+      background: white;
+    }
   }
 
   & .time-feed-nom-nom-nom-nom {
@@ -1646,7 +1647,6 @@ $.style(`
   }
 
   & .era {
-    padding: 1rem;
   }
 
   & .creation-container {
@@ -1715,8 +1715,10 @@ $.style(`
 
   & .era-header {
     position: sticky;
+    background: white;
     top: 0;
     z-index: 21;
+    border-bottom: 1px solid rgba(0, 0, 0,.2);
   }
 
   & .era-label {
@@ -1725,7 +1727,7 @@ $.style(`
     font-weight: 100;
     margin-bottom: 1rem;
     margin: 0 auto;
-    padding: .5rem 0;
+    padding: .5rem;
     display: inline-block;
   }
 
@@ -1734,6 +1736,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    padding: 1rem;
   }
 
   & .now {
@@ -1744,10 +1747,8 @@ $.style(`
     position: sticky;
     top: 0;
     bottom: 0;
-    z-index: 20;
-    display: flex;
-    justify-content: end;
-    gap: .5rem;
+    z-index: 20; 
+    grid-column: -1 / 1;
   }
 
   & .now-date {
@@ -1958,13 +1959,13 @@ $.style(`
     transform: scale(1);
   }
 
-  & .view-event[data-show="${eventTypes.journal}"] {
+  & .view-event[data-show="${eventTypes.note}"] {
     background: lemonchiffon;
     color: saddlebrown;
   }
 
-  & .view-event[data-show="${eventTypes.journal}"]:hover,
-  & .view-event[data-show="${eventTypes.journal}"]:focus {
+  & .view-event[data-show="${eventTypes.note}"]:hover,
+  & .view-event[data-show="${eventTypes.note}"]:focus {
     background:
       linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.75) 20%, rgba(255,255,255,.45)),
       linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
@@ -1977,13 +1978,11 @@ $.style(`
 
   }
 
-
-
-  & .journal-preview-1 {
+  & .note-preview-1 {
     color: rgba(0,0,0,.65);
   }
 
-  & .journal-preview-2 {
+  & .note-preview-2 {
     color: rgba(0,0,0,.35);
   }
 
@@ -2102,15 +2101,91 @@ $.style(`
     border-top: 1px solid rgba(255,255,255, .15);
     margin: .25rem 0;
   }
-`)
+
+  & .chat-realm {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    z-index: 10;
+    height: 100%;
+  }
+
+  & .chat-realm.grabbed {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  & .chat-sidebar-inner {
+    position: relative;
+    overflow: auto;
+    height: 100%;
+  }
+
+  & .chat-sidebar {
+    overflow: auto;
+    border-right: 1px solid rgba(0, 0, 0,.2);
+    background: white;
+    position: relative;
+    z-index: 21;
+  }
+
+  & .show-sidebar .chat-sidebar {
+    position; absolute;
+    left: 0;
+    display: block;
+    width: clamp(240px, var(--sidebar-width, 320px), 100%);
+    max-width: 100vw;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 25;
+    padding-right: 10px;
+    display: grid;
+    grid-template-rows: 1fr auto;
+  }
+
+  & .show-sidebar .chat-sidebar-inner {
+    display: block;
+  }
+
+  & .chat-footer {
+    padding: .5rem;
+    position: absolute;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  & .chat-footer .action-button {
+    display: none;
+    width: 100%;
+  }
+  & .show-sidebar .chat-footer .action-button {
+    display: block;
+  }
+
+  & .show-sidebar .chat-footer .action-icon {
+    display: none;
+  }
+
+  & .chat-footer .action-icon {
+    display: block;
+  }
+
+
+
+  & .show-sidebar .chat-footer {
+    position: relative;
+  }
+
+
+`
+}
 
 $.when('click', '[data-cancel-draft]', () => {
   $.teach({ draft: newDraft($.learn().draft.type), context: null })
-  hideModal()
-})
-
-$.when('click', '.overlay-background', () => {
-  hideModal()
 })
 
 function formatDate(date) {
@@ -2187,6 +2262,31 @@ $.when('click', '[data-menu-target]', (event) => {
   event.preventDefault()
   const { activeMenu } = $.learn()
   const { menuTarget } = event.target.dataset
-  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
+  const same = activeMenu === menuTarget
+  $.teach({ activeMenu: same ? null : menuTarget, sidebar: same })
   event.stopImmediatePropagation()
 })
+
+$.when('pointerdown', '[data-resize-sidebar]', event => {
+  $.teach({ grabbing: true })
+  document.addEventListener("pointermove", resizeSidebar, false);
+  document.addEventListener("pointerup", () => {
+    $.teach({ grabbing: false })
+    document.removeEventListener("pointermove", resizeSidebar, false);
+  }, false);
+})
+
+function resizeSidebar(event) {
+  let width
+  if (event.touches && event.touches[0] && typeof event.touches[0]["force"] !== "undefined") {
+    width = event.touches[0].clientX
+  } else {
+    width = event.clientX
+  }
+
+  const size = `${width}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--sidebar-width", size);
+}
+
+
