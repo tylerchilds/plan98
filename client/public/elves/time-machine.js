@@ -2,7 +2,6 @@ import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { launch } from './plan98-synthia.js'
 import { getKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 
 const bucketKeys = {
@@ -1136,57 +1135,29 @@ $.draw((target)=> {
   }
 
   query(target)
-  const { now, pastEnabled, buckets } = $.learn()
+  const { now, buckets, draft } = $.learn()
   return `
-    <button class="create-item" data-new>
-      <sl-icon name="plus-lg"></sl-icon>
-    </button>
+    <div class="creation-container">
+      <button class="create-item" data-new data-tooltip="${draft.type}">
+        <sl-icon name="plus-lg"></sl-icon>
+      </button>
+      <div class="menu-item">
+        <button data-menu-target="edit" class="more-item">
+          <sl-icon name="list"></sl-icon>
+        </button>
+        <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.video}">Video</button>
+          <button data-new="${eventTypes.audio}">Audio</button>
+          <button data-new="${eventTypes.image}">Image</button>
+          <button data-new="${eventTypes.sketch}">Sketch</button>
+          <button data-new="${eventTypes.journal}">Journal</button>
+          <hr>
+          <button data-journal>Quit</button>
+        </div>
+      </div>
+    </div>
+
     <div class="time-feed-nom-nom-nom-nom">
-      <div class="wallet-header">
-        <button data-wallet>
-          <plan98-icon></plan98-icon>
-        </button>
-      </div>
-
-      <div class="past-toggle-wrapper">
-        <button class="standard-button" data-past-toggle>
-          ${pastEnabled?'Hide Past':'View Past'}
-        </button>
-      </div>
-      <div class="the-past ${pastEnabled?'visible':'hidden'}">
-        <div class="era">
-          <div class="era-header">
-            <div class="era-label">
-              Past
-            </div>
-          </div>
-          <div class="era-events">
-            ${renderBucket(bucketKeys.past)}
-          </div>
-        </div>
-
-        <div class="era">
-          <div class="era-header">
-            <div class="era-label">
-              Last Week
-            </div>
-          </div>
-          <div class="era-events">
-            ${renderBucket(bucketKeys.lastWeek)}
-          </div>
-        </div>
-        <div class="era">
-          <div class="era-header">
-            <div class="era-label">
-              Yesterday
-            </div>
-          </div>
-          <div class="era-events">
-            ${renderBucket(bucketKeys.yesterday)}
-          </div>
-        </div>
-      </div>
-
       <div class="now">
         <div class="now-date">
           ${formatDate(now)}
@@ -1197,6 +1168,37 @@ $.draw((target)=> {
       </div>
 
       <div class="era">
+        <div class="era-header">
+          <div class="era-label">
+            Past
+          </div>
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.past)}
+        </div>
+      </div>
+
+      <div class="era">
+        <div class="era-header">
+          <div class="era-label">
+            Last Week
+          </div>
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.lastWeek)}
+        </div>
+      </div>
+      <div class="era">
+        <div class="era-header">
+          <div class="era-label">
+            Yesterday
+          </div>
+        </div>
+        <div class="era-events">
+          ${renderBucket(bucketKeys.yesterday)}
+        </div>
+      </div>
+      <div class="era the-present">
         <div class="era-header">
           <div class="era-label">
             Today
@@ -1223,6 +1225,7 @@ $.draw((target)=> {
           <div class="era-label">
             This Week
           </div>
+        </div>
         <div class="era-events">
           ${renderBucket(bucketKeys.thisWeek)}
         </div>
@@ -1283,6 +1286,19 @@ $.draw((target)=> {
     {
       afterUpdateTheme($paperPocket, target)
     }
+
+    { // menu items
+      const { activeMenu } = $.learn()
+      const currentlyActive = target.querySelector('[data-menu-target].active')
+      if(currentlyActive) {
+        currentlyActive.classList.remove('active')
+      }
+      const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
+      if(activeItem) {
+        activeItem.classList.add('active')
+      }
+    }
+
 
     {
       replaceElves(target, 'sketch-pad')
@@ -1427,9 +1443,6 @@ function renderBucket(spaceKey) {
 }
 
 
-$.when('click', '[data-past-toggle]', (event) => {
-  $.teach({ pastEnabled: !$.learn().pastEnabled })
-})
 
 $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
@@ -1565,15 +1578,20 @@ $.when('click', '[data-show]', (event) => {
 
 
 $.when('click', '[data-new]', (event) => {
+  const type = event.target.dataset.new
+
+  if(eventTypes[type]) {
+    $.teach({
+      name: 'type',
+      value: type
+    }, bound('draft'))
+  }
+
   showModal(`
     <time-machine view="${views.create}"></time-machine>
   `, {
     transparent: true
   })
-})
-
-$.when('click', '[data-wallet]', (event) => {
-  launch()
 })
 
 $.style(`
@@ -1588,10 +1606,6 @@ $.style(`
   & .time-feed-nom-nom-nom-nom {
     height: 100%;
     overflow: auto;
-  }
-
-  & .wallet-header {
-    text-align: center;
   }
 
   & [data-destroy] {
@@ -1609,17 +1623,6 @@ $.style(`
     padding: .25rem;
     line-height: 1;
     place-content: center;
-  }
-
-  & [data-wallet] {
-    border: 0;
-    background: transparent;
-    padding: 0;
-  }
-
-  & [data-wallet]:hover,
-  & [data-wallet]:focus, {
-    background: transparent;
   }
 
   & .edit-banner {
@@ -1646,10 +1649,15 @@ $.style(`
     padding: 1rem;
   }
 
-  & .create-item {
+  & .creation-container {
     position: absolute;
-    bottom: 2rem;
-    right: 2rem;
+    bottom: 1rem;
+    right: 1rem;
+    display: inline-grid;
+    grid-template-columns: auto auto;
+  }
+
+  & .create-item {
     font-size: 2rem;
     border: none;
     border-radius: 3px;
@@ -1664,7 +1672,9 @@ $.style(`
     border-radius: 100%;
     display: grid;
     place-content: center;
-    z-index: 23;
+    z-index: 27;
+    position: relative;
+    left: 1.25rem;
   }
 
   & .create-item:hover,
@@ -1676,10 +1686,36 @@ $.style(`
       var(--root-theme, mediumseagreen);
   }
 
+  & .more-item {
+    border: none;
+    border-radius: 3px;
+    border: 1px solid var(--root-theme, mediumseagreen);
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.45) 20%, rgba(0,0,0,.65)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    padding: .5rem .5rem .5rem 1.5rem;
+    font-weight: bold;
+    border-radius: 0 .5rem .5rem 0;;
+    display: grid;
+    place-content: center;
+    z-index: 23;
+  }
+
+  & .more-item:hover,
+  & .more-item:focus {
+    color: rgba(255,255,255,.85);
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
+      var(--root-theme, mediumseagreen);
+  }
+
+
   & .era-header {
     position: sticky;
     top: 0;
-    text-align: center;
     z-index: 21;
   }
 
@@ -1689,12 +1725,11 @@ $.style(`
     font-weight: 100;
     margin-bottom: 1rem;
     margin: 0 auto;
-    padding: .5rem 1rem;
+    padding: .5rem 0;
     display: inline-block;
   }
 
   & .era-events {
-    max-width: 90ch;
     margin: auto;
     display: flex;
     flex-direction: column;
@@ -1703,35 +1738,28 @@ $.style(`
 
   & .now {
     padding: .5rem;
+    background: white;
     text-align: center;
-    background:
-      linear-gradient(rgba(255,255,255,.5), rgba(255,255,255,.5)),
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
+    border-bottom: 1px solid rgba(0, 0, 0,.2);
     position: sticky;
     top: 0;
     bottom: 0;
     z-index: 20;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    justify-content: end;
+    gap: .5rem;
   }
 
   & .now-date {
-    font-weight: bold;
     color: rgba(0,0,0,.65);
     place-self: start;
   }
 
 
   & .now-time {
+    font-weight: bold;
     color: rgba(0,0,0,.45);
     place-self: end;
-  }
-
-  & .past-toggle-wrapper {
-    text-align: center;
-    padding: 1rem;
   }
 
   & .the-past.visible {
@@ -2008,6 +2036,72 @@ $.style(`
     padding: .5rem;
     overflow: auto;
   }
+
+  & .menu-item {
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  & .dropdown-items {
+    display: none;
+    background: rgba(0,0,0,1);
+    position: absolute;
+    bottom: 0px;
+    left: 0;
+    max-height: calc(100vh);
+    max-width: calc(100vw - 40px);
+    overflow: auto;
+    transform: translate(calc(-100% + 1.25rem), 1rem);
+    z-index: 30;
+  }
+
+  & [data-menu-target].active + .dropdown-items {
+    display: block;
+  }
+
+
+
+  & .dropdown-items button > * {
+    pointer-events: none;
+  }
+
+  & .dropdown-items button:focus,
+  & .dropdown-items button.active,
+  & .dropdown-items button:hover {
+    background: rgba(255,255,255,.35);
+  }
+
+
+  & .dropdown-items  button {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,.85);
+    width: 100%;
+    text-align: left;
+    white-space: nowrap;
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-flex;
+    padding: .5rem;
+    gap: .5rem;
+    text-align: left;
+    display: block;
+    font-size: 1rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+  }
+
+  & hr {
+    border-top: 1px solid rgba(255,255,255, .15);
+    margin: .25rem 0;
+  }
 `)
 
 $.when('click', '[data-cancel-draft]', () => {
@@ -2047,7 +2141,11 @@ $.when('input', '[data-bind]', (event) => {
   $.teach({
     name: event.target.name,
     value: event.target.value
-  }, (state, payload) => {
+  }, bound(bind))
+})
+
+function bound(bind) {
+  return (state, payload) => {
     return {
       ...state,
       [bind]: {
@@ -2055,8 +2153,8 @@ $.when('input', '[data-bind]', (event) => {
         [payload.name]: payload.value
       }
     }
-  })
-})
+  }
+}
 
 function escapeHyperText(text = '') {
   if(!text) return ''
@@ -2075,4 +2173,20 @@ $.when('json-rpc', 'my-wallet', (event) => {
   if(event.detail.method === 'updated') {
     $.teach({ cards: event.detail.params.cards })
   }
+})
+
+$.when('pointerdown', '*', (event) => {
+  if(event.target.closest('.menu-item')) {
+    // child of a menu item
+    return
+  }
+  $.teach({ activeMenu: null })
+})
+
+$.when('click', '[data-menu-target]', (event) => {
+  event.preventDefault()
+  const { activeMenu } = $.learn()
+  const { menuTarget } = event.target.dataset
+  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
+  event.stopImmediatePropagation()
 })

@@ -17,7 +17,10 @@ $.draw((target) => {
         if(src) {
           get(src).then(blob => {
             const url = URL.createObjectURL(new Blob([blob]))
-            target.querySelector('img').src = url
+            const image = target.querySelector('img')
+            if(image) {
+              image.src = url
+            }
           })
         }
       }

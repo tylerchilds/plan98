@@ -1055,7 +1055,7 @@ sillonious-brand > xml-html {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 10000;
+  z-index: 2;
   background: var(--root-theme, transparent);
   mix-blend-mode: soft-light;
   opacity: .75;
