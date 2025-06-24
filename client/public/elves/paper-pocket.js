@@ -1926,6 +1926,11 @@ function toggleFullscreen (event) {
   $.teach({ headless: false })
 }
 
+export function quit (event) {
+  window.location.href = '/app/paper-pocket'
+}
+
+
 $.style(`
   & {
     display: block;

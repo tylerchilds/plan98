@@ -99,6 +99,8 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new>New</button>
+          <hr>
           <button data-stroke-color><span class="color-sample"></span>Color</button>
           <button data-drawer="size">Size</button>
           <div data-pocket="size">
@@ -107,16 +109,14 @@ function mount(target) {
             `).join('')}
           </div>
           <hr>
+          <button data-undo>Undo</button>
+          <button data-redo>Redo</button>
+          <hr>
           <button data-save>Save</button>
           <button data-help>
             Help
           </button>
           <button data-journal>Quit</button>
-          <hr>
-          <button data-undo>Undo</button>
-          <button data-redo>Redo</button>
-          <hr>
-          <button data-new>New</button>
         </div>
       </div>
     </div>
@@ -662,7 +662,7 @@ $.style(`
   }
 `)
 
-
+/*
 $.when('pointerdown', '*', (event) => {
   if(event.target.closest('.menu-item')) {
     // child of a menu item
@@ -670,6 +670,7 @@ $.when('pointerdown', '*', (event) => {
   }
   $.teach({ activeMenu: null })
 })
+*/
 
 $.when('click', '[data-menu-target]', (event) => {
   event.preventDefault()

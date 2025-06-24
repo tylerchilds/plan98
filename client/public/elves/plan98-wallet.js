@@ -551,11 +551,13 @@ $.draw((target) => {
   ` : `
     <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
-        Wallet
-      </div>
-      <div style="text-align: right;">
         <button data-create>
           New Keycard
+        </button>
+      </div>
+      <div style="text-align: right;">
+        <button data-quit>
+          Quit
         </button>
       </div>
     </header>
@@ -706,6 +708,10 @@ $.when('click', '[data-create]', async (event) => {
   const keycard = await newKeycard().catch(console.error)
   $.teach(keycard, unshiftKeycard)
   $.teach({ activeKeycardId: keycard.id })
+})
+
+$.when('click', '[data-quit]', async (event) => {
+  window.location.href = '/app/paper-pocket'
 })
 
 function pushKeycard(state, payload) {

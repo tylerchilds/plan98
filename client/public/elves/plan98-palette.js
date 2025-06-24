@@ -269,10 +269,6 @@ $.when('pointerup', '[data-midi]', (event) => {
     root.dispatchEvent(new CustomEvent('input', {
       detail: { color: newColor }
     }))
-
-    if(target.getAttribute('escape') !== 'disabled') {
-      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-    }
   }
 })
 

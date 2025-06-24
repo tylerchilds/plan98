@@ -54,8 +54,8 @@ const views = {
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
-  [eventTypes.audio]: eventTypes.video,
-  [eventTypes.video]: eventTypes.audio,
+  [eventTypes.audio]: eventTypes.audio,
+  [eventTypes.video]: eventTypes.video,
   [eventTypes.archive]: eventTypes.archive,
   [eventTypes.dwebcamp]: eventTypes.dwebcamp,
   edge: 'edge'
@@ -143,6 +143,7 @@ const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 
 function newDraft(type) {
   return {
+    id: self.crypto.randomUUID(),
     ...(schemas[type] || {}),
     ...timeFields()
   }
@@ -1138,7 +1139,7 @@ $.draw((target)=> {
           <button data-new="${eventTypes.sketch}">Sketch</button>
           <button data-new="${eventTypes.note}">Note</button>
           <hr>
-          <button data-note>Quit</button>
+          <button data-quit>Quit</button>
         </div>
       </div>
     </div>
@@ -1438,7 +1439,13 @@ function renderBucket(spaceKey) {
 
 $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
+  $.teach({ view: views.create })
 })
+
+$.when('click', '[data-edit]', async (event) => {
+  $.teach({ view: views.create })
+})
+
 
 export function savePhoto(draft, context) {
   save({
@@ -1551,7 +1558,7 @@ $.when('click', '[data-destroy]', async (event) => {
 $.when('click', '[data-view]', (event) => {
   event.preventDefault()
   const { view, space, time } = event.target.dataset
-  event.target.closest($.link).setAttribute('view', view)
+  $.teach({ view })
 
   const h = $.learn().buckets[space][time] || { data: {} }
   $.teach({ draft: h.data, context: h.handle })
@@ -1578,7 +1585,11 @@ $.when('click', '[data-new]', (event) => {
     }, bound('draft'))
   }
 
-  $.teach({ view: views.create })
+  $.teach({ view: views.create, activeMenu: null })
+})
+
+$.when('click', '[data-quit]', (event) => {
+  window.location.href = '/app/plan98-wallet'
 })
 
 function paint() {
@@ -2179,13 +2190,11 @@ function paint() {
   & .show-sidebar .chat-footer {
     position: relative;
   }
-
-
 `
 }
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ draft: newDraft($.learn().draft.type), context: null })
+  $.teach({ view: null, context: null })
 })
 
 function formatDate(date) {
@@ -2202,7 +2211,6 @@ function formatTime(date, options = {
   hour: '2-digit',
   minute: '2-digit',
 }) {
-
   return date.toLocaleString('en-US', options);
 }
 
