@@ -147,11 +147,25 @@ function renderModels(model) {
   `).join('')
 }
 
+const killCommands = ['exit', 'quit', 'escape']
+
+function kill(program) {
+  return killCommands.includes(program.toLowerCase())
+}
+
+const killCommandHandlers = {}
+
+for(const command of killCommands) {
+  killCommandHandlers[command] = () => {
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+  }
+}
+
 const modalities = {
   luau(program) {
-    if(program === 'exit') {
+    if(kill(program)) {
       $.teach({ modality: null })
-    return 'Exiting Luau modality.'
+      return 'Exiting Luau modality.'
     }
     if(imports.haveLuau) {
       const logs = imports.haveLuau(program)
@@ -160,7 +174,7 @@ const modalities = {
     }
   },
   async js(program) {
-    if(program === 'exit') {
+    if(program === 'exit' || program === 'quit') {
       $.teach({ modality: null })
     return 'Exiting JS modality.'
     }
@@ -400,9 +414,7 @@ const commands = {
       return `${key}: ${plan98.env[key]}`
     }).join('\n')
   },
-  'exit': () => {
-    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-  },
+  ...killCommandHandlers,
   'help': (...args) => {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
@@ -412,7 +424,7 @@ PLAN98
 help
   display help options
 
-exit
+${killCommands.join(' ')}
   quit playing around and go outside
 
 color
