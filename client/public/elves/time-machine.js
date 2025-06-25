@@ -681,10 +681,6 @@ $.style(`
     height: 100%;
   }
 
-  & .chat-realm[data-sidebar="true"] {
-    grid-template-columns: auto 1fr;
-  }
-
   & .chat-realm[data-grabbing="true"] {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -740,12 +736,9 @@ $.style(`
     position: relative;
   }
 
-  &  [data-resize-sidebar] {
+  & [data-resize-sidebar] {
     display: none;
-  }
-  & [data-sidebar="true"] [data-resize-sidebar] {
     position: absolute;
-    display: block;
     top: 0;
     bottom: 0;
     left: clamp(240px, var(--sidebar-width, 320px), 100%);
@@ -755,11 +748,11 @@ $.style(`
     z-index: 10;
     cursor: col-resize;
   }
-
-  & .chat-realm[data-sidebar="true"] {
-    grid-template-columns: 1fr;
+  & [data-sidebar="true"] [data-resize-sidebar] {
+    display: block;
   }
-  & .chat-realm[data-sidebar="true"] .profile-actions {
+
+    & .chat-realm[data-sidebar="true"] .profile-actions {
     padding: .5rem .5rem .5rem calc(34px + 1.5rem);
     flex-direction: row;
     position: absolute;
@@ -783,6 +776,9 @@ $.style(`
   }
 
   @media (min-width: 48rem) {
+    &  [data-resize-sidebar] {
+      display: block !important;
+    }
 
     & .chat-realm {
       grid-template-columns: clamp(240px, var(--sidebar-width, 320px), 100%) 1fr;
@@ -797,6 +793,10 @@ $.style(`
   & .search-and-filter {
     display: grid;
     grid-template-columns: auto 1fr;
+  }
+
+  & .search-and-filter input {
+    width: 100%;
   }
 `)
 
@@ -941,8 +941,7 @@ const creationForms = {
           name="text"
           data-bind="draft"
           placeholder="This is a space for you."
-          value="${escapeHyperText(draft.text)}"
-        ></textarea>
+        >${escapeHyperText(draft.text)}</textarea>
       </div>
     `
   },
@@ -1332,6 +1331,7 @@ const viewRenderers = {
   },
   [views.create]: (target) => {
     const { draft, context } = $.learn()
+    const form = renderCreationFormByType.call(context, draft)
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -1345,7 +1345,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="text-well">
-              ${renderCreationFormByType.call(context, draft)}
+              ${form}
             </div>
             <div class="draft-footer">
               <div class="time-form">
@@ -1972,7 +1972,7 @@ $.draw((target)=> {
   },
   afterUpdate(target) {
     {
-      patch(target)
+      requestAnimationFrame(() => patch(target))
     }
 
     {
@@ -2130,13 +2130,6 @@ $.when('submit', '[action="edit"]', async (event) => {
   $.teach({ view: views.create })
 })
 
-$.when('click', '[data-edit]', async (event) => {
-  const { space, time } = event.target.dataset
-  debugger
-  $.teach({ view: views.create, space, time })
-})
-
-
 export function savePhoto(draft, context) {
   save({
     title: 'Untitled',
@@ -2229,7 +2222,7 @@ $.when('submit', '[action="post"]', async (event) => {
   if(draft) {
     save(draft, context)
     toast('Created!', { type: 'success' })
-    $.teach({ draft: newDraft(draft.type), content: null, view: null })
+    $.teach({ draft: newDraft(draft.type), content: null, view: null, space: null, time: null })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
@@ -2249,7 +2242,7 @@ $.when('click', '[data-destroy]', async (event) => {
 $.when('click', '[data-view]', (event) => {
   event.preventDefault()
   const { view, space, time } = event.target.dataset
-  $.teach({ view })
+  $.teach({ view, space, time })
 
   const h = $.learn().buckets[space][time] || { data: {} }
   $.teach({ draft: h.data, context: h.handle })
