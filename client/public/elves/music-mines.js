@@ -1,6 +1,6 @@
 import elf from '@silly/tag'
 import * as Tone from 'tone@next'
-import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
+import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 
 const modes = {

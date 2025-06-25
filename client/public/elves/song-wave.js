@@ -1,7 +1,7 @@
 import elf from '@silly/elf'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
-import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
+import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { systemMenu, getTheme } from './paper-pocket.js'
 import { gamestateUplink, gamestateDownlink } from './couch-coop.js'
 

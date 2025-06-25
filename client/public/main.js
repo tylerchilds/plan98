@@ -1,8 +1,9 @@
 import module from '@silly/tag'
-import 'randomuuid'
 import { doingBusinessAs } from "@sillonious/brand"
-import './elves/plan98-synthia.js'
-import './elves/plan98-console.js'
+
+import('randomuuid').catch(console.error)
+import('./elves/plan98-console.js').catch(console.error)
+import('./elves/plan98-synthia.js').catch(console.error)
 
 self.plan98 ||= { env: {} }
 

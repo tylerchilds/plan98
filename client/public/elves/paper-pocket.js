@@ -3,7 +3,7 @@ import { consoleShow, consoleHide } from './plan98-console.js'
 import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
-import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
+import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
 const modes = {

@@ -1948,11 +1948,12 @@ $.draw((target)=> {
 }, {
   beforeUpdate(target) {
     const q = target.getAttribute('q')
+    const src = target.getAttribute('src') || '/app/plan98-wallet'
     const view = target.getAttribute('view')
     if(!target.initialized) {
       target.initialized = true
       if(q) {
-        $.teach({ view: views.create })
+        $.teach({ view: views.create, src })
         $.teach({
           type: eventTypes.note,
           text: decodeURIComponent(q)
@@ -1966,7 +1967,7 @@ $.draw((target)=> {
           }
         })
       } else if(view) {
-        $.teach({ view })
+        $.teach({ view, src })
       }
     }
   },

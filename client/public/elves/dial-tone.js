@@ -1,6 +1,6 @@
 import elf from '@silly/tag'
 import * as Tone from 'tone@next'
-import { SampleLibrary } from '/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
+import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 
 const $ = elf('dial-tone', { root: 60, meander: true, samples: {} })
 
