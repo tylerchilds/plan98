@@ -7,6 +7,11 @@
       "autostart": true
     },
     {
+      "id": "plan98-start-peer",
+      "cmd": "cd client && deno run -A server.js",
+      "autostart": true
+    },
+    {
       "id": "plan98-start-multiplayer",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",
       "autostart": true

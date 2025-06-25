@@ -7,85 +7,65 @@
     "package": "deno run -A .deno/to-npm.js",
     "publish": "cd npm && npm publish",
     "start-proxy": "caddy run --config Caddyfile",
-
     "start-old": "deno run -A --unstable mod.js",
     "start": "pup run --config pup.json",
     "compile-client": "deno compile -A --output p98 client.js",
-
     "provision-api": "cd server/api && ./provision.sh",
     "start-api": "cd server/api && deno -A index.js",
     "reverse-api": "ssh -N -R 3003:localhost:3003 local.$USER.me",
-
     "start-client": "deno run -A client.js",
     "debug-client": "deno run -A --inspect-brk client.js",
     "reverse-client": "ssh -N -R 1998:localhost:8000 local.$USER.me",
-
+    "start-peer": "cd client && deno run -A server.js",
+    "deploy-peer": "cd client && deployctl deploy --entrypoint=./server.js --prod --exclude=./private --exclude=./public",
+    "debug-peer": "cd client && deno run -A --inspect-brk server.js",
+    "reverse-peer": "ssh -N -R 1024:localhost:1024 $USER.plan98.org",
     "start-server": "plan98client=$(pwd)/client; cd distros/subsystems/rust-9p/example/unpfs && cargo run --release 'tcp!0.0.0.0!7777' $plan98client",
     "reverse-server": "ssh -N -R 7777:localhost:7777 drive.$USER.me",
-
     "start-identity": "deno run -A identity.js",
     "reverse-identity": "ssh -N -R 3001:localhost:3001 wallet.$USER.me",
-
     "start-modules": "cd ../SourceCode/esm.sh && go run main.go --config=config.json --dev",
     "reverse-modules": "ssh -N -R 8080:localhost:8090 esm.$USER.me",
-
     "start-relay": "cd server/relay && npm start",
     "reverse-relay": "ssh -N -R 8765:localhost:8765 relay.$USER.me",
-
     "provision-braidmail": "cd server/braidmail && ./provision.sh",
     "start-braidmail": "cd server/braidmail/braidmail-main && node server-demo.js",
     "reverse-braidmail": "ssh -N -R 7465:localhost:7465 braidmail.$USER.me",
-
     "provision-verison-control": "cd server/braid-text && ./provision.sh",
     "start-version-control": "cd server/braid-text/braid-text-master && node server-demo.js",
     "reverse-version-control": "ssh -N -R 8888:localhost:8888 braidmail.$USER.me",
-
     "provision-solid": "cd server/solid && ./provision.sh",
     "start-solid": "cd server/solid/CommunitySolidServer-main && npm start",
     "reverse-solid": "ssh -N -R 3000:localhost:3000 pod.$USER.me",
-
     "provision-activity-pub": "cd server/activity-pub && ./provision.sh",
     "start-activity-pub": "cd server/activity-pub/express-activitypub-master && node index.js",
     "reverse-activity-pub": "ssh -N -R 3002:localhost:3002 pub.$USER.me",
-
     "provision-translate": "cd server/libretranslate && ./provision.sh",
     "start-translate": "cd server/libretranslate && ./start.sh",
     "reverse-translate": "ssh -N -R 3005:localhost:3005 translate.$USER.me",
-
     "start-multiplayer": "cd server/multiplayer && npm i && node index.mjs",
     "reverse-multiplayer": "ssh -N -R 9208:localhost:9208 multiplayer.$USER.me",
-
     "start-database": "cd server/private && ./pocketbase serve",
     "reverse-database": "ssh -N -R 8090:localhost:8090 pocket.$USER.me",
-
     "thumb-drive": "sudo mount -t 9p -o trans=tcp,port=7777,uname=$USER 127.0.0.1 /home/$USER/thumb-drive",
     "unthumb-drive": "sudo umount /home/$USER/thumb-drive",
-
     "package-assets": "cp -r client/public sillyz.computer/src",
-
     "native-dev": "deno task package-assets && cd sillyz.computer && cargo-tauri dev",
     "native-build": "deno task package-assets && cd sillyz.computer && NO_STRIP=true cargo-tauri build --bundles appimage",
-
     "mac-build": "deno task package-assets && cd sillyz.computer && NO_STRIP=true cargo-tauri build",
-
     "unix-install": "sudo cp sillyz.computer/src-tauri/target/release/bundle/appimage/sillyz_*.AppImage /home/tychi/Applications/sillyz.AppImage",
-
     "ios-init": "deno task package-assets && cd sillyz.computer && npm run tauri ios init",
     "ios-dev": "deno task package-assets && cd sillyz.computer && npm run tauri ios dev",
     "ios-build": "deno task package-assets && cd sillyz.computer && npm run tauri ios build",
-
     "android-init": "deno task package-assets && cd sillyz.computer && npm run tauri android init",
     "android-dev": "deno task package-assets && cd sillyz.computer && npm run tauri android dev",
     "android-build": "deno task package-assets && cd sillyz.computer && npm run tauri android dev",
-
     "chunk-video": "deno run --allow-run --allow-read --allow-write functions/convert.js",
-
     "provision-ollama": "cd server/ollama && ./provision.sh",
     "ollama-start-deepseek": "ollama run deepseek-r1:1.5b",
     "ollama-start-mistral": "ollama run mistral:7b",
     "ollama-start-gemma": "ollama run gemma3:1b",
     "ollama-start-llama": "ollama run llama3.2:3b",
-
     "ollama-stop-deepseek": "ollama stop deepseek-r1:1.5b",
     "ollama-stop-mistral": "ollama stop mistral:7b",
     "ollama-stop-gemma": "ollama stop gemma3:1b",
@@ -99,7 +79,6 @@
     "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
     "statebus": "./client/public/_statebus.js",
     "marked": "https://esm.sh/marked@11.1.0",
-
     "@cross/deepmerge": "jsr:@cross/deepmerge@^1.0.0",
     "@cross/env": "jsr:@cross/env@^1.0.2",
     "@cross/kv": "jsr:@cross/kv@^0.16.3",
@@ -129,6 +108,15 @@
     "zod": "npm:zod@^3.22.4",
     "zod-to-json-schema": "npm:zod-to-json-schema@^3.22.5"
   },
-  "compilerOptions": {
+  "compilerOptions": {},
+  "deploy": {
+    "project": "b4b54450-dd7a-4a96-8504-02b5471377d7",
+    "exclude": [
+      "./private",
+      "./public",
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "client/server.js"
   }
 }
