@@ -63,6 +63,17 @@ Deno.serve(
       }
 
     } catch {
+
+      const configObject = {
+        PLAN98_WAS_HOST: "http://localhost:8080",
+        PLAN98_WAS_SPACE_ID: spaceId,
+        PLAN98_WAS_SIGNER: JSON.stringify(signer.toJSON())
+      }
+      const configArray = []
+      for(const key of Object.keys(configObject)) {
+        configArray.push(`${key}: '${configObject[key]}'`)
+      }
+      const ENVIRONMENT_VARIABLES = configArray.join(',\n')
       return new Response(`<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -133,8 +144,7 @@ Deno.serve(
     <script>
       plan98 = {
         env: {
-          PLAN98_WAS_HOST: "http://localhost:8080",
-          PLAN98_JSON_SIGNER: ${JSON.stringify(signer.toJSON())}
+          ${ENVIRONMENT_VARIABLES}
         }
       }
     </script>
@@ -154,7 +164,7 @@ Deno.serve(
       import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 
       (async function init() {
-        const signer = await Ed25519Signer.fromJSON(JSON.stringify(plan98.env.PLAN98_JSON_SIGNER))
+        const signer = await Ed25519Signer.fromJSON(${JSON.stringify(configObject.PLAN98_WAS_SIGNER)})
 
         const storageId = plan98.env.PLAN98_WAS_HOST
         if(!storageId) return
@@ -164,7 +174,7 @@ Deno.serve(
         // create the space with signer so all requests get signed by it
         const space = storage.space({
           signer,
-          id: ${`"urn:uuid:${spaceId}"`}
+          id: "urn:uuid:${configObject.PLAN98_WAS_SPACE_ID}"
         })
 
         const linkset = space.resource('linkset')
