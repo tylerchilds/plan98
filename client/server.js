@@ -490,7 +490,7 @@ function template() {
     <main>
       <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
         <div style="padding: 51px; height: 100%; display: flex;">
-          <qr-code src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+          <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
         </div>
       </div>
     </main>

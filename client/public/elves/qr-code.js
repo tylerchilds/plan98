@@ -8,7 +8,9 @@ const $ = elf('qr-code')
 
 $.draw(target => {
   const codes = $.learn()
-  const code = target.getAttribute('src') || target.getAttribute('text')
+  const lazyPrefix = target.getAttribute('lazy-prefix') === "true"
+  const href = target.getAttribute('src') || target.getAttribute('text')
+  const code = lazyPrefix ? globalThis.location.origin + href : href
   const _target = target.getAttribute('target') || "_top"
   const noLink = target.getAttribute('no-link') === 'true'
   const image = codes[code]
