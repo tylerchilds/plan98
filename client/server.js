@@ -201,17 +201,28 @@ Deno.serve(
     }
 
     try {
+      console.log(filepath)
       const file = await Deno.open("." + filepath, { read: true });
       if(file) {
         return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
       }
+
+      const storageId = walletDefaultHost
+      if(!storageId) return
+      const storageUrl = new URL(storageId)
+      const storage = new StorageClient(storageUrl)
+      const space = storage.space({
+          signer,
+          id: `urn:uuid:${spaceId}`
+        })
+
       const resource = space.resource(filepath)
       const data = await resource.get({ signer })
         .then(async res => {
           if(res.status !== 200) {
             throw new Error('Not a 200')
           }
-          return (await res)
+          return res
         })
 
       if(data) {
@@ -219,7 +230,8 @@ Deno.serve(
         return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
       }
 
-    } catch {
+    } catch(e) {
+      console.error(e)
       return new Response(template(), {
         status: 404,
         headers: {

@@ -4,10 +4,10 @@ import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
-const ERROR_P98_PROVISION_FAILED                                      = '001'
-const ERROR_P98_BACKUP_FAILED                                         = '002'
-const ERROR_P98_KEYCARD_REJECTED                                      = '003'
-const ERROR_P98_KEYCARD_TIMEOUT                                       = '004'
+const ERROR_P98_PROVISION_FAILED                                        = '001'
+const ERROR_P98_BACKUP_FAILED                                           = '002'
+const ERROR_P98_KEYCARD_REJECTED                                        = '003'
+const ERROR_P98_KEYCARD_TIMEOUT                                         = '004'
 
 const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 
@@ -171,11 +171,18 @@ const methodHandlers = {
 
     if(errorCheck()) return
 
+    await backupPlan98({ space, signer, cwd: '/private/tychi.1998.social/SourceCode/tonejs-instruments/samples' }).catch((e) => {
+      error = true
+      reject(ERROR_P98_BACKUP_FAILED)
+      console.error(e)
+    })
+
     await backupPlan98({ space, signer, cwd: '/public' }).catch((e) => {
       error = true
       reject(ERROR_P98_BACKUP_FAILED)
       console.error(e)
     })
+
 
     if(errorCheck()) return
 
@@ -460,50 +467,6 @@ function uploadRecursive(context, { tree = {}, pathParts = [], subtree = {} }) {
   return files
 }
 
-export async function backupPlan98(context) {
-  $.teach({ uploadQueue: [], uploadCursor: 0 })
-  uploading = false
-  const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
-    .then(res => res.json())
-
-  const filesOnly = uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
-
-  const aclAllowingPublicReads = context.space.resource('policy/published')
-  {
-    const policy = { type: 'PublicCanRead' }
-    const policyBlob = new Blob([JSON.stringify(policy)], { type: 'application/json' })
-    const responseToPutPolicy = await aclAllowingPublicReads.put(policyBlob, { signer: context.signer })
-      .then(res => {
-        if (!res.ok) throw new Error(`Failed to put policy: ${res.status} ${res.statusText}`, { cause: { res } })
-        return res
-      })
-      .catch(e => {
-        console.error(e)
-        toast(e.message, { type: 'error' })
-      })
-  }
-
-  const publicPaths = filesOnly.map(path => ({
-    "anchor": context.space.resource(path).path,
-    "acl": [
-      {
-        "href": aclAllowingPublicReads.path,
-      }
-    ]
-  }))
-
-  const linkset = context.space.resource(`linkset`)
-  {
-    const linksetObject = {
-      "linkset": publicPaths
-    };
-    const linksetBlob = new Blob([JSON.stringify(linksetObject)], { type: 'application/linkset+json' })
-    const response = await linkset.put(linksetBlob, { signer: context.signer })
-    if (!response.ok) throw new Error(`Failed to put linkset: ${response.status} ${response.statusText}`, { cause: { response } });
-  }
-
-}
-
 let queue = []
 let uploading = false
 function queueUpload(context, path) {
@@ -585,6 +548,68 @@ function updateQueueAt(index) {
       })
     }
   }
+}
+
+function systemAwaitBackupComplete() {
+  return new Promise((resolve) => {
+    function loop() {
+      const { uploadQueue, uploadCursor } = $.learn()
+      if(uploadCursor < uploadQueue.length) {
+        requestAnimationFrame(loop)
+      } else {
+        resolve()
+      }
+    }
+
+    requestAnimationFrame(loop)
+  })
+}
+
+
+
+export async function backupPlan98(context) {
+  $.teach({ uploadQueue: [], uploadCursor: 0 })
+  uploading = false
+  const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
+    .then(res => res.json())
+
+  const filesOnly = uploadRecursive(context, { tree: plan98, pathParts: [], subtree: plan98 })
+
+  const aclAllowingPublicReads = context.space.resource('policy/published')
+  {
+    const policy = { type: 'PublicCanRead' }
+    const policyBlob = new Blob([JSON.stringify(policy)], { type: 'application/json' })
+    const responseToPutPolicy = await aclAllowingPublicReads.put(policyBlob, { signer: context.signer })
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to put policy: ${res.status} ${res.statusText}`, { cause: { res } })
+        return res
+      })
+      .catch(e => {
+        console.error(e)
+        toast(e.message, { type: 'error' })
+      })
+  }
+
+  const publicPaths = filesOnly.map(path => ({
+    "anchor": context.space.resource(path).path,
+    "acl": [
+      {
+        "href": aclAllowingPublicReads.path,
+      }
+    ]
+  }))
+
+  const linkset = context.space.resource(`linkset`)
+  {
+    const linksetObject = {
+      "linkset": publicPaths
+    };
+    const linksetBlob = new Blob([JSON.stringify(linksetObject)], { type: 'application/linkset+json' })
+    const response = await linkset.put(linksetBlob, { signer: context.signer })
+    if (!response.ok) throw new Error(`Failed to put linkset: ${response.status} ${response.statusText}`, { cause: { response } });
+  }
+
+  return systemAwaitBackupComplete()
 }
 
 $.when('click', '[data-backup]', async (event) => {

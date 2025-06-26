@@ -2,6 +2,8 @@ import tag from '@silly/tag'
 
 const $ = tag('source-code')
 
+
+
 $.draw(() => {
   const entries = performance.getEntriesByType('resource');
 
