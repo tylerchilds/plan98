@@ -105,7 +105,7 @@ $.when('click', '[data-load]', (event) => {
 async function init(target) {
   const { realtime } = $.learn()
   const channel = new MessageChannel();
-  const model = await Vosk.createModel('/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
+  const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
 
   const sampleRate = 48000;

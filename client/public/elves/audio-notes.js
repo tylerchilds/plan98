@@ -55,18 +55,8 @@ $.draw((target) => null, {
       partial='',
       translated,
       recording,
-      ready,
       result=''
     } = $.learn()
-
-    if(!ready) {
-      innerHTML(target, `
-        <loading>
-          <flying-disk></flying-disk>
-        </loading>
-      `)
-      return
-    }
 
     const audio = target.querySelector('audio')
     if(!audio) {
@@ -213,7 +203,7 @@ $.when('change', '[type="checkbox"]', (event) => {
 async function init(target) {
   const { realtime } = $.learn()
   const channel = new MessageChannel();
-  const model = await Vosk.createModel('/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
+  const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
 
   const sampleRate = 48000;
@@ -263,8 +253,6 @@ async function init(target) {
 
   const source = audioContext.createMediaStreamSource(target.mediaStream);
   source.connect(recognizerProcessor);
-
-  $.teach({ ready: true })
 }
 
 const defaults = {

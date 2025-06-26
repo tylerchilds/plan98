@@ -661,7 +661,7 @@ $.style(`
     z-index: 30;
   }
 
-  & [data-menu-target].active + .dropdown-items {
+  & [data-os-target].active + .dropdown-items {
     display: block;
   }
 
@@ -984,6 +984,7 @@ const creationForms = {
     return `
       ${editBanner(this)}
       <div class="image-form">
+        <was-camera id="${draft.id}"></was-camera>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
@@ -1000,6 +1001,7 @@ const creationForms = {
     return `
       ${editBanner(this)}
       <div class="image-form">
+        <sketch-pad id="${draft.id}"></sketch-pad>
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
@@ -1015,6 +1017,7 @@ const creationForms = {
   [eventTypes.audio]: function(draft) {
     return `
       ${editBanner(this)}
+      <audio-notes id="${draft.id}"></audio-notes>
       <div class="audio-form">
         <label class="field">
           <span class="label">Title</span>
@@ -1031,6 +1034,7 @@ const creationForms = {
   [eventTypes.video]: function(draft) {
     return `
       ${editBanner(this)}
+      <video-notes id="${draft.id}"></video-notes>
       <div class="video-form">
         <label class="field">
           <span class="label">Title</span>
@@ -1873,7 +1877,7 @@ $.draw((target)=> {
         <sl-icon name="plus-lg"></sl-icon>
       </button>
       <div class="menu-item">
-        <button data-menu-target="edit" class="more-item">
+        <button data-os-target="edit" class="more-item">
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
@@ -2020,11 +2024,11 @@ $.draw((target)=> {
 
     { // menu items
       const { activeMenu } = $.learn()
-      const currentlyActive = target.querySelector('[data-menu-target].active')
+      const currentlyActive = target.querySelector('[data-os-target].active')
       if(currentlyActive) {
         currentlyActive.classList.remove('active')
       }
-      const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
+      const activeItem = target.querySelector(`[data-os-target="${activeMenu}"]`)
       if(activeItem) {
         activeItem.classList.add('active')
       }
@@ -2383,12 +2387,12 @@ $.when('pointerdown', '*', (event) => {
   $.teach({ activeMenu: null })
 })
 
-$.when('click', '[data-menu-target]', (event) => {
+$.when('click', '[data-os-target]', (event) => {
   event.preventDefault()
   const { activeMenu } = $.learn()
-  const { menuTarget } = event.target.dataset
-  const same = activeMenu === menuTarget
-  $.teach({ activeMenu: same ? null : menuTarget, sidebar: !same })
+  const { osTarget } = event.target.dataset
+  const same = activeMenu === osTarget
+  $.teach({ activeMenu: same ? null : osTarget, sidebar: !same })
   event.stopImmediatePropagation()
 })
 
