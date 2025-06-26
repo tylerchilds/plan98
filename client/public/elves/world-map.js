@@ -156,8 +156,10 @@ $.draw((target) => {
 $.style(`
 	& {
 		display: block;
+    position: relative;
 		height: 100%;
     width: 100%;
+    z-index: 1;
 	}
 
 	& .leaflet-container {

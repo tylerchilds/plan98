@@ -6,6 +6,8 @@ import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
 const ERROR_P98_PROVISION_FAILED                                      = '001'
 const ERROR_P98_BACKUP_FAILED                                         = '002'
+const ERROR_P98_KEYCARD_REJECTED                                      = '003'
+const ERROR_P98_KEYCARD_TIMEOUT                                       = '004'
 
 const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 
@@ -56,6 +58,72 @@ const initialState = existingState
 
 const $ = elf(link, initialState)
 
+$.when('click', '[data-approve-keycard]', () => {
+  $.teach({ pendingKeycard: { __status: 'APPROVED' } })
+})
+
+$.when('click', '[data-reject-keycard]', () => {
+  $.teach({ pendingKeycard: { __status: 'REJECTED' } })
+})
+
+function userAcceptImportKeycard(request) {
+  const { keycard } = request.params
+  $.teach({
+    pendingKeycard: {
+      __status: 'PENDING',
+      ...keycard
+    }
+  })
+
+  return new Promise((resolve, reject) => {
+
+    const timeout = setTimeout(() => reject({
+      "jsonrpc": "2.0",
+      id: request.id,
+      error: {
+        code: ERROR_P98_KEYCARD_TIMEOUT,
+        message: 'Initialization Failed',
+      }
+    }), 30 * 1000)
+
+    function loop() {
+      const { pendingKeycard } = $.learn()
+
+      const { __status } = pendingKeycard
+
+      if(__status === 'APPROVED') {
+        clearTimeout(timeout)
+        $.teach({ pendingKeycard: null })
+        resolve({
+          "jsonrpc": "2.0",
+          id: request.id,
+          result: { status: 204 }
+        })
+        return
+      }
+
+      if(__status === 'REJECTED') {
+        clearTimeout(timeout)
+        $.teach({ pendingKeycard: null })
+        reject({
+          "jsonrpc": "2.0",
+          id: request.id,
+          error: {
+            code: ERROR_P98_KEYCARD_REJECTED,
+            message: 'Initialization Failed',
+          }
+        })
+        return
+      }
+
+      requestAnimationFrame(loop)
+    }
+
+    requestAnimationFrame(loop)
+
+  })
+}
+
 const methods = {
   importKeycard: 'import-keycard'
 }
@@ -64,6 +132,30 @@ const methodHandlers = {
   [methods.importKeycard]: async (request, resolve, reject) => {
     const { keycard } = request.params
 
+    let error
+
+    function errorCheck() {
+      if(error) {
+        reject({
+          "jsonrpc": "2.0",
+          id: request.id,
+          error: {
+            code: '-32601',
+            message: 'Initialization Failed',
+          }
+        })
+        return true
+      }
+      return false
+    }
+
+    await userAcceptImportKeycard(request).catch(e => {
+      error = true
+      reject(ERROR_P98_PROVISION_FAILED)
+    })
+
+    if(errorCheck()) return
+
     const signer = await getSigner(keycard)
     const storage = await getStorage(keycard)
     const space = storage.space({
@@ -71,14 +163,13 @@ const methodHandlers = {
       id: `urn:uuid:${keycard.id}`
     })
 
-
-
-    let error
     await provisionPlan98(signer, keycard).catch((e) => {
       error = true
       reject(ERROR_P98_PROVISION_FAILED)
       console.error(e)
     })
+
+    if(errorCheck()) return
 
     await backupPlan98({ space, signer, cwd: '/public' }).catch((e) => {
       error = true
@@ -86,26 +177,17 @@ const methodHandlers = {
       console.error(e)
     })
 
-    if(error) {
-      reject({
-        "jsonrpc": "2.0",
-        id: request.id,
-        error: {
-          code: '-32601',
-          message: 'Initialization Failed',
-        }
-      })
-    } else {
-      if(keycard) {
-        $.teach({ id: keycard.id, ...keycard }, insertKeycard)
-      }
+    if(errorCheck()) return
 
-      resolve({
-        "jsonrpc": "2.0",
-        id: request.id,
-        result: { status: 204 }
-      })
+    if(keycard) {
+      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
     }
+
+    resolve({
+      "jsonrpc": "2.0",
+      id: request.id,
+      result: { status: 204 }
+    })
   }
 }
 
@@ -531,11 +613,71 @@ function renderQueue(item) {
 
 
 $.draw((target) => {
-  const { editId, keycards, uploadQueue=[], uploadCursor } = $.learn()
+  const { pendingKeycard, editId, keycards, uploadQueue=[], uploadCursor } = $.learn()
 
   const draft = $.learn()[editId] || {}
 
   const [active, ...row] = keycards
+
+  function footer() {
+    return `
+      ${uploadQueue[uploadCursor] ? `
+        <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
+          <span class="loader-status">
+            ${renderQueue(uploadQueue[uploadCursor])}
+          </span>
+        </div>
+      `:`
+        <footer style="display: grid; grid-template-columns: 1fr 1fr;">
+          <div>
+            Powered by <a href="https://plan98.org">Plan98</a>
+          </div>
+          <div style="text-align: right;">
+            <button data-remix>
+              Remix
+            </button>
+          </div>
+        </footer>
+      `}
+    `
+  }
+
+  if(pendingKeycard) {
+    return `
+      <header style="display: grid; grid-template-columns: 1fr 1fr;">
+        <div>
+          Keycard Import Request
+        </div>
+        <div style="text-align: right;">
+          <button data-reject-keycard>
+            Quit
+          </button>
+        </div>
+      </header>
+      <section>
+        <h1>
+          Keyboard Import Request
+        </h1>
+        <p>
+          A keycard that goes by ${pendingKeycard.name} and is known to be connected to ${pendingKeycard.host} would like to be added to your wallet.
+        </p>
+
+        <p>
+          <strong>Serial Number: </strong>${pendingKeycard.id}
+        </p>
+        
+        <button data-approve-keycard>
+          Approve
+        </button>
+
+        <button data-reject-keycard>
+          Deny
+        </button>
+      </section>
+      ${footer()}
+    `
+  }
+
   return editId ? `
      <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
@@ -589,25 +731,8 @@ $.draw((target) => {
       <button data-backup="/private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown">
         Publish: Video
       </button>
-
-      ${uploadQueue[uploadCursor] ? `
-        <div class="loader-bar" style="--progress: calc(${uploadCursor} / ${uploadQueue.length}  * 100%);">
-          <span class="loader-status">
-            ${renderQueue(uploadQueue[uploadCursor])}
-          </span>
-        </div>
-      `:''}
     </div>
-    <footer style="display: grid; grid-template-columns: 1fr 1fr;">
-      <div>
-        Powered by <a href="https://plan98.org">Plan98</a>
-      </div>
-      <div style="text-align: right;">
-        <button data-remix>
-          Remix
-        </button>
-      </div>
-    </footer>
+    ${footer()}
   ` : `
     <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
@@ -627,9 +752,6 @@ $.draw((target) => {
           <div class="active-keycard">
             ${render(active)}
             <div class="keycard-actions">
-              <button data-launch="${active.id}">
-                Launch
-              </button>
               <button data-export="${active.id}">
                 Export
               </button>
@@ -647,16 +769,7 @@ $.draw((target) => {
         ${row.map(render).join('')}
       </div>
     </section>
-    <footer style="display: grid; grid-template-columns: 1fr 1fr;">
-      <div>
-        Powered by <a href="https://plan98.org">Plan98</a>
-      </div>
-      <div style="text-align: right;">
-        <button data-remix>
-          Remix
-        </button>
-      </div>
-    </footer>
+    ${footer()}
   `
 }, {
   beforeUpdate(target) {
@@ -744,8 +857,14 @@ async function seed() {
 
 function render(keycard) {
   const { activeKeycardId } = $.learn()
+  const isActive = activeKeycardId === keycard.id
+ 
   return `
-    <button data-select="${keycard.id}" class="keycard ${activeKeycardId === keycard.id?'active':''}" style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
+    <button
+      ${isActive?`data-launch="${keycard.id}"`:''}
+      data-select="${keycard.id}"
+      class="keycard ${isActive?'active':''}"
+      style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
       <span class="keycard-name">
         ${keycard.name}
       </span>
@@ -1019,8 +1138,10 @@ $.style(`
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
     text-align: right;
     padding: .5rem;
-    border-radius: .5rem;
+    border-radius: 0;
     overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   & .loader-status {

@@ -241,7 +241,6 @@ function template() {
     configArray.push(`${key}: '${configObject[key]}'`)
   }
   const ENVIRONMENT_VARIABLES = configArray.join(',\n')
-  console.log(keycard)
   const ENCODED_KEYCARD = btoa(
     JSON.stringify({
       jsonrpc: "2.0",

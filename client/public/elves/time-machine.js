@@ -236,6 +236,7 @@ $.style(`
     right: 1rem;
     display: inline-grid;
     grid-template-columns: auto auto;
+    z-index: 1000;
   }
 
   & .create-item {
@@ -320,6 +321,9 @@ $.style(`
   }
 
   & .now {
+    display: flex;
+    justify-content: end;
+    gap: .5rem;
     padding: .5rem;
     background: white;
     text-align: center;
@@ -328,6 +332,37 @@ $.style(`
     top: 0;
     bottom: 0;
     z-index: 20; 
+    grid-column: -1 / 1;
+  }
+
+  & [data-sidebar="false"] .now {
+    display: none;
+  }
+
+  & .content-area:empty {
+    display: none;
+  }
+
+  & .fallback {
+    display: none;
+  }
+
+  & .content-area:empty + .fallback {
+    display: block;
+  }
+
+  & [data-sidebar="false"] .chat-sidebar {
+    display: none;
+  }
+
+  & [data-sidebar="false"] .fallback,
+  & [data-sidebar="false"] .content-area,
+  & [data-sidebar="false"] .chat-sidebar {
+    grid-row: -1 / 1;
+  }
+
+  & [data-sidebar="false"] .fallback,
+  & [data-sidebar="false"] .content-area {
     grid-column: -1 / 1;
   }
 
@@ -1801,6 +1836,7 @@ function patch(target) {
   }
 
   {
+    const content = target.querySelector('[data-dom="content"]')
     if(
       target.view !== view ||
       (target.dataset.space && target.dataset.space !== space) ||
@@ -1819,9 +1855,8 @@ function patch(target) {
         target.dataset.time = time
       }
 
-      const content = target.querySelector('[data-dom="content"]')
-      const html = viewRenderers[view] ? viewRenderers[view](target) : '' 
-      content.innerHTML=  html
+      const html = viewRenderers[view] ? viewRenderers[view](target) : ''
+      content.innerHTML =  html
     }
   }
 }
@@ -1853,7 +1888,7 @@ $.draw((target)=> {
       </div>
     </div>
     <div data-dom="realm" class="chat-realm">
-      <div class="now" style="display: flex; justify-content: end; gap: .5rem;">
+      <div class="now">
         <div data-dom="date" class="now-date"></div>
         <div data-dom="time" class="now-time"></div>
       </div>
@@ -1943,6 +1978,9 @@ $.draw((target)=> {
         </div>
       </div>
       <div data-dom="content" class="content-area"></div>
+      <div class="fallback">
+        <world-map></world-map>
+      </div>
     </div>
   `
 }, {
