@@ -4,6 +4,9 @@ import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
+const ERROR_P98_PROVISION_FAILED                                      = '001'
+const ERROR_P98_BACKUP_FAILED                                         = '002'
+
 const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 
 const Types = {
@@ -58,13 +61,72 @@ const methods = {
 }
 
 const methodHandlers = {
-  [methods.importKeycard]: (payload) => {
-    const { keycard } = payload.params
-    if(keycard) {
-      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+  [methods.importKeycard]: async (request, resolve, reject) => {
+    const { keycard } = request.params
+
+    const signer = await getSigner(keycard)
+    const storage = await getStorage(keycard)
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+
+
+    let error
+    await provisionPlan98(signer, keycard).catch((e) => {
+      error = true
+      reject(ERROR_P98_PROVISION_FAILED)
+      console.error(e)
+    })
+
+    await backupPlan98({ space, signer, cwd: '/public' }).catch((e) => {
+      error = true
+      reject(ERROR_P98_BACKUP_FAILED)
+      console.error(e)
+    })
+
+    if(error) {
+      reject({
+        "jsonrpc": "2.0",
+        id: request.id,
+        error: {
+          code: '-32601',
+          message: 'Initialization Failed',
+        }
+      })
+    } else {
+      if(keycard) {
+        $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+      }
+
+      resolve({
+        "jsonrpc": "2.0",
+        id: request.id,
+        result: { status: 204 }
+      })
     }
   }
 }
+
+function jsonRPC(request) {
+  return new Promise((resolve, reject) => {
+    const handler = methodHandlers[request.method]
+    if(handler) {
+      handler(request, resolve, reject)
+    } else {
+      reject({
+        "jsonrpc": "2.0",
+        id: request.id,
+        error: {
+          code: '-32601',
+          message: 'Method not found',
+        }
+      })
+    }
+  })
+}
+
 
 function insertKeycard(state, payload) {
   if(state.keycards.find(x => x.id === payload.id)) {
@@ -91,9 +153,7 @@ export function getKeycard() {
   return keycards[0]
 }
 
-export async function getSigner() {
-  const keycard = getKeycard()
-
+export async function getSigner(keycard=getKeycard()) {
   if(!keycard) {
     return null
   }
@@ -319,6 +379,8 @@ function uploadRecursive(context, { tree = {}, pathParts = [], subtree = {} }) {
 }
 
 export async function backupPlan98(context) {
+  $.teach({ uploadQueue: [], uploadCursor: 0 })
+  uploading = false
   const { plan98 } = await fetch(`/plan98/about?cwd=${context.cwd}`)
     .then(res => res.json())
 
@@ -454,8 +516,6 @@ $.when('click', '[data-backup]', async (event) => {
         id: `urn:uuid:${keycard.id}`
       })
 
-      $.teach({ uploadQueue: [], uploadCursor: 0 })
-      uploading = false
       backupPlan98({ space, signer, cwd: event.target.dataset.backup || '' })
     })
   }
@@ -604,8 +664,8 @@ $.draw((target) => {
       target.initialized = true
       const data = target.getAttribute('data')
       if(data) {
-        const payload = JSON.parse(atob(data))
-        jsonRPC(payload)
+        const request = JSON.parse(atob(data))
+        jsonRPC(request).then(console.log)
       }
 
       const { keycards } = $.learn()
@@ -665,14 +725,6 @@ function settingsMenu(editId) {
   return `
     ${cardOptions}
   `
-}
-
-
-function jsonRPC(payload) {
-  const handler = methodHandlers[payload.method]
-  if(handler) {
-    handler(payload)
-  }
 }
 
 async function seed() {

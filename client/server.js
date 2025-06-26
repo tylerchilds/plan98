@@ -1,5 +1,7 @@
 import { Ed25519Signer } from "https://esm.sh/@did.coop/did-key-ed25519";
 import { StorageClient } from "https://esm.sh/@wallet.storage/fetch-client@^1.1.3"
+import { walk } from "https://deno.land/std/fs/mod.ts";
+import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { DOMParser } from "npm:linkedom@0.18.5";
 
 self.DOMParser = DOMParser
@@ -87,6 +89,89 @@ async function showApp(request, tag) {
 }
 
 
+const byPath = (x) => x.path
+async function fileSystem(request) {
+  const { search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const world = parameters.get('world')
+  if(world) {
+    const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+  } else {
+    let paths = []
+
+    const currentPath = Deno.cwd() + (parameters.get('cwd') || '')
+    const files = walk(currentPath, {
+      skip: [
+        /\.git/,
+        /\.autosave/,
+        /\.swp/,
+        /\.swo/,
+        /\.env/,
+        /node_modules/,
+        /backup/,
+        /db/
+      ],
+      includeDirs: true,
+    })
+
+    for await(const file of files) {
+      const { name } = file
+      const [_, path] = file.path.split(currentPath)
+      paths.push({ path, name, isDirectory: file.isDirectory })
+    }
+
+    paths = sortPaths([...paths], byPath, '/')
+
+    const data = {
+      plan98: {
+        type: 'FileSystem',
+        children: [kids(paths)]
+      }
+    }
+
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+
+  }
+}
+
+function kids(paths) {
+  const root = { name: '', path: '/', type: 'Directory', children: [] };
+
+  for (const system of paths) {
+    const [_, ...pathComponents] = system.path.split('/');
+    let currentNode = root;
+
+    for (const component of pathComponents) {
+      if (!currentNode.children) {
+        currentNode.children = [];
+      }
+
+      let childNode = currentNode.children.find(node => node.name === component);
+
+      if (!childNode) {
+        childNode = { path: system.path, name: component, type: 'Directory', children: [] };
+        currentNode.children.push(childNode);
+      }
+
+      currentNode = childNode;
+    }
+
+    currentNode.type = system.isDirectory ? 'Directory' : 'File'; 
+    delete currentNode.children
+  }
+
+  return root;
+}
+
 Deno.serve(
   { hostname: "localhost", port: 1024 },
   async (request) => {
@@ -95,6 +180,10 @@ Deno.serve(
 
     if(filepath === '/') {
       filepath = '/index.html'
+    }
+
+    if(filepath === '/plan98/about') {
+      return fileSystem(request)
     }
 
     if(filepath.startsWith('/app/')) {
@@ -145,16 +234,18 @@ function template() {
   const configObject = {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
-    PLAN98_WAS_SIGNER: JSON.stringify(signer.toJSON())
+    PLAN98_WAS_SIGNER: keycard.asJSON
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
     configArray.push(`${key}: '${configObject[key]}'`)
   }
   const ENVIRONMENT_VARIABLES = configArray.join(',\n')
+  console.log(keycard)
   const ENCODED_KEYCARD = btoa(
     JSON.stringify({
       jsonrpc: "2.0",
+      id: keycard.id,
       method: methods.importKeycard,
       params: {
         type: 'keycard',
@@ -409,7 +500,7 @@ function template() {
       import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 
       (async function init() {
-        const signer = await Ed25519Signer.fromJSON(${JSON.stringify(configObject.PLAN98_WAS_SIGNER)})
+        const signer = await Ed25519Signer.fromJSON(JSON.stringify(${JSON.stringify(configObject.PLAN98_WAS_SIGNER)}))
 
         const storageId = plan98.env.PLAN98_WAS_HOST
         if(!storageId) return
