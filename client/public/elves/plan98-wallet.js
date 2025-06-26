@@ -671,17 +671,17 @@ $.draw((target) => {
     return `
       <header style="display: grid; grid-template-columns: 1fr 1fr;">
         <div>
-          Keycard Import Request
+          System Message
         </div>
         <div style="text-align: right;">
           <button data-reject-keycard>
-            Quit
+            Ignore
           </button>
         </div>
       </header>
-      <section>
+      <section class="serious-business">
         <h1>
-          Keyboard Import Request
+          Keycard Import Request
         </h1>
         <p>
           A keycard that goes by ${pendingKeycard.name} and is known to be connected to ${pendingKeycard.host} would like to be added to your wallet.
@@ -1101,6 +1101,20 @@ $.style(`
   & .wallet {
     overflow: auto;
   }
+
+  & .serious-business {
+    padding: 1rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    background: white;
+    color: rgba(0,0,0,.85);
+  }
+
 
   & .keycard-form {
     overflow: auto;
