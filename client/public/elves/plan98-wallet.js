@@ -154,6 +154,10 @@ const methodHandlers = {
       reject(ERROR_P98_PROVISION_FAILED)
     })
 
+    if(keycard) {
+      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+    }
+
     if(errorCheck()) return
 
     const signer = await getSigner(keycard)
@@ -185,10 +189,6 @@ const methodHandlers = {
 
 
     if(errorCheck()) return
-
-    if(keycard) {
-      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
-    }
 
     resolve({
       "jsonrpc": "2.0",

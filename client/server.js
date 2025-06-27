@@ -3,11 +3,29 @@ import { StorageClient } from "https://esm.sh/@wallet.storage/fetch-client@^1.1.
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { DOMParser } from "npm:linkedom@0.18.5";
+import { config } from "https://deno.land/x/dotenv/mod.ts";
 
+config()
 self.DOMParser = DOMParser
 
-const signer = await Ed25519Signer.generate()
-const spaceId = self.crypto.randomUUID()
+const port = Deno.env.get('PLAN98_PORT') || 8000
+
+
+function safeEnv(key) {
+  const value = Deno.env.get(key)
+  return value ? `${key}: "${value}",` : ''
+}
+
+const SECRET_KEY = JSON.stringify({"type":"Ed25519VerificationKey2020","controller":"did:key:z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","publicKeyMultibase":"z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","privateKeyMultibase":"zrv42zX2tskp26s5jo9cXzTTqdck9hu2feUUSftF58hZCieeXkdPkbx71QpHfXA8cooo9MeWadmKFNVbMy7Pwjafka4"})
+
+const signer = SECRET_KEY
+  ? await Ed25519Signer.fromJSON(SECRET_KEY)
+  : await Ed25519Signer.generate()
+console.log('using: ' + JSON.stringify(signer.toJSON()))
+const SECRET_SPACE = "5a60c931-01d6-42ac-9eaf-6ba842a7f880"
+const spaceId = SECRET_SPACE
+  ? SECRET_SPACE
+  : self.crypto.randomUUID()
 const walletDefaultHost = 'http://localhost:8080'
 
 const keycard = newKeycard({ name: "ROOT" })
@@ -201,11 +219,12 @@ Deno.serve(
     }
 
     try {
-      console.log(filepath)
+      /*
       const file = await Deno.open("." + filepath, { read: true });
       if(file) {
         return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
       }
+      */
 
       const storageId = walletDefaultHost
       if(!storageId) return
@@ -217,8 +236,10 @@ Deno.serve(
         })
 
       const resource = space.resource(filepath)
+
       const data = await resource.get({ signer })
         .then(async res => {
+          console.log(res)
           if(res.status !== 200) {
             throw new Error('Not a 200')
           }
