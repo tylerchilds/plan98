@@ -829,7 +829,9 @@ $.draw((target) => {
           })
 
           getPlan98Config({ space, signer }).then((keycardMetadata) => {
-            $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+            if(keycardMetadata) {
+              $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+            }
           })
         })
       }
