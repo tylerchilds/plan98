@@ -154,7 +154,7 @@ function newDraft(type) {
 const $ = elf('time-machine', {
   cards: [],
   grabbing: false,
-  sidebar: false,
+  sidebar: true,
   space: null,
   time: null,
   now: new Date(),
@@ -402,35 +402,9 @@ $.style(`
     overflow: hidden;
   }
 
-  & .draft-header {
-    background: rgba(0,0,0,.1);
-    padding: .5rem;
-  }
-
-  & .draft-body {
+  & .wallet-body {
     padding: .5rem;
     overflow: auto;
-  }
-
-  & .draft-footer {
-    padding: .5rem;
-    background:
-      linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.25)),
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    display: flex;
-    align-items: end;
-    justify-content: end;
-  }
-
-  & .draft-footer select {
-    color: white;
-    background: rgba(0,0,0,.85);
-    border: none;
-    border-radius: 3px;
-    padding: 0 .5rem;
   }
 
   & .form-card {
@@ -450,9 +424,11 @@ $.style(`
 
   & .draft-template {
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr;
     overflow: hidden;
     max-height: 100%;
+    grid-template-areas: "footer header" "body body";
+    grid-template-columns: 1fr auto;
   }
 
   & .raw-json {
@@ -516,14 +492,37 @@ $.style(`
 
   & .draft-header {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: auto auto;
+    grid-area: header;
+    background: rgba(0,0,0,.1);
+    padding: .5rem;
+    gap: .5rem;
+  }
+
+  & .draft-body {
+    grid-area: body;
   }
 
   & .draft-footer {
     display: grid;
+    grid-area: footer;
+    padding: .5rem;
+    background: rgba(0,0,0,.1);
+    color: rgba(0,0,0,.65);
+    display: flex;
   }
 
+  & .draft-footer select {
+    color: rgba(0,0,0,.85);
+    background: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 3px;
+    padding: 0 .5rem;
+  }
+
+
   & .draft-content {
+    grid-area: body;
     width: 100%;
     resize: none;
     border: 1px solid rgba(0,0,0,.15);
@@ -1260,7 +1259,7 @@ function renderCreationFormByType(draft) {
 
 function typeSelector(selected) {
   return `
-    <select name="type" data-bind="draft">
+    <select class="standard-button -small" name="type" data-bind="draft">
       ${Object.keys(eventTypes).map((key) => `
         <option value="${key}" ${key===selected?'selected':''}>${key}</option>
       `)}
@@ -1357,7 +1356,7 @@ const viewRenderers = {
                 Cancel
               </button>
             </div>
-            <div class="draft-body">
+            <div class="wallet-body draft-body">
               <my-wallet></my-wallet>
             </div>
             <div class="draft-footer">
@@ -1379,11 +1378,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
-              <button class="standard-button -small" style="place-self: end;" type="submit">
+              <button class="standard-button -small" style="place-self: start end;" type="submit">
                 Save
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               ${form}
             </div>
             <div class="draft-footer">
@@ -1430,11 +1429,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               <div class="textarea">${escapeHyperText(x.text)}</div>
             </div>
             <div class="draft-footer">
@@ -1464,11 +1463,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="image-well">
+            <div class="draft-body image-well">
               <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -1499,11 +1498,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="image-well">
+            <div class="draft-body image-well">
               <was-image src="${x.src}"></was-image>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -1533,11 +1532,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="image-well">
+            <div class="draft-body image-well">
               <was-video src="${x.src}"></was-video>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -1567,11 +1566,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="image-well">
+            <div class="draft-body image-well">
               <was-audio src="${x.src}"></was-audio>
               <div class="title">${escapeHyperText(x.title)}</div>
             </div>
@@ -1602,11 +1601,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               <div class="tommi">
                 <div class="tommi-title">
                   <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
@@ -1655,11 +1654,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               <div class="tommi">
                 <div class="tommi-title">
                   <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
@@ -1714,11 +1713,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               <div class="tommi">
                 <div class="tommi-title">
                   <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
@@ -1775,11 +1774,11 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
-            <div class="text-well">
+            <div class="draft-body text-well">
               <div class="raw-json">${
                 JSON.stringify(event.data, '', 2)
               }</div>
@@ -2170,7 +2169,7 @@ function renderBucket(spaceKey) {
 
 $.when('submit', '[action="edit"]', async (event) => {
   event.preventDefault()
-  $.teach({ view: views.create })
+  $.teach({ view: views.create, sidebar: true })
 })
 
 export function savePhoto(draft, context) {
@@ -2265,7 +2264,7 @@ $.when('submit', '[action="post"]', async (event) => {
   if(draft) {
     save(draft, context)
     toast('Created!', { type: 'success' })
-    $.teach({ draft: newDraft(draft.type), content: null, view: null, space: null, time: null })
+    $.teach({ sidebar: true, draft: newDraft(draft.type), content: null, view: null, space: null, time: null })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
@@ -2307,7 +2306,7 @@ $.when('click', '[data-new]', (event) => {
     }, bound('draft'))
   }
 
-  $.teach({ view: views.create, sidebar: false, activeMenu: null })
+  $.teach({ view: views.create, activeMenu: null, sidebar: false })
 })
 
 $.when('click', '[data-quit]', (event) => {

@@ -9,29 +9,35 @@ import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_
 config()
 self.DOMParser = DOMParser
 
-const port = Deno.env.get('PLAN98_PORT') || 1024
+const port = safeEnv('PLAN98_PORT', 1024)
 
-function safeEnv(key) {
-  return Deno.env.get(key) || ''
+function safeEnv(key, type='') {
+  return Deno.env.get(key) || type
 }
 
-const SECRET_KEY = JSON.stringify({"type":"Ed25519VerificationKey2020","controller":"did:key:z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","publicKeyMultibase":"z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","privateKeyMultibase":"zrv42zX2tskp26s5jo9cXzTTqdck9hu2feUUSftF58hZCieeXkdPkbx71QpHfXA8cooo9MeWadmKFNVbMy7Pwjafka4"})
-
+const SECRET_KEY = safeEnv('PLAN98_SIGNER', null)
 const signer = SECRET_KEY
   ? await Ed25519Signer.fromJSON(SECRET_KEY)
   : await Ed25519Signer.generate()
-const SECRET_SPACE = "5a61c931-01d6-42ac-9eaf-6ba842a74880"
+
+const SECRET_SPACE = safeEnv('PLAN98_SPACE_ID', null)
 const spaceId = SECRET_SPACE
   ? SECRET_SPACE
   : self.crypto.randomUUID()
+
 const walletDefaultHost = 'http://localhost:8080'
 
-const keycard = newKeycard({ name: "ROOT", id: spaceId })
+const keycard = newKeycard({
+  name: "ROOT",
+  id: spaceId,
+  src: '/app/time-machine?id='+spaceId,
+})
 
 function newKeycard(overrides={}) {
+  const id = self.crypto.randomUUID()
   const keycard = {
-    id: self.crypto.randomUUID(),
-    src: '/app/blue-sky',
+    id,
+    src: '/app/time-machine?id='+id,
     name: 'Keycard',
     host: walletDefaultHost,
     at: new Date().toJSON(),
@@ -249,7 +255,8 @@ function template() {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
-    BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY')
+    BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
+    PROTOMAPS_API_KEY: safeEnv('PROTOMAPS_API_KEY')
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
@@ -267,6 +274,7 @@ function template() {
           id: keycard.id,
           name: keycard.name,
           asJSON: keycard.asJSON,
+          src: keycard.src,
           host: keycard.host,
         }
       }

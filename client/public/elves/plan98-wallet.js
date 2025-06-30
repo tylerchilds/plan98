@@ -149,13 +149,16 @@ const methodHandlers = {
       return false
     }
 
-    await userAcceptImportKeycard(request).catch(e => {
-      error = true
-      reject(ERROR_P98_PROVISION_FAILED)
-    })
+    await userAcceptImportKeycard(request)
+      .then(console.log)
+      .catch(e => {
+        error = true
+        reject(ERROR_P98_PROVISION_FAILED)
+      })
 
     if(keycard) {
       $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+      $.teach({ activeKeycardId: keycard.id })
     }
 
     if(errorCheck()) return
@@ -175,11 +178,13 @@ const methodHandlers = {
 
     if(errorCheck()) return
 
+    /*
     await backupPlan98({ space, signer, cwd: '/private/tychi.1998.social/SourceCode/tonejs-instruments/samples' }).catch((e) => {
       error = true
       reject(ERROR_P98_BACKUP_FAILED)
       console.error(e)
     })
+    */
 
     await backupPlan98({ space, signer, cwd: '/public' }).catch((e) => {
       error = true
@@ -262,7 +267,7 @@ async function newKeycard(overrides={}) {
 
   const keycard = {
     id,
-    src: '/app/blue-sky',
+    src: '/app/time-machine?id='+id,
     name: 'Keycard',
     host: walletDefaultHost,
     at: new Date().toJSON(),
@@ -324,7 +329,9 @@ async function provisionPlan98(signer, keycard) {
   if (!responseToPutConfig) return
   const keycardMetadata = await getPlan98Config({space, signer}).catch(console.error)
 
-  $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+  if(keycardMetadata) {
+    $.teach({ id: keycardMetadata.id, ...keycardMetadata }, pasteToKeycard)
+  }
 }
 
 export async function get(src) {
@@ -942,7 +949,6 @@ function prioritizeKeycardById(state, payload) {
 $.when('click', '[data-launch]', (event) => {
   const id = event.target.dataset.launch
   const keycard = $.learn().keycards.find(x => x.id === id)
-
   if(keycard) {
     self.location.href = keycard.src
   }
