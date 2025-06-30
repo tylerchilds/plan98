@@ -203,14 +203,18 @@ Deno.serve(
     }
 
     try {
+      const headers = {
+        'content-type': getContentTypeByPath(filepath)
+      }
+
       const storageId = walletDefaultHost
       if(storageId) {
         const storageUrl = new URL(storageId)
         const storage = new StorageClient(storageUrl)
         const space = storage.space({
-            signer,
-            id: `urn:uuid:${spaceId}`
-          })
+          signer,
+          id: `urn:uuid:${spaceId}`
+        })
 
         console.log(spaceId)
         console.log(space)
@@ -229,14 +233,33 @@ Deno.serve(
 
         if(data) {
           console.log('Serving ' + filepath + ' from ' + spaceId + ' @ ' + storageId)
-          return new Response(await data.blob(),  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
+          if(request.method === 'HEAD') {
+            return new Response(null, {
+              status: 200,
+              headers
+            });
+          }
+          return new Response(await data.blob(), {
+            status: 200,
+            headers
+          });
         }
       }
 
       const file = await Deno.open("." + filepath, { read: true });
       if(file) {
         console.log('Serving ' + filepath + ' from disk.')
-        return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
+        if(request.method === 'HEAD') {
+          file.close()
+          return new Response(null, {
+            status: 200,
+            headers
+          });
+        }
+        return new Response(file.readable, {
+          status: 200,
+          headers
+        });
       }
 
     } catch(e) {
