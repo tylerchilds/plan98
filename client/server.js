@@ -25,7 +25,7 @@ const spaceId = SECRET_SPACE
   ? SECRET_SPACE
   : self.crypto.randomUUID()
 
-const walletDefaultHost = 'http://localhost:8080'
+const walletDefaultHost = safeEnv('PLAN98_WAS_HOST', 'http://localhost:8080')
 
 const keycard = newKeycard({
   name: "ROOT",
