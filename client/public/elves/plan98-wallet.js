@@ -4,10 +4,10 @@ import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
-const ERROR_P98_PROVISION_FAILED                                        = '001'
-const ERROR_P98_BACKUP_FAILED                                           = '002'
-const ERROR_P98_KEYCARD_REJECTED                                        = '003'
-const ERROR_P98_KEYCARD_TIMEOUT                                         = '004'
+const ERROR_P98_PROVISION_FAILED = '001'
+const ERROR_P98_BACKUP_FAILED = '002'
+const ERROR_P98_KEYCARD_REJECTED = '003'
+const ERROR_P98_KEYCARD_TIMEOUT = '004'
 
 const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 

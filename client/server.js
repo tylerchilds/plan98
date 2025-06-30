@@ -257,8 +257,18 @@ function template() {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
+
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
-    PROTOMAPS_API_KEY: safeEnv('PROTOMAPS_API_KEY')
+
+    PROTOMAPS_API_KEY: safeEnv('PROTOMAPS_API_KEY'),
+
+    VAULT_APP_ID: safeEnv('VAULT_APP_ID'),
+    VAULT_APP_SECRET: safeEnv('VAULT_APP_SECRET'),
+    VAULT_APP_SALT: safeEnv('VAULT_APP_SALT'),
+    VAULT_BASE_URL: safeEnv('VAULT_BASE_URL'),
+    VAULT_PUBLIC_KEY: safeEnv('VAULT_PUBLIC_KEY'),
+    SUPABASE_URL: safeEnv('SUPABASE_URL'),
+    SUPABASE_KEY: safeEnv('SUPABASE_KEY'),
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
