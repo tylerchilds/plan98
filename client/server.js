@@ -4,16 +4,15 @@ import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { DOMParser } from "npm:linkedom@0.18.5";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
+import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
 
 config()
 self.DOMParser = DOMParser
 
-const port = Deno.env.get('PLAN98_PORT') || 8000
-
+const port = Deno.env.get('PLAN98_PORT') || 1024
 
 function safeEnv(key) {
-  const value = Deno.env.get(key)
-  return value ? `${key}: "${value}",` : ''
+  return Deno.env.get(key) || ''
 }
 
 const SECRET_KEY = JSON.stringify({"type":"Ed25519VerificationKey2020","controller":"did:key:z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","publicKeyMultibase":"z6Mkr6h9yrB33EZMquqc2sWgfVNKuf1McScqqFKjccYnQ3m2","privateKeyMultibase":"zrv42zX2tskp26s5jo9cXzTTqdck9hu2feUUSftF58hZCieeXkdPkbx71QpHfXA8cooo9MeWadmKFNVbMy7Pwjafka4"})
@@ -21,18 +20,17 @@ const SECRET_KEY = JSON.stringify({"type":"Ed25519VerificationKey2020","controll
 const signer = SECRET_KEY
   ? await Ed25519Signer.fromJSON(SECRET_KEY)
   : await Ed25519Signer.generate()
-console.log('using: ' + JSON.stringify(signer.toJSON()))
-const SECRET_SPACE = "5a60c931-01d6-42ac-9eaf-6ba842a7f880"
+const SECRET_SPACE = "5a61c931-01d6-42ac-9eaf-6ba842a74880"
 const spaceId = SECRET_SPACE
   ? SECRET_SPACE
   : self.crypto.randomUUID()
 const walletDefaultHost = 'http://localhost:8080'
 
-const keycard = newKeycard({ name: "ROOT" })
+const keycard = newKeycard({ name: "ROOT", id: spaceId })
 
 function newKeycard(overrides={}) {
   const keycard = {
-    id: spaceId,
+    id: self.crypto.randomUUID(),
     src: '/app/blue-sky',
     name: 'Keycard',
     host: walletDefaultHost,
@@ -52,28 +50,9 @@ const methods = {
   importKeycard: 'import-keycard'
 }
 
-const contentTypes = {
-  // Web documents
-  '.html': 'text/html',
-  '.css': 'text/css',
-  '.js': 'text/javascript',
-  '.json': 'application/json',
-  '.txt': 'text/plain',
-  '.jpg': 'image/jpeg',
-  '.jpeg': 'image/jpeg',
-  '.png': 'image/png',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.webp': 'image/webp',
-  '.mp3': 'audio/mpeg',
-  '.mp4': 'video/mp4',
-  '.pdf': 'application/pdf',
-  'default': 'application/octet-stream'
-};
-
 function getContentType(filename) {
   const ext = filename.toLowerCase().substring(filename.lastIndexOf('.'));
-  return contentTypes[ext] || contentTypes.default;
+  return typeByExtension(ext);
 }
 
 function getContentTypeByPath(filePath) {
@@ -191,7 +170,7 @@ function kids(paths) {
 }
 
 Deno.serve(
-  { hostname: "localhost", port: 1024 },
+  { hostname: "localhost", port },
   async (request) => {
     const url = new URL(request.url);
     let filepath = decodeURIComponent(url.pathname);
@@ -219,35 +198,37 @@ Deno.serve(
     }
 
     try {
-      /*
+      const storageId = walletDefaultHost
+      if(storageId) {
+        const storageUrl = new URL(storageId)
+        const storage = new StorageClient(storageUrl)
+        const space = storage.space({
+            signer,
+            id: `urn:uuid:${spaceId}`
+          })
+
+        console.log(spaceId)
+        console.log(space)
+
+        const resource = space.resource(filepath)
+
+        const data = await resource.get({ signer })
+          .then(async res => {
+            if(res.status !== 200) {
+              throw new Error('Failed private lookup: '+ filepath)
+            }
+            return res
+          }).catch((e) => {
+            return null
+          })
+
+        if(data) {
+          return new Response(await data.blob(),  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
+        }
+      }
+
       const file = await Deno.open("." + filepath, { read: true });
       if(file) {
-        return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
-      }
-      */
-
-      const storageId = walletDefaultHost
-      if(!storageId) return
-      const storageUrl = new URL(storageId)
-      const storage = new StorageClient(storageUrl)
-      const space = storage.space({
-          signer,
-          id: `urn:uuid:${spaceId}`
-        })
-
-      const resource = space.resource(filepath)
-
-      const data = await resource.get({ signer })
-        .then(async res => {
-          console.log(res)
-          if(res.status !== 200) {
-            throw new Error('Not a 200')
-          }
-          return res
-        })
-
-      if(data) {
-        console.log(data)
         return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
       }
 
@@ -267,7 +248,8 @@ function template() {
   const configObject = {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
-    PLAN98_WAS_SIGNER: keycard.asJSON
+    PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
+    BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY')
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
@@ -532,7 +514,7 @@ function template() {
       import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 
       (async function init() {
-        const signer = await Ed25519Signer.fromJSON(JSON.stringify(${JSON.stringify(configObject.PLAN98_WAS_SIGNER)}))
+        const signer = await Ed25519Signer.fromJSON(JSON.stringify(${configObject.PLAN98_WAS_SIGNER}))
 
         const storageId = plan98.env.PLAN98_WAS_HOST
         if(!storageId) return

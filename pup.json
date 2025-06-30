@@ -2,22 +2,17 @@
   "name": "plan98",
   "processes": [
     {
-      "id": "plan98-start-client",
-      "cmd": "deno run -A client.js",
-      "autostart": true
-    },
-    {
       "id": "plan98-start-peer",
       "cmd": "cd client && deno run -A server.js",
       "autostart": true
     },
     {
-      "id": "plan98-start-multiplayer",
+      "id": "plan98-start-relay",
       "cmd": "cd server/multiplayer && npm i && node index.mjs",
       "autostart": true
     },
     {
-      "id": "plan98-start-was",
+      "id": "plan98-start-storage",
       "cmd": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE npm run dev",
       "autostart": true
     }

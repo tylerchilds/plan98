@@ -1,0 +1,11 @@
+plan98.org {
+  reverse_proxy localhost:1024
+}
+
+storage.plan98.org {
+  reverse_proxy localhost:8080
+}
+
+relay.plan98.org {
+  reverse_proxy localhost:9208
+}

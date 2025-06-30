@@ -274,4 +274,5 @@ function stringFunction(s) {
 
 // make sure the client uses the same port
 // @geckos.io/client uses the port 9208 by default
+console.log('relay running on 9208')
 server.listen(9208)
