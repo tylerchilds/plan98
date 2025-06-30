@@ -81,13 +81,12 @@ async function showApp(request, tag) {
 
   const dom = page()
 
-  const main = dom.querySelector('body > main')
-  main.parentNode.insertAdjacentHTML('afterbegin', `
+  const main = dom.querySelector('.the-main-area')
+  main.innerHTML = `
     <sillonious-brand>
       <${tag} ${attributes}></${tag}>
     </sillonious-brand>
-  `)
-  main.remove()
+  `
   return `<!DOCTYPE html>${dom.documentElement}`
 }
 
@@ -257,6 +256,7 @@ function template() {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
+    PLAN98_WAS_REALTIME: safeEnv('PLAN98_REALTIME'),
 
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
 
@@ -522,13 +522,17 @@ function template() {
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.16.0/cdn/shoelace-autoloader.js"></script>
   </head>
   <body>
-    <main>
+    <data-tooltip>
+    <data-popover>
+    <main class="the-main-area">
       <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
         <div style="padding: 51px; height: 100%; display: flex;">
           <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
         </div>
       </div>
     </main>
+    </data-popover>
+    </data-tooltip>
     <script type="module">
       import { StorageClient } from "@wallet.storage/fetch-client";
       import { Ed25519Signer } from "@did.coop/did-key-ed25519"

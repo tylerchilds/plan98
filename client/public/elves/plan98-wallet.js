@@ -8,6 +8,7 @@ const ERROR_P98_PROVISION_FAILED = '001'
 const ERROR_P98_BACKUP_FAILED = '002'
 const ERROR_P98_KEYCARD_REJECTED = '003'
 const ERROR_P98_KEYCARD_TIMEOUT = '004'
+const ERROR_P98_BOOTSTRAP_FAILED = '005'
 
 const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 
@@ -156,12 +157,12 @@ const methodHandlers = {
         reject(ERROR_P98_PROVISION_FAILED)
       })
 
+    if(errorCheck()) return
+
     if(keycard) {
       $.teach({ id: keycard.id, ...keycard }, insertKeycard)
       $.teach({ activeKeycardId: keycard.id })
     }
-
-    if(errorCheck()) return
 
     const signer = await getSigner(keycard)
     const storage = await getStorage(keycard)
@@ -186,11 +187,58 @@ const methodHandlers = {
     })
     */
 
-    await backupPlan98({ space, signer, cwd: '/public' }).catch((e) => {
+    $.teach({ uploadQueue: [], uploadCursor: 0 })
+
+    const bootstrapDependencies = [
+      '/public/index.html',
+      '/public/styles/system.css',
+      '/public/vendor/es-module-shims.js',
+      '/public/brand.js',
+      '/public/elves/sillonious-brand.js',
+      '/public/elf.js',
+      '/public/module.js',
+      '/public/plan98.js',
+      '/public/saga.js',
+      '/public/elves/data-popover.js',
+      '/public/elves/data-tooltip.js',
+      '/public/elves/plan98-modal.js',
+      '/public/elves/plan98-panel.js',
+      '/public/elves/plan98-toast.js',
+      '/public/_statebus.js',
+      '/public/statebus/statebus.js',
+      '/public/statebus/client-library.js',
+      '/public/statebus/braidify-client.js',
+      '/public/sqlite.js',
+      '/public/main.js',
+      '/public/elves/plan98-console.js',
+      '/public/elves/plan98-synthia.js',
+      '/public/elves/plan98-wallet.js',
+      '/public/elves/debug-gamepads.js',
+      '/public/elves/paper-pocket.js',
+      '/public/elves/tiniest-violin.js',
+      '/public/elves/time-machine.js',
+      '/public/elves/sketch-pad.js',
+      '/public/elves/was-code.js',
+      '/public/elves/code-module.js',
+      '/public/elves/source-code.js',
+    ]
+
+    bootstrapDependencies.map(path => {
+      queueUpload({ space, signer }, path)
+    })
+
+    await systemAwaitUploadQueue().catch(() => {
+      error = true
+      reject(ERROR_P98_BOOTSTRAP_FAILED)
+    })
+
+    /*
+    await backupPlan98({ space, signer, cwd: '/public/elves' }).catch((e) => {
       error = true
       reject(ERROR_P98_BACKUP_FAILED)
       console.error(e)
     })
+    */
 
 
     if(errorCheck()) return
@@ -478,7 +526,7 @@ let queue = []
 let uploading = false
 function queueUpload(context, path) {
   queue.push({
-    path: context.cwd + path,
+    path: (context.cwd || '') + path,
     error: false,
     done: false
   })
@@ -557,7 +605,7 @@ function updateQueueAt(index) {
   }
 }
 
-function systemAwaitBackupComplete() {
+function systemAwaitUploadQueue() {
   return new Promise((resolve) => {
     function loop() {
       const { uploadQueue, uploadCursor } = $.learn()
@@ -616,7 +664,7 @@ export async function backupPlan98(context) {
     if (!response.ok) throw new Error(`Failed to put linkset: ${response.status} ${response.statusText}`, { cause: { response } });
   }
 
-  return systemAwaitBackupComplete()
+  return systemAwaitUploadQueue()
 }
 
 $.when('click', '[data-backup]', async (event) => {

@@ -1,4 +1,4 @@
-import elf from '../elf.js'
+import elf from '@silly/elf'
 
 export const types = {
   news: 'news'

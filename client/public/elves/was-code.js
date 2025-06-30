@@ -28,6 +28,14 @@ function mount(target) {
   get(src).then(async blob => {
     const file = await blob.text()
     $.teach({ src, [src]: { file, src }})
+  }).catch(e => {
+    fetch(src).then(async blob => {
+      const file = await blob.text()
+      $.teach({ src, [src]: { file, src }})
+    }).catch(e2 => {
+      console.error(e)
+      console.error(e2)
+    })
   })
 }
 
