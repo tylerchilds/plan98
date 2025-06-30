@@ -229,12 +229,14 @@ Deno.serve(
           })
 
         if(data) {
+          console.log('Serving ' + filepath + ' from ' + spaceId + ' @ ' + storageId)
           return new Response(await data.blob(),  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
         }
       }
 
       const file = await Deno.open("." + filepath, { read: true });
       if(file) {
+        console.log('Serving ' + filepath + ' from disk.')
         return new Response(file.readable,  { status: 200, headers: { 'content-type': getContentTypeByPath(filepath) } });
       }
 
