@@ -1018,90 +1018,49 @@ sillonious-brand > xml-html {
   font-weight: 100;
 }
 
+
+.standard-input,
 .standard-button {
-  border: none;
-  border-radius: 3px;
-  border: 1px solid var(--root-theme, mediumseagreen);
-  background:
-    linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.45) 20%, rgba(0,0,0,.75)),
-    linear-gradient(-65deg, rgba(255,255,255,.5), rgba(255,255,255,.15)),
-    var(--root-theme, mediumseagreen);
-  color: rgba(255,255,255,.85);
+  background: linear-gradient(var(--nav-background-start) 0%, var(--root-theme, mediumseagreen), var(--nav-background-end) 100%);
+  background-size: 1px 14.4rem;
+  background-repeat: repeat-x;
+  font-weight: 400;
   padding: .5rem;
-  font-weight: bold;
-  position: relative;
+  transition: all 200ms ease;
+  line-height: 1;
+  white-space: nowrap;
+  border: none;
+  padding: .5rem;
+  color: rgba(0,0,0,.85);
+  --nav-background-start: rgba(255,255,255,.65);
+  --nav-background-end: rgba(255,255,255,.25);
+  border-bottom: 3px solid var(--root-theme);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.standard-input.bias-positive,
+.standard-button.bias-positive {
+  --root-theme: mediumseagreen;
+}
+
+.standard-input.bias-negative,
+.standard-button.bias-negative {
+  --root-theme: firebrick;
+}
+
+
+.standard-button:link,
+.standard-button:visited {
+  color: rgba(0,0,0,.85);
 }
 
 .standard-button:hover,
 .standard-button:focus {
   color: rgba(255,255,255,.85);
-  background:
-    linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
-    linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
-    var(--root-theme, mediumseagreen);
-}
-
-.standard-input {
-  border: 1px solid rgba(0,0,0,.15);
-  border-radius: 3px;
-  color: rgba(0,0,0,.85);
-  padding: .5rem;
-}
-
-
-.old-button::after,
-.standard-button::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: var(--root-theme, transparent);
-  mix-blend-mode: soft-light;
-  opacity: .75;
-}
-
-
-.old-button,
-.old-button:link,
-.old-button:visited {
-  background: rgba(0,0,0,.1);
-  border: 2px solid;
-  border-top-color: rgba(255,255,255,.5);
-  border-left-color: rgba(255,255,255,.5);
-  border-bottom-color: rgba(0,0,0,.5);
-  border-right-color: rgba(0,0,0,.5);
-  text-decoration: none;
-  padding: .25rem .5rem;
-  color: rgba(0,0,0,.85);
-  position: relative;
-}
-
-.old-button:hover,
-.old-button:focus {
-  color: mediumseagreen;
-}
-
-.old-button:active {
-  text-decoration: none;
-  color: firebrick;
-  background: rgba(0,0,0,.8);
-  border-bottom-color: rgba(255,255,255,.5);
-  border-right-color: rgba(255,255,255,.5);
-  border-top-color: rgba(0,0,0,.5);
-  border-left-color: rgba(0,0,0,.5);
-}
-
-.standard-button.-clear {
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.standard-button.-outlined,
-.old-button.-outlined {
-  border: 1px solid var(--root-theme, mediumseagreen);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  --nav-background-start: rgba(0,0,0,.25);
+  --nav-background-end: rgba(0,0,0,.85);
+  background-position-y: -7.2rem;
 }
 
 .standard-button.-small {

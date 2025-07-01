@@ -190,23 +190,6 @@ $.style(`
     overflow: auto;
   }
 
-  & [data-destroy] {
-    cursor: pointer;
-    color: firebrick;
-    background: transparent;
-    border: none;
-    border-radius: 0;
-  }
-
-  & [data-destroy] {
-    background: firebrick;
-    color: white;
-    display: grid;
-    padding: .25rem;
-    line-height: 1;
-    place-content: center;
-  }
-
   & .edit-banner {
     background: lemonchiffon;
     color: saddlebrown;
@@ -458,10 +441,6 @@ $.style(`
       0 0 3px rgba(0,0,0,.15),
       0 0 2px rgba(0,0,0,.25),
       1px 1px rgba(0,0,0,.45);
-  }
-
-  & [data-destroy] {
-    display: grid;
   }
 
   & .text-well {
@@ -956,7 +935,7 @@ function timeMachine(spaceKey, timeKey, file) {
 function editBanner(context) {
   return `
     <div class="edit-banner">${context?`
-      <button data-destroy="${context.path}">
+      <button class="standard-button -smol bias-negative" data-destroy="${context.path}">
         Delete
       </button>
       <span class="edit-label">
@@ -1378,7 +1357,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
-              <button class="standard-button -small" style="place-self: start end;" type="submit">
+              <button class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Save
               </button>
             </div>
@@ -1426,10 +1405,10 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button -small" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small  bias-positive" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1463,7 +1442,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1498,7 +1477,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1532,7 +1511,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1566,7 +1545,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1601,7 +1580,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1654,7 +1633,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1713,7 +1692,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1774,7 +1753,7 @@ const viewRenderers = {
               <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Edit
               </button>
             </div>
@@ -1841,11 +1820,13 @@ function patch(target) {
   {
     const content = target.querySelector('[data-dom="content"]')
     if(
+      target.type !== draft.type ||
       target.view !== view ||
       (target.dataset.space && target.dataset.space !== space) ||
       (target.dataset.time && target.dataset.time !== time)
     ) {
       target.view = view
+      target.type = draft.type
       if(!space && target.dataset.space) {
         delete target.dataset.space
       } else {

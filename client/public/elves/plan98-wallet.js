@@ -713,7 +713,7 @@ $.draw((target) => {
             Powered by <a href="https://plan98.org">Plan98</a>
           </div>
           <div style="text-align: right;">
-            <button data-remix>
+            <button class="standard-button -small" data-remix>
               Remix
             </button>
           </div>
@@ -729,7 +729,7 @@ $.draw((target) => {
           System Message
         </div>
         <div style="text-align: right;">
-          <button data-reject-keycard>
+          <button class="standard-button -small" data-reject-keycard>
             Ignore
           </button>
         </div>
@@ -746,11 +746,11 @@ $.draw((target) => {
           <strong>Serial Number: </strong>${pendingKeycard.id}
         </p>
         
-        <button data-approve-keycard>
+        <button class="standard-button bias-positive -small" data-approve-keycard>
           Approve
         </button>
 
-        <button data-reject-keycard>
+        <button class="standard-button bias-negative -small" data-reject-keycard>
           Deny
         </button>
       </section>
@@ -761,12 +761,12 @@ $.draw((target) => {
   return editId ? `
      <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
-        <button data-cancel>
+        <button class="standard-button bias-negative -small" data-cancel>
           Cancel
         </button>
       </div>
       <div style="text-align: right;">
-        <button data-save="${editId}">
+        <button class="standard-button bias-positive -small" data-save="${editId}">
           Save
         </button>
       </div>
@@ -816,12 +816,12 @@ $.draw((target) => {
   ` : `
     <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
-        <button data-create>
+        <button class="standard-button bias-positive -small" data-create>
           New Keycard
         </button>
       </div>
       <div style="text-align: right;">
-        <button data-quit>
+        <button class="standard-button bias-negative -small" data-quit>
           Quit
         </button>
       </div>
@@ -830,23 +830,25 @@ $.draw((target) => {
       ${active?`
         <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
           <div class="active-keycard">
-            ${render(active)}
             <div class="keycard-actions">
-              <button data-export="${active.id}">
+              <button class="standard-button -brand" data-export="${active.id}">
                 Export
               </button>
-              <button data-edit="${active.id}">
+              <button class="standard-button -brand" data-edit="${active.id}">
                 Edit
               </button>
-              <button data-delete="${active.id}">
+              <button class="standard-button -brand" data-delete="${active.id}">
                 Delete
               </button>
             </div>
+            ${render(active)}
           </div>
         </div>
       `:''}
       <div class="keyring">
-        ${row.map(render).join('')}
+        <div class="keyring-scroller">
+          ${row.map(render).join('')}
+        </div>
       </div>
     </section>
     ${footer()}
@@ -1130,33 +1132,50 @@ $.style(`
     background: rgba(255,255,255,.15);
     color: rgba(255,255,255,.85);
     padding: .5rem;
+    align-items: center;
   }
 
   & footer {
     background: rgba(255,255,255,.85);
     padding: .5rem;
+    align-items: center;
   }
 
   & .active-keycard {
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr;
     gap: 1rem;
+    place-items: center;
+  }
+
+  & .keycard-actions {
+    position: absolute;
+    top: 0;
+    z-index: 1;
   }
 
   & .lightbox {
-    padding: 3rem;
-    display: grid;
-    grid-template-rows: 1fr auto;
+    padding: 1rem;
+    position: relative;
+    display: block;
     background:
       linear-gradient(335deg, var(--lightbox-color), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       var(--lightbox-color);
     place-content: center;
+    overflow: hidden;
+  }
+
+  & .standard-button.-brand {
+    background: linear-gradient(var(--nav-background-start) 0%, var(--lightbox-color, mediumseagreen), var(--nav-background-end) 100%);
+    border-bottom-color: var(--lightbox-color);
   }
 
   & .wallet {
     overflow: auto;
+    display: grid;
+    grid-template-rows: 1fr 180px;
   }
 
   & .serious-business {
@@ -1180,19 +1199,25 @@ $.style(`
   }
 
   & .keyring {
-    padding: .5rem;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: .5rem;
-    overflow: auto;
+    display: grid;
     place-items: center;
+    overflow: hidden;
+  }
+
+  & .keyring-scroller {
+    max-width: 100%;
+    overflow: auto;
+    gap: .5rem;
+    display: flex;
+    padding: .5rem;
+    justify-content: space-around;
   }
 
   & .keycard {
     aspect-ratio: 1.66/1;
     width: 100%;
     max-width: 280px;
+    min-width: 220px;
     opacity: .65;
     display: grid;
     place-content: end end;
