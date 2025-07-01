@@ -393,8 +393,6 @@ $.style(`
   & .form-card {
     display: grid;
     background: white;
-    max-width: 90ch;
-    margin: 0 auto;
 
     box-shadow:
       0 0 6px 6px rgba(0,0,0,.05),
