@@ -1018,6 +1018,7 @@ $.when('click', '[data-export]', (event) => {
           keycard: {
             id: keycard.id,
             name: keycard.name,
+            src: keycard.src,
             asJSON: keycard.asJSON,
             host: keycard.host,
           }
