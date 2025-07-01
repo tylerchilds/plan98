@@ -1170,6 +1170,8 @@ $.style(`
   & .standard-button.-brand {
     background: linear-gradient(var(--nav-background-start) 0%, var(--lightbox-color, mediumseagreen), var(--nav-background-end) 100%);
     border-bottom-color: var(--lightbox-color);
+    background-size: 1px 14.4rem;
+  background-repeat: repeat-x;
   }
 
   & .wallet {

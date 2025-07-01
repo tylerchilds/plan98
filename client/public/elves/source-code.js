@@ -13,6 +13,6 @@ $.draw(() => {
   });
 
   return `
-    <code-module src="${new URL(import.meta.url).pathname}" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></code-module>
+    <was-code src="${new URL(import.meta.url).pathname}" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
   `
 })

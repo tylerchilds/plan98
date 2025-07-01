@@ -1037,6 +1037,7 @@ sillonious-brand > xml-html {
   border-bottom: 3px solid var(--root-theme);
   text-decoration: none;
   display: inline-block;
+  border-radius: 0 0 3px 3px;
 }
 
 .standard-input.bias-positive,
