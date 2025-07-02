@@ -27,7 +27,7 @@
 :focus {
     position: relative;
     outline: 1px solid var(--root-theme, dodgerblue);
-    outline-offset: -1px;
+    outline-offset: 2px;
 }
 
 button:-moz-focusring,
@@ -940,7 +940,7 @@ sillonious-brand > xml-html {
   overflow: auto;
   flex-wrap: wrap;
   display: flex;
-  gap: .25rem;
+  gap: .5rem;
   padding: 0 0 .5rem;
 }
 
@@ -1019,35 +1019,46 @@ sillonious-brand > xml-html {
 }
 
 
-.standard-input,
 .standard-button {
-  background: linear-gradient(var(--nav-background-start) 0%, var(--root-theme, mediumseagreen), var(--nav-background-end) 100%);
-  background-size: 1px 14.4rem;
+  background: linear-gradient(var(--nav-background-start) 0%, var(--root-theme, mediumseagreen), var(--nav-background-end) 100%), var(--root-theme, mediumseagreen);
+  background-size: 1px 9.6rem;
   background-repeat: repeat-x;
+  background-position-y: 0rem;
   font-weight: 400;
   padding: .5rem;
-  transition: all 200ms ease;
+  transition: background 200ms ease-in-out;
   line-height: 1;
   white-space: nowrap;
   border: none;
   padding: .5rem;
   color: rgba(0,0,0,.85);
-  --nav-background-start: rgba(255,255,255,.65);
-  --nav-background-end: rgba(255,255,255,.25);
-  border-bottom: 3px solid var(--root-theme);
+  --nav-background-start: rgba(255,255,255,1);
+  --nav-background-end: rgba(255,255,255,1);
+  border-bottom: 3px solid var(--root-theme, mediumseagreen);
   text-decoration: none;
   display: inline-block;
-  border-radius: 0 0 3px 3px;
+  border-radius: 5px;
 }
 
-.standard-input.bias-positive,
+.standard-button:active {
+  border-top: 3px solid rgba(255,255,255,.25);
+  border-bottom: none;
+}
+
 .standard-button.bias-positive {
-  --root-theme: mediumseagreen;
+  --root-theme: var(--green, mediumseagreen);
 }
 
-.standard-input.bias-negative,
+.standard-button.bias-link {
+  --root-theme: var(--blue, dodgerblue);
+}
+
+.standard-button.bias-generic {
+  --root-theme: dimgray;
+}
+
 .standard-button.bias-negative {
-  --root-theme: firebrick;
+  --root-theme: var(--red, firebrick);
 }
 
 
@@ -1057,11 +1068,20 @@ sillonious-brand > xml-html {
 }
 
 .standard-button:hover,
-.standard-button:focus {
+.standard-button:focus,
+.standard-button:active {
   color: rgba(255,255,255,.85);
   --nav-background-start: rgba(0,0,0,.25);
-  --nav-background-end: rgba(0,0,0,.85);
-  background-position-y: -7.2rem;
+  --nav-background-end: rgba(0,0,0,.25);
+  background-position-y: -4.8rem;
+}
+
+.standard-button:active {
+  color: rgba(0,0,0,.85);
+  background-position-y: 0rem;
+  --nav-background-start: rgba(255,255,255,.85);
+  --nav-background-end: rgba(255,255,255,.85);
+  border-color: rgba(255,255,255,.85);
 }
 
 .standard-button.-small {
@@ -1069,11 +1089,25 @@ sillonious-brand > xml-html {
   font-size: 1rem;
 }
 
-.standard-button.-smol,
-.old-button.-smol {
-  padding: 0 4px;
-  font-size: 1rem;
-  font-weight: normal;
+.standard-button.-large {
+  padding: .75rem;
+  font-size: 1.25rem;
 }
 
 
+.standard-button.-smol,
+.old-button.-smol {
+  padding: 2px 4px;
+  font-size: 13px;
+  font-weight: normal;
+}
+
+.standard-button.-round {
+  border-radius: 100%;
+  aspect-ratio: 1;
+}
+
+.button-container {
+  display: flex;
+  gap: .5rem;
+}

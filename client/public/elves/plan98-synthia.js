@@ -158,8 +158,15 @@ $.style(`
   & .search-input {
     width: 100%;
     padding: .25rem .5rem;
-    border-radius: .5rem;
+    border-radius: 5px;
     border: 1px solid rgba(0,0,0,.15);
+    box-shadow: 0 1px 3px 0 rgba(0,0,0,.1),
+                0 1px 3px 3px rgba(0,0,0,.05);
+    border-bottom: 3px solid rgba(0,0,0,.2);
+  }
+
+  & .search-input:focus {
+    border-bottom-color: rgba(0,0,0,.4);
   }
 
   & .share-actions {

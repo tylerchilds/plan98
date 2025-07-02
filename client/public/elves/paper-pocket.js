@@ -1074,12 +1074,9 @@ function settingsMenu() {
           <div class="selectbox-label">
             ${label}
           </div>
-          <div class="selectbox-description">
-            ${description}
-          </div>
         </div>
         <div class="selectbox-selector">
-          <div class="standard-button selectbox-view">
+          <div class="standard-button -small selectbox-view">
             ${value}
           </div>
           <select data-settings name="${key}">
@@ -1090,6 +1087,9 @@ function settingsMenu() {
               `
             }).join('')}
           </select>
+        </div>
+        <div class="selectbox-description">
+          ${description}
         </div>
     </div>
     `
@@ -1119,28 +1119,28 @@ export function ai(operation) {
   return `
     <paper-pocket static="true">
       <div class="share-actions">
-        <a class="standard-button -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
           clipboard
         </a>
-        <a class="standard-button -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
           journal
         </a>
-        <a class="standard-button -smol" target="_blank" href="/app/e-mail?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/e-mail?q=${encodeURIComponent(operation)}">
           email
         </a>
-        <a class="standard-button -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
           bluesky
         </a>
-        <a class="standard-button -smol" target="_blank" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
           chat
         </a>
-        <a class="standard-button -smol" target="_blank" href="/app/ur-shell?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/ur-shell?q=${encodeURIComponent(operation)}">
           shell
         </a>
       </div>
       <div class="search-bar">
         <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
-        <button class="standard-button" data-search="${encodeURIComponent(operation)}">
+        <button class="standard-button bias-positive" data-search="${encodeURIComponent(operation)}">
           <sl-icon name="search"></sl-icon>
         </button>
       </div>
@@ -1187,7 +1187,7 @@ export function ai(operation) {
       <div class="llm-grid">
         <div class="av -snapshot">
           <div class="av-cta">
-            <a class="standard-button" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
+            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
               Ask
             </a>
           </div>
@@ -1200,7 +1200,7 @@ export function ai(operation) {
 
         <div class="av -snapshot">
           <div class="av-cta">
-            <a class="standard-button" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
+            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
               Ask
             </a>
           </div>
@@ -1212,7 +1212,7 @@ export function ai(operation) {
 
         <div class="av -snapshot">
           <div class="av-cta">
-            <a class="standard-button" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
+            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
               Ask
             </a>
           </div>
@@ -1224,7 +1224,7 @@ export function ai(operation) {
 
         <div class="av -snapshot">
           <div class="av-cta">
-            <a class="standard-button" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
+            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
               Ask
             </a>
           </div>
@@ -2390,7 +2390,7 @@ $.style(`
   & .repl-grid {
     display: flex;
     padding: .5rem;
-    gap: 1rem;
+    gap: .5rem 1rem;
     flex-wrap: wrap;
   }
 
@@ -2417,9 +2417,6 @@ $.style(`
   }
 
   & .settings-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
   }
 
   & .settings-human {
@@ -2434,6 +2431,7 @@ $.style(`
 
   & .selectbox-selector {
     position: relative;
+    display: inline-block;
   }
 
   & .selectbox-view {

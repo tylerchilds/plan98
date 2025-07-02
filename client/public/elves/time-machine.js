@@ -224,14 +224,7 @@ $.style(`
 
   & .create-item {
     font-size: 2rem;
-    border: none;
     border-radius: 3px;
-    border: 1px solid var(--root-theme, mediumseagreen);
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
     padding: .5rem;
     font-weight: bold;
     border-radius: 100%;
@@ -242,24 +235,7 @@ $.style(`
     left: 1.25rem;
   }
 
-  & .create-item:hover,
-  & .create-item:focus {
-    color: rgba(255,255,255,.85);
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
-      var(--root-theme, mediumseagreen);
-  }
-
   & .more-item {
-    border: none;
-    border-radius: 3px;
-    border: 1px solid var(--root-theme, mediumseagreen);
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.45) 20%, rgba(0,0,0,.65)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
     padding: .5rem .5rem .5rem 1.5rem;
     font-weight: bold;
     border-radius: 0 .5rem .5rem 0;;
@@ -267,16 +243,6 @@ $.style(`
     place-content: center;
     z-index: 26;
   }
-
-  & .more-item:hover,
-  & .more-item:focus {
-    color: rgba(255,255,255,.85);
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
-      var(--root-theme, mediumseagreen);
-  }
-
 
   & .era-header {
     position: sticky;
@@ -489,15 +455,6 @@ $.style(`
     display: flex;
   }
 
-  & .draft-footer select {
-    color: rgba(0,0,0,.85);
-    background: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 3px;
-    padding: 0 .5rem;
-  }
-
-
   & .draft-content {
     grid-area: body;
     width: 100%;
@@ -676,7 +633,6 @@ $.style(`
     --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
-    transition: background 200ms ease-in-out;
   }
 
   & hr {
@@ -1236,7 +1192,7 @@ function renderCreationFormByType(draft) {
 
 function typeSelector(selected) {
   return `
-    <select class="standard-button -small" name="type" data-bind="draft">
+    <select class="standard-button -smol" name="type" data-bind="draft">
       ${Object.keys(eventTypes).map((key) => `
         <option value="${key}" ${key===selected?'selected':''}>${key}</option>
       `)}
@@ -1256,7 +1212,7 @@ for(let i = today.getFullYear() - 50; i < today.getFullYear() + 50; i++) {
 
 function yearSelector(selected) {
   return `
-    <select name="year" data-bind="draft">
+    <select class="standard-button -smol" name="year" data-bind="draft">
       ${years.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1266,7 +1222,7 @@ function yearSelector(selected) {
 
 function monthSelector(selected) {
   return `
-    <select name="month" data-bind="draft">
+    <select class="standard-button -smol"  name="month" data-bind="draft">
       ${months.map((_value, index) => `
         <option value="${index}" ${index===selected?'selected':''}>${index+1}</option>
       `)}
@@ -1285,7 +1241,7 @@ function daySelector(selected, month, year) {
     days.push(i)
   }
   return `
-    <select name="day" data-bind="draft">
+    <select class="standard-button -smol"  name="day" data-bind="draft">
       ${days.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1299,7 +1255,7 @@ function hourSelector(selected) {
     hours.push(i)
   }
   return `
-    <select name="hour" data-bind="draft">
+    <select class="standard-button -smol"  name="hour" data-bind="draft">
       ${hours.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1314,7 +1270,7 @@ function minuteSelector(selected) {
   }
 
   return `
-    <select name="minute" data-bind="draft">
+    <select class="standard-button -smol"  name="minute" data-bind="draft">
       ${minutes.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1329,7 +1285,7 @@ const viewRenderers = {
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -clear" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -clear" style="place-self: start;" type="reset">
                 Cancel
               </button>
             </div>
@@ -1352,7 +1308,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="post" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
               <button class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1403,7 +1359,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small  bias-positive" style="place-self: start end;" type="submit">
@@ -1437,7 +1393,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1472,7 +1428,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1506,7 +1462,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1540,7 +1496,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1575,7 +1531,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1628,7 +1584,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1687,7 +1643,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1748,7 +1704,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button -small -outlined" style="place-self: start;" type="reset">
+              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1851,11 +1807,11 @@ $.draw((target)=> {
 
   return `
     <div class="creation-container">
-      <button data-dom="create-button" class="create-item" data-new>
+      <button data-dom="create-button" class="create-item standard-button" data-new>
         <sl-icon name="plus-lg"></sl-icon>
       </button>
       <div class="menu-item">
-        <button data-os-target="edit" class="more-item">
+        <button data-os-target="edit" class="more-item standard-button">
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">

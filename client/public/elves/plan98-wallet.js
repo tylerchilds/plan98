@@ -2,7 +2,7 @@ import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
-import $paperPocket, { sideEffects, afterUpdateTheme } from './paper-pocket.js'
+import $paperPocket, { replaceElves, sideEffects, afterUpdateTheme } from './paper-pocket.js'
 
 const ERROR_P98_PROVISION_FAILED = '001'
 const ERROR_P98_BACKUP_FAILED = '002'
@@ -708,9 +708,9 @@ $.draw((target) => {
           </span>
         </div>
       `:`
-        <footer style="display: grid; grid-template-columns: 1fr 1fr;">
-          <div>
-            Powered by <a href="https://plan98.org">Plan98</a>
+        <footer style="display: grid; grid-template-columns: 1fr auto;">
+          <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
+            Powered by <a class="standard-button bias-link -small" href="https://plan98.org">Plan98</a>
           </div>
           <div style="text-align: right;">
             <button class="standard-button -small" data-remix>
@@ -729,7 +729,7 @@ $.draw((target) => {
           System Message
         </div>
         <div style="text-align: right;">
-          <button class="standard-button -small" data-reject-keycard>
+          <button class="standard-button bias-generic -small" data-reject-keycard>
             Ignore
           </button>
         </div>
@@ -738,6 +738,17 @@ $.draw((target) => {
         <h1>
           Keycard Import Request
         </h1>
+
+        <div class="button-container">
+          <button class="standard-button bias-positive -small" data-approve-keycard>
+            Approve
+          </button>
+
+          <button class="standard-button bias-negative -small" data-reject-keycard>
+            Deny
+          </button>
+        </div>
+
         <p>
           A keycard that goes by ${pendingKeycard.name} and is known to be connected to ${pendingKeycard.host} would like to be added to your wallet.
         </p>
@@ -745,14 +756,6 @@ $.draw((target) => {
         <p>
           <strong>Serial Number: </strong>${pendingKeycard.id}
         </p>
-        
-        <button class="standard-button bias-positive -small" data-approve-keycard>
-          Approve
-        </button>
-
-        <button class="standard-button bias-negative -small" data-reject-keycard>
-          Deny
-        </button>
       </section>
       ${footer()}
     `
@@ -821,7 +824,7 @@ $.draw((target) => {
         </button>
       </div>
       <div style="text-align: right;">
-        <button class="standard-button bias-negative -small" data-quit>
+        <button class="standard-button bias-generic -small" data-quit>
           Quit
         </button>
       </div>
@@ -829,18 +832,19 @@ $.draw((target) => {
     <section class="wallet">
       ${active?`
         <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
+          <div class="keycard-actions">
+            <button class="standard-button -large bias-generic -round" data-export="${active.id}">
+              <sl-icon name="qr-code"></sl-icon>
+            </button>
+            <button class="standard-button -large -brand -round" data-edit="${active.id}">
+              <sl-icon name="pencil-fill"></sl-icon>
+            </button>
+            <button class="standard-button -large bias-negative -round" style="margin-left: auto;" data-delete="${active.id}">
+              <sl-icon name="trash3-fill"></sl-icon>
+            </button>
+          </div>
+
           <div class="active-keycard">
-            <div class="keycard-actions">
-              <button class="standard-button -brand" data-export="${active.id}">
-                Export
-              </button>
-              <button class="standard-button -brand" data-edit="${active.id}">
-                Edit
-              </button>
-              <button class="standard-button -brand" data-delete="${active.id}">
-                Delete
-              </button>
-            </div>
             ${render(active)}
           </div>
         </div>
@@ -890,6 +894,10 @@ $.draw((target) => {
   afterUpdate(target) {
     {
       afterUpdateTheme($paperPocket, target)
+    }
+
+    {
+      replaceElves(target, 'sl-icon')
     }
   }
 })
@@ -1146,12 +1154,20 @@ $.style(`
     grid-template-rows: auto 1fr;
     gap: 1rem;
     place-items: center;
+    position: relative;
   }
 
   & .keycard-actions {
     position: absolute;
-    top: 0;
+    bottom: 0;
     z-index: 1;
+    margin: 0 auto;
+    padding: .5rem;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
   }
 
   & .lightbox {
@@ -1168,10 +1184,10 @@ $.style(`
   }
 
   & .standard-button.-brand {
-    background: linear-gradient(var(--nav-background-start) 0%, var(--lightbox-color, mediumseagreen), var(--nav-background-end) 100%);
-    border-bottom-color: var(--lightbox-color);
-    background-size: 1px 14.4rem;
-  background-repeat: repeat-x;
+    --root-theme: var(--lightbox-color, mediumseagreen);
+    background-repeat: repeat-x;
+    display: grid;
+    place-content: center;
   }
 
   & .wallet {
@@ -1191,6 +1207,7 @@ $.style(`
     font-family: "Recursive";
     background: white;
     color: rgba(0,0,0,.85);
+    overflow: auto;
   }
 
 
@@ -1222,12 +1239,12 @@ $.style(`
     min-width: 220px;
     opacity: .65;
     display: grid;
-    place-content: end end;
+    place-content: center;
+    gap: .5rem;
     padding: .5rem;
-    text-align: left;
     border-radius: .5rem;
     border: 0;
-    text-align: right;
+    text-align: center;
     background:
       linear-gradient(155deg, var(--keycard-theme, var(--root-theme, mediumseagreen)), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(145deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
@@ -1327,15 +1344,3 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
-
-export function replaceElves(target, tag) {
-  [...target.querySelectorAll(tag)].map(node => {
-    const newNode = document.createElement(tag)
-    for (const attr of node.attributes) {
-      newNode.setAttribute(attr.name, attr.value)
-    }
-    node.replaceWith(newNode)
-  })
-}
-
-
