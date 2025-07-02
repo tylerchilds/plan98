@@ -33,13 +33,12 @@ function afterUpdate(target) {
         const data = new Blob([blob], { type: blob.type });
         const video = target.shadowRoot.querySelector('video')
         video.src = URL.createObjectURL(data);
-        target.ready = true
       })
     }
   }
 }
 
-class VideoFeed extends HTMLElement {
+class SecureVideo extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' })
@@ -61,4 +60,4 @@ class VideoFeed extends HTMLElement {
   }
 }
 
-customElements.define(tag, VideoFeed);
+customElements.define(tag, SecureVideo);

@@ -446,6 +446,21 @@ $.style(`
     grid-area: body;
   }
 
+  & .draft-metadata {
+    grid-area: body;
+    z-index: 1;
+    background: white;
+  }
+
+  & .draft-metadata {
+    display: none;
+  }
+
+  & .show-metadata {
+    display: block;
+  }
+
+
   & .draft-footer {
     display: grid;
     grid-area: footer;
@@ -453,6 +468,7 @@ $.style(`
     background: rgba(0,0,0,.1);
     color: rgba(0,0,0,.65);
     display: flex;
+    gap: .5rem;
   }
 
   & .draft-content {
@@ -463,9 +479,16 @@ $.style(`
     padding: .5rem;
   }
 
+  & .draft-title {
+    font-weight: 600;
+    color: rgba(0,0,0,.65);
+    padding: .25rem 0;
+  }
+
   & .time-form {
     display: flex;
     gap: .5rem;
+    padding: .5rem;
     flex-wrap: wrap;
   }
 
@@ -760,6 +783,7 @@ $.style(`
   & .search-and-filter {
     display: grid;
     grid-template-columns: auto 1fr;
+    gap: .5rem;
   }
 
   & .search-and-filter input {
@@ -902,98 +926,52 @@ function editBanner(context) {
 const creationForms = {
   [eventTypes.note]: function(draft) {
     return `
-      <div class="tychi-form">
-        ${editBanner(this)}
-        <textarea
-          name="text"
-          data-bind="draft"
-          placeholder="This is a space for you."
-        >${escapeHyperText(draft.text)}</textarea>
-      </div>
+      ${editBanner(this)}
     `
   },
   [eventTypes.image]: function(draft) {
     return `
       ${editBanner(this)}
-      <div class="image-form">
-        <was-camera id="${draft.id}"></was-camera>
-        <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </label>
-
-        <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-        </label>
-      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
     `
   },
   [eventTypes.sketch]: function(draft) {
     return `
       ${editBanner(this)}
-      <div class="image-form">
-        <sketch-pad id="${draft.id}"></sketch-pad>
-        <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </label>
-
-        <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-        </label>
-      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
     `
   },
   [eventTypes.audio]: function(draft) {
     return `
       ${editBanner(this)}
-      <audio-notes id="${draft.id}"></audio-notes>
-      <div class="audio-form">
-        <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </label>
-
-        <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-        </label>
-      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
     `
   },
   [eventTypes.video]: function(draft) {
     return `
       ${editBanner(this)}
-      <video-notes id="${draft.id}"></video-notes>
-      <div class="video-form">
-        <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </label>
-
-        <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-        </label>
-      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
     `
   },
   [eventTypes.gallery]: function(draft) {
     return `
-      <div class="gallery-form">
-        ${editBanner(this)}
-        <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </label>
-
-        <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-        </label>
-      </div>
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
     `
   },
   [eventTypes.tommi]: function(draft) {
@@ -1004,53 +982,46 @@ const creationForms = {
     }
 
     return `
-      <div class="tommi-form">
-        ${editBanner(this)}
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text"/>
-          </label>
-
-          <label class="field">
-            <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
-          </label>
-        </div>
+      ${editBanner(this)}
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
         <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
+          <span class="label">URL</span>
+          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+        </label>
+      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
+      </label>
+
+      ${x.tags?.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">City</span>
+          <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
         </label>
 
-        ${x.tags?.map(x => {
-          return `
-            <button class="standard-button" data-tag="${x}">
-              ${x}
-            </button>
-          `
-        }).join('')}
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">City</span>
-            <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">Country</span>
-            <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
-          </label>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Longitude</span>
-            <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
-          </label>
-          <label class="field">
-            <span class="label">Latitude</span>
-            <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
-          </label>
-        </div>
+        <label class="field">
+          <span class="label">Country</span>
+          <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
+        </label>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Longitude</span>
+          <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
+        </label>
+        <label class="field">
+          <span class="label">Latitude</span>
+          <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
+        </label>
       </div>
     `
   },
@@ -1062,53 +1033,46 @@ const creationForms = {
     }
 
     return `
-      <div class="archive-form">
-        ${editBanner(this)}
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
-          </label>
-        </div>
+      ${editBanner(this)}
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
         <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
+          <span class="label">URL</span>
+          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
+        </label>
+      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
+      </label>
+
+      ${x.tags?.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Creator</span>
+          <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
         </label>
 
-        ${x.tags?.map(x => {
-          return `
-            <button class="standard-button" data-tag="${x}">
-              ${x}
-            </button>
-          `
-        }).join('')}
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Creator</span>
-            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">Collection</span>
-            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
-          </label>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Language</span>
-            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
-          </label>
-          <label class="field">
-            <span class="label">License</span>
-            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
-          </label>
-        </div>
+        <label class="field">
+          <span class="label">Collection</span>
+          <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
+        </label>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Language</span>
+          <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
+        </label>
+        <label class="field">
+          <span class="label">License</span>
+          <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
+        </label>
       </div>
     `
   },
@@ -1120,67 +1084,60 @@ const creationForms = {
     }
 
     return `
-      <div class="dwebcamp-form">
-        ${editBanner(this)}
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Title</span>
-            <input data-bind="draft"  name="title" value="${escapeHyperText(x.title)}" type="text" />
-          </label>
-
-          <label class="field">
-            <span class="label">URL</span>
-            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
-          </label>
-        </div>
+      ${editBanner(this)}
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
         <label class="field">
-          <span class="label">Description</span>
-          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
+          <span class="label">URL</span>
+          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
         </label>
-        <label class="field">
-          <span class="label">Location</span>
-          <select data-bind="draft" name="location">
-            <option disabled>--Select--</option>
-            ${x.locations.map((location, i) => `
-              <option value="${location}" ${location === x.location?'selected':''}>
-                ${x.locations[i]}
-              </button>
-            `).join('')}
-
-          </select>
-
-        </label>
-
-
-        ${x.tags?.map(x => {
-          return `
-            <button class="standard-button" data-tag="${x}">
-              ${x}
+      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
+      </label>
+      <label class="field">
+        <span class="label">Location</span>
+        <select data-bind="draft" name="location">
+          <option disabled>--Select--</option>
+          ${x.locations.map((location, i) => `
+            <option value="${location}" ${location === x.location?'selected':''}>
+              ${x.locations[i]}
             </button>
-          `
-        }).join('')}
+          `).join('')}
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Creator</span>
-            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
-          </label>
+        </select>
 
-          <label class="field">
-            <span class="label">Collection</span>
-            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
-          </label>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr;">
-          <label class="field">
-            <span class="label">Language</span>
-            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
-          </label>
-          <label class="field">
-            <span class="label">License</span>
-            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
-          </label>
-        </div>
+      </label>
+
+
+      ${x.tags?.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Creator</span>
+          <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
+        </label>
+
+        <label class="field">
+          <span class="label">Collection</span>
+          <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
+        </label>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Language</span>
+          <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
+        </label>
+        <label class="field">
+          <span class="label">License</span>
+          <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
+        </label>
       </div>
     `
   }
@@ -1189,6 +1146,81 @@ const creationForms = {
 function renderCreationFormByType(draft) {
   return creationForms[draft.type] ? creationForms[draft.type].call(this, draft) : ''
 }
+
+const studios = {
+  [eventTypes.note]: function(draft) {
+    return `
+      <textarea
+        name="text"
+        data-bind="draft"
+        placeholder="This is a space for you."
+      >${escapeHyperText(draft.text)}</textarea>
+    `
+  },
+  [eventTypes.image]: function(draft) {
+    return `
+      <was-camera id="${draft.id}"></was-camera>
+    `
+  },
+  [eventTypes.sketch]: function(draft) {
+    return `
+      <sketch-pad id="${draft.id}"></sketch-pad>
+    `
+  },
+  [eventTypes.audio]: function(draft) {
+    return `
+      <audio-notes id="${draft.id}"></audio-notes>
+    `
+  },
+  [eventTypes.video]: function(draft) {
+    return `
+      <video-notes id="${draft.id}"></video-notes>
+    `
+  },
+  [eventTypes.gallery]: function(draft) {
+    return `
+    `
+  },
+  [eventTypes.tommi]: function(draft) {
+
+    const x = {
+      ...schemas[views.tommi],
+      ...draft,
+    }
+
+    return `
+      ??? What type of custom tommi wizard app should go here
+    `
+  },
+  [eventTypes.archive]: function(draft) {
+
+    const x = {
+      ...schemas[views.archive],
+      ...draft,
+    }
+
+    return `
+      ??? What type of custom archive wizard app should go here
+    `
+  },
+  [eventTypes.dwebcamp]: function(draft) {
+
+    const x = {
+      ...schemas[views.dwebcamp],
+      ...draft,
+    }
+
+    return `
+      ??? What type of custom archive wizard app should go here
+    `
+  }
+}
+
+
+function renderStudioByType(draft) {
+  return studios[draft.type] ? studios[draft.type].call(this, draft) : ''
+}
+
 
 function typeSelector(selected) {
   return `
@@ -1301,8 +1333,9 @@ const viewRenderers = {
     `
   },
   [views.create]: (target) => {
-    const { draft, context } = $.learn()
+    const { draft, viewMetadata, context } = $.learn()
     const form = renderCreationFormByType.call(context, draft)
+    const studio = renderStudioByType.call(context, draft)
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -1316,9 +1349,15 @@ const viewRenderers = {
               </button>
             </div>
             <div class="draft-body text-well">
-              ${form}
+              ${viewMetadata ? '' : studio}
             </div>
             <div class="draft-footer">
+              <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                <sl-icon name="gear-fill"></sl-icon>
+              </div>
+              <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
+            </div>
+            <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
               <div class="time-form">
                 <div class="time-form-section">
                   $
@@ -1338,6 +1377,8 @@ const viewRenderers = {
                   ${minuteSelector(parseInt(draft.minute))}
                 </div>
               </div>
+
+              ${form}
             </div>
           </form>
         </div>
@@ -1369,11 +1410,8 @@ const viewRenderers = {
             <div class="draft-body text-well">
               <div class="textarea">${escapeHyperText(x.text)}</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
-
         </div>
       </div>
     `
@@ -1402,11 +1440,8 @@ const viewRenderers = {
             </div>
             <div class="draft-body image-well">
               <was-image src="${x.src}"></was-image>
-              <div class="title">${escapeHyperText(x.title)}</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
 
         </div>
@@ -1437,11 +1472,8 @@ const viewRenderers = {
             </div>
             <div class="draft-body image-well">
               <was-image src="${x.src}"></was-image>
-              <div class="title">${escapeHyperText(x.title)}</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
@@ -1471,11 +1503,8 @@ const viewRenderers = {
             </div>
             <div class="draft-body image-well">
               <was-video src="${x.src}"></was-video>
-              <div class="title">${escapeHyperText(x.title)}</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
@@ -1505,11 +1534,8 @@ const viewRenderers = {
             </div>
             <div class="draft-body image-well">
               <was-audio src="${x.src}"></was-audio>
-              <div class="title">${escapeHyperText(x.title)}</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
@@ -1563,9 +1589,7 @@ const viewRenderers = {
                 </div>
               </div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
@@ -1622,9 +1646,7 @@ const viewRenderers = {
                 </div>
               </div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
@@ -1684,16 +1706,12 @@ const viewRenderers = {
                 </div>
               </div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
     `
   },
-
-
 
   edge: (target) => {
     const { space, time } = target.dataset
@@ -1716,19 +1734,16 @@ const viewRenderers = {
                 JSON.stringify(event.data, '', 2)
               }</div>
             </div>
-            <div class="draft-footer">
-              ${stamp(x)}
-            </div>
+            ${stamp(x)}
           </form>
         </div>
       </div>
     `
   }
-
 }
 
 function patch(target) {
-  const { space, time, now, buckets, view, draft, grabbing, sidebar } = $.learn()
+  const { space, time, now, buckets, view, draft, grabbing, sidebar, viewMetadata } = $.learn()
 
   {
     const button = target.querySelector('[data-dom="create-button"]')
@@ -1777,8 +1792,10 @@ function patch(target) {
       target.type !== draft.type ||
       target.view !== view ||
       (target.dataset.space && target.dataset.space !== space) ||
-      (target.dataset.time && target.dataset.time !== time)
+      (target.dataset.time && target.dataset.time !== time) ||
+      target.viewMetadata !== viewMetadata
     ) {
+      target.viewMetadata = viewMetadata
       target.view = view
       target.type = draft.type
       if(!space && target.dataset.space) {
@@ -1792,11 +1809,12 @@ function patch(target) {
       } else {
         target.dataset.time = time
       }
-    }
 
-    if(content) {
-      const html = viewRenderers[view] ? viewRenderers[view](target) : ''
-      innerHTML(content, html)
+      if(content) {
+        const html = viewRenderers[view] ? viewRenderers[view](target) : ''
+        innerHTML(content, html)
+        //content.innerHTML = html
+      }
     }
   }
 }
@@ -1818,9 +1836,9 @@ $.draw((target)=> {
         </button>
         <div class="dropdown-items" data-menu="edit">
           <button data-new="${eventTypes.video}">Video</button>
-          <button data-new="${eventTypes.audio}">Audio</button>
-          <button data-new="${eventTypes.image}">Image</button>
+          <button data-new="${eventTypes.image}">Photo</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
+          <button data-new="${eventTypes.audio}">Microphone</button>
           <button data-new="${eventTypes.note}">Note</button>
           <hr>
           <button data-quit>Quit</button>
@@ -1910,10 +1928,10 @@ $.draw((target)=> {
         </div>
         <div class="chat-footer">
           <div class="search-and-filter">
-            <button class="">
+            <button class="standard-button">
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input type="text">
+            <input class="standard-input" placeholder="?" type="text">
           </div>
         </div>
       </div>
@@ -1925,6 +1943,10 @@ $.draw((target)=> {
   `
 }, {
   beforeUpdate(target) {
+    {
+      saveCursor(target)
+    }
+
     const q = target.getAttribute('q')
     const src = target.getAttribute('src') || '/app/plan98-wallet'
     const view = target.getAttribute('view')
@@ -1955,6 +1977,10 @@ $.draw((target)=> {
     }
 
     {
+      replaceCursor(target)
+    }
+
+    {
       afterUpdateTheme($paperPocket, target)
     }
 
@@ -1968,6 +1994,10 @@ $.draw((target)=> {
       if(activeItem) {
         activeItem.classList.add('active')
       }
+    }
+
+    {
+      recoverElves(target, 'sl-icon')
     }
   }
 })
@@ -2102,6 +2132,10 @@ function renderBucket(spaceKey) {
   }).join('')
 }
 
+$.when('click', '[data-toggle-metadata]', (event) => {
+  const { viewMetadata } = $.learn()
+  $.teach({ viewMetadata: !viewMetadata })
+})
 
 
 $.when('submit', '[action="edit"]', async (event) => {
@@ -2251,7 +2285,7 @@ $.when('click', '[data-quit]', (event) => {
 })
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ view: null, context: null })
+  $.teach({ view: null, sidebar: true, viewMetadata: false, context: null })
 })
 
 function formatDate(date) {
@@ -2272,8 +2306,22 @@ function formatTime(date, options = {
 }
 
 function stamp(x) {
+  const { viewMetadata } = $.learn()
   const date = new Date(x.year, x.month, x.day, x.hour, x.minute)
-  return `${formatDate(date)} @ ${formatTime(date)}`
+  return `
+    <div class="draft-footer">
+      <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+        <sl-icon name="gear-fill"></sl-icon>
+      </div>
+      <div class="draft-title">
+        ${escapeHyperText(x.title)}
+      </div>
+    </div>
+    <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
+      ${formatDate(date)} @ ${formatTime(date)}
+    </div>
+
+  `
 }
 
 $.when('input', '[data-bind]', (event) => {
@@ -2352,6 +2400,48 @@ function resizeSidebar(event) {
   const size = `${width}px`;
   const root = event.target.closest($.link)
   root.style.setProperty("--sidebar-width", size);
+}
+
+let sel = []
+const tags = ['TEXTAREA', 'INPUT']
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.field = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  }
+}
+
+function replaceCursor(target) {
+  const field = target.querySelector(`[name="${target.dataset.field}"]`)
+  
+  if(field) {
+    field.focus()
+
+    if(tags.includes(field.tagName)) {
+      field.selectionStart = sel[0];
+      field.selectionEnd = sel[1];
+    }
+  }
+}
+
+function clearCursor(target) {
+  target.dataset.field = null
+  sel = []
+}
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
 }
 
 

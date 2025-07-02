@@ -1028,7 +1028,7 @@ sillonious-brand > xml-html {
   font-weight: 400;
   padding: .5rem;
   transition: background 200ms ease-in-out;
-  line-height: 1;
+  line-height: 1.25;
   white-space: nowrap;
   border: none;
   padding: .5rem;
@@ -1086,17 +1086,39 @@ sillonious-brand > xml-html {
   border-color: rgba(0,0,0,.85);
 }
 
+.standard-input {
+  width: 100%;
+  padding: .25rem .5rem;
+  border-radius: 5px;
+  border: none;
+  box-shadow: 0 1px 3px 0 rgba(0,0,0,.1),
+              0 1px 3px 3px rgba(0,0,0,.05);
+  border-bottom: 3px solid rgba(0,0,0,.2);
+  line-height: 1.25;
+}
+
+.standard-button * {
+  pointer-events: none;
+}
+
+.standard-input:focus {
+  border-bottom-color: rgba(0,0,0,.4);
+}
+
+.standard-input.-small,
 .standard-button.-small {
   padding: .25rem .5rem;
   font-size: 1rem;
 }
 
+.standard-input.-large,
 .standard-button.-large {
   padding: .75rem;
   font-size: 1.25rem;
 }
 
 
+.standard-input.-smol,
 .standard-button.-smol,
 .old-button.-smol {
   padding: 2px 4px;
@@ -1113,3 +1135,4 @@ sillonious-brand > xml-html {
   display: flex;
   gap: .5rem;
 }
+

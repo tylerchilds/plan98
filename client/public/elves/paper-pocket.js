@@ -1136,7 +1136,7 @@ export function ai(operation) {
         </a>
       </div>
       <div class="search-bar">
-        <input class="search-input" name="prompt" data-bind="synthia" value="${operation}" />
+        <input class="standard-input" name="prompt" data-bind="synthia" value="${operation}" />
         <button class="standard-button bias-positive" data-search="${encodeURIComponent(operation)}">
           <sl-icon name="search"></sl-icon>
         </button>

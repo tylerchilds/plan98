@@ -93,12 +93,12 @@ function update(target) {
 
 function mount(target) {
   target.innerHTML = `
-    <div class="drop-down">
+    <div class="palette">
       <div class="menu-item">
         <button data-menu-target="edit">
           <plan98-icon></plan98-icon>
         </button>
-        <div class="dropdown-items" data-menu="edit">
+        <div class="palette-items" data-menu="edit">
           <button data-new>New</button>
           <hr>
           <button data-stroke-color><span class="color-sample"></span>Color</button>
@@ -518,6 +518,7 @@ $.style(`
     display: block;
     height: 100%;
     position: relative;
+    z-index: 1;
     overflow: hidden;
     touch-action: manipulation;
     user-select: none; /* supported by Chrome and Opera */
@@ -527,7 +528,7 @@ $.style(`
     -ms-user-select: none; /* Internet Explorer/Edge */
   }
 
-  &[data-touching="true"] .drop-down {
+  &[data-touching="true"] .palette {
     pointer-events: none;
     opacity: .15;
     transition: opacity 1000ms ease-in-out;
@@ -538,7 +539,7 @@ $.style(`
     margin: .25rem 0;
   }
 
-  & .drop-down {
+  & .palette {
     z-index: 10;
     background: var(--active-color, black);
     position: absolute;
@@ -558,12 +559,12 @@ $.style(`
       grid-template-columns: 2rem 1fr;
     }
 
-    & .drop-down {
+    & .palette {
       display: inline-block;
     }
   }
 
-  & .drop-down button {
+  & .palette button {
     background: transparent;
     color: rgba(255,255,255,.85);
     border: none;
@@ -579,13 +580,13 @@ $.style(`
     transition: background 200ms ease-in-out;
   }
 
-  & .drop-down button > * {
+  & .palette button > * {
     pointer-events: none;
   }
 
-  & .drop-down button:focus,
-  & .drop-down button.active,
-  & .drop-down button:hover {
+  & .palette button:focus,
+  & .palette button.active,
+  & .palette button:hover {
     background: rgba(255,255,255,.35);
   }
 
@@ -593,7 +594,7 @@ $.style(`
     position: relative;
   }
 
-  & .dropdown-items {
+  & .palette-items {
     display: none;
     background: rgba(0,0,0,1);
     position: absolute;
@@ -604,11 +605,11 @@ $.style(`
     overflow: auto;
   }
 
-  & [data-menu-target].active + .dropdown-items {
+  & [data-menu-target].active + .palette-items {
     display: block;
   }
 
-  & .dropdown-items  button {
+  & .palette-items  button {
     width: 100%;
     text-align: left;
     white-space: nowrap;
@@ -648,7 +649,7 @@ $.style(`
     display: grid;
   }
 
-  &[data-overlay="color"] .drop-down {
+  &[data-overlay="color"] .palette {
     display: none;
   }
 
