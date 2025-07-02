@@ -1231,10 +1231,10 @@ function monthSelector(selected) {
 }
 
 function daysInMonth (month, year) {
-  return new Date(year, month, 0).getDate();
+  return new Date(year, month+1, 0).getDate();
 }
 
-function daySelector(selected, month, year) {
+function daySelector(day, month, year) {
   const maxDays = daysInMonth(month, year)
   const days = []
   for(let i = 1; i <= maxDays; i++) {
@@ -1243,7 +1243,7 @@ function daySelector(selected, month, year) {
   return `
     <select class="standard-button -smol"  name="day" data-bind="draft">
       ${days.map(value => `
-        <option value="${value}" ${value===selected?'selected':''}>${value}</option>
+        <option value="${value}" ${value===day?'selected':''}>${value}</option>
       `)}
     </select>
   `
@@ -1325,17 +1325,17 @@ const viewRenderers = {
                   ${typeSelector(draft.type)}
                 </div>
                 <div class="time-form-section">
-                  ${yearSelector(draft.year)}
+                  ${yearSelector(parseInt(draft.year))}
                   /
-                  ${monthSelector(draft.month)}
+                  ${monthSelector(parseInt(draft.month))}
                   /
-                  ${daySelector(draft.day, draft.month, draft.year)}
+                  ${daySelector(parseInt(draft.day), parseInt(draft.month), parseInt(draft.year))}
                 </div>
                 <div class="time-form-section">
                   @
-                  ${hourSelector(draft.hour)}
+                  ${hourSelector(parseInt(draft.hour))}
                   <span>:</span>
-                  ${minuteSelector(draft.minute)}
+                  ${minuteSelector(parseInt(draft.minute))}
                 </div>
               </div>
             </div>
@@ -1792,9 +1792,11 @@ function patch(target) {
       } else {
         target.dataset.time = time
       }
+    }
 
+    if(content) {
       const html = viewRenderers[view] ? viewRenderers[view](target) : ''
-      content.innerHTML =  html
+      innerHTML(content, html)
     }
   }
 }
