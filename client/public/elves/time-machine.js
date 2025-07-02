@@ -1973,7 +1973,10 @@ $.draw((target)=> {
   },
   afterUpdate(target) {
     {
-      requestAnimationFrame(() => patch(target))
+      requestAnimationFrame(() => {
+        patch(target)
+        recoverElves(target, 'sl-icon')
+      })
     }
 
     {
@@ -1994,10 +1997,6 @@ $.draw((target)=> {
       if(activeItem) {
         activeItem.classList.add('active')
       }
-    }
-
-    {
-      recoverElves(target, 'sl-icon')
     }
   }
 })
