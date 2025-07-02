@@ -292,6 +292,8 @@ function template() {
     VAULT_PUBLIC_KEY: safeEnv('VAULT_PUBLIC_KEY'),
     SUPABASE_URL: safeEnv('SUPABASE_URL'),
     SUPABASE_KEY: safeEnv('SUPABASE_KEY'),
+
+    ROWS_N_COLUMNS_LICENSE_KEY: safeEnv('ROWS_N_COLUMNS_LICENSE_KEY')
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {

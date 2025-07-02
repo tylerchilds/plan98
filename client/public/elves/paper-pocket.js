@@ -1076,14 +1076,11 @@ function settingsMenu() {
           </div>
         </div>
         <div class="selectbox-selector">
-          <div class="standard-button -small selectbox-view">
-            ${value}
-          </div>
-          <select data-settings name="${key}">
-            <option disabled selected>${label}</option>
+          <select class="standard-button -small" data-settings name="${key}">
+            <option disabled>${label}</option>
             ${options.map(option => {
               return `
-                <option ${option === value?'selected':''}>${option}</option>
+                <option value="${option}" ${option === value?'selected':''}>${option}</option>
               `
             }).join('')}
           </select>
@@ -2427,27 +2424,6 @@ $.style(`
   }
 
   & .selectbox-description {
-  }
-
-  & .selectbox-selector {
-    position: relative;
-    display: inline-block;
-  }
-
-  & .selectbox-view {
-    pointer-events: none;
-    padding: .5rem;
-  }
-
-  & .selectbox-selector select {
-    opacity: 0;
-    padding: .5rem;
-    position: absolute;
-    inset: 0;
-  }
-
-  & select:focus {
-    position: absolute;
   }
 
   & select option {

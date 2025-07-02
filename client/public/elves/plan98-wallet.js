@@ -1150,11 +1150,11 @@ $.style(`
   }
 
   & .active-keycard {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    gap: 1rem;
-    place-items: center;
     position: relative;
+    text-align: center;
+    height: 100%;
+    display: grid;
+    place-items: center;
   }
 
   & .keycard-actions {
@@ -1168,6 +1168,7 @@ $.style(`
     display: flex;
     justify-content: center;
     gap: .5rem;
+    pointer-events: none;
   }
 
   & .lightbox {
@@ -1193,7 +1194,7 @@ $.style(`
   & .wallet {
     overflow: auto;
     display: grid;
-    grid-template-rows: 1fr 180px;
+    grid-template-rows: 1fr 7rem;
   }
 
   & .serious-business {
@@ -1233,12 +1234,14 @@ $.style(`
   }
 
   & .keycard {
-    aspect-ratio: 1.66/1;
     width: 100%;
+    max-height: calc(280px / 1.66);
+    height: 100%;
+    min-height: 6rem;
     max-width: 280px;
     min-width: 220px;
     opacity: .65;
-    display: grid;
+    display: inline-grid;
     place-content: center;
     gap: .5rem;
     padding: .5rem;
