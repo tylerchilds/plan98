@@ -9,14 +9,15 @@ function draw(target) {
   target.shadowRoot.innerHTML = `
     <style>
       :host {
-        display: block;
+        display: grid;
         width: 100%;
         height: 100%;
       }
 
       :host img {
-        width: 100%;
-        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        margin: auto;
       }
    </style>
    <img />
