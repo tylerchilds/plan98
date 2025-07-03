@@ -119,11 +119,24 @@ const schemas = {
     tags: [],
   },
   [eventTypes.image]: {
-    type: eventTypes.gallery,
+    type: eventTypes.image,
     title: 'Untitled',
     description: null,
     tags: [],
   },
+  [eventTypes.audio]: {
+    type: eventTypes.audio,
+    title: 'Untitled',
+    description: null,
+    tags: [],
+  },
+  [eventTypes.video]: {
+    type: eventTypes.video,
+    title: 'Untitled',
+    description: null,
+    tags: [],
+  },
+
   [eventTypes.dwebcamp]: {
     type: eventTypes.dwebcamp,
     location: null,
@@ -194,8 +207,8 @@ $.style(`
   }
 
   & .edit-banner {
-    background: lemonchiffon;
-    color: saddlebrown;
+    background: black;
+    color: rgba(255,255,255,.65);
     text-align: right;
     padding: .5rem;
     grid-template-columns: auto 1fr;
@@ -390,24 +403,7 @@ $.style(`
     overflow: hidden;
     text-align: center;
     background: black;
-    display: grid;
-    place-content: center;
     position: relative;
-  }
-
-  & .image-well .title {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    padding: .5rem;
-    color: white;
-    background: linear-gradient(transparent, rgba(0,0,0,.85));
-    text-align: left;
-    text-shadow:
-      0 0 3px rgba(0,0,0,.15),
-      0 0 2px rgba(0,0,0,.25),
-      1px 1px rgba(0,0,0,.45);
   }
 
   & .text-well {
@@ -452,12 +448,23 @@ $.style(`
   }
 
   & .draft-metadata {
+    display: none;
     grid-area: body;
     z-index: 1;
     background: white;
   }
 
-  & .draft-metadata {
+  & .view-metadata {
+    display: none;
+    padding: .5rem;
+    height: 100%;
+    z-index: 1;
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), white;
+    grid-area: body;
+  }
+
+
+  & .view-metadata {
     display: none;
   }
 
@@ -495,6 +502,9 @@ $.style(`
     gap: .5rem;
     padding: .5rem;
     flex-wrap: wrap;
+    place-content: end;
+    background: black;
+    color: rgba(255,255,255,.65);
   }
 
   & .time-form-section {
@@ -1365,10 +1375,9 @@ const viewRenderers = {
             <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
               <div class="time-form">
                 <div class="time-form-section">
-                  $
                   ${typeSelector(draft.type)}
                 </div>
-                <div class="time-form-section">
+                <div class="time-form-section" style="margin-left: auto;">
                   ${yearSelector(parseInt(draft.year))}
                   /
                   ${monthSelector(parseInt(draft.month))}
@@ -1739,7 +1748,7 @@ const viewRenderers = {
                 JSON.stringify(event.data, '', 2)
               }</div>
             </div>
-            ${stamp(x)}
+            ${stamp(event)}
           </div>
         </div>
       </div>
@@ -1843,7 +1852,7 @@ $.draw((target)=> {
           <button data-new="${eventTypes.video}">Video</button>
           <button data-new="${eventTypes.image}">Photo</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
-          <button data-new="${eventTypes.audio}">Microphone</button>
+          <button data-new="${eventTypes.audio}">Audio</button>
           <button data-new="${eventTypes.note}">Note</button>
           <hr>
           <button data-quit>Quit</button>
@@ -2331,7 +2340,7 @@ function stamp(x) {
         ${escapeHyperText(x.title)}
       </div>
     </div>
-    <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
+    <div class="view-metadata ${viewMetadata ? 'show-metadata':''}">
       ${formatDate(date)} @ ${formatTime(date)}
     </div>
 
