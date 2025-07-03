@@ -823,8 +823,12 @@ async function fate() {
           const parts = paths[i].split('/')
           const name = parts[parts.length - 1]
           return {
-            handle: { path: resources[i].path, name },
+            handle: { path: paths[i], name },
             data
+          }
+        }).catch(e => {
+          return {
+            error: e,
           }
         }))
       )
@@ -840,12 +844,6 @@ async function fate() {
     await touch('time-machine')
     get('time-machine').then(addData)
   })
-  /*
-  const { plan98 } = await fetch(`/plan98/about?cwd=/private/time-machine`)
-    .then(res => res.json()).catch(console.error)
-    */
-
-
 }
 
 function mergeEvents(state, payload) {
@@ -860,7 +858,9 @@ function mergeEvents(state, payload) {
     future: {}
   };
 
-  payload.forEach(file => {
+  payload.filter(x => {
+    return !x.error
+  }).forEach(file => {
     try {
       const [timeKey] = file.handle.name.split('.json')
       const fileDate = new Date(timeKey);
@@ -2211,9 +2211,8 @@ function appendPath(path) {
 
 export function destroy(context) {
   if(!context) return
-
   // Attempt to upload to server
-  del(`/private/time-machine${context.path}`).then(response => {
+  del(context.path).then(response => {
     if (!response.ok) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
