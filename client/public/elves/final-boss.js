@@ -88,11 +88,11 @@ $.draw((target) => {
           </div>
 
           <div class="fake-actions">
-            <button class="fake-button bad">
-              Decline
+            <button class="bad-button standard-button bias-negative">
+              Quit
             </button>
-            <button class="fake-button good">
-              Accept
+            <button class="good-button standard-button bias-positive">
+              Continue
             </button>
           </div>
         </div>
@@ -139,8 +139,8 @@ function decline() {
   window.location.href = '/app/ur-shell'
 }
 
-$.when('click', '.fake-button.good', accept)
-$.when('click', '.fake-button.bad', decline)
+$.when('click', '.good-button', accept)
+$.when('click', '.bad-button', decline)
 
 $.when('pointerenter', '.step', (event) => {
   const { note } = event.target.dataset

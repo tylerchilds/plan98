@@ -1339,12 +1339,12 @@ const viewRenderers = {
     return `
       <div class="overlay-background">
         <div class="form-card">
-          <form action="post" method="post" class="draft-template">
+          <div class="draft-template">
             <div class="draft-header">
               <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Cancel
               </button>
-              <button class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
+              <button data-action="post" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
                 Save
               </button>
             </div>
@@ -1380,7 +1380,7 @@ const viewRenderers = {
 
               ${form}
             </div>
-          </form>
+          </div>
         </div>
       </div>
     `
@@ -1720,12 +1720,12 @@ const viewRenderers = {
     return `
       <div class="overlay-background">
         <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
+          <div class="draft-template">
             <div class="draft-header">
               <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" data-action="edit" type="submit">
                 Edit
               </button>
             </div>
@@ -1735,7 +1735,7 @@ const viewRenderers = {
               }</div>
             </div>
             ${stamp(x)}
-          </form>
+          </div>
         </div>
       </div>
     `
@@ -2137,7 +2137,7 @@ $.when('click', '[data-toggle-metadata]', (event) => {
 })
 
 
-$.when('submit', '[action="edit"]', async (event) => {
+$.when('click', '[data-action="edit"]', async (event) => {
   event.preventDefault()
   $.teach({ view: views.create, sidebar: true })
 })
@@ -2224,7 +2224,7 @@ export function destroy(context) {
 }
 
 
-$.when('submit', '[action="post"]', async (event) => {
+$.when('click', '[data-action="post"]', async (event) => {
   event.preventDefault()
 
   // Get current date and time for filename

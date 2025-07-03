@@ -66,6 +66,10 @@ window.addEventListener('keydown', (event) => {
   }
 });
 
+export function update(message) {
+  console.log(message)
+  hideModal()
+}
 
 $.teach({ body: `Silly, at your service.
 

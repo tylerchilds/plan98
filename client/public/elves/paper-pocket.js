@@ -642,7 +642,7 @@ $.draw((target) => {
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
-            <button key="os" class="clear" data-press="os">
+            <button key="os" class="standard-button bias-generic -small" data-press="os">
               PaperPocket
             </button>
           </div>
@@ -651,10 +651,10 @@ $.draw((target) => {
             <${rom} ${src?`src="${src}"`:''}></${rom}>
           </div>
           <div class="menu-items">
-            <button key="options" class="clear select" data-press="select">
+            <button key="options" class="standard-button bias-generic select -smol" data-press="select">
               Settings
             </button>
-            <button key="start" class="clear start" data-press="start">
+            <button key="start" class="standard-button bias-generic start -smol" data-press="start">
               Start
             </button>
           </div>

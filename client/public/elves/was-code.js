@@ -55,6 +55,10 @@ Vim.defineEx('write', 'w', function(event) {
   saveFile(src, file)
 });
 
+Vim.defineEx('quit', 'q', function(event) {
+  window.location.href = '/app/tiniest-violin'
+});
+
 $.when('click', '.publish', (event) => {
   const { file, src } = sourceFile(event.target)
   saveFile(src, file)

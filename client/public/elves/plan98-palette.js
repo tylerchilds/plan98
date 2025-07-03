@@ -5,6 +5,9 @@ import {
   attackRelease,
   setTheme,
 } from './paper-pocket.js'
+import {
+  update
+} from './ur-shell.js'
 
 const center = 60
 const spatialOffset = 0
@@ -266,8 +269,11 @@ $.when('pointerup', '[data-midi]', (event) => {
     }
 
     const root = event.target.closest($.link)
+    const data = { color: newColor }
+
+    update(data)
     root.dispatchEvent(new CustomEvent('input', {
-      detail: { color: newColor }
+      detail: data
     }))
   }
 })
