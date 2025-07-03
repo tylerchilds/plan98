@@ -49,12 +49,6 @@ class SecureImage extends HTMLElement {
     // Initialize your component here
     $.draw(draw, { beforeUpdate, afterUpdate })
   }
-
-  connectedCallback() {
-  }
-
-  disconnectedCallback() {
-  }
 }
 
 customElements.define(tag, SecureImage);

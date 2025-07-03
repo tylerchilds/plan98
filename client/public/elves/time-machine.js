@@ -77,7 +77,7 @@ function timeFields() {
 const schemas = {
   [eventTypes.archive]: {
     type: eventTypes.archive,
-    title: null,
+    title: 'Untitled',
     url: null,
     description: null,
     tags: [],
@@ -91,7 +91,7 @@ const schemas = {
   [eventTypes.tommi]: {
     type: eventTypes.tommi,
     url: null,
-    title: null,
+    title: 'Untitled',
     description: null,
     tags: [],
     city: null,
@@ -101,24 +101,26 @@ const schemas = {
   },
   [eventTypes.instrument]: {
     type: eventTypes.instrument,
+    title: 'Untitled',
   },
   [eventTypes.sketch]: {
     type: eventTypes.sketch,
-    title: null,
+    title: 'Untitled',
   },
   [eventTypes.note]: {
     type: eventTypes.note,
+    title: 'Untitled',
     text: '',
   },
   [eventTypes.gallery]: {
     type: eventTypes.gallery,
-    title: null,
+    title: 'Untitled',
     description: null,
     tags: [],
   },
   [eventTypes.image]: {
     type: eventTypes.gallery,
-    title: null,
+    title: 'Untitled',
     description: null,
     tags: [],
   },
@@ -126,7 +128,7 @@ const schemas = {
     type: eventTypes.dwebcamp,
     location: null,
     locations: ['Wayback Wheel', 'Hackers Hall', 'Migration Library', 'Treehouse', 'Cultivation Station', 'Access to Knowledge Amphitheater', 'Campfire', 'Stages', 'AI Think Tank', 'Art Barn', 'Volunteers HQ', 'Nest', 'Impact Island', 'Heartwood Chapel', 'Lightning Salon', 'Tea Tent', 'Redwood Cathedral'],
-    title: null,
+    title: 'Untitled',
     url: null,
     description: null,
     tags: [],
@@ -145,6 +147,7 @@ const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
 function newDraft(type) {
   return {
     id: self.crypto.randomUUID(),
+    title: 'Untitled',
     ...(schemas[type] || {}),
     ...timeFields()
   }
@@ -418,6 +421,7 @@ $.style(`
     padding: .5rem;
     white-space: preserve;
     overflow: auto;
+    line-height: 1;
   }
 
   & .text-well textarea {
@@ -427,6 +431,7 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
+    line-height: 1;
   }
 
   & .text-well .edit-banner:empty + textarea {
@@ -480,9 +485,9 @@ $.style(`
   }
 
   & .draft-title {
-    font-weight: 600;
     color: rgba(0,0,0,.65);
-    padding: .25rem 0;
+    padding: .25rem .5rem;
+    line-height: 1.3;
   }
 
   & .time-form {
@@ -1400,7 +1405,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small  bias-positive" style="place-self: start end;" type="submit">
@@ -1431,7 +1436,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1463,7 +1468,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1494,7 +1499,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1525,7 +1530,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1557,7 +1562,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1608,7 +1613,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1665,7 +1670,7 @@ const viewRenderers = {
         <div class="form-card">
           <form action="edit" method="post" class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
@@ -1722,7 +1727,7 @@ const viewRenderers = {
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
                 Close
               </button>
               <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" data-action="edit" type="submit">
@@ -2233,7 +2238,7 @@ $.when('click', '[data-action="post"]', async (event) => {
   if(draft) {
     save(draft, context)
     toast('Created!', { type: 'success' })
-    $.teach({ sidebar: true, draft: newDraft(draft.type), content: null, view: null, space: null, time: null })
+    $.teach({ sidebar: true, view: null, space: null, time: null })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
   }
@@ -2244,6 +2249,7 @@ $.when('click', '[data-destroy]', async (event) => {
   try {
     destroy({ path: event.target.dataset.destroy })
     toast('Destroyed!', { type: 'success' })
+    $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
   } catch(e) {
     toast('Error!' + e.message, { type: 'error' })
   }
@@ -2256,13 +2262,13 @@ $.when('click', '[data-view]', (event) => {
   $.teach({ view, space, time })
 
   const h = $.learn().buckets[space][time] || { data: {} }
-  $.teach({ draft: h.data, context: h.handle })
+  $.teach({ draft: h.data, viewMetadata: false, context: h.handle })
 })
 
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
 
-  $.teach({ view: views[show], space, time, activeMenuItem: null, sidebar: false })
+  $.teach({ view: views[show], space, time, viewMetadata: false, activeMenuItem: null, sidebar: false })
 })
 
 $.when('click', '[data-new]', (event) => {
@@ -2275,7 +2281,7 @@ $.when('click', '[data-new]', (event) => {
     }, bound('draft'))
   }
 
-  $.teach({ view: views.create, activeMenu: null, sidebar: false })
+  $.teach({ view: views.create, draft: newDraft(type || 'note'), activeMenu: null, sidebar: false })
 })
 
 $.when('click', '[data-quit]', (event) => {
@@ -2283,7 +2289,17 @@ $.when('click', '[data-quit]', (event) => {
 })
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ view: null, sidebar: true, viewMetadata: false, context: null })
+  const { draft, context } = $.learn()
+
+  if(!context) {
+    $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
+  } else {
+    $.teach({ view: draft.type })
+  }
+})
+
+$.when('click', '[data-close-draft]', () => {
+  $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
 })
 
 function formatDate(date) {
