@@ -1,4 +1,5 @@
 import elf from '@plan98/elf'
+import { showModal, hideModal } from './plan98-modal.js'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia', { synthia: {} })
 
@@ -211,3 +212,20 @@ $.when('input', '[data-bind]', (event) => {
   })
 })
 
+let isRoot = false
+window.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') {
+    event.preventDefault()
+    if(isRoot) return
+    isRoot = true
+    showModal(`
+      <div style="width: 100%; height: 100%; overflow: hidden;">
+        <source-code></source-code>
+      </div>
+    `, { centered: true, onHide: normalMode, blockExit: false })
+  }
+
+  function normalMode() {
+    isRoot = false
+  }
+});

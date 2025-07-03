@@ -47,25 +47,6 @@ const $ = elf('ur-shell', {
   cwd: null,
 })
 
-
-window.addEventListener('keydown', (event) => {
-  const { popped, debug } = $.learn()
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    if(debug || popped) return
-    $.teach({ debug:true })
-    showModal(`
-      <div style="width: 100%; height: 100%; overflow: hidden;">
-        <source-code></source-code>
-      </div>
-    `, { centered: true, onHide: normalMode, suppressEscape: true })
-  }
-
-  function normalMode() {
-    $.teach({ debug: false })
-  }
-});
-
 export function update(message) {
   console.log(message)
   hideModal()
