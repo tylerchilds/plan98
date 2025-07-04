@@ -1062,7 +1062,8 @@ sillonious-brand > xml-html {
 .field input:active,
 .field textarea:active,
 .field select:active,
-.standard-button:active {
+.standard-button:active,
+.standard-input:active {
   border-top: 3px solid rgba(255,255,255,.25);
   border-bottom: none;
 }
@@ -1098,6 +1099,7 @@ sillonious-brand > xml-html {
   background-position-y: -4.8rem;
 }
 
+.standard-input:active,
 .standard-button:active {
   color: rgba(0,0,0,.85);
   background-position-y: 0rem;

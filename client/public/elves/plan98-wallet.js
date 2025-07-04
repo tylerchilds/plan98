@@ -295,6 +295,18 @@ export function getKeycard() {
   return keycards[0]
 }
 
+export function setKeycard(id) {
+  const { keycards } = $.learn()
+  const primaryKeycard = keycards.find(x => x.id === id)
+  if(primaryKeycard){
+    $.teach(id, prioritizeKeycardById)
+  }
+}
+
+export function listKeycards() {
+  return $.learn().keycards || []
+}
+
 export async function getSigner(keycard=getKeycard()) {
   if(!keycard) {
     return null

@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { getKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
+import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 
 const bucketKeys = {
   past: 'past',
@@ -176,6 +176,7 @@ const $ = elf('time-machine', {
   now: new Date(),
   buckets: emptyBuckets,
   draft: newDraft(eventTypes.note),
+  meta: {},
   context: null
 })
 
@@ -283,6 +284,10 @@ $.style(`
     margin: auto;
     display: flex;
     flex-direction: column;
+  }
+
+  & .identity-selector {
+    margin-right: auto;
   }
 
   & .now {
@@ -1831,6 +1836,27 @@ function patch(target) {
       }
     }
   }
+
+  {
+    const identity = target.querySelector('.identity-selector')
+    const list = listKeycards()
+
+    const activeKeycard = getKeycard()
+
+    if(target.keycardsLength !== list.length || activeKeycard.id !== target.activeKeycardId) {
+      target.activeKeycardId = activeKeycard.id
+      target.keycardsLength = list.length
+      identity.innerHTML = `
+        <select name="keycard" class="standard-input -small">
+          ${list.map(keycard => {
+            return `
+              <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
+            `
+          }).join('')}
+        </select>
+      `
+    }
+  }
 }
 
 
@@ -1861,6 +1887,8 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
+        <div class="identity-selector">
+        </div>
         <div data-dom="date" class="now-date"></div>
         <div data-dom="time" class="now-time"></div>
       </div>
@@ -2346,6 +2374,16 @@ function stamp(x) {
 
   `
 }
+
+$.when('input', '[name="keycard"]', (event) => {
+  const { value } = event.target
+  setKeycard(value)
+
+  const keycard = getKeycard()
+
+  fate()
+})
+
 
 $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
