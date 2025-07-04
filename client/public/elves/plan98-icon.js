@@ -29,8 +29,8 @@ $.style(`
     aspect-ratio: 1;
     margin: auto;
     max-width: 100%;
-    min-height: 48px;
-    min-width: 48px;
+    height: 48px;
+    width: 48px;
     background: black;
     border-radius: 100%;
     overflow: hidden;

@@ -49,7 +49,7 @@ $.draw(() => {
   return visible ? `
     <div class="activator-bar">
       <button class="synthia">
-        <plan98-icon></plan98-icon>
+        <plan98-icon style="height: 2rem; width: 2rem;"></plan98-icon>
       </button>
     </div>
     ${activated ? `
@@ -133,22 +133,23 @@ $.style(`
     position: relative;
     z-index: 900000;
     display: flex;
-    place-content: center;
     pointer-events: all;
-    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,0));
   }
 
   & .synthia {
     border: none;
     padding: 0;
     background: transparent;
+    border-radius: 100%;
+    overflow: hidden;
+    box-shadow: 0 0 10px 0px var(--root-theme);
   }
 
   & .search-bar {
     display: grid;
     grid-template-columns: 1fr auto;
     padding: .5rem;
-    background: white;
+    background: rgba(255,255,255,.5);
     gap: .5rem;
     position: sticky;
     top: 0;

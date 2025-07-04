@@ -3,6 +3,7 @@ import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
+import { launch } from './plan98-synthia.js'
 
 const bucketKeys = {
   past: 'past',
@@ -287,21 +288,32 @@ $.style(`
   }
 
   & .identity-selector {
-    margin-right: auto;
+    position: relative;
+  }
+
+  & [name="keycard"] {
+    position: absolute;
+    inset: 0;
+    max-width: 320px;
+  }
+
+  & .logo-area {
+    border: none;
+    padding: 0;
+    background: transparent;
+    border-radius: 100%;
   }
 
   & .now {
-    display: flex;
-    justify-content: end;
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
     gap: .5rem;
     padding: .5rem;
     background: white;
     text-align: center;
     border-bottom: 1px solid rgba(0, 0, 0,.2);
-    position: sticky;
-    top: 0;
-    bottom: 0;
-    z-index: 20; 
+    position: relative;
+    z-index: 30; 
     grid-column: -1 / 1;
   }
 
@@ -808,6 +820,9 @@ $.style(`
 
   & .search-and-filter input {
     width: 100%;
+  }
+  & [data-toggle-metadata="on"] {
+    filter: invert(1);
   }
 `)
 
@@ -1799,7 +1814,8 @@ function patch(target) {
         const node = target.querySelector(`[data-dom="${key}"]`)
         if(node) {
           const html = renderBucket(key)
-          node.innerHTML = html
+          innerHTML(node, html)
+          //node.innerHTML = html
         }
       }
     }
@@ -1847,7 +1863,7 @@ function patch(target) {
       target.activeKeycardId = activeKeycard.id
       target.keycardsLength = list.length
       identity.innerHTML = `
-        <select name="keycard" class="standard-input -small">
+        <select name="keycard" class="standard-input -smol">
           ${list.map(keycard => {
             return `
               <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
@@ -1887,6 +1903,9 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
+        <button class="logo-area" data-assistant>
+          <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+        </button>
         <div class="identity-selector">
         </div>
         <div data-dom="date" class="now-date"></div>
@@ -2173,6 +2192,11 @@ function renderBucket(spaceKey) {
   }).join('')
 }
 
+$.when('click', '[data-assistant]', (event) => {
+  launch()
+})
+
+
 $.when('click', '[data-toggle-metadata]', (event) => {
   const { viewMetadata } = $.learn()
   $.teach({ viewMetadata: !viewMetadata })
@@ -2309,7 +2333,8 @@ $.when('click', '[data-show]', (event) => {
 })
 
 $.when('click', '[data-new]', (event) => {
-  const type = event.target.dataset.new
+  const { draft } = $.learn()
+  const type = event.target.dataset.new || draft.type
 
   if(eventTypes[type]) {
     $.teach({
@@ -2381,9 +2406,17 @@ $.when('input', '[name="keycard"]', (event) => {
 
   const keycard = getKeycard()
 
+  reset(event.target.closest($.link))
   fate()
 })
 
+function reset(target) {
+  $.teach({ buckets: emptyBuckets })
+
+  for(const key in bucketKeys) {
+    target[key] = 0
+  }
+}
 
 $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
