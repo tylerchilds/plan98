@@ -538,9 +538,8 @@ $.draw((target) => {
           data-bind
           name="messageText"
           placeholder="help"
-          value="${escapeHyperText(messageText)}"
           ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-        ></textarea>
+        >${escapeHyperText(messageText)}</textarea>
       </div>
     </div>
   `

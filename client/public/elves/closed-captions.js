@@ -160,7 +160,7 @@ async function init(target) {
   });
 
   const audioContext = new AudioContext();
-  await audioContext.audioWorklet.addModule('/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
+  await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
   const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
   recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
   recognizerProcessor.connect(audioContext.destination);

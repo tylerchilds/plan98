@@ -1384,7 +1384,7 @@ const viewRenderers = {
               </button>
             </div>
             <div class="draft-body text-well">
-              ${viewMetadata ? '' : studio}
+              ${studio}
             </div>
             <div class="draft-footer">
               <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
@@ -2309,7 +2309,7 @@ $.when('click', '[data-destroy]', async (event) => {
   event.preventDefault()
   try {
     destroy({ path: event.target.dataset.destroy })
-    toast('Destroyed!', { type: 'success' })
+    toast('Destroyed!', { type: 'info' })
     $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
   } catch(e) {
     toast('Error!' + e.message, { type: 'error' })
