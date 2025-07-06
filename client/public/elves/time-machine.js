@@ -2012,7 +2012,7 @@ function patch(target) {
       target.activeKeycardId = activeKeycard.id
       target.keycardsLength = list.length
       identity.innerHTML = `
-        <select name="keycard" class="standard-input -smol">
+        <select name="keycard" class="standard-button -smol">
           ${list.map(keycard => {
             return `
               <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
@@ -2040,6 +2040,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.product}">Product</button>
           <button data-new="${eventTypes.video}">Video</button>
           <button data-new="${eventTypes.image}">Photo</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
@@ -2141,7 +2142,7 @@ $.draw((target)=> {
             <button class="standard-button">
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-input" placeholder="?" type="text">
+            <input class="standard-button" placeholder="?" type="text">
           </div>
         </div>
       </div>

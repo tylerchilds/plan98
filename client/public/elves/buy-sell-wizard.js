@@ -10,12 +10,13 @@ const views = {
 
 const viewRenderers = {
   [views.first]: (state) => {
+    const keycard = getKeycard()
     return `
       <div class="view-title">
         Sell
       </div>
       <div class="view-description">
-        Upload your digital product. It will be stored securely in your wallet using the abcxyz keycard.
+        Upload your digital product. It will be stored securely in your wallet using the ${keycard.name} keycard.
       </div>
 
       <div class="file-region">
@@ -27,6 +28,10 @@ const viewRenderers = {
       <button data-submit="${views.first}">
         Upload
       </button>
+
+      <a href="/app/plan98-wallet">
+        Wrong Keycard? Go to wallet.
+      </a>
     `
   },
   [views.second]: (state) => {

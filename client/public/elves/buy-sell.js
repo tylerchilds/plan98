@@ -19,7 +19,7 @@ const viewRenderers = {
         Store
       </div>
       <button data-view="${views.buy}">Buy</button>
-      <button data-view="${views.sell}">Sell</button>
+      <button data-view="${views.admin}">Sell</button>
     `
   },
   [views.buy]: (state) => {
@@ -28,7 +28,7 @@ const viewRenderers = {
         Buy
       </div>
       <button data-view="${views.buy}">Buy</button>
-      <button data-view="${views.sell}">Sell</button>
+      <button data-view="${views.admin}">Sell</button>
     `
   },
   [views.sell]: (state) => {
@@ -38,11 +38,17 @@ const viewRenderers = {
   },
   [views.admin]: (state) => {
     return `
-      My Sales
+      <div>
+        My Sales
+      </div>
+      <div>
+        My Products
+        <button data-view="${views.sell}">Sell</button>
+      </div>
 
-      My Products
-
-      My Purchases
+      <div>
+        My Purchases
+      </div>
     `
   },
   [views.create]: (state) => {
@@ -136,7 +142,10 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
-        Back, Buy, Sell
+        <button data-back>Back</button>
+        <div></div>
+        <button data-view="${views.buy}">Buy</button>
+        <button data-view="${views.admin}">Sell</button>
       </div>
 
       <div class="chat-sidebar">
