@@ -34,7 +34,7 @@ const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000);
 const thisWeek = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
 const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
-const eventTypes = {
+export const eventTypes = {
   note: 'note',
   tommi: 'tommi',
   instrument: 'instrument',
@@ -44,14 +44,16 @@ const eventTypes = {
   audio: 'audio',
   video: 'video',
   archive: 'archive',
+  product: 'product',
   dwebcamp: 'dwebcamp'
 }
 
-const views = {
+export const views = {
   wallet: 'wallet',
   create: 'create',
   [eventTypes.note]: eventTypes.note,
   [eventTypes.tommi]: eventTypes.tommi,
+  [eventTypes.product]: eventTypes.product,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
@@ -75,7 +77,7 @@ function timeFields() {
   }
 }
 
-const schemas = {
+export const schemas = {
   [eventTypes.archive]: {
     type: eventTypes.archive,
     title: 'Untitled',
@@ -91,6 +93,17 @@ const schemas = {
   },
   [eventTypes.tommi]: {
     type: eventTypes.tommi,
+    url: null,
+    title: 'Untitled',
+    description: null,
+    tags: [],
+    city: null,
+    country: null,
+    longitude: null,
+    latitude: null,
+  },
+  [eventTypes.product]: {
+    type: eventTypes.product,
     url: null,
     title: 'Untitled',
     description: null,
@@ -158,7 +171,7 @@ const schemas = {
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
-function newDraft(type) {
+export function newDraft(type) {
   return {
     id: self.crypto.randomUUID(),
     title: 'Untitled',
@@ -414,6 +427,8 @@ $.style(`
   & .raw-json {
     white-space: preserve;
     padding: .5rem;
+    height: 100%;
+    overflow: auto;
   }
 
   & .image-well {
@@ -958,7 +973,7 @@ function editBanner(context) {
   `
 }
 
-const creationForms = {
+export const creationForms = {
   [eventTypes.note]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1009,6 +1024,62 @@ const creationForms = {
       </label>
     `
   },
+  [eventTypes.product]: function(draft) {
+
+    const x = {
+      ...schemas[views.product],
+      ...draft,
+    }
+
+    return `
+      ${editBanner(this)}
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Title</span>
+          <input data-bind="draft" name="title" value="${escapeHyperText(x.title)}" type="text"/>
+        </label>
+        <label class="field">
+          <span class="label">URL</span>
+          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+        </label>
+      </div>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
+      </label>
+
+      ${x.tags?.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">City</span>
+          <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
+        </label>
+
+        <label class="field">
+          <span class="label">Country</span>
+          <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
+        </label>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Longitude</span>
+          <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
+        </label>
+        <label class="field">
+          <span class="label">Latitude</span>
+          <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
+        </label>
+      </div>
+    `
+  },
+
   [eventTypes.tommi]: function(draft) {
 
     const x = {
@@ -1216,6 +1287,18 @@ const studios = {
     return `
     `
   },
+  [eventTypes.product]: function(draft) {
+
+    const x = {
+      ...schemas[views.product],
+      ...draft,
+    }
+
+    return `
+      ??? What type of custom product should go here
+    `
+  },
+
   [eventTypes.tommi]: function(draft) {
 
     const x = {
@@ -1576,6 +1659,66 @@ const viewRenderers = {
     `
   },
 
+  [views.product]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.product],
+      ...event.data,
+    }
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="draft-body text-well">
+              <div class="product">
+                <div class="product-title">
+                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+                </div>
+                <div class="attachments">
+                  ${x.attachments?.map(x => {
+                    return `
+                      <button class="standard-button" data-url="${x.url}">
+                        ${x.name}
+                      </button>
+                    `
+                  }).join('')}
+                </div>
+                <div class="product-description">
+                  ${x.description || ''}
+                </div>
+                <div class="tags">
+                  ${x.tags?.map(x => {
+                    return `
+                      <button class="standard-button" data-tag="${x}">
+                        ${x}
+                      </button>
+                    `
+                  }).join('')}
+                </div>
+                <div class="location">
+                  ${x.city || ''}, ${x.country || ''}
+                </div>
+                <div class="map">
+                  ${x.longitude || ''}, ${x.latitude || ''}
+                </div>
+              </div>
+            </div>
+            ${stamp(x)}
+          </form>
+        </div>
+      </div>
+    `
+  },
 
 
   [views.tommi]: (target) => {
@@ -2080,6 +2223,18 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.product]: function (event) {
+    const data = {
+      ...schemas[views.product],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
+
   [eventTypes.tommi]: function (event) {
     const data = {
       ...schemas[views.tommi],
@@ -2207,6 +2362,16 @@ $.when('click', '[data-action="edit"]', async (event) => {
   event.preventDefault()
   $.teach({ view: views.create, sidebar: true })
 })
+
+export function saveProduct(draft, context) {
+  save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.product,
+  }, context)
+}
+
 
 export function savePhoto(draft, context) {
   save({
