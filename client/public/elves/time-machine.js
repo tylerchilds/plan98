@@ -4,6 +4,7 @@ import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 import { launch } from './plan98-synthia.js'
+import JSZip from 'jszip'
 
 const bucketKeys = {
   past: 'past',
@@ -1687,11 +1688,16 @@ const viewRenderers = {
                 <div class="attachments">
                   ${x.attachments?.map(x => {
                     return `
-                      <button class="standard-button" data-url="${x.url}">
-                        ${x.name}
-                      </button>
+                      ${x.name}
+                      ${x.type}
+                      ${x.size}
                     `
                   }).join('')}
+                  ${x.attachments?.length > 0 ? `
+                    <button data-download-attachments data-space="${space}" data-time="${time}">
+                      Download
+                    </button>
+                  `:''}
                 </div>
                 <div class="product-description">
                   ${x.description || ''}
@@ -2490,6 +2496,54 @@ $.when('click', '[data-view]', (event) => {
   const h = $.learn().buckets[space][time] || { data: {} }
   $.teach({ draft: h.data, viewMetadata: false, context: h.handle })
 })
+
+$.when('click', '[data-download-attachments]', async (event) => {
+  event.preventDefault()
+  const { space, time } = event.target.dataset
+  $.teach({ space, time })
+  const { data } = $.learn().buckets[space][time]
+  if(data.attachments) {
+
+    const zip = new JSZip();
+    const collection = await Promise.all(data.attachments.map(async file => {
+      const blob = await get(file.url).catch(console.error)
+
+      if(blob) {
+        zip.file(file.name, blob);
+        return {
+          name: file.name,
+          url: file.url,
+          blob
+        }
+      }
+    }))
+
+    zip.generateAsync({type:"blob"})
+      .then(function(content) {
+        const name = "example.zip"
+        const downloadURL = (data) => {
+          const a = document.createElement('a')
+          a.href = data
+          document.body.appendChild(a)
+          a.style.display = 'none'
+          a.download = name
+          a.click()
+          a.remove()
+        }
+
+        const blob = new Blob([content])
+
+        const url = window.URL.createObjectURL(blob)
+
+        downloadURL(url)
+      });
+
+    console.log(collection)
+  } else {
+    toast('No attachments to download', { type: 'error' })
+  }
+})
+
 
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset

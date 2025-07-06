@@ -468,6 +468,7 @@ function template() {
           "gun/sea": "https://cdn.jsdelivr.net/gh/amark/gun@master/sea.js",
           "gun/rad": "https://cdn.jsdelivr.net/gh/amark/gun@master/rad.js",
           "jsx-runtime": "https://esm.sh/react/jsx-runtime",
+          "jszip": "https://esm.sh/jszip@3.10.1",
           "havok": "https://esm.sh/@babylonjs/havok@1.3.0",
           "hls.js": "https://esm.sh/hls.js@1.5.15",
           "htmx.org": "https://esm.sh/htmx.org@1.9.11",

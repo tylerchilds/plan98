@@ -204,12 +204,6 @@ $.when('dragleave', '.file-region', (event) => {
 $.when('drop', '.file-region', (event) => {
   event.preventDefault()
   event.stopPropagation()
-  console.log('Drop event details:');
-    console.log('- dataTransfer exists:', !!event.dataTransfer);
-    console.log('- Event is trusted:', event.isTrusted);
-    console.log('- Event type:', event.type);
-    console.log('- Constructor:', event.constructor.name);
-
   const root = event.target.closest($.link)
   root.dataset.hovering = false
   if (event.dataTransfer) {
