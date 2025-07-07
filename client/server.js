@@ -279,7 +279,7 @@ function template() {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
-    PLAN98_WAS_REALTIME: safeEnv('PLAN98_REALTIME'),
+    PLAN98_REALTIME: safeEnv('PLAN98_REALTIME'),
 
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
 

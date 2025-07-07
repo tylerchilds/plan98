@@ -49,7 +49,7 @@ $.draw(() => {
   return visible ? `
     <div class="activator-bar">
       <button class="synthia">
-        <plan98-icon style="height: 2rem; width: 2rem;"></plan98-icon>
+        <plan98-icon style="height: 35px; width: 35px;"></plan98-icon>
       </button>
     </div>
     ${activated ? `
@@ -134,6 +134,7 @@ $.style(`
     z-index: 900000;
     display: flex;
     pointer-events: all;
+    padding: 2px;
   }
 
   & .synthia {
@@ -143,7 +144,22 @@ $.style(`
     border-radius: 100%;
     overflow: hidden;
     box-shadow: 0 0 10px 0px var(--root-theme);
+    animation: &-fade-in 500ms ease-out forwards;
   }
+
+  @keyframes &-fade-in {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+      filter: grayScale(1) blur(10px);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+      filter: grayScale(0) blur(0);
+    }
+  }
+
 
   & .search-bar {
     display: grid;

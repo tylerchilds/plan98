@@ -5,6 +5,7 @@ import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 import { launch } from './plan98-synthia.js'
 import JSZip from 'jszip'
+import lunr from 'lunr'
 
 const bucketKeys = {
   past: 'past',
@@ -472,7 +473,7 @@ $.style(`
     grid-template-columns: auto auto;
     grid-area: header;
     background: rgba(0,0,0,.1);
-    padding: .5rem;
+    padding: 4px;
     gap: .5rem;
   }
 
@@ -509,7 +510,7 @@ $.style(`
   & .draft-footer {
     display: grid;
     grid-area: footer;
-    padding: .5rem;
+    padding: 4px;
     background: rgba(0,0,0,.1);
     color: rgba(0,0,0,.65);
     display: flex;
@@ -852,6 +853,8 @@ function query(target) {
   fate()
 }
 
+fate()
+
 async function fate() {
   const signer = await getSigner()
   const storage = getStorage()
@@ -885,16 +888,20 @@ async function fate() {
       )
 
       $.teach(events, mergeEvents)
+
+      return events
     } catch(e) {
       console.error(e)
     }
   }
 
 
-  const res = await get(`time-machine`).then(addData).catch(async (error) => {
+  const events = await get(`time-machine`).then(addData).catch(async (error) => {
     await touch('time-machine')
     get('time-machine').then(addData)
   })
+
+  reIndex(events)
 }
 
 function mergeEvents(state, payload) {
@@ -959,6 +966,62 @@ function timeMachine(spaceKey, timeKey, file) {
     timeKey,
     ...file
   }
+}
+
+let idx
+
+export function getSearchResults(query, options={}) {
+  const defaultOptions = {
+     sortBy: 'title' 
+  }
+
+  const config = {
+    ...defaultOptions,
+    options
+  }
+  return new Promise((resolve, reject) => {
+    // timeout after 30 seconds
+    const timeout = setTimeout(reject, 30*1000);
+
+    (function loop() {
+      if(idx) {
+        clearTimeout(timeout)
+        const results = idx.search(query)
+        resolve(results.map(x => {
+          const data = $.learn()[x.ref]
+
+          return data
+        }).sort((a, b) => {
+          return a.data[config.sortBy].localeCompare(b.data[config.sortBy])
+        }))
+      } else {
+        requestAnimationFrame(loop)
+      }
+    })()
+  })
+}
+
+function reIndex(events=[]) {
+  idx = lunr(function () {
+    this.ref('id')
+    this.field('title')
+    this.field('path')
+    this.field('keywords')
+    this.field('type')
+
+    events.forEach(event => {
+      const node = {
+        id: event.data.id,
+        title: event.data.title,
+        keywords: event.handle.path.split('/').join(' '),
+        type: event.data.type,
+      }
+
+      $.teach({ [event.data.id]: event })
+
+      this.add(node)
+    }, this)
+  })
 }
 
 function editBanner(context) {
@@ -2370,8 +2433,8 @@ $.when('click', '[data-action="edit"]', async (event) => {
   $.teach({ view: views.create, sidebar: true })
 })
 
-export function saveProduct(draft, context) {
-  save({
+export async function saveProduct(draft, context) {
+  return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
@@ -2380,8 +2443,8 @@ export function saveProduct(draft, context) {
 }
 
 
-export function savePhoto(draft, context) {
-  save({
+export async function savePhoto(draft, context) {
+  return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
@@ -2389,8 +2452,8 @@ export function savePhoto(draft, context) {
   }, context)
 }
 
-export function saveSketch(draft, context) {
-  save({
+export async function saveSketch(draft, context) {
+  return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
@@ -2398,8 +2461,8 @@ export function saveSketch(draft, context) {
   }, context)
 }
 
-export function saveAudio(draft, context) {
-  save({
+export async function saveAudio(draft, context) {
+  return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
@@ -2407,8 +2470,8 @@ export function saveAudio(draft, context) {
   }, context)
 }
 
-export function saveVideo(draft, context) {
-  save({
+export async function saveVideo(draft, context) {
+  return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
@@ -2417,7 +2480,7 @@ export function saveVideo(draft, context) {
 }
 
 
-export function save(draft, context) {
+export async function save(draft, context) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
   const timestamp = now.toJSON()
   let path = `/${timestamp}.json`
@@ -2427,24 +2490,24 @@ export function save(draft, context) {
 
   const filePath = `/private/time-machine${path}`
   // Attempt to upload to server
-  put(filePath, JSON.stringify(draft), { type: 'application/json' }).then(response => {
-    fate()
+  await put(filePath, JSON.stringify(draft), { type: 'application/json' }).then(response => {
   }).catch(error => {
     console.warn(error);
   });
 
-  appendPath(filePath)
+  return await appendPath(filePath)
 }
 
-function appendPath(path) {
-  get('time-machine').then(async response => {
+async function appendPath(path) {
+  await get('time-machine').then(async response => {
     const obj = await response.text().then(str => JSON.parse(str))
     const paths = [...(obj.paths || [])]
     paths.push(path)
-    put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' }).then(() => {
-      fate()
-    })
+    await put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' })
+
   })
+
+  return await fate()
 }
 
 export function destroy(context) {

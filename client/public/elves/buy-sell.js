@@ -1,112 +1,27 @@
 import elf from '@silly/elf'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { saveProduct, eventTypes, newDraft } from './time-machine.js'
+import { saveProduct, eventTypes, newDraft, getSearchResults } from './time-machine.js'
+import { launch } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
 
 const views = {
   welcome: 'welcome',
-  create: 'create',
+  wizard: 'wizard',
   sell: 'sell',
+  checkout: 'checkout',
   buy: 'buy',
-  admin: 'admin',
-  edge: 'edge'
+  product: 'product',
 }
 
-const viewRenderers = {
-  [views.welcome]: (state) => {
-    return `
-      <div class="app-title">
-        Store
-      </div>
-      <button data-view="${views.buy}">Buy</button>
-      <button data-view="${views.admin}">Sell</button>
-    `
-  },
-  [views.buy]: (state) => {
-    return `
-      <div class="view-title">
-        Buy
-      </div>
-      <button data-view="${views.buy}">Buy</button>
-      <button data-view="${views.admin}">Sell</button>
-    `
-  },
-  [views.sell]: (state) => {
-    return `
-      <buy-sell-wizard></buy-sell-wizard>
-    `
-  },
-  [views.admin]: (state) => {
-    return `
-      <div>
-        My Sales
-      </div>
-      <div>
-        My Products
-        <button data-view="${views.sell}">Sell</button>
-      </div>
-
-      <div>
-        My Purchases
-      </div>
-    `
-  },
-  [views.create]: (state) => {
-    const { draft, viewMetadata, context } = state
-    const form = renderCreationFormByType.call(context, draft)
-    const studio = renderStudioByType.call(context, draft)
-    return `
-      <div class="draft-template">
-        <div class="draft-header">
-          <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-            Cancel
-          </button>
-          <button data-action="post" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-            Save
-          </button>
-        </div>
-        <div class="draft-body text-well">
-          ${studio}
-        </div>
-        <div class="draft-footer">
-          <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-            <sl-icon name="gear-fill"></sl-icon>
-          </div>
-          <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
-        </div>
-        <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
-          <div class="time-form">
-            <div class="time-form-section">
-              ${typeSelector(draft.type)}
-            </div>
-            <div class="time-form-section" style="margin-left: auto;">
-              ${yearSelector(parseInt(draft.year))}
-              /
-              ${monthSelector(parseInt(draft.month))}
-              /
-              ${daySelector(parseInt(draft.day), parseInt(draft.month), parseInt(draft.year))}
-            </div>
-            <div class="time-form-section">
-              @
-              ${hourSelector(parseInt(draft.hour))}
-              <span>:</span>
-              ${minuteSelector(parseInt(draft.minute))}
-            </div>
-          </div>
-
-          ${form}
-        </div>
-      </div>
-    `
-  },
+const historyTypes = {
+  view: 'view',
+  create: 'create',
 }
-
 
 const $ = elf('buy-sell', {
   grabbing: false,
   sidebar: false,
   draft: {},
-  view: views.welcome,
   categoryIds: ['001','003'],
   '001': {
     label: 'Movies',
@@ -120,20 +35,112 @@ const $ = elf('buy-sell', {
 
 export default $
 
-function query(target) {
+const viewRenderers = {
+  [views.welcome]: (target) => {
+    return `
+      <div class="app-title">
+        Store
+      </div>
+      <button data-view="${views.buy}" class="standard-button bias-link">Buy</button>
+      <button data-view="${views.sell}" class="standard-button bias-positive">Sell</button>
+    `
+  },
+  [views.buy]: (target) => {
+    return `
+      All Products
+    `
+  },
+  [views.wizard]: (target) => {
+    return `
+      <buy-sell-wizard></buy-sell-wizard>
+    `
+  },
+  [views.product]: (target) => {
+    const { product } = $.learn()
+    const { id, title } = product.data
+
+    return `
+      <div class="product-id">
+        ${id}
+      </div>
+      <div class="product-title">
+        ${title}
+      </div>
+    `
+  },
+
+  [views.sell]: (target) => {
+    const { products } = $.learn()
+    return `
+      <button data-view="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
+      <div class="admin-title">
+        My Products
+      </div>
+      <div class="horizontal-scroll-container">
+        <div class="table">
+          <div class="table-row">
+            <div class="table-id">
+              <div>
+                ID
+              </div>
+            </div>
+            <div class="table-title">
+              Title
+            </div>
+          </div>
+          ${products.map(x => {
+            const { id, title } = x.data
+            return `
+              <div class="table-row">
+                <div class="table-id">
+                  <button class="standard-button -smol bias-link" data-view="${views.product}" data-id="${id}">
+                    ${id.split('-')[0]}
+                  </button>
+                </div>
+                <div class="table-title">
+                  ${title}
+                </div>
+              </div>
+            `
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="admin-title">
+        My Sales
+      </div>
+      <div class="horizontal-scroll-container">
+        <div class="table">
+        </div>
+      </div>
+      <div class="admin-title">
+        My Purchases
+      </div>
+      <div class="horizontal-scroll-container">
+        <div class="table">
+        </div>
+      </div>
+    `
+  },
+}
+
+async function query(target) {
   if(target.queried) return
   target.queried = true
+
+  const products = await getSearchResults(eventTypes.product)
+  $.teach({ products, ready: true })
 }
 
 $.draw((target)=> {
+  const { ready } = $.learn()
   query(target)
+  if(!ready) return
   if(target.innerHTML) return
 
   return `
-    <div class="creation-container">
-      <button data-dom="create-button" class="create-item standard-button" data-new>
-        <sl-icon name="plus-lg"></sl-icon>
-      </button>
+    <div class="creation-container" data-dom="nav">
+      <div data-dom="primary-action"></div>
       <div class="menu-item">
         <button class="more-item standard-button">
           <sl-icon name="list"></sl-icon>
@@ -142,16 +149,18 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
-        <button data-back>Back</button>
+        <button class="logo-area" data-assistant>
+          <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+        </button>
         <div></div>
-        <button data-view="${views.buy}">Buy</button>
-        <button data-view="${views.admin}">Sell</button>
+        <button data-view="${views.buy}" class="standard-button -smol bias-link">Buy</button>
+        <button data-view="${views.sell}" class="standard-button -smol bias-positive">Sell</button>
       </div>
 
       <div class="chat-sidebar">
         <div data-resize-sidebar></div>
         <div class="chat-sidebar-inner">
-          ${sidebar()}
+          ${renderSidebar()}
         </div>
         <div class="chat-footer">
           <div class="search-and-filter">
@@ -174,17 +183,23 @@ $.draw((target)=> {
     const view = target.getAttribute('view')
     if(!target.initialized) {
       target.initialized = true
+      let data = { view: views.welcome }
       if(view) {
-        $.teach({ view, src })
+        data = { view, src }
       }
+
+      replaceHistory({ type: historyTypes.view, [historyTypes.view]: data })
+      $.teach(data)
     }
   },
   afterUpdate(target) {
     {
-      requestAnimationFrame(() => {
-        patch(target)
-        //recoverElves(target, 'sl-icon')
-      })
+      if(target.innerHTML) {
+        requestAnimationFrame(() => {
+          patch(target)
+          //recoverElves(target, 'sl-icon')
+        })
+      }
     }
 
     {
@@ -193,23 +208,67 @@ $.draw((target)=> {
   }
 })
 
+const LOCKED_VIEWS = [views.welcome, views.wizard, views.checkout]
+const BUYER_VIEWS = [views.buy]
+const SELLER_VIEWS = [views.sell]
+
 function patch(target) {
   const { view, draft, grabbing, sidebar } = $.learn()
+  const locked = LOCKED_VIEWS.includes(view)
+
+  {
+    const primary = target.querySelector('[data-dom="primary-action"]')
+    const isSeller = SELLER_VIEWS.includes(view)
+    const isBuyer = BUYER_VIEWS.includes(view)
+    if(target.lastAction !== 'seller' && isSeller) {
+      target.lastAction = 'seller'
+      primary.innerHTML = `
+        <button class="action-item standard-button" data-new>
+          <sl-icon name="plus-circle"></sl-icon>
+        </button>
+      `
+    } else if(target.lastAction !== 'buyer' && isBuyer) {
+      target.lastAction = 'buyer'
+      primary.innerHTML = `
+        <button class="action-item standard-button" data-cart>
+          <sl-icon name="basket2"></sl-icon>
+        </button>
+      `
+    } else if(target.lastAction !== 'back' && !(isBuyer || isSeller)) {
+      target.lastAction = 'back'
+      primary.innerHTML = `
+        <button class="action-item standard-button" data-back>
+          <sl-icon name="arrow-left-circle"></sl-icon>
+        </button>
+      `
+    }
+  }
+
+  {
+    const nav = target.querySelector('[data-dom="nav"]')
+
+    if(locked) {
+      nav.dataset.locked = true
+    } else {
+      nav.dataset.locked = false
+    }
+  }
 
   {
     const realm = target.querySelector('[data-dom="realm"]')
     if(realm.dataset.grabbing !== grabbing.toString()) {
       realm.dataset.grabbing = grabbing
     }
-    if(realm.dataset.sidebar !== sidebar.toString()) {
-      realm.dataset.sidebar = sidebar
+    if(realm.dataset.sidebar !== sidebar.toString() || target.locked !== locked) {
+      target.locked = locked
+      realm.dataset.sidebar = locked ? false : sidebar
     }
   }
 
   {
     const content = target.querySelector('[data-dom="content"]')
-    if(target.view !== view) {
-      target.view = view
+    if(target.dataset.view !== view) {
+      target.dataset.view = view
 
       if(content) {
         const html = viewRenderers[view] ? `
@@ -224,7 +283,7 @@ function patch(target) {
   }
 }
 
-function sidebar() {
+function renderSidebar() {
   const { categoryIds } = $.learn()
   const categories = categoryIds.map(id => {
     const category = $.learn()[id] || {}
@@ -249,7 +308,13 @@ function sidebar() {
               </div>
             </div>
             <div class="era-events">
-              ${collection.map(renderSidebar).join('')}
+              ${collection.map((item) => {
+                return `
+                  <div class="event">
+                    ${item.title}
+                  </div>
+                `
+              }).join('')}
             </div>
           </div>
         `
@@ -258,40 +323,94 @@ function sidebar() {
   `
 }
 
-function renderSidebar(item) {
-  return `
-    <div class="event">
-      ${item.title}
-    </div>
-  `
-}
-
 $.when('click', '.more-item', (event) => {
   event.preventDefault()
   const { sidebar } = $.learn()
-  $.teach({ sidebar: !sidebar })
+  const newSidebar = { sidebar: !sidebar }
+  if(history.state) {
+    const newPatch = {
+      ...history.state.patch,
+      [history.state.patch.type]: {
+        ...history.state.patch[history.state.patch.type],
+        ...newSidebar
+      }
+    }
+    replaceHistory(newPatch)
+  }
+  $.teach(newSidebar)
   event.stopImmediatePropagation()
 })
 
 $.when('click', '[data-view]', (event) => {
   event.preventDefault()
+  const { sidebar } = $.learn()
   const { view } = event.target.dataset
-  $.teach({ view })
+
+  let data = { sidebar, view }
+
+  if(view === views.wizard) {
+    data = {
+      ...data,
+      draft: newDraft(eventTypes.product)
+    }
+  } else if(view === views.product) {
+    const { products } = $.learn()
+    const { id } = event.target.dataset
+    const product = products.find(x => x.data.id === id)
+
+    data = {
+      ...data,
+      product
+    }
+  }
+
+  $.teach(data)
+  saveHistory({ type: historyTypes.view, [historyTypes.view]: data })
 })
 
 $.when('click', '[data-new]', (event) => {
-  const { draft } = $.learn()
-  const type = event.target.dataset.new || draft.type
+  const { sidebar } = $.learn()
+  const historyData = { sidebar, view: views.wizard }
 
-  if(eventTypes[type]) {
-    $.teach({
-      name: 'type',
-      value: type
-    }, bound('draft'))
+  saveHistory({ type: historyTypes.create, [historyTypes.create]: historyData })
+  $.teach({ draft: newDraft(eventTypes.product), ...historyData })
+})
+
+$.when('click', '[data-cart]', (event) => {
+  const { sidebar } = $.learn()
+  const historyData = { sidebar, view: views.wizard }
+
+  saveHistory({ type: historyTypes.create, [historyTypes.create]: historyData })
+  $.teach({ draft: newDraft(eventTypes.product), ...historyData })
+})
+
+
+
+$.when('click', '[data-assistant]', (event) => {
+  launch()
+})
+
+$.when('pointerdown', '[data-resize-sidebar]', event => {
+  $.teach({ grabbing: true })
+  document.addEventListener("pointermove", resizeSidebar, false);
+  document.addEventListener("pointerup", () => {
+    $.teach({ grabbing: false })
+    document.removeEventListener("pointermove", resizeSidebar, false);
+  }, false);
+})
+
+function resizeSidebar(event) {
+  let width
+  if (event.touches && event.touches[0] && typeof event.touches[0]["force"] !== "undefined") {
+    width = event.touches[0].clientX
+  } else {
+    width = event.clientX
   }
 
-  $.teach({ view: views.sell, draft: newDraft(eventTypes.product), sidebar: false })
-})
+  const size = `${width}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--sidebar-width", size);
+}
 
 
 
@@ -301,20 +420,6 @@ $.style(`
     height: 100%;
     overflow: hidden;
     position: relative;
-    animation: &-fade-in 1000ms ease-in-out forwards;
-    background: black;
-    opacity: 0;
-  }
-
-  @keyframes &-fade-in {
-    0% {
-      opacity: 0;
-      background: black;
-    }
-    100% {
-      opacity: 1;
-      background: white;
-    }
   }
 
   & .time-feed-nom-nom-nom-nom {
@@ -354,7 +459,7 @@ $.style(`
     z-index: 1000;
   }
 
-  & .create-item {
+  & .action-item {
     font-size: 2rem;
     border-radius: 3px;
     padding: .5rem;
@@ -570,7 +675,7 @@ $.style(`
     grid-template-columns: auto auto;
     grid-area: header;
     background: rgba(0,0,0,.1);
-    padding: .5rem;
+    padding: 4px;
     gap: .5rem;
   }
 
@@ -607,7 +712,7 @@ $.style(`
   & .draft-footer {
     display: grid;
     grid-area: footer;
-    padding: .5rem;
+    padding: 4px;
     background: rgba(0,0,0,.1);
     color: rgba(0,0,0,.65);
     display: flex;
@@ -937,6 +1042,49 @@ $.style(`
     font-weight: 600;
   }
 
+  &[data-view="${views.welcome}"] [data-dom="nav"] {
+    display: none;
+  }
+
+  & [data-dom="nav"][data-locked="true"] .more-item {
+    visibility: hidden;
+  }
+
+  & .horizontal-scroll-container {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: auto;
+  }
+
+  & .table {
+    display: table;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  & .table-row {
+    display: table-row;
+  }
+
+  & .table-row > * {
+    display: table-cell;
+    padding: 2px;
+  }
+
+  & .table-row:nth-child(2n) {
+    background: rgba(0,0,0,.1);
+  }
+
+  & buy-sell-child-sell {
+    display: block;
+    padding: .5rem;
+  }
+
+  & .admin-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgba(0,0,0,.65);
+  }
 `)
 
 export function updateDraft(data) {
@@ -995,11 +1143,12 @@ export function wizardError(node, params) {
   }))
 }
 
-$.when('json-rpc', 'buy-sell-wizard', (event) => {
+$.when('json-rpc', 'buy-sell-wizard', async (event) => {
   if(event.detail.method === 'success') {
     const { draft } = $.learn()
-    saveProduct(draft)
-    $.teach({ view: views.admin })
+    await saveProduct(draft)
+    const products = await getSearchResults(eventTypes.product)
+    $.teach({ view: views.sell, products })
   }
 
   if(event.detail.method === 'error') {
@@ -1007,4 +1156,44 @@ $.when('json-rpc', 'buy-sell-wizard', (event) => {
   }
 })
 
+function saveHistory(patch) {
+  self.history.pushState({
+    type: `${$.link}-navigation`,
+    patch
+  }, "");
+}
+
+function replaceHistory(patch) {
+  self.history.replaceState({
+    type: `${$.link}-navigation`,
+    patch
+  }, "");
+}
+
+
+function restoreHistory(patch) {
+  patchHandlers[patch.type]
+    ? patchHandlers[patch.type](patch[patch.type])
+    : ''
+}
+
+const patchHandlers = {
+  [historyTypes.view]: navigateHistory,
+  [historyTypes.create]: navigateHistory,
+}
+
+function navigateHistory(data) {
+  $.teach(data)
+}
+
+addEventListener("popstate", async (event) => {
+  const { type, patch } = event.state || {}
+  if(type === `${$.link}-navigation`) {
+    restoreHistory(patch)
+  }
+});
+
+$.when('click', '[data-back]', (event) => {
+  history.back()
+})
 
