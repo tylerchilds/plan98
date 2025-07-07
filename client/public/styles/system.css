@@ -571,6 +571,7 @@ button, input, optgroup, select, textarea {
   position: relative;
   left: .25rem;
   color: rgba(0,0,0,.65);
+  letter-spacing: 1px;
 }
 
 .field [type=checkbox] + .label,

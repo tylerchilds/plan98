@@ -110,10 +110,6 @@ export const schemas = {
     title: 'Untitled',
     description: null,
     tags: [],
-    city: null,
-    country: null,
-    longitude: null,
-    latitude: null,
   },
   [eventTypes.instrument]: {
     type: eventTypes.instrument,
@@ -1097,7 +1093,7 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
         <label class="field">
           <span class="label">Title</span>
           <input data-bind="draft" name="title" value="${escapeHyperText(x.title)}" type="text"/>
@@ -1119,28 +1115,6 @@ export const creationForms = {
           </button>
         `
       }).join('')}
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">City</span>
-          <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
-        </label>
-
-        <label class="field">
-          <span class="label">Country</span>
-          <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
-        </label>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Longitude</span>
-          <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
-        </label>
-        <label class="field">
-          <span class="label">Latitude</span>
-          <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
-        </label>
-      </div>
     `
   },
 
@@ -1773,12 +1747,6 @@ const viewRenderers = {
                       </button>
                     `
                   }).join('')}
-                </div>
-                <div class="location">
-                  ${x.city || ''}, ${x.country || ''}
-                </div>
-                <div class="map">
-                  ${x.longitude || ''}, ${x.latitude || ''}
                 </div>
               </div>
             </div>

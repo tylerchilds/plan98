@@ -1,8 +1,10 @@
 import elf from '@silly/elf'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { saveProduct, eventTypes, newDraft, getSearchResults } from './time-machine.js'
+import { get } from './plan98-wallet.js'
 import { launch } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
+import JSZip from 'jszip'
 
 const views = {
   welcome: 'welcome',
@@ -38,12 +40,17 @@ export default $
 const viewRenderers = {
   [views.welcome]: (target) => {
     return `
-      <div class="app-title">
-        Store
+      <div>
+        <plan98-icon></plan98-icon>
       </div>
-      <button data-view="${views.buy}" class="standard-button bias-link">Buy</button>
-      <button data-view="${views.sell}" class="standard-button bias-positive">Sell</button>
-    `
+      <div class="app-title">
+        Shop
+      </div>
+      <div class="button-container">
+        <button data-view="${views.buy}" class="standard-button -large bias-link">Buy</button>
+        <button data-view="${views.sell}" class="standard-button -large bias-positive">Sell</button>
+      </div>
+      `
   },
   [views.buy]: (target) => {
     return `
@@ -57,7 +64,12 @@ const viewRenderers = {
   },
   [views.product]: (target) => {
     const { product } = $.learn()
-    const { id, title } = product.data
+    if(!product) {
+      return `
+        Product not found...
+      `
+    }
+    const { id, title, attachments } = product.data
 
     return `
       <div class="product-id">
@@ -66,58 +78,84 @@ const viewRenderers = {
       <div class="product-title">
         ${title}
       </div>
+      ${attachments ? attachments.map(x => {
+        return `
+          <div class="table">
+            <div class="table-row">
+              <div class="table-cell">
+                ${x.name}
+              </div>
+              <div class="table-cell">
+                ${formatBytes(x.size)}
+              </div>
+            </div>
+          </div>
+        `
+      }).join('') : ''}
+
+      <button data-download-attachments="${id}">
+        Download
+      </button>
     `
   },
 
   [views.sell]: (target) => {
     const { products } = $.learn()
     return `
-      <button data-view="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
-      <div class="admin-title">
-        My Products
-      </div>
-      <div class="horizontal-scroll-container">
-        <div class="table">
-          <div class="table-row">
-            <div class="table-id">
-              <div>
-                ID
+      <div class="section">
+        <button data-view="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
+        <div class="admin-title">
+          My Products
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="table">
+            <div class="table-row">
+              <div class="table-id">
+                <div>
+                  ID
+                </div>
+              </div>
+              <div class="table-title">
+                Title
               </div>
             </div>
-            <div class="table-title">
-              Title
-            </div>
+            ${products.map(x => {
+              const { id, title } = x.data
+              return `
+                <div class="table-row">
+                  <div class="table-id">
+                    <div style="display: inline-grid; place-content: center;">
+                      <button class="standard-button -smol bias-link" data-view="${views.product}" data-id="${id}">
+                        ${id ? id.split('-')[0] : '????'}
+                      </button>
+                    </div>
+                  </div>
+                  <div class="table-title">
+                    ${title}
+                  </div>
+                </div>
+              `
+            }).join('')}
           </div>
-          ${products.map(x => {
-            const { id, title } = x.data
-            return `
-              <div class="table-row">
-                <div class="table-id">
-                  <button class="standard-button -smol bias-link" data-view="${views.product}" data-id="${id}">
-                    ${id.split('-')[0]}
-                  </button>
-                </div>
-                <div class="table-title">
-                  ${title}
-                </div>
-              </div>
-            `
-          }).join('')}
         </div>
       </div>
 
-      <div class="admin-title">
-        My Sales
-      </div>
-      <div class="horizontal-scroll-container">
-        <div class="table">
+      <div class="section">
+        <div class="admin-title">
+          My Sales
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="table">
+          </div>
         </div>
       </div>
-      <div class="admin-title">
-        My Purchases
-      </div>
-      <div class="horizontal-scroll-container">
-        <div class="table">
+      <div class="section">
+        <div class="admin-title">
+          My Purchases
+        </div>
+        <div class="horizontal-scroll-container">
+          <div class="table">
+          </div>
         </div>
       </div>
     `
@@ -1059,6 +1097,9 @@ $.style(`
   & .table {
     display: table;
     width: 100%;
+  }
+
+  & .section {
     margin-bottom: 2rem;
   }
 
@@ -1084,6 +1125,22 @@ $.style(`
     font-size: 1.5rem;
     font-weight: bold;
     color: rgba(0,0,0,.65);
+  }
+
+  & buy-sell-child-wizard,
+  & buy-sell-child-welcome {
+    display: block;
+    max-width: 50ch;
+    margin: 0 auto;
+    padding: 1rem;
+  }
+
+  & buy-sell-child-welcome {
+    display: grid;
+    gap: 1rem;
+    place-content: center;
+    height: 100%;
+    text-align: center;
   }
 `)
 
@@ -1197,3 +1254,62 @@ $.when('click', '[data-back]', (event) => {
   history.back()
 })
 
+$.when('click', '[data-download-attachments]', async (event) => {
+  event.preventDefault()
+
+  const { products } = $.learn()
+  const id = event.target.dataset.downloadAttachments
+  const { data } = products.find(x => x.data.id === id)
+  if(data.attachments) {
+
+    const zip = new JSZip();
+    const collection = await Promise.all(data.attachments.map(async file => {
+      const blob = await get(file.url).catch(console.error)
+
+      if(blob) {
+        zip.file(file.name, blob);
+        return {
+          name: file.name,
+          url: file.url,
+          blob
+        }
+      }
+    }))
+
+    zip.generateAsync({type:"blob"})
+      .then(function(content) {
+        const name = "example.zip"
+        const downloadURL = (data) => {
+          const a = document.createElement('a')
+          a.href = data
+          document.body.appendChild(a)
+          a.style.display = 'none'
+          a.download = name
+          a.click()
+          a.remove()
+        }
+
+        const blob = new Blob([content])
+
+        const url = window.URL.createObjectURL(blob)
+
+        downloadURL(url)
+      });
+
+    console.log(collection)
+  } else {
+    toast('No attachments to download', { type: 'error' })
+  }
+})
+
+export function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
