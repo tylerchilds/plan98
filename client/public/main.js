@@ -26,16 +26,8 @@ style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)
 document.head.appendChild(style)
 
-const missingContent = doingBusinessAs[window.location.host] ? '' : `
-  <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
-    <div style="padding: 51px; height: 100%; display: flex;">
-      <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
-    </div>
-  </div>
-`
-
 const newpage = `
-  <sillonious-brand host="${plan98.host}">${missingContent}</sillonious-brand>
+  <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `
 
 module('#main').draw(target => newpage)

@@ -1,108 +1,78 @@
-import { StorageClient } from "@wallet.storage/fetch-client";
-import { Ed25519Signer } from "@did.coop/did-key-ed25519"
-import elf from '@plan98/elf'
+import module from '@silly/tag'
+import { get, put } from './plan98-wallet.js'
 
-const storageId = 'http://localhost:8080'
-const storageUrl = new URL(storageId)
-const storage = new StorageClient(storageUrl)
+const $ = module('clip-board', { value: '' })
 
-// This signer can create cryptographic signatures
-const signer = await Ed25519Signer.generate()
-
-// create the space with signer so all requests get signed by it
-const space = storage.space({ signer })
-
-async function main() {
-  const spaceObject = {
-    controller: signer.controller,
+$.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    line-height: 2rem;
   }
-  const spaceObjectBlob = new Blob(
-    [JSON.stringify(spaceObject)],
-    {type:'application/json'},
-  )
 
-  // send PUT request to update the space
-  const responseToPutSpace = await space.put(spaceObjectBlob)
-  console.debug({ responseToPutSpace })
+  & textarea {
+    width: 100%;
+    height: 100%;
+    resize: none;
+    border: none;
+    padding: 1rem;
+    line-height: 2rem;
+    background: transparent;
+  }
 
-  const responseToGetSpace = await space.get()
-  console.debug({ responseToGetSpace })
-
-  const index = space.resource('/hahahla/aalkslj')
-  const blobForIndex = new Blob(['<!doctype html><h1>The Index5</h1>'], { type: 'text/html' })
-  const responseToPutIndex = await index.put(blobForIndex, { signer })
-  const indexUrl = new URL(index.path, storageUrl)
-  $.teach({ home: indexUrl.toString() })
-}
-
-main()
-
-const $ = elf('clip-board', { current: '', history: '' })
+  & .page {
+    height: 100%;
+    line-height: 3rem;
+    background: white;
+    color: rgba(0,0,0,.85);
+  }
+`)
 
 $.draw((target) => {
-  const { current, cards, home } = $.learn()
+  subscribe(target)
+  const { value } = $.learn()
   return `
-    ${escapeHyperText(current)}
+    <div class="page">
+      <textarea>${value?value:''}</textarea>
+    </div>
   `
-}, {
-  beforeUpdate(target) {
-    { // convert a query string to new post
-      const q = target.getAttribute('q')
-      if(!target.initialized) {
-        target.initialized = true
-
-        if(q) {
-          const current = decodeURIComponent(q)
-          $.teach({ current })
-        }
-      }
-    }
-  }
 })
 
-function renderCard(data) {
-  const { did, nick } = data.card
-  return `
-    <button data-did="${did}">
-      ${nick}
-    </button>
-  `
-}
+$.when('input', '.page textarea', async (event) => {
+  const root = event.target.closest($.link)
 
-$.when('click', '[data-link]', (event) => {
-  const wallet = event.target.closest($.link)
-  wallet.dispatchEvent(new CustomEvent('json-rpc', {
-    detail: {
-      jsonrpc: "2.0",
-      method: 'updated',
-      params: {
-        cards: $.learn().cards
-      }
-    }
-  }))
+  const clipboard = { history: [event.target.value] }
 
-  $.teach({
-    type: 'card',
-    card: { did: self.crypto.randomUUID(), nick: 'Card Name' }
-  }, linkCard)
+  $.teach({ value: event.target.value })
+  put(getClipboard(root), JSON.stringify(clipboard), { type: 'application/json' })
 })
 
-function linkCard(state, payload) {
-  return {
-    ...state,
-    cards: [...state.cards, payload]
-  }
+function getClipboard(node) {
+  return `/private/clip-board/${node.id}.json`
 }
 
-function escapeHyperText(text = '') {
-  return text.replace(/[&<>'"]/g, 
-    actor => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;'
-    }[actor])
-  )
-}
+async function subscribe(target) {
+  if(target.subscribed) return
+  target.subscribed = true
 
+  await get(getClipboard(target)).then(async response => {
+    const clipboard = await response.text().then(str => JSON.parse(str))
+    const { history } = clipboard
+
+    if(history[0]) {
+      $.teach({ value: history[0] })
+    }
+  }).catch(console.error).finally(() => {
+    const q = target.getAttribute('q')
+    const { value } = $.learn()
+
+    if(q) {
+      const prependedQuery = q + '\n' + value
+      $.teach({ value: prependedQuery })
+      const clipboard = { history: [prependedQuery] }
+      put(getClipboard(target), JSON.stringify(clipboard), { type: 'application/json' })
+    }
+  })
+}

@@ -1116,7 +1116,7 @@ export function ai(operation) {
   return `
     <paper-pocket static="true">
       <div class="share-actions">
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/clip-board?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" target="_blank" href="/app/clip-board?id=log&q=${encodeURIComponent(operation)}">
           clipboard
         </a>
         <a class="standard-button bias-generic -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
