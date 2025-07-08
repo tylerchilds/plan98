@@ -454,7 +454,7 @@ export default $
 function startMode() {
   return localStorage.getItem('paper-pocket/tutorialComplete') === "true"
     ? modes.game
-    : modes.tutorial
+    : modes.game //modes.tutorial
 }
 
 export function getFontSizeOptions() {
