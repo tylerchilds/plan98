@@ -1871,7 +1871,7 @@ const modeRenderers = {
       <div class="settings-section">
         <strong>Author's note:</strong><br>
         Probably a flamewar, but. You don't quit vim. You embed it.<br><br>
-        <code-module src="${new URL(import.meta.url).pathname}"></code-module>
+        <was-code src="${new URL(import.meta.url).pathname}"></was-code>
       </div>
     `
   },
