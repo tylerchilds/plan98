@@ -486,6 +486,7 @@ function template() {
           "@observablehq/plot": "https://esm.sh/@observablehq/plot@0.6.14",
           "@christianliebel/paint": "https://esm.sh/@christianliebel/paint@1.2.0",
           "frh": "https://esm.sh/reference-frh@1.0.0",
+          "ollama/browser": "https://esm.sh/ollama@0.5.16/browser",
           "papaparse": "https://esm.sh/papaparse@5.4.1",
           "p2panda-js": "https://esm.sh/p2panda-js@0.8.1",
           "phaser": "https://esm.sh/phaser@3.80.1",

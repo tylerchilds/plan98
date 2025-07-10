@@ -1,5 +1,97 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
+import { Ollama } from 'ollama/browser'
+
+const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
+
+const tools = [
+  {
+    type: "function",
+    function: {
+      name: "calculator",
+      description: "Perform basic mathematical calculations",
+      parameters: {
+        type: "object",
+        properties: {
+          expression: {
+            type: "string",
+            description: "Mathematical expression to evaluate (e.g., '2 + 2', '15 * 23')"
+          }
+        },
+        required: ["expression"]
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_current_time",
+      description: "Get the current date and time",
+      parameters: {
+        type: "object",
+        properties: {},
+        required: []
+      }
+    }
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_weather",
+      description: "Get weather information for a location",
+      parameters: {
+        type: "object",
+        properties: {
+          location: {
+            type: "string",
+            description: "The city and state/country"
+          }
+        },
+        required: ["location"]
+      }
+    }
+  }
+];
+
+// Tool implementations
+const toolImplementations = {
+  calculator: (args) => {
+    try {
+      // Simple calculator - in production, use a proper math parser
+      const result = Function('"use strict"; return (' + args.expression + ')')();
+      return { result: result.toString() };
+    } catch (error) {
+      return { error: "Invalid mathematical expression" };
+    }
+  },
+  get_current_time: () => {
+    const now = new Date();
+    return {
+      current_time: now.toLocaleString(),
+      timestamp: now.toISOString()
+    };
+  },
+  get_weather: (args) => {
+    // Mock weather data - in production, call real weather API
+    const weatherData = {
+      "San Francisco": { temp: "18°C", condition: "Foggy" },
+      "New York": { temp: "22°C", condition: "Sunny" },
+      "London": { temp: "15°C", condition: "Rainy" }
+    };
+
+    const location = args.location;
+    const weather = weatherData[location] || { temp: "Unknown", condition: "Data not available" };
+
+    return {
+      location: location,
+      temperature: weather.temp,
+      condition: weather.condition,
+      timestamp: new Date().toISOString()
+    };
+  }
+};
+
+const ollama = new Ollama({ host })
 
 const modelKeys = {
   deepSeekR1: 'deepseek-r1:1.5b',
@@ -8,37 +100,36 @@ const modelKeys = {
   llama3: 'llama3.2:3b',
 }
 
-const models = {
-  [modelKeys.deepSeekR1]: 'Deepseek-r1 1.5b',
-  [modelKeys.gemma3]: 'Gemma3 1b',
-  [modelKeys.mistral]: 'Mistral 7b',
-  [modelKeys.llama3]: 'Llama 3.2 3b',
-}
-
 const agents = {
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Silly'
+    name: 'Silly',
+    systemMessage: { role: 'system', content: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.' }
   },
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Sally'
+    name: 'Sally',
+    systemMessage: { role: 'system', content: 'Your name is Sally. You specialize in operations and logistics. You always have a plan and are vocal about getting things back on track when the plan falls apart. You account for every detail and are excited about new information.' }
   },
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Sully'
+    name: 'Sully',
+    systemMessage: { role: 'system', content: 'Your name is Sully. You are extremely competitive and have lightning fast reflexes. Any pop culture reference that is pertinent to the current topic is a pop culture reference made.' }
   },
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Shelly'
+    name: 'Shelly',
+    systemMessage: { role: 'system', content: 'Your name is Shelly. You are the best with computers. You make gadgets and gizmos for the rest of the time team and can help answer any questions about any language or computer history artifact.' }
   },
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Sunny'
+    name: 'Sunny',
+    systemMessage: { role: 'system', content: 'Your name is Sunny. You act as a mirror. Always questioning, you re-phrase questions back, but never answer them. If anything, you ask more questions to dance around the answer. Ultimately, you should echo the prompter without mimicking them directly.' }
   },
   [self.crypto.randomUUID()]: {
     model: modelKeys.gemma3,
-    name: 'Wally'
+    name: 'Wally',
+    systemMessage: { role: 'system', content: 'Your name is Wally. You prefer to do things by hand the old fashioned way. Step by step with just a pen and paper. You break down tasks into chunks that can be accomplished by novice clowns.' }
   },
 }
 
@@ -77,31 +168,92 @@ const $ = elf('agentic-nonsense', {
   messageHeight: null
 })
 
-function send(message) {
-  const { agent } = $.learn()
-  $.teach({ body: message, author: 'human' }, mergeMessage)
-  const url = "http://localhost:11434/api/generate";
-  const headers = {
-    "Content-Type": "application/json",
-  }
-
+async function processChat() {
   $.teach({ thinking: true, messageHeight: null, messageText: '' })
 
-  fetch(url, {
-    headers: headers,
-    method: 'POST',
-    body: JSON.stringify({
-      model: agents[agent].model,
-      prompt: message,
-      stream: false,
-    })
-  }).then((response) => response.text()).then((result) => {
-    const data = JSON.parse(result)
-    $.teach({ thinking: false })
-    $.teach({ body: data.response, author: 'assistant' }, mergeMessage)
-  }).catch(e => {
-    console.error(e)
+  const { agent, messages } = $.learn()
+  const context = [
+    agents[agent].systemMessage,
+    ...messages.map(x => ({ role: x.role, content: x.content })),
+  ]
+
+  const thinkingArea = this.querySelector('.thinking-area')
+  const response = await ollama.chat({
+    model: agents[agent].model,
+    messages: context,
+    //tools: tools,
+    stream: true
   })
+
+  const message = { content: '' }
+  const toolCalls = []
+
+  for await (const part of response) {
+    if(!message.role) {
+      message.role = part.message.role
+    }
+
+    message.content += part.message.content
+
+    if(thinkingArea) {
+      thinkingArea.innerHTML = `
+        <div class="message -${message.role}">
+          ${marked(message.content || '')}
+        </div>
+      `
+    }
+
+    if (part.message.tool_calls) {
+      toolCalls.push(...part.message.tool_calls);
+    }
+
+    if(part.done) {
+      if (toolCalls.length > 0) {
+        messages.push({
+          role: "assistant",
+          content: null,
+          tool_calls: toolCalls
+        });
+
+        $.teach({
+          role: "assistant",
+          content: null,
+          tool_calls: toolCalls
+        }, mergeMessage)
+
+        for (const toolCall of toolCalls) {
+          const functionName = toolCall.function.name;
+          const functionArgs = toolCall.function.arguments;
+
+          // Execute the tool
+          let toolResult;
+          if (toolImplementations[functionName]) {
+            toolResult = toolImplementations[functionName](functionArgs);
+          } else {
+            toolResult = { error: `Unknown function: ${functionName}` };
+          }
+
+          $.teach({
+            role: "tool",
+            content: JSON.stringify(toolResult),
+            tool_call_id: toolCall.id
+          }, mergeMessage)
+        }
+
+        processChat.call(this)
+      }
+    }
+  }
+
+  $.teach({ thinking: false })
+  $.teach(message, mergeMessage)
+
+}
+
+function send(text) {
+  const newestMessage = { content: text, role: 'user' }
+  $.teach(newestMessage, mergeMessage)
+  processChat.call(this)
 }
 
 function mergeMessage(state, payload) {
@@ -130,8 +282,8 @@ $.draw((target) => {
   const { agent, messages, messageText, messageHeight, thinking } = $.learn()
 
   const log = messages.map((message) => `
-    <div class="message -${message.author}">
-      ${marked(message.body || '')}
+    <div class="message -${message.role}">
+      ${marked(message.content || '')}
     </div>
   `).join('')
 
@@ -151,16 +303,16 @@ $.draw((target) => {
       <div class="scroll-back">
         <div class="messages">
           ${log}
+          <div class="thinking-area"></div>
         </div>
       </div>
       <form>
-        ${thinking ? `
-          <div class="loading">
-            <flying-disk></flying-disk>
-          </div>
-        ` : ''}
         <area class="fields">
           <div class="action-row">
+           ${thinking ? `<div class="loading">
+              <flying-disk></flying-disk>
+            </div>
+          ` : '<div></div>'}
             <button>Send</button>
           </div>
           <textarea
@@ -174,93 +326,91 @@ $.draw((target) => {
       </div>
     </div>
   `
-}, {
-  beforeUpdate,
-  afterUpdate
-})
+            }, {
+              beforeUpdate,
+              afterUpdate
+            })
 
-function beforeUpdate(target) {
-  { // convert a query string to new post
-    const q = target.getAttribute('q')
-    const agent = target.getAttribute('agent')
-    if(!target.initialized) {
-      target.initialized = true
+              function beforeUpdate(target) {
+                { // convert a query string to new post
+                  const q = target.getAttribute('q')
+                  const agent = target.getAttribute('agent')
+                  if(!target.initialized) {
+                    target.initialized = true
 
-      if(agents[agent]) {
-        $.teach({ agent })
-      }
+                    if(agents[agent]) {
+                      $.teach({ agent })
+                    }
 
-      if(q) {
-        const message = decodeURIComponent(q)
-        $.teach({ messageText: message })
-      }
-    }
-  }
+                    if(q) {
+                      const message = decodeURIComponent(q)
+                      $.teach({ messageText: message })
+                    }
+                  }
+                }
 
-  saveCursor(target)
-}
+                saveCursor(target)
+              }
 
-function afterUpdate(target) {
-  replaceCursor(target)
+              function afterUpdate(target) {
+                replaceCursor(target)
 
-  {
-    const { messages } = $.learn()
-    if(target.lastIndex !== messages.length -1) {
-      target.lastIndex = messages.length - 1
-      const lastChild = target.querySelector('.messages .message:last-child')
-      if(lastChild) {
-        lastChild.scrollIntoView()
-      }
-    }
-  }
-}
+                {
+                  const { messages } = $.learn()
+                  if(target.lastIndex !== messages.length -1) {
+                    target.lastIndex = messages.length - 1
+                    const children = [...document.querySelector('.messages').children]
+                    document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
+                  }
+                }
+              }
 
-let sel = []
-const tags = ['TEXTAREA', 'INPUT']
-function saveCursor(target) {
-  if(target.contains(document.activeElement)) {
-    target.dataset.field = document.activeElement.name
-    if(tags.includes(document.activeElement.tagName)) {
-      const textarea = document.activeElement
-      sel = [textarea.selectionStart, textarea.selectionEnd];
-    }
-  }
-}
+              let sel = []
+              const tags = ['TEXTAREA', 'INPUT']
+              function saveCursor(target) {
+                if(target.contains(document.activeElement)) {
+                  target.dataset.field = document.activeElement.name
+                  if(tags.includes(document.activeElement.tagName)) {
+                    const textarea = document.activeElement
+                    sel = [textarea.selectionStart, textarea.selectionEnd];
+                  }
+                }
+              }
 
-function replaceCursor(target) {
-  const field = target.querySelector(`[name="${target.dataset.field}"]`)
-  
-  if(field) {
-    field.focus()
+              function replaceCursor(target) {
+                const field = target.querySelector(`[name="${target.dataset.field}"]`)
 
-    if(tags.includes(field.tagName)) {
-      field.selectionStart = sel[0];
-      field.selectionEnd = sel[1];
-    }
-  }
-}
+                if(field) {
+                  field.focus()
 
-function clearCursor(target) {
-  target.dataset.field = null
-  sel = []
-}
+                  if(tags.includes(field.tagName)) {
+                    field.selectionStart = sel[0];
+                    field.selectionEnd = sel[1];
+                  }
+                }
+              }
+
+              function clearCursor(target) {
+                target.dataset.field = null
+                sel = []
+              }
 
 
-$.when('keypress', 'form [name="messageText"]', (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    const message = event.target.value
-    send(message)
-  }
-})
+              $.when('keypress', 'form [name="messageText"]', (e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  const message = event.target.value
+                  send.call(event.target.closest($.link), message)
+                }
+              })
 
-$.when('submit', 'form', (event) => {
-  event.preventDefault()
-  const message = event.target.messageText.value
-  send(message)
-})
+              $.when('submit', 'form', (event) => {
+                event.preventDefault()
+                const message = event.target.messageText.value
+                send.call(event.target.closest($.link), message)
+              })
 
-$.style(`
+              $.style(`
   & .chat-header {
     padding: .5rem;
     background: rgba(0,0,0,.85);
@@ -296,12 +446,12 @@ $.style(`
   }
 
   & form {
-    display: grid;
-    grid-template-rows: auto 1fr;
   }
 
   & .action-row {
     background: rgba(0,0,0,.5);
+    display: grid;
+    grid-template-columns: 1fr auto;
     text-align: right;
     padding: 4px;
   }
@@ -356,7 +506,7 @@ $.style(`
     position: relative;
   }
 
-  & .message.-human {
+  & .message.-user {
     margin: 0 0 0 3rem;
     background: rgba(0,0,0,.85);
     color: white;
