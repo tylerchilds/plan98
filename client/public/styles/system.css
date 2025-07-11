@@ -1037,7 +1037,8 @@ sillonious-brand > xml-html {
 .field input,
 .field textarea,
 .field select,
-.standard-button {
+.standard-button,
+::part(button) {
   background: linear-gradient(var(--nav-background-start) 0%, var(--root-theme, mediumseagreen), var(--nav-background-end) 100%), var(--root-theme, mediumseagreen);
   pointer-events: all;
   background-size: 1px 9.6rem;

@@ -1181,55 +1181,8 @@ export function ai(operation) {
         </div>
       </div>
 
-      <div class="llm-grid">
-        <div class="av -snapshot">
-          <div class="av-cta">
-            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=llama3.2:3b&q=${encodeURIComponent(operation)}">
-              Ask
-            </a>
-          </div>
-          <div class="av-snapshot">
-            <div class="av-title">Llama 3.2 3b</div>
-            <div class="av-description">From the meta/facebook group</div>
-          </div>
-        </div>
-
-
-        <div class="av -snapshot">
-          <div class="av-cta">
-            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=gemma3:1b&q=${encodeURIComponent(operation)}">
-              Ask
-            </a>
-          </div>
-          <div class="av-copy">
-            <div class="av-title">gemma3</div>
-            <div class="av-description">the model code named gemma3:1b</div>
-          </div>
-        </div>
-
-        <div class="av -snapshot">
-          <div class="av-cta">
-            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=mistral:7b&q=${encodeURIComponent(operation)}">
-              Ask
-            </a>
-          </div>
-          <div class="av-copy">
-            <div class="av-title">Mistral 7b</div>
-            <div class="av-description">The 7b mistral series line of models</div>
-          </div>
-        </div>
-
-        <div class="av -snapshot">
-          <div class="av-cta">
-            <a class="standard-button -small" target="_blank" href="/app/hello-ollama?model=deepseek-r1:1.5b&q=${encodeURIComponent(operation)}">
-              Ask
-            </a>
-          </div>
-          <div class="av-copy">
-            <div class="av-title">Deepseek</div>
-            <div class="av-description">Deepseek-r1 1.5b</div>
-          </div>
-        </div>
+      <div>
+      <agentic-nonsense q="${operation}" view="launcher"></agentic-nonsense>
       </div>
 
       <!--

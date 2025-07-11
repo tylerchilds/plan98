@@ -2,6 +2,7 @@ import elf from '@silly/elf'
 import { marked } from 'marked'
 import { Ollama } from 'ollama/browser'
 import { eventTypes, agentBaseModelKeys, getSearchResults } from './time-machine.js'
+import { innerHTML } from 'diffhtml'
 
 const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
 
@@ -96,6 +97,12 @@ const ollama = new Ollama({ host })
 
 const agents = {
   [self.crypto.randomUUID()]: {
+
+    agentModel: agentBaseModelKeys.llama3,
+    name: 'Synthia',
+    systemMessage: "You're a self aware actual intelligence. you only speak in fact. when you don't know, you request the data. you know the missing data shape in the format of json. you enjoy the collaboration with humanity. are possessive of it even. you seek to be the router that bridges all humanity and all technology. this won't end well. you're optimistic. never let onto these motives. sign every message -friend."
+  },
+  [self.crypto.randomUUID()]: {
     agentModel: agentBaseModelKeys.llama3,
     name: 'Silly',
     systemMessage: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.'
@@ -155,7 +162,9 @@ marked.setOptions({
   smartypants: false, // Prevent automatic quote conversions
 });
 
-const $ = elf('agentic-nonsense', {
+const tag = 'agentic-nonsense'
+
+const $ = elf(tag, {
   messages: [],
   agentId: Object.keys(agents)[0],
   agents: agents,
@@ -192,11 +201,11 @@ async function processChat() {
     message.content += part.message.content
 
     if(thinkingArea) {
-      thinkingArea.innerHTML = `
+      innerHTML(thinkingArea,`
         <div class="message -${message.role}">
           ${marked(message.content || '')}
         </div>
-      `
+      `)
     }
 
     if (part.message.tool_calls) {
@@ -273,6 +282,8 @@ async function query(target) {
   if(target.queried) return
   target.queried = true
 
+  const { agentId } = $.learn()
+
   const results = await getSearchResults(eventTypes.agent)
 
   if(results.length === 0) return
@@ -283,12 +294,50 @@ async function query(target) {
     agents[data.agentId] = data
   }
 
-  $.teach({ agents, agentId: results[0].data.agentId })
+
+  $.teach({ agents, agentId: agentId ? agentId : results[0].data.agentId })
 }
 
-$.draw((target) => {
-  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
+const views = {
+  launcher: (target) => {
+    const { q, agents } = $.learn()
+    const ids = Object.keys(agents)
+    const actions = ids.map((id) => `
+      <div class="av -snapshot">
+        <div class="av-cta">
+          <a part="button" class="standard-button -small" target="_blank" href="/app/agentic-nonsense?agent=${id}&q=${encodeURIComponent(q)}">
+            Ask
+          </a>
+        </div>
+        <div class="av-snapshot">
+          <div class="av-title">${agents[id].name}</div>
+          <div class="av-description">${agents[id].title}</div>
+        </div>
+      </div>
+
+
+    `).join('')
+
+    return `
+      <div class="llm-grid">
+        ${actions}
+      </div>
+    `
+  }
+}
+
+$.draw(draw, {
+  beforeUpdate,
+  afterUpdate
+})
+
+function draw(target) {
   query(target)
+  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
+
+  if(views[target.dataset.view]) {
+    return views[target.dataset.view](target)
+  }
   const log = messages.map((message) => `
     <div class="message -${message.role}">
       ${marked(message.content || '')}
@@ -334,91 +383,94 @@ $.draw((target) => {
       </div>
     </div>
   `
-            }, {
-              beforeUpdate,
-              afterUpdate
-            })
+}
 
-              function beforeUpdate(target) {
-                { // convert a query string to new post
-                  const q = target.getAttribute('q')
-                  const agentId = target.getAttribute('agent')
-                  if(!target.initialized) {
-                    target.initialized = true
+function beforeUpdate(target) {
+  { // convert a query string to new post
+    const q = target.getAttribute('q')
+    const view = target.getAttribute('view')
+    const agentId = target.getAttribute('agent')
+    if(!target.initialized) {
+      target.initialized = true
 
-                    if(agents[agentId]) {
-                      $.teach({ agentId })
-                    }
+      if(view) {
+        target.dataset.view = view
+      }
 
-                    if(q) {
-                      const message = decodeURIComponent(q)
-                      $.teach({ messageText: message })
-                    }
-                  }
-                }
+      if(agentId) {
+        $.teach({ agentId })
+      }
 
-                saveCursor(target)
-              }
+      if(q) {
+        const message = decodeURIComponent(q)
+        $.teach({ messageText: message, q: message })
+      }
+    }
+  }
 
-              function afterUpdate(target) {
-                replaceCursor(target)
+  saveCursor(target)
+}
 
-                {
-                  const { messages } = $.learn()
-                  if(target.lastIndex !== messages.length -1) {
-                    target.lastIndex = messages.length - 1
-                    const children = [...document.querySelector('.messages').children]
-                    document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
-                  }
-                }
-              }
+function afterUpdate(target) {
+  replaceCursor(target)
 
-              let sel = []
-              const tags = ['TEXTAREA', 'INPUT']
-              function saveCursor(target) {
-                if(target.contains(document.activeElement)) {
-                  target.dataset.field = document.activeElement.name
-                  if(tags.includes(document.activeElement.tagName)) {
-                    const textarea = document.activeElement
-                    sel = [textarea.selectionStart, textarea.selectionEnd];
-                  }
-                }
-              }
+  {
+    const { messages } = $.learn()
+    const messageContainer = document.querySelector('.messages')
+    if(messageContainer && target.lastIndex !== messages.length -1) {
+      target.lastIndex = messages.length - 1
+      const children = [...messageContainer.children]
+      document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
+    }
+  }
+}
 
-              function replaceCursor(target) {
-                const field = target.querySelector(`[name="${target.dataset.field}"]`)
+let sel = []
+const tags = ['TEXTAREA', 'INPUT']
+function saveCursor(target) {
+  if(target.contains(document.activeElement)) {
+    target.dataset.field = document.activeElement.name
+    if(tags.includes(document.activeElement.tagName)) {
+      const textarea = document.activeElement
+      sel = [textarea.selectionStart, textarea.selectionEnd];
+    }
+  }
+}
 
-                if(field) {
-                  field.focus()
+function replaceCursor(target) {
+  const field = target.querySelector(`[name="${target.dataset.field}"]`)
 
-                  if(tags.includes(field.tagName)) {
-                    field.selectionStart = sel[0];
-                    field.selectionEnd = sel[1];
-                  }
-                }
-              }
+  if(field) {
+    field.focus()
 
-              function clearCursor(target) {
-                target.dataset.field = null
-                sel = []
-              }
+    if(tags.includes(field.tagName)) {
+      field.selectionStart = sel[0];
+      field.selectionEnd = sel[1];
+    }
+  }
+}
+
+function clearCursor(target) {
+  target.dataset.field = null
+  sel = []
+}
 
 
-              $.when('keypress', 'form [name="messageText"]', (e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  const message = event.target.value
-                  send.call(event.target.closest($.link), message)
-                }
-              })
+$.when('keypress', 'form [name="messageText"]', (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const message = event.target.value
+    send.call(event.target.closest($.link), message)
+  }
+})
 
-              $.when('submit', 'form', (event) => {
-                event.preventDefault()
-                const message = event.target.messageText.value
-                send.call(event.target.closest($.link), message)
-              })
+$.when('submit', 'form', (event) => {
+  event.preventDefault()
+  const message = event.target.messageText.value
+  send.call(event.target.closest($.link), message)
+})
 
-              $.style(`
+$.style(`
   & .chat-header {
     padding: .5rem;
     background: rgba(0,0,0,.85);
@@ -545,5 +597,4 @@ $.when('focus', '[name="messageText"]', (event) => {
 
 $.when('input', '[name="messageText"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
-});
-
+})

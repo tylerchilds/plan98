@@ -539,7 +539,8 @@ $.draw((target) => {
           name="messageText"
           placeholder="help"
           ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-        >${escapeHyperText(messageText)}</textarea>
+          value="${escapeHyperText(messageText)}"
+        ></textarea>
       </div>
     </div>
   `

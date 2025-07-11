@@ -43,34 +43,32 @@ document.addEventListener('pointerup', function(event) {
 const context = document.createElement('plan98-synthia')
 document.body.appendChild(context)
 
-$.draw(() => {
+$.draw((target) => {
   const { visible, activated, synthia } = $.learn()
   const operation = escapeHyperText(synthia.prompt || '')
-  return visible ? `
+  if(!visible) {
+    target.innerHTML = null
+    return
+  }
+  target.dataset.activated = activated
+  return `
     <div class="activator-bar">
       <button class="synthia">
         <plan98-icon style="height: 35px; width: 35px;"></plan98-icon>
       </button>
     </div>
-    ${activated ? `
-      <div class="result activated">
-        <div class="result-card">
-          ${ai(operation)}
-        </div>
+    <div class="result">
+      <div class="result-card">
+        ${ai(operation)}
       </div>
-    ` : `
-      <div class="result">
-        <div class="result-card">
-          ${ai(operation)}
-        </div>
-      </div>
-    `}
-  `: '<div></div>'
+    </div>
+  `
 }, {
   afterUpdate(target) {
     { // recover icons from the virtual dom
       recoverElves(target, 'sl-icon')
       recoverElves(target, 'plan98-icon')
+      recoverElves(target, 'agentic-nonsense')
     }
 
     afterUpdateTheme(null, target)
@@ -125,7 +123,7 @@ $.style(`
     background: rgba(0,0,0,.1);
   }
 
-  & .result.activated {
+  &[data-activated="true"] .result {
     transform: translateY(0);
   }
 
