@@ -33,7 +33,7 @@ document.addEventListener('pointerdown', function(event) {
 
 document.addEventListener('pointerup', function(event) {
   const { selectedText, activated, visible } = $.learn()
-  if(activated && selectedText) {
+  if(activated && selectedText && selectedText.length > 2) {
     $.teach({ activated: true })
   }
 });

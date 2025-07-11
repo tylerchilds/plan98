@@ -47,6 +47,7 @@ export const eventTypes = {
   video: 'video',
   archive: 'archive',
   product: 'product',
+  agent: 'agent',
   dwebcamp: 'dwebcamp'
 }
 
@@ -56,6 +57,7 @@ export const views = {
   [eventTypes.note]: eventTypes.note,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
+  [eventTypes.agent]: eventTypes.agent,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
@@ -77,6 +79,13 @@ function timeFields() {
     minute: now.getMinutes(),
     second: now.getSeconds(),
   }
+}
+
+export const agentBaseModelKeys = {
+  deepSeekR1: 'deepseek-r1:1.5b',
+  gemma3: 'gemma3:1b',
+  mistral: 'mistral:7b',
+  llama3: 'llama3.2:3b',
 }
 
 export const schemas = {
@@ -110,6 +119,20 @@ export const schemas = {
     title: 'Untitled',
     description: null,
     tags: [],
+  },
+  [eventTypes.agent]: {
+    type: eventTypes.agent,
+    title: 'Untitled',
+    description: null,
+    tags: [],
+    agentId: null,
+    agentModel: agentBaseModelKeys.llama3,
+    name: 'Agent',
+    systemMessage: 'You are a personal assistant. You are friendly and helpful, yet direct with no frills.',
+    format: null,
+    tools: null,
+    keep_alive: 60 * 1000 + 'ms',
+    options: null //https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values
   },
   [eventTypes.instrument]: {
     type: eventTypes.instrument,
@@ -1117,6 +1140,50 @@ export const creationForms = {
       }).join('')}
     `
   },
+  [eventTypes.agent]: function(draft) {
+
+    const x = {
+      ...schemas[views.agent],
+      ...draft,
+    }
+
+    return `
+      ${editBanner(this)}
+      <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+        <label class="field">
+          <span class="label">Name</span>
+          <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
+        </label>
+      </div>
+      <label class="field">
+        <span class="label">System Message</span>
+        <input data-bind="draft" name="systemMessage" value="${escapeHyperText(x.systemMessage)}" type="text"/>
+      </label>
+      <label class="field">
+        <span class="label">Base Model</span>
+        <select data-bind="draft" name="agentModel">
+          <option disabled>--Select--</option>
+          ${Object.keys(agentBaseModelKeys).map((key, i) => `
+            <option value="${agentBaseModelKeys[key]}" ${agentBaseModelKeys[key] === x.agentModel?'selected':''}>
+              ${agentBaseModelKeys[key]}
+            </option>
+          `).join('')}
+
+        </select>
+      </label>
+
+
+
+      ${x.tags?.map(x => {
+        return `
+          <button class="standard-button" data-tag="${x}">
+            ${x}
+          </button>
+        `
+      }).join('')}
+    `
+  },
+
 
   [eventTypes.tommi]: function(draft) {
 
@@ -1334,6 +1401,17 @@ const studios = {
 
     return `
       ??? What type of custom product should go here
+    `
+  },
+  [eventTypes.agent]: function(draft) {
+
+    const x = {
+      ...schemas[views.agent],
+      ...draft,
+    }
+
+    return `
+      New Agent Wizard
     `
   },
 
@@ -1756,7 +1834,35 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.agent]: (target) => {
+    const { space, time } = target.dataset
 
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.agent],
+      ...event.data,
+    }
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <form action="edit" method="post" class="draft-template">
+            <div class="draft-header">
+              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
+                Close
+              </button>
+              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
+                Edit
+              </button>
+            </div>
+            <div class="draft-body text-well">
+              <agentic-nonsense agent="${x.agentId}"></agentic-nonsense>
+            </div>
+            ${stamp(x)}
+          </form>
+        </div>
+      </div>
+    `
+  },
 
   [views.tommi]: (target) => {
     const { space, time } = target.dataset
@@ -2027,8 +2133,8 @@ function patch(target) {
 
       if(content) {
         const html = viewRenderers[view] ? viewRenderers[view](target) : ''
-        innerHTML(content, html)
-        //content.innerHTML = html
+        //innerHTML(content, html)
+        content.innerHTML = html
       }
     }
   }
@@ -2071,6 +2177,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.agent}">Agent</button>
           <button data-new="${eventTypes.product}">Product</button>
           <button data-new="${eventTypes.video}">Video</button>
           <button data-new="${eventTypes.image}">Photo</button>
@@ -2272,6 +2379,17 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.agent]: function (event) {
+    const data = {
+      ...schemas[views.agent],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.agent}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
 
   [eventTypes.tommi]: function (event) {
     const data = {
@@ -2410,6 +2528,16 @@ export async function saveProduct(draft, context) {
   }, context)
 }
 
+export async function saveAgent(draft, context) {
+  return await save({
+    title: 'Untitled',
+    agentModel: agentBaseModelKeys.llama3,
+    ...timeFields(),
+    ...draft,
+    agentId: draft.agentId ? draft.agentId : self.crypto.randomUUID(),
+    type: eventTypes.agent,
+  }, context)
+}
 
 export async function savePhoto(draft, context) {
   return await save({
@@ -2456,14 +2584,42 @@ export async function save(draft, context) {
     path = context.path
   }
 
+  const event = {
+    ...(schemas[draft.type] || {}),
+    ...draft
+  }
+
   const filePath = `/private/time-machine${path}`
   // Attempt to upload to server
-  await put(filePath, JSON.stringify(draft), { type: 'application/json' }).then(response => {
+  await put(filePath, JSON.stringify(event), { type: 'application/json' }).then(response => {
   }).catch(error => {
     console.warn(error);
   });
 
   return await appendPath(filePath)
+}
+
+const saveHandlers = {
+  [eventTypes.note]: save,
+  [eventTypes.tommi]: save,
+  [eventTypes.instrument]: save,
+  [eventTypes.sketch]: saveSketch,
+  [eventTypes.gallery]: save,
+  [eventTypes.image]: savePhoto,
+  [eventTypes.audio]: saveAudio,
+  [eventTypes.video]: saveVideo,
+  [eventTypes.archive]: save,
+  [eventTypes.product]: saveProduct,
+  [eventTypes.agent]: saveAgent,
+  [eventTypes.dwebcamp]: save,
+}
+
+export function saveByType(draft, context) {
+  if(saveHandlers[draft.type]) {
+    saveHandlers[draft.type](draft, context)
+  } else {
+    save(draft, context)
+  }
 }
 
 async function appendPath(path) {
@@ -2500,7 +2656,7 @@ $.when('click', '[data-action="post"]', async (event) => {
   const { draft, context } = $.learn()
 
   if(draft) {
-    save(draft, context)
+    saveByType(draft, context)
     toast('Created!', { type: 'success' })
     $.teach({ sidebar: true, view: null, space: null, time: null })
   } else {

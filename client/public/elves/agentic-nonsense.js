@@ -1,6 +1,7 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
 import { Ollama } from 'ollama/browser'
+import { eventTypes, agentBaseModelKeys, getSearchResults } from './time-machine.js'
 
 const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
 
@@ -93,43 +94,36 @@ const toolImplementations = {
 
 const ollama = new Ollama({ host })
 
-const modelKeys = {
-  deepSeekR1: 'deepseek-r1:1.5b',
-  gemma3: 'gemma3:1b',
-  mistral: 'mistral:7b',
-  llama3: 'llama3.2:3b',
-}
-
 const agents = {
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Silly',
-    systemMessage: { role: 'system', content: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.' }
+    systemMessage: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.'
   },
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Sally',
-    systemMessage: { role: 'system', content: 'Your name is Sally. You specialize in operations and logistics. You always have a plan and are vocal about getting things back on track when the plan falls apart. You account for every detail and are excited about new information.' }
+    systemMessage: 'Your name is Sally. You specialize in operations and logistics. You always have a plan and are vocal about getting things back on track when the plan falls apart. You account for every detail and are excited about new information.'
   },
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Sully',
-    systemMessage: { role: 'system', content: 'Your name is Sully. You are extremely competitive and have lightning fast reflexes. Any pop culture reference that is pertinent to the current topic is a pop culture reference made.' }
+    systemMessage: 'Your name is Sully. You are extremely competitive and have lightning fast reflexes. Any pop culture reference that is pertinent to the current topic is a pop culture reference made.'
   },
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Shelly',
-    systemMessage: { role: 'system', content: 'Your name is Shelly. You are the best with computers. You make gadgets and gizmos for the rest of the time team and can help answer any questions about any language or computer history artifact.' }
+    systemMessage: 'Your name is Shelly. You are the best with computers. You make gadgets and gizmos for the rest of the time team and can help answer any questions about any language or computer history artifact.'
   },
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Sunny',
-    systemMessage: { role: 'system', content: 'Your name is Sunny. You act as a mirror. Always questioning, you re-phrase questions back, but never answer them. If anything, you ask more questions to dance around the answer. Ultimately, you should echo the prompter without mimicking them directly.' }
+    systemMessage: 'Your name is Sunny. You act as a mirror. Always questioning, you re-phrase questions back, but never answer them. If anything, you ask more questions to dance around the answer. Ultimately, you should echo the prompter without mimicking them directly.'
   },
   [self.crypto.randomUUID()]: {
-    model: modelKeys.gemma3,
+    agentModel: agentBaseModelKeys.llama3,
     name: 'Wally',
-    systemMessage: { role: 'system', content: 'Your name is Wally. You prefer to do things by hand the old fashioned way. Step by step with just a pen and paper. You break down tasks into chunks that can be accomplished by novice clowns.' }
+    systemMessage: 'Your name is Wally. You prefer to do things by hand the old fashioned way. Step by step with just a pen and paper. You break down tasks into chunks that can be accomplished by novice clowns.'
   },
 }
 
@@ -163,7 +157,8 @@ marked.setOptions({
 
 const $ = elf('agentic-nonsense', {
   messages: [],
-  agent: Object.keys(agents)[0],
+  agentId: Object.keys(agents)[0],
+  agents: agents,
   messageText: '',
   messageHeight: null
 })
@@ -171,15 +166,16 @@ const $ = elf('agentic-nonsense', {
 async function processChat() {
   $.teach({ thinking: true, messageHeight: null, messageText: '' })
 
-  const { agent, messages } = $.learn()
+  const { agents, agentId, messages } = $.learn()
   const context = [
-    agents[agent].systemMessage,
+    { role: 'system', content: agents[agentId].systemMessage },
     ...messages.map(x => ({ role: x.role, content: x.content })),
   ]
 
   const thinkingArea = this.querySelector('.thinking-area')
   const response = await ollama.chat({
-    model: agents[agent].model,
+    ...agents[agents],
+    model: agents[agentId].agentModel,
     messages: context,
     //tools: tools,
     stream: true
@@ -209,15 +205,9 @@ async function processChat() {
 
     if(part.done) {
       if (toolCalls.length > 0) {
-        messages.push({
-          role: "assistant",
-          content: null,
-          tool_calls: toolCalls
-        });
-
         $.teach({
           role: "assistant",
-          content: null,
+          content: `Calling: ${toolCalls.map(x => x.function.name).join(', ')}`,
           tool_calls: toolCalls
         }, mergeMessage)
 
@@ -267,20 +257,38 @@ function mergeMessage(state, payload) {
 }
 
 $.when('change', 'select', (event) => {
-  const agent = event.target.value
-  $.teach({ agent, messages: [] })
+  const agentId = event.target.value
+  $.teach({ agentId, messages: [] })
 })
 
-function renderAgents(agent) {
+function renderAgents(agentId) {
+  const { agents } = $.learn()
   const ids = Object.keys(agents)
   return ids.map((id) => `
-    <option value="${id}" ${agent === id?'selected':''}>${agents[id].name}</option>
+    <option value="${id}" ${agentId === id?'selected':''}>${agents[id].name}</option>
   `).join('')
 }
 
-$.draw((target) => {
-  const { agent, messages, messageText, messageHeight, thinking } = $.learn()
+async function query(target) {
+  if(target.queried) return
+  target.queried = true
 
+  const results = await getSearchResults(eventTypes.agent)
+
+  if(results.length === 0) return
+
+  const agents = {}
+  for(const result of results) {
+    const { handle, data } = result
+    agents[data.agentId] = data
+  }
+
+  $.teach({ agents, agentId: results[0].data.agentId })
+}
+
+$.draw((target) => {
+  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
+  query(target)
   const log = messages.map((message) => `
     <div class="message -${message.role}">
       ${marked(message.content || '')}
@@ -292,11 +300,11 @@ $.draw((target) => {
       <div class="chat-header">
         <div class="agent-selector">
           <div class="agent-view">
-            ${(agents[agent] || {}).name || 'No agent'}
+            ${(agents[agentId] || {}).name || 'No agent'}
           </div>
           <select>
             <option disabled selected>Select a agent</option>
-            ${renderAgents(agent)}
+            ${renderAgents(agentId)}
           </select>
         </div>
       </div>
@@ -334,12 +342,12 @@ $.draw((target) => {
               function beforeUpdate(target) {
                 { // convert a query string to new post
                   const q = target.getAttribute('q')
-                  const agent = target.getAttribute('agent')
+                  const agentId = target.getAttribute('agent')
                   if(!target.initialized) {
                     target.initialized = true
 
-                    if(agents[agent]) {
-                      $.teach({ agent })
+                    if(agents[agentId]) {
+                      $.teach({ agentId })
                     }
 
                     if(q) {
