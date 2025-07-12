@@ -267,11 +267,16 @@ $.style(`
 
   & .creation-container {
     position: absolute;
-    bottom: 1rem;
-    right: 1rem;
+    bottom: 0;
+    right: 0;
     display: inline-grid;
     grid-template-columns: auto auto;
     z-index: 1000;
+    pointer-events: none;
+  }
+
+  & .creation-container button {
+    pointer-events: all;
   }
 
   & .create-item {
@@ -438,10 +443,10 @@ $.style(`
 
   & .draft-template {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: 1fr auto;
     overflow: hidden;
     max-height: 100%;
-    grid-template-areas: "footer header" "body body";
+    grid-template-areas: "body body" "footer header";
     grid-template-columns: 1fr auto;
   }
 
@@ -457,6 +462,14 @@ $.style(`
     text-align: center;
     background: black;
     position: relative;
+  }
+
+  & .child-well {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    position: relative;
+    z-index: 3;
   }
 
   & .text-well {
@@ -494,6 +507,7 @@ $.style(`
     background: rgba(0,0,0,.1);
     padding: 4px;
     gap: .5rem;
+    padding-right: 5rem;
   }
 
   & .draft-body {
@@ -511,7 +525,7 @@ $.style(`
     display: none;
     padding: .5rem;
     height: 100%;
-    z-index: 1;
+    z-index: 5;
     background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), white;
     grid-area: body;
   }
@@ -681,7 +695,7 @@ $.style(`
     max-height: calc(100vh);
     max-width: calc(100vw - 40px);
     overflow: auto;
-    transform: translate(calc(-100% + 1.25rem), 1rem);
+    transform: translate(calc(-100% + 1.25rem), 0);
     z-index: 30;
   }
 
@@ -1150,15 +1164,7 @@ export const creationForms = {
     return `
       ${editBanner(this)}
       <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Name</span>
-          <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
-        </label>
       </div>
-      <label class="field">
-        <span class="label">System Message</span>
-        <input data-bind="draft" name="systemMessage" value="${escapeHyperText(x.systemMessage)}" type="text"/>
-      </label>
       <label class="field">
         <span class="label">Base Model</span>
         <select data-bind="draft" name="agentModel">
@@ -1411,7 +1417,15 @@ const studios = {
     }
 
     return `
-      New Agent Wizard
+      To create an agent, give it a name and tell it what to do using the system message. For advanced tuning, go to settings.
+      <label class="field">
+        <span class="label">Name</span>
+        <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
+      </label>
+      <label class="field">
+        <span class="label">System Message</span>
+        <input data-bind="draft" name="systemMessage" value="${escapeHyperText(x.systemMessage)}" type="text"/>
+      </label>
     `
   },
 
@@ -1544,6 +1558,31 @@ function minuteSelector(selected) {
   `
 }
 
+function viewTemplate(x, child) {
+  const { viewMetadata } = $.learn()
+  return `
+    <div class="overlay-background">
+      <div class="form-card">
+        <div method="post" class="draft-template">
+          <div class="draft-header">
+            <button data-action="edit" data-view="${views.create}" data-space="${x.space}" data-time="${x.time}" class="standard-button -small  bias-positive" type="submit">
+              <sl-icon name="pencil-fill"></sl-icon>
+            </button>
+            <button class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+              <sl-icon name="gear-fill"></sl-icon>
+            </button>
+          </div>
+          <div class="draft-body child-well">
+            ${child}
+          </div>
+          ${stamp(x)}
+        </div>
+      </div>
+    </div>
+  `
+
+}
+
 const viewRenderers = {
   [views.wallet]: (target) => {
     return `
@@ -1551,15 +1590,14 @@ const viewRenderers = {
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -clear" style="place-self: start;" type="reset">
-                Cancel
-              </button>
             </div>
             <div class="wallet-body draft-body">
               <my-wallet></my-wallet>
             </div>
             <div class="draft-footer">
-              :)
+              <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-circle"></sl-icon>
+              </button>
             </div>
           </div>
         </div>
@@ -1575,20 +1613,20 @@ const viewRenderers = {
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
-              <button data-cancel-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Cancel
+              <button data-action="post" class="standard-button bias-positive -small" type="submit">
+                <sl-icon name="cloud-arrow-up-fill"></sl-icon>
               </button>
-              <button data-action="post" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Save
-              </button>
+              <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                <sl-icon name="gear-fill"></sl-icon>
+              </div>
             </div>
             <div class="draft-body text-well">
               ${studio}
             </div>
             <div class="draft-footer">
-              <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-                <sl-icon name="gear-fill"></sl-icon>
-              </div>
+              <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-circle"></sl-icon>
+              </button>
               <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
             </div>
             <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
@@ -1626,28 +1664,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.note],
       ...event.data,
+      space,
+      time
     }
 
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button -small  bias-positive" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="textarea">${escapeHyperText(x.text)}</div>
-            </div>
-            ${stamp(x)}
-          </form>
-        </div>
-      </div>
-    `
+    return viewTemplate(x, `
+      <div class="textarea">${escapeHyperText(x.text)}</div>
+    `)
   },
   [views.sketch]: (target) => {
     const { space, time } = target.dataset
@@ -1657,29 +1680,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.sketch],
       ...event.data,
+      space,
+      time
     }
 
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body image-well">
-              <was-image src="${x.src}"></was-image>
-            </div>
-            ${stamp(x)}
-          </form>
-
-        </div>
-      </div>
-    `
+    return viewTemplate(x, `
+      <was-image src="${x.src}"></was-image>
+    `)
   },
   [views.image]: (target) => {
     const { space, time } = target.dataset
@@ -1689,28 +1696,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.image],
       ...event.data,
+      space,
+      time
     }
 
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body image-well">
-              <was-image src="${x.src}"></was-image>
-            </div>
-            ${stamp(x)}
-          </form>
-        </div>
-      </div>
-    `
+    return viewTemplate(x, `
+      <was-image src="${x.src}"></was-image>
+    `)
   },
   [views.video]: (target) => {
     const { space, time } = target.dataset
@@ -1720,28 +1712,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.video],
       ...event.data,
+      space,
+      time
     }
 
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body image-well">
-              <was-video src="${x.src}"></was-video>
-            </div>
-            ${stamp(x)}
-          </form>
-        </div>
-      </div>
-    `
+    return viewTemplate(x, `
+      <was-video src="${x.src}"></was-video>
+    `)
   },
   [views.audio]: (target) => {
     const { space, time } = target.dataset
@@ -1751,28 +1728,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.audio],
       ...event.data,
+      space,
+      time
     }
 
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body image-well">
-              <was-audio src="${x.src}"></was-audio>
-            </div>
-            ${stamp(x)}
-          </form>
-        </div>
-      </div>
-    `
+    return viewTemplate(x, `
+      <was-audio src="${x.src}"></was-audio>
+    `)
   },
 
   [views.product]: (target) => {
@@ -1782,57 +1744,43 @@ const viewRenderers = {
     const x = {
       ...schemas[views.product],
       ...event.data,
+      space,
+      time
     }
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
+
+    return viewTemplate(x, `
+      <div class="product">
+        <div class="product-title">
+          <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+        </div>
+        <div class="attachments">
+          ${x.attachments?.map(x => {
+            return `
+              ${x.name}
+              ${x.type}
+              ${x.size}
+            `
+          }).join('')}
+          ${x.attachments?.length > 0 ? `
+            <button data-download-attachments data-space="${space}" data-time="${time}">
+              Download
+            </button>
+          `:''}
+        </div>
+        <div class="product-description">
+          ${x.description || ''}
+        </div>
+        <div class="tags">
+          ${x.tags?.map(x => {
+            return `
+              <button class="standard-button" data-tag="${x}">
+                ${x}
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="product">
-                <div class="product-title">
-                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
-                </div>
-                <div class="attachments">
-                  ${x.attachments?.map(x => {
-                    return `
-                      ${x.name}
-                      ${x.type}
-                      ${x.size}
-                    `
-                  }).join('')}
-                  ${x.attachments?.length > 0 ? `
-                    <button data-download-attachments data-space="${space}" data-time="${time}">
-                      Download
-                    </button>
-                  `:''}
-                </div>
-                <div class="product-description">
-                  ${x.description || ''}
-                </div>
-                <div class="tags">
-                  ${x.tags?.map(x => {
-                    return `
-                      <button class="standard-button" data-tag="${x}">
-                        ${x}
-                      </button>
-                    `
-                  }).join('')}
-                </div>
-              </div>
-            </div>
-            ${stamp(x)}
-          </form>
+            `
+          }).join('')}
         </div>
       </div>
-    `
+    `)
   },
   [views.agent]: (target) => {
     const { space, time } = target.dataset
@@ -1841,27 +1789,13 @@ const viewRenderers = {
     const x = {
       ...schemas[views.agent],
       ...event.data,
+      space,
+      time
     }
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <agentic-nonsense agent="${x.agentId}"></agentic-nonsense>
-            </div>
-            ${stamp(x)}
-          </form>
-        </div>
-      </div>
-    `
+
+    return viewTemplate(x, `
+      <agentic-nonsense agent="${x.agentId}"></agentic-nonsense>
+    `)
   },
 
   [views.tommi]: (target) => {
@@ -1871,49 +1805,35 @@ const viewRenderers = {
     const x = {
       ...schemas[views.tommi],
       ...event.data,
+      space,
+      time
     }
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
+
+    return viewTemplate(x, `
+      <div class="tommi">
+        <div class="tommi-title">
+          <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+        </div>
+        <div class="tommi-description">
+          ${x.description || ''}
+        </div>
+        <div class="tags">
+          ${x.tags?.map(x => {
+            return `
+              <button class="standard-button" data-tag="${x}">
+                ${x}
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="tommi">
-                <div class="tommi-title">
-                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
-                </div>
-                <div class="tommi-description">
-                  ${x.description || ''}
-                </div>
-                <div class="tags">
-                  ${x.tags?.map(x => {
-                    return `
-                      <button class="standard-button" data-tag="${x}">
-                        ${x}
-                      </button>
-                    `
-                  }).join('')}
-                </div>
-                <div class="location">
-                  ${x.city || ''}, ${x.country || ''}
-                </div>
-                <div class="map">
-                  ${x.longitude || ''}, ${x.latitude || ''}
-                </div>
-              </div>
-            </div>
-            ${stamp(x)}
-          </form>
+            `
+          }).join('')}
+        </div>
+        <div class="location">
+          ${x.city || ''}, ${x.country || ''}
+        </div>
+        <div class="map">
+          ${x.longitude || ''}, ${x.latitude || ''}
         </div>
       </div>
-    `
+    `)
   },
   [views.archive]: (target) => {
     const { space, time } = target.dataset
@@ -1922,55 +1842,41 @@ const viewRenderers = {
     const x = {
       ...schemas[views.archive],
       ...event.data,
+      space,
+      time
     }
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
+
+    return viewTemplate(x, `
+      <div class="tommi">
+        <div class="tommi-title">
+          <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+        </div>
+        <div class="tommi-description">
+          ${x.description || ''}
+        </div>
+        <div class="tags">
+          ${x.tags?.map(x => {
+            return `
+              <button class="standard-button" data-tag="${x}">
+                ${x}
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="tommi">
-                <div class="tommi-title">
-                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
-                </div>
-                <div class="tommi-description">
-                  ${x.description || ''}
-                </div>
-                <div class="tags">
-                  ${x.tags?.map(x => {
-                    return `
-                      <button class="standard-button" data-tag="${x}">
-                        ${x}
-                      </button>
-                    `
-                  }).join('')}
-                </div>
-                <div class="creator">
-                  ${x.creator || ''}
-                </div>
-                <div class="collection">
-                  ${x.collection || ''}
-                </div>
-                <div class="language">
-                  ${x.language || ''}
-                </div>
-                <div class="license">
-                  ${x.license || ''}
-                </div>
-              </div>
-            </div>
-            ${stamp(x)}
-          </form>
+            `
+          }).join('')}
+        </div>
+        <div class="creator">
+          ${x.creator || ''}
+        </div>
+        <div class="collection">
+          ${x.collection || ''}
+        </div>
+        <div class="language">
+          ${x.language || ''}
+        </div>
+        <div class="license">
+          ${x.license || ''}
         </div>
       </div>
-    `
+    `)
   },
   [views.dwebcamp]: (target) => {
     const { space, time } = target.dataset
@@ -1979,86 +1885,58 @@ const viewRenderers = {
     const x = {
       ...schemas[views.dwebcamp],
       ...event.data,
+      space,
+      time
     }
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <form action="edit" method="post" class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
+    return viewTemplate(x, `
+      <div class="tommi">
+        <div class="tommi-title">
+          <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+        </div>
+        <div class="tommi-description">
+          ${x.description || ''}
+        </div>
+        <div class="tags">
+          ${x.tags?.map(x => {
+            return `
+              <button class="standard-button" data-tag="${x}">
+                ${x}
               </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="tommi">
-                <div class="tommi-title">
-                  <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
-                </div>
-                <div class="tommi-location">
-                  ${x.location || ''}
-                </div>
-                <div class="tommi-description">
-                  ${x.description || ''}
-                </div>
-                <div class="tags">
-                  ${x.tags?.map(x => {
-                    return `
-                      <button class="standard-button" data-tag="${x}">
-                        ${x}
-                      </button>
-                    `
-                  }).join('')}
-                </div>
-                <div class="creator">
-                  ${x.creator || ''}
-                </div>
-                <div class="collection">
-                  ${x.collection || ''}
-                </div>
-                <div class="language">
-                  ${x.language || ''}
-                </div>
-                <div class="license">
-                  ${x.license || ''}
-                </div>
-              </div>
-            </div>
-            ${stamp(x)}
-          </form>
+            `
+          }).join('')}
+        </div>
+        <div class="creator">
+          ${x.creator || ''}
+        </div>
+        <div class="collection">
+          ${x.collection || ''}
+        </div>
+        <div class="language">
+          ${x.language || ''}
+        </div>
+        <div class="license">
+          ${x.license || ''}
         </div>
       </div>
-    `
+    `)
   },
 
   edge: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <div class="draft-template">
-            <div class="draft-header">
-              <button data-close-draft class="standard-button bias-generic -small -outlined" style="place-self: start;" type="reset">
-                Close
-              </button>
-              <button data-view="${views.create}" data-space="${space}" data-time="${time}" class="standard-button bias-positive -small" style="place-self: start end;" data-action="edit" type="submit">
-                Edit
-              </button>
-            </div>
-            <div class="draft-body text-well">
-              <div class="raw-json">${
-                JSON.stringify(event.data, '', 2)
-              }</div>
-            </div>
-            ${stamp(event)}
-          </div>
-        </div>
-      </div>
-    `
+
+    const x = {
+      ...event,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <div class="raw-json">${
+        JSON.stringify(event.data, '', 2)
+      }</div>
+    `)
   }
 }
 
@@ -2133,8 +2011,8 @@ function patch(target) {
 
       if(content) {
         const html = viewRenderers[view] ? viewRenderers[view](target) : ''
-        //innerHTML(content, html)
-        content.innerHTML = html
+        innerHTML(content, html)
+        //content.innerHTML = html
       }
     }
   }
@@ -2277,10 +2155,10 @@ $.draw((target)=> {
         </div>
         <div class="chat-footer">
           <div class="search-and-filter">
-            <button class="standard-button">
+            <button class="standard-button -small">
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-button" placeholder="?" type="text">
+            <input class="standard-button -small" placeholder="?" type="text">
           </div>
         </div>
       </div>
@@ -2516,7 +2394,7 @@ $.when('click', '[data-toggle-metadata]', (event) => {
 
 $.when('click', '[data-action="edit"]', async (event) => {
   event.preventDefault()
-  $.teach({ view: views.create, sidebar: true })
+  $.teach({ view: views.create })
 })
 
 export async function saveProduct(draft, context) {
@@ -2657,7 +2535,7 @@ $.when('click', '[data-action="post"]', async (event) => {
 
   if(draft) {
     saveByType(draft, context)
-    toast('Created!', { type: 'success' })
+    toast('Saved!', { type: 'success' })
     $.teach({ sidebar: true, view: null, space: null, time: null })
   } else {
     toast('Incomplete information, please try again.', { type: 'error' })
@@ -2793,9 +2671,10 @@ function stamp(x) {
   const date = new Date(x.year, x.month, x.day, x.hour, x.minute)
   return `
     <div class="draft-footer">
-      <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-        <sl-icon name="gear-fill"></sl-icon>
-      </div>
+      <button data-close-draft class="standard-button bias-generic -small -round" type="reset">
+        <sl-icon name="x-circle"></sl-icon>
+      </button>
+
       <div class="draft-title">
         ${escapeHyperText(x.title)}
       </div>

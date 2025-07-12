@@ -1154,6 +1154,9 @@ sillonious-brand > xml-html {
   font-weight: normal;
 }
 
+.standard-button.-soft {
+  border-radius: .5rem;
+}
 .standard-button.-round {
   border-radius: 100%;
   aspect-ratio: 1;

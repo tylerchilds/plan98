@@ -10,7 +10,7 @@ $.draw((target) => {
     const { body, type } = $.learn()[id]
 
     return `
-      <button class="toast-message standard-button ${type}" key="${id}" data-close="${id}">
+      <button class="toast-message standard-button -soft ${type}" key="${id}" data-close="${id}">
         ${body}
       </button>
     `
@@ -81,22 +81,26 @@ export function untoast(id) {
 $.style(`
   & {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    top: 1rem;
+    right: 1rem;
+    width: 280px;
+    max-width: calc(100vw - 2rem);
     place-content: center;
     z-index: 9000;
     overflow: auto;
     max-height: 100vh;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: .5rem;
   }
 
   & .toast-message {
     --toast-color: black;
     position: relative;
-    display: flex;
-    flex-direction: column;
     width: 100%;
     border-radius: 0;
+    display: flex;
+    flex-direction: column;
     text-align: left;
   }
 
