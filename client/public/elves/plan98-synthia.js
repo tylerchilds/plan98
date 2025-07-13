@@ -1,7 +1,24 @@
 import elf from '@plan98/elf'
 import { showModal, hideModal } from './plan98-modal.js'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
+import { Ollama } from 'ollama/browser'
 const $ = elf('plan98-synthia', { synthia: {} })
+
+const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
+export const ollama = new Ollama({
+  host,
+  model: agentBaseModelKeys.qwen25coder7b,
+  temperature: 0,
+  maxRetries: 2,
+})
+
+export const agentBaseModelKeys = {
+  deepseekr115b: 'deepseek-r1:1.5b',
+  gemma31b: 'gemma3:1b',
+  mistral7b: 'mistral:7b',
+  llama323b: 'llama3.2:3b',
+  qwen25coder7b: 'qwen2.5-coder:7b'
+}
 
 export function launch() {
   $.teach({ visible: true, activated: true })

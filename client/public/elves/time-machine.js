@@ -3,7 +3,7 @@ import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
-import { launch } from './plan98-synthia.js'
+import { launch, agentBaseModelKeys } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
 
@@ -81,13 +81,6 @@ function timeFields() {
   }
 }
 
-export const agentBaseModelKeys = {
-  deepSeekR1: 'deepseek-r1:1.5b',
-  gemma3: 'gemma3:1b',
-  mistral: 'mistral:7b',
-  llama3: 'llama3.2:3b',
-}
-
 export const schemas = {
   [eventTypes.archive]: {
     type: eventTypes.archive,
@@ -126,7 +119,7 @@ export const schemas = {
     description: null,
     tags: [],
     agentId: null,
-    agentModel: agentBaseModelKeys.llama3,
+    agentModel: agentBaseModelKeys.llama323b,
     name: 'Agent',
     systemMessage: 'You are a personal assistant. You are friendly and helpful, yet direct with no frills.',
     format: null,
@@ -517,7 +510,7 @@ $.style(`
   & .draft-metadata {
     display: none;
     grid-area: body;
-    z-index: 1;
+    z-index: 5;
     background: white;
   }
 
@@ -2409,7 +2402,7 @@ export async function saveProduct(draft, context) {
 export async function saveAgent(draft, context) {
   return await save({
     title: 'Untitled',
-    agentModel: agentBaseModelKeys.llama3,
+    agentModel: agentBaseModelKeys.llama323b,
     ...timeFields(),
     ...draft,
     agentId: draft.agentId ? draft.agentId : self.crypto.randomUUID(),
