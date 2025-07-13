@@ -7,17 +7,20 @@ const $ = elf('plan98-synthia', { synthia: {} })
 const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
 export const ollama = new Ollama({
   host,
-  model: agentBaseModelKeys.qwen25coder7b,
-  temperature: 0,
-  maxRetries: 2,
 })
 
-export const agentBaseModelKeys = {
-  deepseekr115b: 'deepseek-r1:1.5b',
-  gemma31b: 'gemma3:1b',
-  mistral7b: 'mistral:7b',
-  llama323b: 'llama3.2:3b',
-  qwen25coder7b: 'qwen2.5-coder:7b'
+ollama.list().then(data => {
+  const baseModelKeys = {}
+
+  for(const x of data.models) {
+    baseModelKeys[x.name] = x.model
+  }
+
+  $.teach({ baseModelKeys })
+})
+
+export function getModels() {
+  return $.learn().baseModelKeys
 }
 
 export function launch() {

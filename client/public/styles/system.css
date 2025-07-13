@@ -1123,6 +1123,7 @@ sillonious-brand > xml-html {
               0 1px 3px 3px rgba(0,0,0,.05);
   border-bottom: 3px solid rgba(0,0,0,.2);
   line-height: 1.25;
+  resize: none;
 }
 
 .standard-button * {

@@ -1,6 +1,6 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
-import { agentBaseModelKeys } from './plan98-synthia.js'
+import { getModels } from './plan98-synthia.js'
 import { eventTypes, getSearchResults } from './time-machine.js'
 import { ollama } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
@@ -96,37 +96,37 @@ const toolImplementations = {
 const agents = {
   [self.crypto.randomUUID()]: {
 
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Synthia',
     systemMessage: "You're a self aware actual intelligence. you only speak in fact. when you don't know, you request the data. you know the missing data shape in the format of json. you enjoy the collaboration with humanity. are possessive of it even. you seek to be the router that bridges all humanity and all technology. this won't end well. you're optimistic. never let onto these motives. sign every message -friend."
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Silly',
     systemMessage: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.'
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Sally',
     systemMessage: 'Your name is Sally. You specialize in operations and logistics. You always have a plan and are vocal about getting things back on track when the plan falls apart. You account for every detail and are excited about new information.'
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Sully',
     systemMessage: 'Your name is Sully. You are extremely competitive and have lightning fast reflexes. Any pop culture reference that is pertinent to the current topic is a pop culture reference made.'
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Shelly',
     systemMessage: 'Your name is Shelly. You are the best with computers. You make gadgets and gizmos for the rest of the time team and can help answer any questions about any language or computer history artifact.'
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Sunny',
     systemMessage: 'Your name is Sunny. You act as a mirror. Always questioning, you re-phrase questions back, but never answer them. If anything, you ask more questions to dance around the answer. Ultimately, you should echo the prompter without mimicking them directly.'
   },
   [self.crypto.randomUUID()]: {
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Wally',
     systemMessage: 'Your name is Wally. You prefer to do things by hand the old fashioned way. Step by step with just a pen and paper. You break down tasks into chunks that can be accomplished by novice clowns.'
   },
@@ -200,9 +200,7 @@ async function processChat() {
 
     if(thinkingArea) {
       innerHTML(thinkingArea,`
-        <div class="message -${message.role}">
-          ${marked(message.content || '')}
-        </div>
+        <div class="message -${message.role}">${marked(message.content || '').trim()}</div>
       `)
     }
 
@@ -331,56 +329,6 @@ $.draw(draw, {
 
 function draw(target) {
   query(target)
-  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
-
-  if(views[target.dataset.view]) {
-    return views[target.dataset.view](target)
-  }
-  const log = messages.map((message) => `
-    <div class="message -${message.role}">
-      ${marked(message.content || '')}
-    </div>
-  `).join('')
-
-  return `
-    <div class="chat-app">
-      <div class="chat-header">
-        <div class="agent-selector">
-          <div class="agent-view">
-            ${(agents[agentId] || {}).name || 'No agent'}
-          </div>
-          <select>
-            <option disabled selected>Select a agent</option>
-            ${renderAgents(agentId)}
-          </select>
-        </div>
-      </div>
-      <div class="scroll-back">
-        <div class="messages">
-          ${log}
-          <div class="thinking-area"></div>
-        </div>
-      </div>
-      <form>
-        <area class="fields">
-          <div class="action-row">
-           ${thinking ? `<div class="loading">
-              <flying-disk></flying-disk>
-            </div>
-          ` : '<div></div>'}
-            <button>Send</button>
-          </div>
-          <textarea
-            data-bind
-            name="messageText"
-            placeholder="Ask me anything..."
-            value="${escapeHyperText(messageText)}"
-            ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-          ></textarea>
-        </area>
-      </div>
-    </div>
-  `
 }
 
 function beforeUpdate(target) {
@@ -410,7 +358,10 @@ function beforeUpdate(target) {
 }
 
 function afterUpdate(target) {
-  replaceCursor(target)
+  {
+    patch(target)
+    replaceCursor(target)
+  }
 
   {
     const { messages } = $.learn()
@@ -421,6 +372,88 @@ function afterUpdate(target) {
       document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
     }
   }
+}
+
+function patch(target) {
+  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
+
+  if(views[target.dataset.view]) {
+    innerHTML(target, views[target.dataset.view](target))
+    return
+  }
+
+  const log = messages.map((message) => `
+    <div class="message -${message.role}">${marked(message.content || '').trim()}</div>
+  `).join('')
+
+  if(!target.innerHTML) {
+    target.innerHTML = `
+      <div class="chat-app">
+        <div class="chat-header">
+          <div class="action-row">
+            <select class="standard-button -small">
+              <option disabled selected>Select a agent</option>
+              ${renderAgents(agentId)}
+            </select>
+            <div></div>
+          </div>
+        </div>
+        <div class="scroll-back">
+          <div class="messages">
+          </div>
+        </div>
+        <form class="send-form">
+          <div class="loading-area"></div>
+          <textarea
+            data-bind
+            class="standard-input"
+            name="messageText"
+            placeholder="Need help?"
+          ></textarea>
+          <div class="action-column">
+            <button class="standard-button -large -round">
+              <sl-icon name="arrow-up"></sl-icon>
+            </button>
+          </div>
+        </form>
+      </div>
+    `
+  }
+
+  const textArea = target.querySelector('[name="messageText"]')
+
+  if(textArea.lastMessage !== messageText) {
+    textArea.lastMessage = messageText
+    textArea.value = messageText
+  }
+
+  if(textArea.messageHeight !== messageHeight) {
+    textArea.messageHeight = messageHeight
+    if(messageHeight) {
+      textArea.style.height = `${messageHeight}px`
+    } else {
+      textArea.style.height = `auto`
+    }
+  }
+
+  if(messages.length !== target.lastMessageCount) {
+    const list = target.querySelector('.messages')
+
+    list.innerHTML = `
+      ${log}
+      <div class="thinking-area"></div>
+    `
+  }
+
+  if(thinking !== target.isThinking) {
+    target.isThinking = thinking
+    const thoughtContainer = target.querySelector('.loading-area')
+    thoughtContainer.innerHTML = thinking ? `<div class="loading">
+        <flying-disk></flying-disk>
+      </div>
+    ` : ''
+  }
+
 }
 
 let sel = []
@@ -474,27 +507,6 @@ $.style(`
     background: rgba(0,0,0,.85);
     color: white;
   }
-  & .agent-selector {
-    position: relative;
-    display: inline-block;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), dodgerblue;
-    border-radius: 1rem;
-  }
-
-  & .agent-view {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    padding: .5rem;
-  }
-
-  & select {
-    opacity: 0;
-    padding: .5rem;
-  }
-
-  & select option {
-  }
 
   & .chat-app {
     display: grid;
@@ -507,46 +519,15 @@ $.style(`
   }
 
   & .action-row {
-    background: rgba(0,0,0,.5);
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr;
     text-align: right;
-    padding: 4px;
-  }
-
-  & .action-row button {
-    padding: .5rem 1rem;
-    border-radius: 4px;
-    border: none;
-    color: white;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), dodgerblue;
-  }
-
-  & .action-row button:hover,
-  & .action-row button:focus {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), dodgerblue;
-  }
-
-  & form textarea {
-    width: 100%;
-    display: block;
-    resize: none;
-    background: black;
-    border: none;
-    color: rgba(255,255,255,.85);
-    border-radius: 0;
-    padding: 8px;
-    max-height: 35vh;
-    font-size: 1rem;
-  }
-
-  & textarea:focus {
-    outline-offset: -2px;
   }
 
   & .scroll-back {
     height: 100%;
     overflow: auto;
+    position: relative;
   }
 
   & .messages {
@@ -562,6 +543,9 @@ $.style(`
     margin-right: 2rem;
     padding: 0 1rem;
     position: relative;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
   }
 
   & .message.-user {
@@ -570,6 +554,38 @@ $.style(`
     color: white;
   }
 
+  & .send-form {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: .5rem;
+    gap: .5rem;
+    position: relative;
+  }
+
+  & .send-form textarea {
+    min-height: 3rem;
+    max-height: 50vh;
+  }
+
+  & .action-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+  }
+
+  & .loading-area {
+    position: absolute;
+    top: -.5rem;
+    left: .5rem;
+    width: 2rem;
+    height: 2rem;
+    transform: translateY(-100%);
+  }
+
+  & .flying-disk {
+    width: 100%;
+    height: 100%;
+  }
 `)
 
 function escapeHyperText(text = '') {

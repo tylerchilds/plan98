@@ -3,7 +3,7 @@ import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
-import { launch, agentBaseModelKeys } from './plan98-synthia.js'
+import { launch, getModels } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
 
@@ -119,7 +119,7 @@ export const schemas = {
     description: null,
     tags: [],
     agentId: null,
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: 'llama3.2:3b',
     name: 'Agent',
     systemMessage: 'You are a personal assistant. You are friendly and helpful, yet direct with no frills.',
     format: null,
@@ -1154,6 +1154,8 @@ export const creationForms = {
       ...draft,
     }
 
+    const agentBaseModels = getModels()
+
     return `
       ${editBanner(this)}
       <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
@@ -1162,9 +1164,9 @@ export const creationForms = {
         <span class="label">Base Model</span>
         <select data-bind="draft" name="agentModel">
           <option disabled>--Select--</option>
-          ${Object.keys(agentBaseModelKeys).map((key, i) => `
-            <option value="${agentBaseModelKeys[key]}" ${agentBaseModelKeys[key] === x.agentModel?'selected':''}>
-              ${agentBaseModelKeys[key]}
+          ${Object.keys(agentBaseModels).map((key, i) => `
+            <option value="${agentBaseModels[key]}" ${agentBaseModels[key] === x.agentModel?'selected':''}>
+              ${agentBaseModels[key]}
             </option>
           `).join('')}
 
@@ -2400,9 +2402,11 @@ export async function saveProduct(draft, context) {
 }
 
 export async function saveAgent(draft, context) {
+  const models = getModels()
+  const someModel = models[Object.keys(models)[0]]
   return await save({
     title: 'Untitled',
-    agentModel: agentBaseModelKeys.llama323b,
+    agentModel: someModel,
     ...timeFields(),
     ...draft,
     agentId: draft.agentId ? draft.agentId : self.crypto.randomUUID(),
