@@ -266,6 +266,7 @@ $.style(`
     grid-template-columns: auto auto;
     z-index: 1000;
     pointer-events: none;
+    padding: 4px;
   }
 
   & .creation-container button {
@@ -519,7 +520,7 @@ $.style(`
     background: rgba(0,0,0,.1);
     padding: 4px;
     gap: .5rem;
-    padding-right: 5rem;
+    padding-right: 5.5rem;
   }
 
   & .draft-body {
@@ -1067,16 +1068,18 @@ function reIndex(events=[]) {
     this.field('type')
 
     events.forEach(event => {
-      const node = {
-        id: event.data.id,
-        title: event.data.title,
-        keywords: event.handle.path.split('/').join(' '),
-        type: event.data.type,
+      if(event.data) {
+        const node = {
+          id: event.data.id,
+          title: event.data.title,
+          keywords: event.handle.path.split('/').join(' '),
+          type: event.data.type,
+        }
+
+        $.teach({ [event.data.id]: event })
+
+        this.add(node)
       }
-
-      $.teach({ [event.data.id]: event })
-
-      this.add(node)
     }, this)
   })
 }
@@ -2523,7 +2526,6 @@ export async function save(draft, context) {
   // async just go, w/e
   await appendPath(path)
   const { spaceKey, timeKey } = getSpaceTimeFromEventPath(path)
-
   return { path, spaceKey, timeKey }
 }
 
@@ -2587,11 +2589,14 @@ $.when('click', '[data-action="post"]', async (event) => {
     $.teach({ view: views.thinking })
 
     const data = await saveByType(draft, context).catch(e => {
+      console.error(e)
       toast(e.message, { type: 'error' })
       $.teach({ view: views.create })
     })
-    toast('Saved!', { type: 'success' })
-    $.teach({ view: draft.type, space: data.spaceKey, time: data.timeKey })
+    if(data) {
+      toast('Saved!', { type: 'success' })
+      $.teach({ view: draft.type, space: data.spaceKey, time: data.timeKey })
+    }
   } else {
     $.teach({ view: views.create })
     toast('Incomplete information, please try again.', { type: 'error' })
