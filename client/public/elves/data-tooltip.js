@@ -84,7 +84,7 @@ function draw() {
 const tooltipStyles = `
   <style>
     .data-tooltip {
-      background: rgba(255,255,255,.85);
+      background: rgba(255,255,255,1);
       color: rgba(0,0,0,.85);
       box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
       display: none;
@@ -97,12 +97,14 @@ const tooltipStyles = `
         max(0px, calc(-100% + var(--x) - 3px)),
         max(0px, calc(-100% + var(--y) - 3px))
       );
+      font-size: 13px;
       transition: opacity 100ms ease-in-out;
       top: 0;
-      white-space: break-work;
+      white-space: break-word;
       max-width: 200px;
       z-index: -1;
       pointer-events: none;
+      border-radius: 4px;
     }
 
     .data-tooltip.active {

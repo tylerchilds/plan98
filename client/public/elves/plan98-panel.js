@@ -172,7 +172,7 @@ $.style(`
     height: 100%;
     max-width: 320px;
     background: white;
-    padding: .5rem;
+    padding: 4px;
     position: absolute;
     right: 0;
     pointer-events: all;

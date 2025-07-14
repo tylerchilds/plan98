@@ -334,6 +334,15 @@ $.style(`
     padding: 0;
     background: transparent;
     border-radius: 100%;
+
+    --v-font-mono: 0;
+    --v-font-casl: 0;
+    --v-font-wght: 1000;
+    --v-font-slnt: -15;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+
   }
 
   & .now {
@@ -387,8 +396,17 @@ $.style(`
 
 
   & .now-time {
-    font-weight: bold;
-    color: rgba(0,0,0,.45);
+    font-weight: light;
+    color: rgba(0,0,0,.65);
+    --v-font-mono: 0;
+    --v-font-casl: 0;
+    --v-font-wght: 100;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+
+
     place-self: start end;
   }
 
@@ -1365,7 +1383,7 @@ const studios = {
       <textarea
         name="text"
         data-bind="draft"
-        placeholder="This is a space for you."
+        placeholder="Today, I ..."
       >${escapeHyperText(draft.text)}</textarea>
     `
   },
@@ -1958,10 +1976,9 @@ function patch(target) {
   {
     if(now !== target.now) {
       target.now = now
-      const date = target.querySelector('[data-dom="date"]')
       const time = target.querySelector('[data-dom="time"]')
-      date.innerHTML = formatDate(now)
       time.innerHTML = formatTime(now)
+      time.dataset.tooltip = formatDate(now)
     }
   }
 
@@ -2065,12 +2082,14 @@ $.draw((target)=> {
     <div data-dom="realm" class="chat-realm">
       <div class="now">
         <button class="logo-area" data-assistant>
-          <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+          Plan98
         </button>
         <div class="identity-selector">
         </div>
-        <div data-dom="date" class="now-date"></div>
         <div data-dom="time" class="now-time"></div>
+        <button class="logo-area" data-assistant>
+          <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+        </button>
       </div>
 
       <div class="chat-sidebar">

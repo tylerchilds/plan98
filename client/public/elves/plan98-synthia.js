@@ -153,6 +153,7 @@ $.style(`
     display: flex;
     pointer-events: all;
     padding: 2px;
+    justify-content: end;
   }
 
   & .synthia {
