@@ -1039,21 +1039,19 @@ sillonious-brand > xml-html {
 .field select,
 .standard-button,
 ::part(button) {
-  background: linear-gradient(var(--nav-background-start) 0%, var(--root-theme, mediumseagreen), var(--nav-background-end) 100%), var(--root-theme, mediumseagreen);
+  background: linear-gradient(var(--nav-background-start) 0%, var(--nav-background-end) 100%), var(--root-theme, mediumseagreen);
   pointer-events: all;
-  background-size: 1px 9.6rem;
+  background-size: 1px 100%;
   background-repeat: repeat-x;
-  background-position-y: 0rem;
   font-weight: 400;
   padding: .5rem;
   transition: background 200ms ease-in-out;
   line-height: 1.25;
-  white-space: nowrap;
   border: none;
   padding: .5rem;
   color: rgba(0,0,0,.85);
   --nav-background-start: rgba(255,255,255,1);
-  --nav-background-end: rgba(255,255,255,1);
+  --nav-background-end: rgba(255,255,255,.5);
   border-bottom: 3px solid var(--root-theme, mediumseagreen);
   text-decoration: none;
   display: inline-grid;
@@ -1096,15 +1094,13 @@ sillonious-brand > xml-html {
 .standard-button:focus,
 .standard-button:active {
   color: rgba(255,255,255,.85);
-  --nav-background-start: rgba(0,0,0,.25);
+  --nav-background-start: rgba(255,255,255,.5);
   --nav-background-end: rgba(0,0,0,.25);
-  background-position-y: -4.8rem;
 }
 
 .standard-input:active,
 .standard-button:active {
   color: rgba(0,0,0,.85);
-  background-position-y: 0rem;
   --nav-background-start: rgba(255,255,255,.85);
   --nav-background-end: rgba(255,255,255,.85);
   border-color: rgba(0,0,0,.85);

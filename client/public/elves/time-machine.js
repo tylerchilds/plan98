@@ -54,6 +54,7 @@ export const eventTypes = {
 export const views = {
   wallet: 'wallet',
   create: 'create',
+  thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
@@ -238,9 +239,8 @@ $.style(`
   & .edit-banner {
     background: black;
     color: rgba(255,255,255,.65);
-    text-align: right;
     padding: .5rem;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr auto;
     display: grid;
     gap: .5rem;
     overflow: hidden;
@@ -490,11 +490,12 @@ $.style(`
     position: relative;
   }
 
+  & .child-well .textarea,
   & .text-well .textarea {
     padding: .5rem;
     white-space: preserve;
     overflow: auto;
-    line-height: 1;
+    line-height: 1.25;
   }
 
   & .text-well textarea {
@@ -504,7 +505,7 @@ $.style(`
     width: 100%;
     height: 100%;
     overflow: auto;
-    line-height: 1;
+    line-height: 1.25;
   }
 
   & .text-well .edit-banner:empty + textarea {
@@ -885,6 +886,12 @@ $.style(`
   & [data-toggle-metadata="on"] {
     filter: invert(1);
   }
+
+  & .wizard {
+    margin: 0 auto;
+    max-width: 480px;
+    padding: 3rem .5rem 1rem;
+  }
 `)
 
 setInterval(() => {
@@ -965,34 +972,8 @@ function mergeEvents(state, payload) {
   }).forEach(file => {
     try {
       const [timeKey] = file.handle.name.split('.json')
-      const fileDate = new Date(timeKey);
-      const fileDateOnly = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate());
-
-      if (fileDateOnly.getTime() < lastWeek.getTime()) {
-        const spaceKey = bucketKeys.lastWeek
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < yesterday.getTime()) {
-        const spaceKey = bucketKeys.yesterday
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < today.getTime()) {
-        const spaceKey = bucketKeys.today
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() > nextWeek.getTime()) {
-        const spaceKey = bucketKeys.future
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() < tomorrow.getTime()) {
-        const spaceKey = bucketKeys.tomorrow
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() <= thisWeek.getTime()) {
-        const spaceKey = bucketKeys.thisWeek
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else if (fileDateOnly.getTime() <= nextWeek.getTime()) {
-        const spaceKey = bucketKeys.nextWeek
-        buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file);
-      } else {
-        const spaceKey = bucketKeys.past
-        buckets[bucketKeys.past][timeKey] = timeMachine(spaceKey, timeKey, file);
-      }
+      const spaceKey = getSpaceFromTime(timeKey)
+      buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file)
     } catch (_e) {
       console.warn(`Skipping invalid filename: ${file.handle.name}`);
     }
@@ -1001,6 +982,38 @@ function mergeEvents(state, payload) {
   return {
     ...state,
     buckets,
+  }
+}
+
+function getSpaceTimeFromEventPath(path) {
+  const segments = path.split('/')
+  const name = segments[segments.length - 1]
+  const [timeKey] = name.split('.json')
+  const spaceKey = getSpaceFromTime(timeKey)
+
+  return { timeKey, spaceKey }
+}
+
+function getSpaceFromTime(timeKey) {
+  const fileDate = new Date(timeKey);
+  const fileDateOnly = new Date(fileDate.getFullYear(), fileDate.getMonth(), fileDate.getDate());
+
+  if (fileDateOnly.getTime() < lastWeek.getTime()) {
+    return bucketKeys.lastWeek
+  } else if (fileDateOnly.getTime() < yesterday.getTime()) {
+    return bucketKeys.yesterday
+  } else if (fileDateOnly.getTime() < today.getTime()) {
+    return bucketKeys.today
+  } else if (fileDateOnly.getTime() > nextWeek.getTime()) {
+    return bucketKeys.future
+  } else if (fileDateOnly.getTime() < tomorrow.getTime()) {
+    return bucketKeys.tomorrow
+  } else if (fileDateOnly.getTime() <= thisWeek.getTime()) {
+    return bucketKeys.thisWeek
+  } else if (fileDateOnly.getTime() <= nextWeek.getTime()) {
+    return bucketKeys.nextWeek
+  } else {
+    return bucketKeys.past
   }
 }
 
@@ -1071,12 +1084,13 @@ function reIndex(events=[]) {
 function editBanner(context) {
   return `
     <div class="edit-banner">${context?`
+      <span class="edit-label">
+        ${context.name}
+      </span>
+
       <button class="standard-button -smol bias-negative" data-destroy="${context.path}">
         Delete
       </button>
-      <span class="edit-label">
-        Editing: ${context.name}
-      </span>
     `:''}</div>
   `
 }
@@ -1176,30 +1190,30 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+      <div class="wizard">
+        <label class="field">
+          <span class="label">Base Model</span>
+          <select data-bind="draft" name="agentModel">
+            <option disabled>--Select--</option>
+            ${Object.keys(agentBaseModels).map((key, i) => `
+              <option value="${agentBaseModels[key]}" ${agentBaseModels[key] === x.agentModel?'selected':''}>
+                ${agentBaseModels[key]}
+              </option>
+            `).join('')}
+
+          </select>
+        </label>
+
+
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
       </div>
-      <label class="field">
-        <span class="label">Base Model</span>
-        <select data-bind="draft" name="agentModel">
-          <option disabled>--Select--</option>
-          ${Object.keys(agentBaseModels).map((key, i) => `
-            <option value="${agentBaseModels[key]}" ${agentBaseModels[key] === x.agentModel?'selected':''}>
-              ${agentBaseModels[key]}
-            </option>
-          `).join('')}
-
-        </select>
-      </label>
-
-
-
-      ${x.tags?.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
     `
   },
 
@@ -1430,15 +1444,19 @@ const studios = {
     }
 
     return `
-      To create an agent, give it a name and tell it what to do using the system message. For advanced tuning, go to settings.
-      <label class="field">
-        <span class="label">Name</span>
-        <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
-      </label>
-      <label class="field">
-        <span class="label">System Message</span>
-        <input data-bind="draft" name="systemMessage" value="${escapeHyperText(x.systemMessage)}" type="text"/>
-      </label>
+      <div class="wizard">
+        <p>
+          To create an agent, give it a name and tell it what to do using the system message. For advanced tuning, open Settings <span><sl-icon name="gear-fill"></sl-icon></span>.
+        </p>
+        <label class="field">
+          <span class="label">Name</span>
+          <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
+        </label>
+        <label class="field">
+          <span class="label">System Message</span>
+          <textarea name="systemMessage" style="height: 8rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
+        </label>
+      </div>
     `
   },
 
@@ -1612,6 +1630,17 @@ const viewRenderers = {
                 <sl-icon name="x-circle"></sl-icon>
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+  [views.thinking]: (target) => {
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <div>
+            Thinking...
           </div>
         </div>
       </div>
@@ -2172,7 +2201,7 @@ $.draw((target)=> {
             <button class="standard-button -small">
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-button -small" placeholder="?" type="text">
+            <input class="standard-input -small" placeholder="Search..." type="text">
           </div>
         </div>
       </div>
@@ -2476,6 +2505,8 @@ export async function save(draft, context) {
   let path = `/${timestamp}.json`
   if(context) {
     path = context.path
+  } else {
+    path = `/private/time-machine${path}`
   }
 
   const event = {
@@ -2483,14 +2514,17 @@ export async function save(draft, context) {
     ...draft
   }
 
-  const filePath = `/private/time-machine${path}`
   // Attempt to upload to server
-  await put(filePath, JSON.stringify(event), { type: 'application/json' }).then(response => {
+  await put(path, JSON.stringify(event), { type: 'application/json' }).then(response => {
   }).catch(error => {
     console.warn(error);
   });
 
-  return await appendPath(filePath)
+  // async just go, w/e
+  await appendPath(path)
+  const { spaceKey, timeKey } = getSpaceTimeFromEventPath(path)
+
+  return { path, spaceKey, timeKey }
 }
 
 const saveHandlers = {
@@ -2508,11 +2542,11 @@ const saveHandlers = {
   [eventTypes.dwebcamp]: save,
 }
 
-export function saveByType(draft, context) {
+export async function saveByType(draft, context) {
   if(saveHandlers[draft.type]) {
-    saveHandlers[draft.type](draft, context)
+    return await saveHandlers[draft.type](draft, context)
   } else {
-    save(draft, context)
+    return await save(draft, context)
   }
 }
 
@@ -2550,10 +2584,16 @@ $.when('click', '[data-action="post"]', async (event) => {
   const { draft, context } = $.learn()
 
   if(draft) {
-    saveByType(draft, context)
+    $.teach({ view: views.thinking })
+
+    const data = await saveByType(draft, context).catch(e => {
+      toast(e.message, { type: 'error' })
+      $.teach({ view: views.create })
+    })
     toast('Saved!', { type: 'success' })
-    $.teach({ sidebar: true, view: null, space: null, time: null })
+    $.teach({ view: draft.type, space: data.spaceKey, time: data.timeKey })
   } else {
+    $.teach({ view: views.create })
     toast('Incomplete information, please try again.', { type: 'error' })
   }
 })
@@ -2576,7 +2616,7 @@ $.when('click', '[data-view]', (event) => {
   $.teach({ view, space, time })
 
   const h = $.learn().buckets[space][time] || { data: {} }
-  $.teach({ draft: h.data, viewMetadata: false, context: h.handle })
+  $.teach({ draft: h.data, context: h.handle })
 })
 
 $.when('click', '[data-download-attachments]', async (event) => {
