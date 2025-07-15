@@ -161,6 +161,10 @@ export function hideModal() {
 
 window.hideModal = hideModal
 
+export function isVisible() {
+  return $.learn().isOpen
+}
+
 $.when('click', '[data-close]', hideModal)
 
 $.style(`
@@ -275,7 +279,7 @@ $.style(`
     right: 0;
     place-self: start;
     pointer-events: none;
-    padding: .5rem;
+    padding: 4px;
     z-index: 2000;
   }
 
