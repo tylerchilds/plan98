@@ -15,6 +15,11 @@
       "id": "plan98-start-storage",
       "cmd": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE npm run dev",
       "autostart": true
+    },
+    {
+      "id": "plan98-start-version-control",
+      "cmd": "cd server/braid-text/braid-text-master && node server-demo.js",
+      "autostart": true
     }
   ]
 }
