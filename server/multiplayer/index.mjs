@@ -39,6 +39,7 @@ function free_the_cors (req, res, next) {
 app.use(free_the_cors)
 
 function auth(req, res, next) {
+  /*
   if (req.method == "PUT" || req.method == "POST" || req.method == "PATCH") {
 
     if (!req.headers.cookie?.split(/;/).map(x => x.trim()).some(x => x === 'fuzzydoodle')) {
@@ -47,6 +48,7 @@ function auth(req, res, next) {
         return res.end()
     }
   }
+  */
 
   next()
 }

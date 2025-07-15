@@ -38,6 +38,7 @@ const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
 export const eventTypes = {
   note: 'note',
+  memo: 'memo',
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
@@ -56,6 +57,7 @@ export const views = {
   create: 'create',
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
+  [eventTypes.memo]: eventTypes.memo,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
   [eventTypes.agent]: eventTypes.agent,
@@ -143,6 +145,10 @@ export const schemas = {
     title: 'Untitled',
     text: '',
   },
+  [eventTypes.memo]: {
+    type: eventTypes.memo,
+    title: 'Untitled',
+    text: '',
   [eventTypes.gallery]: {
     type: eventTypes.gallery,
     title: 'Untitled',
@@ -1118,6 +1124,11 @@ export const creationForms = {
       ${editBanner(this)}
     `
   },
+  [eventTypes.memo]: function(draft) {
+    return `
+      ${editBanner(this)}
+    `
+  },
   [eventTypes.image]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1416,6 +1427,12 @@ const studios = {
         data-bind="draft"
         placeholder="Today, I ..."
       >${escapeHyperText(draft.text)}</textarea>
+    `
+  },
+  [eventTypes.memo]: function(draft) {
+    const src = this && this.path ? `src="${this.path}"` : ''
+    return `
+      <pro-teleprompter id="${draft.id}" ${src}></pro-teleprompter>
     `
   },
   [eventTypes.image]: function(draft) {
@@ -1735,6 +1752,23 @@ const viewRenderers = {
       <div class="textarea">${escapeHyperText(x.text)}</div>
     `)
   },
+  [views.memo]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.memo],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <pro-teleprompter src="${x.src}"></pro-teleprompter>
+    `)
+  },
+
   [views.sketch]: (target) => {
     const { space, time } = target.dataset
 
@@ -2123,6 +2157,7 @@ $.draw((target)=> {
           <button data-new="${eventTypes.image}">Photo</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
           <button data-new="${eventTypes.audio}">Audio</button>
+          <button data-new="${eventTypes.memo}">Memo</button>
           <button data-new="${eventTypes.note}">Note</button>
           <hr>
           <button data-quit>Quit</button>
@@ -2307,6 +2342,18 @@ const eventRenderers = {
         <div class="note-preview-2">
           ${secondLine}
         </div>
+      </button>
+    `
+  },
+  [eventTypes.memo]: function (event) {
+    const data = {
+      ...schemas[views.memo],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event" data-show="${eventTypes.memo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
       </button>
     `
   },
@@ -2552,6 +2599,7 @@ export async function save(draft, context={}) {
 
 const saveHandlers = {
   [eventTypes.note]: save,
+  [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
   [eventTypes.sketch]: saveSketch,
