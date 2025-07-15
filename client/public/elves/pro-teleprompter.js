@@ -18,12 +18,11 @@ $.draw((target) => {
   return `
     <div class="background">
       <simpleton-client src="${target.getAttribute('src')}" data-script="${import.meta.url}" data-action="sync"></simpleton-client>
-      <button data-teleprompt class="nonce" aria-label="Teleprompt" data-tooltip="Teleprompt"></button>
-      <a href="/" class="nonce" aria-label="home" data-tooltip="home"></a>
+      <button data-teleprompt class="standard-button -small -round" aria-label="Teleprompt" data-tooltip="Teleprompt"><sl-icon name="circle"></sl-icon></button>
     </div>
     <div class="foreground hidden">
       <div class="script"></div>
-      <button data-close class="nonce"></button>
+      <button data-close class="standard-button -small -round"><sl-icon name="circle-fill"></sl-icon></button>
     </div>
   `
 }, {
@@ -59,11 +58,9 @@ $.style(`
   & [data-close],
   & [data-teleprompt] {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 4px;
+    right: 4px;
     z-index: 2;
-    width: 3rem;
-    height: 3rem;
   }
 
   & {
@@ -112,7 +109,7 @@ $.style(`
     & .foreground {
       position: absolute;
       inset: 0;
-      padding-top: 3rem;
+      padding-top: 2rem;
       overflow: auto;
     }
 

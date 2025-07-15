@@ -149,6 +149,7 @@ export const schemas = {
     type: eventTypes.memo,
     title: 'Untitled',
     text: '',
+  },
   [eventTypes.gallery]: {
     type: eventTypes.gallery,
     title: 'Untitled',
@@ -2263,7 +2264,7 @@ $.draw((target)=> {
       </div>
       <div data-dom="content" class="content-area"></div>
       <div class="fallback">
-        <world-map></world-map>
+        <ur-shell></ur-shell>
       </div>
     </div>
   `
