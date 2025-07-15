@@ -135,6 +135,8 @@ export const schemas = {
   [eventTypes.sketch]: {
     type: eventTypes.sketch,
     title: 'Untitled',
+    strokeHistory: [],
+    strokeRevisory: [],
   },
   [eventTypes.note]: {
     type: eventTypes.note,
@@ -193,6 +195,18 @@ export function newDraft(type) {
     ...(schemas[type] || {}),
     ...timeFields()
   }
+}
+
+export function updateDraft(data) {
+  $.teach(data, (state, payload) => {
+    return {
+      ...state,
+      draft: {
+        ...state.draft,
+        ...payload
+      }
+    }
+  })
 }
 
 // dear diary
@@ -1410,8 +1424,9 @@ const studios = {
     `
   },
   [eventTypes.sketch]: function(draft) {
+    const src = this && this.path ? `src="${this.path}"` : ''
     return `
-      <sketch-pad id="${draft.id}"></sketch-pad>
+      <sketch-pad id="${draft.id}" ${src}></sketch-pad>
     `
   },
   [eventTypes.audio]: function(draft) {
@@ -1500,7 +1515,10 @@ const studios = {
 
 
 function renderStudioByType(draft) {
-  return studios[draft.type] ? studios[draft.type].call(this, draft) : ''
+  const context = this ? this : {
+    path: newEventPath(draft)
+  }
+  return studios[draft.type] ? studios[draft.type].call(context, draft) : ''
 }
 
 
@@ -2501,15 +2519,18 @@ export async function saveVideo(draft, context) {
   }, context)
 }
 
-
-export async function save(draft, context) {
+function newEventPath(draft) {
   const now = new Date(draft.year, draft.month, draft.day, draft.hour, draft.minute, draft.second);
   const timestamp = now.toJSON()
-  let path = `/${timestamp}.json`
-  if(context) {
+  return `/private/time-machine/${timestamp}.json`
+}
+
+export async function save(draft, context={}) {
+  let path
+  if(context.path) {
     path = context.path
   } else {
-    path = `/private/time-machine${path}`
+    path = newEventPath(draft)
   }
 
   const event = {
@@ -2523,8 +2544,8 @@ export async function save(draft, context) {
     console.warn(error);
   });
 
-  // async just go, w/e
   await appendPath(path)
+
   const { spaceKey, timeKey } = getSpaceTimeFromEventPath(path)
   return { path, spaceKey, timeKey }
 }
@@ -2555,13 +2576,14 @@ export async function saveByType(draft, context) {
 async function appendPath(path) {
   await get('time-machine').then(async response => {
     const obj = await response.text().then(str => JSON.parse(str))
-    const paths = [...(obj.paths || [])]
-    paths.push(path)
-    await put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' })
+    const existing = (obj.paths || [])
+    if(!existing.includes(path)) {
+      const paths = [...existing]
+      paths.push(path)
+      await put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' })
+    }
 
   })
-
-  return await fate()
 }
 
 export function destroy(context) {
@@ -2595,8 +2617,10 @@ $.when('click', '[data-action="post"]', async (event) => {
     })
     if(data) {
       toast('Saved!', { type: 'success' })
+      await fate()
       $.teach({ view: draft.type, space: data.spaceKey, time: data.timeKey })
     }
+
   } else {
     $.teach({ view: views.create })
     toast('Incomplete information, please try again.', { type: 'error' })
@@ -2679,8 +2703,7 @@ $.when('click', '[data-show]', (event) => {
 })
 
 $.when('click', '[data-new]', (event) => {
-  const { draft } = $.learn()
-  const type = event.target.dataset.new || draft.type
+  const type = event.target.dataset.new || $.learn().draft.type
 
   if(eventTypes[type]) {
     $.teach({
@@ -2689,7 +2712,15 @@ $.when('click', '[data-new]', (event) => {
     }, bound('draft'))
   }
 
-  $.teach({ view: views.create, draft: newDraft(type || 'note'), activeMenu: null, sidebar: false })
+  const draft = newDraft(type || 'note')
+  const path = newEventPath(draft)
+  $.teach({
+    view: views.create,
+    draft,
+    activeMenu: null,
+    sidebar: false,
+    context: { path }
+  })
 })
 
 $.when('click', '[data-quit]', (event) => {
@@ -2697,13 +2728,7 @@ $.when('click', '[data-quit]', (event) => {
 })
 
 $.when('click', '[data-cancel-draft]', () => {
-  const { draft, context } = $.learn()
-
-  if(!context) {
-    $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
-  } else {
-    $.teach({ view: draft.type })
-  }
+  $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
 })
 
 $.when('click', '[data-close-draft]', () => {

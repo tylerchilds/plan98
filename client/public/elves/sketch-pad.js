@@ -1,14 +1,15 @@
 import elf from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
-import { saveSketch } from './time-machine.js'
+import { saveSketch, updateDraft } from './time-machine.js'
+
 import { get, put } from './plan98-wallet.js'
 
 let lineWidth = 0
 let isMousedown = false
 let points = []
 let strokeHistory = []
-const strokeRevisory = []
+let strokeRevisory = []
 const thicknoids = [1, 4, 16, 64, 256]
 const overlays = { color: 'color' }
 
@@ -20,10 +21,15 @@ const $ = elf('sketch-pad', {
 })
 
 function engine(target) {
-  const canvas = target.closest($.link).querySelector('canvas')
+  const root = target.closest($.link)
+  const canvas = root.querySelector('canvas')
   const rectangle = canvas.getBoundingClientRect()
 
-  return { canvas, rectangle }
+  return {
+    canvas,
+    rectangle,
+    src: root.getAttribute('src')
+  }
 }
 
 $.draw(target => {
@@ -141,6 +147,24 @@ function mount(target) {
   resizeCanvas();
   target.appendChild(canvas)
   update(target)
+
+  const src = target.getAttribute('src')
+  if(src) {
+    get(src).then(blob => {
+      if(blob) {
+        blob.text().then(str => JSON.parse(str)).then(data => {
+          if(data.strokeHistory) {
+            strokeHistory = data.strokeHistory
+          }
+
+          if(data.strokeRevisory) {
+            strokeRevisory = data.strokeRevisory
+          }
+          redraw(target)
+        })
+      }
+    })
+  }
 }
 
 const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
@@ -220,9 +244,10 @@ $.when('click', '[data-violion]', function  (event) {
 })
 
 
-$.when('click', '[data-save]', function (event) {
-  event.preventDefault()
-  const { canvas } = engine(event.target)
+$.when('click', '[data-save]', ({ target }) => publish(target))
+
+function publish (target) {
+  const { canvas, src } = engine(target)
   // Get current date and time for filename
   const now = new Date();
   const timestamp = now.toJSON()
@@ -237,12 +262,15 @@ $.when('click', '[data-save]', function (event) {
   }
   const byteArray = new Uint8Array(byteNumbers);
 
-  const src = `/private/${$.link}/${timestamp}.jpg`
+  const image = `/private/${$.link}/${timestamp}.jpg`
+
+  const data = { src: image, strokeHistory, strokeRevisory }
+  updateDraft(data)
 
   // Attempt to upload to server
-  put(src, byteArray, { type: 'image/jpeg' }).then(res => {
+  put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
-      saveSketch({ src })
+      saveSketch(data, { path: src })
     } else {
       throw new Error('Upload failed')
     }
@@ -259,12 +287,12 @@ $.when('click', '[data-save]', function (event) {
   });
 
   $.teach({ activeMenu: null })
-})
+}
 
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
   strokeHistory = []
-  redraw(event)
+  redraw(event.target)
   $.teach({ activeMenu: null })
 })
 
@@ -294,11 +322,11 @@ $.when('click', '[data-undo]', function undoDraw (event) {
   }
   const stroke = strokeHistory.pop()
   strokeRevisory.unshift(stroke)
-  redraw(event)
+  redraw(event.target)
 })
 
-function redraw(event) {
-  const { canvas } = engine(event.target)
+function redraw(target) {
+  const { canvas, src } = engine(target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
   context.fillStyle = $.learn().background
@@ -312,9 +340,13 @@ function redraw(event) {
     let strokePath = [];
     stroke.map(function (point) {
       strokePath.push(point)
-      drawOnCanvas(event.target, strokePath)
+      drawOnCanvas(target, strokePath)
     })
   })
+
+  if(src) {
+    publish(target)
+  }
 }
 
 $.when('click', '[data-redo]', function redoDraw (event) {
@@ -323,7 +355,7 @@ $.when('click', '[data-redo]', function redoDraw (event) {
 
   const stroke = strokeRevisory.shift()
   strokeHistory.push(stroke)
-  redraw(event)
+  redraw(event.target)
 })
 
 
@@ -411,7 +443,7 @@ $.when('touchend', 'canvas', end)
 $.when('touchleave', 'canvas', end)
 $.when('mouseup', 'canvas', end)
 function end (e) {
-  const { canvas, rectangle } = engine(e.target)
+  const { src, canvas, rectangle } = engine(e.target)
   $.teach({ touching: false })
   const context = canvas.getContext('2d')
   let pressure = 0.1;
@@ -431,9 +463,13 @@ function end (e) {
 
   isMousedown = false
 
-  requestIdleCallback(function () { strokeHistory.push([...points]); points = []})
+  strokeHistory.push([...points]); points = []
 
   lineWidth = 0
+
+  if(src) {
+    publish(e.target)
+  }
 };
 
 const paneByTarget = (target) => {
@@ -472,7 +508,7 @@ function setColor(event) {
   const { value } = event.target
 
   $.teach({ [target]: value })
-  redraw(event)
+  redraw(event.target)
 }
 
 function closeTray(event) {
