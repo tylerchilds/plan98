@@ -12,8 +12,7 @@ console.log(change)
 
 const $ = elf('pro-teleprompter', { hidden: true })
 
-$.draw((target) => {
-
+function draw (target) {
   if(target.innerHTML) return
   return `
     <div class="background">
@@ -25,26 +24,25 @@ $.draw((target) => {
       <button data-close class="standard-button -small -round"><sl-icon name="circle-fill"></sl-icon></button>
     </div>
   `
-}, {
-  afterUpdate: (target) => {
-    {
-      const { hidden } = $.learn()
-      const play = render($.learn().text)
-      const script = document.querySelector('.script')
-      script.innerHTML = play
-    }
-
-    {
-      const { hidden } = $.learn()
-      const foreground = document.querySelector('.foreground')
-      const background = document.querySelector('.background')
-
-      hidden ? foreground.classList.add('hidden') : foreground.classList.remove('hidden')
-      !hidden ? background.classList.add('hidden') : background.classList.remove('hidden')
-    }
-
+}
+function afterUpdate(target) {
+  {
+    const { hidden } = $.learn()
+    const play = render($.learn().text)
+    const script = document.querySelector('.script')
+    script.innerHTML = play
   }
-})
+
+  {
+    const { hidden } = $.learn()
+    const foreground = document.querySelector('.foreground')
+    const background = document.querySelector('.background')
+
+    hidden ? foreground.classList.add('hidden') : foreground.classList.remove('hidden')
+    !hidden ? background.classList.add('hidden') : background.classList.remove('hidden')
+  }
+}
+
 
 export function sync(target, text) {
   const { src } = target.getAttribute('src') || 'nonce'
@@ -221,4 +219,11 @@ $.style(`
   }
 `)
 
-customElements.define('pro-teleprompter', class WebComponent extends HTMLElement { constructor() { super() } });
+customElements.define('pro-teleprompter', class WebComponent extends HTMLElement {
+  constructor() {
+    super()
+    $.draw(draw, {
+      afterUpdate
+    })
+  }
+});

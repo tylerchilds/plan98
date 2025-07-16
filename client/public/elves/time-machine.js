@@ -389,6 +389,7 @@ $.style(`
   }
 
   & .fallback {
+    overflow: hidden;
     display: none;
   }
 
@@ -1431,9 +1432,13 @@ const studios = {
     `
   },
   [eventTypes.memo]: function(draft) {
-    const src = this && this.path ? `src="${this.path}"` : ''
+    let src = draft.src
+    if(!src) {
+      src = `/private/${$.link}/memos/${new Date().toISOString()}.txt`
+      updateDraft({ src })
+    }
     return `
-      <pro-teleprompter id="${draft.id}" ${src}></pro-teleprompter>
+      <pro-teleprompter id="${draft.id}" src="${src}"></pro-teleprompter>
     `
   },
   [eventTypes.image]: function(draft) {

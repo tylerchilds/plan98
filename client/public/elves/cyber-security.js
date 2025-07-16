@@ -221,13 +221,19 @@ const players = {
 const ids = Object.keys(players)
 const activePlayerId = ids[randomInteger(0,ids.length-1)]
 
+const modes = {
+  welcome: 'welcome'
+}
+
 const $ = elf('cyber-security', {
   players,
+  mode: modes.welcome,
+  turn: 0,
   activePlayerId
 })
 
 $.draw((target) => {
-  const { players, activePlayerId } = $.learn()
+  const { turn, players, activePlayerId } = $.learn()
 
   const player = players[activePlayerId]
 
@@ -258,20 +264,25 @@ $.draw((target) => {
   }
 
   return `
-    <div>
-      Draws left: ${deck.length}
+    <div class="play-area" data-mode="${mode}" data-turn="${turn}">
+      <div>
+        Enemy: deck / health / M G E
+      </div>
+      <div>
+
+      </div>
+
+      <button data-start>
+        start
+      </button>
+
+      ${drawCollection(hand, 'hand')}
+      ${drawCollection(passive, 'passive')}
+      ${drawCollection(active, 'active')}
+      ${drawCollection(ready, 'ready')}
+      ${drawCollection(deactivated, 'deactivated')}
+      ${drawCollection(discarded, 'discarded')}
     </div>
-
-    <button data-start>
-      start
-    </button>
-
-    ${drawCollection(hand, 'hand')}
-    ${drawCollection(passive, 'passive')}
-    ${drawCollection(active, 'active')}
-    ${drawCollection(ready, 'ready')}
-    ${drawCollection(deactivated, 'deactivated')}
-    ${drawCollection(discarded, 'discarded')}
   `
 }, {
   beforeUpdate(target) {
@@ -280,6 +291,23 @@ $.draw((target) => {
     }
   }
 })
+
+$.style(`
+  & {
+    display: block;
+    height: 100%;
+    width: 100%;
+    overflow: auto;
+  }
+
+  & [data-mode="${modes.welcome}"] [data-start] {
+    display: block;
+  }
+
+  & .play-area {
+    display: grid;
+  }
+`)
 
 $.when('click', '[data-start]', (event) => {
   const { players } = $.learn()

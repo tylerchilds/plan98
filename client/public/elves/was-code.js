@@ -72,17 +72,6 @@ function saveFile(src, file) {
   })
 }
 
-$.when('change', 'select', (event) => {
-  const { value } = event.target
-  const root = event.target.closest($.link)
-  root.setAttribute('src', value)
-  $.teach({ src: value })
-  root.initialized = false
-  root.view = null
-})
-
-
-
 $.draw(target => {
   mount(target)
   const { src, activeMenu } = $.learn()

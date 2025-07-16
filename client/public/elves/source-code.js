@@ -13,6 +13,6 @@ $.draw(() => {
   });
 
   return `
-    <was-code src="${new URL(import.meta.url).pathname}" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
+    <was-code src="/public/cdn/vim-tutor.txt" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
   `
 })
