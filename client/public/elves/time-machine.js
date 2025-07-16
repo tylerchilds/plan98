@@ -3,7 +3,7 @@ import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
-import { launch, getModels } from './plan98-synthia.js'
+import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
 
@@ -390,6 +390,10 @@ $.style(`
 
   & [data-sidebar="false"] .now {
     display: none;
+  }
+
+  & .content-area {
+    overflow: hidden;
   }
 
   & .content-area:empty {
@@ -980,7 +984,6 @@ async function fate() {
     }
   }
 
-
   const events = await get(`time-machine`).then(addData).catch(async (error) => {
     await touch('time-machine')
     get('time-machine').then(addData)
@@ -1496,7 +1499,35 @@ const studios = {
         </label>
         <label class="field">
           <span class="label">System Message</span>
-          <textarea data-bind="draft" name="systemMessage" style="height: 8rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
+          <textarea data-bind="draft" name="systemMessage" style="height: 16rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
+        </label>
+        <label class="field">
+          <span class="label">Keep Alive</span>
+          <input data-bind="draft" name="keep_alive" value="${escapeHyperText(x.keep_alive)}" type="text"/>
+        </label>
+
+        <hr>
+
+        <p>
+          These settings influence the agent in chat mode
+        </p>
+
+        <label class="field">
+          <span class="label">Format</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticFormatPlaceholder, '', 2))}" name="format" style="height: 24rem;" value="${escapeHyperText(x.format)}"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="label">Options</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticOptionsPlaceholder, '', 2))}" name="options" style="height: 33rem;" value="${escapeHyperText(x.options)}"></textarea>
+        </label>
+
+
+
+
+        <label class="field">
+          <span class="label">Tools</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticToolsPlaceholder, '', 2))}" name="tools" style="height: 92rem;" value="${escapeHyperText(x.tools)}"></textarea>
         </label>
       </div>
     `
@@ -1707,7 +1738,7 @@ const viewRenderers = {
                 <sl-icon name="gear-fill"></sl-icon>
               </div>
             </div>
-            <div class="draft-body text-well">
+            <div class="draft-body child-well">
               ${studio}
             </div>
             <div class="draft-footer">
@@ -2848,11 +2879,25 @@ function reset(target) {
   $.teach({ buckets: emptyBuckets() })
 }
 
+const formats = {
+  'stringify': (value) => {
+    return JSON.stringify(value)
+  }
+}
+
+function formatify(format, value) {
+  if(formats[format]) {
+    return formats[format](value)
+  }
+
+  return value
+}
+
 $.when('input', '[data-bind]', (event) => {
-  const { bind } = event.target.dataset
+  const { bind, format } = event.target.dataset
   $.teach({
     name: event.target.name,
-    value: event.target.value
+    value: formatify(format, event.target.value)
   }, bound(bind))
 })
 

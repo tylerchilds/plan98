@@ -4,55 +4,6 @@ import { eventTypes, getSearchResults } from './time-machine.js'
 import { ollama } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
 
-const tools = [
-  {
-    type: "function",
-    function: {
-      name: "calculator",
-      description: "Perform basic mathematical calculations",
-      parameters: {
-        type: "object",
-        properties: {
-          expression: {
-            type: "string",
-            description: "Mathematical expression to evaluate (e.g., '2 + 2', '15 * 23')"
-          }
-        },
-        required: ["expression"]
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_current_time",
-      description: "Get the current date and time",
-      parameters: {
-        type: "object",
-        properties: {},
-        required: []
-      }
-    }
-  },
-  {
-    type: "function",
-    function: {
-      name: "get_weather",
-      description: "Get weather information for a location",
-      parameters: {
-        type: "object",
-        properties: {
-          location: {
-            type: "string",
-            description: "The city and state/country"
-          }
-        },
-        required: ["location"]
-      }
-    }
-  }
-];
-
 // Tool implementations
 const toolImplementations = {
   calculator: (args) => {
@@ -168,6 +119,26 @@ const $ = elf(tag, {
   messageHeight: null
 })
 
+function optionalChatSettings(agent) {
+  if(!agent) return {}
+
+  const options = {}
+
+  if(agent.tools) {
+    options.tools = JSON.parse(agent.tools)
+  }
+
+  if(agent.options) {
+    options.options = JSON.parse(agent.options)
+  }
+
+  if(agent.format) {
+    options.format = JSON.parse(agent.format)
+  }
+
+  return options
+}
+
 async function processChat() {
   $.teach({ thinking: true, messageHeight: null, messageText: '' })
 
@@ -182,7 +153,7 @@ async function processChat() {
     ...agents[agents],
     model: agents[agentId].agentModel,
     messages: context,
-    //tools: tools,
+    ...optionalChatSettings(agents[agentId]),
     stream: true
   })
 
