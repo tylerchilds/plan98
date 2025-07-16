@@ -2837,11 +2837,14 @@ $.when('input', '[name="keycard"]', (event) => {
 })
 
 function reset(target) {
-  $.teach({ buckets: emptyBuckets })
-
   for(const key in bucketKeys) {
     target[key] = 0
   }
+
+  target.innerHTML = ''
+  target.queried = false
+
+  $.teach({ buckets: emptyBuckets })
 }
 
 $.when('input', '[data-bind]', (event) => {
