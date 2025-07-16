@@ -1,0 +1,81 @@
+Plan98: The Card Game
+
+Economy. Factory. Victory.
+
+Rules
+
+Player Setup:
+
+1. Build Computer Deck (max of 20 software, 20 hardware, and 20 event Cards)
+2. Place 5 software cards in each player's PASSIVE STAGING
+3. Draw 7 cards
+
+Game start:
+
+1. Cut decks to resolve initiative initiative; highest level gains initiative and reveals first.
+2. Each player may reveal a higher level card from their hand to gain initiative.
+
+Turn:
+
+1. Upkeep: move ACTIVE SOFTWARE to PASSIVE, deactivate HARDWARE, draw card
+2. Activate: from hand, then staging, then production
+3. Resolve defenses (3+: Attack Left, Defend Right)
+
+End:
+
+1. Null Pointer: Player cannot draw a card
+2. Empty Call Stack: All hardware has been eliminated from production and all software has been eliminated from staging
+
+Clarifications:
+
+1. No max hand, no reshuffle
+2. Attacking hardware may not defend until next upkeep
+
+Card Structure
+
+Power: Lightning, Ocean, Volcano, Forest, Atmosphere
+Cost: 1, 2, 3, 4, 5, 6, 7, 8, 9
+Level: Byte, Kilo, Mega, Giga, Tera, Peta, Exo, Zetta, Yotta
+Type: Software, Hardware, Event
+
+Types
+
+Software:
+
+Your life force. Run out of software, you lose.
+
+Activate in STAGING area providing COST to POOL
+
+Activate at COST from POOL to play from HAND to STAGING
+
+Hardware:
+
+Activate at COST from POOL to play from HAND to STAGING
+
+In STAGING, may be activated to provide COST to POOL
+In PRODUCTION, may be activated to ATTACK
+In DEFENSE, may be activated to DEFEND
+
+Events:
+
+May be played at any time and are resolved in the order they are declared
+
+1. Spawn: Play HARDWARE of COST or less from HAND to PRODUCTION
+2. Destroy: Destroy TARGET hardware of COST or less
+3. Cancel: Nullify EVENT of COST or less
+4. Hot Swap: Equip to TARGET HARDWARE. Target is now LEVEL level COST cost.
+
+Resolution
+
+Attacks will inflict damage equal to their COST.
+Defending players choose how to defend. Higher power levels win (B<K<M<G<T<P<E<Z<Y) (elemental immunities) 
+All damage from a single attacker is blocked by a single defender regardless of power differential.
+
+Notes:
+
+Software can be any misc. artwork, media, code, poetry, resource.
+Favorites will just be named colors, firebrick, darkorange, gold, mediumseagreen, slateblue, mediumpurple
+
+Hardware will scale from
+
+Circuits, to Chips, to Computers, to Clusters, to Networks, to Nations, to Corporations, to Religions, to Planets.
