@@ -133,7 +133,7 @@ document.addEventListener("selectionchange", () => {
 document.addEventListener('pointerdown', function(event) {
   const { activated, visible } = $.learn()
   if(!activated && !visible) return
-  if (!event.target.closest('plan98-synthia .synthia, plan98-synthia .result')) {
+  if (!event.target.closest('plan98-synthia .synthia, plan98-synthia .result, plan98-synthia .standard-button')) {
     $.teach({ visible: false, activated: false, synthia: {} })
   }
 });
@@ -160,6 +160,11 @@ $.draw((target) => {
   target.dataset.activated = activated
   return `
     <div class="activator-bar">
+      <button class="standard-button -smol bias-generic -round escape">
+        ESC
+      </button>
+      <div class="tabs">
+      </div>
       <button class="synthia">
         <plan98-icon style="height: 35px; width: 35px;"></plan98-icon>
       </button>
@@ -194,6 +199,11 @@ $.when('click', 'paper-pocket [data-search]', (event) => {
 
 $.when('click', '.synthia', (event) => {
   $.teach({ activated: !$.learn().activated })
+})
+
+$.when('click', '.escape', (event) => {
+  $.teach({ activated: false })
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
 })
 
 $.style(`
@@ -237,10 +247,11 @@ $.style(`
   & .activator-bar {
     position: relative;
     z-index: 900000;
-    display: flex;
     pointer-events: all;
     padding: 2px;
     justify-content: end;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
   }
 
   & .synthia {
