@@ -18,15 +18,17 @@ const bucketKeys = {
   future: 'future',
 }
 
-const emptyBuckets = {
-  [bucketKeys.past]: {},
-  [bucketKeys.lastWeek]: {},
-  [bucketKeys.yesterday]: {},
-  [bucketKeys.today]: {},
-  [bucketKeys.tomorrow]: {},
-  [bucketKeys.thisWeek]: {},
-  [bucketKeys.nextWeek]: {},
-  [bucketKeys.future]: {},
+function emptyBuckets() {
+  return {
+    [bucketKeys.past]: {},
+    [bucketKeys.lastWeek]: {},
+    [bucketKeys.yesterday]: {},
+    [bucketKeys.today]: {},
+    [bucketKeys.tomorrow]: {},
+    [bucketKeys.thisWeek]: {},
+    [bucketKeys.nextWeek]: {},
+    [bucketKeys.future]: {},
+  }
 }
 
 const today = new Date();
@@ -219,15 +221,21 @@ export function updateDraft(data) {
 // dear diary
 const $ = elf('time-machine', {
   cards: [],
+  cache: [],
   grabbing: false,
   sidebar: true,
   space: null,
   time: null,
   now: new Date(),
-  buckets: emptyBuckets,
+  buckets: emptyBuckets(),
   draft: newDraft(eventTypes.note),
+  agentBaseModels: {},
   meta: {},
   context: null
+})
+
+getModels().then(agentBaseModels => {
+  $.teach({ agentBaseModels })
 })
 
 $.style(`
@@ -938,6 +946,8 @@ async function fate() {
     id: `urn:uuid:${keycard.id}`
   })
 
+  const { cache } = $.learn()
+
   async function addData(response) {
     try {
       const data = await response.text()
@@ -946,24 +956,25 @@ async function fate() {
 
       const resources = paths.map(x => space.resource(x))
 
-      const events = await Promise.all(
-        resources.map((resource, i) => resource.get({ signer }).then(res => res.json()).then(data => {
+      const events = await resources
+        .filter(x => !cache.includes(x.path))
+        .map((resource, i) => resource.get({ signer }).then(res => res.json())
+        .then(data => {
           const parts = paths[i].split('/')
           const name = parts[parts.length - 1]
-          return {
+          const event = {
             handle: { path: paths[i], name },
             data
           }
+          $.teach(event, mergeEvent)
+          return event
         }).catch(e => {
           return {
             error: e,
           }
         }))
-      )
 
-      $.teach(events, mergeEvents)
-
-      return events
+      return await Promise.all(events)
     } catch(e) {
       console.error(e)
     }
@@ -978,32 +989,22 @@ async function fate() {
   reIndex(events)
 }
 
-function mergeEvents(state, payload) {
-  const buckets = {
-    past: {},
-    lastWeek: {},
-    yesterday: {},
-    today: {},
-    tomorrow: {},
-    thisWeek: {},
-    nextWeek: {},
-    future: {}
-  };
-
-  payload.filter(x => {
-    return !x.error
-  }).forEach(file => {
-    try {
-      const [timeKey] = file.handle.name.split('.json')
-      const spaceKey = getSpaceFromTime(timeKey)
-      buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file)
-    } catch (_e) {
-      console.warn(`Skipping invalid filename: ${file.handle.name}`);
-    }
-  });
+function mergeEvent(state, payload) {
+  const buckets = { ...state.buckets }
+  const cache = [ ...state.cache ]
+  const file = payload
+  try {
+    const [timeKey] = file.handle.name.split('.json')
+    const spaceKey = getSpaceFromTime(timeKey)
+    buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file)
+    cache[file.handle.path] = true
+  } catch (_e) {
+    console.warn(`Skipping invalid filename: ${file.handle.name}`);
+  }
 
   return {
     ...state,
+    cache,
     buckets,
   }
 }
@@ -1216,7 +1217,7 @@ export const creationForms = {
       ...draft,
     }
 
-    const agentBaseModels = getModels()
+    const { agentBaseModels } = $.learn()
 
     return `
       ${editBanner(this)}
@@ -1495,7 +1496,7 @@ const studios = {
         </label>
         <label class="field">
           <span class="label">System Message</span>
-          <textarea name="systemMessage" style="height: 8rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
+          <textarea data-bind="draft" name="systemMessage" style="height: 8rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
         </label>
       </div>
     `
@@ -2844,7 +2845,7 @@ function reset(target) {
   target.innerHTML = ''
   target.queried = false
 
-  $.teach({ buckets: emptyBuckets })
+  $.teach({ buckets: emptyBuckets() })
 }
 
 $.when('input', '[data-bind]', (event) => {

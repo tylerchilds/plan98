@@ -9,18 +9,16 @@ export const ollama = new Ollama({
   host,
 })
 
-ollama.list().then(data => {
-  const baseModelKeys = {}
-
-  for(const x of data.models) {
-    baseModelKeys[x.name] = x.model
-  }
-
-  $.teach({ baseModelKeys })
-})
-
 export function getModels() {
-  return $.learn().baseModelKeys
+  return ollama.list().then(data => {
+    const models = {}
+
+    for(const x of data.models) {
+      models[x.name] = x.model
+    }
+
+    return models
+  })
 }
 
 export function launch() {

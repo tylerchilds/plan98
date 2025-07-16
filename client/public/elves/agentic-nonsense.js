@@ -1,10 +1,8 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
-import { getModels } from './plan98-synthia.js'
 import { eventTypes, getSearchResults } from './time-machine.js'
 import { ollama } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
-
 
 const tools = [
   {
@@ -289,7 +287,6 @@ async function query(target) {
     const { handle, data } = result
     agents[data.agentId] = data
   }
-
 
   $.teach({ agents, agentId: agentId ? agentId : results[0].data.agentId })
 }
