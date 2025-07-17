@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <ur-shell src="/app/time-machine"></ur-shell>
+    <time-machine></time-machine>
   `
 })
 
