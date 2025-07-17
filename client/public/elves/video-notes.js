@@ -8,7 +8,8 @@ import { get, put } from './plan98-wallet.js'
 translate.engine = "libre";
 translate.url = plan98.env.LIBRE_TRANSLATE_URL + '/translate'
 
-const $ = elf('video-notes', {
+const tag = 'video-notes'
+const $ = elf(tag, {
   caption: '',
   translated: '',
   to: 'es',
@@ -42,50 +43,6 @@ try {
   alert('Error submitting form.');
 }
 
-
-$.draw((target) => null, {
-  beforeUpdate(target) {
-    if(!target.initialized) {
-      target.initialized = true
-      init(event.target.closest($.link))
-    }
-  },
-  afterUpdate(target) {
-    const {
-      partial='',
-      translated,
-      recording,
-      result=''
-    } = $.learn()
-
-    if(!target.video) {
-      target.innerHTML = `
-        <div class="microphone"></div>
-        <video controls="true"></video>
-        <div class="partial"></div>
-        <div class="result"></div>
-        <div class="translate"></div>
-      `
-      target.video = target.querySelector('video')
-      target.video.muted = true
-      target.video.srcObject = target.mediaStream;
-      // Display video stream in a video element, etc.
-      target.video.playsInline = true
-      target.video.autoplay = true;
-    }
-
-    const partialContainer = target.querySelector('.partial')
-    const resultContainer = target.querySelector('.result')
-    const translateContainer = target.querySelector('.translate')
-    const microphoneContainer = target.querySelector('.microphone')
-
-    partialContainer.innerHTML = partial
-    resultContainer.innerHTML = result
-    translateContainer.innerHTML = translated
-    microphoneContainer.innerHTML = recording ? '<button data-stop>Stop</button>' : '<button data-record>Record</button>'
-  }
-})
-
 let mediaRecorder;
 let audioChunks = [];
 
@@ -103,6 +60,7 @@ const supportedVideoType = videoMimeTypes.find(type =>
 );
 
 $.when('click', '[data-record]', async (event) => {
+  debugger
   if (!supportedVideoType) {
     return
   }
@@ -187,92 +145,152 @@ $.when('click', '[data-stop]', async () => {
   }
 });
 
-$.when('input', '[data-bind]', (event) => {
-  $.teach({[event.target.name]: event.target.value })
-})
-
-
-$.when('change', '[data-bind]', (event) => {
-  $.teach({[event.target.name]: event.target.value })
-})
-
-$.when('change', '[type="checkbox"]', (event) => {
-  const { checked, name } = event.target
-  $.teach({ [name]: checked })
-})
-
-
-async function init(target) {
-  const { realtime } = $.learn()
-  const channel = new MessageChannel();
-  const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
-  model.registerPort(channel.port1);
-
-  const sampleRate = 48000;
-
-  const recognizer = new model.KaldiRecognizer(sampleRate);
-  recognizer.setWords(true);
-
-    recognizer.on("partialresult", async (message) => {
-      const partial = message.result.partial;
-      if(partial === '') return
-      $.teach({
-        partial
-      })
-    });
-
-    recognizer.on("result", async (message) => {
-      const result = message.result;
-
-      if(result.text) {
-        $.teach({
-          result: result.text
-        })
-
-        const { to, from } = $.learn()
-        const translated = await translate(result.text, { to, from })
-        $.teach({
-          translated
-        })
-      }
-    });
-
-  target.mediaStream = await navigator.mediaDevices.getUserMedia({
-    video: true,
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      channelCount: 1,
-      sampleRate
-    },
-  });
-
-  const audioContext = new AudioContext();
-  await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
-  const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
-  recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
-  recognizerProcessor.connect(audioContext.destination);
-
-  const source = audioContext.createMediaStreamSource(target.mediaStream);
-  source.connect(recognizerProcessor);
-}
-
-const defaults = {
-  monospace: '0',
-  casual: '1',
-  weight: '800',
-  slant: '-15',
-  cursive: '1',
-}
-
-const {
-  monospace,
-  casual,
-  weight,
-  slant,
-  cursive
-} = defaults
-
 $.style(`
   
 `)
+
+class VideoNotes extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' })
+  }
+
+  connectedCallback() {
+    if(!this.shadowRoot.innerHTML) {
+      this.shadowRoot.innerHTML = `
+        <style>
+          :host {
+            display: block;
+            width: 100%;
+            height: 100%;
+          }
+
+          :host video {
+            width: 100%;
+            height: 100%;
+          }
+        </style>
+
+        <div class="microphone"></div>
+        <video controls="true"></video>
+        <div class="partial"></div>
+        <div class="result"></div>
+        <div class="translate"></div>
+      `
+      this.init(this)
+    }
+
+    $.draw(() => null, { afterUpdate: this.afterUpdate })
+  }
+
+  disconnectedCallback() {
+    const video = this.shadowRoot.querySelector('video')
+    if(video) {
+      video.pause();
+
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      }
+
+      if (video.src && video.src.startsWith('blob:')) {
+        URL.revokeObjectURL(video.src);
+        video.src = '';
+      }
+
+      video.removeAttribute('src');
+    }
+
+    this.shadowRoot.innerHTML = null
+
+    if(this.mediaStream) {
+      this.mediaStream.getTracks().forEach(track => track.stop());
+      this.mediaStream = null
+    }
+  }
+
+  async init(target) {
+    const sampleRate = 48000;
+    target.mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        channelCount: 1,
+        sampleRate
+      },
+    });
+
+    target.video = target.shadowRoot.querySelector('video')
+    target.video.muted = true
+    target.video.srcObject = target.mediaStream;
+    // Display video stream in a video element, etc.
+    target.video.playsInline = true
+    target.video.autoplay = true;
+
+    const channel = new MessageChannel();
+    const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
+    model.registerPort(channel.port1);
+
+    const recognizer = new model.KaldiRecognizer(sampleRate);
+    recognizer.setWords(true);
+
+      recognizer.on("partialresult", async (message) => {
+        const partial = message.result.partial;
+        if(partial === '') return
+        $.teach({
+          partial
+        })
+      });
+
+      recognizer.on("result", async (message) => {
+        const result = message.result;
+
+        if(result.text) {
+          $.teach({
+            result: result.text
+          })
+
+          const { to, from } = $.learn()
+          const translated = await translate(result.text, { to, from })
+          $.teach({
+            translated
+          })
+        }
+      });
+
+    const audioContext = new AudioContext();
+    await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
+    const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
+    recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
+    recognizerProcessor.connect(audioContext.destination);
+
+    const source = audioContext.createMediaStreamSource(target.mediaStream);
+    source.connect(recognizerProcessor);
+  }
+
+
+  afterUpdate(target) {
+    if(!target.shadowRoot.innerHTML) return
+    const {
+      partial='',
+      translated,
+      recording,
+      result=''
+    } = $.learn()
+
+    const partialContainer = target.shadowRoot.querySelector('.partial')
+    const resultContainer = target.shadowRoot.querySelector('.result')
+    const translateContainer = target.shadowRoot.querySelector('.translate')
+    const microphoneContainer = target.shadowRoot.querySelector('.microphone')
+
+    partialContainer.innerHTML = partial
+    resultContainer.innerHTML = result
+    translateContainer.innerHTML = translated
+    microphoneContainer.innerHTML = recording ? '<button data-stop>Stop</button>' : '<button data-record>Record</button>'
+  }
+}
+
+customElements.define(tag, VideoNotes);
+
+
