@@ -60,7 +60,6 @@ const supportedVideoType = videoMimeTypes.find(type =>
 );
 
 $.when('click', '[data-record]', async (event) => {
-  debugger
   if (!supportedVideoType) {
     return
   }
@@ -152,39 +151,15 @@ $.style(`
 class VideoNotes extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' })
   }
 
   connectedCallback() {
-    if(!this.shadowRoot.innerHTML) {
-      this.shadowRoot.innerHTML = `
-        <style>
-          :host {
-            display: block;
-            width: 100%;
-            height: 100%;
-          }
-
-          :host video {
-            width: 100%;
-            height: 100%;
-          }
-        </style>
-
-        <div class="microphone"></div>
-        <video controls="true"></video>
-        <div class="partial"></div>
-        <div class="result"></div>
-        <div class="translate"></div>
-      `
-      this.init(this)
-    }
-
     $.draw(() => null, { afterUpdate: this.afterUpdate })
+    this.init(this)
   }
 
   disconnectedCallback() {
-    const video = this.shadowRoot.querySelector('video')
+    const video = this.querySelector('video')
     if(video) {
       video.pause();
 
@@ -201,7 +176,7 @@ class VideoNotes extends HTMLElement {
       video.removeAttribute('src');
     }
 
-    this.shadowRoot.innerHTML = null
+    this.innerHTML = null
 
     if(this.mediaStream) {
       this.mediaStream.getTracks().forEach(track => track.stop());
@@ -221,7 +196,18 @@ class VideoNotes extends HTMLElement {
       },
     });
 
-    target.video = target.shadowRoot.querySelector('video')
+    if(!target.innerHTML) {
+      target.innerHTML = `
+        <div class="microphone"></div>
+        <video controls="true"></video>
+        <div class="partial"></div>
+        <div class="result"></div>
+        <div class="translate"></div>
+      `
+      this.afterUpdate(target)
+    }
+
+    target.video = target.querySelector('video')
     target.video.muted = true
     target.video.srcObject = target.mediaStream;
     // Display video stream in a video element, etc.
@@ -269,9 +255,8 @@ class VideoNotes extends HTMLElement {
     source.connect(recognizerProcessor);
   }
 
-
   afterUpdate(target) {
-    if(!target.shadowRoot.innerHTML) return
+    if(!target.innerHTML) return
     const {
       partial='',
       translated,
@@ -279,10 +264,10 @@ class VideoNotes extends HTMLElement {
       result=''
     } = $.learn()
 
-    const partialContainer = target.shadowRoot.querySelector('.partial')
-    const resultContainer = target.shadowRoot.querySelector('.result')
-    const translateContainer = target.shadowRoot.querySelector('.translate')
-    const microphoneContainer = target.shadowRoot.querySelector('.microphone')
+    const partialContainer = target.querySelector('.partial')
+    const resultContainer = target.querySelector('.result')
+    const translateContainer = target.querySelector('.translate')
+    const microphoneContainer = target.querySelector('.microphone')
 
     partialContainer.innerHTML = partial
     resultContainer.innerHTML = result
