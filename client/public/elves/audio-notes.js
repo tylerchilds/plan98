@@ -148,7 +148,49 @@ $.when('click', '[data-stop]', async () => {
 
 
 $.style(`
-  
+  & {
+    position: relative;
+    touch-action: none;
+    overflow: hidden;
+    display: block;
+    height: 100%;
+  }
+
+  & .viewport {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+  }
+
+  & .lingustics {
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,0));
+    font-size: 1.5rem;
+    padding: .5rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    color: white;
+    text-shadow: 1px 1px black;
+  }
+
+  & audio {
+    width: 100%;
+  }
+
+  & .taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 5;
+    padding: .5rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+  }
 `)
 
 
@@ -202,11 +244,23 @@ class AudioNotes extends HTMLElement {
 
     if(!target.innerHTML) {
       target.innerHTML = `
-        <div class="microphone"></div>
-        <audio controls="true"></audio>
-        <div class="partial"></div>
-        <div class="result"></div>
-        <div class="translate"></div>
+        <div class="taskbar">
+          <div class="left">
+          </div>
+          <div class="center" data-primary-action></div>
+          <div class="right">
+          </div>
+        </div>
+
+        <div class="viewport">
+          <div class="lingustics">
+            <div class="partial"></div>
+            <div class="result"></div>
+            <div class="translate"></div>
+          </div>
+          <audio playsinline controls="true"></audio>
+        </div>
+
       `
 
       this.afterUpdate(target)
@@ -272,14 +326,14 @@ class AudioNotes extends HTMLElement {
     const partialContainer = target.querySelector('.partial')
     const resultContainer = target.querySelector('.result')
     const translateContainer = target.querySelector('.translate')
-    const microphoneContainer = target.querySelector('.microphone')
+    const actionContainer = target.querySelector('[data-primary-action]')
 
     partialContainer.innerHTML = partial
     resultContainer.innerHTML = result
     translateContainer.innerHTML = translated
-    microphoneContainer.innerHTML = recording
-      ? '<button data-stop>Stop</button>'
-      : '<button data-record>Record</button>'
+    actionContainer.innerHTML = recording
+      ? '<button data-stop class="standard-button">Stop</button>'
+      : '<button data-record class="standard-button">Record</button>'
   }
 
 }

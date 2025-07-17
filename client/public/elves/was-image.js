@@ -18,6 +18,7 @@ function draw(target) {
         max-width: 100%;
         max-height: 100%;
         margin: auto;
+        object-fit: cover;
       }
    </style>
    <img />

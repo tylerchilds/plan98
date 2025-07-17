@@ -60,7 +60,37 @@ $.when('click', '[data-snap]', async (event) => {
 });
 
 $.style(`
-  
+  & {
+    position: relative;
+    touch-action: none;
+    overflow: hidden;
+    display: block;
+    height: 100%;
+  }
+
+  & .viewport {
+    position: absolute;
+    inset: 0;
+  }
+
+  & video {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+  }
+
+  & .taskbar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 5;
+    padding: .5rem;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+  }
 `)
 
 class WasCamera extends HTMLElement {
@@ -113,13 +143,26 @@ class WasCamera extends HTMLElement {
 
     if(!target.innerHTML) {
       target.innerHTML = `
-        <div class="microphone">
-          <button data-snap>Snap</button>
+        <div class="taskbar">
+          <div class="left">
+          </div>
+          <div class="center">
+            <button data-snap class="standard-button">Snap</button>
+          </div>
+          <div class="right">
+          </div>
         </div>
-        <video playsinline></video>
+
+        <div class="viewport">
+          <video playsinline></video>
+          <div class="partial"></div>
+          <div class="result"></div>
+          <div class="translate"></div>
+        </div>
       `
       this.afterUpdate(target)
     }
+
 
     target.video = target.querySelector('video')
     target.video.muted = true

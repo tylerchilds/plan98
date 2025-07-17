@@ -18,6 +18,7 @@ function draw(target) {
       :host video {
         width: 100%;
         height: 100%;
+        object-fit: cover;
       }
      </style>
      <video controls="true"></video>
