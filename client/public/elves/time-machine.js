@@ -364,7 +364,15 @@ $.style(`
     padding: 0;
     background: transparent;
     border-radius: 100%;
+  }
 
+  & .logo-gradient {
+    border: none;
+    padding: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
     --v-font-mono: 0;
     --v-font-casl: 0;
     --v-font-wght: 1000;
@@ -372,7 +380,6 @@ $.style(`
     --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
-
   }
 
   & .now {
@@ -2204,7 +2211,7 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
-        <button class="logo-area" data-assistant>
+        <button class="logo-gradient" data-assistant>
           Plan98
         </button>
         <div class="identity-selector">
