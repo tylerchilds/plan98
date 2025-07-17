@@ -540,7 +540,7 @@ $.style(`
     line-height: 1.25;
   }
 
-  & .text-well textarea {
+  & .child-well .full-textarea {
     padding: .5rem;
     resize: none;
     border: none;
@@ -744,7 +744,7 @@ $.style(`
     display: none;
     background: rgba(0,0,0,1);
     position: absolute;
-    bottom: 0px;
+    bottom: -4px;
     left: 0;
     max-height: calc(100vh);
     max-width: calc(100vw - 40px);
@@ -1436,6 +1436,7 @@ const studios = {
   [eventTypes.note]: function(draft) {
     return `
       <textarea
+        class="full-textarea"
         name="text"
         data-bind="draft"
         placeholder="Today, I ..."
@@ -2675,8 +2676,9 @@ async function appendPath(path) {
       paths.push(path)
       await put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' })
     }
-
   })
+
+  fate()
 }
 
 export function destroy(context) {

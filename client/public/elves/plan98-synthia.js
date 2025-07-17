@@ -3,6 +3,7 @@ import { showModal, isVisible, hideModal } from './plan98-modal.js'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 import { Ollama } from 'ollama/browser'
 const $ = elf('plan98-synthia', { synthia: {} })
+import { update } from './ur-shell.js'
 
 const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
 export const ollama = new Ollama({
@@ -347,25 +348,42 @@ $.when('input', '[data-bind]', (event) => {
 })
 
 let isRoot = false
+
+function normalMode() {
+  isRoot = false
+}
+
+
+self.addEventListener('message', function handleMessage(event) {
+  if(event.data.whisper === 'synthia-escape') {
+    handleEscapePropagation()
+  } else { console.log(event) }
+});
+
+
 window.addEventListener('keydown', (event) => {
   if (event.key === 'Escape') {
     event.preventDefault()
-    if(isRoot) return
-
-    if(!isVisible()) {
-      isRoot = true
-      showModal(`
-        <div style="width: 100%; height: 100%; overflow: hidden;">
-          <source-code></source-code>
-        </div>
-      `, { centered: true, onHide: normalMode, blockExit: false })
-    } else {
-      isRoot = false
-      hideModal()
-    }
-  }
-
-  function normalMode() {
-    isRoot = false
+    handleEscapePropagation()
   }
 });
+
+function handleEscapePropagation() {
+  if(self.self !== self.top) {
+    self.parent.postMessage({ whisper: 'synthia-escape' }, "*");
+    return
+  }
+
+  if(isRoot) return
+  if(!isVisible()) {
+    isRoot = true
+    showModal(`
+      <div style="width: 100%; height: 100%; overflow: hidden;">
+        <source-code></source-code>
+      </div>
+    `, { centered: true, onHide: normalMode, blockExit: false })
+  } else {
+    isRoot = false
+    hideModal()
+  }
+}

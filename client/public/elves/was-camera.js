@@ -116,7 +116,7 @@ class WasCamera extends HTMLElement {
         <div class="microphone">
           <button data-snap>Snap</button>
         </div>
-        <video></video>
+        <video playsinline></video>
       `
       this.afterUpdate(target)
     }
