@@ -199,7 +199,7 @@ class VideoNotes extends HTMLElement {
     if(!target.innerHTML) {
       target.innerHTML = `
         <div class="microphone"></div>
-        <video controls="true"></video>
+        <video playsinline></video>
         <div class="partial"></div>
         <div class="result"></div>
         <div class="translate"></div>

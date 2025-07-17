@@ -51,6 +51,7 @@ export const eventTypes = {
   archive: 'archive',
   product: 'product',
   agent: 'agent',
+  sheet: 'sheet',
   dwebcamp: 'dwebcamp'
 }
 
@@ -63,6 +64,7 @@ export const views = {
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
   [eventTypes.agent]: eventTypes.agent,
+  [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.gallery]: eventTypes.gallery,
@@ -113,6 +115,13 @@ export const schemas = {
   },
   [eventTypes.product]: {
     type: eventTypes.product,
+    url: null,
+    title: 'Untitled',
+    description: null,
+    tags: [],
+  },
+  [eventTypes.sheet]: {
+    type: eventTypes.sheet,
     url: null,
     title: 'Untitled',
     description: null,
@@ -1220,6 +1229,15 @@ export const creationForms = {
       }).join('')}
     `
   },
+  [eventTypes.sheet]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
+    `
+  },
   [eventTypes.agent]: function(draft) {
 
     const x = {
@@ -1487,6 +1505,12 @@ const studios = {
 
     return `
       ??? What type of custom product should go here
+    `
+  },
+  [eventTypes.sheet]: function(draft) {
+    const src = this && this.path ? `src="${this.path}"` : ''
+    return `
+      <react-sheets id="${draft.id}" ${src}></react-sheets>
     `
   },
   [eventTypes.agent]: function(draft) {
@@ -1925,6 +1949,22 @@ const viewRenderers = {
       </div>
     `)
   },
+  [views.sheet]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.sketch],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <react-sheets src="${x.src}"></react-sheets>
+    `)
+  },
   [views.agent]: (target) => {
     const { space, time } = target.dataset
 
@@ -2197,6 +2237,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.sheet}">Sheet</button>
           <button data-new="${eventTypes.agent}">Agent</button>
           <button data-new="${eventTypes.product}">Product</button>
           <button data-new="${eventTypes.video}">Video</button>
@@ -2410,6 +2451,17 @@ const eventRenderers = {
     }
     return `
       <button class="view-event" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
+  [eventTypes.sheet]: function (event) {
+    const data = {
+      ...schemas[views.sheet],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.sheet}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
