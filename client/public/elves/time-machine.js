@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
+import { walletDefaultHost, bios, getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
@@ -49,8 +49,9 @@ export const eventTypes = {
   audio: 'audio',
   video: 'video',
   archive: 'archive',
-  product: 'product',
   agent: 'agent',
+  product: 'product',
+  keycard: 'keycard',
   sheet: 'sheet',
   dwebcamp: 'dwebcamp'
 }
@@ -63,6 +64,7 @@ export const views = {
   [eventTypes.memo]: eventTypes.memo,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
+  [eventTypes.keycard]: eventTypes.keycard,
   [eventTypes.agent]: eventTypes.agent,
   [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
@@ -120,6 +122,15 @@ export const schemas = {
     description: null,
     tags: [],
   },
+  [eventTypes.keycard]: {
+    type: eventTypes.keycard,
+    src: '/app/time-machine',
+    title: 'Untitled',
+    name: 'Keycard',
+    description: null,
+    tags: [],
+  },
+
   [eventTypes.sheet]: {
     type: eventTypes.sheet,
     url: null,
@@ -1196,6 +1207,41 @@ export const creationForms = {
       </label>
     `
   },
+  [eventTypes.keycard]: function(draft) {
+
+    const x = {
+      ...schemas[views.keycard],
+      ...draft,
+    }
+
+    return `
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">name</span>
+        <input data-bind="draft" name="name" value="${escapeHyperText(x.name) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(x.description) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">host</span>
+        <input data-bind="draft" name="host" value="${escapeHyperText(x.host || walletDefaultHost) || ''}" />
+      </label>
+      <label class="field">
+        <span class="label">launch</span>
+        <select data-bind="draft" name="src">
+          <option disabled>--Select--</option>
+          ${Object.keys(bios).map((key) => `
+            <option value="${bios[key]}" ${bios[key] === x.src?'selected':''}>
+              ${key}
+            </button>
+          `).join('')}
+        </select>
+      </label>
+    `
+  },
+
   [eventTypes.product]: function(draft) {
 
     const x = {
@@ -1496,15 +1542,25 @@ const studios = {
     return `
     `
   },
+  [eventTypes.keycard]: function(draft) {
+
+    const x = {
+      ...schemas[views.keycard],
+      ...draft,
+    }
+    return `
+      <plan98-wallet id="${draft.id}"></plan98-wallet>
+    `
+  },
+
   [eventTypes.product]: function(draft) {
 
     const x = {
       ...schemas[views.product],
       ...draft,
     }
-
     return `
-      ??? What type of custom product should go here
+      <buy-sell></buy-sell>
     `
   },
   [eventTypes.sheet]: function(draft) {
@@ -1904,6 +1960,44 @@ const viewRenderers = {
     `)
   },
 
+  [views.keycard]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.keycard],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <div class="keycard">
+        <div class="keycard-title">
+          <a href="${x.src || ''}" class="keycard-url">${x.name || x.src}</a>
+        </div>
+        <div class="keycard-host">
+          ${x.host}
+        </div>
+
+        <div class="attachments">
+          ${x.attachments?.map(x => {
+            return `
+              ${x.name}
+              ${x.type}
+              ${x.size}
+            `
+          }).join('')}
+          ${x.attachments?.length > 0 ? `
+            <button data-download-attachments data-space="${space}" data-time="${time}">
+              Download
+            </button>
+          `:''}
+        </div>
+      </div>
+    `)
+  },
+
   [views.product]: (target) => {
     const { space, time } = target.dataset
 
@@ -2205,18 +2299,20 @@ function patch(target) {
 
     const activeKeycard = getKeycard()
 
-    if(target.keycardsLength !== list.length || activeKeycard.id !== target.activeKeycardId) {
-      target.activeKeycardId = activeKeycard.id
-      target.keycardsLength = list.length
-      identity.innerHTML = `
-        <select name="keycard" class="standard-button -smol">
-          ${list.map(keycard => {
-            return `
-              <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
-            `
-          }).join('')}
-        </select>
-      `
+    if(activeKeycard) {
+      if(target.keycardsLength !== list.length || activeKeycard.id !== target.activeKeycardId) {
+        target.activeKeycardId = activeKeycard.id
+        target.keycardsLength = list.length
+        identity.innerHTML = `
+          <select name="keycard" class="standard-button -smol">
+            ${list.map(keycard => {
+              return `
+                <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
+              `
+            }).join('')}
+          </select>
+        `
+      }
     }
   }
 }
@@ -2239,7 +2335,7 @@ $.draw((target)=> {
         <div class="dropdown-items" data-menu="edit">
           <button data-new="${eventTypes.sheet}">Sheet</button>
           <button data-new="${eventTypes.agent}">Agent</button>
-          <button data-new="${eventTypes.product}">Product</button>
+          <button data-new="${eventTypes.keycard}">Keycard</button>
           <button data-new="${eventTypes.video}">Video</button>
           <button data-new="${eventTypes.image}">Photo</button>
           <button data-new="${eventTypes.sketch}">Sketch</button>
@@ -2357,6 +2453,15 @@ $.draw((target)=> {
 }, {
   beforeUpdate(target) {
     {
+      const activeKeycard = getKeycard()
+
+      if(!activeKeycard) {
+        window.location.href = '/app/welcome-onboarding'
+        return
+      }
+    }
+
+    {
       saveCursor(target)
     }
 
@@ -2385,6 +2490,12 @@ $.draw((target)=> {
     }
   },
   afterUpdate(target) {
+    {
+      const activeKeycard = getKeycard()
+      if(!activeKeycard) {
+        return
+      }
+    }
     {
       requestAnimationFrame(() => {
         patch(target)
@@ -2444,6 +2555,17 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.keycard]: function (event) {
+    const data = {
+      ...schemas[views.keycard],
+      ...event.data
+    }
+    return `
+      <button class="view-event" data-show="${eventTypes.keycard}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        ${data.title}
+      </button>
+    `
+  },
   [eventTypes.product]: function (event) {
     const data = {
       ...schemas[views.product],
@@ -2455,6 +2577,7 @@ const eventRenderers = {
       </button>
     `
   },
+
   [eventTypes.sheet]: function (event) {
     const data = {
       ...schemas[views.sheet],
@@ -2606,6 +2729,15 @@ $.when('click', '[data-action="edit"]', async (event) => {
   $.teach({ view: views.create })
 })
 
+export async function saveKeycard(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.keycard,
+  }, context)
+}
+
 export async function saveProduct(draft, context) {
   return await save({
     title: 'Untitled',
@@ -2706,6 +2838,7 @@ const saveHandlers = {
   [eventTypes.audio]: saveAudio,
   [eventTypes.video]: saveVideo,
   [eventTypes.archive]: save,
+  [eventTypes.keycard]: saveKeycard,
   [eventTypes.product]: saveProduct,
   [eventTypes.agent]: saveAgent,
   [eventTypes.dwebcamp]: save,

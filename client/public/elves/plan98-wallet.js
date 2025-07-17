@@ -10,7 +10,7 @@ const ERROR_P98_KEYCARD_REJECTED = '003'
 const ERROR_P98_KEYCARD_TIMEOUT = '004'
 const ERROR_P98_BOOTSTRAP_FAILED = '005'
 
-const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
+export const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
 
 const Types = {
   File: {
@@ -21,7 +21,7 @@ const Types = {
   },
 }
 
-const bios = {
+export const bios = {
   'bluesky': '/app/blue-sky',
   'desktop': '/app/door-man',
   'mobile': '/app/mobile-device',
@@ -280,10 +280,14 @@ function insertKeycard(state, payload) {
 
 subscribe((link) => {
   if(link === $.link) {
-    const { keycards } = $.learn()
-    localStorage.setItem(`${$.link}`, JSON.stringify({ keycards }))
+    persist()
   }
 })
+
+function persist() {
+  const { keycards } = $.learn()
+  localStorage.setItem(`${$.link}`, JSON.stringify({ keycards }))
+}
 
 export function getKeycard() {
   const { keycards } = $.learn()
@@ -321,7 +325,7 @@ export function getStorage(keycard=getKeycard()) {
   return new StorageClient(new URL(keycard.host || walletDefaultHost))
 }
 
-async function newKeycard(overrides={}) {
+export async function newKeycard(overrides={}) {
   const id = self.crypto.randomUUID()
   const signer = await Ed25519Signer.generate()
 
@@ -980,10 +984,15 @@ function render(keycard) {
 }
 
 $.when('click', '[data-create]', async (event) => {
+  provisionActiveKeycard()
+})
+
+export async function provisionActiveKeycard() {
   const keycard = await newKeycard().catch(console.error)
   $.teach(keycard, unshiftKeycard)
   $.teach({ activeKeycardId: keycard.id })
-})
+  persist()
+}
 
 $.when('click', '[data-quit]', async (event) => {
   window.location.href = '/app/paper-pocket'
