@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
@@ -3096,7 +3096,10 @@ $.when('input', '[data-bind]', (event) => {
   $.teach({
     name: event.target.name,
     value: formatify(format, event.target.value)
-  }, bound(bind))
+  }, {
+    mergeHandler: bound,
+    parameters: [bind]
+  })
 })
 
 function bound(bind) {
