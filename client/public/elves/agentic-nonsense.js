@@ -115,7 +115,7 @@ const $ = elf(tag, {
   messages: [],
   agentId: Object.keys(agents)[0],
   agents: agents,
-  messageText: '',
+  messageString: '',
   messageHeight: null
 })
 
@@ -140,7 +140,7 @@ function optionalChatSettings(agent) {
 }
 
 async function processChat() {
-  $.teach({ thinking: true, messageHeight: null, messageText: '' })
+  $.teach({ thinking: true, messageHeight: null, messageString: '' })
 
   const { agents, agentId, messages } = $.learn()
   const context = [
@@ -317,7 +317,7 @@ function beforeUpdate(target) {
 
       if(q) {
         const message = decodeURIComponent(q)
-        $.teach({ messageText: message, q: message })
+        $.teach({ messageString: message, q: message })
       }
     }
   }
@@ -343,7 +343,7 @@ function afterUpdate(target) {
 }
 
 function patch(target) {
-  const { agents, agentId, messages, messageText, messageHeight, thinking } = $.learn()
+  const { agents, agentId, messages, messageString, messageHeight, thinking } = $.learn()
 
   if(views[target.dataset.view]) {
     innerHTML(target, views[target.dataset.view](target))
@@ -375,7 +375,7 @@ function patch(target) {
           <textarea
             data-bind
             class="standard-input"
-            name="messageText"
+            name="messageString"
             placeholder="Need help?"
           ></textarea>
           <div class="action-column">
@@ -388,11 +388,11 @@ function patch(target) {
     `
   }
 
-  const textArea = target.querySelector('[name="messageText"]')
+  const textArea = target.querySelector('[name="messageString"]')
 
-  if(textArea.lastMessage !== messageText) {
-    textArea.lastMessage = messageText
-    textArea.value = messageText
+  if(textArea.lastMessage !== messageString) {
+    textArea.lastMessage = messageString
+    textArea.value = messageString
   }
 
   if(textArea.messageHeight !== messageHeight) {
@@ -455,7 +455,7 @@ function clearCursor(target) {
 }
 
 
-$.when('keypress', 'form [name="messageText"]', (e) => {
+$.when('keypress', 'form [name="messageString"]', (e) => {
   if (e.key === "Enter" && !e.shiftKey) {
     e.preventDefault();
     const message = event.target.value
@@ -465,7 +465,7 @@ $.when('keypress', 'form [name="messageText"]', (e) => {
 
 $.when('submit', 'form', (event) => {
   event.preventDefault()
-  const message = event.target.messageText.value
+  const message = event.target.messageString.value
   send.call(event.target.closest($.link), message)
 })
 
@@ -573,10 +573,10 @@ $.when('input', '[data-bind]', event => {
   $.teach({ [name]: value })
 })
 
-$.when('focus', '[name="messageText"]', (event) => {
+$.when('focus', '[name="messageString"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
 });
 
-$.when('input', '[name="messageText"]', (event) => {
+$.when('input', '[name="messageString"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
 })

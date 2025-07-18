@@ -554,20 +554,26 @@ $.style(`
 
   & .child-well .textarea,
   & .text-well .textarea {
-    padding: .5rem;
+    padding: 3rem .5rem 2rem;
     white-space: preserve;
     overflow: auto;
     line-height: 1.25;
+    max-width: 7.5in;
+    margin: auto;
+    display: block;
   }
 
   & .child-well .full-textarea {
-    padding: .5rem;
+    padding: 3rem .5rem 2rem;
     resize: none;
     border: none;
     width: 100%;
     height: 100%;
     overflow: auto;
     line-height: 1.25;
+    max-width: 7.5in;
+    margin: auto;
+    display: block;
   }
 
   & .text-well .edit-banner:empty + textarea {
@@ -1323,7 +1329,7 @@ export const creationForms = {
 
         <label class="field">
           <span class="label">Options</span>
-          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticOptionsPlaceholder, '', 2))}" name="options" style="height: 33rem;" value="${escapeHyperText(x.options)}"></textarea>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticOptionsPlaceholder, '', 2))}" name="options" style="height: 48rem;" value="${escapeHyperText(x.options)}"></textarea>
         </label>
 
         <label class="field">
@@ -1602,10 +1608,6 @@ const studios = {
         <p>
           To create an agent, give it a name and tell it what to do using the system message. For advanced tuning, open Settings <span><sl-icon name="gear-fill"></sl-icon></span>.
         </p>
-        <label class="field">
-          <span class="label">Name</span>
-          <input data-bind="draft" name="name" value="${escapeHyperText(x.name)}" type="text"/>
-        </label>
         <label class="field">
           <span class="label">System Message</span>
           <textarea data-bind="draft" name="systemMessage" style="height: 16rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
@@ -2750,11 +2752,13 @@ export async function saveProduct(draft, context) {
 export async function saveAgent(draft, context) {
   const models = getModels()
   const someModel = models[Object.keys(models)[0]]
+  const title = draft.title || 'Untitled'
   return await save({
-    title: 'Untitled',
+    title,
     agentModel: someModel,
     ...timeFields(),
     ...draft,
+    name: title,
     agentId: draft.agentId ? draft.agentId : self.crypto.randomUUID(),
     type: eventTypes.agent,
   }, context)

@@ -33,7 +33,7 @@ Clarifications:
 
 Card Structure
 
-Power: Lightning, Ocean, Volcano, Forest, Atmosphere
+Power: Ocean (diamond), Volcano (spade), Forest (club), Atmosphere (heart)
 Cost: 1, 2, 3, 4, 5, 6, 7, 8, 9
 Level: Byte, Kilo, Mega, Giga, Tera, Peta, Exo, Zetta, Yotta
 Type: Software, Hardware, Event
@@ -60,10 +60,11 @@ Events:
 
 May be played at any time and are resolved in the order they are declared
 
-1. Spawn: Play HARDWARE of COST or less from HAND to PRODUCTION
-2. Destroy: Destroy TARGET hardware of COST or less
-3. Cancel: Nullify EVENT of COST or less
-4. Hot Swap: Equip to TARGET HARDWARE. Target is now LEVEL level COST cost.
+1. Spawn (king): Play HARDWARE of COST or less from HAND to PRODUCTION
+2. Destroy (queen)): Destroy TARGET hardware of COST or less
+3. Cancel (jack): Nullify EVENT of COST or less
+4. Hot Swap (joker): Equip to TARGET HARDWARE. Target is now LEVEL level COST cost.
+5. Evolution (ace): Add ONE to TARGET and SUIT will match.
 
 Resolution
 
