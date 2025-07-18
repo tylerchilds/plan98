@@ -1055,7 +1055,7 @@ sillonious-brand > xml-html {
   border-bottom: 3px solid var(--root-theme, mediumseagreen);
   text-decoration: none;
   display: inline-grid;
-  place-content: center;
+  place-items: center;
   border-radius: 5px;
 }
 

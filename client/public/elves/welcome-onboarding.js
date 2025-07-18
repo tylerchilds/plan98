@@ -92,6 +92,9 @@ const formRenderers = {
       <div class="form-description">
         You get the idea.
       </div>
+      <div class="form-description">
+        The Plan98 mission is simple. Bring everything together into one spot. A party!
+      </div>
       <div style="margin: 3rem 0;">
         <plan98-icon></plan98-icon>
       </div>
@@ -176,6 +179,9 @@ const formRenderers = {
       <button class="standard-button bias-positive -large" data-submit="${forms.create}">
         Create Keycard
       </button>
+      <button class="standard-button bias-generic -large" data-submit="${forms.first}">
+        Go Back
+      </button>
     `
   },
   [forms.success]: (target) => {
@@ -248,6 +254,23 @@ const formRenderers = {
 
       <button class="standard-button bias-generic -large" data-submit="${forms.leave}">
         Skip
+      </button>
+    `
+  },
+  [forms.complete]: (target) => {
+    return `
+      <div>
+        <plan98-icon></plan98-icon>
+      </div>
+      <div class="form-title">
+        Success!
+      </div>
+      <div class="form-description">
+        Your website has been published. Nothing left to do other than jump in. You finished the tutorial. Great work!
+      </div>
+
+      <button class="standard-button bias-positive -large" data-submit="${forms.leave}">
+        Enter Time Machine
       </button>
     `
   },
@@ -327,9 +350,7 @@ const formValidators = {
     const errors = []
     try {
       await provisionActiveKeycard({
-        src: state.draft.src,
-        name: state.draft.name,
-        host: state.draft.host,
+        ...state.draft
       })
       await saveKeycard(state.draft).catch(console.error)
     } catch(e) {
@@ -386,7 +407,23 @@ $.style(`
   & {
     display: grid;
     gap: 1rem;
+    animation: &-fade-in 1000ms ease-in-out forwards;
+    background: var(--root-theme, mediumseagreen);
+    opacity: 0;
+    height: 100%;
   }
+
+  @keyframes &-fade-in {
+    0% {
+      opacity: 0;
+      background: var(--root-theme, mediumseagreen);
+    }
+    100% {
+      opacity: 1;
+      background: white;
+    }
+  }
+
 
   & .file-region {
     border: 3px dashed rgba(0,0,0,.45);
@@ -492,7 +529,10 @@ function bound(bind) {
 $.draw((target) => {
   const { form } = $.learn()
   const html = formRenderers[form] ? formRenderers[form](target) : ''
-  return `
+
+  if(form === target.lastForm) return
+  target.lastForm = form
+  target.innerHTML = `
     <div class="wizard">
       ${html}
     </div>

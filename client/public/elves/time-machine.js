@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { walletDefaultHost, bios, getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
+import { settingsMenu, walletDefaultHost, bios, getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
@@ -93,7 +93,7 @@ function timeFields() {
 export const schemas = {
   [eventTypes.archive]: {
     type: eventTypes.archive,
-    title: 'Untitled',
+    title: 'Archive',
     url: null,
     description: null,
     tags: [],
@@ -107,7 +107,7 @@ export const schemas = {
   [eventTypes.tommi]: {
     type: eventTypes.tommi,
     url: null,
-    title: 'Untitled',
+    title: 'Tommi',
     description: null,
     tags: [],
     city: null,
@@ -118,15 +118,15 @@ export const schemas = {
   [eventTypes.product]: {
     type: eventTypes.product,
     url: null,
-    title: 'Untitled',
+    title: 'Product',
     description: null,
     tags: [],
   },
   [eventTypes.keycard]: {
     type: eventTypes.keycard,
     src: '/app/time-machine',
-    title: 'Untitled',
-    name: 'Keycard',
+    title: 'Keycard',
+    host: walletDefaultHost,
     description: null,
     tags: [],
   },
@@ -134,18 +134,17 @@ export const schemas = {
   [eventTypes.sheet]: {
     type: eventTypes.sheet,
     url: null,
-    title: 'Untitled',
+    title: 'Sheet',
     description: null,
     tags: [],
   },
   [eventTypes.agent]: {
     type: eventTypes.agent,
-    title: 'Untitled',
+    title: 'Agent',
     description: null,
     tags: [],
     agentId: null,
     agentModel: 'llama3.2:3b',
-    name: 'Agent',
     systemMessage: 'You are a personal assistant. You are friendly and helpful, yet direct with no frills.',
     format: null,
     tools: null,
@@ -154,45 +153,45 @@ export const schemas = {
   },
   [eventTypes.instrument]: {
     type: eventTypes.instrument,
-    title: 'Untitled',
+    title: 'Instrument',
   },
   [eventTypes.sketch]: {
     type: eventTypes.sketch,
-    title: 'Untitled',
+    title: 'Sketch',
     strokeHistory: [],
     strokeRevisory: [],
   },
   [eventTypes.note]: {
     type: eventTypes.note,
-    title: 'Untitled',
+    title: 'Note',
     text: '',
   },
   [eventTypes.memo]: {
     type: eventTypes.memo,
-    title: 'Untitled',
+    title: 'Memo',
     text: '',
   },
   [eventTypes.gallery]: {
     type: eventTypes.gallery,
-    title: 'Untitled',
+    title: 'Gallery',
     description: null,
     tags: [],
   },
   [eventTypes.image]: {
     type: eventTypes.image,
-    title: 'Untitled',
+    title: 'Image',
     description: null,
     tags: [],
   },
   [eventTypes.audio]: {
     type: eventTypes.audio,
-    title: 'Untitled',
+    title: 'Audio',
     description: null,
     tags: [],
   },
   [eventTypes.video]: {
     type: eventTypes.video,
-    title: 'Untitled',
+    title: 'Video',
     description: null,
     tags: [],
   },
@@ -201,7 +200,7 @@ export const schemas = {
     type: eventTypes.dwebcamp,
     location: null,
     locations: ['Wayback Wheel', 'Hackers Hall', 'Migration Library', 'Treehouse', 'Cultivation Station', 'Access to Knowledge Amphitheater', 'Campfire', 'Stages', 'AI Think Tank', 'Art Barn', 'Volunteers HQ', 'Nest', 'Impact Island', 'Heartwood Chapel', 'Lightning Salon', 'Tea Tent', 'Redwood Cathedral'],
-    title: 'Untitled',
+    title: 'Session',
     url: null,
     description: null,
     tags: [],
@@ -212,7 +211,6 @@ export const schemas = {
     license: null,
     more: {}
   },
-
 }
 
 const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -265,14 +263,14 @@ $.style(`
     overflow: hidden;
     position: relative;
     animation: &-fade-in 1000ms ease-in-out forwards;
-    background: black;
+    background: var(--root-theme, mediumseagreen);
     opacity: 0;
   }
 
   @keyframes &-fade-in {
     0% {
       opacity: 0;
-      background: black;
+      background: var(--root-theme, mediumseagreen);
     }
     100% {
       opacity: 1;
@@ -349,7 +347,7 @@ $.style(`
     background: white;
     top: 0;
     z-index: 21;
-    border-bottom: 1px solid rgba(0, 0, 0,.2);
+    border-top: 1px solid rgba(0, 0, 0,.2);
   }
 
   & .era-label {
@@ -367,6 +365,8 @@ $.style(`
     margin: auto;
     display: flex;
     flex-direction: column;
+    gap: 4px;
+    padding: 4px;
   }
 
   & .identity-selector {
@@ -657,15 +657,9 @@ $.style(`
   }
 
   & .view-event {
-    border: none;
-    background: white;
-    border-radius: 0;
-    padding: .5rem;
-    color: rgba(0,0,0,.65);
-    display: block;
-    text-align: left;
-    transition: transform ease-in-out 100ms;
     width: 100%;
+    text-align: left;
+    display: block;
   }
 
   & .view-event img,
@@ -676,12 +670,6 @@ $.style(`
     height: 100%;
     aspect-ratio: 1;
     object-fit: cover;
-  }
-
-  & .view-event:hover,
-  & .view-event:focus {
-    color: rgba(0,0,0,.85);
-    background: rgba(0,0,0,.2);
   }
 
   & .view-event[data-show="${eventTypes.note}"] {
@@ -698,10 +686,14 @@ $.style(`
 
   & .note-preview-1 {
     color: rgba(0,0,0,.65);
+    width: 100%;
+    text-align: left;
   }
 
   & .note-preview-2 {
     color: rgba(0,0,0,.35);
+    width: 100%;
+    text-align: left;
   }
 
   & .tommi {
@@ -1217,16 +1209,13 @@ export const creationForms = {
     return `
       ${editBanner(this)}
       <label class="field">
-        <span class="label">name</span>
-        <input data-bind="draft" name="name" value="${escapeHyperText(x.name) || ''}" />
+        <span class="label">title</span>
+        <input data-bind="draft" name="title" value="${escapeHyperText(x.title || '')}" />
       </label>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description) || ''}" />
-      </label>
+
       <label class="field">
         <span class="label">host</span>
-        <input data-bind="draft" name="host" value="${escapeHyperText(x.host || walletDefaultHost) || ''}" />
+        <input data-bind="draft" name="host" value="${escapeHyperText(x.host) || ''}" />
       </label>
       <label class="field">
         <span class="label">launch</span>
@@ -1239,6 +1228,12 @@ export const creationForms = {
           `).join('')}
         </select>
       </label>
+      <details>
+        <summary class="standard-button bias-generic -small" style="margin: 0 0 1rem 0;">Advanced Options</summary>
+        <div style="margin: 1rem 0 0;">
+        ${settingsMenu('draft')}
+        </div>
+      </details>
     `
   },
 
@@ -1801,13 +1796,18 @@ const viewRenderers = {
   },
   [views.thinking]: (target) => {
     return `
-      <div class="overlay-background">
+      <thinking class="overlay-background">
         <div class="form-card">
-          <div>
-            Thinking...
+          <div style="display: grid; place-content: center; position: relative; grid-template-areas: 'stack';">
+            <div style="width: 280px; height: 280px; margin: auto; position: absolute; inset: 0;">
+              <plan98-icon style="width: 100%; height: 100%;"></plan98-icon>
+            </div>
+            <div style="width: 2rem; height: 2rem; grid-area: stack;">
+              <flying-disk></flying-disk>
+            </div>
           </div>
         </div>
-      </div>
+      </thinking>
     `
   },
   [views.create]: (target) => {
@@ -2307,7 +2307,7 @@ function patch(target) {
           <select name="keycard" class="standard-button -smol">
             ${list.map(keycard => {
               return `
-                <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.name}</option>
+                <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.title}</option>
               `
             }).join('')}
           </select>
@@ -2320,6 +2320,8 @@ function patch(target) {
 
 // you are my diary
 $.draw((target)=> {
+  const activeKeycard = getKeycard()
+  if(!activeKeycard) return
   query(target)
   if(target.innerHTML) return
 
@@ -2533,7 +2535,7 @@ const eventRenderers = {
     }
     const [firstLine='', secondLine=''] = data.text.split('\n')
     return `
-      <button class="view-event" data-show="${eventTypes.note}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.note}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <div class="note-preview-1">
           ${firstLine}
         </div>
@@ -2550,7 +2552,7 @@ const eventRenderers = {
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.memo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.memo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2561,7 +2563,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.keycard}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.keycard}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2572,7 +2574,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2584,7 +2586,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.sheet}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.sheet}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2595,7 +2597,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.agent}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.agent}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2607,7 +2609,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2619,7 +2621,7 @@ const eventRenderers = {
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.sketch}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.sketch}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
@@ -2631,7 +2633,7 @@ const eventRenderers = {
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.image}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.image}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
@@ -2643,7 +2645,7 @@ const eventRenderers = {
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.audio}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.audio}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         Audio: ${data.title}
       </button>
     `
@@ -2655,7 +2657,7 @@ const eventRenderers = {
     }
 
     return `
-      <button class="view-event" data-show="${eventTypes.video}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.video}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         Video: ${data.title}
       </button>
     `
@@ -2668,7 +2670,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.archive}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.archive}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2679,7 +2681,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="${eventTypes.dwebcamp}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.dwebcamp}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `
@@ -2690,7 +2692,7 @@ const eventRenderers = {
       ...event.data
     }
     return `
-      <button class="view-event" data-show="edge" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="edge" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         ${data.title}
       </button>
     `

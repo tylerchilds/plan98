@@ -332,7 +332,7 @@ export async function newKeycard(overrides={}) {
   const keycard = {
     id,
     src: '/app/time-machine?id='+id,
-    name: 'Keycard',
+    title: 'Keycard',
     host: walletDefaultHost,
     at: new Date().toJSON(),
     ...overrides
@@ -766,7 +766,7 @@ $.draw((target) => {
         </div>
 
         <p>
-          A keycard that goes by ${pendingKeycard.name} and is known to be connected to ${pendingKeycard.host} would like to be added to your wallet.
+          A keycard that goes by ${pendingKeycard.title} and is known to be connected to ${pendingKeycard.host} would like to be added to your wallet.
         </p>
 
         <p>
@@ -793,8 +793,8 @@ $.draw((target) => {
     <div class="keycard-form">
       ${editId}
       <label class="field">
-        <span class="label">name</span>
-        <input data-bind="${editId}" name="name" value="${escapeHyperText(active.name) || ''}" />
+        <span class="label">title</span>
+        <input data-bind="${editId}" name="title" value="${escapeHyperText(active.title) || ''}" />
       </label>
       <label class="field">
         <span class="label">host</span>
@@ -919,12 +919,12 @@ $.draw((target) => {
 })
 
 
-function settingsMenu(editId) {
+export function settingsMenu(editId) {
   const cardOptions = Object
       .keys(settingsMenuTypeSchema()).map(key => {
     const { label, description, options } = $paperPocket.learn().settings[key]
     const draft = ($.learn()[$.learn()?.editId])
-    const value = (draft ? draft[key] : null) || getKeycard()[key] || $paperPocket.learn()[key]
+    const value = (draft ? draft[key] : null) || (getKeycard() && getKeycard()[key]) || $paperPocket.learn()[key]
     return `
       <label class="field">
         <span class="label" data-tooltip="${description}">
@@ -950,12 +950,12 @@ function settingsMenu(editId) {
 
 async function seed() {
   Promise.all([
-    newKeycard({ name: 'silly', src: '/app/sketch-pad' }),
-    newKeycard({ name: 'sally', src: '/app/time-machine' }),
-    newKeycard({ name: 'sully', src: '/app/couch-coop' }),
-    newKeycard({ name: 'shelly', src: '/app/ur-shell' }),
-    newKeycard({ name: 'sunny', src: '/app/paper-pocket?headless=true' }),
-    newKeycard({ name: 'wally', src: '/app/hyper-script' }),
+    newKeycard({ title: 'silly', src: '/app/sketch-pad' }),
+    newKeycard({ title: 'sally', src: '/app/time-machine' }),
+    newKeycard({ title: 'sully', src: '/app/couch-coop' }),
+    newKeycard({ title: 'shelly', src: '/app/ur-shell' }),
+    newKeycard({ title: 'sunny', src: '/app/paper-pocket?headless=true' }),
+    newKeycard({ title: 'wally', src: '/app/hyper-script' }),
   ]).then(agents => {
     agents.forEach(keycard => {
       $.teach(keycard, pushKeycard)
@@ -973,8 +973,8 @@ function render(keycard) {
       data-select="${keycard.id}"
       class="keycard ${isActive?'active':''}"
       style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
-      <span class="keycard-name">
-        ${keycard.name}
+      <span class="keycard-title">
+        ${keycard.title}
       </span>
       <span class="keycard-host">
         ${keycard.host}
@@ -987,8 +987,9 @@ $.when('click', '[data-create]', async (event) => {
   provisionActiveKeycard()
 })
 
-export async function provisionActiveKeycard() {
-  const keycard = await newKeycard().catch(console.error)
+export async function provisionActiveKeycard(options={}) {
+  const keycard = await newKeycard(options).catch(console.error)
+  await updatePlan98Config(keycard)
   $.teach(keycard, unshiftKeycard)
   $.teach({ activeKeycardId: keycard.id })
   persist()
@@ -1048,7 +1049,7 @@ $.when('click', '[data-export]', (event) => {
           type: 'keycard',
           keycard: {
             id: keycard.id,
-            name: keycard.name,
+            title: keycard.title,
             src: keycard.src,
             asJSON: keycard.asJSON,
             host: keycard.host,
@@ -1097,25 +1098,28 @@ $.when('click', '[data-save]', async (event) => {
   const keycard = $.learn().keycards.find(x => x.id === id)
 
   if(keycard) {
-    const cleanKeycard = {
-      ...keycard
-    }
-
-    delete cleanKeycard.asJSON
-
-    const signer = await getSigner()
-    const storage = getStorage()
-
-    const space = storage.space({
-      signer,
-      id: `urn:uuid:${keycard.id}`
-    })
-
+    await updatePlan98Config(keycard)
     await provisionPlan98(signer, keycard).catch(console.error)
-
-    const json = await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
   }
 })
+
+async function updatePlan98Config(keycard) {
+  const cleanKeycard = {
+    ...keycard
+  }
+
+  delete cleanKeycard.asJSON
+
+  const signer = await getSigner(keycard)
+  const storage = getStorage(keycard)
+
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+  return await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
+}
 
 function pasteToKeycard(state, payload) {
   return {

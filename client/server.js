@@ -348,6 +348,36 @@ function template() {
         box-sizing: border-box;
       }
 
+      @keyframes lazy-fade-in {
+        0% {
+          opacity: 0;
+          background: var(--root-theme, mediumseagreen);
+        }
+        100% {
+          opacity: .5;
+          background: white;
+        }
+      }
+
+      :not(:defined) {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      :not(:defined)::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        animation: lazy-fade-in 3000ms ease-in-out alternate infinite;
+        width: 3.25in;
+        height: 3.12in;
+        opacity: .5;
+        mix-blend-mode: multiply;
+        margin: auto;
+      }
+
       html, body {
         height: 100%;
         background: rgba(255,255,255,.85);
@@ -552,7 +582,8 @@ function template() {
     <data-tooltip>
     <data-popover>
     <main class="the-main-area">
-      <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
+      <sillonious-brand></sillonious-brand>
+      <div style="display: none; background: white; height: 100%; width: 100%; overflow: hidden;">
         <div style="padding: 51px; height: 100%; display: flex;">
           <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
         </div>
