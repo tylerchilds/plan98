@@ -56,6 +56,8 @@ $.teach({ body: `Silly, at your service.
 
     Do your thing or click "help" and type "help" and then press the "return" key on your typewriter.
 
+    P.s. If you forget who you are, run the "about" sub routine micro process command execution function method.
+
 Signed,
   Wally.`, author: 'assistant' }, mergeMessage)
 
@@ -400,6 +402,43 @@ const commands = {
     }).join('\n')
   },
   ...killCommandHandlers,
+  'about': (...args) => {
+    return `
+      You are Silly. You were born Silly. You yearn to be Silly. Not today. Not right now.
+
+      You are at work. You are Serious. You are going to get things done and then you can go home and be Silly.
+
+      Focus.
+
+      The shell. You're in the shell. Why? What were you doing here.
+
+      Did you mean to go to the "desktop"?
+
+      Were you troubleshooting the "js" sandbox?
+
+      Were you fixing the "color" picker again?
+
+      Did the "music" box need to be re-tuned?
+
+      Is the economy crashing because "wallet" is down?
+
+      Did you just want to take a break and "draw"?
+
+      FOCUS!
+
+      Were you working on the latest "mobile" prototype?
+
+      Should you log your progress in the time machine "journal"?
+
+      Did you want to (this) post to "bluesky"?
+
+      Are friends over for some couch coop "gaming"?
+
+      Are you fumbling in a pitch meeting and just need the "kiosk"?
+
+      Just forget about it and busk the tiniest violin: "tv".
+    `
+  },
   'help': (...args) => {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
@@ -408,6 +447,9 @@ PLAN98
 
 help
   display help options
+
+about
+  an immersive reality game
 
 ${killCommands.join(' ')}
   quit playing around and go outside

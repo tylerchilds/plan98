@@ -593,6 +593,7 @@ $.style(`
     grid-area: body;
     z-index: 5;
     background: white;
+    overflow: auto;
   }
 
   & .view-metadata {
@@ -1304,6 +1305,31 @@ export const creationForms = {
           </select>
         </label>
 
+        <label class="field">
+          <span class="label">Keep Alive</span>
+          <input data-bind="draft" name="keep_alive" value="${escapeHyperText(x.keep_alive)}" type="text"/>
+        </label>
+
+        <hr>
+
+        <p>
+          These settings influence the agent in chat mode
+        </p>
+
+        <label class="field">
+          <span class="label">Format</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticFormatPlaceholder, '', 2))}" name="format" style="height: 24rem;" value="${escapeHyperText(x.format)}"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="label">Options</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticOptionsPlaceholder, '', 2))}" name="options" style="height: 33rem;" value="${escapeHyperText(x.options)}"></textarea>
+        </label>
+
+        <label class="field">
+          <span class="label">Tools</span>
+          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticToolsPlaceholder, '', 2))}" name="tools" style="height: 92rem;" value="${escapeHyperText(x.tools)}"></textarea>
+        </label>
 
 
         ${x.tags?.map(x => {
@@ -1583,34 +1609,6 @@ const studios = {
         <label class="field">
           <span class="label">System Message</span>
           <textarea data-bind="draft" name="systemMessage" style="height: 16rem;" value="${escapeHyperText(x.systemMessage)}"></textarea>
-        </label>
-        <label class="field">
-          <span class="label">Keep Alive</span>
-          <input data-bind="draft" name="keep_alive" value="${escapeHyperText(x.keep_alive)}" type="text"/>
-        </label>
-
-        <hr>
-
-        <p>
-          These settings influence the agent in chat mode
-        </p>
-
-        <label class="field">
-          <span class="label">Format</span>
-          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticFormatPlaceholder, '', 2))}" name="format" style="height: 24rem;" value="${escapeHyperText(x.format)}"></textarea>
-        </label>
-
-        <label class="field">
-          <span class="label">Options</span>
-          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticOptionsPlaceholder, '', 2))}" name="options" style="height: 33rem;" value="${escapeHyperText(x.options)}"></textarea>
-        </label>
-
-
-
-
-        <label class="field">
-          <span class="label">Tools</span>
-          <textarea data-bind="draft" placeholder="${escapeHyperText(JSON.stringify(agenticToolsPlaceholder, '', 2))}" name="tools" style="height: 92rem;" value="${escapeHyperText(x.tools)}"></textarea>
         </label>
       </div>
     `

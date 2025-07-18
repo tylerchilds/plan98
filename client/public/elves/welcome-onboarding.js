@@ -93,19 +93,16 @@ const formRenderers = {
         You get the idea.
       </div>
       <div class="form-description">
-        The Plan98 mission is simple. Bring everything together into one spot. A party!
+        The Plan98 mission is simple. Bring everything together into one spot.
       </div>
       <div style="margin: 3rem 0;">
         <plan98-icon></plan98-icon>
       </div>
       <div class="form-description">
-        Plan98 is a personal computer for computer professionals.
+        A personal computer for computer professionals.
       </div>
       <div class="form-description">
-        Are you tired of updating your lifestyle routines after businesses that power your work tools, social gatherings, and personal mementos make updates?
-      </div>
-      <div class="form-description">
-        Plan98 stores your data is where you say to. Your identity is what you declare it. You control your own narrative.
+        Plan98 stores your data is where you say to. Your identity is what you declare it. You control your narrative.
       </div>
       <div class="form-description">
         Too good to be true? Press the "ESC" key on your keyboard to check the code.
