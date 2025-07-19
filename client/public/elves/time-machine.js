@@ -666,7 +666,19 @@ $.style(`
   & .view-event {
     width: 100%;
     text-align: left;
-    display: block;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    place-items: center start;
+    gap: .5rem;
+  }
+
+  & .view-event > span {
+    display: grid;
+    place-items: center;
+  }
+
+  & .view-event sl-icon {
+    opacity: .5;
   }
 
   & .view-event img,
@@ -1545,6 +1557,7 @@ const studios = {
     `
   },
   [eventTypes.image]: function(draft) {
+    const src = draft && draft ? `src="${draft.src}"` : ''
     return `
       <was-camera id="${draft.id}"></was-camera>
     `
@@ -1556,13 +1569,15 @@ const studios = {
     `
   },
   [eventTypes.audio]: function(draft) {
+    const src = draft && draft ? `src="${draft.src}"` : ''
     return `
-      <audio-notes id="${draft.id}"></audio-notes>
+      <audio-notes id="${draft.id}" ${src}></audio-notes>
     `
   },
   [eventTypes.video]: function(draft) {
+    const src = draft && draft ? `src="${draft.src}"` : ''
     return `
-      <video-notes id="${draft.id}"></video-notes>
+      <video-notes id="${draft.id}" ${src}></video-notes>
     `
   },
   [eventTypes.gallery]: function(draft) {
@@ -2536,11 +2551,16 @@ const eventRenderers = {
     const [firstLine='', secondLine=''] = data.text.split('\n')
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.note}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <div class="note-preview-1">
-          ${firstLine}
-        </div>
-        <div class="note-preview-2">
-          ${secondLine}
+        <span>
+          <sl-icon name="input-cursor-text"></sl-icon>
+        </span>
+        <div>
+          <div class="note-preview-1">
+            ${firstLine}
+          </div>
+          <div class="note-preview-2">
+            ${secondLine}
+          </div>
         </div>
       </button>
     `
@@ -2553,6 +2573,9 @@ const eventRenderers = {
 
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.memo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="paperclip"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2564,6 +2587,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.keycard}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="person-badge"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2575,6 +2601,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="box2-heart"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2587,6 +2616,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.sheet}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="table"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2598,6 +2630,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.agent}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="robot"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2610,6 +2645,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="battery-charging"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2622,6 +2660,9 @@ const eventRenderers = {
 
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.sketch}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="pencil"></sl-icon>
+        </span>
         <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
@@ -2634,6 +2675,9 @@ const eventRenderers = {
 
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.image}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="camera"></sl-icon>
+        </span>
         <was-image src="${data.src}" alt="${data.title}"></was-image>
       </button>
     `
@@ -2646,7 +2690,10 @@ const eventRenderers = {
 
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.audio}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        Audio: ${data.title}
+        <span>
+          <sl-icon name="speaker"></sl-icon>
+        </span>
+        ${data.title}
       </button>
     `
   },
@@ -2658,7 +2705,10 @@ const eventRenderers = {
 
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.video}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        Video: ${data.title}
+        <span>
+          <sl-icon name="camera-reels"></sl-icon>
+        </span>
+        ${data.title}
       </button>
     `
   },
@@ -2671,6 +2721,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.archive}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="file-zip"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2682,6 +2735,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.dwebcamp}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="fire"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `
@@ -2693,6 +2749,9 @@ const eventRenderers = {
     }
     return `
       <button class="view-event standard-button -small" data-show="edge" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="asterisk"></sl-icon>
+        </span>
         ${data.title}
       </button>
     `

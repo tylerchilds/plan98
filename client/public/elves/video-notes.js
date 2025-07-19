@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import Vosk from 'vosk-browser'
 import translate from 'translate'
 import { innerHTML } from 'diffhtml'
-import { saveVideo } from './time-machine.js'
+import { updateDraft } from './time-machine.js'
 import { get, put } from './plan98-wallet.js'
 
 translate.engine = "libre";
@@ -106,7 +106,7 @@ $.when('click', '[data-record]', async (event) => {
       //root.mediaStream.getTracks().forEach(track => track.stop());
       const now = new Date();
       const timestamp = now.toJSON()
-      const src = `/private/video-notes/${timestamp}.${extensions[supportedVideoType]}`
+      const src = root.getAttribute('src') || `/private/video-notes/${timestamp}.${extensions[supportedVideoType]}`
 
       // Attempt to upload to server
       put(src, videoBlob, { type: supportedVideoType }).then(response => {
@@ -115,10 +115,9 @@ $.when('click', '[data-record]', async (event) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        saveVideo({ src })
+        updateDraft({ src })
       }).catch(error => {
       });
-
     };
 
     // Start recording
@@ -263,9 +262,9 @@ class VideoNotes extends HTMLElement {
     target.video = target.querySelector('video')
     target.video.muted = true
     target.video.srcObject = target.mediaStream;
-    // Display video stream in a video element, etc.
-    target.video.playsInline = true
     target.video.autoplay = true;
+
+
 
     const channel = new MessageChannel();
     const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');

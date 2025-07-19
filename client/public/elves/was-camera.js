@@ -1,5 +1,5 @@
 import elf from '@silly/elf'
-import { savePhoto } from './time-machine.js'
+import { updateDraft } from './time-machine.js'
 import { get, put } from './plan98-wallet.js'
 
 
@@ -33,12 +33,12 @@ $.when('click', '[data-snap]', async (event) => {
     }
     const byteArray = new Uint8Array(byteNumbers);
 
-    const src = `/private/camera-roll/${timestamp}.jpg`
+    const src = root.getAttribute('src') || `/private/camera-roll/${timestamp}.jpg`
 
     // Attempt to upload to server
     put(src, byteArray, { type: 'image/jpeg' }).then(res => {
       if(res.ok) {
-        savePhoto({ src })
+        updateDraft({ src })
       } else {
         throw new Error('Upload failed')
       }

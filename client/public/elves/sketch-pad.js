@@ -1,7 +1,7 @@
 import elf from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
-import { saveSketch, updateDraft } from './time-machine.js'
+import { updateDraft } from './time-machine.js'
 
 import { get, put } from './plan98-wallet.js'
 
@@ -265,12 +265,11 @@ function publish (target) {
   const image = `/private/${$.link}/${timestamp}.jpg`
 
   const data = { src: image, strokeHistory, strokeRevisory }
-  updateDraft(data)
 
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
-      saveSketch(data, { path: src })
+      updateDraft(data)
     } else {
       throw new Error('Upload failed')
     }

@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import Vosk from 'vosk-browser'
 import translate from 'translate'
 import { innerHTML } from 'diffhtml'
-import { saveAudio } from './time-machine.js'
+import { updateDraft } from './time-machine.js'
 import { get, put } from './plan98-wallet.js'
 
 translate.engine = "libre";
@@ -108,7 +108,8 @@ $.when('click', '[data-record]', async (event) => {
       //root.mediaStream.getTracks().forEach(track => track.stop());
       const now = new Date();
       const timestamp = now.toJSON()
-      const src = `/private/audio-notes/${timestamp}.${extensions[supportedAudioType]}`
+
+      const src = root.getAttribute('src') || `/private/audio-notes/${timestamp}.${extensions[supportedAudioType]}`
 
       // Attempt to upload to server
       put(src, audioBlob, { type: supportedAudioType }).then(response => {
@@ -117,7 +118,7 @@ $.when('click', '[data-record]', async (event) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        saveAudio({ src })
+        updateDraft({ src })
       }).catch(error => {
         console.warn('Server upload failed, falling back to download', error);
       });
@@ -267,11 +268,6 @@ class AudioNotes extends HTMLElement {
     }
 
     target.audio = target.querySelector('audio')
-    target.audio.muted = true
-    target.audio.srcObject = target.mediaStream;
-    // Display audio stream in a audio element, etc.
-    target.audio.playsInline = true
-    target.audio.autoplay = true;
 
     const channel = new MessageChannel();
     const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
