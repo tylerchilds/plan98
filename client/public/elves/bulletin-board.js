@@ -24,7 +24,7 @@ const modes = {
 }
 
 const $ = elf('bulletin-board', {
-  menuOpen: true,
+  menuOpen: false,
   mode: modes.cursor,
   panX: -2500 + document.documentElement.clientWidth / 2,
   panY: -2500 + document.documentElement.clientHeight / 2,
@@ -32,7 +32,7 @@ const $ = elf('bulletin-board', {
   panYmod: 0,
   zoom: 1,
   color: 'white',
-  background: 'dodgerblue',
+  background: 'var(--root-theme, mediumseagreen)',
   displays: ['display-self', 'display-iphone', 'display-watch', 'display-ipad'],
   'display-self': {
     width: document.documentElement.clientWidth,
@@ -89,11 +89,11 @@ function afterUpdate(target) {
 
   {
     const { mode } = $.learn()
-    const uuid = target.getAttribute('uuid')
+    const id = target.getAttribute('id')
     const camera = target.querySelector('.camera')
     if(!camera.innerHTML && mode === modes.camera) {
       camera.innerHTML = `
-        <live-help room="${uuid}" class="stack"></live-help>
+        <live-help room="${id}" class="stack"></live-help>
       `
     }
   }
@@ -203,7 +203,7 @@ function afterUpdate(target) {
     const chat = target.querySelector('.chat')
     if(!chat.innerHTML && mode === modes.chat) {
       chat.innerHTML = `
-        <iframe class="stack" src="/app/party-chat"></iframe>
+        <iframe class="stack" src="/app/cool-chat"></iframe>
       `
     }
   }
@@ -333,29 +333,20 @@ function mount(target) {
           <sl-icon name="grip-vertical"></sl-icon>
         </button>
         <button data-menu data-tooltip="Menu" class="toolbelt-actuator">
-          <div class="nonce"></div>
+          <plan98-icon></plan98-icon>
         </button>
-        <div class="action-bar toolbelt-actuator">
+        <div class="action-bar toolbelt-actuator" data-open="false">
           <button data-mode="cursor" data-tooltip="Open Windows">
             <sl-icon name="cursor"></sl-icon>
           </button>
           <button data-mode="move"  data-tooltip="Pan Canvas">
             <sl-icon name="arrows-move"></sl-icon>
           </button>
-          <button data-mode="map" data-tooltip="Relevant Places">
-            <sl-icon name="compass"></sl-icon>
-          </button>
           <button data-mode="chat" data-tooltip="Quick Chat">
             <sl-icon name="chat"></sl-icon>
           </button>
           <button data-mode="camera"  data-tooltip="Conference">
             <sl-icon name="camera-reels"></sl-icon>
-          </button>
-          <button data-goto="${window.location.href}" data-tooltip="share">
-            <sl-icon name="box-arrow-up-right"></sl-icon>
-          </button>
-          <button class="toolbelt-debugger" data-tooltip="Toggle Debugger">
-            <sl-icon name="bug"></sl-icon>
           </button>
         </div>
         <button class="toolbelt-grabber toolbelt-actuator">
@@ -364,7 +355,7 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
-      <shared-terminal src="about:blank" background="transparent" color="lemonchiffon" class="infinite stack"></shared-terminal>
+      <door-man id="wm-${target.id}" src="about:blank" background="transparent" color="lemonchiffon" class="infinite stack"></door-man>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
@@ -764,8 +755,8 @@ $.style(`
   & .toolbelt-actions .toolbelt-grabber:focus,
   & .toolbelt-actions .toolbelt-grabber.active,
   & .toolbelt-actions .toolbelt-grabber:hover {
-    color: #E83FB8;
-    background: lemonchiffon;
+    background: var(--root-theme, mediumseagreen);
+    color: white;
   }
 
   & .toolbelt-grabber {
@@ -775,7 +766,7 @@ $.style(`
 
   & .menu-group button.toolbelt-grabber {
     padding: .75rem .25rem;
-    color: #E83FB8;
+    color: var(--root-theme, mediumseagreen);
   }
 
 
@@ -870,13 +861,13 @@ $.style(`
   & .toolbelt-actions button.active,
   & .toolbelt-actions button:hover {
     color: #fff;
-    background: dodgerblue;
+    background: var(--root-theme, mediumseagreen);
   }
 
   & .action-bar button.enabled,
   & .toolbelt-actions button.enabled {
     background: black;
-    color: dodgerblue;
+    color: var(--root-theme, mediumseagreen);
   }
 
   & .menu-group {
@@ -931,7 +922,7 @@ $.style(`
   }
 
   & live-help,
-  & shared-terminal {
+  & door-man {
     pointer-events: none;
     opacity: .5;
     position: relative;
@@ -942,23 +933,23 @@ $.style(`
     opacity: 0;
   }
 
-  &:not([data-mode="${modes.cursor}"]) shared-terminal .tray .tray-wake,
-  &:not([data-mode="${modes.cursor}"]) shared-terminal .tray[data-focused="true"] {
+  &:not([data-mode="${modes.cursor}"]) door-man .tray .tray-wake,
+  &:not([data-mode="${modes.cursor}"]) door-man .tray[data-focused="true"] {
     pointer-events: none !important;
   }
 
   &[data-mode="${modes.draw}"] .workspace .displays *,
-  &[data-mode="${modes.draw}"] .workspace shared-terminal * {
+  &[data-mode="${modes.draw}"] .workspace door-man * {
     pointer-events: none !important;
   }
-  &[data-mode="${modes.move}"] .workspace shared-terminal * {
+  &[data-mode="${modes.move}"] .workspace door-man * {
     pointer-events: none !important;
   }
 
-  &[data-mode="${modes.move}"] .workspace shared-terminal .tray-body{
+  &[data-mode="${modes.move}"] .workspace door-man .tray-body{
     background: rgba(0,0,0,.85);
   }
-  &[data-mode="${modes.move}"] .workspace shared-terminal iframe{
+  &[data-mode="${modes.move}"] .workspace door-man iframe{
     display: none;
   }
   &[data-mode="${modes.note}"] simpleton-client {
@@ -967,7 +958,7 @@ $.style(`
   }
 
   &[data-mode="${modes.camera}"] live-help,
-  &[data-mode="${modes.cursor}"] shared-terminal {
+  &[data-mode="${modes.cursor}"] door-man {
     pointer-events: all;
     opacity: 1;
   }
@@ -1036,7 +1027,7 @@ $.style(`
     border-radius: 0;
   }
 
-  & shared-terminal.stack {
+  & door-man.stack {
     width: 5000px;
     height: 5000px;
   }
@@ -1050,6 +1041,7 @@ $.style(`
     height: 5000px;
     position: relative;
     pointer-events: none;
+    display: none;
   }
 
   & [data-share] {

@@ -680,6 +680,10 @@ $.style(`
     overflow-x: auto;
   }
 
+  &[background="transparent"] {
+    background: transparent;
+  }
+
   & .desktop {
     position: relative;
     overflow: hidden;
@@ -1475,8 +1479,8 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      title: 'Backpack',
-      url: `/app/plan98-backpack`
+      title: 'Journal',
+      url: `/app/time-machine`
     })
 
 

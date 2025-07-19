@@ -44,6 +44,7 @@ export const eventTypes = {
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
+  bulletin: 'bulletin',
   gallery: 'gallery',
   image: 'image',
   audio: 'audio',
@@ -69,6 +70,7 @@ export const views = {
   [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
+  [eventTypes.bulletin]: eventTypes.bulletin,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
   [eventTypes.audio]: eventTypes.audio,
@@ -157,7 +159,13 @@ export const schemas = {
   },
   [eventTypes.sketch]: {
     type: eventTypes.sketch,
-    title: 'Sketch',
+    title: 'Bulletin',
+    strokeHistory: [],
+    strokeRevisory: [],
+  },
+  [eventTypes.bulletin]: {
+    type: eventTypes.bulletin,
+    title: 'Bulletin',
     strokeHistory: [],
     strokeRevisory: [],
   },
@@ -1182,6 +1190,16 @@ export const creationForms = {
       </label>
     `
   },
+  [eventTypes.bulletin]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
+    `
+  },
+
   [eventTypes.sketch]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1562,6 +1580,12 @@ const studios = {
       <was-camera id="${draft.id}"></was-camera>
     `
   },
+  [eventTypes.bulletin]: function(draft) {
+    const src = this && this.path ? `src="${this.path}"` : ''
+    return `
+      <bulletin-board id="${draft.id}" ${src}></bulletin-board>
+    `
+  },
   [eventTypes.sketch]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
@@ -1909,7 +1933,22 @@ const viewRenderers = {
       <pro-teleprompter src="${x.src}"></pro-teleprompter>
     `)
   },
+  [views.bulletin]: (target) => {
+    const { space, time } = target.dataset
 
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.bulletin],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <bulletin-board id=${x.id}"" src="${x.src}"></bulletin-board>
+    `)
+  },
   [views.sketch]: (target) => {
     const { space, time } = target.dataset
 
@@ -2064,7 +2103,7 @@ const viewRenderers = {
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.sketch],
+      ...schemas[views.sheet],
       ...event.data,
       space,
       time
@@ -2350,6 +2389,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.bulletin}">Bulletin</button>
           <button data-new="${eventTypes.sheet}">Sheet</button>
           <button data-new="${eventTypes.agent}">Agent</button>
           <button data-new="${eventTypes.keycard}">Keycard</button>
@@ -2652,6 +2692,21 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.bulletin]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event standard-button -small" data-show="${eventTypes.bulletin}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="copy"></sl-icon>
+        </span>
+        ${data.title}
+      </button>
+    `
+  },
   [eventTypes.sketch]: function (event) {
     const data = {
       ...schemas[views.tommi],
@@ -2832,6 +2887,15 @@ export async function savePhoto(draft, context) {
   }, context)
 }
 
+export async function saveBulletin(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.bulletin,
+  }, context)
+}
+
 export async function saveSketch(draft, context) {
   return await save({
     title: 'Untitled',
@@ -2895,6 +2959,7 @@ const saveHandlers = {
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
+  [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,
   [eventTypes.gallery]: save,
   [eventTypes.image]: savePhoto,
