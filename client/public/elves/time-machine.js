@@ -45,6 +45,7 @@ export const eventTypes = {
   instrument: 'instrument',
   sketch: 'sketch',
   bulletin: 'bulletin',
+  character: 'character',
   gallery: 'gallery',
   image: 'image',
   audio: 'audio',
@@ -71,6 +72,7 @@ export const views = {
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.bulletin]: eventTypes.bulletin,
+  [eventTypes.character]: eventTypes.character,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
   [eventTypes.audio]: eventTypes.audio,
@@ -159,7 +161,13 @@ export const schemas = {
   },
   [eventTypes.sketch]: {
     type: eventTypes.sketch,
-    title: 'Bulletin',
+    title: 'Sketch',
+    strokeHistory: [],
+    strokeRevisory: [],
+  },
+  [eventTypes.character]: {
+    type: eventTypes.character,
+    title: 'Character',
     strokeHistory: [],
     strokeRevisory: [],
   },
@@ -1190,6 +1198,15 @@ export const creationForms = {
       </label>
     `
   },
+  [eventTypes.character]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
+    `
+  },
   [eventTypes.bulletin]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1580,6 +1597,13 @@ const studios = {
       <was-camera id="${draft.id}"></was-camera>
     `
   },
+  [eventTypes.character]: function(draft) {
+    const src = this && this.path ? `src="${this.path}"` : ''
+    return `
+      <path-finder id="${draft.id}" ${src}></path-finder>
+    `
+  },
+
   [eventTypes.bulletin]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
@@ -1933,6 +1957,23 @@ const viewRenderers = {
       <pro-teleprompter src="${x.src}"></pro-teleprompter>
     `)
   },
+  [views.character]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.character],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <path-finder id=${x.id}"" src="${x.src}"></path-finder>
+    `)
+  },
+
   [views.bulletin]: (target) => {
     const { space, time } = target.dataset
 
@@ -2389,6 +2430,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.character}">Character</button>
           <button data-new="${eventTypes.bulletin}">Bulletin</button>
           <button data-new="${eventTypes.sheet}">Sheet</button>
           <button data-new="${eventTypes.agent}">Agent</button>
@@ -2692,6 +2734,22 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.character]: function (event) {
+    const data = {
+      ...schemas[views.tommi],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event standard-button -small" data-show="${eventTypes.character}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="copy"></sl-icon>
+        </span>
+        ${data.title}
+      </button>
+    `
+  },
+
   [eventTypes.bulletin]: function (event) {
     const data = {
       ...schemas[views.tommi],
@@ -2887,6 +2945,15 @@ export async function savePhoto(draft, context) {
   }, context)
 }
 
+export async function saveCharacter(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.character,
+  }, context)
+}
+
 export async function saveBulletin(draft, context) {
   return await save({
     title: 'Untitled',
@@ -2959,6 +3026,7 @@ const saveHandlers = {
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
+  [eventTypes.character]: saveCharacter,
   [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,
   [eventTypes.gallery]: save,

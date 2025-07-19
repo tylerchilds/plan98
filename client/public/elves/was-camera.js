@@ -132,12 +132,17 @@ class WasCamera extends HTMLElement {
   async init(target) {
     const sampleRate = 48000;
     target.mediaStream = await navigator.mediaDevices.getUserMedia({
-      video: true,
       audio: {
         echoCancellation: true,
         noiseSuppression: true,
         channelCount: 1,
         sampleRate
+      },
+      video: {
+        facingMode: "environment",
+        width: { min: 1280, ideal: 1920, max: 3840 },
+        height: { min: 720, ideal: 1080, max: 2160 },
+        aspectRatio: { ideal: 16/9 }
       },
     });
 
