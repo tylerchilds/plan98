@@ -2561,7 +2561,7 @@ $.draw((target)=> {
     }
 
     {
-      saveCursor(target)
+      //saveCursor(target)
     }
 
     const q = target.getAttribute('q')
@@ -2603,7 +2603,7 @@ $.draw((target)=> {
     }
 
     {
-      replaceCursor(target)
+      //replaceCursor(target)
     }
 
     {

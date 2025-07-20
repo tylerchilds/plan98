@@ -604,11 +604,11 @@ function beforeUpdate(target) {
     }
   }
 
-  saveCursor(target)
+  //saveCursor(target)
 }
 
 function afterUpdate(target) {
-  replaceCursor(target)
+  //replaceCursor(target)
 
   {
     const { messages } = $.learn()
