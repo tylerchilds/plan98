@@ -90,7 +90,7 @@ const $ = elf('generic-park', {
 	celestials: ['water','dark', 'island-1'],
 	'island-1': aPlane({z: '0', y: -1, yaw: '-90'}, { color: 'mediumseagreen',  width: '100', height: '100' }),
 	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'dodgerblue',  width: '5000', height: '5000' }),
-	dark: aSky({}, { color: 'black' }),
+	dark: aSky({}, { color: 'mediumpurple' }),
 })
 
 export default $
@@ -318,7 +318,7 @@ function library(target) {
   const end = Math.min(suggestIndex + 5, suggestions.length - 1)
   const search = `
     <div class="search">
-      <input placeholder="Search..." type="text" value="${filter}" name="search" autocomplete="off" />
+      <input placeholder="Search..." class="standard-input" type="text" value="${filter}" name="search" autocomplete="off" />
       <div class="suggestions">
         ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
           const item = documents.find(y => {
@@ -326,7 +326,7 @@ function library(target) {
           })
 
           return `
-            <button type="button" class="auto-item ${suggestIndex === i + start ? 'active': ''}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
+            <button type="button" class="auto-item standard-button -small ${suggestIndex === i + start ? 'bias-positive': 'bias-generic'}" data-name="${item.name}" data-path="${item.path}" data-index="${i}">
               <div class="name">
                 ${item.name}
               </div>
@@ -351,7 +351,7 @@ function preview(target) {
   if(target.dataset.last !== preview) {
     target.dataset.last = preview
     target.innerHTML = `
-      <button data-goto="${preview}">
+      <button data-goto="${preview}" class="standard-button">
         <iframe src="${preview}"></iframe>
       </button>
     `
@@ -617,6 +617,8 @@ $.style(`
     display: grid;
     z-index: 100;
     pointer-events: none;
+    gap: .5rem;
+    padding: .5rem;
   }
 
 
@@ -635,17 +637,17 @@ $.style(`
     border: 0;
     width: 100%;
     height: 100%;
+    position: absolute;
+    inset: 0;
   }
 
   & .preview button {
     pointer-events: all;
     padding: 0;
-    border: none;
-    border-radius: 0;
-    display: block;
     width: 100%;
     height: 100%;
-    background: transparent;
+    overflow: hidden;
+    position: relative;
   }
 
   & .menu {
@@ -771,37 +773,6 @@ $.style(`
   & .search img {
     display: block;
   }
-  & .search input {
-    display: block;
-    margin: auto;
-    text-align: left;
-    background: transparent;
-    font-size: 1.2rem;
-    padding: .5rem 1rem;
-    margin: 0 auto;
-    width: 100%;
-    border-radius: 0;
-    border: none;
-  }
-
-  & .search input:focus {
-  }
-
-  & .suggestions .auto-item,
-  & .search .auto-item {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, dodgerblue);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .search .auto-item:focus,
-  & .search .auto-item:hover {
-    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
-  }
 
   & .suggestions {
     display: flex;
@@ -817,30 +788,6 @@ $.style(`
   & sillonious-joypro {
     position: relative;
     z-index: 500;
-  }
-
-  & .suggestions .auto-item {
-    background: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85));
-    color: var(--button-color, dodgerblue);
-    transition: all 100ms ease-in-out;
-    padding: .5rem;
-    width: 100%;
-    text-align: left;
-    max-width: 100%;
-  }
-
-  & .suggestions .auto-item:focus,
-  & .suggestions .auto-item:hover {
-    background-color: var(--button-color, dodgerblue);
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    color: white;
-  }
-
-  & .suggestions .auto-item.active {
-    color: white;
-    background-image: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.35));
-    background-color: var(--button-color, dodgerblue);
   }
 
 

@@ -1059,12 +1059,14 @@ sillonious-brand > xml-html {
   display: inline-grid;
   place-items: center;
   border-radius: 5px;
+  place-content: center start;
 }
 
 .field input:active,
 .field textarea:active,
 .field select:active,
 .standard-button:active,
+.standard-button.active,
 .standard-input:active {
   border-top: 3px solid rgba(255,255,255,.25);
   border-bottom: none;
@@ -1094,6 +1096,7 @@ sillonious-brand > xml-html {
 
 .standard-button:hover,
 .standard-button:focus,
+.standard-button.active,
 .standard-button:active {
   color: rgba(255,255,255,.85);
   --nav-background-start: rgba(255,255,255,.5);
@@ -1101,6 +1104,7 @@ sillonious-brand > xml-html {
 }
 
 .standard-input:active,
+.standard-button.active,
 .standard-button:active {
   color: rgba(0,0,0,.85);
   --nav-background-start: rgba(255,255,255,.85);

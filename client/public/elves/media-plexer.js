@@ -44,7 +44,7 @@ function iframeRenderer(path) {
 }
 
 function codeRenderer(path) {
-  return `<code-module src="${path}"></code-module>`
+  return `<was-code src="${path}"></was-code>`
 }
 
 function sagaRenderer(path) {
