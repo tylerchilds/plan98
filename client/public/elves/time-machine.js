@@ -260,6 +260,8 @@ export function updateDraft(data) {
 
 // dear diary
 const $ = elf('time-machine', {
+  suggestions: [],
+  searchQuery: '',
   cards: [],
   cache: [],
   grabbing: false,
@@ -273,8 +275,6 @@ const $ = elf('time-machine', {
   meta: {},
   context: null
 })
-
-export default $
 
 getModels().then(agentBaseModels => {
   $.teach({ agentBaseModels })
@@ -652,9 +652,10 @@ $.style(`
     padding: 4px;
     background: rgba(0,0,0,.1);
     color: rgba(0,0,0,.65);
-    display: flex;
+    display: grid;
     gap: .5rem;
     z-index: 10;
+    grid-template-columns: auto 1fr auto auto;
   }
 
   & .draft-content {
@@ -669,6 +670,9 @@ $.style(`
     color: rgba(0,0,0,.65);
     padding: .25rem .5rem;
     line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   & .time-form {
@@ -687,6 +691,24 @@ $.style(`
   }
 
   & .event {
+    position: relative;
+  }
+
+  & .event.active {
+    z-index: 2;
+    height: auto;
+    opacity: 1;
+    max-height: 100vh;
+    transition: opacity 100ms ease-in-out, max-height 250ms ease-in;
+  }
+
+  & .event.inactive {
+    pointer-events: none;
+    z-index: 1;
+    max-height: 0;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(0, 0, 0,.1);
+    transition: opacity 100ms ease-in-out, max-height 250ms ease-out;
   }
 
   & .view-event {
@@ -2359,7 +2381,7 @@ const viewRenderers = {
 }
 
 function patch(target) {
-  const { space, time, now, buckets, view, draft, grabbing, sidebar, viewMetadata } = $.learn()
+  const { searchQuery, space, time, now, buckets, view, draft, grabbing, sidebar, viewMetadata } = $.learn()
 
   {
     const button = target.querySelector('[data-dom="create-button"]')
@@ -2390,7 +2412,8 @@ function patch(target) {
   {
     for(const key in bucketKeys) {
       const events = Object.keys(buckets[key])
-      if(target[key] !== events.length) {
+      if(target[key] !== events.length || searchQuery !== target.searchQuery) {
+        console.log(searchQuery)
         target[key] = events.length
         const node = target.querySelector(`[data-dom="${key}"]`)
         if(node) {
@@ -2400,6 +2423,7 @@ function patch(target) {
         }
       }
     }
+    target.searchQuery = searchQuery 
   }
 
   {
@@ -2586,7 +2610,7 @@ $.draw((target)=> {
             <button class="standard-button -small">
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-input -small" placeholder="Search..." type="text">
+            <input class="standard-input -small" name="searchQuery" placeholder="Search..." type="text">
           </div>
         </div>
       </div>
@@ -2936,11 +2960,17 @@ const eventRenderers = {
 }
 
 function renderBucket(spaceKey) {
-  const { buckets } = $.learn()
+  const { buckets, suggestions } = $.learn()
   return Object.keys(buckets[spaceKey]).map(key => {
     const event = buckets[spaceKey][key]
+
+    let active = true
+    if(suggestions.length > 0) {
+      active = suggestions.includes(event.data.id)
+    }
+
     return `
-      <div class="event">
+      <div class="event ${active?'active':'inactive'}">
         ${
           eventRenderers[event.data.type]
             ? eventRenderers[event.data.type](event)
@@ -2955,6 +2985,11 @@ $.when('click', '[data-assistant]', (event) => {
   launch()
 })
 
+$.when('input', '[name="searchQuery"]', (event) => {
+  const { value } = event.target;
+  const suggestions = idx.search(value).map(x => x.ref)
+  $.teach({ suggestions, searchQuery: value  })
+})
 
 $.when('click', '[data-toggle-metadata]', (event) => {
   const { viewMetadata } = $.learn()
@@ -3359,13 +3394,21 @@ function formatify(format, value) {
 
 $.when('input', '[data-bind]', (event) => {
   const { bind, format } = event.target.dataset
-  $.teach({
-    name: event.target.name,
-    value: formatify(format, event.target.value)
-  }, {
-    mergeHandler: bound,
-    parameters: [bind]
-  })
+
+  if(bind) {
+    $.teach({
+      name: event.target.name,
+      value: formatify(format, event.target.value)
+    }, {
+      mergeHandler: bound,
+      parameters: [bind]
+    })
+  } else {
+    $.teach({ 
+      name: event.target.name,
+      value: formatify(format, event.target.value)
+    })
+  }
 })
 
 function bound(bind) {
