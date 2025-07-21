@@ -274,6 +274,8 @@ const $ = elf('time-machine', {
   context: null
 })
 
+export default $
+
 getModels().then(agentBaseModels => {
   $.teach({ agentBaseModels })
 })
@@ -1621,7 +1623,7 @@ const studios = {
   },
   [eventTypes.world]: function(draft) {
     return `
-      <generic-park id="${draft.id}" src="/public/elves"></generic-park>
+      <was-code id="${draft.id}" src="/public/elves/generic-park.js"></was-code>
     `
   },
   [eventTypes.character]: function(draft) {

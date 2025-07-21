@@ -838,12 +838,12 @@ $.draw((target) => {
   ` : `
     <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
-        <button class="standard-button bias-positive -small" data-create>
+        <button class="standard-button bias-generic -small" data-create>
           New Keycard
         </button>
       </div>
       <div style="text-align: right;">
-        <button class="standard-button -small" data-remix>
+        <button class="standard-button bias-generic -small" data-remix>
           Remix
         </button>
       </div>
@@ -1167,7 +1167,7 @@ $.style(`
   }
 
   & header {
-    background: rgba(255,255,255,.15);
+    background: rgba(0,0,0,.85);
     color: rgba(255,255,255,.85);
     padding: .5rem;
     align-items: center;
@@ -1205,9 +1205,9 @@ $.style(`
     padding: 1rem;
     position: relative;
     display: block;
-    background: white;
     place-content: center;
     overflow: hidden;
+    background: rgba(255,255,255,.85);
   }
 
   & .standard-button.-brand {
@@ -1222,6 +1222,8 @@ $.style(`
     display: grid;
     grid-template-rows: 7rem 1fr;
     grid-template-columns: auto;
+    background: rgba(0,0,0,.5);
+    color: rgba(255,255,255,.85);
   }
 
   & .keyring-scroller {

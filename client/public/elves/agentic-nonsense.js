@@ -235,12 +235,19 @@ $.when('change', 'select', (event) => {
   $.teach({ agentId, messages: [] })
 })
 
-function renderAgents(agentId) {
+function renderAgentSelector(agentId) {
   const { agents } = $.learn()
   const ids = Object.keys(agents)
-  return ids.map((id) => `
+  const options = ids.map((id) => `
     <option value="${id}" ${agentId === id?'selected':''}>${agents[id].name}</option>
   `).join('')
+
+  return `
+    <select class="standard-button -small">
+      <option disabled selected>Select a agent</option>
+      ${options}
+    </select>
+  `
 }
 
 async function query(target) {
@@ -357,10 +364,9 @@ function patch(target) {
       <div class="chat-app">
         <div class="chat-header">
           <div class="action-row">
-            <select class="standard-button -small">
-              <option disabled selected>Select a agent</option>
-              ${renderAgents(agentId)}
-            </select>
+            <div class="agent-selector-container">
+              ${renderAgentSelector(agentId)}
+            </div>
             <div></div>
           </div>
         </div>
@@ -403,6 +409,7 @@ function patch(target) {
   }
 
   if(messages.length !== target.lastMessageCount) {
+    target.lastMessageCount = messages.length
     const list = target.querySelector('.messages')
 
     list.innerHTML = `
@@ -410,6 +417,15 @@ function patch(target) {
       <div class="thinking-area"></div>
     `
   }
+
+  if(namesOf(agents) !== target.namesOfAgents) {
+    target.namesOfAgents = namesOf(agents)
+    const { agentId } = $.learn()
+    const selector = target.querySelector('.agent-selector-container')
+
+    selector.innerHTML = renderAgentSelector(agentId)
+  }
+
 
   if(thinking !== target.isThinking) {
     target.isThinking = thinking
@@ -419,7 +435,13 @@ function patch(target) {
       </div>
     ` : ''
   }
+}
 
+function namesOf(agents = {}) {
+  return Object
+    .keys(agents)
+    .map(id => agents[id].name)
+    .join(', ')
 }
 
 let sel = []
