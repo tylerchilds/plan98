@@ -275,7 +275,7 @@ const views = {
         </div>
         <div class="av-snapshot">
           <div class="av-title">${agents[id].name}</div>
-          <div class="av-description">${agents[id].title}</div>
+          <div class="av-description">${agents[id].description || ''}</div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { replaceElves, sideEffects, afterUpdateTheme } from './paper-pocket.js'
+import { launch } from './plan98-synthia.js'
 
 const ERROR_P98_PROVISION_FAILED = '001'
 const ERROR_P98_BACKUP_FAILED = '002'
@@ -726,11 +727,13 @@ $.draw((target) => {
       `:`
         <footer style="display: grid; grid-template-columns: 1fr auto;">
           <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
-            Powered by <a class="standard-button bias-link -small" href="https://plan98.org">Plan98</a>
+            <button class="logo-gradient" data-assistant>
+              Plan98
+            </button>
           </div>
           <div style="text-align: right;">
-            <button class="standard-button -small" data-remix>
-              Remix
+            <button class="standard-button bias-generic -small" data-quit>
+              Quit
             </button>
           </div>
         </footer>
@@ -840,23 +843,28 @@ $.draw((target) => {
         </button>
       </div>
       <div style="text-align: right;">
-        <button class="standard-button bias-generic -small" data-quit>
-          Quit
+        <button class="standard-button -small" data-remix>
+          Remix
         </button>
       </div>
     </header>
     <section class="wallet">
+      <div class="keyring">
+        <div class="keyring-scroller">
+          ${row.map(render).join('')}
+        </div>
+      </div>
       ${active?`
         <div class="lightbox" style="--lightbox-color: ${active.theme || 'var(--root-theme, mediumseagreen)'}">
           <div class="keycard-actions">
-            <button class="standard-button -large bias-generic -round" data-export="${active.id}">
+            <button class="standard-button -large bias-negative -round" data-delete="${active.id}">
+              <sl-icon name="trash3-fill"></sl-icon>
+            </button>
+            <button class="standard-button -large bias-generic -round"  style="margin-left: auto;" data-export="${active.id}">
               <sl-icon name="qr-code"></sl-icon>
             </button>
             <button class="standard-button -large -brand -round" data-edit="${active.id}">
               <sl-icon name="pencil-fill"></sl-icon>
-            </button>
-            <button class="standard-button -large bias-negative -round" style="margin-left: auto;" data-delete="${active.id}">
-              <sl-icon name="trash3-fill"></sl-icon>
             </button>
           </div>
 
@@ -865,11 +873,6 @@ $.draw((target) => {
           </div>
         </div>
       `:''}
-      <div class="keyring">
-        <div class="keyring-scroller">
-          ${row.map(render).join('')}
-        </div>
-      </div>
     </section>
     ${footer()}
   `
@@ -971,7 +974,7 @@ function render(keycard) {
     <button
       ${isActive?`data-launch="${keycard.id}"`:''}
       data-select="${keycard.id}"
-      class="keycard ${isActive?'active':''}"
+      class="standard-button keycard ${isActive?'active':''}"
       style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
       <span class="keycard-title">
         ${keycard.title}
@@ -1027,6 +1030,9 @@ function prioritizeKeycardById(state, payload) {
   }
 }
 
+$.when('click', '[data-assistant]', (event) => {
+  launch()
+})
 
 $.when('click', '[data-launch]', (event) => {
   const id = event.target.dataset.launch
@@ -1158,7 +1164,6 @@ $.style(`
     display: grid;
     grid-template-rows: auto 1fr auto;
     overflow: hidden;
-    background: black;
   }
 
   & header {
@@ -1184,7 +1189,7 @@ $.style(`
 
   & .keycard-actions {
     position: absolute;
-    bottom: 0;
+    top: 0;
     z-index: 1;
     margin: 0 auto;
     padding: .5rem;
@@ -1200,11 +1205,7 @@ $.style(`
     padding: 1rem;
     position: relative;
     display: block;
-    background:
-      linear-gradient(335deg, var(--lightbox-color), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      var(--lightbox-color);
+    background: white;
     place-content: center;
     overflow: hidden;
   }
@@ -1219,7 +1220,32 @@ $.style(`
   & .wallet {
     overflow: auto;
     display: grid;
-    grid-template-rows: 1fr 7rem;
+    grid-template-rows: 7rem 1fr;
+    grid-template-columns: auto;
+  }
+
+  & .keyring-scroller {
+    max-width: 100%;
+    gap: .5rem;
+    display: flex;
+    overflow-y: hidden;
+    overflow-x: auto;
+    height: 100%;
+    padding: .5rem;
+    justify-content: space-around;
+  }
+
+  @media (min-width: 768px) {
+    & .wallet {
+      grid-template-columns: 280px 1fr;
+      grid-template-rows: auto;
+    }
+
+    & .keyring-scroller {
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex-direction: column;
+    }
   }
 
   & .serious-business {
@@ -1244,18 +1270,9 @@ $.style(`
   }
 
   & .keyring {
-    display: grid;
+    display: block;
     place-items: center;
     overflow: hidden;
-  }
-
-  & .keyring-scroller {
-    max-width: 100%;
-    overflow: auto;
-    gap: .5rem;
-    display: flex;
-    padding: .5rem;
-    justify-content: space-around;
   }
 
   & .keycard {
@@ -1265,20 +1282,11 @@ $.style(`
     min-height: 6rem;
     max-width: 280px;
     min-width: 220px;
-    opacity: .65;
     display: inline-grid;
     place-content: center;
     gap: .5rem;
     padding: .5rem;
-    border-radius: .5rem;
-    border: 0;
     text-align: center;
-    background:
-      linear-gradient(155deg, var(--keycard-theme, var(--root-theme, mediumseagreen)), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(145deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      linear-gradient(115deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      var(--keycard-theme, var(--root-theme, mediumseagreen));
-    color: rgba(255,255,255,.85);
     word-break: break-all;
   }
 
@@ -1325,6 +1333,22 @@ $.style(`
     position: absolute;
     inset: 0;
     background: linear-gradient(135deg, rgba(0,0,0,.25), rgba(0,0,0,.65)), var(--keycard-theme, var(--root-theme, mediumseagreen));
+  }
+
+  & .logo-gradient {
+    border: none;
+    padding: 0;
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+    --v-font-mono: 0;
+    --v-font-casl: 0;
+    --v-font-wght: 1000;
+    --v-font-slnt: -15;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
   }
 `)
 

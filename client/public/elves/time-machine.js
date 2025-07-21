@@ -1363,6 +1363,11 @@ export const creationForms = {
           <input data-bind="draft" name="keep_alive" value="${escapeHyperText(x.keep_alive)}" type="text"/>
         </label>
 
+        <label class="field">
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+        </label>
+
         <hr>
 
         <p>
