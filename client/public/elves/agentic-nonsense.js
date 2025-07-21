@@ -278,8 +278,6 @@ const views = {
           <div class="av-description">${agents[id].description || ''}</div>
         </div>
       </div>
-
-
     `).join('')
 
     return `

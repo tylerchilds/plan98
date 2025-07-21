@@ -45,6 +45,7 @@ export const eventTypes = {
   instrument: 'instrument',
   sketch: 'sketch',
   bulletin: 'bulletin',
+  world: 'world',
   character: 'character',
   gallery: 'gallery',
   image: 'image',
@@ -72,6 +73,7 @@ export const views = {
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.bulletin]: eventTypes.bulletin,
+  [eventTypes.world]: eventTypes.world,
   [eventTypes.character]: eventTypes.character,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
@@ -164,6 +166,10 @@ export const schemas = {
     title: 'Sketch',
     strokeHistory: [],
     strokeRevisory: [],
+  },
+  [eventTypes.world]: {
+    type: eventTypes.world,
+    title: 'World',
   },
   [eventTypes.character]: {
     type: eventTypes.character,
@@ -604,6 +610,7 @@ $.style(`
     padding: 4px;
     gap: .5rem;
     padding-right: 5.5rem;
+    z-index: 10;
   }
 
   & .draft-body {
@@ -645,6 +652,7 @@ $.style(`
     color: rgba(0,0,0,.65);
     display: flex;
     gap: .5rem;
+    z-index: 10;
   }
 
   & .draft-content {
@@ -1198,6 +1206,15 @@ export const creationForms = {
       </label>
     `
   },
+  [eventTypes.world]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <label class="field">
+        <span class="label">Description</span>
+        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
+      </label>
+    `
+  },
   [eventTypes.character]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1602,6 +1619,11 @@ const studios = {
       <was-camera id="${draft.id}"></was-camera>
     `
   },
+  [eventTypes.world]: function(draft) {
+    return `
+      <generic-park id="${draft.id}" src="/public/elves"></generic-park>
+    `
+  },
   [eventTypes.character]: function(draft) {
     return `
       <path-finder id="${draft.id}"></path-finder>
@@ -1961,6 +1983,24 @@ const viewRenderers = {
       <pro-teleprompter src="${x.src}"></pro-teleprompter>
     `)
   },
+  [views.world]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.world],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <generic-park id="${x.id}" src="/public/elves"></generic-park>
+    `)
+  },
+
+
   [views.character]: (target) => {
     const { space, time } = target.dataset
 
@@ -2434,6 +2474,7 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-new="${eventTypes.world}">World</button>
           <button data-new="${eventTypes.character}">Character</button>
           <button data-new="${eventTypes.bulletin}">Bulletin</button>
           <button data-new="${eventTypes.sheet}">Sheet</button>
@@ -2738,9 +2779,26 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.world]: function (event) {
+    const data = {
+      ...schemas[views.world],
+      ...event.data
+    }
+
+    return `
+      <button class="view-event standard-button -small" data-show="${eventTypes.world}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="copy"></sl-icon>
+        </span>
+        ${data.title}
+      </button>
+    `
+  },
+
+
   [eventTypes.character]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.character],
       ...event.data
     }
 
@@ -2756,7 +2814,7 @@ const eventRenderers = {
 
   [eventTypes.bulletin]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.bulletin],
       ...event.data
     }
 
@@ -2771,7 +2829,7 @@ const eventRenderers = {
   },
   [eventTypes.sketch]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.sketch],
       ...event.data
     }
 
@@ -2786,7 +2844,7 @@ const eventRenderers = {
   },
   [eventTypes.image]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.image],
       ...event.data
     }
 
@@ -2801,7 +2859,7 @@ const eventRenderers = {
   },
   [eventTypes.audio]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.audio],
       ...event.data
     }
 
@@ -2816,7 +2874,7 @@ const eventRenderers = {
   },
   [eventTypes.video]: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.video],
       ...event.data
     }
 
@@ -2861,7 +2919,7 @@ const eventRenderers = {
   },
   edge: function (event) {
     const data = {
-      ...schemas[views.tommi],
+      ...schemas[views.edge],
       ...event.data
     }
     return `
@@ -2949,6 +3007,15 @@ export async function savePhoto(draft, context) {
   }, context)
 }
 
+export async function saveWorld(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.world,
+  }, context)
+}
+
 export async function saveCharacter(draft, context) {
   return await save({
     title: 'Untitled',
@@ -3030,6 +3097,7 @@ const saveHandlers = {
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
+  [eventTypes.world]: saveWorld,
   [eventTypes.character]: saveCharacter,
   [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,

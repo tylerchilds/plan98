@@ -111,25 +111,23 @@ $.draw((target) => {
 
 	const scene = celestials().map(component)
 
-  requestIdleCallback(() => {
-    target.innerHTML = `
-      <div class="heads-up-display">
-        <div class="preview"></div>
-        <div>
-          <div class="library">
-            ${library(null)}
-          </div>
+  target.innerHTML = `
+    <div class="heads-up-display">
+      <div class="preview"></div>
+      <div>
+        <div class="library">
+          ${library(null)}
         </div>
       </div>
-      <a-scene>
-        <a-camera rotation="0 0 0" position="0 1.6 0">
-          <a-cursor material="color: white;"></a-cursor>
-        </a-camera>
-        ${scene.join('')}
-        <a-entity class="irix"></a-entity>
-      </a-scene>
-    `
-  })
+    </div>
+    <a-scene>
+      <a-camera rotation="0 0 0" position="0 1.6 0">
+        <a-cursor material="color: white;"></a-cursor>
+      </a-camera>
+      ${scene.join('')}
+      <a-entity class="irix"></a-entity>
+    </a-scene>
+  `
 }, {
   beforeUpdate,
   afterUpdate
