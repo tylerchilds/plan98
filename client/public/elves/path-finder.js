@@ -1,12 +1,19 @@
 import elf from '@plan98/elf'
 
+const STR = 'STR'
+const DEX = 'DEX'
+const CON = 'CON'
+const INT = 'INT'
+const WIS = 'WIS'
+const CHA = 'CHA'
+
 const attributes = {
-  'STR': 'Strength',
-  'DEX': 'Dexterity',
-  'CON': 'Constitution',
-  'INT': 'Intelligence',
-  'WIS': 'Wisdom',
-  'CHA': 'Charisma',
+  [STR]: 'Strength',
+  [DEX]: 'Dexterity',
+  [CON]: 'Constitution',
+  [INT]: 'Intelligence',
+  [WIS]: 'Wisdom',
+  [CHA]: 'Charisma',
 }
 
 const ancestriesList = [
@@ -31,23 +38,91 @@ const classesList = [
 ]
 
 const skillsList = [
-  'Acrobatics',
-  'Arcana',
-  'Athletics',
-  'Crafting',
-  'Deception',
-  'Diplomacy',
-  'Intimidation',
-  'Lore',
-  'Medicine',
-  'Nature',
-  'Occultism',
-  'Performance',
-  'Religion',
-  'Society',
-  'Stealth',
-  'Survival',
-  'Thievery',
+  {
+    label: 'Acrobatics',
+    name: 'acrobatics',
+    modifier: DEX,
+  },
+  {
+    label: 'Arcana',
+    name: 'arcana',
+    modifier: INT,
+  },
+  {
+    label: 'Athletics',
+    name: 'athletics',
+    modifier: STR,
+  },
+  {
+    label: 'Crafting',
+    name: 'crafting',
+    modifier: INT,
+  },
+  {
+    label: 'Deception',
+    name: 'deception',
+    modifier: CHA,
+  },
+  {
+    label: 'Diplomacy',
+    name: 'diplomacy',
+    modifier: CHA,
+  },
+  {
+    label: 'Intimidation',
+    name: 'intimidation',
+    modifier: CHA,
+  },
+  {
+    label: 'Lore',
+    name: 'lore',
+    modifier: INT,
+  },
+  {
+    label: 'Medicine',
+    name: 'medicine',
+    modifier: WIS,
+  },
+  {
+    label: 'Nature',
+    name: 'nature',
+    modifier: WIS,
+  },
+  {
+    label: 'Occultism',
+    name: 'occultism',
+    modifier: INT,
+  },
+  {
+    label: 'Performance',
+    name: 'performance',
+    modifier: CHA,
+  },
+  {
+    label: 'Religion',
+    name: 'religion',
+    modifier: WIS,
+  },
+  {
+    label: 'Society',
+    name: 'society',
+    modifier: INT,
+  },
+  {
+    label: 'Stealth',
+    name: 'stealth',
+    modifier: DEX,
+  },
+  {
+    label: 'Survival',
+    name: 'survival',
+    modifier: WIS,
+  },
+  {
+    label: 'Thievery',
+    name: 'thievery',
+    modifier: DEX,
+  },
 ]
 
 const ethicsList = ["Lawful", "Neutral", "Chaotic"]
@@ -94,91 +169,94 @@ origin.draw(target => {
 
 
   return `
-    <h1>
-      ${character || '??????'}
-    </h1>
-    <h2>
-      ${ancestry || '????'} / ${classification || '?????'}
-    </h2>
-    ${classification === 'Bard' ? `<music-walk></music-walk>` : ''}
-    <div class="navigation">
-      <a href="${self.location.href}" target="_top">
-        Permalink
-      </a>
-      <a href="/app/bulletin-board?src=${target.getAttribute('src') || ''}">
-        Campaign Board
-      </a>
-    </div>
-    <div class="character">
-      <label class="field" style="grid-area: name;">
-        <span class="label">Character</span>
-        <input data-bind name="character" value="${character || ''}">
-      </label>
+    <div class="page">
       <label class="field">
-        <span class="label">Ancestry</span>
-        <select data-bind name="ancestry">
-          <option disabled>--select--</option>
-          ${ancestryOptions}
-        </select>
+        <span class="label">Background</span>
+        <textarea class="standard-input" data-bind name="background">${getState(target).background || ''}</textarea>
       </label>
+
+      <div class="character">
+        <label class="field" style="grid-area: name;">
+          <span class="label">Character</span>
+          <input data-bind name="character" value="${character || ''}">
+        </label>
+        <label class="field">
+          <span class="label">Ancestry</span>
+          <select data-bind name="ancestry">
+            <option disabled>--select--</option>
+            ${ancestryOptions}
+          </select>
+        </label>
+        <label class="field">
+          <span class="label">Class</span>
+          <select data-bind name="classification">
+            <option disabled>--select--</option>
+            ${classOptions}
+          </select>
+        </label>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+        <div>
+          Ethics<br>
+          ${ethicsList.map(value => {
+            return `
+              <label class="field -inline">
+                <input data-bind type="radio" name="ethics" value="${value}" data-option="${value}" ${ethics === value ? 'checked="true"':''} />
+                <span class="label">${value}</span>
+              </label>
+            `
+          }).join('')}
+        </div>
+        <div>
+          Morals<br>
+          ${modalsList.map(value => {
+            return `
+              <label class="field -inline">
+                <input data-bind type="radio" name="morals" value="${value}" data-option="${value}" ${morals === value ? 'checked="true"':''} />
+                <span class="label">${value}</span>
+              </label>
+            `
+          }).join('')}
+        </div>
+      </div>
+
+      <div class="stats">
+        ${stats}
+      </div>
+
+      <div class="skills">
+        ${
+          skillsList.map(skill => {
+            const { label, name, modifier } = skill
+            const value = parseInt(getState(target)[name] || 0)
+            const mod = parseInt(getState(target)[modifier] || 0)
+            return `
+              <div class="skill">
+                <div class="skill-value">
+                  <label class="field">
+                    <span class="label">${label}</span>
+                    <input data-bind name="${name}" value="${value}">
+                  </label>
+                </div>
+                <div class="skill-math">
+                  ${value + mod}
+                </div>
+                <div class="skill-notes">
+                  <textarea class="standard-input" data-bind name="${name}-note">${getState(target)[`${name}-note`] || ''}</textarea>
+                </div>
+              </div>
+            `
+          }).join('')
+        }
+      </div>
+
       <label class="field">
-        <span class="label">Class</span>
-        <select data-bind name="classification">
-          <option disabled>--select--</option>
-          ${classOptions}
-        </select>
+        <span class="label">Inventory</span>
+        <textarea class="standard-input" data-bind name="inventory">${getState(target).inventory || ''}</textarea>
       </label>
-    </div>
-    <div style="display: grid; grid-template-columns: 1fr 1fr;">
-      <div>
-        Ethics
-        ${ethicsList.map(value => {
-          return `
-            <label class="field">
-              <input data-bind type="radio" name="ethics" value="${value}" data-option="${value}" ${ethics === value ? 'checked="true"':''} />
-              <span class="label">${value}</span>
-            </label>
-          `
-        }).join('')}
-      </div>
-      <div>
-        Morals
-        ${modalsList.map(value => {
-          return `
-            <label class="field">
-              <input data-bind type="radio" name="morals" value="${value}" data-option="${value}" ${morals === value ? 'checked="true"':''} />
-              <span class="label">${value}</span>
-            </label>
-          `
-        }).join('')}
-      </div>
-    </div>
 
-
-    <h2>Stats</h2>
-    <div class="stats">
-      ${stats}
-    </div>
-
-    <h3>Skills</h3>
-    <div class="skills">
-      ${
-        skillsList.map(skill => {
-          return `
-            <span class="label">${skill}</span>
-            <div class="skill">
-              <div class="skill-value">
-                <input data-bind name="${skill}" value="${getState(target)[skill] || ''}">
-              </div>
-              <div class="skill-math">
-              </div>
-              <div class="skill-notes">
-                <textarea data-bind name="${skill}-note">${getState(target)[`${skill}-note`] || ''}</textarea>
-              </div>
-            </div>
-          `
-        }).join('')
-      }
+      ${classification === 'Bard' ? `<paper-pocket></paper-pocket>` : ''}
     </div>
   `
 })
@@ -217,22 +295,45 @@ origin.style(`
   & {
     display: block;
     height: 100%;
-    padding: 1rem;
+    overflow: auto;
+  }
+
+  & .page {
+    padding: 1in 1rem;
+    max-width: 7.5in;
+    margin: auto;
+    display: grid;
+    gap: 1rem;
   }
   & .character {
     display: grid;
     grid-template-areas: "name name" "ancestry classification";
     grid-template-columns: 1fr 1fr;
+    gap: .5rem;
   }
 
   & .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(4ch, 1fr));
+    gap: .5rem;
+  }
+
+  & .skills {
+    display: grid;
+    gap: 1rem;
   }
 
   & .skill {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+    gap: .5rem;
+  }
+
+  & .skill-math {
+    display: grid;
+    place-content: end;
+    font-size: 2rem;
+    color: rgba(0,0,0,.5);
   }
 
   & .skill-value input {
@@ -245,10 +346,8 @@ origin.style(`
 
   & .skill-notes textarea {
     height: 100%;
-    border-radius: 0;
     resize: none;
     max-width: 100%;
-    border: 1px solid rgba(0,0,0,.1);
   }
 
   & .navigation {

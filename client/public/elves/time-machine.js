@@ -1598,9 +1598,8 @@ const studios = {
     `
   },
   [eventTypes.character]: function(draft) {
-    const src = this && this.path ? `src="${this.path}"` : ''
     return `
-      <path-finder id="${draft.id}" ${src}></path-finder>
+      <path-finder id="${draft.id}"></path-finder>
     `
   },
 
@@ -1970,7 +1969,7 @@ const viewRenderers = {
     }
 
     return viewTemplate(x, `
-      <path-finder id=${x.id}"" src="${x.src}"></path-finder>
+      <path-finder id="${x.id}"></path-finder>
     `)
   },
 
