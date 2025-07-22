@@ -1018,6 +1018,13 @@ $.style(`
     padding: 3rem .5rem 1rem;
   }
 
+  & .metadata-form {
+    margin: 0 auto;
+    max-width: 480px;
+    padding: 3rem .5rem 1rem;
+  }
+
+
   & .filters {
     position: absolute;
     inset: 0;
@@ -1195,6 +1202,7 @@ function reIndex(events=[]) {
   idx = lunr(function () {
     this.ref('id')
     this.field('title')
+    this.field('description')
     this.field('path')
     this.field('keywords')
     this.field('type')
@@ -1204,6 +1212,7 @@ function reIndex(events=[]) {
         const node = {
           id: event.data.id,
           title: event.data.title,
+          description: event.data.description,
           keywords: event.handle.path.split('/').join(' '),
           type: event.data.type,
         }
@@ -1234,84 +1243,112 @@ export const creationForms = {
   [eventTypes.note]: function(draft) {
     return `
       ${editBanner(this)}
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.memo]: function(draft) {
     return `
       ${editBanner(this)}
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.image]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.world]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.character]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.bulletin]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
 
   [eventTypes.sketch]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.audio]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.video]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.gallery]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.keycard]: function(draft) {
@@ -1323,32 +1360,33 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">title</span>
-        <input data-bind="draft" name="title" value="${escapeHyperText(x.title || '')}" />
-      </label>
-
-      <label class="field">
-        <span class="label">host</span>
-        <input data-bind="draft" name="host" value="${escapeHyperText(x.host) || ''}" />
-      </label>
-      <label class="field">
-        <span class="label">launch</span>
-        <select data-bind="draft" name="src">
-          <option disabled>--Select--</option>
-          ${Object.keys(bios).map((key) => `
-            <option value="${bios[key]}" ${bios[key] === x.src?'selected':''}>
-              ${key}
-            </button>
-          `).join('')}
-        </select>
-      </label>
-      <details>
-        <summary class="standard-button bias-generic -small" style="margin: 0 0 1rem 0;">Advanced Options</summary>
-        <div style="margin: 1rem 0 0;">
-        ${settingsMenu('draft')}
-        </div>
-      </details>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+        <label class="field">
+          <span class="label">host</span>
+          <input data-bind="draft" name="host" value="${escapeHyperText(x.host) || ''}" />
+        </label>
+        <label class="field">
+          <span class="label">launch</span>
+          <select data-bind="draft" name="src">
+            <option disabled>--Select--</option>
+            ${Object.keys(bios).map((key) => `
+              <option value="${bios[key]}" ${bios[key] === x.src?'selected':''}>
+                ${key}
+              </button>
+            `).join('')}
+          </select>
+        </label>
+        <details>
+          <summary class="standard-button bias-generic -small" style="margin: 0 0 1rem 0;">Advanced Options</summary>
+          <div style="margin: 1rem 0 0;">
+          ${settingsMenu('draft')}
+          </div>
+        </details>
+      </div>
     `
   },
 
@@ -1361,37 +1399,38 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+      <div class="metadata-form">
+        <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+          </label>
+        </div>
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
         <label class="field">
-          <span class="label">Title</span>
-          <input data-bind="draft" name="title" value="${escapeHyperText(x.title)}" type="text"/>
-        </label>
-        <label class="field">
-          <span class="label">URL</span>
-          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
         </label>
       </div>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
-      </label>
-
-      ${x.tags?.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
     `
   },
   [eventTypes.sheet]: function(draft) {
     return `
       ${editBanner(this)}
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(draft.description)}" type="text"/>
-      </label>
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
     `
   },
   [eventTypes.agent]: function(draft) {
@@ -1405,7 +1444,7 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div class="wizard">
+      <div class="metadata-form">
         <label class="field">
           <span class="label">Base Model</span>
           <select data-bind="draft" name="agentModel">
@@ -1472,44 +1511,50 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div class="metadata-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+          </label>
+        </div>
         <label class="field">
-          <span class="label">URL</span>
-          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
-        </label>
-      </div>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
-      </label>
-
-      ${x.tags?.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">City</span>
-          <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text"/>
         </label>
 
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">City</span>
+            <input data-bind="draft" name="city" value="${escapeHyperText(x.city)}" type="text" />
+          </label>
+
+          <label class="field">
+            <span class="label">Country</span>
+            <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Longitude</span>
+            <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
+          </label>
+          <label class="field">
+            <span class="label">Latitude</span>
+            <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
+          </label>
+        </div>
         <label class="field">
-          <span class="label">Country</span>
-          <input data-bind="draft" name="country" value="${escapeHyperText(x.country)}" type="text" />
-        </label>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Longitude</span>
-          <input data-bind="draft" name="longitude" value="${escapeHyperText(x.longitude)}" type="text" />
-        </label>
-        <label class="field">
-          <span class="label">Latitude</span>
-          <input data-bind="draft" name="latitude" value="${escapeHyperText(x.latitude)}" type="text" />
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
         </label>
       </div>
     `
@@ -1523,45 +1568,47 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div class="metadata-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
+          </label>
+        </div>
         <label class="field">
-          <span class="label">URL</span>
-          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
-        </label>
-      </div>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
-      </label>
-
-      ${x.tags?.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Creator</span>
-          <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
         </label>
 
-        <label class="field">
-          <span class="label">Collection</span>
-          <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
-        </label>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Language</span>
-          <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
-        </label>
-        <label class="field">
-          <span class="label">License</span>
-          <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
-        </label>
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Creator</span>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
+          </label>
+
+          <label class="field">
+            <span class="label">Collection</span>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Language</span>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
+          </label>
+          <label class="field">
+            <span class="label">License</span>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
+          </label>
+        </div>
       </div>
     `
   },
@@ -1574,59 +1621,61 @@ export const creationForms = {
 
     return `
       ${editBanner(this)}
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div class="metadata-form">
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
+          </label>
+        </div>
         <label class="field">
-          <span class="label">URL</span>
-          <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text" />
+          <span class="label">Description</span>
+          <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
         </label>
-      </div>
-      <label class="field">
-        <span class="label">Description</span>
-        <input data-bind="draft" name="description" value="${escapeHyperText(x.description)}" type="text" />
-      </label>
-      <label class="field">
-        <span class="label">Location</span>
-        <select data-bind="draft" name="location">
-          <option disabled>--Select--</option>
-          ${x.locations.map((location, i) => `
-            <option value="${location}" ${location === x.location?'selected':''}>
-              ${x.locations[i]}
+        <label class="field">
+          <span class="label">Location</span>
+          <select data-bind="draft" name="location">
+            <option disabled>--Select--</option>
+            ${x.locations.map((location, i) => `
+              <option value="${location}" ${location === x.location?'selected':''}>
+                ${x.locations[i]}
+              </button>
+            `).join('')}
+
+          </select>
+
+        </label>
+
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
             </button>
-          `).join('')}
+          `
+        }).join('')}
 
-        </select>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Creator</span>
+            <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
+          </label>
 
-      </label>
-
-
-      ${x.tags?.map(x => {
-        return `
-          <button class="standard-button" data-tag="${x}">
-            ${x}
-          </button>
-        `
-      }).join('')}
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Creator</span>
-          <input data-bind="draft" name="creator" value="${escapeHyperText(x.creator)}" type="text" />
-        </label>
-
-        <label class="field">
-          <span class="label">Collection</span>
-          <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
-        </label>
-      </div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr;">
-        <label class="field">
-          <span class="label">Language</span>
-          <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
-        </label>
-        <label class="field">
-          <span class="label">License</span>
-          <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
-        </label>
+          <label class="field">
+            <span class="label">Collection</span>
+            <input data-bind="draft" name="collection" value="${escapeHyperText(x.collection)}" type="text" />
+          </label>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">Language</span>
+            <input data-bind="draft" name="language" value="${escapeHyperText(x.language)}" type="text" />
+          </label>
+          <label class="field">
+            <span class="label">License</span>
+            <input data-bind="draft" name="license" value="${escapeHyperText(x.license)}" type="text" />
+          </label>
+        </div>
       </div>
     `
   }
