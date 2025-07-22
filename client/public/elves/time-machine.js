@@ -431,7 +431,7 @@ $.style(`
     display: grid;
     grid-template-columns: auto 1fr auto auto;
     gap: .5rem;
-    padding: .5rem;
+    padding: 4px;
     background: white;
     text-align: center;
     border-bottom: 1px solid rgba(0, 0, 0,.2);
@@ -609,7 +609,8 @@ $.style(`
     display: grid;
     grid-template-columns: auto auto;
     grid-area: header;
-    background: rgba(0,0,0,.1);
+    border-top: 1px solid rgba(0, 0, 0,.2);
+    background: rgba(255,255,255,.85);
     padding: 4px;
     gap: .5rem;
     padding-right: 5.5rem;
@@ -651,12 +652,13 @@ $.style(`
     display: grid;
     grid-area: footer;
     padding: 4px;
-    background: rgba(0,0,0,.1);
+    border-top: 1px solid rgba(0, 0, 0,.2);
+    background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.65);
     display: grid;
     gap: .5rem;
     z-index: 10;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr;
   }
 
   & .draft-content {
@@ -753,13 +755,13 @@ $.style(`
   }
 
   & .note-preview-1 {
-    color: rgba(0,0,0,.65);
+    opacity: .85;
     width: 100%;
     text-align: left;
   }
 
   & .note-preview-2 {
-    color: rgba(0,0,0,.35);
+    opacity: .65;
     width: 100%;
     text-align: left;
   }
@@ -917,7 +919,8 @@ $.style(`
   }
 
   & .chat-footer {
-    padding: .5rem;
+    padding: 4px;
+    border-top: 1px solid rgba(0, 0, 0,.2);
   }
 
   & .chat-footer .action-button {
@@ -1792,7 +1795,7 @@ function renderStudioByType(draft) {
 
 function typeSelector(selected) {
   return `
-    <select class="standard-button -smol" name="type" data-bind="draft">
+    <select class="standard-input -smol" name="type" data-bind="draft">
       ${Object.keys(eventTypes).map((key) => `
         <option value="${key}" ${key===selected?'selected':''}>${key}</option>
       `)}
@@ -1812,7 +1815,7 @@ for(let i = today.getFullYear() - 50; i < today.getFullYear() + 50; i++) {
 
 function yearSelector(selected) {
   return `
-    <select class="standard-button -smol" name="year" data-bind="draft">
+    <select class="standard-input -smol" name="year" data-bind="draft">
       ${years.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1822,7 +1825,7 @@ function yearSelector(selected) {
 
 function monthSelector(selected) {
   return `
-    <select class="standard-button -smol"  name="month" data-bind="draft">
+    <select class="standard-input -smol"  name="month" data-bind="draft">
       ${months.map((_value, index) => `
         <option value="${index}" ${index===selected?'selected':''}>${index+1}</option>
       `)}
@@ -1841,7 +1844,7 @@ function daySelector(day, month, year) {
     days.push(i)
   }
   return `
-    <select class="standard-button -smol"  name="day" data-bind="draft">
+    <select class="standard-input -smol"  name="day" data-bind="draft">
       ${days.map(value => `
         <option value="${value}" ${value===day?'selected':''}>${value}</option>
       `)}
@@ -1855,7 +1858,7 @@ function hourSelector(selected) {
     hours.push(i)
   }
   return `
-    <select class="standard-button -smol"  name="hour" data-bind="draft">
+    <select class="standard-input -smol"  name="hour" data-bind="draft">
       ${hours.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -1870,7 +1873,7 @@ function minuteSelector(selected) {
   }
 
   return `
-    <select class="standard-button -smol"  name="minute" data-bind="draft">
+    <select class="standard-input -smol"  name="minute" data-bind="draft">
       ${minutes.map(value => `
         <option value="${value}" ${value===selected?'selected':''}>${value}</option>
       `)}
@@ -2513,7 +2516,7 @@ function patch(target) {
         target.activeKeycardId = activeKeycard.id
         target.keycardsLength = list.length
         identity.innerHTML = `
-          <select name="keycard" class="standard-button -smol">
+          <select name="keycard" class="standard-input -smol">
             ${list.map(keycard => {
               return `
                 <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.title}</option>
@@ -2652,7 +2655,7 @@ $.draw((target)=> {
         </div>
         <div class="chat-footer">
           <div class="search-and-filter">
-            <button class="standard-button -small" data-toggle-filters>
+            <button class="standard-button bias-generic -small -round" data-toggle-filters>
               <sl-icon name="funnel"></sl-icon>
             </button>
             <input class="standard-input -small" name="searchQuery" placeholder="Filter..." type="text">
@@ -2887,7 +2890,7 @@ const eventRenderers = {
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.world}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <span>
-          <sl-icon name="copy"></sl-icon>
+          <sl-icon name="joystick"></sl-icon>
         </span>
         ${data.title}
       </button>
@@ -2904,7 +2907,7 @@ const eventRenderers = {
     return `
       <button class="view-event standard-button -small" data-show="${eventTypes.character}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <span>
-          <sl-icon name="copy"></sl-icon>
+          <sl-icon name="person-walking"></sl-icon>
         </span>
         ${data.title}
       </button>

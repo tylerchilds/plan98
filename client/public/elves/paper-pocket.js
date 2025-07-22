@@ -1076,7 +1076,7 @@ function settingsMenu() {
           </div>
         </div>
         <div class="selectbox-selector">
-          <select class="standard-button -small" data-settings name="${key}">
+          <select class="standard-input -small" data-settings name="${key}">
             <option disabled>${label}</option>
             ${options.map(option => {
               return `
@@ -1147,7 +1147,7 @@ export function ai(operation) {
           return `
             <div class="av -chip">
               <div class="av-cta">
-                <a class="standard-button -smol" target="_blank" href="${searchEngineMap[key].url}${encodeURIComponent(operation)}">
+                <a class="standard-button bias-generic -smol" target="_blank" href="${searchEngineMap[key].url}${encodeURIComponent(operation)}">
                   Ask
                 </a>
               </div>
@@ -1159,7 +1159,7 @@ export function ai(operation) {
         }).join('')}
         <div class="av -chip">
           <div class="av-cta">
-            <a class="standard-button -smol" target="_blank" href="/app/js-repl?q=${encodeURIComponent(operation)}">
+            <a class="standard-button bias-generic -smol" target="_blank" href="/app/js-repl?q=${encodeURIComponent(operation)}">
               Run
             </a>
           </div>
@@ -1171,7 +1171,7 @@ export function ai(operation) {
 
         <div class="av -chip">
           <div class="av-cta">
-            <a class="standard-button -smol" target="_blank" href="/app/luau-repl?q=${encodeURIComponent(operation)}">
+            <a class="standard-button bias-generic -smol" target="_blank" href="/app/luau-repl?q=${encodeURIComponent(operation)}">
               Run
             </a>
           </div>
@@ -1208,7 +1208,7 @@ export function ai(operation) {
                 ${list.map(({ label, url }) => {
                   return `
                     <div class="mega-footer-item">
-                      <a class="standard-button" href="${url}">
+                      <a class="standard-button bias-generic -small" href="${url}">
                         ${label}
                       </a>
                     </div>

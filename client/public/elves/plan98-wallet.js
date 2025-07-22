@@ -332,7 +332,7 @@ export async function newKeycard(overrides={}) {
 
   const keycard = {
     id,
-    src: '/app/time-machine?id='+id,
+    src: '/app/time-machine',
     title: 'Keycard',
     host: walletDefaultHost,
     at: new Date().toJSON(),

@@ -564,7 +564,7 @@ button, input, optgroup, select, textarea {
   font-size: .9rem;
   line-height: 1rem;
   display: inline-block;
-  background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), white;
+  background: linear-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 100%), lightgray;
   box-shadow: 0 1px 1px 0 rgba(0,0,0,.2),
               0 1px 2px 2px rgba(0,0,0,.1);
   border-radius: 3px;
@@ -647,8 +647,8 @@ button, input, optgroup, select, textarea {
 
 .field [type=checkbox] + .label::before,
 .field [type=radio] + .label::before {
-	background-color: var(--color-neutral-tint4);
-	border: 2px solid var(--color-neutral-shade1);
+	background-color: white;
+	border: 2px solid rgba(0,0,0,.35);
 	content: '';
 	height: 12px;
 	left: 3px;
@@ -688,6 +688,13 @@ button, input, optgroup, select, textarea {
 	outline: var(--focus-outline);
 	outline-offset: var(--focus-outline-offset);
 }
+
+.field [type=checkbox]:checked + .label::before,
+.field [type=radio]:checked + .label::before {
+	border: 2px solid rgba(0,0,0,.65);
+}
+
+
 
 .field [type=checkbox]:checked + .label::after,
 .field [type=radio]:checked + .label::after {
@@ -951,8 +958,8 @@ sillonious-brand > xml-html {
 }
 
 .mega-footer-title {
-  padding: .5rem 0 0;
-  font-weight: bold;
+  padding: .5rem 0 4px;
+  color: rgba(0,0,0,.5);
 }
 
 .mega-footer-list {
@@ -1043,7 +1050,7 @@ sillonious-brand > xml-html {
 .standard-button,
 .standard-input,
 ::part(button) {
-  background: linear-gradient(var(--nav-background-start) 0%, var(--nav-background-end) 100%), var(--root-theme, mediumseagreen);
+  background: linear-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 100%), var(--root-theme, mediumseagreen);
   pointer-events: all;
   background-size: 1px 100%;
   background-repeat: repeat-x;
@@ -1054,14 +1061,19 @@ sillonious-brand > xml-html {
   border: none;
   padding: .5rem;
   color: rgba(0,0,0,.85);
-  --nav-background-start: rgba(255,255,255,1);
-  --nav-background-end: rgba(255,255,255,.5);
   border-bottom: 3px solid var(--root-theme, mediumseagreen);
   text-decoration: none;
   display: inline-grid;
   place-items: center;
   border-radius: 5px;
   place-content: center start;
+}
+
+.field input,
+.field textarea,
+.field select,
+.standard-input {
+  background: linear-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 100%), lightgray;
 }
 
 .field input:active,
@@ -1101,17 +1113,20 @@ sillonious-brand > xml-html {
 .standard-button.active,
 .standard-button:active {
   color: rgba(255,255,255,.85);
-  --nav-background-start: rgba(255,255,255,.5);
-  --nav-background-end: rgba(0,0,0,.25);
+  background: linear-gradient(rgba(255,255,255,.5) 0%, rgba(0,0,0,.25) 100%), var(--root-theme, mediumseagreen);
 }
 
-.standard-input:active,
 .standard-button.active,
 .standard-button:active {
   color: rgba(0,0,0,.85);
-  --nav-background-start: rgba(255,255,255,.85);
-  --nav-background-end: rgba(255,255,255,.85);
+  background: linear-gradient(rgba(255,255,255,.85) 0%, rgba(255,255,255,.85) 100%), var(--root-theme, mediumseagreen);
   border-color: rgba(0,0,0,.85);
+}
+
+.standard-input:active {
+  color: rgba(0,0,0,.85);
+  border-color: rgba(0,0,0,.85);
+  background: linear-gradient(rgba(255,255,255,.85) 0%, rgba(255,255,255,.85) 100%), lightgray;
 }
 
 
