@@ -977,7 +977,7 @@ $.style(`
     width: clamp(240px, var(--sidebar-width, 320px), 100%);
     max-width: 100vw;
     position: absolute;
-    top: calc(2.5rem + 1px);
+    top: calc(1.5rem + 8px + 1px);
     bottom: 0;
     z-index: 25;
     display: grid;
