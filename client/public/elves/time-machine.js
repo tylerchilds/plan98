@@ -260,6 +260,7 @@ export function updateDraft(data) {
 
 // dear diary
 const $ = elf('time-machine', {
+  activeTypes: {},
   suggestions: [],
   searchQuery: '',
   cards: [],
@@ -1012,6 +1013,22 @@ $.style(`
     margin: 0 auto;
     max-width: 480px;
     padding: 3rem .5rem 1rem;
+  }
+
+  & .filters {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,.65);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    overflow: auto;
+    opacity: 1;
+    transition: opacity 100ms ease-in-out;
+  }
+
+  & .filters:empty {
+    opacity: 0;
+    pointer-events: none;
   }
 `)
 
@@ -2381,7 +2398,20 @@ const viewRenderers = {
 }
 
 function patch(target) {
-  const { searchQuery, space, time, now, buckets, view, draft, grabbing, sidebar, viewMetadata } = $.learn()
+  const {
+    showFilters,
+    searchQuery,
+    activeTypes,
+    space,
+    time,
+    now,
+    buckets,
+    view,
+    draft,
+    grabbing,
+    sidebar,
+    viewMetadata
+  } = $.learn()
 
   {
     const button = target.querySelector('[data-dom="create-button"]')
@@ -2401,6 +2431,17 @@ function patch(target) {
   }
 
   {
+    const filters = target.querySelector('[data-dom="filters"]')
+    if(filters && showFilters !== target.dataset.filters) {
+      target.dataset.filters = showFilters
+      innerHTML(filters, showFilters
+        ? renderFilters()
+        : '')
+    }
+  }
+
+
+  {
     if(now !== target.now) {
       target.now = now
       const time = target.querySelector('[data-dom="time"]')
@@ -2412,8 +2453,10 @@ function patch(target) {
   {
     for(const key in bucketKeys) {
       const events = Object.keys(buckets[key])
-      if(target[key] !== events.length || searchQuery !== target.searchQuery) {
-        console.log(searchQuery)
+      if(target[key] !== events.length ||
+        searchQuery !== target.searchQuery ||
+        activeTypes !== target.activeTypes
+      ) {
         target[key] = events.length
         const node = target.querySelector(`[data-dom="${key}"]`)
         if(node) {
@@ -2424,6 +2467,7 @@ function patch(target) {
       }
     }
     target.searchQuery = searchQuery 
+    target.activeTypes = activeTypes 
   }
 
   {
@@ -2533,6 +2577,7 @@ $.draw((target)=> {
       <div class="chat-sidebar">
         <div data-resize-sidebar></div>
         <div class="chat-sidebar-inner">
+          <div data-dom="filters" class="filters"></div>
           <div class="time-feed-nom-nom-nom-nom">
              <div class="era">
               <div class="era-header">
@@ -2607,10 +2652,10 @@ $.draw((target)=> {
         </div>
         <div class="chat-footer">
           <div class="search-and-filter">
-            <button class="standard-button -small">
+            <button class="standard-button -small" data-toggle-filters>
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-input -small" name="searchQuery" placeholder="Search..." type="text">
+            <input class="standard-input -small" name="searchQuery" placeholder="Filter..." type="text">
           </div>
         </div>
       </div>
@@ -2694,6 +2739,34 @@ $.draw((target)=> {
     }
   }
 })
+
+function renderFilters() {
+  const { activeTypes } = $.learn()
+  return `
+    <div class="era">
+      <div class="era-header">
+        <div class="era-label">
+          Types
+        </div>
+      </div>
+      <div class="era-events">
+        <div>
+          ${Object.keys(eventTypes).map(key => {
+            const value = eventTypes[key]
+            return `
+              <label class="field -inline">
+                <input data-check="activeTypes" type="checkbox" name="filter-${key}" value="${value}" data-option="${value}" ${activeTypes['filter-'+key] ? 'checked="true"':''} />
+                <span class="label">${value}</span>
+              </label>
+            `
+          }).join('')}
+        </div>
+  
+      </div>
+    </div>
+  `
+}
+
 
 const eventRenderers = {
   [eventTypes.note]: function (event) {
@@ -2960,13 +3033,19 @@ const eventRenderers = {
 }
 
 function renderBucket(spaceKey) {
-  const { buckets, suggestions } = $.learn()
+  const { buckets, suggestions, activeTypes } = $.learn()
+  const typeKeys = Object.keys(activeTypes).map(x => x.split('filter-')[1])
+
   return Object.keys(buckets[spaceKey]).map(key => {
     const event = buckets[spaceKey][key]
 
     let active = true
-    if(suggestions.length > 0) {
+    if(suggestions.length > 0 && typeKeys.length > 0) {
+      active = suggestions.includes(event.data.id) && typeKeys.includes(event.data.type)
+    } else if(suggestions.length > 0) {
       active = suggestions.includes(event.data.id)
+    } else if(typeKeys.length > 0) {
+      active = typeKeys.includes(event.data.type)
     }
 
     return `
@@ -2980,6 +3059,11 @@ function renderBucket(spaceKey) {
     `
   }).join('')
 }
+
+$.when('click', '[data-toggle-filters]', (event) => {
+  $.teach({ showFilters: !$.learn().showFilters })
+})
+
 
 $.when('click', '[data-assistant]', (event) => {
   launch()
@@ -3392,9 +3476,10 @@ function formatify(format, value) {
   return value
 }
 
-$.when('input', '[data-bind]', (event) => {
-  const { bind, format } = event.target.dataset
+$.when('input', '[data-bind]', handleBind)
 
+function handleBind(event) {
+  const { bind, format } = event.target.dataset
   if(bind) {
     $.teach({
       name: event.target.name,
@@ -3409,7 +3494,7 @@ $.when('input', '[data-bind]', (event) => {
       value: formatify(format, event.target.value)
     })
   }
-})
+}
 
 function bound(bind) {
   return (state, payload) => {
@@ -3422,6 +3507,51 @@ function bound(bind) {
     }
   }
 }
+
+$.when('input', '[data-check]', handleCheck)
+
+function handleCheck(event) {
+  const { check } = event.target.dataset
+  const { name, checked } = event.target
+  $.teach({
+    name: name,
+    value: checked
+  }, {
+    mergeHandler: reduceCheckmark,
+    parameters: [check]
+  })
+}
+
+function reduceCheckmark(key) {
+  return (state, payload) => {
+    const newFields = {
+      ...state[key],
+      [payload.name]: payload.value
+    }
+
+    if(payload.value === false) {
+      delete newFields[payload.name]
+    }
+
+    return {
+      ...state,
+      [key]: newFields
+    }
+  }
+}
+
+function reduceUncheck(key) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [key]: {
+        ...state[key],
+      }
+    }
+  }
+}
+
+
 
 function escapeHyperText(text = '') {
   if(!text) return ''

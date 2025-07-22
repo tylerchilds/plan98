@@ -179,8 +179,8 @@ button:-moz-focusring,
   --color-neutral-shade2: hsl(170, 10%, 30%);
   --color-neutral-shade3: hsl(170, 10%, 18%);
   --color-neutral-shade4: hsl(170, 10%, 2%);
-  --focus-outline: 1px solid var(--root-theme, mediumseagreen);
-  --focus-outline-offset: 1px;
+  --focus-outline: 1px solid var(--root-theme, black);
+  --focus-outline-offset: 2px;
   --font-heading: var(--font-family);
 }
 
@@ -671,9 +671,11 @@ button, input, optgroup, select, textarea {
 	width: 6px;
 }
 
-.field [type=checkbox] + .label::before,
+.field [type=checkbox] + .label::before {
+	border-radius: 3px;
+}
 .field [type=checkbox] + .label::after {
-	border-radius: var(--border-radius);
+	border-radius: 1px;
 }
 
 .field [type=radio] + .label::before,
