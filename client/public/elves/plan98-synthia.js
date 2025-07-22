@@ -194,7 +194,7 @@ $.when('click', 'paper-pocket [data-search]', (event) => {
   const config = getSearchEngineConfig()
 
   if(config.url) {
-    self.open(config.url + search)
+    window.location.href = config.url + search
   }
 })
 

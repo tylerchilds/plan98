@@ -1116,22 +1116,22 @@ export function ai(operation) {
   return `
     <paper-pocket static="true">
       <div class="share-actions">
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/clip-board?id=log&q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/clip-board?id=log&q=${encodeURIComponent(operation)}">
           clipboard
         </a>
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/time-machine?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/time-machine?q=${encodeURIComponent(operation)}">
           journal
         </a>
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/e-mail?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/e-mail?q=${encodeURIComponent(operation)}">
           email
         </a>
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/blue-sky?q=${encodeURIComponent(operation)}">
           bluesky
         </a>
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/cool-chat?q=${encodeURIComponent(operation)}">
           chat
         </a>
-        <a class="standard-button bias-generic -smol" target="_blank" href="/app/ur-shell?q=${encodeURIComponent(operation)}">
+        <a class="standard-button bias-generic -smol" href="/app/ur-shell?q=${encodeURIComponent(operation)}">
           shell
         </a>
       </div>
@@ -1182,7 +1182,7 @@ export function ai(operation) {
       </div>
 
       <div>
-      <agentic-nonsense q="${operation}" view="launcher"></agentic-nonsense>
+      <agentic-nonsense q="${encodeURIComponent(operation)}" view="launcher"></agentic-nonsense>
       </div>
 
       <!--

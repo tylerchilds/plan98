@@ -112,6 +112,7 @@ marked.setOptions({
 const tag = 'agentic-nonsense'
 
 const $ = elf(tag, {
+  q: '',
   messages: [],
   agentId: Object.keys(agents)[0],
   agents: agents,
@@ -276,7 +277,7 @@ const views = {
     const actions = ids.map((id) => `
       <div class="av -snapshot">
         <div class="av-cta">
-          <a part="button" class="standard-button -small" target="_blank" href="/app/agentic-nonsense?agent=${id}&q=${encodeURIComponent(q)}">
+          <a part="button" class="standard-button -small" href="/app/agentic-nonsense?agent=${id}&q=${encodeURIComponent(q)}">
             Ask
           </a>
         </div>

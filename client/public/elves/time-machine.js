@@ -430,8 +430,8 @@ $.style(`
   & .now {
     display: grid;
     grid-template-columns: auto 1fr auto auto;
-    gap: .5rem;
-    padding: 4px;
+    gap: 1rem;
+    padding: 4px .5rem;
     background: white;
     text-align: center;
     border-bottom: 1px solid rgba(0, 0, 0,.2);
@@ -919,7 +919,7 @@ $.style(`
   }
 
   & .chat-footer {
-    padding: 4px;
+    padding: 4px .5rem;
     border-top: 1px solid rgba(0, 0, 0,.2);
   }
 
