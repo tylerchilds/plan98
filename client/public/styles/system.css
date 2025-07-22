@@ -1187,3 +1187,9 @@ sillonious-brand > xml-html {
   gap: .5rem;
 }
 
+.wizard {
+  margin: 0 auto;
+  max-width: 480px;
+  padding: 3rem .5rem 1rem;
+}
+

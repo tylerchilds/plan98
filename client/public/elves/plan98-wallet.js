@@ -795,44 +795,45 @@ $.draw((target) => {
     </header>
     <div class="keycard-form">
       ${editId}
-      <label class="field">
-        <span class="label">title</span>
-        <input data-bind="${editId}" name="title" value="${escapeHyperText(active.title) || ''}" />
-      </label>
-      <label class="field">
-        <span class="label">host</span>
-        <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || walletDefaultHost) || ''}" />
-      </label>
-      <label class="field">
-        <span class="label">launch</span>
-        <select data-bind="${editId}" name="src">
-          <option disabled>--Select--</option>
-          ${Object.keys(bios).map((x) => `
-            <option value="${bios[x]}" ${bios[x] === active.src?'selected':''}>
-              ${x}
-            </button>
-          `).join('')}
-        </select>
-      </label>
+      <div class="wizard">
+        <label class="field">
+          <span class="label">title</span>
+          <input data-bind="${editId}" name="title" value="${escapeHyperText(active.title) || ''}" />
+        </label>
+        <label class="field">
+          <span class="label">host</span>
+          <input data-bind="${editId}" name="host" value="${escapeHyperText(active.host || walletDefaultHost) || ''}" />
+        </label>
+        <label class="field">
+          <span class="label">launch</span>
+          <select data-bind="${editId}" name="src">
+            <option disabled>--Select--</option>
+            ${Object.keys(bios).map((x) => `
+              <option value="${bios[x]}" ${bios[x] === active.src?'selected':''}>
+                ${x}
+              </button>
+            `).join('')}
+          </select>
+        </label>
 
+        <hr>
 
-      <hr>
+        <!--
+        <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
+          <plan98-palette local="true" name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+        </div>
+        -->
+        ${settingsMenu(editId)}
 
-      <!--
-      <div class="colorpicker" style="clear: both; overflow: hidden; background: linear-gradient(90deg, rgba(255,255,255,1), rgba(255,255,255,0), rgba(0,0,0,.5), rgb(0,0,0,1)), ${draft.theme || active.theme || 'var(--root-theme, mediumseagreen)'}">
-        <plan98-palette local="true" name="theme" style="width: 160px; height: 80px; float: right;" data-bind="${editId}"></plan98-palette>
+        <hr>
+
+        <button class="standard-button" data-backup="/public">
+          Publish: /public
+        </button>
+        <button class="standard-button" data-backup="/private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown">
+          Publish: Video
+        </button>
       </div>
-      -->
-      ${settingsMenu(editId)}
-
-      <hr>
-
-      <button data-backup="/public">
-        Publish: /public
-      </button>
-      <button data-backup="/private/home/tychi/Videos/2024-11-08-blox-b-roll/020-cabaret-clown">
-        Publish: Video
-      </button>
     </div>
     ${footer()}
   ` : `
@@ -974,7 +975,7 @@ function render(keycard) {
     <button
       ${isActive?`data-launch="${keycard.id}"`:''}
       data-select="${keycard.id}"
-      class="standard-button keycard ${isActive?'active':''}"
+      class="standard-button keycard ${isActive?'is-active':''}"
       style="--keycard-theme: ${keycard.theme || 'var(--root-theme, mediumseagreen)'}">
       <span class="keycard-title">
         ${keycard.title}
@@ -1175,7 +1176,7 @@ $.style(`
 
   & footer {
     background: rgba(255,255,255,.85);
-    padding: .5rem;
+    padding: 4px .5rem;
     align-items: center;
   }
 
@@ -1294,7 +1295,7 @@ $.style(`
 
   & .keycard:hover,
   & .keycard:focus,
-  & .keycard.active {
+  & .keycard.is-active {
     opacity: 1;
   }
 

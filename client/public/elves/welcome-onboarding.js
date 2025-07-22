@@ -457,11 +457,6 @@ $.style(`
   & .form-description {
     margin-bottom: 1rem;
   }
-  & .wizard {
-    margin: 0 auto;
-    max-width: 480px;
-    padding: 3rem .5rem 3rem;
-  }
 `)
 
 $.when('click', '.click-proxy', (event) => {

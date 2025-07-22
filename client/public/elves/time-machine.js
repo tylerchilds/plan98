@@ -1012,12 +1012,6 @@ $.style(`
     filter: invert(1);
   }
 
-  & .wizard {
-    margin: 0 auto;
-    max-width: 480px;
-    padding: 3rem .5rem 1rem;
-  }
-
   & .metadata-form {
     margin: 0 auto;
     max-width: 480px;
@@ -1362,10 +1356,6 @@ export const creationForms = {
       ${editBanner(this)}
       <div class="metadata-form">
         <label class="field">
-          <span class="label">Description</span>
-          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
-        </label>
-        <label class="field">
           <span class="label">host</span>
           <input data-bind="draft" name="host" value="${escapeHyperText(x.host) || ''}" />
         </label>
@@ -1383,7 +1373,11 @@ export const creationForms = {
         <details>
           <summary class="standard-button bias-generic -small" style="margin: 0 0 1rem 0;">Advanced Options</summary>
           <div style="margin: 1rem 0 0;">
-          ${settingsMenu('draft')}
+            ${settingsMenu('draft')}
+            <label class="field">
+              <span class="label">Description</span>
+              <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+            </label>
           </div>
         </details>
       </div>
@@ -3307,7 +3301,7 @@ async function appendPath(path) {
   fate()
 }
 
-export function destroy(context) {
+export function destroy(target, context) {
   if(!context) return
   // Attempt to upload to server
   del(context.path).then(response => {
@@ -3315,11 +3309,27 @@ export function destroy(context) {
       // Explicitly throw for non-200 responses
       throw new Error(`HTTP error! status: ${response.status}`);
     }
-    fate()
+    reset(target)
+    removePath(context.path)
   }).catch(error => {
     console.warn(error);
   });
+
 }
+
+async function removePath(path) {
+  await get('time-machine').then(async response => {
+    const obj = await response.text().then(str => JSON.parse(str))
+    const existing = (obj.paths || [])
+    if(existing.includes(path)) {
+      const paths = [...existing].filter(x => x !== path)
+      await put('time-machine', JSON.stringify({ ...obj, paths }), { type: 'application/json' })
+    }
+  })
+
+  fate()
+}
+
 
 
 $.when('click', '[data-action="post"]', async (event) => {
@@ -3351,7 +3361,7 @@ $.when('click', '[data-action="post"]', async (event) => {
 $.when('click', '[data-destroy]', async (event) => {
   event.preventDefault()
   try {
-    destroy({ path: event.target.dataset.destroy })
+    destroy(event.target, { path: event.target.dataset.destroy })
     toast('Destroyed!', { type: 'info' })
     $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
   } catch(e) {
