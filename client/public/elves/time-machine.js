@@ -826,20 +826,17 @@ $.style(`
     display: none;
     background: rgba(0,0,0,1);
     position: absolute;
-    bottom: -4px;
-    left: 0;
-    max-height: calc(100vh);
-    max-width: calc(100vw - 40px);
+    bottom: 3rem;
+    right: -4px;
+    max-height: calc(100vh - 3rem);
+    max-width: calc(100vw);
     overflow: auto;
-    transform: translate(calc(-100% + 1.25rem), 0);
-    z-index: 30;
+    z-index: 25;
   }
 
   & [data-os-target].active + .dropdown-items {
     display: block;
   }
-
-
 
   & .dropdown-items button > * {
     pointer-events: none;
@@ -857,14 +854,13 @@ $.style(`
     border: none;
     color: rgba(255,255,255,.85);
     width: 100%;
-    text-align: left;
+    text-align: right;
     white-space: nowrap;
     font-size: 1rem;
     line-height: 1;
     display: inline-flex;
     padding: .5rem;
     gap: .5rem;
-    text-align: left;
     display: block;
     font-size: 1rem;
     --v-font-mono: 1;
@@ -2590,6 +2586,8 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
+          <button data-quit>Quit</button>
+          <hr>
           <button data-new="${eventTypes.world}">World</button>
           <button data-new="${eventTypes.character}">Character</button>
           <button data-new="${eventTypes.bulletin}">Bulletin</button>
@@ -2602,8 +2600,6 @@ $.draw((target)=> {
           <button data-new="${eventTypes.audio}">Audio</button>
           <button data-new="${eventTypes.memo}">Memo</button>
           <button data-new="${eventTypes.note}">Note</button>
-          <hr>
-          <button data-quit>Quit</button>
         </div>
       </div>
     </div>
