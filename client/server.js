@@ -293,7 +293,8 @@ function template() {
     SUPABASE_URL: safeEnv('SUPABASE_URL'),
     SUPABASE_KEY: safeEnv('SUPABASE_KEY'),
 
-    ROWS_N_COLUMNS_LICENSE_KEY: safeEnv('ROWS_N_COLUMNS_LICENSE_KEY')
+    ROWS_N_COLUMNS_LICENSE_KEY: safeEnv('ROWS_N_COLUMNS_LICENSE_KEY'),
+    HEAVY_ASSET_CDN_URL: safeEnv('HEAVY_ASSET_CDN_URL')
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
