@@ -102,6 +102,7 @@ export const schemas = {
     title: 'Archive',
     url: null,
     description: null,
+    transcription: '',
     tags: [],
     creator: null,
     collection: null,
@@ -115,6 +116,7 @@ export const schemas = {
     url: null,
     title: 'Tommi',
     description: null,
+    transcription: '',
     tags: [],
     city: null,
     country: null,
@@ -126,6 +128,7 @@ export const schemas = {
     url: null,
     title: 'Product',
     description: null,
+    transcription: '',
     tags: [],
   },
   [eventTypes.keycard]: {
@@ -134,6 +137,7 @@ export const schemas = {
     title: 'Keycard',
     host: walletDefaultHost,
     description: null,
+    transcription: '',
     tags: [],
   },
 
@@ -142,12 +146,14 @@ export const schemas = {
     url: null,
     title: 'Sheet',
     description: null,
+    transcription: '',
     tags: [],
   },
   [eventTypes.agent]: {
     type: eventTypes.agent,
     title: 'Agent',
     description: null,
+    transcription: '',
     tags: [],
     agentId: null,
     agentModel: 'llama3.2:3b',
@@ -197,24 +203,28 @@ export const schemas = {
     type: eventTypes.gallery,
     title: 'Gallery',
     description: null,
+    transcription: '',
     tags: [],
   },
   [eventTypes.image]: {
     type: eventTypes.image,
     title: 'Image',
     description: null,
+    transcription: '',
     tags: [],
   },
   [eventTypes.audio]: {
     type: eventTypes.audio,
     title: 'Audio',
     description: null,
+    transcription: '',
     tags: [],
   },
   [eventTypes.video]: {
     type: eventTypes.video,
     title: 'Video',
     description: null,
+    transcription: '',
     tags: [],
   },
 
@@ -225,6 +235,7 @@ export const schemas = {
     title: 'Session',
     url: null,
     description: null,
+    transcription: '',
     tags: [],
     creator: null,
     collection: null,
@@ -256,6 +267,10 @@ export function updateDraft(data) {
       }
     }
   })
+}
+
+export function getDraft() {
+  return $.learn().draft
 }
 
 // dear diary
@@ -638,15 +653,10 @@ $.style(`
     grid-area: body;
   }
 
-
-  & .view-metadata {
-    display: none;
-  }
-
-  & .show-metadata {
+  &[data-show-metadata="true"] .draft-metadata,
+  &[data-show-metadata="true"] .view-metadata {
     display: block;
   }
-
 
   & .draft-footer {
     display: grid;
@@ -824,7 +834,6 @@ $.style(`
 
   & .dropdown-items {
     display: none;
-    background: rgba(0,0,0,1);
     position: absolute;
     bottom: 3rem;
     right: -4px;
@@ -832,44 +841,34 @@ $.style(`
     max-width: calc(100vw);
     overflow: auto;
     z-index: 25;
+    flex-direction: column-reverse;
+    gap: 4px;
+    padding: .5rem 0;
+    pointer-events: all;
   }
 
   & [data-os-target].active + .dropdown-items {
-    display: block;
+    display: flex;
   }
 
   & .dropdown-items button > * {
     pointer-events: none;
   }
 
-  & .dropdown-items button:focus,
-  & .dropdown-items button.active,
-  & .dropdown-items button:hover {
-    background: rgba(255,255,255,.35);
-  }
-
-
-  & .dropdown-items  button {
+  & .dropdown-items .dropdown-item {
     background: transparent;
     border: none;
-    color: rgba(255,255,255,.85);
-    width: 100%;
-    text-align: right;
-    white-space: nowrap;
-    font-size: 1rem;
-    line-height: 1;
-    display: inline-flex;
-    padding: .5rem;
+    display: grid;
+    place-content: center end;
+    padding: 0 .5rem;
     gap: .5rem;
-    display: block;
-    font-size: 1rem;
-    --v-font-mono: 1;
-    --v-font-casl: 0;
-    --v-font-wght: 400;
-    --v-font-slnt: 0;
-    --v-font-crsv: 0;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
+  }
+
+  & .dropdown-item.-edge-case {
+    place-content: center start;
+    padding-right: 3rem;
+    position: sticky;
+    top: 0;
   }
 
   & hr {
@@ -1193,6 +1192,7 @@ function reIndex(events=[]) {
     this.ref('id')
     this.field('title')
     this.field('description')
+    this.field('transcription')
     this.field('path')
     this.field('keywords')
     this.field('type')
@@ -1202,7 +1202,7 @@ function reIndex(events=[]) {
         const node = {
           id: event.data.id,
           title: event.data.title,
-          description: event.data.description,
+          transcription: event.data.transcription,
           keywords: event.handle.path.split('/').join(' '),
           type: event.data.type,
         }
@@ -1313,6 +1313,11 @@ export const creationForms = {
       ${editBanner(this)}
       <div class="metadata-form">
         <label class="field">
+          <span class="label">Transcription</span>
+          <textarea data-bind="draft" name="transcription" value="${escapeHyperText(draft.transcription)}"></textarea>
+        </label>
+
+        <label class="field">
           <span class="label">Description</span>
           <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
         </label>
@@ -1323,6 +1328,11 @@ export const creationForms = {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
+        <label class="field">
+          <span class="label">Transcription</span>
+          <textarea data-bind="draft" name="transcription" value="${escapeHyperText(draft.transcription)}"></textarea>
+        </label>
+
         <label class="field">
           <span class="label">Description</span>
           <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
@@ -1984,7 +1994,6 @@ const viewRenderers = {
   },
   [views.create]: (target) => {
     const { draft, viewMetadata, context } = $.learn()
-    const form = renderCreationFormByType.call(context, draft)
     const studio = renderStudioByType.call(context, draft)
     return `
       <div class="overlay-background">
@@ -2007,7 +2016,7 @@ const viewRenderers = {
               </button>
               <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
             </div>
-            <div class="draft-metadata ${viewMetadata ? 'show-metadata':''}">
+            <div class="draft-metadata">
               <div class="time-form">
                 <div class="time-form-section">
                   ${typeSelector(draft.type)}
@@ -2027,7 +2036,7 @@ const viewRenderers = {
                 </div>
               </div>
 
-              ${form}
+              <div data-dom="metadata-fields"></div>
             </div>
           </div>
         </div>
@@ -2450,6 +2459,7 @@ function patch(target) {
     buckets,
     view,
     draft,
+    context,
     grabbing,
     sidebar,
     viewMetadata
@@ -2518,10 +2528,8 @@ function patch(target) {
       target.type !== draft.type ||
       target.view !== view ||
       (target.dataset.space && target.dataset.space !== space) ||
-      (target.dataset.time && target.dataset.time !== time) ||
-      target.viewMetadata !== viewMetadata
+      (target.dataset.time && target.dataset.time !== time)
     ) {
-      target.viewMetadata = viewMetadata
       target.view = view
       target.type = draft.type
       if(!space && target.dataset.space) {
@@ -2541,6 +2549,21 @@ function patch(target) {
         innerHTML(content, html)
         //content.innerHTML = html
       }
+    }
+  }
+
+
+  {
+    const fieldArea = target.querySelector('[data-dom="metadata-fields"]')
+    if(view === views.create && fieldArea) {
+      const form = renderCreationFormByType.call(context, draft)
+      innerHTML(fieldArea, form)
+    }
+  }
+
+  {
+    if(target.dataset.showMetadata !== viewMetadata) {
+      target.dataset.showMetadata = viewMetadata
     }
   }
 
@@ -2586,20 +2609,43 @@ $.draw((target)=> {
           <sl-icon name="list"></sl-icon>
         </button>
         <div class="dropdown-items" data-menu="edit">
-          <button data-quit>Quit</button>
-          <hr>
-          <button data-new="${eventTypes.world}">World</button>
-          <button data-new="${eventTypes.character}">Character</button>
-          <button data-new="${eventTypes.bulletin}">Bulletin</button>
-          <button data-new="${eventTypes.sheet}">Sheet</button>
-          <button data-new="${eventTypes.agent}">Agent</button>
-          <!--<button data-new="${eventTypes.keycard}">Keycard</button>-->
-          <button data-new="${eventTypes.video}">Video</button>
-          <button data-new="${eventTypes.image}">Photo</button>
-          <button data-new="${eventTypes.sketch}">Sketch</button>
-          <button data-new="${eventTypes.audio}">Audio</button>
-          <button data-new="${eventTypes.memo}">Memo</button>
-          <button data-new="${eventTypes.note}">Note</button>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.note}">Note</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.memo}">Memo</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.audio}">Audio</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.image}">Photo</button>
+          </div>
+          <div class="dropdown-item">
+            <!--<button class="standard-button -small bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.video}">Video</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.agent}">Agent</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.character}">Character</button>
+          </div>
+          <div class="dropdown-item">
+            <button class="standard-button -small bias-generic" data-new="${eventTypes.world}">World</button>
+          </div>
+          <div class="dropdown-item -edge-case">
+            <button data-quit  class="standard-button -small bias-negative" >Quit</button>
+          </div>
         </div>
       </div>
     </div>
@@ -3480,7 +3526,6 @@ function formatTime(date, options = {
 }
 
 function stamp(x) {
-  const { viewMetadata } = $.learn()
   const date = new Date(x.year, x.month, x.day, x.hour, x.minute)
   return `
     <div class="draft-footer">
@@ -3492,11 +3537,22 @@ function stamp(x) {
         ${escapeHyperText(x.title)}
       </div>
     </div>
-    <div class="view-metadata ${viewMetadata ? 'show-metadata':''}">
+    <div class="view-metadata">
+
+      ${renderDraftMetadata(x, 'description')}
+      ${renderDraftMetadata(x, 'transcription')}
+
       ${formatDate(date)} @ ${formatTime(date)}
     </div>
-
   `
+}
+
+function renderDraftMetadata(x, key) {
+  return x[key] ? `
+    <div class="draft-${key}">
+      ${escapeHyperText(x[key])}
+    </div>
+  ` : ''
 }
 
 $.when('input', '[name="keycard"]', (event) => {

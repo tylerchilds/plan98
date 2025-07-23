@@ -2,7 +2,7 @@ import elf from '@silly/elf'
 import Vosk from 'vosk-browser'
 import translate from 'translate'
 import { innerHTML } from 'diffhtml'
-import { updateDraft } from './time-machine.js'
+import { updateDraft, getDraft } from './time-machine.js'
 import { get, put } from './plan98-wallet.js'
 
 translate.engine = "libre";
@@ -285,9 +285,15 @@ class AudioNotes extends HTMLElement {
       });
 
       recognizer.on("result", async (message) => {
+        const { recording } = $.learn()
         const result = message.result;
 
         if(result.text) {
+          if(recording) {
+            const { transcription } = getDraft()
+            updateDraft({ transcription: transcription + ' ' + result.text })
+          }
+
           $.teach({
             result: result.text
           })
