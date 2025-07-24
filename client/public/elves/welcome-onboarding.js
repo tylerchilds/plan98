@@ -67,7 +67,7 @@ const formRenderers = {
         Smol U
       </button>
       <button class="standard-button -round bias-generic">
-        <sl-icon name="x-circle"></sl-icon>
+        <sl-icon name="x-lg"></sl-icon>
       </button>
     `
   },

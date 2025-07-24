@@ -1968,7 +1968,7 @@ const viewRenderers = {
             </div>
             <div class="draft-footer">
               <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
-                <sl-icon name="x-circle"></sl-icon>
+                <sl-icon name="x-lg"></sl-icon>
               </button>
             </div>
           </div>
@@ -2001,7 +2001,7 @@ const viewRenderers = {
           <div class="draft-template">
             <div class="draft-header">
               <button data-action="post" class="standard-button bias-positive -small" type="submit">
-                <sl-icon name="cloud-arrow-up-fill"></sl-icon>
+                <sl-icon name="check-lg"></sl-icon>
               </button>
               <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
                 <sl-icon name="gear-fill"></sl-icon>
@@ -2012,7 +2012,7 @@ const viewRenderers = {
             </div>
             <div class="draft-footer">
               <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
-                <sl-icon name="x-circle"></sl-icon>
+                <sl-icon name="x-lg"></sl-icon>
               </button>
               <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
             </div>
@@ -3530,7 +3530,7 @@ function stamp(x) {
   return `
     <div class="draft-footer">
       <button data-close-draft class="standard-button bias-generic -small -round" type="reset">
-        <sl-icon name="x-circle"></sl-icon>
+        <sl-icon name="x-lg"></sl-icon>
       </button>
 
       <div class="draft-title">
