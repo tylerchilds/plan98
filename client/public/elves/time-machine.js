@@ -70,6 +70,7 @@ export const views = {
   wallet: 'wallet',
   create: 'create',
   security: 'security',
+  emergency: 'emergency',
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
   [eventTypes.memo]: eventTypes.memo,
@@ -2007,7 +2008,12 @@ const viewRenderers = {
       </security>
     `
   },
-
+  [views.emergency]: (target) => {
+    const activeKeycard = getKeycard()
+    return `
+      <live-help room="${activeKeycard.id}"></live-help>
+    `
+  },
   [views.create]: (target) => {
     const { draft, viewMetadata, context } = $.learn()
     const studio = renderStudioByType.call(context, draft)
@@ -2689,7 +2695,7 @@ $.draw((target)=> {
         </button>
         <div class="identity-selector"></div>
         <div class="security-selector"></div>
-        <div data-dom="time" class="now-time"></div>
+        <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
         <button class="logo-area" data-assistant>
           <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
         </button>
@@ -3188,6 +3194,11 @@ $.when('click', '[data-toggle-filters]', (event) => {
 $.when('click', '[data-security]', (event) => {
   $.teach({ view: views.security, sidebar: false })
 })
+
+$.when('click', '[data-emergency]', (event) => {
+  $.teach({ view: views.emergency, sidebar: false })
+})
+
 
 $.when('click', '[data-assistant]', (event) => {
   launch()

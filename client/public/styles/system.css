@@ -1052,6 +1052,8 @@ sillonious-brand > xml-html {
 ::part(button) {
   background: linear-gradient(rgba(255,255,255,1) 0%, rgba(255,255,255,.5) 100%), var(--root-theme, mediumseagreen);
   pointer-events: all;
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,.1),
+              0 1px 2px 2px rgba(0,0,0,.05);
   background-size: 1px 100%;
   background-repeat: repeat-x;
   font-weight: 400;
@@ -1084,6 +1086,8 @@ sillonious-brand > xml-html {
 .standard-input:active {
   border-top: 3px solid rgba(255,255,255,.25);
   border-bottom: none;
+  box-shadow: 0 1px 1px 0 rgba(0,0,0,.1) inset,
+              0 1px 2px 2px rgba(0,0,0,.05) inset;
 }
 
 .standard-button.bias-positive {
@@ -1172,6 +1176,21 @@ sillonious-brand > xml-html {
   padding: 2px 4px;
   font-size: 13px;
   font-weight: normal;
+}
+
+.standard-input.-stealth,
+.standard-button.-stealth,
+.old-button.-stealth {
+  background: white;
+  border-bottom-color: rgba(0,0,0,.05);
+}
+
+.standard-button.-stealth:hover,
+.standard-button.-stealth:focus,
+.standard-button.-stealth.active,
+.standard-button.-stealth:active {
+  color: rgba(255,255,255,.85);
+  background: linear-gradient(rgba(255,255,255,.5) 0%, rgba(0,0,0,.25) 100%), var(--root-theme, mediumseagreen);
 }
 
 .standard-button.-soft {
