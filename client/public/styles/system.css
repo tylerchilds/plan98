@@ -1209,6 +1209,17 @@ sillonious-brand > xml-html {
 .wizard {
   margin: 0 auto;
   max-width: 480px;
-  padding: 3rem .5rem 1rem;
+  padding: 3rem .5rem 3rem;
+}
+
+.form-title {
+  margin-top: 2rem;
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.form-description {
+  margin-bottom: 1rem;
 }
 

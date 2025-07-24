@@ -446,17 +446,6 @@ $.style(`
   & .file-region > button {
     pointer-events: all;
   }
-
-  & .form-title {
-    margin-top: 2rem;
-    font-size: 2rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-
-  & .form-description {
-    margin-bottom: 1rem;
-  }
 `)
 
 $.when('click', '.click-proxy', (event) => {

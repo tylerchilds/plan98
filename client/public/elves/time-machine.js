@@ -422,6 +422,13 @@ $.style(`
     position: relative;
   }
 
+  & .security-selector {
+    position: relative;
+    display: grid;
+    place-content: center;
+  }
+
+
   & [name="keycard"] {
     position: absolute;
     inset: 0;
@@ -539,8 +546,9 @@ $.style(`
   }
 
   & .overlay-background {
+    display: block;
     height: 100%;
-    background: rgba(0,0,0,.15);
+    background: white;
     backdrop-filter: blur(2px);
     overflow: hidden;
   }
@@ -670,7 +678,7 @@ $.style(`
   & .draft-footer {
     display: grid;
     grid-area: footer;
-    padding: 4px;
+    padding: 4px 4px 4px .5rem;
     border-top: 1px solid rgba(0, 0, 0,.2);
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.65);
@@ -2001,7 +2009,7 @@ const viewRenderers = {
   },
   [views.security]: (target) => {
     return `
-      <security class="overlay-background">
+      <security class="overlay-background" style="overflow: auto;">
         <div class="wizard">
           <secure-persona></secure-persona>
         </div>

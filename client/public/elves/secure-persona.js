@@ -42,17 +42,17 @@ export const $ = elf('secure-persona', {
 const modes = {
   error: function error(target) {
     return `
-      <div class="persona-title">
+      <div class="form-title">
         Session Error
       </div>
-      <div class="persona-context">
+      <div class="form-description">
         There was an error linking your persona, press retry to try again.
       </div>
 
       <div>
-        <button class="persona-deactivate" data-action="handleSessionEnd">
-          <span>
-            <sl-icon name="shield-x"></sl-icon>
+        <button class="standard-button -bias-negative persona-deactivate" data-action="handleSessionEnd">
+          <span style="display: grid; place-content: center;">
+            <sl-icon name="emoji-frown"></sl-icon>
           </span>
           Retry
         </button>
@@ -63,11 +63,11 @@ const modes = {
   onboard: function intake(target) {
     return `
       <div class="persona-form">
-        <div class="persona-title">
+        <div class="form-title">
           Activate Persona
         </div>
 
-        <div class="persona-context">
+        <div class="form-description">
           Your persona is your secure callsign for encrypting data with <strong>${organization}</strong>.
         </div>
         <div>
@@ -78,7 +78,7 @@ const modes = {
             <span class="label">Persona</span>
             <input type="text" name="account" required/>
           </label>
-          <button class="persona-action" type="submit">
+          <button class="standard-button bias-positive" type="submit">
             Activate
           </button>
         </form>
@@ -103,11 +103,11 @@ const modes = {
     const organization = getCompanyName()
     return `
       <div class="persona-form">
-        <div class="persona-title">
+        <div class="form-title">
           Create Credentials
         </div>
 
-        <div class="persona-context">
+        <div class="form-description">
           To establish credentials for <strong>${persona}@${organization}</strong>, please customize the questionnaire below.
         </div>
         <div>
@@ -144,7 +144,7 @@ const modes = {
             </span>
             <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
           </label>
-          <button class="persona-action" type="submit">
+          <button class="standard-button bias-positive" type="submit">
             Provision
           </button>
         </form>
@@ -165,11 +165,11 @@ const modes = {
     const companyName = getCompanyName()
     return `
       <div key="challenge" class="persona-form">
-        <div class="persona-title">
+        <div class="form-title">
           Answer Challenge
         </div>
 
-        <div class="persona-context">
+        <div class="form-description">
           Correctly provide answers for the questions below to begin the secure session for <strong>${companyEmployeeId}@${companyName}</strong>
         </div>
         <div>
@@ -197,7 +197,7 @@ const modes = {
             <span class="label">${questions[5]}</span>
             <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
           </label>
-          <button class="persona-action" type="submit">
+          <button class="standard-button bias-positive" type="submit">
             Validate
           </button>
         </form>
@@ -209,19 +209,23 @@ const modes = {
     const companyName = getCompanyName()
 
     return `
-      <div class="persona-title">
-        Secure Persona
+      <div class="form-title">
+        Secured!
       </div>
-      <div class="persona-context">
-        Session secured as <strong>${companyEmployeeId}@${companyName}</strong> for all friend to friend friendcryption.
+      <div class="form-description">
+        Go offline to swap personas.
+      </div>
+      <div class="form-description">
+        Persona: <strong>${companyEmployeeId}</strong><br/>
+        Provider: <strong>${companyName}</strong><br/>
       </div>
 
       <div style="margin: 0 0 2rem;">
-        <button class="persona-deactivate" data-action="handleSessionEnd">
-          <span>
-            <sl-icon name="shield-x"></sl-icon>
+        <button class="standard-button -bias-negative persona-deactivate" data-action="handleSessionEnd">
+          <span style="display: grid; place-content: center;">
+            <sl-icon name="emoji-frown"></sl-icon>
           </span>
-          Disengage
+          Go offline
         </button>
       </div>
     `
@@ -246,6 +250,7 @@ export function handleSessionStart(event, root) {
 }
 
 export function handleSessionEnd(event, root) {
+  $.teach({ data: null })
   clearSession()
   broadcastPersonaDeactivated()
 }
@@ -337,6 +342,9 @@ $.draw((target) => {
 
   if(modes[mode]) {
     return `
+      <div>
+        <plan98-icon></plan98-icon>
+      </div>
       <div${mode}>
         ${modes[mode](target)}
       </div${mode}>
@@ -348,6 +356,7 @@ function afterUpdate(target) {
   {
     recoverElves(target, 'bayun-feedback')
     recoverElves(target, 'sl-icon')
+    recoverElves(target, 'plan98-icon')
     recoverElves(target, 'flying-disk')
   }
 }
@@ -416,6 +425,8 @@ function start(event) {
         provision()
       }
     };
+
+    $.teach({ mode: 'loading'  })
 
     schedule(() => {
       bayunCore.loginWithoutPassword(
@@ -672,6 +683,7 @@ $.style(`
   
   & .persona-bar {
     display: block;
+    margin: 3rem 0;
   }
 
   & .persona-status {
@@ -699,48 +711,13 @@ $.style(`
     margin-bottom: 3px;
   }
 
-  & .persona-title {
-    font-weight: bold;
-    font-size: 1.2rem;
-    color: rgba(0,0,0,.65);
-    margin: 1rem 0;
-  }
-
-  & .persona-context {
-    padding-bottom: 1rem;
-  }
-
-  & .persona-action {
-    padding: 1rem;
-    border-radius: 4px;
-    font-weight: bold;
-    margin: 1rem auto;
-    width: 100%;
-    border: none;
-    color: white;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-  }
-
-  & .persona-action:hover,
-  & .persona-action:focus {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
-  }
-
-
-
   & .persona-deactivate {
-    background: firebrick;
     text-align: left;
     display: grid;
     grid-template-columns: auto 1fr;
     gap: .5rem;
     align-items: center;
-    border: none;
-    padding: 1rem;
-    border-radius: 4px;
-    font-weight: bold;
-    color: white;
-    margin: 1rem auto;
+    margin: 1rem 0;
   }
 
   & hr {
