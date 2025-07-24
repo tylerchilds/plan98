@@ -337,9 +337,9 @@ $.draw((target) => {
 
   if(modes[mode]) {
     return `
-      <div-${mode}>
+      <div${mode}>
         ${modes[mode](target)}
-      </div-${mode}>
+      </div${mode}>
     `
   }
 }, { afterUpdate })

@@ -6,6 +6,13 @@ import { settingsMenu, walletDefaultHost, bios, getKeycard, listKeycards, setKey
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
+import {
+  getSession,
+  clearSession,
+  getCompanyName,
+  getEmployeeId
+} from './bayun-wizard.js'
+
 
 const bucketKeys = {
   past: 'past',
@@ -62,6 +69,7 @@ export const eventTypes = {
 export const views = {
   wallet: 'wallet',
   create: 'create',
+  security: 'security',
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
   [eventTypes.memo]: eventTypes.memo,
@@ -444,7 +452,7 @@ $.style(`
 
   & .now {
     display: grid;
-    grid-template-columns: auto 1fr auto auto;
+    grid-template-columns: auto 1fr auto auto auto;
     gap: 1rem;
     padding: 4px .5rem;
     background: white;
@@ -865,8 +873,6 @@ $.style(`
   }
 
   & .dropdown-item.-edge-case {
-    place-content: center start;
-    padding-right: 3rem;
     position: sticky;
     top: 0;
   }
@@ -1992,6 +1998,16 @@ const viewRenderers = {
       </thinking>
     `
   },
+  [views.security]: (target) => {
+    return `
+      <security class="overlay-background">
+        <div class="wizard">
+          <secure-persona></secure-persona>
+        </div>
+      </security>
+    `
+  },
+
   [views.create]: (target) => {
     const { draft, viewMetadata, context } = $.learn()
     const studio = renderStudioByType.call(context, draft)
@@ -2534,13 +2550,13 @@ function patch(target) {
       target.type = draft.type
       if(!space && target.dataset.space) {
         delete target.dataset.space
-      } else {
+      } else if(time) {
         target.dataset.space = space
       }
 
       if(!time && target.dataset.time) {
         delete target.dataset.time
-      } else {
+      } else if(time) {
         target.dataset.time = time
       }
 
@@ -2588,6 +2604,23 @@ function patch(target) {
         `
       }
     }
+  }
+
+  {
+    const security = target.querySelector('.security-selector')
+    const { sessionId } = getSession()
+    
+    innerHTML(security, sessionId
+      ? `
+        <button class="standard-button bias-positive -smol -round" data-security>
+          <sl-icon name="emoji-sunglasses"></sl-icon>
+        </button>
+      `
+      : `
+        <button class="standard-button bias-negative -smol -round" data-security>
+          <sl-icon name="emoji-expressionless"></sl-icon>
+        </button>
+      `)
   }
 }
 
@@ -2654,8 +2687,8 @@ $.draw((target)=> {
         <button class="logo-gradient" data-assistant>
           Plan98
         </button>
-        <div class="identity-selector">
-        </div>
+        <div class="identity-selector"></div>
+        <div class="security-selector"></div>
         <div data-dom="time" class="now-time"></div>
         <button class="logo-area" data-assistant>
           <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
@@ -3152,6 +3185,9 @@ $.when('click', '[data-toggle-filters]', (event) => {
   $.teach({ showFilters: !$.learn().showFilters })
 })
 
+$.when('click', '[data-security]', (event) => {
+  $.teach({ view: views.security, sidebar: false })
+})
 
 $.when('click', '[data-assistant]', (event) => {
   launch()
