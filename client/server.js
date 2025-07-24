@@ -294,7 +294,8 @@ function template() {
     SUPABASE_KEY: safeEnv('SUPABASE_KEY'),
 
     ROWS_N_COLUMNS_LICENSE_KEY: safeEnv('ROWS_N_COLUMNS_LICENSE_KEY'),
-    HEAVY_ASSET_CDN_URL: safeEnv('HEAVY_ASSET_CDN_URL')
+    HEAVY_ASSET_CDN_URL: safeEnv('HEAVY_ASSET_CDN_URL'),
+    JITSI_MAGIC_COOKIE: safeEnv('JITSI_MAGIC_COOKIE')
   }
   const configArray = []
   for(const key of Object.keys(configObject)) {
