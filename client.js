@@ -71,7 +71,7 @@ if(commands[command]) {
 }
 
 async function page() {
-  const index = await Deno.readTextFile(`./client/index.html`)
+  const index = await Deno.readTextFile(`./client/public/index.html`)
   const dom = new DOMParser().parseFromString(index, "text/html");
 
   dom.head.insertAdjacentHTML('beforeend', `
