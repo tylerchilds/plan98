@@ -221,7 +221,7 @@ const modes = {
       </div>
 
       <div style="margin: 0 0 2rem;">
-        <button class="standard-button -bias-negative persona-deactivate" data-action="handleSessionEnd">
+        <button class="standard-button bias-generic persona-deactivate" data-action="handleSessionEnd">
           <span style="display: grid; place-content: center;">
             <sl-icon name="emoji-frown"></sl-icon>
           </span>
@@ -441,6 +441,7 @@ function start(event) {
     })
   } else {
     setError('Missing information.')
+    $.teach({ mode: 'onboard'  })
   }
 }
 
@@ -538,7 +539,7 @@ function newUserCredentials(event) {
 
       const failureCallback = error => {
         //setError(error)
-        console.error(error)
+        $.teach({ mode: 'provision'  })
       };
 
       // Take user Input for optional registerFaceId
@@ -620,6 +621,7 @@ function securityQuestions(event) {
         const failureCallback = error => {
           console.error(error)
           //setError(error)
+          $.teach({ mode: 'provision'  })
         };
 
         bayunCore.validateSecurityQuestions(
@@ -649,8 +651,13 @@ async function provision(event) {
     };
 
     const failureCallback = error => {
-      setError(error)
+      //setError(error)
+      $.teach({
+        mode: 'provision',
+      })
     };
+
+    $.teach({ mode: 'loading'  })
 
     bayunCore.registerEmployeeWithoutPassword(
       '', //sessionId,
@@ -667,6 +674,7 @@ async function provision(event) {
     );
   } else {
     setError('Missing Information.')
+    $.teach({ mode: 'challenge'  })
   }
 }
 
