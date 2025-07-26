@@ -14,6 +14,7 @@ const forms = {
   upload: 'upload',
   complete: 'complete',
   wallet: 'wallet',
+  leave: 'leave',
   template: 'template'
 }
 const tag = 'welcome-onboarding'
@@ -381,7 +382,12 @@ const formValidators = {
     $.teach({ draft: newDraft(eventTypes.keycard), form: forms.second })
   },
   [forms.leave]: (state, target) => {
-    window.location.href = '/app/time-machine'
+    target.dispatchEvent(new CustomEvent('json-rpc', {
+      detail: {
+        jsonrpc: "2.0",
+        method: 'done',
+      }
+    }))
   },
 }
 
@@ -408,6 +414,7 @@ $.style(`
     background: var(--root-theme, mediumseagreen);
     opacity: 0;
     height: 100%;
+    overflow: auto;
   }
 
   @keyframes &-fade-in {

@@ -290,7 +290,7 @@ const $ = elf('time-machine', {
   cards: [],
   cache: [],
   grabbing: false,
-  sidebar: true,
+  sidebar: false,
   space: null,
   time: null,
   now: new Date(),
@@ -490,6 +490,7 @@ $.style(`
 
   & .content-area:empty + .fallback {
     display: block;
+    overflow: auto;
   }
 
   & [data-sidebar="false"] .chat-sidebar {
@@ -1028,6 +1029,9 @@ $.style(`
     padding: 3rem .5rem 1rem;
   }
 
+  & welcome-onboarding .metadata-form {
+    padding: 0;
+  }
 
   & .filters {
     position: absolute;
@@ -1062,6 +1066,7 @@ async function fate() {
   const signer = await getSigner()
   const storage = getStorage()
   const keycard = getKeycard()
+  if(!keycard || !storage) return
   const space = storage.space({
     signer,
     id: `urn:uuid:${keycard.id}`
@@ -2497,7 +2502,7 @@ function patch(target) {
 
   {
     const button = target.querySelector('[data-dom="create-button"]')
-    if(draft.type !== button.dataset.tooltip) {
+    if(button && draft.type !== button.dataset.tooltip) {
       button.dataset.tooltip = draft.type
     }
   }
@@ -2641,8 +2646,10 @@ function patch(target) {
 
 // you are my diary
 $.draw((target)=> {
-  const activeKeycard = getKeycard()
-  if(!activeKeycard) return
+  const { ready } = $.learn()
+  if(!ready && !target.innerHTML) return `
+    <welcome-onboarding></welcome-onboarding>
+  `
   query(target)
   if(target.innerHTML) return
 
@@ -2796,21 +2803,77 @@ $.draw((target)=> {
       </div>
       <div data-dom="content" class="content-area"></div>
       <div class="fallback">
-        <ur-shell></ur-shell>
+        <div class="wizard">
+          <div>
+            <plan98-icon></plan98-icon>
+          </div>
+          <div class="form-title">
+            Plan98: A Memex
+          </div>
+          <div class="form-description">
+            a MEM-ory EX-pansion device.
+          </div>
+          <div class="form-description">
+            With a Memex, teams can communicate across the globe, securely, in an instant.
+          </div>
+
+          <div class="form-subtitle">
+            Healthcare
+          </div>
+          <div class="form-description">
+            A doctor may use a Memex as a personal assistant that transcribes voice notes into searchable documents to more effectively scan patient interactions.
+          </div>
+          <div class="form-description">
+            Their memex may highlight key insights that the doctor can customize and share with the patient, nurse, and pharmacist.
+          </div>
+          <div class="form-description">
+            Their memex is capable of facilitating the communications securely, serving as a one stop bridge for the entire care team.
+          </div>
+
+          <div class="form-subtitle">
+            Technology
+          </div>
+          <div class="form-description">
+            A manager may use a Memex to track the history of a product through the lifecycle of scoping, budgeting, designing, developing, testing, and maintaining it.
+          </div>
+          <div class="form-description">
+            This standard process involves collaboration with individuals across finance, marketing, science, quality, and operations.
+          </div>
+          <div class="form-description">
+            The manager may have a memex per project, one where anyone on a project can transparently track work and another secured as "need to know".
+          </div>
+
+          <div class="form-subtitle">
+            Education
+          </div>
+          <div class="form-description">
+            Virtual learning allows students to learn and submit their homework from anywhere.
+          </div>
+          <div class="form-description">
+            With their assigments and achievements in their memex, they can bring their success from grade school to university and ultimately into the workforce.
+          </div>
+          <div class="form-description">
+            By consolidating the digital touchpoints of online learning into a Memex, more attention can be spent on topics that matter: subject matter.
+          </div>
+
+          <div class="form-subtitle">
+            Use Cases
+          </div>
+          <div class="form-description">
+            Are as simple as: "Multiple people over multiple days need to stay on the same page."
+          </div>
+          <div class="form-description">
+            Which is only a problem since: "Nobody can agree on which link to use for 'the same page'."
+          </div>
+          <div class="form-description">
+            And can be solved by deciding: "This page is a good of a page as any to be <strong>our same page</strong>."
+          </div>
+        </div>
       </div>
     </div>
   `
 }, {
   beforeUpdate(target) {
-    {
-      const activeKeycard = getKeycard()
-
-      if(!activeKeycard) {
-        window.location.href = '/app/welcome-onboarding'
-        return
-      }
-    }
-
     {
       //saveCursor(target)
     }
@@ -2820,6 +2883,13 @@ $.draw((target)=> {
     const view = target.getAttribute('view')
     if(!target.initialized) {
       target.initialized = true
+
+      const activeKeycard = getKeycard()
+
+      if(activeKeycard) {
+        $.teach({ ready: true })
+      }
+
       if(q) {
         $.teach({ view: views.create, src })
         $.teach({
@@ -2841,8 +2911,8 @@ $.draw((target)=> {
   },
   afterUpdate(target) {
     {
-      const activeKeycard = getKeycard()
-      if(!activeKeycard) {
+      const { ready } = $.learn()
+      if(!ready) {
         return
       }
     }
@@ -3738,6 +3808,13 @@ function escapeHyperText(text = '') {
 $.when('json-rpc', 'my-wallet', (event) => {
   if(event.detail.method === 'updated') {
     $.teach({ cards: event.detail.params.cards })
+  }
+})
+
+$.when('json-rpc', 'welcome-onboarding', (event) => {
+  if(event.detail.method === 'done') {
+    event.target.closest($.link).innerHTML = ''
+    $.teach({ ready: true })
   }
 })
 

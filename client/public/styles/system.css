@@ -1066,9 +1066,8 @@ sillonious-brand > xml-html {
   border-bottom: 3px solid var(--root-theme, mediumseagreen);
   text-decoration: none;
   display: inline-grid;
-  place-items: center;
   border-radius: 5px;
-  place-content: center start;
+  place-items: center start;
 }
 
 .field input,
@@ -1147,6 +1146,7 @@ sillonious-brand > xml-html {
   border-bottom: 3px solid rgba(0,0,0,.2);
   line-height: 1.25;
   resize: none;
+  place-items: center start;
 }
 
 .standard-button * {
@@ -1215,6 +1215,13 @@ sillonious-brand > xml-html {
 .form-title {
   margin-top: 2rem;
   font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.form-subtitle {
+  margin-top: 2rem;
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
 }
