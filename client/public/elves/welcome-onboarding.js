@@ -85,35 +85,21 @@ const formRenderers = {
         There are billions of computing devices globally. Desktops. Laptops. Keyboards. Phones. Watches. Glasses. Rooms.
       </div>
       <div class="form-description">
-        Across them are dozens of vendors and their suppliers. The digital landscape is fragmented.
-      </div>
-      <div class="form-description">
         Have you ever tried to move an Apple to a Google? A Microsoft to an IBM? A Betamax to a VHS?
       </div>
       <div class="form-description">
         You get the idea.
       </div>
       <div class="form-description">
-        The Plan98 mission is simple. Bring everything together into one spot.
+        The Plan98 mission is simple: A Private Local Area Network, like in 1998, but secure and wireless.
       </div>
-      <div style="margin: 3rem 0;">
-        <plan98-icon></plan98-icon>
-      </div>
+
       <div class="form-description">
-        A personal computer for computer professionals.
-      </div>
-      <div class="form-description">
-        Plan98 stores your data is where you say to. Your identity is what you declare it. You control your narrative.
-      </div>
-      <div class="form-description">
-        Too good to be true? Press the "ESC" key on your keyboard to check the code.
-      </div>
-      <div class="form-description">
-        No keyboard? No problem. Highlight any text and press the "ESC" button in the top left of your screen.
+        To connect to the network, use a Memex.
       </div>
 
       <button class="standard-button bias-positive -large" data-submit="${forms.second}">
-        Create Keycard
+        Create Memex
       </button>
       <button class="standard-button bias-generic -large" data-submit="${forms.first}">
         Go Back
@@ -132,15 +118,15 @@ const formRenderers = {
       </div>
       <div class="form-description">
         ${keycard
-          ? 'Welcome back. You can make a new keycard or continue with the one in your pocket.'
-          : 'First time? You can create a keycard now or learn more before getting started. '
+          ? 'Welcome back. You can make a new memex or continue with your existing collection.'
+          : 'First time? You can create a memex now or learn more before getting started. '
         }
       </div>
 
         ${keycard
           ? `
             <button class="standard-button bias-positive -large" data-submit="${forms.second}">
-              Create Keycard
+              Create Memex
             </button>
             <button class="standard-button -large" data-submit="${forms.leave}">
               Continue
@@ -148,7 +134,7 @@ const formRenderers = {
           `
           : `
             <button class="standard-button bias-positive -large" data-submit="${forms.second}">
-              Create Keycard
+              Create Memex
             </button>
             <button class="standard-button bias-generic -large" data-submit="${forms.learn}">
               Learn More
@@ -164,7 +150,7 @@ const formRenderers = {
         <plan98-icon></plan98-icon>
       </div>
       <div class="form-title">
-        Create Keycard
+        Create Memex
       </div>
       <div class="form-description">
         A keycard grants access to portals. Portals can be any digital surface. You'll try the time machine soon-- One of the best portals for navigating portals.
@@ -175,7 +161,7 @@ const formRenderers = {
       </div>
 
       <button class="standard-button bias-positive -large" data-submit="${forms.create}">
-        Create Keycard
+        Create Memex
       </button>
       <button class="standard-button bias-generic -large" data-submit="${forms.first}">
         Go Back

@@ -3784,9 +3784,10 @@ $.when('json-rpc', 'my-wallet', (event) => {
   }
 })
 
-$.when('json-rpc', 'welcome-onboarding', (event) => {
+$.when('json-rpc', 'welcome-onboarding', async (event) => {
   if(event.detail.method === 'done') {
     event.target.closest($.link).innerHTML = ''
+    await fate()
     $.teach({ ready: true })
   }
 })
