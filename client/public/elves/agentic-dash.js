@@ -109,7 +109,7 @@ marked.setOptions({
   smartypants: false, // Prevent automatic quote conversions
 });
 
-const tag = 'agentic-nonsense'
+const tag = 'agentic-dash'
 
 const $ = elf(tag, {
   q: '',
@@ -277,7 +277,7 @@ const views = {
     const actions = ids.map((id) => `
       <div class="av -snapshot">
         <div class="av-cta">
-          <a part="button" class="standard-button -small" href="/app/agentic-nonsense?agent=${id}&q=${encodeURIComponent(q)}">
+          <a part="button" class="standard-button -small" href="/app/agentic-dash?agent=${id}&q=${encodeURIComponent(q)}">
             Ask
           </a>
         </div>

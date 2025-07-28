@@ -228,6 +228,10 @@ const modes = {
           Go offline
         </button>
       </div>
+
+      <div>
+        <secure-followers></secure-followers>
+      </div>
     `
   },
   loading: function loading(target) {

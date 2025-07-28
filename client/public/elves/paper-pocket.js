@@ -1182,7 +1182,7 @@ export function ai(operation) {
       </div>
 
       <div>
-      <agentic-nonsense q="${encodeURIComponent(operation)}" view="launcher"></agentic-nonsense>
+      <agentic-dash q="${encodeURIComponent(operation)}" view="launcher"></agentic-dash>
       </div>
 
       <!--

@@ -53,47 +53,13 @@ marked.setOptions({
   smartypants: false, // Prevent automatic quote conversions
 });
 
-const apps = [
-  {
-    name: 'Home',
-    href: '/app/hive-landing'
-  },
-  {
-    name: 'World Map',
-    href: '/app/world-map'
-  },
-  {
-    name: 'Email',
-    href: '/app/secure-mail'
-  },
-  {
-    name: 'File System',
-    href: '/app/file-system'
-  },
-  /*
-  {
-    name: 'Shared Notes',
-    href: '/app/private-notes?id=admin-notes'
-  },
-  */
-  {
-    name: 'Virtual Desktop',
-    href: '/app/hive-desktop'
-  },
-  {
-    name: 'Gaming',
-    href: 'https://sillyz.computer'
-  },
-
-]
-
 const zeroState = {
   secureSession: getSession(),
   loggedIn: false,
   sidebar: self.innerWidth > 768,
   newLogName: '',
   logBookId: null,
-  paneUrl: '/app/hive-landing',
+  paneUrl: '/app/agentic-dash',
   profile: {},
   logBooks: {},
   threads: {},
@@ -763,7 +729,6 @@ function renderActions(target) {
   } = $.learn()
 
   if(!settingsModal) return ''
-  debugger
   if(settingsModal === target.settingsModal) return
   target.settingsModal = settingsModal
 
@@ -1245,7 +1210,7 @@ $.draw(target => {
         </div>
         <div class="content-area">
           <div class="zero-state">
-            <iframe src="${paneUrl?paneUrl:'/app/hive-landing'}"></iframe>
+            <iframe src="${paneUrl?paneUrl:'/app/agentic-dash'}"></iframe>
           </div>
         </div>
       </div>
@@ -1295,17 +1260,6 @@ $.draw(target => {
         </div>
         <div data-resize-sidebar></div>
         <div class="chat-sidebar-inner">
-          <div class="sidebar-title">
-            <div>
-              Apps
-            </div>
-          </div>
-          ${apps.map((app) => `
-            <button data-url="${app.href}" class="launch-app sidebar-action ${paneUrl === app.href?'active':''}">${app.name}</button>
-          `).join('')}
-
- 
-
           <div class="sidebar-title">
             <div>
               My Projects
@@ -1480,7 +1434,7 @@ $.draw(target => {
           </div>
         `:`
           <div class="zero-state">
-            <iframe src="${paneUrl?paneUrl:'/app/hive-landing'}"></iframe>
+            <iframe src="${paneUrl?paneUrl:'/app/agentic-dash'}"></iframe>
           </div>
         `}
       </div>

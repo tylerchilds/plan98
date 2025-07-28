@@ -194,6 +194,7 @@ export async function get(src) {
 
     return await resource.get({ signer })
       .then(async res => {
+        debugger
         if(res.status !== 200) {
           throw new Error('Not a 200')
         }

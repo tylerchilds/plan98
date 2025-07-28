@@ -69,7 +69,7 @@ export const eventTypes = {
 export const views = {
   wallet: 'wallet',
   create: 'create',
-  security: 'security',
+  identity: 'identity',
   emergency: 'emergency',
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
@@ -422,13 +422,6 @@ $.style(`
     position: relative;
   }
 
-  & .security-selector {
-    position: relative;
-    display: grid;
-    place-content: center;
-  }
-
-
   & [name="keycard"] {
     position: absolute;
     inset: 0;
@@ -460,7 +453,7 @@ $.style(`
 
   & .now {
     display: grid;
-    grid-template-columns: auto 1fr auto auto auto;
+    grid-template-columns: auto 1fr auto auto;
     gap: 1rem;
     padding: 4px .5rem;
     background: white;
@@ -1396,7 +1389,7 @@ export const creationForms = {
             `).join('')}
           </select>
         </label>
-        <details>
+        <details class="advanced-options">
           <summary class="standard-button bias-generic -small" style="margin: 0 0 1rem 0;">Advanced Options</summary>
           <div style="margin: 1rem 0 0;">
             ${settingsMenu('draft')}
@@ -2012,13 +2005,13 @@ const viewRenderers = {
       </thinking>
     `
   },
-  [views.security]: (target) => {
+  [views.identity]: (target) => {
     return `
-      <security class="overlay-background" style="overflow: auto;">
+      <identity class="overlay-background" style="overflow: auto;">
         <div class="wizard">
           <secure-persona></secure-persona>
         </div>
-      </security>
+      </identity>
     `
   },
   [views.emergency]: (target) => {
@@ -2337,7 +2330,7 @@ const viewRenderers = {
     }
 
     return viewTemplate(x, `
-      <agentic-nonsense agent="${x.agentId}"></agentic-nonsense>
+      <agentic-dash agent="${x.agentId}"></agentic-dash>
     `)
   },
 
@@ -2624,25 +2617,7 @@ function patch(target) {
       }
     }
   }
-
-  {
-    const security = target.querySelector('.security-selector')
-    const { sessionId } = getSession()
-    
-    innerHTML(security, sessionId
-      ? `
-        <button class="standard-button bias-positive -smol -round" data-security>
-          <sl-icon name="emoji-sunglasses"></sl-icon>
-        </button>
-      `
-      : `
-        <button class="standard-button bias-negative -smol -round" data-security>
-          <sl-icon name="emoji-expressionless"></sl-icon>
-        </button>
-      `)
-  }
 }
-
 
 // you are my diary
 $.draw((target)=> {
@@ -2705,11 +2680,10 @@ $.draw((target)=> {
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
-        <button class="logo-gradient" data-assistant>
+        <button class="logo-gradient" data-plan98>
           Plan98
         </button>
         <div class="identity-selector"></div>
-        <div class="security-selector"></div>
         <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
         <button class="logo-area" data-assistant>
           <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
@@ -3269,14 +3243,13 @@ $.when('click', '[data-toggle-filters]', (event) => {
   $.teach({ showFilters: !$.learn().showFilters })
 })
 
-$.when('click', '[data-security]', (event) => {
-  $.teach({ view: views.security, sidebar: false })
-})
-
 $.when('click', '[data-emergency]', (event) => {
   $.teach({ view: views.emergency, sidebar: false })
 })
 
+$.when('click', '[data-plan98]', (event) => {
+  $.teach({ view: views.identity, sidebar: false })
+})
 
 $.when('click', '[data-assistant]', (event) => {
   launch()

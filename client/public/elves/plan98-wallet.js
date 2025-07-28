@@ -415,8 +415,8 @@ export async function get(src) {
 
     return await resource.get({ signer })
       .then(async res => {
-        if(res.status !== 200) {
-          throw new Error('Not a 200')
+        if(!res.ok) {
+          throw new Error('Not OKAY!')
         }
         return (await res.blob())
       })
@@ -743,16 +743,7 @@ $.draw((target) => {
 
   if(pendingKeycard) {
     return `
-      <header style="display: grid; grid-template-columns: 1fr 1fr;">
-        <div>
-          System Message
-        </div>
-        <div style="text-align: right;">
-          <button class="standard-button bias-generic -small" data-reject-keycard>
-            Ignore
-          </button>
-        </div>
-      </header>
+      ${footer()}
       <section class="serious-business">
         <h1>
           Keycard Import Request
@@ -776,23 +767,21 @@ $.draw((target) => {
           <strong>Serial Number: </strong>${pendingKeycard.id}
         </p>
       </section>
-      ${footer()}
+      <header style="display: grid; grid-template-columns: 1fr 1fr;">
+        <div>
+          System Message
+        </div>
+        <div style="text-align: right;">
+          <button class="standard-button bias-generic -small" data-reject-keycard>
+            Ignore
+          </button>
+        </div>
+      </header>
     `
   }
 
   return editId ? `
-     <header style="display: grid; grid-template-columns: 1fr 1fr;">
-      <div>
-        <button class="standard-button bias-negative -small" data-cancel>
-          Cancel
-        </button>
-      </div>
-      <div style="text-align: right;">
-        <button class="standard-button bias-positive -small" data-save="${editId}">
-          Save
-        </button>
-      </div>
-    </header>
+    ${footer()}
     <div class="keycard-form">
       ${editId}
       <div class="wizard">
@@ -835,20 +824,21 @@ $.draw((target) => {
         </button>
       </div>
     </div>
-    ${footer()}
-  ` : `
     <header style="display: grid; grid-template-columns: 1fr 1fr;">
       <div>
-        <button class="standard-button bias-generic -small" data-create>
-          New Keycard
+        <button class="standard-button bias-negative -small" data-cancel>
+          Cancel
         </button>
       </div>
       <div style="text-align: right;">
-        <button class="standard-button bias-generic -small" data-remix>
-          Remix
+        <button class="standard-button bias-positive -small" data-save="${editId}">
+          Save
         </button>
       </div>
     </header>
+
+  ` : `
+    ${footer()}
     <section class="wallet">
       <div class="keyring">
         <div class="keyring-scroller">
@@ -875,7 +865,18 @@ $.draw((target) => {
         </div>
       `:''}
     </section>
-    ${footer()}
+    <header style="display: grid; grid-template-columns: 1fr 1fr;">
+      <div>
+        <button class="standard-button bias-generic -small" data-create>
+          New Keycard
+        </button>
+      </div>
+      <div style="text-align: right;">
+        <button class="standard-button bias-generic -small" data-remix>
+          Remix
+        </button>
+      </div>
+    </header>
   `
 }, {
   beforeUpdate(target) {

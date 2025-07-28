@@ -453,6 +453,10 @@ $.style(`
   & .file-region > button {
     pointer-events: all;
   }
+
+  & .advanced-options {
+    display: none;
+  }
 `)
 
 $.when('click', '.click-proxy', (event) => {

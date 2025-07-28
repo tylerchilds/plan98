@@ -181,7 +181,7 @@ $.draw((target) => {
     { // recover icons from the virtual dom
       recoverElves(target, 'sl-icon')
       recoverElves(target, 'plan98-icon')
-      recoverElves(target, 'agentic-nonsense')
+      recoverElves(target, 'agentic-dash')
     }
 
     afterUpdateTheme(null, target)
