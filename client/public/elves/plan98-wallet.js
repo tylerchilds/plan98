@@ -333,7 +333,7 @@ export async function newKeycard(overrides={}) {
   const keycard = {
     id,
     src: '/app/time-machine',
-    title: 'Keycard',
+    title: 'Memex',
     host: walletDefaultHost,
     at: new Date().toJSON(),
     ...overrides

@@ -38,7 +38,7 @@ function newKeycard(overrides={}) {
   const keycard = {
     id,
     src: '/app/time-machine?id='+id,
-    name: 'Keycard',
+    name: 'Memex',
     host: walletDefaultHost,
     at: new Date().toJSON(),
     ...overrides

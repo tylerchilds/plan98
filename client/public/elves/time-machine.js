@@ -284,6 +284,7 @@ export function getDraft() {
 
 // dear diary
 const $ = elf('time-machine', {
+  root: true,
   activeTypes: {},
   suggestions: [],
   searchQuery: '',
@@ -392,11 +393,8 @@ $.style(`
   }
 
   & .era-header {
-    position: sticky;
     background: white;
-    top: 0;
-    z-index: 21;
-    border-top: 1px solid rgba(0, 0, 0,.2);
+    text-align: center;
   }
 
   & .era-label {
@@ -422,12 +420,6 @@ $.style(`
     position: relative;
   }
 
-  & [name="keycard"] {
-    position: absolute;
-    inset: 0;
-    max-width: 320px;
-  }
-
   & .logo-area {
     border: none;
     padding: 0;
@@ -451,21 +443,57 @@ $.style(`
     font-family: "Recursive";
   }
 
-  & .now {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
+  & [data-mode="memex"] {
+    grid-template-rows: auto 1fr;
+    height: 100%;
+    overflow: hidden;
     gap: 1rem;
-    padding: 4px .5rem;
     background: white;
     text-align: center;
     border-bottom: 1px solid rgba(0, 0, 0,.2);
     position: relative;
     z-index: 30; 
-    grid-column: -1 / 1;
+    display: none;
   }
 
-  & [data-sidebar="false"] .now {
-    display: none;
+  & .memex-header {
+    display: grid;
+    padding: 4px .5rem;
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  & .memex-header-left {
+    text-align: left;
+    display: grid;
+    place-content: start;
+  }
+
+  & .memex-header-mid {
+    display: grid;
+    text-align: center;
+    place-content: center;
+  }
+
+  & .memex-header-right {
+    text-align: right;
+    display: grid;
+    place-content: end;
+  }
+
+  & .memex-body {
+    height: 100%;
+    overflow: auto;
+    padding: 4px .5rem;
+  }
+
+  & .memex-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  & [data-chat-mode="memex"] [data-mode="memex"] {
+    display: block;
   }
 
   & .content-area {
@@ -474,16 +502,6 @@ $.style(`
 
   & .content-area:empty {
     display: none;
-  }
-
-  & .fallback {
-    overflow: hidden;
-    display: none;
-  }
-
-  & .content-area:empty + .fallback {
-    display: block;
-    overflow: auto;
   }
 
   & [data-sidebar="false"] .chat-sidebar {
@@ -887,8 +905,6 @@ $.style(`
 
   & .chat-realm {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr;
     z-index: 10;
     height: 100%;
   }
@@ -908,19 +924,24 @@ $.style(`
     height: 100%;
   }
 
-  & .chat-sidebar {
+  & [data-mode="events"] {
     border-right: 1px solid rgba(0, 0, 0,.2);
     background: white;
     position: relative;
     display: none;
     z-index: 21;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr auto;
     overflow-x: hidden;
   }
 
   & [data-sidebar="true"] .chat-sidebar-inner {
     display: block;
   }
+
+  & .chat-header {
+    padding: 4px .5rem;
+  }
+
 
   & .chat-footer {
     padding: 4px .5rem;
@@ -975,37 +996,32 @@ $.style(`
     height: auto;
   }
 
-  & [data-sidebar="true"] .chat-sidebar {
-    left: 0;
-    display: block;
-    width: clamp(240px, var(--sidebar-width, 320px), 100%);
-    max-width: 100vw;
-    position: absolute;
-    top: calc(1.5rem + 8px + 1px);
-    bottom: 0;
-    z-index: 25;
+  & [data-chat-mode="events"] [data-mode="events"] {
     display: grid;
-    grid-template-rows: 1fr auto;
   }
 
-  @media (min-width: 48rem) {
-    &  [data-resize-sidebar] {
-      display: block !important;
-    }
+  & [data-mode="item"] {
+    display: none;
+    height: 100%;
+  }
 
-    & .chat-realm {
-      grid-template-columns: clamp(240px, var(--sidebar-width, 320px), 100%) 1fr;
-    }
+  & [data-chat-mode="item"] [data-mode="item"]:not(:empty) {
+    display: grid;
+  }
 
-    & .chat-sidebar {
-      position: static !important;
-      display: grid;
-    }
+  & .fallback {
+    overflow: hidden;
+    display: none;
+  }
+
+  & [data-chat-mode="item"] [data-mode="item"]:empty + .fallback {
+    display: block;
+    overflow: auto;
   }
 
   & .search-and-filter {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto 1fr auto;
     gap: .5rem;
   }
 
@@ -2478,6 +2494,7 @@ const viewRenderers = {
 
 function patch(target) {
   const {
+    root,
     showFilters,
     searchQuery,
     activeTypes,
@@ -2507,6 +2524,14 @@ function patch(target) {
     }
     if(realm.dataset.sidebar !== sidebar.toString()) {
       realm.dataset.sidebar = sidebar
+    }
+
+    if(root) {
+      realm.dataset.chatMode = 'memex'
+    } else if(sidebar) {
+      realm.dataset.chatMode = 'events'
+    } else {
+      realm.dataset.chatMode = 'item'
     }
   }
 
@@ -2606,13 +2631,13 @@ function patch(target) {
         target.activeKeycardId = activeKeycard.id
         target.keycardsLength = list.length
         identity.innerHTML = `
-          <select name="keycard" class="standard-input -smol">
+          <div class="memex-list">
             ${list.map(keycard => {
               return `
-                <option value="${keycard.id}" ${activeKeycard.id === keycard.id ? 'selected':''}>${keycard.title}</option>
+                <button data-keycard="${keycard.id}" class="standard-button ${activeKeycard.id === keycard.id ? 'selected':''}">${keycard.title}</button>
               `
             }).join('')}
-          </select>
+          </div>
         `
       }
     }
@@ -2679,19 +2704,43 @@ $.draw((target)=> {
       </div>
     </div>
     <div data-dom="realm" class="chat-realm">
-      <div class="now">
-        <button class="logo-gradient" data-plan98>
-          Plan98
-        </button>
-        <div class="identity-selector"></div>
-        <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
-        <button class="logo-area" data-assistant>
-          <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
-        </button>
+      <div class="now" data-mode="memex">
+        <div class="memex-header">
+          <div class="memex-header-left">
+            <button class="logo-gradient" data-plan98>
+              Plan98
+            </button>
+          </div>
+
+          <div class="memex-header-mid">
+            <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
+          </div>
+
+          <div class="memex-header-right">
+            <button class="logo-area" data-assistant>
+              <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+            </button>
+          </div>
+        </div>
+        <div class="memex-body">
+          <div class="identity-selector"></div>
+        </div>
       </div>
 
-      <div class="chat-sidebar">
+      <div class="chat-sidebar" data-mode="events">
         <div data-resize-sidebar></div>
+        <div class="chat-header">
+          <div class="search-and-filter">
+            <button class="standard-button bias-generic -small -round" data-root>
+              <sl-icon name="x-lg"></sl-icon>
+            </button>
+            <input class="standard-input -small" name="searchQuery" placeholder="Filter..." type="text">
+            <button class="standard-button bias-generic -small -round" data-toggle-filters>
+              <sl-icon name="funnel"></sl-icon>
+            </button>
+          </div>
+        </div>
+
         <div class="chat-sidebar-inner">
           <div data-dom="filters" class="filters"></div>
           <div class="time-feed-nom-nom-nom-nom">
@@ -2767,15 +2816,10 @@ $.draw((target)=> {
           </div>
         </div>
         <div class="chat-footer">
-          <div class="search-and-filter">
-            <button class="standard-button bias-generic -small -round" data-toggle-filters>
-              <sl-icon name="funnel"></sl-icon>
-            </button>
-            <input class="standard-input -small" name="searchQuery" placeholder="Filter..." type="text">
-          </div>
+          CREATION FORM!
         </div>
       </div>
-      <div data-dom="content" class="content-area"></div>
+      <div data-dom="content" data-mode="item" class="content-area"></div>
       <div class="fallback">
         <div class="wizard">
           <div>
@@ -3239,6 +3283,11 @@ function renderBucket(spaceKey) {
   }).join('')
 }
 
+$.when('click', '[data-root]', (event) => {
+  $.teach({ root: true })
+})
+
+
 $.when('click', '[data-toggle-filters]', (event) => {
   $.teach({ showFilters: !$.learn().showFilters })
 })
@@ -3653,14 +3702,13 @@ function renderDraftMetadata(x, key) {
   ` : ''
 }
 
-$.when('input', '[name="keycard"]', (event) => {
+$.when('click', '[data-keycard]', (event) => {
   const { value } = event.target
   setKeycard(value)
 
-  const keycard = getKeycard()
-
   reset(event.target.closest($.link))
   fate()
+  $.teach({ root: false, sidebar: true })
 })
 
 function reset(target) {
