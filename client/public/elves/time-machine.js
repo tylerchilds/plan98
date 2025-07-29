@@ -779,6 +779,25 @@ $.style(`
     transition: opacity 100ms ease-in-out, max-height 250ms ease-out;
   }
 
+  & .event-horizon {
+    display: grid;
+    gap: .5rem;
+    grid-template-columns: auto 1fr;
+    max-width: 55ch;
+    margin: auto;
+  }
+
+  & .meta-column {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    padding: 4px;
+  }
+
+  & .event-type-icon {
+    opacity: .5;
+  }
+
   & .view-event {
     width: 100%;
     text-align: left;
@@ -3069,6 +3088,57 @@ function renderFilters() {
   `
 }
 
+const eventTypeObjectClass = {
+  [eventTypes.note]: {
+    icon: '<sl-icon name="input-cursor-text"></sl-icon>',
+  },
+  [eventTypes.memo]: {
+    icon: '<sl-icon name="paperclip"></sl-icon>',
+  },
+  [eventTypes.keycard]: {
+    icon: '<sl-icon name="person-badge"></sl-icon>',
+  },
+  [eventTypes.product]: {
+    icon: '<sl-icon name="box2-heart"></sl-icon>',
+  },
+  [eventTypes.sheet]: {
+    icon: '<sl-icon name="table"></sl-icon>',
+  },
+  [eventTypes.agent]: {
+    icon: '<sl-icon name="robot"></sl-icon>',
+  },
+  [eventTypes.tommi]: {
+    icon: '<sl-icon name="battery-charging"></sl-icon>',
+  },
+  [eventTypes.world]: {
+    icon: '<sl-icon name="joystick"></sl-icon>',
+  },
+  [eventTypes.character]: {
+    icon: '<sl-icon name="person-walking"></sl-icon>',
+  },
+  [eventTypes.bulletin]: {
+    icon: '<sl-icon name="copy"></sl-icon>',
+  },
+  [eventTypes.sketch]: {
+    icon: '<sl-icon name="pencil"></sl-icon>',
+  },
+  [eventTypes.image]: {
+    icon: '<sl-icon name="camera"></sl-icon>',
+  },
+  [eventTypes.audio]: {
+    icon: '<sl-icon name="speaker"></sl-icon>',
+  },
+  [eventTypes.video]: {
+    icon: '<sl-icon name="camera-reels"></sl-icon>',
+  },
+  [eventTypes.archive]: {
+    icon: '<sl-icon name="file-zip"></sl-icon>',
+  },
+  [eventTypes.dwebcamp]: {
+    icon: '<sl-icon name="fire"></sl-icon>',
+  },
+}
+
 
 const eventRenderers = {
   [eventTypes.note]: function (event) {
@@ -3323,13 +3393,19 @@ const eventRenderers = {
       ...schemas[views.edge],
       ...event.data
     }
+    const config = eventTypeObjectClass[event.data.type] || {}
+
     return `
-      <button class="view-event standard-button -small" data-show="edge" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="asterisk"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
+      <div class="event-horizon">
+        <div class="meta-column">
+          <span class="event-type-icon">
+            ${config.icon || `<sl-icon name="asterisk"></sl-icon>`}
+          </span>
+        </div>
+        <button class="view-event standard-button -small -stealth" data-show="${event.data.type}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+          ${data.title}
+        </button>
+      </div>
     `
   }
 }
@@ -3352,11 +3428,7 @@ function renderBucket(spaceKey) {
 
     return `
       <div class="event ${active?'active':'inactive'}">
-        ${
-          eventRenderers[event.data.type]
-            ? eventRenderers[event.data.type](event)
-            : eventRenderers.edge(event)
-        }
+        ${eventRenderers.edge(event)}
       </div>
     `
   }).join('')

@@ -83,7 +83,9 @@ $.style(`
     position: absolute;
     top: 1rem;
     right: 1rem;
+    left: 1rem;
     width: 280px;
+    margin: auto;
     max-width: calc(100vw - 2rem);
     place-content: center;
     z-index: 9000;
@@ -99,9 +101,6 @@ $.style(`
     position: relative;
     width: 100%;
     border-radius: 0;
-    display: flex;
-    flex-direction: column;
-    text-align: left;
   }
 
   & .toast-message.success {
