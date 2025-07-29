@@ -112,7 +112,7 @@ async function newKeycard(overrides={}) {
   const keycard = {
     id,
     src: '/app/blue-sky',
-    name: 'Keycard',
+    name: 'Memex',
     host: plan98.env.PLAN98_WAS_HOST,
     at: new Date().toJSON(),
     ...overrides

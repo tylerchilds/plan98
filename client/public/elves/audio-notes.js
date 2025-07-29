@@ -124,6 +124,7 @@ $.when('click', '[data-record]', async (event) => {
       });
     };
 
+    updateDraft({ transcription: '' })
     // Start recording
     mediaRecorder.start();
 
@@ -330,14 +331,14 @@ class AudioNotes extends HTMLElement {
     const translateContainer = target.querySelector('.translate')
     const actionContainer = target.querySelector('[data-primary-action]')
 
-    partialContainer.innerHTML = partial
-    resultContainer.innerHTML = result
-    translateContainer.innerHTML = translated
-    actionContainer.innerHTML = recording
-      ? '<button data-stop class="standard-button">Stop</button>'
-      : '<button data-record class="standard-button">Record</button>'
+    innerHTML(partialContainer, partial)
+    innerHTML(resultContainer, result)
+    innerHTML(translateContainer, translated)
+    innerHTML(actionContainer, recording
+      ? '<div2><button data-stop class="standard-button">Stop</button></div2>'
+      : '<div3><button data-record class="standard-button">Record</button></div3>'
+    )
   }
-
 }
 
 customElements.define(tag, AudioNotes);

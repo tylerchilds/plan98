@@ -326,12 +326,18 @@ export function getStorage(keycard=getKeycard()) {
   return new StorageClient(new URL(keycard.host || walletDefaultHost))
 }
 
+export const KEYCARD_TYPES = {
+  GENERIC: 'generic',
+  MEMEX: 'memex',
+}
+
 export async function newKeycard(overrides={}) {
   const id = self.crypto.randomUUID()
   const signer = await Ed25519Signer.generate()
 
   const keycard = {
     id,
+    type: KEYCARD_TYPES.GENERIC,
     src: '/app/time-machine',
     title: 'Memex',
     host: walletDefaultHost,

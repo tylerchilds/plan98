@@ -2,7 +2,23 @@ import elf from '@plan98/elf'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
-import { settingsMenu, walletDefaultHost, bios, getKeycard, listKeycards, setKeycard, getStorage, getSigner, get, del, put, touch } from './plan98-wallet.js'
+import {
+  settingsMenu,
+  walletDefaultHost,
+  bios,
+  provisionActiveKeycard,
+  getKeycard,
+  listKeycards,
+  setKeycard,
+  getStorage,
+  getSigner,
+  get,
+  del,
+  put,
+  touch,
+  KEYCARD_TYPES
+} from './plan98-wallet.js'
+
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
@@ -12,7 +28,6 @@ import {
   getCompanyName,
   getEmployeeId
 } from './bayun-wizard.js'
-
 
 const bucketKeys = {
   past: 'past',
@@ -145,7 +160,7 @@ export const schemas = {
   [eventTypes.keycard]: {
     type: eventTypes.keycard,
     src: '/app/time-machine',
-    title: 'Keycard',
+    title: 'Memex',
     host: walletDefaultHost,
     description: null,
     transcription: '',
@@ -268,6 +283,19 @@ export function newDraft(type) {
   }
 }
 
+export function newMemex() {
+  const id = self.crypto.randomUUID()
+  return {
+    id,
+    type: KEYCARD_TYPES.MEMEX,
+    title: 'New Memex ' + id.slice(0,3),
+    description: 'A memex is an indexed collection for collaboration.',
+    logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
+    ...timeFields()
+  }
+}
+
+
 export function updateDraft(data) {
   $.teach(data, (state, payload) => {
     return {
@@ -297,6 +325,7 @@ const $ = elf('time-machine', {
   now: new Date(),
   buckets: emptyBuckets(),
   draft: newDraft(eventTypes.note),
+  memex: newMemex(),
   agentBaseModels: {},
   meta: {},
   context: null,
@@ -363,7 +392,7 @@ $.style(`
     grid-template-columns: auto auto;
     z-index: 1000;
     pointer-events: none;
-    padding: 4px;
+    padding: .5rem;
   }
 
   & .creation-container button {
@@ -379,8 +408,6 @@ $.style(`
     display: grid;
     place-content: center;
     z-index: 27;
-    position: relative;
-    left: 1.25rem;
   }
 
   & .more-item {
@@ -443,9 +470,8 @@ $.style(`
     grid-template-rows: auto 1fr;
     height: 100%;
     overflow: hidden;
-    gap: 1rem;
+    display: grid;
     background: white;
-    text-align: center;
     border-bottom: 1px solid rgba(0, 0, 0,.2);
     position: relative;
     z-index: 30; 
@@ -479,14 +505,26 @@ $.style(`
     height: 100%;
     overflow: auto;
     padding: 4px .5rem;
-    max-width: 55ch;
-    margin: auto;
+  }
+
+  & .introduction {
+    color: rgba(0,0,0,.5);
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    margin-bottom: 1rem;
   }
 
   & .memex-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    max-width: 55ch;
+    margin: auto;
   }
 
   & [data-chat-mode="memex"] [data-mode="memex"] {
@@ -507,7 +545,6 @@ $.style(`
   }
 
   & .now-time {
-    font-weight: light;
     color: rgba(0,0,0,.65);
     --v-font-mono: 0;
     --v-font-casl: 0;
@@ -516,9 +553,20 @@ $.style(`
     --v-font-crsv: 0;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
-
-
     place-self: start end;
+    position: relative;
+  }
+
+  & .flip-clock {
+    display: block;
+  }
+
+  & .flip-date {
+
+  }
+
+  & .flip-time {
+
   }
 
   & .the-past.visible {
@@ -900,7 +948,6 @@ $.style(`
 
   & .chat-footer {
     position: relative;
-    border-top: 1px solid rgba(0, 0, 0,.2);
     overflow: hidden;
   }
 
@@ -996,6 +1043,49 @@ $.style(`
   & .search-filter {
     max-width: 55ch;
     margin: auto;
+  }
+
+  & .memex-keycard {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "activity title"
+      "activity description";
+    gap: .5rem;
+  }
+
+  & .memex-logo {
+    grid-area: activity;
+    aspect-ratio: 1;
+    display: grid;
+    place-content: center;
+    width: 3rem;
+    border-radius: 100%;
+    overflow: hidden;
+  }
+
+  & .memex-title {
+    grid-area: title;
+    place-self: start;
+    text-align: left;
+    color: rgba(0,0,0,.85);
+    font-weight: bold;
+  }
+
+  & .memex-description {
+    grid-area: description;
+    place-self: start;
+    text-align: left;
+    color: rgba(0,0,0,.65);
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+
   }
 `)
 
@@ -1930,18 +2020,40 @@ function viewTemplate(x, child) {
 
 const viewRenderers = {
   [views.wallet]: (target) => {
+    const { memex } = $.learn()
     return `
       <div class="overlay-background">
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
+
             </div>
+            <div class="draft-header">
+              <div style="display: grid; place-content: start">
+                (New Memex)
+              </div>
+
+              <div style="display: grid; place-content: end">
+                <button data-root class="standard-button bias-generic -small -round" type="reset">
+                  <sl-icon name="x-lg"></sl-icon>
+                </button>
+              </div>
+            </div>
+
             <div class="wallet-body draft-body">
-              <my-wallet></my-wallet>
+              <div class="overlay-background" style="overflow: auto;">
+                <div class="wizard">
+                  <label class="field">
+                    <span class="label">Description</span>
+                    <textarea data-bind="memex" name="description" style="height: 12rem;" value="${escapeHyperText(memex.description)}"></textarea>
+                  </label>
+                </div>
+              </div>
             </div>
             <div class="draft-footer">
-              <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
-                <sl-icon name="x-lg"></sl-icon>
+              <input class="standard-input -small" data-bind="memex"  name="title" value="${escapeHyperText(memex.title)}" type="text"/>
+              <button data-action="memex" class="standard-button bias-positive -small" type="submit">
+                <sl-icon name="check-lg"></sl-icon>
               </button>
             </div>
           </div>
@@ -1982,6 +2094,11 @@ const viewRenderers = {
   [views.emergency]: (target) => {
     const activeKeycard = getKeycard()
     return `
+      <div class="abs-top-right">
+        <button class="standard-button bias-generic -small -round" data-root>
+          <sl-icon name="x-lg"></sl-icon>
+        </button>
+      </div>
       <live-help room="${activeKeycard.id}"></live-help>
     `
   },
@@ -2124,9 +2241,21 @@ const viewRenderers = {
 
     const list = `
       <div class="memex-list">
-        ${listKeycards().map(keycard => {
+        ${listKeycards()
+            .filter(x => x.type === KEYCARD_TYPES.MEMEX)
+            .map(keycard => {
           return `
-            <button data-keycard="${keycard.id}" class="standard-button ${activeKeycard.id === keycard.id ? 'selected':''}">${keycard.title}</button>
+            <button data-keycard="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
+              <div class="memex-logo">
+                <img src="${keycard.logoUrl}" />
+              </div>
+              <div class="memex-title">
+                ${keycard.title}
+              </div>
+              <div class="memex-description">
+                ${keycard.description}
+              </div>
+            </button>
           `
         }).join('')}
       </div>
@@ -2141,7 +2270,7 @@ const viewRenderers = {
           </div>
 
           <div class="memex-header-mid">
-            <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
+            <div data-dom="time" class="now-time"></div>
           </div>
 
           <div class="memex-header-right">
@@ -2151,8 +2280,16 @@ const viewRenderers = {
           </div>
         </div>
         <div class="memex-body">
+          <div class="introduction">
+            Mem(ex). Memory(Extender, Express, Expansion).
+          </div>
           ${list}
         </div>
+      </div>
+      <div class="creation-container">
+        <button class="create-item standard-button" data-new-memex>
+          <sl-icon name="plus-lg"></sl-icon>
+        </button>
       </div>
     `
   },
@@ -2665,15 +2802,6 @@ function patch(target) {
 
 
   {
-    const time = target.querySelector('[data-dom="time"]')
-    if(time && now !== target.now) {
-      target.now = now
-      time.innerHTML = formatTime(now)
-      time.dataset.tooltip = formatDate(now)
-    }
-  }
-
-  {
     const content = target.querySelector('[data-dom="content"]')
     if(
       target.type !== draft.type ||
@@ -2724,6 +2852,23 @@ function patch(target) {
     target.searchQuery = searchQuery 
     target.activeTypes = activeTypes 
   }
+  {
+    const time = target.querySelector('[data-dom="time"]')
+    if(time && (now !== target.now || !time.innerHTML)) {
+      target.now = now
+      time.innerHTML = `
+        <div class="flip-clock">
+          <div class="flip-date">
+            <!--${formatDate(now)}-->
+          </div>
+          <div class="flip-time">
+            ${formatTime(now)}
+          </div>
+        </div>
+      `
+    }
+  }
+
 
 
   {
@@ -3249,6 +3394,12 @@ $.when('click', '[data-toggle-metadata]', (event) => {
   $.teach({ viewMetadata: !viewMetadata })
 })
 
+$.when('click', '[data-action="memex"]', async (event) => {
+  event.preventDefault()
+  const { memex } = $.learn()
+  await provisionActiveKeycard(memex)
+  $.teach({ view: views.home })
+})
 
 $.when('click', '[data-action="edit"]', async (event) => {
   event.preventDefault()
@@ -3576,6 +3727,10 @@ $.when('click', '[data-new]', (event) => {
   })
 })
 
+$.when('click', '[data-new-memex]', (event) => {
+  $.teach({ view: views.wallet, memex: newMemex() })
+})
+
 $.when('click', '[data-quit]', (event) => {
   window.location.href = '/app/plan98-wallet'
 })
@@ -3761,12 +3916,6 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
-
-$.when('json-rpc', 'my-wallet', (event) => {
-  if(event.detail.method === 'updated') {
-    $.teach({ cards: event.detail.params.cards })
-  }
-})
 
 $.when('json-rpc', 'welcome-onboarding', async (event) => {
   if(event.detail.method === 'done') {
