@@ -68,6 +68,8 @@ export const eventTypes = {
 
 export const views = {
   wallet: 'wallet',
+  home: 'home',
+  events: 'events',
   create: 'create',
   identity: 'identity',
   emergency: 'emergency',
@@ -284,14 +286,12 @@ export function getDraft() {
 
 // dear diary
 const $ = elf('time-machine', {
-  root: true,
   activeTypes: {},
   suggestions: [],
   searchQuery: '',
   cards: [],
   cache: [],
   grabbing: false,
-  sidebar: false,
   space: null,
   time: null,
   now: new Date(),
@@ -299,7 +299,8 @@ const $ = elf('time-machine', {
   draft: newDraft(eventTypes.note),
   agentBaseModels: {},
   meta: {},
-  context: null
+  context: null,
+  view: views.home
 })
 
 getModels().then(agentBaseModels => {
@@ -334,8 +335,7 @@ $.style(`
   }
 
   & .edit-banner {
-    background: black;
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
     padding: .5rem;
     grid-template-columns: 1fr auto;
     display: grid;
@@ -416,10 +416,6 @@ $.style(`
     padding: 4px;
   }
 
-  & .identity-selector {
-    position: relative;
-  }
-
   & .logo-area {
     border: none;
     padding: 0;
@@ -453,7 +449,6 @@ $.style(`
     border-bottom: 1px solid rgba(0, 0, 0,.2);
     position: relative;
     z-index: 30; 
-    display: none;
   }
 
   & .memex-header {
@@ -465,7 +460,7 @@ $.style(`
   & .memex-header-left {
     text-align: left;
     display: grid;
-    place-content: start;
+    place-content: center start;
   }
 
   & .memex-header-mid {
@@ -477,13 +472,15 @@ $.style(`
   & .memex-header-right {
     text-align: right;
     display: grid;
-    place-content: end;
+    place-content: center end;
   }
 
   & .memex-body {
     height: 100%;
     overflow: auto;
     padding: 4px .5rem;
+    max-width: 55ch;
+    margin: auto;
   }
 
   & .memex-list {
@@ -504,26 +501,10 @@ $.style(`
     display: none;
   }
 
-  & [data-sidebar="false"] .chat-sidebar {
-    display: none;
-  }
-
-  & [data-sidebar="false"] .fallback,
-  & [data-sidebar="false"] .content-area,
-  & [data-sidebar="false"] .chat-sidebar {
-    grid-row: -1 / 1;
-  }
-
-  & [data-sidebar="false"] .fallback,
-  & [data-sidebar="false"] .content-area {
-    grid-column: -1 / 1;
-  }
-
   & .now-date {
     color: rgba(0,0,0,.65);
     place-self: start;
   }
-
 
   & .now-time {
     font-weight: light;
@@ -585,10 +566,10 @@ $.style(`
 
   & .draft-template {
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr auto;
     overflow: hidden;
     max-height: 100%;
-    grid-template-areas: "body body" "footer header";
+    grid-template-areas: "header" "body" "footer";
     grid-template-columns: 1fr auto;
   }
 
@@ -623,7 +604,7 @@ $.style(`
 
   & .child-well .textarea,
   & .text-well .textarea {
-    padding: 3rem .5rem 2rem;
+    padding: 1rem;
     white-space: preserve;
     overflow: auto;
     line-height: 1.25;
@@ -633,7 +614,7 @@ $.style(`
   }
 
   & .child-well .full-textarea {
-    padding: 3rem .5rem 2rem;
+    padding: 1rem;
     resize: none;
     border: none;
     width: 100%;
@@ -657,7 +638,6 @@ $.style(`
     background: rgba(255,255,255,.85);
     padding: 4px;
     gap: .5rem;
-    padding-right: 5.5rem;
     z-index: 10;
   }
 
@@ -690,14 +670,14 @@ $.style(`
   & .draft-footer {
     display: grid;
     grid-area: footer;
-    padding: 4px 4px 4px .5rem;
+    padding: 4px;
     border-top: 1px solid rgba(0, 0, 0,.2);
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.65);
     display: grid;
     gap: .5rem;
     z-index: 10;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr auto;
   }
 
   & .draft-content {
@@ -723,8 +703,6 @@ $.style(`
     padding: .5rem;
     flex-wrap: wrap;
     place-content: end;
-    background: black;
-    color: rgba(255,255,255,.65);
   }
 
   & .time-form-section {
@@ -861,41 +839,8 @@ $.style(`
     place-items: center;
   }
 
-  & .dropdown-items {
-    display: none;
-    position: absolute;
-    bottom: 3rem;
-    right: -4px;
-    max-height: calc(100vh - 3rem);
-    max-width: calc(100vw);
-    overflow: auto;
-    z-index: 25;
-    flex-direction: column-reverse;
-    gap: 4px;
-    padding: .5rem 0;
-    pointer-events: all;
-  }
-
-  & [data-os-target].active + .dropdown-items {
-    display: flex;
-  }
-
   & .dropdown-items button > * {
     pointer-events: none;
-  }
-
-  & .dropdown-items .dropdown-item {
-    background: transparent;
-    border: none;
-    display: grid;
-    place-content: center end;
-    padding: 0 .5rem;
-    gap: .5rem;
-  }
-
-  & .dropdown-item.-edge-case {
-    position: sticky;
-    top: 0;
   }
 
   & hr {
@@ -928,7 +873,7 @@ $.style(`
     border-right: 1px solid rgba(0, 0, 0,.2);
     background: white;
     position: relative;
-    display: none;
+    display: grid;
     z-index: 21;
     grid-template-rows: auto 1fr auto;
     overflow-x: hidden;
@@ -939,25 +884,29 @@ $.style(`
   }
 
   & .chat-header {
-    padding: 4px .5rem;
+    padding: 4px;
   }
 
+  & .app-launcher {
+    width: 100%;
+    overflow: auto;
+    padding: 4px 4px .5rem;
+  }
+
+  & .data-types {
+    display: flex;
+    gap: 4px;
+  }
 
   & .chat-footer {
-    padding: 4px .5rem;
+    position: relative;
     border-top: 1px solid rgba(0, 0, 0,.2);
+    overflow: hidden;
   }
 
   & .chat-footer .action-button {
     display: none;
     width: 100%;
-  }
-  & [data-sidebar="true"] .chat-footer .action-button {
-    display: block;
-  }
-
-  & [data-sidebar="true"] .chat-footer .action-icon {
-    display: none;
   }
 
   & .chat-footer .action-icon {
@@ -965,28 +914,7 @@ $.style(`
   }
 
 
-
-  & [data-sidebar="true"] .chat-footer {
-    position: relative;
-  }
-
-  & [data-resize-sidebar] {
-    display: none;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: clamp(240px, var(--sidebar-width, 320px), 100%);
-    transform: translateX(-10px);
-    width: 10px;
-    background: rgba(255,255,255,.05);
-    z-index: 10;
-    cursor: col-resize;
-  }
-  & [data-sidebar="true"] [data-resize-sidebar] {
-    display: block;
-  }
-
-    & .chat-realm[data-sidebar="true"] .profile-actions {
+    & .chat-realm .profile-actions {
     padding: .5rem .5rem .5rem calc(34px + 1.5rem);
     flex-direction: row;
     position: absolute;
@@ -1035,7 +963,7 @@ $.style(`
   & .metadata-form {
     margin: 0 auto;
     max-width: 480px;
-    padding: 3rem .5rem 1rem;
+    padding: 1rem;
   }
 
   & welcome-onboarding .metadata-form {
@@ -1056,6 +984,18 @@ $.style(`
   & .filters:empty {
     opacity: 0;
     pointer-events: none;
+  }
+
+  & .abs-top-right {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 10;
+  }
+
+  & .search-filter {
+    max-width: 55ch;
+    margin: auto;
   }
 `)
 
@@ -1966,12 +1906,16 @@ function viewTemplate(x, child) {
       <div class="form-card">
         <div method="post" class="draft-template">
           <div class="draft-header">
-            <button data-action="edit" data-view="${views.create}" data-space="${x.space}" data-time="${x.time}" class="standard-button -small  bias-positive" type="submit">
-              <sl-icon name="pencil-fill"></sl-icon>
-            </button>
-            <button class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-              <sl-icon name="gear-fill"></sl-icon>
-            </button>
+            <div style="display: grid; place-content: start">
+              <button class="standard-button bias-generic -small -round" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                <sl-icon name="gear-fill"></sl-icon>
+              </button>
+            </div>
+            <div style="display: grid; place-content: end">
+              <button data-close-draft class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
           </div>
           <div class="draft-body child-well">
             ${child}
@@ -2023,6 +1967,11 @@ const viewRenderers = {
   },
   [views.identity]: (target) => {
     return `
+      <div class="abs-top-right">
+        <button class="standard-button bias-generic -small -round" data-root>
+          <sl-icon name="x-lg"></sl-icon>
+        </button>
+      </div>
       <identity class="overlay-background" style="overflow: auto;">
         <div class="wizard">
           <secure-persona></secure-persona>
@@ -2036,6 +1985,177 @@ const viewRenderers = {
       <live-help room="${activeKeycard.id}"></live-help>
     `
   },
+  [views.events]: (target) => {
+    const activeKeycard = getKeycard()
+    return `
+      <div class="chat-sidebar" data-mode="events">
+        <div class="chat-header">
+          <div class="search-and-filter">
+            <button class="standard-button bias-generic -small -round" data-toggle-filters>
+              <sl-icon name="funnel"></sl-icon>
+            </button>
+            <input class="standard-input -small search-filter" name="searchQuery" placeholder="Search..." type="text">
+            <button class="standard-button bias-generic -small -round" data-root>
+              <sl-icon name="x-lg"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="chat-sidebar-inner">
+          <div data-dom="filters" class="filters"></div>
+          <div class="time-feed-nom-nom-nom-nom">
+             <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Past
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.past}" class="era-events"></div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Last Week
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.lastWeek}" class="era-events"></div>
+            </div>
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Yesterday
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.yesterday}" class="era-events"></div>
+            </div>
+            <div class="era the-present">
+              <div class="era-header">
+                <div class="era-label">
+                  Today
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.today}" class="era-events"></div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Tomorrow
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.tomorrow}" class="era-events"></div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  This Week
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.thisWeek}" class="era-events"></div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Next Week
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.nextWeek}" class="era-events"></div>
+            </div>
+
+            <div class="era">
+              <div class="era-header">
+                <div class="era-label">
+                  Future
+                </div>
+              </div>
+              <div data-dom="${bucketKeys.future}" class="era-events"></div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-footer">
+          <div class="app-launcher">
+            <div class="data-types">
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.note}">Note</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.memo}">Memo</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.audio}">Audio</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.image}">Photo</button>
+              </div>
+              <div class="dropdown-item">
+                <!--<button class="standard-button -small bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.video}">Video</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.agent}">Agent</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.character}">Character</button>
+              </div>
+              <div class="dropdown-item">
+                <button class="standard-button -small bias-generic" data-new="${eventTypes.world}">World</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    `
+  },
+  [views.home]: (target) => {
+    const activeKeycard = getKeycard()
+
+    const list = `
+      <div class="memex-list">
+        ${listKeycards().map(keycard => {
+          return `
+            <button data-keycard="${keycard.id}" class="standard-button ${activeKeycard.id === keycard.id ? 'selected':''}">${keycard.title}</button>
+          `
+        }).join('')}
+      </div>
+    `
+    return `
+      <div class="now" data-mode="memex">
+        <div class="memex-header">
+          <div class="memex-header-left">
+            <button class="logo-gradient" data-plan98>
+              Plan98
+            </button>
+          </div>
+
+          <div class="memex-header-mid">
+            <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
+          </div>
+
+          <div class="memex-header-right">
+            <button class="logo-area" data-assistant>
+              <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
+            </button>
+          </div>
+        </div>
+        <div class="memex-body">
+          ${list}
+        </div>
+      </div>
+    `
+  },
   [views.create]: (target) => {
     const { draft, viewMetadata, context } = $.learn()
     const studio = renderStudioByType.call(context, draft)
@@ -2044,21 +2164,26 @@ const viewRenderers = {
         <div class="form-card">
           <div class="draft-template">
             <div class="draft-header">
-              <button data-action="post" class="standard-button bias-positive -small" type="submit">
-                <sl-icon name="check-lg"></sl-icon>
-              </button>
-              <div class="standard-button bias-generic -small" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-                <sl-icon name="gear-fill"></sl-icon>
+              <div style="display: grid; place-content: start">
+                <div class="standard-button bias-generic -small -round" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                  <sl-icon name="gear-fill"></sl-icon>
+                </div>
+              </div>
+
+              <div style="display: grid; place-content: end">
+                <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
+                  <sl-icon name="x-lg"></sl-icon>
+                </button>
               </div>
             </div>
             <div class="draft-body child-well">
               ${studio}
             </div>
             <div class="draft-footer">
-              <button data-cancel-draft class="standard-button bias-generic -small -round" type="reset">
-                <sl-icon name="x-lg"></sl-icon>
-              </button>
               <input class="standard-input -small" data-bind="draft"  name="title" value="${escapeHyperText(draft.title)}" type="text"/>
+              <button data-action="post" class="standard-button bias-positive -small" type="submit">
+                <sl-icon name="check-lg"></sl-icon>
+              </button>
             </div>
             <div class="draft-metadata">
               <div class="time-form">
@@ -2494,7 +2619,6 @@ const viewRenderers = {
 
 function patch(target) {
   const {
-    root,
     showFilters,
     searchQuery,
     activeTypes,
@@ -2506,7 +2630,6 @@ function patch(target) {
     draft,
     context,
     grabbing,
-    sidebar,
     viewMetadata
   } = $.learn()
 
@@ -2522,13 +2645,8 @@ function patch(target) {
     if(realm.dataset.grabbing !== grabbing.toString()) {
       realm.dataset.grabbing = grabbing
     }
-    if(realm.dataset.sidebar !== sidebar.toString()) {
-      realm.dataset.sidebar = sidebar
-    }
 
-    if(root) {
-      realm.dataset.chatMode = 'memex'
-    } else if(sidebar) {
+    if(view === view.events) {
       realm.dataset.chatMode = 'events'
     } else {
       realm.dataset.chatMode = 'item'
@@ -2547,32 +2665,12 @@ function patch(target) {
 
 
   {
-    if(now !== target.now) {
+    const time = target.querySelector('[data-dom="time"]')
+    if(time && now !== target.now) {
       target.now = now
-      const time = target.querySelector('[data-dom="time"]')
       time.innerHTML = formatTime(now)
       time.dataset.tooltip = formatDate(now)
     }
-  }
-
-  {
-    for(const key in bucketKeys) {
-      const events = Object.keys(buckets[key])
-      if(target[key] !== events.length ||
-        searchQuery !== target.searchQuery ||
-        activeTypes !== target.activeTypes
-      ) {
-        target[key] = events.length
-        const node = target.querySelector(`[data-dom="${key}"]`)
-        if(node) {
-          const html = renderBucket(key)
-          innerHTML(node, html)
-          //node.innerHTML = html
-        }
-      }
-    }
-    target.searchQuery = searchQuery 
-    target.activeTypes = activeTypes 
   }
 
   {
@@ -2605,6 +2703,28 @@ function patch(target) {
     }
   }
 
+  {
+    for(const key in bucketKeys) {
+      /*
+      const events = Object.keys(buckets[key])
+      if(target[key] !== events.length ||
+        searchQuery !== target.searchQuery ||
+        activeTypes !== target.activeTypes
+      ) {
+        target[key] = events.length
+        */
+        const node = target.querySelector(`[data-dom="${key}"]`)
+        if(node) {
+          const html = renderBucket(key)
+          innerHTML(node, html)
+          //node.innerHTML = html
+        }
+      //}
+    }
+    target.searchQuery = searchQuery 
+    target.activeTypes = activeTypes 
+  }
+
 
   {
     const fieldArea = target.querySelector('[data-dom="metadata-fields"]')
@@ -2620,28 +2740,6 @@ function patch(target) {
     }
   }
 
-  {
-    const identity = target.querySelector('.identity-selector')
-    const list = listKeycards()
-
-    const activeKeycard = getKeycard()
-
-    if(activeKeycard) {
-      if(target.keycardsLength !== list.length || activeKeycard.id !== target.activeKeycardId) {
-        target.activeKeycardId = activeKeycard.id
-        target.keycardsLength = list.length
-        identity.innerHTML = `
-          <div class="memex-list">
-            ${list.map(keycard => {
-              return `
-                <button data-keycard="${keycard.id}" class="standard-button ${activeKeycard.id === keycard.id ? 'selected':''}">${keycard.title}</button>
-              `
-            }).join('')}
-          </div>
-        `
-      }
-    }
-  }
 }
 
 // you are my diary
@@ -2654,171 +2752,7 @@ $.draw((target)=> {
   if(target.innerHTML) return
 
   return `
-    <div class="creation-container">
-      <button data-dom="create-button" class="create-item standard-button" data-new>
-        <sl-icon name="plus-lg"></sl-icon>
-      </button>
-      <div class="menu-item">
-        <button data-os-target="edit" class="more-item standard-button">
-          <sl-icon name="list"></sl-icon>
-        </button>
-        <div class="dropdown-items" data-menu="edit">
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.note}">Note</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.memo}">Memo</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.audio}">Audio</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.image}">Photo</button>
-          </div>
-          <div class="dropdown-item">
-            <!--<button class="standard-button -small bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.video}">Video</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.agent}">Agent</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.character}">Character</button>
-          </div>
-          <div class="dropdown-item">
-            <button class="standard-button -small bias-generic" data-new="${eventTypes.world}">World</button>
-          </div>
-          <div class="dropdown-item -edge-case">
-            <button data-quit  class="standard-button -small bias-negative" >Quit</button>
-          </div>
-        </div>
-      </div>
-    </div>
     <div data-dom="realm" class="chat-realm">
-      <div class="now" data-mode="memex">
-        <div class="memex-header">
-          <div class="memex-header-left">
-            <button class="logo-gradient" data-plan98>
-              Plan98
-            </button>
-          </div>
-
-          <div class="memex-header-mid">
-            <button data-dom="time" class="now-time standard-button -smol -stealth" data-emergency></button>
-          </div>
-
-          <div class="memex-header-right">
-            <button class="logo-area" data-assistant>
-              <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
-            </button>
-          </div>
-        </div>
-        <div class="memex-body">
-          <div class="identity-selector"></div>
-        </div>
-      </div>
-
-      <div class="chat-sidebar" data-mode="events">
-        <div data-resize-sidebar></div>
-        <div class="chat-header">
-          <div class="search-and-filter">
-            <button class="standard-button bias-generic -small -round" data-root>
-              <sl-icon name="x-lg"></sl-icon>
-            </button>
-            <input class="standard-input -small" name="searchQuery" placeholder="Filter..." type="text">
-            <button class="standard-button bias-generic -small -round" data-toggle-filters>
-              <sl-icon name="funnel"></sl-icon>
-            </button>
-          </div>
-        </div>
-
-        <div class="chat-sidebar-inner">
-          <div data-dom="filters" class="filters"></div>
-          <div class="time-feed-nom-nom-nom-nom">
-             <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Past
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.past}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Last Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.lastWeek}" class="era-events"></div>
-            </div>
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Yesterday
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.yesterday}" class="era-events"></div>
-            </div>
-            <div class="era the-present">
-              <div class="era-header">
-                <div class="era-label">
-                  Today
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.today}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Tomorrow
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.tomorrow}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  This Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.thisWeek}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Next Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.nextWeek}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Future
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.future}" class="era-events"></div>
-            </div>
-          </div>
-        </div>
-        <div class="chat-footer">
-          CREATION FORM!
-        </div>
-      </div>
       <div data-dom="content" data-mode="item" class="content-area"></div>
       <div class="fallback">
         <div class="wizard">
@@ -3284,7 +3218,7 @@ function renderBucket(spaceKey) {
 }
 
 $.when('click', '[data-root]', (event) => {
-  $.teach({ root: true })
+  $.teach({ view: views.home })
 })
 
 
@@ -3293,11 +3227,11 @@ $.when('click', '[data-toggle-filters]', (event) => {
 })
 
 $.when('click', '[data-emergency]', (event) => {
-  $.teach({ view: views.emergency, sidebar: false })
+  $.teach({ view: views.emergency })
 })
 
 $.when('click', '[data-plan98]', (event) => {
-  $.teach({ view: views.identity, sidebar: false })
+  $.teach({ view: views.identity })
 })
 
 $.when('click', '[data-assistant]', (event) => {
@@ -3552,7 +3486,7 @@ $.when('click', '[data-destroy]', async (event) => {
   try {
     destroy(event.target, { path: event.target.dataset.destroy })
     toast('Destroyed!', { type: 'info' })
-    $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
+    $.teach({ view: views.events, context: null, viewMetadata: false })
   } catch(e) {
     toast('Error!' + e.message, { type: 'error' })
   }
@@ -3619,7 +3553,7 @@ $.when('click', '[data-download-attachments]', async (event) => {
 $.when('click', '[data-show]', (event) => {
   const { show, space, time } = event.target.dataset
 
-  $.teach({ view: views[show], space, time, viewMetadata: false, activeMenuItem: null, sidebar: false })
+  $.teach({ view: views[show], space, time, viewMetadata: false, activeMenuItem: null })
 })
 
 $.when('click', '[data-new]', (event) => {
@@ -3638,7 +3572,6 @@ $.when('click', '[data-new]', (event) => {
     view: views.create,
     draft,
     activeMenu: null,
-    sidebar: false,
     context: { path }
   })
 })
@@ -3648,11 +3581,15 @@ $.when('click', '[data-quit]', (event) => {
 })
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
+  $.teach({ view: views.events, context: null, viewMetadata: false })
 })
 
 $.when('click', '[data-close-draft]', () => {
-  $.teach({ view: null, sidebar: true, context: null, viewMetadata: false })
+  $.teach({ view: views.events, context: null, viewMetadata: false })
+})
+
+$.when('click', '[data-home]', () => {
+  $.teach({ view: views.home })
 })
 
 function formatDate(date) {
@@ -3676,13 +3613,12 @@ function stamp(x) {
   const date = new Date(x.year, x.month, x.day, x.hour, x.minute)
   return `
     <div class="draft-footer">
-      <button data-close-draft class="standard-button bias-generic -small -round" type="reset">
-        <sl-icon name="x-lg"></sl-icon>
-      </button>
-
       <div class="draft-title">
         ${escapeHyperText(x.title)}
       </div>
+      <button data-action="edit" data-view="${views.create}" data-space="${x.space}" data-time="${x.time}" class="standard-button -small  bias-positive" type="submit">
+        <sl-icon name="pencil-fill"></sl-icon>
+      </button>
     </div>
     <div class="view-metadata">
 
@@ -3703,12 +3639,12 @@ function renderDraftMetadata(x, key) {
 }
 
 $.when('click', '[data-keycard]', (event) => {
-  const { value } = event.target
-  setKeycard(value)
+  const { keycard } = event.target.dataset
+  setKeycard(keycard)
 
   reset(event.target.closest($.link))
   fate()
-  $.teach({ root: false, sidebar: true })
+  $.teach({ view: views.events })
 })
 
 function reset(target) {
@@ -3853,31 +3789,9 @@ $.when('click', '[data-os-target]', (event) => {
   const { activeMenu } = $.learn()
   const { osTarget } = event.target.dataset
   const same = activeMenu === osTarget
-  $.teach({ activeMenu: same ? null : osTarget, sidebar: !same })
+  $.teach({ activeMenu: same ? null : osTarget })
   event.stopImmediatePropagation()
 })
-
-$.when('pointerdown', '[data-resize-sidebar]', event => {
-  $.teach({ grabbing: true })
-  document.addEventListener("pointermove", resizeSidebar, false);
-  document.addEventListener("pointerup", () => {
-    $.teach({ grabbing: false })
-    document.removeEventListener("pointermove", resizeSidebar, false);
-  }, false);
-})
-
-function resizeSidebar(event) {
-  let width
-  if (event.touches && event.touches[0] && typeof event.touches[0]["force"] !== "undefined") {
-    width = event.touches[0].clientX
-  } else {
-    width = event.clientX
-  }
-
-  const size = `${width}px`;
-  const root = event.target.closest($.link)
-  root.style.setProperty("--sidebar-width", size);
-}
 
 let sel = []
 const tags = ['TEXTAREA', 'INPUT']
