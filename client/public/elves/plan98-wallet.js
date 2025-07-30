@@ -270,6 +270,26 @@ function jsonRPC(request) {
   })
 }
 
+export async function requestKeycardInsertion(keycard) {
+  if(keycard) {
+    const signer = await getSigner(keycard)
+    const storage = await getStorage(keycard)
+    const space = storage.space({
+      signer,
+      id: `urn:uuid:${keycard.id}`
+    })
+
+    const keycardMetadata = await getPlan98Config({space, signer}).catch(console.error)
+
+    if(keycardMetadata) {
+      $.teach({ id: keycardMetadata.id, ...keycard, ...keycardMetadata }, insertKeycard)
+    } else {
+      $.teach({ id: keycard.id, ...keycard }, insertKeycard)
+    }
+
+    $.teach({ activeKeycardId: keycard.id })
+  }
+}
 
 function insertKeycard(state, payload) {
   if(state.keycards.find(x => x.id === payload.id)) {

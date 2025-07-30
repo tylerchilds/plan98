@@ -1,6 +1,6 @@
 import elf, { subscribe } from '@silly/elf'
 import $buySell, { formatBytes, updateDraft, wizardSuccess, wizardError } from './buy-sell.js'
-import { provisionActiveKeycard, getKeycard, getSigner, getStorage } from './plan98-wallet.js'
+import { KEYCARD_TYPES, provisionActiveKeycard, getKeycard, getSigner, getStorage } from './plan98-wallet.js'
 import { saveKeycard, newDraft, creationForms, eventTypes } from './time-machine.js'
 import { replaceElves } from './paper-pocket.js'
 

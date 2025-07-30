@@ -16,7 +16,8 @@ import {
   del,
   put,
   touch,
-  KEYCARD_TYPES
+  KEYCARD_TYPES,
+  requestKeycardInsertion
 } from './plan98-wallet.js'
 
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
@@ -38,6 +39,33 @@ const bucketKeys = {
   thisWeek: 'thisWeek',
   nextWeek: 'nextWeek',
   future: 'future',
+}
+
+const bucketTypeObjectClass = {
+  [bucketKeys.past]: {
+    label: 'Past'
+  },
+  [bucketKeys.lastWeek]: {
+    label: 'Last Week'
+  },
+  [bucketKeys.yesterday]: {
+    label: 'Yesterday'
+  },
+  [bucketKeys.today]: {
+    label: 'Today'
+  },
+  [bucketKeys.tomorrow]: {
+    label: 'Tomorrow'
+  },
+  [bucketKeys.thisWeek]: {
+    label: 'This Week'
+  },
+  [bucketKeys.nextWeek]: {
+    label: 'Next Week'
+  },
+  [bucketKeys.future]: {
+    label: 'Future'
+  },
 }
 
 function emptyBuckets() {
@@ -82,7 +110,8 @@ export const eventTypes = {
 }
 
 export const views = {
-  wallet: 'wallet',
+  memex: 'memex',
+  share: 'share',
   home: 'home',
   events: 'events',
   create: 'create',
@@ -158,12 +187,12 @@ export const schemas = {
     tags: [],
   },
   [eventTypes.keycard]: {
-    type: eventTypes.keycard,
+    type: KEYCARD_TYPES.MEMEX,
+    title: 'My Memex',
+    description: 'A private space for my thoughts.',
+    logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
     src: '/app/time-machine',
-    title: 'Memex',
     host: walletDefaultHost,
-    description: null,
-    transcription: '',
     tags: [],
   },
 
@@ -283,19 +312,6 @@ export function newDraft(type) {
   }
 }
 
-export function newMemex() {
-  const id = self.crypto.randomUUID()
-  return {
-    id,
-    type: KEYCARD_TYPES.MEMEX,
-    title: 'New Memex ' + id.slice(0,3),
-    description: 'A memex is an indexed collection for collaboration.',
-    logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
-    ...timeFields()
-  }
-}
-
-
 export function updateDraft(data) {
   $.teach(data, (state, payload) => {
     return {
@@ -325,7 +341,7 @@ const $ = elf('time-machine', {
   now: new Date(),
   buckets: emptyBuckets(),
   draft: newDraft(eventTypes.note),
-  memex: newMemex(),
+  memex: newDraft(eventTypes.keycard),
   agentBaseModels: {},
   meta: {},
   context: null,
@@ -384,7 +400,7 @@ $.style(`
   & .era {
   }
 
-  & .creation-container {
+  & .abs-bottom-right {
     position: absolute;
     bottom: 0;
     right: 0;
@@ -395,7 +411,7 @@ $.style(`
     padding: .5rem;
   }
 
-  & .creation-container button {
+  & .abs-bottom-right button {
     pointer-events: all;
   }
 
@@ -519,12 +535,19 @@ $.style(`
     margin-bottom: 1rem;
   }
 
+  & .memex-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+  }
+
   & .memex-list {
     display: flex;
     flex-direction: column;
     gap: 4px;
     max-width: 55ch;
     margin: auto;
+    padding-bottom: 3rem;
   }
 
   & [data-chat-mode="memex"] [data-mode="memex"] {
@@ -594,7 +617,7 @@ $.style(`
     overflow: hidden;
   }
 
-  & .wallet-body {
+  & .memex-body {
     padding: .5rem;
     overflow: auto;
   }
@@ -719,7 +742,6 @@ $.style(`
     display: grid;
     grid-area: footer;
     padding: 4px;
-    border-top: 1px solid rgba(0, 0, 0,.2);
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.65);
     display: grid;
@@ -785,6 +807,8 @@ $.style(`
     grid-template-columns: auto 1fr;
     max-width: 55ch;
     margin: auto;
+    opacity: 0;
+    animation: &-fade-in 150ms ease-out forwards;
   }
 
   & .meta-column {
@@ -995,12 +1019,11 @@ $.style(`
   }
 
   & [data-mode="item"] {
-    display: none;
+    display: grid;
     height: 100%;
   }
 
   & [data-chat-mode="item"] [data-mode="item"]:not(:empty) {
-    display: grid;
   }
 
   & .fallback {
@@ -2038,15 +2061,12 @@ function viewTemplate(x, child) {
 }
 
 const viewRenderers = {
-  [views.wallet]: (target) => {
+  [views.memex]: (target) => {
     const { memex } = $.learn()
     return `
       <div class="overlay-background">
         <div class="form-card">
           <div class="draft-template">
-            <div class="draft-header">
-
-            </div>
             <div class="draft-header">
               <div style="display: grid; place-content: start">
                 (New Memex)
@@ -2059,12 +2079,16 @@ const viewRenderers = {
               </div>
             </div>
 
-            <div class="wallet-body draft-body">
+            <div class="memex-body draft-body">
               <div class="overlay-background" style="overflow: auto;">
                 <div class="wizard">
                   <label class="field">
                     <span class="label">Description</span>
                     <textarea data-bind="memex" name="description" style="height: 12rem;" value="${escapeHyperText(memex.description)}"></textarea>
+                  </label>
+                  <label class="field">
+                    <span class="label">Host</span>
+                    <input data-bind="draft" name="host" value="${escapeHyperText(memex.host) || ''}" />
                   </label>
                 </div>
               </div>
@@ -2080,6 +2104,63 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.share]: (target) => {
+    const { memex } = $.learn()
+    const encoded = btoa(
+      JSON.stringify({
+        jsonrpc: "2.0",
+        method: 'import-memex',
+        params: {
+          type: 'memex',
+          memex: {
+            id: memex.id,
+            type: memex.type,
+            title: memex.title,
+            src: memex.src,
+            asJSON: memex.asJSON,
+            host: memex.host,
+          }
+        }
+      })
+    )
+
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <div class="draft-template">
+            <div class="draft-header">
+              <div style="display: grid; place-content: start">
+                <button data-root class="standard-button bias-generic -small -round" type="reset">
+                  <sl-icon name="pencil"></sl-icon>
+                </button>
+              </div>
+
+              <div style="display: grid; place-content: end">
+                <button data-root class="standard-button bias-generic -small -round" type="reset">
+                  <sl-icon name="x-lg"></sl-icon>
+                </button>
+              </div>
+            </div>
+
+            <div class="memex-body draft-body">
+              <div class="overlay-background">
+                <div style="padding: 51px; height: 100%; display: flex;">
+                  <qr-code src="${window.location.origin}/app/time-machine?data=${encoded}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+                </div>
+              </div>
+            </div>
+            <div class="draft-footer">
+              <input class="standard-input -small" data-bind="memex"  name="title" value="${escapeHyperText(memex.title)}" type="text"/>
+              <button data-action="memex" class="standard-button bias-positive -small" type="submit">
+                <sl-icon name="check-lg"></sl-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `
+  },
+
   [views.thinking]: (target) => {
     return `
       <thinking class="overlay-background">
@@ -2122,6 +2203,7 @@ const viewRenderers = {
     `
   },
   [views.events]: (target) => {
+    const { searchQuery } = $.learn()
     const activeKeycard = getKeycard()
     return `
       <div class="chat-sidebar" data-mode="events">
@@ -2130,7 +2212,7 @@ const viewRenderers = {
             <button class="standard-button bias-generic -small -round" data-toggle-filters>
               <sl-icon name="funnel"></sl-icon>
             </button>
-            <input class="standard-input -small search-filter" name="searchQuery" placeholder="Search..." type="text">
+            <input class="standard-input -small search-filter" value="${searchQuery}" name="searchQuery" placeholder="Search..." type="text">
             <button class="standard-button bias-generic -small -round" data-root>
               <sl-icon name="x-lg"></sl-icon>
             </button>
@@ -2140,75 +2222,14 @@ const viewRenderers = {
         <div class="chat-sidebar-inner">
           <div data-dom="filters" class="filters"></div>
           <div class="time-feed-nom-nom-nom-nom">
-             <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Past
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.past}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Last Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.lastWeek}" class="era-events"></div>
-            </div>
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Yesterday
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.yesterday}" class="era-events"></div>
-            </div>
-            <div class="era the-present">
-              <div class="era-header">
-                <div class="era-label">
-                  Today
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.today}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Tomorrow
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.tomorrow}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  This Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.thisWeek}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Next Week
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.nextWeek}" class="era-events"></div>
-            </div>
-
-            <div class="era">
-              <div class="era-header">
-                <div class="era-label">
-                  Future
-                </div>
-              </div>
-              <div data-dom="${bucketKeys.future}" class="era-events"></div>
-            </div>
+            <div data-dom="${bucketKeys.past}" class="era"></div>
+            <div data-dom="${bucketKeys.lastWeek}" class="era"></div>
+            <div data-dom="${bucketKeys.yesterday}" class="era"></div>
+            <div data-dom="${bucketKeys.today}" class="era"></div>
+            <div data-dom="${bucketKeys.tomorrow}" class="era"></div>
+            <div data-dom="${bucketKeys.thisWeek}" class="era"></div>
+            <div data-dom="${bucketKeys.nextWeek}" class="era"></div>
+            <div data-dom="${bucketKeys.future}" class="era"></div>
           </div>
         </div>
         <div class="chat-footer">
@@ -2264,17 +2285,24 @@ const viewRenderers = {
             .filter(x => x.type === KEYCARD_TYPES.MEMEX)
             .map(keycard => {
           return `
-            <button data-keycard="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
-              <div class="memex-logo">
-                <img src="${keycard.logoUrl}" />
+            <div class="memex-row">
+              <button data-keycard="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
+                <div class="memex-logo">
+                  <img src="${keycard.logoUrl}" />
+                </div>
+                <div class="memex-title">
+                  ${keycard.title}
+                </div>
+                <div class="memex-description">
+                  ${keycard.description}
+                </div>
+              </button>
+              <div>
+                <button data-share="${keycard.id}" class="standard-button -round -stealth">
+                  <sl-icon name="qr-code"></sl-icon>
+                </button>
               </div>
-              <div class="memex-title">
-                ${keycard.title}
-              </div>
-              <div class="memex-description">
-                ${keycard.description}
-              </div>
-            </button>
+            </div>
           `
         }).join('')}
       </div>
@@ -2305,7 +2333,7 @@ const viewRenderers = {
           ${list}
         </div>
       </div>
-      <div class="creation-container">
+      <div class="abs-bottom-right">
         <button class="create-item standard-button" data-new-memex>
           <sl-icon name="plus-lg"></sl-icon>
         </button>
@@ -2801,12 +2829,6 @@ function patch(target) {
     if(realm.dataset.grabbing !== grabbing.toString()) {
       realm.dataset.grabbing = grabbing
     }
-
-    if(view === view.events) {
-      realm.dataset.chatMode = 'events'
-    } else {
-      realm.dataset.chatMode = 'item'
-    }
   }
 
   {
@@ -2862,7 +2884,17 @@ function patch(target) {
         */
         const node = target.querySelector(`[data-dom="${key}"]`)
         if(node) {
-          const html = renderBucket(key)
+          const list = renderBucket(key)
+          const config = bucketTypeObjectClass[key] || {}
+
+          const html = list ? `
+            <div class="era-header">
+              <div class="era-label">
+                ${config.label || 'Era'}
+              </div>
+            </div>
+            <div class="era-events">${list}</div>
+          ` : ''
           innerHTML(node, html)
           //node.innerHTML = html
         }
@@ -3002,9 +3034,29 @@ $.draw((target)=> {
 
       const activeKeycard = getKeycard()
 
+      let hasKeycard = false
       if(activeKeycard) {
+        hasKeycard = true
         $.teach({ ready: true })
       }
+
+      const data = target.getAttribute('data')
+      if(data) {
+        const request = JSON.parse(atob(data))
+        const { memex } = request.params
+
+        if(memex) {
+          requestKeycardInsertion(memex).then(() => {
+            const activeKeycard = getKeycard()
+
+            if(!hasKeycard && activeKeycard) {
+              target.innerHTML = ''
+              $.teach({ ready: true })
+            }
+          })
+        }
+      }
+
 
       if(q) {
         $.teach({ view: views.create, src })
@@ -3090,51 +3142,67 @@ function renderFilters() {
 
 const eventTypeObjectClass = {
   [eventTypes.note]: {
+    label: 'Note',
     icon: '<sl-icon name="input-cursor-text"></sl-icon>',
   },
   [eventTypes.memo]: {
+    label: 'Memo',
     icon: '<sl-icon name="paperclip"></sl-icon>',
   },
   [eventTypes.keycard]: {
+    label: 'Keycard',
     icon: '<sl-icon name="person-badge"></sl-icon>',
   },
   [eventTypes.product]: {
+    label: 'Product',
     icon: '<sl-icon name="box2-heart"></sl-icon>',
   },
   [eventTypes.sheet]: {
+    label: 'Sheet',
     icon: '<sl-icon name="table"></sl-icon>',
   },
   [eventTypes.agent]: {
+    label: 'Agent',
     icon: '<sl-icon name="robot"></sl-icon>',
   },
   [eventTypes.tommi]: {
+    label: 'Tommi',
     icon: '<sl-icon name="battery-charging"></sl-icon>',
   },
   [eventTypes.world]: {
+    label: 'World',
     icon: '<sl-icon name="joystick"></sl-icon>',
   },
   [eventTypes.character]: {
+    label: 'Character',
     icon: '<sl-icon name="person-walking"></sl-icon>',
   },
   [eventTypes.bulletin]: {
+    label: 'Bulletin',
     icon: '<sl-icon name="copy"></sl-icon>',
   },
   [eventTypes.sketch]: {
+    label: 'Sketch',
     icon: '<sl-icon name="pencil"></sl-icon>',
   },
   [eventTypes.image]: {
+    label: 'Image',
     icon: '<sl-icon name="camera"></sl-icon>',
   },
   [eventTypes.audio]: {
+    label: 'Audio',
     icon: '<sl-icon name="speaker"></sl-icon>',
   },
   [eventTypes.video]: {
+    label: 'Video',
     icon: '<sl-icon name="camera-reels"></sl-icon>',
   },
   [eventTypes.archive]: {
+    label: 'Archive',
     icon: '<sl-icon name="file-zip"></sl-icon>',
   },
   [eventTypes.dwebcamp]: {
+    label: 'Dweb Camp',
     icon: '<sl-icon name="fire"></sl-icon>',
   },
 }
@@ -3435,7 +3503,7 @@ function renderBucket(spaceKey) {
 }
 
 $.when('click', '[data-root]', (event) => {
-  $.teach({ view: views.home })
+  $.teach({ view: views.home, searchQuery: '', suggestions: [] })
 })
 
 
@@ -3470,7 +3538,7 @@ $.when('click', '[data-action="memex"]', async (event) => {
   event.preventDefault()
   const { memex } = $.learn()
   await provisionActiveKeycard(memex)
-  $.teach({ view: views.home })
+  $.teach({ view: views.home, searchQuery: '', suggestions: [] })
 })
 
 $.when('click', '[data-action="edit"]', async (event) => {
@@ -3800,7 +3868,7 @@ $.when('click', '[data-new]', (event) => {
 })
 
 $.when('click', '[data-new-memex]', (event) => {
-  $.teach({ view: views.wallet, memex: newMemex() })
+  $.teach({ view: views.memex, memex: newDraft(eventTypes.keycard) })
 })
 
 $.when('click', '[data-quit]', (event) => {
@@ -3816,7 +3884,7 @@ $.when('click', '[data-close-draft]', () => {
 })
 
 $.when('click', '[data-home]', () => {
-  $.teach({ view: views.home })
+  $.teach({ view: views.home, searchQuery: '', suggestions: [] })
 })
 
 function formatDate(date) {
@@ -3864,6 +3932,17 @@ function renderDraftMetadata(x, key) {
     </div>
   ` : ''
 }
+
+$.when('click', '[data-share]', (event) => {
+  const { share } = event.target.dataset
+  const keycards = listKeycards()
+  const memex = keycards.find(x => x.id === share)
+
+  if(memex) {
+    $.teach({ view: views.share, memex })
+  }
+})
+
 
 $.when('click', '[data-keycard]', (event) => {
   const { keycard } = event.target.dataset
