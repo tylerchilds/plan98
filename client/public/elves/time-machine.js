@@ -3451,9 +3451,11 @@ const eventRenderers = {
             ${config.icon || `<sl-icon name="asterisk"></sl-icon>`}
           </span>
         </div>
-        <button class="view-event standard-button -small -stealth" data-show="${event.data.type}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-          ${data.title}
-        </button>
+        <div>
+          <button class="view-event standard-button -small -stealth" data-show="${event.data.type}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+            ${data.title}
+          </button>
+        </div>
       </div>
     `
   }

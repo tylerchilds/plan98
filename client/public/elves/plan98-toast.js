@@ -81,7 +81,7 @@ export function untoast(id) {
 $.style(`
   & {
     position: absolute;
-    top: 1rem;
+    bottom: 1rem;
     right: 1rem;
     left: 1rem;
     width: 280px;

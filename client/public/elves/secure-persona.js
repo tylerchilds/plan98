@@ -210,14 +210,14 @@ const modes = {
 
     return `
       <div class="form-title">
-        Secured!
-      </div>
-      <div class="form-description">
-        Go offline to swap personas.
+        Secure!
       </div>
       <div class="form-description">
         Persona: <strong>${companyEmployeeId}</strong><br/>
         Provider: <strong>${companyName}</strong><br/>
+      </div>
+      <div class="form-description">
+        Disconnect to switch active persona.
       </div>
 
       <div style="margin: 0 0 2rem;">
@@ -225,7 +225,7 @@ const modes = {
           <span style="display: grid; place-content: center;">
             <sl-icon name="emoji-frown"></sl-icon>
           </span>
-          Go offline
+          Disconnect
         </button>
       </div>
 
