@@ -18,6 +18,7 @@ import {
   touch,
   KEYCARD_TYPES,
   requestKeycardInsertion,
+  requestKeycardDeletion,
   requestKeycardPaste
 } from './plan98-wallet.js'
 
@@ -1044,9 +1045,6 @@ $.style(`
 
   & .search-and-filter input {
     width: 100%;
-  }
-  & [data-toggle-metadata="on"] {
-    filter: invert(1);
   }
 
   & .metadata-form {
@@ -2081,6 +2079,17 @@ const viewRenderers = {
       })
     )
 
+    const memexExists = listKeycards().find(x => x.id === memex.id)
+    const adminArea = memexExists ? `
+      <hr>
+      <div>
+        Deleting a Memex is an irreversible decision. Be wise.
+      </div>
+      <button class="standard-button -smol bias-negative" data-delete-memex="${memex.id}">
+        Delete
+      </button>
+    ` : ''
+
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -2118,6 +2127,7 @@ const viewRenderers = {
                     <span class="label">Host</span>
                     <input data-bind="draft" name="host" value="${escapeHyperText(memex.host) || ''}" />
                   </label>
+                  ${adminArea}
                 </div>
               </div>
             </div>
@@ -2257,7 +2267,7 @@ const viewRenderers = {
             .map(keycard => {
           return `
             <div class="memex-row">
-              <button data-keycard="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
+              <button data-show-memex="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
                 <div class="memex-logo">
                   <img src="${keycard.logoUrl}" />
                 </div>
@@ -3846,7 +3856,7 @@ $.when('click', '[data-new]', (event) => {
 })
 
 $.when('click', '[data-new-memex]', (event) => {
-  $.teach({ view: views.memex, memex: newDraft(eventTypes.keycard) })
+  $.teach({ view: views.memex, viewMetadata: true, memex: newDraft(eventTypes.keycard) })
 })
 
 $.when('click', '[data-quit]', (event) => {
@@ -3917,14 +3927,20 @@ $.when('click', '[data-share]', (event) => {
   const memex = keycards.find(x => x.id === share)
 
   if(memex) {
-    $.teach({ view: views.memex, memex })
+    $.teach({ view: views.memex, viewMetadata: false, memex })
   }
 })
 
+$.when('click', '[data-delete-memex]', (event) => {
+  const { deleteMemex } = event.target.dataset
+  requestKeycardDeletion(deleteMemex)
+  $.teach({ view: views.home, memex: getKeycard() })
+})
 
-$.when('click', '[data-keycard]', (event) => {
-  const { keycard } = event.target.dataset
-  setKeycard(keycard)
+
+$.when('click', '[data-show-memex]', (event) => {
+  const { showMemex } = event.target.dataset
+  setKeycard(showMemex)
 
   reset(event.target.closest($.link))
   fate()

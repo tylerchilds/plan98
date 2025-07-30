@@ -1198,6 +1198,13 @@ function deleteKeycardById(state, payload) {
   }
 }
 
+export function requestKeycardDeletion(id) {
+  if(id) {
+    $.teach(id, deleteKeycardById)
+  }
+}
+
+
 
 $.style(`
   & {
