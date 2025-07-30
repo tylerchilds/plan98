@@ -17,7 +17,8 @@ import {
   put,
   touch,
   KEYCARD_TYPES,
-  requestKeycardInsertion
+  requestKeycardInsertion,
+  requestKeycardPaste
 } from './plan98-wallet.js'
 
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
@@ -111,7 +112,6 @@ export const eventTypes = {
 
 export const views = {
   memex: 'memex',
-  share: 'share',
   home: 'home',
   events: 'events',
   create: 'create',
@@ -2062,50 +2062,7 @@ function viewTemplate(x, child) {
 
 const viewRenderers = {
   [views.memex]: (target) => {
-    const { memex } = $.learn()
-    return `
-      <div class="overlay-background">
-        <div class="form-card">
-          <div class="draft-template">
-            <div class="draft-header">
-              <div style="display: grid; place-content: start">
-                (New Memex)
-              </div>
-
-              <div style="display: grid; place-content: end">
-                <button data-root class="standard-button bias-generic -small -round" type="reset">
-                  <sl-icon name="x-lg"></sl-icon>
-                </button>
-              </div>
-            </div>
-
-            <div class="memex-body draft-body">
-              <div class="overlay-background" style="overflow: auto;">
-                <div class="wizard">
-                  <label class="field">
-                    <span class="label">Description</span>
-                    <textarea data-bind="memex" name="description" style="height: 12rem;" value="${escapeHyperText(memex.description)}"></textarea>
-                  </label>
-                  <label class="field">
-                    <span class="label">Host</span>
-                    <input data-bind="draft" name="host" value="${escapeHyperText(memex.host) || ''}" />
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div class="draft-footer">
-              <input class="standard-input -small" data-bind="memex"  name="title" value="${escapeHyperText(memex.title)}" type="text"/>
-              <button data-action="memex" class="standard-button bias-positive -small" type="submit">
-                <sl-icon name="check-lg"></sl-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    `
-  },
-  [views.share]: (target) => {
-    const { memex } = $.learn()
+    const { memex, viewMetadata } = $.learn()
     const encoded = btoa(
       JSON.stringify({
         jsonrpc: "2.0",
@@ -2130,8 +2087,8 @@ const viewRenderers = {
           <div class="draft-template">
             <div class="draft-header">
               <div style="display: grid; place-content: start">
-                <button data-root class="standard-button bias-generic -small -round" type="reset">
-                  <sl-icon name="pencil"></sl-icon>
+                <button class="standard-button bias-generic -small -round" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                  <sl-icon name="gear-fill"></sl-icon>
                 </button>
               </div>
 
@@ -2142,10 +2099,25 @@ const viewRenderers = {
               </div>
             </div>
 
+
             <div class="memex-body draft-body">
               <div class="overlay-background">
                 <div style="padding: 51px; height: 100%; display: flex;">
                   <qr-code src="${window.location.origin}/app/time-machine?data=${encoded}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+                </div>
+              </div>
+            </div>
+            <div class="draft-metadata">
+              <div class="overlay-background" style="overflow: auto;">
+                <div class="wizard">
+                  <label class="field">
+                    <span class="label">Description</span>
+                    <textarea data-bind="memex" name="description" style="height: 12rem;" value="${escapeHyperText(memex.description)}"></textarea>
+                  </label>
+                  <label class="field">
+                    <span class="label">Host</span>
+                    <input data-bind="draft" name="host" value="${escapeHyperText(memex.host) || ''}" />
+                  </label>
                 </div>
               </div>
             </div>
@@ -2160,7 +2132,6 @@ const viewRenderers = {
       </div>
     `
   },
-
   [views.thinking]: (target) => {
     return `
       <thinking class="overlay-background">
@@ -3537,7 +3508,14 @@ $.when('click', '[data-toggle-metadata]', (event) => {
 $.when('click', '[data-action="memex"]', async (event) => {
   event.preventDefault()
   const { memex } = $.learn()
-  await provisionActiveKeycard(memex)
+
+  const existing = listKeycards().find(x => x.id === memex.id)
+
+  if(existing) {
+    await requestKeycardPaste(memex)
+  } else {
+    await provisionActiveKeycard(memex)
+  }
   $.teach({ view: views.home, searchQuery: '', suggestions: [] })
 })
 
@@ -3939,7 +3917,7 @@ $.when('click', '[data-share]', (event) => {
   const memex = keycards.find(x => x.id === share)
 
   if(memex) {
-    $.teach({ view: views.share, memex })
+    $.teach({ view: views.memex, memex })
   }
 })
 

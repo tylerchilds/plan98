@@ -1018,6 +1018,16 @@ $.when('click', '[data-create]', async (event) => {
   provisionActiveKeycard()
 })
 
+export async function requestKeycardPaste(keycard) {
+  if(keycard) {
+    await updatePlan98Config(keycard)
+    $.teach({ activeKeycardId: keycard.id })
+    persist()
+  }
+}
+
+
+
 export async function provisionActiveKeycard(options={}) {
   const keycard = await newKeycard(options).catch(console.error)
   await updatePlan98Config(keycard)
@@ -1138,12 +1148,6 @@ $.when('click', '[data-save]', async (event) => {
 })
 
 async function updatePlan98Config(keycard) {
-  const cleanKeycard = {
-    ...keycard
-  }
-
-  delete cleanKeycard.asJSON
-
   const signer = await getSigner(keycard)
   const storage = getStorage(keycard)
 
@@ -1152,8 +1156,19 @@ async function updatePlan98Config(keycard) {
     id: `urn:uuid:${keycard.id}`
   })
 
+  const keycardMetadata = await getPlan98Config({space, signer}).catch(console.error)
+  const cleanKeycard = {
+    ...keycardMetadata,
+    ...keycard
+  }
+
+  $.teach(cleanKeycard, pasteToKeycard)
+
+  delete cleanKeycard.asJSON
+
   return await putPlan98Config({space, signer}, cleanKeycard).catch(console.error)
 }
+
 
 function pasteToKeycard(state, payload) {
   return {
