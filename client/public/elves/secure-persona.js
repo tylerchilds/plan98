@@ -1,6 +1,6 @@
-import elf from '@silly/elf'
+import elf, { subscribe } from '@silly/elf'
 import supabase from '@sillonious/database'
-import { bayunCore } from '@sillonious/vault'
+import { bayunCore, BayunCore } from '@sillonious/vault'
 import {
   getSession,
   getFeedback,
@@ -16,6 +16,24 @@ import {
   getEmail
 } from './bayun-wizard.js'
 import { popover } from './data-popover.js'
+import {
+  provisionActiveKeycard,
+  getKeycard,
+  listKeycards,
+  setKeycard,
+  getStorage,
+  getSigner,
+  get,
+  del,
+  put,
+  touch,
+  KEYCARD_TYPES,
+  requestKeycardInsertion,
+  requestKeycardDeletion,
+  requestKeycardPaste
+} from './plan98-wallet.js'
+
+
 
 const organization = 'sillyz.computer'
 
@@ -38,6 +56,223 @@ export const $ = elf('secure-persona', {
   step: 0,
   user: {}
 })
+
+let lastMode = null
+subscribe((link) => {
+  if(link === $.link) {
+    const { mode } = $.learn()
+    if(mode !== lastMode) {
+      lastMode = mode
+
+      if(mode === 'authenticated') {
+        maybeProvsionPersonaKeycard()
+      }
+    }
+  }
+})
+
+async function maybeProvsionPersonaKeycard() {
+  const { sessionId, companyEmployeeId, companyName } = getSession()
+
+  if(!sessionId) return
+
+  const exists = listKeycards().find(x => {
+    return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
+  })
+
+  if(!exists) {
+    await provisionActiveKeycard({
+      type: KEYCARD_TYPES.PERSONA,
+      title: 'Persona',
+      logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
+      description: 'Secure social graph',
+      companyEmployeeId,
+      companyName
+    })
+
+    const groupType = BayunCore.GroupType.PRIVATE;
+    const group = await bayunCore.createGroup(sessionId, `${companyEmployeeId}@${companyName}:friends`, groupType)
+    .catch(error => {
+      console.log(error);
+    });
+
+    await updatePersona({
+      moniker: companyEmployeeId,
+      organization: companyName,
+      groupId: group.groupId,
+      groupKey: group.groupKey,
+      followers: [],
+      following: []
+    })
+  }
+}
+
+export function persona() {
+  return $.learn().persona
+}
+
+async function updatePersona(payload, mergeHandler=(s,p) => ({...s,...p})) {
+  const persona = await getPersona()
+    .catch(e => {
+      console.error(e)
+      return {}
+    })
+
+  const data = mergeHandler(persona, payload)
+
+  $.teach({ persona: data })
+  return await putPersona(data).catch(console.error)
+}
+
+export async function putPersona(persona) {
+  const keycard = getKeycard()
+
+  const signer = await getSigner(keycard)
+  const storage = getStorage(keycard)
+
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+  const config = space.resource('/.plan98/persona.json')
+  const blobForConfig = new Blob([JSON.stringify(persona)], { type: 'application/json' })
+  return await config.put(blobForConfig, { signer })
+    .then(res => {
+      console.debug({ res })
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
+    })
+}
+
+export async function getPersona() {
+  const { companyEmployeeId, companyName } = getSession()
+  const personaKeycard = listKeycards().find(x => {
+    return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
+  })
+
+  if(!personaKeycard) return
+
+  setKeycard(personaKeycard.id)
+
+  const keycard = getKeycard()
+
+  const signer = await getSigner(keycard)
+  const storage = getStorage(keycard)
+
+  const space = storage.space({
+    signer,
+    id: `urn:uuid:${keycard.id}`
+  })
+
+
+  const config = space.resource('/.plan98/persona.json')
+
+  return await config.get({ signer })
+    .then(async res => {
+      if(res.status === 404) {
+        throw new Error('Persona Not Found')
+      }
+      return await res.json()
+    })
+}
+
+export async function addFollow(moniker, organization) {
+  const { persona } = $.learn()
+
+  let error = false
+  if(persona.groupId) {
+    const { sessionId } = getSession()
+    const result = await bayunCore.addMemberToGroup(
+      sessionId,
+      persona.groupId,
+      moniker,
+      organization
+    ).catch(e => {
+      error = true
+      console.error(e)
+    })
+    if(!error) {
+      await updatePersona(
+        { moniker, organization },
+        function (state, payload) {
+          const followers = [...state.followers].map(x => {
+            if(x.moniker === moniker && x.organization === organization) {
+              x.approved = true
+            }
+            return x
+          })
+
+          const exists = followers.find(x => {
+            return x.moniker === moniker && x.organization === organization
+          })
+
+          if(!exists) {
+            followers.push({
+              ...payload,
+              approved: true
+            })
+          }
+
+          return {
+            ...state,
+            followers
+          }
+        }
+      )
+    }
+  }
+}
+
+export async function blockFollow(moniker, organization) {
+  const { persona } = $.learn()
+
+  let error = false
+  if(persona.groupId) {
+    const { sessionId } = getSession()
+    const result = bayunCore.removeMemberFromGroup(
+      sessionId,
+      persona.groupId,
+      moniker,
+      organization
+    ).catch(e => {
+      error = true
+      console.error(e)
+    })
+
+    if(!error) {
+      await updatePersona(
+        { moniker, organization },
+        function (state, payload) {
+          const followers = [...state.followers].map(x => {
+            if(x.moniker === moniker && x.organization === organization) {
+              x.approved = false 
+            }
+            return x
+          })
+
+          const exists = followers.find(x => {
+            return x.moniker === moniker && x.organization === organization
+          })
+
+          if(!exists) {
+            followers.push({
+              ...payload,
+              approved: false
+            })
+          }
+
+          return {
+            ...state,
+            followers
+          }
+        }
+      )
+    }
+  }
+}
 
 const modes = {
   error: function error(target) {
@@ -216,9 +451,6 @@ const modes = {
         Persona: <strong>${companyEmployeeId}</strong><br/>
         Provider: <strong>${companyName}</strong><br/>
       </div>
-      <div class="form-description">
-        Disconnect to switch active persona.
-      </div>
 
       <div style="margin: 0 0 2rem;">
         <button class="standard-button bias-generic persona-deactivate" data-action="handleSessionEnd">
@@ -301,6 +533,8 @@ function init() {
 
   $.teach({ ...baseQandA, mode: 'authenticated' })
   broadcastPersonaActivated()
+
+  getPersona().then(persona => $.teach({ persona }))
 }
 
 function broadcastPersonaActivated() {
@@ -362,6 +596,7 @@ function afterUpdate(target) {
     recoverElves(target, 'sl-icon')
     recoverElves(target, 'plan98-icon')
     recoverElves(target, 'flying-disk')
+    recoverElves(target, 'secure-followers')
   }
 }
 
@@ -734,7 +969,7 @@ $.style(`
 
   & hr {
     border: 0;
-    border-bottom: 1px solid rgba(255,255,255,.2);
+    border-bottom: 1px solid rgba(0,0,0,.1);
   }
 
   & .password-grid {

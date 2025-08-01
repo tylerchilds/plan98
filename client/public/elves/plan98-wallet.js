@@ -349,6 +349,7 @@ export function getStorage(keycard=getKeycard()) {
 export const KEYCARD_TYPES = {
   GENERIC: 'generic',
   MEMEX: 'memex',
+  PERSONA: 'persona',
 }
 
 export async function newKeycard(overrides={}) {

@@ -1,33 +1,72 @@
-import elf, { state }  from '@silly/tag'
-import supabase from '@sillonious/database'
-import { bayunCore, BayunCore } from '@sillonious/vault'
-import { $ as $login } from './hive-login.js'
+import elf  from '@plan98/elf'
+import { bayunCore } from '@sillonious/vault'
 import {
   getSession,
   clearSession,
 } from './bayun-wizard.js'
+import {
+  addFollow,
+  blockFollow,
+  persona,
+  getPersona
+} from './secure-persona.js'
 
-const $ = elf('secure-followers', { followers: [], syncStatus: null })
+const $ = elf('secure-followers', { follower: {moniker: '', organization: 'sillyz.computer' }, followers: [], syncStatus: null })
 
 $.draw((target) => {
   mount(target)
 
-  const { followers, loading } = $.learn()
+  const { follower, followers, loading } = $.learn()
   if(loading) {
     return `
-      <div>
+      <disk>
         <flying-disk></flying-disk>
-      </div>
+      </disk>
     `
   }
 
-  return followers.length > 0 ? `
+  const newFollowerForm = `
+    <div>
+      <div class="relationship-member">
+        <label class="field">
+          <span class="label">Moniker</span>
+          <input data-bind="follower" name="moniker" value="${escapeHyperText(follower.moniker)}"/>
+        </label>
+        <label class="field">
+          <span class="label">Organization</span>
+          <input data-bind="follower" name="organization" value="${escapeHyperText(follower.organization)}"/>
+        </label>
+        <button data-add-follower class="standard-button -round bias-positive">
+          Add Friend
+        </button>
+      </div>
+    </div>
+  `
+
+  const approvedFollowers = followers.filter(x => x.approved)
+
+  return approvedFollowers.length > 0 ? `
+    <div class="form-subtitle">
+      Friends
+
+      <button data-full-sync class="standard-button -small -round bias-generic">
+        <sl-icon name="arrow-repeat"></sl-icon>
+      </button>
+    </div>
     ${renderSyncronizer()}
     <div class="relationship-group">
-      ${followers.map(render).join('')}
+      ${approvedFollowers.map(render).join('')}
     </div>
+    ${newFollowerForm}
   ` : `
-    No one follows you yet... put yourself out there.
+    <div class="form-subtitle">
+      Friends
+      <button data-full-sync class="standard-button -small -round -bias-generic">
+        <sl-icon name="arrow-repeat"></sl-icon>
+      </button>
+    </div>
+    ${renderSyncronizer()}
+    ${newFollowerForm}
   `
 }, {
   afterUpdate: (target) => {
@@ -61,30 +100,23 @@ function renderSyncronizer() {
           </p>
         `:''}
       `: `
-      To fully syncronize your approved followers with your encryption group, click "Sync Friendcryption"
-      <button data-full-sync class="sync-friendcryption">
-        <span>
-          <sl-icon name="arrow-repeat"></sl-icon>
-        </span>
-        Sync Friendcryption
-      </button>
     `}
-    <hr>
   `
 }
 
 function render(follower) {
   return `
     <div class="relationship-member">
-      <a class="member-picture" href="/app/secure-profile?data-user=${follower.user_id}">
-        <img  src="${follower.picture || '/public/cdn/sillyz.computer/default-picture.png' }" />
-      </a>
-      <div class="member-handle" data-tooltip="${follower.moniker}@${follower.organization}">
-        ${follower.nick || follower.moniker}
+      <div class="member-handle">
+        ${follower.moniker}
+      </div>
+
+      <div class="organization-handle">
+        ${follower.organization}
       </div>
       <div class="member-actions">
         ${follower.approved ? `
-          <button class="icon-action negative follower-kick" data-friend="${follower.friend_id}">
+          <button class="standard-button bias-negative -smol -round" data-remove-follower="${follower.moniker}@${follower.organization}">
             <span>
               <sl-icon name="x-lg"></sl-icon>
             </span>
@@ -161,74 +193,28 @@ $.when('click', '.follower-kick', async (event) => {
   }
 })
 
-$.when('click', '.follower-approve', async (event) => {
-  const { friend } = event.target.dataset
-
-  const { data, error } = await supabase
-    .from('friendcryption')
-    .update({ approved: true, approval_timestamp: new Date() })
-    .eq('friend_id', friend);
-
-  if (error) {
-    console.error('Error approving friendcryption:', error);
-    return;
-  }
-
-  query()
-
-  const { data: personaData, error: personaError } = await supabase
-    .from('persona')
-    .select('*')
-    .eq('id', friend)
-    .single();
-
-  if (personaError || !personaData) {
-    console.error('Error fetching persona:', personaError);
-  } else {
-    const { persona } = $.learn()
-    if(persona.bayun_group_id) {
-      const { sessionId } = getSession()
-      bayunCore.addMemberToGroup(sessionId, persona.bayun_group_id, personaData.moniker, personaData.organization)
-      .then(result => {
-        console.log(result)
-      }).catch(e => {
-        console.error(e)
-      })
-    }
-  }
+$.when('click', '[data-add-follower]', async (event) => {
+  const { moniker, organization } = $.learn().follower
+  await addFollow(moniker, organization)
+  $.teach({ followers: persona().followers || [] })
 })
 
+$.when('click', '[data-remove-follower]', async (event) => {
+  const { removeFollower } = event.target.dataset
+  const [moniker, organization ] = removeFollower.split('@')
+  await blockFollow(moniker, organization)
+  $.teach({ followers: persona().followers || [] })
+})
 
 async function mount(target) {
   if(target.mounted) return
   target.mounted = true
   $.teach({ loading: true, syncStatus: null })
-  await query()
-
-  const { persona } = $.learn()
-
-  if(!persona.bayun_group_id && persona.id) {
-    const { data, error } = await createFriendGroup(persona.id)
-
-    if(error) {
-      console.error(error)
-    } else {
-      console.log(data)
-    }
-  }
+  query()
 }
 
-async function query() {
-  const userId = $login.learn().user?.id
-
-  const { data: followersData, error: followersError } = await getFollowersWithMutual(userId)
-
-  $.teach({ loading: false })
-  if(followersError) {
-    console.error(followersError)
-  } else {
-    $.teach({ followers: followersData })
-  }
+function query() {
+  $.teach({ loading: false, followers: persona().followers || [] })
 }
 
 $.when('click', '.unfollow', async (event) => {
@@ -248,83 +234,17 @@ $.when('click', '.unfollow', async (event) => {
 })
 
 
-
-async function getFollowersWithMutual(userId) {
-  const { data: personaData, error: personaError } = await supabase
-    .from('persona')
-    .select('*')
-    .eq('user_id', userId)
-    .single();
-
-  if (personaError || !personaData) {
-    console.error('Error fetching persona:', personaError);
-    return { data: null, error: personaError };
-  }
-
-  $.teach({ persona: personaData })
-
-  const personaId = personaData.id;
-
-  const { data: followersData, error: followersError } = await supabase.rpc(
-    'get_followers_with_mutual',
-    { current_persona_id: personaId }
-  );
-
-  if (followersError) {
-    console.error('Error fetching followers with mutual:', followersError);
-    return { data: null, error: followersError };
-  }
-
-  return { data: followersData };
-}
-
 $.when('click', '[data-full-sync]', async (event) => {
   $.teach({ addedMembersCount: null, removedMembersCount: null, syncStatus: "Fetching followers from database." })
-  await query()
-  const { persona } = $.learn()
+  query()
 
-  if(!persona.bayun_group_id) {
-    $.teach({ syncStatus: "Creating new group in encryption service." })
-
-    const { data: group, error } = await createFriendGroup(persona.id)
-
-    if(error) {
-      $.teach({ syncStatus: error })
-    } else {
-      syncEncryptionGroupMembers(group.groupId)
-    }
-  } else {
-    syncEncryptionGroupMembers(persona.bayun_group_id)
-  }
+  syncEncryptionGroupMembers(persona().groupId)
 })
 
-async function createFriendGroup(id) {
-  const groupType = BayunCore.GroupType.PRIVATE;
-  const { sessionId } = getSession()
-  const group = await bayunCore.createGroup(sessionId, `${id}:friends`, groupType)
-    .catch(error => {
-      console.log(error);
-    });
-
-  if(group) {
-    const { groupId } = group
-
-    const { error } = await supabase
-      .from('persona')
-      .update({ bayun_group_id: groupId })  // Set deleted to true instead of deleting
-      .match({ id })
-
-    if(!error) {
-      return { data: group }
-    } else {
-      return { error: 'error saving group to database' }
-    }
-  } else {
-    return { error: 'error creating group in encryption service' }
-  }
-}
-
 async function syncEncryptionGroupMembers(id) {
+  const persona = await getPersona()
+  if(!persona) return
+
   $.teach({ syncStatus: "Fetching list from encryption service." })
   const { sessionId } = getSession()
   const { groupMembers } = await bayunCore.getGroupById(sessionId, id)
@@ -333,9 +253,7 @@ async function syncEncryptionGroupMembers(id) {
       console.log(error);
     });
 
-  const { followers, persona } = $.learn()
-
-  const approvedFollowers = followers.filter(x => x.approved)
+  const approvedFollowers = persona.followers.filter(x => x.approved)
 
   const addList = approvedFollowers.filter(follower => {
     return !groupMembers.some(member => {
@@ -398,11 +316,12 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    margin-bottom: 1rem;
   }
 
   & .relationship-member {
     display: grid;
-    grid-template-columns: 32px 1fr auto;
+    grid-template-columns: 1fr 1fr 2rem;
     border-radius: 4px;
     background: rgba(255,255,255,.15);
     gap: 1rem;
@@ -521,3 +440,64 @@ function recoverElves(target, tag) {
     node.replaceWith(newNode)
   })
 }
+
+$.when('input', '[data-bind]', handleBind)
+
+const formats = {
+  'stringify': (value) => {
+    return JSON.stringify(value)
+  }
+}
+
+function formatify(format, value) {
+  if(formats[format]) {
+    return formats[format](value)
+  }
+
+  return value
+}
+
+function handleBind(event) {
+  const { bind, format } = event.target.dataset
+  if(bind) {
+    $.teach({
+      name: event.target.name,
+      value: formatify(format, event.target.value)
+    }, {
+      mergeHandler: bound,
+      parameters: [bind]
+    })
+  } else {
+    $.teach({ 
+      name: event.target.name,
+      value: formatify(format, event.target.value)
+    })
+  }
+}
+
+function bound(bind) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [bind]: {
+        ...state[bind],
+        [payload.name]: payload.value
+      }
+    }
+  }
+}
+
+function escapeHyperText(text = '') {
+  if(!text) return ''
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+
