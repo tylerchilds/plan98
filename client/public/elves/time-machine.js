@@ -531,6 +531,10 @@ $.style(`
     gap: 1rem;
   }
 
+  & .memex-row button {
+    width: 100%;
+  }
+
   & .memex-list {
     display: flex;
     flex-direction: column;
@@ -2226,17 +2230,19 @@ const viewRenderers = {
                 : `<plan98-icon></plan98-icon>`
           return `
             <div class="memex-row">
-              <button data-show-memex="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
-                <div class="memex-logo">
-                  ${keycardIcon}
-                </div>
-                <div class="memex-title">
-                  ${keycard.title}
-                </div>
-                <div class="memex-description">
-                  ${keycard.description}
-                </div>
-              </button>
+              <div>
+                <button data-show-memex="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
+                  <div class="memex-logo">
+                    ${keycardIcon}
+                  </div>
+                  <div class="memex-title">
+                    ${keycard.title}
+                  </div>
+                  <div class="memex-description">
+                    ${keycard.description}
+                  </div>
+                </button>
+              </div>
               <div>
                 <button data-share="${keycard.id}" class="standard-button -round -stealth">
                   <sl-icon name="qr-code"></sl-icon>
