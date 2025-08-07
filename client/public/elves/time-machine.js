@@ -96,7 +96,7 @@ export const eventTypes = {
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
-  bulletin: 'bulletin',
+  desktop: 'desktop',
   world: 'world',
   character: 'character',
   gallery: 'gallery',
@@ -114,6 +114,7 @@ export const eventTypes = {
 export const views = {
   memex: 'memex',
   home: 'home',
+  types: 'types',
   events: 'events',
   create: 'create',
   identity: 'identity',
@@ -128,7 +129,7 @@ export const views = {
   [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
-  [eventTypes.bulletin]: eventTypes.bulletin,
+  [eventTypes.desktop]: eventTypes.desktop,
   [eventTypes.world]: eventTypes.world,
   [eventTypes.character]: eventTypes.character,
   [eventTypes.gallery]: eventTypes.gallery,
@@ -191,7 +192,7 @@ export const schemas = {
     type: KEYCARD_TYPES.MEMEX,
     title: 'My Memex',
     description: 'A private space for my thoughts.',
-    logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
+    logoUrl: null,
     src: '/app/time-machine',
     host: walletDefaultHost,
     tags: [],
@@ -239,9 +240,9 @@ export const schemas = {
     strokeHistory: [],
     strokeRevisory: [],
   },
-  [eventTypes.bulletin]: {
-    type: eventTypes.bulletin,
-    title: 'Bulletin',
+  [eventTypes.desktop]: {
+    type: eventTypes.desktop,
+    title: 'Desktop',
     strokeHistory: [],
     strokeRevisory: [],
   },
@@ -524,18 +525,6 @@ $.style(`
     padding: 4px .5rem;
   }
 
-  & .introduction {
-    color: rgba(0,0,0,.5);
-    --v-font-mono: 1;
-    --v-font-casl: 0;
-    --v-font-wght: 400;
-    --v-font-slnt: 0;
-    --v-font-crsv: 1;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
-    margin-bottom: 1rem;
-  }
-
   & .memex-row {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -641,6 +630,7 @@ $.style(`
     grid-template-rows: auto 1fr auto;
     overflow: hidden;
     max-height: 100%;
+    height: 100%;
     grid-template-areas: "header" "body" "footer";
     grid-template-columns: 1fr auto;
   }
@@ -931,6 +921,18 @@ $.style(`
     place-items: center;
   }
 
+  & .types-list {
+    max-width: 55ch;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  & .dropdown-item button {
+    width: 100%;
+  }
+
   & .dropdown-items button > * {
     pointer-events: none;
   }
@@ -953,6 +955,10 @@ $.style(`
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+  }
+
+  & .chat-sidebar {
+    height: 100%;
   }
 
   & .chat-sidebar-inner {
@@ -990,22 +996,7 @@ $.style(`
     gap: 4px;
   }
 
-  & .chat-footer {
-    position: relative;
-    overflow: hidden;
-  }
-
-  & .chat-footer .action-button {
-    display: none;
-    width: 100%;
-  }
-
-  & .chat-footer .action-icon {
-    display: block;
-  }
-
-
-    & .chat-realm .profile-actions {
+  & .chat-realm .profile-actions {
     padding: .5rem .5rem .5rem calc(34px + 1.5rem);
     flex-direction: row;
     position: absolute;
@@ -1020,7 +1011,7 @@ $.style(`
   }
 
   & [data-mode="item"] {
-    display: grid;
+    display: block;
     height: 100%;
   }
 
@@ -1384,7 +1375,7 @@ export const creationForms = {
       </div>
     `
   },
-  [eventTypes.bulletin]: function(draft) {
+  [eventTypes.desktop]: function(draft) {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
@@ -1822,7 +1813,7 @@ const studios = {
     `
   },
 
-  [eventTypes.bulletin]: function(draft) {
+  [eventTypes.desktop]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
       <bulletin-board id="${draft.id}" ${src}></bulletin-board>
@@ -2213,45 +2204,10 @@ const viewRenderers = {
             <div data-dom="${bucketKeys.future}" class="era"></div>
           </div>
         </div>
-        <div class="chat-footer">
-          <div class="app-launcher">
-            <div class="data-types">
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.note}">Note</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.memo}">Memo</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.audio}">Audio</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.image}">Photo</button>
-              </div>
-              <div class="dropdown-item">
-                <!--<button class="standard-button -small bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.video}">Video</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.agent}">Agent</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.character}">Character</button>
-              </div>
-              <div class="dropdown-item">
-                <button class="standard-button -small bias-generic" data-new="${eventTypes.world}">World</button>
-              </div>
-            </div>
-          </div>
+        <div class="abs-bottom-right">
+          <button class="create-item standard-button" data-new-creation>
+            <sl-icon name="plus-lg"></sl-icon>
+          </button>
         </div>
       </div>
 
@@ -2265,11 +2221,14 @@ const viewRenderers = {
         ${listKeycards()
             .filter(x => x.type === KEYCARD_TYPES.MEMEX)
             .map(keycard => {
+              const keycardIcon = keycard.logoUrl
+                ? `<img src="${keycard.logoUrl}" />`
+                : `<plan98-icon></plan98-icon>`
           return `
             <div class="memex-row">
               <button data-show-memex="${keycard.id}" class="standard-button -stealth memex-keycard ${activeKeycard.id === keycard.id ? 'selected':''}">
                 <div class="memex-logo">
-                  <img src="${keycard.logoUrl}" />
+                  ${keycardIcon}
                 </div>
                 <div class="memex-title">
                   ${keycard.title}
@@ -2293,7 +2252,7 @@ const viewRenderers = {
         <div class="memex-header">
           <div class="memex-header-left">
             <button class="logo-gradient" data-plan98>
-              Plan98
+              Memex
             </button>
           </div>
 
@@ -2308,9 +2267,6 @@ const viewRenderers = {
           </div>
         </div>
         <div class="memex-body">
-          <div class="introduction">
-            Mem(ex). Memory(Extender, Express, Expansion).
-          </div>
           ${list}
         </div>
       </div>
@@ -2318,6 +2274,82 @@ const viewRenderers = {
         <button class="create-item standard-button" data-new-memex>
           <sl-icon name="plus-lg"></sl-icon>
         </button>
+      </div>
+    `
+  },
+  [views.types]: (target) => {
+    return `
+      <div class="overlay-background">
+        <div class="form-card">
+          <div class="draft-template">
+            <div class="draft-header">
+              <div style="display: grid; place-content: start">
+              </div>
+
+              <div style="display: grid; place-content: end">
+                <button data-cancel-type-picker class="standard-button bias-generic -small -round" type="reset">
+                  <sl-icon name="x-lg"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="draft-body child-well">
+              <div class="types-list">
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.note}">Note</button>
+                </div>
+                <!--
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.memo}">Memo</button>
+                </div>
+                -->
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.audio}">Audio</button>
+                </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
+                </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.image}">Photo</button>
+                </div>
+                <div class="dropdown-item">
+                  <!--<button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.video}">Video</button>
+                </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.agent}">Agent</button>
+                </div>
+                <!--
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
+                </div>
+                -->
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.desktop}">Desktop</button>
+                </div>
+                <!--
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.character}">Character</button>
+                </div>
+                -->
+                <!--
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.world}">World</button>
+                </div>
+                -->
+              </div>
+            </div>
+            <div class="draft-footer">
+              Pick something to create
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-footer">
+        <div class="app-launcher">
+          <div class="data-types">
+          </div>
+        </div>
       </div>
     `
   },
@@ -2444,13 +2476,13 @@ const viewRenderers = {
     `)
   },
 
-  [views.bulletin]: (target) => {
+  [views.desktop]: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.bulletin],
+      ...schemas[views.desktop],
       ...event.data,
       space,
       time
@@ -3158,8 +3190,8 @@ const eventTypeObjectClass = {
     label: 'Character',
     icon: '<sl-icon name="person-walking"></sl-icon>',
   },
-  [eventTypes.bulletin]: {
-    label: 'Bulletin',
+  [eventTypes.desktop]: {
+    label: 'Desktop',
     icon: '<sl-icon name="copy"></sl-icon>',
   },
   [eventTypes.sketch]: {
@@ -3332,14 +3364,14 @@ const eventRenderers = {
     `
   },
 
-  [eventTypes.bulletin]: function (event) {
+  [eventTypes.desktop]: function (event) {
     const data = {
-      ...schemas[views.bulletin],
+      ...schemas[views.desktop],
       ...event.data
     }
 
     return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.bulletin}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.desktop}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <span>
           <sl-icon name="copy"></sl-icon>
         </span>
@@ -3596,12 +3628,12 @@ export async function saveCharacter(draft, context) {
   }, context)
 }
 
-export async function saveBulletin(draft, context) {
+export async function saveDesktop(draft, context) {
   return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
-    type: eventTypes.bulletin,
+    type: eventTypes.desktop,
   }, context)
 }
 
@@ -3648,7 +3680,8 @@ export async function save(draft, context={}) {
 
   const event = {
     ...(schemas[draft.type] || {}),
-    ...draft
+    ...draft,
+    persona: currentPersona()
   }
 
   // Attempt to upload to server
@@ -3663,6 +3696,16 @@ export async function save(draft, context={}) {
   return { path, spaceKey, timeKey }
 }
 
+function currentPersona() {
+  const { sessionId, companyEmployeeId, companyName } = getSession()
+
+  if(!sessionId) {
+    return null
+  }
+
+  return `${companyEmployeeId}@${companyName}`
+}
+
 const saveHandlers = {
   [eventTypes.note]: save,
   [eventTypes.memo]: save,
@@ -3670,7 +3713,7 @@ const saveHandlers = {
   [eventTypes.instrument]: save,
   [eventTypes.world]: saveWorld,
   [eventTypes.character]: saveCharacter,
-  [eventTypes.bulletin]: saveBulletin,
+  [eventTypes.desktop]: saveDesktop,
   [eventTypes.sketch]: saveSketch,
   [eventTypes.gallery]: save,
   [eventTypes.image]: savePhoto,
@@ -3852,6 +3895,7 @@ $.when('click', '[data-new]', (event) => {
   $.teach({
     view: views.create,
     draft,
+    viewMetadata: false,
     activeMenu: null,
     context: { path }
   })
@@ -3861,6 +3905,10 @@ $.when('click', '[data-new-memex]', (event) => {
   $.teach({ view: views.memex, viewMetadata: true, memex: newDraft(eventTypes.keycard) })
 })
 
+$.when('click', '[data-new-creation]', (event) => {
+  $.teach({ view: views.types })
+})
+
 $.when('click', '[data-quit]', (event) => {
   window.location.href = '/app/plan98-wallet'
 })
@@ -3868,6 +3916,11 @@ $.when('click', '[data-quit]', (event) => {
 $.when('click', '[data-cancel-draft]', () => {
   $.teach({ view: views.events, context: null, viewMetadata: false })
 })
+
+$.when('click', '[data-cancel-type-picker]', () => {
+  $.teach({ view: views.events })
+})
+
 
 $.when('click', '[data-close-draft]', () => {
   $.teach({ view: views.events, context: null, viewMetadata: false })
@@ -3911,6 +3964,8 @@ function stamp(x) {
       ${renderDraftMetadata(x, 'transcription')}
 
       ${formatDate(date)} @ ${formatTime(date)}
+
+      by ${x.persona || 'anonymous'}
     </div>
   `
 }

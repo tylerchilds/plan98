@@ -37,7 +37,7 @@ $.draw((target) => {
           <input data-bind="follower" name="organization" value="${escapeHyperText(follower.organization)}"/>
         </label>
         <button data-add-follower class="standard-button -round bias-positive">
-          Add Friend
+          <sl-icon name="plus-lg"></sl-icon>
         </button>
       </div>
     </div>
@@ -49,15 +49,17 @@ $.draw((target) => {
     <div class="form-subtitle">
       Friends
 
-      <button data-full-sync class="standard-button -small -round bias-generic">
-        <sl-icon name="arrow-repeat"></sl-icon>
-      </button>
+      <span style="display: inline-grid; place-content: center;">
+        <button data-full-sync class="standard-button -small -round bias-generic">
+          <sl-icon name="arrow-repeat"></sl-icon>
+        </button>
+      </span>
     </div>
     ${renderSyncronizer()}
+    ${newFollowerForm}
     <div class="relationship-group">
       ${approvedFollowers.map(render).join('')}
     </div>
-    ${newFollowerForm}
   ` : `
     <div class="form-subtitle">
       Friends
@@ -331,10 +333,16 @@ $.style(`
   & .member-actions {
     display: flex;
     gap: .5rem;
+    place-content: center;
   }
   & .member-handle {
     text-overflow: ellipsis;
     overflow: hidden;
+  }
+
+  & .member-handle,
+  & .organization-handle {
+    padding: 0 .5rem;
   }
 
   & .member-picture img {

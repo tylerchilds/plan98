@@ -445,20 +445,16 @@ const modes = {
 
     return `
       <div class="form-title">
-        Secure!
+        Connected
+        <span style="display: inline-grid; place-content: center;">
+          <button class="standard-button -small -round bias-generic" data-action="handleSessionEnd">
+            <sl-icon name="cloud-slash"></sl-icon>
+          </button>
+        </span>
       </div>
       <div class="form-description">
         Persona: <strong>${companyEmployeeId}</strong><br/>
         Provider: <strong>${companyName}</strong><br/>
-      </div>
-
-      <div style="margin: 0 0 2rem;">
-        <button class="standard-button bias-generic persona-deactivate" data-action="handleSessionEnd">
-          <span style="display: grid; place-content: center;">
-            <sl-icon name="emoji-frown"></sl-icon>
-          </span>
-          Disconnect
-        </button>
       </div>
 
       <div>
@@ -956,15 +952,6 @@ $.style(`
   & .persona-form .label.-as-input input {
     border: 0;
     margin-bottom: 3px;
-  }
-
-  & .persona-deactivate {
-    text-align: left;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: .5rem;
-    align-items: center;
-    margin: 1rem 0;
   }
 
   & hr {

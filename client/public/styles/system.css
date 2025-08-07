@@ -1217,6 +1217,8 @@ sillonious-brand > xml-html {
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .form-subtitle {
@@ -1224,6 +1226,8 @@ sillonious-brand > xml-html {
   font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  display: flex;
+  gap: 1rem;
 }
 
 .form-description {
