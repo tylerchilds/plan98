@@ -98,7 +98,7 @@ const formRenderers = {
         To connect to the network, use a Memex.
       </div>
 
-      <button class="standard-button bias-positive -large" data-submit="${forms.second}">
+      <button class="standard-button bias-positive -large" data-submit="${forms.create}">
         Create Memex
       </button>
       <button class="standard-button bias-generic -large" data-submit="${forms.first}">
@@ -114,18 +114,18 @@ const formRenderers = {
         <plan98-icon></plan98-icon>
       </div>
       <div class="form-title">
-        Getting Started
+        <div>Mem<span class="light-font">-ory</span> Ex<span class="light-font">-perts</span></div>
       </div>
       <div class="form-description">
         ${keycard
           ? 'Welcome back. You can make a new memex or continue with your existing collection.'
-          : 'First time? You can create a memex now or learn more before getting started. '
+          : 'Plan98 is a tool for managing Memexes. A Memex is a <strong>Mem</strong>ory: <ul><li><strong>Ex</strong>tender<li><strong>Ex</strong>plorer<li><strong>Ex</strong>pansion</ul>Create a Memex now or learn more before getting started.'
         }
       </div>
 
         ${keycard
           ? `
-            <button class="standard-button bias-positive -large" data-submit="${forms.second}">
+            <button class="standard-button bias-positive -large" data-submit="${forms.create}">
               Create Memex
             </button>
             <button class="standard-button -large" data-submit="${forms.leave}">
@@ -133,7 +133,7 @@ const formRenderers = {
             </button>
           `
           : `
-            <button class="standard-button bias-positive -large" data-submit="${forms.second}">
+            <button class="standard-button bias-positive -large" data-submit="${forms.create}">
               Create Memex
             </button>
             <button class="standard-button bias-generic -large" data-submit="${forms.learn}">
@@ -175,19 +175,21 @@ const formRenderers = {
         <plan98-icon></plan98-icon>
       </div>
       <div class="form-title">
-        Success!
+        Memory Expanded!
       </div>
       <div class="form-description">
-        Your new keycard has been activated and is ready for use. You may enter the time machine now or publish a website instead.
+        Your first Memex is ready, whenever you are.
       </div>
 
       <button class="standard-button bias-positive -large" data-submit="${forms.leave}">
-        Enter Time Machine
+        Start
       </button>
 
+      <!--
       <button class="standard-button -large" data-submit="${forms.publish}">
         Publish Website
       </button>
+      -->
     `
   },
   [forms.publish]: (target) => {
@@ -334,7 +336,10 @@ const formValidators = {
     const errors = []
     try {
       await provisionActiveKeycard({
-        ...state.draft
+        title: 'Quick Start',
+        description: `Memexes can be personal or professional. What are you working on?`,
+        ...state.draft,
+        type: KEYCARD_TYPES.MEMEX,
       })
       await saveKeycard(state.draft).catch(console.error)
     } catch(e) {
@@ -442,6 +447,10 @@ $.style(`
 
   & .advanced-options {
     display: none;
+  }
+
+  & .light-font {
+    font-weight: 100;
   }
 `)
 

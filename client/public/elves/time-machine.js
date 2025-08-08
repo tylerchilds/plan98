@@ -4060,7 +4060,7 @@ $.when('click', '[data-new]', (event) => {
 })
 
 $.when('click', '[data-new-memex]', (event) => {
-  $.teach({ view: views.memex, viewMetadata: true, memex: newDraft(eventTypes.keycard) })
+  $.teach({ view: views.memex, viewMetadata: false, memex: newDraft(eventTypes.keycard) })
 })
 
 $.when('click', '[data-new-creation]', (event) => {
