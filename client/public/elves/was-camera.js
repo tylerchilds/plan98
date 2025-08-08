@@ -84,7 +84,6 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0,0,0,.5);
     z-index: 5;
     padding: .5rem;
     display: grid;
@@ -152,7 +151,9 @@ class WasCamera extends HTMLElement {
           <div class="left">
           </div>
           <div class="center">
-            <button data-snap class="standard-button">Snap</button>
+            <button data-snap class="standard-button -large -round">
+              <sl-icon name="camera-fill"></sl-icon>
+            </button>
           </div>
           <div class="right">
           </div>

@@ -92,6 +92,7 @@ const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
 export const eventTypes = {
   note: 'note',
+  richtext: 'richtext',
   memo: 'memo',
   tommi: 'tommi',
   instrument: 'instrument',
@@ -122,6 +123,7 @@ export const views = {
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
   [eventTypes.memo]: eventTypes.memo,
+  [eventTypes.richtext]: eventTypes.richtext,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
   [eventTypes.keycard]: eventTypes.keycard,
@@ -250,6 +252,12 @@ export const schemas = {
     type: eventTypes.note,
     title: 'Note',
     text: '',
+  },
+  [eventTypes.richtext]: {
+    type: eventTypes.richtext,
+    title: 'Richtext',
+    rawHTML: '',
+    delta: []
   },
   [eventTypes.memo]: {
     type: eventTypes.memo,
@@ -603,6 +611,35 @@ $.style(`
     padding: .5rem 1rem;
   }
 
+  & .action-area {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    padding: .5rem;
+    gap: .5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .share-link-copyable-url {
+    white-space: nowrap;
+    overflow-x: auto;
+    max-width: 320px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  & .action-bar {
+    text-align: center;
+  }
+
+  & .action-bar > button {
+    pointer-events: all;
+  }
+
   & .overlay-background {
     display: block;
     height: 100%;
@@ -659,6 +696,7 @@ $.style(`
     overflow: auto;
     position: relative;
     z-index: 3;
+    background: rgba(0,0,0,.1);
   }
 
   & .text-well {
@@ -677,6 +715,9 @@ $.style(`
     max-width: 7.5in;
     margin: auto;
     display: block;
+    background: white;
+    height: 100%;
+    margin-top: 1rem;
   }
 
   & .child-well .full-textarea {
@@ -690,6 +731,8 @@ $.style(`
     max-width: 7.5in;
     margin: auto;
     display: block;
+    background: white;
+    margin-top: 1rem;
   }
 
   & .text-well .edit-banner:empty + textarea {
@@ -931,6 +974,7 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
+    padding: 1rem;
   }
 
   & .dropdown-item button {
@@ -1082,21 +1126,20 @@ $.style(`
 
   & .memex-keycard {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr auto;
     grid-template-rows: auto 1fr;
     grid-template-areas:
-      "activity title"
-      "activity description";
+      "title activity"
+      "description activity";
     gap: .5rem;
   }
 
   & .memex-logo {
     grid-area: activity;
     aspect-ratio: 1;
-    display: grid;
-    place-content: center;
+    place-self: start;
     width: 3rem;
-    border-radius: 100%;
+    border-radius: 4px;
     overflow: hidden;
   }
 
@@ -1325,6 +1368,17 @@ function editBanner(context) {
 
 export const creationForms = {
   [eventTypes.note]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
+    `
+  },
+  [eventTypes.richtext]: function(draft) {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
@@ -1790,6 +1844,12 @@ const studios = {
       >${escapeHyperText(draft.text)}</textarea>
     `
   },
+  [eventTypes.richtext]: function(draft) {
+    return `
+      <rich-text id="${draft.id}"></rich-text>
+    `
+  },
+
   [eventTypes.memo]: function(draft) {
     let src = draft.src
     if(!src) {
@@ -2085,6 +2145,10 @@ const viewRenderers = {
       </button>
     ` : ''
 
+
+    const shareLink = `${window.location.origin}/app/time-machine?data=${encoded}`
+    const copyId = self.crypto.randomUUID()
+
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -2096,6 +2160,15 @@ const viewRenderers = {
                 </button>
               </div>
 
+              <div class="action-area">
+                <div class="action-bar">
+                  <button data-copy="${copyId}" class="standard-button -round -large">
+                    <sl-icon name="copy"></sl-icon>
+                  </button>
+                </div>
+                <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
+              </div>
+
               <div style="display: grid; place-content: end">
                 <button data-root class="standard-button bias-generic -small -round" type="reset">
                   <sl-icon name="x-lg"></sl-icon>
@@ -2103,11 +2176,10 @@ const viewRenderers = {
               </div>
             </div>
 
-
             <div class="memex-body draft-body">
               <div class="overlay-background">
                 <div style="padding: 51px; height: 100%; display: flex;">
-                  <qr-code src="${window.location.origin}/app/time-machine?data=${encoded}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+                  <qr-code src="${shareLink}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
                 </div>
               </div>
             </div>
@@ -2305,6 +2377,11 @@ const viewRenderers = {
                 </div>
                 <!--
                 <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.richtext}">Document</button>
+                </div>
+                -->
+                <!--
+                <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.memo}">Memo</button>
                 </div>
                 -->
@@ -2431,6 +2508,23 @@ const viewRenderers = {
       <div class="textarea">${escapeHyperText(x.text)}</div>
     `)
   },
+  [views.richtext]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.richtext],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <rich-text id="${x.id}"></rich-text>
+    `)
+  },
+
   [views.memo]: (target) => {
     const { space, time } = target.dataset
 
@@ -3164,6 +3258,10 @@ const eventTypeObjectClass = {
     label: 'Note',
     icon: '<sl-icon name="input-cursor-text"></sl-icon>',
   },
+  [eventTypes.richtext]: {
+    label: 'Document',
+    icon: '<sl-icon name="file-earmark-richtext"></sl-icon>',
+  },
   [eventTypes.memo]: {
     label: 'Memo',
     icon: '<sl-icon name="paperclip"></sl-icon>',
@@ -3250,6 +3348,22 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.richtext]: function (event) {
+    const data = {
+      ...schemas[views.richtext],
+      ...event.data
+    }
+    const [firstLine='', secondLine=''] = data.text.split('\n')
+    return `
+      <button class="view-event standard-button -small" data-show="${eventTypes.richtext}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="input-cursor-text"></sl-icon>
+        </span>
+        ${data.title}
+      </button>
+    `
+  },
+
   [eventTypes.memo]: function (event) {
     const data = {
       ...schemas[views.memo],
@@ -3523,9 +3637,37 @@ function renderBucket(spaceKey) {
   }).join('')
 }
 
+/*
+ * https://stackoverflow.com/a/36640126
+ */
+function copyToClipboard(target) {
+  if (document.selection) {
+    const range = document.body.createTextRange();
+    range.moveToElementText(target);
+    range.select().createTextRange();
+    document.execCommand("copy");
+    toast("Copied to clipboard")
+  } else if (window.getSelection) {
+    const range = document.createRange();
+    range.selectNode(target);
+    window.getSelection().addRange(range);
+    document.execCommand("copy");
+    toast("Copied to clipboard")
+  }
+  window.getSelection().removeAllRanges()
+}
+
+$.when('click', '[data-copy]', (event) => {
+  const { copy } = event.target.dataset
+  const targetToCopy = event.target.closest($.link).querySelector(`[id="${copy}"]`)
+  copyToClipboard(targetToCopy)
+})
+
+
 $.when('click', '[data-root]', (event) => {
   $.teach({ view: views.home, searchQuery: '', suggestions: [] })
 })
+
 
 
 $.when('click', '[data-toggle-filters]', (event) => {
@@ -3714,6 +3856,7 @@ function currentPersona() {
 
 const saveHandlers = {
   [eventTypes.note]: save,
+  [eventTypes.richtext]: save,
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
