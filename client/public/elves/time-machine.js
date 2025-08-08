@@ -776,6 +776,10 @@ $.style(`
     display: block;
   }
 
+  &[data-show-metadata="true"] .action-area {
+    display: none;
+  }
+
   & .draft-footer {
     display: grid;
     grid-area: footer;
@@ -1149,6 +1153,8 @@ $.style(`
     text-align: left;
     color: rgba(0,0,0,.85);
     font-weight: bold;
+    overflow: hidden;
+    max-width: 100%;
   }
 
   & .memex-description {
@@ -1163,7 +1169,8 @@ $.style(`
     --v-font-crsv: 1;
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive";
-
+    overflow: hidden;
+    max-width: 100%;
   }
 `)
 
@@ -2149,6 +2156,17 @@ const viewRenderers = {
     const shareLink = `${window.location.origin}/app/time-machine?data=${encoded}`
     const copyId = self.crypto.randomUUID()
 
+    const actionArea = memexExists ? `
+      <div class="action-area">
+        <div class="action-bar">
+          <button data-copy="${copyId}" class="standard-button -round -large">
+            <sl-icon name="copy"></sl-icon>
+          </button>
+        </div>
+        <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
+      </div>
+    ` : ''
+
     return `
       <div class="overlay-background">
         <div class="form-card">
@@ -2159,16 +2177,7 @@ const viewRenderers = {
                   <sl-icon name="gear-fill"></sl-icon>
                 </button>
               </div>
-
-              <div class="action-area">
-                <div class="action-bar">
-                  <button data-copy="${copyId}" class="standard-button -round -large">
-                    <sl-icon name="copy"></sl-icon>
-                  </button>
-                </div>
-                <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
-              </div>
-
+              ${actionArea}
               <div style="display: grid; place-content: end">
                 <button data-root class="standard-button bias-generic -small -round" type="reset">
                   <sl-icon name="x-lg"></sl-icon>
