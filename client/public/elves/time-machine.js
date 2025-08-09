@@ -97,7 +97,7 @@ export const eventTypes = {
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
-  desktop: 'desktop',
+  bulletin: 'bulletin',
   world: 'world',
   character: 'character',
   gallery: 'gallery',
@@ -131,7 +131,7 @@ export const views = {
   [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
-  [eventTypes.desktop]: eventTypes.desktop,
+  [eventTypes.bulletin]: eventTypes.bulletin,
   [eventTypes.world]: eventTypes.world,
   [eventTypes.character]: eventTypes.character,
   [eventTypes.gallery]: eventTypes.gallery,
@@ -242,9 +242,9 @@ export const schemas = {
     strokeHistory: [],
     strokeRevisory: [],
   },
-  [eventTypes.desktop]: {
-    type: eventTypes.desktop,
-    title: 'Desktop',
+  [eventTypes.bulletin]: {
+    type: eventTypes.bulletin,
+    title: 'Bulletin',
     strokeHistory: [],
     strokeRevisory: [],
   },
@@ -706,6 +706,10 @@ $.style(`
     position: relative;
   }
 
+  & .note-margin {
+    padding: 1rem;
+  }
+
   & .child-well .textarea,
   & .text-well .textarea {
     padding: 1rem;
@@ -717,7 +721,6 @@ $.style(`
     display: block;
     background: white;
     height: 100%;
-    margin-top: 1rem;
   }
 
   & .child-well .full-textarea {
@@ -731,8 +734,6 @@ $.style(`
     max-width: 7.5in;
     margin: auto;
     display: block;
-    background: white;
-    margin-top: 1rem;
   }
 
   & .text-well .edit-banner:empty + textarea {
@@ -1440,7 +1441,7 @@ export const creationForms = {
       </div>
     `
   },
-  [eventTypes.desktop]: function(draft) {
+  [eventTypes.bulletin]: function(draft) {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
@@ -1843,12 +1844,14 @@ function renderCreationFormByType(draft) {
 const studios = {
   [eventTypes.note]: function(draft) {
     return `
-      <textarea
-        class="full-textarea"
-        name="text"
-        data-bind="draft"
-        placeholder="Today, I ..."
-      >${escapeHyperText(draft.text)}</textarea>
+      <div class="note-margin">
+        <textarea
+          class="full-textarea standard-input"
+          name="text"
+          data-bind="draft"
+          placeholder="Today, I ..."
+        >${escapeHyperText(draft.text)}</textarea>
+      </div>
     `
   },
   [eventTypes.richtext]: function(draft) {
@@ -1884,7 +1887,7 @@ const studios = {
     `
   },
 
-  [eventTypes.desktop]: function(draft) {
+  [eventTypes.bulletin]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
       <bulletin-board id="${draft.id}" ${src}></bulletin-board>
@@ -2416,7 +2419,7 @@ const viewRenderers = {
                 </div>
                 -->
                 <div class="dropdown-item">
-                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.desktop}">Desktop</button>
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
                 </div>
                 <!--
                 <div class="dropdown-item">
@@ -2514,7 +2517,9 @@ const viewRenderers = {
     }
 
     return viewTemplate(x, `
-      <div class="textarea">${escapeHyperText(x.text)}</div>
+      <div class="note-margin">
+        <div class="textarea">${escapeHyperText(x.text)}</div>
+      </div>
     `)
   },
   [views.richtext]: (target) => {
@@ -2585,13 +2590,13 @@ const viewRenderers = {
     `)
   },
 
-  [views.desktop]: (target) => {
+  [views.bulletin]: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.desktop],
+      ...schemas[views.bulletin],
       ...event.data,
       space,
       time
@@ -3303,8 +3308,8 @@ const eventTypeObjectClass = {
     label: 'Character',
     icon: '<sl-icon name="person-walking"></sl-icon>',
   },
-  [eventTypes.desktop]: {
-    label: 'Desktop',
+  [eventTypes.bulletin]: {
+    label: 'Bulletin',
     icon: '<sl-icon name="copy"></sl-icon>',
   },
   [eventTypes.sketch]: {
@@ -3493,14 +3498,14 @@ const eventRenderers = {
     `
   },
 
-  [eventTypes.desktop]: function (event) {
+  [eventTypes.bulletin]: function (event) {
     const data = {
-      ...schemas[views.desktop],
+      ...schemas[views.bulletin],
       ...event.data
     }
 
     return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.desktop}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+      <button class="view-event standard-button -small" data-show="${eventTypes.bulletin}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
         <span>
           <sl-icon name="copy"></sl-icon>
         </span>
@@ -3674,7 +3679,7 @@ $.when('click', '[data-copy]', (event) => {
 
 
 $.when('click', '[data-root]', (event) => {
-  $.teach({ view: views.home, searchQuery: '', suggestions: [] })
+  $.teach({ view: views.home, searchQuery: '', showFilters: false, suggestions: [] })
 })
 
 
@@ -3785,12 +3790,12 @@ export async function saveCharacter(draft, context) {
   }, context)
 }
 
-export async function saveDesktop(draft, context) {
+export async function saveBulletin(draft, context) {
   return await save({
     title: 'Untitled',
     ...timeFields(),
     ...draft,
-    type: eventTypes.desktop,
+    type: eventTypes.bulletin,
   }, context)
 }
 
@@ -3871,7 +3876,7 @@ const saveHandlers = {
   [eventTypes.instrument]: save,
   [eventTypes.world]: saveWorld,
   [eventTypes.character]: saveCharacter,
-  [eventTypes.desktop]: saveDesktop,
+  [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,
   [eventTypes.gallery]: save,
   [eventTypes.image]: savePhoto,
@@ -4072,7 +4077,7 @@ $.when('click', '[data-quit]', (event) => {
 })
 
 $.when('click', '[data-cancel-draft]', () => {
-  $.teach({ view: views.events, context: null, viewMetadata: false })
+  $.teach({ view: views.events, context: null, showFilters: false, viewMetadata: false })
 })
 
 $.when('click', '[data-cancel-type-picker]', () => {
@@ -4081,7 +4086,7 @@ $.when('click', '[data-cancel-type-picker]', () => {
 
 
 $.when('click', '[data-close-draft]', () => {
-  $.teach({ view: views.events, context: null, viewMetadata: false })
+  $.teach({ view: views.events, context: null, showFilters: false, viewMetadata: false })
 })
 
 $.when('click', '[data-home]', () => {

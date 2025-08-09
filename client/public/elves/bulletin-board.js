@@ -385,7 +385,7 @@ function mount(target) {
 
   canvas.width = 5000;
   canvas.height = 5000;
-  canvas.style=`background-image: ${stars}, linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5));`
+  canvas.style=`background-image: ${stars};`
 
   target.querySelector('.workspace').appendChild(canvas)
 }
@@ -702,7 +702,7 @@ $.style(`
   }
 
   & .stars {
-    background-color: dodgerblue;
+    background-color: white;
   }
 
   & .toolbelt-grabber,

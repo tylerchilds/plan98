@@ -10,6 +10,7 @@ translate.url = plan98.env.LIBRE_TRANSLATE_URL + '/translate'
 
 const tag = 'audio-notes'
 const $ = elf(tag, {
+  recording: false,
   caption: '',
   translated: '',
   to: 'es',
@@ -166,15 +167,19 @@ $.style(`
   }
 
   & .lingustics {
-    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,0));
     font-size: 1.5rem;
     padding: .5rem;
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    bottom: 4rem;
+    left: 2rem;
+    right: 2rem;
     color: white;
     text-shadow: 1px 1px black;
+  }
+
+  & .partial {
+    display: inline-block;
+    background: black;
   }
 
   & audio {
@@ -186,7 +191,6 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(0,0,0,.5);
     z-index: 5;
     padding: .5rem;
     display: grid;
@@ -257,7 +261,6 @@ class AudioNotes extends HTMLElement {
         <div class="viewport">
           <div class="lingustics">
             <div class="partial"></div>
-            <div class="result"></div>
             <div class="translate"></div>
           </div>
           <audio playsinline controls="true"></audio>
@@ -327,17 +330,30 @@ class AudioNotes extends HTMLElement {
     } = $.learn()
 
     const partialContainer = target.querySelector('.partial')
-    const resultContainer = target.querySelector('.result')
     const translateContainer = target.querySelector('.translate')
     const actionContainer = target.querySelector('[data-primary-action]')
 
     innerHTML(partialContainer, partial)
-    innerHTML(resultContainer, result)
     innerHTML(translateContainer, translated)
-    innerHTML(actionContainer, recording
-      ? '<div2><button data-stop class="standard-button">Stop</button></div2>'
-      : '<div3><button data-record class="standard-button">Record</button></div3>'
-    )
+    if(recording !== target.lastRecording) {
+      target.lastRecording = recording
+        innerHTML(actionContainer, recording
+          ? `
+            <div2>
+              <button data-stop class="standard-button bias-negative -large -round">
+                <sl-icon name="stop-circle-fill"></sl-icon>
+              </button>
+            </div2>
+          `
+          : `
+            <div3>
+              <button data-record class="standard-button -large -round">
+                <sl-icon name="record-circle-fill"></sl-icon>
+              </button>
+            </div3>
+          `
+        )
+    }
   }
 }
 

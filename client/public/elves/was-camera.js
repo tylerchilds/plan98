@@ -6,6 +6,13 @@ import { get, put } from './plan98-wallet.js'
 const tag = 'was-camera'
 const $ = elf(tag)
 
+$.when('click', '[data-recycle]', async (event) => {
+  const root = event.target.closest($.link)
+  root.dataset.mode = null
+  const image = root.querySelector('img')
+  image.src = null
+})
+
 $.when('click', '[data-snap]', async (event) => {
   try {
     const root = event.target.closest($.link)
@@ -35,8 +42,15 @@ $.when('click', '[data-snap]', async (event) => {
 
     const src = root.getAttribute('src') || `/private/camera-roll/${timestamp}.jpg`
 
+    root.dataset.mode = 'preview'
+
+    const type = { type: 'image/jpeg' }
+    const data = new Blob([byteArray], type);
+    const image = root.querySelector('img')
+    image.src = URL.createObjectURL(data);
+
     // Attempt to upload to server
-    put(src, byteArray, { type: 'image/jpeg' }).then(res => {
+    put(src, byteArray, type).then(res => {
       if(res.ok) {
         updateDraft({ src })
       } else {
@@ -68,11 +82,27 @@ $.style(`
     height: 100%;
   }
 
+  & img {
+    display: none;
+  }
+
+  &[data-mode="preview"] [data-recycle],
+  &[data-mode="preview"] img {
+    display: block;
+  }
+
+  & [data-recycle],
+  &[data-mode="preview"] [data-snap],
+  &[data-mode="preview"] video {
+    display: none;
+  }
+
   & .viewport {
     position: absolute;
     inset: 0;
   }
 
+  & img,
   & video {
     height: 100%;
     width: 100%;
@@ -154,13 +184,18 @@ class WasCamera extends HTMLElement {
             <button data-snap class="standard-button -large -round">
               <sl-icon name="camera-fill"></sl-icon>
             </button>
+
+            <button data-recycle class="standard-button -large -round">
+              <sl-icon name="recycle"></sl-icon>
+            </button>
           </div>
           <div class="right">
           </div>
         </div>
 
         <div class="viewport">
-          <video playsinline></video>
+          <video playsinline disablePictureInPicture></video>
+          <img>
           <div class="partial"></div>
           <div class="result"></div>
           <div class="translate"></div>
