@@ -107,6 +107,7 @@ export const eventTypes = {
   archive: 'archive',
   agent: 'agent',
   product: 'product',
+  zipfile: 'zipfile',
   keycard: 'keycard',
   sheet: 'sheet',
   dwebcamp: 'dwebcamp'
@@ -126,6 +127,7 @@ export const views = {
   [eventTypes.richtext]: eventTypes.richtext,
   [eventTypes.tommi]: eventTypes.tommi,
   [eventTypes.product]: eventTypes.product,
+  [eventTypes.zipfile]: eventTypes.zipfile,
   [eventTypes.keycard]: eventTypes.keycard,
   [eventTypes.agent]: eventTypes.agent,
   [eventTypes.sheet]: eventTypes.sheet,
@@ -188,6 +190,13 @@ export const schemas = {
     title: 'Product',
     description: null,
     transcription: '',
+    tags: [],
+  },
+  [eventTypes.zipfile]: {
+    type: eventTypes.zipfile,
+    url: null,
+    title: 'Zipfile',
+    description: null,
     tags: [],
   },
   [eventTypes.keycard]: {
@@ -1548,6 +1557,39 @@ export const creationForms = {
     `
   },
 
+  [eventTypes.zipfile]: function(draft) {
+
+    const x = {
+      ...schemas[views.zipfile],
+      ...draft,
+    }
+
+    return `
+      ${editBanner(this)}
+      <div class="metadata-form">
+        <div style="display: grid; gap: 1rem; grid-template-columns: 1fr 1fr;">
+          <label class="field">
+            <span class="label">URL</span>
+            <input data-bind="draft" name="url" value="${escapeHyperText(x.url)}" type="text"/>
+          </label>
+        </div>
+
+        ${x.tags?.map(x => {
+          return `
+            <button class="standard-button" data-tag="${x}">
+              ${x}
+            </button>
+          `
+        }).join('')}
+
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
+    `
+  },
+
   [eventTypes.product]: function(draft) {
 
     const x = {
@@ -1925,6 +1967,17 @@ const studios = {
     }
     return `
       <plan98-wallet id="${draft.id}"></plan98-wallet>
+    `
+  },
+
+  [eventTypes.zipfile]: function(draft) {
+
+    const x = {
+      ...schemas[views.zipfile],
+      ...draft,
+    }
+    return `
+      <zip-file></zip-file>
     `
   },
 
@@ -2419,23 +2472,20 @@ const viewRenderers = {
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
                 </div>
                 <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.zipfile}">Zipfile</button>
+                </div>
+                <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.product}">Product</button>
                 </div>
-                <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
                 </div>
-                -->
-                <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.character}">Character</button>
                 </div>
-                -->
-                <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.world}">World</button>
                 </div>
-                -->
               </div>
             </div>
             <div class="draft-footer">
@@ -2709,6 +2759,52 @@ const viewRenderers = {
               Download
             </button>
           `:''}
+        </div>
+      </div>
+    `)
+  },
+
+  [views.zipfile]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+    const x = {
+      ...schemas[views.zipfile],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <div class="product">
+        <div class="product-title">
+          <a href="${x.url || ''}" class="tommi-url">${x.title || x.url}</a>
+        </div>
+        <div class="attachments">
+          ${x.attachments?.map(x => {
+            return `
+              ${x.name}
+              ${x.type}
+              ${x.size}
+            `
+          }).join('')}
+          ${x.attachments?.length > 0 ? `
+            <button data-download-attachments data-space="${space}" data-time="${time}">
+              Download
+            </button>
+          `:''}
+        </div>
+        <div class="product-description">
+          ${x.description || ''}
+        </div>
+        <div class="tags">
+          ${x.tags?.map(x => {
+            return `
+              <button class="standard-button" data-tag="${x}">
+                ${x}
+              </button>
+            `
+          }).join('')}
         </div>
       </div>
     `)
@@ -3289,6 +3385,10 @@ const eventTypeObjectClass = {
     label: 'Keycard',
     icon: '<sl-icon name="person-badge"></sl-icon>',
   },
+  [eventTypes.zipfile]: {
+    label: 'Zipfile',
+    icon: '<sl-icon name="file-zip"></sl-icon>',
+  },
   [eventTypes.product]: {
     label: 'Product',
     icon: '<sl-icon name="box2-heart"></sl-icon>',
@@ -3412,6 +3512,22 @@ const eventRenderers = {
       </button>
     `
   },
+  [eventTypes.zipfile]: function (event) {
+    const data = {
+      ...schemas[views.zipfile],
+      ...event.data
+    }
+    return `
+      <button class="view-event standard-button -small" data-show="${eventTypes.zipfile}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
+        <span>
+          <sl-icon name="file-zip"></sl-icon>
+        </span>
+        ${data.title}
+      </button>
+    `
+  },
+
+
   [eventTypes.product]: function (event) {
     const data = {
       ...schemas[views.product],
@@ -3744,6 +3860,15 @@ export async function saveKeycard(draft, context) {
   }, context)
 }
 
+export async function saveZipfile(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.zipfile,
+  }, context)
+}
+
 export async function saveProduct(draft, context) {
   return await save({
     title: 'Untitled',
@@ -3889,6 +4014,7 @@ const saveHandlers = {
   [eventTypes.video]: saveVideo,
   [eventTypes.archive]: save,
   [eventTypes.keycard]: saveKeycard,
+  [eventTypes.zipfile]: saveZipfile,
   [eventTypes.product]: saveProduct,
   [eventTypes.agent]: saveAgent,
   [eventTypes.dwebcamp]: save,

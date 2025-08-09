@@ -128,7 +128,7 @@ $.draw((target) => {
   const { art } = { art: 'sillyz.computer' }
 	if(!mount(target)) return
 
-  if(ready) {
+  if(ready && target.map) {
     if(target.marker) {
       target.map.removeLayer(target.marker)
     }
