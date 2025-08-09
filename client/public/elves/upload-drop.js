@@ -1,98 +1,10 @@
 import elf, { subscribe } from '@silly/elf'
 import $zipFile, { formatBytes, updateDraft, wizardSuccess, wizardError } from './zip-file.js'
 import { getKeycard, getSigner, getStorage } from './plan98-wallet.js'
-import { creationForms, eventTypes } from './time-machine.js'
-import { replaceElves } from './paper-pocket.js'
 
-const views = {
-  first: 'first',
-  second: 'second'
-}
 const $ = elf('upload-drop', {
-  view: views.first,
   attachments: []
 })
-
-const viewRenderers = {
-  [views.first]: (target) => {
-    const keycard = getKeycard()
-    const { draft } = $.learn()
-    return `
-      <div>
-        <plan98-icon></plan98-icon>
-      </div>
-      <div class="view-title">
-        Make Money
-      </div>
-      <div class="view-description">
-        Upload your digital product to your store using your ${keycard.name} keycard. Your customers purchase securely and directly from your store.
-      </div>
-
-      <div class="file-region">
-        <div>
-          Drag and Drop
-        </div>
-        <div class="small-text">
-          or
-        </div>
-        <button class="click-proxy standard-button bias-generic">Browse Files</button>
-        <input type="file" name="files" multiple style="display: none;">
-
-        <div class="file-list">
-          ${draft && draft.attachments ? draft.attachments.map(x => {
-            return `
-              <div class="table">
-                <div class="table-row">
-                  <div class="table-cell">
-                    ${x.name}
-                  </div>
-                  <div class="table-cell">
-                    ${formatBytes(x.size)}
-                  </div>
-                </div>
-              </div>
-            `
-          }).join('') : ''}
-        </div>
-      </div>
-
-      <button data-submit="${views.first}" class="standard-button -large bias-positive">
-        Continue
-      </button>
-
-      <div style="text-align: center">
-        <a href="/app/plan98-wallet">
-          Wrong Keycard? Go to wallet.
-        </a>
-      </div>
-    `
-  },
-  [views.second]: (target) => {
-    const { draft } = $.learn()
-    return `
-      <div>
-        <plan98-icon></plan98-icon>
-      </div>
-      <div class="view-title">
-        Make Money
-      </div>
-      <div class="view-description">
-        Describe your product and then press "Go to Market" to ship to production.
-      </div>
-
-      <div>
-        ${creationForms[eventTypes.product].call(null, draft)}
-      </div>
-
-      <button class="standard-button bias-positive -large" data-submit="${views.second}">
-        Go to Market
-      </button>
-    `
-
-  }
-}
-
-
 
 let STAGED_FILES = {}
 
@@ -114,8 +26,9 @@ function handleFiles(files) {
   })
 
   $.teach({ attachments: fileMeta })
-}
 
+  startProductUpload()
+}
 
 function startProductUpload() {
   const { draft } = $.learn()
@@ -134,6 +47,9 @@ function startProductUpload() {
       if(draft.attachments) {
         [...draft.attachments].map(queueUpload.bind(context))
       }
+
+      const root = event.target.closest($.link)
+      wizardSuccess(root)
     })
   }
 }
@@ -157,37 +73,6 @@ function queueUpload(attachment) {
 
 }
 
-const viewValidators = {
-  [views.first]: (state, target) => {
-    const errors = []
-    console.log(state)
-    startProductUpload()
-    $.teach({ view: views.second })
-    return errors.length > 0 ? errors : null
-  },
-  [views.second]: (state, target) => {
-    const errors = []
-
-    if(errors.length === 0) {
-      wizardSuccess(target)
-    } else {
-      wizardError(target)
-    }
-
-    return errors.length > 0 ? errors : null
-  }
-}
-
-
-
-$.when('click', '[data-submit]', (event) => {
-  const { submit } = event.target.dataset
-  if(viewValidators[submit]) {
-    const root = event.target.closest($.link)
-    viewValidators[submit]($.learn(), root)
-  }
-})
-
 subscribe((link) => {
   if(link === $zipFile.link) {
     const { draft } = $zipFile.learn()
@@ -196,18 +81,43 @@ subscribe((link) => {
 })
 
 $.draw((target) => {
-  const { view } = $.learn()
-  const html = viewRenderers[view] ? viewRenderers[view](target) : ''
-  return html
+  const { draft } = $.learn()
+  return `
+    <div class="file-region">
+      <div>
+        Drag and Drop
+      </div>
+      <div class="small-text">
+        or
+      </div>
+      <button class="click-proxy standard-button bias-generic">Browse Files</button>
+      <input type="file" name="files" multiple style="display: none;">
+
+      <div class="file-list">
+        ${draft && draft.attachments ? draft.attachments.map(x => {
+          return `
+            <div class="table">
+              <div class="table-row">
+                <div class="table-cell">
+                  ${x.name}
+                </div>
+                <div class="table-cell">
+                  ${formatBytes(x.size)}
+                </div>
+              </div>
+            </div>
+          `
+        }).join('') : ''}
+      </div>
+    </div>
+  `
 }, {
   beforeUpdate(target) {
     if(!target.mounted) {
       target.mounted = true
-      $.teach({ view: views.first })
     }
   },
   afterUpdate(target) {
-    replaceElves(target, 'plan98-icon')
   }
 })
 
@@ -283,4 +193,3 @@ $.when('drop', '.file-region', (event) => {
 $.when('change', '[name="files"]', (event) => {
   handleFiles(event.target.files);
 });
-
