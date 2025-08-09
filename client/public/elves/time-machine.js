@@ -708,6 +708,7 @@ $.style(`
 
   & .note-margin {
     padding: 1rem;
+    height: 100%;
   }
 
   & .child-well .textarea,
@@ -2387,6 +2388,9 @@ const viewRenderers = {
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.note}">Note</button>
                 </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.image}">Camera</button>
+                </div>
                 <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.richtext}">Document</button>
@@ -2402,9 +2406,6 @@ const viewRenderers = {
                 </div>
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
-                </div>
-                <div class="dropdown-item">
-                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.image}">Photo</button>
                 </div>
                 <div class="dropdown-item">
                   <!--<button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
