@@ -972,6 +972,7 @@ $.style(`
     position: relative;
     display: grid;
     place-items: center;
+    display: none;
   }
 
   & .types-list {
@@ -2414,14 +2415,17 @@ const viewRenderers = {
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.agent}">Agent</button>
                 </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
+                </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.product}">Product</button>
+                </div>
                 <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
                 </div>
                 -->
-                <div class="dropdown-item">
-                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.bulletin}">Bulletin</button>
-                </div>
                 <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.character}">Character</button>

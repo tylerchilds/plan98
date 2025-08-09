@@ -528,19 +528,22 @@ $.style(`
   }
   & .message {
     overflow: auto;
-    border-radius: 1rem;
     margin-right: 2rem;
-    padding: 0 1rem;
     position: relative;
     white-space: pre-wrap;
     overflow-wrap: break-word;
     word-wrap: break-word;
   }
 
+  & .message p {
+    margin: 0;
+  }
+
   & .message.-user {
     margin: 0 0 0 3rem;
-    background: rgba(0,0,0,.85);
-    color: white;
+    background: rgba(0,0,0,.1);
+    padding: 4px .5rem;
+    border-radius: 5px;
   }
 
   & .send-form {

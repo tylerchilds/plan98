@@ -361,6 +361,7 @@ function template() {
         }
       }
 
+/*
       :not(:defined) {
         position: relative;
         display: block;
@@ -379,6 +380,7 @@ function template() {
         mix-blend-mode: multiply;
         margin: auto;
       }
+*/
 
       html, body {
         height: 100%;

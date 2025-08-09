@@ -47,8 +47,8 @@ const viewRenderers = {
         Shop
       </div>
       <div class="button-container">
-        <button data-view="${views.buy}" class="standard-button -large bias-link">Buy</button>
-        <button data-view="${views.sell}" class="standard-button -large bias-positive">Sell</button>
+        <button data-swap="${views.buy}" class="standard-button -large bias-link">Buy</button>
+        <button data-swap="${views.sell}" class="standard-button -large bias-positive">Sell</button>
       </div>
       `
   },
@@ -103,7 +103,7 @@ const viewRenderers = {
     const { products } = $.learn()
     return `
       <div class="section">
-        <button data-view="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
+        <button data-swap="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
         <div class="admin-title">
           My Products
         </div>
@@ -125,7 +125,7 @@ const viewRenderers = {
                 <div class="table-row">
                   <div class="table-id">
                     <div style="display: inline-grid; place-content: center;">
-                      <button class="standard-button -smol bias-link" data-view="${views.product}" data-id="${id}">
+                      <button class="standard-button -smol bias-link" data-swap="${views.product}" data-id="${id}">
                         ${id ? id.split('-')[0] : '????'}
                       </button>
                     </div>
@@ -191,8 +191,8 @@ $.draw((target)=> {
           <plan98-icon style="height: 1.5rem; width: 1.5rem;"></plan98-icon>
         </button>
         <div></div>
-        <button data-view="${views.buy}" class="standard-button -smol bias-link">Buy</button>
-        <button data-view="${views.sell}" class="standard-button -smol bias-positive">Sell</button>
+        <button data-swap="${views.buy}" class="standard-button -smol bias-link">Buy</button>
+        <button data-swap="${views.wizard}" class="standard-button -smol bias-positive">Sell</button>
       </div>
 
       <div class="chat-sidebar">
@@ -221,7 +221,7 @@ $.draw((target)=> {
     const view = target.getAttribute('view')
     if(!target.initialized) {
       target.initialized = true
-      let data = { view: views.welcome }
+      let data = { view: views.wizard }
       if(view) {
         data = { view, src }
       }
@@ -379,10 +379,11 @@ $.when('click', '.more-item', (event) => {
   event.stopImmediatePropagation()
 })
 
-$.when('click', '[data-view]', (event) => {
+$.when('click', '[data-swap]', (event) => {
   event.preventDefault()
   const { sidebar } = $.learn()
-  const { view } = event.target.dataset
+  const { swap } = event.target.dataset
+  const view = swap
 
   let data = { sidebar, view }
 
@@ -508,6 +509,7 @@ $.style(`
     z-index: 27;
     position: relative;
     left: 1.25rem;
+    display: none;
   }
 
   & .more-item {
@@ -1080,7 +1082,7 @@ $.style(`
     font-weight: 600;
   }
 
-  &[data-view="${views.welcome}"] [data-dom="nav"] {
+  &[data-swap="${views.welcome}"] [data-dom="nav"] {
     display: none;
   }
 

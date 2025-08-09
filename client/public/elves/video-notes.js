@@ -45,7 +45,7 @@ try {
 }
 
 let mediaRecorder;
-let audioChunks = [];
+let videoChunks = [];
 
 const extensions = {
   'video/mp4;codecs=avc1': 'mp4',
@@ -79,19 +79,19 @@ $.when('click', '[data-record]', async (event) => {
     // Event handler for when data is available
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
-        audioChunks.push(event.data);
+        videoChunks.push(event.data);
       }
     };
 
     // Event handler for when recording stops
     mediaRecorder.onstop = () => {
       // Combine all audio chunks into a single Blob
-      const videoBlob = new Blob(audioChunks, { type: supportedVideoType });
-      audioChunks = []; // Clear chunks for next recording
+      const videoBlob = new Blob(videoChunks, { type: supportedVideoType });
+      videoChunks = []; // Clear chunks for next recording
 
       // Create a URL for the Blob and set it as the audio source
-      const audioUrl = URL.createObjectURL(videoBlob);
-      recordedVideo.src = audioUrl;
+      const videoUrl = URL.createObjectURL(videoBlob);
+      recordedVideo.src = videoUrl;
 
       // Play the recorded audio
       recordedVideo.play()
@@ -100,7 +100,7 @@ $.when('click', '[data-record]', async (event) => {
       // Clean up the object URL after the audio is loaded (optional, but good practice)
       // For longer audio, you might do this on audio.onended
       recordedVideo.onloadedmetadata = () => {
-        URL.revokeObjectURL(audioUrl); // Revoke after metadata is loaded
+        URL.revokeObjectURL(videoUrl); // Revoke after metadata is loaded
       };
 
       // Stop the microphone stream
