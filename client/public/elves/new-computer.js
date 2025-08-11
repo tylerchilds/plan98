@@ -99,7 +99,7 @@ ${background ? `--background: ${background};` : ``} ${color ? `--color: ${color}
       const { x, y, width, height, top, right, bottom, left } = cursor.getBoundingClientRect()
       cursor.innerHTML = `
       <div class="prose">
-        This cursor is ${width} pixels wide and ${height} high. By multiplying them together, we know the area is ${width * height}px. By adding them together, twice, we can calculate the perimeter as ${ width + height + width + height}px.<br><br>Do you think you can calculate the negative space outside the cursor but still on the screen?<br><br>The additional information we have are the inset coordinates.<br><br>top: ${top}<br>left: ${left}<br>right: ${right}<br>bottom: ${bottom}<br>
+        This cursor is ${width} pixels wide and ${height} high. By multiplying them together, we know the area is ${width * height}px. By adding them together, twice, we can calculate the perimeter as ${ width + height + width + height}px.<br><br>Do you think you can calculate the negative space outside the cursor but still on the screen?<br><br>The additional information we have are the inset coordinates.<br><br>top: ${top}<br>left: ${left}<br>right: ${right}<br>bottom: ${bottom}<br><br>The canvas area is ${rectangle.width * rectangle.height}px.
       </div>
       `
     }
