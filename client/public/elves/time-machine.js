@@ -92,6 +92,7 @@ const nextWeek = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
 
 export const eventTypes = {
   note: 'note',
+  saga: 'saga',
   richtext: 'richtext',
   memo: 'memo',
   tommi: 'tommi',
@@ -123,6 +124,7 @@ export const views = {
   emergency: 'emergency',
   thinking: 'thinking',
   [eventTypes.note]: eventTypes.note,
+  [eventTypes.saga]: eventTypes.saga,
   [eventTypes.memo]: eventTypes.memo,
   [eventTypes.richtext]: eventTypes.richtext,
   [eventTypes.tommi]: eventTypes.tommi,
@@ -260,6 +262,11 @@ export const schemas = {
   [eventTypes.note]: {
     type: eventTypes.note,
     title: 'Note',
+    text: '',
+  },
+  [eventTypes.saga]: {
+    type: eventTypes.saga,
+    title: 'Saga',
     text: '',
   },
   [eventTypes.richtext]: {
@@ -715,6 +722,11 @@ $.style(`
     position: relative;
   }
 
+  & .media-margin,
+  & .media-margin media-plexer {
+    height: 100%;
+  }
+
   & .note-margin {
     padding: 1rem;
     height: 100%;
@@ -975,13 +987,6 @@ $.style(`
     height: 100%;
     padding: .5rem;
     overflow: auto;
-  }
-
-  & .menu-item {
-    position: relative;
-    display: grid;
-    place-items: center;
-    display: none;
   }
 
   & .types-list {
@@ -1397,6 +1402,18 @@ export const creationForms = {
       </div>
     `
   },
+  [eventTypes.saga]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
+    `
+  },
+
   [eventTypes.richtext]: function(draft) {
     return `
       ${editBanner(this)}
@@ -1898,6 +1915,18 @@ const studios = {
       </div>
     `
   },
+  [eventTypes.saga]: function(draft) {
+    let src = draft.src
+    if(!src) {
+      src = `/private/${$.link}/memos/${new Date().toISOString()}.saga`
+      updateDraft({ src })
+    }
+    return `
+      <hyper-script id="${draft.id}" src="${src}"></hyper-script>
+    `
+
+  },
+
   [eventTypes.richtext]: function(draft) {
     return `
       <rich-text id="${draft.id}"></rich-text>
@@ -2486,6 +2515,9 @@ const viewRenderers = {
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.world}">World</button>
                 </div>
+                <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.saga}">Saga</button>
+                </div>
               </div>
             </div>
             <div class="draft-footer">
@@ -2577,6 +2609,25 @@ const viewRenderers = {
       </div>
     `)
   },
+  [views.saga]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.saga],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <div class="media-margin">
+        <media-plexer src="${x.src}"></media-plexer>
+      </div>
+    `)
+  },
+
   [views.richtext]: (target) => {
     const { space, time } = target.dataset
 
@@ -3373,6 +3424,11 @@ const eventTypeObjectClass = {
     label: 'Note',
     icon: '<sl-icon name="input-cursor-text"></sl-icon>',
   },
+[eventTypes.saga]: {
+    label: 'Saga',
+    icon: '<sl-icon name="input-cursor-text"></sl-icon>',
+  },
+
   [eventTypes.richtext]: {
     label: 'Document',
     icon: '<sl-icon name="file-earmark-richtext"></sl-icon>',
@@ -3467,173 +3523,6 @@ const eventRenderers = {
       </button>
     `
   },
-  [eventTypes.richtext]: function (event) {
-    const data = {
-      ...schemas[views.richtext],
-      ...event.data
-    }
-    const [firstLine='', secondLine=''] = data.text.split('\n')
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.richtext}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="input-cursor-text"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-  [eventTypes.memo]: function (event) {
-    const data = {
-      ...schemas[views.memo],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.memo}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="paperclip"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.keycard]: function (event) {
-    const data = {
-      ...schemas[views.keycard],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.keycard}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="person-badge"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.zipfile]: function (event) {
-    const data = {
-      ...schemas[views.zipfile],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.zipfile}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="file-zip"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-
-  [eventTypes.product]: function (event) {
-    const data = {
-      ...schemas[views.product],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.product}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="box2-heart"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-  [eventTypes.sheet]: function (event) {
-    const data = {
-      ...schemas[views.sheet],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.sheet}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="table"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.agent]: function (event) {
-    const data = {
-      ...schemas[views.agent],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.agent}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="robot"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-  [eventTypes.tommi]: function (event) {
-    const data = {
-      ...schemas[views.tommi],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.tommi}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="battery-charging"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.world]: function (event) {
-    const data = {
-      ...schemas[views.world],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.world}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="joystick"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-
-  [eventTypes.character]: function (event) {
-    const data = {
-      ...schemas[views.character],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.character}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="person-walking"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-  [eventTypes.bulletin]: function (event) {
-    const data = {
-      ...schemas[views.bulletin],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.bulletin}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="copy"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
   [eventTypes.sketch]: function (event) {
     const data = {
       ...schemas[views.sketch],
@@ -3661,66 +3550,6 @@ const eventRenderers = {
           <sl-icon name="camera"></sl-icon>
         </span>
         <was-image src="${data.src}" alt="${data.title}"></was-image>
-      </button>
-    `
-  },
-  [eventTypes.audio]: function (event) {
-    const data = {
-      ...schemas[views.audio],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.audio}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="speaker"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.video]: function (event) {
-    const data = {
-      ...schemas[views.video],
-      ...event.data
-    }
-
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.video}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="camera-reels"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-
-
-  [eventTypes.archive]: function (event) {
-    const data = {
-      ...schemas[views.archive],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.archive}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="file-zip"></sl-icon>
-        </span>
-        ${data.title}
-      </button>
-    `
-  },
-  [eventTypes.dwebcamp]: function (event) {
-    const data = {
-      ...schemas[views.dwebcamp],
-      ...event.data
-    }
-    return `
-      <button class="view-event standard-button -small" data-show="${eventTypes.dwebcamp}" data-space="${event.spaceKey}" data-time="${event.timeKey}">
-        <span>
-          <sl-icon name="fire"></sl-icon>
-        </span>
-        ${data.title}
       </button>
     `
   },
@@ -4000,6 +3829,7 @@ function currentPersona() {
 
 const saveHandlers = {
   [eventTypes.note]: save,
+  [eventTypes.saga]: save,
   [eventTypes.richtext]: save,
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
@@ -4419,14 +4249,6 @@ $.when('json-rpc', 'welcome-onboarding', async (event) => {
     await fate()
     $.teach({ ready: true })
   }
-})
-
-$.when('pointerdown', '*', (event) => {
-  if(event.target.closest('.menu-item')) {
-    // child of a menu item
-    return
-  }
-  $.teach({ activeMenu: null })
 })
 
 $.when('click', '[data-os-target]', (event) => {
