@@ -7,12 +7,8 @@ import { innerHTML } from 'diffhtml'
 import JSZip from 'jszip'
 
 const views = {
-  welcome: 'welcome',
   wizard: 'wizard',
-  sell: 'sell',
-  checkout: 'checkout',
-  buy: 'buy',
-  zipfile: 'zipfile',
+  oz: 'oz',
 }
 
 const historyTypes = {
@@ -38,46 +34,22 @@ const $ = elf('zip-file', {
 export default $
 
 const viewRenderers = {
-  [views.welcome]: (target) => {
-    return `
-      <div>
-        <plan98-icon></plan98-icon>
-      </div>
-      <div class="app-title">
-        Shop
-      </div>
-      <div class="button-container">
-        <button data-swap="${views.buy}" class="standard-button -large bias-link">Buy</button>
-        <button data-swap="${views.sell}" class="standard-button -large bias-positive">Sell</button>
-      </div>
-      `
-  },
-  [views.buy]: (target) => {
-    return `
-      All Products
-    `
-  },
   [views.wizard]: (target) => {
     return `
       <upload-drop></upload-drop>
     `
   },
-  [views.zipfile]: (target) => {
-    const { zipfile } = $.learn()
-    if(!zipfile) {
+  [views.oz]: (target) => {
+    const { zipfiles } = $.learn()
+    if(!zipfiles) {
       return `
-        Product not found...
+        Sorry?
       `
     }
-    const { id, title, attachments } = zipfile.data
+
+    const { attachments, id } = zipfiles[0].data
 
     return `
-      <div class="zipfile-id">
-        ${id}
-      </div>
-      <div class="zipfile-title">
-        ${title}
-      </div>
       ${attachments ? attachments.map(x => {
         return `
           <div class="table">
@@ -96,68 +68,6 @@ const viewRenderers = {
       <button data-download-attachments="${id}">
         Download
       </button>
-    `
-  },
-
-  [views.sell]: (target) => {
-    const { zipfiles } = $.learn()
-    return `
-      <div class="section">
-        <button data-swap="${views.wizard}" class="standard-button bias-positive" style="float: right;">New Product</button>
-        <div class="admin-title">
-          My Products
-        </div>
-        <div class="horizontal-scroll-container">
-          <div class="table">
-            <div class="table-row">
-              <div class="table-id">
-                <div>
-                  ID
-                </div>
-              </div>
-              <div class="table-title">
-                Title
-              </div>
-            </div>
-            ${zipfiles.map(x => {
-              const { id, title } = x.data
-              return `
-                <div class="table-row">
-                  <div class="table-id">
-                    <div style="display: inline-grid; place-content: center;">
-                      <button class="standard-button -smol bias-link" data-swap="${views.zipfile}" data-id="${id}">
-                        ${id ? id.split('-')[0] : '????'}
-                      </button>
-                    </div>
-                  </div>
-                  <div class="table-title">
-                    ${title}
-                  </div>
-                </div>
-              `
-            }).join('')}
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="admin-title">
-          My Sales
-        </div>
-        <div class="horizontal-scroll-container">
-          <div class="table">
-          </div>
-        </div>
-      </div>
-      <div class="section">
-        <div class="admin-title">
-          My Purchases
-        </div>
-        <div class="horizontal-scroll-container">
-          <div class="table">
-          </div>
-        </div>
-      </div>
     `
   },
 }
@@ -179,11 +89,6 @@ $.draw((target)=> {
   return `
     <div class="creation-container" data-dom="nav">
       <div data-dom="primary-action"></div>
-      <div class="menu-item">
-        <button class="more-item standard-button">
-          <sl-icon name="list"></sl-icon>
-        </button>
-      </div>
     </div>
     <div data-dom="realm" class="chat-realm">
       <div class="now">
@@ -211,7 +116,7 @@ $.draw((target)=> {
       </div>
       <div data-dom="content" class="content-area"></div>
       <div class="fallback">
-        <world-map></world-map>
+        Sorry?
       </div>
     </div>
   `
@@ -377,34 +282,6 @@ $.when('click', '.more-item', (event) => {
   }
   $.teach(newSidebar)
   event.stopImmediatePropagation()
-})
-
-$.when('click', '[data-swap]', (event) => {
-  event.preventDefault()
-  const { sidebar } = $.learn()
-  const { swap } = event.target.dataset
-  const view = swap
-
-  let data = { sidebar, view }
-
-  if(view === views.wizard) {
-    data = {
-      ...data,
-      draft: newDraft(eventTypes.zipfile)
-    }
-  } else if(view === views.zipfile) {
-    const { zipfiles } = $.learn()
-    const { id } = event.target.dataset
-    const zipfile = zipfiles.find(x => x.data.id === id)
-
-    data = {
-      ...data,
-      zipfile
-    }
-  }
-
-  $.teach(data)
-  saveHistory({ type: historyTypes.view, [historyTypes.view]: data })
 })
 
 $.when('click', '[data-new]', (event) => {
@@ -877,12 +754,6 @@ $.style(`
     overflow: auto;
   }
 
-  & .menu-item {
-    position: relative;
-    display: grid;
-    place-items: center;
-  }
-
   & .dropdown-items {
     display: none;
     background: rgba(0,0,0,1);
@@ -1118,7 +989,7 @@ $.style(`
     background: rgba(0,0,0,.1);
   }
 
-  & buy-sell-child-sell {
+  & buy-sell-child-oz {
     display: block;
     padding: .5rem;
   }
@@ -1129,20 +1000,11 @@ $.style(`
     color: rgba(0,0,0,.65);
   }
 
-  & buy-sell-child-wizard,
-  & buy-sell-child-welcome {
+  & buy-sell-child-wizard {
     display: block;
     max-width: 50ch;
     margin: 0 auto;
     padding: 1rem;
-  }
-
-  & buy-sell-child-welcome {
-    display: grid;
-    gap: 1rem;
-    place-content: center;
-    height: 100%;
-    text-align: center;
   }
 `)
 
@@ -1207,7 +1069,7 @@ $.when('json-rpc', 'upload-drop', async (event) => {
     const { draft } = $.learn()
     await saveZipfile(draft)
     const zipfiles = await getSearchResults(eventTypes.zipfile)
-    $.teach({ view: views.sell, zipfiles })
+    $.teach({ view: views.oz, zipfiles })
   }
 
   if(event.detail.method === 'error') {

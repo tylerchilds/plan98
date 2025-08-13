@@ -112,7 +112,7 @@ function start (e) {
   e.preventDefault()
   const { rectangle } = graphics(e.target)
   let startX, startY, x, y;
-  if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
+  if (e.touches && e.touches[0]) {
     startX = e.touches[0].clientX - rectangle.left
     startY = e.touches[0].clientY - rectangle.top
   } else {
@@ -187,7 +187,7 @@ computer.style(`
     display: block;
     width: 100%;
     height: 100%;
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */

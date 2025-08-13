@@ -707,7 +707,7 @@ $.style(`
 
   & .toolbelt-grabber,
   & canvas {
-    touch-action: manipulation;
+    touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
 		-webkit-user-select: none; /* Safari */
 		-khtml-user-select: none; /* Konqueror HTML */
