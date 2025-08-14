@@ -325,7 +325,7 @@ function template() {
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, viewport-fit=cover" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>&lt;:-)</title>
     <style>
@@ -389,6 +389,11 @@ function template() {
         transform: translateZ(0);
         padding: 0;
         margin: 0;
+      }
+
+      body {
+       padding: env(safe-area-inset-top, 20px) env(safe-area-inset-right, 20px)
+    env(safe-area-inset-bottom, 20px) env(safe-area-inset-left, 20px);
       }
 
       body > *{
