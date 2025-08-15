@@ -33,7 +33,7 @@ $.when('click', '[data-full]', (event) => {
 })
 
 $.when('click', '[data-quit]', (event) => {
-  window.location.href = '/app/sketch-pad'
+  window.location.href = 'https://plan98.org'
 })
 
 $.when('click', '[data-code]', (event) => {
