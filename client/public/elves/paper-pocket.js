@@ -19,6 +19,10 @@ export const systemMenu = {
     label: "Favorites",
     list: [
       {
+        label: 'Plan98:Memex',
+        url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/memex.saga&rom=silly-script'
+      },
+      {
         label: 'Wallet',
         url: '/app/plan98-wallet'
       },
