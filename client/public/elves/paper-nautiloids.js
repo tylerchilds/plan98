@@ -423,6 +423,10 @@ $.style(`
     touch-action: none;
   }
 
+  & .a-enter-vr {
+    display: none !important;
+  }
+
   & .title {
     font-size: 1.5rem;
     font-weight: bold;

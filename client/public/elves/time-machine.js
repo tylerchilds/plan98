@@ -403,6 +403,7 @@ $.style(`
   & .time-feed-nom-nom-nom-nom {
     height: 100%;
     overflow: auto;
+    background: white;
   }
 
   & .edit-banner {
@@ -513,7 +514,8 @@ $.style(`
     height: 100%;
     overflow: hidden;
     display: grid;
-    background: white;
+    background: rgba(255,255,255,.65);
+    backdrop-filter: blur(2px);
     border-bottom: 1px solid rgba(0, 0, 0,.2);
     position: relative;
     z-index: 30; 
@@ -574,6 +576,8 @@ $.style(`
 
   & .content-area {
     overflow: hidden;
+    position: relative;
+    z-index: 10;
   }
 
   & .content-area:empty {
@@ -1011,6 +1015,12 @@ $.style(`
     margin: .25rem 0;
   }
 
+  & the-oasis {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+  }
+
   & .chat-realm {
     display: grid;
     z-index: 10;
@@ -1038,7 +1048,8 @@ $.style(`
 
   & [data-mode="events"] {
     border-right: 1px solid rgba(0, 0, 0,.2);
-    background: white;
+    background: rgba(255,255,255,.65);
+    backdrop-filter: blur(2px);
     position: relative;
     display: grid;
     z-index: 21;
@@ -3227,6 +3238,7 @@ $.draw((target)=> {
   if(target.innerHTML) return
 
   return `
+    <the-oasis></the-oasis>
     <div data-dom="realm" class="chat-realm">
       <div data-dom="content" data-mode="item" class="content-area"></div>
       <div class="fallback">

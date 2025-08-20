@@ -46,7 +46,7 @@ export function setupSaga(nextSaga, target, options={}) {
       schedule(() => {
         root.innerHTML = `
           <div class="wrapper">
-            <img src="/cdn/potluck.org/potluck.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
+            <img src="/public/cdn/potluck.org/potluck.svg" style="max-height: 8rem; margin: auto; display: block;" alt="" />
             ${render(saga)}
           </div>
         `
