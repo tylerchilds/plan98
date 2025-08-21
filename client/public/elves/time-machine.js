@@ -1980,7 +1980,7 @@ const studios = {
   [eventTypes.sketch]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
-      <sketch-pad id="${draft.id}" ${src}></sketch-pad>
+      <joke-book id="${draft.id}" ${src}></joke-book>
     `
   },
   [eventTypes.audio]: function(draft) {
@@ -3238,7 +3238,6 @@ $.draw((target)=> {
   if(target.innerHTML) return
 
   return `
-    <the-oasis></the-oasis>
     <div data-dom="realm" class="chat-realm">
       <div data-dom="content" data-mode="item" class="content-area"></div>
       <div class="fallback">
