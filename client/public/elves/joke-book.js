@@ -1,7 +1,8 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { updateDraft } from './time-machine.js'
+import { launch } from './plan98-synthia.js'
 
 import { get, put } from './plan98-wallet.js'
 
@@ -90,12 +91,21 @@ function update(target) {
 function mount(target) {
   target.innerHTML = `
     <div class="island">
-      <button data-undo class="standard-button -round bias-generic">
-        <sl-icon name="arrow-counterclockwise"></sl-icon>
-      </button>
-      <button data-redo class="standard-button -round bias-generic">
-        <sl-icon name="arrow-clockwise"></sl-icon>
-      </button>
+      <span>
+        <button data-undo class="standard-button -round bias-generic">
+          <sl-icon name="arrow-counterclockwise"></sl-icon>
+        </button>
+      </span>
+      <span class="home">
+        <button class="standard-button -round bias-positive" data-assistant>
+          <sl-icon name="house-heart-fill"></sl-icon>
+        </button>
+      </span>
+      <span>
+        <button data-redo class="standard-button -round bias-generic">
+          <sl-icon name="arrow-clockwise"></sl-icon>
+        </button>
+      </span>
     </div>
     <div class="overlays">
       <div class="overlay-color">
@@ -172,6 +182,10 @@ function drawOnCanvas (target, stroke) {
     context.stroke()
   }
 }
+
+$.when('click', '[data-assistant]', (event) => {
+  launch()
+})
 
 $.when('input', 'plan98-palette', (event) => {
   const { color } = event.detail
@@ -332,14 +346,27 @@ $.when('click', '[data-redo]', function redoDraw (event) {
 
 const easeInCubic = (t) => t * t * t;
 
-function getThicknessWithEasing(position, screenHeight, easingFunction) {
-  const center = screenHeight / 2;
-  const distanceFromCenter = Math.abs(position - center);
-  const maxDistance = screenHeight / 2;
-  const normalizedDistance = distanceFromCenter / maxDistance; // 0 to 1
+function getThicknessWithEasing(x, y, rectangle, easingFunction) {
+  const centerX = rectangle.width / 2;
+  const centerY = rectangle.height / 2;
 
-  // Apply easing to the normalized distance
-  const easedDistance = easingFunction(normalizedDistance);
+  // Calculate distance from center in both dimensions
+  const distanceX = Math.abs(x - centerX);
+  const distanceY = Math.abs(y - centerY);
+
+  // Maximum possible distances
+  const maxDistanceX = rectangle.width / 2;
+  const maxDistanceY = rectangle.height / 2;
+
+  // Normalize both distances (0 to 1)
+  const normalizedX = distanceX / maxDistanceX;
+  const normalizedY = distanceY / maxDistanceY;
+
+  // Use the maximum of the two distances for "rectangular" zones
+  const maxDistance = Math.max(normalizedX, normalizedY);
+
+  // Apply easing
+  const easedDistance = easingFunction(maxDistance);
 
   return 1 + easedDistance * 100;
 }
@@ -365,7 +392,7 @@ function start(e) {
     y = e.clientY - rectangle.top
   }
 
-  const thickness = getThicknessWithEasing(y, rectangle.height, easeInCubic);
+  const thickness = getThicknessWithEasing(x, y, rectangle, easeInCubic);
 
   isMousedown = true
 
@@ -537,6 +564,11 @@ function ungrab({ target }) {
 }
 
 $.style(`
+
+  time-machine & .home {
+    display: none;
+  }
+
   & {
     display: block;
     height: 100%;
@@ -549,6 +581,13 @@ $.style(`
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
+  }
+
+  & .logo-area {
+    border: none;
+    padding: 0;
+    background: transparent;
+    border-radius: 100%;
   }
 
   &[data-touching="true"] .palette {
@@ -683,6 +722,9 @@ $.style(`
     text-align: center;
     pointer-events: none;
     z-index: 3;
+    display: inline-flex;
+    place-content: center;
+    gap: 1rem;
   }
 
   & .island  button {

@@ -13,10 +13,10 @@ const padding = 4
 
 const oasis = {
 	celestials: ['water','dark', 'island-1', 'sky'],
-	'island-1': aBox({z: '0', y: -1, yaw: '-90'}, { material: 'emissive:#111; metalness:0.5', color: 'mediumseagreen',  depth: '1', width: '100', height: '100' }),
+	'island-1': aBox({z: '0', y: -1, yaw: '-90'}, { material: 'emissive:#111; metalness:0.5', color: 'darkgray',  depth: '1', width: '100', height: '100' }),
 	'sky': aBox({z: '-4', y: 115, yaw: '-90'}, { wireframe: true, color: 'firebrick',  depth: '100', width: '100', height: '100' }),
-	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'dodgerblue',  width: '5000', height: '5000' }),
-	dark: aSky({}, { color: 'black' }),
+	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'lightgray',  width: '5000', height: '5000' }),
+	dark: aSky({}, { color: 'white' }),
   peers: []
 }
 

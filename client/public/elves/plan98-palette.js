@@ -71,12 +71,12 @@ function maybe(id, value, note) {
 }
 
 function yes(id, note) {
-  attack(note)
+  //attack(note)
   mark(id, note)
 }
 
 function no(id, note) {
-  release(note)
+  //release(note)
   unmark(id, note)
 }
 
@@ -180,10 +180,10 @@ function queueAttack(event) {
   event.preventDefault()
   const { midi } = event.target.dataset
   const { id } = event.target.closest($.link)
-  attack(midi)
+  //attack(midi)
 
   setTimeout(() => {
-    release(midi)
+    //release(midi)
     unmark(id, midi)
   }, 5000)
 }
@@ -192,7 +192,7 @@ function queueRelease (event) {
   event.preventDefault()
   const { midi } = event.target.dataset
   const { id } = event.target.closest($.link)
-  release(midi)
+  //release(midi)
   unmark(id, midi)
 }
 
@@ -511,12 +511,14 @@ $.when('click', '.note', (event) => {
   const { x, y } = event.target.dataset
   const { id } = event.target.closest($.link)
   const note = noteFromGrid(parseInt(x), parseInt(y))
+  /*
   mark(id, note)
   manualNotes[note] = true
   attackRelease(note, () => {
     unmark(id, note)
     delete manualNotes[note]
   })
+  */
 })
 
 const spamCache = {}
