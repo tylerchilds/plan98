@@ -1,8 +1,7 @@
 import app from '@plan98/app'
 import 'aframe'
 
-const GRAVITY = 0.001;
-const FRICTION = 0.98;
+const GRAVITY = 0.00001;
 let lastTime
 
 const orientation = {
@@ -112,7 +111,7 @@ ${background ? `--background: ${background};` : ``} ${color ? `--color: ${color}
       const context = canvas.getContext('2d')
       context.clearRect(0, 0, canvas.width, canvas.height)
 
-      context.fillStyle = 'white'
+      context.fillStyle = 'black'
       context.textAlign = 'left'
       context.textBaseline = 'top'
       context.fillText(`TOP LEFT`, padding, padding);
@@ -209,15 +208,11 @@ function increment(target) {
           // ay += windForceY;
 
           // Apply acceleration to velocity
-          properties.vx += ax * dt;
+          //properties.vx += ax * dt;
           properties.vy += ay * dt;
 
-          // Apply friction/damping
-          properties.vx *= FRICTION;
-          properties.vy *= FRICTION;
-
           // Apply velocity to position
-          position.x += properties.vx * dt;
+          //position.x += properties.vx * dt;
           position.y += properties.vy * dt;
 
           return { position, properties }
@@ -276,13 +271,27 @@ function end (e) {
   e.preventDefault()
   const { startX, startY, x, y } = robot.learn()
   const { canvas } = graphics(e.target)
-  const width = (Math.abs(startX - x) * 100) / canvas.width
-  const depth = (Math.abs(startY - y) * 100) / canvas.height
+
+  const width = Math.abs(x) / canvas.width * 100
+  const depth = Math.abs(y) / canvas.height * 100
+
   const height = 4
+
+  console.log(`
+    startX: ${startX}
+    startY: ${startY}
+    x: ${x}
+    y: ${y}
+    height: ${height}
+    width: ${width}
+    depth: ${depth}
+    node1: (${startX}, ${startY})
+    node2: (${startX + x}, ${startY + y})
+  `)
   const peer = {
     position: {
-      x: (x * 100) / canvas.height,
-      z: ((y) * 100) / canvas.width,
+      x: (((startX+x+startX)/2) / canvas.width) * 100 - 50,
+      z: (((startY+y+startY)/2) / canvas.height) * 100 - 50,
       y: 100,
     },
     properties: {
