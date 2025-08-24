@@ -344,8 +344,6 @@ $.when('click', '[data-redo]', function redoDraw (event) {
   redraw(event.target)
 })
 
-const easeInCubic = (t) => t * t * t;
-
 function getThicknessWithEasing(x, y, rectangle, easingFunction) {
   const centerX = rectangle.width / 2;
   const centerY = rectangle.height / 2;
@@ -368,7 +366,7 @@ function getThicknessWithEasing(x, y, rectangle, easingFunction) {
   // Apply easing
   const easedDistance = easingFunction(maxDistance);
 
-  return 1 + easedDistance * 100;
+  return 1 + easedDistance * 75;
 }
 
 $.when('touchstart', 'canvas', start)
@@ -392,7 +390,7 @@ function start(e) {
     y = e.clientY - rectangle.top
   }
 
-  const thickness = getThicknessWithEasing(x, y, rectangle, easeInCubic);
+  const thickness = getThicknessWithEasing(x, y, rectangle, x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 
   isMousedown = true
 
