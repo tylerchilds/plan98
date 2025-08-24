@@ -366,7 +366,7 @@ function getThicknessWithEasing(x, y, rectangle, easingFunction) {
   // Apply easing
   const easedDistance = easingFunction(maxDistance);
 
-  return 1 + easedDistance * 75;
+  return 1 + easedDistance * 125;
 }
 
 $.when('touchstart', 'canvas', start)
