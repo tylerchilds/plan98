@@ -570,6 +570,7 @@ $.style(`
   & {
     display: block;
     height: 100%;
+    min-height: 6rem;
     position: relative;
     z-index: 1;
     overflow: hidden;

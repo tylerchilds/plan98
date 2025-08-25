@@ -499,6 +499,7 @@ function template() {
           "@emoji-mart/data": "https://esm.sh/@emoji-mart/data@1.2.1",
           "eruda": "https://esm.sh/eruda@3.4.0",
           "fantasydata-node-client": "https://esm.sh/fantasydata-node-client@1.6.0",
+          "fast-deep-equal": "https://esm.sh/fast-deep-equal@3.1.3",
           "focus-trap" : "https://esm.sh/focus-trap@7.6.2",
           "grapheme-splitter": "https://esm.sh/grapheme-splitter@1.0.4",
           "gridjs": "https://esm.sh/gridjs@6.0.6",

@@ -98,6 +98,7 @@ export const eventTypes = {
   tommi: 'tommi',
   instrument: 'instrument',
   sketch: 'sketch',
+  xanadoc: 'xanadoc',
   bulletin: 'bulletin',
   world: 'world',
   character: 'character',
@@ -135,6 +136,7 @@ export const views = {
   [eventTypes.sheet]: eventTypes.sheet,
   [eventTypes.instrument]: eventTypes.instrument,
   [eventTypes.sketch]: eventTypes.sketch,
+  [eventTypes.xanadoc]: eventTypes.xanadoc,
   [eventTypes.bulletin]: eventTypes.bulletin,
   [eventTypes.world]: eventTypes.world,
   [eventTypes.character]: eventTypes.character,
@@ -243,6 +245,11 @@ export const schemas = {
     strokeHistory: [],
     strokeRevisory: [],
   },
+  [eventTypes.xanadoc]: {
+    type: eventTypes.xanadoc,
+    title: 'Xanadoc',
+    src: ''
+  },
   [eventTypes.world]: {
     type: eventTypes.world,
     title: 'World',
@@ -250,14 +257,10 @@ export const schemas = {
   [eventTypes.character]: {
     type: eventTypes.character,
     title: 'Character',
-    strokeHistory: [],
-    strokeRevisory: [],
   },
   [eventTypes.bulletin]: {
     type: eventTypes.bulletin,
     title: 'Bulletin',
-    strokeHistory: [],
-    strokeRevisory: [],
   },
   [eventTypes.note]: {
     type: eventTypes.note,
@@ -1491,8 +1494,18 @@ export const creationForms = {
       </div>
     `
   },
-
   [eventTypes.sketch]: function(draft) {
+    return `
+      ${editBanner(this)}
+      <div class="metadata-form">
+        <label class="field">
+          <span class="label">Description</span>
+          <textarea data-bind="draft" name="description" value="${escapeHyperText(draft.description)}"></textarea>
+        </label>
+      </div>
+    `
+  },
+  [eventTypes.xanadoc]: function(draft) {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
@@ -1981,6 +1994,20 @@ const studios = {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
       <joke-book id="${draft.id}" ${src}></joke-book>
+    `
+  },
+  [eventTypes.xanadoc]: function(draft) {
+    let src = draft.src
+    if(!src) {
+      const now = new Date();
+      const timestamp = now.toJSON()
+      src = `/private/${$.link}/${timestamp}.xdoc`
+
+      updateDraft({ src })
+    }
+
+    return `
+      <trans-clusions id="${draft.id}" src="${src}"></trans-clusions>
     `
   },
   [eventTypes.audio]: function(draft) {
@@ -2502,6 +2529,9 @@ const viewRenderers = {
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sketch}">Sketch</button>
                 </div>
                 <div class="dropdown-item">
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.xanadoc}">Xanadoc</button>
+                </div>
+                <div class="dropdown-item">
                   <!--<button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.keycard}">Keycard</button>-->
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.video}">Video</button>
                 </div>
@@ -2739,6 +2769,23 @@ const viewRenderers = {
       <was-image src="${x.src}"></was-image>
     `)
   },
+  [views.xanadoc]: (target) => {
+    const { space, time } = target.dataset
+
+    const event = $.learn().buckets[space][time]
+
+    const x = {
+      ...schemas[views.xanadoc],
+      ...event.data,
+      space,
+      time
+    }
+
+    return viewTemplate(x, `
+      <xana-doc src="${x.src}"></xana-doc>
+    `)
+  },
+
   [views.image]: (target) => {
     const { space, time } = target.dataset
 
@@ -3488,6 +3535,10 @@ const eventTypeObjectClass = {
     label: 'Sketch',
     icon: '<sl-icon name="pencil"></sl-icon>',
   },
+  [eventTypes.xanadoc]: {
+    label: 'Xanadoc',
+    icon: '<sl-icon name="circle-square"></sl-icon>',
+  },
   [eventTypes.image]: {
     label: 'Image',
     icon: '<sl-icon name="camera"></sl-icon>',
@@ -3778,6 +3829,15 @@ export async function saveSketch(draft, context) {
   }, context)
 }
 
+export async function saveXanadoc(draft, context) {
+  return await save({
+    title: 'Untitled',
+    ...timeFields(),
+    ...draft,
+    type: eventTypes.xanadoc,
+  }, context)
+}
+
 export async function saveAudio(draft, context) {
   return await save({
     title: 'Untitled',
@@ -3849,6 +3909,7 @@ const saveHandlers = {
   [eventTypes.character]: saveCharacter,
   [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,
+  [eventTypes.xanadoc]: saveXanadoc,
   [eventTypes.gallery]: save,
   [eventTypes.image]: savePhoto,
   [eventTypes.audio]: saveAudio,
