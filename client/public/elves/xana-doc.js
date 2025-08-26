@@ -163,6 +163,7 @@ robot.style(`
   & .definitely-not-paper {
     background: white;
     width: 100%;
+    max-width: 8.5in;
     height: 100%;
     padding: .5in;
     margin: auto;

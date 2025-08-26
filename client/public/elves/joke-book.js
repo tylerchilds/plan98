@@ -120,8 +120,9 @@ function mount(target) {
   self.addEventListener('resize', resizeCanvas, false);
 
   function resizeCanvas() {
-    canvas.width = self.innerWidth - 32;
-    canvas.height = self.innerHeight - 32;
+    const { width, height } = target.parentElement.getBoundingClientRect()
+    canvas.width = width - 32;
+    canvas.height = height - 32;
     const context = canvas.getContext('2d')
     context.fillStyle = $.learn().background
     context.fillRect(0, 0, canvas.width, canvas.height)

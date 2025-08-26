@@ -2001,7 +2001,7 @@ const studios = {
     if(!src) {
       const now = new Date();
       const timestamp = now.toJSON()
-      src = `/private/${$.link}/${timestamp}.xdoc`
+      src = `/private/${$.link}/${draft.type}/${timestamp}.json`
 
       updateDraft({ src })
     }
