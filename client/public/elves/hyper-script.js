@@ -1,6 +1,7 @@
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
 import { render } from '@sillonious/saga'
+import { get, put } from './plan98-wallet.js'
 
 const pitch = `<hello-world
 
@@ -275,18 +276,18 @@ function sourceFile(target) {
     : (function initialize() {
       requestIdleCallback(() => {
         let file = pitch
-        fetch(src).then(async res => {
-          if(res.status === 404) {
-
-            file = 'untitled'
-          } else {
-            file = await res.text()
+        get(src).then(async blob => {
+          if(blob) {
+            const handle = JSON.parse(
+              await blob.text()
+              .catch(e => {return '{file:"Error..."}'})
+            )
+            file = handle.file
           }
-        }).catch((error) => {
-          console.error(error)
         }).finally(() => {
           $.teach({ [src]: file })
         })
+
       })
       return file
     })()
@@ -388,7 +389,7 @@ $.when('click', '[data-print]', async (event) => {
   preview.focus(); // necessary for IE >= 10*/
 })
 
-$.when('click', '[data-publish]', (event) => {
+$.when('click', '[data-publish]', async (event) => {
   const src = source(event.target)
 
   const authorization = btoa(plan98.env.PLAN98_USERNAME + ':' + plan98.env.PLAN98_PASSWORD);
@@ -402,23 +403,19 @@ $.when('click', '[data-publish]', (event) => {
   const file = $.learn()[src]
 
   if(file) {
-    fetch(src, {
-      headers,
-      method: 'POST',
-      body: JSON.stringify({
-        file,
-        src
-      })
-    }).then((response) => response.text()).then((result) => {
-      try {
-        const data = JSON.parse(result)
-        data.error
-          ? toast('Are you even allowed to save, bro?', { type: 'error' })
-          : toast('File saved!', { type: 'success' })
-      } catch(e) {
-        toast(result)
-      }
-    })
+    const response = await put(src, JSON.stringify({
+      file,
+      src
+    }), { type: 'application/json' })
+    .catch(error => {
+      toast('Bro. Where are we?', { type: 'error' })
+    });
+
+    if(response.ok) {
+      toast('File saved!', { type: 'success' })
+    } else {
+      toast('Are you even allowed to save, bro?', { type: 'error' })
+    }
   }
 })
 

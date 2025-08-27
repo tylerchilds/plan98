@@ -1,5 +1,6 @@
 import app from '@plan98/app'
 import 'aframe'
+import { get, put } from './plan98-wallet.js'
 
 const GRAVITY = 0.00001;
 let lastTime
@@ -16,7 +17,7 @@ const oasis = {
 	'sky': aBox({z: '-4', y: 115, yaw: '-90'}, { wireframe: true, color: 'firebrick',  depth: '100', width: '100', height: '100' }),
 	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'lightgray',  width: '5000', height: '5000' }),
 	dark: aSky({}, { color: 'white' }),
-  peers: []
+  blocks: []
 }
 
 const initial = {
@@ -75,6 +76,23 @@ robot.draw((target) => {
   }
 }, {
   beforeUpdate(target) {
+    {
+      if(!target.mounted) {
+        target.mounted = true
+        const src = target.getAttribute('src')
+        if(src) {
+          robot.teach({ blocks: [] })
+          get(src).then(blob => {
+            if(blob) {
+              blob.text().then(str => JSON.parse(str)).then(data => {
+                robot.teach(data)
+              })
+            }
+          })
+        }
+      }
+    }
+
     {
       const { startX, startY, x, y, invertX, invertY } = robot.learn()
       const background = target.getAttribute('background')
@@ -171,7 +189,7 @@ function increment(target) {
   lastTime = currentTime;
 
   const irix = target.querySelector('.irix')
-  const { peers } = robot.learn()
+  const { blocks } = robot.learn()
 	celestials().map(name => {
     const node = target.querySelector(`[id="${name}"]`)
     if(node) {
@@ -179,11 +197,11 @@ function increment(target) {
     }
 	})
 
-  if(peers) {
-    const models = peers.map((peer, i) => {
-      if(peer) {
+  if(blocks) {
+    const models = blocks.map((block, i) => {
+      if(block) {
         return draw3d(
-          aBox({...peer.position}, {...peer.properties})
+          aBox({...block.position}, {...block.properties})
         )
       }
     }).join('')
@@ -193,8 +211,8 @@ function increment(target) {
   {
     requestIdleCallback(() => {
       robot.teach(null, (state) => {
-        const newPeers = state.peers.map(peer => {
-          const { position, properties } = peer
+        const newBlocks = state.blocks.map(block => {
+          const { position, properties } = block
           properties.vy += GRAVITY * dt;
           properties.y += properties.vy * dt;
           // Reset acceleration each frame
@@ -219,7 +237,7 @@ function increment(target) {
         })
         return {
           ...state,
-          peers: newPeers
+          blocks: newBlocks
         }
       })
     })
@@ -269,6 +287,7 @@ robot.when('pointerup', '.paper', end)
 
 function end (e) {
   e.preventDefault()
+  const src = e.target.closest(robot.link).getAttribute('src')
   const { startX, startY, x, y } = robot.learn()
   const { canvas } = graphics(e.target)
 
@@ -288,7 +307,7 @@ function end (e) {
     node1: (${startX}, ${startY})
     node2: (${startX + x}, ${startY + y})
   `)
-  const peer = {
+  const block = {
     position: {
       x: (((startX+x+startX)/2) / canvas.width) * 100 - 50,
       z: (((startY+y+startY)/2) / canvas.height) * 100 - 50,
@@ -302,16 +321,39 @@ function end (e) {
     }
   }
 
-  appendPeer(peer)
+  appendBlock(block)
   robot.teach({ startX: null, startY: null, isMouseDown: false, x: 0, y: 0 })
+
+  if(src) {
+    persist(src)
+  }
 };
 
-function appendPeer(x) {
+async function persist(src) {
+  const { blocks } = robot.learn()
+  const broblox = { blocks }
+
+  // Attempt to upload to server
+  await put(src, JSON.stringify(broblox), { type: 'application/json' })
+    .catch(error => { console.warn(error) });
+}
+
+function splice(state, payload) {
+  const transclusions = [...state.transclusions]
+  transclusions.splice(payload.index, 0, payload.transclusion)
+  return {
+    ...state,
+    transclusions
+  }
+}
+
+
+function appendBlock(x) {
   robot.teach(x, (state, payload) => {
     return {
       ...state,
-      peers: [
-        ...state.peers,
+      blocks: [
+        ...state.blocks,
         payload
       ]
     }

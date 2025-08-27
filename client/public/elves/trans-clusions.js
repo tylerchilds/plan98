@@ -56,7 +56,7 @@ const library = {
           Plan98<br>
 <br>
           In Xanadu, did Kubla Khan and Kubla Khan found Alph.<br>
-          Now Alph is a river that slips and it slithers,<br>
+          Now, Alph is a river that slips as it slithers,<br>
           while time is adjacent to space ever so nascent,<br>
           That water flows upwards and downwards at once.<br>
 <br>
@@ -152,9 +152,7 @@ robot.draw((target) => {
           get(src).then(blob => {
             if(blob) {
               blob.text().then(str => JSON.parse(str)).then(data => {
-                if(data.transclusions) {
-                  robot.teach({ transclusions: data.transclusions })
-                }
+                robot.teach(data)
               })
             }
           })
@@ -208,10 +206,8 @@ async function persist(src) {
   const xdoc = { transclusions }
 
   // Attempt to upload to server
-  await put(src, JSON.stringify(xdoc), { type: 'application/json' }).then(response => {
-  }).catch(error => {
-    console.warn(error);
-  });
+  await put(src, JSON.stringify(xdoc), { type: 'application/json' })
+    .catch(error => { console.warn(error) });
 }
 
 function splice(state, payload) {

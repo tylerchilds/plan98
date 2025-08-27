@@ -100,7 +100,7 @@ export const eventTypes = {
   sketch: 'sketch',
   xanadoc: 'xanadoc',
   bulletin: 'bulletin',
-  world: 'world',
+  broblox: 'broblox',
   character: 'character',
   gallery: 'gallery',
   image: 'image',
@@ -138,7 +138,7 @@ export const views = {
   [eventTypes.sketch]: eventTypes.sketch,
   [eventTypes.xanadoc]: eventTypes.xanadoc,
   [eventTypes.bulletin]: eventTypes.bulletin,
-  [eventTypes.world]: eventTypes.world,
+  [eventTypes.broblox]: eventTypes.broblox,
   [eventTypes.character]: eventTypes.character,
   [eventTypes.gallery]: eventTypes.gallery,
   [eventTypes.image]: eventTypes.image,
@@ -250,9 +250,9 @@ export const schemas = {
     title: 'Xanadoc',
     src: ''
   },
-  [eventTypes.world]: {
-    type: eventTypes.world,
-    title: 'World',
+  [eventTypes.broblox]: {
+    type: eventTypes.broblox,
+    title: 'Broblox',
   },
   [eventTypes.character]: {
     type: eventTypes.character,
@@ -813,7 +813,7 @@ $.style(`
   & .draft-footer {
     display: grid;
     grid-area: footer;
-    padding: 4px;
+    padding: 4px .5rem;
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.65);
     display: grid;
@@ -1461,7 +1461,7 @@ export const creationForms = {
       </div>
     `
   },
-  [eventTypes.world]: function(draft) {
+  [eventTypes.broblox]: function(draft) {
     return `
       ${editBanner(this)}
       <div class="metadata-form">
@@ -1973,9 +1973,20 @@ const studios = {
       <was-camera id="${draft.id}"></was-camera>
     `
   },
-  [eventTypes.world]: function(draft) {
+  [eventTypes.broblox]: function(draft) {
+    let src = draft.src
+    if(!src) {
+      const now = new Date();
+      const timestamp = now.toJSON()
+      src = `/private/${$.link}/${draft.type}/${timestamp}.json`
+
+      updateDraft({ src })
+    }
+
     return `
-      <was-code id="${draft.id}" src="/public/elves/generic-park.js"></was-code>
+      <div3>
+        <the-oasis id="${draft.id}" src="${src}"></the-oasis>
+      </div3>
     `
   },
   [eventTypes.character]: function(draft) {
@@ -1983,7 +1994,6 @@ const studios = {
       <path-finder id="${draft.id}"></path-finder>
     `
   },
-
   [eventTypes.bulletin]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
@@ -2554,7 +2564,7 @@ const viewRenderers = {
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.character}">Character</button>
                 </div>
                 <div class="dropdown-item">
-                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.world}">World</button>
+                  <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.broblox}">Broblox</button>
                 </div>
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.saga}">Saga</button>
@@ -2702,20 +2712,22 @@ const viewRenderers = {
       <pro-teleprompter src="${x.src}"></pro-teleprompter>
     `)
   },
-  [views.world]: (target) => {
+  [views.broblox]: (target) => {
     const { space, time } = target.dataset
 
     const event = $.learn().buckets[space][time]
 
     const x = {
-      ...schemas[views.world],
+      ...schemas[views.broblox],
       ...event.data,
       space,
       time
     }
 
     return viewTemplate(x, `
-      <generic-park id="${x.id}" src="/public/elves"></generic-park>
+      <div2>
+        <the-oasis id="${x.id}" src="${x.src}"></the-oasis>
+      </div2>
     `)
   },
 
@@ -3519,8 +3531,8 @@ const eventTypeObjectClass = {
     label: 'Tommi',
     icon: '<sl-icon name="battery-charging"></sl-icon>',
   },
-  [eventTypes.world]: {
-    label: 'World',
+  [eventTypes.broblox]: {
+    label: 'Broblox',
     icon: '<sl-icon name="joystick"></sl-icon>',
   },
   [eventTypes.character]: {
@@ -3798,7 +3810,7 @@ export async function saveWorld(draft, context) {
     title: 'Untitled',
     ...timeFields(),
     ...draft,
-    type: eventTypes.world,
+    type: eventTypes.broblox,
   }, context)
 }
 
@@ -3905,7 +3917,7 @@ const saveHandlers = {
   [eventTypes.memo]: save,
   [eventTypes.tommi]: save,
   [eventTypes.instrument]: save,
-  [eventTypes.world]: saveWorld,
+  [eventTypes.broblox]: saveWorld,
   [eventTypes.character]: saveCharacter,
   [eventTypes.bulletin]: saveBulletin,
   [eventTypes.sketch]: saveSketch,
