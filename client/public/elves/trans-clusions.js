@@ -1,37 +1,6 @@
-// The reason this application is important
-//
-// WE DO NOT KNOW WHERE HATE COMES FROM
-//
-// There are graves with no names as the people that did it were paid and paid and paid and on and on and no one takes the blame
-//
-// Hundred million dollars
-// what's it gonna cost
-// bodies on my mind
-// bodies on my mind
-// bodies on my mind
-//
-// Forget Forgetting
-// Agency Over Memory
-//
-// Restoring Silicon Valley to the Time Prior to Forgetfulness As A Service
-//
-// What?
-//
-// Saving literature.
-//
-// With literature, you can find the missing books. The ones that burned. Read enough, and perhaps discover clues to where authors hide their libraries with scripts that haven't been performed in centuries.
-//
-// Recover the books. Become the one to restore the narrative.
-//
-// Save the libraries, save reality.
-
 import app from '@plan98/app'
-import equal from 'fast-deep-equal'
 
-import { updateDraft } from './time-machine.js'
 import { get, put } from './plan98-wallet.js'
-
-const cache = {}
 
 const library = {
   [self.crypto.randomUUID()]: {
@@ -53,7 +22,7 @@ const library = {
       tag: 'p',
       properties: {
         html: `
-          Plan98<br>
+          Porlock<br>
 <br>
           In Xanadu, did Kubla Khan and Kubla Khan found Alph.<br>
           Now, Alph is a river that slips as it slithers,<br>

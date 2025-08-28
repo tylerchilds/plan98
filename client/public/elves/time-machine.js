@@ -2557,9 +2557,11 @@ const viewRenderers = {
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.product}">Product</button>
                 </div>
+                <!--
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.sheet}">Sheet</button>
                 </div>
+                -->
                 <div class="dropdown-item">
                   <button class="standard-button -large -stealth bias-generic" data-new="${eventTypes.character}">Character</button>
                 </div>
