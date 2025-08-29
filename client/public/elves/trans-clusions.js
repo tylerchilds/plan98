@@ -24,7 +24,7 @@ const library = {
         html: `
           Porlock<br>
 <br>
-          In Xanadu, did Kubla Khan and Kubla Khan found Alph.<br>
+          In Xanadu did Kubla Khan and Kubla Khan found Alph.<br>
           Now, Alph is a river that slips as it slithers,<br>
           while time is adjacent to space ever so nascent,<br>
           That water flows upwards and downwards at once.<br>
@@ -34,12 +34,12 @@ const library = {
           becoming the jester for heightened bemusement, she rang<br>
           whole kingdoms now circused in total amusement, she sang<br>
 <br>
-          Time and again she keeps thwarting their effort,<br>
+          Time and again she keeps thwarting their efforts,<br>
           How? Space is a construct, she's throwing a concert,<br>
           that fits in her pocket, on paper as finite as self,<br>
           it sounds somewhat silly, in that it was made by an elf.<br>
 <br>
-          In Xanadu, did Kubla Khan and Kubla Khan found Alph.<br>
+          In Xanadu did Kubla Khan and Kubla Khan found Alph.<br>
 <br>
 - A person on business from Porlock
         `
