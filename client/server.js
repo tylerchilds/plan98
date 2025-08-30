@@ -463,6 +463,7 @@ function template() {
           "@silly/elf": "/public/elf.js",
           "@plan98/elf": "/public/plan98.js",
           "@plan98/app": "/public/plan98.js",
+          "@plan68/app": "/public/plan68.js",
           "@silly/gelf": "/public/gun-module.js",
           "@sillonious/payments": "/public/elves/payment-debugger.js",
           "@sillonious/saga": "/public/saga.js",
