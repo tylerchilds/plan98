@@ -10,13 +10,36 @@ console.log('v0.0.1')
 console.log(`window.innerHeight = ${window.innerHeight}`)
 console.log(`body.offsetHeight = ${document.body.offsetHeight}`)
 
+const instruments = {
+  ukelele: 'ukelele',
+  guitar: 'guitar'
+}
+
+const frequencies = {
+  [instruments.ukelele]: [261.63, 329.63, 392.00, 440.00],
+  [instruments.guitar]: [82.41, 110.00, 146.83, 196.00, 246.94, 329.63]
+}
+
+const options = [
+  {
+    value: instruments.ukelele,
+    label: 'Ukelele'
+  },
+  {
+    value: instruments.guitar,
+    label: 'Guitar'
+  },
+]
+
 const $ = app('music-tuner', {
   started: false,
-  transpose: false
+  transpose: false,
+  value: instruments.ukelele,
+  options
 })
 
 function main(target) {
-  const { transpose } = $.learn()
+  const { transpose, value } = $.learn()
   const canvas = target.querySelector('#first');
   const ctx = canvas.getContext('2d');
 
@@ -87,7 +110,7 @@ function main(target) {
     }
 
     // draw guitar strings
-    const strings = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
+    const strings = frequencies[value]
     const minPitch = strings[0] - 30; //set min pitch 30 below the lowest string
     const maxPitch = strings[strings.length-1] + 30; //set max pitch 30 above the highest string
 
@@ -128,11 +151,22 @@ function main(target) {
 
 $.draw(() => {
   const stars = getStars(true)
-  const { started } = $.learn()
+  const { started, options, value } = $.learn()
   if(!started) {
     return `
       <div id="start-button">
-        <button>click to start</button>
+        <h1>Tuner</h1>
+        <select data-instrument class="standard-input -small">
+          ${options.map(option => {
+            return `
+              <option value="${option.value}" ${option.value === value?'selected':''}>${option.label}</option>
+            `
+          }).join('')}
+        </select>
+
+        <button data-tune class="standard-button bias-positive">
+          Tune
+        </button>
       </div>
     `
   }
@@ -147,7 +181,11 @@ $.draw(() => {
   }
 })
 
-$.when('click', '#start-button button', (event) => {
+$.when('change', '[data-instrument]', (event) => {
+  $.teach({ value: event.target.value })
+})
+
+$.when('click', '[data-tune]', (event) => {
   const root = event.target.closest($.link)
   $.teach({ started: true })
   main(root)
@@ -186,31 +224,15 @@ $.style(`
     opacity: .5;
   }
 
+  & h1 {
+    margin-bottom: 0;
+  }
+
   & #start-button {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: rgba(0, 0, 0, 0.5);
-  }
-
-  & #start-button button {
-      width: 100%;
-      height: 100%;
-      font-size: 24px;
-      padding: 10px 20px;
-      background-color: transparent;
-      border: none;
-      color: #fff;
-      cursor: pointer;
-  }
-
-  & #start-button button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
+    height: 100%;
+    display: grid;
+    place-content: center;
+    gap: 1rem;
   }
 `)
 
