@@ -1,4 +1,4 @@
-import app, { get, put, del} from '@plan68/app'
+import app, { get, getSpace, put, del} from '@plan68/app'
 import Vosk from 'vosk-browser'
 import translate from 'translate'
 import { innerHTML } from 'diffhtml'
@@ -234,13 +234,17 @@ $.when('click', '[data-record]', async (event) => {
 
       const historicalNugget = {
         src,
-        title: 'Untitled',
+        title: 'Recorded Entry',
+        author: 'Wally Wollaston',
+        when: new Date().toLocaleString('en-us')
       }
 
       POST(historicalNugget, appendToHistoricalRecord)
 
+      const space = getSpace(root.id)
+
       // Attempt to upload to server
-      put(src, videoBlob, { type: supportedVideoType }).then(response => {
+      put.call({ space }, src, videoBlob, { type: supportedVideoType }).then(response => {
         if (!response.ok) {
           // Explicitly throw for non-200 responses
           throw new Error(`HTTP error! status: ${response.status}`);
@@ -328,8 +332,7 @@ $.style(`
   }
 
   & .panel-area {
-    background: #303030;
-    color: white;
+    background: white;
     display: none;
     overflow: auto;
   }
@@ -339,13 +342,38 @@ $.style(`
     right: 0;
     display: block;
     width: clamp(240px, var(--panel-width, 320px), 100%);
-    padding-left: 10px;
     max-width: 100vw;
     position: absolute;
     top: 0;
     bottom: 0;
     z-index: 25;
     display: block;
+  }
+
+  & .playlist {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 1rem;
+    padding: 1rem;
+  }
+
+  & .clip {
+    
+  }
+
+  & .clip-title {
+    color: rgba(0,0,0,.85);
+    font-weight: 100;
+  }
+
+  & .clip-author {
+    color: rgba(0,0,0,.65);
+    font-weight: 400;
+  }
+
+  & .clip-time {
+    color: rgba(0,0,0,.45);
+    font-weight: 700;
   }
 `)
 
@@ -509,16 +537,21 @@ class CulturalPreservation extends HTMLElement {
 
     if(showPanel) {
       const area = document.querySelector('.panel-area')
-      area.innerHTML = GET(topEight).map(x => {
+      const clips = GET(topEight).map(x => {
         return `
-          <div class="clip">
-            <img src="${x.thumbnail}" />
-            <span>${x.title}</span>
-            <span>${x.author}</span>
-            <span>${x.when}</span>
-          </div>
+          <button data-play="${x.src}" class="clip standard-button -stealth">
+            <div class="clip-title">${x.title}</div>
+            <div class="clip-author">${x.author}</div>
+            <div class="clip-time">${x.when}</div>
+          </button>
         `
       }).join('')
+
+      area.innerHTML = `
+        <div class="playlist">
+          ${clips}
+        </div>
+      `
       target.dataset.showPanel = true
     } else {
       const area = document.querySelector('.panel-area')
@@ -545,6 +578,19 @@ async function setMediaStream(target) {
     },
   });
 }
+
+$.when('click', '[data-play]', (event) => {
+  const { play } = event.target.dataset
+  const root = event.target.closest($.link)
+  showModal(`
+    <div style="height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
+      <plan68-video src="${play}" space="${root.id}"></plan68-video>
+    </div>
+  `, {
+    blockExit: false,
+    onHide: () => $.teach({ popped: false })
+  })
+})
 
 $.when('click', '[data-flip]', (event) => {
   const { facingMode } = $.learn()

@@ -12,12 +12,14 @@ console.log(`body.offsetHeight = ${document.body.offsetHeight}`)
 
 const instruments = {
   ukelele: 'ukelele',
-  guitar: 'guitar'
+  guitar: 'guitar',
+  tinwhistle: 'tinwhistle'
 }
 
 const frequencies = {
   [instruments.ukelele]: [261.63, 329.63, 392.00, 440.00],
-  [instruments.guitar]: [82.41, 110.00, 146.83, 196.00, 246.94, 329.63]
+  [instruments.guitar]: [82.41, 110.00, 146.83, 196.00, 246.94, 329.63],
+  [instruments.tinwhistle]: [293.66, 329.63, 369.99, 415.30, 466.16, 523.25, 587.33, 659.25, 739.99, 830.61, 932.33, 1046.50, 1174.66]
 }
 
 const options = [
@@ -28,6 +30,10 @@ const options = [
   {
     value: instruments.guitar,
     label: 'Guitar'
+  },
+  {
+    value: instruments.tinwhistle,
+    label: 'Tinwhistle'
   },
 ]
 
