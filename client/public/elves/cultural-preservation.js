@@ -1,24 +1,19 @@
 import app, { get, getSpace, put, del} from '@plan68/app'
 import Vosk from 'vosk-browser'
-import translate from 'translate'
 import { innerHTML } from 'diffhtml'
-import { updateDraft, getDraft } from './time-machine.js'
 
 const sampleRate = 48000;
-
-translate.engine = "libre";
-translate.url = plan98.env.LIBRE_TRANSLATE_URL + '/translate'
 
 const tag = 'cultural-preservation'
 const $ = app(tag, {
   recording: false,
   caption: '',
-  translated: '',
   facingMode: 'environment',
   to: 'es',
   from: 'en',
   sourceLanguages: [],
   destinationLanguages: [],
+  transcription: '',
   history: [],
   consented: false
 })
@@ -141,32 +136,6 @@ function topEight(rizz) {
   )
 }
 
-
-
-let languages = []
-async function loadLanguages() {
-  const response = await fetch(plan98.env.LIBRE_TRANSLATE_URL + '/languages', {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  }).catch(console.error);
-  
-  const languages = await response.json().catch(console.error)
-  if(languages) {
-    $.teach({
-      sourceLanguages: languages.map(x => ({code: x.code, name: x.name})),
-      destinationLanguages: languages[0].targets
-    })
-  }
-}
-
-try {
-  loadLanguages()
-} catch (error) {
-  alert('Error submitting form.');
-}
-
 let mediaRecorder;
 let videoChunks = [];
 
@@ -250,12 +219,10 @@ $.when('click', '[data-record]', async (event) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        updateDraft({ src })
       }).catch(error => {
       });
     };
 
-    updateDraft({ transcription: '' })
     // Start recording
     mediaRecorder.start();
 
@@ -435,7 +402,6 @@ class CulturalPreservation extends HTMLElement {
         <div class="viewport">
           <div class="lingustics">
             <div class="partial"></div>
-            <div class="translate"></div>
           </div>
           <video playsinline disablePictureInPicture></video>
         </div>
@@ -467,22 +433,15 @@ class CulturalPreservation extends HTMLElement {
       });
 
       recognizer.on("result", async (message) => {
-        const { recording } = $.learn()
+        const { recording, transcription } = $.learn()
         const result = message.result;
 
         if(result.text) {
           if(recording) {
-            const { transcription } = getDraft()
-            updateDraft({ transcription: transcription + ' ' + result.text })
+            $.teach({ transcription: transcription + ' ' + result.text })
           }
           $.teach({
             result: result.text
-          })
-
-          const { to, from } = $.learn()
-          const translated = await translate(result.text, { to, from })
-          $.teach({
-            translated
           })
         }
       });
@@ -501,7 +460,6 @@ class CulturalPreservation extends HTMLElement {
     if(!target.innerHTML) return
     const {
       partial='',
-      translated,
       recording,
       showPanel,
       result='',
@@ -509,11 +467,9 @@ class CulturalPreservation extends HTMLElement {
     } = $.learn()
 
     const partialContainer = target.querySelector('.partial')
-    const translateContainer = target.querySelector('.translate')
     const actionContainer = target.querySelector('[data-primary-action]')
 
     innerHTML(partialContainer, partial)
-    innerHTML(translateContainer, translated)
 
     if(recording !== target.lastRecording) {
       target.lastRecording = recording

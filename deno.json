@@ -15,7 +15,7 @@
     "reverse-api": "ssh -N -R 3003:localhost:3003 local.$USER.me",
     "start-client": "deno run -A client.js",
     "debug-client": "deno run -A --inspect-brk client.js",
-    "reverse-client": "ssh -N -R 1998:localhost:8000 local.$USER.me",
+    "reverse-client": "ssh -N -R 1998:localhost:1024 local.$USER.me",
     "start-peer": "cd client && deno run -A server.js",
     "deploy-peer": "cd client && deployctl deploy --entrypoint=./server.js --prod --exclude=./private",
     "debug-peer": "cd client && deno run -A --inspect-brk server.js",

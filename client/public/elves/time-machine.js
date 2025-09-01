@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import app from '@plan68/app'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
@@ -358,7 +358,7 @@ export function getDraft() {
 }
 
 // dear diary
-const $ = elf('time-machine', {
+const $ = app('time-machine', {
   activeTypes: {},
   suggestions: [],
   searchQuery: '',
