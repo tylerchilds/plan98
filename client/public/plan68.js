@@ -24,8 +24,16 @@ if(!rootAgent){
   rootAgent = JSON.parse(rootAgent)
 }
 
-const signer = await Ed25519Signer.fromJSON(JSON.stringify(rootAgent.asJSON))
+let signer = await Ed25519Signer.fromJSON(JSON.stringify(rootAgent.asJSON))
 const storage = new StorageClient(new URL(walletDefaultHost))
+
+export function getSigner() {
+  return signer
+}
+
+export function setSigner(s) {
+  signer = s
+}
 
 const logs = {}
 

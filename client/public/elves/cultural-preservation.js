@@ -1,22 +1,90 @@
+/*
+
+In the beginning,
+
+Dog created man. Man's best friend.
+
+Man's first instruction: fetch
+
+The fetch command instructs the human to chase and fetch the ball
+
+*/
+
 import app, { get, getSpace, put, del} from '@plan68/app'
+
+/*
+
+Since man could not reliably communicate telepathically,
+
+Dog gave man voice
+
+*/
+
 import Vosk from 'vosk-browser'
+
+/*
+
+An dog fed man toast.
+
+*/
+
+import { toast } from './plan98-toast.js'
+
+/*
+
+And for performance reasons, included an additional dependency when bootstrapping reality
+
+*/
+
 import { innerHTML } from 'diffhtml'
+
+/*
+
+Every universe needs a number. Some like Earth 616, others like it 48000
+
+*/
 
 const sampleRate = 48000;
 
+/*
+
+Data means nothing without a tag or a label or a lens through which to see
+
+*/
+
 const tag = 'cultural-preservation'
+
+/*
+
+An app is a nanobot.
+
+*/
+
 const $ = app(tag, {
   recording: false,
   caption: '',
   facingMode: 'environment',
-  to: 'es',
-  from: 'en',
-  sourceLanguages: [],
-  destinationLanguages: [],
   transcription: '',
+  url: '',
+  title: '',
+  author: '',
+  when: '',
+  description: '',
   history: [],
-  consented: false
+  showPanel: false,
+  showOverlay: false,
+  view: null,
+  objectId: null
 })
+
+/*
+
+
+*/
+
+async function initialize(target) {
+}
+
 
 /*
 
@@ -60,6 +128,32 @@ function appendToHistoricalRecord(state, payload) {
     history: [
       ...state.history,
       payload
+    ]
+  }
+}
+
+/*
+
+Replacing In
+
+Forget forgetting! When new facts are found, incorporate them into the model.
+
+*/
+
+function replaceInHistoricalRecord(state, payload) {
+  return {
+    ...state,
+    history: [
+      ...state.history.map(x => {
+        if(x.id === payload.id) {
+          return {
+            ...x,
+            ...payload
+          }
+        }
+
+        return x
+      })
     ]
   }
 }
@@ -136,21 +230,58 @@ function topEight(rizz) {
   )
 }
 
+/*
+
+Dog said, "No more fake news" and there was a media recorder
+
+*/
+
 let mediaRecorder;
+
+/*
+
+And a news station to store all the clips moment by moment was born
+
+*/
+
 let videoChunks = [];
+
+/*
+
+And the political and technical details were not lost on dog.
+
+*/
 
 const extensions = {
   'video/mp4;codecs=avc1': 'mp4',
   'video/mp4': 'mp4',
-  'video/webm;codecs=vp8,opus': 'webm', // Fallback for other browsers
+  'video/webm;codecs=vp8,opus': 'webm',
   'video/webm': 'webm'
 }
 
+/*
+
+And dog realized the humans needed sheperds and created mimes.
+
+*/
 
 const videoMimeTypes = Object.keys(extensions)
+
+/*
+
+And depending on exactly someone's identity politics, a palatable mime is alotted.
+
+*/
+
 const supportedVideoType = videoMimeTypes.find(type =>
   MediaRecorder.isTypeSupported(type)
 );
+
+/*
+
+Dog knew humans lacked telepathy and created a record button, imbued with magic
+
+*/
 
 $.when('click', '[data-record]', async (event) => {
   if (!supportedVideoType) {
@@ -159,63 +290,53 @@ $.when('click', '[data-record]', async (event) => {
 
   try {
     const root = event.target.closest($.link)
-    $.teach({ recording: true })
+    $.teach({ recording: true, transcription: '' })
 
-    // Create a MediaRecorder instance
-    // You can specify the MIME type here if you want a specific format,
-    // e.g., { mimeType: 'audio/webm; codecs=opus' }
-    // If not specified, the browser will choose a default supported format.
     mediaRecorder = new MediaRecorder(root.mediaStream);
     const recordedVideo = root.querySelector('video')
 
-    // Event handler for when data is available
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         videoChunks.push(event.data);
       }
     };
 
-    // Event handler for when recording stops
     mediaRecorder.onstop = () => {
-      // Combine all audio chunks into a single Blob
       const videoBlob = new Blob(videoChunks, { type: supportedVideoType });
-      videoChunks = []; // Clear chunks for next recording
+      videoChunks = [];
 
-      // Create a URL for the Blob and set it as the audio source
       const videoUrl = URL.createObjectURL(videoBlob);
       recordedVideo.src = videoUrl;
 
-      // Play the recorded audio
       recordedVideo.play()
         .catch(e => console.error("Error playing recorded audio:", e));
 
-      // Clean up the object URL after the audio is loaded (optional, but good practice)
-      // For longer audio, you might do this on audio.onended
       recordedVideo.onloadedmetadata = () => {
-        URL.revokeObjectURL(videoUrl); // Revoke after metadata is loaded
+        URL.revokeObjectURL(videoUrl);
       };
 
-      // Stop the microphone stream
-      //root.mediaStream.getTracks().forEach(track => track.stop());
       const now = new Date();
       const timestamp = now.toJSON()
       const src = root.getAttribute('src') || `/private/video-notes/${timestamp}.${extensions[supportedVideoType]}`
 
+      const { transcription } = $.learn()
+
       const historicalNugget = {
+        id: self.crypto.randomUUID(),
         src,
         title: 'Recorded Entry',
         author: 'Wally Wollaston',
-        when: new Date().toLocaleString('en-us')
+        description: 'A video recorded now about another time or place',
+        when: new Date().toLocaleString('en-us'),
+        transcription
       }
 
       POST(historicalNugget, appendToHistoricalRecord)
 
       const space = getSpace(root.id)
 
-      // Attempt to upload to server
       put.call({ space }, src, videoBlob, { type: supportedVideoType }).then(response => {
         if (!response.ok) {
-          // Explicitly throw for non-200 responses
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
@@ -223,10 +344,8 @@ $.when('click', '[data-record]', async (event) => {
       });
     };
 
-    // Start recording
     mediaRecorder.start();
 
-    // Update button states
     recordedVideo.src = ''; // Clear previous recording
 
     console.log('Recording started...');
@@ -238,6 +357,12 @@ $.when('click', '[data-record]', async (event) => {
   }
 });
 
+/*
+
+And a button to stop the record
+
+*/
+
 $.when('click', '[data-stop]', async () => {
   if (mediaRecorder && mediaRecorder.state === 'recording') {
     mediaRecorder.stop();
@@ -245,6 +370,12 @@ $.when('click', '[data-stop]', async () => {
     console.log('Recording stopped.');
   }
 });
+
+/*
+
+And a bunch of colorful shapes and sizes, since once again, humans.
+
+*/
 
 $.style(`
   & {
@@ -298,6 +429,21 @@ $.style(`
     text-align: right;
   }
 
+  & .overlay-area {
+    background: white;
+    display: none;
+    overflow: auto;
+  }
+
+  &[data-show-overlay="true"] .overlay-area {
+    position; absolute;
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: block;
+  }
+
   & .panel-area {
     background: white;
     display: none;
@@ -320,8 +466,22 @@ $.style(`
   & .playlist {
     display: flex;
     flex-direction: column-reverse;
-    gap: 1rem;
-    padding: 1rem;
+    gap: .5rem;
+    padding: 0 .5rem .5rem;
+  }
+
+  & .instructions {
+    padding: 0 .5rem .5rem;
+    display: none;
+  }
+
+  & .playlist:empty + .instructions {
+    display: block;
+  }
+
+  & .share-area {
+    text-align: right;
+    padding: .5rem;
   }
 
   & .clip {
@@ -342,16 +502,122 @@ $.style(`
     color: rgba(0,0,0,.45);
     font-weight: 700;
   }
+
+  & .memex-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+  }
+
+  & .memex-row button {
+    width: 100%;
+  }
+
+  & .focused-work {
+    display: grid;
+    margin: 0 auto;
+    max-width: 480px;
+    padding: 1rem .5rem 1rem;
+    display: block;
+  }
+
+  & .form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 0 auto 2rem;
+    max-width: 320px;
+  }
+
+  & .form-actions button {
+    width: 100%;
+  }
 `)
+
+/*
+
+And after filling the mind of man with fantasy, dog gave visions and dreams
+
+*/
+
+const views = {
+  edit: 'edit'
+}
+
+const viewRenderers = {
+  [views.edit]: function (target) {
+    const { draft } = $.learn()
+    const { id, title, author, description, transcription } = draft
+
+    return `
+      <div${id} class="focused-work">
+        <div class="form-actions">
+          <div>
+            <button data-save class="standard-button bias-positive">
+              Save
+            </button>
+          </div>
+          <div>
+            <button data-cancel class="standard-button bias-generic">
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <div class="metadata-form">
+          <label class="field">
+            <span class="label">Title</span>
+            <input data-bind="draft" name="title" value="${escapeHyperText(title)}"/>
+          </label>
+
+          <label class="field">
+            <span class="label">Author</span>
+            <input data-bind="draft" name="author" value="${escapeHyperText(author)}"/>
+          </label>
+
+          <label class="field">
+            <span class="label">Description</span>
+            <textarea data-bind="draft" name="description" value="${escapeHyperText(description)}"></textarea>
+          </label>
+
+          <label class="field">
+            <span class="label">Transcription</span>
+            <textarea data-bind="draft" name="transcription" value="${escapeHyperText(transcription)}"></textarea>
+          </label>
+        </div>
+
+      </div${id}>
+    `
+  }
+}
+
+/*
+
+And while dog created man, he imbued them with free will
+
+Free to make their own mistakes, they did.
+
+*/
 
 class CulturalPreservation extends HTMLElement {
   constructor() {
     super();
   }
 
+
   connectedCallback() {
-    $.draw(() => null, { afterUpdate: this.afterUpdate })
+    $.draw(() => null, {
+      beforeUpdate: this.beforeUpdate,
+      afterUpdate: this.afterUpdate
+    })
     this.init(this)
+  }
+
+  beforeUpdate(target) {
+    if(!target.mounted) {
+      target.mounted = true
+      initialize(target)
+    }
   }
 
   disconnectedCallback() {
@@ -407,7 +673,7 @@ class CulturalPreservation extends HTMLElement {
         </div>
 
         <div class="panel-area"></div>
-        <div class="modal-area"></div>
+        <div class="overlay-area"></div>
       `
       this.afterUpdate(target)
     }
@@ -462,6 +728,8 @@ class CulturalPreservation extends HTMLElement {
       partial='',
       recording,
       showPanel,
+      showOverlay,
+      view,
       result='',
       history,
     } = $.learn()
@@ -495,18 +763,41 @@ class CulturalPreservation extends HTMLElement {
       const area = document.querySelector('.panel-area')
       const clips = GET(topEight).map(x => {
         return `
-          <button data-play="${x.src}" class="clip standard-button -stealth">
-            <div class="clip-title">${x.title}</div>
-            <div class="clip-author">${x.author}</div>
-            <div class="clip-time">${x.when}</div>
-          </button>
+          <div class="memex-row">
+            <div>
+              <button data-play="${x.src}" class="clip standard-button -stealth">
+                <div class="clip-title">${x.title}</div>
+                <div class="clip-author">${x.author}</div>
+                <div class="clip-time">${x.when}</div>
+              </button>
+            </div>
+            <div>
+              <button data-edit="${x.id}" class="standard-button -round -stealth">
+                <sl-icon name="pencil"></sl-icon>
+              </button>
+            </div>
+          </div>
         `
       }).join('')
 
+      const copyId = self.crypto.randomUUID()
+      const permalink = `${window.location.origin}/app/${$.link}?id=${target.id}`
+
       area.innerHTML = `
-        <div class="playlist">
-          ${clips}
+        <div class="share-area">
+          <div class="action-bar">
+            <button data-copy="${copyId}" class="standard-button" style="display: inline-grid; grid-template-columns: auto 1fr; gap: .5rem">
+              <span>
+                <sl-icon name="copy"></sl-icon>
+              </span>
+              Copy Link
+            </button>
+          </div>
+          <div id="${copyId}" style="height: 0px; overflow: hidden; opacity: 0;">${permalink}</div>
+          </div>
         </div>
+        <div class="playlist">${clips}</div>
+        <div class="instructions">Record a video and it will display here.</div>
       `
       target.dataset.showPanel = true
     } else {
@@ -514,8 +805,24 @@ class CulturalPreservation extends HTMLElement {
       target.dataset.showPanel = false
       if(area.innerHTML) area.innerHTML = ''
     }
+
+    if(showOverlay) {
+      const area = document.querySelector('.overlay-area')
+      innerHTML(area, (viewRenderers[view] || (() => '404'))())
+      target.dataset.showOverlay = true
+    } else {
+      const area = document.querySelector('.overlay-area')
+      target.dataset.showOverlay = false
+      if(area.innerHTML) area.innerHTML = ''
+    }
   }
 }
+
+/*
+
+And dog demanded resolution and quality
+
+*/
 
 async function setMediaStream(target) {
   const { facingMode } = $.learn()
@@ -535,6 +842,12 @@ async function setMediaStream(target) {
   });
 }
 
+/*
+
+And dog saw it fit for man to see their mistakes.
+
+*/
+
 $.when('click', '[data-play]', (event) => {
   const { play } = event.target.dataset
   const root = event.target.closest($.link)
@@ -548,7 +861,15 @@ $.when('click', '[data-play]', (event) => {
   })
 })
 
-$.when('click', '[data-flip]', (event) => {
+/*
+
+And man was vain while dog was not.
+
+So rather than only allow dog photos, dog allowed man to turn the camera in.
+
+*/
+
+$.when('click', '[data-flip]', async (event) => {
   const { facingMode } = $.learn()
 
   if(facingMode === 'environment') {
@@ -558,9 +879,16 @@ $.when('click', '[data-flip]', (event) => {
   }
 
   const target = event.target.closest($.link)
-  setMediaStream(target)
+  await setMediaStream(target)
   target.video.srcObject = target.mediaStream;
+  target.video.autoplay = true;
 })
+
+/*
+
+And dog provided a panel with a list of all memories
+
+*/
 
 $.when('click', '[data-list]', () => {
   const { showPanel } = $.learn()
@@ -571,11 +899,140 @@ $.when('click', '[data-list]', () => {
 
 /*
 
-This last line is important to some people for whatever reason
+And dog let man assume the role of producer with a clipboard
 
-In elf world, omission of this is allowed and it may be auto-defined at runtime
+*/
 
-In this case in particular, it was needed for system hooks to toggle media
+function copyToClipboard(target) {
+  if (document.selection) {
+    const range = document.body.createTextRange();
+    range.moveToElementText(target);
+    range.select().createTextRange();
+    document.execCommand("copy");
+    toast("Copied to clipboard")
+  } else if (window.getSelection) {
+    const range = document.createRange();
+    range.selectNode(target);
+    window.getSelection().addRange(range);
+    document.execCommand("copy");
+    toast("Copied to clipboard")
+  }
+  window.getSelection().removeAllRanges()
+}
+
+/*
+
+And a button to easily copy the dailies to share back with dog
+
+*/
+
+$.when('click', '[data-copy]', (event) => {
+  const { copy } = event.target.dataset
+  const targetToCopy = event.target.closest($.link).querySelector(`[id="${copy}"]`)
+  copyToClipboard(targetToCopy)
+})
+
+/*
+
+
+*/
+
+$.when('click', '[data-edit]', (event) => {
+  const { edit } = event.target.dataset
+  const { showOverlay, history } = $.learn()
+
+  const object = history.find(x => edit === x.id)
+
+  if(object) {
+    $.teach({ showOverlay: true, view: views.edit, objectId: object.id, draft: object })
+  }
+})
+
+/*
+
+And dog gave man the ability to close without changes
+
+*/
+
+$.when('click', '[data-cancel]', (event) => {
+  $.teach({ showOverlay: false, view: null, objectId: null })
+})
+
+/*
+
+And the ability to save to dog with them
+
+*/
+
+$.when('click', '[data-save]', (event) => {
+  const { draft } = $.learn()
+  POST(draft, replaceInHistoricalRecord)
+  $.teach({ view: null, objectId: null, showOverlay: false })
+  toast("Memex updated.")
+})
+
+/*
+
+And dog provided a way to declaratively bind data and views
+
+*/
+
+
+$.when('input', '[data-bind]', function handleBind(event) {
+  const { bind } = event.target.dataset
+  if(bind) {
+    $.teach({
+      name: event.target.name,
+      value: event.target.value
+    }, bound(bind))
+  } else {
+    $.teach({ 
+      name: event.target.name,
+      value: event.target.value
+    })
+  }
+})
+
+/*
+
+And dog taught man the lambda calculus
+
+*/
+
+function bound(bind) {
+  return (state, payload) => {
+    return {
+      ...state,
+      [bind]: {
+        ...state[bind],
+        [payload.name]: payload.value
+      }
+    }
+  }
+}
+
+/*
+
+And dog allowed man some control of hyper space, but not all
+
+*/
+
+function escapeHyperText(text = '') {
+  if(!text) return ''
+  return text.replace(/[&<>'"]/g,
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+/*
+
+And once again, Dog committed lines of syntax to satiate the higher powers
 
 */
 customElements.define(tag, CulturalPreservation);
