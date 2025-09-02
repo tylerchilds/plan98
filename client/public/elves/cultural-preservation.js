@@ -494,12 +494,12 @@ $.style(`
   }
 
   & .clip-author {
-    color: rgba(0,0,0,.65);
+    color: rgba(0,0,0,.45);
     font-weight: 400;
   }
 
   & .clip-time {
-    color: rgba(0,0,0,.45);
+    color: rgba(0,0,0,.25);
     font-weight: 700;
   }
 
@@ -1035,4 +1035,8 @@ function escapeHyperText(text = '') {
 And once again, Dog committed lines of syntax to satiate the higher powers
 
 */
-customElements.define(tag, CulturalPreservation);
+try {
+  customElements.define(tag, CulturalPreservation);
+} catch (e) {
+  console.error(e)
+}

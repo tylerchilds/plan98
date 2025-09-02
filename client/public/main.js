@@ -1,4 +1,3 @@
-import module from '@silly/tag'
 import { doingBusinessAs } from "@sillonious/brand"
 
 import('randomuuid').catch(console.error)
@@ -30,7 +29,10 @@ const newpage = `
   <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `
 
-module('#main').draw(target => newpage)
+import('@silly/elf').then(x => {
+  x.default('#main').draw(target => newpage)
+})
+
 
 export function setDatabase(url) {
   localStorage.setItem("plan98.database", 'https://sillonious.pockethost.io')
