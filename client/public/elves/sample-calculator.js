@@ -1,7 +1,7 @@
 import elf from '@silly/elf'
 
 const $ = elf('sample-calculator', {
-  expression: '2*3+4'
+  expression: '5*52*50*45'//'2*3+4'
 })
 
 $.draw((target) => {
