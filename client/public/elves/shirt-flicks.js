@@ -24,6 +24,32 @@ const lolol = {
   },
 }
 
+function audioFactory(url) {
+  const audioPool = [];
+  const poolSize = 3;
+  let poolIndex = 0;
+
+  // Initialize pool
+  for (let i = 0; i < poolSize; i++) {
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      audio.load();
+      audioPool.push(audio);
+  }
+
+  return function play() {
+      const sound = audioPool[poolIndex];
+      sound.currentTime = 0; // Reset to start
+      sound.play().catch(e => console.log('Play failed:', e));
+
+      // Cycle through pool
+      poolIndex = (poolIndex + 1) % poolSize;
+  }
+}
+
+const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor.sh/output/a.mp3')
+const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor.sh/output/b.mp3')
+
 const $ = app('shirt-flicks', {
   rows: 1,
   columns: 1,
@@ -38,8 +64,8 @@ $.draw((target) => {
 
   if(mode === modes.settings) {
     return `
-      <button data-options>
-        Options
+      <button class="logo" data-options>
+        ShirtFlicks
       </button>
       <div class="settings">
         <div class="title">Settings</div>
@@ -102,9 +128,10 @@ $.draw((target) => {
   const grid = [y-1,y,y+1].map(createRow).join('')
 
   return `
-    <button data-options>
-      Options
+    <button class="logo" data-options>
+      ShirtFlicks
     </button>
+
     <div class="game">
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
@@ -203,12 +230,8 @@ $.when('click', '[data-install]', function launchInstallWizard (event) {
     const target = event.target.closest($.link)
     const instance = instances[target.id]
     const { x, y } = instance
-    const content = `
-      <div${x}${y}>
-        ${product.boxart}
-      </div${x}${y}>
-    `
-    updateBox({ x, y, id: target.id }, { content })
+    lolol[`${y}`][`${x}`] = product.boxart
+    updateBox({ x, y, id: target.id }, { content: content(x, y) })
     $.teach({ mode: modes.game })
   }
 })
@@ -330,7 +353,12 @@ function slideLeft(id) {
   const { instances } = $.learn()
 
   if(!instances[id]) return
-  const { x } = instances[id]
+  const { x, y } = instances[id]
+
+  if(softBoundary(x,y) && softBoundary(x-1,y)) {
+    playStuckSound()
+    return
+  }
 
   updateInstance({ id }, { x: x - 1 })
   playSwipeSound()
@@ -339,7 +367,12 @@ function slideLeft(id) {
 function slideRight(id) {
   const { instances } = $.learn()
   if(!instances[id]) return
-  const { x } = instances[id]
+  const { x, y } = instances[id]
+
+  if(softBoundary(x,y) && softBoundary(x+1,y)) {
+    playStuckSound()
+    return
+  }
 
   updateInstance({ id }, { x: x + 1 })
   playSwipeSound()
@@ -348,7 +381,12 @@ function slideRight(id) {
 function slideUp(id) {
   const { instances } = $.learn()
   if(!instances[id]) return
-  const { y } = instances[id]
+  const { x, y } = instances[id]
+
+  if(softBoundary(x,y) && softBoundary(x,y-1)) {
+    playStuckSound()
+    return
+  }
 
   updateInstance({ id }, { y: y - 1 })
   playSwipeSound()
@@ -357,29 +395,25 @@ function slideUp(id) {
 function slideDown(id) {
   const { instances } = $.learn()
   if(!instances[id]) return
-  const { y } = instances[id]
+  const { x, y } = instances[id]
+
+  if(softBoundary(x,y) && softBoundary(x,y+1)) {
+    playStuckSound()
+    return
+  }
 
   updateInstance({ id }, { y: y + 1 })
   playSwipeSound()
 }
 
-function playSwipeSound() {
-    const sound = new Audio('/public/cdn/sillyz.computer/beat-tape-extractor.sh/output/a.mp3');
-
-    // Clean up when audio finishes or fails
-    const cleanup = () => {
-        sound.removeEventListener('ended', cleanup);
-        sound.removeEventListener('error', cleanup);
-        sound.src = ''; // Release the audio resource
-    };
-
-    sound.addEventListener('ended', cleanup);
-    sound.addEventListener('error', cleanup);
-
-    sound.play().catch(e => {
-        console.log('Audio play failed:', e);
-        cleanup(); // Clean up on play failure too
-    });
+function softBoundary(x, y) {
+  if(!lolol[y]) {
+    return true
+  } else if(!lolol[y][x]) {
+    return true
+  } else {
+    return false
+  }
 }
 
 function setGesture(){
@@ -420,21 +454,40 @@ $.style(`
     font-weight: bold;
   }
 
+  & .logo {
+    position: relative;
+    font-weight: 100%;
+    border-radius: 100%;
+    padding: .25rem;
+    font-weight: bold;
+  }
+
+  & .shirtflicks-s {
+
+  }
+
+  & .shirtflicks-f {
+
+  }
+
+
+
   & [data-options] {
-    background: rgba(255,255,255,.05);
-    border: 1px solid rgba(255,255,255,.25);
-    color: rgba(255,255,255,.65);
+    background: rgba(0,0,0,1);
+    border: none;
+    color: rgba(255,255,255,.85);
     position: absolute;
     top: 0;
     right: 0;
     z-index: 10;
     padding: 4px 8px;
+    border-radius: 2px;
+    margin: .5rem;
   }
 
   & [data-options]:hover,
   & [data-options]:focus {
-    background: rgba(255,255,255,.25);
-    color: rgba(0,0,0,1);
+    color: rgba(255,255,255,1);
   }
 
   & .game,
@@ -493,7 +546,7 @@ $.style(`
   & .tile {
     grid-area: tile;
     display: grid;
-    place-content: center;
+    place-items: center;
     --tile-x: 0;
     --tile-y: 0;
     transform: translate(var(--tile-x), var(--tile-y));
@@ -571,6 +624,19 @@ $.style(`
     mix-blend-mode: soft-light;
   }
 
+  & .transclusion {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    place-content: end center;
+    padding: 1rem;
+    pointer-events: none;
+  }
+
+
+  & .transclution button {
+    pointer-events: all;
+  }
 `)
 
 const lastFrame = {
@@ -715,7 +781,7 @@ function content(x, y) {
   }
 
   return `
-    <div${x}${y}>
+    <div${x}${y} class="transclusion">
       ${value}
     </div${x}${y}>
   `
