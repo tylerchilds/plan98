@@ -95,7 +95,7 @@ $.draw((target) => {
       const product = products[key]
 
       return `
-        <button data-install="${key}">
+        <button class="standard-button -large -stealth bias-generic" data-install="${key}">
           ${product.title}
         </button>
       `
@@ -103,7 +103,9 @@ $.draw((target) => {
 
     return `
       <div class="flicks">
-        ${flicks}
+        <div class="product-list">
+          ${flicks}
+        </div>
       </div>
     `
   }
@@ -230,6 +232,9 @@ $.when('click', '[data-install]', function launchInstallWizard (event) {
     const target = event.target.closest($.link)
     const instance = instances[target.id]
     const { x, y } = instance
+    if(!lolol[`${y}`]) {
+      lolol[`${y}`] = {}
+    }
     lolol[`${y}`][`${x}`] = product.boxart
     updateBox({ x, y, id: target.id }, { content: content(x, y) })
     $.teach({ mode: modes.game })
@@ -628,7 +633,7 @@ $.style(`
     height: 100%;
     width: 100%;
     display: grid;
-    place-content: end center;
+    place-content: end start;
     padding: 1rem;
     pointer-events: none;
   }
@@ -637,6 +642,82 @@ $.style(`
   & .transclution button {
     pointer-events: all;
   }
+
+  & .system-title {
+    color: rgba(255,255,255, .95);
+    font-size: 1.2rem;
+    position: relative;
+    font-weight: bold;
+    z-index: 3;
+    background: black;
+    padding: .5rem;
+  }
+
+  & .system-keyart {
+    position: absolute;
+    inset: 0;
+    object-fit: contain;
+    display: grid;
+  }
+
+  & .system-keyart img {
+    margin: auto;
+  }
+
+  & .system-artist {
+    color: rgba(255,255,255, .85);
+    background: black;
+    position: relative;
+    font-size: .9rem;
+    padding: 4px;
+    z-index: 3;
+  }
+
+  & .system-description {
+    color: rgba(255,255,255, .85);
+    background: black;
+    position: relative;
+    z-index: 3;
+    margin-bottom: 1rem;
+    padding: .5rem;
+  }
+
+  & .system-button {
+    max-width: 100%;
+    width: 240px;
+    position: relative;
+    z-index: 3;
+  }
+
+  & .action-area {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  & .flicks {
+    height: 100%;
+    overflow: auto;
+  }
+
+  & .product-list {
+    max-width: 55ch;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    gap: .5rem;
+    padding: 1rem;
+  }
+
+  & .flicks button {
+    width: 100%;
+  }
+
+  & .flicks button > * {
+    pointer-events: none;
+  }
+
+
 `)
 
 const lastFrame = {
@@ -761,11 +842,25 @@ function gameLoop(time) {
 
 function installFlick(x, y) {
   return `
-    Install Flick
+    <div class="action-area">
+      <div>
+        <span class="system-title">
+          Install Flick
+        </span>
+        <span class="system-artist">
+          Plan98
+        </span>
+      </div>
 
-    <button data-browse data-x="${x}" data-y="${y}">
-      Browse
-    </button>
+
+      <div class="system-description">
+        From the content catalog, pick your favorite flicks.
+      </div>
+
+      <button class="standard-button system-button" data-browse data-x="${x}" data-y="${y}">
+        Browse
+      </button>
+    </div>
   `
 }
 

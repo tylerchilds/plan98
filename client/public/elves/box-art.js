@@ -3,7 +3,7 @@ import elf from '@silly/elf'
 export const products = {
   jokebook: {
     title: 'Joke Book',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'A personal journal for the any type of different joke.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="jokebook"></box-art>',
@@ -11,7 +11,7 @@ export const products = {
   },
   memex: {
     title: 'Plan98:Memex',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'Forget forgetting. Agency over memory. Your brains.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="memex"></box-art>',
@@ -19,7 +19,7 @@ export const products = {
   },
   songwave: {
     title: 'Song Wave',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'A multiplayer game to face and save the music.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="songwave"></box-art>',
@@ -27,7 +27,7 @@ export const products = {
   },
   finalboss: {
     title: 'Final Boss',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'A multiplayer game to face and save the music.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="finalboss"></box-art>',
@@ -35,7 +35,7 @@ export const products = {
   },
   securemail: {
     title: 'Secure Mail',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'Email is the preferred communication for busy people.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="securemail"></box-art>',
@@ -43,7 +43,7 @@ export const products = {
   },
   coolchat: {
     title: 'Cool Chat',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'Nobody likes downloading or using chat apps, say hi and bye',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="coolchat"></box-art>',
@@ -51,7 +51,7 @@ export const products = {
   },
   drawterm: {
     title: 'Draw Term',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'Swipe a windows',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="drawterm"></box-art>',
@@ -59,7 +59,7 @@ export const products = {
   },
   typohero: {
     title: 'Typo Hero',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'Learn to type on a five chorder with a strummer input',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="typohero"></box-art>',
@@ -67,7 +67,7 @@ export const products = {
   },
   filesystem: {
     title: 'File System',
-    artist: 'Tyler Childs',
+    artist: 'Sillyz.Computer',
     description: 'View all your files',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="filesystem"></box-art>',
@@ -81,7 +81,46 @@ export const products = {
     boxart: '<box-art product="sonicknuckles"></box-art>',
     url: '/app/sonic-knuckles'
   },
-
+  netflix: {
+    title: 'Netflix',
+    artist: 'Netflix.Com',
+    description: 'Movies',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="netflix"></box-art>',
+    url: 'https://netflix.com'
+  },
+  google: {
+    title: 'Google',
+    artist: 'Google.Com',
+    description: 'Inventory',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="google"></box-art>',
+    url: 'https://google.com'
+  },
+  archive: {
+    title: 'Archive',
+    artist: 'Archive.Org',
+    description: 'Inventory',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="archive"></box-art>',
+    url: 'https://google.com'
+  },
+  bluesky: {
+    title: 'Bluesky',
+    artist: 'Bsky.App',
+    description: 'Inventory',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="bluesky"></box-art>',
+    url: 'https://bsky.app/'
+  },
+  blue98: {
+    title: 'Blue98',
+    artist: 'Sillyz.Computer',
+    description: 'A social media network inside a social media network',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="blue98"></box-art>',
+    url: '/app/blue-sky'
+  },
 }
 
 const $ = elf('box-art')
@@ -136,7 +175,7 @@ $.style(`
     font-weight: bold;
     z-index: 3;
     background: black;
-    padding: 1rem;
+    padding: .5rem;
   }
 
   & .product-keyart {
