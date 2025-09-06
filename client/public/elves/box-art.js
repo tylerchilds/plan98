@@ -197,8 +197,8 @@ $.style(`
   & .product-keyart {
     position: absolute;
     inset: 0;
-    object-fit: contain;
     display: grid;
+    place-content: center;
   }
 
   & .product-keyart img {
