@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <time-machine></time-machine>
+    <ur-shell rom="shirt-flicks"></ur-shell>
   `
 })
 
