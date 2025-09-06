@@ -1193,6 +1193,23 @@ sillonious-brand > xml-html {
   background: linear-gradient(rgba(255,255,255,.5) 0%, rgba(0,0,0,.25) 100%), var(--root-theme, mediumseagreen);
 }
 
+.standard-input.-dark,
+.standard-button.-dark {
+  color: white;
+  background: rgba(0,0,0,.85);
+  border-bottom-color: rgba(0,0,0,1);
+}
+
+.standard-button.-dark:hover,
+.standard-button.-dark:focus,
+.standard-button.-dark.active,
+.standard-button.-dark:active {
+  color: rgba(255,255,255,.85);
+  background: linear-gradient(rgba(255,255,255,.5) 0%, rgba(0,0,0,.25) 100%), var(--root-theme, mediumseagreen);
+}
+
+
+
 .standard-button.-soft {
   border-radius: .5rem;
 }

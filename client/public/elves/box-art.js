@@ -39,7 +39,7 @@ export const products = {
     description: 'Email is the preferred communication for busy people.',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="securemail"></box-art>',
-    url: '/app/secure-mail'
+    url: '/app/e-mail'
   },
   coolchat: {
     title: 'Cool Chat',
@@ -73,6 +73,14 @@ export const products = {
     boxart: '<box-art product="filesystem"></box-art>',
     url: '/app/file-system'
   },
+  stardew: {
+    title: 'Stardew Valley',
+    artist: 'StardewValley.Net',
+    description: 'A slice of life simulator on your slice of life simulator',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="stardew"></box-art>',
+    url: 'steam://rungameid/413150'
+  },
   sonicknuckles: {
     title: 'Sonic &amp; Knuckles',
     artist: 'Sonic 3 A.I.R.',
@@ -80,6 +88,14 @@ export const products = {
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="sonicknuckles"></box-art>',
     url: '/app/sonic-knuckles'
+  },
+  tamashika: {
+    title: 'Tamashika',
+    artist: 'QuickTequila.Com',
+    description: 'ATTENTION IS ALL YOU NEED',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="tamashika"></box-art>',
+    url: 'steam://rungameid/3788220'
   },
   netflix: {
     title: 'Netflix',
@@ -103,7 +119,7 @@ export const products = {
     description: 'Inventory',
     keyart: '/public/cdn/boxart.svg',
     boxart: '<box-art product="archive"></box-art>',
-    url: 'https://google.com'
+    url: 'https://archive.org'
   },
   bluesky: {
     title: 'Bluesky',

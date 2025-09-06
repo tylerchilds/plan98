@@ -12,15 +12,15 @@ const modes = {
 
 const lolol = {
   '0': {
-    '-1': products.memex.boxart,
-    '0': products.jokebook.boxart,
-    '1': products.memex.boxart,
+    '-1': products.memex,
+    '0': products.jokebook,
+    '1': products.memex,
   },
   '1': {
-    '0': products.memex.boxart,
+    '0': products.memex,
   },
   '-1': {
-    '0': products.memex.boxart,
+    '0': products.memex,
   },
 }
 
@@ -54,11 +54,12 @@ const $ = app('shirt-flicks', {
   rows: 1,
   columns: 1,
   instances: {},
-  mode: modes.game
+  mode: modes.game,
+  browserIndex: 0
 })
 
 $.draw((target) => {
-  const { mode, player, instances, debuggerVisible } = $.learn()
+  const { mode, player, instances, debuggerVisible, browserIndex } = $.learn()
   seed(target)
   if(!instances[target.id]) return
 
@@ -91,11 +92,11 @@ $.draw((target) => {
   }
 
   if(mode === modes.browse) {
-    const flicks = Object.keys(products).map(key => {
+    const flicks = Object.keys(products).map((key, index )=> {
       const product = products[key]
 
       return `
-        <button class="standard-button -large -stealth bias-generic" data-install="${key}">
+        <button class="standard-button -large ${browserIndex === index ? 'bias-generic' : '-dark'}" data-install="${key}" ${browserIndex === index?'data-focused':''}>
           ${product.title}
         </button>
       `
@@ -173,6 +174,20 @@ $.draw((target) => {
         target.style.setProperty("--pan-y", `0`);
       }
     }
+
+    {
+      const { mode } = $.learn()
+
+      if(mode === modes.browse) {
+        const active = target.querySelector('[data-focused]')
+
+        if(active) {
+          active.scrollIntoView({
+            block: "center"
+          })
+        }
+      }
+    }
   }
 })
 
@@ -223,7 +238,37 @@ $.when('click', '[data-browse]', function launchInstallWizard (event) {
   $.teach({ mode: modes.browse })
 })
 
-$.when('click', '[data-install]', function launchInstallWizard (event) {
+function streamA(value, id) {
+  const { instances } = $.learn()
+  const instance = instances[id]
+
+  if(instance) {
+    const { x, y } = instance
+    
+    if(softBoundary(x, y)) {
+      toggleSpam('a', value, () => {
+        $.teach({ mode: modes.browse })
+      })
+    } else {
+      toggleSpam('a', value, () => {
+        const product = getProduct(x,y)
+        window.location.href = product.url
+      })
+    }
+  }
+}
+
+function streamFactory(key, handler) {
+  return (value, id) => {
+    toggleSpam(key, value, () => {
+      handler(id)
+    })
+  }
+}
+
+$.when('click', '[data-install]', installProduct)
+
+function installProduct (event) {
   const { install } = event.target.dataset
   const { instances } = $.learn()
   const product = products[install]
@@ -235,13 +280,11 @@ $.when('click', '[data-install]', function launchInstallWizard (event) {
     if(!lolol[`${y}`]) {
       lolol[`${y}`] = {}
     }
-    lolol[`${y}`][`${x}`] = product.boxart
+    lolol[`${y}`][`${x}`] = product
     updateBox({ x, y, id: target.id }, { content: content(x, y) })
     $.teach({ mode: modes.game })
   }
-})
-
-
+}
 
 $.when('pointerdown', '.tile', function(e) {
   event.preventDefault()
@@ -432,6 +475,22 @@ function setGesture(){
     $.teach({ tileGesture: 'swipe' })
   }
 }
+
+function browserUp(id) {
+  const { browserIndex } = $.learn()
+  const index = mod((browserIndex - 1), Object.keys(products).length)
+  $.teach({ browserIndex: index })
+  playSwipeSound()
+}
+
+function browserDown(id) {
+  const { browserIndex } = $.learn()
+  const index = mod((browserIndex + 1), Object.keys(products).length)
+  $.teach({ browserIndex: index })
+  playSwipeSound()
+}
+
+
 
 $.style(`
   & {
@@ -720,6 +779,46 @@ $.style(`
 
 `)
 
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const forceCache = {}
+
+// essentially make sure the button was released to ensure the screen
+function forceAcknowledge(code, value, callback) {
+  if(value === 0 && !forceCache[code]) {
+    forceCache[code] = 0
+    return
+  }
+  if(forceCache[code] === 1 || (forceCache[code] === 0 && value === 1)) {
+    forceCache[code] = 1
+    callback()
+  }
+}
+
+function clearAcknowledge(code) {
+  delete forceCache[code]
+}
+
 const lastFrame = {
   a: false,
   b: false,
@@ -731,9 +830,10 @@ const lastFrame = {
   right: false,
 }
 
+
 function gameLoop(time) {
   const { id } = this
-  const { instances } = $.learn()
+  const { mode, instances, browserIndex } = $.learn()
   if(instances[id]) {
     const { x, y } = instances[id]
     const player = {
@@ -756,82 +856,62 @@ function gameLoop(time) {
       os: checkButton(0, 16),
     }
 
-    if(player.a) {
-    } else {
+    if(mode === modes.game) {
+      const streamOS = streamFactory('os', toggleMode)
+
+      const streamUp = streamFactory('up', slideUp)
+      const streamDown = streamFactory('down', slideDown)
+      const streamLeft = streamFactory('left', slideLeft)
+      const streamRight = streamFactory('right', slideRight)
+      const streamB = streamFactory('b', (id) => {
+          $.teach({ mode: modes.browse })
+      })
+
+      streamOS(player.os, id)
+
+      streamA(player.a, id)
+      streamB(player.b, id)
+      streamUp(player.up, id)
+      streamDown(player.down, id)
+      streamLeft(player.left, id)
+      streamRight(player.right, id)
     }
 
-    if(player.b) {
-    } else {
+    if(mode === modes.browse) {
+      const streamUp = streamFactory('up', browserUp)
+      const streamDown = streamFactory('down', browserDown)
+
+      const streamA = streamFactory('a', (id) => {
+        $.teach({ mode: modes.browse })
+        const install = Object.keys(products)[browserIndex]
+        const product = products[install]
+
+        if(product) {
+          const instance = instances[id]
+          const { x, y } = instance
+          if(!lolol[`${y}`]) {
+            lolol[`${y}`] = {}
+          }
+          lolol[`${y}`][`${x}`] = product
+          updateBox({ x, y, id }, { content: content(x, y) })
+          $.teach({ mode: modes.game })
+        }
+      })
+ 
+      const streamB = streamFactory('b', (id) => {
+        $.teach({ mode: modes.browse })
+      })
+
+      streamUp(player.up, id)
+      streamDown(player.down, id)
+
+      streamA(player.a, id)
+      streamB(player.b, id)
     }
 
-    if(player.x) {
-    } else {
-    }
-
-    if(player.y) {
-    } else {
-    }
-
-    if(player.lb) {
-    } else {
-    }
-
-    if(player.rb) {
-    } else {
-    }
-
-    if(player.lt) {
-    } else {
-    }
-
-    if(player.rt) {
-    } else {
-    }
-
-    if(player.up) {
-      if(!lastFrame.up) {
-        lastFrame.up = true
-        slideUp(id)
-      }
-    } else {
-      lastFrame.up = false
-    }
-
-    if(player.down) {
-      if(!lastFrame.down) {
-        lastFrame.down = true
-        slideDown(id)
-      }
-    } else {
-      lastFrame.down = false
-    }
-
-    if(player.left) {
-      if(!lastFrame.left) {
-        lastFrame.left = true
-        slideLeft(id)
-      }
-    } else {
-      lastFrame.left = false
-    }
-
-    if(player.right) {
-      if(!lastFrame.right) {
-        lastFrame.right = true
-        slideRight(id)
-      }
-    } else {
-      lastFrame.right = false
-    }
-
-    if(player.os) {
-      if(!lastFrame.os) {
-        lastFrame.os = true
-        toggleMode()
-        //document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-      }
-    } else {
-      lastFrame.os = false
+    if(mode === modes.settings) {
+      const streamOS = streamFactory('os', toggleMode)
+      streamOS(player.os, id)
     }
 
     $.teach({ player })
@@ -867,12 +947,10 @@ function installFlick(x, y) {
 function content(x, y) {
   let value
 
-  if(!lolol[y]) {
-    value = installFlick(x, y)
-  } else if(!lolol[y][x]) {
+  if(softBoundary(x,y)) {
     value = installFlick(x, y)
   } else {
-    value = lolol[`${y}`][`${x}`]
+    value = lolol[`${y}`][`${x}`].boxart
   }
 
   return `
@@ -880,6 +958,10 @@ function content(x, y) {
       ${value}
     </div${x}${y}>
   `
+}
+
+function getProduct(x,y) {
+  return lolol[`${y}`][`${x}`]
 }
 
 function seed(target) {
