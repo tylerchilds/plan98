@@ -17,6 +17,14 @@ export const products = {
     boxart: '<box-art product="memex"></box-art>',
     url: '/app/time-machine'
   },
+  tuner: {
+    title: 'Music Tuner',
+    artist: 'Bloop.Monster',
+    description: 'A string tuner for guitar and uke, then more...',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="tuner"></box-art>',
+    url: '/app/music-tuner'
+  },
   songwave: {
     title: 'Song Wave',
     artist: 'Sillyz.Computer',
@@ -165,15 +173,15 @@ $.draw((target) => {
     <div class="product-keyart">
       <img src="${product.keyart}" />
     </div>
-    <button class="standard-button product-button" data-url="${product.url}">
-      Launch
-    </button>
+    <div class="product-actions">
+      <button class="standard-button product-button" data-launch="${product.url}">
+        Launch
+      </button>
+      <button class="standard-button" data-browse>
+        Swap
+      </button>
+    </div>
   `
-})
-
-$.when('click', '.product-button', (event) => {
-  const { url } = event.target.dataset
-  window.location.href = url
 })
 
 $.style(`
@@ -193,7 +201,6 @@ $.style(`
     background: black;
     padding: .5rem;
   }
-
   & .product-keyart {
     position: absolute;
     inset: 0;
@@ -223,9 +230,7 @@ $.style(`
     padding: .5rem;
   }
 
-  & .product-button {
-    max-width: 100%;
-    width: 240px;
+  & .product-actions button {
     position: relative;
     z-index: 3;
   }

@@ -69,10 +69,6 @@ $.draw((target) => {
         ShirtFlicks
       </button>
       <div class="settings">
-        <div class="title">Settings</div>
-
-        <hr>
-
         ${Object.keys(player).map(key => {
           return `
             <div>
@@ -81,12 +77,12 @@ $.draw((target) => {
           `
         }).join('')}
 
-        <hr>
-
         <button class="toolbelt-debugger">
           ${ debuggerVisible ? 'Hide Debugger' : 'Show Debugger' }
         </button>
-
+        <button class="toolbelt-escape">
+          Escape
+        </button>
       </div>
     `
   }
@@ -237,6 +233,12 @@ function toggleMode (event) {
 $.when('click', '[data-browse]', function launchInstallWizard (event) {
   $.teach({ mode: modes.browse })
 })
+
+$.when('click', '[data-launch]', (event) => {
+  const { launch } = event.target.dataset
+  window.location.href = launch
+})
+
 
 function streamA(value, id) {
   const { instances } = $.learn()
@@ -1059,3 +1061,9 @@ function debugToolbelt(event) {
 
   event.target.classList.toggle('enabled')
 }
+
+$.when('click', '.toolbelt-escape', (event) => {
+  $.teach({ activated: false })
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+})
+
