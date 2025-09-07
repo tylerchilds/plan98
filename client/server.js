@@ -421,6 +421,7 @@ function template() {
     </style>
     <link href="/public/styles/system.css" rel="stylesheet">
     <script async src="/public/vendor/es-module-shims.js"></script>
+    <script async src="/public/plan98-shims.js"></script>
     <script type="importmap">
       {
         "imports": {
