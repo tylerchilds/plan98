@@ -2774,10 +2774,6 @@ $.style(`
     display: block;
     overflow: hidden;
     height: 100%;
-    background:
-      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.5), rgba(0,0,0,.5), var(--root-theme, mediumseagreen)),
-      var(--root-theme, mediumseagreen);
   }
 
   & [view=${views.notification}] {
@@ -2815,7 +2811,6 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: 1px;
-    background: rgba(0,0,0,.25);
   }
 
   & .sidebar button {
@@ -3005,7 +3000,6 @@ $.style(`
   }
 
   & .sidebar .navigation {
-    background: rgba(0,0,0,.85);
     display: grid;
     grid-template-columns: 2rem 1fr;
     align-items: center;

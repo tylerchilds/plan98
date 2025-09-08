@@ -4,8 +4,9 @@ import { consoleShow, consoleHide } from './plan98-console.js'
 import { products } from './box-art.js'
 
 const modes = {
-  game: 'game',
+  system: 'system',
   browse: 'browse',
+  play: 'play',
   settings: 'settings',
   player: {}
 }
@@ -54,12 +55,13 @@ const $ = app('shirt-flicks', {
   rows: 1,
   columns: 1,
   instances: {},
-  mode: modes.game,
-  browserIndex: 0
+  mode: modes.system,
+  browserIndex: 0,
+  src: null
 })
 
 $.draw((target) => {
-  const { mode, player, instances, debuggerVisible, browserIndex } = $.learn()
+  const { src, mode, player, instances, debuggerVisible, browserIndex } = $.learn()
   seed(target)
   if(!instances[target.id]) return
 
@@ -131,11 +133,12 @@ $.draw((target) => {
       ShirtFlicks
     </button>
 
-    <div class="game">
+    <div class="system">
       <div class="grid ${finished ? (won?'won':'lost') : ''}">
         ${grid}
       </div>
     </div>
+    <iframe class="rom-slot" src="${src}"></iframe>
   `
 }, {
   beforeUpdate: (target) => {
@@ -226,7 +229,7 @@ function tilePosition(xIndex, yIndex) {
 $.when('click', '[data-options]', toggleMode)
 function toggleMode (event) {
   const { mode } = $.learn()
-  const newMode = mode !== modes.settings ? modes.settings : modes.game
+  const newMode = mode !== modes.settings ? modes.settings : modes.system
   $.teach({ mode: newMode })
 }
 
@@ -236,7 +239,7 @@ $.when('click', '[data-browse]', function launchInstallWizard (event) {
 
 $.when('click', '[data-launch]', (event) => {
   const { launch } = event.target.dataset
-  window.location.href = launch
+  $.teach({ src: launch, mode: modes.play })
 })
 
 
@@ -254,7 +257,7 @@ function streamA(value, id) {
     } else {
       toggleSpam('a', value, () => {
         const product = getProduct(x,y)
-        window.location.href = product.url
+        $.teach({ src: product.url, mode: modes.play })
       })
     }
   }
@@ -284,7 +287,7 @@ function installProduct (event) {
     }
     lolol[`${y}`][`${x}`] = product
     updateBox({ x, y, id: target.id }, { content: content(x, y) })
-    $.teach({ mode: modes.game })
+    $.teach({ mode: modes.system })
   }
 }
 
@@ -492,8 +495,6 @@ function browserDown(id) {
   playSwipeSound()
 }
 
-
-
 $.style(`
   & {
     background: black;
@@ -513,6 +514,20 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     touch-action: none;
+  }
+
+  & .rom-slot {
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    transition: opacity 250ms easeinout;
+    z-index: 20;
+  }
+
+  &[data-mode="${modes.play}"] .rom-slot {
+    opacity : 1;
+    pointer-events: all;
   }
 
   & .title {
@@ -556,7 +571,7 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
-  & .game,
+  & .system,
   & .settings {
     display: none;
     height: 100%;
@@ -568,7 +583,7 @@ $.style(`
     overflow-x: hidden;
   }
 
-  &[data-mode="game"] .game {
+  &[data-mode="system"] .system {
     display: block;
   }
 
@@ -662,14 +677,14 @@ $.style(`
     grid-template-rows: 1fr auto;
   }
 
-  & .game-dialog {
+  & .system-dialog {
     padding: 1rem 1rem 0;
   }
 
-  & .game-actions {
+  & .system-actions {
     padding: .5rem 0;
   }
-  & .game-actions button {
+  & .system-actions button {
     border: none;
     border-radius: none;
     background: transparent;
@@ -833,7 +848,7 @@ const lastFrame = {
 }
 
 
-function gameLoop(time) {
+function systemLoop(time) {
   const { id } = this
   const { mode, instances, browserIndex } = $.learn()
   if(instances[id]) {
@@ -858,7 +873,14 @@ function gameLoop(time) {
       os: checkButton(0, 16),
     }
 
-    if(mode === modes.game) {
+    if(mode === modes.play) {
+      const streamOS = streamFactory('os', () => {
+        $.teach({ mode: modes.system })
+      })
+      streamOS(player.os, id)
+    }
+
+    if(mode === modes.system) {
       const streamOS = streamFactory('os', toggleMode)
 
       const streamUp = streamFactory('up', slideUp)
@@ -896,7 +918,7 @@ function gameLoop(time) {
           }
           lolol[`${y}`][`${x}`] = product
           updateBox({ x, y, id }, { content: content(x, y) })
-          $.teach({ mode: modes.game })
+          $.teach({ mode: modes.system })
         }
       })
  
@@ -919,7 +941,7 @@ function gameLoop(time) {
     $.teach({ player })
   }
 
-  requestAnimationFrame(gameLoop.bind(this))
+  requestAnimationFrame(systemLoop.bind(this))
 }
 
 function installFlick(x, y) {
@@ -994,7 +1016,7 @@ function seed(target) {
     })
   })
 
-  requestAnimationFrame(gameLoop.bind({ id }))
+  requestAnimationFrame(systemLoop.bind({ id }))
 }
 
 function updateInstance({ id }, payload) {
