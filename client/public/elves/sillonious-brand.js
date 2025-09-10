@@ -21,7 +21,7 @@ $.draw((target) => {
   }
 
   return `
-    <ur-shell rom="shirt-flicks"></ur-shell>
+    <shirt-flicks></shirt-flicks>
   `
 })
 

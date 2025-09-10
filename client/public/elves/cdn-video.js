@@ -6,8 +6,10 @@ const cdn = self.plan98.env.HEAVY_ASSET_CDN_URL
 
 $.draw((target) => {
   const src = target.getAttribute('src')
+  const autoplay = target.getAttribute('autoplay') || false
+  const controls = target.getAttribute('controls') || false
   return `
-    <hls-video src="${cdn}${src}"></hls-video>
+    <hls-video src="${cdn}${src}" autoplay="${autoplay}" controls="${controls}"></hls-video>
   `
 })
 

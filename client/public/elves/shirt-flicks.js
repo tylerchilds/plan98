@@ -1,4 +1,5 @@
 import app from '@plan98/app'
+import diffHTML from 'diffhtml'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
 import { products } from './box-art.js'
@@ -8,7 +9,6 @@ const modes = {
   browse: 'browse',
   play: 'play',
   settings: 'settings',
-  player: {}
 }
 
 const lolol = {
@@ -60,36 +60,35 @@ const $ = app('shirt-flicks', {
   src: null
 })
 
-$.draw((target) => {
-  const { src, mode, player, instances, debuggerVisible, browserIndex } = $.learn()
-  seed(target)
-  if(!instances[target.id]) return
+const modeHandlers = {
+  [modes.system]: (target) => {
+    const { instances } = $.learn()
+    const instance = instances[target.id]
 
-  if(mode === modes.settings) {
-    return `
-      <button class="logo" data-options>
-        ShirtFlicks
-      </button>
-      <div class="settings">
-        ${Object.keys(player).map(key => {
-          return `
-            <div>
-              ${key}: ${player[key]}
-            </div>
-          `
-        }).join('')}
+    if(!instance) return
 
-        <button class="toolbelt-debugger">
-          ${ debuggerVisible ? 'Hide Debugger' : 'Show Debugger' }
-        </button>
-        <button class="toolbelt-escape">
-          Escape
-        </button>
-      </div>
-    `
-  }
+    const { x, y, boxes } = instance
 
-  if(mode === modes.browse) {
+    function createRow(row, yIndex) {
+      if(!boxes) return 'no boxes'
+
+      return [x-1,x,x+1].map((column, xIndex) => {
+        if((xIndex===0&&yIndex===0)||(xIndex===2&&yIndex===2)||(xIndex===0&&yIndex===2)||(xIndex===2&&yIndex===0)) return ''
+        const box = boxes[`${row}:${column}`] || {}
+        return `
+          <div class="shirt ${shirtPosition(xIndex,yIndex)} ${ box.alive ? 'alive' : '' }" data-id="${target.id}">
+            ${box.content}
+          </div>
+        `
+      }).join('')
+    }
+
+    const grid = [y-1,y,y+1].map(createRow).join('')
+    const div = target.querySelector('[data-dom="grid"]')
+    diffHTML.innerHTML(div, grid)
+  },
+  [modes.browse]: (target) => {
+    const { browserIndex } = $.learn()
     const flicks = Object.keys(products).map((key, index )=> {
       const product = products[key]
 
@@ -100,45 +99,70 @@ $.draw((target) => {
       `
     }).join('')
 
-    return `
-      <div class="flicks">
-        <div class="product-list">
-          ${flicks}
-        </div>
+    const div = target.querySelector('[data-dom="catalog"]')
+    diffHTML.innerHTML(div, flicks)
+  },
+  [modes.play]: (target) => {
+    const { src, mode, instances, browserIndex } = $.learn()
+  },
+  [modes.settings]: (target) => {
+    const { debuggerVisible } = $.learn()
+    const button = target.querySelector('[data-dom="debugger-button"]')
+    button.innerText = debuggerVisible ? 'Hide Debugger' : 'Show Debugger'
+  },
+}
+
+function patchByMode(target) {
+  const { mode } = $.learn()
+  if(modeHandlers[mode]) {
+    return modeHandlers[mode](target)
+  }
+}
+
+function autoplayTrailer(target) {
+  const activeShirt = target.querySelector('.shirt.center [data-trailer]')
+
+  if(!activeShirt) return
+
+  const { trailer } = activeShirt.dataset
+
+  if(target.trailer !== trailer) {
+    target.trailer = trailer
+
+    activeShirt.innerHTML = `
+      <div class="transclusion-trailer">
+        <cdn-video autoplay="true" controls="false" src="${trailer}"></cdn-video>
       </div>
     `
+
   }
+}
 
-  const instance = instances[target.id]
-  const { finished, x, y, won, boxes, rows, columns, maxFlags, totalFlags } = instance
-
-  function createRow(row, yIndex) {
-    if(!boxes) return 'no boxes'
-
-    return [x-1,x,x+1].map((column, xIndex) => {
-      if((xIndex===0&&yIndex===0)||(xIndex===2&&yIndex===2)||(xIndex===0&&yIndex===2)||(xIndex===2&&yIndex===0)) return ''
-      const box = boxes[`${row}:${column}`] || {}
-      return `
-        <div class="tile ${tilePosition(xIndex,yIndex)} ${ box.alive ? 'alive' : '' }" data-id="${target.id}">
-          ${box.content}
-        </div>
-      `
-    }).join('')
-  }
-
-  const grid = [y-1,y,y+1].map(createRow).join('')
+$.draw((target) => {
+  const { src, instances } = $.learn()
+  seed(target)
+  if(!instances[target.id]) return
 
   return `
     <button class="logo" data-options>
       ShirtFlicks
     </button>
-
-    <div class="system">
-      <div class="grid ${finished ? (won?'won':'lost') : ''}">
-        ${grid}
+    <div class="${modes.browse}">
+      <div class="flicks">
+        <div class="product-list" data-dom="catalog"></div>
       </div>
     </div>
-    <iframe class="rom-slot" src="${src}"></iframe>
+    <div class="${modes.settings}">
+      <button class="toolbelt-debugger" data-dom="debugger-button"></button>
+      <button class="toolbelt-escape">
+        Escape
+      </button>
+    </div>
+
+    <div class="${modes.system}">
+      <div data-dom="grid" class="grid"></div>
+    </div>
+    <iframe class="${modes.play}" src="${src}"></iframe>
   `
 }, {
   beforeUpdate: (target) => {
@@ -162,12 +186,12 @@ $.draw((target) => {
     }
 
     {
-      const { tileGesture, tileDistance } = $.learn()
+      const { shirtGesture, shirtDistance } = $.learn()
 
-      if(tileGesture === 'swipe') {
-        target.style.setProperty("--pan-x", `${tileDistance.x}px`);
-      } else if(tileGesture === 'scroll') {
-        target.style.setProperty("--pan-y", `${tileDistance.y}px`);
+      if(shirtGesture === 'swipe') {
+        target.style.setProperty("--pan-x", `${shirtDistance.x}px`);
+      } else if(shirtGesture === 'scroll') {
+        target.style.setProperty("--pan-y", `${shirtDistance.y}px`);
       } else {
         target.style.setProperty("--pan-x", `0`);
         target.style.setProperty("--pan-y", `0`);
@@ -187,34 +211,42 @@ $.draw((target) => {
         }
       }
     }
+
+    {
+      patchByMode(target)
+    }
+
+    {
+      autoplayTrailer(target)
+    }
   }
 })
 
-function tilePosition(xIndex, yIndex) {
-  const { tileGesture, tileDistance } = $.learn()
+function shirtPosition(xIndex, yIndex) {
+  const { shirtGesture, shirtDistance } = $.learn()
   const classes = []
 
   if(yIndex === 0) {
     classes.push('top')
 
-    if(tileGesture === 'scroll' && Math.sign(tileDistance.y)===1) {
+    if(shirtGesture === 'scroll' && Math.sign(shirtDistance.y)===1) {
       classes.push('incoming')
     }
   } else if(yIndex === 2) {
     classes.push('bottom')
-    if(tileGesture === 'scroll' && Math.sign(tileDistance.y)!==1) {
+    if(shirtGesture === 'scroll' && Math.sign(shirtDistance.y)!==1) {
       classes.push('incoming')
     }
   }
 
   if(xIndex === 0) {
     classes.push('left')
-    if(tileGesture === 'swipe' && Math.sign(tileDistance.x)===1) {
+    if(shirtGesture === 'swipe' && Math.sign(shirtDistance.x)===1) {
       classes.push('incoming')
     }
   } else if(xIndex === 2) {
     classes.push('right')
-    if(tileGesture === 'swipe' && Math.sign(tileDistance.x)!==1) {
+    if(shirtGesture === 'swipe' && Math.sign(shirtDistance.x)!==1) {
       classes.push('incoming')
     }
   }
@@ -291,9 +323,9 @@ function installProduct (event) {
   }
 }
 
-$.when('pointerdown', '.tile', function(e) {
+$.when('pointerdown', '.shirt', function(e) {
   event.preventDefault()
-  $.teach({ tileStartTime: e.timeStamp })
+  $.teach({ shirtStartTime: e.timeStamp })
   let startX, startY;
   const rectangle = event.target.getBoundingClientRect()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
@@ -306,19 +338,19 @@ $.when('pointerdown', '.tile', function(e) {
 
 
   $.teach({
-    tileFirstTouch: {
+    shirtFirstTouch: {
       x: startX,
       y: startY
     }
   })
 })
 
-$.when('pointermove', '.tile', function(e){
+$.when('pointermove', '.shirt', function(e){
   event.preventDefault()
-  const { tileStartTime, tileFirstTouch, tileGesture } = $.learn()
-  if(!tileFirstTouch) return
-  const tileEndTime = e.timeStamp;
-  const tileDuration = tileEndTime - tileStartTime;
+  const { shirtStartTime, shirtFirstTouch, shirtGesture } = $.learn()
+  if(!shirtFirstTouch) return
+  const shirtEndTime = e.timeStamp;
+  const shirtDuration = shirtEndTime - shirtStartTime;
   let lastX, lastY;
   const rectangle = event.target.closest($.link).getBoundingClientRect()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
@@ -329,61 +361,61 @@ $.when('pointermove', '.tile', function(e){
     lastY = e.clientY -rectangle.top
   }
 
-  const tileLastTouch = {
+  const shirtLastTouch = {
     x: lastX,
     y: lastY
   }
 
 
-  const tileDistance = {
-    x: tileLastTouch.x - tileFirstTouch.x,
-    y: tileLastTouch.y - tileFirstTouch.y
+  const shirtDistance = {
+    x: shirtLastTouch.x - shirtFirstTouch.x,
+    y: shirtLastTouch.y - shirtFirstTouch.y
   }
 
   $.teach({
-    tileEndTime,
-    tileDuration,
-    tileLastTouch,
-    tileDistance
+    shirtEndTime,
+    shirtDuration,
+    shirtLastTouch,
+    shirtDistance
   })
 
-  if(!tileGesture) {
+  if(!shirtGesture) {
     setGesture();
   }
 })
 
-$.when('pointerup', '.tile', function(event){
+$.when('pointerup', '.shirt', function(event){
   const { id } = event.target.dataset
-  const { instances, tileDistance, tileGesture, tileLastTouch, tileDuration } = $.learn()
+  const { instances, shirtDistance, shirtGesture, shirtLastTouch, shirtDuration } = $.learn()
 
-  if(!tileDistance) {
+  if(!shirtDistance) {
     clearPointer()
     return
   }
 
-  if(tileGesture === 'scroll') {
-    const distance = Math.abs(tileDistance.y);
+  if(shirtGesture === 'scroll') {
+    const distance = Math.abs(shirtDistance.y);
 
     if(distance < 20) {
       clearPointer()
       return
     }
 
-    if(Math.sign(tileDistance.y)===1) {
+    if(Math.sign(shirtDistance.y)===1) {
       slideUp(id)
     } else {
       slideDown(id)
     }
 
-  } else if(tileGesture === 'swipe') {
-    const distance = Math.abs(tileDistance.x);
+  } else if(shirtGesture === 'swipe') {
+    const distance = Math.abs(shirtDistance.x);
 
     if(distance < 20) {
       clearPointer()
       return
     }
 
-    if(Math.sign(tileDistance.x)===1) {
+    if(Math.sign(shirtDistance.x)===1) {
       slideLeft(id)
     } else {
       slideRight(id)
@@ -395,10 +427,10 @@ $.when('pointerup', '.tile', function(event){
 
 function clearPointer() {
   $.teach({ 
-    tileGesture: null,
-    tileDistance: null,
-    tileLastTouch: null,
-    tileFirstTouch: null
+    shirtGesture: null,
+    shirtDistance: null,
+    shirtLastTouch: null,
+    shirtFirstTouch: null
   })
 }
 
@@ -413,8 +445,9 @@ function slideLeft(id) {
     return
   }
 
-  updateInstance({ id }, { x: x - 1 })
   playSwipeSound()
+  updateInstance({ id }, { x: x - 1 })
+  cleanup(id)
 }
 
 function slideRight(id) {
@@ -427,8 +460,9 @@ function slideRight(id) {
     return
   }
 
-  updateInstance({ id }, { x: x + 1 })
   playSwipeSound()
+  updateInstance({ id }, { x: x + 1 })
+  cleanup(id)
 }
 
 function slideUp(id) {
@@ -441,8 +475,9 @@ function slideUp(id) {
     return
   }
 
-  updateInstance({ id }, { y: y - 1 })
   playSwipeSound()
+  updateInstance({ id }, { y: y - 1 })
+  cleanup(id)
 }
 
 function slideDown(id) {
@@ -455,8 +490,15 @@ function slideDown(id) {
     return
   }
 
-  updateInstance({ id }, { y: y + 1 })
   playSwipeSound()
+  updateInstance({ id }, { y: y + 1 })
+  cleanup(id)
+}
+
+function cleanup(id) {
+  const node = document.getElementById(id)
+  if(node)
+    node.trailer = null
 }
 
 function softBoundary(x, y) {
@@ -470,14 +512,14 @@ function softBoundary(x, y) {
 }
 
 function setGesture(){
-  const { tileDistance } = $.learn()
-  const y = Math.abs(tileDistance.y)
-  const x = Math.abs(tileDistance.x)
+  const { shirtDistance } = $.learn()
+  const y = Math.abs(shirtDistance.y)
+  const x = Math.abs(shirtDistance.x)
   if(x < 5 && y < 5) return
   if(y > x){
-    $.teach({ tileGesture: 'scroll' })
+    $.teach({ shirtGesture: 'scroll' })
   } else {
-    $.teach({ tileGesture: 'swipe' })
+    $.teach({ shirtGesture: 'swipe' })
   }
 }
 
@@ -516,7 +558,9 @@ $.style(`
     touch-action: none;
   }
 
-  & .rom-slot {
+  & .${modes.play},
+  & .${modes.browse},
+  & .${modes.settings} {
     opacity: 0;
     position: absolute;
     inset: 0;
@@ -525,7 +569,12 @@ $.style(`
     z-index: 20;
   }
 
-  &[data-mode="${modes.play}"] .rom-slot {
+  &[data-mode="${modes.browse}"] .${modes.browse},
+  &[data-mode="${modes.settings}"] .${modes.settings} {
+    display: block;
+  }
+
+  &[data-mode="${modes.play}"] .${modes.play} {
     opacity : 1;
     pointer-events: all;
   }
@@ -611,7 +660,7 @@ $.style(`
 
   & .grid {
     display: grid;
-    grid-template-areas: 'tile';
+    grid-template-areas: 'shirt';
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     height: 100%;
@@ -619,40 +668,40 @@ $.style(`
     transform: translate(var(--pan-x, 0), var(--pan-y, 0))
   }
 
-  & .tile.incoming,
-  & .tile.center {
+  & .shirt.incoming,
+  & .shirt.center {
     display: grid;
   }
 
-  & .tile {
-    grid-area: tile;
+  & .shirt {
+    grid-area: shirt;
     display: grid;
     place-items: center;
-    --tile-x: 0;
-    --tile-y: 0;
-    transform: translate(var(--tile-x), var(--tile-y));
+    --shirt-x: 0;
+    --shirt-y: 0;
+    transform: translate(var(--shirt-x), var(--shirt-y));
     position: relative;
     display: none;
   }
 
-  & .tile.left {
-    --tile-x: -100%;
+  & .shirt.left {
+    --shirt-x: -100%;
   }
 
-  & .tile.right {
-    --tile-x: 100%;
+  & .shirt.right {
+    --shirt-x: 100%;
   }
 
-  & .tile.top {
-    --tile-y: -100%;
+  & .shirt.top {
+    --shirt-y: -100%;
   }
 
-  & .tile.bottom {
-    --tile-y: 100%;
+  & .shirt.bottom {
+    --shirt-y: 100%;
   }
 
 
-  & .tile.center {
+  & .shirt.center {
     z-index: 2;
   }
 
@@ -708,11 +757,28 @@ $.style(`
   & .transclusion {
     height: 100%;
     width: 100%;
+    display: block;
+    pointer-events: none;
+    position: relative;
+  }
+
+  & .transclusion-boxart {
+    position: absolute;
+    inset: 0;
     display: grid;
     place-content: end start;
     padding: 1rem;
-    pointer-events: none;
   }
+
+  & .transclusion-trailer {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    padding: 1rem;
+    background: black;
+  }
+
 
 
   & .transclution button {
@@ -937,8 +1003,6 @@ function systemLoop(time) {
       const streamOS = streamFactory('os', toggleMode)
       streamOS(player.os, id)
     }
-
-    $.teach({ player })
   }
 
   requestAnimationFrame(systemLoop.bind(this))
@@ -946,24 +1010,26 @@ function systemLoop(time) {
 
 function installFlick(x, y) {
   return `
-    <div class="action-area">
-      <div>
-        <span class="system-title">
-          Install Flick
-        </span>
-        <span class="system-artist">
-          Plan98
-        </span>
+    <div class="transclusion-boxart">
+      <div class="action-area">
+        <div>
+          <span class="system-title">
+            Install Flick
+          </span>
+          <span class="system-artist">
+            Plan98
+          </span>
+        </div>
+
+
+        <div class="system-description">
+          From the content catalog, pick your favorite flicks.
+        </div>
+
+        <button class="standard-button system-button" data-browse data-x="${x}" data-y="${y}">
+          Browse
+        </button>
       </div>
-
-
-      <div class="system-description">
-        From the content catalog, pick your favorite flicks.
-      </div>
-
-      <button class="standard-button system-button" data-browse data-x="${x}" data-y="${y}">
-        Browse
-      </button>
     </div>
   `
 }
@@ -974,13 +1040,20 @@ function content(x, y) {
   if(softBoundary(x,y)) {
     value = installFlick(x, y)
   } else {
-    value = lolol[`${y}`][`${x}`].boxart
+    const { boxart, trailer } = lolol[`${y}`][`${x}`]
+    value = `
+      <div data-trailer="${trailer}" class="transclusion-boxart">
+        ${boxart}
+      </div>
+    `
   }
 
+  const divkey = `div${x.toString().replaceAll('-','')}${y.toString().replaceAll('-','')}`
+
   return `
-    <div${x}${y} class="transclusion">
+    <${divkey} class="transclusion">
       ${value}
-    </div${x}${y}>
+    </${divkey}>
   `
 }
 

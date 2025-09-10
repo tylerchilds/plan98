@@ -1,9 +1,14 @@
 import elf from '@silly/tag'
 import Hls from 'hls.js'
 
-const $ = elf('hls-video')
+const tag = 'hls-video'
+const $ = elf(tag)
 
-$.draw(() => `<video controls="true"></video>`, { afterUpdate })
+$.draw((target) => {
+  const autoplay = target.getAttribute('autoplay') || false
+  const controls = target.getAttribute('controls') || true
+  return `<video autoplay="${autoplay}" controls="${controls}"></video>`
+}, { afterUpdate })
 
 function afterUpdate(target) {
   {
@@ -19,6 +24,8 @@ function afterUpdate(target) {
         $.teach({ status: 'error' })
       }
     });
+
+    target.hls = hls
   }
 }
 
@@ -34,3 +41,15 @@ $.style(`
     margin: auto;
   }
 `)
+
+class HlsVideo extends HTMLElement {
+  constructor() { super(); }
+
+  disconnectedCallback() {
+    this.querySelector('video').pause();
+    this.hls.stopLoad();
+    this.hls.destroy();
+  }
+}
+
+customElements.define(tag, HlsVideo);
