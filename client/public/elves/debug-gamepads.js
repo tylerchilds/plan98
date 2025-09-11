@@ -1,6 +1,28 @@
 import elf from '@silly/elf'
 const controllers = {};
 
+export const BUTTON_CODES = {
+  a: 0,
+  b: 1,
+  x: 3,
+  y: 2,
+  lb: 4,
+  rb: 5,
+  lt: 6,
+  rt: 7,
+  select: 8,
+  start: 9,
+  ls: 10,
+  rs: 11,
+  up: 12,
+  down: 13,
+  left: 14,
+  right: 15,
+  os: 16
+}
+
+
+
 const initialState = {
   gamepads: [{buttons:[], axes: []}]
 }
@@ -169,3 +191,62 @@ $.style(`
 `)
 
 export default $
+
+const keyFlips = {
+  Meta: keyFlipper(0, BUTTON_CODES.os),
+  Alt: keyFlipper(0, BUTTON_CODES.start),
+  Control: keyFlipper(0, BUTTON_CODES.select),
+  ArrowUp: keyFlipper(0, BUTTON_CODES.up),
+  w: keyFlipper(0, BUTTON_CODES.up),
+  W: keyFlipper(0, BUTTON_CODES.up),
+  ArrowDown: keyFlipper(0, BUTTON_CODES.down),
+  S: keyFlipper(0, BUTTON_CODES.down),
+  s: keyFlipper(0, BUTTON_CODES.down),
+  ArrowRight: keyFlipper(0, BUTTON_CODES.right),
+  d: keyFlipper(0, BUTTON_CODES.right),
+  D: keyFlipper(0, BUTTON_CODES.right),
+  ArrowLeft: keyFlipper(0, BUTTON_CODES.left),
+  a: keyFlipper(0, BUTTON_CODES.left),
+  A: keyFlipper(0, BUTTON_CODES.left),
+  j: keyFlipper(0, BUTTON_CODES.a),
+  J: keyFlipper(0, BUTTON_CODES.a),
+  k: keyFlipper(0, BUTTON_CODES.b),
+  K: keyFlipper(0, BUTTON_CODES.b),
+  l: keyFlipper(0, BUTTON_CODES.x),
+  L: keyFlipper(0, BUTTON_CODES.x),
+  h: keyFlipper(0, BUTTON_CODES.y),
+  H: keyFlipper(0, BUTTON_CODES.y),
+  u: keyFlipper(0, BUTTON_CODES.lb),
+  U: keyFlipper(0, BUTTON_CODES.lb),
+  i: keyFlipper(0, BUTTON_CODES.rb),
+  I: keyFlipper(0, BUTTON_CODES.rb),
+  y: keyFlipper(0, BUTTON_CODES.lt),
+  Y: keyFlipper(0, BUTTON_CODES.lt),
+  o: keyFlipper(0, BUTTON_CODES.rt),
+  O: keyFlipper(0, BUTTON_CODES.rt),
+  q: keyFlipper(0, BUTTON_CODES.ls),
+  Q: keyFlipper(0, BUTTON_CODES.ls),
+  e: keyFlipper(0, BUTTON_CODES.rs),
+  E: keyFlipper(0, BUTTON_CODES.rs),
+}
+
+function keyFlipper(slot, button) {
+  return (value) => {
+    overrideButton(slot, button, value)
+  }
+}
+
+
+document.addEventListener('keydown', (event) => {
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](1)
+  }
+})
+
+document.addEventListener('keyup', (event) => {
+  if(keyFlips[event.key]) {
+    keyFlips[event.key](0)
+  }
+})
+
+

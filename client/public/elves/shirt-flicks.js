@@ -13,16 +13,25 @@ const modes = {
 
 const lolol = {
   '0': {
-    '-1': products.memex,
-    '0': products.jokebook,
-    '1': products.memex,
+    '-2'  : products.memex,
+    '-1'  : products.desktop,
+    '0'   : products.jokebook,
+    '1'   : products.mobile,
+    '2'   : products.memex,
   },
   '1': {
-    '0': products.memex,
+    '0'   : products.memex,
   },
   '-1': {
-    '0': products.memex,
+    '0'   : products.shell,
   },
+  '2': {
+    '0'   : products.memex,
+  },
+  '-2': {
+    '0'   : products.memex,
+  },
+
 }
 
 function audioFactory(url) {
@@ -572,6 +581,7 @@ $.style(`
   &[data-mode="${modes.browse}"] .${modes.browse},
   &[data-mode="${modes.settings}"] .${modes.settings} {
     display: block;
+    opacity : 1;
   }
 
   &[data-mode="${modes.play}"] .${modes.play} {

@@ -19,6 +19,42 @@ export const products = {
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/time-machine'
   },
+  desktop: {
+    title: 'Door Man',
+    artist: 'Sillyz.Computer',
+    description: 'A multi tasker that can summon answers to inqueries from thin air.',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="desktop"></box-art>',
+    trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
+    url: '/app/door-man'
+  },
+  mobile: {
+    title: 'Mobile Device',
+    artist: 'Sillyz.Computer',
+    description: 'A mobile device in your mobile device for directions inside.',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="mobile"></box-art>',
+    trailer: '/public/cdn/sillyz.computer/six-modalities/Mobile/manifest.m3u8',
+    url: '/app/mobile-device'
+  },
+  coop: {
+    title: 'Couch Cooperative',
+    artist: 'Sillyz.Computer',
+    description: '',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="coop"></box-art>',
+    trailer: '/public/cdn/sillyz.computer/six-modalities/Gaming/manifest.m3u8',
+    url: '/app/couch-coop'
+  },
+  shell: {
+    title: 'yo(UR SH)ell',
+    artist: 'Sillyz.Computer',
+    description: '',
+    keyart: '/public/cdn/boxart.svg',
+    boxart: '<box-art product="shell"></box-art>',
+    trailer: '/public/cdn/sillyz.computer/six-modalities/Shell/manifest.m3u8',
+    url: '/app/ur-shell'
+  },
   tuner: {
     title: 'Music Tuner',
     artist: 'Bloop.Monster',

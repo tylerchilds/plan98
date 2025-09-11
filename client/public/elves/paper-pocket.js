@@ -4,7 +4,7 @@ import { render } from '@sillonious/saga'
 import diffHTML from 'diffhtml'
 import * as Tone from 'tone@next'
 import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
-import { overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
+import { BUTTON_CODES, overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
 const modes = {
   game: 'game',
@@ -1466,26 +1466,6 @@ function standardAction(code) {
   }
 }
 
-const buttons = {
-  a: 0,
-  b: 1,
-  x: 3,
-  y: 2,
-  lb: 4,
-  rb: 5,
-  lt: 6,
-  rt: 7,
-  select: 8,
-  start: 9,
-  ls: 10,
-  rs: 11,
-  up: 12,
-  down: 13,
-  left: 14,
-  right: 15,
-  os: 16
-}
-
 const actions = {
   a: standardAction('a'),
   b: standardAction('b'),
@@ -1632,69 +1612,12 @@ $.when('touchend', '[data-press]', (event) => {
 
 $.when('pointerdown', '[data-press]', (event) => {
   const { press } = event.target.dataset
-  overrideButton(0, buttons[press], 1)
+  overrideButton(0, BUTTON_CODES[press], 1)
 })
 
 $.when('pointerup', '[data-press]', (event) => {
   const { press } = event.target.dataset
-  overrideButton(0, buttons[press], 0)
-})
-
-const keyFlips = {
-  Meta: keyFlipper(0, buttons.os),
-  Alt: keyFlipper(0, buttons.start),
-  Control: keyFlipper(0, buttons.select),
-  ArrowUp: keyFlipper(0, buttons.up),
-  w: keyFlipper(0, buttons.up),
-  W: keyFlipper(0, buttons.up),
-  ArrowDown: keyFlipper(0, buttons.down),
-  S: keyFlipper(0, buttons.down),
-  s: keyFlipper(0, buttons.down),
-  ArrowRight: keyFlipper(0, buttons.right),
-  d: keyFlipper(0, buttons.right),
-  D: keyFlipper(0, buttons.right),
-  ArrowLeft: keyFlipper(0, buttons.left),
-  a: keyFlipper(0, buttons.left),
-  A: keyFlipper(0, buttons.left),
-  j: keyFlipper(0, buttons.a),
-  J: keyFlipper(0, buttons.a),
-  k: keyFlipper(0, buttons.b),
-  K: keyFlipper(0, buttons.b),
-  l: keyFlipper(0, buttons.x),
-  L: keyFlipper(0, buttons.x),
-  h: keyFlipper(0, buttons.y),
-  H: keyFlipper(0, buttons.y),
-  u: keyFlipper(0, buttons.lb),
-  U: keyFlipper(0, buttons.lb),
-  i: keyFlipper(0, buttons.rb),
-  I: keyFlipper(0, buttons.rb),
-  y: keyFlipper(0, buttons.lt),
-  Y: keyFlipper(0, buttons.lt),
-  o: keyFlipper(0, buttons.rt),
-  O: keyFlipper(0, buttons.rt),
-  q: keyFlipper(0, buttons.ls),
-  Q: keyFlipper(0, buttons.ls),
-  e: keyFlipper(0, buttons.rs),
-  E: keyFlipper(0, buttons.rs),
-}
-
-function keyFlipper(slot, button) {
-  return (value) => {
-    overrideButton(slot, button, value)
-  }
-}
-
-
-document.addEventListener('keydown', (event) => {
-  if(keyFlips[event.key]) {
-    keyFlips[event.key](1)
-  }
-})
-
-document.addEventListener('keyup', (event) => {
-  if(keyFlips[event.key]) {
-    keyFlips[event.key](0)
-  }
+  overrideButton(0, BUTTON_CODES[press], 0)
 })
 
 function standardFire(player, node, code) {
@@ -1757,7 +1680,7 @@ function clearAcknowledge(code) {
 
 
 function player1(code) {
-  return checkButton(0, buttons[code])
+  return checkButton(0, BUTTON_CODES[code])
 }
 
 function gameLoop(time) {
