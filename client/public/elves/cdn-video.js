@@ -8,8 +8,9 @@ $.draw((target) => {
   const src = target.getAttribute('src')
   const autoplay = target.getAttribute('autoplay') || false
   const controls = target.getAttribute('controls') || false
+  if(target.innerHTML) return
   return `
-    <hls-video src="${cdn}${src}" autoplay="${autoplay}" controls="${controls}"></hls-video>
+    <hls-video id="${src}" src="${cdn}${src}" autoplay="${autoplay}" controls="${controls}"></hls-video>
   `
 })
 

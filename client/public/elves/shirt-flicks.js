@@ -1,4 +1,4 @@
-import app from '@plan98/app'
+import app from '@silly/elf'
 import diffHTML from 'diffhtml'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
@@ -112,7 +112,12 @@ const modeHandlers = {
     diffHTML.innerHTML(div, flicks)
   },
   [modes.play]: (target) => {
-    const { src, mode, instances, browserIndex } = $.learn()
+    const { src } = $.learn()
+
+    const div = target.querySelector('[data-dom="player"]')
+    diffHTML.innerHTML(div, `
+      <iframe class="${modes.play}" src="${src}"></iframe>
+    `)
   },
   [modes.settings]: (target) => {
     const { debuggerVisible } = $.learn()
@@ -128,19 +133,22 @@ function patchByMode(target) {
   }
 }
 
-function autoplayTrailer(target) {
+function autoplay(target) {
   const activeShirt = target.querySelector('.shirt.center [data-trailer]')
 
   if(!activeShirt) return
 
   const { trailer } = activeShirt.dataset
 
+  const theater = target.querySelector('[data-dom="theater"]')
   if(target.trailer !== trailer) {
     target.trailer = trailer
-
-    activeShirt.innerHTML = `
-      <div class="transclusion-trailer">
-        <cdn-video autoplay="true" controls="false" src="${trailer}"></cdn-video>
+    theater.innerHTML = ''
+    theater.innerHTML = `
+      <div class="transclusion">
+        <div class="transclusion-trailer">
+          <cdn-video autoplay="true" controls="false" src="${trailer}"></cdn-video>
+        </div>
       </div>
     `
 
@@ -148,9 +156,11 @@ function autoplayTrailer(target) {
 }
 
 $.draw((target) => {
-  const { src, instances } = $.learn()
+  const { instances } = $.learn()
   seed(target)
   if(!instances[target.id]) return
+
+  if(target.innerHTML) return
 
   return `
     <button class="logo" data-options>
@@ -162,6 +172,7 @@ $.draw((target) => {
       </div>
     </div>
     <div class="${modes.settings}">
+      <secure-persona></secure-persona>
       <button class="toolbelt-debugger" data-dom="debugger-button"></button>
       <button class="toolbelt-escape">
         Escape
@@ -170,8 +181,11 @@ $.draw((target) => {
 
     <div class="${modes.system}">
       <div data-dom="grid" class="grid"></div>
+      <div data-dom="theater" class="theater"></div>
     </div>
-    <iframe class="${modes.play}" src="${src}"></iframe>
+
+    <div class="${modes.play}" data-dom="player">
+    </div>
   `
 }, {
   beforeUpdate: (target) => {
@@ -226,7 +240,7 @@ $.draw((target) => {
     }
 
     {
-      autoplayTrailer(target)
+      autoplay(target)
     }
   }
 })
@@ -676,6 +690,21 @@ $.style(`
     height: 100%;
     transform-origin: bottom;
     transform: translate(var(--pan-x, 0), var(--pan-y, 0))
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  & .theater {
+    display: grid;
+    grid-template-areas: 'shirt';
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: 100%;
+    transform-origin: bottom;
+    transform: translate(var(--pan-x, 0), var(--pan-y, 0));
+    position: absolute;
+    inset: 0;
   }
 
   & .shirt.incoming,
@@ -772,7 +801,7 @@ $.style(`
     position: relative;
   }
 
-  & .transclusion-boxart {
+  & .transclusion-boundary {
     position: absolute;
     inset: 0;
     display: grid;
@@ -811,6 +840,12 @@ $.style(`
     display: grid;
     place-content: center;
   }
+
+  & .system-launcher {
+    position: relative;
+    z-index: 10;
+  }
+
 
   & .system-keyart img {
     margin: auto;
@@ -869,7 +904,17 @@ $.style(`
     pointer-events: none;
   }
 
+  & .shirt-keyart {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    opacity: 0;
+  }
 
+  & .shirt-keyart img {
+    margin: auto;
+  }
 `)
 
 const spamCache = {}
@@ -1020,7 +1065,7 @@ function systemLoop(time) {
 
 function installFlick(x, y) {
   return `
-    <div class="transclusion-boxart">
+    <div class="transclusion-boundary">
       <div class="action-area">
         <div>
           <span class="system-title">
@@ -1050,10 +1095,15 @@ function content(x, y) {
   if(softBoundary(x,y)) {
     value = installFlick(x, y)
   } else {
-    const { boxart, trailer } = lolol[`${y}`][`${x}`]
+    const { keyart, launcher, trailer } = lolol[`${y}`][`${x}`]
     value = `
-      <div data-trailer="${trailer}" class="transclusion-boxart">
-        ${boxart}
+      <div data-trailer="${trailer}" class="transclusion-boundary">
+        <div class="shirt-keyart">
+          <img src="${keyart}" />
+        </div>
+        <div class="shirt-launcher">
+          ${launcher}
+        </div>
       </div>
     `
   }

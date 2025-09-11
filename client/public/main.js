@@ -17,6 +17,7 @@ self.plan98 = {
   parameters,
   database,
   host: world ? world : doingBusinessAs[window.location.host] ? window.location.host : 'sillyz.computer',
+  registry: {}
 }
 
 const style = document.createElement('link')

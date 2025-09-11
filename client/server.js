@@ -588,6 +588,9 @@ function template() {
       plan98 = {
         env: {
           ${ENVIRONMENT_VARIABLES}
+        },
+        registry: {
+
         }
       }
     </script>

@@ -6,7 +6,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A personal journal for the any type of different joke.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="jokebook"></box-art>',
+    launcher: '<box-art product="jokebook"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/joke-book'
   },
@@ -15,7 +15,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'Forget forgetting. Agency over memory. Your brains.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="memex"></box-art>',
+    launcher: '<box-art product="memex"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/time-machine'
   },
@@ -24,7 +24,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A multi tasker that can summon answers to inqueries from thin air.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="desktop"></box-art>',
+    launcher: '<box-art product="desktop"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/door-man'
   },
@@ -33,7 +33,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A mobile device in your mobile device for directions inside.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="mobile"></box-art>',
+    launcher: '<box-art product="mobile"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Mobile/manifest.m3u8',
     url: '/app/mobile-device'
   },
@@ -42,7 +42,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: '',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="coop"></box-art>',
+    launcher: '<box-art product="coop"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Gaming/manifest.m3u8',
     url: '/app/couch-coop'
   },
@@ -51,7 +51,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: '',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="shell"></box-art>',
+    launcher: '<box-art product="shell"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Shell/manifest.m3u8',
     url: '/app/ur-shell'
   },
@@ -60,7 +60,7 @@ export const products = {
     artist: 'Bloop.Monster',
     description: 'A string tuner for guitar and uke, then more...',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="tuner"></box-art>',
+    launcher: '<box-art product="tuner"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/music-tuner'
   },
@@ -69,7 +69,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A multiplayer game to face and save the music.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="songwave"></box-art>',
+    launcher: '<box-art product="songwave"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/couch-coop?rom=song-wave'
   },
@@ -78,7 +78,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A multiplayer game to face and save the music.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="finalboss"></box-art>',
+    launcher: '<box-art product="finalboss"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/paper-pocket?rom=final-boss'
   },
@@ -87,7 +87,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'Email is the preferred communication for busy people.',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="securemail"></box-art>',
+    launcher: '<box-art product="securemail"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/e-mail'
   },
@@ -96,7 +96,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'Nobody likes downloading or using chat apps, say hi and bye',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="coolchat"></box-art>',
+    launcher: '<box-art product="coolchat"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/cool-chat'
   },
@@ -105,7 +105,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'Swipe a windows',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="drawterm"></box-art>',
+    launcher: '<box-art product="drawterm"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/draw-term'
   },
@@ -114,7 +114,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'Learn to type on a five chorder with a strummer input',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="typohero"></box-art>',
+    launcher: '<box-art product="typohero"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/typo-hero'
   },
@@ -123,7 +123,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'View all your files',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="filesystem"></box-art>',
+    launcher: '<box-art product="filesystem"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/file-system'
   },
@@ -132,7 +132,7 @@ export const products = {
     artist: 'StardewValley.Net',
     description: 'A slice of life simulator on your slice of life simulator',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="stardew"></box-art>',
+    launcher: '<box-art product="stardew"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'steam://rungameid/413150'
   },
@@ -141,7 +141,7 @@ export const products = {
     artist: 'Sonic 3 A.I.R.',
     description: 'Retro Future Childhood Nostalgia',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="sonicknuckles"></box-art>',
+    launcher: '<box-art product="sonicknuckles"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/sonic-knuckles'
   },
@@ -150,7 +150,7 @@ export const products = {
     artist: 'QuickTequila.Com',
     description: 'ATTENTION IS ALL YOU NEED',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="tamashika"></box-art>',
+    launcher: '<box-art product="tamashika"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'steam://rungameid/3788220'
   },
@@ -159,7 +159,7 @@ export const products = {
     artist: 'Netflix.Com',
     description: 'Movies',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="netflix"></box-art>',
+    launcher: '<box-art product="netflix"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'https://netflix.com'
   },
@@ -168,7 +168,7 @@ export const products = {
     artist: 'Google.Com',
     description: 'Inventory',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="google"></box-art>',
+    launcher: '<box-art product="google"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'https://google.com'
   },
@@ -177,7 +177,7 @@ export const products = {
     artist: 'Archive.Org',
     description: 'Inventory',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="archive"></box-art>',
+    launcher: '<box-art product="archive"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'https://archive.org'
   },
@@ -186,7 +186,7 @@ export const products = {
     artist: 'Bsky.App',
     description: 'Inventory',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="bluesky"></box-art>',
+    launcher: '<box-art product="bluesky"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: 'https://bsky.app/'
   },
@@ -195,7 +195,7 @@ export const products = {
     artist: 'Sillyz.Computer',
     description: 'A social media network inside a social media network',
     keyart: '/public/cdn/boxart.svg',
-    boxart: '<box-art product="blue98"></box-art>',
+    launcher: '<box-art product="blue98"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
     url: '/app/blue-sky'
   },
@@ -224,9 +224,6 @@ $.draw((target) => {
     <div class="product-description">
       ${product.description}
     </div>
-    <div class="product-keyart">
-      <img src="${product.keyart}" />
-    </div>
     <div class="product-actions">
       <button class="standard-button product-button" data-launch="${product.url}">
         Launch
@@ -254,16 +251,6 @@ $.style(`
     z-index: 3;
     background: black;
     padding: .5rem;
-  }
-  & .product-keyart {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-content: center;
-  }
-
-  & .product-keyart img {
-    margin: auto;
   }
 
   & .product-artist {
