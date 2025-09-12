@@ -5,9 +5,10 @@ const tag = 'hls-video'
 const $ = elf(tag)
 
 $.draw((target) => {
-  const autoplay = target.getAttribute('autoplay') || false
-  const controls = target.getAttribute('controls') || true
-  return `<video playsinline disablepictureinpicture autoplay="${autoplay}" controls="${controls}"></video>`
+  const autoplay = target.getAttribute('autoplay') === "true" || false
+  const controls = target.getAttribute('controls') === "true" || false
+  const loop = target.getAttribute('loop') === "true" || false
+  return `<video playsinline disablepictureinpicture ${loop?`loop`:''} autoplay="${autoplay}" ${controls?`controls="true"`:''}></video>`
 }, { afterUpdate })
 
 function afterUpdate(target) {
@@ -28,14 +29,14 @@ function afterUpdate(target) {
 
 $.style(`
   & {
-    display: grid;
+    display: block;
     background: black;
-    place-content: center;
     height: 100%;
   }
 
   & video {
     margin: auto;
+    width: 100%;
   }
 `)
 

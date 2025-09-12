@@ -147,7 +147,7 @@ function autoplay(target) {
     theater.innerHTML = `
       <div class="transclusion">
         <div class="transclusion-trailer">
-          <cdn-video autoplay="true" controls="false" src="${trailer}"></cdn-video>
+          <cdn-video loop="true" autoplay="true" controls="false" src="${trailer}"></cdn-video>
         </div>
       </div>
     `
@@ -812,8 +812,6 @@ $.style(`
   & .transclusion-trailer {
     position: absolute;
     inset: 0;
-    display: grid;
-    place-content: center;
     padding: 1rem;
     background: black;
   }
