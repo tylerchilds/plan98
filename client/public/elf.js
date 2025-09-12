@@ -215,8 +215,8 @@ function modules({ registry }) {
 
   tags.forEach(async (tag) => {
     const url = `${registry || '.'}/${tag}.js`
-    if(!plan98 || plan98.registry[tag]) return
-    plan98.registry[tag] = url
+    //if(!plan98 || plan98.registry[tag]) return
+    //plan98.registry[tag] = url
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true
