@@ -812,8 +812,9 @@ $.style(`
   & .transclusion-trailer {
     position: absolute;
     inset: 0;
-    padding: 1rem;
     background: black;
+    display: grid;
+    place-items: center;
   }
 
 
