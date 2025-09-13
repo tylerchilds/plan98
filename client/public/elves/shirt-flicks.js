@@ -1107,9 +1107,11 @@ function installFlick(x, y) {
           </span>
         </div>
 
-        <button class="standard-button system-button" data-browse data-x="${x}" data-y="${y}">
-          Browse
-        </button>
+        <div style="text-align: right;">
+          <button class="gaming-button -a" data-browse data-x="${x}" data-y="${y}">
+            Browse
+          </button>
+        </div>
       </div>
     </div>
   `
