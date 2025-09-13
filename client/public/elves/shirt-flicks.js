@@ -1244,6 +1244,6 @@ function debugToolbelt(event) {
 $.when('click', '.toolbelt-escape', handleEscape)
 
 function handleEscape (event) {
-  window.location.href = '/app/was-code?src=/public/elves/shirt-flicks.js'
+  window.location.href = '/app/ur-shell?src=/app/was-code?src=/public/elves/shirt-flicks.js'
 }
 
