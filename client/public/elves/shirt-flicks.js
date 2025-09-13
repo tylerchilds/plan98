@@ -172,11 +172,14 @@ $.draw((target) => {
       </div>
     </div>
     <div class="${modes.settings}">
-      <secure-persona></secure-persona>
-      <button class="toolbelt-debugger" data-dom="debugger-button"></button>
-      <button class="toolbelt-escape">
-        Escape
-      </button>
+      <div class="pane">
+        <div class="pane-actions">
+          <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
+          <button class="gaming-button -y toolbelt-escape">
+            Escape
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="${modes.system}">
@@ -661,7 +664,7 @@ $.style(`
   }
 
   & .settings {
-    padding: 2rem 1rem;
+    padding: 1rem;
   }
 
   & select {
@@ -803,9 +806,9 @@ $.style(`
 
   & .transclusion-boundary {
     position: absolute;
-    inset: 0;
-    display: grid;
-    place-content: end start;
+    bottom: 0;
+    left: 0;
+    right: 0;
     padding: 1rem;
   }
 
@@ -913,6 +916,18 @@ $.style(`
 
   & .shirt-keyart img {
     margin: auto;
+  }
+
+  & .pane {
+    grid-template-areas: 'main' 'actions';
+    grid-template-rows: 1fr auto;
+    display: grid;
+    height: 100%;
+  }
+
+  & .pane-actions {
+    grid-area: actions;
+    text-align: right;
   }
 `)
 
@@ -1055,6 +1070,16 @@ function systemLoop(time) {
 
     if(mode === modes.settings) {
       const streamOS = streamFactory('os', toggleMode)
+      const streamX = streamFactory('x', (id) => {
+        debugToolbelt()
+      })
+      const streamY = streamFactory('x', (id) => {
+        handleEscape()
+      })
+
+      streamX(player.x, id)
+      streamY(player.y, id)
+
       streamOS(player.os, id)
     }
   }
@@ -1076,8 +1101,10 @@ function installFlick(x, y) {
         </div>
 
 
-        <div class="system-description">
-          From the content catalog, pick your favorite flicks.
+        <div>
+          <span class="system-description">
+            From the content catalog, pick your favorite flicks.
+          </span>
         </div>
 
         <button class="standard-button system-button" data-browse data-x="${x}" data-y="${y}">
@@ -1212,12 +1239,11 @@ function debugToolbelt(event) {
     consoleShow()
     $.teach({ debuggerVisible: true })
   }
-
-  event.target.classList.toggle('enabled')
 }
 
-$.when('click', '.toolbelt-escape', (event) => {
-  $.teach({ activated: false })
-  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
-})
+$.when('click', '.toolbelt-escape', handleEscape)
+
+function handleEscape (event) {
+  window.location.href = '/app/was-code?src=/public/elves/shirt-flicks.js'
+}
 

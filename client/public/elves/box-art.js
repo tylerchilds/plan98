@@ -40,7 +40,7 @@ export const products = {
   coop: {
     title: 'Couch Cooperative',
     artist: 'Sillyz.Computer',
-    description: '',
+    description: 'A couch cooperative multiplayer experience',
     keyart: '/public/cdn/boxart.svg',
     launcher: '<box-art product="coop"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Gaming/manifest.m3u8',
@@ -49,7 +49,7 @@ export const products = {
   shell: {
     title: 'yo(UR SH)ell',
     artist: 'Sillyz.Computer',
-    description: '',
+    description: 'Your universal resource shell for securely dialing code',
     keyart: '/public/cdn/boxart.svg',
     launcher: '<box-art product="shell"></box-art>',
     trailer: '/public/cdn/sillyz.computer/six-modalities/Shell/manifest.m3u8',
@@ -221,14 +221,16 @@ $.draw((target) => {
         ${product.artist}
       </span>
     </div>
-    <div class="product-description">
-      ${product.description}
+    <div>
+      <span class="product-description">
+        ${product.description}
+      </span>
     </div>
     <div class="product-actions">
-      <button class="standard-button product-button" data-launch="${product.url}">
+      <button class="gaming-button -a" data-launch="${product.url}">
         Launch
       </button>
-      <button class="standard-button" data-browse>
+      <button class="gaming-button -b" data-browse>
         Swap
       </button>
     </div>
@@ -240,7 +242,6 @@ $.style(`
     display: flex;
     flex-direction: column;
     gap: .5rem;
-    background: black;
   }
 
   & .product-title {
@@ -269,8 +270,12 @@ $.style(`
     z-index: 3;
     margin-bottom: 1rem;
     padding: .5rem;
+    line-height: 1.75;
   }
 
+  & .product-actions {
+    text-align: right;
+  }
   & .product-actions button {
     position: relative;
     z-index: 3;

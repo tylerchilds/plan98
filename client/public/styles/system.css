@@ -1218,6 +1218,63 @@ sillonious-brand > xml-html {
   aspect-ratio: 1;
 }
 
+.gaming-button {
+  background: black;
+  pointer-events: all;
+  font-weight: 400;
+  padding: .5rem;
+  transition: background 200ms ease-in-out;
+  line-height: 1.25;
+  border: none;
+  padding: .5rem;
+  color: white;
+  text-decoration: none;
+  display: inline-grid;
+  grid-template-columns: auto 1fr;
+  gap: .5rem;
+  border-radius: 5px;
+  place-items: center start;
+  text-shadow: 1px 1px rgba(0,0,0,.85);
+}
+
+.gaming-button:link,
+.gaming-button:visited {
+  color: white;
+}
+
+.gaming-button:hover,
+.gaming-button:focus,
+.gaming-button.active,
+.gaming-button:active {
+  color: white;
+  background: rgba(128,128,128,.5)
+}
+
+.gaming-button.-a::before,
+.gaming-button.-b::before,
+.gaming-button.-x::before,
+.gaming-button.-y::before {
+  content: '';
+  width: 1rem;
+  height: 1rem;
+  border-radius: 100%;
+}
+.gaming-button.-a::before {
+  background: var(--green, mediumseagreen);
+}
+
+.gaming-button.-b::before {
+  background: var(--red, firebrick);
+}
+
+.gaming-button.-x::before {
+  background: var(--blue, dodgerblu);
+}
+
+.gaming-button.-y::before {
+  background: var(--yellow, gold);
+}
+
 .button-container {
   display: flex;
   gap: .5rem;
