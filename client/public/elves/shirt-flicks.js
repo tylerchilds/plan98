@@ -57,8 +57,8 @@ function audioFactory(url) {
   }
 }
 
-const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor.sh/output/a.mp3')
-const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor.sh/output/b.mp3')
+const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/a.mp3')
+const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/b.mp3')
 
 const $ = app('shirt-flicks', {
   rows: 1,
