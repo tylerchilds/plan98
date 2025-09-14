@@ -36,7 +36,7 @@ const lolol = {
     '2'   : products.memex,
   },
   '1': {
-    '0'   : products.memex,
+    '0'   : products.coop,
   },
   '-1': {
     '0'   : products.shell,
