@@ -399,6 +399,7 @@ function porlockCycle() {
     next = 0
   }
 
+  playSwipeSound()
   $.teach({ porlockIndex: next })
 }
 
@@ -407,6 +408,7 @@ $.when('click', '[data-welcome-continue]', (event) => {
 })
 
 function porlockSkip() {
+  playSwipeSound()
   $.teach({ mode: modes.system })
 }
 
@@ -1126,6 +1128,7 @@ function systemLoop(time) {
 
     if(mode === modes.welcome) {
       const streamUp = streamFactory('up', (id) => {
+        playStuckSound()
         $.teach({ porlockIndex: 0 })
       })
       const streamLeft = streamFactory('left', (id) => {
@@ -1133,6 +1136,9 @@ function systemLoop(time) {
 
         if(next < 0) {
           next = 0
+          playStuckSound()
+        } else {
+          playSwipeSound()
         }
 
         $.teach({ porlockIndex: next })
@@ -1143,11 +1149,15 @@ function systemLoop(time) {
 
         if(next >= porlock.length) {
           next = porlock.length - 1
+          playStuckSound()
+        } else {
+          playSwipeSound()
         }
 
         $.teach({ porlockIndex: next })
       })
       const streamDown = streamFactory('down', (id) => {
+        playStuckSound()
         $.teach({ porlockIndex: porlock.length - 1 })
       })
 
