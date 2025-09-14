@@ -212,10 +212,10 @@ $.draw((target) => {
       <div class="pane">
         <div class="pane-view" data-dom="welcome"></div>
         <div class="pane-actions">
-          <button class="gaming-button -a">
+          <button class="gaming-button -a" data-welcome-continue>
             Continue
           </button>
-          <button class="gaming-button -b">
+          <button class="gaming-button -b" data-welcome-skip>
             Skip
           </button>
         </div>
@@ -386,6 +386,37 @@ function streamFactory(key, handler) {
     })
   }
 }
+
+const gamepadPorlockCycle = streamFactory('a', (id) => {
+  porlockCycle()
+})
+
+function porlockCycle() {
+  const { porlockIndex } = $.learn()
+  let next = porlockIndex + 1 
+
+  if(next >= porlock.length) {
+    next = 0
+  }
+
+  $.teach({ porlockIndex: next })
+}
+
+$.when('click', '[data-welcome-continue]', (event) => {
+  porlockCycle()
+})
+
+function porlockSkip() {
+  $.teach({ mode: modes.system })
+}
+
+$.when('click', '[data-welcome-skip]', (event) => {
+  porlockSkip()
+})
+
+const gamepadPorlockSkip = streamFactory('b', (id) => {
+  porlockSkip()
+})
 
 $.when('click', '[data-install]', installProduct)
 
@@ -640,6 +671,10 @@ $.style(`
 		-moz-user-select: none; /* Firefox */
 		-ms-user-select: none; /* Internet Explorer/Edge */
     touch-action: none;
+  }
+
+  & .${modes.welcome} {
+    display: none;
   }
 
   & .${modes.play},
@@ -1090,18 +1125,6 @@ function systemLoop(time) {
     }
 
     if(mode === modes.welcome) {
-      const streamA = streamFactory('a', (id) => {
-        let next = porlockIndex + 1 
-
-        if(next >= porlock.length) {
-          next = 0
-        }
-
-        $.teach({ porlockIndex: next })
-      })
-      const streamB = streamFactory('b', (id) => {
-        $.teach({ mode: modes.system })
-      })
       const streamUp = streamFactory('up', (id) => {
         $.teach({ porlockIndex: 0 })
       })
@@ -1128,8 +1151,8 @@ function systemLoop(time) {
         $.teach({ porlockIndex: porlock.length - 1 })
       })
 
-      streamA(player.a, id)
-      streamB(player.b, id)
+      gamepadPorlockCycle(player.a, id)
+      gamepadPorlockSkip(player.b, id)
       streamUp(player.up, id)
       streamLeft(player.left, id)
       streamRight(player.right, id)
