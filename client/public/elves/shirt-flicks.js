@@ -4,7 +4,23 @@ import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
 import { products } from './box-art.js'
 
+const porlock = [
+  'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
+  'Now, Alph is a river that slips as it slithers,',
+  'while time is adjacent to space ever so nascent,',
+  'that water flows upwards and downwards at once.',
+  'A story unfolded as it was tolded, a bardly dulcimer,',
+  'Beginning unkindly, the realms sent war to her,',
+  'Assuming the jester for heightened bemusement, she rang',
+  'whole kingdoms now circused in total amusement, she sang',
+  'Over and over she keeps thwarting their efforts,',
+  "How? Space is a construct, she's throwing a concert,",
+  'that fits in her pocket, on paper as finite as self,',
+  'it sounds somewhat silly: time is a gift of the elves.',
+]
+
 const modes = {
+  welcome: 'welcome',
   system: 'system',
   browse: 'browse',
   play: 'play',
@@ -31,7 +47,6 @@ const lolol = {
   '-2': {
     '0'   : products.memex,
   },
-
 }
 
 function audioFactory(url) {
@@ -64,12 +79,37 @@ const $ = app('shirt-flicks', {
   rows: 1,
   columns: 1,
   instances: {},
-  mode: modes.system,
+  mode: modes.welcome,
   browserIndex: 0,
-  src: null
+  src: null,
+  porlockIndex: 0
 })
 
+const coloures = [
+  'firebrick',
+  'darkorange',
+  'gold',
+  'mediumseagreen',
+  'dodgerblue',
+  'slateblue',
+  'mediumpurple',
+]
+
 const modeHandlers = {
+  [modes.welcome]: (target) => {
+    const { porlockIndex } = $.learn()
+
+    const hypertext = `
+      <div class="brand-voice" style="background-color: ${coloures[porlockIndex % coloures.length]}">
+        <span class="brand-message">${porlock[porlockIndex]}</span>
+      </div>
+    `
+
+    const view = target.querySelector('[data-dom="welcome"]')
+
+    if(view)
+      diffHTML.innerHTML(view, hypertext)
+  },
   [modes.system]: (target) => {
     const { instances } = $.learn()
     const instance = instances[target.id]
@@ -163,9 +203,24 @@ $.draw((target) => {
   if(target.innerHTML) return
 
   return `
-    <button class="logo" data-options>
-      ShirtFlicks
-    </button>
+    <div class="header">
+      <button class="logo" data-options>
+        ShirtFlicks
+      </button>
+    </div>
+    <div class="${modes.welcome}">
+      <div class="pane">
+        <div class="pane-view" data-dom="welcome"></div>
+        <div class="pane-actions">
+          <button class="gaming-button -a">
+            Continue
+          </button>
+          <button class="gaming-button -b">
+            Skip
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="${modes.browse}">
       <div class="flicks">
         <div class="product-list" data-dom="catalog"></div>
@@ -173,6 +228,9 @@ $.draw((target) => {
     </div>
     <div class="${modes.settings}">
       <div class="pane">
+        <div class="pane-view">
+          <time-machine></time-machine>
+        </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
           <button class="gaming-button -y toolbelt-escape">
@@ -586,6 +644,7 @@ $.style(`
 
   & .${modes.play},
   & .${modes.browse},
+  & .${modes.welcome},
   & .${modes.settings} {
     opacity: 0;
     position: absolute;
@@ -595,6 +654,7 @@ $.style(`
     z-index: 20;
   }
 
+  &[data-mode="${modes.welcome}"] .${modes.welcome},
   &[data-mode="${modes.browse}"] .${modes.browse},
   &[data-mode="${modes.settings}"] .${modes.settings} {
     display: block;
@@ -611,12 +671,21 @@ $.style(`
     font-weight: bold;
   }
 
+  & .header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    z-index: 90001;
+    pointer-events: none;
+  }
+
   & .logo {
-    position: relative;
-    font-weight: 100%;
     border-radius: 100%;
     padding: .25rem;
     font-weight: bold;
+    pointer-events: all;
   }
 
   & .shirtflicks-s {
@@ -633,13 +702,9 @@ $.style(`
     background: rgba(0,0,0,1);
     border: none;
     color: rgba(255,255,255,.85);
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
     padding: 4px 8px;
     border-radius: 2px;
-    margin: .5rem;
+    margin: 4px;
   }
 
   & [data-options]:hover,
@@ -664,7 +729,7 @@ $.style(`
   }
 
   & .settings {
-    padding: 1rem;
+    padding: 0 1rem;
   }
 
   & select {
@@ -809,7 +874,7 @@ $.style(`
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 1rem;
+    padding: 0 1rem;
   }
 
   & .transclusion-trailer {
@@ -819,8 +884,6 @@ $.style(`
     display: grid;
     place-items: center;
   }
-
-
 
   & .transclution button {
     pointer-events: all;
@@ -847,7 +910,6 @@ $.style(`
     position: relative;
     z-index: 10;
   }
-
 
   & .system-keyart img {
     margin: auto;
@@ -925,9 +987,28 @@ $.style(`
     height: 100%;
   }
 
+  & .pane-view {
+    position: relative;
+  }
+
   & .pane-actions {
     grid-area: actions;
     text-align: right;
+  }
+
+  & .brand-voice {
+    font-size: 2rem;
+    position: absolute;
+    inset: 0;
+    padding: 1rem;
+    display: flex;
+    align-items: end;
+  }
+
+  & .brand-message {
+    background: black;
+    color: white;
+    padding: .5rem 1rem;
   }
 `)
 
@@ -985,7 +1066,7 @@ const lastFrame = {
 
 function systemLoop(time) {
   const { id } = this
-  const { mode, instances, browserIndex } = $.learn()
+  const { porlockIndex, mode, instances, browserIndex } = $.learn()
   if(instances[id]) {
     const { x, y } = instances[id]
     const player = {
@@ -1007,6 +1088,54 @@ function systemLoop(time) {
       right: checkButton(0, 15),
       os: checkButton(0, 16),
     }
+
+    if(mode === modes.welcome) {
+      const streamA = streamFactory('a', (id) => {
+        let next = porlockIndex + 1 
+
+        if(next >= porlock.length) {
+          next = 0
+        }
+
+        $.teach({ porlockIndex: next })
+      })
+      const streamB = streamFactory('b', (id) => {
+        $.teach({ mode: modes.system })
+      })
+      const streamUp = streamFactory('up', (id) => {
+        $.teach({ porlockIndex: 0 })
+      })
+      const streamLeft = streamFactory('left', (id) => {
+        let next = porlockIndex - 1 
+
+        if(next < 0) {
+          next = 0
+        }
+
+        $.teach({ porlockIndex: next })
+      })
+
+      const streamRight = streamFactory('right', (id) => {
+        let next = porlockIndex + 1 
+
+        if(next >= porlock.length) {
+          next = porlock.length - 1
+        }
+
+        $.teach({ porlockIndex: next })
+      })
+      const streamDown = streamFactory('down', (id) => {
+        $.teach({ porlockIndex: porlock.length - 1 })
+      })
+
+      streamA(player.a, id)
+      streamB(player.b, id)
+      streamUp(player.up, id)
+      streamLeft(player.left, id)
+      streamRight(player.right, id)
+      streamDown(player.down, id)
+    }
+
 
     if(mode === modes.play) {
       const streamOS = streamFactory('os', () => {
@@ -1073,7 +1202,7 @@ function systemLoop(time) {
       const streamX = streamFactory('x', (id) => {
         debugToolbelt()
       })
-      const streamY = streamFactory('x', (id) => {
+      const streamY = streamFactory('y', (id) => {
         handleEscape()
       })
 

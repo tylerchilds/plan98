@@ -30,8 +30,8 @@ const library = {
           That water flows upwards and downwards at once.<br>
 <br>
           A story unfolded as it was tolded, a bardly dulcimer,<br>
-          Beginning unkindly, the realms sent war to her,<br>
-          becoming the jester for heightened bemusement, she rang<br>
+          Beginning unkindly, the realms sent war to her,<br
+          assuming the jester for heightened bemusement, she rang<br>
           whole kingdoms now circused in total amusement, she sang<br>
 <br>
           Time and again she keeps thwarting their efforts,<br>
