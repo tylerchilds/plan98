@@ -1031,6 +1031,7 @@ $.style(`
   & .pane-actions {
     grid-area: actions;
     text-align: right;
+    padding: 0 .5rem;
   }
 
   & .brand-voice {
