@@ -1,5 +1,3 @@
-import { doingBusinessAs } from "@sillonious/brand"
-
 import('randomuuid').catch(console.error)
 import('./elves/plan98-console.js').catch(console.error)
 //import('./elves/plan98-synthia.js').catch(console.error)
@@ -16,7 +14,7 @@ self.plan98 = {
   ...self.plan98,
   parameters,
   database,
-  host: world ? world : doingBusinessAs[window.location.host] ? window.location.host : 'sillyz.computer',
+  host: world ? window.location.host : 'sillyz.computer',
   registry: {}
 }
 
