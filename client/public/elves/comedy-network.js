@@ -134,12 +134,14 @@ function myBiography(node) {
   const { activeTab } = $.learn()
 
   diffHTML.innerHTML(node, `
-    <div class="tabs">
-      ${Object.keys(tabs).map(tabulature).join('')}
-    </div>
-    <div class="tab-content">
-      ${tabRenderer(activeTab)}
-    </div>
+    <div${activeTab}>
+      <div class="tabs">
+        ${Object.keys(tabs).map(tabulature).join('')}
+      </div>
+      <div class="tab-content">
+        ${tabRenderer(activeTab)}
+      </div>
+    </div${activeTab}>
   `)
 }
 

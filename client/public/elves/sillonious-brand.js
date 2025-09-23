@@ -9,6 +9,33 @@ const $ = elf('sillonious-brand', {
   council: '6174'
 })
 
+const dns = {
+  'sillyz.computer': {
+    elf: 'ur-shell'
+  },
+  'comedymap.org': {
+    elf: 'comedy-network'
+  },
+  'plan98.org': {
+    elf: 'time-machine'
+  },
+  'shirtflicks.app': {
+    elf: 'shirt-flicks'
+  },
+  'css.ceo': {
+    elf: 'joke-book'
+  },
+  'thelanding.page': {
+    elf: 'landing-template'
+  },
+  'friendcryption.org': {
+    elf: 'cool-chat'
+  },
+  'friendcryption.com': {
+    elf: 'time-machine'
+  },
+}
+
 const standard = window.plan98 || { host: window.location.host }
 export function currentBusiness(host = standard) {
   return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
@@ -18,6 +45,12 @@ $.draw((target) => {
   if(target.innerHTML) return
   if(target.getAttribute('innerHTML')) {
     return target.getAttribute('innerHTML')
+  }
+
+  if(dns[self.plan98.host]) {
+    const domain = dns[self.plan98.host]
+
+    return `<${domain.elf}></${domain.elf}>`
   }
 
   return `
