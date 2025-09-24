@@ -1244,6 +1244,12 @@ $.style(`
     color: white;
   }
 
+  @media(max-width: 768px) {
+    & .interlude-title {
+      font-size: 2rem;
+    }
+  }
+
   & .interlude-subtitle {
     font-size: 1.5rem;
     color: rgba(255,255,255,.65);
@@ -1359,6 +1365,14 @@ $.style(`
     text-align: center;
   }
 
+  @media(max-width: 768px) {
+    & .featured-title {
+      font-size: 2rem;
+    }
+  }
+
+
+
   & .featured-video {
     max-width: 960px;
     margin: 1rem auto;
@@ -1402,7 +1416,7 @@ $.style(`
     font-weight: bold;
     text-decoration: underline;
     text-decoration-thickness: 2px;
-    text-decoration-color: #ffce00;
+    text-decoration-color: darkorange;
   }
 
   & .logo-area {
