@@ -8,7 +8,7 @@ $.draw((target) => {
   const autoplay = target.getAttribute('autoplay') === "true" || false
   const controls = target.getAttribute('controls') === "true" || false
   const loop = target.getAttribute('loop') === "true" || false
-  return `<video playsinline disablepictureinpicture ${loop?`loop`:''} autoplay="${autoplay}" ${controls?`controls="true"`:''}></video>`
+  return `<video playsinline disablepictureinpicture ${loop?`loop`:''} ${autoplay?"autoplay=":''} ${controls?`controls="true"`:''}></video>`
 }, { afterUpdate })
 
 function afterUpdate(target) {

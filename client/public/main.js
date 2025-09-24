@@ -10,7 +10,7 @@ const world = parameters.get('world')
 self.plan98 = {
   ...self.plan98,
   parameters,
-  host: world ? world : window.location.host,
+  host: world ? world : window.location.host.includes('localhost:') ? 'sillyz.computer' : window.location.host,
   registry: {}
 }
 
