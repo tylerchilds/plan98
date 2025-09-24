@@ -1,4 +1,3 @@
-import supabase from '@sillonious/database'
 import elf from '@silly/elf'
 
 function logo() {
@@ -685,39 +684,6 @@ $.when('click', '[data-slideout]', (event) => {
 $.when('input', '[data-bind]', (event) => {
   $.teach({[event.target.name]: event.target.value })
 })
-
-$.when('submit', '[data-contact]', async event => {
-  event.preventDefault()
-
-  $.teach({
-    message: null
-  })
-
-  const { name, email, company, industry, phone, details } = event.target
-
-  const values = {
-    name: name.value,
-    email: email.value,
-    company: company.value,
-    industry: industry.value,
-    phone: phone.value,
-    details: details.value,
-  }
-
-  try {
-    const { error } = await supabase
-      .from('client_intake')
-      .insert(values)
-
-    const response = error
-      ? { error: true, message: error.message  }
-      : { success: true, message: "We'll be in touch, thanks for reaching out!" }
-    $.teach(response)
-  } catch(e) {
-    $.teach({ error: true, message: e.message })
-  }
-})
-
 
 $.style(`
   & {
