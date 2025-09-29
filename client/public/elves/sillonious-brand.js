@@ -11,7 +11,7 @@ const $ = elf('sillonious-brand', {
 
 const dns = {
   'sillyz.computer': {
-    elf: 'ur-shell'
+    elf: 'root-shell'
   },
   'comedymap.org': {
     elf: 'comedy-network'

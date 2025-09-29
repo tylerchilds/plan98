@@ -31,7 +31,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/sketch-pad'
+    self.location.href = '/app/ur-shell'
     return
   }
 
@@ -63,7 +63,7 @@ $.draw((target) => {
     <div style="display: grid; height: 100%; position: relative;">
       <footer>
         <div>
-          <a href="/cdn/sillyz.computer/index.md">Help</a>
+          <a href="https://tychi.me">Help</a>
         </div>
         <form name="enter-cheat">
           <input name="cheat-code" placeholder="cool-chat" type="text" />

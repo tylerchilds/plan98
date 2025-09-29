@@ -54,9 +54,9 @@ export function update(message) {
 
 $.teach({ body: `Silly, at your service.
 
-    Do your thing or click "help" and type "help" and then press the "return" key on your typewriter.
+  Do your thing or click "help" and type "help" and then press the "return" key on your typewriter.
 
-    P.s. If you forget who you are, run the "about" sub routine micro process command execution function method.
+  P.s. If you forget who you are, run the "about" sub routine micro process command execution function method.
 
 Signed,
   Wally.`, author: 'assistant' }, mergeMessage)

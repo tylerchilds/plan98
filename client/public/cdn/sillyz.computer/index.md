@@ -1,5 +1,33 @@
 <action-script class="discreet" data-action="launch" data-script="/public/elves/plan98-synthia.js"><plan98-icon style="width: 128px; height: 128px;"></plan98-icon></action-script>
 
+# The Five Investigative Journalisms of <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+1. Who is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+You are
+
+2. What is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+A "Flick"
+
+3. When is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+Now or a later Now in the future
+
+4. Where is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+Find out on <a href="https://comedymap.org">ComedyMap.org</a>
+
+5. Why is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+Stream now on  <a href="https://shirtflicks.app">ShirtFlicks.App</a>
+
+6. How is <a href="https://sillyz.computer">Sillyz.Computer</a>?
+
+Everything will eventually make sense on <a href="https://thelanding.page">TheLanding.Page</a>
+
+
+
 # Plan98
 
 The graphic below is an operating system. So is the graphic above. Which came first, the circle or the square?
@@ -86,6 +114,9 @@ In general, the applications and components recently depend on assumptions and i
 
 2025
 ===
+
+[ComedyMap.Org](ComedyMap.Org)
+[ShirtFlicks.App](ShirtFlicks.App)
 
 @plan98/blue-sky
 ---

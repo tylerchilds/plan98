@@ -160,7 +160,7 @@ $.draw((target) => {
   mount(target)
   const { slot, booting } = $.learn()
   const variation = target.getAttribute('variation') || 'super'
-  rom = target.getAttribute('rom') || 'song-wave'
+  rom = target.getAttribute('rom') || 'player-piano'
 
   if(booting) {
     return `
