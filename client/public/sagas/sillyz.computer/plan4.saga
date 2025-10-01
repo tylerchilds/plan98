@@ -1,0 +1,177 @@
+<title-page
+title: Untitled Fourth Amendment Project
+author: Smartist Collective
+
+# Int. Photography Set - White backdrop
+
+A PERSON stands in front of a CAMERA, reading a TELEPROMPTER.
+
+@ Person
+> I am a person.
+
+The person continues reading.
+
+@ Person
+> For work, I am a medical professional. I only offer one type of prescription.
+
+The PERSON removes a PAGE from the BACKPACK.
+
+@ Person
+> The Giggle.
+
+^ Paper Cutaway
+
+# Int. Hospital - Day (PERSONAL RELIGION)
+
+A MECICINE CLOWN hands a CHILD the PAGE
+
+@ Doctor Medicine
+> The reality is some conditions are terminal, leaving only the soul for treatment.
+
+The MEDICINE CLOWN flicks through a Rabbi, Priest, Shaman, Elder, and so on.
+
+@ Doctor Medicine
+> Our lives end the same way they begin: however we perceive.
+
+^ Paper Cutaway
+
+# Int. Office - Night (PERSONAL DEVICES)
+
+A WRITER seated at a DESK places a PAGE in a DRAWER
+
+@ Writer
+> Back in my day, my ideas were bound by the paper I could author and carry.
+
+The TYPEWRITER on the DESK flicks through a DESKTOP, LAPTOP, TABLET, PHONE, GLASSES, FLICK
+
+^ Paper Cutaway
+
+# Int. KITCHEN - (PERSONAL MEDICINE)
+
+A CHEF puts a RECIPE in a BOX, then mixes themselves a SMOOTHIE
+
+@ Chef
+> I know my body, my body knows me, I know what I like, I know what I need.
+
+A collection of INGREDIENTS flick through assortments of FRUITS and VEGETABLES
+
+^ Paper Cutaway
+
+# Int. Classroom - (PERSONAL MEMORIES)
+
+A PROFESSOR turns the PAGE in their NOTEBOOK on the LECTURN
+
+@ Professor
+> My professor once professed to me that the professoral profession was profound.
+
+The PROFESSOR flicks through a DOCTOR, MECHANIC, ROCKSTAR, MASCOT, FIREMAN
+
+# User Story - Personal Religion
+
+I am a death doula. I provide end of life services to people that wish they were dead already, but are still kicking.
+
+Some find peace in prayer and philanthropy, but others reach out to me to find peace through comedy in the ultimate tragedy.
+
+Everybody dies the same way they live. Everybody poops.
+
+Most of my customers do not want their friends and family to know they are dying.
+
+Most of my customers do not want to be associated with me. Period.
+
+To maintain ultimate secrecy, it is important my network of contacts never leave my possession.
+
+# User Story - Personal Devices
+
+Now, death comes for us all and will come for us at the most inopportune times.
+
+I offer end of life transition services to maintain coherency when migrating from this life to the after, for the departed and the remainded.
+
+While my customers are still here, they might think about death at all hours and I will need to respond immediately with assurance that their time has not yet come and that I'm still with them, too.
+
+When that happens, I could be on my (memex of devices) and they could be on their (memex of devices), but the point remains-- if they want to talk to me, it actually is an emergency and I need to connect with them as quickly and securely as possible.
+
+I need to be able to BE PAGED across my PERSONAL DEVICE NETWORK by EMERGENCY CONTACTS.
+
+# User Story - Personal Medicine
+
+Now, while I play DOCTOR MEDICINE on TELEVISION, as an ACTOR, I need a real DOCTOR.
+
+My DNA is unique to me, the same way your DNA is unique to you. I have allergies you do not have and vice versa.
+
+Based on my age and habits, my doctor gives me customized advice that is usually "Exercise more" and "Floss."
+
+Based on what has happened to me in the past and what my family has experienced, my doctor is able to tailor my life-plan to optimize for not needing a doula like myself any time soon.
+
+It is important that only my doctor and myself access my PERSONAL MEDICAL RECORDS.
+
+# User Story - Personal Memories
+
+Throughout my time entertaining people, I've made some unimaginable memories meeting some unforgettable people.
+
+I keep a personal collection of all my customers, they are very near and dear to my heart. Sometimes decades after they've been gone, people that remember them will remember me and reach out to check in and reminisce together.
+
+If they are a trusted friend, I'll gladly share the stories and artifacts I'm authorized to share on behalf of the dearly departed. I serve as a stew of the digital rights of my wards, a trusted agent of their cyber estate, until death do me part.
+
+In the end, I have shelfs of albums of all sorts of artificts: BOOKS, PHOTOS, POEMS, FLICKS. Really that's the costly part of running a personal memory machine-- the size of thought itself!
+
+# User Story - Personal Comedy
+
+Now the hard part of the job. Finding replacement customers.
+
+No one likes losing business. No one likes losing a friend.
+
+That's the hard part: one headstone for both my birds.
+
+So, like all doulas, we fill our cups in the same way others empty theirs.
+
+We just talk about our problems in public. The dark comedy of a medical professional is not for the faint of heart.
+
+That's not something one can simply broadcast. The locations where these conversations happen simply cannot be shared globally.
+
+Find me, then follow me on https://comedymap.org
+
+# Other Characters
+
+@ Patient Zero
+> I can sync my PHONE, LAPTOP, WATCH to a STORAGE DEVICE or SERVICE PROVIDER
+> I can buy a STORAGE DEVICE from a BIG BOX RETAILER
+> I can pay a SERVICE PROVIDER to automatically BACKUP and RESTORE
+> I can GRANT my DOCTOR and ACCOUNTANT access only to my BODY and MONEY, RESPECTIVELY
+> I can GRANT access to my ARIFACTS by PERSONAL OPINION
+
+@ Power of Attorney
+> I can do anything PATIENT ZERO authorizes
+
+@ Accountant
+> I can SEND and RECEIVE MONEY
+> I can FILE TAXES
+
+@ Doctor
+> I can VIEW the PATIENT RECORDS from ALL DOCTORS
+> I can EDIT the PATIENT RECORDS that were AUTHORED by ME
+> I can VIEW the results of RESEARCH
+
+@ Researcher
+> I can PUBLISH RESEARCH
+> I can REVIEW PEER RESEARCH
+
+@ ADMINISTRATOR
+> I can be DELEGATED PERMISSIONS
+> I can DELEGATE PERMISSIONS
+
+@ Producer
+> I can PUBLISH on BEHALF
+> I can ACCESS the MEDIA ARCHIVE
+> I can PROCURE VENUES
+
+@ Venue
+> I can GRANT ACCESS to EQUIPMENT
+
+@ Banker
+> I can PRINT MONEY
+
+@ Customer
+> I can EXCHANGE VALUE
+
+@ Artist
+> I can
