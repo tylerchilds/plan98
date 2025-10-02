@@ -26,7 +26,7 @@ const dns = {
     elf: 'joke-book'
   },
   'thelanding.page': {
-    elf: 'landing-template'
+    elf: 'quick-blog'
   },
   'friendcryption.org': {
     elf: 'cool-chat'
