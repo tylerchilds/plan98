@@ -61,6 +61,9 @@ function router(route) {
 }
 
 
+const hello = { world: 'bye' }
+
+console . log ( hello . world )
 
 
 const $ = elf('quick-blog', {
@@ -488,6 +491,10 @@ function renderContent(target) {
     </div>
   `
 }
+
+$.when('click', '[data-get-started]', (event) => {
+  window.location.href = 'https://shirtflicks.app'
+})
 
 $.when('click', '[data-page]', (event) => {
   event.preventDefault()

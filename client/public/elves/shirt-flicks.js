@@ -31,9 +31,9 @@ const lolol = {
   '0': {
     '-2'  : products.memex,
     '-1'  : products.desktop,
-    '0'   : products.jokebook,
+    '0'   : products.hello,
     '1'   : products.mobile,
-    '2'   : products.memex,
+    '2'   : products.jokebook,
   },
   '1': {
     '0'   : products.coop,

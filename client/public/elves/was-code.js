@@ -9,6 +9,7 @@ import { gruvboxDark } from '@uiw/codemirror-theme-gruvbox-dark';
 
 import { EditorView } from '@codemirror/view'
 import { EditorState } from '@codemirror/state'
+import { consoleShow, consoleHide } from './plan98-console.js'
 
 import {
   basicSetup
@@ -48,6 +49,19 @@ function sourceFile(target) {
 $.when('click', '.preview', (event) => {
   const src = event.target.closest($.link).getAttribute('src')
   self.open(src, '_blank')
+})
+
+$.when('click', '.debug', (event) => {
+  let console = document.body.querySelector('plan98-console')
+  if(!console) {
+    document.body.insertAdjacentHTML('beforeend', '<plan98-console></plan98-console>')
+    console = document.body.querySelector('plan98-console')
+  } else {
+    console.classList.toggle('hidden')
+  }
+
+  consoleShow()
+
 })
 
 Vim.defineEx('write', 'w', function(event) {
@@ -94,6 +108,7 @@ $.draw(target => {
         </button>
         <div class="menu-actions" data-menu="file">
           <button class="preview" data-src="${src}">Raw</button>
+          <button class="debug" data-src="${src}">Debugger</button>
         </div>
       </div>
     `
@@ -176,6 +191,7 @@ $.draw(target => {
     const config = {
       extensions: [
         basicSetup,
+        EditorView.lineWrapping,
         gruvboxDark,
         javascript(),
         html(),

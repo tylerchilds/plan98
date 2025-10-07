@@ -1,6 +1,16 @@
 import elf from '@silly/elf'
 
 export const products = {
+  hello: {
+    title: 'Hello World',
+    artist: 'Sillyz.Computer',
+    description: 'Learn English Comedy Grammar Elvish JavaScript Syncronistically.',
+    keyart: '/public/cdn/boxart.svg',
+    launcher: '<box-art product="hello"></box-art>',
+    trailer: '/public/cdn/sillyz.computer/six-modalities/Desktop/manifest.m3u8',
+    url: '/app/was-code?src=/public/elves/hello-world.js'
+  },
+
   jokebook: {
     title: 'Joke Book',
     artist: 'Sillyz.Computer',
