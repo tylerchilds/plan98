@@ -34,11 +34,10 @@ And the circus at the end of time has not stopped since Silly tried to reason wi
 
 */
 
-import taughtMe from '@silly/elf'
+import elf from '@silly/elf'
 
-const yoMomma = taughtMe("hello-world")
+const $ = elf("hello-world")
 
-yoMomma.draw(_ => {
-  // i don't write a lot of one liners and i definitely rarely publish them, but
-  return "yoMamma taught me 'Hello, World!' last night."
+$.draw(_ => {
+  return "Hello, World!"
 })
