@@ -191,6 +191,7 @@ export default function elf(link, initialState) {
 ```
 
 References:
+https://github.com/tylerchilds?achievement=arctic-code-vault-contributor&tab=achievements
 https://forum.solidproject.org/t/idea-launcher-app/3468
 https://github.com/tylerchilds/plan98
 https://thelanding.page
