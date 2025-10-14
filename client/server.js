@@ -465,6 +465,7 @@ function template() {
           "@sillonious/computer": "/public/sillyz.computer.js",
           "@silly/tag": "/public/module.js",
           "@silly/elf": "/public/elf.js",
+          "@plan98/types": "/public/types.js",
           "@plan98/elf": "/public/plan98.js",
           "@plan98/app": "/public/plan98.js",
           "@plan68/app": "/public/plan68.js",

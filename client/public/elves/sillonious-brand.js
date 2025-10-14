@@ -34,6 +34,9 @@ const dns = {
   'friendcryption.com': {
     elf: 'time-machine'
   },
+  'ncity.executiontime.pub': {
+    elf: 'generic-park'
+  },
 }
 
 const standard = window.plan98 || { host: window.location.host }

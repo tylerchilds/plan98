@@ -14,13 +14,15 @@ A "Hello World" program example MUST:
 
 A reference implementation in JavaScript
 
-<static-code>import elf from '@plan98/elvish'
+```
+import elf from '@plan98/elvish'
 
 const $ = elf("hello-world")
 
 $.draw((target)) => {
   return "Hello World"
-})</static-code>
+})
+```
 
 In this example, "target", is unused directly. The return value is inserted automatically.
 
@@ -42,7 +44,8 @@ The draw method MAY
 
 1. Call "beforeUpdate" and "afterUpdate" lifeCycle methods, when present, before and after the compositor respectively.
 
-<static-code>function draw(link, compositor, lifeCycle) {
+```
+function draw(link, compositor, lifeCycle) {
   
 }
 
@@ -50,7 +53,8 @@ export default function elf(link) {
   return {
     draw: draw.bind(this, link),
   }
-}</static-code>
+}
+```
 
 ### Example
 
@@ -65,7 +69,8 @@ A "Clock" program will count seconds since pageload.
 
 A reference implementation in JavaScript
 
-<static-code>import elf from '@plan98/elvish'
+```
+import elf from '@plan98/elvish'
 
 const $ = elf("clock-program", {
   seconds: 0
@@ -82,7 +87,8 @@ $.draw((target) => {
   return `
     Seconds elapsed: ${seconds}
   `
-})</static-code>
+})
+```
 
 ## Interface Template
 

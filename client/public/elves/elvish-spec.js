@@ -24,7 +24,7 @@ function main(data) {
     decodedCode = decodeHtmlEntities(decodedCode); // Second decode to fix double encoding
 
     const langClass = language ? ` class="language-${language}"` : "";
-    return `<pre><code${langClass}>${escapeHyperText(decodedCode)}</code></pre>`;
+    return `<static-code${langClass}>${escapeHyperText(decodedCode)}</static-code>`;
   };
 
   marked.setOptions({
@@ -33,28 +33,6 @@ function main(data) {
     breaks: false,    // Keep standard line breaks
     sanitize: false,
     smartypants: false, // Prevent automatic quote conversions
-  });
-
-  marked.use({
-    extensions: [{
-      name: 'static-code',
-      level: 'block',
-      start(src) { return src.match(/<static-code>/)?.index; },
-      tokenizer(src) {
-        const match = src.match(/^<static-code>\n?([\s\S]*?)\n?<\/static-code>/);
-        if (match) {
-          return {
-            type: 'static-code',
-            raw: match[0],
-            text: match[1]  // Raw content without parsing
-          };
-        }
-      },
-      renderer(token) {
-        // Return your custom HTML with vim/syntax highlighting
-        return `<static-code>${token.text}</static-code>`;
-      }
-    }]
   });
 
   const $ = elf('elvish-spec')

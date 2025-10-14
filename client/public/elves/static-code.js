@@ -1,4 +1,4 @@
-import module from '@silly/tag'
+import { Elf } from '@plan98/types'
 import { vim, Vim } from "@replit/codemirror-vim"
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
@@ -14,9 +14,15 @@ import {
   basicSetup
 } from "codemirror"
 
-const $ = module('static-code')
+const $ = Elf('static-code')
 
 const cursors = {}
+
+function decodeHtmlEntities(text) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = text;
+  return textarea.value;
+}
 
 function mount(target) {
   if(target.initialized) return
