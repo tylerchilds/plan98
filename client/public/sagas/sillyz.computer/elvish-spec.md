@@ -14,15 +14,13 @@ A "Hello World" program example MUST:
 
 A reference implementation in JavaScript
 
-```
-import elf from '@plan98/elvish'
+<static-code>import elf from '@plan98/elvish'
 
 const $ = elf("hello-world")
 
 $.draw((target)) => {
   return "Hello World"
-})
-```
+})</static-code>
 
 In this example, "target", is unused directly. The return value is inserted automatically.
 
@@ -44,8 +42,7 @@ The draw method MAY
 
 1. Call "beforeUpdate" and "afterUpdate" lifeCycle methods, when present, before and after the compositor respectively.
 
-```
-function draw(link, compositor, lifeCycle) {
+<static-code>function draw(link, compositor, lifeCycle) {
   
 }
 
@@ -53,8 +50,11 @@ export default function elf(link) {
   return {
     draw: draw.bind(this, link),
   }
-}
-```
+}</static-code>
+
+### Example
+
+<hello-world></hello-world>
 
 # Lesson 2: Clock
 
@@ -65,26 +65,24 @@ A "Clock" program will count seconds since pageload.
 
 A reference implementation in JavaScript
 
-```
-import elf from '@plan98/elvish'
+<static-code>import elf from '@plan98/elvish'
 
 const $ = elf("clock-program", {
   seconds: 0
 })
 
-setTimeout(() => {
+setInterval(() => {
   const { seconds } = $.learn()
   $.teach({ seconds: seconds + 1 })
 }, 1000)
 
-$.draw((target)) => {
+$.draw((target) => {
   const { seconds } = $.learn()
 
   return `
-    Seconds elapsed: 0
+    Seconds elapsed: ${seconds}
   `
-})
-```
+})</static-code>
 
 ## Interface Template
 
@@ -105,8 +103,7 @@ The teach method MAY
 1. Use a handler to effectively reject data for any reason
 2. Incorporate knowledge into the current link
 
-```
-export function learn(link) {
+<static-code>export function learn(link) {
 }
 
 export function teach(link, data, handler) {
@@ -120,8 +117,11 @@ export default function elf(link, initialState) {
     draw: draw.bind(this, link),
     teach: teach.bind(this, link),
   }
-}
-```
+}</static-code>
+
+### Example
+
+<hello-clock></hello-clock>
 
 # Lesson 3: Counter
 
@@ -132,14 +132,13 @@ A "Counter" program will render an interactive button that counts clicks.
 
 A reference implementation in JavaScript
 
-```
-import elf from '@plan98/elvish'
+<static-code>import elf from '@plan98/elvish'
 
 const $ = elf("counter-program", {
   count: 0
 })
 
-$.draw((target)) => {
+$.draw((target) => {
   const { count } = $.learn()
 
   let string = '0 times'
@@ -161,8 +160,7 @@ $.when('click', 'button', (event) => {
   $.teach({
     count: $.learn().count + 1
   })
-})
-```
+})</static-code>
 
 ## Interface Template
 
@@ -172,10 +170,9 @@ In quantum progamming, the mental model is "When something, do something"
 
 The when method MUST
 
-2. Invoke the do, when the event is emitted, on all selections in a light cone
+1. Invoke the run, when the event is emitted, on all selections in a light cone
 
-```
-export function when(link, type, selector, do) {
+<static-code>export function when(link, type, selector, run) {
 }
 
 export default function elf(link, initialState) {
@@ -187,13 +184,17 @@ export default function elf(link, initialState) {
     teach: teach.bind(this, link),
     when: when.bind(this, link),
   }
-}
-```
+}</static-code>
 
-References:
-https://github.com/tylerchilds?achievement=arctic-code-vault-contributor&tab=achievements
-https://forum.solidproject.org/t/idea-launcher-app/3468
-https://github.com/tylerchilds/plan98
-https://thelanding.page
-https://github.com/tylerchilds/self-transforming-elf-machines/
-https://sillyz.computer/public/sagas/sillyz.computer/elvish-spec.md
+### Example
+
+<hello-counter></hello-counter>
+
+Additional Links:
+
+1. [Perfect Game](https://github.com/tylerchilds?achievement=arctic-code-vault-contributor&tab=achievements)
+2. [A Better Operating System](https://forum.solidproject.org/t/idea-launcher-app/3468)
+3. [A Personal Machine](https://github.com/tylerchilds/plan98)
+4. [An Act of Realization](https://thelanding.page)
+5. [A Minimal Hook](https://github.com/tylerchilds/self-transforming-elf-machines/)
+6. [Six Elves in a Trenchcoat](https://sillyz.computer)

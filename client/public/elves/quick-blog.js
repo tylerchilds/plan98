@@ -403,11 +403,11 @@ function create() {
     <div class="publish-form">
       <div style="background: lemonchiffon; display: grid; grid-template-columns: 1fr auto; padding: .5rem; gap: .5rem;">
         <div>
-          Thank you for choosing Blog Org Inc, where U is in charge of U, 4 REAL! By pushing the "Go Online!" button, the thoughts you shared will leave local subspace and achieve global subspace. More optionalities incoming!
+          Fill out the form and press the button to share your thoughts!
         </div>
         <div>
           <button class="standard-button" data-publish>
-            Go Online!
+            Publish
           </button>
         </div>
       </div>

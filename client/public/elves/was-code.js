@@ -65,8 +65,9 @@ $.when('click', '.debug', (event) => {
 })
 
 Vim.defineEx('write', 'w', function(event) {
+  const root = document.querySelector($.link)
   const { file, src } = sourceFile(document.querySelector($.link))
-  saveFile(src, file)
+  saveFile(src, file, { root })
 });
 
 Vim.defineEx('quit', 'q', function(event) {
@@ -74,15 +75,25 @@ Vim.defineEx('quit', 'q', function(event) {
 });
 
 $.when('click', '.publish', (event) => {
+  const root = event.target.closest($.link)
   const { file, src } = sourceFile(event.target)
-  saveFile(src, file)
+  saveFile(src, file, { root })
 })
 
-function saveFile(src, file) {
+function saveFile(src, file, { root }) {
+
   put(src, file).then((res) => {
-    res.error
-      ? toast('Are you even allowed to save, bro?', { type: 'error' })
-      : toast('File saved!', { type: 'success' })
+    if(res.error) {
+      toast('Are you even allowed to save, bro?', { type: 'error' })
+      root.dispatchEvent(new CustomEvent('save-error', {
+        detail: {}
+      }))
+    } else {
+      toast('File saved!', { type: 'success' })
+      root.dispatchEvent(new CustomEvent('save-success', {
+        detail: {}
+      }))
+    }
   })
 }
 

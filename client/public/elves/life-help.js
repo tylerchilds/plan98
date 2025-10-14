@@ -109,7 +109,7 @@ marked.setOptions({
   smartypants: false, // Prevent automatic quote conversions
 });
 
-const tag = 'agentic-dash'
+const tag = 'life-help'
 
 const views = {
   welcome: 'welcome',
@@ -310,6 +310,7 @@ const renderers = {
 
     return `
       <div class="wizard">
+        <img src="/public/cdn/beerdogusa.com/logo.jpeg">
         ${actions}
       </div>
     `
@@ -367,13 +368,24 @@ function beforeUpdate(target) {
     }
   }
 
+  saveCursor(target)
 }
 
 function afterUpdate(target) {
   {
     patch(target)
+    replaceCursor(target)
   }
 
+  {
+    const { messages } = $.learn()
+    const messageContainer = document.querySelector('.messages')
+    if(messageContainer && target.lastIndex !== messages.length -1) {
+      target.lastIndex = messages.length - 1
+      const children = [...messageContainer.children]
+      document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
+    }
+  }
 }
 
 function patch(target) {
@@ -445,10 +457,10 @@ function patch(target) {
     target.lastMessageCount = messages.length
     const list = target.querySelector('.messages')
 
-    list.innerHTML = `
+    innerHTML(list, `
       ${log}
       <div class="thinking-area"></div>
-    `
+    `)
   }
 
   if(namesOf(agents) !== target.namesOfAgents) {
@@ -463,10 +475,10 @@ function patch(target) {
   if(thinking !== target.isThinking) {
     target.isThinking = thinking
     const thoughtContainer = target.querySelector('.loading-area')
-    thoughtContainer.innerHTML = thinking ? `<div class="loading">
+    innerHTML(thoughtContainer, thinking ? `<div class="loading">
         <flying-disk></flying-disk>
       </div>
-    ` : ''
+    ` : '')
   }
 }
 

@@ -8,7 +8,7 @@
     "publish": "cd npm && npm publish",
     "start-proxy": "caddy run --config Caddyfile",
     "start-old": "deno run -A --unstable mod.js",
-    "start": "pup run --config pup.json",
+    "start": "deno task start-peer",
     "compile-client": "deno compile -A --output p98 client.js",
     "provision-api": "cd server/api && ./provision.sh",
     "start-api": "cd server/api && deno -A index.js",

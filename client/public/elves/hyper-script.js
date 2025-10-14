@@ -579,7 +579,7 @@ $.style(`
     background: transparent;
     border-bottom: 1px solid rgba(255,255,255,.25);
     display: none;
-    background: black;
+    background: rgba(0,0,0,.2);
   }
 
   @media screen {
@@ -588,7 +588,6 @@ $.style(`
       width: 100%;
       display: grid;
       grid-template-rows: auto 1fr;
-      background: #54796d;
     }
 
     & [data-hidden="true"] {
@@ -614,8 +613,8 @@ $.style(`
   }
 
   & .actions button {
-    background: black;
-    color: rgba(255,255,255,.85);
+    background: transparent;
+    color: rgba(0,0,0,.85);
     border: none;
     box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
     padding: 0 .5rem;
@@ -637,8 +636,8 @@ $.style(`
   & .joke-actions button.active,
   & .actions button:hover,
   & .joke-actions button:hover {
-    color: #fff;
-    background: #54796d;
+    color: black;
+    background: white;
   }
 
 
@@ -767,20 +766,19 @@ $.style(`
   & [name="read"] {
     margin: 0 auto;
     overflow: auto;
-    background: #54796d;
+    background: white;
   }
   & [name="page"] {
     background: white;
     box-shadow: 2px 2px 4px 4px rgba(0,0,0,.10);
     height: 100%;
     width: 100%;
-    background: white;
     margin: auto;
     color: black;
     overflow: auto;
   }
   & [name="perform"] {
-    background: #54796d;
+    background: white;
   }
   & iframe {
     display: block;
