@@ -440,7 +440,7 @@ function installProduct (event) {
   }
 }
 
-$.when('pointerdown', '.shirt', function(e) {
+$.when('pointerdown', '.shirt', function(event) {
   event.preventDefault()
   $.teach({ shirtStartTime: e.timeStamp })
   let startX, startY;
@@ -462,7 +462,7 @@ $.when('pointerdown', '.shirt', function(e) {
   })
 })
 
-$.when('pointermove', '.shirt', function(e){
+$.when('pointermove', '.shirt', function(event){
   event.preventDefault()
   const { shirtStartTime, shirtFirstTouch, shirtGesture } = $.learn()
   if(!shirtFirstTouch) return
@@ -794,7 +794,7 @@ $.style(`
     grid-template-rows: 1fr;
     height: 100%;
     transform-origin: bottom;
-    transform: translate(var(--pan-x, 0), var(--pan-y, 0))
+    transform: translate(var(--pan-x, 0), var(--pan-y, 0));
     position: absolute;
     inset: 0;
     z-index: 2;
