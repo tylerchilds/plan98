@@ -440,11 +440,11 @@ function installProduct (event) {
   }
 }
 
-$.when('pointerdown', '.shirt', function(event) {
-  event.preventDefault()
+$.when('pointerdown', '.shirt', function(e) {
+  e.preventDefault()
   $.teach({ shirtStartTime: e.timeStamp })
   let startX, startY;
-  const rectangle = event.target.getBoundingClientRect()
+  const rectangle = e.target.getBoundingClientRect()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
     startX = e.touches[0].clientX - rectangle.left
     startY = e.touches[0].clientY - rectangle.top
@@ -462,14 +462,14 @@ $.when('pointerdown', '.shirt', function(event) {
   })
 })
 
-$.when('pointermove', '.shirt', function(event){
-  event.preventDefault()
+$.when('pointermove', '.shirt', function(e){
+  e.preventDefault()
   const { shirtStartTime, shirtFirstTouch, shirtGesture } = $.learn()
   if(!shirtFirstTouch) return
   const shirtEndTime = e.timeStamp;
   const shirtDuration = shirtEndTime - shirtStartTime;
   let lastX, lastY;
-  const rectangle = event.target.closest($.link).getBoundingClientRect()
+  const rectangle = e.target.closest($.link).getBoundingClientRect()
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
     lastX = e.touches[0].clientX - rectangle.left
     lastY = e.touches[0].clientY - rectangle.top
