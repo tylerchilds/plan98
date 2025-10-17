@@ -119,6 +119,73 @@ const $ = elf('quick-blog', {
   ]
 })
 
+function mount(target) {
+  if(!target.mounted) {
+    target.mounted = true
+    const src = target.getAttribute('src')
+    lazy(src)
+  }
+}
+
+function retrieve(src) {
+  return async (post) => {
+    const headers = {}
+    let mediaType
+    if(post.representation[0]) {
+      mediaType = post.representation[0].mediaType
+      headers['Accept'] = mediaType
+    }
+
+    return await fetch(`${plan98.env.PLAN98_PROXY}?src=` + src + post.url, {
+      headers
+    })
+    .then(async (res) => {
+      if(mediaType === "application/json") {
+        const data = await res.json()
+        return derivePostFromJSON(src, post, data)
+      }
+
+      const data = await res.text()
+      return derivePostFromText(src, post, data)
+    })
+  }
+}
+
+function derivePostFromJSON(src, post, data) {
+  const { origin } = new URL(src)
+  return {
+    title: data.name ? data.name : 'Some Title',
+    author: 'Some One',
+    permalink: origin + '/' +  post.url,
+    timestamp: (data.published ? new Date(data.published) : new Date()).toJSON(),
+    body: data.content ? data.content : 'blank'
+  }
+}
+
+function derivePostFromText(src, post, data) {
+  const { origin } = new URL(src)
+
+  return {
+    title: 'Edge Case',
+    author: 'Edge Lord',
+    permalink: origin + '/' +  post.url,
+    timestamp: new Date().toJSON(),
+  }
+}
+
+async function lazy(src) {
+  if(!src) return
+
+  const data = await fetch(`${plan98.env.PLAN98_PROXY}?src=${src}`)
+    .then(res => res.json())
+
+  const posts = await Promise.all(data.items.map(retrieve(src)))
+
+  debugger
+
+  $.teach({ posts })
+}
+
 function nav(keys) {
   const { page } = $.learn()
   return keys
@@ -448,6 +515,7 @@ $.draw((target) => {
 }, {
   beforeUpdate: (target) => {
     {
+      mount(target)
     }
   },
   afterUpdate: (target) => {

@@ -174,6 +174,14 @@ function kids(paths) {
   return root;
 }
 
+async function proxy(request) {
+  const { search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const src = parameters.get('src')
+  return await fetch(src)
+    .then(res => res.json())
+}
+
 Deno.serve(
   { hostname: "localhost", port },
   async (request) => {
@@ -187,6 +195,16 @@ Deno.serve(
     if(filepath === '/plan98/about') {
       return fileSystem(request)
     }
+
+    if(filepath.startsWith('/proxy/')) {
+      const data = await proxy(request)
+      return new Response(JSON.stringify(data, null, 2), {
+        headers: {
+          "content-type": "application/json; charset=utf-8"
+        },
+      });
+    }
+
 
     if(filepath.startsWith('/app/')) {
       const [app] = filepath.split('/app/')[1].split('/')
@@ -280,6 +298,7 @@ function template() {
     PLAN98_WAS_SPACE_ID: spaceId,
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
     PLAN98_REALTIME: safeEnv('PLAN98_REALTIME'),
+    PLAN98_PROXY: safeEnv('PLAN98_PROXY'),
 
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
 
