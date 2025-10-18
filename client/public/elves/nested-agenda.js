@@ -8,7 +8,7 @@ function node(name, children) {
     name,
     children,
     done: false,
-    expanded: true
+    expanded: false
   }
 
   db[tree.id] = tree
@@ -21,7 +21,45 @@ const $ = elf('nested-agenda', {
     node(
       'hello',
       [
-        node('world', []),
+        node('world', [
+          node('Africa', []),
+          node('America (North)', [
+            node('Canada', []),
+            node('United States', [
+              node('California', [
+                node('San Francisco', [
+                  node('North Beach', [
+                    node("Cobb's Comedy Club", []),
+                    node("Lost Church", []),
+                  ]),
+                  node('Embarcadero', [
+                    node('Ferry Building', []),
+                    node("Fisherman's Wharf", [
+                      node('Pier 39', [
+                        node('Street Performer Stage Sponsored by Dasani, plastic bottled water, located near the sea lions.', []),
+                      ]),
+                    ]),
+                  ])
+                ])
+              ]),
+              node('Massachusetts', [
+                node('Boston', [
+                  node('Fenway Park', []),
+                  node('Yawkee Way', []),
+                  node('Faneuil Hall', [
+                    node('A Street Clown named Desire', []),
+                  ]),
+                ]),
+              ]),
+            ]),
+            node('Mexico', []),
+          ]),
+          node('America (South)', []),
+          node('Antarctica', []),
+          node('Asia', []),
+          node('Australia', []),
+          node('Europe', []),
+        ]),
         node('pluto', [
           node('The Heart', []),
           node('The Brass Knuckles', []),
@@ -68,6 +106,7 @@ function toggleExpand(id) {
 $.draw(() => {
   const { children } = $.learn()
   return `
+    Places you've never seen a clown play.<br>
     ${children.map(renderTree).join('')}
   `
 }, afterUpdate)
