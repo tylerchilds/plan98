@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import diffHTML from 'diffhtml'
 
 function logo() {
   return `
@@ -207,7 +208,8 @@ addEventListener("popstate", (event) => {
 
 const renderers = {
   [PAGES.HOME]: {
-    render: () => {
+    render: (target) => {
+      target.page = PAGES.HOME
       return `
         <div class="interlude">
           <div class="interlude-title">
@@ -389,18 +391,19 @@ const renderers = {
     }
   },
   news: {
-    render: () => {
+    render: (target) => {
+      target.page = PAGES.NEWS
       return news()
     }
   },
   create: {
-    render: () => {
-      return create()
+    render: (target) => {
+      return create(target)
     }
   },
   about: {
-    render: () => {
-
+    render: (target) => {
+      target.page = PAGES.NEWS
       return `
         <div class="hero">
           <img class="hero-image" src="/public/cdn/sillyz.computer/definitive-edition.jpeg" alt="That is right.">
@@ -463,55 +466,63 @@ function news() {
   `
 }
 
-function create() {
+function create(target) {
+  if(target.page !== PAGES.CREATE) {
+    target.page = PAGES.CREATE
+    target.innerHTML = `
+      <div class="publish-form">
+        <div style="background: lemonchiffon; display: grid; grid-template-columns: 1fr auto; padding: .5rem; gap: .5rem;">
+          <div>
+            Fill out the form and press the button to share your thoughts!
+          </div>
+          <div>
+            <button class="standard-button" data-publish>
+              Publish
+            </button>
+          </div>
+        </div>
+        <div class="page-title">
+          <input data-bind name="title" class="transparent-input" placeholder="Article Title" />
+        </div>
+        <textarea
+          data-bind
+          class="page-body"
+          name="messageText"
+          placeholder="help"
+        ></textarea>
+
+        <upload-drop></upload-drop>
+      </div>
+    `
+  }
   const { title, messageText, messageHeight } = $.learn()
 
-  return `
-    <div class="publish-form">
-      <div style="background: lemonchiffon; display: grid; grid-template-columns: 1fr auto; padding: .5rem; gap: .5rem;">
-        <div>
-          Fill out the form and press the button to share your thoughts!
-        </div>
-        <div>
-          <button class="standard-button" data-publish>
-            Publish
-          </button>
-        </div>
-      </div>
-      <div class="page-title">
-        <input data-bind name="title" class="transparent-input" placeholder="Article Title" value="${escapeHyperText(title)}" />
-      </div>
-      <textarea
-        data-bind
-        class="page-body"
-        name="messageText"
-        placeholder="help"
-        ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-        value="${escapeHyperText(messageText)}"
-      ></textarea>
+  const titleNode = target.querySelector('[name="title"]')
+  const messageNode = target.querySelector('[name="messageText"]')
 
-      <upload-drop></upload-drop>
-    </div>
-  `
+  if(messageHeight) {
+    messageNode.style.height = messageHeight + 'px'
+  } else {
+    delete messageNode.style.height
+  }
+
+  updateField(titleNode, escapeHyperText(title))
+  updateField(messageNode, escapeHyperText(messageText))
 }
 
 $.draw((target) => {
-  const { page, slideout } = $.learn()
-
-  return `
-    <header>
-      ${logo()}
-      <nav>
-        ${nav([PAGES.HOME, PAGES.ABOUT, PAGES.NEWS, PAGES.CREATE])}
-      </nav>
-    </header>
-    <section class="content ${slideout?'':'bleed'}">
-      ${renderContent(target)}
-    </section>
-    <footer>
-      &copy; 2025 Half-Rights Reserved<br>Production provided by the Chief Executive Officer of Custom Secure Shirts (<a href="https://css.ceo">CSS.CEO</a>)
-    </footer>
-  `
+  if(!target.innerHTML) {
+    return `
+      <header>
+        ${logo()}
+        <nav data-dom="nav"></nav>
+      </header>
+      <section class="content" data-dom="main-content"></section>
+      <footer>
+        &copy; 2025 Half-Rights Reserved<br>Production provided by the Chief Executive Officer of Custom Secure Shirts (<a href="https://css.ceo">CSS.CEO</a>)
+      </footer>
+    `
+  }
 }, {
   beforeUpdate: (target) => {
     {
@@ -520,16 +531,16 @@ $.draw((target) => {
   },
   afterUpdate: (target) => {
     {
+      const main = target.querySelector('[data-dom="main-content"]')
+      const value = renderContent(main)
+      if(value) {
+        main.innerHTML = value
+      }
     }
 
     {
-      const { slideout } = $.learn()
-      if(target.dataset.slideout !== 'true' && slideout) {
-        target.querySelector('.context').scrollTop = 0
-        target.dataset.slideout = true
-      } else {
-        target.dataset.slideout = false
-      }
+      const navNode = target.querySelector('[data-dom="nav"]')
+      diffHTML.innerHTML(navNode, nav([PAGES.HOME, PAGES.ABOUT, PAGES.NEWS, PAGES.CREATE]))
     }
 
     {
@@ -551,7 +562,12 @@ $.draw((target) => {
 function renderContent(target) {
   const { page } = $.learn()
 
-  if(pages[page]) return renderers[page].render(target)
+  if(pages[page]) {
+    const value =  renderers[page].render(target)
+
+    if(!value) return
+    return value
+  }
 
   return `
     <div class="page-title">
@@ -567,7 +583,7 @@ $.when('click', '[data-get-started]', (event) => {
 $.when('click', '[data-page]', (event) => {
   event.preventDefault()
   const { page, path } = event.target.dataset
-  $.teach({ page, slideout: false })
+  $.teach({ page  })
   //self.history.pushState(null, '', `${path}`)
 })
 
@@ -575,11 +591,6 @@ $.when('click', '[data-href]', (event) => {
   event.preventDefault()
   const { href } = event.target.dataset
   window.location.href = href
-})
-
-$.when('click', '[data-slideout]', (event) => {
-  const { slideout } = $.learn()
-  $.teach({ slideout: !slideout })
 })
 
 $.when('click', '[data-publish]', () => {
@@ -668,6 +679,7 @@ $.style(`
     padding: 0 1rem;
     display: flex;
     flex-direction: column;
+    flex-direction: column-reverse;
     gap: 4rem;
   }
 
@@ -967,4 +979,9 @@ function escapeHyperText(text = '') {
   )
 }
 
-
+function updateField(field, value) {
+  const start = field.selectionStart;
+  const end = field.selectionEnd;
+  field.value = value;
+  field.setSelectionRange(start, end);
+}

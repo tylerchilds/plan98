@@ -17,7 +17,7 @@ const dns = {
     elf: 'comedy-network'
   },
   'plan98.org': {
-    elf: 'plan98-ide'
+    elf: 'plan98-splash'
   },
   'shirtflicks.app': {
     elf: 'shirt-flicks'

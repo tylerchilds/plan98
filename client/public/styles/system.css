@@ -305,6 +305,70 @@ button, input, optgroup, select, textarea {
   margin: 0;
 }
 
+.red-text {
+  color: var(--red, firebrick);
+}
+
+.orange-text {
+  color: var(--orange, darkorange);
+}
+
+.yellow-text {
+  color: var(--yellow, gold);
+}
+
+.green-text {
+  color: var(--green, mediumseagreen);
+}
+
+.blue-text {
+  color: var(--blue, dodgerblue);
+}
+
+.indigo-text {
+  color: var(--indigo, slateblue);
+}
+
+.purple-text {
+  color: var(--purple, mediumpurple);
+}
+
+.violet-text {
+  color: var(--purple, mediumpurple);
+}
+
+.red-bg {
+  color: var(--red, firebrick);
+}
+
+.orange-bg {
+  color: var(--orange, darkorange);
+}
+
+.yellow-bg {
+  color: var(--yellow, gold);
+}
+
+.green-bg {
+  color: var(--green, mediumseagreen);
+}
+
+.blue-bg {
+  color: var(--blue, dodgerblue);
+}
+
+.indigo-bg {
+  color: var(--indigo, slateblue);
+}
+
+.purple-bg {
+  color: var(--purple, mediumpurple);
+}
+
+.violet-bg {
+  color: var(--purple, mediumpurple);
+}
+
 .button {
   --border-color: transparent;
   --border-color-hover: transparent;

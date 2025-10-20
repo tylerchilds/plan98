@@ -994,7 +994,17 @@ $.draw((target) => {
     if(!target.innerHTML) {
       target.innerHTML = `
         <div class="newgame-container">
-          Touch the screen or any key to continue.
+          <p>
+            Welcome to Song Wave.
+          </p>
+
+          <p>
+            You're a band of misadventurers. Play the piano if you want to live.
+          </p>
+
+          <p>
+            Touch the screen or any key to continue.
+          </p>
         </div>
         <div class="system-container"></div>
         <div class="pause-container"></div>
@@ -2367,6 +2377,10 @@ $.style(`
   & .minimap-cell.active-cell {
     background: rgba(255,255,255,.85);
     color: rgba(0,0,0,.85);
+  }
+
+  & .newgame-container > * {
+    pointer-events: none;
   }
 `)
 
