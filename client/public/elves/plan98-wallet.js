@@ -1046,7 +1046,7 @@ export async function provisionActiveKeycard(options={}) {
 }
 
 $.when('click', '[data-quit]', async (event) => {
-  window.location.href = '/app/paper-pocket'
+  window.location.href = '/app/ur-shell'
 })
 
 function pushKeycard(state, payload) {

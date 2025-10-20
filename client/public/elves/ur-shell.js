@@ -1,6 +1,7 @@
 import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
+import './plan98-synthia.js'
 
 // helper for system settings
 console.log(Object.keys(sideEffects).map((key) => {

@@ -29,22 +29,6 @@ const modes = {
 
 const lolol = {
   '0': {
-    '-2'  : products.memex,
-    '-1'  : products.desktop,
-    '0'   : products.hello,
-    '1'   : products.mobile,
-    '2'   : products.jokebook,
-  },
-  '1': {
-    '0'   : products.coop,
-  },
-  '-1': {
-    '0'   : products.shell,
-  },
-  '2': {
-    '0'   : products.memex,
-  },
-  '-2': {
     '0'   : products.memex,
   },
 }
@@ -229,7 +213,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <time-machine></time-machine>
+          <iframe src="/admin/"></iframe>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
@@ -767,6 +751,7 @@ $.style(`
 
   & .settings {
     padding: 0 1rem;
+    pointer-events: all;
   }
 
   & select {
