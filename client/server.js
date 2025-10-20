@@ -5,8 +5,10 @@ import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { DOMParser } from "npm:linkedom@0.18.5";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
+import CryptoJS from 'https://esm.sh/crypto-js@4.2.0';
 
 config()
+const PASSPHRASE = safeEnv('PLAN98_PASSPHRASE')
 self.DOMParser = DOMParser
 
 const port = safeEnv('PLAN98_PORT', 1024)
@@ -28,7 +30,7 @@ const spaceId = SECRET_SPACE
 const walletDefaultHost = safeEnv('PLAN98_WAS_HOST', 'http://localhost:8080')
 
 const keycard = newKeycard({
-  name: "ROOT",
+  title: "ROOT ACCESS KEY CARD",
   id: spaceId,
   src: '/app/time-machine?id='+spaceId,
 })
@@ -38,7 +40,7 @@ function newKeycard(overrides={}) {
   const keycard = {
     id,
     src: '/app/time-machine?id='+id,
-    name: 'Memex',
+    title: 'Memex',
     host: walletDefaultHost,
     at: new Date().toJSON(),
     ...overrides
@@ -205,6 +207,41 @@ Deno.serve(
       });
     }
 
+    if(filepath.startsWith('/admin/')) {
+      const rootKeycard = {
+        jsonrpc: "2.0",
+        id: keycard.id,
+        method: methods.importKeycard,
+        params: {
+          type: 'keycard',
+          keycard: {
+            id: keycard.id,
+            title: keycard.title,
+            asJSON: keycard.asJSON,
+            src: keycard.src,
+            host: keycard.host,
+          }
+        }
+      }
+
+      const stringifiedKeycard = JSON.stringify(rootKeycard)
+      const encodedKeycard = btoa(stringifiedKeycard)
+      const encryptedKeycard = CryptoJS.AES.encrypt(encodedKeycard, PASSPHRASE).toString();
+      const safeKeycard = encodeURIComponent(encryptedKeycard);
+
+      return new Response(template(`
+        <div style="background: white; height: 100%; width: 100%; overflow: hidden;">
+          <div style="padding: 51px; height: 100%; display: flex;">
+            <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${safeKeycard}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+          </div>
+        </div>
+      `), {
+        headers: {
+          'content-type': 'text/html',
+        },
+        status: 200
+      })
+    }
 
     if(filepath.startsWith('/app/')) {
       const [app] = filepath.split('/app/')[1].split('/')
@@ -292,7 +329,7 @@ Deno.serve(
   },
 );
 
-function template() {
+function template(body) {
   const configObject = {
     PLAN98_WAS_HOST: walletDefaultHost,
     PLAN98_WAS_SPACE_ID: spaceId,
@@ -324,24 +361,6 @@ function template() {
     configArray.push(`${key}: '${configObject[key]}'`)
   }
   const ENVIRONMENT_VARIABLES = configArray.join(',\n')
-  const ENCODED_KEYCARD = btoa(
-    JSON.stringify({
-      jsonrpc: "2.0",
-      id: keycard.id,
-      method: methods.importKeycard,
-      params: {
-        type: 'keycard',
-        keycard: {
-          id: keycard.id,
-          name: keycard.name,
-          asJSON: keycard.asJSON,
-          src: keycard.src,
-          host: keycard.host,
-        }
-      }
-    })
-  )
-
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -520,6 +539,7 @@ function template() {
           "cards": "https://esm.sh/cards@2.0.3",
           "codemirror": "https://esm.sh/codemirror@6.0.1",
           "chess": "https://esm.sh/chess@1.2.1",
+          "crypto-js": "https://esm.sh/crypto-js@4.2.0?bundle",
           "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
           "d3": "https://esm.sh/d3@7.9.0",
           "diffhtml": "https://esm.sh/diffhtml@1.0.0-beta.30",
@@ -626,12 +646,7 @@ function template() {
     <data-tooltip>
     <data-popover>
     <main class="the-main-area">
-      <sillonious-brand></sillonious-brand>
-      <div style="display: none; background: white; height: 100%; width: 100%; overflow: hidden;">
-        <div style="padding: 51px; height: 100%; display: flex;">
-          <qr-code lazy-prefix="true" src="/app/plan98-wallet?data=${ENCODED_KEYCARD}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
-        </div>
-      </div>
+      ${body ? body : '<sillonious-brand></sillonious-brand>'}
     </main>
     </data-popover>
     </data-tooltip>

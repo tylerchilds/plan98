@@ -2326,12 +2326,12 @@ $.when('click', '[data-escape]', () => {
 
 export function replaceElves(target, tag) {
   [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
     const newNode = document.createElement(tag)
     for (const attr of node.attributes) {
       newNode.setAttribute(attr.name, attr.value)
     }
-    node.replaceWith(newNode)
+    node.remove()
+    nodeParent.appendChild(newNode)
   })
 }
-
-

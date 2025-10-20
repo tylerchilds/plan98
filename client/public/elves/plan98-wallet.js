@@ -4,6 +4,15 @@ import { showModal } from './plan98-modal.js'
 import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { replaceElves, sideEffects, afterUpdateTheme } from './paper-pocket.js'
 import { launch } from './plan98-synthia.js'
+import CryptoJS from 'crypto-js';
+
+function addToKeychain(data) {
+  const passphrase = prompt('enter admin passphrase')
+  const decryptedKeycard = CryptoJS.AES.decrypt(data, passphrase).toString(CryptoJS.enc.Utf8);
+  const stringifiedKeycard = atob(decryptedKeycard)
+  const rootKeycard = JSON.parse(stringifiedKeycard)
+  jsonRPC(rootKeycard).then(console.log)
+}
 
 const ERROR_P98_PROVISION_FAILED = '001'
 const ERROR_P98_BACKUP_FAILED = '002'
@@ -911,8 +920,7 @@ $.draw((target) => {
       target.initialized = true
       const data = target.getAttribute('data')
       if(data) {
-        const request = JSON.parse(atob(data))
-        jsonRPC(request).then(console.log)
+        addToKeychain(data)
       }
 
       const { keycards } = $.learn()
