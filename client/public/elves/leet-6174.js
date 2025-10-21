@@ -1,12 +1,14 @@
 /*
+
  6174 is a magic number
 
- 1. write a function to sort 6174, yielding two numbers: a big one and a small one
+ 1. for any four digit two numbers: a big one and a small one
  2. subtract the small one from the big one
  3. If all numbers are identical, return it as is
  4. Finally, render the results to a webpage
 
 */
+
 function magic(number) {
   const small = (number).toString().split('').sort()
 
@@ -31,7 +33,7 @@ function magic(number) {
 }
 
 const samples = []
-for(let i = 1; i < 9999; i++) {
+for(let i = 1000; i < 9999; i++) {
   samples.push(i)
 }
 
