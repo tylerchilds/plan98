@@ -154,7 +154,7 @@ $.style(`
     z-index: 10;
     cursor: row-resize;
     height: 10px;
-    text-align: right;
+    text-align: center;
     z-index: 9001;
   }
 

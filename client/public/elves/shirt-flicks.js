@@ -29,7 +29,7 @@ const modes = {
 
 const lolol = {
   '0': {
-    '0'   : products.memex,
+    '0'   : products.coop,
   },
 }
 
@@ -750,7 +750,6 @@ $.style(`
   }
 
   & .settings {
-    padding: 0 1rem;
     pointer-events: all;
   }
 

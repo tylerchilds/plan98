@@ -9,6 +9,30 @@ const $ = elf('sillonious-brand', {
   council: '6174'
 })
 
+/*
+
+The Six Pillars of Self-Sufficient Software
+
+Identity
+Sillyz.Computer is my personal identity
+
+Security
+Plan98.org is my personal computer
+
+Entertainment
+ShirtFlicks.app is my personal entertainment
+
+Social
+ComedyMap.org is my personal social graph
+
+Business
+CSS.CEO is my personal portfolio
+
+Creativity
+TheLanding.Page is my personal blog
+
+*/
+
 const dns = {
   'sillyz.computer': {
     elf: 'root-shell'
