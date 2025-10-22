@@ -1480,7 +1480,7 @@ function end (e) {
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
       title: 'Journal',
-      url: `/app/time-machine`
+      url: `/app/ur-shell`
     })
 
 
