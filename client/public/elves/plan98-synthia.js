@@ -10,6 +10,12 @@ export const ollama = new Ollama({
   host,
 })
 
+export const friends = {
+  bengo: {
+    bios: 'https://plan98.org/app/quick-blog?src=https://www.bengo.is/outbox/'
+  }
+}
+
 export function getModels() {
   return ollama.list().then(data => {
     const models = {}

@@ -182,8 +182,6 @@ async function lazy(src) {
 
   const posts = await Promise.all(data.items.map(retrieve(src)))
 
-  debugger
-
   $.teach({ posts })
 }
 

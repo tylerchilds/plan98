@@ -1,7 +1,7 @@
 import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
-import './plan98-synthia.js'
+import { friends } from './plan98-synthia.js'
 
 // helper for system settings
 console.log(Object.keys(sideEffects).map((key) => {
@@ -378,6 +378,13 @@ const commands = {
     $.teach({ cwd: newPath })
   },
 
+  su(unix_id) {
+    if(friends[unix_id]) {
+      return loadPath(friends[unix_id].bios)
+    } else {
+      return 'User not found'
+    }
+  },
 
   ls() {
     const { cwd } = $.learn()
