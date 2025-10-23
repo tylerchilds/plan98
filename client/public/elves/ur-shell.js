@@ -182,6 +182,10 @@ const commands = {
     loadModule('<plan98-palette')
     return 'Success!'
   },
+  'ide': () => {
+    loadPath('/app/plan98-ide')
+    return 'Success!'
+  },
   'wallet': () => {
     loadPath('/app/plan98-wallet')
     return 'Success!'
@@ -517,6 +521,9 @@ printenv [...args]
 
 shebang
   launch the whole #!shebang
+
+ide
+  change the whole #!shebang
 
 
 Modes:
