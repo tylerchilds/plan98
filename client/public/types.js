@@ -1,6 +1,14 @@
 import elf from '@silly/elf'
+import saga from "@sillonious/saga"
+
+export const string = 'string'
+export const bool = 'boolean'
+export const number = 'number'
 
 const Types = {
+  string,
+  bool,
+  number,
   True,
   False,
   Value,
@@ -13,7 +21,9 @@ const Types = {
   Modulo,
   Box,
   Elf,
-  Expect
+  Saga,
+  Expect,
+  Describe
 }
 
 export default Types
@@ -34,7 +44,7 @@ export function Precision(x) {
   return parseFloat(x)
 }
 
-export function Text(x) {
+export function Text(x='') {
   return x.toString()
 }
 
@@ -66,6 +76,27 @@ export function Elf(x, box) {
   return elf(x, box)
 }
 
+export function Saga(x) {
+  return saga(Text(x))
+}
+
 export function Expect(a, b) {
-  return a === b
+  if(a === b) {
+    Success()
+  } else {
+    console.error(a, b)
+    Failure()
+  }
+}
+
+export function Describe(x, a) {
+  console.log(x, a(Success))
+}
+
+function Success() {
+  return True()
+}
+
+function Failure() {
+  throw new Error('Strongly Typed No No!')
 }

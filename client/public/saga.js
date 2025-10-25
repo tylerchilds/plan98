@@ -77,6 +77,7 @@ export function r($, path, options={}) {
   return string
 }
 
+
 export function render(script) {
   // nothing in, nothing out
   if(!script) return ''
@@ -323,3 +324,4 @@ function escapeHyperText(text = '') {
   )
 }
 
+export default render

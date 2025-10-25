@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "exports": "./mod.ts",
   "tasks": {
+    "test": "deno run --allow-env --config deno.json --location http://localhost client/public/tests.js",
     "provision": "./provision.sh",
     "package": "deno run -A .deno/to-npm.js",
     "publish": "cd npm && npm publish",
@@ -75,6 +76,7 @@
   },
   "imports": {
     "@silly/tag": "./client/public/module.js",
+    "@silly/elf": "./client/public/elf.js",
     "@sillonious/saga": "./client/public/saga.js",
     "@sillonious/brand": "./client/public/brand.js",
     "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",
