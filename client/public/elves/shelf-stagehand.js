@@ -21,8 +21,7 @@ function read(link) {
 }
 
 function write(link, data, merge = (key, data) => {
-  co:st shelf = link.learn().instances[href]
-    debugger
+  const shelf = link.learn().instances[href]
   const change = shelf_merge(shelf, { [key]: data[key] })
   link.teach({ href, shelf, change }, (s, p) => {
     return {

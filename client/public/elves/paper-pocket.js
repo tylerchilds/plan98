@@ -560,7 +560,7 @@ export function setTheme(theme) {
 }
 
 export function getTheme() {
-  return localStorage.getItem('paper-pocket/theme') || 'lightgray'
+  return localStorage.getItem('paper-pocket/theme') || 'darkorange'
 }
 
 export function getBpmOptions() {

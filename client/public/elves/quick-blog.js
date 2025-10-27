@@ -374,14 +374,14 @@ const renderers = {
 
         <div class="interlude">
           <div class="interlude-title">
-            ShirtFlicks.App
+            Generic Park
           </div>
           <div class="interlude-subtitle">
-            "All my Flicks in my Shirt."
+            Alfheim is a state of mind and a location in code; beep boop.
           </div>
           <div>
-            <button data-get-started class="standard-button bias-generic -large">
-              What?
+            <button data-generic-park class="standard-button bias-generic -large">
+              Where?
             </button>
           </div>
         </div>
@@ -406,7 +406,7 @@ const renderers = {
         <div class="hero">
           <img class="hero-image" src="/public/cdn/sillyz.computer/definitive-edition.jpeg" alt="That is right.">
           <div class="hero-caption">
-            An accidental art installation photographed by <a href="https://tychi.me">Ty</a>. Located at the Internet Archive 300 Funston, San Francisco at 12:16pm on September 12th, 2025. Original creation: March 21st, 2025, also by <a href="https://tychi.me">Ty</a>.
+            An accidental art installation photographed by <a href="https://tychi.me">Ty</a>. Located at the Internet Archive 300 Funston, San Francisco at 12:16pm on September 12th, 2025. Original creation: March 21st, 2025, also by <a href="https://tychi.me">Ty</a>. <a href="https://github.com/tylerchilds/plan68/blob/main/public/elf.js">/public/elf.js</a> is what powers the <a href="https://sillyz.computer/app/ur-shell?src=/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=player-piano">#!</a>
           </div>
         </div>
         <div class="wizard">
@@ -575,7 +575,11 @@ function renderContent(target) {
 }
 
 $.when('click', '[data-get-started]', (event) => {
-  window.location.href = 'https://shirtflicks.app'
+  window.location.href = '/app/saga-crawler'
+})
+
+$.when('click', '[data-generic-park]', (event) => {
+  window.location.href = '/app/generic-park?src=/public/elves'
 })
 
 $.when('click', '[data-page]', (event) => {
