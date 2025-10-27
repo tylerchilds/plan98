@@ -13,6 +13,9 @@ export const ollama = new Ollama({
 export const friends = {
   bengo: {
     bios: 'https://plan98.org/app/quick-blog?src=https://www.bengo.is/outbox/'
+  },
+  tychi: {
+    bios: '/app/time-machine'
   }
 }
 
