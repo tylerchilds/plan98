@@ -8,12 +8,12 @@ import { get, put } from './plan98-wallet.js'
 let lineWidth = 0
 let isMousedown = false
 let points = []
-let strokeHistory = []
-let strokeRevisory = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 const overlays = { color: 'color' }
 
 const $ = Self('sketch-pad', {
+  strokeHistory: [],
+  strokeRevisory: [],
   background: '#54796d',
   color: 'white',
   drawer: 'size',
@@ -41,8 +41,15 @@ $.head(target => {
 })
 
 function update(target) {
+  const { strokeHistory, strokeRevisory } = $.ear()
   {
     afterUpdateTheme($paperPocket, target)
+
+    if(target.strokeHistoryLength !== strokeHistory.length || target.strokeRevisoryLength !== strokeRevisory.length) {
+      target.strokeHistoryLength = strokeHistory.length
+      target.strokeRevisoryLength = strokeRevisory.length
+      redraw(target)
+    }
   }
 
   {
@@ -170,13 +177,16 @@ function mount(target) {
     get(src).then(blob => {
       if(blob) {
         blob.text().then(str => JSON.parse(str)).then(data => {
+          let strokeHistory = []
           if(data.strokeHistory) {
             strokeHistory = data.strokeHistory
           }
 
+          let strokeRevisory = []
           if(data.strokeRevisory) {
             strokeRevisory = data.strokeRevisory
           }
+          $.teach({ strokeHistory, strokeRevisory })
           redraw(target)
         })
       }
@@ -341,6 +351,7 @@ $.hand('click', '[data-violin]', function  (event) {
 $.hand('click', '[data-save]', ({ target }) => publish(target))
 
 function publish (target) {
+  const { strokeHistory, strokeRevisory } = $.ear()
   const { canvas, src } = engine(target)
   // Get current date and time for filename
   const now = new Date();
@@ -384,9 +395,8 @@ function publish (target) {
 
 $.hand('click', '[data-new]', function (event) {
   event.preventDefault()
-  strokeHistory = []
+  $.mouth({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
   redraw(event.target)
-  $.mouth({ activeMenu: null })
 })
 
 $.hand('click', '[data-download]', function (event) {
@@ -410,15 +420,24 @@ $.hand('click', '[data-download]', function (event) {
  */
 $.hand('click', '[data-undo]', function undoDraw (event) {
   event.preventDefault()
+  const { strokeHistory } = $.ear()
   if(strokeHistory.length === 0) {
     return
   }
-  const stroke = strokeHistory.pop()
-  strokeRevisory.unshift(stroke)
+
+  $.mouth({}, (state, _payload) => {
+    const newState = { ...state }
+    const stroke = newState.strokeHistory.pop()
+    newState.strokeRevisory.unshift(stroke)
+    return {
+      ...newState
+    }
+  })
   redraw(event.target)
 })
 
 function redraw(target) {
+  const { strokeHistory } = $.ear()
   const { canvas, src } = engine(target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
@@ -444,10 +463,19 @@ function redraw(target) {
 
 $.hand('click', '[data-redo]', function redoDraw (event) {
   event.preventDefault()
+  const { strokeRevisory } = $.ear()
   if(strokeRevisory.length === 0) return
 
-  const stroke = strokeRevisory.shift()
-  strokeHistory.push(stroke)
+
+  $.mouth({}, (state, _payload) => {
+    const newState = { ...state }
+    const stroke = newState.strokeRevisory.shift()
+    newState.strokeHistory.push(stroke)
+    return {
+      ...newState
+    }
+  })
+
   redraw(event.target)
 })
 
@@ -556,7 +584,15 @@ function end (e) {
 
   isMousedown = false
 
-  strokeHistory.push([...points]); points = []
+  $.mouth(points, (state, payload) => {
+    const newState = { ...state }
+    newState.strokeHistory.push([...payload])
+    return {
+      ...newState
+    }
+  })
+
+  points = []
 
   lineWidth = 0
 
