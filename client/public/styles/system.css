@@ -1079,9 +1079,11 @@ sillonious-brand > xml-html {
 
 .av.-snapshot {
   color: rgba(0,0,0,.65);
-  display: grid;
+  display: inline-grid;
   grid-template-columns: auto 1fr;
+  place-items: center;
   gap: .5rem;
+  padding: 4px;
 }
 
 .av.-chip {

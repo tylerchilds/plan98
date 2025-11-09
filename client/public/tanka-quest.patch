@@ -1,0 +1,1112 @@
+From 8ac3710f1fe9dfb4e45e31d8f7b325d935ce2969 Mon Sep 17 00:00:00 2001
+From: Tyler Childs <email@tychi.me>
+Date: Sat, 8 Nov 2025 16:13:47 -0800
+Subject: [PATCH] Fixing the tiniest violin is the easiest trick in the book.
+ All you do is delete four forward slashes. That's it.
+
+---
+ client/public/elves/plan98-palette.js   |   6 +
+ client/public/elves/root-shell.js       |   8 +-
+ client/public/elves/saga-crawler.js     |  17 +-
+ client/public/elves/sillonious-brand.js |   6 +
+ client/public/elves/sketch-pad.js       | 192 +++++++++++++--------
+ client/public/elves/static-code.js      |   4 +-
+ client/public/elves/tiniest-violin.js   |   7 +
+ client/public/elves/ur-shell.js         |  10 +-
+ client/public/index.html                |   1 +
+ client/public/plan98.js                 | 218 ++++++++++++++----------
+ client/public/saga.js                   |   8 +-
+ client/public/types.js                  |  12 +-
+ client/server.js                        |   1 +
+ 13 files changed, 323 insertions(+), 167 deletions(-)
+
+diff --git a/client/public/elves/plan98-palette.js b/client/public/elves/plan98-palette.js
+index c9617bc..8b0508f 100644
+--- a/client/public/elves/plan98-palette.js
++++ b/client/public/elves/plan98-palette.js
+@@ -70,6 +70,12 @@ function maybe(id, value, note) {
+   }
+ }
+ 
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ function yes(id, note) {
+   //attack(note)
+   mark(id, note)
+diff --git a/client/public/elves/root-shell.js b/client/public/elves/root-shell.js
+index ecb0185..dea51dc 100644
+--- a/client/public/elves/root-shell.js
++++ b/client/public/elves/root-shell.js
+@@ -1,7 +1,13 @@
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ import elf from '@silly/elf'
+ 
+ const $ = elf('root-shell')
+ 
+ $.draw(() => {
+-  return `<ur-shell src="/app/door-man?src=/app/hello-elvish?elf=quick-blog"></ur-shell>`
++  return `<ur-shell src="/app/saga-crawler?next=/app/sketch-pad"></ur-shell>`
+ })
+diff --git a/client/public/elves/saga-crawler.js b/client/public/elves/saga-crawler.js
+index ea4ee37..91c6992 100644
+--- a/client/public/elves/saga-crawler.js
++++ b/client/public/elves/saga-crawler.js
+@@ -1,4 +1,11 @@
+-import { string, Elf, Saga, Expect } from '@plan98/types'
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
++import Self from '@silly/elf'
++import Saga from "@silly/saga"
+ 
+ function crawlerTemplate(html) {
+   return `
+@@ -15,13 +22,14 @@ function crawlerTemplate(html) {
+   `
+ }
+ 
+-const $ = Elf('saga-crawler')
++const $ = Self('saga-crawler')
+ 
+ $.draw(() => null, {
+   beforeUpdate(target) {
+     if(target.initialized) return
+     target.initialized = true
+     const src = target.getAttribute('src') || '/public/cdn/sillyz.computer/en-us/saga-crawler.saga'
++    const next = target.getAttribute('next') || '/app/shirt-flicks'
+     const duration = target.getAttribute('duration')
+ 
+     requestIdleCallback(() => {
+@@ -38,8 +46,9 @@ $.draw(() => null, {
+       }).finally(() => {
+         try {
+           const screenplay = Saga(file)
+-          Expect(typeof screenplay, string)
+-          target.innerHTML = crawlerTemplate(screenplay)
++          if(typeof screenplay === 'string') {
++            target.innerHTML = crawlerTemplate(screenplay)
++          }
+         } catch(e) {
+           target.innerHTML = e.message
+         }
+diff --git a/client/public/elves/sillonious-brand.js b/client/public/elves/sillonious-brand.js
+index 675bb56..20c76e1 100644
+--- a/client/public/elves/sillonious-brand.js
++++ b/client/public/elves/sillonious-brand.js
+@@ -1,3 +1,9 @@
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ import elf from '@silly/elf'
+ import Color from "colorjs.io";
+ import { doingBusinessAs as dba } from '@sillonious/brand'
+diff --git a/client/public/elves/sketch-pad.js b/client/public/elves/sketch-pad.js
+index fd7c1e9..fbdb432 100644
+--- a/client/public/elves/sketch-pad.js
++++ b/client/public/elves/sketch-pad.js
+@@ -1,4 +1,4 @@
+-import elf from '@plan98/elf'
++import Self from '@plan98/elf'
+ import { toast } from './plan98-toast.js'
+ import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
+ import { updateDraft } from './time-machine.js'
+@@ -10,12 +10,12 @@ let isMousedown = false
+ let points = []
+ let strokeHistory = []
+ let strokeRevisory = []
+-const thicknoids = [1, 4, 16, 64, 256]
++const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+ const overlays = { color: 'color' }
+ 
+-const $ = elf('sketch-pad', {
+-  background: 'lemonchiffon',
+-  color: 'saddlebrown',
++const $ = Self('sketch-pad', {
++  background: '#54796d',
++  color: 'white',
+   drawer: 'size',
+   thickness: 4
+ })
+@@ -32,7 +32,7 @@ function engine(target) {
+   }
+ }
+ 
+-$.draw(target => {
++$.head(target => {
+   if(target.innerHTML) {
+     requestAnimationFrame(() => update(target))
+     return null
+@@ -46,36 +46,36 @@ function update(target) {
+   }
+ 
+   {
+-    const { touching } = $.learn()
++    const { touching } = $.ear()
+     target.dataset.touching = touching
+   }
+ 
+   {
+-    const { thickness } = $.learn()
++    const { thickness } = $.ear()
+     target.dataset.size = thickness
+   }
+ 
+   {
+-    const { color } = $.learn()
++    const { color } = $.ear()
+     if(target.color !== color) {
+       target.style.setProperty('--active-color', color)
+     }
+   }
+ 
+   {
+-    const { drawer } = $.learn()
++    const { drawer } = $.ear()
+     target.dataset.drawer = drawer
+   }
+ 
+   {
+-    const { overlay } = $.learn()
++    const { overlay } = $.ear()
+     if(target.overlay !== overlay) {
+       target.dataset.overlay = overlay
+     }
+   }
+ 
+   { // menu items
+-    const { activeMenu } = $.learn()
++    const { activeMenu } = $.ear()
+     const currentlyActive = target.querySelector('[data-menu-target].active')
+     if(currentlyActive) {
+       currentlyActive.classList.remove('active')
+@@ -123,6 +123,15 @@ function mount(target) {
+             Help
+           </button>
+           <button data-journal>Quit</button>
++          <hr>
++          <button data-shell>Quit to Shell</button>
++          <button data-mobile>Quit to Mobile</button>
++          <button data-desktop>Quit to Desktop</button>
++          <button data-handheld>Quit to Handheld</button>
++          <button data-console>Quit to Console</button>
++          <hr>
++          <button data-escape>Escape</button>
++          <button data-violin>Escape to Violin</button>
+         </div>
+       </div>
+     </div>
+@@ -140,7 +149,7 @@ function mount(target) {
+     canvas.width = self.innerWidth;
+     canvas.height = self.innerHeight;
+     const context = canvas.getContext('2d')
+-    context.fillStyle = $.learn().background
++    context.fillStyle = $.ear().background
+     context.fillRect(0, 0, canvas.width, canvas.height)
+   }
+ 
+@@ -200,51 +209,100 @@ function drawOnCanvas (target, stroke) {
+   }
+ }
+ 
+-$.when('input', 'plan98-palette', (event) => {
++$.hand('input', 'plan98-palette', (event) => {
+   const { color } = event.detail
+-  $.teach({ color, overlay: 'none' })
++  $.mouth({ color, overlay: 'none' })
+ })
+ 
+-$.when('click', '[data-help]', function  (event) {
++$.hand('click', '[data-help]', function  (event) {
+   event.preventDefault()
+-  window.location.href = "/app/cool-chat"
++  window.location.href = "/?world=thelanding.page"
+ })
+ 
+-$.when('click', '[data-stroke-color]', function  (event) {
++$.hand('click', '[data-stroke-color]', function  (event) {
+   event.preventDefault()
+-  $.teach({
++  $.mouth({
+     overlay: overlays.color,
+     activeMenu: null,
+   })
+ })
+ 
+-$.when('click', '[data-drawer]', function  (event) {
++$.hand('click', '[data-drawer]', function  (event) {
+   event.preventDefault()
+   const { drawer } = event.target.dataset
+-  $.teach({ drawer: drawer === $.learn().drawer ?null:drawer })
++  $.mouth({ drawer: drawer === $.ear().drawer ?null:drawer })
+ })
+ 
+-$.when('click', '[data-thickness]', function  (event) {
++$.hand('click', '[data-thickness]', function  (event) {
+   event.preventDefault()
+-  $.teach({
++  $.mouth({
+     activeMenu: null,
+     thickness: parseInt(event.target.dataset.thickness) || 1
+   })
+ })
+ 
+ 
+-$.when('click', '[data-journal]', function  (event) {
++$.hand('click', '[data-journal]', function  (event) {
+   event.preventDefault()
+-  window.location.href = '/app/time-machine'
++  window.location.href = '/?world=shirtflicks.app'
+ })
+ 
+-$.when('click', '[data-violion]', function  (event) {
++$.hand('click', '[data-shell]', function  (event) {
+   event.preventDefault()
+-  window.location.href = '/app/tiniest-violin'
++  const id = event.target.closest($.elf).id
++  window.location.href = `/app/ur-shell?id=${id}`
++})
++
++$.hand('click', '[data-mobile]', function  (event) {
++  event.preventDefault()
++  const id = event.target.closest($.elf).id
++  window.location.href = `/app/mobile-device?id=${id}`
++})
++
++$.hand('click', '[data-desktop]', function  (event) {
++  event.preventDefault()
++  const id = event.target.closest($.elf).id
++  window.location.href = `/app/door-man?id=${id}`
++})
++
++$.hand('click', '[data-handheld]', function  (event) {
++  event.preventDefault()
++  const id = event.target.closest($.elf).id
++  window.location.href = `/app/paper-pocket?id=${id}`
++})
++
++$.hand('click', '[data-console]', function  (event) {
++  event.preventDefault()
++  const id = event.target.closest($.elf).id
++  window.location.href = `/app/couch-coop?id=${id}`
++})
++
++$.hand('click', '[data-escape]', function  (event) {
++  event.preventDefault()
++  const id = event.target.closest($.elf).id
++  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+ })
+ 
++$.hand('click', '[data-violin]', function  (event) {
++  event.preventDefault()
++  window.location.href = '/app/tiniest-violin'
++
++
++
++
++
++
++
++
++  // the tanka of the tiniest violin
++
++  // Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++  ////
++
++})
+ 
+-$.when('click', '[data-save]', ({ target }) => publish(target))
++$.hand('click', '[data-save]', ({ target }) => publish(target))
+ 
+ function publish (target) {
+   const { canvas, src } = engine(target)
+@@ -285,17 +343,17 @@ function publish (target) {
+     document.body.removeChild(link);
+   });
+ 
+-  $.teach({ activeMenu: null })
++  $.mouth({ activeMenu: null })
+ }
+ 
+-$.when('click', '[data-new]', function (event) {
++$.hand('click', '[data-new]', function (event) {
+   event.preventDefault()
+   strokeHistory = []
+   redraw(event.target)
+-  $.teach({ activeMenu: null })
++  $.mouth({ activeMenu: null })
+ })
+ 
+-$.when('click', '[data-download]', function (event) {
++$.hand('click', '[data-download]', function (event) {
+   event.preventDefault()
+   const { canvas } = engine(event.target)
+   const now = new Date();
+@@ -307,14 +365,14 @@ $.when('click', '[data-download]', function (event) {
+   document.body.appendChild(link);
+   link.click();
+   document.body.removeChild(link);
+-  $.teach({ activeMenu: null })
++  $.mouth({ activeMenu: null })
+ })
+ 
+ /**
+  * Remove the previous stroke from history and repaint the entire canvas based on history
+  * @return {void}
+  */
+-$.when('click', '[data-undo]', function undoDraw (event) {
++$.hand('click', '[data-undo]', function undoDraw (event) {
+   event.preventDefault()
+   if(strokeHistory.length === 0) {
+     return
+@@ -328,7 +386,7 @@ function redraw(target) {
+   const { canvas, src } = engine(target)
+   const context = canvas.getContext('2d')
+   context.clearRect(0, 0, canvas.width, canvas.height)
+-  context.fillStyle = $.learn().background
++  context.fillStyle = $.ear().background
+   context.fillRect(0, 0, canvas.width, canvas.height)
+ 
+   strokeHistory.map(function (stroke) {
+@@ -348,7 +406,7 @@ function redraw(target) {
+   }
+ }
+ 
+-$.when('click', '[data-redo]', function redoDraw (event) {
++$.hand('click', '[data-redo]', function redoDraw (event) {
+   event.preventDefault()
+   if(strokeRevisory.length === 0) return
+ 
+@@ -358,13 +416,13 @@ $.when('click', '[data-redo]', function redoDraw (event) {
+ })
+ 
+ 
+-$.when('touchstart', 'canvas', start)
+-$.when('mousedown', 'canvas', start)
++$.hand('touchstart', 'canvas', start)
++$.hand('mousedown', 'canvas', start)
+ 
+ function start(e) {
+   const { canvas, rectangle } = engine(e.target)
+-  $.teach({ touching: true })
+-  const { thickness } = $.learn()
++  $.mouth({ touching: true })
++  const { thickness } = $.ear()
+   const context = canvas.getContext('2d')
+   let pressure = 0.1;
+   let x, y;
+@@ -389,13 +447,13 @@ function start(e) {
+   drawOnCanvas(e.target, points)
+ }
+ 
+-$.when('touchmove', 'canvas', move)
+-$.when('mousemove', 'canvas', move)
++$.hand('touchmove', 'canvas', move)
++$.hand('mousemove', 'canvas', move)
+ 
+ function move (e) {
+   e.preventDefault()
+   const { canvas, rectangle } = engine(e.target)
+-  const { thickness, color } = $.learn()
++  const { thickness, color } = $.ear()
+   const context = canvas.getContext('2d')
+   if (!isMousedown) return
+ 
+@@ -420,11 +478,11 @@ function move (e) {
+   drawOnCanvas(e.target, points);
+ 
+   requestIdleCallback(() => {
+-    $.teach({ pressure })
++    $.mouth({ pressure })
+ 
+     const touch = e.touches ? e.touches[0] : null
+     if (touch) {
+-      $.teach({
++      $.mouth({
+         touchesHTML: `
+           touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
+           radiusX = ${touch.radiusX} <br/>
+@@ -438,12 +496,12 @@ function move (e) {
+   })
+ }
+ 
+-$.when('touchend', 'canvas', end)
+-$.when('touchleave', 'canvas', end)
+-$.when('mouseup', 'canvas', end)
++$.hand('touchend', 'canvas', end)
++$.hand('touchleave', 'canvas', end)
++$.hand('mouseup', 'canvas', end)
+ function end (e) {
+   const { src, canvas, rectangle } = engine(e.target)
+-  $.teach({ touching: false })
++  $.mouth({ touching: false })
+   const context = canvas.getContext('2d')
+   let pressure = 0.1;
+   let x, y;
+@@ -478,7 +536,7 @@ const paneByTarget = (target) => {
+ 
+ 
+ function setState(tray, payload) {
+-  $.teach(payload, {
++  $.mouth(payload, {
+     mergeHandler: mergeByTray,
+     parameters: [tray]
+   })
+@@ -494,19 +552,19 @@ function mergeByTray(state) {
+   }
+ }
+ 
+-$.when('mousedown', '.tray-title-bar', grab)
+-$.when('mousemove', '.tray-title-bar', drag)
+-$.when('mouseup', '.tray-title-bar', ungrab)
+-$.when('mouseout', '.tray-title-bar', ungrab)
+-$.when('input', '.picker', setColor)
+-$.when('click', '.tray-close', closeTray)
++$.hand('mousedown', '.tray-title-bar', grab)
++$.hand('mousemove', '.tray-title-bar', drag)
++$.hand('mouseup', '.tray-title-bar', ungrab)
++$.hand('mouseout', '.tray-title-bar', ungrab)
++$.hand('input', '.picker', setColor)
++$.hand('click', '.tray-close', closeTray)
+ 
+ function setColor(event) {
+   event.preventDefault()
+   const { target } = event.target.dataset
+   const { value } = event.target
+ 
+-  $.teach({ [target]: value })
++  $.mouth({ [target]: value })
+   redraw(event.target)
+ }
+ 
+@@ -519,12 +577,12 @@ function closeTray(event) {
+ // grab a pane
+ function grab({ target }) {
+   const { tray } = event.target.dataset
+-  const { z } = $.learn()[tray]
+-  const { trayZ } = $.learn()
++  const { z } = $.ear()[tray]
++  const { trayZ } = $.ear()
+   const newZ = trayZ + 1
+ 
+   setState(tray, { grabbed: true, z: newZ })
+-  $.teach({ trayZ: newZ })
++  $.mouth({ trayZ: newZ })
+ }
+ 
+ // drag a pane
+@@ -532,7 +590,7 @@ function drag(event) {
+   const { target, movementX, movementY } = event
+ 
+   const { tray } = target.dataset
+-  const { grabbed, x, y } = $.learn()[tray]
++  const { grabbed, x, y } = $.ear()[tray]
+ 
+   if(grabbed) {
+     setState(tray, {
+@@ -548,7 +606,7 @@ function ungrab({ target }) {
+   setState(tray, { grabbed: false })
+ }
+ 
+-$.style(`
++$.eye(`
+   & {
+     display: block;
+     height: 100%;
+@@ -699,19 +757,19 @@ $.style(`
+ `)
+ 
+ /*
+-$.when('pointerdown', '*', (event) => {
++$.hand('pointerdown', '*', (event) => {
+   if(event.target.closest('.menu-item')) {
+     // child of a menu item
+     return
+   }
+-  $.teach({ activeMenu: null })
++  $.mouth({ activeMenu: null })
+ })
+ */
+ 
+-$.when('click', '[data-menu-target]', (event) => {
++$.hand('click', '[data-menu-target]', (event) => {
+   event.preventDefault()
+-  const { activeMenu } = $.learn()
++  const { activeMenu } = $.ear()
+   const { menuTarget } = event.target.dataset
+-  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
++  $.mouth({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
+   event.stopImmediatePropagation()
+ })
+diff --git a/client/public/elves/static-code.js b/client/public/elves/static-code.js
+index 60921a4..75ace8c 100644
+--- a/client/public/elves/static-code.js
++++ b/client/public/elves/static-code.js
+@@ -1,4 +1,4 @@
+-import { Elf } from '@plan98/types'
++import { Self } from '@plan98/types'
+ import { vim, Vim } from "@replit/codemirror-vim"
+ import { javascript } from "@codemirror/lang-javascript";
+ import { html } from "@codemirror/lang-html";
+@@ -14,7 +14,7 @@ import {
+   basicSetup
+ } from "codemirror"
+ 
+-const $ = Elf('static-code')
++const $ = Self('static-code')
+ 
+ const cursors = {}
+ 
+diff --git a/client/public/elves/tiniest-violin.js b/client/public/elves/tiniest-violin.js
+index 7efcd5e..30d279d 100644
+--- a/client/public/elves/tiniest-violin.js
++++ b/client/public/elves/tiniest-violin.js
+@@ -1,3 +1,10 @@
++
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ import { setInstrument } from './paper-pocket.js'
+ import elf from '@silly/elf'
+ 
+diff --git a/client/public/elves/ur-shell.js b/client/public/elves/ur-shell.js
+index 3f8b1d6..cd99a33 100644
+--- a/client/public/elves/ur-shell.js
++++ b/client/public/elves/ur-shell.js
+@@ -190,6 +190,14 @@ const commands = {
+     loadPath('/app/plan98-wallet')
+     return 'Success!'
+   },
++  'focus': () => {
++    window.location.href = '/app/time-machine'
++    return 'Success!'
++  },
++  'memex': () => {
++    window.location.href = '/app/time-machine'
++    return 'Success!'
++  },
+   'draw': () => {
+     window.location.href = '/app/sketch-pad'
+     return 'Success!'
+@@ -420,7 +428,7 @@ const commands = {
+ 
+       You are at work. You are Serious. You are going to get things done and then you can go home and be Silly.
+ 
+-      Focus.
++      Focus. memex.
+ 
+       The shell. You're in the shell. Why? What were you doing here.
+ 
+diff --git a/client/public/index.html b/client/public/index.html
+index b24877b..988b659 100644
+--- a/client/public/index.html
++++ b/client/public/index.html
+@@ -169,6 +169,7 @@
+           "@sillonious/computer": "/public/sillyz.computer.js",
+           "@silly/tag": "/public/module.js",
+           "@silly/elf": "/public/elf.js",
++          "@silly/saga": "/public/saga.js",
+           "@plan98/types": "/public/types.js",
+           "@plan98/elf": "/public/plan98.js",
+           "@plan98/app": "/public/plan98.js",
+diff --git a/client/public/plan98.js b/client/public/plan98.js
+index f156880..9fdf716 100644
+--- a/client/public/plan98.js
++++ b/client/public/plan98.js
+@@ -16,11 +16,11 @@ export function insights() {
+   return logs
+ }
+ 
+-function insight(name, table) {
+-  if(!logs[`${name}:${table}`]) {
+-    logs[`${name}:${table}`] = 0
++function insight(name, elf) {
++  if(!logs[`${name}:${elf}`]) {
++    logs[`${name}:${elf}`] = 0
+   }
+-  logs[`${name}:${table}`] += 1
++  logs[`${name}:${elf}`] += 1
+ }
+ 
+ const CREATE_EVENT = 'create'
+@@ -29,20 +29,20 @@ const observableEvents = [CREATE_EVENT]
+ const reactiveFunctions = {}
+ 
+ 
+-function react(table) {
+-  if(!reactiveFunctions[table]) return
++function react(elf) {
++  if(!reactiveFunctions[elf]) return
+ 
+-  Object.keys(reactiveFunctions[table])
+-    .map(id => reactiveFunctions[table][id]())
++  Object.keys(reactiveFunctions[elf])
++    .map(id => reactiveFunctions[elf][id]())
+ }
+ 
+ const notifications = {
+   [react.toString()]: react
+ }
+ 
+-function notify(table) {
++function notify(elf) {
+   Object.keys(notifications)
+-    .map(key => notifications[key](table))
++    .map(key => notifications[key](elf))
+ }
+ 
+ const store = createStore({}, notify)
+@@ -83,9 +83,9 @@ channel.onConnect(error => {
+   peerReady = true
+   processSubscriptionQueue()
+ 
+-  channel.on('stateCache', ({ table, data }) => {
++  channel.on('stateCache', ({ elf, data }) => {
+     if(data) {
+-      store.set(table, data, (state, payload) => {
++      store.set(elf, data, (state, payload) => {
+         return {
+           ...state,
+           ...payload
+@@ -103,19 +103,19 @@ channel.onConnect(error => {
+   })
+ })
+ 
+-function linkState(table) {
++function linkState(elf) {
+   channel.emit('linkState', {
+-    table,
++    elf,
+     id: this.id,
+-    data: learn(table)
++    data: learn(elf)
+   });
+ }
+ 
+ function udpDownload(data) {
+-  if(!data.table) return
++  if(!data.elf) return
+   const {
+     __plan98_sender_id,
+-    table,
++    elf,
+     knowledge,
+     serializedNuance
+   } = data
+@@ -125,10 +125,10 @@ function udpDownload(data) {
+   const merge = typeof serializedNuance === 'object'
+     ? objectFunction(serializedNuance)
+     : stringFunction(serializedNuance)
+-  store.set(table, knowledge, merge)
++  store.set(elf, knowledge, merge)
+ }
+ 
+-function udpUpload(table, knowledge, nuance) {
++function udpUpload(elf, knowledge, nuance) {
+   const serializedNuance = typeof nuance === 'function'
+     ? nuance.toString()
+     : {
+@@ -138,7 +138,7 @@ function udpUpload(table, knowledge, nuance) {
+ 
+   const data = {
+     __plan98_sender_id: PLAN98_NODE_ID,
+-    table,
++    elf,
+     knowledge,
+     serializedNuance
+   }
+@@ -147,43 +147,43 @@ function udpUpload(table, knowledge, nuance) {
+ 
+ const uploadCallbacks = {}
+ 
+-export function subscribeToUpload(table, callback) {
+-  if(!uploadCallbacks[table]) {
+-    uploadCallbacks[table] = []
++export function subscribeToUpload(elf, callback) {
++  if(!uploadCallbacks[elf]) {
++    uploadCallbacks[elf] = []
+   }
+-  uploadCallbacks[table].push(callback)
++  uploadCallbacks[elf].push(callback)
+ }
+ 
+-function notifyUploaders(table, knowledge, nuance) {
+-  if(!uploadCallbacks[table]) {
++function notifyUploaders(elf, knowledge, nuance) {
++  if(!uploadCallbacks[elf]) {
+     return
+   }
+-  uploadCallbacks[table].forEach(callback => {
+-    callback(table, knowledge, nuance)
++  uploadCallbacks[elf].forEach(callback => {
++    callback(elf, knowledge, nuance)
+   })
+ }
+ 
+ 
+ const downloadCallbacks = {}
+ 
+-export function subscribeToDownload(table, callback) {
+-  if(!downloadCallbacks[table]) {
+-    downloadCallbacks[table] = []
++export function subscribeToDownload(elf, callback) {
++  if(!downloadCallbacks[elf]) {
++    downloadCallbacks[elf] = []
+   }
+-  downloadCallbacks[table].push(callback)
++  downloadCallbacks[elf].push(callback)
+ }
+ 
+ function notifyDownloaders(data) {
+-  if(!downloadCallbacks[data.table]) {
++  if(!downloadCallbacks[data.elf]) {
+     return
+   }
+-  downloadCallbacks[data.table].forEach(callback => {
++  downloadCallbacks[data.elf].forEach(callback => {
+     callback(data)
+   })
+ }
+ 
+-function update(table, target, compositor, lifeCycle={}) {
+-  insight('plan98:update', table)
++function update(elf, target, compositor, lifeCycle={}) {
++  insight('plan98:update', elf)
+   if(lifeCycle.beforeUpdate) {
+     lifeCycle.beforeUpdate.call(this, target)
+   }
+@@ -200,15 +200,15 @@ const middleware = [
+   udpSync
+ ]
+ 
+-function udpSync(table, target) {
++function udpSync(elf, target) {
+   if(target.getAttribute('offline') === 'true') return
+   if(target['udpSync']) return
+   target['udpSync'] = true
+   
+   connect(() => {
+-    linkState.call(target, table)
+-    subscribeToUpload(table, udpUpload.bind(target))
+-    subscribeToDownload(table, udpDownload.bind(target))
++    linkState.call(target, elf)
++    subscribeToUpload(elf, udpUpload.bind(target))
++    subscribeToDownload(elf, udpDownload.bind(target))
+   })
+ } 
+ 
+@@ -220,64 +220,106 @@ function stringFunction(s) {
+   return new Function('return ' + s)()
+ }
+ 
+-function draw(table, compositor, lifeCycle={}) {
+-  insight('plan98:draw', table)
+-  if(!reactiveFunctions[table]) {
+-    reactiveFunctions[table] = {}
++function draw(elf, compositor, lifeCycle={}) {
++  insight('plan98:draw', elf)
++  if(!reactiveFunctions[elf]) {
++    reactiveFunctions[elf] = {}
+   }
+ 
+-  listen(CREATE_EVENT, table, (event) => {
+-    middleware.forEach(x => x(table, event.target))
+-    const draw = update.bind(this, table, event.target, compositor, lifeCycle)
+-    reactiveFunctions[table][event.target.id] = draw
++  listen(CREATE_EVENT, elf, (event) => {
++    middleware.forEach(x => x(elf, event.target))
++    const draw = update.bind(this, elf, event.target, compositor, lifeCycle)
++    reactiveFunctions[elf][event.target.id] = draw
+     draw()
+   })
+ }
+ 
+-function style(table, stylesheet) {
+-  insight('plan98:style', table)
++function style(elf, stylesheet) {
++  insight('plan98:style', elf)
+   const styles = `
+-    <style type="text/css" data-table="${table}">
+-      ${stylesheet.replaceAll('&', table)}
++    <style type="text/css" data-elf="${elf}">
++      ${stylesheet.replaceAll('&', elf)}
+     </style>
+   `;
+ 
+   document.body.insertAdjacentHTML("beforeend", styles)
+ }
+ 
+-export function learn(table) {
+-  insight('plan98:learn', table)
+-  return store.get(table) || {}
++export function learn(elf) {
++  insight('plan98:learn', elf)
++  return store.get(elf) || {}
+ }
+ 
+-export function teach(table, knowledge, nuance = (s, p) => ({...s,...p})) {
+-  insight('plan98:teach', table)
+-  store.set(table, knowledge, nuance)
+-  notifyUploaders(table, knowledge, nuance)
++export function teach(elf, knowledge, nuance = (s, p) => ({...s,...p})) {
++  insight('plan98:teach', elf)
++  store.set(elf, knowledge, nuance)
++  notifyUploaders(elf, knowledge, nuance)
+ }
+ 
+-export function when(table, type, arg2, callback) {
++export function when(elf, type, arg2, callback) {
+   if(typeof arg2 === 'function') {
+-    insight('plan98:when:'+type, table)
+-    return listen.call(this, type, table, arg2)
++    insight('plan98:when:'+type, elf)
++    return listen.call(this, type, elf, arg2)
+   } else {
+-    const nested = `${table} ${arg2}`
++    const nested = `${elf} ${arg2}`
+     insight('plan98:when:'+type, nested)
+     return listen.call(this, type, nested, callback)
+   }
+ }
+ 
+-export default function elf(table, initialState = {}) {
+-  insight('plan98', table)
+-  teach(table, initialState)
++export default function Self(elf, initialState = {}) {
++  insight('plan98', elf)
++  teach(elf, initialState)
+ 
+   return {
+-    link: table,
+-    learn: learn.bind(this, table),
+-    draw: draw.bind(this, table),
+-    style: style.bind(this, table),
+-    when: when.bind(this, table),
+-    teach: teach.bind(this, table),
++    // link is a human that is permitted to be an elf per order of the deku tree
++    link: elf,
++    elf: elf,
++    table: elf,
++    root: elf,
++    tag: elf,
++    selector: elf,
++    body: elf,
++
++    // link has an ear to listen to the peoples of zora, goron, korok, kokiri, rito, gerudo, hyrule, et al
++    ear: learn.bind(this, elf),
++    learn: learn.bind(this, elf),
++    get: learn.bind(this, elf),
++    read: learn.bind(this, elf),
++    model: learn.bind(this, elf),
++    object: learn.bind(this, elf),
++    subject: learn.bind(this, elf),
++    predicate: learn.bind(this, elf),
++
++    // link has a head to keep all his facts straight in the current moment in time
++    head: draw.bind(this, elf),
++    draw: draw.bind(this, elf),
++    render: draw.bind(this, elf),
++    view: draw.bind(this, elf),
++
++    // link has an eye through which to spy reality
++    eye: style.bind(this, elf),
++    style: style.bind(this, elf),
++    flair: style.bind(this, elf),
++    skin: style.bind(this, elf),
++    fashion: style.bind(this, elf),
++
++    // link has a hand to move the pieces into place at his command
++    hand: when.bind(this, elf),
++    when: when.bind(this, elf),
++    on: when.bind(this, elf),
++    listen: when.bind(this, elf),
++
++    // link has a mouth that he lets others stuff with their hopes and dreams
++    mouth: teach.bind(this, elf),
++    teach: teach.bind(this, elf),
++    set: teach.bind(this, elf),
++    write: teach.bind(this, elf),
++    update: teach.bind(this, elf),
++    put: teach.bind(this, elf),
++    post: teach.bind(this, elf),
++    patch: teach.bind(this, elf),
++    delete: teach.bind(this, elf),
+   }
+ }
+ 
+@@ -291,15 +333,15 @@ export function unsubscribe(fun) {
+   }
+ }
+ 
+-export function listen(type, table, handler = () => null) {
++export function listen(type, elf, handler = () => null) {
+   const callback = (event) => {
+     if(
+       event.target &&
+       event.target.matches &&
+-      event.target.matches(table)
++      event.target.matches(elf)
+     ) {
+ 
+-      insight('plan98:listen:'+type, table)
++      insight('plan98:listen:'+type, elf)
+       handler.call(this, event);
+     }
+   };
+@@ -308,12 +350,12 @@ export function listen(type, table, handler = () => null) {
+   document.addEventListener(type, callback, options);
+ 
+   if(observableEvents.includes(type)) {
+-    observe(table);
++    observe(elf);
+   }
+ 
+   return function unlisten() {
+     if(type === CREATE_EVENT) {
+-      disregard(table);
++      disregard(elf);
+     }
+ 
+     document.removeEventListener(type, callback, options);
+@@ -322,13 +364,13 @@ export function listen(type, table, handler = () => null) {
+ 
+ let tables = []
+ 
+-function observe(table) {
+-  tables = [...new Set([...tables, table])];
+-  maybeCreateReactive([...document.querySelectorAll(table)])
++function observe(elf) {
++  tables = [...new Set([...tables, elf])];
++  maybeCreateReactive([...document.querySelectorAll(elf)])
+ }
+ 
+-function disregard(table) {
+-  const index = tables.indexOf(table);
++function disregard(elf) {
++  const index = tables.indexOf(elf);
+   if(index >= 0) {
+     tables = [
+       ...tables.slice(0, index),
+@@ -420,23 +462,23 @@ function createStore(initialState = {}, subscribe = () => null) {
+   };
+ 
+   return {
+-    set: function(table, knowledge, nuance) {
++    set: function(elf, knowledge, nuance) {
+ 
+       const merge = typeof nuance === 'function'
+         ? nuance
+         : nuance.mergeHandler.apply(null, nuance.parameters)
+-      const wisdom = merge(state[table] || {}, knowledge);
++      const wisdom = merge(state[elf] || {}, knowledge);
+ 
+       state = {
+         ...state,
+-        [table]: wisdom
++        [elf]: wisdom
+       };
+ 
+-      subscribe(table);
++      subscribe(elf);
+     },
+ 
+-    get: function(table) {
+-      return state[table];
++    get: function(elf) {
++      return state[elf];
+     }
+   }
+ }
+diff --git a/client/public/saga.js b/client/public/saga.js
+index 5108a27..88c5454 100644
+--- a/client/public/saga.js
++++ b/client/public/saga.js
+@@ -1,5 +1,11 @@
+ /*
+ 
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ 
+ 
+ 
+@@ -31,7 +37,7 @@
+    {&!    {&!    {&!    {&!    {&!    {&!    {&!
+     #      #      #      #      #      #      #
+ 
+-  Silly  Sally  Sully  Shelly  Sol   Wally   Thesillonious Caramera
++  Silly  Sally  Sully  Shelly  Sonny   Wally   Thesillonious Caramera
+   1998   1970   2077   2038    2012  1888    now
+ 
+ 
+diff --git a/client/public/types.js b/client/public/types.js
+index fd163c0..317601b 100644
+--- a/client/public/types.js
++++ b/client/public/types.js
+@@ -1,5 +1,11 @@
++// the tanka of the tiniest violin
++
++// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
++
++////
++
+ import elf from '@silly/elf'
+-import saga from "@sillonious/saga"
++import saga from "@silly/saga"
+ 
+ export const string = 'string'
+ export const bool = 'boolean'
+@@ -20,7 +26,7 @@ const Types = {
+   Divide,
+   Modulo,
+   Box,
+-  Elf,
++  Self,
+   Saga,
+   Expect,
+   Describe
+@@ -72,7 +78,7 @@ export function Box(x) {
+   return { ...x }
+ }
+ 
+-export function Elf(x, box) {
++export function Self(x, box) {
+   return elf(x, box)
+ }
+ 
+diff --git a/client/server.js b/client/server.js
+index 373d233..f28fdfc 100644
+--- a/client/server.js
++++ b/client/server.js
+@@ -507,6 +507,7 @@ function template(body) {
+           "@sillonious/computer": "/public/sillyz.computer.js",
+           "@silly/tag": "/public/module.js",
+           "@silly/elf": "/public/elf.js",
++          "@silly/saga": "/public/saga.js",
+           "@plan98/types": "/public/types.js",
+           "@plan98/elf": "/public/plan98.js",
+           "@plan98/app": "/public/plan98.js",
+-- 
+2.51.0
+

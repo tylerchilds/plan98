@@ -105,33 +105,40 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="palette-items" data-menu="edit">
-          <button data-new>New</button>
+          <button data-new data-tooltip="Wipe the board clean">New</button>
           <hr>
-          <button data-stroke-color><span class="color-sample"></span>Color</button>
-          <button data-drawer="size">Size</button>
+          <button data-tooltip="Change the stroke color" data-stroke-color><span class="color-sample"></span>Color</button>
+          <button data-tooltip="Toggle thicknoid options" data-drawer="size">Size</button>
           <div data-pocket="size">
             ${thicknoids.map(x => `
-              <button data-thickness="${x}">${x}</button>
+              <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">${x}</button>
             `).join('')}
           </div>
           <hr>
-          <button data-undo>Undo</button>
-          <button data-redo>Redo</button>
+          <button data-tooltip="backstep reality by a single step" data-undo>Undo</button>
+          <button data-tooltip="tock the reality clock by a tick"  data-redo>Redo</button>
           <hr>
-          <button data-save>Save</button>
-          <button data-help>
+          <button data-tooltip="Save this sketck to your most recent memex" data-save>Save</button>
+          <button data-tooltip="Seek help from the premium gods" data-help>
             Help
           </button>
-          <button data-journal>Quit</button>
+          <button data-tooltip="Don't ask where your mind exists" data-journal>Quit</button>
           <hr>
-          <button data-shell>Quit to Shell</button>
-          <button data-mobile>Quit to Mobile</button>
-          <button data-desktop>Quit to Desktop</button>
-          <button data-handheld>Quit to Handheld</button>
-          <button data-console>Quit to Console</button>
+          <button data-tooltip="Where's ur stuff at and in" data-wallet>Quit to Wallet</button>
+          <button data-tooltip="Always question everything" data-shell>Quit to Shell</button>
+          <button data-tooltip="Surf the files in the system" data-files>Quit to Files</button>
+          <button data-tooltip="What is a mobile device by a pocket sized imagination" data-mobile>Quit to Mobile</button>
+          <button data-tooltip="A metaphor as timeless as the desk itself" data-desktop>Quit to Desktop</button>
+          <button data-tooltip="For the gamers on the go with all the buttons broke" data-handheld>Quit to Handheld</button>
+          <button data-tooltip="For when you're not alone and want o jam through phones" data-console>Quit to Console</button>
           <hr>
-          <button data-escape>Escape</button>
-          <button data-violin>Escape to Violin</button>
+          <button data-tooltip="Consider changing your current reality" data-escape>Escape to Local Context</button>
+          <button data-tooltip="Consider changing our current reality" data-plan98>Escape to Global Context</button>
+          <button data-tooltip="Consider saving all forms of reality" data-violin>Escape to Violin</button>
+          <hr>
+          <button data-tooltip="Securely Enter Admin Area" data-admin>Admin</button>
+          <hr>
+          <button data-tooltip="If you know any unix systems at all, be amused" data-crichton>Mike Backes Edition</button>
         </div>
       </div>
     </div>
@@ -151,11 +158,12 @@ function mount(target) {
     const context = canvas.getContext('2d')
     context.fillStyle = $.ear().background
     context.fillRect(0, 0, canvas.width, canvas.height)
+    redraw(target)
   }
 
-  resizeCanvas();
   target.appendChild(canvas)
   update(target)
+  resizeCanvas();
 
   const src = target.getAttribute('src')
   if(src) {
@@ -236,7 +244,6 @@ $.hand('click', '[data-drawer]', function  (event) {
 $.hand('click', '[data-thickness]', function  (event) {
   event.preventDefault()
   $.mouth({
-    activeMenu: null,
     thickness: parseInt(event.target.dataset.thickness) || 1
   })
 })
@@ -247,11 +254,23 @@ $.hand('click', '[data-journal]', function  (event) {
   window.location.href = '/?world=shirtflicks.app'
 })
 
+$.hand('click', '[data-wallet]', function  (event) {
+  event.preventDefault()
+  window.location.href = `/app/plan98-wallet`
+})
+
 $.hand('click', '[data-shell]', function  (event) {
   event.preventDefault()
   const id = event.target.closest($.elf).id
   window.location.href = `/app/ur-shell?id=${id}`
 })
+
+$.hand('click', '[data-files]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/file-surf?id=${id}`
+})
+
 
 $.hand('click', '[data-mobile]', function  (event) {
   event.preventDefault()
@@ -282,6 +301,23 @@ $.hand('click', '[data-escape]', function  (event) {
   const id = event.target.closest($.elf).id
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
 })
+
+$.hand('click', '[data-plan98]', function  (event) {
+  event.preventDefault()
+  window.location.href = '/?world=plan98.org'
+})
+
+$.hand('click', '[data-admin]', function  (event) {
+  event.preventDefault()
+  window.location.href = '/admin/'
+})
+
+$.hand('click', '[data-crichton]', function  (event) {
+  event.preventDefault()
+  window.location.href = '/app/generic-park?src=/public/elves'
+})
+
+
 
 $.hand('click', '[data-violin]', function  (event) {
   event.preventDefault()
@@ -421,7 +457,7 @@ $.hand('mousedown', 'canvas', start)
 
 function start(e) {
   const { canvas, rectangle } = engine(e.target)
-  $.mouth({ touching: true })
+  $.mouth({ touching: true, activeMenu: null })
   const { thickness } = $.ear()
   const context = canvas.getContext('2d')
   let pressure = 0.1;

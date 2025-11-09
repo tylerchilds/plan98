@@ -12,8 +12,15 @@ function crawlerTemplate(html) {
     <div style="display: grid; height: 100%; position: relative;">
       <div name="square">
         <div class="skybox active">
-          <div class="c">
+          <div class="c scroller-area">
             ${html}
+          </div>
+          <div class="f">
+            <div>
+              <button data-wallet>
+                <plan98-icon></plan98-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -57,9 +64,15 @@ $.draw(() => null, {
   }
 })
 
-$.when('animationend', 'xml-html', () => {
-  window.location.href = '/app/shirt-flicks'
-})
+function go(event) {
+  const next = event.target.closest($.link).getAttribute('next') || '/app/shirt-flicks'
+  window.top.location.href = next
+}
+
+$.when('animationend', 'xml-html', go)
+
+$.when('click', '[data-wallet]', go)
+
 
 $.style(`
   & xml-html {
@@ -67,7 +80,7 @@ $.style(`
     flex-direction: column;
     gap: 1rem;
 
-    animation: &-crawler 60000ms linear forwards;
+    animation: &-crawler 30000ms linear forwards;
   }
 
   @keyframes &-crawler {
@@ -76,7 +89,7 @@ $.style(`
     }
 
     100% {
-      transform: translateY(-100%);
+      transform: translateY(0%);
     }
   }
 
@@ -188,8 +201,6 @@ $.style(`
     border-radius: .5rem;
   }
 
-
-
   & .cta .nonce {
     height: 2rem;
   }
@@ -215,9 +226,10 @@ $.style(`
     margin: auto;
     transform-style: preserve-3d;
     width: 100%;
-    aspect-ratio: 1;
-    max-width: 100cqmin;
-    max-height: 100cqmin;
+    max-width: 100vm;
+    max-height: 100vh;
+    height: 100vh;
+    width: 100vm;
     place-self: center;
     overflow: hidden;
   }
@@ -247,6 +259,11 @@ $.style(`
   & .emerald.-in-bag {
     background: blue
   }
+
+  & .scroller-area {
+    font-size: 2rem;
+  }
+
   & .skybox.active .a,
   & .skybox.active .b,
   & .skybox.active .c,
@@ -277,7 +294,6 @@ $.style(`
    width: 100%;
    z-index: 100;
    color: gold;
-   font-size: 3rem;
    font-weight: 600;
  }
 
@@ -336,9 +352,23 @@ $.style(`
    display: grid;
    grid-template-areas: "stack";
    overflow: hidden;
+   pointer-events: none;
  }
 
  & .f > * {
   grid-area: stack;
  }
+
+  & [data-wallet] {
+    border: 0;
+    background: transparent;
+    padding: 0;
+    pointer-events: all;
+  }
+
+  & [data-wallet]:hover,
+  & [data-wallet]:focus, {
+    background: transparent;
+  }
+
 `)
