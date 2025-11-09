@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import Self from '@plan98/elf'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { updateDraft } from './time-machine.js'
@@ -10,12 +10,12 @@ let isMousedown = false
 let points = []
 let strokeHistory = []
 let strokeRevisory = []
-const thicknoids = [1, 4, 16, 64, 256]
+const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256]
 const overlays = { color: 'color' }
 
-const $ = elf('sketch-pad', {
-  background: 'lemonchiffon',
-  color: 'saddlebrown',
+const $ = Self('sketch-pad', {
+  background: '#54796d',
+  color: 'white',
   drawer: 'size',
   thickness: 4
 })
@@ -32,7 +32,7 @@ function engine(target) {
   }
 }
 
-$.draw(target => {
+$.head(target => {
   if(target.innerHTML) {
     requestAnimationFrame(() => update(target))
     return null
@@ -46,36 +46,36 @@ function update(target) {
   }
 
   {
-    const { touching } = $.learn()
+    const { touching } = $.ear()
     target.dataset.touching = touching
   }
 
   {
-    const { thickness } = $.learn()
+    const { thickness } = $.ear()
     target.dataset.size = thickness
   }
 
   {
-    const { color } = $.learn()
+    const { color } = $.ear()
     if(target.color !== color) {
       target.style.setProperty('--active-color', color)
     }
   }
 
   {
-    const { drawer } = $.learn()
+    const { drawer } = $.ear()
     target.dataset.drawer = drawer
   }
 
   {
-    const { overlay } = $.learn()
+    const { overlay } = $.ear()
     if(target.overlay !== overlay) {
       target.dataset.overlay = overlay
     }
   }
 
   { // menu items
-    const { activeMenu } = $.learn()
+    const { activeMenu } = $.ear()
     const currentlyActive = target.querySelector('[data-menu-target].active')
     if(currentlyActive) {
       currentlyActive.classList.remove('active')
@@ -123,6 +123,15 @@ function mount(target) {
             Help
           </button>
           <button data-journal>Quit</button>
+          <hr>
+          <button data-shell>Quit to Shell</button>
+          <button data-mobile>Quit to Mobile</button>
+          <button data-desktop>Quit to Desktop</button>
+          <button data-handheld>Quit to Handheld</button>
+          <button data-console>Quit to Console</button>
+          <hr>
+          <button data-escape>Escape</button>
+          <button data-violin>Escape to Violin</button>
         </div>
       </div>
     </div>
@@ -140,7 +149,7 @@ function mount(target) {
     canvas.width = self.innerWidth;
     canvas.height = self.innerHeight;
     const context = canvas.getContext('2d')
-    context.fillStyle = $.learn().background
+    context.fillStyle = $.ear().background
     context.fillRect(0, 0, canvas.width, canvas.height)
   }
 
@@ -200,51 +209,100 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
-$.when('input', 'plan98-palette', (event) => {
+$.hand('input', 'plan98-palette', (event) => {
   const { color } = event.detail
-  $.teach({ color, overlay: 'none' })
+  $.mouth({ color, overlay: 'none' })
 })
 
-$.when('click', '[data-help]', function  (event) {
+$.hand('click', '[data-help]', function  (event) {
   event.preventDefault()
-  window.location.href = "/app/cool-chat"
+  window.location.href = "/?world=thelanding.page"
 })
 
-$.when('click', '[data-stroke-color]', function  (event) {
+$.hand('click', '[data-stroke-color]', function  (event) {
   event.preventDefault()
-  $.teach({
+  $.mouth({
     overlay: overlays.color,
     activeMenu: null,
   })
 })
 
-$.when('click', '[data-drawer]', function  (event) {
+$.hand('click', '[data-drawer]', function  (event) {
   event.preventDefault()
   const { drawer } = event.target.dataset
-  $.teach({ drawer: drawer === $.learn().drawer ?null:drawer })
+  $.mouth({ drawer: drawer === $.ear().drawer ?null:drawer })
 })
 
-$.when('click', '[data-thickness]', function  (event) {
+$.hand('click', '[data-thickness]', function  (event) {
   event.preventDefault()
-  $.teach({
+  $.mouth({
     activeMenu: null,
     thickness: parseInt(event.target.dataset.thickness) || 1
   })
 })
 
 
-$.when('click', '[data-journal]', function  (event) {
+$.hand('click', '[data-journal]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/time-machine'
+  window.location.href = '/?world=shirtflicks.app'
 })
 
-$.when('click', '[data-violion]', function  (event) {
+$.hand('click', '[data-shell]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/ur-shell?id=${id}`
+})
+
+$.hand('click', '[data-mobile]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/mobile-device?id=${id}`
+})
+
+$.hand('click', '[data-desktop]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/door-man?id=${id}`
+})
+
+$.hand('click', '[data-handheld]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/paper-pocket?id=${id}`
+})
+
+$.hand('click', '[data-console]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  window.location.href = `/app/couch-coop?id=${id}`
+})
+
+$.hand('click', '[data-escape]', function  (event) {
+  event.preventDefault()
+  const id = event.target.closest($.elf).id
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', code: 'Escape', keyCode: 27, which: 27, bubbles: true }));
+})
+
+$.hand('click', '[data-violin]', function  (event) {
   event.preventDefault()
   window.location.href = '/app/tiniest-violin'
+
+
+
+
+
+
+
+
+  // the tanka of the tiniest violin
+
+  // Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+
+  ////
+
 })
 
-
-$.when('click', '[data-save]', ({ target }) => publish(target))
+$.hand('click', '[data-save]', ({ target }) => publish(target))
 
 function publish (target) {
   const { canvas, src } = engine(target)
@@ -285,17 +343,17 @@ function publish (target) {
     document.body.removeChild(link);
   });
 
-  $.teach({ activeMenu: null })
+  $.mouth({ activeMenu: null })
 }
 
-$.when('click', '[data-new]', function (event) {
+$.hand('click', '[data-new]', function (event) {
   event.preventDefault()
   strokeHistory = []
   redraw(event.target)
-  $.teach({ activeMenu: null })
+  $.mouth({ activeMenu: null })
 })
 
-$.when('click', '[data-download]', function (event) {
+$.hand('click', '[data-download]', function (event) {
   event.preventDefault()
   const { canvas } = engine(event.target)
   const now = new Date();
@@ -307,14 +365,14 @@ $.when('click', '[data-download]', function (event) {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
-  $.teach({ activeMenu: null })
+  $.mouth({ activeMenu: null })
 })
 
 /**
  * Remove the previous stroke from history and repaint the entire canvas based on history
  * @return {void}
  */
-$.when('click', '[data-undo]', function undoDraw (event) {
+$.hand('click', '[data-undo]', function undoDraw (event) {
   event.preventDefault()
   if(strokeHistory.length === 0) {
     return
@@ -328,7 +386,7 @@ function redraw(target) {
   const { canvas, src } = engine(target)
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
-  context.fillStyle = $.learn().background
+  context.fillStyle = $.ear().background
   context.fillRect(0, 0, canvas.width, canvas.height)
 
   strokeHistory.map(function (stroke) {
@@ -348,7 +406,7 @@ function redraw(target) {
   }
 }
 
-$.when('click', '[data-redo]', function redoDraw (event) {
+$.hand('click', '[data-redo]', function redoDraw (event) {
   event.preventDefault()
   if(strokeRevisory.length === 0) return
 
@@ -358,13 +416,13 @@ $.when('click', '[data-redo]', function redoDraw (event) {
 })
 
 
-$.when('touchstart', 'canvas', start)
-$.when('mousedown', 'canvas', start)
+$.hand('touchstart', 'canvas', start)
+$.hand('mousedown', 'canvas', start)
 
 function start(e) {
   const { canvas, rectangle } = engine(e.target)
-  $.teach({ touching: true })
-  const { thickness } = $.learn()
+  $.mouth({ touching: true })
+  const { thickness } = $.ear()
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let x, y;
@@ -389,13 +447,13 @@ function start(e) {
   drawOnCanvas(e.target, points)
 }
 
-$.when('touchmove', 'canvas', move)
-$.when('mousemove', 'canvas', move)
+$.hand('touchmove', 'canvas', move)
+$.hand('mousemove', 'canvas', move)
 
 function move (e) {
   e.preventDefault()
   const { canvas, rectangle } = engine(e.target)
-  const { thickness, color } = $.learn()
+  const { thickness, color } = $.ear()
   const context = canvas.getContext('2d')
   if (!isMousedown) return
 
@@ -420,11 +478,11 @@ function move (e) {
   drawOnCanvas(e.target, points);
 
   requestIdleCallback(() => {
-    $.teach({ pressure })
+    $.mouth({ pressure })
 
     const touch = e.touches ? e.touches[0] : null
     if (touch) {
-      $.teach({
+      $.mouth({
         touchesHTML: `
           touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
           radiusX = ${touch.radiusX} <br/>
@@ -438,12 +496,12 @@ function move (e) {
   })
 }
 
-$.when('touchend', 'canvas', end)
-$.when('touchleave', 'canvas', end)
-$.when('mouseup', 'canvas', end)
+$.hand('touchend', 'canvas', end)
+$.hand('touchleave', 'canvas', end)
+$.hand('mouseup', 'canvas', end)
 function end (e) {
   const { src, canvas, rectangle } = engine(e.target)
-  $.teach({ touching: false })
+  $.mouth({ touching: false })
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let x, y;
@@ -478,7 +536,7 @@ const paneByTarget = (target) => {
 
 
 function setState(tray, payload) {
-  $.teach(payload, {
+  $.mouth(payload, {
     mergeHandler: mergeByTray,
     parameters: [tray]
   })
@@ -494,19 +552,19 @@ function mergeByTray(state) {
   }
 }
 
-$.when('mousedown', '.tray-title-bar', grab)
-$.when('mousemove', '.tray-title-bar', drag)
-$.when('mouseup', '.tray-title-bar', ungrab)
-$.when('mouseout', '.tray-title-bar', ungrab)
-$.when('input', '.picker', setColor)
-$.when('click', '.tray-close', closeTray)
+$.hand('mousedown', '.tray-title-bar', grab)
+$.hand('mousemove', '.tray-title-bar', drag)
+$.hand('mouseup', '.tray-title-bar', ungrab)
+$.hand('mouseout', '.tray-title-bar', ungrab)
+$.hand('input', '.picker', setColor)
+$.hand('click', '.tray-close', closeTray)
 
 function setColor(event) {
   event.preventDefault()
   const { target } = event.target.dataset
   const { value } = event.target
 
-  $.teach({ [target]: value })
+  $.mouth({ [target]: value })
   redraw(event.target)
 }
 
@@ -519,12 +577,12 @@ function closeTray(event) {
 // grab a pane
 function grab({ target }) {
   const { tray } = event.target.dataset
-  const { z } = $.learn()[tray]
-  const { trayZ } = $.learn()
+  const { z } = $.ear()[tray]
+  const { trayZ } = $.ear()
   const newZ = trayZ + 1
 
   setState(tray, { grabbed: true, z: newZ })
-  $.teach({ trayZ: newZ })
+  $.mouth({ trayZ: newZ })
 }
 
 // drag a pane
@@ -532,7 +590,7 @@ function drag(event) {
   const { target, movementX, movementY } = event
 
   const { tray } = target.dataset
-  const { grabbed, x, y } = $.learn()[tray]
+  const { grabbed, x, y } = $.ear()[tray]
 
   if(grabbed) {
     setState(tray, {
@@ -548,7 +606,7 @@ function ungrab({ target }) {
   setState(tray, { grabbed: false })
 }
 
-$.style(`
+$.eye(`
   & {
     display: block;
     height: 100%;
@@ -699,19 +757,19 @@ $.style(`
 `)
 
 /*
-$.when('pointerdown', '*', (event) => {
+$.hand('pointerdown', '*', (event) => {
   if(event.target.closest('.menu-item')) {
     // child of a menu item
     return
   }
-  $.teach({ activeMenu: null })
+  $.mouth({ activeMenu: null })
 })
 */
 
-$.when('click', '[data-menu-target]', (event) => {
+$.hand('click', '[data-menu-target]', (event) => {
   event.preventDefault()
-  const { activeMenu } = $.learn()
+  const { activeMenu } = $.ear()
   const { menuTarget } = event.target.dataset
-  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
+  $.mouth({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
 })

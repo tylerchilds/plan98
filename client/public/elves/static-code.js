@@ -1,4 +1,4 @@
-import { Elf } from '@plan98/types'
+import { Self } from '@plan98/types'
 import { vim, Vim } from "@replit/codemirror-vim"
 import { javascript } from "@codemirror/lang-javascript";
 import { html } from "@codemirror/lang-html";
@@ -14,7 +14,7 @@ import {
   basicSetup
 } from "codemirror"
 
-const $ = Elf('static-code')
+const $ = Self('static-code')
 
 const cursors = {}
 

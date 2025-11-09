@@ -1,5 +1,11 @@
+// the tanka of the tiniest violin
+
+// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+
+////
+
 import elf from '@silly/elf'
-import saga from "@sillonious/saga"
+import saga from "@silly/saga"
 
 export const string = 'string'
 export const bool = 'boolean'
@@ -20,7 +26,7 @@ const Types = {
   Divide,
   Modulo,
   Box,
-  Elf,
+  Self,
   Saga,
   Expect,
   Describe
@@ -72,7 +78,7 @@ export function Box(x) {
   return { ...x }
 }
 
-export function Elf(x, box) {
+export function Self(x, box) {
   return elf(x, box)
 }
 

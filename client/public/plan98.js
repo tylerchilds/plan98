@@ -16,11 +16,11 @@ export function insights() {
   return logs
 }
 
-function insight(name, table) {
-  if(!logs[`${name}:${table}`]) {
-    logs[`${name}:${table}`] = 0
+function insight(name, elf) {
+  if(!logs[`${name}:${elf}`]) {
+    logs[`${name}:${elf}`] = 0
   }
-  logs[`${name}:${table}`] += 1
+  logs[`${name}:${elf}`] += 1
 }
 
 const CREATE_EVENT = 'create'
@@ -29,20 +29,20 @@ const observableEvents = [CREATE_EVENT]
 const reactiveFunctions = {}
 
 
-function react(table) {
-  if(!reactiveFunctions[table]) return
+function react(elf) {
+  if(!reactiveFunctions[elf]) return
 
-  Object.keys(reactiveFunctions[table])
-    .map(id => reactiveFunctions[table][id]())
+  Object.keys(reactiveFunctions[elf])
+    .map(id => reactiveFunctions[elf][id]())
 }
 
 const notifications = {
   [react.toString()]: react
 }
 
-function notify(table) {
+function notify(elf) {
   Object.keys(notifications)
-    .map(key => notifications[key](table))
+    .map(key => notifications[key](elf))
 }
 
 const store = createStore({}, notify)
@@ -83,9 +83,9 @@ channel.onConnect(error => {
   peerReady = true
   processSubscriptionQueue()
 
-  channel.on('stateCache', ({ table, data }) => {
+  channel.on('stateCache', ({ elf, data }) => {
     if(data) {
-      store.set(table, data, (state, payload) => {
+      store.set(elf, data, (state, payload) => {
         return {
           ...state,
           ...payload
@@ -103,19 +103,19 @@ channel.onConnect(error => {
   })
 })
 
-function linkState(table) {
+function linkState(elf) {
   channel.emit('linkState', {
-    table,
+    elf,
     id: this.id,
-    data: learn(table)
+    data: learn(elf)
   });
 }
 
 function udpDownload(data) {
-  if(!data.table) return
+  if(!data.elf) return
   const {
     __plan98_sender_id,
-    table,
+    elf,
     knowledge,
     serializedNuance
   } = data
@@ -125,10 +125,10 @@ function udpDownload(data) {
   const merge = typeof serializedNuance === 'object'
     ? objectFunction(serializedNuance)
     : stringFunction(serializedNuance)
-  store.set(table, knowledge, merge)
+  store.set(elf, knowledge, merge)
 }
 
-function udpUpload(table, knowledge, nuance) {
+function udpUpload(elf, knowledge, nuance) {
   const serializedNuance = typeof nuance === 'function'
     ? nuance.toString()
     : {
@@ -138,7 +138,7 @@ function udpUpload(table, knowledge, nuance) {
 
   const data = {
     __plan98_sender_id: PLAN98_NODE_ID,
-    table,
+    elf,
     knowledge,
     serializedNuance
   }
@@ -147,43 +147,43 @@ function udpUpload(table, knowledge, nuance) {
 
 const uploadCallbacks = {}
 
-export function subscribeToUpload(table, callback) {
-  if(!uploadCallbacks[table]) {
-    uploadCallbacks[table] = []
+export function subscribeToUpload(elf, callback) {
+  if(!uploadCallbacks[elf]) {
+    uploadCallbacks[elf] = []
   }
-  uploadCallbacks[table].push(callback)
+  uploadCallbacks[elf].push(callback)
 }
 
-function notifyUploaders(table, knowledge, nuance) {
-  if(!uploadCallbacks[table]) {
+function notifyUploaders(elf, knowledge, nuance) {
+  if(!uploadCallbacks[elf]) {
     return
   }
-  uploadCallbacks[table].forEach(callback => {
-    callback(table, knowledge, nuance)
+  uploadCallbacks[elf].forEach(callback => {
+    callback(elf, knowledge, nuance)
   })
 }
 
 
 const downloadCallbacks = {}
 
-export function subscribeToDownload(table, callback) {
-  if(!downloadCallbacks[table]) {
-    downloadCallbacks[table] = []
+export function subscribeToDownload(elf, callback) {
+  if(!downloadCallbacks[elf]) {
+    downloadCallbacks[elf] = []
   }
-  downloadCallbacks[table].push(callback)
+  downloadCallbacks[elf].push(callback)
 }
 
 function notifyDownloaders(data) {
-  if(!downloadCallbacks[data.table]) {
+  if(!downloadCallbacks[data.elf]) {
     return
   }
-  downloadCallbacks[data.table].forEach(callback => {
+  downloadCallbacks[data.elf].forEach(callback => {
     callback(data)
   })
 }
 
-function update(table, target, compositor, lifeCycle={}) {
-  insight('plan98:update', table)
+function update(elf, target, compositor, lifeCycle={}) {
+  insight('plan98:update', elf)
   if(lifeCycle.beforeUpdate) {
     lifeCycle.beforeUpdate.call(this, target)
   }
@@ -200,15 +200,15 @@ const middleware = [
   udpSync
 ]
 
-function udpSync(table, target) {
+function udpSync(elf, target) {
   if(target.getAttribute('offline') === 'true') return
   if(target['udpSync']) return
   target['udpSync'] = true
   
   connect(() => {
-    linkState.call(target, table)
-    subscribeToUpload(table, udpUpload.bind(target))
-    subscribeToDownload(table, udpDownload.bind(target))
+    linkState.call(target, elf)
+    subscribeToUpload(elf, udpUpload.bind(target))
+    subscribeToDownload(elf, udpDownload.bind(target))
   })
 } 
 
@@ -220,64 +220,106 @@ function stringFunction(s) {
   return new Function('return ' + s)()
 }
 
-function draw(table, compositor, lifeCycle={}) {
-  insight('plan98:draw', table)
-  if(!reactiveFunctions[table]) {
-    reactiveFunctions[table] = {}
+function draw(elf, compositor, lifeCycle={}) {
+  insight('plan98:draw', elf)
+  if(!reactiveFunctions[elf]) {
+    reactiveFunctions[elf] = {}
   }
 
-  listen(CREATE_EVENT, table, (event) => {
-    middleware.forEach(x => x(table, event.target))
-    const draw = update.bind(this, table, event.target, compositor, lifeCycle)
-    reactiveFunctions[table][event.target.id] = draw
+  listen(CREATE_EVENT, elf, (event) => {
+    middleware.forEach(x => x(elf, event.target))
+    const draw = update.bind(this, elf, event.target, compositor, lifeCycle)
+    reactiveFunctions[elf][event.target.id] = draw
     draw()
   })
 }
 
-function style(table, stylesheet) {
-  insight('plan98:style', table)
+function style(elf, stylesheet) {
+  insight('plan98:style', elf)
   const styles = `
-    <style type="text/css" data-table="${table}">
-      ${stylesheet.replaceAll('&', table)}
+    <style type="text/css" data-elf="${elf}">
+      ${stylesheet.replaceAll('&', elf)}
     </style>
   `;
 
   document.body.insertAdjacentHTML("beforeend", styles)
 }
 
-export function learn(table) {
-  insight('plan98:learn', table)
-  return store.get(table) || {}
+export function learn(elf) {
+  insight('plan98:learn', elf)
+  return store.get(elf) || {}
 }
 
-export function teach(table, knowledge, nuance = (s, p) => ({...s,...p})) {
-  insight('plan98:teach', table)
-  store.set(table, knowledge, nuance)
-  notifyUploaders(table, knowledge, nuance)
+export function teach(elf, knowledge, nuance = (s, p) => ({...s,...p})) {
+  insight('plan98:teach', elf)
+  store.set(elf, knowledge, nuance)
+  notifyUploaders(elf, knowledge, nuance)
 }
 
-export function when(table, type, arg2, callback) {
+export function when(elf, type, arg2, callback) {
   if(typeof arg2 === 'function') {
-    insight('plan98:when:'+type, table)
-    return listen.call(this, type, table, arg2)
+    insight('plan98:when:'+type, elf)
+    return listen.call(this, type, elf, arg2)
   } else {
-    const nested = `${table} ${arg2}`
+    const nested = `${elf} ${arg2}`
     insight('plan98:when:'+type, nested)
     return listen.call(this, type, nested, callback)
   }
 }
 
-export default function elf(table, initialState = {}) {
-  insight('plan98', table)
-  teach(table, initialState)
+export default function Self(elf, initialState = {}) {
+  insight('plan98', elf)
+  teach(elf, initialState)
 
   return {
-    link: table,
-    learn: learn.bind(this, table),
-    draw: draw.bind(this, table),
-    style: style.bind(this, table),
-    when: when.bind(this, table),
-    teach: teach.bind(this, table),
+    // link is a human that is permitted to be an elf per order of the deku tree
+    link: elf,
+    elf: elf,
+    table: elf,
+    root: elf,
+    tag: elf,
+    selector: elf,
+    body: elf,
+
+    // link has an ear to listen to the peoples of zora, goron, korok, kokiri, rito, gerudo, hyrule, et al
+    ear: learn.bind(this, elf),
+    learn: learn.bind(this, elf),
+    get: learn.bind(this, elf),
+    read: learn.bind(this, elf),
+    model: learn.bind(this, elf),
+    object: learn.bind(this, elf),
+    subject: learn.bind(this, elf),
+    predicate: learn.bind(this, elf),
+
+    // link has a head to keep all his facts straight in the current moment in time
+    head: draw.bind(this, elf),
+    draw: draw.bind(this, elf),
+    render: draw.bind(this, elf),
+    view: draw.bind(this, elf),
+
+    // link has an eye through which to spy reality
+    eye: style.bind(this, elf),
+    style: style.bind(this, elf),
+    flair: style.bind(this, elf),
+    skin: style.bind(this, elf),
+    fashion: style.bind(this, elf),
+
+    // link has a hand to move the pieces into place at his command
+    hand: when.bind(this, elf),
+    when: when.bind(this, elf),
+    on: when.bind(this, elf),
+    listen: when.bind(this, elf),
+
+    // link has a mouth that he lets others stuff with their hopes and dreams
+    mouth: teach.bind(this, elf),
+    teach: teach.bind(this, elf),
+    set: teach.bind(this, elf),
+    write: teach.bind(this, elf),
+    update: teach.bind(this, elf),
+    put: teach.bind(this, elf),
+    post: teach.bind(this, elf),
+    patch: teach.bind(this, elf),
+    delete: teach.bind(this, elf),
   }
 }
 
@@ -291,15 +333,15 @@ export function unsubscribe(fun) {
   }
 }
 
-export function listen(type, table, handler = () => null) {
+export function listen(type, elf, handler = () => null) {
   const callback = (event) => {
     if(
       event.target &&
       event.target.matches &&
-      event.target.matches(table)
+      event.target.matches(elf)
     ) {
 
-      insight('plan98:listen:'+type, table)
+      insight('plan98:listen:'+type, elf)
       handler.call(this, event);
     }
   };
@@ -308,12 +350,12 @@ export function listen(type, table, handler = () => null) {
   document.addEventListener(type, callback, options);
 
   if(observableEvents.includes(type)) {
-    observe(table);
+    observe(elf);
   }
 
   return function unlisten() {
     if(type === CREATE_EVENT) {
-      disregard(table);
+      disregard(elf);
     }
 
     document.removeEventListener(type, callback, options);
@@ -322,13 +364,13 @@ export function listen(type, table, handler = () => null) {
 
 let tables = []
 
-function observe(table) {
-  tables = [...new Set([...tables, table])];
-  maybeCreateReactive([...document.querySelectorAll(table)])
+function observe(elf) {
+  tables = [...new Set([...tables, elf])];
+  maybeCreateReactive([...document.querySelectorAll(elf)])
 }
 
-function disregard(table) {
-  const index = tables.indexOf(table);
+function disregard(elf) {
+  const index = tables.indexOf(elf);
   if(index >= 0) {
     tables = [
       ...tables.slice(0, index),
@@ -420,23 +462,23 @@ function createStore(initialState = {}, subscribe = () => null) {
   };
 
   return {
-    set: function(table, knowledge, nuance) {
+    set: function(elf, knowledge, nuance) {
 
       const merge = typeof nuance === 'function'
         ? nuance
         : nuance.mergeHandler.apply(null, nuance.parameters)
-      const wisdom = merge(state[table] || {}, knowledge);
+      const wisdom = merge(state[elf] || {}, knowledge);
 
       state = {
         ...state,
-        [table]: wisdom
+        [elf]: wisdom
       };
 
-      subscribe(table);
+      subscribe(elf);
     },
 
-    get: function(table) {
-      return state[table];
+    get: function(elf) {
+      return state[elf];
     }
   }
 }

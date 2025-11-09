@@ -190,6 +190,14 @@ const commands = {
     loadPath('/app/plan98-wallet')
     return 'Success!'
   },
+  'focus': () => {
+    window.location.href = '/app/time-machine'
+    return 'Success!'
+  },
+  'memex': () => {
+    window.location.href = '/app/time-machine'
+    return 'Success!'
+  },
   'draw': () => {
     window.location.href = '/app/sketch-pad'
     return 'Success!'
@@ -420,7 +428,7 @@ const commands = {
 
       You are at work. You are Serious. You are going to get things done and then you can go home and be Silly.
 
-      Focus.
+      Focus. memex.
 
       The shell. You're in the shell. Why? What were you doing here.
 

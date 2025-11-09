@@ -1,5 +1,11 @@
 /*
 
+// the tanka of the tiniest violin
+
+// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+
+////
+
 
 
 
@@ -31,7 +37,7 @@
    {&!    {&!    {&!    {&!    {&!    {&!    {&!
     #      #      #      #      #      #      #
 
-  Silly  Sally  Sully  Shelly  Sol   Wally   Thesillonious Caramera
+  Silly  Sally  Sully  Shelly  Sonny   Wally   Thesillonious Caramera
   1998   1970   2077   2038    2012  1888    now
 
 

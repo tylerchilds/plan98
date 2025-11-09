@@ -1,4 +1,11 @@
-import { string, Elf, Saga, Expect } from '@plan98/types'
+// the tanka of the tiniest violin
+
+// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+
+////
+
+import Self from '@silly/elf'
+import Saga from "@silly/saga"
 
 function crawlerTemplate(html) {
   return `
@@ -15,13 +22,14 @@ function crawlerTemplate(html) {
   `
 }
 
-const $ = Elf('saga-crawler')
+const $ = Self('saga-crawler')
 
 $.draw(() => null, {
   beforeUpdate(target) {
     if(target.initialized) return
     target.initialized = true
     const src = target.getAttribute('src') || '/public/cdn/sillyz.computer/en-us/saga-crawler.saga'
+    const next = target.getAttribute('next') || '/app/shirt-flicks'
     const duration = target.getAttribute('duration')
 
     requestIdleCallback(() => {
@@ -38,8 +46,9 @@ $.draw(() => null, {
       }).finally(() => {
         try {
           const screenplay = Saga(file)
-          Expect(typeof screenplay, string)
-          target.innerHTML = crawlerTemplate(screenplay)
+          if(typeof screenplay === 'string') {
+            target.innerHTML = crawlerTemplate(screenplay)
+          }
         } catch(e) {
           target.innerHTML = e.message
         }

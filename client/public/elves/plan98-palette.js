@@ -70,6 +70,12 @@ function maybe(id, value, note) {
   }
 }
 
+// the tanka of the tiniest violin
+
+// Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+
+////
+
 function yes(id, note) {
   //attack(note)
   mark(id, note)
