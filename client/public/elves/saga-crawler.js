@@ -31,11 +31,13 @@ function crawlerTemplate(html) {
 
 const $ = Self('saga-crawler')
 
+const DEFAULT_SRC = '/public/cdn/sillyz.computer/en-us/saga-crawler.saga'
+
 $.draw(() => null, {
   beforeUpdate(target) {
     if(target.initialized) return
     target.initialized = true
-    const src = target.getAttribute('src') || '/public/cdn/sillyz.computer/en-us/saga-crawler.saga'
+    const src = target.getAttribute('src') || DEFAULT_SRC
     const next = target.getAttribute('next') || '/app/shirt-flicks'
     const duration = target.getAttribute('duration')
 
@@ -69,9 +71,16 @@ function go(event) {
   window.top.location.href = next
 }
 
+function edit(event) {
+  const src = event.target.closest($.link).getAttribute('src') || DEFAULT_SRC
+  const editSrc = '/app/paper-pocket?rom=silly-script&src=' + src
+  window.top.location.href = editSrc
+}
+
+
 $.when('animationend', 'xml-html', go)
 
-$.when('click', '[data-wallet]', go)
+$.when('click', '[data-wallet]', edit)
 
 
 $.style(`

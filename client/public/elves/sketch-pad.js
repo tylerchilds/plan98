@@ -134,6 +134,7 @@ function mount(target) {
           <button data-tooltip="Consider changing your current reality" data-escape>Escape to Local Context</button>
           <button data-tooltip="Consider changing our current reality" data-plan98>Escape to Global Context</button>
           <button data-tooltip="Consider saving all forms of reality" data-violin>Escape to Violin</button>
+          <button data-tooltip="Consider rebooting reality from scratch" data-prequel>Escape to Prequels</button>
           <hr>
           <button data-tooltip="Securely Enter Admin Area" data-admin>Admin</button>
           <hr>
@@ -363,6 +364,13 @@ $.hand('click', '[data-violin]', function  (event) {
   ////
 
 })
+
+$.hand('click', '[data-prequel]', function  (event) {
+  event.preventDefault()
+  window.location.href = '/app/hello-elvish?elf=saga-crawler'
+})
+
+
 
 function share(target) {
   const { viewMetadata } = $.ear()

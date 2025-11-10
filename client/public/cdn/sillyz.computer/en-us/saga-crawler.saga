@@ -47,3 +47,20 @@ Porlock turns around and leaves. The innkeeper, still polishing.
 
 @ Porlock
 > Goodbye
+
+# Int. Computer History Museum - IIW 41
+
+@ Silly
+> Oh, you want to see the Silly Stack?
+
+Silly fumbles through a stack of SILLY SCOPES
+
+@ Silly
+> Here's one! This is  my most advanced Self().
+
+<was-code
+src: /public/plan98.js
+style: height: 60vh;
+
+@ Silly
+> So, what'd you think?

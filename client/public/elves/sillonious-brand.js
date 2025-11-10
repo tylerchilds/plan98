@@ -41,7 +41,7 @@ TheLanding.Page is my personal blog
 
 const dns = {
   'sillyz.computer': {
-    elf: 'root-shell'
+    elf: 'sketch-pad'
   },
   'comedymap.org': {
     elf: 'comedy-network'
@@ -65,7 +65,7 @@ const dns = {
     elf: 'time-machine'
   },
   'ncity.executiontime.pub': {
-    elf: 'generic-park'
+    elf: 'root-shell'
   },
 }
 

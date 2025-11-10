@@ -9,5 +9,5 @@ import elf from '@silly/elf'
 const $ = elf('root-shell')
 
 $.draw(() => {
-  return `<ur-shell src="/app/saga-crawler?next=/app/sketch-pad"></ur-shell>`
+  return `<ur-shell src="/app/saga-crawler?next=/app/generic-park"></ur-shell>`
 })
