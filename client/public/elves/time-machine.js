@@ -2003,7 +2003,7 @@ const studios = {
   [eventTypes.sketch]: function(draft) {
     const src = this && this.path ? `src="${this.path}"` : ''
     return `
-      <joke-book id="${draft.id}" ${src}></joke-book>
+      <sketch-pad id="${draft.id}" ${src}></sketch-pad>
     `
   },
   [eventTypes.xanadoc]: function(draft) {

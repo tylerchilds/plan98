@@ -213,7 +213,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <iframe src="/admin/"></iframe>
+          <iframe src="/app/time-machine"></iframe>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>

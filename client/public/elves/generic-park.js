@@ -87,7 +87,7 @@ const $ = elf('generic-park', {
   suggestions: [],
   suggesttionsLength: 0,
   filter: '',
-	celestials: ['water','dark', 'island-1'],
+	celestials: ['water',/*'dark'*/, 'island-1'],
 	'island-1': aPlane({z: '0', y: -1, yaw: '-90'}, { color: 'mediumseagreen',  width: '100', height: '100' }),
 	water: aPlane({z: '-4', y: -2, yaw: '-90'}, { color: 'dodgerblue',  width: '5000', height: '5000' }),
 	dark: aSky({}, { color: 'mediumpurple' }),
@@ -119,6 +119,9 @@ $.draw((target) => {
           ${library(null)}
         </div>
       </div>
+    </div>
+    <div class="background">
+      <video-feed></video-feed>
     </div>
     <a-scene>
       <a-camera rotation="0 0 0" position="0 1.6 0">

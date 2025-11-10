@@ -1,4 +1,5 @@
 import Self from '@plan98/elf'
+import { showModal } from './plan98-modal.js'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { updateDraft } from './time-machine.js'
@@ -9,7 +10,7 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256]
-const overlays = { color: 'color' }
+const overlays = { color: 'color', share: 'share' }
 
 const $ = Self('sketch-pad', {
   strokeHistory: [],
@@ -92,16 +93,6 @@ function update(target) {
       activeItem.classList.add('active')
     }
   }
-
-  { // recover icons from the virtual dom
-    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
-      const iconParent = ogIcon.parentNode
-      const icon = document.createElement('sl-icon')
-      icon.name = ogIcon.name
-      ogIcon.remove()
-      iconParent.appendChild(icon)
-    })
-  }
 }
 
 function mount(target) {
@@ -112,8 +103,6 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="palette-items" data-menu="edit">
-          <button data-new data-tooltip="Wipe the board clean">New</button>
-          <hr>
           <button data-tooltip="Change the stroke color" data-stroke-color><span class="color-sample"></span>Color</button>
           <button data-tooltip="Toggle thicknoid options" data-drawer="size">Size</button>
           <div data-pocket="size">
@@ -125,6 +114,7 @@ function mount(target) {
           <button data-tooltip="backstep reality by a single step" data-undo>Undo</button>
           <button data-tooltip="tock the reality clock by a tick"  data-redo>Redo</button>
           <hr>
+          <button data-tooltip="Collaborate across the planet!"  data-share>Share</button>
           <button data-tooltip="Save this sketck to your most recent memex" data-save>Save</button>
           <button data-tooltip="Seek help from the premium gods" data-help>
             Help
@@ -137,7 +127,7 @@ function mount(target) {
           <button data-tooltip="What is a mobile device by a pocket sized imagination" data-mobile>Quit to Mobile</button>
           <button data-tooltip="A metaphor as timeless as the desk itself" data-desktop>Quit to Desktop</button>
           <button data-tooltip="For the gamers on the go with all the buttons broke" data-handheld>Quit to Handheld</button>
-          <button data-tooltip="For when you're not alone and want o jam through phones" data-console>Quit to Console</button>
+          <button data-tooltip="For when you're not alone and want t/o jam through phones" data-console>Quit to Console</button>
           <hr>
           <button data-tooltip="Consider changing your current reality" data-escape>Escape to Local Context</button>
           <button data-tooltip="Consider changing our current reality" data-plan98>Escape to Global Context</button>
@@ -145,13 +135,18 @@ function mount(target) {
           <hr>
           <button data-tooltip="Securely Enter Admin Area" data-admin>Admin</button>
           <hr>
-          <button data-tooltip="If you know any unix systems at all, be amused" data-crichton>Mike Backes Edition</button>
+          <button data-tooltip="If you know any unix systems at all, be amused; the elves are in the computer-- in the computer!!!" data-crichton>Mike Backes Edition (Zoolander, click here!)</button>
+          <hr>
+          <button data-new data-tooltip="Wipe the board clean">New</button>
         </div>
       </div>
     </div>
     <div class="overlays">
       <div class="overlay-color">
         <plan98-palette></plan98-palette>
+      </div>
+      <div class="overlay-share">
+        ${share(target)}
       </div>
     </div>
   `
@@ -227,6 +222,14 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
+$.when('click', '[data-root]', (event) => {
+  $.teach({
+    overlay: null,
+    viewMetadata: false,
+    activeMenu: null
+  })
+})
+
 $.hand('input', 'plan98-palette', (event) => {
   const { color } = event.detail
   $.mouth({ color, overlay: 'none' })
@@ -244,6 +247,15 @@ $.hand('click', '[data-stroke-color]', function  (event) {
     activeMenu: null,
   })
 })
+
+$.hand('click', '[data-share]', function  (event) {
+  event.preventDefault()
+  $.mouth({
+    overlay: overlays.share,
+    activeMenu: null,
+  })
+})
+
 
 $.hand('click', '[data-drawer]', function  (event) {
   event.preventDefault()
@@ -348,18 +360,117 @@ $.hand('click', '[data-violin]', function  (event) {
 
 })
 
+function share(target) {
+  const { viewMetadata } = $.ear()
+  const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
+  const copyId = self.crypto.randomUUID()
+
+  const actionArea = `
+    <div class="action-area">
+      <div class="action-bar">
+        <button data-copy="${copyId}" class="standard-button -round -large">
+          <sl-icon name="copy"></sl-icon>
+        </button>
+      </div>
+      <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
+    </div>
+  `
+
+  return `
+    <div class="overlay-background">
+      <div class="form-card">
+        <div class="draft-template">
+          <div class="draft-header">
+            <div style="display: grid; place-content: start">
+              <button class="standard-button bias-generic -small -round" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
+                <sl-icon name="gear-fill"></sl-icon>
+              </button>
+            </div>
+            ${actionArea}
+            <div style="display: grid; place-content: end">
+              <button data-root class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
+          </div>
+
+          <div class="memex-body draft-body">
+            <div class="overlay-background">
+              <div style="padding: 51px; height: 100%; display: flex;">
+                <qr-code src="${shareLink}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+              </div>
+            </div>
+          </div>
+          <div class="draft-metadata">
+            <div class="overlay-background" style="overflow: auto;">
+              <div class="wizard">
+                <label class="field">
+                  <span class="label">Description</span>
+                  <textarea data-bind="memex" name="description" style="height: 12rem;" value="${escapeHyperText('ok')}"></textarea>
+                </label>
+                <label class="field">
+                  <span class="label">Host</span>
+                  <input data-bind="draft" name="host" value="${escapeHyperText('okay') || ''}" />
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="draft-footer">
+            <input class="standard-input -small" data-bind="memex"  name="title" value="${escapeHyperText('okay')}" type="text"/>
+            <button data-action="memex" class="standard-button bias-positive -small" type="submit">
+              <sl-icon name="check-lg"></sl-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}
+
+$.hand('click', '[data-copy]', async (event) => {
+  const { copy } = event.target.dataset
+  const target = event.target.closest($.link).querySelector(`[id="${copy}"]`)
+
+  try {
+    // Modern approach using Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(target.textContent)
+      toast("Copied to clipboard")
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = target.textContent
+      textArea.style.position = "fixed"
+      textArea.style.left = "-999999px"
+      textArea.style.top = "-999999px"
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+
+      try {
+        document.execCommand('copy')
+        toast("Copied to clipboard")
+      } catch (err) {
+        console.error('Fallback: Failed to copy', err)
+        toast("Failed to copy")
+      }
+
+      document.body.removeChild(textArea)
+    }
+  } catch (err) {
+    console.error('Failed to copy text: ', err)
+    toast("Failed to copy")
+  }
+})
+
+
+$.hand('click', '[data-share]', ({ target }) => share(target))
 $.hand('click', '[data-save]', ({ target }) => publish(target))
 
-function publish (target) {
-  const { strokeHistory, strokeRevisory } = $.ear()
+function snapshot(target) {
   const { canvas, src } = engine(target)
-  // Get current date and time for filename
-  const now = new Date();
-  const timestamp = now.toJSON()
-
-  // Convert canvas to data URL with JPEG format
+  const { strokeHistory, strokeRevisory } = $.ear()
   const dataURL = canvas.toDataURL('image/jpeg');
-
   const byteCharacters = atob(dataURL.split(',')[1]);
   const byteNumbers = new Array(byteCharacters.length);
   for (let i = 0; i < byteCharacters.length; i++) {
@@ -367,9 +478,13 @@ function publish (target) {
   }
   const byteArray = new Uint8Array(byteNumbers);
 
+  const now = new Date();
+  const timestamp = now.toJSON()
   const image = `/private/${$.link}/${timestamp}.jpg`
 
   const data = { src: image, strokeHistory, strokeRevisory }
+
+  console.log({ data })
 
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
@@ -378,17 +493,24 @@ function publish (target) {
     } else {
       throw new Error('Upload failed')
     }
-  }).catch(error => {
-    console.warn('Server upload failed, falling back to download', error);
+  })
+}
 
-    // Fallback: create a download link
-    const link = document.createElement('a');
-    link.download = `${timestamp}.jpg`;
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  });
+function publish (target) {
+  const { canvas, src } = engine(target)
+  // Get current date and time for filename
+  const now = new Date();
+  const timestamp = now.toJSON()
+
+  // Convert canvas to data URL with JPEG format
+  const dataURL = canvas.toDataURL('image/jpeg');
+  // Fallback: create a download link
+  const link = document.createElement('a');
+  link.download = `${timestamp}.jpg`;
+  link.href = dataURL;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 
   $.mouth({ activeMenu: null })
 }
@@ -457,7 +579,7 @@ function redraw(target) {
   })
 
   if(src) {
-    publish(target)
+    snapshot(target)
   }
 }
 
@@ -595,10 +717,6 @@ function end (e) {
   points = []
 
   lineWidth = 0
-
-  if(src) {
-    publish(e.target)
-  }
 };
 
 const paneByTarget = (target) => {
@@ -693,6 +811,10 @@ $.eye(`
     -ms-user-select: none; /* Internet Explorer/Edge */
   }
 
+  & canvas {
+    height: 100%;
+  }
+
   &[data-touching="true"] .palette {
     pointer-events: none;
     opacity: .15;
@@ -768,6 +890,7 @@ $.eye(`
     max-height: calc(100vh - 40px);
     max-width: calc(100vw - 40px);
     overflow: auto;
+    padding-bottom: 80%;
   }
 
   & [data-menu-target].active + .palette-items {
@@ -805,13 +928,24 @@ $.eye(`
   `).join('')}
 
   & .overlays {
-    display: none;
+    display: grid;
     position: absolute;
     inset: 0;
+    pointer-events: none;
   }
 
-  &[data-overlay="color"] .overlays {
-    display: grid;
+  & .overlays > * {
+    display: none;
+  }
+
+  &[data-overlay="share"] .overlays > .overlay-share,
+  &[data-overlay="color"] .overlays > .overlay-color {
+    display: block;
+    pointer-events: all;
+    position: absolute;
+    inset: 0;
+    z-index: 100;
+    background: white;
   }
 
   &[data-overlay="color"] .palette {
@@ -826,7 +960,169 @@ $.eye(`
     display: inline-block;
     margin-right: .5rem;
   }
+
+  & .draft-header {
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-area: header;
+    border-top: 1px solid rgba(0, 0, 0,.2);
+    background: rgba(255,255,255,.85);
+    padding: 4px;
+    gap: .5rem;
+    z-index: 10;
+  }
+
+  & .draft-body {
+    grid-area: body;
+  }
+
+  & .draft-metadata {
+    display: none;
+    grid-area: body;
+    z-index: 5;
+    background: white;
+    overflow: auto;
+  }
+
+  & .view-metadata {
+    display: none;
+    padding: .5rem;
+    height: 100%;
+    z-index: 5;
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), white;
+    grid-area: body;
+  }
+
+  &[data-show-metadata="true"] .draft-metadata,
+  &[data-show-metadata="true"] .view-metadata {
+    display: block;
+  }
+
+  &[data-show-metadata="true"] .action-area {
+    display: none;
+  }
+
+  & .draft-footer {
+    display: grid;
+    grid-area: footer;
+    padding: 4px .5rem;
+    background: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.65);
+    display: grid;
+    gap: .5rem;
+    z-index: 10;
+    grid-template-columns: 1fr auto;
+  }
+
+  & .draft-content {
+    grid-area: body;
+    width: 100%;
+    resize: none;
+    border: 1px solid rgba(0,0,0,.15);
+    padding: .5rem;
+  }
+
+  & .draft-title {
+    color: rgba(0,0,0,.65);
+    padding: .25rem .5rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  & .time-form {
+    display: flex;
+    gap: .5rem;
+    padding: .5rem;
+    flex-wrap: wrap;
+    place-content: end;
+  }
+
+  & .time-form-section {
+    display: flex;
+    gap: .25rem;
+  }
+
+  & .action-area {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 5;
+    padding: .5rem;
+    gap: .5rem;
+    display: flex;
+    flex-direction: column;
+  }
+
+  & .share-link-copyable-url {
+    white-space: nowrap;
+    overflow-x: auto;
+    max-width: 320px;
+    margin: 0 auto;
+    display: block;
+  }
+
+  & .action-bar {
+    text-align: center;
+  }
+
+  & .action-bar > button {
+    pointer-events: all;
+  }
+
+  & .overlay-background {
+    display: block;
+    height: 100%;
+    background: white;
+    backdrop-filter: blur(2px);
+    overflow: hidden;
+  }
+
+  & .draft-template {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
+    max-height: 100%;
+    height: 100%;
+    grid-template-areas: "header" "body" "footer";
+    grid-template-columns: 1fr auto;
+  }
+
+  & .form-card {
+    display: grid;
+    background: white;
+
+    box-shadow:
+      0 0 6px 6px rgba(0,0,0,.05),
+      0 0 3px 3px rgba(0,0,0,.10),
+      0 0 1px 1px rgba(0,0,0,.15);
+
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .draft-footer,
+  & [data-toggle-metadata] {
+    display: none;
+  }
 `)
+
+$.hand('click', '[data-toggle-metadata]', (event) => {
+  {
+    const { viewMetadata } = $.ear()
+    $.mouth({ viewMetadata: !viewMetadata })
+  }
+  {
+    const { viewMetadata } = $.ear()
+    event.target.dataset.toggleMetadata = viewMetadata ? 'on':'off'
+    const root = event.target.closest($.link)
+    root.dataset.showMetadata = viewMetadata
+  }
+})
+
 
 /*
 $.hand('pointerdown', '*', (event) => {
@@ -837,6 +1133,21 @@ $.hand('pointerdown', '*', (event) => {
   $.mouth({ activeMenu: null })
 })
 */
+
+function escapeHyperText(text = '') {
+  if(!text) return ''
+  return text.replace(/[&<>'"]/g, 
+    actor => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    }[actor])
+  )
+}
+
+
 
 $.hand('click', '[data-menu-target]', (event) => {
   event.preventDefault()
