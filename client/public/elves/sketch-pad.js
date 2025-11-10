@@ -137,6 +137,8 @@ function mount(target) {
           <hr>
           <button data-tooltip="If you know any unix systems at all, be amused; the elves are in the computer-- in the computer!!!" data-crichton>Mike Backes Edition (Zoolander, click here!)</button>
           <hr>
+          <img src="/public/cdn/sillyz.computer/self-portrait.jpeg">
+          <hr>
           <button data-new data-tooltip="Wipe the board clean">New</button>
         </div>
       </div>
@@ -854,6 +856,8 @@ $.eye(`
   & .palette button {
     background: transparent;
     color: rgba(255,255,255,.85);
+    position: relative;
+    z-index: 2;
     border: none;
     padding: 1rem;
     font-size: 1rem;
@@ -883,7 +887,8 @@ $.eye(`
 
   & .palette-items {
     display: none;
-    background: rgba(0,0,0,1);
+    background: black;
+    z-index: 3;
     position: absolute;
     top: 40px;
     left: 40px;
@@ -894,7 +899,9 @@ $.eye(`
   }
 
   & [data-menu-target].active + .palette-items {
-    display: block;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
   }
 
   & .palette-items  button {
@@ -908,6 +915,7 @@ $.eye(`
     gap: .5rem;
     text-align: left;
     display: block;
+    background: rgba(255,255,255,.1);
   }
 
   & [data-pocket] {
