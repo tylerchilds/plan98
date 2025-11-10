@@ -9,7 +9,7 @@ import { get, put } from './plan98-wallet.js'
 let lineWidth = 0
 let isMousedown = false
 let points = []
-const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256]
+const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
 const overlays = { color: 'color', share: 'share' }
 
 const $ = Self('sketch-pad', {
@@ -890,7 +890,7 @@ $.eye(`
     max-height: calc(100vh - 40px);
     max-width: calc(100vw - 40px);
     overflow: auto;
-    padding-bottom: 80%;
+    padding-bottom: 80vh;
   }
 
   & [data-menu-target].active + .palette-items {
