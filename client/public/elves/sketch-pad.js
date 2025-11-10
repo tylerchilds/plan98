@@ -105,10 +105,12 @@ function mount(target) {
         <div class="palette-items" data-menu="edit">
           <button data-tooltip="Change the stroke color" data-stroke-color><span class="color-sample"></span>Color</button>
           <button data-tooltip="Toggle thicknoid options" data-drawer="size">Size</button>
-          <div data-pocket="size">
-            ${thicknoids.map(x => `
-              <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">${x}</button>
-            `).join('')}
+          <div>
+            <div data-pocket="size">
+              ${thicknoids.map(x => `
+                <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">${x}</button>
+              `).join('')}
+            </div>
           </div>
           <hr>
           <button data-tooltip="backstep reality by a single step" data-undo>Undo</button>
