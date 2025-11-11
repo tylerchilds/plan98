@@ -341,7 +341,7 @@ function mount(target) {
 }
 
 $.when('click', '[data-help]', function (event) {
-  window.location.href = "/cdn/sillyz.computer/index.md"
+  window.location.href = "/app/mark-down?src=/public/cdn/sillyz.computer/index.md"
 })
 
 

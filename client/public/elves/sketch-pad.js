@@ -3,6 +3,7 @@ import { showModal } from './plan98-modal.js'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { updateDraft } from './time-machine.js'
+import { checkButton, checkAxis } from './debug-gamepads.js'
 
 import { get, put } from './plan98-wallet.js'
 
@@ -10,13 +11,33 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
-const overlays = { color: 'color', share: 'share' }
+const overlays = { chat: 'chat', color: 'color', share: 'share' }
 
+const porlock = [
+  'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
+  'Now, Alph is a river that slips as it slithers,',
+  'while time is adjacent to space ever so nascent,',
+  'that water flows upwards and downwards at once.',
+  'A story unfolded as it was tolded, a bardly dulcimer,',
+  'Beginning unkindly, the realms sent war to her,',
+  'Assuming the jester for heightened bemusement, she rang',
+  'whole kingdoms now circused in total amusement, she sang',
+  'Over and over she keeps thwarting their efforts,',
+  "How? Space is a construct, she's throwing a concert,",
+  'that fits in her pocket, on paper as finite as self,',
+  'it sounds somewhat silly: time is a gift of the elves.',
+]
+
+const modes = {
+  welcome: 'welcome',
+}
 const $ = Self('sketch-pad', {
+  activeMenu: null,
+  mode: modes.welcome,
   strokeHistory: [],
   strokeRevisory: [],
-  background: '#54796d',
-  color: 'white',
+  background: 'lemonchiffon',
+  color: 'dodgerblue',
   drawer: 'size',
   thickness: 4
 })
@@ -32,6 +53,32 @@ function engine(target) {
     src: root.getAttribute('src')
   }
 }
+
+function audioFactory(url) {
+  const audioPool = [];
+  const poolSize = 3;
+  let poolIndex = 0;
+
+  // Initialize pool
+  for (let i = 0; i < poolSize; i++) {
+      const audio = new Audio(url);
+      audio.preload = 'auto';
+      audio.load();
+      audioPool.push(audio);
+  }
+
+  return function play() {
+      const sound = audioPool[poolIndex];
+      sound.currentTime = 0; // Reset to start
+      sound.play().catch(e => console.log('Play failed:', e));
+
+      // Cycle through pool
+      poolIndex = (poolIndex + 1) % poolSize;
+  }
+}
+
+const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/a.mp3')
+const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/b.mp3')
 
 $.head(target => {
   if(target.innerHTML) {
@@ -103,52 +150,177 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="palette-items" data-menu="edit">
-          <button data-tooltip="Change the stroke color" data-stroke-color><span class="color-sample"></span>Color</button>
-          <button data-tooltip="Toggle thicknoid options" data-drawer="size">Size</button>
+          <button data-stroke-color class="bookended-label">
+            <span class="color-sample"></span>
+            <span>Color</span>
+            <span data-tooltip="Change the stroke color">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-drawer="size">
+            Size
+            <span data-tooltip="Toggle thicknoid options">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <div>
             <div data-pocket="size">
               ${thicknoids.map(x => `
-                <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">${x}</button>
+                <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
+                  ${x}
+                </button>
               `).join('')}
             </div>
           </div>
           <hr>
-          <button data-tooltip="backstep reality by a single step" data-undo>Undo</button>
-          <button data-tooltip="tock the reality clock by a tick"  data-redo>Redo</button>
-          <hr>
-          <button data-tooltip="Collaborate across the planet!"  data-share>Share</button>
-          <button data-tooltip="Save this sketck to your most recent memex" data-save>Save</button>
-          <button data-tooltip="Seek help from the premium gods" data-help>
-            Help
+          <button data-undo>
+            Undo
+            <span data-tooltip="backstep reality by a single step">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
           </button>
-          <button data-tooltip="Don't ask where your mind exists" data-journal>Quit</button>
+          <button data-redo>
+            Redo
+            <span data-tooltip="tock the reality clock by a tick">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <hr>
-          <button data-tooltip="Where's ur stuff at and in" data-wallet>Quit to Wallet</button>
-          <button data-tooltip="Always question everything" data-shell>Quit to Shell</button>
-          <button data-tooltip="Surf the files in the system" data-files>Quit to Files</button>
-          <button data-tooltip="What is a mobile device by a pocket sized imagination" data-mobile>Quit to Mobile</button>
-          <button data-tooltip="A metaphor as timeless as the desk itself" data-desktop>Quit to Desktop</button>
-          <button data-tooltip="For the gamers on the go with all the buttons broke" data-handheld>Quit to Handheld</button>
-          <button data-tooltip="For when you're not alone and want t/o jam through phones" data-console>Quit to Console</button>
+          <button data-share>
+            Share
+            <span data-tooltip="Collaborate across the planet!">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-save>
+            Save
+            <span data-tooltip="Save this sketck to your most recent memex">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-buy>
+            Purchase
+            <span data-tooltip="Seek help from the premium gods">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-help>
+            Help
+            <span data-tooltip="Seek help from chat">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-journal>
+            Quit
+            <span data-tooltip="Don't ask where your mind exists">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <hr>
-          <button data-tooltip="Consider changing your current reality" data-escape>Escape to Local Context</button>
-          <button data-tooltip="Consider changing our current reality" data-plan98>Escape to Global Context</button>
-          <button data-tooltip="Consider saving all forms of reality" data-violin>Escape to Violin</button>
-          <button data-tooltip="Consider rebooting reality from scratch" data-prequel>Escape to Prequels</button>
+          <button data-wallet>
+            Quit to Wallet
+            <span data-tooltip="Where's ur stuff at and in">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-shell>
+            Quit to Shell
+            <span data-tooltip="Always question everything">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-files>
+            Quit to Files
+            <span data-tooltip="Surf the files in the system">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-mobile>
+            Quit to Mobile
+            <span data-tooltip="What is a mobile device by a pocket sized imagination">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-desktop>
+            Quit to Desktop
+            <span data-tooltip="A metaphor as timeless as the desk itself">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-handheld>
+            Quit to Handheld
+            <span data-tooltip="For the gamers on the go with all the buttons broke">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-console>
+            Quit to Console
+            <span data-tooltip="For when you're not alone and want t/o jam through phones">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <hr>
-          <button data-tooltip="Securely Enter Admin Area" data-admin>Admin</button>
+          <button data-escape>
+            Escape to Local Context
+            <span data-tooltip="Consider changing your current reality">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-plan98>
+            Escape to Global Context
+            <span data-tooltip="Consider changing our current reality">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-violin>
+            Escape to Violin
+            <span data-tooltip="Consider saving all forms of reality">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-prequel>
+            Escape to Prequels
+            <span data-tooltip="Consider rebooting reality from scratch">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <hr>
-          <button data-tooltip="If you know any unix systems at all, be amused; the elves are in the computer-- in the computer!!!" data-crichton>Mike Backes Edition (Zoolander, click here!)</button>
+          <button data-admin>
+            Admin
+            <span data-tooltip="Securely Enter Admin Area">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
+          <button data-crichton>
+            Mike Backes Edition
+            <span data-tooltip="If you know any unix systems at all, be amused; the elves are in the computer-- in the computer!!!">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <hr>
           <img src="/public/cdn/sillyz.computer/self-portrait.jpeg">
           <hr>
-          <button data-new data-tooltip="Wipe the board clean">New</button>
+          <button data-new>
+            New
+            <span data-tooltip="Wipe the board clean">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
         </div>
       </div>
     </div>
     <div class="overlays">
       <div class="overlay-color">
         <plan98-palette></plan98-palette>
+      </div>
+      <div class="overlay-chat">
+        <cool-chat></cool-chat>
+        <div class="action-wrapper">
+          <button data-close class="standard-button bias-generic -small -round" type="reset">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>
+        </div>
       </div>
       <div class="overlay-share">
         ${share(target)}
@@ -186,12 +358,15 @@ function mount(target) {
           if(data.strokeRevisory) {
             strokeRevisory = data.strokeRevisory
           }
-          $.teach({ strokeHistory, strokeRevisory })
+          $.mouth({ strokeHistory, strokeRevisory })
           redraw(target)
         })
       }
     })
   }
+
+  const id = target.id
+  requestAnimationFrame(systemLoop.bind({ id }))
 }
 
 const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
@@ -228,7 +403,7 @@ function drawOnCanvas (target, stroke) {
 }
 
 $.when('click', '[data-root]', (event) => {
-  $.teach({
+  $.mouth({
     overlay: null,
     viewMetadata: false,
     activeMenu: null
@@ -240,9 +415,25 @@ $.hand('input', 'plan98-palette', (event) => {
   $.mouth({ color, overlay: 'none' })
 })
 
-$.hand('click', '[data-help]', function  (event) {
+$.hand('click', '[data-buy]', function  (event) {
   event.preventDefault()
   window.location.href = "/?world=thelanding.page"
+})
+
+$.hand('click', '[data-close]', function  (event) {
+  event.preventDefault()
+  $.mouth({
+    overlay: null,
+    activeMenu: null,
+  })
+})
+
+$.hand('click', '[data-help]', function  (event) {
+  event.preventDefault()
+  $.mouth({
+    overlay: overlays.chat,
+    activeMenu: null,
+  })
 })
 
 $.hand('click', '[data-stroke-color]', function  (event) {
@@ -924,8 +1115,18 @@ $.eye(`
     padding: .5rem;
     gap: .5rem;
     text-align: left;
-    display: block;
     background: rgba(255,255,255,.1);
+    display: grid;
+    grid-template-columns: 1fr auto;
+  }
+
+  & .palette-items  button > [data-tooltip] {
+    pointer-events: all;
+  }
+
+  & .palette-items button.bookended-label {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
   }
 
   & [data-pocket] {
@@ -956,6 +1157,7 @@ $.eye(`
     display: none;
   }
 
+  &[data-overlay="chat"] .overlays > .overlay-chat,
   &[data-overlay="share"] .overlays > .overlay-share,
   &[data-overlay="color"] .overlays > .overlay-color {
     display: block;
@@ -1126,7 +1328,44 @@ $.eye(`
   & [data-toggle-metadata] {
     display: none;
   }
+
+  & .action-wrapper {
+    position: absolute;
+    top: 0;
+    right: 0;
+    place-self: start;
+    pointer-events: none;
+    padding: 4px;
+    z-index: 2000;
+  }
+
+  & [data-close] * {
+    pointer-events: none;
+  }
 `)
+
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
 
 $.hand('click', '[data-toggle-metadata]', (event) => {
   {
@@ -1154,7 +1393,7 @@ $.hand('pointerdown', '*', (event) => {
 
 function escapeHyperText(text = '') {
   if(!text) return ''
-  return text.replace(/[&<>'"]/g, 
+  return text.replace(/[&<>'"]/g,
     actor => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -1174,3 +1413,176 @@ $.hand('click', '[data-menu-target]', (event) => {
   $.mouth({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
   event.stopImmediatePropagation()
 })
+
+const lastFrame = {
+  a: false,
+  b: false,
+  x: false,
+  y: false,
+  down: false,
+  up: false,
+  left: false,
+  right: false,
+}
+
+function streamFactory(key, handler) {
+  return (value, id) => {
+    toggleSpam(key, value, () => {
+      handler(id)
+    })
+  }
+}
+
+const gamepadPorlockCycle = streamFactory('a', (id) => {
+  porlockCycle()
+})
+
+function porlockCycle() {
+  const { porlockIndex } = $.learn()
+  let next = porlockIndex + 1
+
+  if(next >= porlock.length) {
+    next = 0
+  }
+
+  playSwipeSound()
+  $.teach({ porlockIndex: next })
+}
+
+$.when('click', '[data-welcome-continue]', (event) => {
+  porlockCycle()
+})
+
+function porlockSkip() {
+  playSwipeSound()
+  $.teach({ mode: modes.system })
+}
+
+$.when('click', '[data-welcome-skip]', (event) => {
+  porlockSkip()
+})
+
+const gamepadPorlockSkip = streamFactory('b', (id) => {
+  porlockSkip()
+})
+
+function systemLoop(time) {
+  const { id } = this
+  const { activeMenu, overlay, mode, porlockIndex } = $.ear()
+  const player = {
+    a: checkButton(0, 0),
+    b: checkButton(0, 1),
+    x: checkButton(0, 3),
+    y: checkButton(0, 2),
+    lb: checkButton(0, 4),
+    rb: checkButton(0, 5),
+    lt: checkButton(0, 6),
+    rt: checkButton(0, 7),
+    select: checkButton(0, 8),
+    start: checkButton(0, 9),
+    ls: checkButton(0, 10),
+    rs: checkButton(0, 11),
+    up: checkButton(0, 12),
+    down: checkButton(0, 13),
+    left: checkButton(0, 14),
+    right: checkButton(0, 15),
+    os: checkButton(0, 16),
+  }
+
+  if(mode === modes.welcome) {
+    const streamOs = streamFactory('os', (id) => {
+
+      if(overlay === overlays.color) {
+        $.mouth({
+          overlay: null,
+          activeMenu: null,
+        })
+      } else {
+        $.mouth({
+          overlay: overlays.color,
+          activeMenu: null,
+        })
+      }
+      playSwipeSound()
+    })
+
+    const streamStart = streamFactory('start', (id) => {
+
+      if(overlay === overlays.chat) {
+        $.mouth({
+          overlay: null,
+          activeMenu: null,
+        })
+      } else {
+        $.mouth({
+          overlay: overlays.chat,
+          activeMenu: null,
+        })
+      }
+      playSwipeSound()
+    })
+
+
+    const streamSelect = streamFactory('select', (id) => {
+      if(activeMenu === "edit") {
+        $.mouth({
+          overlay: null,
+          activeMenu: null,
+        })
+      } else {
+        $.mouth({
+          overlay: null,
+          activeMenu: "edit",
+        })
+      }
+      playSwipeSound()
+    })
+
+    const streamUp = streamFactory('up', (id) => {
+      playStuckSound()
+      $.mouth({ porlockIndex: 0 })
+    })
+    const streamLeft = streamFactory('left', (id) => {
+      let next = porlockIndex - 1
+
+      if(next < 0) {
+        next = 0
+        playStuckSound()
+      } else {
+        playSwipeSound()
+      }
+
+      $.mouth({ porlockIndex: next })
+    })
+
+    const streamRight = streamFactory('right', (id) => {
+      let next = porlockIndex + 1
+
+      if(next >= porlock.length) {
+        next = porlock.length - 1
+        playStuckSound()
+      } else {
+        playSwipeSound()
+      }
+
+      $.mouth({ porlockIndex: next })
+    })
+    const streamDown = streamFactory('down', (id) => {
+      playStuckSound()
+      $.mouth({ porlockIndex: porlock.length - 1 })
+    })
+
+    gamepadPorlockCycle(player.a, id)
+    gamepadPorlockSkip(player.b, id)
+    streamOs(player.os, id)
+    streamStart(player.start, id)
+    streamSelect(player.select, id)
+    streamUp(player.up, id)
+    streamLeft(player.left, id)
+    streamRight(player.right, id)
+    streamDown(player.down, id)
+  }
+
+  requestAnimationFrame(systemLoop.bind(this))
+}
+

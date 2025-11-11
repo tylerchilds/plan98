@@ -11,6 +11,7 @@ $.when('mouseup', '[data-tooltip]', release)
 
 $.when('pointerdown', '[data-tooltip]', attack)
 $.when('pointerup', '[data-tooltip]', release)
+$.when('pointerleave', '[data-tooltip]', release)
 
 function attack(event) {
   tooltip(event, event.target.dataset.tooltip)
