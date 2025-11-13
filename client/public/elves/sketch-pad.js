@@ -1,4 +1,5 @@
 import Self from '@plan98/elf'
+import diffHTML from 'diffhtml'
 import { showModal } from './plan98-modal.js'
 import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
@@ -11,7 +12,7 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
-const overlays = { chat: 'chat', color: 'color', share: 'share' }
+const overlays = { preview: 'preview', chat: 'chat', color: 'color', share: 'share' }
 
 const porlock = [
   'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
@@ -32,6 +33,7 @@ const modes = {
   welcome: 'welcome',
 }
 const $ = Self('sketch-pad', {
+  preview: { alpha: null, beta: null, gamma: null },
   activeMenu: null,
   mode: modes.welcome,
   strokeHistory: [],
@@ -123,9 +125,21 @@ function update(target) {
   }
 
   {
-    const { overlay } = $.ear()
+    const { overlay, preview, image } = $.ear()
     if(target.overlay !== overlay) {
       target.dataset.overlay = overlay
+    }
+
+    if(overlay === overlays.preview) {
+      const node = target.querySelector('.overlay-preview')
+
+      diffHTML.innerHTML(node, `
+        <div class="background" style="height: 100%; transform-style: preserve-3d; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};">
+          <div class="foreground" style="height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotate-of-x-axis, 30deg)) rotateY(var(--rotate-of-y-axis, 30deg)) rotateZ(var(--rotate-of-z-axis, 30deg))">
+            <was-image src="${image}" style="display: block;"></was-image>
+          </div>
+        </div>
+      `)
     }
   }
 
@@ -143,6 +157,12 @@ function update(target) {
 }
 
 function mount(target) {
+  const src = target.getAttribute('src')
+  if(!src) {
+    const now = new Date();
+    const timestamp = now.toJSON()
+    target.setAttribute('src', `/private/${$.link}/${timestamp}.json`)
+  }
   target.innerHTML = `
     <div class="palette">
       <div class="menu-item">
@@ -278,8 +298,9 @@ function mount(target) {
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
+          <hr>
           <button data-prequel>
-            Escape to Prequels
+            Reboot the Prequel
             <span data-tooltip="Consider rebooting reality from scratch">
               <sl-icon name="info-circle"></sl-icon>
             </span>
@@ -299,6 +320,19 @@ function mount(target) {
             </span>
           </button>
           <hr>
+          <button data-enable-gyro>
+            Enable Gyroscope
+            <span data-tooltip="Re-project your hand as a wand like a whizz">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-enable-preview>
+            Enable Preview
+            <span data-tooltip="See how a hand actually works">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
           <img src="/public/cdn/sillyz.computer/self-portrait.jpeg">
           <hr>
           <button data-new>
@@ -311,6 +345,7 @@ function mount(target) {
       </div>
     </div>
     <div class="overlays">
+      <div class="overlay-preview"><!--will be swapped --></div>
       <div class="overlay-color">
         <plan98-palette></plan98-palette>
       </div>
@@ -344,7 +379,6 @@ function mount(target) {
   update(target)
   resizeCanvas();
 
-  const src = target.getAttribute('src')
   if(src) {
     get(src).then(blob => {
       if(blob) {
@@ -693,10 +727,12 @@ function snapshot(target) {
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
       updateDraft(data)
+      $.mouth({ image })
     } else {
       throw new Error('Upload failed')
     }
   })
+
 }
 
 function publish (target) {
@@ -1157,6 +1193,7 @@ $.eye(`
     display: none;
   }
 
+  &[data-overlay="preview"] .overlays > .overlay-preview,
   &[data-overlay="chat"] .overlays > .overlay-chat,
   &[data-overlay="share"] .overlays > .overlay-share,
   &[data-overlay="color"] .overlays > .overlay-color {
@@ -1314,7 +1351,6 @@ $.eye(`
   & .form-card {
     display: grid;
     background: white;
-
     box-shadow:
       0 0 6px 6px rgba(0,0,0,.05),
       0 0 3px 3px rgba(0,0,0,.10),
@@ -1341,6 +1377,18 @@ $.eye(`
 
   & [data-close] * {
     pointer-events: none;
+  }
+
+  & .background {
+    background: lime;
+    padding: 2rem;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    place-content: center;
+  }
+
+  & .foreground {
+    background: lemonchiffon;
   }
 `)
 
@@ -1586,3 +1634,39 @@ function systemLoop(time) {
   requestAnimationFrame(systemLoop.bind(this))
 }
 
+$.when('click', '[data-enable-preview]', async function getOrientation(){
+  $.mouth({
+    overlay: overlays.preview,
+    activeMenu: null,
+  })
+})
+
+$.when('click', '[data-enable-gyro]', async function getOrientation(){
+  if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
+    return alert("Your current device does not have access to the DeviceOrientation event");
+  }
+ 
+  let permission = await window.DeviceOrientationEvent.requestPermission();
+  if (permission !== "granted"){
+    return alert("You must grant access to the device's sensor for this demo");
+  }
+})
+ 
+window.addEventListener("deviceorientation", function(e){
+  let requestBtn = document.querySelector("#get-orientation");
+  if (requestBtn){requestBtn.remove();}
+  
+  const alpha = e.alpha.toFixed(1)+"deg"; //angle of motion around the Z axis
+  const beta = e.beta.toFixed(1)+"deg"; //angle of motion around the X axis
+  const gamma = e.gamma.toFixed(1)+"deg"; //angle of motion around the Y axis
+  const orientation = Math.abs(e.beta) > Math.abs(e.gamma) ? "portrait" : "landscape";  
+
+  const preview = {
+    alpha,
+    beta,
+    gamma,
+    orientation
+  }
+
+  $.mouth({ preview })
+});
