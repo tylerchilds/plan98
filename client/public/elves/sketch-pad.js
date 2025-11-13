@@ -133,6 +133,7 @@ function update(target) {
     if(overlay === overlays.preview) {
       const node = target.querySelector('.overlay-preview')
 
+      console.log({preview})
       diffHTML.innerHTML(node, `
         <div class="background" style="height: 100%; transform-style: preserve-3d; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};">
           <div class="foreground" style="height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotate-of-x-axis, 30deg)) rotateY(var(--rotate-of-y-axis, 30deg)) rotateZ(var(--rotate-of-z-axis, 30deg))">
@@ -1660,6 +1661,8 @@ window.addEventListener("deviceorientation", function(e){
   const beta = e.beta.toFixed(1)+"deg"; //angle of motion around the X axis
   const gamma = e.gamma.toFixed(1)+"deg"; //angle of motion around the Y axis
   const orientation = Math.abs(e.beta) > Math.abs(e.gamma) ? "portrait" : "landscape";  
+
+  console.log(e)
 
   const preview = {
     alpha,
