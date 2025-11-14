@@ -154,9 +154,9 @@ function update(target) {
                 <sl-icon name="x-lg"></sl-icon>
               </button>
             </div>
-            <div class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
+            <button data-journal class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
               <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
-            </div>
+            </button>
           </div>
         `
       }
@@ -1434,6 +1434,10 @@ $.eye(`
 
   & .foreground {
     background: lemonchiffon;
+    border-radius: 0;
+    border: 0;
+    min-height: 2rem;
+    min-width: 2rem;
   }
 `)
 
