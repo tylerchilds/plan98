@@ -32,8 +32,19 @@ const porlock = [
 const modes = {
   welcome: 'welcome',
 }
+
+const realityCounterWeights = {
+  alpha: 45,
+  beta: 0,
+  gamma: 0,
+}
+
 const $ = Self('sketch-pad', {
-  preview: { alpha: null, beta: null, gamma: null },
+  preview: {
+    alpha: realityCounterWeights.alpha+'deg',
+    beta: realityCounterWeights.beta+'deg',
+    gamma: realityCounterWeights.gamma+'deg',
+  },
   activeMenu: null,
   mode: modes.welcome,
   strokeHistory: [],
@@ -142,8 +153,8 @@ function update(target) {
                 <sl-icon name="x-lg"></sl-icon>
               </button>
             </div>
-            <div class="foreground" style="height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg))">
-              <was-image src="${image}"></was-image>
+            <div class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
+              <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
             </div>
           </div>
         `
@@ -151,7 +162,7 @@ function update(target) {
 
       const scene = node.querySelector('.background')
       if(scene) {
-        scene.style = `height: 100%; transform-style: preserve-3d; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};`
+        scene.style = `height: 100%; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};`
       }
     }
   }
@@ -1409,11 +1420,12 @@ $.eye(`
 
   & .background {
     background: var(--blue, dodgerblue);
-    padding: 2rem;
+    padding: 1rem 1rem 1rem 10vmin;
     display: grid;
     grid-template-columns: auto 1fr;
     place-content: center;
-    padding: 1rem;
+    min-height: 100vh;
+    perspective: 1000px;
   }
 
   & .foreground {
@@ -1678,12 +1690,6 @@ $.when('click', '[data-enable-preview]', async function getOrientation(){
     activeMenu: null,
   })
 })
-
-const realityCounterWeights = {
-  alpha: 90,
-  beta: 90,
-  gamma: 90,
-}
 
 window.addEventListener("deviceorientation", function(e){
   const alpha = realityCounterWeights.alpha - e.alpha.toFixed(1)+"deg"; //angle of motion around the Z axis
