@@ -31,7 +31,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/ur-shell'
+    self.location.href = '/app/ur-shell?src=/app/hello-elvish?elf=saga-crawler'
     return
   }
 

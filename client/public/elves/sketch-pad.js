@@ -34,18 +34,19 @@ const modes = {
 }
 
 const realityCounterWeights = {
-  alpha: 45,
-  beta: 0,
+  alpha: 90,
+  beta: 90,
   gamma: 0,
 }
 
 const $ = Self('sketch-pad', {
   preview: {
-    alpha: realityCounterWeights.alpha+'deg',
-    beta: realityCounterWeights.beta+'deg',
-    gamma: realityCounterWeights.gamma+'deg',
+    alpha: -1 * realityCounterWeights.alpha+'deg',
+    beta: 1 * realityCounterWeights.beta+'deg',
+    gamma: 1 * realityCounterWeights.gamma+'deg',
   },
   activeMenu: null,
+  overlay: overlays.share,
   mode: modes.welcome,
   strokeHistory: [],
   strokeRevisory: [],
@@ -525,7 +526,7 @@ $.hand('click', '[data-thickness]', function  (event) {
 
 $.hand('click', '[data-journal]', function  (event) {
   event.preventDefault()
-  window.location.href = '/?world=shirtflicks.app'
+  window.location.href = '/app/cultural-preservation'
 })
 
 $.hand('click', '[data-wallet]', function  (event) {
@@ -614,7 +615,7 @@ $.hand('click', '[data-violin]', function  (event) {
 
 $.hand('click', '[data-prequel]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/hello-elvish?elf=saga-crawler'
+  window.location.href = '/app/plan98-boxart'
 })
 
 
@@ -655,8 +656,11 @@ function share(target) {
 
           <div class="memex-body draft-body">
             <div class="overlay-background">
-              <div style="padding: 51px; height: 100%; display: flex;">
-                <qr-code src="${shareLink}" style="width: 75vmin; height: 75vmin;" target="_top"></qr-code>
+              <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
+                <qr-code src="${shareLink}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+                <div class="welcome-text">
+                  Hey, listen! Copy this link and share it online or let someone in person scan it to link up and "Sketch" together!
+                </div>
               </div>
             </div>
           </div>
