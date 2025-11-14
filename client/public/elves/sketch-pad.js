@@ -133,14 +133,26 @@ function update(target) {
     if(overlay === overlays.preview) {
       const node = target.querySelector('.overlay-preview')
 
-      console.log({preview})
-      diffHTML.innerHTML(node, `
-        <div class="background" style="height: 100%; transform-style: preserve-3d; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};">
-          <div class="foreground" style="height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotate-of-x-axis, 30deg)) rotateY(var(--rotate-of-y-axis, 30deg)) rotateZ(var(--rotate-of-z-axis, 30deg))">
-            <was-image src="${image}" style="display: block;"></was-image>
+      if(image !== target.image) {
+        target.image = image
+        node.innerHTML = `
+          <div class="background">
+            <div class="action-wrapper">
+              <button data-close class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
+            <div class="foreground" style="height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg))">
+              <was-image src="${image}"></was-image>
+            </div>
           </div>
-        </div>
-      `)
+        `
+      }
+
+      const scene = node.querySelector('.background')
+      if(scene) {
+        scene.style = `height: 100%; transform-style: preserve-3d; --rotation-of-x-axis: ${preview.beta};--rotation-of-y-axis: ${preview.gamma};--rotation-of-z-axis: ${preview.alpha};`
+      }
     }
   }
 
@@ -321,12 +333,6 @@ function mount(target) {
             </span>
           </button>
           <hr>
-          <button data-enable-gyro>
-            Enable Gyroscope
-            <span data-tooltip="Re-project your hand as a wand like a whizz">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <button data-enable-preview>
             Enable Preview
             <span data-tooltip="See how a hand actually works">
@@ -365,14 +371,18 @@ function mount(target) {
   `
 
   const canvas = document.createElement('canvas')
-  self.addEventListener('resize', resizeCanvas, false);
+  self.addEventListener('resize', debounce(resizeCanvas, 50), false);
 
-  function resizeCanvas() {
+  function clearCanvas() {
     canvas.width = self.innerWidth;
     canvas.height = self.innerHeight;
     const context = canvas.getContext('2d')
     context.fillStyle = $.ear().background
     context.fillRect(0, 0, canvas.width, canvas.height)
+  }
+
+  function resizeCanvas() {
+    clearCanvas()
     redraw(target)
   }
 
@@ -722,12 +732,13 @@ function snapshot(target) {
 
   const data = { src: image, strokeHistory, strokeRevisory }
 
-  console.log({ data })
+  console.log({ image })
 
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
       updateDraft(data)
+      console.log({ image })
       $.mouth({ image })
     } else {
       throw new Error('Upload failed')
@@ -759,6 +770,11 @@ $.hand('click', '[data-new]', function (event) {
   event.preventDefault()
   $.mouth({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
   redraw(event.target)
+
+  const { src } = engine(event.target)
+  if(src) {
+    snapshot(event.target)
+  }
 })
 
 $.hand('click', '[data-download]', function (event) {
@@ -796,6 +812,12 @@ $.hand('click', '[data-undo]', function undoDraw (event) {
     }
   })
   redraw(event.target)
+
+  const { src } = engine(event.target)
+  if(src) {
+    snapshot(event.target)
+  }
+
 })
 
 function redraw(target) {
@@ -817,10 +839,6 @@ function redraw(target) {
       drawOnCanvas(target, strokePath)
     })
   })
-
-  if(src) {
-    snapshot(target)
-  }
 }
 
 $.hand('click', '[data-redo]', function redoDraw (event) {
@@ -839,6 +857,11 @@ $.hand('click', '[data-redo]', function redoDraw (event) {
   })
 
   redraw(event.target)
+
+  const { src } = engine(event.target)
+  if(src) {
+    snapshot(event.target)
+  }
 })
 
 
@@ -957,6 +980,10 @@ function end (e) {
   points = []
 
   lineWidth = 0
+
+  if(src) {
+    snapshot(event.target)
+  }
 };
 
 const paneByTarget = (target) => {
@@ -1381,11 +1408,12 @@ $.eye(`
   }
 
   & .background {
-    background: lime;
+    background: var(--blue, dodgerblue);
     padding: 2rem;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-columns: auto 1fr;
     place-content: center;
+    padding: 1rem;
   }
 
   & .foreground {
@@ -1636,33 +1664,32 @@ function systemLoop(time) {
 }
 
 $.when('click', '[data-enable-preview]', async function getOrientation(){
+  if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
+    console.error("Your current device does not have access to the DeviceOrientation event");
+  } else {
+    let permission = await window.DeviceOrientationEvent.requestPermission();
+    if (permission !== "granted"){
+      console.error("You must grant access to the device's sensor for this demo");
+    }
+  }
+
   $.mouth({
     overlay: overlays.preview,
     activeMenu: null,
   })
 })
 
-$.when('click', '[data-enable-gyro]', async function getOrientation(){
-  if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
-    return alert("Your current device does not have access to the DeviceOrientation event");
-  }
- 
-  let permission = await window.DeviceOrientationEvent.requestPermission();
-  if (permission !== "granted"){
-    return alert("You must grant access to the device's sensor for this demo");
-  }
-})
- 
-window.addEventListener("deviceorientation", function(e){
-  let requestBtn = document.querySelector("#get-orientation");
-  if (requestBtn){requestBtn.remove();}
-  
-  const alpha = e.alpha.toFixed(1)+"deg"; //angle of motion around the Z axis
-  const beta = e.beta.toFixed(1)+"deg"; //angle of motion around the X axis
-  const gamma = e.gamma.toFixed(1)+"deg"; //angle of motion around the Y axis
-  const orientation = Math.abs(e.beta) > Math.abs(e.gamma) ? "portrait" : "landscape";  
+const realityCounterWeights = {
+  alpha: 90,
+  beta: 90,
+  gamma: 90,
+}
 
-  console.log(e)
+window.addEventListener("deviceorientation", function(e){
+  const alpha = realityCounterWeights.alpha - e.alpha.toFixed(1)+"deg"; //angle of motion around the Z axis
+  const beta = realityCounterWeights.beta - e.beta.toFixed(1)+"deg"; //angle of motion around the X axis
+  const gamma = realityCounterWeights.gamma - e.gamma.toFixed(1)+"deg"; //angle of motion around the Y axis
+  const orientation = Math.abs(e.beta) > Math.abs(e.gamma) ? "portrait" : "landscape";  
 
   const preview = {
     alpha,
@@ -1673,3 +1700,18 @@ window.addEventListener("deviceorientation", function(e){
 
   $.mouth({ preview })
 });
+
+
+// thanks Josh, always love your work
+// https://www.joshwcomeau.com/snippets/javascript/debounce/
+function debounce(callback, wait) {
+  let timeoutId = null;
+
+  return (...args) => {
+    window.clearTimeout(timeoutId);
+
+    timeoutId = window.setTimeout(() => {
+      callback.apply(null, args);
+    }, wait);
+  };
+}

@@ -12,6 +12,8 @@ function draw(target) {
         display: grid;
         width: 100%;
         height: 100%;
+        place-content: center;
+        overflow: hidden;
       }
 
       :host img {
@@ -19,6 +21,7 @@ function draw(target) {
         max-height: 100%;
         margin: auto;
         object-fit: cover;
+        overflow: hidden;
       }
    </style>
    <img />
