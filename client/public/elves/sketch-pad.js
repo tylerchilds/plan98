@@ -346,7 +346,7 @@ function mount(target) {
           </button>
           <hr>
           <button data-enable-preview>
-            Enable Preview
+            VFX Preview
             <span data-tooltip="See how a hand actually works">
               <sl-icon name="info-circle"></sl-icon>
             </span>
@@ -1423,7 +1423,7 @@ $.eye(`
   }
 
   & .background {
-    background: var(--blue, dodgerblue);
+    background: var(--active-color, black);
     padding: 1rem 1rem 1rem 10vmin;
     display: grid;
     grid-template-columns: auto 1fr;
