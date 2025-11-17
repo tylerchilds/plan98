@@ -144,7 +144,6 @@ function update(target) {
 
     if(overlay === overlays.preview) {
       const node = target.querySelector('.overlay-preview')
-
       if(image !== target.image) {
         target.image = image
         node.innerHTML = `
@@ -157,6 +156,19 @@ function update(target) {
             <button data-journal class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
               <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
             </button>
+          </div>
+        `
+      } else {
+        node.innerHTML = `
+          <div class="action-wrapper">
+            <button data-close class="standard-button bias-generic -small -round" type="reset">
+              <sl-icon name="x-lg"></sl-icon>
+            </button>
+          </div>
+          <div style="height: 100%;">
+            Error:
+            Experiencing connectivity issues with your storage.
+            <a href="/app/time-machine">Try to recalibrate your memex in the time machine.</a>
           </div>
         `
       }
@@ -338,6 +350,26 @@ function mount(target) {
             </span>
           </button>
           <hr>
+          <button data-enable-preview>
+            VFX Preview
+            <span data-tooltip="See how a hand actually works">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
+          <button data-enable-friends>
+            Friends
+            <span data-tooltip="Stay connected with people you like coloring with.">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-enable-publish>
+            Publish
+            <span data-tooltip="Publish this so that your friends can see it">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
           <button data-admin>
             Admin
             <span data-tooltip="Securely Enter Admin Area">
@@ -348,13 +380,6 @@ function mount(target) {
           <button data-crichton>
             Mike Backes Edition
             <span data-tooltip="If you know any unix systems at all, be amused; the elves are in the computer-- in the computer!!!">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <hr>
-          <button data-enable-preview>
-            VFX Preview
-            <span data-tooltip="See how a hand actually works">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
@@ -382,6 +407,12 @@ function mount(target) {
             <sl-icon name="x-lg"></sl-icon>
           </button>
         </div>
+      </div>
+      <div class="overlay-friends">
+        ${friends(target)}
+      </div>
+      <div class="overlay-publish">
+        ${publish(target)}
       </div>
       <div class="overlay-tutorial">
         ${tutorial(target)}
@@ -628,6 +659,79 @@ $.hand('click', '[data-prequel]', function  (event) {
   window.location.href = '/app/silly-wizard'
 })
 
+function friends(target) {
+  return `
+    <div class="overlay-background">
+      <div class="form-card">
+        <div class="draft-template">
+          <div class="frame-header">
+            <div style="display: grid; place-content: start">
+            </div>
+            <div style="display: grid; place-content: end">
+              <button data-root class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
+          </div>
+          <div class="frame-body">
+            <div class="wizard">
+              <secure-persona></secure-persona>
+            </div>
+          </div>
+          <div class="frame-footer">
+            <div style="text-align: right;">
+              <button data-share class="standard-button bias-generic -small" type="submit">
+                Share
+              </button>
+              <button data-start class="standard-button bias-positive -small" type="submit">
+                Start
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+
+}
+
+function publish(target) {
+  const { image } = $.ear()
+  return `
+    <div class="overlay-background">
+      <div class="form-card">
+        <div class="draft-template">
+          <div class="frame-header">
+            <div style="display: grid; place-content: start">
+            </div>
+            <div style="display: grid; place-content: end">
+              <button data-root class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
+          </div>
+          <div class="frame-body">
+            <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
+          </div>
+          <div class="frame-footer">
+            <div style="text-align: right;">
+              <button data-share class="standard-button bias-generic -small" type="submit">
+                Cancel
+              </button>
+              <button data-start class="standard-button bias-positive -small" type="submit">
+                Publish
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+
+}
+
+
 function tutorial(target) {
   const { viewMetadata } = $.ear()
   const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
@@ -773,7 +877,7 @@ $.hand('click', '[data-copy]', async (event) => {
 
 
 $.hand('click', '[data-share]', ({ target }) => share(target))
-$.hand('click', '[data-save]', ({ target }) => publish(target))
+$.hand('click', '[data-save]', ({ target }) => save(target))
 
 function snapshot(target) {
   const { canvas, src } = engine(target)
@@ -807,7 +911,7 @@ function snapshot(target) {
 
 }
 
-function publish (target) {
+function save (target) {
   const { canvas, src } = engine(target)
   // Get current date and time for filename
   const now = new Date();
@@ -1284,6 +1388,7 @@ $.eye(`
   &[data-overlay="preview"] .overlays > .overlay-preview,
   &[data-overlay="chat"] .overlays > .overlay-chat,
   &[data-overlay="tutorial"] .overlays > .overlay-tutorial,
+  &[data-overlay="publish"] .overlays > .overlay-publish,
   &[data-overlay="friends"] .overlays > .overlay-friends,
   &[data-overlay="share"] .overlays > .overlay-share,
   &[data-overlay="color"] .overlays > .overlay-color {
@@ -1751,13 +1856,29 @@ $.hand('click', '[data-enable-tutorial]', async function getOrientation(){
   })
 })
 
+$.hand('click', '[data-enable-friends]', async function getOrientation(){
+  $.mouth({
+    overlay: overlays.friends,
+    activeMenu: null,
+  })
+})
+
+$.hand('click', '[data-enable-publish]', async function getOrientation(){
+  $.mouth({
+    overlay: overlays.publish,
+    activeMenu: null,
+  })
+})
+
+
+
 $.hand('click', '[data-enable-preview]', async function getOrientation(){
   if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
-    console.error("Your current device does not have access to the DeviceOrientation event");
+    toast("Your current device does not have access to the DeviceOrientation event", { type: 'error' })
   } else {
     let permission = await window.DeviceOrientationEvent.requestPermission();
     if (permission !== "granted"){
-      console.error("You must grant access to the device's sensor for this demo");
+      toast("You must grant access to the device's sensor for this demo", { type: 'error' })
     }
   }
 
