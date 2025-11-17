@@ -16,7 +16,10 @@ export function quest(event) {
 }
 
 export function learn(event) {
+  window.location.href = '/?world=thelanding.page'
+  /*
   setupSaga('learn.saga', event.target)
+  */
 }
 
 export function chaseEggs(event) {
@@ -62,6 +65,9 @@ export function rewindTime(event) {
   setupSaga('000-000.saga', event.target)
 }
 
+export function ok(event) {
+  window.location.href = '/app/plan98-boxart'
+}
 
 export function blankSave(event) {
   state['ls/save-file'] = {
@@ -90,7 +96,16 @@ export function setupSaga(nextSaga, target, options={}) {
   const { activeDialect } = $.learn()
   const key = currentWorkingDirectory + 'sillyz.computer' + '/' + activeDialect + '/' + nextSaga
   root.dataset.lastHtml = target.innerHTML
-  root.innerHTML = `<a href="${key}">Loading...</a>`
+  root.innerHTML = `
+    <div style="display: grid; place-content: center; position: relative; grid-template-areas: 'stack';">
+      <div style="width: 280px; height: 280px; margin: auto; position: absolute; inset: 0;">
+        <plan98-icon style="width: 100%; height: 100%;"></plan98-icon>
+      </div>
+      <div style="width: 2rem; height: 2rem; grid-area: stack;">
+        <flying-disk></flying-disk>
+      </div>
+    </div>
+  `
   fetch(raw+key)
     .then(async response => {
       if(response.status === 404) {

@@ -12,7 +12,7 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
-const overlays = { preview: 'preview', chat: 'chat', color: 'color', share: 'share' }
+const overlays = { tutorial: 'tutorial', preview: 'preview', chat: 'chat', color: 'color', share: 'share', friends: 'friends'  }
 
 const porlock = [
   'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
@@ -46,7 +46,7 @@ const $ = Self('sketch-pad', {
     gamma: 1 * realityCounterWeights.gamma+'deg',
   },
   activeMenu: null,
-  overlay: overlays.share,
+  overlay: overlays.tutorial,
   mode: modes.welcome,
   strokeHistory: [],
   strokeRevisory: [],
@@ -324,6 +324,13 @@ function mount(target) {
             </span>
           </button>
           <hr>
+          <button data-enable-tutorial>
+            Restart Tutorial
+            <span data-tooltip="Start from the starting point">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+
           <button data-prequel>
             Reboot the Prequel
             <span data-tooltip="Consider rebooting reality from scratch">
@@ -375,6 +382,9 @@ function mount(target) {
             <sl-icon name="x-lg"></sl-icon>
           </button>
         </div>
+      </div>
+      <div class="overlay-tutorial">
+        ${tutorial(target)}
       </div>
       <div class="overlay-share">
         ${share(target)}
@@ -459,7 +469,7 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
-$.when('click', '[data-root]', (event) => {
+$.hand('click', '[data-root]', (event) => {
   $.mouth({
     overlay: null,
     viewMetadata: false,
@@ -615,10 +625,49 @@ $.hand('click', '[data-violin]', function  (event) {
 
 $.hand('click', '[data-prequel]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/plan98-boxart'
+  window.location.href = '/app/silly-wizard'
 })
 
+function tutorial(target) {
+  const { viewMetadata } = $.ear()
+  const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
+  const copyId = self.crypto.randomUUID()
 
+  return `
+    <div class="overlay-background">
+      <div class="form-card">
+        <div class="draft-template">
+          <div class="frame-header">
+            <div style="display: grid; place-content: start">
+            </div>
+            <div style="display: grid; place-content: end">
+              <button data-root class="standard-button bias-generic -small -round" type="reset">
+                <sl-icon name="x-lg"></sl-icon>
+              </button>
+            </div>
+          </div>
+          <div class="frame-body">
+            <div style="padding: 1rem; max-width: 55ch; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
+              <div class="welcome-text">
+                A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
+              </div>
+            </div>
+          </div>
+          <div class="frame-footer">
+            <div style="text-align: right;">
+              <button data-share class="standard-button bias-generic -small" type="submit">
+                Share
+              </button>
+              <button data-start class="standard-button bias-positive -small" type="submit">
+                Start
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `
+}
 
 function share(target) {
   const { viewMetadata } = $.ear()
@@ -658,9 +707,6 @@ function share(target) {
             <div class="overlay-background">
               <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
                 <qr-code src="${shareLink}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
-                <div class="welcome-text">
-                  Hey, listen! Copy this link and share it online or let someone in person scan it to link up and "Sketch" together!
-                </div>
               </div>
             </div>
           </div>
@@ -679,10 +725,9 @@ function share(target) {
             </div>
           </div>
           <div class="draft-footer">
-            <input class="standard-input -small" data-bind="memex"  name="title" value="${escapeHyperText('okay')}" type="text"/>
-            <button data-action="memex" class="standard-button bias-positive -small" type="submit">
-              <sl-icon name="check-lg"></sl-icon>
-            </button>
+            <div class="welcome-text">
+              Hey, listen! Copy this link and share it online or let someone in person scan it to link up and "Sketch" together!
+            </div>
           </div>
         </div>
       </div>
@@ -1238,6 +1283,8 @@ $.eye(`
 
   &[data-overlay="preview"] .overlays > .overlay-preview,
   &[data-overlay="chat"] .overlays > .overlay-chat,
+  &[data-overlay="tutorial"] .overlays > .overlay-tutorial,
+  &[data-overlay="friends"] .overlays > .overlay-friends,
   &[data-overlay="share"] .overlays > .overlay-share,
   &[data-overlay="color"] .overlays > .overlay-color {
     display: block;
@@ -1261,6 +1308,7 @@ $.eye(`
     margin-right: .5rem;
   }
 
+  & .frame-header,
   & .draft-header {
     display: grid;
     grid-template-columns: auto auto;
@@ -1275,6 +1323,12 @@ $.eye(`
   & .draft-body {
     grid-area: body;
   }
+
+  & .frame-body {
+    grid-area: body;
+    overflow: auto;
+  }
+
 
   & .draft-metadata {
     display: none;
@@ -1302,6 +1356,7 @@ $.eye(`
     display: none;
   }
 
+  & .frame-footer,
   & .draft-footer {
     display: grid;
     grid-area: footer;
@@ -1403,7 +1458,6 @@ $.eye(`
     overflow: hidden;
   }
 
-  & .draft-footer,
   & [data-toggle-metadata] {
     display: none;
   }
@@ -1535,7 +1589,7 @@ const gamepadPorlockCycle = streamFactory('a', (id) => {
 })
 
 function porlockCycle() {
-  const { porlockIndex } = $.learn()
+  const { porlockIndex } = $.ear()
   let next = porlockIndex + 1
 
   if(next >= porlock.length) {
@@ -1546,7 +1600,7 @@ function porlockCycle() {
   $.teach({ porlockIndex: next })
 }
 
-$.when('click', '[data-welcome-continue]', (event) => {
+$.hand('click', '[data-welcome-continue]', (event) => {
   porlockCycle()
 })
 
@@ -1555,7 +1609,7 @@ function porlockSkip() {
   $.teach({ mode: modes.system })
 }
 
-$.when('click', '[data-welcome-skip]', (event) => {
+$.hand('click', '[data-welcome-skip]', (event) => {
   porlockSkip()
 })
 
@@ -1683,7 +1737,21 @@ function systemLoop(time) {
   requestAnimationFrame(systemLoop.bind(this))
 }
 
-$.when('click', '[data-enable-preview]', async function getOrientation(){
+$.hand('click', '[data-start]', async function getOrientation(){
+  $.mouth({
+    overlay: null,
+    activeMenu: null,
+  })
+})
+
+$.hand('click', '[data-enable-tutorial]', async function getOrientation(){
+  $.mouth({
+    overlay: overlays.tutorial,
+    activeMenu: null,
+  })
+})
+
+$.hand('click', '[data-enable-preview]', async function getOrientation(){
   if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
     console.error("Your current device does not have access to the DeviceOrientation event");
   } else {
