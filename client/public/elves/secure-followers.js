@@ -312,6 +312,7 @@ $.style(`
     display: block;
     max-width: 55ch;
     margin: auto;
+    padding: 0 .5rem;
   }
 
   & .relationship-group {

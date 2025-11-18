@@ -319,8 +319,13 @@ function persist() {
   localStorage.setItem(`${$.link}`, JSON.stringify({ keycards }))
 }
 
-export function getKeycard() {
+export function getKeycard(id) {
   const { keycards } = $.learn()
+
+  if(id) {
+    const primaryKeycard = keycards.find(x => x.id === id)
+    return primaryKeycard ? primaryKeycard : null
+  }
 
   if(keycards.length === 0) {
     return null

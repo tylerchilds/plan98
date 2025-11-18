@@ -20,7 +20,6 @@ import {
   provisionActiveKeycard,
   getKeycard,
   listKeycards,
-  setKeycard,
   getStorage,
   getSigner,
   get,
@@ -155,9 +154,7 @@ export async function getPersona() {
 
   if(!personaKeycard) return
 
-  setKeycard(personaKeycard.id)
-
-  const keycard = getKeycard()
+  const keycard = getKeycard(personaKeycard.id)
 
   const signer = await getSigner(keycard)
   const storage = getStorage(keycard)
@@ -922,6 +919,8 @@ $.style(`
     z-index: 2;
     background: white;
     color: rgba(0,0,0,.85);
+    max-width: 55ch;
+    padding: 0 .5rem;
   }
   
   & .persona-bar {
@@ -983,6 +982,12 @@ $.style(`
     color: rgba(255,255,255,.4);
     font-weight: 800;
     margin-top: 2rem;
+  }
+
+  & {
+    display: block;
+    max-width: 55ch;
+    margin: auto;
   }
 `)
 

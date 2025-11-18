@@ -5,6 +5,20 @@ import { toast } from './plan98-toast.js'
 import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { updateDraft } from './time-machine.js'
 import { checkButton, checkAxis } from './debug-gamepads.js'
+import {
+  getSession,
+  getFeedback,
+  login,
+  getCompanyName,
+  getEmployeeId,
+  getSessionId,
+  setSessionId,
+  clearSession,
+  setError,
+  setEmployeeId,
+  setCompanyName,
+  getEmail
+} from './bayun-wizard.js'
 
 import { get, put } from './plan98-wallet.js'
 
@@ -12,7 +26,15 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
-const overlays = { tutorial: 'tutorial', preview: 'preview', chat: 'chat', color: 'color', share: 'share', friends: 'friends'  }
+const overlays = {
+  tutorial: 'tutorial',
+  preview: 'preview',
+  chat: 'chat',
+  color: 'color',
+  share: 'share',
+  friends: 'friends',
+  publish: 'publish'
+}
 
 const porlock = [
   'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
@@ -138,8 +160,30 @@ function update(target) {
 
   {
     const { overlay, preview, image } = $.ear()
-    if(target.overlay !== overlay) {
+    if(target.dataset.overlay !== overlay) {
       target.dataset.overlay = overlay
+
+      if(overlay === overlays.publish) {
+        const node = target.querySelector('.overlay-publish')
+        node.innerHTML = publish(target)
+      }
+    }
+
+    if(overlay === overlays.publish) {
+      const node = target.querySelector('.overlay-publish')
+      const { title, messageText, messageHeight } = $.ear()
+
+      const titleNode = node.querySelector('[name="title"]')
+      const messageNode = node.querySelector('[name="messageText"]')
+
+      if(messageHeight) {
+        messageNode.style.height = messageHeight + 'px'
+      } else {
+        delete messageNode.style.height
+      }
+
+      updateField(titleNode, escapeHyperText(title))
+      updateField(messageNode, escapeHyperText(messageText))
     }
 
     if(overlay === overlays.preview) {
@@ -412,7 +456,7 @@ function mount(target) {
         ${friends(target)}
       </div>
       <div class="overlay-publish">
-        ${publish(target)}
+        <!--will be swapped -->
       </div>
       <div class="overlay-tutorial">
         ${tutorial(target)}
@@ -698,6 +742,8 @@ function friends(target) {
 
 function publish(target) {
   const { image } = $.ear()
+  const persona = getEmployeeId()
+  const organization = getCompanyName()
   return `
     <div class="overlay-background">
       <div class="form-card">
@@ -712,11 +758,25 @@ function publish(target) {
             </div>
           </div>
           <div class="frame-body">
-            <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
+            <div class="plan98-title">
+              <input data-bind name="title" class="transparent-input" placeholder="Article Title" />
+            </div>
+            <was-image class="plan98-hero" src="${image}"></was-image>
+            <div class="plan98-body">
+              <textarea
+                data-bind
+                class="publish-body"
+                name="messageText"
+                placeholder="Share something helpful to others, maybe something you wished you knew before you knew it."
+              ></textarea>
+            </div>
+            <div class="plan98-signoff">
+              Of "${persona}" in "${organization}".
+            </div>
           </div>
           <div class="frame-footer">
             <div style="text-align: right;">
-              <button data-share class="standard-button bias-generic -small" type="submit">
+              <button data-cancel class="standard-button bias-generic -small" type="submit">
                 Cancel
               </button>
               <button data-start class="standard-button bias-positive -small" type="submit">
@@ -875,7 +935,11 @@ $.hand('click', '[data-copy]', async (event) => {
   }
 })
 
+function cancel(target) {
+  $.mouth({ activeMenu: null, overlay: null })
+}
 
+$.hand('click', '[data-cancel]', ({ target }) => cancel(target))
 $.hand('click', '[data-share]', ({ target }) => share(target))
 $.hand('click', '[data-save]', ({ target }) => save(target))
 
@@ -1598,6 +1662,14 @@ $.eye(`
     min-height: 2rem;
     min-width: 2rem;
   }
+
+  & .publish-body {
+    width: 100%;
+    padding: 0;
+    border: 0;
+    resize: none;
+  }
+
 `)
 
 const spamCache = {}
@@ -1917,4 +1989,29 @@ function debounce(callback, wait) {
       callback.apply(null, args);
     }, wait);
   };
+}
+
+$.when('input', '[data-bind]', (event) => {
+  $.teach({[event.target.name]: event.target.value })
+})
+
+$.when('focus', '[name="messageText"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+
+$.when('keydown', '[name="messageText"]', (event) => {
+  $.teach({ messageHeight: event.target.scrollHeight })
+});
+
+$.when('input', '[name="messageText"]', (event) => {
+  const { value } = event.target;
+  $.teach({ messageDraft: value, messageHeight: event.target.scrollHeight })
+});
+
+
+function updateField(field, value) {
+  const start = field.selectionStart;
+  const end = field.selectionEnd;
+  field.value = value;
+  field.setSelectionRange(start, end);
 }

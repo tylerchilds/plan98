@@ -1373,3 +1373,24 @@ sillonious-brand > xml-html {
 .form-description {
   margin-bottom: 1rem;
 }
+
+.plan98-title {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.plan98-signoff {
+  font-size: 1.5rem;
+  font-weight: 100;
+}
+
+.plan98-body {
+  line-height: 2;
+  max-width: 55ch;
+}
+
+.plan98-hero {
+  display: block;
+  text-align: left;
+  height: auto;
+}
