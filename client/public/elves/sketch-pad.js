@@ -19,8 +19,7 @@ import {
   setCompanyName,
   getEmail
 } from './bayun-wizard.js'
-
-import { get, put } from './plan98-wallet.js'
+import { get, put, getKeycard, getSigner, getStorage } from './plan98-wallet.js'
 
 let lineWidth = 0
 let isMousedown = false
@@ -33,7 +32,7 @@ const overlays = {
   color: 'color',
   share: 'share',
   friends: 'friends',
-  publish: 'publish'
+  publish: 'publish',
 }
 
 const porlock = [
@@ -75,7 +74,8 @@ const $ = Self('sketch-pad', {
   background: 'lemonchiffon',
   color: 'dodgerblue',
   drawer: 'size',
-  thickness: 4
+  thickness: 4,
+  attachments: []
 })
 
 function engine(target) {
@@ -171,7 +171,9 @@ function update(target) {
 
     if(overlay === overlays.publish) {
       const node = target.querySelector('.overlay-publish')
-      const { title, messageText, messageHeight } = $.ear()
+      const fileListNode = target.querySelector('.file-list')
+
+      const { title, attachments, messageText, messageHeight } = $.ear()
 
       const titleNode = node.querySelector('[name="title"]')
       const messageNode = node.querySelector('[name="messageText"]')
@@ -184,6 +186,25 @@ function update(target) {
 
       updateField(titleNode, escapeHyperText(title))
       updateField(messageNode, escapeHyperText(messageText))
+
+      if(attachments.length > 0) {
+        fileListNode.innerHTML = attachments.map(x => {
+          return `
+            <div class="table">
+              <div class="table-row">
+                <div class="table-cell">
+                  ${x.name}
+                </div>
+                <div class="table-cell">
+                  ${formatBytes(x.size)}
+                </div>
+              </div>
+            </div>
+          `
+        }).join('') 
+      } else {
+        fileListNode.innerHTML = `Select or drop files to upload`
+      }
     }
 
     if(overlay === overlays.preview) {
@@ -440,6 +461,9 @@ function mount(target) {
       </div>
     </div>
     <div class="overlays">
+      <div class="overlay-drop">
+        Drop files here to attach them!
+      </div>
       <div class="overlay-preview"><!--will be swapped --></div>
       <div class="overlay-color">
         <plan98-palette></plan98-palette>
@@ -469,6 +493,8 @@ function mount(target) {
 
   const canvas = document.createElement('canvas')
   self.addEventListener('resize', debounce(resizeCanvas, 50), false);
+
+  canvas.classList.add('file-region')
 
   function clearCanvas() {
     canvas.width = self.innerWidth;
@@ -741,7 +767,7 @@ function friends(target) {
 }
 
 function publish(target) {
-  const { image } = $.ear()
+  const { image, attachments } = $.ear()
   const persona = getEmployeeId()
   const organization = getCompanyName()
   return `
@@ -769,6 +795,16 @@ function publish(target) {
                 name="messageText"
                 placeholder="Share something helpful to others, maybe something you wished you knew before you knew it."
               ></textarea>
+
+              <div>
+                Attachments
+              </div>
+              <div>
+                <button class="click-proxy standard-button bias-generic">Browse Files</button>
+                <input type="file" name="files" multiple style="display: none;">
+              </div>
+
+              <div class="file-list"></div>
             </div>
             <div class="plan98-signoff">
               Of "${persona}" in "${organization}".
@@ -788,7 +824,6 @@ function publish(target) {
       </div>
     </div>
   `
-
 }
 
 
@@ -1449,6 +1484,12 @@ $.eye(`
     display: none;
   }
 
+  &[data-hovering="true"] .overlays,
+  &[data-hovering="true"] .overlays > * {
+    pointer-events: none !important;
+  }
+
+  &[data-hovering="true"] .overlays > .overlay-drop,
   &[data-overlay="preview"] .overlays > .overlay-preview,
   &[data-overlay="chat"] .overlays > .overlay-chat,
   &[data-overlay="tutorial"] .overlays > .overlay-tutorial,
@@ -1670,6 +1711,27 @@ $.eye(`
     resize: none;
   }
 
+  & .table {
+    display: table;
+    width: 100%;
+  }
+
+  & .section {
+    margin-bottom: 2rem;
+  }
+
+  & .table-row {
+    display: table-row;
+  }
+
+  & .table-row > * {
+    display: table-cell;
+    padding: 2px;
+  }
+
+  & .table-row:nth-child(2n) {
+    background: rgba(0,0,0,.1);
+  }
 `)
 
 const spamCache = {}
@@ -1732,7 +1794,17 @@ function escapeHyperText(text = '') {
   )
 }
 
+export function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
 
+    const k = 1024
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['Bytes', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}
 
 $.hand('click', '[data-menu-target]', (event) => {
   event.preventDefault()
@@ -2015,3 +2087,116 @@ function updateField(field, value) {
   field.value = value;
   field.setSelectionRange(start, end);
 }
+
+let STAGED_FILES = {}
+
+function handleFiles(files) {
+  STAGED_FILES = {}
+  // Convert FileList to Array and add to selectedFiles
+  const fileMeta = Array.from(files).map(file => {
+    STAGED_FILES[file.name] = file
+    return {
+      name: file.name,
+      url: `/attachments/${self.crypto.randomUUID()}/` + file.name,
+      size: file.size,
+      type: file.type,
+    }
+  });
+
+  updateDraft({
+    attachments: fileMeta
+  })
+
+  $.teach({ attachments: fileMeta, overlay: overlays.publish, activeMenu: null })
+
+  startAttachmentUpload()
+}
+
+function startAttachmentUpload() {
+  const { attachments } = $.learn()
+  const keycard = getKeycard()
+
+  if(attachments.length > 0 && keycard) {
+    getSigner().then(signer => {
+      const storage = getStorage()
+      const space = storage.space({
+        signer,
+        id: `urn:uuid:${keycard.id}`
+      })
+
+      const context = { signer, space }
+
+      $.mouth({
+        uploading: true
+      })
+
+      const uploads = [...attachments].map(upload.bind(context))
+
+      Promise.all(uploads)
+        .then(() => {
+          $.mouth({
+            uploading: false
+          })
+        })
+    })
+  }
+}
+
+function upload(attachment) {
+  const file = STAGED_FILES[attachment.name]
+
+  const resource = this.space.resource(attachment.url)
+  const typedBlob = new Blob([file], { type: file.type })
+  return resource.put(typedBlob, { signer: this.signer })
+    .then(res => {
+      console.debug({ res })
+      return res
+    })
+    .catch(e => {
+      console.debug(e)
+    })
+    .finally(() => {
+      console.log('finally', resource.path)
+    })
+
+}
+
+$.when('dragenter', '.file-region', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  const root = event.target.closest($.link)
+  root.dataset.hovering = true
+})
+
+$.when('dragover', '.file-region', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  const root = event.target.closest($.link)
+  root.dataset.hovering = true
+})
+
+$.when('dragleave', '.file-region', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  const root = event.target.closest($.link)
+  root.dataset.hovering = false
+})
+
+$.when('drop', '.file-region', (event) => {
+  event.preventDefault()
+  event.stopPropagation()
+  const root = event.target.closest($.link)
+  root.dataset.hovering = false
+  if (event.dataTransfer) {
+    console.log('- Files count:', event.dataTransfer.files.length);
+    handleFiles(event.dataTransfer.files);
+  }
+})
+
+$.when('click', '.click-proxy', (event) => {
+  event.target.nextElementSibling.click()
+})
+
+$.when('change', '[name="files"]', (event) => {
+  handleFiles(event.target.files);
+});
