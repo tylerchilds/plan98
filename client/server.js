@@ -147,6 +147,62 @@ async function fileSystem(request) {
   }
 }
 
+async function mp3s(request) {
+  const { search } = new URL(request.url);
+  const parameters = new URLSearchParams(search)
+  const world = parameters.get('world')
+  if(world) {
+    const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+  } else {
+    let paths = []
+
+    const currentPath = Deno.cwd() + (parameters.get('cwd') || '')
+    const files = walk(currentPath, {
+      skip: [
+        /\.git/,
+        /\.autosave/,
+        /\.swp/,
+        /\.swo/,
+        /\.env/,
+        /node_modules/,
+        /backup/,
+        /db/
+      ],
+      includeDirs: false
+    })
+
+    for await(const file of files) {
+      const { name } = file
+      const [_, path] = file.path.split(currentPath)
+      if(name.endsWith('.mp3')) {
+        paths.push({ path, name })
+      }
+    }
+
+    paths = sortPaths([...paths], byPath, '/')
+
+    const data = {
+      plan98: {
+        type: 'FileSystem',
+        children: [kids(paths)]
+      }
+    }
+
+    return new Response(JSON.stringify(data, null, 2), {
+      headers: {
+        "content-type": "application/json; charset=utf-8"
+      },
+    });
+  }
+}
+
+
+
 function kids(paths) {
   const root = { name: '', path: '/', type: 'Directory', children: [] };
 
@@ -196,6 +252,10 @@ Deno.serve(
 
     if(filepath === '/plan98/about') {
       return fileSystem(request)
+    }
+
+    if(filepath === '/plan98/mp3s') {
+      return mp3s(request)
     }
 
     if(filepath.startsWith('/proxy/')) {

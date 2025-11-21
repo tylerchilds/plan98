@@ -1,4 +1,5 @@
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
+import { innerHTML } from 'diffhtml'
 
 const db = {}
 
@@ -90,8 +91,8 @@ const $ = elf('beer-dogusa', {
   database: db
 })
 
-function update(slug, data) {
-  $.teach(data, (state,payload) => {
+function updateBySlug(slug) {
+  return (state,payload) => {
     return {
       ...state,
       database: {
@@ -102,6 +103,13 @@ function update(slug, data) {
         }
       }
     }
+  }
+}
+
+function update(slug, data) {
+  $.teach(data, {
+    mergeHandler: updateBySlug,
+    parameters: [slug]
   })
 }
 
@@ -121,23 +129,31 @@ function toggleExpand(slug) {
   update(slug, { expanded: !node.expanded})
 }
 
-$.draw(() => {
+$.draw((target) => {
+  if(target.innerHTML) return
   return `
     <div class="hero">
       <img src="/public/cdn/beerdogusa.com/logo.jpeg">
     </div>
-    <div class="sticky-nav">
-      <a href="#plan">Plan</a>
-      <a href="#playlist">Playlist</a>
-    </div>
-    <a name="plan"></a>
-    ${['welcome-root', 'closing-ceremony'].map(renderTree).join('')}
     <a name="playlist"></a>
-    Player
+    <d-j></d-j>
+    <a name="plan"></a>
+    <div class="tree"></div>
+    <div class="sticky-nav">
+      <a href="#playlist">Playlist</a>
+      <a href="#plan">Plan</a>
+    </div>
   `
-}, afterUpdate)
+}, {afterUpdate})
 
 function afterUpdate(target) {
+  {
+    const tree = target.querySelector('.tree')
+    innerHTML(tree, [
+      'welcome-root',
+      'closing-ceremony'
+    ].map(renderTree).join(''))
+  }
 }
 
 function renderTree(slug) {
@@ -192,6 +208,16 @@ function renderTree(slug) {
     </div>
   `
 }
+
+$.when('click', '.sticky-nav a[href^="#"]', (event) => {
+  event.preventDefault()
+  const [_, name] = event.target.href.split('#')
+  const anchor = event.target.closest($.link).querySelector(`a[name="${name}"]`)
+
+  if (anchor) {
+    anchor.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+})
 
 $.when('click', '[data-toggle]', (event) => {
   const { toggle } = event.target.dataset
@@ -277,8 +303,8 @@ $.style(`
   }
 
   & .sticky-nav {
-    position: sticky;
-    top: 0;
+    position: fixed;
+    bottom: 0;
     left: 0;
     right: 0;
     background: rgba(0,0,0,.85);
@@ -286,7 +312,6 @@ $.style(`
     z-index: 5;
     display: flex;
     gap: 1rem;
-    margin-bottom: 2rem;
     place-content: center;
     backdrop-filter: blur(4px);
   }
@@ -313,6 +338,10 @@ $.style(`
 
   & a[name] {
     position: relative;
-    top: -5rem;
+  }
+
+  & .tree {
+    margin-top: 3rem;
+    padding-bottom: 6rem;
   }
 `)
