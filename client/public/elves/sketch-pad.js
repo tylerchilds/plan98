@@ -33,6 +33,7 @@ const overlays = {
   share: 'share',
   friends: 'friends',
   publish: 'publish',
+  music: 'music',
 }
 
 const porlock = [
@@ -307,9 +308,16 @@ function mount(target) {
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
+          <button data-enable-music>
+            Music
+            <span data-tooltip="Change the vibe and also schedule what's up next">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+
           <hr>
           <button data-share>
-            Share
+            Collaborate
             <span data-tooltip="Collaborate across the planet!">
               <sl-icon name="info-circle"></sl-icon>
             </span>
@@ -317,6 +325,12 @@ function mount(target) {
           <button data-save>
             Save
             <span data-tooltip="Save this sketck to your most recent memex">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-enable-publish>
+            Publish
+            <span data-tooltip="Publish this so that your friends can see it">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
@@ -428,12 +442,6 @@ function mount(target) {
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
-          <button data-enable-publish>
-            Publish
-            <span data-tooltip="Publish this so that your friends can see it">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <hr>
           <button data-admin>
             Admin
@@ -463,6 +471,14 @@ function mount(target) {
     <div class="overlays">
       <div class="overlay-drop">
         Drop files here to attach them!
+      </div>
+      <div class="overlay-music">
+        <d-j></d-j>
+        <div class="action-wrapper">
+          <button data-close class="standard-button bias-generic -small -round" type="reset">
+            <sl-icon name="x-lg"></sl-icon>
+          </button>
+        </div>
       </div>
       <div class="overlay-preview"><!--will be swapped --></div>
       <div class="overlay-color">
@@ -1491,6 +1507,7 @@ $.eye(`
 
   &[data-hovering="true"] .overlays > .overlay-drop,
   &[data-overlay="preview"] .overlays > .overlay-preview,
+  &[data-overlay="music"] .overlays > .overlay-music,
   &[data-overlay="chat"] .overlays > .overlay-chat,
   &[data-overlay="tutorial"] .overlays > .overlay-tutorial,
   &[data-overlay="publish"] .overlays > .overlay-publish,
@@ -1504,6 +1521,11 @@ $.eye(`
     z-index: 100;
     background: white;
   }
+
+  & .overlay-music {
+    overflow: auto;
+  }
+
 
   &[data-overlay="color"] .palette {
     display: none;
@@ -1673,7 +1695,7 @@ $.eye(`
   }
 
   & .action-wrapper {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
     place-self: start;
@@ -2010,6 +2032,13 @@ $.hand('click', '[data-enable-friends]', async function getOrientation(){
 $.hand('click', '[data-enable-publish]', async function getOrientation(){
   $.mouth({
     overlay: overlays.publish,
+    activeMenu: null,
+  })
+})
+
+$.hand('click', '[data-enable-music]', async function getOrientation(){
+  $.mouth({
+    overlay: overlays.music,
     activeMenu: null,
   })
 })

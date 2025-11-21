@@ -574,6 +574,9 @@ $.style(`
     width: 100%;
     overflow: auto;
     display: block;
+    min-height: 100%;
+    background: black;
+    color: white;
   }
 
   & .menu {

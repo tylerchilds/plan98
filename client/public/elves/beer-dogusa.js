@@ -19,8 +19,8 @@ function node(slug, { data={}, children=[] }) {
 }
 
 const $ = elf('beer-dogusa', {
-  itinerary: {
-    'welcome-root': node('welcome-root', {
+  events: [
+    node('welcome-root', {
       data: {
         name: 'Welcome Agenda',
         description: 'The evening starts with a relaxing atmosphere'
@@ -30,19 +30,19 @@ const $ = elf('beer-dogusa', {
         'welcome-dish'
       ]
     }),
-    'welcome-music': node('welcome-music', {
+    node('welcome-music', {
       data: {
         name: 'Welcome Music',
         description: 'As the guests arrive, a fiddle fiddles'
       }
     }),
-    'welcome-dish': node('welcome-dish', {
+    node('welcome-dish', {
       data: {
         name: 'Welcome Dish',
         description: 'Champagne is served, a toast'
       }
     }),
-    'closing-ceremony': node('closing-ceremony', {
+    node('closing-ceremony', {
       data: {
         name: 'Closing Ceremony',
         description: 'A time for everyone to come together and reflect on the past few days together'
@@ -52,7 +52,7 @@ const $ = elf('beer-dogusa', {
         'closing-dish'
       ]
     }),
-    'closing-music': node('closing-music', {
+    node('closing-music', {
       data: {
         name: 'Closing Music',
         description: 'As the guests leave, a fiddle fiddles, but first...',
@@ -63,31 +63,31 @@ const $ = elf('beer-dogusa', {
         ]
       }
     }),
-    'closing-dish': node('closing-dish', {
+    node('closing-dish', {
       data: {
         name: 'Closing Dessert',
         description: 'A mix of delicious and chocolatey goodies'
       }
     }),
-    'dance-off': node('dance-off', {
+    node('dance-off', {
       data: {
         name: 'Dance Off',
         description: 'A competetive collaborative playlist to get the party started on the dance floor'
       }
     }),
-    'kar-aoke': node('kar-aoke', {
+    node('kar-aoke', {
       data: {
         name: 'Karaoke',
         description: 'A Karaoke sing-a-long to bring the crowd together'
       }
     }),
-    'jam-session': node('jam-session', {
+    node('jam-session', {
       data: {
         name: 'Jam Session',
         description: 'A group setting in a chill atmosphere with instuments waiting for you'
       }
     }),
-  },
+  ],
   database: db
 })
 
