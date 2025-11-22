@@ -1,4 +1,6 @@
 import elf from '@plan98/elf'
+import { showPanel, hidePanel } from './plan98-panel.js'
+import { showModal, hideModal } from './plan98-modal.js'
 import { innerHTML } from 'diffhtml'
 
 const db = {}
@@ -132,16 +134,24 @@ function toggleExpand(slug) {
 $.draw((target) => {
   if(target.innerHTML) return
   return `
+    <a name="home"></a>
     <div class="hero">
       <img src="/public/cdn/beerdogusa.com/logo.jpeg">
     </div>
+    <a name="find"></a>
+    <world-map style="height: 50vh;"></world-map>
     <a name="playlist"></a>
     <d-j></d-j>
-    <a name="plan"></a>
+    <a name="agenda"></a>
     <div class="tree"></div>
+    <a name="bye"></a>
+    <sketch-pad></sketch-pad>
     <div class="sticky-nav">
+      <a href="#home">BEERDOG U.S.A.</a>
+      <a href="#find">Find</a>
       <a href="#playlist">Playlist</a>
-      <a href="#plan">Plan</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#bye">Bye</a>
     </div>
   `
 }, {afterUpdate})
@@ -174,6 +184,14 @@ function renderTree(slug) {
             <div class="agenda-description">
               ${description || ''}
             </div>
+            <div class="agenda-actions">
+              <button data-notes="${slug}" class="agenda-action">
+                Notes
+              </button>
+              <button data-manage="${slug}" class="agenda-action">
+                Manage
+              </button>
+            </div>
           </div>
         </label>
         <div>
@@ -201,6 +219,14 @@ function renderTree(slug) {
             </div>
             <div class="agenda-description">
               ${description || ''}
+            </div>
+            <div class="agenda-actions">
+              <button data-notes="${slug}" class="agenda-action">
+                Notes
+              </button>
+              <button data-manage="${slug}" class="agenda-action">
+                Manage
+              </button>
             </div>
           </div>
         </label>
@@ -231,6 +257,21 @@ $.when('click', '[data-expand]', (event) => {
   toggleExpand(expand)
 })
 
+$.when('click', '[data-notes]', (event) => {
+  const { notes } = event.target.dataset
+
+  showPanel(notes)
+})
+
+$.when('click', '[data-manage]', (event) => {
+  const { manage } = event.target.dataset
+
+  showModal(`<div class="journey -stage">${manage}</div>`, {
+    blockExit: false
+  })
+})
+
+
 $.style(`
   & {
     display: block;
@@ -238,7 +279,17 @@ $.style(`
     color: white;
     height: 100%;
     overflow: auto;
-    padding: 0 1rem;
+    padding: 0 1rem 6rem;
+  }
+
+  & .hero {
+    height: 80vh;
+    display: grid;
+    place-content: center;
+  }
+
+  & .hero img {
+    height: auto;
   }
 
   & .task {
@@ -308,14 +359,15 @@ $.style(`
     left: 0;
     right: 0;
     background: rgba(0,0,0,.85);
-    padding: 1rem 0;
+    padding: 1rem;
     z-index: 5;
     display: flex;
     gap: 1rem;
-    place-content: center;
     backdrop-filter: blur(4px);
+    overflow: auto;
   }
 
+  & .agenda-action,
   & .sticky-nav a:link,
   & .sticky-nav a:visited {
     color: #00c690;
@@ -326,8 +378,11 @@ $.style(`
     text-decoration: none;
     display: inline-block;
     transition: all ease-in-out 100ms;
+    white-space: nowrap;
   }
 
+  & .agenda-action:hover,
+  & .agenda-action:focus,
   & .sticky-nav a:hover,
   & .sticky-nav a:focus {
     background: #00c690;
@@ -342,6 +397,5 @@ $.style(`
 
   & .tree {
     margin-top: 3rem;
-    padding-bottom: 6rem;
   }
 `)

@@ -152,6 +152,7 @@ $.draw((target) => {
         ${list[current] ? list[current] : 'Sum 41 - In Too Deep - All Killer No Filler'}
       </span>
     </div>
+    ${library()}
     <div class="context-menu">${contextMenu}</div>
     <div class="player ${!contextMenu ? 'active': ''}">
       <audio name="walkman" src="${currentTrack}" controls="true"></audio>
@@ -175,7 +176,6 @@ $.draw((target) => {
           </div>
         </div>
       </div>
-      ${library()}
     </div>
 `
 }, {
@@ -215,13 +215,7 @@ function afterUpdate(target) {
   }
 
   { // recover icons from the virtual dom
-    [...target.querySelectorAll('sl-icon')].map(ogIcon => {
-      const iconParent = ogIcon.parentNode
-      const icon = document.createElement('sl-icon')
-      icon.name = ogIcon.name
-      ogIcon.remove()
-      iconParent.appendChild(icon)
-    })
+    recoverElves(target, 'sl-icon')
   }
 
   { // cleanup when contextActions exist and playlist is visible
@@ -1046,8 +1040,6 @@ $.style(`
   & .current-media {
     display: grid;
     place-items: end center;
-    position: sticky;
-    top: 0;
   }
 
   & details {
@@ -1225,3 +1217,17 @@ $.when('click', '.track', (event) => {
   walkman.play()
   $.teach({ audioPlaying: true, currentTrack: href })
 })
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+
+

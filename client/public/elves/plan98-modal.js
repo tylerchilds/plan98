@@ -167,6 +167,16 @@ export function isVisible() {
   return $.learn().isOpen
 }
 
+$.when('click', '.modal', () => {
+  hideModal()
+})
+
+$.when('click', '.modal .body', (event) => {
+  event.stopPropagation()
+})
+
+
+
 $.when('click', '[data-close]', hideModal)
 
 $.style(`
@@ -174,7 +184,11 @@ $.style(`
     display: none;
   }
   & .body {
+    pointer-events: none;
+  }
 
+  & .body > * {
+    pointer-events: all;
   }
   .trap-modal .modal-overlay:before {
     animation: fadein 250ms ease-in-out forwards;

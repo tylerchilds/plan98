@@ -74,7 +74,7 @@ const $ = Self('sketch-pad', {
   strokeRevisory: [],
   background: 'lemonchiffon',
   color: 'dodgerblue',
-  drawer: 'size',
+  drawers: ['size', 'commands'],
   thickness: 4,
   attachments: []
 })
@@ -155,8 +155,8 @@ function update(target) {
   }
 
   {
-    const { drawer } = $.ear()
-    target.dataset.drawer = drawer
+    const { drawers } = $.ear()
+    target.dataset.drawers = drawers.join('+')
   }
 
   {
@@ -273,10 +273,22 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="palette-items" data-menu="edit">
+          <button data-buy>
+            Purchase
+            <span data-tooltip="Seek help from the premium gods">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
           <button data-stroke-color class="bookended-label">
             <span class="color-sample"></span>
             <span>Color</span>
             <span data-tooltip="Change the stroke color">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-enable-music>
+            Music
+            <span data-tooltip="Change the vibe and also schedule what's up next">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
@@ -296,24 +308,101 @@ function mount(target) {
             </div>
           </div>
           <hr>
-          <button data-undo>
-            Undo
-            <span data-tooltip="backstep reality by a single step">
+          <button data-drawer="commands">
+            Commands
+            <span data-tooltip="Things you can just *do*">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
-          <button data-redo>
-            Redo
-            <span data-tooltip="tock the reality clock by a tick">
+          <div>
+            <div data-pocket="commands">
+              <button data-undo data-tooltip="backstep reality by a single step">
+                Undo
+              </button>
+              <button data-redo data-tooltip="tock the reality clock by a tick">
+                Redo
+              </button>
+            </div>
+          </div>
+          <button data-drawer="quit">
+            Quit Menu
+            <span data-tooltip="Toggle thicknoid options">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
-          <button data-enable-music>
-            Music
-            <span data-tooltip="Change the vibe and also schedule what's up next">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
+          <div>
+            <div data-pocket="quit">
+              <button data-journal>
+                Quit
+                <span data-tooltip="Don't ask where your mind exists">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <hr>
+              <button data-wallet>
+                Quit to Wallet
+                <span data-tooltip="Where's ur stuff at and in">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-shell>
+                Quit to Shell
+                <span data-tooltip="Always question everything">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-files>
+                Quit to Files
+                <span data-tooltip="Surf the files in the system">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-mobile>
+                Quit to Mobile
+                <span data-tooltip="What is a mobile device by a pocket sized imagination">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-desktop>
+                Quit to Desktop
+                <span data-tooltip="A metaphor as timeless as the desk itself">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-handheld>
+                Quit to Handheld
+                <span data-tooltip="For the gamers on the go with all the buttons broke">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-console>
+                Quit to Console
+                <span data-tooltip="For when you're not alone and want t/o jam through phones">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <hr>
+              <button data-escape>
+                Escape to Local Context
+                <span data-tooltip="Consider changing your current reality">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-plan98>
+                Escape to Global Context
+                <span data-tooltip="Consider changing our current reality">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+              <button data-violin>
+                Escape to Violin
+                <span data-tooltip="Consider saving all forms of reality">
+                  <sl-icon name="info-circle"></sl-icon>
+                </span>
+              </button>
+
+            </div>
+          </div>
 
           <hr>
           <button data-share>
@@ -334,83 +423,9 @@ function mount(target) {
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
-          <button data-buy>
-            Purchase
-            <span data-tooltip="Seek help from the premium gods">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <button data-help>
             Help
             <span data-tooltip="Seek help from chat">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-journal>
-            Quit
-            <span data-tooltip="Don't ask where your mind exists">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <hr>
-          <button data-wallet>
-            Quit to Wallet
-            <span data-tooltip="Where's ur stuff at and in">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-shell>
-            Quit to Shell
-            <span data-tooltip="Always question everything">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-files>
-            Quit to Files
-            <span data-tooltip="Surf the files in the system">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-mobile>
-            Quit to Mobile
-            <span data-tooltip="What is a mobile device by a pocket sized imagination">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-desktop>
-            Quit to Desktop
-            <span data-tooltip="A metaphor as timeless as the desk itself">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-handheld>
-            Quit to Handheld
-            <span data-tooltip="For the gamers on the go with all the buttons broke">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-console>
-            Quit to Console
-            <span data-tooltip="For when you're not alone and want t/o jam through phones">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <hr>
-          <button data-escape>
-            Escape to Local Context
-            <span data-tooltip="Consider changing your current reality">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-plan98>
-            Escape to Global Context
-            <span data-tooltip="Consider changing our current reality">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-violin>
-            Escape to Violin
-            <span data-tooltip="Consider saving all forms of reality">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
@@ -640,7 +655,24 @@ $.hand('click', '[data-share]', function  (event) {
 $.hand('click', '[data-drawer]', function  (event) {
   event.preventDefault()
   const { drawer } = event.target.dataset
-  $.mouth({ drawer: drawer === $.ear().drawer ?null:drawer })
+
+  const { drawers } = $.ear()
+
+  if(drawers.includes(drawer)) {
+    $.mouth(drawer, (state, payload) => {
+      return {
+        ...state,
+        drawers: [...state.drawers.filter(x => x !== payload)]
+      }
+    })
+  } else {
+    $.mouth(drawer, (state, payload) => {
+      return {
+        ...state,
+        drawers: [...state.drawers, payload]
+      }
+    })
+  }
 })
 
 $.hand('click', '[data-thickness]', function  (event) {
@@ -1355,6 +1387,8 @@ $.eye(`
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
+    background: white;
+    color: black;
   }
 
   & canvas {
@@ -1436,8 +1470,8 @@ $.eye(`
     position: absolute;
     top: 40px;
     left: 40px;
-    max-height: calc(100vh - 40px);
-    max-width: calc(100vw - 40px);
+    max-height: calc(85vh - 40px);
+    max-width: calc(85vw - 40px);
     overflow: auto;
     padding-bottom: 80vh;
   }
@@ -1455,7 +1489,7 @@ $.eye(`
     font-size: 1rem;
     line-height: 1;
     display: inline-flex;
-    padding: .5rem;
+    padding: .5rem 1rem .5rem .5rem;
     gap: .5rem;
     text-align: left;
     background: rgba(255,255,255,.1);
@@ -1476,8 +1510,16 @@ $.eye(`
     display: none;
     background: rgba(255,255,255,.25);
   }
-  &[data-drawer="size"] [data-pocket="size"] {
+  &[data-drawers*="commands"] [data-pocket="commands"],
+  &[data-drawers*="size"] [data-pocket="size"] {
     display: flex;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  &[data-drawers*="quit"] [data-pocket="quit"] {
+    display: flex;
+    flex-direction: column;
     max-width: 100%;
     overflow-x: auto;
   }
@@ -1868,7 +1910,7 @@ function porlockCycle() {
   }
 
   playSwipeSound()
-  $.teach({ porlockIndex: next })
+  $.mouth({ porlockIndex: next })
 }
 
 $.hand('click', '[data-welcome-continue]', (event) => {
@@ -1877,7 +1919,7 @@ $.hand('click', '[data-welcome-continue]', (event) => {
 
 function porlockSkip() {
   playSwipeSound()
-  $.teach({ mode: modes.system })
+  $.mouth({ mode: modes.system })
 }
 
 $.hand('click', '[data-welcome-skip]', (event) => {
@@ -2092,21 +2134,21 @@ function debounce(callback, wait) {
   };
 }
 
-$.when('input', '[data-bind]', (event) => {
-  $.teach({[event.target.name]: event.target.value })
+$.hand('input', '[data-bind]', (event) => {
+  $.mouth({[event.target.name]: event.target.value })
 })
 
-$.when('focus', '[name="messageText"]', (event) => {
-  $.teach({ messageHeight: event.target.scrollHeight })
+$.hand('focus', '[name="messageText"]', (event) => {
+  $.mouth({ messageHeight: event.target.scrollHeight })
 });
 
-$.when('keydown', '[name="messageText"]', (event) => {
-  $.teach({ messageHeight: event.target.scrollHeight })
+$.hand('keydown', '[name="messageText"]', (event) => {
+  $.mouth({ messageHeight: event.target.scrollHeight })
 });
 
-$.when('input', '[name="messageText"]', (event) => {
+$.hand('input', '[name="messageText"]', (event) => {
   const { value } = event.target;
-  $.teach({ messageDraft: value, messageHeight: event.target.scrollHeight })
+  $.mouth({ messageDraft: value, messageHeight: event.target.scrollHeight })
 });
 
 
@@ -2136,13 +2178,13 @@ function handleFiles(files) {
     attachments: fileMeta
   })
 
-  $.teach({ attachments: fileMeta, overlay: overlays.publish, activeMenu: null })
+  $.mouth({ attachments: fileMeta, overlay: overlays.publish, activeMenu: null })
 
   startAttachmentUpload()
 }
 
 function startAttachmentUpload() {
-  const { attachments } = $.learn()
+  const { attachments } = $.ear()
   const keycard = getKeycard()
 
   if(attachments.length > 0 && keycard) {
@@ -2190,28 +2232,28 @@ function upload(attachment) {
 
 }
 
-$.when('dragenter', '.file-region', (event) => {
+$.hand('dragenter', '.file-region', (event) => {
   event.preventDefault()
   event.stopPropagation()
   const root = event.target.closest($.link)
   root.dataset.hovering = true
 })
 
-$.when('dragover', '.file-region', (event) => {
+$.hand('dragover', '.file-region', (event) => {
   event.preventDefault()
   event.stopPropagation()
   const root = event.target.closest($.link)
   root.dataset.hovering = true
 })
 
-$.when('dragleave', '.file-region', (event) => {
+$.hand('dragleave', '.file-region', (event) => {
   event.preventDefault()
   event.stopPropagation()
   const root = event.target.closest($.link)
   root.dataset.hovering = false
 })
 
-$.when('drop', '.file-region', (event) => {
+$.hand('drop', '.file-region', (event) => {
   event.preventDefault()
   event.stopPropagation()
   const root = event.target.closest($.link)
@@ -2222,10 +2264,10 @@ $.when('drop', '.file-region', (event) => {
   }
 })
 
-$.when('click', '.click-proxy', (event) => {
+$.hand('click', '.click-proxy', (event) => {
   event.target.nextElementSibling.click()
 })
 
-$.when('change', '[name="files"]', (event) => {
+$.hand('change', '[name="files"]', (event) => {
   handleFiles(event.target.files);
 });

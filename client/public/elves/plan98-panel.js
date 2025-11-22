@@ -42,7 +42,9 @@ $.draw(() => {
       <div class="panel">
         <div class="body">
           <div class="action-wrapper">
-            <button data-close>&#x2718;</button>
+            <button data-close class="standard-button bias-generic -small -round" type="reset">
+              <sl-icon name="x-lg"></sl-icon>
+            </button>
           </div>
           ${panelHeader}
           ${body}
@@ -100,6 +102,7 @@ window.hidePanel = hidePanel
 $.when('click', '.panel', () => {
   hidePanel()
 })
+
 $.when('click', '[data-close]', hidePanel)
 
 $.style(`
@@ -195,28 +198,6 @@ $.style(`
   & .action-wrapper {
     pointer-events: none;
     text-align: right;
-  }
-
-  & [data-close] {
-    pointer-events: all;
-    background: transparent;
-    border: none;
-    opacity: .65;
-    height: 2rem;
-    width: 2rem;
-    font-size: 1.25rem;
-    transition: color 200ms;
-    background: black;
-    color: white;
-    border-radius: 100%;
-    display: inline-grid;
-    place-content: center;
-  }
-
-  & [data-close]:hover,
-  & [data-close]:focus {
-    cursor: pointer;
-    opacity: 1;
   }
 
   & [data-close] * {

@@ -1352,6 +1352,18 @@ sillonious-brand > xml-html {
   padding: 3rem .5rem 3rem;
 }
 
+.journey.-stage,
+.wizard.-stage {
+  background: white;
+}
+
+.journey {
+  margin: 0 auto;
+  max-width: 768px;
+  padding: 3rem .5rem 3rem;
+}
+
+
 .form-title {
   margin-top: 2rem;
   font-size: 2rem;
