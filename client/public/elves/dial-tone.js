@@ -44,7 +44,7 @@ function shuffle(a) {
 const midiCodes = [...new Array(116)].map((_, i) => i)
 
 $.draw(() => {
-  const { root } = $.learn()
+  const { root, meander } = $.learn()
   const list = Object.keys(instruments).map((item) => {
     return `
       <option value="${item}" ${current === instruments[item] ? 'selected="true"':''}>
@@ -63,14 +63,14 @@ $.draw(() => {
 
   return `
     <div class="controls">
-      <select class="samples">
+      <select class="samples standard-input -smol">
         ${list}
       </select>
-      <select class="notes">
+      <select class="notes standard-input -smol">
         ${notes}
       </select>
-      <button data-meander>
-        ??
+      <button data-meander class="standard-button -smol">
+        ${meander?'Lock':'Unlock'}
       </button>
     </div>
     <div class="the-compass">
@@ -103,8 +103,9 @@ $.style(`
   & {
     display: block;
     height: 100%;
-    background: linear-gradient(-25deg, rgba(0,0,0,.85), rgba(0,0,0,.5)),#54796d;
+    background: black;
     position: relative;
+    padding: 2rem;
   }
 
   &.headless .controls {
@@ -130,11 +131,11 @@ $.style(`
     border: none;
     border-radius: 100%;
     color: white;
-    background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.25) 25%);
+    background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.75) 25%);
   }
 
   & .the-compass button:hover {
-    background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(255,255,255,.25) 25%);
+    background-image: radial-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5) 25%, rgba(0,0,0,0) 25%);
   }
 
   & .the-compass img {
@@ -150,40 +151,40 @@ $.style(`
   & .the-compass .plus-2 {
     grid-row: 3 / 5;
     grid-column: 5 / 7;
-    background-color: mediumseagreen;
+    background-color: var(--green);
   }
 
   & .the-compass .minus-2 {
     grid-row: 3 / 5;
     grid-column: 1 / 3;
-    background-color: yellow;
+    background-color: var(--yellow);
   }
 
   & .the-compass .minus-7 {
     grid-row: 1 / 3;
     grid-column: 2 / 4;
-    background-color: red;
+    background-color: var(--red);
     transform: translateY(13%);
   }
 
   & .the-compass .plus-7 {
     grid-row: 1 / 3;
     grid-column: 4 / 6;
-    background-color: orange;
+    background-color: var(--orange);
     transform: translateY(13%);
   }
 
   & .the-compass .minus-5 {
     grid-row: 5 / 7;
     grid-column: 2 / 4;
-    background-color: dodgerblue;
+    background-color: var(--blue);
     transform: translateY(-13%);
   }
 
   & .the-compass .plus-5 {
     grid-row: 5 / 7;
     grid-column: 4 / 6;
-    background-color: mediumpurple;
+    background-color: var(--purple);
     transform: translateY(-13%);
   }
 
@@ -197,25 +198,13 @@ $.style(`
     display: grid;
     grid-template-columns: 1fr auto auto;
     position: absolute;
+    gap: .5rem;
+    padding: 4px;
     top: 0;
     left: 0;
     right: 0;
     z-index: 1;
     height: 2rem;
-  }
-  & .controls select {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,.65);
-    border-radius: 0;
-    color: rgba(255,255,255,.65);
-    padding: .5rem;
-  }
-
-  & .controls button {
-    background: transparent;
-    color: rgba(255,255,255,.65);
-    border: 1px solid rgba(255,255,255,.65);
-    padding: 0 .5rem;
   }
 `)
 

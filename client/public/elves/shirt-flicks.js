@@ -159,13 +159,16 @@ function patchByMode(target) {
 
 function autoplay(target) {
   const activeShirt = target.querySelector('.shirt.center [data-trailer]')
+  const theater = target.querySelector('[data-dom="theater"]')
 
-  if(!activeShirt) return
+  if(!activeShirt) {
+    if(theater) theater.innerHTML = ''
+
+    return
+  }
 
   const { trailer } = activeShirt.dataset
-
-  const theater = target.querySelector('[data-dom="theater"]')
-  if(target.trailer !== trailer) {
+    if(target.trailer !== trailer) {
     target.trailer = trailer
     theater.innerHTML = ''
     theater.innerHTML = `
@@ -175,7 +178,6 @@ function autoplay(target) {
         </div>
       </div>
     `
-
   }
 }
 
@@ -213,7 +215,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <iframe src="/app/time-machine"></iframe>
+          <iframe src="/app/sketch-pad"></iframe>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
@@ -329,8 +331,10 @@ function shirtPosition(xIndex, yIndex) {
 $.when('click', '[data-options]', toggleMode)
 function toggleMode (event) {
   const { mode } = $.learn()
-  const newMode = mode !== modes.settings ? modes.settings : modes.system
+  const showSettings = mode !== modes.settings
+  const newMode = showSettings ? modes.settings : modes.system
   $.teach({ mode: newMode })
+  // toggle play
 }
 
 $.when('click', '[data-browse]', function launchInstallWizard (event) {
@@ -952,13 +956,6 @@ $.style(`
     z-index: 3;
     margin-bottom: 1rem;
     padding: .5rem;
-  }
-
-  & .system-button {
-    max-width: 100%;
-    width: 240px;
-    position: relative;
-    z-index: 3;
   }
 
   & .action-area {

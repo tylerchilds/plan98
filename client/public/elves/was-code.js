@@ -51,6 +51,14 @@ $.when('click', '.preview', (event) => {
   self.open(src, '_blank')
 })
 
+$.when('click', '.launch', (event) => {
+  const { src } = event.target.dataset
+
+  self.top.location.href = src
+})
+
+
+
 $.when('click', '.debug', (event) => {
   let console = document.body.querySelector('plan98-console')
   if(!console) {
@@ -114,14 +122,30 @@ $.draw(target => {
         </div>
       </div>
       <div class="menu-item">
-        <button data-menu-target="file" class="${activeMenu === 'file'?'active':''}">
+        <button data-menu-target="view" class="${activeMenu === 'view'?'active':''}">
           View
         </button>
-        <div class="menu-actions" data-menu="file">
-          <button class="preview" data-src="${src}">Raw</button>
+        <div class="menu-actions" data-menu="view">
+          <button class="preview" data-src="${src}">Source</button>
           <button class="debug" data-src="${src}">Debugger</button>
         </div>
       </div>
+      <div class="menu-item">
+        <button data-menu-target="launch" class="${activeMenu === 'launch'?'active':''}">
+          Launch
+        </button>
+        <div class="menu-actions" data-menu="launch">
+          <button class="launch" data-src="/app/ur-shell">Shell</button>
+          <button class="launch" data-src="/app/plan98-wallet">Wallet</button>
+          <button class="launch" data-src="/app/file-surf">Files</button>
+          <button class="launch" data-src="/app/door-man">Desktop</button>
+          <button class="launch" data-src="/app/mobile-device">Mobile</button>
+          <button class="launch" data-src="/app/paper-pocket">Handheld</button>
+          <button class="launch" data-src="/app/couch-coop">Console</button>
+          <button class="launch" data-src="/app/shirt-flicks">Shirt</button>
+        </div>
+      </div>
+
     `
 
     if(stack) {
@@ -371,6 +395,16 @@ $.style(`
   & .cm-editor {
     height: 100%;
     overflow: auto;
+  }
+
+  & .cm-scroller {
+    --v-font-wght: 400;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    --v-font-casl: 1;
+    --v-font-mono: 1;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive" !important;
   }
 
   & .select {

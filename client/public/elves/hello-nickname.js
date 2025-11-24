@@ -1,11 +1,11 @@
-import module from '@silly/tag'
+import { Self } from '@plan98/types'
 
-const $ = module('hello-nickname', {
-  'nickname': 'Uncle Toto'
+const $ = Self('hello-nickname', {
+  'nickname': 'Silly'
 })
 
-$.draw(() => {
-  const { nickname } = $.learn()
+$.head(() => {
+  const { nickname } = $.ear()
 
   return `
     <demo>
@@ -18,12 +18,18 @@ $.draw(() => {
   `
 })
 
-$.when('keyup', 'input', event => {
+$.hand('input', 'input', event => {
   const nickname = event.target.value;
-  $.teach({ nickname })
+  $.mouth({ nickname })
 })
 
-$.style(`
+function preventDefault(event) {
+  event.preventDefault()
+}
+
+$.hand('submit', 'form', preventDefault)
+
+$.eye(`
   & {
     display: block;
     margin: 0 auto;

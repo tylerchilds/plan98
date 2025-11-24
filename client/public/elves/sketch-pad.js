@@ -616,7 +616,9 @@ $.hand('input', 'plan98-palette', (event) => {
 
 $.hand('click', '[data-buy]', function  (event) {
   event.preventDefault()
-  window.location.href = "/?world=thelanding.page"
+  showModal(`<quick-blog></quick-blog>`, {
+    blockExit: false
+  })
 })
 
 $.hand('click', '[data-close]', function  (event) {
@@ -894,10 +896,86 @@ function tutorial(target) {
             </div>
           </div>
           <div class="frame-body">
-            <div style="padding: 1rem; max-width: 55ch; margin: 0 auto; height: 100%; display: flex; flex-direction: column;">
-              <div class="welcome-text">
-                A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
+            <div style="padding: 1rem; max-width: 55ch; margin: 0 auto; height: 100%; display: flex; gap: 1rem; flex-direction: column;">
+              <div>
+                <plan98-icon></plan98-icon>
               </div>
+              <p>
+                <strong>The imagination:</strong> <strike>Space!</strike> <u>Time!</u> <sup>Sight!</sup> <sub>Sound!</sub> <em>Mind!</em>
+              </p>
+              <hr>
+              <h1>
+                The ancients sing (5)
+              </h1>
+              <h2>
+                Good Luck (2)
+              </h2>
+              <h3>
+                When their worlds would fling (5)
+              </h3>
+              <dial-tone></dial-tone>
+              <h4>Take care (2) </h4>
+              <h5>
+                The ancients call (5)
+              </h5>
+              <h6>
+                When they falter at the fall (7)
+              </h6>
+              <code>
+                When they ... at the wall (5)
+              </code>
+              <img src="/public/cdn/sillyz.computer/reality-somehow.jpeg">
+              <p>
+                A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
+              </p>
+              <img src="/public/cdn/sillyz.computer/circus-dog.jpeg">
+
+              <ul>
+                <li>Art</li>
+                <li>Music</li>
+                <li>Coding</li>
+              </ul>
+
+              <div>
+                <plan98-palette style="height: 50vh"></plan98-palette>
+              </div>
+
+              <div>
+                <was-code style="height: 50vh" src="/public/elves/hello-nickname.js"></was-code>
+              </div>
+
+              <div>
+                <hello-nickname></hello-nickname>
+              </div>
+
+              <h6>
+                Tips for rebuilding a "Fenway-like" Production from scratch
+              </h6>
+
+              <ol>
+                <li>
+                  Start with a Wall
+                <li>
+                  Like a really BIG wall
+                <li>
+                  Call it "The [Redacted Color] Monster"
+                <li>
+                  Say "Nobody could hammer a homer past this guy
+                <li>
+                  And when they say, "Where's home plate?"
+                <li>
+                  You says, "Over there, but in the future"
+                <li>
+                  And ya tap ya bat on the ground and ya close one eye and ya point
+                <li>
+                  And then before they can question all the "rights"
+                <li>
+                  You say, "So let's take a quick photo here and you can take it home. No charge. If you like it, think about how you wanna help out here at the park."
+                <li>
+                  And you put on the suit and you don't say anything at all
+                <li>
+                  You just come out from behind the wall and everyone has a ball
+              </ol>
             </div>
           </div>
           <div class="frame-footer">
@@ -972,9 +1050,9 @@ function share(target) {
             </div>
           </div>
           <div class="draft-footer">
-            <div class="welcome-text">
+            <p>
               Hey, listen! Copy this link and share it online or let someone in person scan it to link up and "Sketch" together!
-            </div>
+            </p>
           </div>
         </div>
       </div>
@@ -1401,7 +1479,7 @@ $.eye(`
     transition: opacity 1000ms ease-in-out;
   }
 
-  & hr {
+  & .palette-items hr {
     border-top: 1px solid rgba(255,255,255, .15);
     margin: .25rem 0;
   }
@@ -1513,7 +1591,8 @@ $.eye(`
   &[data-drawers*="commands"] [data-pocket="commands"],
   &[data-drawers*="size"] [data-pocket="size"] {
     display: flex;
-    max-width: 100%;
+    width: 100%;
+    max-width: 320px;
     overflow-x: auto;
   }
 

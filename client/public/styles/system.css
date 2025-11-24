@@ -240,6 +240,89 @@ iframe {
   display: block;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  --v-font-mono: 0;
+  --v-font-casl: 0;
+  --v-font-slnt: 0;
+  --v-font-crsv: 0;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  t
+}
+
+h1 {
+  font-size: 3rem;
+  --v-font-wght: 1000;
+  --v-font-mono: .1;
+}
+
+h2 {
+  font-size: 2.5rem;
+  --v-font-wght: 800;
+  --v-font-mono: .2;
+}
+
+h3 {
+  font-size: 2.25rem;
+  --v-font-wght: 600;
+  --v-font-slnt: -3;
+  --v-font-crsv: 0.2;
+  --v-font-mono: .3;
+}
+
+h4 {
+  font-size: 2rem;
+  --v-font-wght: 400;
+  --v-font-slnt: -7;
+  --v-font-crsv: 0.4;
+  --v-font-mono: .4;
+}
+
+h5 {
+  font-size: 1.75rem;
+  --v-font-wght: 200;
+  font-weight: 200;
+  --v-font-slnt: -11;
+  --v-font-crsv: 0.6;
+  --v-font-mono: .5;
+}
+
+h6 {
+  font-size: 1.5rem;
+  --v-font-wght: 100;
+  --v-font-slnt: -15;
+  --v-font-crsv: 1;
+  --v-font-casl: 1;
+  --v-font-mono: 1;
+}
+
+p {
+  line-height: 2;
+  margin: 0;
+  padding: 0;
+}
+
+code {
+  background: #282828;
+  color: #ebdbb2;
+  --v-font-wght: 400;
+  --v-font-slnt: -15;
+  --v-font-crsv: 1;
+  --v-font-casl: 1;
+  --v-font-mono: 1;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  padding: 4px .5rem;
+}
+
 a:link {
 	color: var(--color-link);
 }

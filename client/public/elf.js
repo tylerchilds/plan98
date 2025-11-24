@@ -103,12 +103,56 @@ export default function elf(link, initialState = {}) {
   teach(link, initialState)
 
   return {
-    link,
+    // for the classical progammers
+    model: learn.bind(this, link),
+    view: draw.bind(this, link),
+    controller: teach.bind(this, link),
+
+    // link is a human that is permitted to be an elf per order of the deku tree
+    link: link,
+    elf: link,
+    table: link,
+    root: link,
+    tag: link,
+    selector: link,
+    body: link,
+
+    // link has an ear to listen to the peoples of zora, goron, korok, kokiri, rito, gerudo, hyrule, et al
+    ear: learn.bind(this, link),
     learn: learn.bind(this, link),
+    get: learn.bind(this, link),
+    read: learn.bind(this, link),
+    object: learn.bind(this, link),
+    subject: learn.bind(this, link),
+    predicate: learn.bind(this, link),
+
+    // link has a head to keep all his facts straight in the current moment in time
+    head: draw.bind(this, link),
     draw: draw.bind(this, link),
+    render: draw.bind(this, link),
+
+    // link has an eye through which to spy reality
+    eye: style.bind(this, link),
     style: style.bind(this, link),
+    flair: style.bind(this, link),
+    skin: style.bind(this, link),
+    fashion: style.bind(this, link),
+
+    // link has a hand to move the pieces into place at his command
+    hand: when.bind(this, link),
     when: when.bind(this, link),
+    on: when.bind(this, link),
+    listen: when.bind(this, link),
+
+    // link has a mouth that he lets others stuff with their hopes and dreams
+    mouth: teach.bind(this, link),
     teach: teach.bind(this, link),
+    set: teach.bind(this, link),
+    write: teach.bind(this, link),
+    put: teach.bind(this, link),
+    post: teach.bind(this, link),
+    patch: teach.bind(this, link),
+    delete: teach.bind(this, link),
   }
 }
 

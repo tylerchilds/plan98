@@ -13,6 +13,6 @@ $.draw(() => {
   });
 
   return `
-    <was-code src="/public/cdn/vim-tutor.txt" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
+    <was-code src="/public/plan98.js" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
   `
 })
