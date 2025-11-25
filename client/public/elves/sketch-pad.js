@@ -878,9 +878,7 @@ function publish(target) {
 
 
 function tutorial(target) {
-  const { viewMetadata } = $.ear()
-  const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
-  const copyId = self.crypto.randomUUID()
+  const label = target.getAttribute('label') || 'Pluto'
 
   return `
     <div class="overlay-background">
@@ -901,8 +899,17 @@ function tutorial(target) {
                 <plan98-icon></plan98-icon>
               </div>
               <p>
-                <strong>The imagination:</strong> <strike>Space!</strike> <u>Time!</u> <sup>Sight!</sup> <sub>Sound!</sub> <em>Mind!</em>
+                <center>
+                  <strong>The imagination:</strong> <strike>Space!</strike> <u>Time!</u> <sup>Sight!</sup> <sub>Sound!</sub> <em>Mind!</em>
+                </center>
               </p>
+              <qr-code src="${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+              <div>
+                <strong>${label}</strong><br/>
+                <em>Quadrant:</em> ${window.location.origin} <code>/app/</code><br/>
+                <em>Sector:</em> ${$.link} <code>?id=</code><br/>
+                <em>Planet:</em> ${target.closest($.link).id} <code>&label=${label}</code><br/>
+              </div>
               <hr>
               <h1>
                 The ancients sing (5)
@@ -922,7 +929,7 @@ function tutorial(target) {
                 When they falter at the fall (7)
               </h6>
               <code>
-                When they ... at the wall (5)
+                Regroup at the wall (5)
               </code>
               <img src="/public/cdn/sillyz.computer/reality-somehow.jpeg">
               <p>
@@ -960,7 +967,7 @@ function tutorial(target) {
                 <li>
                   Call it "The [Redacted Color] Monster"
                 <li>
-                  Say "Nobody could hammer a homer past this guy
+                  Say "Nobody could hammer a homer past this guy"
                 <li>
                   And when they say, "Where's home plate?"
                 <li>
@@ -998,6 +1005,7 @@ function share(target) {
   const { viewMetadata } = $.ear()
   const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
   const copyId = self.crypto.randomUUID()
+  const label = target.getAttribute('label') || 'Pluto'
 
   const actionArea = `
     <div class="action-area">
@@ -1031,7 +1039,7 @@ function share(target) {
           <div class="memex-body draft-body">
             <div class="overlay-background">
               <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
-                <qr-code src="${shareLink}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+                <qr-code src="${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
               </div>
             </div>
           </div>
@@ -1051,7 +1059,7 @@ function share(target) {
           </div>
           <div class="draft-footer">
             <p>
-              Hey, listen! Copy this link and share it online or let someone in person scan it to link up and "Sketch" together!
+              Hey, listen! Copy this link and share it online or let someone in person scan it to link up and <button class="standard-button -smol" data-help>"Sketch"</button> together!
             </p>
           </div>
         </div>
