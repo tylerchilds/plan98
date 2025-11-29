@@ -133,6 +133,10 @@ function map() {
   }
 }
 
+function render(tag, x) {
+  return "<"+tag+">"+x+"</"+tag+">"
+}
+
 map()
 view('south')
 view('north')
@@ -146,6 +150,7 @@ view('waffles')
 map()
 view('waffles')
 map()
+render('static-code', JSON.stringify(map(), '', 2))
   `,
   output: null
 }
@@ -196,7 +201,7 @@ function render(target) {
     <div class="action-bar">
       <button style="float: right; margin-left: 1rem;" data-run class="standard-button">Run</button>
       <button style="float: right;" data-edit class="standard-button -outlined hide-full">Edit</button>
-      <div class="title">JS Repl</div>
+      <div class="title">Elf Tunnel A</div>
     </div>
     <div class="input ${output?'invisible':'visible'}">
       <textarea
@@ -207,7 +212,7 @@ function render(target) {
       ></textarea>
     </div>
     <div class="output ${output?'visible':'invisible'}">
-      <div class="textarea">${output?JSON.stringify(output, '', 2) : ''}</div>
+      <div class="textarea">${output}</div>
     </div>
   `
 }

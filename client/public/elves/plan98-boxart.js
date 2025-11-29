@@ -31,7 +31,7 @@ function readyCountdown() {
   const nextTime = timer - 1
 
   if(nextTime < 0) {
-    self.location.href = '/app/ur-shell?src=/app/hello-elvish?elf=saga-crawler'
+    self.location.href = '/app/saga-crawler'
     return
   }
 
@@ -174,7 +174,7 @@ function diffuse(event) {
 }
 
 function start(event) {
-  self.location.href = '/app/sketch-pad'
+  self.location.href = '/app/saga-crawler'
 }
 
 $.style(`

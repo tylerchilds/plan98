@@ -776,7 +776,7 @@ $.hand('click', '[data-violin]', function  (event) {
 
 $.hand('click', '[data-prequel]', function  (event) {
   event.preventDefault()
-  window.location.href = '/app/silly-wizard'
+  window.location.href = '/app/plan98-boxart'
 })
 
 function friends(target) {
@@ -911,31 +911,10 @@ function tutorial(target) {
                 <em>Planet:</em> ${target.closest($.link).id} <code>&label=${label}</code><br/>
               </div>
               <hr>
-              <h1>
-                The ancients sing (5)
-              </h1>
-              <h2>
-                Good Luck (2)
-              </h2>
-              <h3>
-                When their worlds would fling (5)
-              </h3>
-              <dial-tone></dial-tone>
-              <h4>Take care (2) </h4>
-              <h5>
-                The ancients call (5)
-              </h5>
-              <h6>
-                When they falter at the fall (7)
-              </h6>
-              <code>
-                Regroup at the wall (5)
-              </code>
               <img src="/public/cdn/sillyz.computer/reality-somehow.jpeg">
               <p>
                 A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
               </p>
-              <img src="/public/cdn/sillyz.computer/circus-dog.jpeg">
 
               <ul>
                 <li>Art</li>
@@ -945,6 +924,78 @@ function tutorial(target) {
 
               <div>
                 <plan98-palette style="height: 50vh"></plan98-palette>
+              </div>
+
+              <img src="/public/cdn/sillyz.computer/slides/pitch/01.jpg">
+              <p>
+                A "Stack" is an organized pile to make everyone a little taller
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/02.jpg">
+              <p>
+                Silicon is essentially sand, is time, is space, is reality.
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/03.jpg">
+              <p>
+                "Silly" is the thesis that people can tunnel through paper
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/04.jpg">
+              <p>
+                An Elf Tunnel allows the future to directly influece the past
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/05.jpg">
+              <p>
+                By leveraging technology that existed in the past with modern practices
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/06.jpg">
+              <p>
+                By making the memetics and mimetics understandable by children
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/07.jpg">
+              <p>
+                If I said "AI drew this slide". You know I'd be lying.
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/08.jpg">
+              <p>
+                Which is why people prefer me and my elves to "Intelligence"
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/09.jpg">
+              <p>
+                The "hand" is the most complex subroutine. Get this, get it.
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/10.jpg">
+              <p>
+                Practice makes perfect and no detail should be unaccounted for.
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/11.jpg">
+              <p>
+                I wrote a formulaic proof of my own existence
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/12.jpg">
+              <p>
+                To weave that creativity into a live-action circus narrative
+              </p>
+              <hr>
+              <img src="/public/cdn/sillyz.computer/slides/pitch/13.jpg">
+              <p>
+                Where you can play pretend too: <a href="javascript:;" data-prequel>with this power</a>, what will you do?
+              </p>
+              <hr>
+
+              <div>
+                <div style="display: grid; height: 100vh; place-content: center;">
+                  <a href="/app/hello-elvish?elf=js-repl">Tunnel Practice</a>
+                </div>
               </div>
 
               <div>
@@ -983,6 +1034,51 @@ function tutorial(target) {
                 <li>
                   You just come out from behind the wall and everyone has a ball
               </ol>
+
+              <h1>
+                The ancients sing (5)
+              </h1>
+              <h2>
+                Good Luck (2)
+              </h2>
+              <h3>
+                When their worlds would fling (5)
+              </h3>
+              <dial-tone></dial-tone>
+              <h4>Take care (2) </h4>
+              <h5>
+                The ancients call (5)
+              </h5>
+              <h6>
+                When they falter at the fall (7)
+              </h6>
+              <code>
+                Regroup at the wall (5)
+              </code>
+
+              <img src="/public/cdn/sillyz.computer/circus-dog.jpeg">
+
+              <h2>Author's Note</h2>
+
+              <p>
+                The "Silly Stack" is not a joke. It is a purely functional solution that was designed and engineered to appear like a joke.
+              </p>
+
+              <p>
+                To avoid the trope of being a "just kidding" jokester, I owned the bit. It was designed to appear to fail.
+              </p>
+
+              <p>
+                It would be far to easy to simply fail and say, "I meant to do that." and type-cast myself as a "just kidding" type.
+              </p>
+
+              <p>
+                I bravely walked with undeserved self-confidence claiming to carry the world's most powerful paper personal computer.
+              </p>
+
+              <p>
+                That meant nothing to anybody else. Until.
+              </p>
             </div>
           </div>
           <div class="frame-footer">
