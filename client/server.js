@@ -568,6 +568,7 @@ function template(body) {
           "@silly/tag": "/public/module.js",
           "@silly/elf": "/public/elf.js",
           "@silly/saga": "/public/saga.js",
+          "@silly/cache": "/public/cache.js",
           "@plan98/types": "/public/types.js",
           "@plan98/elf": "/public/plan98.js",
           "@plan98/app": "/public/plan98.js",

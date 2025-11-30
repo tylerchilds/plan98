@@ -266,7 +266,7 @@ function modules({ registry }) {
     let definable = true
     await import(url).catch((e) => {
       definable = false
-      console.error(e)
+      console.error(url, e)
     })
     try {
       definable = definable && document.querySelector(tag) && document.querySelector(tag).matches(':not(:defined)')
