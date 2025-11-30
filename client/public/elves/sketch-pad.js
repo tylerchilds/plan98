@@ -1080,7 +1080,9 @@ function tutorial(target) {
                 That meant nothing to anybody else. Until.
               </p>
 
-              <world-map></world-map>
+              <div>
+                <iframe src="/app/world-map" style="display: block; height: 50vh;"></world-map>
+              </div>
             </div>
           </div>
           <div class="frame-footer">
