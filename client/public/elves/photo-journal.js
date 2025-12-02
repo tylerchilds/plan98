@@ -1,4 +1,6 @@
-import { Self, Cache } from '@plan98/types'
+import { Self } from '@plan98/types'
+import Cache from '@silly/cache'
+
 import $sketchPad from './sketch-pad.js'
 
 const elf = 'photo-journal'
