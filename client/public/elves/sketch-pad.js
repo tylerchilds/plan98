@@ -79,6 +79,8 @@ const $ = Self('sketch-pad', {
   attachments: []
 })
 
+export default $
+
 function engine(target) {
   const root = target.closest($.link)
   const canvas = root.querySelector('canvas')
@@ -562,6 +564,13 @@ function mount(target) {
         })
       }
     })
+  }
+
+  const view = target.getAttribute('view')
+  if(overlays[view]) {
+    $.teach({ overlay: overlays[view] })
+  } else if(view === 'normal') {
+    $.teach({ overlay: null })
   }
 
   const id = target.id
@@ -1229,7 +1238,7 @@ function snapshot(target) {
 
   const data = { src: image, strokeHistory, strokeRevisory }
 
-  console.log({ image })
+  $.mouth({ image })
 
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
@@ -1354,11 +1363,7 @@ $.hand('click', '[data-redo]', function redoDraw (event) {
   })
 
   redraw(event.target)
-
-  const { src } = engine(event.target)
-  if(src) {
-    snapshot(event.target)
-  }
+  snapshot(event.target)
 })
 
 
@@ -1478,9 +1483,7 @@ function end (e) {
 
   lineWidth = 0
 
-  if(src) {
-    snapshot(event.target)
-  }
+  snapshot(event.target)
 };
 
 const paneByTarget = (target) => {
