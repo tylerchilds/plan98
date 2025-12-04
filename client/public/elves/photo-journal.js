@@ -5,8 +5,6 @@ import $sketchPad, { resetSketchPad } from './quick-sketch.js'
 
 const elf = 'photo-journal'
 
-const cache = Cache(elf)
-
 const $ = Self(elf, {
   libraryIndex: null,
   gallery: []
@@ -43,10 +41,11 @@ $.draw((target) => {
     {
       if(!target.mounted) {
         target.mounted = true
+        target.cache = Cache(target.id)
         if(src) {
           $.teach({ gallery: [] })
 
-          cache.get(src).then(data => {
+          target.cache.get(src).then(data => {
             if(data) {
               $.mouth(JSON.parse(data))
             }
@@ -67,7 +66,7 @@ $.draw((target) => {
         const sketchSrc = src + '/' + libraryIndex
 
         surface.innerHTML = `
-          <quick-sketch view="normal" src="${sketchSrc}"></quick-sketch>
+          <quick-sketch id="/${$.link}/${target.id}" view="normal" src="${sketchSrc}"></quick-sketch>
         `
       }
     }
@@ -80,7 +79,7 @@ $.draw((target) => {
         target.galleryLength = gallery.length
         node.innerHTML = `
           <div class="first-button context"></div>
-          ${gallery.map(embed).join('')}
+          ${gallery.map(embed(target)).join('')}
         `
       }
     }
@@ -106,7 +105,8 @@ $.when('click', '[data-cancel]', (event) => {
 })
 
 $.when('click', '[data-save]', (event) => {
-  const src = event.target.closest($.link).getAttribute('src') || '/'
+  const root = event.target.closest($.link)
+  const src = root.getAttribute('src') || '/'
   const { libraryIndex } = $.learn()
   const { image } = $sketchPad.ear()
   $.teach({
@@ -114,15 +114,15 @@ $.when('click', '[data-save]', (event) => {
     image
   }, splice)
   $.teach({ libraryIndex: null })
-  persist(src)
+  persist(root, src)
 })
 
-async function persist(src) {
+async function persist(target, src) {
   const { gallery } = $.learn()
   const data = { gallery }
 
   // Attempt to upload to server
-  await cache.put(src, JSON.stringify(data), { type: 'application/json' })
+  await target.cache.put(src, JSON.stringify(data), { type: 'application/json' })
     .catch(error => { console.warn(error) });
 }
 
@@ -135,17 +135,19 @@ function splice(state, payload) {
   }
 }
 
-function embed(image, index) {
-  return `
-    <div class="context">
-      <button
-        class="snippet"
-        data-index="${index}"
-      >
-        <cached-image key="quick-sketch" src="${image}"></cached-image>
-      </button>
-    </div>
-  `
+function embed(target) {
+  return function (image, index) {
+    return `
+      <div class="context">
+        <button
+          class="snippet"
+          data-index="${index}"
+        >
+          <cached-image key="/${$.link}/${target.id}" src="${image}"></cached-image>
+        </button>
+      </div>
+    `
+  }
 }
 
 $.when('click', '[data-index]', (event) => {
@@ -229,7 +231,7 @@ $.style(`
   }
 
   & .snippet {
-    background: lemonchiffon;
+    background: black;
     box-shadow: 0px 1px 2px 0px rgba(0,0,0,.85);
     padding: .5rem;
     transition: transform ease-in-out 100ms;
@@ -267,7 +269,7 @@ $.style(`
   }
 
   & .portal:hover {
-    background: lemonchiffon;
+    background: rgba(255,255,255,.1);
     box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5);
     transform: scale(1.01);
     opacity: 1;

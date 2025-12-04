@@ -1,6 +1,4 @@
 import Self from '@plan98/elf'
-import diffHTML from 'diffhtml'
-import { showModal } from './plan98-modal.js'
 import { toast } from './plan98-toast.js'
 import Cache from '@silly/cache'
 
@@ -46,8 +44,6 @@ const realityCounterWeights = {
 
 const elf = 'quick-sketch'
 
-const cache = Cache(elf)
-
 const initialState = {
   preview: {
     alpha: -1 * realityCounterWeights.alpha+'deg',
@@ -81,6 +77,7 @@ function engine(target) {
   const rectangle = canvas.getBoundingClientRect()
 
   return {
+    root,
     canvas,
     rectangle,
     src: root.getAttribute('src')
@@ -88,10 +85,12 @@ function engine(target) {
 }
 
 $.head(target => {
-  if(target.innerHTML) {
+  if(target.mounted) {
+    if(!target.innerHTML) return
     requestAnimationFrame(() => update(target))
     return null
   }
+  target.mounted = true
   mount(target)
 })
 
@@ -188,7 +187,7 @@ function update(target) {
               </button>
             </div>
             <button data-journal class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
-              <cached-image src="${image}" style="transform: rotateZ(-45deg)"></cached-image>
+              <cached-image key="${target.id}" src="${image}" style="transform: rotateZ(-45deg)"></cached-image>
             </button>
           </div>
         `
@@ -241,22 +240,10 @@ function mount(target) {
           <plan98-icon></plan98-icon>
         </button>
         <div class="palette-items" data-menu="edit">
-          <button data-buy>
-            Purchase
-            <span data-tooltip="Seek help from the premium gods">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <button data-stroke-color class="bookended-label">
             <span class="color-sample"></span>
             <span>Color</span>
             <span data-tooltip="Change the stroke color">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <button data-enable-music>
-            Music
-            <span data-tooltip="Change the vibe and also schedule what's up next">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
@@ -292,105 +279,39 @@ function mount(target) {
               </button>
             </div>
           </div>
-          <button data-drawer="quit">
-            Quit Menu
-            <span data-tooltip="Toggle thicknoid options">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <div>
-            <div data-pocket="quit">
-              <button data-journal>
-                Quit
-                <span data-tooltip="Don't ask where your mind exists">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <hr>
-              <button data-wallet>
-                Quit to Wallet
-                <span data-tooltip="Where's ur stuff at and in">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-shell>
-                Quit to Shell
-                <span data-tooltip="Always question everything">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-files>
-                Quit to Files
-                <span data-tooltip="Surf the files in the system">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-mobile>
-                Quit to Mobile
-                <span data-tooltip="What is a mobile device by a pocket sized imagination">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-desktop>
-                Quit to Desktop
-                <span data-tooltip="A metaphor as timeless as the desk itself">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-handheld>
-                Quit to Handheld
-                <span data-tooltip="For the gamers on the go with all the buttons broke">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-console>
-                Quit to Console
-                <span data-tooltip="For when you're not alone and want t/o jam through phones">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <hr>
-              <button data-escape>
-                Escape to Local Context
-                <span data-tooltip="Consider changing your current reality">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-plan98>
-                Escape to Global Context
-                <span data-tooltip="Consider changing our current reality">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-              <button data-violin>
-                Escape to Violin
-                <span data-tooltip="Consider saving all forms of reality">
-                  <sl-icon name="info-circle"></sl-icon>
-                </span>
-              </button>
-
-            </div>
-          </div>
-
-          <hr>
           <button data-share>
-            Collaborate
+            Share
             <span data-tooltip="Collaborate across the planet!">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
-          <button data-save>
-            Save
-            <span data-tooltip="Save this sketck to your most recent memex">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <button data-enable-publish>
-            Publish
+            Metadata
             <span data-tooltip="Publish this so that your friends can see it">
               <sl-icon name="info-circle"></sl-icon>
             </span>
           </button>
+          <hr>
+          <button data-new>
+            Clear
+            <span data-tooltip="Wipe the board clean">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
+          <button data-shell>
+            Quit
+            <span data-tooltip="Don't ask where your mind exists">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <button data-plan98>
+            Escape
+            <span data-tooltip="Consider changing our current reality">
+              <sl-icon name="info-circle"></sl-icon>
+            </span>
+          </button>
+          <hr>
           <button data-help>
             Help
             <span data-tooltip="Seek help from chat">
@@ -419,19 +340,6 @@ function mount(target) {
             </span>
           </button>
           <hr>
-          <button data-enable-friends>
-            Friends
-            <span data-tooltip="Stay connected with people you like coloring with.">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
-          <hr>
-          <button data-admin>
-            Admin
-            <span data-tooltip="Securely Enter Admin Area">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
           <hr>
           <button data-crichton>
             Mike Backes Edition
@@ -441,13 +349,6 @@ function mount(target) {
           </button>
           <hr>
           <img src="/public/cdn/sillyz.computer/self-portrait.jpeg">
-          <hr>
-          <button data-new>
-            New
-            <span data-tooltip="Wipe the board clean">
-              <sl-icon name="info-circle"></sl-icon>
-            </span>
-          </button>
         </div>
       </div>
     </div>
@@ -468,15 +369,11 @@ function mount(target) {
         <plan98-palette></plan98-palette>
       </div>
       <div class="overlay-chat">
-        <cool-chat></cool-chat>
         <div class="action-wrapper">
           <button data-close class="standard-button bias-generic -small -round" type="reset">
             <sl-icon name="x-lg"></sl-icon>
           </button>
         </div>
-      </div>
-      <div class="overlay-friends">
-        ${friends(target)}
       </div>
       <div class="overlay-publish">
         <!--will be swapped -->
@@ -489,6 +386,7 @@ function mount(target) {
       </div>
     </div>
   `
+  target.cache = Cache(target.id)
 
   const canvas = document.createElement('canvas')
   self.addEventListener('resize', debounce(resizeCanvas, 50), false);
@@ -515,7 +413,7 @@ function mount(target) {
   resizeCanvas();
 
   if(src) {
-    cache.get(src).then(stringy => {
+    target.cache.get(src).then(stringy => {
       if(stringy) {
         const data = JSON.parse(stringy)
         let strokeHistory = []
@@ -585,13 +483,6 @@ $.hand('click', '[data-root]', (event) => {
 $.hand('input', 'plan98-palette', (event) => {
   const { color } = event.detail
   $.mouth({ color, overlay: 'none' })
-})
-
-$.hand('click', '[data-buy]', function  (event) {
-  event.preventDefault()
-  showModal(`<quick-blog></quick-blog>`, {
-    blockExit: false
-  })
 })
 
 $.hand('click', '[data-close]', function  (event) {
@@ -1031,7 +922,7 @@ $.hand('click', '[data-share]', ({ target }) => share(target))
 $.hand('click', '[data-save]', ({ target }) => save(target))
 
 function snapshot(target) {
-  const { canvas, src } = engine(target)
+  const { root, canvas, src } = engine(target)
   const { strokeHistory, strokeRevisory } = $.ear()
   const dataURL = canvas.toDataURL('image/jpeg');
   const byteCharacters = atob(dataURL.split(',')[1]);
@@ -1049,14 +940,12 @@ function snapshot(target) {
 
   $.mouth({ image })
 
-  // Attempt to upload to server
-  cache.put(src, JSON.stringify(data)).then(response => {
+  root.cache.put(src, JSON.stringify(data)).then(response => {
   }).catch(error => {
     console.warn(error);
   });
 
-  // Attempt to upload to server
-  cache.put(image, byteArray).then(res => {
+  root.cache.put(image, byteArray).then(res => {
     if(res.ok) {
       $.mouth({ image })
     } else {
@@ -1475,7 +1364,6 @@ $.eye(`
     max-height: calc(85vh - 40px);
     max-width: calc(85vw - 40px);
     overflow: auto;
-    padding-bottom: 80vh;
   }
 
   & [data-menu-target].active + .palette-items {
@@ -2034,7 +1922,7 @@ function upload(attachment) {
   const file = STAGED_FILES[attachment.name]
 
   const typedBlob = new Blob([file], { type: file.type })
-  return cache.put(attachment.url, typedBlob)
+  return target.cache.put(attachment.url, typedBlob)
     .then(res => {
       console.debug({ res })
       return res
