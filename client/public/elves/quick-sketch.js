@@ -2,24 +2,7 @@ import Self from '@plan98/elf'
 import diffHTML from 'diffhtml'
 import { showModal } from './plan98-modal.js'
 import { toast } from './plan98-toast.js'
-import $paperPocket, { getTheme, afterUpdateTheme } from './paper-pocket.js'
-import { updateDraft } from './time-machine.js'
-import { checkButton, checkAxis } from './debug-gamepads.js'
-import {
-  getSession,
-  getFeedback,
-  login,
-  getCompanyName,
-  getEmployeeId,
-  getSessionId,
-  setSessionId,
-  clearSession,
-  setError,
-  setEmployeeId,
-  setCompanyName,
-  getEmail
-} from './bayun-wizard.js'
-import { get, put, getKeycard, getSigner, getStorage } from './plan98-wallet.js'
+import Cache from '@silly/cache'
 
 let lineWidth = 0
 let isMousedown = false
@@ -61,7 +44,9 @@ const realityCounterWeights = {
   gamma: 0,
 }
 
-const elf = 'sketch-pad'
+const elf = 'quick-sketch'
+
+const cache = Cache(elf)
 
 const initialState = {
   preview: {
@@ -102,32 +87,6 @@ function engine(target) {
   }
 }
 
-function audioFactory(url) {
-  const audioPool = [];
-  const poolSize = 3;
-  let poolIndex = 0;
-
-  // Initialize pool
-  for (let i = 0; i < poolSize; i++) {
-      const audio = new Audio(url);
-      audio.preload = 'auto';
-      audio.load();
-      audioPool.push(audio);
-  }
-
-  return function play() {
-      const sound = audioPool[poolIndex];
-      sound.currentTime = 0; // Reset to start
-      sound.play().catch(e => console.log('Play failed:', e));
-
-      // Cycle through pool
-      poolIndex = (poolIndex + 1) % poolSize;
-  }
-}
-
-const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/a.mp3')
-const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/b.mp3')
-
 $.head(target => {
   if(target.innerHTML) {
     requestAnimationFrame(() => update(target))
@@ -139,8 +98,6 @@ $.head(target => {
 function update(target) {
   const { strokeHistory, strokeRevisory } = $.ear()
   {
-    afterUpdateTheme($paperPocket, target)
-
     if(target.strokeHistoryLength !== strokeHistory.length || target.strokeRevisoryLength !== strokeRevisory.length) {
       target.strokeHistoryLength = strokeHistory.length
       target.strokeRevisoryLength = strokeRevisory.length
@@ -231,7 +188,7 @@ function update(target) {
               </button>
             </div>
             <button data-journal class="foreground" style="transform-style: preserve-3d; height: 50vmin; aspect-ratio: 1; transform: rotateX(var(--rotation-of-x-axis, 30deg)) rotateY(var(--rotation-of-y-axis, 30deg)) rotateZ(var(--rotation-of-z-axis, 30deg)); overflow: hidden;">
-              <was-image src="${image}" style="transform: rotateZ(-45deg)"></was-image>
+              <cached-image src="${image}" style="transform: rotateZ(-45deg)"></cached-image>
             </button>
           </div>
         `
@@ -552,25 +509,26 @@ function mount(target) {
   }
 
   target.appendChild(canvas)
+
+  resetSketchPad(target)
   update(target)
   resizeCanvas();
 
   if(src) {
-    get(src).then(blob => {
-      if(blob) {
-        blob.text().then(str => JSON.parse(str)).then(data => {
-          let strokeHistory = []
-          if(data.strokeHistory) {
-            strokeHistory = data.strokeHistory
-          }
+    cache.get(src).then(stringy => {
+      if(stringy) {
+        const data = JSON.parse(stringy)
+        let strokeHistory = []
+        if(data.strokeHistory) {
+          strokeHistory = data.strokeHistory
+        }
 
-          let strokeRevisory = []
-          if(data.strokeRevisory) {
-            strokeRevisory = data.strokeRevisory
-          }
-          $.mouth({ strokeHistory, strokeRevisory })
-          redraw(target)
-        })
+        let strokeRevisory = []
+        if(data.strokeRevisory) {
+          strokeRevisory = data.strokeRevisory
+        }
+        $.mouth({ strokeHistory, strokeRevisory })
+        redraw(target)
       }
     })
   }
@@ -581,9 +539,6 @@ function mount(target) {
   } else if(view === 'normal') {
     $.teach({ overlay: null })
   }
-
-  const id = target.id
-  requestAnimationFrame(systemLoop.bind({ id }))
 }
 
 const requestIdleCallback = window.requestIdleCallback || function (fn) { setTimeout(fn, 1) };
@@ -836,8 +791,6 @@ function friends(target) {
 
 function publish(target) {
   const { image, attachments } = $.ear()
-  const persona = getEmployeeId()
-  const organization = getCompanyName()
   return `
     <div class="overlay-background">
       <div class="form-card">
@@ -855,7 +808,7 @@ function publish(target) {
             <div class="plan98-title">
               <input data-bind name="title" class="transparent-input" placeholder="Article Title" />
             </div>
-            <was-image class="plan98-hero" src="${image}"></was-image>
+            <cached-image class="plan98-hero" key="${elf}" src="${image}"></cached-image>
             <div class="plan98-body">
               <textarea
                 data-bind
@@ -875,7 +828,6 @@ function publish(target) {
               <div class="file-list"></div>
             </div>
             <div class="plan98-signoff">
-              Of "${persona}" in "${organization}".
             </div>
           </div>
           <div class="frame-footer">
@@ -944,162 +896,10 @@ function tutorial(target) {
                 <plan98-palette style="height: 50vh"></plan98-palette>
               </div>
 
-              <img src="/public/cdn/sillyz.computer/slides/pitch/01.jpg">
-              <p>
-                A "Stack" is an organized pile to make everyone a little taller
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/02.jpg">
-              <p>
-                Silicon is essentially sand, is time, is space, is reality.
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/03.jpg">
-              <p>
-                "Silly" is the thesis that people can tunnel through paper
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/04.jpg">
-              <p>
-                An Elf Tunnel allows the future to directly influece the past
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/05.jpg">
-              <p>
-                By leveraging technology that existed in the past with modern practices
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/06.jpg">
-              <p>
-                By making the memetics and mimetics understandable by children
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/07.jpg">
-              <p>
-                If I said "AI drew this slide". You know I'd be lying.
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/08.jpg">
-              <p>
-                Which is why people prefer me and my elves to "Intelligence"
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/09.jpg">
-              <p>
-                The "hand" is the most complex subroutine. Get this, get it.
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/10.jpg">
-              <p>
-                Practice makes perfect and no detail should be unaccounted for.
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/11.jpg">
-              <p>
-                I wrote a formulaic proof of my own existence
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/12.jpg">
-              <p>
-                To weave that creativity into a live-action circus narrative
-              </p>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/slides/pitch/13.jpg">
-              <p>
-                Where you can play pretend too: <a href="javascript:;" data-prequel>with this power</a>, what will you do?
-              </p>
-              <hr>
-
               <div>
                 <div style="display: grid; height: 100vh; place-content: center;">
                   <a href="/app/hello-elvish?elf=js-repl">Tunnel Practice</a>
                 </div>
-              </div>
-
-              <div>
-                <was-code style="height: 50vh" src="/public/elves/hello-nickname.js"></was-code>
-              </div>
-
-              <div>
-                <hello-nickname></hello-nickname>
-              </div>
-
-              <h6>
-                Tips for rebuilding a "Fenway-like" Production from scratch
-              </h6>
-
-              <ol>
-                <li>
-                  Start with a Wall
-                <li>
-                  Like a really BIG wall
-                <li>
-                  Call it "The [Redacted Color] Monster"
-                <li>
-                  Say "Nobody could hammer a homer past this guy"
-                <li>
-                  And when they say, "Where's home plate?"
-                <li>
-                  You says, "Over there, but in the future"
-                <li>
-                  And ya tap ya bat on the ground and ya close one eye and ya point
-                <li>
-                  And then before they can question all the "rights"
-                <li>
-                  You say, "So let's take a quick photo here and you can take it home. No charge. If you like it, think about how you wanna help out here at the park."
-                <li>
-                  And you put on the suit and you don't say anything at all
-                <li>
-                  You just come out from behind the wall and everyone has a ball
-              </ol>
-
-              <h1>
-                The ancients sing (5)
-              </h1>
-              <h2>
-                Good Luck (2)
-              </h2>
-              <h3>
-                When their worlds would fling (5)
-              </h3>
-              <dial-tone></dial-tone>
-              <h4>Take care (2) </h4>
-              <h5>
-                The ancients call (5)
-              </h5>
-              <h6>
-                When they falter at the fall (7)
-              </h6>
-              <code>
-                Regroup at the wall (5)
-              </code>
-
-              <img src="/public/cdn/sillyz.computer/circus-dog.jpeg">
-
-              <h2>Author's Note</h2>
-
-              <p>
-                The "Silly Stack" is not a joke. It is a purely functional solution that was designed and engineered to appear like a joke.
-              </p>
-
-              <p>
-                To avoid the trope of being a "just kidding" jokester, I owned the bit. It was designed to appear to fail.
-              </p>
-
-              <p>
-                It would be far to easy to simply fail and say, "I meant to do that." and type-cast myself as a "just kidding" type.
-              </p>
-
-              <p>
-                I bravely walked with undeserved self-confidence claiming to carry the world's most powerful paper personal computer.
-              </p>
-
-              <p>
-                That meant nothing to anybody else. Until.
-              </p>
-
-              <div>
-                <iframe src="/app/world-map" style="display: block; height: 50vh;"></world-map>
               </div>
             </div>
           </div>
@@ -1250,16 +1050,14 @@ function snapshot(target) {
   $.mouth({ image })
 
   // Attempt to upload to server
-  put(src, JSON.stringify(data), { type: 'application/json' }).then(response => {
+  cache.put(src, JSON.stringify(data)).then(response => {
   }).catch(error => {
     console.warn(error);
   });
 
   // Attempt to upload to server
-  put(image, byteArray, { type: 'image/jpeg' }).then(res => {
+  cache.put(image, byteArray).then(res => {
     if(res.ok) {
-      updateDraft(data)
-      console.log({ image })
       $.mouth({ image })
     } else {
       throw new Error('Upload failed')
@@ -2083,178 +1881,6 @@ $.hand('click', '[data-menu-target]', (event) => {
   event.stopImmediatePropagation()
 })
 
-const lastFrame = {
-  a: false,
-  b: false,
-  x: false,
-  y: false,
-  down: false,
-  up: false,
-  left: false,
-  right: false,
-}
-
-function streamFactory(key, handler) {
-  return (value, id) => {
-    toggleSpam(key, value, () => {
-      handler(id)
-    })
-  }
-}
-
-const gamepadPorlockCycle = streamFactory('a', (id) => {
-  porlockCycle()
-})
-
-function porlockCycle() {
-  const { porlockIndex } = $.ear()
-  let next = porlockIndex + 1
-
-  if(next >= porlock.length) {
-    next = 0
-  }
-
-  playSwipeSound()
-  $.mouth({ porlockIndex: next })
-}
-
-$.hand('click', '[data-welcome-continue]', (event) => {
-  porlockCycle()
-})
-
-function porlockSkip() {
-  playSwipeSound()
-  $.mouth({ mode: modes.system })
-}
-
-$.hand('click', '[data-welcome-skip]', (event) => {
-  porlockSkip()
-})
-
-const gamepadPorlockSkip = streamFactory('b', (id) => {
-  porlockSkip()
-})
-
-function systemLoop(time) {
-  const { id } = this
-  const { activeMenu, overlay, mode, porlockIndex } = $.ear()
-  const player = {
-    a: checkButton(0, 0),
-    b: checkButton(0, 1),
-    x: checkButton(0, 3),
-    y: checkButton(0, 2),
-    lb: checkButton(0, 4),
-    rb: checkButton(0, 5),
-    lt: checkButton(0, 6),
-    rt: checkButton(0, 7),
-    select: checkButton(0, 8),
-    start: checkButton(0, 9),
-    ls: checkButton(0, 10),
-    rs: checkButton(0, 11),
-    up: checkButton(0, 12),
-    down: checkButton(0, 13),
-    left: checkButton(0, 14),
-    right: checkButton(0, 15),
-    os: checkButton(0, 16),
-  }
-
-  if(mode === modes.welcome) {
-    const streamOs = streamFactory('os', (id) => {
-
-      if(overlay === overlays.color) {
-        $.mouth({
-          overlay: null,
-          activeMenu: null,
-        })
-      } else {
-        $.mouth({
-          overlay: overlays.color,
-          activeMenu: null,
-        })
-      }
-      playSwipeSound()
-    })
-
-    const streamStart = streamFactory('start', (id) => {
-
-      if(overlay === overlays.chat) {
-        $.mouth({
-          overlay: null,
-          activeMenu: null,
-        })
-      } else {
-        $.mouth({
-          overlay: overlays.chat,
-          activeMenu: null,
-        })
-      }
-      playSwipeSound()
-    })
-
-
-    const streamSelect = streamFactory('select', (id) => {
-      if(activeMenu === "edit") {
-        $.mouth({
-          overlay: null,
-          activeMenu: null,
-        })
-      } else {
-        $.mouth({
-          overlay: null,
-          activeMenu: "edit",
-        })
-      }
-      playSwipeSound()
-    })
-
-    const streamUp = streamFactory('up', (id) => {
-      playStuckSound()
-      $.mouth({ porlockIndex: 0 })
-    })
-    const streamLeft = streamFactory('left', (id) => {
-      let next = porlockIndex - 1
-
-      if(next < 0) {
-        next = 0
-        playStuckSound()
-      } else {
-        playSwipeSound()
-      }
-
-      $.mouth({ porlockIndex: next })
-    })
-
-    const streamRight = streamFactory('right', (id) => {
-      let next = porlockIndex + 1
-
-      if(next >= porlock.length) {
-        next = porlock.length - 1
-        playStuckSound()
-      } else {
-        playSwipeSound()
-      }
-
-      $.mouth({ porlockIndex: next })
-    })
-    const streamDown = streamFactory('down', (id) => {
-      playStuckSound()
-      $.mouth({ porlockIndex: porlock.length - 1 })
-    })
-
-    gamepadPorlockCycle(player.a, id)
-    gamepadPorlockSkip(player.b, id)
-    streamOs(player.os, id)
-    streamStart(player.start, id)
-    streamSelect(player.select, id)
-    streamUp(player.up, id)
-    streamLeft(player.left, id)
-    streamRight(player.right, id)
-    streamDown(player.down, id)
-  }
-
-  requestAnimationFrame(systemLoop.bind(this))
-}
-
 $.hand('click', '[data-start]', async function getOrientation(){
   $.mouth({
     overlay: null,
@@ -2289,8 +1915,6 @@ $.hand('click', '[data-enable-music]', async function getOrientation(){
     activeMenu: null,
   })
 })
-
-
 
 $.hand('click', '[data-enable-preview]', async function getOrientation(){
   if (!window.DeviceOrientationEvent || !window.DeviceOrientationEvent.requestPermission){
@@ -2366,7 +1990,7 @@ function updateField(field, value) {
 
 let STAGED_FILES = {}
 
-function handleFiles(files) {
+function handleFiles(target, files) {
   STAGED_FILES = {}
   // Convert FileList to Array and add to selectedFiles
   const fileMeta = Array.from(files).map(file => {
@@ -2379,51 +2003,38 @@ function handleFiles(files) {
     }
   });
 
-  updateDraft({
-    attachments: fileMeta
-  })
-
   $.mouth({ attachments: fileMeta, overlay: overlays.publish, activeMenu: null })
 
+  snapshot(target)
   startAttachmentUpload()
 }
 
 function startAttachmentUpload() {
   const { attachments } = $.ear()
-  const keycard = getKeycard()
 
   if(attachments.length > 0 && keycard) {
-    getSigner().then(signer => {
-      const storage = getStorage()
-      const space = storage.space({
-        signer,
-        id: `urn:uuid:${keycard.id}`
-      })
+    const context = { signer, space }
 
-      const context = { signer, space }
-
-      $.mouth({
-        uploading: true
-      })
-
-      const uploads = [...attachments].map(upload.bind(context))
-
-      Promise.all(uploads)
-        .then(() => {
-          $.mouth({
-            uploading: false
-          })
-        })
+    $.mouth({
+      uploading: true
     })
+
+    const uploads = [...attachments].map(upload)
+
+    Promise.all(uploads)
+      .then(() => {
+        $.mouth({
+          uploading: false
+        })
+      })
   }
 }
 
 function upload(attachment) {
   const file = STAGED_FILES[attachment.name]
 
-  const resource = this.space.resource(attachment.url)
   const typedBlob = new Blob([file], { type: file.type })
-  return resource.put(typedBlob, { signer: this.signer })
+  return cache.put(attachment.url, typedBlob)
     .then(res => {
       console.debug({ res })
       return res
@@ -2432,9 +2043,7 @@ function upload(attachment) {
       console.debug(e)
     })
     .finally(() => {
-      console.log('finally', resource.path)
     })
-
 }
 
 $.hand('dragenter', '.file-region', (event) => {
@@ -2465,7 +2074,7 @@ $.hand('drop', '.file-region', (event) => {
   root.dataset.hovering = false
   if (event.dataTransfer) {
     console.log('- Files count:', event.dataTransfer.files.length);
-    handleFiles(event.dataTransfer.files);
+    handleFiles(event.target, event.dataTransfer.files);
   }
 })
 
@@ -2474,5 +2083,5 @@ $.hand('click', '.click-proxy', (event) => {
 })
 
 $.hand('change', '[name="files"]', (event) => {
-  handleFiles(event.target.files);
+  handleFiles(event.target, event.target.files);
 });

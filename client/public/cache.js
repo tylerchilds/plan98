@@ -16,38 +16,37 @@ export default function cache(name) {
     };
   });
 
-  async function get(keys) {
+  async function get(key) {
     const db = await database;
 
     const transaction = db.transaction(CACHE);
     const objectStore = transaction.objectStore(CACHE);
 
-    const rows = await new Promise(function loadFromDatabase(resolve, reject) {
-      const rows = [];
+    const value = await new Promise(function loadFromDatabase(resolve, reject) {
       const read = objectStore.openCursor();
 
       read.onsuccess = function(event) {
-        let cursor = event.target.result;
+        const cursor = event.target.result;
 
         if (cursor) {
-          if(keys.includes(cursor.key)) {
-            rows.push(cursor.value);
+          if(key === cursor.key) {
+            resolve(cursor.value.data);
           }
           cursor.continue();
         } else {
-          resolve(rows)
+          resolve(null)
         }
       };
       read.onerror = reject;
     });
 
-    return rows;
+    return value;
   }
 
-  async function put(schema, data) {
+  async function put(key, data) {
     const db = await database;
 
-    const record = { schema, data };
+    const record = { schema: key, data };
 
     const transaction = db.transaction(CACHE, 'readwrite');
     const objectStore = transaction.objectStore(CACHE);
@@ -56,10 +55,10 @@ export default function cache(name) {
 
     return new Promise(function saveToDatabase(resolve, reject) {
       try {
-        request = objectStore.get(schema);
+        request = objectStore.get(key);
         request.onsuccess = function(event) {
           const request = objectStore.put(record);
-          request.onsuccess = resolve;
+          request.onsuccess = () => resolve({ ok: true });
         }
       } catch (e) {
         const request = objectStore.add(record);
@@ -69,7 +68,7 @@ export default function cache(name) {
     });
   }
 
-  async function del(schema) {
+  async function del(key) {
     const db = await database;
 
     const transaction = db.transaction(CACHE, 'readwrite');
@@ -79,7 +78,7 @@ export default function cache(name) {
 
     return new Promise(function deleteFromDatabase(resolve, reject) {
       try {
-        request = objectStore.delete(schema);
+        request = objectStore.delete(key);
         request.onsuccess = resolve;
       } catch (e) {
         reject(e)

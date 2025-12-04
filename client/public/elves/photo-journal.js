@@ -1,7 +1,7 @@
 import { Self } from '@plan98/types'
 import Cache from '@silly/cache'
 
-import $sketchPad from './sketch-pad.js'
+import $sketchPad, { resetSketchPad } from './quick-sketch.js'
 
 const elf = 'photo-journal'
 
@@ -17,12 +17,15 @@ $.draw((target) => {
     target.innerHTML = `
       <div class="viewport">
         <div class="library">
-          <button data-save class="standard-button -round bias-generic">
-            <sl-icon name="check-lg"></sl-icon>
-          </button>
-          <div class="surface">
-            <sketch-pad view="normal"></sketch-pad>
+          <div class="library-actions">
+            <button data-cancel class="standard-button -round bias-generic">
+              <sl-icon name="x-lg"></sl-icon>
+            </button>
+            <button data-save class="standard-button -round bias-positive">
+              <sl-icon name="check-lg"></sl-icon>
+            </button>
           </div>
+          <div class="surface"></div>
         </div>
           <div class="gallery"></div>
       </div>
@@ -30,6 +33,8 @@ $.draw((target) => {
   }
 }, {
   beforeUpdate(target) {
+    const src = target.getAttribute('src')
+
     {
       const { libraryIndex } =  $.learn()
       target.dataset.libraryIndex = libraryIndex
@@ -38,29 +43,46 @@ $.draw((target) => {
     {
       if(!target.mounted) {
         target.mounted = true
-        const src = target.getAttribute('src')
         if(src) {
           $.teach({ gallery: [] })
 
-          cache.get(src).then(rows => {
-            rows.map(({data}) => {
-              if(data) {
-                $.mouth(JSON.parse(data))
-              }
-            })
+          cache.get(src).then(data => {
+            if(data) {
+              $.mouth(JSON.parse(data))
+            }
           })
         }
       }
     }
   },
   afterUpdate(target) {
+    const src = target.getAttribute('src')
+
+    {
+      const { libraryIndex } =  $.learn()
+
+      if(target.index !== libraryIndex) {
+        target.dataset.libraryIndex = libraryIndex
+        const surface = target.querySelector('.surface')
+        const sketchSrc = src + '/' + libraryIndex
+
+        surface.innerHTML = `
+          <quick-sketch view="normal" src="${sketchSrc}"></quick-sketch>
+        `
+      }
+    }
+
     {
       const { gallery } =  $.learn()
       const node = target.querySelector('.gallery')
-      node.innerHTML = `
-        <div class="first-button context"></div>
-        ${gallery.map(embed).join('')}
-      `
+
+      if(gallery.length !== target.galleryLength) {
+        target.galleryLength = gallery.length
+        node.innerHTML = `
+          <div class="first-button context"></div>
+          ${gallery.map(embed).join('')}
+        `
+      }
     }
 
     {
@@ -75,7 +97,12 @@ $.draw((target) => {
 
 $.when('click', '.portal', (event) => {
   const { index } = event.target.dataset
+  //resetSketchPad()
   $.teach({ libraryIndex: index })
+})
+
+$.when('click', '[data-cancel]', (event) => {
+  $.teach({ libraryIndex: null })
 })
 
 $.when('click', '[data-save]', (event) => {
@@ -113,13 +140,19 @@ function embed(image, index) {
     <div class="context">
       <button
         class="snippet"
-        data-goto="${index}"
+        data-index="${index}"
       >
-        <was-image src="${image}"></was-image>
+        <cached-image key="quick-sketch" src="${image}"></cached-image>
       </button>
     </div>
   `
 }
+
+$.when('click', '[data-index]', (event) => {
+  const { index } = event.target.dataset
+  resetSketchPad(event.target.closest($.link).querySelector('quick-sketch'))
+  $.teach({ libraryIndex: parseInt(index) })
+})
 
 function portal(index=$.learn().gallery.length) {
   return `
@@ -137,7 +170,7 @@ $.style(`
     position: relative;
   }
 
-  & [data-save] {
+  & .library-actions {
     position: absolute;
     right: 4px;
     top: 4px;
@@ -148,6 +181,7 @@ $.style(`
     background: rgba(0,0,0,.1);
     overflow: auto;
     height: 100%;
+    padding: .5rem;
   }
 
   &:not([data-library-index="null"]) .viewport {
@@ -204,13 +238,13 @@ $.style(`
     border: none;
     width: 100%;
     text-align: left;
-    margin: .5rem 0;
+    margin: 0;
     height: 100%;
   }
 
   & .snippet:hover {
     box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5);
-    transform: scale(1.01);
+    transform: scale(1.1);
   }
 
   & .snippet > * {
@@ -228,7 +262,8 @@ $.style(`
     border: none;
     width: 100%;
     text-align: center;
-    margin: .5rem 0;
+    margin: 0;
+    height: 100%;
   }
 
   & .portal:hover {
@@ -250,12 +285,11 @@ $.style(`
   & .gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
-    gap: 8px;
+    gap: .5rem;
   }
 
   & .context {
     aspect-ratio: 16/9;
-    overflow: hidden;
     height: 100%;
   }
 `)

@@ -2,7 +2,7 @@ import { Self } from '@plan98/types'
 import Cache from '@silly/cache'
 
 const initialState = {
-  name: 'Silly'
+  name: 'Sully'
 }
 
 const elf = 'hello-cache'
@@ -11,11 +11,10 @@ const cache = Cache(elf)
 
 const $ = Self(elf, initialState)
 
-cache.get(elf).then(rows => {
-  rows.map((row) => {
-    const { data } = row
+cache.get(elf).then(data => {
+  if(data) {
     $.mouth(data)
-  });
+  }
 })
 
 $.head((target) => {

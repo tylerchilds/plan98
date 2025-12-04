@@ -418,6 +418,7 @@ function elves() {
 
 }
 
+const cached = {}
 function modules({ registry }) {
   const tags = new Set(
     [...document.querySelectorAll(':not(:defined)')]
@@ -428,6 +429,8 @@ function modules({ registry }) {
     const url = `${registry || '.'}/${tag}.js`
     //if(!plan98 || plan98.registry[tag]) return
     //plan98.registry[tag] = url
+    if(cached[url]) return
+    cached[url] = true
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
     let definable = true

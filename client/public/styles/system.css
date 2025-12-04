@@ -304,8 +304,14 @@ h6 {
   --v-font-mono: 1;
 }
 
+blockquote {
+  border-left: 2px solid var(--root-theme, dimgray);
+  padding-left: 1rem;
+  margin-left: 0;
+}
+
 p {
-  line-height: 2;
+  line-height: 1.5;
   margin: 0;
   padding: 0;
 }
