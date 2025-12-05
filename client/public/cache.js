@@ -30,7 +30,7 @@ export default function cache(name) {
 
         if (cursor) {
           if(key === cursor.key) {
-            resolve(cursor.value.data);
+            resolve(cursor.value);
           }
           cursor.continue();
         } else {
@@ -43,10 +43,10 @@ export default function cache(name) {
     return value;
   }
 
-  async function put(key, data) {
+  async function put(key, data, type) {
     const db = await database;
 
-    const record = { schema: key, data };
+    const record = { schema: key, data, type };
 
     const transaction = db.transaction(CACHE, 'readwrite');
     const objectStore = transaction.objectStore(CACHE);

@@ -45,9 +45,9 @@ $.draw((target) => {
         if(src) {
           $.teach({ gallery: [] })
 
-          target.cache.get(src).then(data => {
-            if(data) {
-              $.mouth(JSON.parse(data))
+          target.cache.get(src).then(record => {
+            if(record) {
+              $.mouth(JSON.parse(record.data))
             }
           })
         }

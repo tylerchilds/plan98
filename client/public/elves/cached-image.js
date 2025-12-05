@@ -41,9 +41,10 @@ function afterUpdate(target) {
     const key = target.getAttribute('key')
     if(src) {
       const cache = Cache(key)
-      cache.get(src).then(blob => {
-        if(blob) {
-          const data = new Blob([blob], { type: blob.type });
+      cache.get(src).then(record => {
+        if(record) {
+          console.log(record.type)
+          const data = new Blob([record.data], { type: record.type });
           const image = target.shadowRoot.querySelector('img')
           image.src = URL.createObjectURL(data);
         }

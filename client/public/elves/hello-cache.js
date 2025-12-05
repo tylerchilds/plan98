@@ -11,9 +11,9 @@ const cache = Cache(elf)
 
 const $ = Self(elf, initialState)
 
-cache.get(elf).then(data => {
-  if(data) {
-    $.mouth(data)
+cache.get(elf).then(record => {
+  if(record) {
+    $.mouth(record.data)
   }
 })
 

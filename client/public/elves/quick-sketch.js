@@ -413,9 +413,9 @@ function mount(target) {
   resizeCanvas();
 
   if(src) {
-    target.cache.get(src).then(stringy => {
-      if(stringy) {
-        const data = JSON.parse(stringy)
+    target.cache.get(src).then(record => {
+      if(record) {
+        const data = JSON.parse(record.data)
         let strokeHistory = []
         if(data.strokeHistory) {
           strokeHistory = data.strokeHistory
@@ -924,7 +924,7 @@ $.hand('click', '[data-save]', ({ target }) => save(target))
 function snapshot(target) {
   const { root, canvas, src } = engine(target)
   const { strokeHistory, strokeRevisory } = $.ear()
-  const dataURL = canvas.toDataURL('image/jpeg');
+  const dataURL = canvas.toDataURL('image/png');
   const byteCharacters = atob(dataURL.split(',')[1]);
   const byteNumbers = new Array(byteCharacters.length);
   for (let i = 0; i < byteCharacters.length; i++) {
@@ -934,7 +934,7 @@ function snapshot(target) {
 
   const now = new Date();
   const timestamp = now.toJSON()
-  const image = `/private/${$.link}/${timestamp}.jpg`
+  const image = `/private/${$.link}/${timestamp}.png`
 
   const data = { src: image, strokeHistory, strokeRevisory }
 
@@ -945,7 +945,7 @@ function snapshot(target) {
     console.warn(error);
   });
 
-  root.cache.put(image, byteArray).then(res => {
+  root.cache.put(image, byteArray, { type: 'image/png' }).then(res => {
     if(res.ok) {
       $.mouth({ image })
     } else {
