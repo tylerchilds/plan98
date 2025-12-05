@@ -81,10 +81,12 @@ export function untoast(id) {
 $.style(`
   & {
     position: absolute;
-    bottom: 4px;
+    top: 4px;
     left: 4px;
+    right: 4px;
     width: 280px;
     max-width: calc(100vw - 2rem);
+    margin: auto;
     place-content: center;
     z-index: 9000;
     overflow: auto;
