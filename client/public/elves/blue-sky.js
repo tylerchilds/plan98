@@ -1857,7 +1857,7 @@ const modeRenderers = {
   [modes.backpack]: (root, container) => {
     container.innerHTML = `
       <div class="operating-system">
-        <iframe src="/app/plan98-backpack"></iframe>
+        <ur-shell></ur-shell>
       </div>
     `
   },

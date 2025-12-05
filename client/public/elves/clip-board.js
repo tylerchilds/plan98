@@ -1,7 +1,9 @@
 import module from '@silly/tag'
-import { get, put } from './plan98-wallet.js'
+import Cache from '@silly/cache'
 
-const $ = module('clip-board', { value: '' })
+const elf = 'clip-board'
+const cache = Cache(elf)
+const $ = module(elf, { value: '' })
 
 $.style(`
   & {
@@ -46,7 +48,7 @@ $.when('input', '.page textarea', async (event) => {
   const clipboard = { history: [event.target.value] }
 
   $.teach({ value: event.target.value })
-  put(getClipboard(root), JSON.stringify(clipboard), { type: 'application/json' })
+  cache.put(getClipboard(root), JSON.stringify(clipboard), { type: 'application/json' })
 })
 
 function getClipboard(node) {
@@ -57,12 +59,14 @@ async function subscribe(target) {
   if(target.subscribed) return
   target.subscribed = true
 
-  await get(getClipboard(target)).then(async response => {
-    const clipboard = await response.text().then(str => JSON.parse(str))
-    const { history } = clipboard
+  await cache.get(getClipboard(target)).then(record => {
+    if(record) {
+      const clipboard = JSON.parse(record.data)
+      const { history } = clipboard
 
-    if(history[0]) {
-      $.teach({ value: history[0] })
+      if(history[0]) {
+        $.teach({ value: history[0] })
+      }
     }
   }).catch(console.error).finally(() => {
     const q = target.getAttribute('q')
@@ -72,7 +76,7 @@ async function subscribe(target) {
       const prependedQuery = q + '\n' + value
       $.teach({ value: prependedQuery })
       const clipboard = { history: [prependedQuery] }
-      put(getClipboard(target), JSON.stringify(clipboard), { type: 'application/json' })
+      cache.put(getClipboard(target), JSON.stringify(clipboard), { type: 'application/json' })
     }
   })
 }

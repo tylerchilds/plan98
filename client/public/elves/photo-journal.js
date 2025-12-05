@@ -1,4 +1,5 @@
 import { Self } from '@plan98/types'
+import { toast } from './plan98-toast.js'
 import Cache from '@silly/cache'
 
 import $sketchPad, { resetSketchPad } from './quick-sketch.js'
@@ -25,7 +26,10 @@ $.draw((target) => {
           </div>
           <div class="surface"></div>
         </div>
+        <div class="app">
           <div class="gallery"></div>
+        </div>
+        <div class="status-bar"></div>
       </div>
     `
   }
@@ -42,15 +46,16 @@ $.draw((target) => {
       if(!target.mounted) {
         target.mounted = true
         target.cache = Cache(target.id)
-        if(src) {
-          $.teach({ gallery: [] })
-
-          target.cache.get(src).then(record => {
-            if(record) {
-              $.mouth(JSON.parse(record.data))
-            }
-          })
+        if(!src) {
+          target.setAttribute('src', '/'+$.link)
         }
+        $.teach({ gallery: [] })
+
+        target.cache.get(src).then(record => {
+          if(record) {
+            $.mouth(JSON.parse(record.data))
+          }
+        })
       }
     }
   },
@@ -91,6 +96,23 @@ $.draw((target) => {
         butt.innerHTML = portal()
       }
     }
+
+    {
+      const node = target.querySelector('.status-bar')
+
+      if(target.status !== target.id) {
+        target.status = target.id
+
+        const shareLink = `${window.location.origin}/app/${$.link}?id=${target.id}&src=/${$.link}`
+        const copyId = self.crypto.randomUUID()
+        const label = target.getAttribute('label') || 'Pluto'
+        node.innerHTML = `
+          <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
+          <button data-copy="${copyId}" class="standard-input -small bias-positive">Copy</button>
+        `
+      }
+    }
+
   }
 })
 
@@ -158,11 +180,47 @@ $.when('click', '[data-index]', (event) => {
 
 function portal(index=$.learn().gallery.length) {
   return `
-    <button class="portal" data-index="${index}">
+    <button class="portal standard-button" data-index="${index}">
       <sl-icon name="plus-lg"></sl-icon>
     </button>
   `
 }
+
+$.hand('click', '[data-copy]', async (event) => {
+  const { copy } = event.target.dataset
+  const target = event.target.closest($.link).querySelector(`[id="${copy}"]`)
+
+  try {
+    // Modern approach using Clipboard API
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(target.textContent)
+      toast("Copied to clipboard")
+    } else {
+      // Fallback for older browsers
+      const textArea = document.createElement("textarea")
+      textArea.value = target.textContent
+      textArea.style.position = "fixed"
+      textArea.style.left = "-999999px"
+      textArea.style.top = "-999999px"
+      document.body.appendChild(textArea)
+      textArea.focus()
+      textArea.select()
+
+      try {
+        document.execCommand('copy')
+        toast("Copied to clipboard")
+      } catch (err) {
+        console.error('Fallback: Failed to copy', err)
+        toast("Failed to copy")
+      }
+
+      document.body.removeChild(textArea)
+    }
+  } catch (err) {
+    console.error('Failed to copy text: ', err)
+    toast("Failed to copy")
+  }
+})
 
 $.style(`
   & {
@@ -183,7 +241,8 @@ $.style(`
     background: rgba(0,0,0,.1);
     overflow: auto;
     height: 100%;
-    padding: .5rem;
+    display: grid;
+    grid-template-rows: 1fr auto;
   }
 
   &:not([data-library-index="null"]) .viewport {
@@ -254,14 +313,9 @@ $.style(`
   }
 
   & .portal {
-    background: rgba(0,0,0,.1);
-    box-shadow: 0px 1px 2px 0px rgba(0,0,0,.85) inset;
-    padding: .5rem;
     transition: all ease-in-out 100ms;
-    opacity: .5;
     transform: scale(1);
     display: block;
-    border: none;
     width: 100%;
     text-align: center;
     margin: 0;
@@ -269,8 +323,6 @@ $.style(`
   }
 
   & .portal:hover {
-    background: rgba(255,255,255,.1);
-    box-shadow: 0px 2px 4px 0px rgba(0,0,0,.5);
     transform: scale(1.01);
     opacity: 1;
   }
@@ -284,6 +336,11 @@ $.style(`
     height: 1rem;
   }
 
+  & .app {
+    overflow: auto;
+    padding: .5rem;
+  }
+
   & .gallery {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
@@ -294,4 +351,19 @@ $.style(`
     aspect-ratio: 16/9;
     height: 100%;
   }
+
+  & .status-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  & .share-link-copyable-url {
+    white-space: nowrap;
+    overflow-x: auto;
+    margin: 0 auto;
+    display: block;
+  }
+
 `)
