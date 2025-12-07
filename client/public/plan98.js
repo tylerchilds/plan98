@@ -227,6 +227,9 @@ function draw(elf, compositor, lifeCycle={}) {
   }
 
   listen(CREATE_EVENT, elf, (event) => {
+    if(lifeCycle.onCreate) {
+      lifeCycle.onCreate.call(this, event.target)
+    }
     middleware.forEach(x => x(elf, event.target))
     const draw = update.bind(this, elf, event.target, compositor, lifeCycle)
     reactiveFunctions[elf][event.target.id] = draw

@@ -468,6 +468,7 @@ export function getFontSizeOptions() {
 export function setFontSize(fontSize) {
   localStorage.setItem('paper-pocket/fontSize', fontSize)
   $.teach({ fontSize })
+  afterUpdateTheme($, document.body)
 }
 
 export function getFontSize() {
@@ -557,6 +558,7 @@ export function getThemes() {
 export function setTheme(theme) {
   localStorage.setItem('paper-pocket/theme', theme)
   $.teach({ theme })
+  afterUpdateTheme($, document.body)
 }
 
 export function getTheme() {
