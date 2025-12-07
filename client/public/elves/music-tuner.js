@@ -10,37 +10,43 @@ console.log('v0.0.1')
 console.log(`window.innerHeight = ${window.innerHeight}`)
 console.log(`body.offsetHeight = ${document.body.offsetHeight}`)
 
-const instruments = {
-  ukelele: 'ukelele',
-  guitar: 'guitar',
-  tinwhistle: 'tinwhistle'
+
+const UKE = 'ukelele'
+const GUITAR = 'guitar'
+const TINWHISTLE = 'tinwhistle'
+const FIDDLE = 'fiddle'
+
+const config = {
+  [UKE]: {
+    label: 'Ukelele',
+    frequencies: [261.63, 329.63, 392.00, 440.00],
+  },
+  [GUITAR]: {
+    label: 'Guitar',
+    frequencies: [82.41, 110.00, 146.83, 196.00, 246.94, 329.63],
+  },
+  [TINWHISTLE]: {
+    label: 'Tinwhistle',
+    frequencies: [293.66, 329.63, 369.99, 415.30, 466.16, 523.25, 587.33, 659.25, 739.99, 830.61, 932.33, 1046.50, 1174.66],
+  },
+  [FIDDLE]: {
+    label: 'Fiddle',
+    frequencies: [196.00, 293.66, 440.00, 659.25],
+  },
 }
 
-const frequencies = {
-  [instruments.ukelele]: [261.63, 329.63, 392.00, 440.00],
-  [instruments.guitar]: [82.41, 110.00, 146.83, 196.00, 246.94, 329.63],
-  [instruments.tinwhistle]: [293.66, 329.63, 369.99, 415.30, 466.16, 523.25, 587.33, 659.25, 739.99, 830.61, 932.33, 1046.50, 1174.66]
-}
-
-const options = [
-  {
-    value: instruments.ukelele,
-    label: 'Ukelele'
-  },
-  {
-    value: instruments.guitar,
-    label: 'Guitar'
-  },
-  {
-    value: instruments.tinwhistle,
-    label: 'Tinwhistle'
-  },
-]
+const options = Object.keys(config).map(x => {
+  const { label } = config[x]
+  return {
+    value: x,
+    label
+  }
+})
 
 const $ = app('music-tuner', {
   started: false,
   transpose: false,
-  value: instruments.ukelele,
+  value: UKE,
   options
 })
 
@@ -116,7 +122,7 @@ function main(target) {
     }
 
     // draw guitar strings
-    const strings = frequencies[value]
+    const strings = config[value].frequencies
     const minPitch = strings[0] - 30; //set min pitch 30 below the lowest string
     const maxPitch = strings[strings.length-1] + 30; //set max pitch 30 above the highest string
 

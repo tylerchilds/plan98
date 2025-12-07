@@ -273,28 +273,27 @@ function share(target) {
   const copyId = self.crypto.randomUUID()
   const label = target.getAttribute('label') || 'Pluto'
 
-  const actionArea = `
-    <div class="action-area">
-      <div class="action-bar">
-        <button data-copy="${copyId}" class="standard-button -round -large">
-          <sl-icon name="copy"></sl-icon>
-        </button>
+  const copyArea = `
+      <div class="copy-area">
+        <div>
+          <input id="${copyId}" class="share-link-copyable-url standard-input" value="${shareLink}"/>
+        </div>
+        <div>
+          <button data-share="${copyId}" class="standard-button -round">
+            <sl-icon name="copy"></sl-icon>
+          </button>
+        </div>
       </div>
-      <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
-    </div>
   `
 
   return `
-    <div class="overlay-background">
+    <div class="overlay-background share-view">
       <div class="form-card">
         <div class="draft-template">
           <div class="draft-header">
             <div style="display: grid; place-content: start">
-              <button class="standard-button bias-generic -small -round" data-toggle-metadata="${viewMetadata ? 'on':'off'}">
-                <sl-icon name="gear-fill"></sl-icon>
-              </button>
             </div>
-            ${actionArea}
+            ${copyArea}
             <div style="display: grid; place-content: end">
             </div>
           </div>
@@ -308,7 +307,7 @@ function share(target) {
           </div>
           <div class="draft-footer">
             <p>
-              Hey, listen! Copy this link and share it online or let someone in person scan it to link up and <button class="standard-button -smol" data-help>"Sketch"</button> together!
+              Hey, listen! Copy this link and share it online or let someone in person scan it to link up!
             </p>
           </div>
         </div>
@@ -317,9 +316,9 @@ function share(target) {
   `
 }
 
-$.hand('click', '[data-copy]', async (event) => {
-  const { copy } = event.target.dataset
-  const target = event.target.closest($.link).querySelector(`[id="${copy}"]`)
+$.hand('click', '[data-share]', async (event) => {
+  const { share } = event.target.dataset
+  const target = event.target.closest($.link).querySelector(`[id="${share}"]`)
 
   try {
     // Modern approach using Clipboard API
@@ -417,7 +416,6 @@ $.eye(`
     display: block;
     height: 100%;
     background: white;
-    backdrop-filter: blur(2px);
     overflow: hidden;
   }
 
@@ -478,4 +476,13 @@ $.eye(`
     border-bottom: 2px solid rgba(0,0,0, .2);
   }
 
+  & .copy-area {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: .5rem;
+  }
+
+  & .share-view {
+    padding: .5rem;
+  }
 `)
