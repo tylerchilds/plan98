@@ -924,6 +924,20 @@ $.style(`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
+
+  & .title {
+    color: var(--root-theme, #E83FB8);
+    --v-font-wght: 800;
+    --v-font-slnt: -15;
+    --v-font-crsv: 1;
+    --v-font-casl: 1;
+    --v-font-mono: 1;
+    font-size: 2rem;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive" !important;
+  }
+
+
 `)
 
 function escapeHyperText(text = '') {

@@ -1,66 +1,142 @@
 import Self from '@plan98/elf'
+import './plan98-palette.js'
 import { toast } from './plan98-toast.js'
 import { showPanel, hidePanel } from './plan98-panel.js'
+import { showModal, hideModal } from './plan98-modal.js'
 import $paperPocket from './paper-pocket.js'
 import Cache from '@silly/cache'
+
 const elf = 'my-computer'
+
+const cache = Cache(elf)
+const version = '1.0.0-rc3'
+
+const lazyLoaders = [
+  './home-page.js',
+  './photo-journal.js',
+  './dial-tone.js',
+  './plan98-ide.js',
+  './cool-chat.js',
+  './live-help.js',
+  './time-machine.js',
+  './multi-task.js',
+  './brain-storm.js',
+]
+
+lazyLoaders.map(x => import(x))
 
 const modes = {
   welcome: 'welcome',
 }
 
-const PAGES = {
-  HOME: 'home',
-  ART: 'art',
-  MUSIC: 'music',
-  CODING: 'coding',
-  CHAT: 'chat',
-  THEME: 'theme',
-  SHARE: 'share',
-  TUTORIAL: 'tutorial',
-}
+const HOME = 'home'
+const ART = 'art'
+const MUSIC = 'music'
+const CODING = 'coding'
+const CHAT = 'chat'
+const HELP = 'help' 
+const THEME = 'theme'
+const SHARE = 'share'
+const TUTORIAL = 'tutorial'
+
+const TIME_MACHINE = 'time-machine'
+const MULTI_TASK = 'multi-task'
+const BRAIN_STORM = 'brain-storm'
 
 const config = {
-  [PAGES.HOME]: {
+  [HOME]: {
     label: 'Home',
     path: '/',
     icon: '<sl-icon name="house"></sl-icon>',
+    body: (target) => `
+      <home-page></home-page>
+    `
   },
-  [PAGES.ART]: {
+  [ART]: {
     label: 'Art',
     path: '/art',
     icon: '<sl-icon name="newspaper"></sl-icon>',
+    body: (target) => `
+      <photo-journal></photo-journal>
+    `
   },
-  [PAGES.MUSIC]: {
+  [MUSIC]: {
     label: 'Music',
     path: '/music',
     icon: '<sl-icon name="info-circle"></sl-icon>',
+    body: (target) => `
+      <dial-tone></dial-tone>
+    `
   },
-  [PAGES.CODING]: {
+  [CODING]: {
     label: 'Coding',
     path: '/coding',
     icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <plan98-ide src="/public/plan98.js"></plan98-ide>
+    `
   },
-  [PAGES.THEME]: {
+  [HELP]: {
+    label: 'Help',
+    path: '/help',
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <iframe src="/app/live-help?room="${target.id}"></live-help>
+    `
+  },
+  [THEME]: {
     label: 'Theme',
     path: '/theme',
     icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+        <plan98-palette></plan98-palette>
+    `
   },
-  [PAGES.SHARE]: {
+  [SHARE]: {
     label: 'Share',
     path: '/share',
     icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => share(target)
   },
-  [PAGES.TUTORIAL]: {
+  [TUTORIAL]: {
     label: 'Tutorial',
     path: '/tutorial',
     icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => tutorial(target)
   },
-  [PAGES.CHAT]: {
+  [CHAT]: {
     label: 'Chat',
     path: '/chat',
     icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <cool-chat></cool-chat>
+    `
   },
+  [TIME_MACHINE]: {
+    label: 'Time Machine',
+    path: `/${TIME_MACHINE}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <iframe src=/app/time-machine?id="${target.id}"></iframe>
+    `
+  },
+  [MULTI_TASK]: {
+    label: 'Multi Task',
+    path: `/${MULTI_TASK}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <iframe src=/app/${MULTI_TASK}?id="${target.id}"></iframe>
+    `
+  },
+  [BRAIN_STORM]: {
+    label: 'Brain Storm',
+    path: `/${BRAIN_STORM}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <iframe src=/app/${BRAIN_STORM}?id="${target.id}"></iframe>
+    `
+  },
+
 }
 
 function createPathMap() {
@@ -70,7 +146,8 @@ function createPathMap() {
       const page = config[key]
       paths[page.path] = {
         page: key,
-        label: page.label
+        label: page.label,
+        body: page.body
       }
 
       return paths
@@ -80,8 +157,12 @@ function createPathMap() {
 const paths = createPathMap()
 
 function router(route) {
+  const defaultKey = Object.keys(config)[0]
+
   return paths[route] ? paths[route] : {
-    page: Object.keys(config)[0]
+    page: defaultKey,
+    label: config[defaultKey].label,
+    body: config[defaultKey].body,
   }
 }
 
@@ -94,6 +175,24 @@ const initialState = {
 const $ = Self(elf, initialState)
 
 export default $
+
+/*
+cache.get(elf).then(record => {
+  if(!record || version !== record.data) {
+    showModal(`
+    <div style="height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
+      <patch-notes></patch-notes>
+    </div>
+    `, {
+      transparent: true,
+      blockExit: false,
+      onHide: () => $.teach({ popped: false })
+    })
+  }
+
+  cache.put(elf, version)
+})
+*/
 
 addEventListener("popstate", (event) => {
   $.teach(router(self.location.pathname))
@@ -112,10 +211,13 @@ $.head(target => {
 
   target.innerHTML = `
     <header>
-      <button data-nav="/" class="title">
-        C<span class="sublogo -hide-small">ute Strap</span><span class="sublogo -show-small">s</span>
+      <button style="display: inline-grid; grid-template-columns: auto 1fr; gap: .5rem; place-items: end;" data-nav="/" class="title">
+        <plan98-icon></plan98-icon>
+        <div>
+          C<span class="sublogo -hide-small">uteStrap</span><span class="sublogo -show-small">s</span>
+        </div>
       </button>
-      <nav>
+      <nav class="horizontal">
         <button data-nav="/art">
           Art
         </button>
@@ -131,29 +233,7 @@ $.head(target => {
       </nav>
     </header>
     <div class="pages">
-      <div class="page page-${PAGES.HOME}">
-        <home-page></home-page>
-      </div>
-      <div class="page page-${PAGES.MUSIC}">
-        <dial-tone></dial-tone>
-      </div>
-      <div class="page page-${PAGES.ART}">
-        <photo-journal></photo-journal>
-      </div>
-      <div class="page page-${PAGES.CODING}">
-        <plan98-ide src="/public/plan98.js"></plan98-ide>
-      </div>
-      <div class="page page-${PAGES.THEME}">
-        <plan98-palette></plan98-palette>
-      </div>
-      <div class="page page-${PAGES.CHAT}">
-        <cool-chat></cool-chat>
-      </div>
-      <div class="page page-${PAGES.TUTORIAL}">
-        ${tutorial(target)}
-      </div>
-      <div class="page page-${PAGES.SHARE}">
-        ${share(target)}
+      <div class="page">
       </div>
     </div>
   `
@@ -169,6 +249,11 @@ $.head(target => {
       const { route } = $.ear()
       if(target.dataset.route !== route) {
         target.dataset.route = route
+        const page = target.querySelector('.page')
+
+        if(page) {
+          page.innerHTML = router(route).body(target)
+        }
       }
     }
   }
@@ -177,89 +262,98 @@ $.head(target => {
 $.when('click', '[data-panel]', (event) => {
   showPanel(`
     <my-computer class="passthrough">
-      <button data-nav="/share">
-        Share
-      </button>
-      <button data-nav="/theme">
-        Set Theme
-      </button>
-      <button data-nav="/tutorial">
-        Learn More
-      </button>
+      <nav class="vertical">
+        <button data-nav="/tutorial">
+          Learn More
+        </button>
+
+        <button data-nav="/share">
+          Share
+        </button>
+
+        <button data-nav="/theme">
+          Theme Picker
+        </button>
+
+        <button data-nav="/chat">
+          Chat
+        </button>
+
+        <button data-nav="/help">
+          Help
+        </button>
+
+        <button data-nav="/time-machine">
+          Time Machine
+        </button>
+
+        <button data-nav="/${MULTI_TASK}">
+          Multi Task
+        </button>
+        <button data-nav="/${BRAIN_STORM}">
+          Brain Storm
+        </button>
+      </nav>
     </my-computer>
   `)
 })
-
-$.hand('click', '[data-close]', function  (event) {
-  event.preventDefault()
-  $.mouth({
-    page: PAGES.HOME,
-  })
-})
-
 
 function tutorial(target) {
   const label = target.getAttribute('label') || 'Pluto'
 
   return `
-    <div class="overlay-background">
-      <div class="form-card">
-        <div class="draft-template">
-          <div class="frame-header">
-            <div style="display: grid; place-content: start">
-            </div>
-            <div style="display: grid; place-content: end">
-            </div>
+    <div class="form-card">
+      <div class="draft-template">
+        <div class="frame-header">
+          <div style="display: grid; place-content: start">
           </div>
-          <div class="frame-body">
-            <div style="padding: 1rem; max-width: 55ch; margin: 0 auto; height: 100%; display: flex; gap: 1rem; flex-direction: column;">
-              <div>
-                <plan98-icon></plan98-icon>
-              </div>
-              <p>
-                <center>
-                  <strong>The imagination:</strong> <strike>Space!</strike> <u>Time!</u> <sup>Sight!</sup> <sub>Sound!</sub> <em>Mind!</em>
-                </center>
-              </p>
-                <qr-code src="${window.location.origin + window.location.pathname}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
-              <div>
-                <strong>${label}</strong><br/>
-                <em>Quadrant:</em> ${window.location.origin} <code>/app/</code><br/>
-                <em>Sector:</em> ${$.link} <code>?id=</code><br/>
-                <em>Planet:</em> ${target.closest($.link).id} <code>&label=${label}</code><br/>
-              </div>
-              <hr>
-              <img src="/public/cdn/sillyz.computer/reality-somehow.jpeg">
-              <p>
-                A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
-              </p>
-
-              <ul>
-                <li>Art</li>
-                <li>Music</li>
-                <li>Coding</li>
-              </ul>
-
-              <div>
-                <plan98-palette style="height: 50vh"></plan98-palette>
-              </div>
-
-              <div>
-                <div style="display: grid; height: 100vh; place-content: center;">
-                  <a href="/app/hello-elvish?elf=js-repl">Tunnel Practice</a>
-                </div>
-              </div>
-            </div>
+          <div style="display: grid; place-content: end">
           </div>
-          <div class="frame-footer">
-            <div style="text-align: right;">
-              <button data-share class="standard-button bias-generic -small" type="submit">
-                Share
-              </button>
-              <button data-start class="standard-button bias-positive -small" type="submit">
-                Start
-              </button>
+        </div>
+        <div class="frame-body">
+          <div style="padding: 1rem; max-width: 55ch; margin: 0 auto; height: 100%; display: flex; gap: 1rem; flex-direction: column;">
+            <img src="/public/cdn/sillyz.computer/reality-somehow.jpeg">
+            <p>
+              A creative suite for kids at heart. Explore and absorb the ability to create art by learning from it.
+            </p>
+
+            <ul>
+              <li>Art</li>
+              <li>Music</li>
+              <li>Coding</li>
+            </ul>
+
+            <div>
+              <plan98-palette style="height: 50vh"></plan98-palette>
             </div>
+
+            <div>
+              <div style="display: grid; height: 100vh; place-content: center;">
+                <a href="/app/hello-elvish?elf=js-repl">Tunnel Practice</a>
+              </div>
+            </div>
+            <hr>
+            <div>
+              <plan98-icon></plan98-icon>
+            </div>
+            <p>
+              <center>
+                <strong>The imagination:</strong> <strike>Space!</strike> <u>Time!</u> <sup>Sight!</sup> <sub>Sound!</sub> <em>Mind!</em>
+              </center>
+            </p>
+            <qr-code src="${window.location.origin + window.location.pathname}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+            <div>
+              <strong>${label}</strong><br/>
+              <em>Quadrant:</em> ${window.location.origin} <code>/app/</code><br/>
+              <em>Sector:</em> ${$.link} <code>?id=</code><br/>
+              <em>Planet:</em> ${target.closest($.link).id} <code>&label=${label}</code><br/>
+            </div>
+
+          </div>
+        </div>
+        <div class="frame-footer">
+          <div style="transform: rotateZ(-540deg); padding: 1rem; color: white; background: black;">
+            Thanks for playing. -Ty
           </div>
         </div>
       </div>
@@ -276,7 +370,7 @@ function share(target) {
   const copyArea = `
       <div class="copy-area">
         <div>
-          <input id="${copyId}" class="share-link-copyable-url standard-input" value="${shareLink}"/>
+          <div id="${copyId}" class="share-link-copyable-url standard-input">${shareLink}</div>
         </div>
         <div>
           <button data-share="${copyId}" class="standard-button -round">
@@ -287,7 +381,7 @@ function share(target) {
   `
 
   return `
-    <div class="overlay-background share-view">
+    <div class="share-view">
       <div class="form-card">
         <div class="draft-template">
           <div class="draft-header">
@@ -299,10 +393,8 @@ function share(target) {
           </div>
 
           <div class="memex-body draft-body">
-            <div class="overlay-background">
-              <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
-                <qr-code src="${window.location.origin + window.location.pathname}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
-              </div>
+            <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
+              <qr-code src="${window.location.origin + window.location.pathname}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
             </div>
           </div>
           <div class="draft-footer">
@@ -381,43 +473,24 @@ $.eye(`
   }
 
   & .pages {
-    pointer-events: none;
     height: 100%;
     overflow: hidden;
-  }
-
-  & .pages > * {
-    display: none;
   }
 
   & .page {
     height: 100%;
     overflow: auto;
+    background: white;
   }
 
-  ${Object.keys(PAGES).map(key => {
-    const lookup = PAGES[key]
-    const { path } = config[lookup]
+  ${Object.keys(config).map(key => {
+    const { path } = config[key]
     return `
-      &[data-route="${path}"] .page-${lookup} {
-        display: block;
-        pointer-events: all;
-        background: white;
-        height: 100%;
-      }
-
       &[data-route="${path}"] [data-nav="${path}"] {
       border-color: var(--root-theme, #E83FB8);
     }
     `
   }).join('')}
-
-  & .overlay-background {
-    display: block;
-    height: 100%;
-    background: white;
-    overflow: hidden;
-  }
 
   & .title {
     color: var(--root-theme, #E83FB8);
@@ -451,27 +524,47 @@ $.eye(`
     display: grid;
     grid-template-columns: auto 1fr;
     padding: .25rem .5rem;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 1px 2px 0px rgba(0,0,0,.1);
   }
 
-  & header button {
+  & header button,
+  & nav button {
     padding: 0;
     border: none;
     border-radius: 0;
     background: transparent;
   }
 
-  & nav {
+  & nav.horizontal {
     display: inline-flex;
     gap: .5rem;
     align-self: end;
     place-content: end;
   }
 
-  & nav button {
+  & nav.horizontal button {
     font-size: 1rem;
     line-height: 1;
     display: inline-grid;
     place-content: center;
+    padding: .25rem;
+    border-bottom: 2px solid rgba(0,0,0, .2);
+  }
+
+  & nav.vertical {
+    display: flex;
+    gap: .5rem;
+    align-self: end;
+    flex-direction: column;
+  }
+
+  & nav.vertical button {
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-grid;
+    place-content: start;
     padding: .25rem;
     border-bottom: 2px solid rgba(0,0,0, .2);
   }
@@ -485,4 +578,12 @@ $.eye(`
   & .share-view {
     padding: .5rem;
   }
+
+  & .share-link-copyable-url {
+    white-space: nowrap;
+    overflow-x: auto;
+    margin: 0 auto;
+    display: block;
+  }
+
 `)

@@ -1478,8 +1478,8 @@ function end (e) {
       x: invertX ? startX + x : startX,
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
-      title: 'Journal',
-      url: `/app/ur-shell`
+      title: 'My Computer',
+      url: `/app/ur-shell?id=${tray}`
     })
 
 

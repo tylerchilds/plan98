@@ -206,9 +206,6 @@ $.draw(target => {
             <button class="room-select ${currentRoom === x ? 'active':''}" data-value="${rooms[x]}" >${rooms[x]}</button>
           `
         }).join('')}
-        <button class="room-select" data-help>
-          More Help
-        </button>
       </div>
       <div class="chat-area">
         <div class="scroll-back">
