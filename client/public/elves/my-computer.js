@@ -9,7 +9,7 @@ import Cache from '@silly/cache'
 const elf = 'my-computer'
 
 const cache = Cache(elf)
-const version = 'infinite-1.0.0-rc14'
+const version = 'infinite-1.0.0-rc15'
 
 const lazyLoaders = [
   './home-page.js',
@@ -482,8 +482,13 @@ $.eye(`
     const { path } = config[key]
     return `
       &[data-route="${path}"] [data-nav="${path}"] {
-      border-color: var(--root-theme, #E83FB8);
-    }
+        border-color: var(--root-theme, #E83FB8);
+      }
+
+      &[data-route="${path}"] nav [data-nav="${path}"] {
+        background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), linear-gradient(135deg, rgba(255,255,255,.35), rgba(0,0,0,.35), rgba(0,0,0,.25), rgba(0,0,0,.65), rgba(0,0,0,.5)), var(--root-theme, #E83FB8);
+        color: white;
+      }
     `
   }).join('')}
 
@@ -530,6 +535,10 @@ $.eye(`
     border: none;
     border-radius: 0;
     background: transparent;
+  }
+
+  & nav button {
+    color: rgba(0,0,0,.5);
   }
 
   & nav.horizontal {
