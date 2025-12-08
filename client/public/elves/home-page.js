@@ -130,7 +130,7 @@ $.draw(() => {
     </div>
     <div class="featured">
       <div class="featured-title">
-        <span style="font-weight: 100; font-size: 1rem;">Featured Work:</span><br>HiveLabworks.Com
+        <span style="font-weight: 100; font-size: 1rem;">Featured Work:</span><br><a target="_blank" href="https://hivelabworks.com">HiveLabworks.Com</a>
       </div>
 
       <div class="featured-subtitle">

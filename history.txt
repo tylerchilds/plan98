@@ -1,0 +1,1888 @@
+* 2c2de37 (HEAD -> plan98, origin/plan98, origin/HEAD) make cutestrapped sillyz more performant
+* 9ca2d20 begin to tune the fiddle
+* 1dfcc79 start turning sillyz.computer into cutestrap.com
+* 8a7b4c8 bump that toast
+* 2bf128e i don't know when the paper stopped being a troll for real
+* 700c438 attempting to mime on ios
+* 6936604 cold open to quick journal blog thing
+* c9f4e87 make it fast, cache it up, but don't deploy it yet
+* f40262b cache from outside the typed realm
+* a2241ba a foundation for a hand drawn photo gallery
+| * a3b8225 (refs/stash) WIP on plan98: 080ac85 gg & gn
+|/| 
+| * 593b993 index on plan98: 080ac85 gg & gn
+|/  
+* 080ac85 gg & gn
+* 3337df9 world-map
+* b72350b add client-side cache mechanism with elf addressing
+* 57a3f2e start to make multiplayer the single player too
+* bf430bb silly stacks and elf tunnels
+* 3fc4629 i think this is the ideal boot sequence for a portable kiosk
+* c3f5fb6 sillyz.computer is a diggiddle fiddle
+* 176f39b add flexibility to the beerdogusa app
+* 0500286 incorporate music dj into the sketchpad
+* a500811 technically an mp3 player
+* 6532524 i mean, if you could imagine publishing as the event goes on
+* 67a586f never document the internals
+* de6d8f6 prep for publication
+* 4ae57a3 deepen the tangential lores
+* f60aa66 cybersecurity patch for inc-002
+* 7c3dc58 maybe let vfx button be journal
+* 71bcf6b let VFX bg be selectable
+* b28346b make pathways more readily ready
+* 0dd6862 begin to offset reality to proper display calibration
+* dfba79e performance improvements while adding performance issues
+* ff0eb21 log the device orientation to see if capture or compute error
+* eef27a1 idk lets get coffee maybe
+* aa53a59 make the sketchpad the hard face of the operating system
+* ec5683e rebooting reality from scratch
+* c10cd9e fix size from being hidden
+* 911ab7d add the self portrait to the mime's eye with the elephant ears
+* 436ee37 layout prep work
+* dcf92e6 contextual nestings
+* 9329cc4 multiplayer paper introduction
+* c15384f patching in the shrines in the tanka quest temple
+* 8ac3710 Fixing the tiniest violin is the easiest trick in the book. All you do is delete four forward slashes. That's it.
+* caa2097 su tychi
+* e48b79f seedpoem
+* ecb0984 a sanity check by writing tests for some reason
+* 098e8ed su bengo lol
+* c4fd74e make the root shell boot the door man and add ide to cli
+* 1402296 social-template and profile-picker
+* 229e9ea the media mirror
+* 2d66036 leet-6174 fix
+* 7454cc9 iiw41
+* 33f96be make there be a splash page on the paper pocket and on plan98
+* 016a1d6 plan98 logo
+* 89b8bf9 plan98
+* 854e1c5 read, write, web
+* 1fd9319 nested-agenda
+* 0aeb00c the most average technical interview
+* 045e1bc hello-automerge
+* 48b255d is... is this... activity pub
+* 2f397ce revi
+* 3e765d3 minor bugfixes for shirtflicks
+* 89dd92a add strongly typed elvish interface
+* 49ddc32 the elvish spec and such and such
+* 1d0d03e arctic code
+* d3eb28e hello-world
+* c7e4e0b elvish
+* 25277ea add the origin story to when yo momma taught me hello world
+* c1ea2cf okay initial publishing at ui layer for compat with shrubpub
+* 66b14e1 10-4 plan4
+* 36da651 the jester as a commit message
+* b5ae5cc remove supabase from landing
+* 9b86752 responsive tweaks
+* 479cca5 add a new landing template
+* 712aeb9 clean up main street for the circus
+* 93f0cea remove dba from dba
+* 5f6b814 got the whole worlds
+* 01ba313 initial beep boop for the comedy map
+* 7a6ce7e resume
+* 52052f0 always always always regret checking illustrator files into git
+* 4d3064a bring the cajon into the box
+* 8d723e5 if i am the person on business from porlock then that means
+* 233f799 hit them with ur best shot
+* e1749c1 streamline the top of house
+* 6512933 browse button for gaming thingy
+* 92777f2 beat tape extractor
+* 5696d9f boop
+* 25129c0 video killed the radio star
+* 6872f50 center up that video on safari
+* f6885b5 safari fixes
+* 9164ca5 bring back kernel fracturing since that's ironically more stable
+* 6dbe3f1 this actually feels like a thing that can channel surf
+* 9cc98ed shirtflicks player progress
+* b736ee8 add trailer support to shirt flicks
+* 30e45ba bring the playhouse inhouse for shirtflix
+* 7072a16 shim it up for ios
+* ca81dc3 add button to swap
+* 7f1a713 asgard
+* 07b8815 keyart background
+* 7dc4a84 shirtflicks bindings for gamepad
+* dc4c59d installallalalala apps into the shirtflicks
+* 681fc4f shirtflicks prototype
+* 952d0de begin plumbing out this hypothetical shirtflicks
+* 081d5aa the saltiest calculation
+* c9f6b02 start to think about either hyperkernel or monokernel
+* 5583778 add an edit ui for the cultural preservation demo
+* 299477e get to the choppah
+* 509e158 tuner and a tinwhistle
+* 8c4d2ed first successful tuning of the banjolele
+* 343775a begin to coagulate the tuner into 98isms
+* 6216bdd port of bloop.monster/tuner
+* 8302931 minimal plan68 kernel
+* ceddfa0 puncs
+* 54aa96f i am porlock
+* 2afad61 add broblox into the memex
+* 957f946 spacing within
+* 9358dc4 xana-doc and trans-clusions interoperate with the time-machine
+* 99e2dcb trans-clusions transclusions
+* cb98ae5 more space
+* 5fd24b9 new easing function for the joke book
+* 9fbb93c better math around 3d projection dropping
+* 7dd011d sillyz computer, definitive edition directors cut 2025 edition, august
+* f6c52d1 i didn't commit to gravity today, but i'm happy with this jokebook.
+* 00c35b6 the oasis
+* 02a1797 labubu?
+* c011a3b sillyz -> memex
+* 5597bd6 i got a new phone and i hate the corners
+* 7d8d41d you eat a saga the same way you tell an elephant
+* 6787d93 most of the way towards zip files
+* 8e60569 new computer screen area
+* f6873eb mathematical prose
+* 3d37228 remdial zip upload
+* 1bfdd49 remedial zip file support
+* 6d64886 prep for zip
+* 15d2100 note spacing
+* b2102e0 polish up the studios for snapping audio/video
+* 60470eb streamline onboarding
+* 1d84644 cleanup action area to only be on existing and qr screen
+* 14010f7 richtext plumbing and a solid copy/paste to share the qr code
+* d05eda5 ios plz fix
+* de1f49b add persona support and clean up creation workflow
+* 19e611d keycards, personas, memexes oh my
+* 9543402 minor positioning decisions
+* 574df81 how to delete a memex
+* f2f8962 upsert them keycards
+* ba7b54d memex add w/ recovery
+* 44929f6 memex normalization of the feed
+* d877f1e add the ablity to create a memex
+* 7084a67 the time machine has been broken down into more app-like parts
+* acbfe3e wip of simplifying the time machine controls
+* 5d68860 fix first pass onboarding error
+* 1286e91 bring in friendcryption under the secure-* namespace
+* 276a0f7 a pitch or so
+* bf6a524 better loaders around gettings a secure persona
+* bbcbe10 do we even need an index file where we're going?
+* 7ae77bf get the security system design system'd up
+* 3dd6134 when in trouble, click the clock
+* 1daddc1 maybe allow meeting rooms?
+* 4cfd767 begin the friendcryption overlay
+* f5024f5 icon work
+* 122f364 add transcrition and improve dom cache narrative in studio
+* ec34d6c get instruments online
+* 28f8e2a quick menu
+* fd9af6c wallet polish and replenish the buckets on delete
+* 47f1632 add a description field to metadata and index it
+* 3705322 personalize the paper pocket
+* d94e7c0 fix mobile nav issue
+* 0ff43e5 feels weird to be writing cutestrap again???
+* 3438fcc add in filtration systems
+* 484154e add search filtering and interactivity
+* f77c699 polish up the generic park code selector
+* 88fdb33 streamline some of the studio relationships with their creationos
+* 45d5535 begin hyping up towards 3d environments
+* 0b6a447 add description for agents
+* 701075a add pathfinder support
+* 76a2985 remove keycard from time-machin to avoid paradox
+* 6e18720 fix faulty greedy cursor focus apparatusi
+* badb01e add character quickly
+* 38347b4 bulletin board data type
+* 16fd1e7 don't auto save children, just update the draft
+* 848e16b time machine across plan98 for super sync
+* 4cf9dab share title between keycards and their creation events
+* fbe717f add an about command to the shell
+* 877a7f7 loader and keycard creation handling
+* 04b1444 move the html file hencewhere
+* 0635d9e the foundation of an onboarding journey
+* f25535b get all the creative data types in the time machine more clearly good at what they do
+* 27ab275 while queueing during rocket league i added sheets to time-machine (ish)
+* fe97e2f handle escape propagation
+* 7f3c67b logo aesthetic
+* f12f79e handled cleanup better for when accessing media devices
+* 1aeb162 light dom with callbacks for cleanup is the play
+* f533c1d wip shadow root
+* 2700a4b add escape to synthia
+* 6c15e76 bake agentic config into ui
+* b063f08 the better to cache you with my dear
+* 2bc9b51 clear time machine on identity swap
+* ad71975 add vim-tutor and other low level introductions
+* 8446a03 begin balatroatiazatioans
+* a9a93e0 cron-test
+* 781f3d9 mike's nap
+* 3733e34 did... did i write... an os?
+* c5029d7 starting with a square one blank braid install
+* 580451c prep to braid
+* a6cc61e modal interplay logic
+* 0c173a3 add history undo/redo to the sketch files
+* 9aa0c64 filter out missing events
+* c5debd8 logic around staying in the editor after save
+* c3fb399 logo and branding. crisp. clear. Plan98.
+* 433c3b1 amazing progress getting agents connected to system ollama with polish
+* d522299 move agent foundation to synthia intersection
+* e32a747 get stable playareas cooking in the time machine
+* 42686bb basic integration binding the time-machine agents with the chat interface
+* 353610a incorporate agents into the time machine
+* 320653a initial plumbing for agentic tools calls
+* cc4c5a8 begin setting the stage for agentic nonsense
+* a0fa3a3 (tangled/plan98) fix the bug that i should have tested before trying on stage yesterday
+* da3ec56 add clipboard and example env with public pre-fill
+* 73fe260 resume
+* 267d334 get the paper pocket and the new resume online
+* 4f9676e general flow improvements to the buy/sell model
+* f8ae773 polish and flow to the buy/sell app
+* ff3fc25 minor polish around the buy sell app and the interplay
+* 21b9392 start downloading zip files
+* 1d0d3f7 iniitial plumbing on the marketplace app
+* 0a9262e recover voice recognition in the post was era
+* 75b6b28 move the assistant inband
+* 5f6cdfb add keycard selector to swap around realities
+* 4513002 styling for default images
+* 27cb31d get the studio cooking on a per media basis
+* b6554b7 always show code on escape push, nobody should be hitting that button anyways
+* e196710 logic around when drawers in the time machine are opened or closed
+* 5c20bba align the aesthetic across the jester of all demos
+* 5792c36 delete items from time machine, wip
+* 06dd153 timing belt issue
+* ee361de a bit of polish around the time machine edges
+* 81a577b better styling and polish around the wallet and selectboxes that can be standard
+* fe0494c fix timestamp logic
+* fb5a6e7 design system normalize on button styles and behaviors
+* 90d5d58 polish on the buttons
+* fd1164c more bold on the prose
+* 659f264 it absolutely amazes me how powerful styled buttons are
+* b881274 fix lossy export
+* 1d69e12 fix head requests to save get request for import()
+* f4a56e2 allow was host to be configurable
+* 2962dc5 resolve minimal deps for enabling bootstrap
+* 3d59c56 get e2ee plumbing started but not ready
+* 10505af was always from was i suppose and log wherefrom
+* 9e09956 make the wallet remixable itself immediately
+* 8e3c9ae add some polish to the wallet and time machine
+* a1a0530 hard coded tests passing for serving plan98 from a was
+* 72862a3 wipe caddy
+* bb763c0 wip on getting os fully served from was
+* d22545c minimum viable multimedia intake
+* 163885e serious business on entry
+* b28d8d6 actually await the download
+* 7de1abb share across and render default modality
+* 1594dd4 import the file system
+* 77e71e3 when you http over jsonrpc in the same file
+* 8a91c92 most of plan98 loading off the wallet server
+* 0fa4071 allow peer to go public
+* 6c599e8 peer plumbing for serving the client folder of wherever it happens to be
+* 9eec85d fix edit mode
+* f99d350 a lot of polish around time machine layout
+* 4f20c57 STEREO TYPICAL PERFORMANCE ENHANCEMENT EXAMPLE
+* 502bdf8 close the jester loop
+* 923816e moar path
+* 62a78b5 stumble through the jester of all demos, quit but never give up
+* 7177455 most of the way towards a new layout and aesthetic
+* b8b7620 minimal aesthetic for time-machine
+* e94ae14 pioneering the setlist for the jester of all demos
+* 9a1fcc6 attempt to trouble shoot ios video
+* 59af2e0 edge cases around ios nuances
+* c89358c maybe this ios codec
+* d2131fe prioritize mime types to optimize success
+* 637e822 fix safari plan98-camera bug
+* 7088052 add video saves to the time machine
+* 36c2836 re-provision plan98 after save?
+* b632462 polish on the shell and wallet interactions
+* 87ec4bc quality of life around sharing wallets
+* 28b0637 stub custom element recovery
+* a3041b7 beep boop, the time machine is now wired to was directly
+* a49e194 functionally record audio notes
+* 7dc61ec was demos
+* 558e635 was-audio tag
+* 71054d7 more was logic
+* ac5b9c7 allow public the ability to view
+* fd69f08 allow public to be read publicly
+* 2a13549 edit with was code
+* 280e66e add keycard to paper pocket logic
+* d15b17c add paper pocket settings to keycard
+* 6b471d6 wasificate the events
+* 3b05bf7 was backed time machine saves + was camera initial
+* 28658fc need to make the palette cached in the was-wallet
+* de441ff more like a premium and cheap credit card
+* 87a2e9b fix issue where space and signer were missing for save
+* 1cf5e77 meaninfully interact with the woz
+* 3c956e9 make a performant upload queue for backing up plan98
+* 2ef2b35 correctly store plan98 config in
+* 8907d6f did did did it
+* 05b5153 so close to a functional plan98 was config
+* 1792233 add query strings to was-hello for host and match src correctly
+* 786764e default the zero state to have some elf agents
+* 4870814 fix music problem
+* bd9939a paper backup wtf
+* 1d0b768 what time is it? go time.
+* 3cbe702 prioritize key when selected
+* 9861209 initial was-wallet commit
+* c152b44 add delete functionality and normalize synthia
+* 249581c aesthetic and creative plumbing
+* 06cf266 resume touchup
+* 77c4848 @gobengo ty -ty
+* 3b493de check for persisted item at was storage location
+* 8bb504c disable networked cache for was demo
+* 082f39b handle logic around was for storing and recovering credentials
+* 3cf9673 edge case around input and highlighting on first pass
+* 36a3dff was testing harness at /app/was-hello
+* 6a9430e add was to boot priority in plan98
+* ffffa94 not much, sup w/ u
+* 06f4960 initial self reflection for getting ready for walletification
+* 45ec887 add photos to the time machine
+* 993e2b5 save sketches
+* 3fd3adb save sketch pad via post request
+* 3f9c7c5 show active color
+* 47e2405 a coloring app for a kid
+* 52bbccc roll back hot key
+* d015975 make the palette more clear on actions/ur-shell case insensitive
+* 4066bb6 rom-ify the palette
+* adbf2ce sub sienna for gray for earthy
+* c48cc37 make a for real sounding sounding guitar sounds
+* 56ccb9b make this play like a real guitar
+* 8cbc7c2 final boss looks like a circus tent now
+* 1c04710 power the final boss using the tiniest violin
+* ce4c229 hbd mila
+* 7df4777 performance improvements to synthia
+* 335842b better about page and nesting support
+* 3c0813e rush the job into production
+* b2737da expose the escape hatch
+* 3020224 fix sizing
+* 3e6826a reboot your self
+* bfd2f34 balance audio and video in an interlinked paper-pocket
+* ab06a46 add sound effects to the palette i guess
+* 474c029 initial aural checkpoint for the palette
+* 48b0ae8 fix time bug after panic
+* 5df0810 allow all time to be filtered
+* 1d6ad6c a bunch of boring cli and ide related fixes
+* 1b26242 prep for summer vacation
+* 167b712 bounce to all comms channels
+* 884edd5 the paper pocket is getting out of hand
+* e5a71b1 sandbox runner
+* f854745 search engine and llm embed
+* 7bd28f8 launch ai incursively from the highlighter
+* 9b067ae get from the clipboard exports simmering goodly
+* 64b93be comment out synthia actions for now
+* 70d56bf aesthetic for synthia
+* ad26587 synthia. shapes begin to form.
+* e409cdb text selection assitance and aesthetic
+* 9738d71 this... should require security analysis
+* dd5cbd6 i should chill on these z-indices
+* 11b567f interesting helper concept and implementation
+* bfc5b25 begin connecting the wallet to the time machine for the keys
+* ff18ff9 wip wallet-attached-storage demo
+* 67f3ae2 make journal polymorphic
+* 1cd2651 js repl polish for responsize considerations
+* 84bd3a5 sample repl
+* 13af73b polish on js modalities
+* 61b3b00 add js-repl support to the sandbox stack
+* 8b813a8 begin to port in hive things
+* 10e0371 wip. slow build, wrong paths probably
+* a4ae0bd recursive nesting ui alpha
+* f11851b run luau from bluesky
+* d7ade87 minor aesthetical polish now that we have an embeddable scripting engine in our embeddable scripting engine
+* bb9f5da add luau support to ur-shell
+* 164f7a7 complete the repl and adulthood
+* 82a9471 basic luau repl
+* 6d5c193 basic luau implementation
+* bffab23 be an adult
+* 9fac818 merge time-streams with tommi's schema
+* 1b93a3e narrative and ocular correction
+* 6fbd3bd get tommi in the time machine
+* 72f53b5 you ever do those two birds one meta narrative days
+* 18f6a64 fix the dumb calculator in the dumb time machine
+* 0f77c4b fix file system bug
+* e82471b tommi.space
+* 9151356 progress on the time-machine
+* fa20167 calendar like logic
+* 3dfa3c4 fix bugs related to duplicate fetching
+* 2cab429 the virtual dom is the worst and the best
+* 3d5e745 follow/unfollow action-bar display
+* 8cd4ebe scale back the media plexer from all external embeds for now
+* 6c2988c minor polish on bsky edge cases
+* 830ae53 get some initial render splitting for bluesky- namespace
+* c8b528b handlepreviews  in media plexers when link is ambiguous
+* 6065ccb get hashtags in the correct places
+* fe2dc7d hashtag navigation
+* 9ae79b1 better ux journey
+* 3502749 blue-sky perf improvements
+* b879eea performance by not triggering unnecessary re-renders
+* 68bd16d performance improvements just barely enough to make alerts with embedding tolerable
+* 1335e87 search form with advanced searching and hashtags
+* 41a67b4 add backpack, next up search, then marketplace
+* 6b04924 backpack
+* 9ca21f9 better prototyping for alerts context
+* aa5546e begin flattening html for memozation calls
+* 124be07 add history and navigation to blue-sky app
+* 49934ef handle parents and replies for solo posts
+* cef2394 slight copy tweaks
+* 6500ec0 clean up bluesky forms and overflows
+* 776c928 fix a bug in bluesky app for when facets are malformed
+* 282cb26 portfolio context
+* 58cd869 swing
+* 00b4982 edge cases in not having data for bsky
+* a906a77 recover hlsVideo until we go vdom-less
+* efd21c3 polish around sharing and modals and layout
+* 8b16d5f how many components can we shove into a component o m g
+* 7dd9b84 reposts vs quotes
+* 2b90ca6 replies and quotes...
+* 4deb8a9 quote post rendering
+* b5a66bc like and unlike in the blueskies
+* 6ab446c assistance with getting post rendering plumbing
+* 287dc4c fix minor bsky bugs
+* 468953b blue-sky edition one
+* 8d32d46 infinite scroll
+* 5d19896 get email cooking on the theme train
+* 9dce56f bluesky aesthetic
+* 909857a upgrade e-mail
+* 7286897 blue-sky component upgraded with initial data fetching; wip make pretty
+* 7694043 initial plumbing towards and emoji picker
+* d013d9e basic blue sky authentication with session persistence
+* 2ca64ce get patches moving across the network
+* 2ffd192 parity with storing patches
+* 092f8c4 fix code mirror by unpinning the view that breaks on new version
+* 848a000 remove pinned css version
+* 6fdba97 an elf using react powering a spreadsheet
+* d94637f wip react-sheets
+* 108fc6d this is excel-lent
+* 5e87fcd pin css version
+* f6b7452 esm rowsncolumns sample
+* 74b8fa2 hardcode css version for rowsncolumns
+* 7325bce initial plumbing for rows-n-columns integration
+* 787a6f8 resume touchup
+* 068aa2e the markdown for the modalities
+* 1500b62 cdn-ify the videos
+* 0579187 go away from bad remote id
+* c162f6b last minute tweak to modalities
+* 0bda089 the six modalities of computing
+* f21f9f8 the six modalities
+* 06aebf2 remote-control application for the icing of the cake
+* 8757e3c a little more documentation and boxart cleanup
+* 39c712e vim polish
+* 434d2df streamline the code editor aesthetic and edge cases
+* 320867d tweaks around nested boundaries
+* 01f1a78 namespace the multiplayer server better
+* eca186f days like today make me realize: this is a kernel
+* ba21456 hotfix until we get plan98 multiplexing
+* deab14e user experience improvements
+* 6138a5c menuing open and close logic
+* 4fabad8 get the start menu cooking tighter
+* 1cba3e6 fix the bugs around getting window management cruising on mobile
+* 28de165 i understand why css is so hated now
+* 77b5909 add ur-shell to home
+* c0e64cc syncronize while ignoring thine self
+* c7f14d7 fREE THE DOCRS
+* 950aa01 get braidtext running on multiplayer local server
+* a6241f5 peer to peer multiplayer through path finder
+* 1174959 square sticky
+* 7662e0a merge and diverge realities
+* 2ce096d sync mobile device by default
+* caf3140 general micro algae cleanup
+*   d0ee1bd Merge branch 'plan98-sync' into plan98
+|\  
+| * a9fe430 (origin/plan98-sync) plumbing for multiplayer desktop
+| * 43a09b9 basic infrastructure to syncronize tags across systems
+| * 10bfe91 basic plumbing to start broadcasting patches
+| * 06dd6ec (plan98-sync) get plumbing for syncronization thinking through udp and the elves
+| * 08984c2 prep plan98 for synchronicity
+* | b047694 re-arrange app-list
+* | 285342f everything maybe
+* | 3b9105f high level tamashika
+|/  
+* ec8ee7d modalities
+* 8d1c440 fix the shebang and start plumbing the settings for mobile
+* 6fdc0aa bring paper pocket settings configs up and into the ur-shell
+* 6214022 get the mobile device as a studio and with the system menu
+* 01a8ea8 minimized edge case
+* e2832b6 fix cool-chat
+* b0f05a1 xp aesthetic for door-man
+* ceb4613 more polish across the elf stack
+* 9834cec hardcore desktop theme
+* 9d1a424 this is absolutely the silliest
+* d5e8e13 deeper plumbing on the six elves in a trench coat lore
+* 03c4f64 add escape key logic
+* 652950b work in progress on the door-man
+* fe5eb42 u r shell
+* b00ba83 space-time demo
+* 2590e7b hyper-text slideshow presentation
+* e64b1bb the beginning of simultaneous demos
+* 17787f0 i guess at iiw we made a todo reminder thing
+* 1d1190c finished slides yolo
+* bcc9bcb slide polish before go live
+* aa0dc53 iiw 40
+* 27bda1c the start of a brave new world
+* d7bde0b fix codemirror
+* 7bbf788 journalism screenplay
+* 822ebb3 use javascript to prove transitive hypertext turing completeness
+* cb41785 clean up the simple e2ee demo
+* 106c327 fix default cool-chat room
+* eb303e8 party on 91 i guess
+* e1e4a94 call the work done to date the bios of the loom
+* 7e7f920 move to higher order pup
+* ce5f561 get pup prepped for external start
+* 624bb2d audio context block
+* 2970a15 second screen and player controller slot polish
+* 0997f1c bring that paper pocket in house
+* fcd6600 remove udp console.logs
+* 5a20e90 homepage countdown
+* 65ab956 uplink and downlink
+* 8ec0652 disable remote view for a moment
+* 9e8a7c8 bleat beat
+* a55e437 streak multiplier
+* 3188c84 cooperative scoring or competitive, you pick
+* cd8f50d move the set item below channel connection?
+* 365cade slow down the geckos
+* 105a438 menu mirroring position
+* b773f47 health hud polish
+* a43f3f6 difficulty ramp every 12 seconds
+* 384ec65 remedial fps
+* 17747eb syncronize the menu system
+* 2b83272 invisible controls
+* f082f33 initial remote perception
+* 17a1a7b refactor to prep for auxillary solo screen
+* 03cafcb keep menu for settings in view
+* 32197f6 start on the easiest difficulty
+* 150674e overlay nav options
+* 162b00f functional pause menu
+* 590c778 add the shared os menu to the song-wave demo
+* cdb3444 cleanup after the empty columns
+* a91384b change bpm difficulty on the fly
+* 6fcc3f7 music spacing for expert mode pro controls
+* 97ee7ce defeat enemies in the proper order
+* 7fe309e score and gameover polish, still need to touch up the counting mechanisms
+* 872c059 general scoring, game over tbd
+* 991ae80 30amp if actions were performances
+* ee0225c lose condition
+* 8c49073 bring in some character lore
+* 02ca7c1 enemies attack
+* 26c6812 simplifying song wave settings and polish on sprite landing
+* aedf30b add a player sprite to piano keys
+* 833d3bf introduce song wave rhythm battle game
+* d7a9fe7 add some light documentation
+* ce2dc7c update homepage to have cool-chat
+* 274257c cool chat
+* c74fce0 make the boxart the default
+* d715ea0 simple polish around the rougher bits of the entertainment unit
+* d58b26a a trepidatious throughline
+* 6329604 homepage aesthetic
+* 75a03ca add controller variations
+* 8bdf803 add in some os level logic
+* ec07993 pause menu scroll logic
+* f978dde fully functional menus in the system
+* b685884 ugly but functional settings menu for players, moving to shared pause
+* cac193a fix safari qr layout bugs
+* 0c61699 fix safari qr bugs
+* 4a8c57b delegate join codes down into the rom level
+* 7116121 open up cors
+* 2fd3145 sslwebrtc?
+* c8a181f open cors because i am a maniac
+* c90b73b get ready for online multiplayer
+* 27ae40c four player couch co-op jam session with the band
+* c97ff6d lightem up like a tree
+* e5894bb streamline couch-coop and multiplayer template
+* 6745a1d couch-coop
+* 00f7810 tuning the controller for various scenarios
+* 7e39237 minor styling tweaks
+* 0838e20 lay the ground work for being able to synchronize devices and inputs with the tv
+* 49cb555 just the hostname
+* 0acb96d standalone qr code scanner
+* d03fe24 get the styles and proof of concept more fleshed out for the chat room
+* b180939 basic nickname support for geckos chatrooms
+* fb9ddcc basic irc chat example in geckos
+* 8c16867 introduce basic lessons and tracks
+* 126d593 fix multiplayer example
+* b899a50 tweaks for the home-entertainment system
+* 2699da4 remote control home entertainment system
+* e8469c1 convert to a lighter html js lib
+* a239c64 debug=true
+* ba554f8 qr code scanner ftw
+* ba5f44a add the camera desktop with minimal qui
+* ea08680 be the errors you want to see in the world
+* d69a822 debug network request
+* ea98178 basic camera roll functionality?
+* 76b8919 no audio on desktop
+* 2322467 the beginning of camera desktop
+* eaff382 use pauls thirds
+* 9a398c6 lets get that cheddar
+* f5c4a27 resume touchup
+* ec791fd tamashika presentation
+* 566104f tamashika press kit
+* 06b44a1 end game countdown
+* 1bb77b7 fully fleshed prototype of typo-hero
+* 6350cdb aesthetic and plumbing for phrasebooks for typo-sim
+* 10f74ab flesh out theme on controller
+* c8bc94d flip aurals to be linear mappings
+* 6a6a731 typing simulator application framing and plumbing
+* 54c1bbd cleaned up tutorial flow with code samples
+* 006dcd7 port hive hypertext tweaks
+* f05ab21 menu styling and tutorial ergonomics
+* a4473db get all the paper pocket synths respecting the config
+* 0b1c3b8 get the final boss respecting note duration
+* 06ffc6c feedback from gdc yesterday
+* 5db6d14 begin plumbing up silly script
+* 57e3c99 paper pocket polish
+* b0c57a5 match music and color math
+* e136184 i love it
+* f1a5e64 bring pause and settings into the higher order paper pocket
+* a5b667c seo and indexing for sillyz with an actual landing-ish page
+* d43640f fix in place reverse error and setup final boss as paper pocket default
+* 2962459 final boss; music theory is just addition
+* ef8ed47 fix the guitar
+* f595db2 wire up the strings to the guitar
+* 753b15f get sounds touching
+* 27ba9a0 fake consent
+* 2e99a6b aesthetic for the final boss
+* 0528495 bugfix from copy/paste?
+* 3e19df2 model selector for ollama
+* c926f55 plumbing for ollama uis
+* d94b6fa i got called a traitor for this commit lol
+* 13cf849 performance for the low end
+* bdadd48 flying disk
+* d875c57 saved from vim, game-over
+* 847b9fa general editor configuration to silly specifications
+* c3ac184 make the code editor more like an ide
+* eebe5ec resume touchup
+* b2f5d62 pop it in the frame
+* 4edb1a9 start in the menu
+* eaf6b40 make customization a bit more tangible
+* 457a205 themed background
+* fd6d561 manual note animations
+* 7c78319 more performant video and cues
+* af10c30 initial renderings of actively pressed notes
+* 0cae8da actually fix that touch share problem
+* cdaa1af on the pointerend prevent
+* 179ef19 troubleshoot taht ios
+* 338ca51 add a bit of context on where on the grid we are
+* 4f16991 better settings polish
+* 183d763 bug fix for buffer for tone
+* 42d19e5 disable context
+* 5294d92 make the paper-pocket with paper-nautiloids the default rom
+* 94a92f9 add a start menu app launcher
+* 1c96e2c add touch events to settings
+* 3537e08 move the instrument logic up and into the paper pocket
+* 6401e84 incorporate settings for color and active selection, music tbd
+* 139a265 attempt bugfix for raycasting
+* c07879e improv performance
+* 6858ebe 3d rendering with bettah clicks
+* a237a2a begin having a 3d rendering of the paper pocket synth
+* f38352f begin tying this all together into a uniform experience
+* 26fdee3 prep for pause menu and settings menu
+* dd938ac bump readme for fresh deployment, perhaps
+* 1e78016 vim-lish keybinding for synthetic gamepads on a keyboard
+* a9ab813 streamline gamepad interfaces with overrides and helpers
+* ce38efe streamline gamepad inputs and incorporate them into paper nautiloids
+* 59113eb bump deploy? and speed up debounces
+* ffa681c get unified and throttled inputs across clicks, keys, and pads
+* 3ebc99d add keybindings to the paper pocket
+* 004f163 foundations of the game console
+* 9346ed6 flesh out the toasting logic
+* 870814e add chalk board component
+* a510f25 bug fixes on hyper links on silly about
+* 9a7be2f add a ton of links to the about page
+* 1953add add some preliminary about content
+* 4bc3216 minor tweaks to elf-sagas
+* 0df98fc update from bengo
+* 4a8da87 datapub-post elf
+* 47342bf start on a text based adventurable dimension
+* 7f4ce07 minimum viable dungeon crawler
+* 16a0e44 position of slide-os chrome
+* d8f9d2b like tiktok but for app stores
+* 657717c a slight amount of more stability on pbs
+* 233c4ac playsinline
+* d68f94a interdimensional cable with recovery
+* 083c61e it was a subpixel decelerated issue the whole time
+* e4c491d swipe-swipe
+* 9afde70 streamline social profile for just-me app
+* 5fa616c make silly silly again
+* b427a29 fix layout for just-me network
+* f07a5b6 polish app frame for just me
+* 020698e just me and more contextual tooltips on the touch actions
+* 46ee1b0 just me-- killer app
+* b885a8e add some checkboxes and radio buttons to path-finder
+* dde8602 better collision boundaries and gesturing for the music-walk
+* 31bb7cf tile swipe debugger
+* 7612cd3 fix the music
+* f7d22a7 elves in the rocks
+* 62bb0f4 untested victory condition
+* 5732b07 get music walk dialog and actions connected
+* bf3f8c3 clean up color logic
+* 16c51a2 add the color into the music walk
+* d6975fa move to npm from esr
+* 1827171 sticky background music
+* ac0e60c get a swipe-able music over-world wired up
+* d90e4ea fix that longstanding auth error on provision and login
+* 7ab674f friend to friend friendcryption
+* 65777f9 join profiles table
+* 439c97c secure-messenger and secure-chat initial use cases covered
+* 012b27e modal and comedy day image gallery updates
+* 640eb3f such a clean human interface for a faux social network
+* 907fde7 improbable-loader
+* 48d9d87 get some initial styling going for this social network
+* 9300fb3 basic social image uploading
+* 20e7298 get supabase social network plumbing started
+* f2f3473 bring it around town
+* d47ed3a wip voice clone
+* 67acef3 closed captions set target language
+* d3ea02f realtime live translated
+* 4fdea90 flesh out the jurassic park narrative in code
+* 1c4043e become the bard i was always meant to be
+* aded412 closed captioning component
+* b13bb36 add libre-translate component to switch swap languages like whoa
+* 3d0ec75 add backend support for translations
+* 0211a08 vosk browser integration
+* 7899ff5 fix the hyper script slideshow to have buttons
+* dbe46f5 make about:blank be the irix launcher
+* bbbef42 slideshows all around
+* dd8fa2a better compatibility with hyper script: todo video game controls
+* 0271208 email attachments inline and trusted
+* 856461b let signout from the journal happen and fix pulsating hyper script
+* ceac1d2 happy new years eve
+* fe93c15 get things starting to cook for build a band workshop
+* d9c507c make the things native enough ish
+* 789c3b8 and add logic for single-select
+* e1cab19 multi-select with change events
+* 28aa704 multi-select basic implementation
+* 2eb0a0e remove force install for tauri cli
+* b4262ad simplify subsystem initialization
+* 6c70c23 9p for subsystems normalized
+* 58718da add sudos in place to avoid sudo of the shebang
+* 706529e organize external subsystems for all distros and get debian dependencies queued
+* 939bab3 begin prepping distro specific install scripts
+* 07f1a59 move legacy oauth config to server component (wip)
+* 2a65823 cleanup legacy tauri experiments
+* 8442dd3 make pathfinder cross domain
+* 170f461 budget cross domain multiplayer
+* 8d9a1b1 parity between native and non-native and 404 and non-404
+* 2ed5409 christmas 2024 release
+* e6eef70 multiple accounts with docs nested by user
+* 9946118 improve homepage performance for editing code
+* 4f2751c performance issue resolution on homepage
+* 04353f9 path finder?
+* 7a93d5b wip for video game 3d world
+* 419c1e0 streamline bayun auth with secure-authentication elf
+* c3c3b96 cargo-tauri for binding to native at native
+* 7106e3c tauri at top level
+* bc8311c macbook m2 asahi fedora server sway sillyz boot sequence
+* c1ffd28 single source of truth yo
+* 6de52da integrate to get ready for top level same-page
+* 03bd6f6 get /admin up and running
+* c8612e7 hiveminds
+* 52e6f05 virtual machines
+* 6b86db0 bring backpack into plan98 provisions
+* 69605cd get on with the show
+* f4ce2ef probably time to start bringing in the rpg and narrative engine closer together
+* ae2cdeb make the bulletin board a tiny bit cleaner
+* e005eee fix markdown renderer
+* e8145cc the raw ingredients for a global live variety show channel station
+* c337cbd another esm.sh
+* debc3f9 boop
+* c4d6cd5 resolve 404s
+* b28a3cf bump to push to trigger a deployment?
+* e8d3184 pin version of focus-trap
+* d7eb8d3 path-finder
+* 66ee66d scaffolding of the /admin route for the enterprise dashboard
+* e7cd9fe whatever just combine bluesky solid bayun personal online data
+* 9f0cf23 add activity pub micro-service plumbing
+* a7ef668 add the tier list for the meta to the rough pitch
+* f2cbf36 creating the big top
+* d508a98 use my saga engine for portable blogging with pdf generation
+* 193b0d0 incorporate solid back into the microservices
+* ca2f4ec make dad's spreadsheets more like spreadsheets
+* 9ef5314 learning to program with mom and sister
+* 0ad4783 update the stagehand to be more tabular and fork out for shelf
+* e249dff add file manager support to the bulletin board
+* af88453 initial hive labs branding and landing with bay
+* 4bc72db bring video chat up into the forefront of the chat-room
+* 51283fd this is an absolutely wild operating system
+* df11905 get party-chat and chat-room prepped for e2ee hipaa soc2 nist_loa3
+* f109bab get some sort of journey around the party-chat and bayun-wizard
+* ff61192 convert the impromptu stagehand from a demo to the peninsula parade
+* 438d5a2 don't even code review this, ship it 100% tomorrow is game day baby
+* a785800 add jitsi support back into the mix
+* 825e775 allude to the existence of a file system that hasn't been 'public' the whole time
+* bceca86 expose all inboxes that are returned from jmap
+* 5a7c61a slight tweaks to the advent post
+* 93faeeb twelve days of web guest demo
+* 2706554 Revert "attempt to open up css and js for hotlinking"
+* e7d5cc1 attempt to open up css and js for hotlinking
+* 7cdcd75 move secure email into the main app and add slight polish-- get ready for composing
+* 5e2af7e draft for the 12 days of web guest
+* 78596ef get the foundation of secure email laid down
+* 7a2e0cc initial pass at getting mail cooking
+* 2ca5e21 let draw term escape
+* b033a47 quality of life improvements on the window manager
+* 42624f2 fix the performance regression on the silly computer relying on the elf
+* 3a0754c pop pop pop pop pop pop windows
+* 15a2e2e roll-back elf on the shelf for now; probably a spin-off series
+* a310650 shuffle between the clown jukebox and the impromptu stagehand
+* abadc88 make the single player run on the elf w shelf
+* bd45c65 invert the colors
+* d6a0641 streamline the solo experience for thought syncronization
+* 849e87c remove the elf on the shelf reference, but keep the commit making the joke
+* 1002900 begin preparing the plumbing to syncronize teleprompters for the time team
+* a1ffff2 connecting the clown jukebox to the rest of the show
+* 7af6285 smash that like button
+* 6569351 me, greg, the elf, the shelf
+* 5b048e4 which clown nose
+* 1702ce3 at some point, why is my clown jukebox better than ur trillion dllr industry
+* 8603052 better control flow on dropping in cold turkey
+* 5934cce debug the bulleting board
+* bdfac4d allow bayun wizard to scroll in the time team
+* d86914f clean up the bayun wizard logic just enough to be clean-- implement time team next
+* 1026876 upgrade braid and simpleton, vendor packages versus polute global namespace
+* 85b4d61 don't tell my dad i borrowed his computer, i put the sports stats back after rm -rf /
+* 6a99f5a code module full bleed
+* 45bc86b commit to this cutestrap design system of hotpink on light yellow
+* 6af863c turns out synthia is an accidental circus tent in the purest form, alchemy
+* 27833e0 a creative suite for art, music, and coding. my art form is writing and narrating.
+* 0dd6035 bring back the classic play wheel (guitar tbd)
+* 27c01eb sillyz ocarina, not the synth
+* 454a42f streamline initial render of bulletin board launch
+* 9d3496f enjoy that game over code
+*   9654547 Merge branch 'plan1998' into plan98
+|\  
+| * ddef950 (origin/plan1998, plan1998) sillyz as a diss track; absolutely eviscerating
+| * 2aa8b51 tweak the display of the internally nested super computer
+| * 677fb60 add wav support
+| * 84fdd94 clean up the ethnography
+| * 0a7a229 streamline file system interactions
+| * 76c9147 polish on password protecting local assets such as clown videos
+| * e6c3414 after 1,0001 nights, time for that one quiet night.
+* | d07c681 add a debugger to the toolbelt
+* | ec61415 bump the readme to get back to cloud main-- we need to lock down deploy to only one branch...
+|/  
+* 30fe246 rename script
+* a4060a5 95% of the way there on a port of the impromptu-stagehand to gun
+* 20b1816 export bounce up and out
+* 118139c the beginning and the end
+* 6000639 client public elves for now even though bowling isn't done. I just need to timestamp today before the coffee.
+* 139fb48 full bleed bulletin board
+* 2649044 hide top action bar on the bulletin-board
+* e46b7d8 these were a mistake just to try and troubleshoot ios navigation gestures... bye.
+* e4f07c7 same same?
+* 75958d7 samesame.page so you can be on the samesame.page
+* 00bab23 pick a card any card, beta blox season 15 tychi day 1
+* 1408620 make surfaces less prone to accidental navigation with copied pasta
+* f7830b4 samesame.page
+* b84a841 draft show for the lost church
+* 7cc03ca a creative suite for art music and coding you say?
+* a2a90da allow updating cells... did i accidentally create excel?
+* 6ae374b get the stickies rolling a little more organized
+* 9a47b5a wake up in the morning, not sleeping at all because i wrote code in my dreams instead
+* fc0df2c continue contributing to the ethnography
+* d039ace maybe if i didn't fail calculus math would happen faster
+* cc46bb0 get print styles back online and pdf-ing
+* 92666d7 attempt to fix one of the last remaining ios bugs
+* 5df5015 what if this was a production for real
+* cbce822 that was a joke
+* c130ee9 add some tooltips and put a grabber on the far side
+* bb7182a give ios a whirl with a real finger because a simulator can't even gesture
+* f6efb9a pepper in them prevent defaults to fix ios opinions
+* ff102cd smooth operator on the toolbelt
+* 1af10a3 get the toolbelt interactions and stickies at the forefront
+* 1970adb ate the world
+* 16fd9e6 remove generic park from the bulletin board
+* 3bc778c FDOS: The Flying Disk Operating System
+* 8dc4171 improve security and performance by hiding iframes with mousing over things
+* 7d635ad make it so the shared terminal is able to launch launch launch
+* dc212f4 css cleanup and bug fixes
+* 4db7313 get a tad bit more focused on the renderables
+* afad06d browse 2d files, browse 3d files-- really brings high fidelity to the first dimensional clown nose
+* fbc4e45 introduce the file-system component, however remedial
+* 1116331 saga
+* 6c4de0c Revert "after 1,0001 nights, time for that one quiet night."
+* 5045317 braidify the shared terminal
+* db79273 after 1,0001 nights, time for that one quiet night.
+* 257777a rip off the band-aid: 1,000 flops
+* efc793b push up the resume for now
+* 2fb25af hello uncle toto
+* 488c8ff fix debugger and add error handling on the mux video downloadedr
+* 25e3d3c beginning of dad's script
+* 4a741dd feature: get the shared terminal going with the tiniest elf we've ever met
+* bddadd6 slight polish around the front door
+* 53ccf30 visual-aesthetic polish
+* f2f2f54 fix the bug where the shared terminal intercedes
+* b88cc25 halfway to shared team canvases
+* 60e0ddc minor polish for iphone
+* 28cb35e i hate that i can visualize gelf, smoking gun
+* af6b4c5 general quality of life improvements to the board
+* 4f01191 unify sillyz.computer and the default case
+* 05fec43 get time team prepared for double end to end encryption
+* 926b832 begin prepping for end 2 end messaging on p2p systems
+* 4d6db7b begin preparing for the rust rewrite: https://josephg.com/blog/rewriting-rust/
+* 2f5e4e6 polish on the interplay
+* ef315be keep bringing it back towards the journal
+* 7334f6d a player journey of sorts throug 2d space
+* 96f97c8 flesh out the journalistic nature of a comedy notebook that's fuschia proof
+* 098d36a basic deno example using express and mux
+* 5b9b6f3 39 minutes till go live
+* 61b194b the beginning of the dues ex machina
+* a7569e0 better polish for the homepage tumbling flow
+* 7891655 flexibility and polish for the slideshows for variety shows
+* 871d3e6 web design infinity
+* 7021953 make the weird variety center in the light box
+* 969c1a9 lower thirds for the weird variety show by living impaired
+* 6da56e4 video polish
+* d344a26 basic plumbing and being billing to make sure weird variety takes off
+* 0cf5db0 is this url just weird?
+* 28df9b4 more minimal config?
+* 2b0bf8f half passed
+* bdee4a6 experience flow sanding
+* b1b6f62 add a blogging engine
+* 70dd8ae add stream folder for getting owncast installed
+* c456f28 this is by far my favorite version yet
+* c2789bf begin connecting into the lore technically
+* ac753e5 smooth out the grid a little better
+* b4bc3f8 ios normalization of padding
+* d60ca20 make icons have set colors for title bar
+* 26eb0ab remedial rewind
+* 8c54f1f polish around localization and navigation
+* b8706bf fix computer to bottom
+* 61994b2 begin plumbing the journal code to pull bookmarks in
+* 7f4132c properly clear synthia
+* 78c70e4 textarea gets bigger to serve as a prompt + a clear action when navigated
+* a85e259 basic computer vocabulary
+* 6a407f9 synthia is eval and must be stopped
+* a3720e7 get that legal splash with fine print and the code paths to split
+* d07a9f3 video polish
+* 8601546 minor edits to the screenplay
+* 9cb74a2 frame.work wips
+* 0bea423 fix cdn routing for dial-tone and cleaner code editing
+* 8b3f83b get x-platform drag on the infinite canvas going
+* 324831d i'm going to chalk hardware acceration up to a double freebie on safari
+* 704d7d8 make blueprint a little cleaner with chat fixes
+* 267916b turning co-op into a blue print design
+* bb1a863 polish on the drawing and overlay dots
+* 1d977f1 thinking about it now, the 3d graphics programming i've always done was this way
+* c38ad22 three modes all playing nice enough-- video whack- drag needs pan offset
+* e776646 make the bulletin-board more scrollable
+* 361642f polish up the tabs for the bulletin board
+* 9f958e1 the clowns have flown the coop
+* 7abfbf5 polish for black and white editor by default and errors for the noses
+* 124d401 okay things are getting weird as we approach commit 1000
+* 35f382b better support for multi-tasking in the window manager
+* 87152a6 i set out on a quest to find the bottom of the internet and i found the back of it
+* 0c17afd now that's what I call computer polish.
+* 13a2881 resize abilities for the drawn terminal
+* e65c08c draft post articulating around web components instead of through them
+* b026936 get shared space ready for sidebar chat action...
+* 1f04599 shared space demo, maybe a little heavy on the game loop atm
+* cdd3d56 allow the sticky to go to elf world
+* e302042 get the collaborative canvas connected
+* 93abe2e show the elves in elf world
+* b1c876a initial renderings of the filesystem in 3d
+* 38e1300 combine the file system and the 3d rendererer but only in initial commit
+* b65eec6 further touch drag mobile debugging
+* d1a515d migrate to pointers to consolidate realities across devices
+* 171ecac polyfill requestIdleCallback for safari bc ofc
+* b783832 enable the tylerchilds.com multiversal personal computer
+* 05fa82b add loading indicators for action-script
+* 19fd10e at this point, i am the computer
+* f76e100 this is probably my favorite resume ever
+* 34578a7 resume work in progress
+* 9bebdb8 resume updating
+* 5ddd62e meander on the dialtone
+* b2d15de open up hard with the elf world lore
+* 93ebc92 begin preparing for how to present this and yourself
+* 7cc075a desktop very responsive moving of windows
+* 95856f7 minor polish minimized tray
+* 30368a5 opinions around the flow of moving, mining, maxing, mp3ing
+* ca2db3a bring the walkman harder into the zune
+* 58ff2c7 interop between 9 and 98 systems for context sharing
+* 97af9b7 how do you portal?
+* 61189a1 menu interplay optimizations
+* 8ca0398 minor quality of life things
+* d1b0e68 ios bugfix and cursor cleanup
+* 0d736c4 clean up remaining search from the xp variation
+* 5662b95 the file system is in the cli is in the url bar is in the is in the
+* ee9df03 identity flow stuff before trying ios
+* fc407a8 minor polish while testing new app id for ios
+* 8a40050 identity flows
+* 34d60a4 more workspace desktop environment plumbing
+* 806be6b general polish and well-being
+* 0fb042d more polish for operating system window juggling
+* 9146c1a cross functional polish
+* a7fa566 safari wasn't happy, but now should be
+* 3cd0090 verified as dope on the ios simulator
+* db497be how should the emergency clown nose boot on first boot
+* 57e65f0 for anyone keeping score, i started this around dinner after watching a 9front vid
+* 5aadc73 work in progress window summoner
+* d0656e1 difficulty levels
+* a71d11b dude, load hella fast
+* b146edc troubleshoot ios lazy loading
+* 3549fe1 boot to dialtone
+* 1d9dcc7 comedy day gallery
+* d97dd76 make sure the dial tones don't cost more than a quarter
+* 3ff0324 a journey into flower piano
+* 42558d4 bugs
+* 3335030 what if a computer was a clown nose
+* 4912f58 new homepage who dis
+* a5526e3 window manager polish
+* 4406fff lots of minor polish around the system actually looking like a product
+* f16b052 minor hyper-script renderer
+* a655d7a get ready for the chatroom onboarding
+* 40de87b adding the silly tray to story-board
+* 865fcde polish infinite layers landing on the 404 page
+* dc29e17 horizontally scroll the bottom
+* aecad71 get rid of that padding and trust the grid
+* 2c8e63c /x/iphone/9/98/app/sillyz-computer
+* dc35361 hone in on those performance aspects
+* 85872e5 for performance reasons factor out the plan9 from the plan98
+* c88fd87 all killer no filler
+* 99b4d2d dial in the mp3 player styling
+* af4cd35 bring slideshow controls into filemenu
+* 961a070 internet protocol video
+* 0536e7b start of internet protocol television
+* 28f4b34 art supplies
+* b527027 minor polish on the plan98 ui
+* a01b343 black and white polish clean
+* aa6cc58 top level window manager logics
+* e49ed1e 9 frame top bar
+* 7de1f1a mp3 player functionality and screenwriting logics
+* d532dec silly journey sidebar flow
+* 7b72911 workspace toggle logic
+* fceb4d4 ios visual glitchy fixes for plan98
+* 4fa461b more fluid context action control coming from the zune siri
+* f127603 layout tweaks
+* 1de377d zuuuuuuuuuune
+* f4c2b8c zune ui for the bookmarks...
+* 0de8f35 no more height
+* 5b1564d get ready for the zune ui alphabenarium
+* 89b4c8d a creative suite for kids for art, music, and coding
+* c4f78d2 the start of a new way to 'dial-out'
+* fda5480 four pane layout
+* 67a7f6a search improvements
+* 61df53b let's go hard 90s on this
+* 97a1b95 clock
+* 7c78e09 polish and prep for workspaces
+* d583128 handle the wrap around edge case of suggestions
+* a8429c0 scrolling logistics
+* 832e6ac clean logo and super key functionality
+* 0855de2 begin positioning the search bar at the bottom
+* c705122 start of mp3 player
+* b21a13c calendar experiments
+* a678bdb incorporate search recovery for icon nexting cause
+* 26f57fa cleaner search interface
+* c76336c steam deep links
+* c75c7d3 plan98-home
+* 7874326 i feel like the lore in this narrative is finally tightening up
+* 5569a94 plan98 intro
+* ff8a91d preview code module
+* 6c2f60b plan98 color theory
+* 83da54d plan98-intro to load /app/startup-wizard to do auth auth auth back to back to back
+* 5a0569b intro page component for plan98
+* 9f2863b remove some stuff
+* a40de2a hello bluesky rough draft feed
+* ff602ec getting the 1998.social server going
+* d7e9eb8 a handful of quality of life improvements
+* f766abc more starkly paper
+* e057b08 progress on wallet and demo through chromakey
+* 6cc329b heyo maybe yo
+* 5ed608f begin doing the one and done upsert strong lazy into bayun pen and paper recovery
+* 4eb3a5d a handful of wallet experimentations and progressions
+* e2b2e2f disconnect
+* f2c62e2 mobile friendly sagas with hints
+* 9e3b369 boop
+* 2362731 i hope this makes more sense now
+* 863a1b9 typoes with the es
+* fd5328c super helpful?
+* 6f90379 save 2038, stop 1912.
+* d230cf9 design polish before going deep into the lore
+* 842da06 post camp script reveal
+* fe2ba12 nos.social
+* e807840 goToMap
+* 0510ef0 dweb camp clown path
+* 0a3e566 modals in the wizard are a challenge do to focus traps
+* 8aab390 revert cause debugging in the wrong place
+* 634beec why is ios the worst?
+* fc70a48 maybe a classic whoopsie?
+* 490d121 which layer
+* 142aef6 alert(layer)
+* a05d532 revert to oldschool
+* 8715d83 data-close
+* 86abf65 pointer events conflict?
+* 9637c01 debug modal
+* 51b7da0 clown sagas
+* 0e7a7ee get the sagas journey flowing on the silly-wizard
+* 66e8295 story time
+* fe40a11 get the wizard party started for camp
+* d62dcd3 a bit more visual polish on the camp notebook
+* 458406c e2ee local braid...
+* 14ffe02 make the map more mappy
+* c7b1e00 camp map new links
+* 5c7a996 hardcode the guitar because the remaps aren't cooking yet
+* 43e2130 dweb camp homepage takeover
+* 5e63a6b improve the giggle search index of the plan98 operating environment
+* e2553b1 get the green monster rolling for the hyper script
+* 4d3f4bb camp thread like a boss
+* 5d0ac36 plumbing for collaborative coding
+* 8f22b01 dweb camp website finished
+* 668d12b add identity to the camp map
+* 40a540d put sillyz on the map
+* 80217c5 begin braid code and camp thread
+* 3c5d25f dweeb campsite
+* 6b1577a get file system lore chugging along
+* d6188e7 generally making polish progress
+* 63c0d76 the elves are coming down the mountain when they come
+* 5484fd9 beginning of plumbing of paper pockets
+* 9100119 elf camp what up
+* a4a32bf go
+* a199c5d get things going a little blonkers for camp
+* 9167c2b initial plumbing for e2ee drive
+* 51bf616 url params
+* cb1bdc8 no resize
+* bc9debb e2ee with challenging questions
+* 32eb909 bayun login and register with questions
+* 89c4cf4 get devices some additional breathing room
+* d41a0b2 client y
+* 266f6ff polish and test iframe intercept
+* 1d8bd06 make the giggle layout more laughable
+* a917abb ncity clym
+* 3404d8f make the landing page be the devices
+* 3c5ef47 landing page
+* 7a5d3fb Revert "bump"
+* ada2026 pocketbase url
+* 330175b bump
+* 6ef6dea potluck polish
+* ab7a6e8 crash 1%
+* e3f09a8 the internet is made of elves
+* 61db0bb will this fix firefox mobile?
+* a1c7555 create a new potluck from the prototype
+* 8ffbe9b potluck prototype
+| * a436435 (origin/plan99) begin fork with dom-diff instead of diff-html for core
+|/  
+* 12a3684 make the chat-room gui a little cleaner
+* dca900e feed the profiles off braid-text simpleton clients
+* 6615c20 multiplayer in the chats
+* 8d44a80 braid-text version control
+* bba1aa9 get prepped for setting profile info
+* 1813e64 lazy group logic
+* 556316b reel in the ampersand design token token token
+* a7ee3bd bring & more into hyper script
+* 75ec8b4 more streamlined group fetching
+* 93f39d4 basic chat scaffolding
+* 32322ee embody actions and begin to socialize
+* ce26c96 tighten up that landing page
+* 3f9f696 branch out into all the colors on the ocarina on sillyz
+* c38a831 turn this up to 111
+* 75c2093 get a plethora of heros
+* 64fd3d3 multiple other groups
+* 17151a6 polish around the logged in tab state
+* 5773603 multiplayer in the parental controls module
+* 22e78fc now that's an interesting juxtaposition between single and multiplayer
+* 69a3578 begin prepping answers when we get them from login
+* 962a872 wip plumbing to skip to login
+* aea9cc3 flesh out the gameloop around login/register fork
+* b4a2426 add a progress bar and get the initial registration path plumbed through
+* 5c2f733 most of the registration logic and steps are in place for bayun systems
+* 46f81f3 beginnings of a co operative journey with a real wizard
+* 1d2c826 begin exposing bayun wizard to get actually security pumping
+* ea89130 pneumatic unix
+* b1c8894 wizard journey on start
+* eda80b5 trim start for now
+* 311b45c iframe fullstop
+* 4e4fc2c get tommi.space online
+* 63828d4 add a progressive journey into the hands of the homepage
+* f95bbc3 pop sillyz computer with pokemon
+* 3a41d77 pokedex <pocket-dexterity
+* 05b8b7f bring back clean thelanding.page
+* 4c12a3f tighten up the personal computing experience
+* b2e5893 paint up the homepage a bit
+* 2c807d3 general re-organization and re-folding of the continuum
+* be6f7e5 general layout towards exposing the admin as the front end
+* f839b17 aggressively increase performance but fixing encapsulation is wip
+* a89dbc9 bring the parental controls to the front
+* e33b46f mobile net hello world computer vision classifier
+* 3429c58 bring in basic classification
+* a96f21d i'm the map i'm the map i'm the map
+* 43c5b12 general wizard journey logisticals
+* 39bf59d what happens when the flow becomes easier for the kid entrepreneurs
+* b24cfe7 begin to integrate the Paper Nautilus
+* 18f85b0 don't override event
+* e9a1d7f i was 100% correct, seeing if 'self' is 'too new'
+* d055033 guessing first, then checking
+* 2027d99 debug on android mobile
+* 50641ea begin forking the comedy notebook to be a boring business to business notebook
+* 24c2b56 orient even more out from behind the shade wall
+* 8df4b7b generic park could honestly be built in two weeks on plan 98
+* 40c937b flow through the giggle
+* 1701085 dealio
+* ba6e18d login based on plan98 host
+* 3142065 minor details around chat like encryption
+* 1d24c95 user auth stuff
+* 8ddc3a1 not here to slam windows
+* 3f23919 develop
+* b30f2d6 top of the morning to the funnel
+* 0be43e2 sillyz parental controls
+* bd392b3 exploratory hooks for modules before and after update
+* bd27d5c comedy and landing page quality of life
+* c094f46 tag; you're it
+* 67963e2 doing it live
+* 090d952 bring payments to the landing page forefront
+* d87e3b2 bring back https and domain
+* 1944d7b raw port and ip for braid-text cors issue
+* a5ad4c1 saga genesis with braid-text.1998.social
+* 09ad10c bring in simpleton to the sidebar
+* b698eba paper polish.
+* 393d872 add styling to make simpleton client to be an index card
+* 68f2233 squishy index cards
+* c1d6460 minimum viable simpleton client tag
+* afff0a6 start braid-text locally by default
+* 9dc33f7 giggle search
+* 9faab41 trim credit doxxing
+* 7282a87 upgrade group chat functionality
+* c1033ec get more lines in more places: hyper text + chat room
+* 93c08e6 further logistical plumbing on the wire
+* 12eb431 beginning of the group chat chat chat
+* b684f1b fix glitchy keyup binding across platform
+* cea9922 add a debugger to the comedy notebook
+* 87662b9 cleanup comedy notebook
+* f1e46e0 scrollable index cards
+* fe4e4cd i actually, really, really like this.
+* 0a6f04c modal polish
+* a56006d get that cooking minimally in the hyper script
+* 1155603 better than a method=get eh
+* 00e4c5e what if my comedy notebook was the most secure operating system on earth
+* 2181abb added to homepage
+* 7ec7c7c add video to the landing page
+* 1c3de2d add clym, but only the thelanding.page
+* a437b3a wizard journey cleanup work
+* d904a08 get comedy notebook starting to cook a little bit
+* 62f51e5 normalize embedding worlds in the hyper browser
+* 6f37450 owncast-surfer
+* 3ac8bc5 minor edits
+* dc5c230 boop
+* 74aa952 add a script to use for shooting ads
+* a8b4828 port to web audio daw
+* b47e502 live show tonight
+* 07382b2 thelandingpage hyper browser
+* 91cd7ba be fast, be so fast. run like the wind.
+* d91c958 get hyper browser jamming
+* 34fcabc make the plan98 panel be paper
+* a300fce what a nice round of cards
+* f9ef01f this has been cleaned up to be much more pretty
+* 4455546 comedy notebook plumbing
+* bd5bf53 whoa, end2end encrypted comedy notebook
+* 0724f9d wip to next bayun sandbox
+* 4dbb4bd begin bringing braid and encryption together
+* e746d97 re-orient around chats and browsers
+* f33007b work in progress group play
+* 294c277 make party chat multi-tenant, split-persona
+* 54450c7 work in progress towards group functionality
+* 8ea7131 basic locking and unlocking of the vault
+* be2d163 begin prepping for a deeper bayun integration
+* 3752e67 fix my business bug
+* cab1c5b fix the rendering bug when no business is needed and prep for more bayun integrations
+* 827e18a hello-vault enclave opener
+* 52d36c2 bring in node deps
+* eed95b2 Revert "just break and fix it live in prod"
+* 1c34ad5 just break and fix it live in prod
+* 04cccc4 multiplayer flows and journeys
+* 1a69387 login/logout buttons
+* f6a9896 generificating
+* 218d5c0 cleanup overflow and nesting challenges
+* 16dab63 getting the landingpage into a shape that actually resembles a shape
+* a5ec3f2 begin further vault plumbing
+* c67853e assorted things getting ready for publication
+* 8132f90 @silly/tag
+* f23b5db @sillonious/module -> @silly/tag
+* b233380 wip for publishing
+* 1f53589 more landing page polish
+* 6e0694d fix modal bug, get landing page templating cleaned up
+* 2b0c291 get the links coming from the business config
+* 72d3449 deeper down the rabbit hole
+* f102786 add analytics but only in the one spot
+* 86e2d44 templating foundations
+* 20c3e82 get ready for multiplayer
+* 9183696 mine-sweeper
+* 95f872d start-client now that braidmail is cool
+* fab099e cleanup desktop ignores and polish blocks
+* f8778ba begin plumbing for an enclave
+* 86cf120 defensive and offensive stats in the dadmin dashboard
+* 0e9eb04 unix-install
+* 87a2cff pivot desktop back to be tauri 1.0 for now-- gonna have native desktop builds sooooooon.
+* 82001b6 explicitly dependent
+* e7c8949 remove the bottom links
+* bacb330 the beginning of the dadmin-dashboard
+* 9b9d96b the start of projections
+* ed85551 upsort the provision script
+* 42d1d75 we're basically actually shuffling a deck of cards at this point
+* b8024a1 bottom bar or w/e
+* e5908a3 polish around the card analogy
+* 248b4fb whoa i wrote a real web component
+* ec6aaf1 make upsell command hyper customizable
+* e635960 when i woke up this morning, i did not anticipate embedding flash but better here we are
+* b3df518 bring home the card metaphor
+* 1e91567 boooooooo global enter key
+* 52162b8 work towards immersive reality
+* 48aceaf start multiplayer service in the background
+* 267545b node for multiplayer or nah
+* cac4e8d get that hyper browser gamepad juice flowing
+* e08ee49 add upsell over hyper browser
+* 5d9a348 stylistic decisions
+* 200a49f switch argo to guitargo
+* c0181f7 debugging guitar
+* 2ebd725 the in real life middle out algorithm
+* 7d0064b multiplayer?
+* 15bd386 reset reset
+* 8c07822 reset button
+* 69894cf reset button
+* 34771c9 top of the funnel flow
+* 8906eaf filling out this ide hard
+* a041df5 what if we started mostly black, white, lemonchiffon
+* c450a2e drop success thumbs up of my face
+* 3c88f32 begin linking up email signups
+* 13d1568 furthering the braid research and experiments
+* 25f4247 esm.sh local isn't configured yet
+* a107a0c bring in the braidmail microservice
+* 41c9876 get data ten per second or 600 in a minute
+* a736e1f work in progress braid mail
+* 48c7c06 blue kazoo
+* e8f6568 place the ocarina at the end of the chaos emeralds
+* 467dc5d site map foundation
+* 2aeaacd try less, but correctly
+* 80bc59a try everything....?
+* 5e5ddf6 sitemap foundational work
+* d0a73f6 e-commerce language flow demo
+* ad3711b even better print functionality
+* ace82cb polish up user experience around cutestrap and printing
+* 5fe1ba6 boot2cutestrap lol
+* 715eee7 streamline blankpage publishing flow
+* 0b9d4a7 expose git over rad in browser
+* bbdd8cb add video feed to troubleshoot
+* e8dffba patch module file to have some analysis
+* bfae84b code editor cleanup
+* 2a53685 integrated development payments and improvements
+* 9415b17 orient the user to have more experience
+* 4fcb89a provide gun as a relay service
+* de4bb5a toying with micro services
+* 34edcc0 @silly/linux
+* a402ef4 fix payment flow regression
+* 732c29a minor ui polish
+* 8b04bf3 booya
+* 55c18a0 toast to good || bad
+* 29f4642 terminal demo
+* e3702bd sillyz/linux a new userland
+* 848ce57 safari zero state?
+* 8195056 landingpage be chilling
+* ff9d4b1 payment customer journey
+* f7e9676 catalog browsing
+* 510a89e e-commerce math and tracking
+* 42d4b37 scaffolding for a legit payment journey
+* 0f82cde horizontal scrollbar
+* d7e1161 archive space
+* 8528f7d polish around intro to game logic
+* 106d41a make some game logic get stitched together
+* a90b6dd tooltip and other polish
+* 9178409 re-organize homepage, landing page, and 404
+* fd77ed1 partial plumbing for gamepad into hyper browser
+* 489e122 blankSave on new
+* 14f8c4b wip: gamepad web surfing
+* cb9640b start getting gamepad plumbing back + lore
+* 254d797 expose performance and spot the difference demos on the homepage
+* 3572650 begin abstracting payment query layer up into sagas
+* db3c037 the feeling when it says transaction successful
+* fe32c5c punch out of the ether
+* ab3e875 make the payment flow go whoa-oa
+* 6120e6a env for test prod
+* 1ec1557 pay-by-link infrastructure
+* 900162f make it so like a stargate meets a transporter thing
+* 7193f5d blur in and out
+* 54d16f8 sticky only export
+* 852443e 1:1 port of the adyen pay by link flow
+* 0add83a overload the landingpage
+* dba30b4 add static loop for the tutorial journey
+* 81ef4ef begin customer journey
+* e42f616 hyperscript preview window
+* b005c66 hyper-browser positioning
+* 5f8a125 paradox paradox
+* 645a844 finally got around to the paradox edge case
+* 52eeb9b streamline local file compatibility
+* e78210c <hello-calendar
+* a106c9e a million little things
+* f6f5cf7 begin to expose the architecture as a game show or a show game
+* 4fd0702 work on infinite canvas component
+* 4fcec22 expose the scripts in a rudimentary escape pod
+* cb1d14f wrap that explicit server content in a fancy noscript tag to remove fluc
+* 411c966 re-route the macguffin to preserve pathnames
+* 3ba5cb5 make sure vision pro can have an escape key
+* 4cb1e91 background for story-chat
+* c09cb44 expose the macguffin when escaped
+* 5ef1963 tweak readme for test radicle
+* 7ad02c3 animating opacity across dynamic loadtimes was a painful idea
+* d49d0ae center ish
+* 96a9c1b lean into the sticky branding for obnoxious loading
+* 456b4ef that's an expensive typo
+* c5d3051 goto bed
+* db42562 work in progress llm
+* 5e5344d fix that plagued bug
+* 21b0689 re-order things
+* bec2551 remove performance hiccup
+* e342cdb text cleanup and victory condition scaffolding
+* 7134a5a punching this up to be more pitchable
+* db24cfa swap back to reality post gdc, thanks for playing!
+* e967fe5 when it works, it works
+* 274e46f transparency is more confusing in feedback
+* 0334f30 test live in prod
+* dadaf71 remove the reload button
+* 7d30f35 feature flags, assemble!
+* ec6e714 seed for a new day
+* 36ff6be silly sizing
+* 4bd7d24 begin plumbing audio and shared private lans
+* d503447 cleaning things up from yesterday
+* ee19d73 you missed the train again...
+* 17ddd8f make this puppy purrr
+* 4f5b786 slow down to go fast
+* 5f69deb if the three body problem were a checkbox, it would be adjacent to the virtual dom
+* 6d31120 give the people what they want
+* dc9ecd2 go to bed dude
+* c363f16 never fix in code (during a convention) what can be fixed with copy
+* 634766a better upsell journey
+* 808abd1 bring back the thingy
+* 05ce7ca the wind was too strong for the physical stickies
+* 959cb8b quality assurance testing
+* d705741 mind-chess mind-chess mind-chess mind-chess mind-chess mind-chess
+* 908890a get the text based adventure games flow logic in place
+* ebcf69a supabase for a contact form
+* bf897d6 dues ex machina; grandpa undefeated 4166 times on freecell due to time travel
+* 6645a6a now that's functionally equivalent
+* 2c1ee0d EIP-6963 proof of concept implementation
+* 5813a8f purecss basic integrations
+* b455139 add visualizations to a couple of the physics engines
+* c64ff3d mobile styles and touch events for the ide
+* 79ed0cf more polish for the file system
+* 9b02fd4 get the filesystem component and web browser cooking
+* 75b764f resize for ios
+* 9403c99 quality of life maintainer simplifications
+* 3ada591 story work in progress
+* b755891 overall interface cleanup
+* 3fddd12 bugfix for isomorphic saga rendering
+* 5580bf0 bugfix on the slideshow front
+* c62723b quality of life improvements
+* d304a80 <mind-chess
+* b9ff9bd m04r css
+* a7ec7dd css > js;
+* 086b09e don't scroll while drawing
+* 717dfe0 this counts as collision detection, prove me wrong
+* d8e4a8d story-board basic implementation
+* 409750a add painted detour
+* c334971 infinite canvas basic rendering-ish
+* 09d61db get the basic data structure for infinite canvas braided
+* 4b24854 work in progress of the inifinite canvas renderer
+* 5146d6b begin stubbing work for local, self hosted esm.sh
+* 853c563 everything but the victory conditions
+* ec30b7f add some visual flair to the screenplay annotations
+* a748d68 work towards a trade maximizer
+* 3a30f7f pouch db wip
+* 70966a3 Revert "young's computer"
+* 9eb0196 young's computer
+* 06cec89 flip it and reverse it
+* f125ddb gigapet>?
+* 2d246de quick and dirty code for daddy
+* 210a96e actually mine sweeper
+* 82f2688 add go-to links for the defacto.javascript experience
+* 3dec5d0 rough first draft for defacto javascript
+* 81c12ae just point the sim straight out
+* 3f18899 .envrc ignore
+* 56c94cf <quick-media id='strongly-typed-programming'></quick-media>
+* 84b61b6 minor polish for mlb scenarios
+* f26f933 rapier physics engine for 2d and 3d simulations
+* 7d24bfb <mlb-teams
+* 8b94f60 general polish
+* 1120766 clean up some branding guidelines
+* 66c716b postgres wasm blog in browser
+* 649a850 a little padding to check the pi-top push
+* f113eeb clowns cannot afford money
+* a8fbdcd ficing yesterday from in the apple store spatially
+* 57c8cb3 nice touches before i try and apple this
+* dd084ee my precious
+* 97236db talk about a title am i right
+* 21e7c9d finally a greenlit script with the correct format
+* d250dc8 wip oauth data exchange from gun
+* 36a2081 identity service beginnings
+* 5ab1331 work in progress around auth experiments
+* db011f5 bring that lemonchiffon brand around town
+* df4e896 brand lore
+* fceffe0 i am actually very pleased with this release: print works and clean
+* 3078ad6 backing up my saga genesis
+* 73cd495 sadly remove focus party but fix codee
+* c3fc546 this commit is a time warp
+* dcdb108 bring the actual database infrastructure into the fold
+* 234bccf get ready to solidify as the paper.pocket protocol tomorrow
+* 04d0117 basic upsell flow with dynamic sagas
+* 83ca730 let's touch an upsell?
+* af31abd get that pagination functionality wired to the wand
+* 0244181 make the slideshow beats more performant
+* 4cf13a9 login through pocketbase and not gun
+* 18b513d reverse engineer the comedy swap
+* f5437dd apply to resume and drop the j
+* 465a703 bring back polyfill
+* d36a125 the deno lock file is the bane of my existence for jumping across chip boundaries
+* d01b193 pocketbase addin
+* be0f1f2 let us debug on mobile
+* c5593b2 sillyz.computer? oh, you must mean the easter egg on my resume
+* 0169f0d bug edge case
+* b30cc58 size of the paper doesn't matter, but the order does.
+* a70293d add live help to email
+* 4f2f505 fix ios home layout
+* 0b34326 fix login screen
+* 988bf1a wip gun hyper scripts
+* 8e3e3d5 add landing page and internet archive support
+* 397a522 visual cleanups
+* dd2086e disable wasmer modules for now to enable embeds again
+* e42cc84 what if this was as it was
+* 62e8177 whitespace: pleasewrap
+* 515bb27 boop
+* 3479495 capstone
+* 3785ee5 minor polish changes for hyperscript quality of life
+* b17e5fd add lottie-player same day as linux foundation announcement
+* 3361c7b indeed. boot 2 resume
+* fa4a3a0 boot to resume?
+* 0a5222a server side rendering for landing pages
+* 2d8789e get resume published
+* ecf4a5e back to sillyz
+* 46c12b1 get scrolling yo
+* 2c63cad MyJournal on 1998.social
+* 04d561a slightly more polished
+* 533fad0 get gun ready to be my journal
+* 78e28a4 os.js.org fork
+* 6610a80 when you wake up, maybe check your email and respond to some
+* 998ccb1 stages towards a local journal
+* e5cc695 the design patterns are coming together
+* 722ecd8 everything except making gh057 alive from today
+* db1a4c3 sagas are the landing page and the pockets are the 404
+* ab41530 sticky baselines and acceleration
+* 09ecc79 flip fast and native native native
+* ef1ade8 turn this brand and this metaphor up to 11
+* e30dd13 get hypervisor orientation orientated
+* e00afc4 get cookin' on them pockets
+* 37ded8c progress towards getting that vision pro fullscreen
+* e396557 orient landing and cursor
+* c8bbaa1 get login up
+* 3f7cf7b tweak carousel interjection issues
+* fdd1722 get more aligment cleaned up
+* 3e7d0e4 hyper script and carousel adjustments
+* a67adb9 mimesweeper
+* 0ab5176 mimesweeper basic edition
+* df9f450 life by a thousand uncuts
+* 6373e42 branding and interface re-organization
+* bd5e646 beginning of native clients
+* be58928 sillyz.computer
+* 06f2410 plan98 login screen
+* 2d1736f begin orienting my space into correct location
+* 1a32784 get myspace admin tables both running and we're ready to pump into profile
+* 8d7cd59 https://musings.tychi.me/9-client-side-javascript-libraries-youre-probably-sleeping-on
+* 014eb84 toggle admin view when logged in as one
+* 486614f now that's what i call administrative
+* bee8b8f add standalone python demo demo
+* 2e84b5b pool all braid things onto the braid page
+* 35a3892 resize image component to be like tap do
+* 8bcbf64 copy pasta braid.org config
+* fe7f5e6 simpleton-client module
+* 582e59d add a webgl demo library
+* fe19e2a katex demo
+* 570c7fa database configuration for pockebase
+* 39a7579 allow custom servers for pocket-authentication
+* b4dc8cc add pocketbase authentication module
+* f0a9213 deno lock updates
+* 0b3c4f7 image resizing components
+* 767e2fb remove the council from the landing
+* 77b6528 myspace.com filtered through my brand perception
+* 1d88794 pin http version and consider import mapping the rest for stability
+* 894df1a who owns w3c.org anyways? dns?
+* 5191ad7 polish up the old abc.xyz
+* c139c04 mo'gamepads
+* 4f6bae7 buttons buttons buttons buttons
+* ea15402 add paper pocket at the abc.xyz index
+* 02040a8 the beginnings of a proximity chat
+* 72039d3 add icon set
+* dc69177 tweak close modal options
+* aa87c49 reverse roadmap
+* 519e65d correct box sized portals
+* ee242a6 and at this point, we're nearing completion because this resembles react, but vertically architected
+* d1da393 PaperPocket powers sillyz.computer, a party in your pants as a platform
+* 2ea705c add themes for QR full bleed modals
+* fb9fcc0 upgrade QR code
+* 97215dd elve council
+* f27fbbc the elve-council assembles but the pandas fail to join them
+* 185064e markdown support added for server side rendering
+* 118b8e9 add support for server side rendering sagas
+* 043739d add braid panel html to debugger for braid.org
+* f2a0b3b visual cleanup
+* e692271 pitch deck
+* fafb335 san fransokyo
+* 40a1cdd later felicia
+* 60e59d5 plumbing to eventually full ssr with statefulness
+* 4cefd2b begin plugging sports data
+* 5a60a2d lore and init stuff
+* 324dac9 whoami
+* 5aa1900 lore updates
+* 9d49489 disable upsell until we're cruising
+* e8160ec narrative writing
+* 27f88f6 let's boot straight into the pro-version.
+* 28ab147 uxm.wasm support added!
+* 3beb9ef now we're cooking with gas
+* cfb8e8b sillyz registry and boot loader
+* 6240524 try and debug that line wrapping issue
+* 0cb4255 add the wasmer terminal demo
+* 5d4a084 make python polyglot between native and native
+* 0158feb python demo
+* 71dd75f win some lose some punt on this one
+* 1c422d7 add ffmpeg-demo
+* e537aa6 work in progress python support (not working) (gated by not being summoned)
+* fe3d8cb fix that bug that made the sad things happen
+* 4ee4231 thank finally we got the guitar back online-- i mean, ocarina-- i mean, lute
+* 3cbcf5e more buttons fleshed out
+* 271c334 joypro
+* f47187f deno arm for rpi 400 or w/e
+* 6ef607e drop the podcast gag
+* 0dd986d it was commit messages like these why i chose learn/teach over read/write
+* 8944da9 clean. clean. - the buggles
+* 9cbc9eb go live and add debugger for next time we go offline
+* 4cd494c Revert "deleting to push to troubleshoot"
+* e705dc6 deleting to push to troubleshoot
+* 4e72e4a sh script for provisioning
+* 005d519 talk about documentation
+* 7a1f20d actually get the 9p stuff going locally, maybe remotely, idk
+* 4754540 refactor plan98 for growth
+* 11deee4 get solid plumbed back into ui-- failing but whoa halfway there (don't 4get caddyfile)
+* 13ffeed final experiments on 9p filesystem musings until i gave up
+* 809c8dd detoxify my name
+* 6c5b42b keep it local
+* f1e40b1 let's get 9p
+* 07c18c2 let's try cloud9p
+* 80d2615 never hurts to fix bugs side by side with the inventor
+* 5d974d7 let's get ready to party
+* b35776d connect my local to the web
+* 2bb51f3 bugfix for service rename
+* 3cbb021 we always _knew_ that was a bad idea
+* 44970bd hilarious easter egg throwback at the root that's actually extremely practical and marketable
+* e61169e move statebus into dependencies
+* a28d421 make the main quest a bit bigger
+* b367635 bugfix
+* dbf9a86 gps hooks and links and simplification of the carousel
+* 5de66f4 circle circle dot dot
+* 0242c00 get some color plumbing down into gamepads
+* d57a268 orient the relationship between sillyz, plan98, thelanding.page, and pro.thelanding.page
+* cc08fbc honey i turned the kids into abstract string objects and they're freezing in hyperspace
+* 86ffc4c bring back a gun example
+* edbe001 simplify braid debugger integration
+* 4e09c4a polyfill with esmshims
+* d935f8a and we're up and running with havok in the main quest storyline
+* 34f2dbf import havok into sillyz availability tree
+* 599383c fshwoop
+* e2b8d08 out with the old in with the new
+* 039d27c a taste of the future
+* 50c7001 prepare the legacy deck
+* b2651b5 add braid debugger scaffolding from all directions
+* ae4ecb4 disable upsells
+* 9b30f11 shared physical and virtual gamepad
+* 1bcf92e blend fantasy gamepad and reality gamepad???
+* d91e275 get the print capability back in some fashion
+* 9f11501 i might hate it but this is currently to spec
+* 7a01baa begin mapping osc as the intermediary between metal, plastic, and glass
+* 8a1673a abstract out a trapping pattern
+* b84d165 get gamepad state in a more networkable format
+* 7b0182e why you never mutate state. check it-- didn't need a build step or a library
+* 80b169f proof of concept focus trapping and input remapping
+* a8f66c6 prep upsell dialog to be everywhere and gamepad prepped
+* 84554e7 maybe fix ios
+* 66ad5ee (tag: 0.1998.0) see the errors
+* e6c0108 remove legacy node systems
+* fb1b05f remove the holdover
+* e8bf3f4 truth
+* 5514385 massive refactor i'm sure regression but peace out npm
+* 0489ce6 inner watch based rendering
+* a63f6ff watch me
+* ec38143 string interpololololololol
+* d1ead95 bring in the ocarina
+* dc9e363 begin bringing back musical instruments to play with
+* 635929b say less.
+* 65ccb45 surface full filesystem
+* da653f6 minor cleanup
+* 627de2a rename formulas to modules
+* b2f5a07 launch a video conferencing service to talk to hunter about hld legacy
+* d5d0b5a Update README.md
+* 51dd7ba @arky thanks for the tip! sorry the button is broken'ed
+* 7b295de make this smartwatch smart poppin'
+* 9150cce leaflet integration for middle earth to help explain my comedy set
+* d024706 live comedy lore
+* cc5e198 owncast broadcast status component
+* 42b4dca add live app to watch
+* 0439e7e open up cors?
+* 089e9d7 owncast client wip
+* b7b2b50 implementation of react without jsx
+* eed5427 minor rendering swap
+* edcf70a connect my lore with earth lore
+* 5e07712 stick to the formula, jerry! the formula!
+* dbadd02 lore patch
+* 304637d a unit test or a typed language would have caught this. shoot me-- first production bug ever.
+* f40a67d translate for shark watch label 1:1 for en_US
+* caa02a6 handle edge case for fresh off the factory floor
+* a0d3ee7 lore patch; time machine pun thick
+* 45e2ca9 begin modeling the multiversal demonstration off my shark watch for compatibility
+* 59a3ce5 maybe one man's web ring is a seventh dimensional video game
+* 4f101a0 oops color back on
+* 57cb8c8 remap saga renderer but more to go still
+* 656dc3c handle more root edge cases for the file system
+* a749d7a get paths rolling
+* e626f4b root node edge cases
+* dae100d begin replumbing back to the system, pending access
+* 322d3a0 onboarding with a single step to nowhere
+* 35f0898 push on a friday. every site. live. all at once. zero downtime. 35regions*7hosts=245isolates
+* e88b445 make these brands pop
+* bd90c69 whitelabeling made configurable
+* 0f9406d get stickies ready for brand colors
+* 05f6175 forced the push so redo this
+* 06b7ee3 yo, why did i never think about using clue as a proxy for networking
+* 98a69f9 prep for launching multiple stickies
+* e87aa2a lol when josh finally tried and everything was broken
+* 27de3bc whitelabeling? never once in my life.
+* 89506c2 multiplex
+* 12f50b9 smugmug photos
+* ef6131c how i became link
+* 1cdb43b %s/user/player-character/gc
+* 28e1130 add some lore before we launch 8
+* 51452aa actor model metaphors for less cognitive hurdles
+* 1016457 saga genesis chaos emeralds
+* af6b40a resolve typo
+* 88b322a bug fixes
+* 1cc6766 scripty mcscript face
+* 65ba43c a couple minor tweaks
+* f886d62 one less step
+* 2b1c6d6 young mc abdul- sorry i missed you september 9th, i got stuck at the interdimensional night market being serious.
+* 0cd767d did we actually just launch
+* 0545ce7 proper dimensions for 'device simulation'
+* 73fa9be whitespace and generally more air
+* 8b0677c add the play embed default
+* 09a4ac1 license up
+* 85b4c3e do the play button thing with state magic
+* c13f9a4 hide the gamepad related bugs for now
+* 3feb406 update default script and get xposting flowing
+* f4461fa begin by playing pretend
+* ea2a2cc aesthetic af
+* 9c0f5a4 modal welcome with e s r b
+* 267bb45 wip: jmap email
+* f9c6452 braid chat is back http://invisible.college:3007/messages
+* 008b120 wow adding a blues scale and commenting your code how classy wearing a suit
+* 95912dc reddit sizing issues
+* ad79fca begin the story telling aspect of the hyper script source code
+* ba42b43 get the avatar up
+* eb08be2 reddit markup
+* e71ab86 button styles and labels
+* af208d9 deno edge
+* 645f87d get deno ready for edging
+* b1ff66e get prepped for video output mode
+* 861bee5 better pagination
+* 1f4b71a cleanest cross platform rendering yet
+* 7c411aa make transitioning smooth and possible at all
+* c464a54 get slick transitions cooking
+* 521ba7e move print to read page
+* 3dc6b08 rendering issues around first load
+* cb900c5 better size for that ratio
+* ded16de button less select-y
+* ba76541 get performance tab cooking betterish
+* cdce74f plumbing for converting to svg
+* dd709e8 get that 16/9 preview panel
+* 14fcd8d decently functioning rendering across mediums
+* 6cfbe91 height diff
+* 56fc84f white background
+* b1f3c3a edge case
+* 04acca6 get performance layout ready
+* 6db5a6f layout for hyperscript
+* 26e7462 welcome/readme???
+* 0928d4f hyper script layout
+* 44c1959 hyperscript ui improvements
+* 41062c0 fix gamepad controllers object
+* aee5987 watch sized os placements
+* 512d45f launcher-ify
+* 2d7447c sync guitar to the piano too
+* b60af4d restore minimal gamepad, guitar, and synth
+* 6f4cd64 dope default
+* ef85b2c treeview bug
+* 22127e1 remove deprecated, buggy highlighter
+* ce7eb03 port over a ton of markups
+* 5981ee5 migrate from packages to markup
+* 5d51a8f get textfield compatible with html entities
+* 51ae557 greet your friend ok
+* f9580d0 wrap eruda in a module
+* 73d47a1 tweak parsing and debugging
+* 832a479 more print friendly styles
+* 5225284 hyperscript and hypertext interhypersection
+* 42d4cfd add archive.org download link
+* 46e8062 handle first boot error edge cases
+* 788ba2c readme
+* b332690 add some grayscale chrome
+* 942f00a delete a bunch of whatever
+* 0740a55 pruning to head towards minimal bootstrapped system
+* 05367d3 go whack with external embeds with internal scoping preserved
+* dd9cb4c auto treeview
+* 94192af file tree glitch fixes
+* 49200c7 context menu file tree
+* 50ecb5a pump up basic tooltip
+* c50c13d last pivots for vocabulary
+* b5d26a1 migrate the filesystem to be plan98 compatible and markup
+* b84280f refactor flair to be style
+* cc7c68f higher order factory reset
+* f4c12ba swap what the word tag means and does and where
+* 0b764c2 braidify sourcecode
+* 1b3c6cb rerun that file store stuff
+* 4594782 broaden path from cwd
+* c719555 syncronized working directory
+* 3229db3 traversal in directory maybez
+* 798fb8d proof of concept for autotags
+* 5a16946 move that email to a thing
+* 29196bc infinite list scaffolding and bug fixes
+* 34a4708 cool modules
+* 7ec0750 origin wildcloak maybe
+* cbe5668 env yo
+* 9b77d6b lean
+* 298958e i love u 3000
+* 0b0ca66 install defaults
+* c469d15 esbuild maybe
+* ec1a30e add cool module concept
+* 660c970 add proxy plumbing to get remote smugmug data
+* 845a85c generic oauth scaffolding for callingfoward and calling backward
+* a50cd77 add wizard and modulify inbox card list
+* 529b21a minor ui polish
+* 9bf1d12 minimum viable google inbox ompetitor
+* 596ce13 add fastmail wizard
+* bccc1e8 heyo
+* 67c13f0 example env
+* 065429c show a modal with email
+* ce9d3fb ietf jmap inbox hacks
+* b942f4c out the door
+* fd26151 side by side editor and view
+* 8f9c83f smugmuggle apis
+* ea63e19 basic oauth flow with hardcoded storage of keys
+* a848e77 wip from the other day
+* 0ff1218 scaffolding for flow from music-verse
+* 5d9ea2f maps wip
+* f3a0768 smugoogle readme
+* 947949e bus state and silly spec
+* b7d1ffd align on server approach for statebus
+* 7858aba what if module just existed
+* 36b0a87 clean down
+* f6cc9ca braid kit
+* c91889d minimum viable chat
+* 1923131 minimal module with braid baked in
+* 32cb1ba migrate everything to the new vocabulary maybe
+* ff361d6 add reddit support
+* 3179a26 use npm to build
+* 5f2a67e tauri upload
+* e9796d5 tauri publish
+* 174ddfa tauri test on pr
+* d048b69 better landing demo
+* 8c31c4e get colors ready to sync to neopixels
+* 3e30861 hello world os homepage
+* 56fcd70 tweak music math
+* 8857272 get screentest ready
+* bec9600 kitchen sink
+* 0ab933b allow dynamic edge2edge
+* 07b19d0 indentation
+* 5b3589c add basic code editor module
+* 582d009 added systems level time-travel programming
+* b716528 development story and pipeline
+* 5c92072 honk
+* 712b8a6 header
+* f3a60be honk
+* a58bbc9 get t
+* fdeb216 add abort
+* 3871852 user auth
+* e60bf0d don't like error on first hit plz
+* a6403c7 prep for oauth
+* 9373765 basic supabase integration
+* 8ca47ba migrate from bare node to bare express
+* fd15273 my grapevine started in 1989
+* 605266b statebus running over node

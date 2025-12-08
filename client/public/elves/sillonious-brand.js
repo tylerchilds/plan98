@@ -43,6 +43,9 @@ const dns = {
   'sillyz.computer': {
     elf: 'my-computer'
   },
+  'cutestrap.com': {
+    elf: 'my-computer'
+  },
   'comedymap.org': {
     elf: 'comedy-network'
   },

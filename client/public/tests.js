@@ -56,11 +56,11 @@ import("npm:linkedom@0.18.5").then(async({ DOMParser }) => {
     Divide,
     Modulo,
     Box,
-    Elf,
+    Self,
     Saga,
     Expect,
     Describe
-  } = await import('./types.js')
+  } = await import('@plan98/types')
 
   Describe('True is true', (done) => {
     Expect(True(), true)
@@ -109,12 +109,12 @@ import("npm:linkedom@0.18.5").then(async({ DOMParser }) => {
     return done()
   })
 
-  Describe('An Elf has self-transforming properties', (done) => {
+  Describe('A Self has self-transforming properties', (done) => {
     const selfTransformingProperties = ['link', 'learn', 'draw', 'style', 'when', 'teach']
-    const $ = Box(Elf(Text()))
+    const $ = Box(Self(Text()))
 
-    const everyKeyIsSelfTransforming = Object.keys($)
-      .every(x => selfTransformingProperties.includes(x))
+    const allSelfishProperties = Object.keys($)
+    const everyKeyIsSelfTransforming = selfTransformingProperties.every(x => allSelfishProperties.includes(x))
 
     Expect(everyKeyIsSelfTransforming, True())
 

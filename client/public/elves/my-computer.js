@@ -9,7 +9,7 @@ import Cache from '@silly/cache'
 const elf = 'my-computer'
 
 const cache = Cache(elf)
-const version = '1.0.0-rc3'
+const version = 'infinite-1.0.0-rc14'
 
 const lazyLoaders = [
   './home-page.js',
@@ -176,12 +176,11 @@ const $ = Self(elf, initialState)
 
 export default $
 
-/*
 cache.get(elf).then(record => {
   if(!record || version !== record.data) {
     showModal(`
     <div style="height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
-      <patch-notes></patch-notes>
+      <patch-notes lang="en-US"></patch-notes>
     </div>
     `, {
       transparent: true,
@@ -192,7 +191,6 @@ cache.get(elf).then(record => {
 
   cache.put(elf, version)
 })
-*/
 
 addEventListener("popstate", (event) => {
   $.teach(router(self.location.pathname))
@@ -328,6 +326,10 @@ function tutorial(target) {
             </div>
 
             <div>
+              <patch-notes lang="${target.getAttribute('lang') || 'en-US'}"></patch-notes>
+            </div>
+
+            <div>
               <div style="display: grid; height: 100vh; place-content: center;">
                 <a href="/app/hello-elvish?elf=js-repl">Tunnel Practice</a>
               </div>
@@ -368,16 +370,14 @@ function share(target) {
   const label = target.getAttribute('label') || 'Pluto'
 
   const copyArea = `
-      <div class="copy-area">
-        <div>
-          <div id="${copyId}" class="share-link-copyable-url standard-input">${shareLink}</div>
-        </div>
-        <div>
-          <button data-share="${copyId}" class="standard-button -round">
-            <sl-icon name="copy"></sl-icon>
-          </button>
-        </div>
+    <div class="copy-area">
+      <div id="${copyId}" class="share-link-copyable-url standard-input">${shareLink}</div>
+      <div>
+        <button data-share="${copyId}" class="standard-button -round">
+          <sl-icon name="copy"></sl-icon>
+        </button>
       </div>
+    </div>
   `
 
   return `
@@ -455,11 +455,6 @@ $.eye(`
     z-index: 1;
     overflow: hidden;
     touch-action: manipulation;
-    user-select: none; /* supported by Chrome and Opera */
-    -webkit-user-select: none; /* Safari */
-    -khtml-user-select: none; /* Konqueror HTML */
-    -moz-user-select: none; /* Firefox */
-    -ms-user-select: none; /* Internet Explorer/Edge */
     background: white;
     color: black;
     display: grid;
@@ -587,3 +582,5 @@ $.eye(`
   }
 
 `)
+
+// the jester is inevitable, the bard started the song long ago

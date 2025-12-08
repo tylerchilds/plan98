@@ -77,6 +77,8 @@
   "imports": {
     "@silly/tag": "./client/public/module.js",
     "@silly/elf": "./client/public/elf.js",
+    "@silly/saga": "./client/public/saga.js",
+    "@plan98/types": "./client/public/types.js",
     "@sillonious/saga": "./client/public/saga.js",
     "@sillonious/brand": "./client/public/brand.js",
     "colorjs.io": "https://esm.sh/colorjs.io@0.4.0",

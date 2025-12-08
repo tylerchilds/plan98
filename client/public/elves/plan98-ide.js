@@ -30,7 +30,7 @@ function circus(cwd, nodes) {
       filesOnly.push(cwd + node.path)
     }
 
-    if(node.type === 'Directory') {
+    if(node.type === 'Directory' && node.children) {
       const level2 = circus(cwd, node.children)
       level2.forEach(path => filesOnly.push(path))
     }

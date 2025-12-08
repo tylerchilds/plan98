@@ -255,7 +255,15 @@ h6 {
   --v-font-crsv: 0;
   font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
   font-family: "Recursive";
-  t
+}
+
+h1::after,
+h2::after,
+h3::after,
+h4::after,
+h5::after,
+h6::after {
+  color: var(--root-theme, #E83FB8);
 }
 
 h1 {
@@ -264,11 +272,20 @@ h1 {
   --v-font-mono: .1;
 }
 
+h1::after {
+  content: '*';
+}
+
 h2 {
   font-size: 2.5rem;
   --v-font-wght: 800;
   --v-font-mono: .2;
 }
+
+h2::after {
+  content: '**';
+}
+
 
 h3 {
   font-size: 2.25rem;
@@ -278,12 +295,20 @@ h3 {
   --v-font-mono: .3;
 }
 
+h3::after {
+  content: '***';
+}
+
 h4 {
   font-size: 2rem;
   --v-font-wght: 400;
   --v-font-slnt: -7;
   --v-font-crsv: 0.4;
   --v-font-mono: .4;
+}
+
+h4::after {
+  content: '****';
 }
 
 h5 {
@@ -295,6 +320,10 @@ h5 {
   --v-font-mono: .5;
 }
 
+h5::after {
+  content: '*****';
+}
+
 h6 {
   font-size: 1.5rem;
   --v-font-wght: 100;
@@ -302,6 +331,10 @@ h6 {
   --v-font-crsv: 1;
   --v-font-casl: 1;
   --v-font-mono: 1;
+}
+
+h6::after {
+  content: '******';
 }
 
 blockquote {
