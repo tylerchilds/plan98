@@ -3,57 +3,27 @@ import { toast } from './plan98-toast.js'
 import { render } from '@sillonious/saga'
 import { get, put } from './plan98-wallet.js'
 
-const pitch = `<hello-world
+const pitch = `<title-page
+title: Hyper Script
+author: Ty
 
-# Write once, run globally.
+<img
+src: /public/cdn/sillyz.computer/self-portrait.jpeg
 
-The world runs on computers that fit under our desks, on our laps, in our pockets, around our bodies, and throughout our homes and businesses.
+# A Location
 
-@ Presenter
-> Have you wondered how these all work?
+@ A Character
+> A line of dialogue
 
-> Have you ever felt your computers are actively designed against you?
+^ A special effect
 
-> Have you ever wished you could control them yourself?
+<hello-world
 
-> Have you ever tried to build your own?
+<was-code
+src: /public/elves/hello-world.js
 
-> What was the hardest part?
+<saga-crawler
 
-<div
-html: <sillyz-ocarina></sillyz-ocarina>
-style: height: 100vh;
-
-<story-board
-
-<mine-sweeper
-<mind-chaos3d
-<mind-chess
-
-<title-page
-title: Hello World
-author: Thesillonious Caramera
-
-# Exterior Home
-
-Carrying an UMBRELLA and wearing a JESTER HAT is THESILLONIOUS CARAMERA
-
-@ Thesillonious Caramera
-& winking
-> I didn't break the windows if you didn't
-
-THESILLONIOUS CARAMERA vanishes, leaving behind a NOTE with a maze and a message in BLUE PENCIL
-
-@ NOTE
-> the rest is up to you
-
-^ Fade Out
-
-<infinite-canvas
-src: /cdn/sillyz.computer/index.canvas
-
-<quick-media
-id: quick-media-demo
 `
 
 
@@ -577,7 +547,6 @@ $.style(`
   & .actions {
     z-index: 10;
     background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,.25);
     display: none;
     background: rgba(0,0,0,.2);
   }
@@ -698,6 +667,11 @@ $.style(`
     grid-template-columns: 1fr;
     grid-template-rows: 1fr;
     place-content: center;
+  }
+
+  & [name="stage"] > img,
+  & [name="stage"] > video {
+    object-fit: contain;
   }
 
   & [name="stage"] > * {
@@ -969,8 +943,6 @@ $.style(`
     font-size: 40px;
     padding: 13px;
     line-height: 1.3;
-    text-shadow: .1rem .1rem rgba(0,0,0,.85);
-    color: white;
     bottom: 80px;
     left: 0px;
     right: 0px;
@@ -1017,6 +989,7 @@ $.style(`
 
   & .menu-item {
     position: relative;
+    background: rgba(0,0,0,.2);
   }
 
   & .menu-actions {
@@ -1025,7 +998,7 @@ $.style(`
     left: 0;
     bottom: 0;
     transform: translateY(100%);
-    background: #54796d;
+    background: white;
   }
 
   & [data-menu-target].active + .menu-actions {

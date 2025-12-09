@@ -1289,6 +1289,16 @@ sillonious-brand > xml-html {
   --root-theme: dimgray;
 }
 
+.standard-button.bias-clear {
+  --root-theme: transparent;
+}
+
+.standard-button.bias-clear:hover,
+.standard-button.bias-clear:focus {
+  --root-theme: transparent;
+  color: black;
+}
+
 .standard-button.bias-negative {
   --root-theme: var(--red, firebrick);
 }

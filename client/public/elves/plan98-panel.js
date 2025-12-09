@@ -198,6 +198,9 @@ $.style(`
   & .action-wrapper {
     pointer-events: none;
     text-align: right;
+    position: sticky;
+    top: 0;
+    z-index: 100;
   }
 
   & [data-close] * {

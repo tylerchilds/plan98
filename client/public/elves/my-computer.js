@@ -21,6 +21,11 @@ const lazyLoaders = [
   './time-machine.js',
   './multi-task.js',
   './brain-storm.js',
+  './short-link.js',
+  './period-tracker.js',
+  './blue-sky.js',
+  './secure-mail.js',
+  './hyper-script.js',
 ]
 
 lazyLoaders.map(x => import(x))
@@ -42,6 +47,11 @@ const TUTORIAL = 'tutorial'
 const TIME_MACHINE = 'time-machine'
 const MULTI_TASK = 'multi-task'
 const BRAIN_STORM = 'brain-storm'
+const SHORT_LINK = 'short-link'
+const PERIOD_TRACKER = 'period-tracker'
+const BLUE_SKY = 'blue-sky'
+const E_MAIL = 'e-mail'
+const HYPER_SCRIPT = 'hyper-script'
 
 const config = {
   [HOME]: {
@@ -134,6 +144,46 @@ const config = {
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
       <iframe src=/app/${BRAIN_STORM}?id="${target.id}"></iframe>
+    `
+  },
+  [SHORT_LINK]: {
+    label: 'Short Link',
+    path: `/${SHORT_LINK}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <short-link id="${target.id}"></short-link>
+    `
+  },
+  [PERIOD_TRACKER]: {
+    label: 'Period Tracker',
+    path: `/${PERIOD_TRACKER}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <period-tracker id="${target.id}"></period-tracker>
+    `
+  },
+  [BLUE_SKY]: {
+    label: 'Blue Sky',
+    path: `/${BLUE_SKY}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <blue-sky id="${target.id}"></blue-sky>
+    `
+  },
+  [E_MAIL]: {
+    label: 'E-Mail',
+    path: `/${E_MAIL}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <e-mail></e-mail>
+    `
+  },
+  [HYPER_SCRIPT]: {
+    label: 'Hyper Script',
+    path: `/${HYPER_SCRIPT}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <hyper-script></hyper-script>
     `
   },
 
@@ -290,6 +340,21 @@ $.when('click', '[data-panel]', (event) => {
         </button>
         <button data-nav="/${BRAIN_STORM}">
           Brain Storm
+        </button>
+        <button data-nav="/${SHORT_LINK}">
+          Short Link
+        </button>
+        <button data-nav="/${PERIOD_TRACKER}">
+          Period Tracker
+        </button>
+        <button data-nav="/${BLUE_SKY}">
+          Blue Sky
+        </button>
+        <button data-nav="/${E_MAIL}">
+          E-Mail
+        </button>
+        <button data-nav="/${HYPER_SCRIPT}">
+          Hyper Script
         </button>
       </nav>
     </my-computer>
@@ -553,13 +618,12 @@ $.eye(`
     line-height: 1;
     display: inline-grid;
     place-content: center;
-    padding: .25rem;
+    padding: .5rem;
     border-bottom: 2px solid rgba(0,0,0, .2);
   }
 
   & nav.vertical {
     display: flex;
-    gap: .5rem;
     align-self: end;
     flex-direction: column;
   }
@@ -569,7 +633,7 @@ $.eye(`
     line-height: 1;
     display: inline-grid;
     place-content: start;
-    padding: .25rem;
+    padding: .5rem;
     border-bottom: 2px solid rgba(0,0,0, .2);
   }
 
