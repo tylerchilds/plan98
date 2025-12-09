@@ -12,7 +12,7 @@ Navigating the system has become synonymous with navigating Alfheim; cheat codes
 1. Added <code>&lt;period-tracker&gt;</code> [&lt;;-D](/app/period-tracker) with the [utmost transparency](/app/was-code?src=/public/elves/period-tracker.js), but set to a [mutual gossip](/app/was-code?src=/public/plan98.js) net by default, but [persisted locally](/app/was-code?src=/public/cache.js)
 1. Added <code>&lt;blue-sky&gt;</code> [&lt;;-D](/app/blue-sky) for experimental self-replicating client-to-server social
 1. Added <code>&lt;secure-mail&gt;</code> [&lt;;-D](/app/secure-mail) for enterprises that just need to get it done
-1. Added <code>&lt;hyper-script&gt;</code> [&lt;;-D](/app/secure-mail) for college students to scribble scripts
+1. Added <code>&lt;hyper-script&gt;</code> [&lt;;-D](/app/hyper-script) for college students to scribble scripts
 
 ###### Author's Note
 When I was "In College", I needed a way to convert plaintext to a PDF that could be printed and then placed seamlessly into three ring binders, which is origin of the parsing engine for <code>&lt;hyper-script&gt;</code>. Lovingly, [the "Saga" renderer](/app/was-code?src=/public/cache.js)
