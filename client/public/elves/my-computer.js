@@ -311,6 +311,9 @@ $.when('click', '[data-panel]', (event) => {
   showPanel(`
     <my-computer class="passthrough">
       <nav class="vertical">
+        <h6 style="padding: 1rem .5rem .5rem;">
+          Rest of World
+        </h6>
         <button data-nav="/tutorial">
           Learn More
         </button>
@@ -319,16 +322,18 @@ $.when('click', '[data-panel]', (event) => {
           Share
         </button>
 
+        <button data-nav="/help">
+          Video Help
+        </button>
+
+        <h6 style="padding: 1rem .5rem .5rem;">Apps</h6>
+
         <button data-nav="/theme">
           Theme Picker
         </button>
 
         <button data-nav="/chat">
           Chat
-        </button>
-
-        <button data-nav="/help">
-          Help
         </button>
 
         <button data-nav="/time-machine">
@@ -634,7 +639,7 @@ $.eye(`
     display: inline-grid;
     place-content: start;
     padding: .5rem;
-    border-bottom: 2px solid rgba(0,0,0, .2);
+    border-bottom: 1px solid rgba(0,0,0, .1);
   }
 
   & .copy-area {

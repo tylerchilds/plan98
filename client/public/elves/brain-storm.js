@@ -283,7 +283,6 @@ function mount(target) {
 
   const stars = getStars(target)
   target.innerHTML = `
-    <!--
     <div class="actions">
       <div class="menu-item">
         <button data-menu-target="file">
@@ -326,7 +325,6 @@ function mount(target) {
         </div>
       </div>
     </div>
-    -->
     <div class="toolbelt-actions">
       <div class="menu-group">
         <button class="toolbelt-grabber">
@@ -355,7 +353,7 @@ function mount(target) {
       </div>
     </div>
     <div class="workspace" style="--pan-x: ${panX}px; --pan-y: ${panY}px; --zoom: ${zoom};">
-      <door-man id="wm-${target.id}" src="about:blank" background="transparent" color="lemonchiffon" class="infinite stack"></door-man>
+      <multi-task id="wm-${target.id}" src="about:blank" background="transparent" color="lemonchiffon" class="infinite stack"></multi-task>
       <div class="displays stack"></div>
     </div>
     <div class="viewport">
@@ -922,7 +920,7 @@ $.style(`
   }
 
   & live-help,
-  & door-man {
+  & multi-task {
     pointer-events: none;
     opacity: .5;
     position: relative;
@@ -933,23 +931,23 @@ $.style(`
     opacity: 0;
   }
 
-  &:not([data-mode="${modes.cursor}"]) door-man .tray .tray-wake,
-  &:not([data-mode="${modes.cursor}"]) door-man .tray[data-focused="true"] {
+  &:not([data-mode="${modes.cursor}"]) multi-task .tray .tray-wake,
+  &:not([data-mode="${modes.cursor}"]) multi-task .tray[data-focused="true"] {
     pointer-events: none !important;
   }
 
   &[data-mode="${modes.draw}"] .workspace .displays *,
-  &[data-mode="${modes.draw}"] .workspace door-man * {
+  &[data-mode="${modes.draw}"] .workspace multi-task * {
     pointer-events: none !important;
   }
-  &[data-mode="${modes.move}"] .workspace door-man * {
+  &[data-mode="${modes.move}"] .workspace multi-task * {
     pointer-events: none !important;
   }
 
-  &[data-mode="${modes.move}"] .workspace door-man .tray-body{
+  &[data-mode="${modes.move}"] .workspace multi-task .tray-body{
     background: rgba(0,0,0,.85);
   }
-  &[data-mode="${modes.move}"] .workspace door-man iframe{
+  &[data-mode="${modes.move}"] .workspace multi-task iframe{
     display: none;
   }
   &[data-mode="${modes.note}"] simpleton-client {
@@ -958,7 +956,7 @@ $.style(`
   }
 
   &[data-mode="${modes.camera}"] live-help,
-  &[data-mode="${modes.cursor}"] door-man {
+  &[data-mode="${modes.cursor}"] multi-task {
     pointer-events: all;
     opacity: 1;
   }
@@ -1027,7 +1025,7 @@ $.style(`
     border-radius: 0;
   }
 
-  & door-man.stack {
+  & multi-task.stack {
     width: 5000px;
     height: 5000px;
   }

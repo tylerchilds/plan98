@@ -520,17 +520,24 @@ let grabTimeout
 let grabOffsetX, grabOffsetY
 function grab(event) {
   event.preventDefault()
-  const { offsetX, offsetY } = event
+  const { clientX, clientY } = event
   const { tray } = event.target.dataset
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
+  const zoom = parseFloat(getComputedStyle(event.target).getPropertyValue('--zoom')) || 1
+  const trayData = $.learn()[tray]
+  const { x: trayX, y: trayY } = trayData
+  const { canvas, rectangle } = engine(event.target)
+  const clickX = (event.clientX - rectangle.left) / zoom
+  const clickY = (event.clientY - rectangle.top) / zoom
+
   $.teach({ trayZ: newZ, focusedTray: tray })
   setState(tray, { z: newZ })
   grabTimeout = setTimeout(() => {
     setState(tray, { grabbed: true })
     $.teach({ grabbing: tray })
-    grabOffsetX = offsetX
-    grabOffsetY = offsetY
+    grabOffsetX = clickX - trayX
+    grabOffsetY = clickY - trayY
   }, 100)
 }
 
@@ -545,10 +552,11 @@ function drag(event) {
 
   const panX = getComputedStyle(event.target).getPropertyValue("--pan-x") || 0;
   const panY = getComputedStyle(event.target).getPropertyValue("--pan-y") || 0;
+  const zoom = parseFloat(getComputedStyle(event.target).getPropertyValue('--zoom')) || 1
 
   if (lastX !== undefined && lastY !== undefined) {
-    const movementX = clientX - lastX;
-    const movementY = clientY - lastY;
+    const movementX = (clientX - lastX) / zoom;
+    const movementY = (clientY - lastY) / zoom;
     // Use movementX and movementY here
     if(grabbed) {
       setState(tray, {
@@ -588,10 +596,15 @@ function drag(event) {
 
     }
   } else {
+    const { canvas, rectangle } = engine(event.target)
+
     if(grabbed) {
+      const canvasX = (clientX - rectangle.left) / zoom
+      const canvasY = (clientY - rectangle.top) / zoom
+
       setState(tray, {
-        x: clientX - grabOffsetX - parseInt(panX, 10),
-        y: clientY - grabOffsetY - parseInt(panY, 10)
+        x: canvasX - grabOffsetX,
+        y: canvasY - grabOffsetY
       })
     }
 
@@ -617,14 +630,21 @@ function ungrab(event) {
 // grab a pane
 function resize(event) {
   event.preventDefault()
-  const { offsetX, offsetY } = event
+  const { clientX, clientY } = event
   const { tray } = event.target.dataset
   const { trayZ } = $.learn()
   const newZ = trayZ + 1
+  const zoom = parseFloat(getComputedStyle(event.target).getPropertyValue('--zoom')) || 1
+  const trayData = $.learn()[tray]
+  const { x: trayX, y: trayY } = trayData
+  const { canvas, rectangle } = engine(event.target)
+  const clickX = (event.clientX - rectangle.left) / zoom
+  const clickY = (event.clientY - rectangle.top) / zoom
+
   $.teach({ resizing: tray, trayZ: newZ, focusedTray: tray })
   setState(tray, { resize: event.target.dataset.direction, z: newZ })
-  grabOffsetX = offsetX
-  grabOffsetY = offsetY
+  grabOffsetX = clickX - trayX
+  grabOffsetY = clickY - trayY
 }
 function unresize({ target }) {
   const tray = $.learn().resizing
@@ -1421,14 +1441,15 @@ function start(e) {
   const { grabbing } = $.learn()
   if(grabbing) return
   const { canvas, rectangle } = engine(e.target)
+  const zoom = parseFloat(getComputedStyle(event.target).getPropertyValue('--zoom')) || 1
   const context = canvas.getContext('2d')
   let startX, startY, x, y;
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    startX = e.touches[0].clientX - rectangle.left
-    startY = e.touches[0].clientY - rectangle.top
+    startX = (e.touches[0].clientX - rectangle.left) / zoom
+    startY = (e.touches[0].clientY - rectangle.top) / zoom
   } else {
-    startX = e.clientX - rectangle.left
-    startY = e.clientY -rectangle.top
+    startX = (e.clientX - rectangle.left) / zoom
+    startY = (e.clientY - rectangle.top) / zoom
   }
 
   x = 0
@@ -1447,13 +1468,14 @@ function move (e) {
   const context = canvas.getContext('2d')
   if (!isMouseDown) return
 
+  const zoom = parseFloat(getComputedStyle(event.target).getPropertyValue('--zoom')) || 1
   let x, y
   if (e.touches && e.touches[0] && typeof e.touches[0]["force"] !== "undefined") {
-    x = e.touches[0].clientX - startX - rectangle.left
-    y = e.touches[0].clientY - startY - rectangle.top
+    x = (e.touches[0].clientX - rectangle.left) / zoom - startX
+    y = (e.touches[0].clientY - rectangle.top) / zoom - startY
   } else {
-    x = e.clientX - startX - rectangle.left
-    y = e.clientY - startY - rectangle.top
+    x = (e.clientX - rectangle.left) / zoom - startX
+    y = (e.clientY - rectangle.top) / zoom - startY
   }
   $.teach({ x, y, invertX: x < 0, invertY: y < 0 })
 }
