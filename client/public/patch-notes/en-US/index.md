@@ -2,6 +2,14 @@
 
 ## Cutestrap
 
+### Version 3.0.2
+
+#### 2025-12-12 Status 
+Generally quiet before the great freeze of 2026, preparing for Doomsday around this time next year, thinking about what I'd need from an Elf Tunnel on the other side.
+
+##### Details
+1. Upgraded <code>&lt;brain-storm&gt;</code> [&lt;;-D](/app/brain-storm) to leverage <code>&lt;joke-book&gt;</code> [&lt;;-D](/app/joke-book) as a starting point
+
 ### Version 3.0.1
 
 #### 2025-12-08 Status 
@@ -11,7 +19,7 @@ Navigating the system has become synonymous with navigating Alfheim; cheat codes
 1. Added <code>&lt;short-link&gt;</code> [&lt;;-D](/app/short-link) to create links that are more copy and paste friendly, while respecting the security practices of Plan98
 1. Added <code>&lt;period-tracker&gt;</code> [&lt;;-D](/app/period-tracker) with the [utmost transparency](/app/was-code?src=/public/elves/period-tracker.js), but set to a [mutual gossip](/app/was-code?src=/public/plan98.js) net by default, but [persisted locally](/app/was-code?src=/public/cache.js)
 1. Added <code>&lt;blue-sky&gt;</code> [&lt;;-D](/app/blue-sky) for experimental self-replicating client-to-server social
-1. Added <code>&lt;secure-mail&gt;</code> [&lt;;-D](/app/secure-mail) for enterprises that just need to get it done
+1. Added <code>&lt;e-mail&gt;</code> [&lt;;-D](/app/e-mail) for enterprises that just need to get it done
 1. Added <code>&lt;hyper-script&gt;</code> [&lt;;-D](/app/hyper-script) for college students to scribble scripts
 
 ###### Author's Note

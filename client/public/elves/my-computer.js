@@ -26,6 +26,7 @@ const lazyLoaders = [
   './blue-sky.js',
   './secure-mail.js',
   './hyper-script.js',
+  './patch-notes.js',
 ]
 
 lazyLoaders.map(x => import(x))
@@ -52,6 +53,7 @@ const PERIOD_TRACKER = 'period-tracker'
 const BLUE_SKY = 'blue-sky'
 const E_MAIL = 'e-mail'
 const HYPER_SCRIPT = 'hyper-script'
+const PATCH_NOTES = 'patch-notes'
 
 const config = {
   [HOME]: {
@@ -91,7 +93,7 @@ const config = {
     path: '/help',
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
-      <iframe src="/app/live-help?room="${target.id}"></live-help>
+      <iframe src="/app/live-help?room=${target.id}"></live-help>
     `
   },
   [THEME]: {
@@ -127,7 +129,7 @@ const config = {
     path: `/${TIME_MACHINE}`,
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
-      <iframe src=/app/time-machine?id="${target.id}"></iframe>
+      <iframe src="/app/time-machine?id=${target.id}"></iframe>
     `
   },
   [MULTI_TASK]: {
@@ -135,7 +137,7 @@ const config = {
     path: `/${MULTI_TASK}`,
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
-      <iframe src=/app/${MULTI_TASK}?id="${target.id}"></iframe>
+      <iframe src="/app/${MULTI_TASK}?id=${target.id}"></iframe>
     `
   },
   [BRAIN_STORM]: {
@@ -143,7 +145,7 @@ const config = {
     path: `/${BRAIN_STORM}`,
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
-      <iframe src=/app/${BRAIN_STORM}?id="${target.id}"></iframe>
+      <iframe src="/app/${BRAIN_STORM}?id=${target.id}"></iframe>
     `
   },
   [SHORT_LINK]: {
@@ -184,6 +186,14 @@ const config = {
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
       <hyper-script></hyper-script>
+    `
+  },
+  [PATCH_NOTES]: {
+    label: 'Patch Notes',
+    path: `/${PATCH_NOTES}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <patch-notes></patch-notes>
     `
   },
 
@@ -259,7 +269,7 @@ $.head(target => {
 
   target.innerHTML = `
     <header>
-      <button style="display: inline-grid; grid-template-columns: auto 1fr; gap: .5rem; place-items: end;" data-nav="/" class="title">
+      <button style="display: inline-grid; grid-template-columns: auto 1fr; gap: .5rem; place-items: center;" data-nav="/" class="title">
         <plan98-icon></plan98-icon>
         <div>
           C<span class="sublogo -hide-small">uteStrap</span><span class="sublogo -show-small">s</span>
@@ -312,7 +322,7 @@ $.when('click', '[data-panel]', (event) => {
     <my-computer class="passthrough">
       <nav class="vertical">
         <h6 style="padding: 1rem .5rem .5rem;">
-          Rest of World
+          Quick Links
         </h6>
         <button data-nav="/tutorial">
           Learn More
@@ -324,6 +334,10 @@ $.when('click', '[data-panel]', (event) => {
 
         <button data-nav="/help">
           Video Help
+        </button>
+
+        <button data-nav="/patch-notes">
+          Patch Notes
         </button>
 
         <h6 style="padding: 1rem .5rem .5rem;">Apps</h6>
@@ -393,10 +407,6 @@ function tutorial(target) {
 
             <div>
               <plan98-palette style="height: 50vh"></plan98-palette>
-            </div>
-
-            <div>
-              <patch-notes lang="${target.getAttribute('lang') || 'en-US'}"></patch-notes>
             </div>
 
             <div>

@@ -166,7 +166,7 @@ function afterUpdate(target) {
     const draw = target.querySelector('.draw')
     if(!draw.innerHTML && mode === modes.draw) {
       draw.innerHTML = `
-        <iframe src="/app/story-board?src=${src}"></iframe>
+        <iframe src="/app/sketch-pad?src=${src}"></iframe>
       `
     }
   }
@@ -339,6 +339,9 @@ function mount(target) {
           </button>
           <button data-mode="move"  data-tooltip="Pan Canvas">
             <sl-icon name="arrows-move"></sl-icon>
+          </button>
+          <button data-mode="draw" data-tooltip="Photo Journal">
+            <sl-icon name="pencil"></sl-icon>
           </button>
           <button data-mode="chat" data-tooltip="Quick Chat">
             <sl-icon name="chat"></sl-icon>
