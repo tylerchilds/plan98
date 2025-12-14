@@ -284,11 +284,11 @@ function mount(target) {
   const stars = getStars(target)
   target.innerHTML = `
     <div class="actions">
-      <div class="menu-item">
+      <div class="action-item">
         <button data-menu-target="file">
           File
         </button>
-        <div class="menu-actions" data-menu="file">
+        <div class="actions-menu" data-menu="file">
           <button data-file-open>
             <span>
             <sl-icon name="folder2-open"></sl-icon>
@@ -305,11 +305,11 @@ function mount(target) {
         </div>
       </div>
 
-      <div class="menu-item">
+      <div class="action-item">
         <button data-menu-target="view">
           View
         </button>
-        <div class="menu-actions" data-menu="view">
+        <div class="actions-menu" data-menu="view">
           <button data-zoom-in>
             <span>
             <sl-icon name="zoom-in"></sl-icon>
@@ -770,53 +770,6 @@ $.style(`
     color: var(--root-theme, mediumseagreen);
   }
 
-
-  & .actions {
-    z-index: 10;
-    background: transparent;
-    border-bottom: 1px solid rgba(255,255,255,.25);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: none;
-    background: black;
-    height: 2rem;
-  }
-
-  @media screen {
-    & .actions {
-      display: flex;
-    }
-  }
-
-  & .actions button {
-    background: black;
-    color: rgba(255,255,255,.85);
-    border: none;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    padding: 0 .5rem;
-    height: 100%;
-    font-size: 1rem;
-    --v-font-mono: 1;
-    --v-font-casl: 0;
-    --v-font-wght: 400;
-    --v-font-slnt: 0;
-    --v-font-crsv: 0;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
-    transition: background 200ms ease-in-out;
-  }
-
-  & .actions button:focus,
-  & .actions button.active,
-  & .actions button:hover {
-    color: #fff;
-    background: #54796d;
-    z-index: 2;
-  }
-
-
   & .display {
     width: var(--width, 160px);
     height: var(--height, 90px);
@@ -878,17 +831,17 @@ $.style(`
     overflow: auto;
   }
 
-  & .menu-item {
+  & .action-item {
     position: relative;
   }
 
-  & .menu-item.disabled {
+  & .action-item.disabled {
     filter: grayscale(1);
     opacity: .5;
     pointer-events: none;
   }
 
-  & .menu-actions {
+  & .actions-menu {
     display: none;
     position: absolute;
     left: 0;
@@ -901,11 +854,11 @@ $.style(`
   & [data-menu-target] {
     aspect-ratio: 1;
   }
-  & [data-menu-target].active + .menu-actions {
+  & [data-menu-target].active + .actions-menu {
     display: block;
   }
 
-  & .menu-actions  button {
+  & .actions-menu  button {
     width: 100%;
     text-align: left;
     white-space: nowrap;
@@ -1078,7 +1031,7 @@ function getStars(target) {
 }
 
 $.when('click', '*', (event) => {
-  if(event.target.closest('.menu-item')) {
+  if(event.target.closest('.action-item')) {
     // child of a menu item
     return
   }

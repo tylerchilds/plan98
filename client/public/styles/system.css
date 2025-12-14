@@ -641,7 +641,6 @@ button, input, optgroup, select, textarea {
   background-color: lemonchiffon;
 }
 
-
 .actions {
   z-index: 10;
   background: transparent;
@@ -650,6 +649,16 @@ button, input, optgroup, select, textarea {
   left: 0;
   right: 0;
   display: none;
+  border-bottom: 1px solid rgba(255,255,255,.25);
+  background: black;
+  height: 2rem;
+}
+
+.actions.-attach-bottom {
+  border-bottom: none;
+  top: auto;
+  bottom: 0;
+  border-top: 1px solid rgba(255,255,255,.25);
 }
 
 @media screen {
@@ -658,17 +667,20 @@ button, input, optgroup, select, textarea {
   }
 }
 
+.actions .action,
 .actions .menu-item {
   position: relative;
   max-height: 100%;
 }
 
+.actions .action.disabled,
 .actions .menu-item.disabled {
   filter: grayscale(1);
   opacity: .5;
   pointer-events: none;
 }
 
+.actions .actions-menu,
 .actions .menu-actions {
   display: none;
   position: absolute;
@@ -677,11 +689,24 @@ button, input, optgroup, select, textarea {
   transform: translateY(100%);
 }
 
+.actions.-attach-bottom .actions-menu,
+.actions .menu-actions {
+  display: none;
+  position: absolute;
+  left: 0;
+  bottom: auto;
+  top: 0;
+  transform: translateY(-100%);
+}
+
+
+.actions [data-menu-target].active + .actions-menu,
 .actions [data-menu-target].active + .menu-actions {
   display: block;
 }
 
-.actions .menu-actions  button {
+.actions .actions-menu button,
+.actions .menu-actions button {
   width: 100%;
   text-align: left;
   white-space: nowrap;
@@ -694,11 +719,9 @@ button, input, optgroup, select, textarea {
   display: block;
 }
 
-
-
 .actions button {
-  background: lemonchiffon;
-  color: saddlebrown;
+  background: black;
+  color: white;
   border: none;
   padding: .5rem;
   font-size: 1rem;
@@ -710,12 +733,15 @@ button, input, optgroup, select, textarea {
   font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
   font-family: "Recursive";
   transition: background 200ms ease-in-out;
+  height: 100%;
 }
 
 .actions button:focus,
 .actions button.active,
 .actions button:hover {
-  color: #fff;
+  color: black;
+  background: white;
+  z-index: 2;
 }
 
 .toolbelt-actions {
