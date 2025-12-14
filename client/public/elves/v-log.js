@@ -60,6 +60,10 @@ An app is a nanobot.
 
 */
 
+
+let lineWidth = 0
+let isMousedown = false
+let points = []
 const $ = app(tag, {
   recording: false,
   caption: '',
@@ -75,9 +79,13 @@ const $ = app(tag, {
   showPanel: false,
   showOverlay: false,
   view: null,
-  objectId: null
+  objectId: null,
+  strokeHistory: [],
+  strokeRevisory: [],
+  thickness: 4,
+  color: 'white',
+  background: 'transparent'
 })
-
 
 /*
   
@@ -549,6 +557,10 @@ $.style(`
     inset: 0;
     max-width: 100%;
   }
+
+  & .output-canvas {
+    pointer-events: none;
+  }
 `)
 
 /*
@@ -746,56 +758,71 @@ class CulturalPreservation extends HTMLElement {
 
     {
       const letterbox = target.querySelector('.letterbox')
-      target.compositeCanvas = document.createElement('canvas')
-      target.compositeCanvas.width = target.video.videoWidth
-      target.compositeCanvas.height = target.video.videoHeight
-      letterbox.appendChild(target.compositeCanvas)
+      target.inputCanvas = document.createElement('canvas')
+      target.inputCanvas.classList.add('input-canvas')
+      target.inputCanvas.width = target.video.videoWidth
+      target.inputCanvas.height = target.video.videoHeight
+      letterbox.appendChild(target.inputCanvas)
     }
 
     {
       const letterbox = target.querySelector('.letterbox')
-      target.drawingCanvas = document.createElement('canvas')
-      target.drawingCanvas.width = target.video.videoWidth
-      target.drawingCanvas.height = target.video.videoHeight
-      letterbox.appendChild(target.drawingCanvas)
+      target.outputCanvas = document.createElement('canvas')
+      target.outputCanvas.classList.add('output-canvas')
+      target.outputCanvas.width = target.video.videoWidth
+      target.outputCanvas.height = target.video.videoHeight
+      letterbox.appendChild(target.outputCanvas)
     }
   }
 
   afterUpdate(target) {
     if(!target.innerHTML) return
+
     const {
       partial='',
       recording,
       showPanel,
       showOverlay,
+      strokeHistory,
+      strokeRevisory,
       view,
-      result='',
-      history,
     } = $.learn()
 
-    const partialContainer = target.querySelector('.partial')
-    const actionContainer = target.querySelector('[data-primary-action]')
+    {
+      {
+        if(target.strokeHistoryLength !== strokeHistory.length || target.strokeRevisoryLength !== strokeRevisory.length) {
+          target.strokeHistoryLength = strokeHistory.length
+          target.strokeRevisoryLength = strokeRevisory.length
+          redraw(target)
+        }
+      }
+    }
 
-    innerHTML(partialContainer, partial)
+    {
+      const partialContainer = target.querySelector('.partial')
+      const actionContainer = target.querySelector('[data-primary-action]')
 
-    if(recording !== target.lastRecording) {
-      target.lastRecording = recording
-      innerHTML(actionContainer, recording
-        ? `
-          <div2>
-            <button data-stop class="standard-button bias-negative -large -round">
-              <sl-icon name="stop-circle-fill"></sl-icon>
-            </button>
-          </div2>
-        `
-        : `
-          <div3>
-            <button data-record class="standard-button -large -round">
-              <sl-icon name="record-circle-fill"></sl-icon>
-            </button>
-          </div3>
-        `
-      )
+      innerHTML(partialContainer, partial)
+
+      if(recording !== target.lastRecording) {
+        target.lastRecording = recording
+        innerHTML(actionContainer, recording
+          ? `
+            <div2>
+              <button data-stop class="standard-button bias-negative -large -round">
+                <sl-icon name="stop-circle-fill"></sl-icon>
+              </button>
+            </div2>
+          `
+          : `
+            <div3>
+              <button data-record class="standard-button -large -round">
+                <sl-icon name="record-circle-fill"></sl-icon>
+              </button>
+            </div3>
+          `
+        )
+      }
     }
 
     if(showPanel) {
@@ -870,7 +897,6 @@ class CulturalPreservation extends HTMLElement {
         activeItem.classList.add('active')
       }
     }
-
   }
 }
 
@@ -1180,6 +1206,238 @@ function clearCanvas(canvas) {
   canvas.width = self.innerWidth;
   canvas.height = self.innerHeight;
   const context = canvas.getContext('2d')
-  context.fillStyle = $.ear().background
+  context.fillStyle = $.learn().background
   context.fillRect(0, 0, canvas.width, canvas.height)
 }
+
+function redraw(target) {
+  const { canvas } = engine(target)
+
+  if(!canvas) return
+  const { strokeHistory } = $.learn()
+  const context = canvas.getContext('2d')
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.fillStyle = $.learn().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  strokeHistory.map(function (stroke) {
+    if (strokeHistory.length === 0) return
+
+    context.beginPath()
+
+    let strokePath = [];
+    stroke.map(function (point) {
+      strokePath.push(point)
+      drawOnCanvas(target, strokePath)
+    })
+  })
+}
+
+function engine(target) {
+  const root = target.closest($.link)
+  const canvas = root.querySelector('.input-canvas')
+
+  if(!canvas) return {}
+  const rectangle = canvas.getBoundingClientRect()
+
+  const scaleX = canvas.width / rectangle.width;
+  const scaleY = canvas.height / rectangle.height;
+
+  return {
+    root,
+    canvas,
+    rectangle,
+    scaleX,
+    scaleY
+  }
+}
+
+$.when('click', '[data-new]', function (event) {
+  event.preventDefault()
+  $.teach({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
+  redraw(event.target)
+})
+
+$.when('click', '[data-undo]', function undoDraw (event) {
+  event.preventDefault()
+  const { strokeHistory } = $.learn()
+  if(strokeHistory.length === 0) {
+    return
+  }
+
+  $.teach({}, (state, _payload) => {
+    const newState = { ...state }
+    const stroke = newState.strokeHistory.pop()
+    newState.strokeRevisory.unshift(stroke)
+    return {
+      ...newState
+    }
+  })
+  redraw(event.target)
+})
+
+$.when('click', '[data-redo]', function redoDraw (event) {
+  event.preventDefault()
+  const { strokeRevisory } = $.learn()
+  if(strokeRevisory.length === 0) return
+
+
+  $.teach({}, (state, _payload) => {
+    const newState = { ...state }
+    const stroke = newState.strokeRevisory.shift()
+    newState.strokeHistory.push(stroke)
+    return {
+      ...newState
+    }
+  })
+
+  redraw(event.target)
+})
+
+
+$.when('touchstart', '.input-canvas', start)
+$.when('mousedown', '.input-canvas', start)
+
+function start(e) {
+  const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
+  $.teach({ touching: true, activeMenu: null })
+  const { thickness } = $.learn()
+  const context = canvas.getContext('2d')
+  let pressure = 0.1;
+  let clientX, clientY;
+
+  if (e.touches && e.touches[0]) {
+    const touch = e.touches[0]
+    if (typeof touch["force"] !== "undefined" && touch["force"] > 0) {
+      pressure = touch["force"]
+    }
+    clientX = touch.clientX
+    clientY = touch.clientY
+  } else {
+    // Mouse event
+    pressure = 1.0
+    clientX = e.clientX
+    clientY = e.clientY
+  }
+
+  const relativeX = clientX - rectangle.left;
+  const relativeY = clientY - rectangle.top;
+
+  const x = relativeX * scaleX;
+  const y = relativeY * scaleY;
+
+  isMousedown = true
+
+  lineWidth = Math.log(pressure + 1) * thickness
+  context.lineWidth = lineWidth
+
+  points.push({ x, y, lineWidth })
+  drawOnCanvas(e.target, points)
+}
+
+$.when('touchmove', '.input-canvas', move)
+$.when('mousemove', '.input-canvas', move)
+
+function move (e) {
+  e.preventDefault()
+  const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
+  const { thickness, color } = $.learn()
+  const context = canvas.getContext('2d')
+  if (!isMousedown) return
+
+  let pressure = 0.1
+  let clientX, clientY;
+
+  if (e.touches && e.touches[0]) {
+    const touch = e.touches[0]
+    if (typeof touch["force"] !== "undefined" && touch["force"] > 0) {
+      pressure = touch["force"]
+    }
+    clientX = touch.clientX
+    clientY = touch.clientY
+  } else {
+    // Mouse event
+    pressure = 1.0
+    clientX = e.clientX
+    clientY = e.clientY
+  }
+
+  const relativeX = clientX - rectangle.left;
+  const relativeY = clientY - rectangle.top;
+
+  const x = relativeX * scaleX;
+  const y = relativeY * scaleY;
+
+  lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
+  context.lineWidth = lineWidth
+
+  points.push({ x, y, lineWidth, color })
+  drawOnCanvas(e.target, points)
+
+  requestIdleCallback(() => {
+    $.teach({ pressure })
+
+    const touch = e.touches ? e.touches[0] : null
+    if (touch) {
+      $.teach({
+        touchesHTML: `
+          touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
+          radiusX = ${touch.radiusX} <br/>
+          radiusY = ${touch.radiusY} <br/>
+          rotationAngle = ${touch.rotationAngle} <br/>
+          altitudeAngle = ${touch.altitudeAngle} <br/>
+          azimuthAngle = ${touch.azimuthAngle} <br/>
+        `
+      })
+    }
+  })
+}
+
+$.when('touchend', '.input-canvas', end)
+$.when('touchleave', '.input-canvas', end)
+$.when('mouseup', '.input-canvas', end)
+function end (e) {
+  $.teach({ touching: false })
+
+  isMousedown = false
+
+  $.teach(points, (state, payload) => {
+    const newState = { ...state }
+    newState.strokeHistory.push([...payload])
+    return {
+      ...newState
+    }
+  })
+
+  points = []
+
+  lineWidth = 0
+};
+
+function drawOnCanvas (target, stroke) {
+  const { canvas } = engine(target)
+  const context = canvas.getContext('2d')
+  context.strokeStyle = stroke.color
+  context.lineCap = 'round'
+  context.lineJoin = 'round'
+
+  const l = stroke.length - 1
+  if (stroke.length >= 3) {
+    const xc = (stroke[l].x + stroke[l - 1].x) / 2
+    const yc = (stroke[l].y + stroke[l - 1].y) / 2
+    context.lineWidth = stroke[l - 1].lineWidth
+    context.quadraticCurveTo(stroke[l - 1].x, stroke[l - 1].y, xc, yc)
+    context.stroke()
+    context.beginPath()
+    context.moveTo(xc, yc)
+  } else {
+    const point = stroke[l];
+    context.lineWidth = point.lineWidth
+    context.strokeStyle = point.color
+    context.beginPath()
+    context.moveTo(point.x, point.y)
+    context.stroke()
+  }
+}
+
+
