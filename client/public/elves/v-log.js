@@ -394,7 +394,10 @@ $.style(`
 
   & .viewport {
     position: absolute;
-    inset: 0;
+    inset: 0 0 2rem 0;
+    background: black;
+    display: grid;
+    place-content: center;
   }
 
   & .lingustics {
@@ -414,9 +417,7 @@ $.style(`
   }
 
   & video {
-    height: 100%;
-    width: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 
   & .taskbar {
@@ -537,6 +538,16 @@ $.style(`
 
   & .form-actions button {
     width: 100%;
+  }
+
+  & .letterbox {
+    position: relative;
+  }
+
+  & .letterbox canvas {
+    position: absolute;
+    inset: 0;
+    max-width: 100%;
   }
 `)
 
@@ -662,7 +673,6 @@ class CulturalPreservation extends HTMLElement {
         </div>
         <div class="taskbar">
           <div class="left">
-          lol
           </div>
           <div class="center" data-primary-action></div>
           <div class="right">
@@ -676,7 +686,9 @@ class CulturalPreservation extends HTMLElement {
           <div class="lingustics">
             <div class="partial"></div>
           </div>
-          <video playsinline disablePictureInPicture></video>
+          <div class="letterbox">
+            <video playsinline disablePictureInPicture></video>
+          </div>
         </div>
 
         <div class="panel-area"></div>
@@ -685,17 +697,20 @@ class CulturalPreservation extends HTMLElement {
       this.afterUpdate(target)
     }
 
-    target.video = target.querySelector('video')
-    target.video.muted = true
-    target.video.srcObject = target.mediaStream;
-    target.video.autoplay = true;
+    {
+      target.video = target.querySelector('video')
+      target.video.muted = true
+      target.video.srcObject = target.mediaStream;
+      target.video.autoplay = true;
+    }
 
-    const channel = new MessageChannel();
-    const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
-    model.registerPort(channel.port1);
+    {
+      const channel = new MessageChannel();
+      const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
+      model.registerPort(channel.port1);
 
-    const recognizer = new model.KaldiRecognizer(sampleRate);
-    recognizer.setWords(true);
+      const recognizer = new model.KaldiRecognizer(sampleRate);
+      recognizer.setWords(true);
 
       recognizer.on("partialresult", async (message) => {
         const partial = message.result.partial;
@@ -719,14 +734,31 @@ class CulturalPreservation extends HTMLElement {
         }
       });
 
-    const audioContext = new AudioContext();
-    await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
-    const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
-    recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
-    recognizerProcessor.connect(audioContext.destination);
+      const audioContext = new AudioContext();
+      await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
+      const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
+      recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
+      recognizerProcessor.connect(audioContext.destination);
 
-    const source = audioContext.createMediaStreamSource(target.mediaStream);
-    source.connect(recognizerProcessor);
+      const source = audioContext.createMediaStreamSource(target.mediaStream);
+      source.connect(recognizerProcessor);
+    }
+
+    {
+      const letterbox = target.querySelector('.letterbox')
+      target.compositeCanvas = document.createElement('canvas')
+      target.compositeCanvas.width = target.video.videoWidth
+      target.compositeCanvas.height = target.video.videoHeight
+      letterbox.appendChild(target.compositeCanvas)
+    }
+
+    {
+      const letterbox = target.querySelector('.letterbox')
+      target.drawingCanvas = document.createElement('canvas')
+      target.drawingCanvas.width = target.video.videoWidth
+      target.drawingCanvas.height = target.video.videoHeight
+      letterbox.appendChild(target.drawingCanvas)
+    }
   }
 
   afterUpdate(target) {
@@ -1144,3 +1176,10 @@ $.when('click', '*', (event) => {
   $.teach({ activeMenu: null, showPanel: false })
 })
 
+function clearCanvas(canvas) {
+  canvas.width = self.innerWidth;
+  canvas.height = self.innerHeight;
+  const context = canvas.getContext('2d')
+  context.fillStyle = $.ear().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
+}
