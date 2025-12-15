@@ -29,6 +29,7 @@ An dog fed man toast.
 */
 
 import { toast } from './plan98-toast.js'
+import { showModal } from './plan98-modal.js'
 
 /*
 
@@ -306,7 +307,7 @@ $.when('click', '[data-record]', async (event) => {
     const root = event.target.closest($.link)
     $.teach({ recording: true, transcription: '' })
 
-    mediaRecorder = new MediaRecorder(root.mediaStream);
+    mediaRecorder = new MediaRecorder(root.webcamStream);
     const recordedVideo = root.querySelector('video')
 
     mediaRecorder.ondataavailable = (event) => {
@@ -417,6 +418,7 @@ $.style(`
     right: 2rem;
     color: white;
     text-shadow: 1px 1px black;
+    z-index: 5;
   }
 
   & .partial {
@@ -669,9 +671,9 @@ class CulturalPreservation extends HTMLElement {
 
     this.innerHTML = null
 
-    if(this.mediaStream) {
-      this.mediaStream.getTracks().forEach(track => track.stop());
-      this.mediaStream = null
+    if(this.webcamStream) {
+      this.webcamStream.getTracks().forEach(track => track.stop());
+      this.webcamStream = null
     }
   }
 
@@ -712,7 +714,7 @@ class CulturalPreservation extends HTMLElement {
     {
       target.video = target.querySelector('video')
       target.video.muted = true
-      target.video.srcObject = target.mediaStream;
+      target.video.srcObject = target.webcamStream;
       target.video.autoplay = true;
     }
 
@@ -752,7 +754,7 @@ class CulturalPreservation extends HTMLElement {
       recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
       recognizerProcessor.connect(audioContext.destination);
 
-      const source = audioContext.createMediaStreamSource(target.mediaStream);
+      const source = audioContext.createMediaStreamSource(target.webcamStream);
       source.connect(recognizerProcessor);
     }
 
@@ -941,7 +943,7 @@ And dog demanded resolution and quality
 
 async function setMediaStream(target) {
   const { facingMode } = $.learn()
-  target.mediaStream = await navigator.mediaDevices.getUserMedia({
+  target.webcamStream = await navigator.mediaDevices.getUserMedia({
     video: {
       facingMode,
       width: { min: 1280, ideal: 1920, max: 3840 },
@@ -1022,7 +1024,7 @@ $.when('click', '[data-flip]', async (event) => {
 
   const target = event.target.closest($.link)
   await setMediaStream(target)
-  target.video.srcObject = target.mediaStream;
+  target.video.srcObject = target.webcamStream;
   target.video.autoplay = true;
 })
 
