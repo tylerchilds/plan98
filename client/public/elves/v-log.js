@@ -88,18 +88,6 @@ const $ = app(tag, {
   background: 'transparent'
 })
 
-/*
-  
-*/
-
-/*
-
-
-*/
-
-async function initialize(target) {
-}
-
 
 /*
 
@@ -306,8 +294,16 @@ $.when('click', '[data-record]', async (event) => {
   try {
     const root = event.target.closest($.link)
     $.teach({ recording: true, transcription: '' })
-
-    mediaRecorder = new MediaRecorder(root.webcamStream);
+    const audioTrack = root.webcamStream.getAudioTracks()[0]
+    const compositedVideoStream = root.outputCanvas.captureStream(24)
+    const product = new MediaStream([
+      compositedVideoStream.getVideoTracks()[0],
+      audioTrack
+    ])
+    mediaRecorder = new MediaRecorder(product, {
+      mimeType: 'video/webm',
+      videoBitsPerSecond: 8000000
+    });
     const recordedVideo = root.querySelector('video')
 
     mediaRecorder.ondataavailable = (event) => {
@@ -560,6 +556,14 @@ $.style(`
     max-width: 100%;
   }
 
+  & .input-video {
+    display: none;
+  }
+
+  & .input-canvas {
+    opacity: 0;
+  }
+
   & .output-canvas {
     pointer-events: none;
   }
@@ -647,7 +651,6 @@ class CulturalPreservation extends HTMLElement {
   beforeUpdate(target) {
     if(!target.mounted) {
       target.mounted = true
-      initialize(target)
     }
   }
 
@@ -701,7 +704,7 @@ class CulturalPreservation extends HTMLElement {
             <div class="partial"></div>
           </div>
           <div class="letterbox">
-            <video playsinline disablePictureInPicture></video>
+            <video class="" playsinline disablePictureInPicture class="input-video"></video>
           </div>
         </div>
 
@@ -759,21 +762,35 @@ class CulturalPreservation extends HTMLElement {
     }
 
     {
-      const letterbox = target.querySelector('.letterbox')
-      target.inputCanvas = document.createElement('canvas')
-      target.inputCanvas.classList.add('input-canvas')
-      target.inputCanvas.width = target.video.videoWidth
-      target.inputCanvas.height = target.video.videoHeight
-      letterbox.appendChild(target.inputCanvas)
-    }
+      const width = target.video.videoWidth
+      const height = target.video.videoHeight
 
-    {
-      const letterbox = target.querySelector('.letterbox')
-      target.outputCanvas = document.createElement('canvas')
-      target.outputCanvas.classList.add('output-canvas')
-      target.outputCanvas.width = target.video.videoWidth
-      target.outputCanvas.height = target.video.videoHeight
-      letterbox.appendChild(target.outputCanvas)
+      {
+        const letterbox = target.querySelector('.letterbox')
+        target.inputCanvas = document.createElement('canvas')
+        target.inputCanvas.classList.add('input-canvas')
+        target.inputCanvas.width = width;
+        target.inputCanvas.height = height;
+        letterbox.appendChild(target.inputCanvas)
+      }
+
+      {
+        const letterbox = target.querySelector('.letterbox')
+        target.outputCanvas = document.createElement('canvas')
+        target.outputCanvas.classList.add('output-canvas')
+        target.outputCanvas.width = width;
+        target.outputCanvas.height = height;
+        letterbox.appendChild(target.outputCanvas)
+      }
+
+      const ctx = target.outputCanvas.getContext('2d'); 
+      const drawComposite = () => {
+        ctx.drawImage(target.video, 0, 0, width, height);
+        ctx.drawImage(target.inputCanvas, 0, 0, width, height);
+        requestAnimationFrame(drawComposite);
+      }
+
+      drawComposite();
     }
   }
 
