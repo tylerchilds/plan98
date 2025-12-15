@@ -11,6 +11,7 @@ The fetch command instructs the human to chase and fetch the ball
 */
 
 import app, { get, getSpace, put, del} from '@plan68/app'
+import elf from '@plan98/elf'
 
 /*
 
@@ -57,7 +58,7 @@ const tag = 'v-log'
 
 /*
 
-An app is a nanobot.
+An app is a nanobot, a machine elf
 
 */
 
@@ -65,7 +66,8 @@ An app is a nanobot.
 let lineWidth = 0
 let isMousedown = false
 let points = []
-const $ = app(tag, {
+const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
+const $ = elf(tag, {
   recording: false,
   caption: '',
   facingMode: 'environment',
@@ -77,7 +79,7 @@ const $ = app(tag, {
   when: '',
   description: '',
   history: [],
-  showPanel: false,
+  showList: false,
   showOverlay: false,
   view: null,
   objectId: null,
@@ -436,6 +438,17 @@ $.style(`
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 1rem;
+    pointer-events: none;
+  }
+
+  & .taskbar.-top {
+    top: 0;
+    bottom: auto;
+  }
+
+
+  & .taskbar button {
+    pointer-events: all;
   }
 
   & .taskbar .right {
@@ -463,7 +476,7 @@ $.style(`
     overflow: auto;
   }
 
-  &[data-show-panel="true"] .panel-area {
+  &[data-show-list="true"] .panel-area {
     position; absolute;
     right: 0;
     display: block;
@@ -567,6 +580,27 @@ $.style(`
   & .output-canvas {
     pointer-events: none;
   }
+
+  & .footer {
+    background: var(--active-color, black);
+    height: 2rem;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    align-content: center;
+  }
+
+  & .footer button {
+    padding: 4px;
+    background: black;
+    color: white;
+    border-radius: 0;
+    background: black;
+    border: none;
+  }
 `)
 
 /*
@@ -576,7 +610,10 @@ And after filling the mind of man with fantasy, dog gave visions and dreams
 */
 
 const views = {
-  edit: 'edit'
+  edit: 'edit',
+  color: 'color',
+  brush: 'brush',
+  settings: 'settings'
 }
 
 const viewRenderers = {
@@ -623,8 +660,45 @@ const viewRenderers = {
 
       </div${id}>
     `
+  },
+  [views.color]: function (target) {
+    return `
+      <plan98-palette></plan98-palette>
+    `
+  },
+  [views.brush]: function (target) {
+    return `
+      <div>
+        ${thicknoids.map(x => `
+          <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
+            ${x}
+          </button>
+        `).join('')}
+
+      </div>
+    `
+  },
+
+  [views.settings]: function (target) {
+    return deviceMenu(target)
   }
 }
+
+$.when('input', 'plan98-palette', (event) => {
+  const { color } = event.detail
+  $.teach({ color, showOverlay: false, view: null, objectId: null })
+})
+
+$.when('click', '[data-thickness]', function  (event) {
+  event.preventDefault()
+  $.mouth({
+    thickness: parseInt(event.target.dataset.thickness) || 1,
+    showOverlay: false,
+    view: null,
+    objectId: null
+  })
+})
+
 
 /*
 
@@ -685,17 +759,38 @@ class CulturalPreservation extends HTMLElement {
 
     if(!target.innerHTML) {
       target.innerHTML = `
-        <div data-dom="devices">
-          ${deviceMenu(target)}
+        <div class="footer">
+          <button data-new>
+            New
+          </button>
+
+          <button style="margin-left: auto;" data-brush-picker>
+            Brush
+          </button>
+
+          <button data-color-picker>
+            Color
+          </button>
+
         </div>
-        <div class="taskbar">
+        <div class="taskbar -top">
+          <div class="left">
+            <button data-settings class="standard-button -stealth -round">
+              <sl-icon name="gear-wide-connected"></sl-icon>
+            </button>
+          </div>
+          <div class="center"></div>
+          <div class="right">
+            <button data-list class="standard-button -stealth -round">
+              <sl-icon name="list"></sl-icon>
+            </button>
+          </div>
+        </div>
+        <div class="taskbar -bottom">
           <div class="left">
           </div>
           <div class="center" data-primary-action></div>
           <div class="right">
-            <button data-list class="standard-button -stealth -large -round">
-              <sl-icon name="music-note-list"></sl-icon>
-            </button>
           </div>
         </div>
 
@@ -800,7 +895,7 @@ class CulturalPreservation extends HTMLElement {
     const {
       partial='',
       recording,
-      showPanel,
+      showList,
       showOverlay,
       strokeHistory,
       strokeRevisory,
@@ -844,7 +939,7 @@ class CulturalPreservation extends HTMLElement {
       }
     }
 
-    if(showPanel) {
+    if(showList) {
       const area = document.querySelector('.panel-area')
       const clips = GET(topEight).map(x => {
         return `
@@ -884,10 +979,10 @@ class CulturalPreservation extends HTMLElement {
         <div class="playlist">${clips}</div>
         <div class="instructions">Record a video and it will display here.</div>
       `
-      target.dataset.showPanel = true
+      target.dataset.showList = true
     } else {
       const area = document.querySelector('.panel-area')
-      target.dataset.showPanel = false
+      target.dataset.showList = false
       if(area.innerHTML) area.innerHTML = ''
     }
 
@@ -901,10 +996,6 @@ class CulturalPreservation extends HTMLElement {
       if(area.innerHTML) area.innerHTML = ''
     }
 
-    {
-      innerHTML(target.querySelector('[data-dom="devices"]'), deviceMenu(target))
-    }
-
     { // menu items
       const { activeMenu } = $.learn()
       const currentlyActive = target.querySelector('[data-menu-target].active')
@@ -914,6 +1005,13 @@ class CulturalPreservation extends HTMLElement {
       const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
       if(activeItem) {
         activeItem.classList.add('active')
+      }
+    }
+
+    {
+      const { color } = $.ear()
+      if(target.color !== color) {
+        target.style.setProperty('--active-color', color)
       }
     }
   }
@@ -932,11 +1030,11 @@ function deviceMenu(target) {
     `).join('')
 
     menuItems.push(`
-      <div class="action-item">
-        <button data-menu-target="${kind}">
+      <div class="device-kind">
+        <div class="device-label">
           ${kind}
-        </button>
-        <div class="actions-menu" data-menu="${kind}">
+        </div>
+        <div class="device-options">
           ${devices}
         </div>
       </div>
@@ -944,7 +1042,7 @@ function deviceMenu(target) {
   }
 
   return `
-    <div class="actions -attach-bottom">
+    <div class="device-list">
       ${menuItems.join('')}
     </div>
   `
@@ -1052,11 +1150,25 @@ And dog provided a panel with a list of all memories
 */
 
 $.when('click', '[data-list]', () => {
-  const { showPanel } = $.learn()
+  const { showList } = $.learn()
 
-  $.teach({ showPanel: !showPanel })
+  $.teach({ showList: !showList })
   event.stopImmediatePropagation()
 })
+
+$.when('click', '[data-color-picker]', () => {
+  $.teach({ showOverlay: true, view: views.color })
+})
+
+$.when('click', '[data-brush-picker]', () => {
+  $.teach({ showOverlay: true, view: views.brush })
+})
+
+
+$.when('click', '[data-settings]', () => {
+  $.teach({ showOverlay: true, view: views.settings })
+})
+
 
 /*
 
@@ -1218,7 +1330,7 @@ $.when('click', '*', (event) => {
     return
   }
 
-  $.teach({ activeMenu: null, showPanel: false })
+  $.teach({ activeMenu: null, showList: false })
 })
 
 function clearCanvas(canvas) {
