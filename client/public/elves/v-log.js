@@ -10,8 +10,8 @@ The fetch command instructs the human to chase and fetch the ball
 
 */
 
-import app, { get, getSpace, put, del} from '@plan68/app'
 import elf from '@plan98/elf'
+import { get, put } from './plan98-wallet.js'
 
 /*
 
@@ -90,27 +90,6 @@ const $ = elf(tag, {
   background: 'transparent'
 })
 
-
-/*
-
-
-
-The Post Request
-
-A post is a message is a mail is a medium which may mean many multitudes.
-
-in computer world, to post is the verb to share, to send, which implies an object
-
-an object that has been posted must be handled and may resolve and redistribute knowledge in the network
-
-
-
-*/
-
-function POST(object, handler) {
-  $.teach(object, handler)
-}
-
 /*
 
 
@@ -161,26 +140,6 @@ function replaceInHistoricalRecord(state, payload) {
       })
     ]
   }
-}
-
-/*
-
-
-
-The Get Request
-
-Information is all around us.
-
-Data, as CARBON, can be snatched out of thin air and turned into butter.
-
-How we handle the ever so prescient flow is all there is to know
-
-
-
-*/
-
-function GET(handler) {
-  return handler($.learn())
 }
 
 /*
@@ -303,7 +262,6 @@ $.when('click', '[data-record]', async (event) => {
       audioTrack
     ])
     mediaRecorder = new MediaRecorder(product, {
-      mimeType: 'video/webm',
       videoBitsPerSecond: 8000000
     });
     const recordedVideo = root.querySelector('video')
@@ -330,13 +288,13 @@ $.when('click', '[data-record]', async (event) => {
 
       const now = new Date();
       const timestamp = now.toJSON()
-      const src = root.getAttribute('src') || `/private/video-notes/${timestamp}.${extensions[supportedVideoType]}`
+      const documentSrc = root.getAttribute('src') || `/private/${$.link}/${timestamp}.json`
 
       const { transcription } = $.learn()
-
+      const videoSrc = `/private/${$.link}/${timestamp}.${extensions[supportedVideoType]}`
       const historicalNugget = {
         id: self.crypto.randomUUID(),
-        src,
+        src: videoSrc,
         title: 'Recorded Entry',
         author: 'Wally Wollaston',
         description: 'A video recorded now about another time or place',
@@ -344,11 +302,14 @@ $.when('click', '[data-record]', async (event) => {
         transcription
       }
 
-      POST(historicalNugget, appendToHistoricalRecord)
+      $.teach(historicalNugget, appendToHistoricalRecord)
+      $.mouth({ videoSrc: videoSrc })
+      put(documentSrc, JSON.stringify($.ear()), { type: 'application/json' }).then(response => {
+      }).catch(error => {
+        console.warn(error);
+      });
 
-      const space = getSpace(root.id)
-
-      put.call({ space }, src, videoBlob, { type: supportedVideoType }).then(response => {
+      put(videoSrc, videoBlob, { type: supportedVideoType }).then(response => {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -408,6 +369,7 @@ $.style(`
   }
 
   & .lingustics {
+    pointer-events: none;
     font-size: 1.5rem;
     padding: .5rem;
     position: absolute;
@@ -434,7 +396,7 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 5;
-    padding: .5rem;
+    padding: 0;
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     gap: 1rem;
@@ -585,6 +547,7 @@ $.style(`
     background: var(--active-color, black);
     height: 2rem;
     position: absolute;
+    gap: .5rem;
     bottom: 0;
     left: 0;
     right: 0;
@@ -593,13 +556,10 @@ $.style(`
     align-content: center;
   }
 
-  & .footer button {
-    padding: 4px;
-    background: black;
-    color: white;
-    border-radius: 0;
-    background: black;
-    border: none;
+  & .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: .5rem;
   }
 `)
 
@@ -668,19 +628,34 @@ const viewRenderers = {
   },
   [views.brush]: function (target) {
     return `
-      <div>
-        ${thicknoids.map(x => `
-          <button data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
-            ${x}
-          </button>
-        `).join('')}
+      <div style="text-align: right;">
+        <button data-cancel class="branded-button">
+          Close
+        </button>
+      </div>
 
+      <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Thickness</h3>
+        <div class="settings-grid">
+          ${thicknoids.map(x => `
+            <button class="branded-button" data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
+              ${x}
+            </button>
+          `).join('')}
+        </div>
       </div>
     `
   },
 
   [views.settings]: function (target) {
-    return deviceMenu(target)
+    return `
+      <div style="text-align: right;">
+        <button data-cancel class="branded-button">
+          Close
+        </button>
+      </div>
+      ${deviceMenu(target)}
+    `
   }
 }
 
@@ -760,29 +735,29 @@ class CulturalPreservation extends HTMLElement {
     if(!target.innerHTML) {
       target.innerHTML = `
         <div class="footer">
-          <button data-new>
+          <button data-new class="branded-button">
             New
           </button>
 
-          <button style="margin-left: auto;" data-brush-picker>
+          <button class="branded-button" style="margin-left: auto;" data-brush-picker>
             Brush
           </button>
 
-          <button data-color-picker>
+          <button class="branded-button" data-color-picker>
             Color
           </button>
 
         </div>
         <div class="taskbar -top">
           <div class="left">
-            <button data-settings class="standard-button -stealth -round">
-              <sl-icon name="gear-wide-connected"></sl-icon>
+            <button data-settings class="branded-button">
+              Settings
             </button>
           </div>
           <div class="center"></div>
           <div class="right">
-            <button data-list class="standard-button -stealth -round">
-              <sl-icon name="list"></sl-icon>
+            <button data-list class="branded-button">
+              List
             </button>
           </div>
         </div>
@@ -922,15 +897,15 @@ class CulturalPreservation extends HTMLElement {
         target.lastRecording = recording
         innerHTML(actionContainer, recording
           ? `
-            <div2>
+            <div2 style="padding: 1rem;">
               <button data-stop class="standard-button bias-negative -large -round">
                 <sl-icon name="stop-circle-fill"></sl-icon>
               </button>
             </div2>
           `
           : `
-            <div3>
-              <button data-record class="standard-button -large -round">
+            <div3 style="padding: 1rem;">
+              <button data-record class="standard-button bias-positive -large -round">
                 <sl-icon name="record-circle-fill"></sl-icon>
               </button>
             </div3>
@@ -941,7 +916,7 @@ class CulturalPreservation extends HTMLElement {
 
     if(showList) {
       const area = document.querySelector('.panel-area')
-      const clips = GET(topEight).map(x => {
+      const clips = $.learn().history.map(x => {
         return `
           <div class="memex-row">
             <div>
@@ -964,15 +939,15 @@ class CulturalPreservation extends HTMLElement {
       const permalink = `${window.location.origin}/app/${$.link}?id=${target.id}`
 
       area.innerHTML = `
+        <div style="display: flex;">
+          <button data-copy="${copyId}" class="branded-button">
+            Copy Link
+          </button>
+          <button style="margin-left: auto;" data-cancel class="branded-button">
+            Close
+          </button>
+        </div>
         <div class="share-area">
-          <div class="action-bar">
-            <button data-copy="${copyId}" class="standard-button" style="display: inline-grid; grid-template-columns: auto 1fr; gap: .5rem">
-              <span>
-                <sl-icon name="copy"></sl-icon>
-              </span>
-              Copy Link
-            </button>
-          </div>
           <div id="${copyId}" style="height: 0px; overflow: hidden; opacity: 0;">${permalink}</div>
           </div>
         </div>
@@ -1109,10 +1084,9 @@ And dog saw it fit for man to see their mistakes.
 
 $.when('click', '[data-play]', (event) => {
   const { play } = event.target.dataset
-  const root = event.target.closest($.link)
   showModal(`
     <div style="height: 100%; background: rgba(128,128,128,1); overflow: auto; width: 100%;">
-      <plan68-video src="${play}" space="${root.id}"></plan68-video>
+      <was-video src="${play}"></was-video>
     </div>
   `, {
     blockExit: false,
@@ -1228,7 +1202,12 @@ And dog gave man the ability to close without changes
 */
 
 $.when('click', '[data-cancel]', (event) => {
-  $.teach({ showOverlay: false, view: null, objectId: null })
+  $.teach({
+    showOverlay: false,
+    showList: false,
+    view: null,
+    objectId: null
+  })
 })
 
 /*
@@ -1239,7 +1218,7 @@ And the ability to save to dog with them
 
 $.when('click', '[data-save]', (event) => {
   const { draft } = $.learn()
-  POST(draft, replaceInHistoricalRecord)
+  $.teach(draft, replaceInHistoricalRecord)
   $.teach({ view: null, objectId: null, showOverlay: false })
   toast("Memex updated.")
 })

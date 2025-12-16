@@ -31,9 +31,9 @@ function afterUpdate(target) {
     const src = target.getAttribute('src')
     if(src) {
       get(src).then(blob => {
-        const data = new Blob([blob], { type: blob.type });
         const video = target.shadowRoot.querySelector('video')
-        video.src = URL.createObjectURL(data);
+        const videoUrl = URL.createObjectURL(blob);
+        video.src = videoUrl;
       })
     }
   }

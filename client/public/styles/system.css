@@ -1564,3 +1564,23 @@ sillonious-brand > xml-html {
   text-align: left;
   height: auto;
 }
+
+.branded-button {
+  padding: .25rem .5rem;
+  background: black;
+  color: white;
+  border-radius: 0;
+  background: black;
+  border: none;
+}
+
+.branded-button:hover,
+.branded-button:focus {
+  background: white;
+  color: black;
+}
+
+.branded-button:active {
+  background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+  color: var(--root-theme, mediumseagreen);
+}

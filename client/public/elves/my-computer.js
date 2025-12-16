@@ -27,6 +27,7 @@ const lazyLoaders = [
   './secure-mail.js',
   './hyper-script.js',
   './patch-notes.js',
+  './v-log.js',
 ]
 
 lazyLoaders.map(x => import(x))
@@ -54,6 +55,7 @@ const BLUE_SKY = 'blue-sky'
 const E_MAIL = 'e-mail'
 const HYPER_SCRIPT = 'hyper-script'
 const PATCH_NOTES = 'patch-notes'
+const V_LOG = 'v-log'
 
 const config = {
   [HOME]: {
@@ -196,6 +198,15 @@ const config = {
       <patch-notes></patch-notes>
     `
   },
+  [V_LOG]: {
+    label: 'Video Log',
+    path: `/${V_LOG}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <v-log></v-log>
+    `
+  },
+
 
 }
 
@@ -374,6 +385,9 @@ $.when('click', '[data-panel]', (event) => {
         </button>
         <button data-nav="/${HYPER_SCRIPT}">
           Hyper Script
+        </button>
+        <button data-nav="/${V_LOG}">
+          Video Log
         </button>
       </nav>
     </my-computer>
