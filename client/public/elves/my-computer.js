@@ -263,15 +263,44 @@ cache.get(elf).then(record => {
   cache.put(elf, version)
 })
 
-addEventListener("popstate", (event) => {
-  $.teach(router(self.location.pathname))
+function saveHistory(patch, url) {
+  self.history.pushState({
+    type: `${$.link}-navigation`,
+    patch
+  }, "", url);
+}
+
+const historyTypes = {
+  view: 'view',
+}
+
+const patchHandlers = {
+  [historyTypes.view]: navigateHistory,
+}
+
+function restoreHistory(patch) {
+  patchHandlers[patch.type]
+    ? patchHandlers[patch.type](patch[patch.type])
+    : ''
+}
+
+function navigateHistory(data) {
+  $.teach(data)
+}
+
+addEventListener("popstate", async (event) => {
+  const { type, patch } = event.state || {}
+  if(type === `${$.link}-navigation`) {
+    restoreHistory(patch)
+  }
 });
 
 $.when('click', '[data-nav]', (event) => {
   event.preventDefault()
   const { nav } = event.target.dataset
-  $.teach({ route: nav  })
-  self.history.pushState(null, '', `${nav}` + window.location.search)
+  const data = { route: nav  }
+  $.teach(data)
+  saveHistory({ type: historyTypes.view, [historyTypes.view]: data },  `${nav}${window.location.search}`)
   hidePanel()
 })
 
@@ -311,6 +340,12 @@ $.head(target => {
     const maybeId = new URLSearchParams(window.location.search).get('id')
     if(maybeId) {
       target.id = maybeId
+    }
+  },
+  beforeUpdate(target) {
+    if(!target.mounted) {
+      target.mounted = true
+      saveHistory({ type: historyTypes.view, [historyTypes.view]: { route: window.location.pathname }})
     }
   },
   afterUpdate(target) {
