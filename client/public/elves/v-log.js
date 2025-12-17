@@ -67,6 +67,7 @@ let lineWidth = 0
 let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
+const opacities = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
 const $ = elf(tag, {
   recording: false,
   caption: '',
@@ -86,6 +87,7 @@ const $ = elf(tag, {
   strokeHistory: [],
   strokeRevisory: [],
   thickness: 4,
+  opacity: .5,
   color: 'white',
   background: 'transparent'
 })
@@ -421,6 +423,8 @@ $.style(`
 
   & video {
     object-fit: contain;
+    width: 100%;
+    height: 100%;
   }
 
   & .taskbar {
@@ -565,7 +569,7 @@ $.style(`
   }
 
   & .input-video {
-    display: none;
+    opacity: 0;
   }
 
   & .input-canvas {
@@ -676,6 +680,15 @@ const viewRenderers = {
             </button>
           `).join('')}
         </div>
+       <h3>Opacities</h3>
+        <div class="settings-grid">
+          ${opacities.map(x => `
+            <button class="branded-button" data-tooltip="Set opacity to ${x}" data-opacity="${x}">
+              ${x}
+            </button>
+          `).join('')}
+        </div>
+
       </div>
     `
   },
@@ -706,6 +719,17 @@ $.when('click', '[data-thickness]', function  (event) {
     objectId: null
   })
 })
+
+$.when('click', '[data-opacity]', function  (event) {
+  event.preventDefault()
+  $.mouth({
+    opacity: event.target.dataset.opacity,
+    showOverlay: false,
+    view: null,
+    objectId: null
+  })
+})
+
 
 
 /*
@@ -807,7 +831,7 @@ class CulturalPreservation extends HTMLElement {
             <div class="partial"></div>
           </div>
           <div class="letterbox">
-            <video class="" playsinline disablePictureInPicture class="input-video"></video>
+            <video playsinline disablePictureInPicture class="input-video"></video>
           </div>
         </div>
 
@@ -1444,7 +1468,7 @@ $.when('mousedown', '.input-canvas', start)
 function start(e) {
   const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
   $.teach({ touching: true, activeMenu: null })
-  const { thickness } = $.learn()
+  const { thickness, opacity } = $.learn()
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let clientX, clientY;
@@ -1474,7 +1498,7 @@ function start(e) {
   lineWidth = Math.log(pressure + 1) * thickness
   context.lineWidth = lineWidth
 
-  points.push({ x, y, lineWidth })
+  points.push({ x, y, lineWidth, opacity })
   drawOnCanvas(e.target, points)
 }
 
@@ -1484,7 +1508,7 @@ $.when('mousemove', '.input-canvas', move)
 function move (e) {
   e.preventDefault()
   const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
-  const { thickness, color } = $.learn()
+  const { thickness, opacity, color } = $.learn()
   const context = canvas.getContext('2d')
   if (!isMousedown) return
 
@@ -1514,7 +1538,7 @@ function move (e) {
   lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
   context.lineWidth = lineWidth
 
-  points.push({ x, y, lineWidth, color })
+  points.push({ x, y, lineWidth, color, opacity })
   drawOnCanvas(e.target, points)
 
   requestIdleCallback(() => {
@@ -1566,15 +1590,20 @@ function drawOnCanvas (target, stroke) {
 
   const l = stroke.length - 1
   if (stroke.length >= 3) {
-    const xc = (stroke[l].x + stroke[l - 1].x) / 2
-    const yc = (stroke[l].y + stroke[l - 1].y) / 2
-    context.lineWidth = stroke[l - 1].lineWidth
-    context.quadraticCurveTo(stroke[l - 1].x, stroke[l - 1].y, xc, yc)
+    const point = stroke[l - 1]
+    const xc = (stroke[l].x + point.x) / 2
+    const yc = (stroke[l].y + point.y) / 2
+    const opacity = point.opacity === null ? 1 : point.opacity
+    context.globalAlpha = opacity; // 50% transparency
+    context.lineWidth = point.lineWidth
+    context.quadraticCurveTo(point.x, point.y, xc, yc)
     context.stroke()
     context.beginPath()
     context.moveTo(xc, yc)
   } else {
     const point = stroke[l];
+    const opacity = point.opacity === null ? 1 : point.opacity
+    context.globalAlpha = opacity; // 50% transparency
     context.lineWidth = point.lineWidth
     context.strokeStyle = point.color
     context.beginPath()
