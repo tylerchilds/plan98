@@ -247,6 +247,20 @@ Dog knew humans lacked telepathy and created a record button, imbued with magic
 
 */
 
+async function startStream() {
+  const response = await fetch('/rtmp/start', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      rtmpUrl: 'rtmp://localhost:1935/live',
+      streamKey: 'abc123'
+    })
+  });
+
+  const { streamId } = await response.json();
+  $.teach({ streamId })
+}
+
 $.when('click', '[data-record]', async (event) => {
   if (!supportedVideoType) {
     return
@@ -261,6 +275,11 @@ $.when('click', '[data-record]', async (event) => {
       compositedVideoStream.getVideoTracks()[0],
       audioTrack
     ])
+
+    await startStream()
+
+    const { streamId } = $.learn()
+
     mediaRecorder = new MediaRecorder(product, {
       videoBitsPerSecond: 8000000
     });
@@ -269,6 +288,11 @@ $.when('click', '[data-record]', async (event) => {
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         videoChunks.push(event.data);
+
+        fetch(`/rtmp/chunk?streamId=${streamId}`, {
+          method: 'POST',
+          body: event.data
+        }).catch(err => console.error('Chunk send failed:', err));
       }
     };
 
@@ -318,7 +342,7 @@ $.when('click', '[data-record]', async (event) => {
       });
     };
 
-    mediaRecorder.start();
+    mediaRecorder.start(1000);
 
     recordedVideo.src = ''; // Clear previous recording
 
@@ -338,8 +362,17 @@ And a button to stop the record
 */
 
 $.when('click', '[data-stop]', async () => {
+  const { streamId } = $.learn()
   if (mediaRecorder && mediaRecorder.state === 'recording') {
     mediaRecorder.stop();
+
+    if (streamId) {
+      await fetch('/rtmp/stop', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ streamId })
+      });
+    }
     $.teach({ recording: false })
     console.log('Recording stopped.');
   }

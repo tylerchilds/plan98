@@ -240,6 +240,91 @@ async function proxy(request) {
     .then(res => res.json())
 }
 
+const activeStreams = new Map();
+
+// Your stream functions here
+async function startRTMPStream(request) {
+  const { streamKey, rtmpUrl } = await request.json();
+
+  if (!streamKey || !rtmpUrl) {
+    return new Response('Missing streamKey or rtmpUrl', { status: 400 });
+  }
+
+  const streamId = crypto.randomUUID();
+
+  const command = new Deno.Command('ffmpeg', {
+    args: [
+      '-f', 'webm',
+      '-i', 'pipe:0',
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-b:v', '3000k',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-f', 'flv',
+      `${rtmpUrl}/${streamKey}`
+    ],
+    stdin: 'piped',
+    stdout: 'piped',
+    stderr: 'piped'
+  });
+
+  const process = command.spawn();
+  activeStreams.set(streamId, process);
+
+  console.log('Started stream:', streamId, 'Active streams:', activeStreams.size);
+
+  return new Response(JSON.stringify({ streamId }), {
+    headers: { 'content-type': 'application/json' }
+  });
+}
+
+async function sendVideoChunk(request) {
+  const url = new URL(request.url);
+  const streamId = url.searchParams.get('streamId');
+
+  console.log('Looking for stream:', streamId, 'Available:', Array.from(activeStreams.keys()));
+
+  const process = activeStreams.get(streamId);
+
+  if (!process) {
+    return new Response('Stream not found', { status: 404 });
+  }
+
+  try {
+    const chunk = await request.arrayBuffer();
+    const writer = process.stdin.getWriter();
+    await writer.write(new Uint8Array(chunk));
+    writer.releaseLock();
+
+    return new Response('OK');
+  } catch (error) {
+    console.error('Chunk write error:', error);
+    return new Response(error.message, { status: 500 });
+  }
+}
+
+async function stopRTMPStream(request) {
+  try {
+    const { streamId } = await request.json();
+
+    console.log('Stopping stream:', streamId);
+
+    const process = activeStreams.get(streamId);
+
+    if (process) {
+      const writer = process.stdin.getWriter();
+      await writer.close();
+      activeStreams.delete(streamId);
+    }
+
+    return new Response('OK');
+  } catch (error) {
+    console.error('Stop stream error:', error);
+    return new Response(error.message, { status: 500 });
+  }
+}
+
 Deno.serve(
   { hostname: "localhost", port },
   async (request) => {
@@ -265,6 +350,18 @@ Deno.serve(
           "content-type": "application/json; charset=utf-8"
         },
       });
+    }
+
+    if (filepath === '/rtmp/start') {
+      return await startRTMPStream(request);
+    }
+
+    if (filepath === '/rtmp/chunk') {
+      return await sendVideoChunk(request);
+    }
+
+    if (filepath === '/rtmp/stop') {
+      return await stopRTMPStream(request);
     }
 
     if(filepath.startsWith('/admin/')) {
