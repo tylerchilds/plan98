@@ -215,7 +215,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <iframe src="/app/sketch-pad"></iframe>
+          <iframe src="/app/v-log"></iframe>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
