@@ -694,13 +694,21 @@ const viewRenderers = {
   },
 
   [views.settings]: function (target) {
+    const { transcriptionEnabled } = $.learn()
     return `
       <div style="text-align: right;">
         <button data-cancel class="branded-button">
           Close
         </button>
       </div>
-      ${deviceMenu(target)}
+      <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Transcription</h3>
+        <div>
+          <button class="branded-button" data-toggle-transcription>${transcriptionEnabled?'on':'off'}</button>
+        </div>
+        <h3>Devices</h3>
+        ${deviceMenu(target)}
+      </div>
     `
   }
 }
@@ -821,7 +829,7 @@ class CulturalPreservation extends HTMLElement {
         <div class="taskbar -bottom">
           <div class="left">
           </div>
-          <div class="center" data-primary-action></div>
+          <div class="center" style="padding: 1rem;" data-primary-action></div>
           <div class="right">
           </div>
         </div>
@@ -846,46 +854,10 @@ class CulturalPreservation extends HTMLElement {
       target.video.muted = true
       target.video.srcObject = target.webcamStream;
       target.video.autoplay = true;
-    }
 
-    {
-      const channel = new MessageChannel();
-      const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
-      model.registerPort(channel.port1);
-
-      const recognizer = new model.KaldiRecognizer(sampleRate);
-      recognizer.setWords(true);
-
-      recognizer.on("partialresult", async (message) => {
-        const partial = message.result.partial;
-        if(partial === '') return
-        $.teach({
-          partial
-        })
+      await new Promise((resolve) => {
+        target.video.addEventListener('loadedmetadata', resolve, { once: true });
       });
-
-      recognizer.on("result", async (message) => {
-        const { recording, transcription } = $.learn()
-        const result = message.result;
-
-        if(result.text) {
-          if(recording) {
-            $.teach({ transcription: transcription + ' ' + result.text })
-          }
-          $.teach({
-            result: result.text
-          })
-        }
-      });
-
-      const audioContext = new AudioContext();
-      await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
-      const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
-      recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
-      recognizerProcessor.connect(audioContext.destination);
-
-      const source = audioContext.createMediaStreamSource(target.webcamStream);
-      source.connect(recognizerProcessor);
     }
 
     {
@@ -918,6 +890,13 @@ class CulturalPreservation extends HTMLElement {
       }
 
       drawComposite();
+    }
+
+    {
+      const { transcriptionEnabled } = $.learn()
+      if (transcriptionEnabled) {
+        initializeVosk(target)
+      }
     }
   }
 
@@ -954,14 +933,14 @@ class CulturalPreservation extends HTMLElement {
         target.lastRecording = recording
         innerHTML(actionContainer, recording
           ? `
-            <div2 style="padding: 1rem;">
+            <div2>
               <button data-stop class="standard-button bias-negative -large -round">
                 <sl-icon name="stop-circle-fill"></sl-icon>
               </button>
             </div2>
           `
           : `
-            <div3 style="padding: 1rem;">
+            <div3>
               <button data-record class="standard-button bias-positive -large -round">
                 <sl-icon name="record-circle-fill"></sl-icon>
               </button>
@@ -1056,7 +1035,7 @@ function deviceMenu(target) {
   const menuItems = []
   for(const kind in devicesByKind) {
     const devices = devicesByKind[kind].map(x => `
-      <button data-${kind}="${x.deviceId}">
+      <button  class="branded-button" data-${kind}="${x.deviceId}">
         ${x.label}
       </button>
     `).join('')
@@ -1613,3 +1592,65 @@ function drawOnCanvas (target, stroke) {
 }
 
 
+async function initializeVosk(target) {
+  const channel = new MessageChannel();
+  const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
+  model.registerPort(channel.port1);
+
+  const recognizer = new model.KaldiRecognizer(sampleRate);
+  recognizer.setWords(true);
+
+  recognizer.on("partialresult", async (message) => {
+    const partial = message.result.partial;
+    if(partial === '') return
+    $.teach({
+      partial
+    })
+  });
+
+  recognizer.on("result", async (message) => {
+    const { recording, transcription } = $.learn()
+    const result = message.result;
+
+    if(result.text) {
+      if(recording) {
+        $.teach({ transcription: transcription + ' ' + result.text })
+      }
+      $.teach({
+        result: result.text
+      })
+    }
+  });
+
+  const audioContext = new AudioContext();
+  await audioContext.audioWorklet.addModule('/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js')
+  const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', { channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1 });
+  recognizerProcessor.port.postMessage({action: 'init', recognizerId: recognizer.id}, [ channel.port2 ])
+  recognizerProcessor.connect(audioContext.destination);
+
+  const source = audioContext.createMediaStreamSource(target.webcamStream);
+  source.connect(recognizerProcessor);
+
+  target.voskContext = { audioContext, recognizerProcessor, source }
+}
+
+$.when('click', '[data-toggle-transcription]', async (event) => {
+  const { transcriptionEnabled } = $.learn()
+  const newState = !transcriptionEnabled
+
+  const target = event.target.closest($.link)
+
+  if (newState && !target.voskContext) {
+    // Enable transcription
+    await initializeVosk(target)
+  } else if (!newState && target.voskContext) {
+    // Disable transcription - clean up
+    const { audioContext, recognizerProcessor, source } = target.voskContext
+    source.disconnect()
+    recognizerProcessor.disconnect()
+    await audioContext.close()
+    target.voskContext = null
+  }
+
+  $.teach({ transcriptionEnabled: newState })
+})
