@@ -2,6 +2,7 @@ import elf from '@silly/elf'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { friends } from './plan98-synthia.js'
+import { mpn } from './mpn-wizard.js'
 
 // helper for system settings
 console.log(Object.keys(sideEffects).map((key) => {
@@ -238,6 +239,10 @@ const commands = {
     loadPath('/app/blue-sky')
     return 'Success!'
   },
+  'mpn': (...args) => {
+    return mpn.apply({loadModule}, args)
+  },
+
   'error': (...args) => {
     throw new Error(args.map(x => JSON.stringify(x)).join(' '))
   },
