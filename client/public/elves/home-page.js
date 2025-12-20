@@ -16,6 +16,12 @@ $.when('click', '[data-generic-park]', (event) => {
   window.location.href = '/app/generic-park?src=/public/elves'
 })
 
+$.when('click', '[data-v-log]', (event) => {
+  window.location.href = '/app/v-log'
+})
+
+
+
 $.draw(() => {
   return `
     <div class="interlude">
@@ -189,7 +195,7 @@ $.draw(() => {
         Alfheim is a state of mind and a location in code; beep boop.
       </div>
       <div>
-        <button data-generic-park class="standard-button bias-generic -large">
+        <button data-v-log class="standard-button bias-generic -large">
           Where?
         </button>
       </div>

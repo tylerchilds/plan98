@@ -690,7 +690,7 @@ button, input, optgroup, select, textarea {
 }
 
 .actions.-attach-bottom .actions-menu,
-.actions .menu-actions {
+.actions.-attach-bottom  .menu-actions {
   display: none;
   position: absolute;
   left: 0;

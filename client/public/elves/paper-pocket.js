@@ -392,7 +392,7 @@ const $ = elf('paper-pocket', {
   fontFamily: getFontFamily(),
   bpm: getBpm(),
   noteDuration: getNoteDuration(),
-  rom: 'final-boss',
+  rom: 'typo-hero',
   mode: startMode(),
   backMode: startMode(),
   settingsKey: 'instrument',
