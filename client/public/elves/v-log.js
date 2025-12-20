@@ -87,7 +87,7 @@ const $ = elf(tag, {
   strokeHistory: [],
   strokeRevisory: [],
   thickness: 4,
-  opacity: .5,
+  opacity: .1,
   color: 'white',
   background: 'transparent'
 })
@@ -615,6 +615,12 @@ $.style(`
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
     gap: .5rem;
   }
+
+  & .share-link-copyable-url {
+    white-space: nowrap;
+    overflow-x: auto;
+    display: block;
+  }
 `)
 
 /*
@@ -627,7 +633,8 @@ const views = {
   edit: 'edit',
   color: 'color',
   brush: 'brush',
-  settings: 'settings'
+  settings: 'settings',
+  share: 'share'
 }
 
 const viewRenderers = {
@@ -727,6 +734,32 @@ const viewRenderers = {
         ${deviceMenu(target)}
       </div>
     `
+  },
+  [views.share]: function share(target) {
+    const { viewMetadata } = $.ear()
+    const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
+    const copyId = self.crypto.randomUUID()
+    const label = target.getAttribute('label') || 'Pluto'
+
+    return `
+      <div style="display: flex;">
+        <button data-copy="${copyId}" class="branded-button">
+          Copy
+        </button>
+        <div id="${copyId}" class="share-link-copyable-url standard-input -small">${shareLink}</div>
+        <button data-cancel class="branded-button" style="margin-left: auto;">
+          Close
+        </button>
+      </div>
+
+      <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Share</h3>
+
+        <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
+          <qr-code src="${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+        </div>
+      </div>
+    `
   }
 }
 
@@ -819,6 +852,9 @@ class CulturalPreservation extends HTMLElement {
         <div class="footer">
           <button data-new class="branded-button">
             New
+          </button>
+          <button data-share class="branded-button">
+            Share
           </button>
 
           <button class="branded-button" style="margin-left: auto;" data-brush-picker>
@@ -1016,7 +1052,7 @@ class CulturalPreservation extends HTMLElement {
 
     if(showOverlay) {
       const area = document.querySelector('.overlay-area')
-      innerHTML(area, (viewRenderers[view] || (() => '404'))())
+      innerHTML(area, (viewRenderers[view] || (() => '404'))(target))
       target.dataset.showOverlay = true
     } else {
       const area = document.querySelector('.overlay-area')
@@ -1042,9 +1078,23 @@ class CulturalPreservation extends HTMLElement {
         target.style.setProperty('--active-color', color)
       }
     }
+    {
+      recoverElves(target, 'qr-code')
+    }
   }
 }
 
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
 
 function deviceMenu(target) {
   const { devicesByKind } = $.learn()
@@ -1189,6 +1239,10 @@ $.when('click', '[data-color-picker]', () => {
 
 $.when('click', '[data-brush-picker]', () => {
   $.teach({ showOverlay: true, view: views.brush })
+})
+
+$.when('click', '[data-share]', () => {
+  $.teach({ showOverlay: true, view: views.share })
 })
 
 
@@ -1414,6 +1468,7 @@ function engine(target) {
     scaleY
   }
 }
+
 
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
