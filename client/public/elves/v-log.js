@@ -249,18 +249,27 @@ Dog knew humans lacked telepathy and created a record button, imbued with magic
 
 */
 
-async function startStream() {
-  const response = await fetch('/rtmp/start', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({
-      rtmpUrl: 'rtmp://localhost:1935/live',
-      streamKey: 'abc123'
-    })
+async function safeAsync(call) {
+  return await call().then((x) => {
+    return { data: x, error: null }
+  }).catch(e => {
+    return { error: e, data: null }
   });
+}
 
-  const { streamId } = await response.json();
-  $.teach({ streamId })
+async function startStream() {
+  return await safeAsync(async () => {
+    const response = await fetch('/rtmp/start', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        rtmpUrl: 'rtmp://localhost:1935/live',
+        streamKey: 'abc123'
+      })
+    });
+
+    return response.json()
+  })
 }
 
 $.when('click', '[data-record]', async (event) => {
@@ -278,9 +287,14 @@ $.when('click', '[data-record]', async (event) => {
       audioTrack
     ])
 
-    await startStream()
 
-    const { streamId } = $.learn()
+    const { data, error } = await startStream()
+
+    if(!error) {
+      const { streamId } = data
+      $.teach({ streamId })
+    }
+
 
     mediaRecorder = new MediaRecorder(product, {
       videoBitsPerSecond: 8000000
@@ -291,10 +305,13 @@ $.when('click', '[data-record]', async (event) => {
       if (event.data.size > 0) {
         videoChunks.push(event.data);
 
-        fetch(`/rtmp/chunk?streamId=${streamId}`, {
-          method: 'POST',
-          body: event.data
-        }).catch(err => console.error('Chunk send failed:', err));
+        const { streamId } = $.learn()
+        if(streamId) {
+          fetch(`/rtmp/chunk?streamId=${streamId}`, {
+            method: 'POST',
+            body: event.data
+          }).catch(err => console.error('Chunk send failed:', err));
+        }
       }
     };
 
