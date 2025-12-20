@@ -1080,6 +1080,7 @@ class CulturalPreservation extends HTMLElement {
     }
     {
       recoverElves(target, 'qr-code')
+      recoverElves(target, 'plan98-palette')
     }
   }
 }
