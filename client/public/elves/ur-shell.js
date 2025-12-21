@@ -60,6 +60,8 @@ $.teach({ body: `Silly, at your service.
 
   P.s. If you forget who you are, run the "about" sub routine micro process command execution function method.
 
+  P.p.s. If you want to be a Computer Teller, apply by running the "apply" command.
+
 Signed,
   Wally.`, author: 'assistant' }, mergeMessage)
 
@@ -176,6 +178,9 @@ const modalities = {
 
 const commands = {
   ...paperPocketPath,
+  'apply': () => {
+    return 'Apply by emailing tellers@plan98.org with the subject "New Computer Teller: YOUR NAME - NEAREST LIBRARY URL" and a message that tells the tellers a little about yourself.'
+  },
   'echo': (...args) => {
     return args.join(' ')
   },

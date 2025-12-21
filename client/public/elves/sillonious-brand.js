@@ -50,7 +50,7 @@ const dns = {
     elf: 'comedy-network'
   },
   'plan98.org': {
-    elf: 'plan98-splash'
+    elf: 'ur-shell'
   },
   'shirtflicks.app': {
     elf: 'shirt-flicks'
@@ -59,7 +59,7 @@ const dns = {
     elf: 'photo-journal'
   },
   'thelanding.page': {
-    elf: 'quick-blog'
+    elf: 'saas-platform'
   },
   'friendcryption.org': {
     elf: 'cool-chat'
