@@ -700,7 +700,7 @@ const viewRenderers = {
           <button class="branded-button -otr" data-background="lemonchiffon">
             Otr
           </button>
-          <button class="branded-button -wally" data-background="54796d">
+          <button class="branded-button -wally" data-background="#54796d">
             Wally
           </button>
         </div>
