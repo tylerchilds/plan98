@@ -86,9 +86,9 @@ const $ = elf(tag, {
   objectId: null,
   strokeHistory: [],
   strokeRevisory: [],
-  thickness: 4,
-  opacity: .1,
-  color: 'white',
+  thickness: 16,
+  opacity: .5,
+  color: 'dodgerblue',
   background: 'transparent'
 })
 
@@ -142,58 +142,6 @@ function replaceInHistoricalRecord(state, payload) {
       })
     ]
   }
-}
-
-/*
-
-
-
-The Breaking News
-
-News breaks all day every day non stop.
-
-How you tune it out or turn it up is real rizz.
-
-
-
-*/
-
-function theBreakingNews(rizz) {
-  if(!rizz.history) return null
-  if(rizz.history.length === 0) return null
-
-  return rizz.history[rizz.history.length - 1]
-}
-
-/*
-
-
-
-The Top 8
-
-In historic implementations, the Top 8 were hand selected individuals
-
-In this implementation, the top eight are recent contributions to the rizzstory
-
-
-
-*/
-
-function topEight(rizz) {
-  const rizzstory = rizz.history
-
-  if(!rizzstory)
-    return []
-  if(rizzstory.length === 0)
-    return []
-
-  return rizzstory.slice(
-    Math.max(
-      0,
-      rizzstory.length-8
-    ),
-    rizzstory.length
-  )
 }
 
 /*
@@ -410,12 +358,13 @@ $.style(`
     overflow: hidden;
     display: block;
     height: 100%;
+    background: black;
   }
 
   & .viewport {
     position: absolute;
     inset: 0 0 2rem 0;
-    background: black;
+    background: var(--background, black);
     display: grid;
     place-content: center;
   }
@@ -613,6 +562,7 @@ $.style(`
   & .settings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    place-items: center;
     gap: .5rem;
   }
 
@@ -696,6 +646,65 @@ const viewRenderers = {
       </div>
 
       <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+             </div>
+    `
+  },
+
+  [views.settings]: function (target) {
+    const { xrEnabled, transcriptionEnabled } = $.learn()
+    return `
+      <div style="text-align: right; position: sticky; top: 0;">
+        <button data-cancel class="branded-button">
+          Close
+        </button>
+      </div>
+      <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Background</h3>
+        <div class="settings-grid">
+          <button class="branded-button -black" data-background="transparent">
+            Transparent
+          </button>
+          <button class="branded-button -black" data-background="black">
+            Black
+          </button>
+          <button class="branded-button -white" data-background="white">
+            White
+          </button>
+          <button class="branded-button -chroma-blue" data-background="#0047bb">
+            Blue
+          </button>
+          <button class="branded-button -chroma-green" data-background="#00b140">
+            Green
+          </button>
+          <button class="branded-button -plan98-red" data-background="firebrick">
+            Red
+          </button>
+          <button class="branded-button -plan98-orange" data-background="darkorange">
+            Orange
+          </button>
+          <button class="branded-button -plan98-yellow" data-background="gold">
+            Yellow
+          </button>
+          <button class="branded-button -plan98-green" data-background="mediumseagreen">
+            Green
+          </button>
+          <button class="branded-button -plan98-blue" data-background="dodgerblue">
+            Blue
+          </button>
+          <button class="branded-button -plan98-indigo" data-background="slateblue">
+            Indigo
+          </button>
+          <button class="branded-button -plan98-violet" data-background="mediumpurple">
+            Violet
+          </button>
+          <button class="branded-button -otr" data-background="lemonchiffon">
+            Otr
+          </button>
+          <button class="branded-button -wally" data-background="54796d">
+            Wally
+          </button>
+        </div>
+
         <h3>Thickness</h3>
         <div class="settings-grid">
           ${thicknoids.map(x => `
@@ -704,7 +713,7 @@ const viewRenderers = {
             </button>
           `).join('')}
         </div>
-       <h3>Opacities</h3>
+        <h3>Opacities</h3>
         <div class="settings-grid">
           ${opacities.map(x => `
             <button class="branded-button" data-tooltip="Set opacity to ${x}" data-opacity="${x}">
@@ -713,25 +722,18 @@ const viewRenderers = {
           `).join('')}
         </div>
 
-      </div>
-    `
-  },
+        <h3>Extend Reality</h3>
+        <div>
+          <button class="branded-button" data-toggle-xr>${xrEnabled?'on':'off'}</button>
+        </div>
 
-  [views.settings]: function (target) {
-    const { transcriptionEnabled } = $.learn()
-    return `
-      <div style="text-align: right;">
-        <button data-cancel class="branded-button">
-          Close
-        </button>
-      </div>
-      <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Devices</h3>
+        ${deviceMenu(target)}
+
         <h3>Transcription</h3>
         <div>
           <button class="branded-button" data-toggle-transcription>${transcriptionEnabled?'on':'off'}</button>
         </div>
-        <h3>Devices</h3>
-        ${deviceMenu(target)}
       </div>
     `
   },
@@ -772,9 +774,6 @@ $.when('click', '[data-thickness]', function  (event) {
   event.preventDefault()
   $.mouth({
     thickness: parseInt(event.target.dataset.thickness) || 1,
-    showOverlay: false,
-    view: null,
-    objectId: null
   })
 })
 
@@ -782,9 +781,6 @@ $.when('click', '[data-opacity]', function  (event) {
   event.preventDefault()
   $.mouth({
     opacity: event.target.dataset.opacity,
-    showOverlay: false,
-    view: null,
-    objectId: null
   })
 })
 
@@ -798,18 +794,20 @@ Free to make their own mistakes, they did.
 
 */
 
-class CulturalPreservation extends HTMLElement {
+class VLog extends HTMLElement {
   constructor() {
     super();
   }
-
 
   connectedCallback() {
     $.draw(() => null, {
       beforeUpdate: this.beforeUpdate,
       afterUpdate: this.afterUpdate
     })
-    this.init(this)
+
+    setMediaStream(this).then(() => {
+      this.init(this)
+    })
   }
 
   beforeUpdate(target) {
@@ -845,26 +843,15 @@ class CulturalPreservation extends HTMLElement {
   }
 
   async init(target) {
-    await setMediaStream(target)
-
     if(!target.innerHTML) {
       target.innerHTML = `
-        <div class="footer">
+        <div class="footer" data-color-picker>
           <button data-new class="branded-button">
             New
           </button>
-          <button data-share class="branded-button">
+          <button data-share  style="margin-left: auto;" class="branded-button">
             Share
           </button>
-
-          <button class="branded-button" style="margin-left: auto;" data-brush-picker>
-            Brush
-          </button>
-
-          <button class="branded-button" data-color-picker>
-            Color
-          </button>
-
         </div>
         <div class="taskbar -top">
           <div class="left">
@@ -1078,6 +1065,28 @@ class CulturalPreservation extends HTMLElement {
         target.style.setProperty('--active-color', color)
       }
     }
+
+    {
+      const { background } = $.ear()
+      if(target.background !== background) {
+        target.style.setProperty('--background', background)
+      }
+    }
+
+
+    {
+      const { xrEnabled } = $.learn()
+      if(target.xrEnabled !== xrEnabled) {
+        target.xrEnabled = xrEnabled
+
+        if (xrEnabled) {
+          enableCameraRigging(target)
+        } else {
+          disableCameraRigging(target)
+        }
+      }
+    }
+
     {
       recoverElves(target, 'qr-code')
       recoverElves(target, 'plan98-palette')
@@ -1205,6 +1214,12 @@ And man was vain while dog was not.
 So rather than only allow dog photos, dog allowed man to turn the camera in.
 
 */
+
+$.when('click', '[data-background]', async (event) => {
+  const { background } = event.target.dataset
+  $.teach({ background })
+  redraw(event.target)
+})
 
 $.when('click', '[data-flip]', async (event) => {
   const { facingMode } = $.learn()
@@ -1396,7 +1411,7 @@ And once again, Dog committed lines of syntax to satiate the higher powers
 
 */
 try {
-  customElements.define(tag, CulturalPreservation);
+  customElements.define(tag, VLog);
 } catch (e) {
   console.error(e)
 }
@@ -1432,11 +1447,14 @@ function redraw(target) {
   const { canvas } = engine(target)
 
   if(!canvas) return
-  const { strokeHistory } = $.learn()
+  const { opacity, strokeHistory } = $.learn()
   const context = canvas.getContext('2d')
   context.clearRect(0, 0, canvas.width, canvas.height)
+
+  context.globalAlpha = 1;
   context.fillStyle = $.learn().background
   context.fillRect(0, 0, canvas.width, canvas.height)
+  context.globalAlpha = opacity; // 50% transparency
 
   strokeHistory.map(function (stroke) {
     if (strokeHistory.length === 0) return
@@ -1664,6 +1682,11 @@ function drawOnCanvas (target, stroke) {
   }
 }
 
+async function enableCameraRigging(target) {
+}
+
+async function disableCameraRigging(target) {
+}
 
 async function initializeVosk(target) {
   const channel = new MessageChannel();

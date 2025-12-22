@@ -1,4 +1,4 @@
-import elf from '@silly/elf'
+import { Self } from '@plan98/types'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { friends } from './plan98-synthia.js'
@@ -30,16 +30,9 @@ const paperPocketHelp = () => {
 `}).join('\n')
 }
 
-const models = {
-  'deepseek-r1:1.5b': 'Deepseek-r1 1.5b',
-  'gemma3:1b': 'Gemma3 1b',
-  'mistral:7b': 'Mistral 7b',
-  'llama3.2:3b': 'Llama 3.2 3b',
-}
-
 let fileSystem = null
 
-const $ = elf('ur-shell', {
+const $ = Self('ur-shell', {
   messages: [],
   history: [],
   historyCursor: null,
@@ -48,6 +41,11 @@ const $ = elf('ur-shell', {
   messageHeight: null,
   cwd: null,
 })
+
+export function sh(message) {
+  $.teach({ messageText: message })
+  hideModal()
+}
 
 export function update(message) {
   console.log(message)
@@ -74,37 +72,6 @@ fetch(window.location.origin + endpoint)
   })
   .catch(e => console.error(e))
 
-function askLLM(message) {
-  const { model } = $.learn()
-
-  if(!model) {
-    $.teach({ body: 'ask "help" for assistance', author: 'assistant' }, mergeMessage)
-    return
-  }
-  const url = "http://localhost:11434/api/generate";
-  const headers = {
-    "Content-Type": "application/json",
-  }
-
-  $.teach({ thinking: true, messageHeight: null, messageText: '' })
-
-  fetch(url, {
-    headers: headers,
-    method: 'POST',
-    body: JSON.stringify({
-      model,
-      prompt: message,
-      stream: false
-    })
-  }).then((response) => response.text()).then((result) => {
-    const data = JSON.parse(result)
-    $.teach({ thinking: false })
-    $.teach({ body: data.response, author: 'assistant' }, mergeMessage)
-  }).catch(e => {
-    console.error(e)
-  })
-}
-
 function history(state, payload) {
   return {
     ...state,
@@ -124,18 +91,6 @@ function mergeMessage(state, payload) {
       payload
     ]
   }
-}
-
-$.when('change', 'select', (event) => {
-  const model = event.target.value
-  $.teach({ model, messages: [] })
-})
-
-function renderModels(model) {
-  const keys = Object.keys(models)
-  return keys.map((key) => `
-    <option value="${key}" ${model === key?'selected':''}>${models[key]}</option>
-  `).join('')
 }
 
 const killCommands = ['exit', 'quit', 'escape']
@@ -210,6 +165,10 @@ const commands = {
   },
   'sillyz': () => {
     loadPath('/app/sillyz-computer')
+    return 'Success!'
+  },
+  'sonic': () => {
+    loadPath('/app/sonic-knuckles')
     return 'Success!'
   },
   'tv': () => {
@@ -578,6 +537,7 @@ function mount(target) {
   if(target.mounted) return
   target.mounted = true
   const command = target.getAttribute('command')
+  const message = target.getAttribute('message')
   const src = target.getAttribute('src')
   const rom = target.getAttribute('rom')
   if(command) {
@@ -586,12 +546,14 @@ function mount(target) {
     execute(src)
   } else if(rom) {
     execute('<'+rom)
+  } else if(message) {
+    sh(message)
   }
 }
 
 $.draw((target) => {
   mount(target)
-  const { model, messages, messageText, messageHeight, thinking } = $.learn()
+  const { messages, messageText, messageHeight, thinking } = $.learn()
 
   const log = messages.map((message) => `
     <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
@@ -754,8 +716,6 @@ async function execute(message) {
     }
     return
   }
-
-  askLLM(message)
 }
 
 export function loadPath(message) {

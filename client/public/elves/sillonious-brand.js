@@ -56,7 +56,7 @@ const dns = {
     elf: 'shirt-flicks'
   },
   'css.ceo': {
-    elf: 'photo-journal'
+    elf: 'v-log'
   },
   'thelanding.page': {
     elf: 'saas-platform'

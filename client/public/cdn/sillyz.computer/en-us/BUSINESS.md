@@ -10,15 +10,18 @@ A single representative to manage customer support requests, lift 50 lbs, and fu
 1 person working
 12 hours per week for
 52 weeks per year at
-2 times the minimum wage is
+2 times the minimum wage of
 7.25 federally at this time
 18,096 total investment for a
-2,088 down payment
+2,088 down payment to unlock
+1 sponsorship unit fully vested
 ```
+
+<silly-leaderboard></silly-leaderboard>
 
 ### Example:
 
-`14.50 Currency Units * 12 Time Units * 52 Space Units * 2 Fathomable Units`
+`14.50 Currency Units * 12 Time Units * 52 Space Units * 2 years`
 
 > In Massachusetts in 2004, the minimum wage was $7.25 per hour. A counter offer to be employed as a junior computer teller by any corporation for any industry would have been $14.50.
 

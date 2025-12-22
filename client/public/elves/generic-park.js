@@ -121,7 +121,6 @@ $.draw((target) => {
       </div>
     </div>
     <div class="background">
-      <video-feed></video-feed>
     </div>
     <a-scene>
       <a-camera rotation="0 0 0" position="0 1.6 0">

@@ -56,6 +56,7 @@ const E_MAIL = 'e-mail'
 const HYPER_SCRIPT = 'hyper-script'
 const PATCH_NOTES = 'patch-notes'
 const V_LOG = 'v-log'
+const BUSINESS_MODEL = 'business-model'
 
 const config = {
   [HOME]: {
@@ -206,8 +207,14 @@ const config = {
       <v-log></v-log>
     `
   },
-
-
+  [BUSINESS_MODEL]: {
+    label: 'Business Model',
+    path: `/${BUSINESS_MODEL}`,
+    icon: '<sl-icon name="globe2"></sl-icon>',
+    body: (target) => `
+      <business-model></business-model>
+    `
+  },
 }
 
 function createPathMap() {
@@ -423,6 +430,9 @@ $.when('click', '[data-panel]', (event) => {
         </button>
         <button data-nav="/${V_LOG}">
           Video Log
+        </button>
+        <button data-nav="/${BUSINESS_MODEL}">
+          Business Model
         </button>
       </nav>
     </my-computer>

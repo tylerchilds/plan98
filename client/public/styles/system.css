@@ -407,6 +407,15 @@ hr {
 	width: 100%;
 }
 
+table {
+
+}
+
+th {
+}
+
+td
+
 menu-resource {
   display: none;
   position: fixed;
@@ -1579,12 +1588,71 @@ sillonious-brand > xml-html {
 }
 
 .branded-button {
-  padding: .25rem .5rem;
+  padding: .5rem 1rem;
+  font-weight: bold;
   background: black;
   color: white;
   border-radius: 0;
   background: black;
+  display: inline-grid;
+  place-content: center;
   border: none;
+}
+
+.branded-button.-white {
+  background: white;
+  color: black;
+}
+
+.branded-button.-chroma-blue {
+  background: #0047bb;
+}
+
+.branded-button.-chroma-green {
+  background: #00b140;
+}
+
+.branded-button.-plan98-red {
+  background: firebrick;
+  color: black;
+}
+
+.branded-button.-plan98-orange {
+  background: darkorange;
+  color: black;
+}
+
+.branded-button.-plan98-yellow {
+  background: gold;
+  color: black;
+}
+
+.branded-button.-otr {
+  background: lemonchiffon;
+  color: dodgerblue;
+  aspect-ratio: 1;
+}
+.branded-button.-wally {
+  background: #54796d;
+  color: white;
+}
+
+
+.branded-button.-plan98-green {
+  background: mediumseagreen;
+}
+
+.branded-button.-plan98-blue {
+  background: dodgerblue;
+}
+
+.branded-button.-plan98-indigo {
+  background: slateblue;
+}
+
+.branded-button.-plan98-violet,
+.branded-button.-plan98-purple {
+  background: mediumpurple;
 }
 
 .branded-button:hover,

@@ -2,6 +2,14 @@
 
 ## Cutestrap
 
+### Version 3.1.0
+
+See this is exactly why i don't keep patch notes, i made so many changes i had to call it a minor update
+
+1. Sales Script: [TheLanding.Page](https://thelanding.page) is powered by the [SaaS Platform](/app/was-code?src=/public/elves/saas-platform.js), which is a wrapper for the [Business Model](/app/was-code?src=/public/elves/business-model.js) that you can learn more about in the educational genre on [Shirt Flicks](https://shirtflicks.app). Take this [free rendition for any kids in your heart](https://sillyz.computer) powered by [Plan98](https://plan98.org).
+2. Been really having fun playing with <code>&lt;v-log&gt;</code> [&lt;;-D](/app/v-log), which has become a holiday multi-lingual, multi-generational cult classic.
+
+
 ### Version 3.0.2
 
 #### 2025-12-12 Status 
