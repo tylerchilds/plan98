@@ -1,0 +1,16 @@
+# 2025-12-25
+
+I think the punchline to Sillyz, "Happy Christmas!" as Grimaldi, the Clown that Inspired Charles would have said, by the way, would have been, "I can't just rearrange reality for your mental conveniences."
+
+The explanation to the joke being, there's always going to be some amount of real real code required for any system. When I start a new file from scratch my mental model is "Call Silly, he'll back me up on this mission." And as I'm writing code, I'm telling a narrative and that keeps me focused, but also the final result is canonically consistent.
+
+I can't just rearrange reality for your mental conveniences. But I can try. So since the beginning, when asked to "prove my work and my worth" and when push came to shove, and I needed to lay down the bare metal nuts and bolts, this was what I summoned top of mind and then we hit the grind.
+
+import elf from '@silly/elf' 
+const $ = elf('hello-world')
+$.draw(() => 'hello world!!!1')
+// usage: <hello-world></hello-world>
+
+which tells the story of a new machine elf being born, both metaphorically, metaphysically, and metamorpheously, which is why Joey cared so much about the Butterflies before they became the Dickens.
+
+And based on how Chuck felt about Hans, I know I would have been to him, a nuisance in the streets of London.

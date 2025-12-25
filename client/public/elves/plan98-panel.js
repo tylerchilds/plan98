@@ -41,9 +41,10 @@ $.draw(() => {
     <div class="shell ${maximized ? 'maximized': ''}">
       <div class="panel">
         <div class="body">
+          <div data-resize-panel></div>
           <div class="action-wrapper">
-            <button data-close class="standard-button bias-generic -small -round" type="reset">
-              <sl-icon name="x-lg"></sl-icon>
+            <button data-close class="branded-button" type="reset">
+              Close
             </button>
           </div>
           ${panelHeader}
@@ -108,6 +109,7 @@ $.when('click', '[data-close]', hidePanel)
 $.style(`
   & {
     display: none;
+    user-select: none;
   }
 
   @keyframes &-fadein {
@@ -173,9 +175,8 @@ $.style(`
 
   & .body {
     height: 100%;
-    max-width: 320px;
+    max-width: clamp(240px, var(--panel-width, 320px), 100%);
     background: white;
-    padding: 4px;
     position: absolute;
     right: 0;
     pointer-events: all;
@@ -196,7 +197,6 @@ $.style(`
   }
 
   & .action-wrapper {
-    pointer-events: none;
     text-align: right;
     position: sticky;
     top: 0;
@@ -206,4 +206,40 @@ $.style(`
   & [data-close] * {
     pointer-events: none;
   }
+
+  & [data-resize-panel] {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: clamp(240px, var(--panel-width, 320px), 100%);
+    transform: translateX(10px);
+    width: 10px;
+    background: rgba(255,255,255,.05);
+    z-index: 100;
+    cursor: col-resize;
+  }
+
 `)
+
+$.when('pointerdown', '[data-resize-panel]', event => {
+  $.teach({ grabbing: true })
+  document.addEventListener("pointermove", resizePanel, false);
+  document.addEventListener("pointerup", () => {
+    $.teach({ grabbing: false })
+    document.removeEventListener("pointermove", resizePanel, false);
+  }, false);
+})
+
+function resizePanel(event) {
+  let width
+  if (event.touches && event.touches[0] && typeof event.touches[0]["force"] !== "undefined") {
+    width = window.innerWidth - event.touches[0].clientX
+  } else {
+    width = window.innerWidth - event.clientX
+  }
+
+  const size = `${width}px`;
+  const root = event.target.closest($.link)
+  root.style.setProperty("--panel-width", size);
+}
+
