@@ -146,6 +146,9 @@ const commands = {
   'tamashika': () => {
     window.location.href = "steam://rungameid/2996080"
   },
+  'stardew': () => {
+    window.location.href = "steam://rungameid/413150"
+  },
   'ide': () => {
     loadPath('/app/plan98-ide')
     return 'Success!'
