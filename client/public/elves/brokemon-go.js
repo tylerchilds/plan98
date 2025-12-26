@@ -228,10 +228,12 @@ $.style(`
     width: 100%;
     height: 100%;
     z-index: 1;
+    transition: opacity 200ms ease-in-out;
   }
 
   &[data-screensaver="true"] {
-    opacity: .5;
+    opacity: .1;
+    transition: opacity 1000ms ease-in-out;
   }
 
   & .maplibregl-canvas-container {

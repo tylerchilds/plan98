@@ -143,6 +143,9 @@ const commands = {
     loadModule('<plan98-palette')
     return 'Success!'
   },
+  'tamashika': () => {
+    window.location.href = "steam://rungameid/2996080"
+  },
   'ide': () => {
     loadPath('/app/plan98-ide')
     return 'Success!'

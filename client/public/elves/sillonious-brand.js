@@ -47,7 +47,7 @@ const dns = {
     elf: 'my-computer'
   },
   'comedymap.org': {
-    elf: 'comedy-network'
+    elf: 'brokemon-go'
   },
   'plan98.org': {
     elf: 'ur-shell'

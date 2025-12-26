@@ -15,7 +15,7 @@ const lazyLoaders = [
   './home-page.js',
   './photo-journal.js',
   './dial-tone.js',
-  './plan98-ide.js',
+  './ur-shell.js',
   './cool-chat.js',
   './live-help.js',
   './time-machine.js',
@@ -88,7 +88,7 @@ const config = {
     path: '/coding',
     icon: '<sl-icon name="globe2"></sl-icon>',
     body: (target) => `
-      <plan98-ide src="/public/plan98.js"></plan98-ide>
+      <ur-shell></ur-shell>
     `
   },
   [HELP]: {

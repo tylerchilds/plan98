@@ -215,7 +215,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <iframe src="/app/v-log"></iframe>
+          <brokemon-go></brokemon-go>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>
@@ -737,7 +737,6 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
-  & .system,
   & .settings {
     display: none;
     height: 100%;
@@ -749,8 +748,9 @@ $.style(`
     overflow-x: hidden;
   }
 
-  &[data-mode="system"] .system {
+  & .system {
     display: block;
+    height: 100%;
   }
 
   & .settings {
