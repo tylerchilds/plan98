@@ -1,7 +1,8 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
+import './plan98-wallet.js'
 import { eventTypes, getSearchResults } from './time-machine.js'
-import { ollama } from './gg-synthia.js'
+import { ollama } from './plan98-synthia.js'
 import { innerHTML } from 'diffhtml'
 
 // Tool implementations

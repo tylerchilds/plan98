@@ -178,6 +178,10 @@ const commands = {
   'echo': (...args) => {
     return args.join(' ')
   },
+  'map': () => {
+    loadModule('<brokemon-go')
+    return "Did you catch at least one or two?"
+  },
   'cutestrap': () => {
     loadModule('<my-computer')
     return "Don't spend it all in one place!"
@@ -884,6 +888,7 @@ export async function loadModule(message) {
 
     // add some hype to our scene
     showModal(`<${elf} ${attributes}>${innerHTML || innerText}</${elf}>`, {
+      transparent: true,
       blockExit: true,
       onHide: () => $.teach({ popped: false })
     })

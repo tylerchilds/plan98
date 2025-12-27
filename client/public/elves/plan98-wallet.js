@@ -1,9 +1,8 @@
+import elf, { subscribe } from '@silly/elf'
 import { StorageClient } from "@wallet.storage/fetch-client";
 import { Ed25519Signer } from "@did.coop/did-key-ed25519"
 import { showModal } from './plan98-modal.js'
-import elf, { subscribe } from '@silly/elf'
 import $paperPocket, { replaceElves, sideEffects, afterUpdateTheme } from './paper-pocket.js'
-import { launch } from './plan98-synthia.js'
 import CryptoJS from 'crypto-js';
 
 function addToKeychain(data) {
@@ -768,7 +767,7 @@ $.draw((target) => {
       `:`
         <footer style="display: grid; grid-template-columns: 1fr auto;">
           <div style="display: flex; gap: .5rem; flex-wrap: wrap;">
-            <button class="logo-gradient" data-assistant>
+            <button class="logo-gradient">
               Plan98
             </button>
           </div>
@@ -1081,10 +1080,6 @@ function prioritizeKeycardById(state, payload) {
     keycards: [keycard, ...state.keycards.filter(x => x.id !== payload)]
   }
 }
-
-$.when('click', '[data-assistant]', (event) => {
-  launch()
-})
 
 $.when('click', '[data-launch]', (event) => {
   const id = event.target.dataset.launch

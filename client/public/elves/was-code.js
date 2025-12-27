@@ -1,4 +1,5 @@
 import module from '@silly/tag'
+import { get, put } from './plan98-wallet.js'
 import { toast } from './plan98-toast.js'
 import { vim, Vim } from "@replit/codemirror-vim"
 import { javascript } from "@codemirror/lang-javascript";
@@ -14,8 +15,6 @@ import { consoleShow, consoleHide } from './plan98-console.js'
 import {
   basicSetup
 } from "codemirror"
-
-import { get, put } from './plan98-wallet.js'
 
 const $ = module('was-code')
 

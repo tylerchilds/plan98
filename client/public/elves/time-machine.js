@@ -1,7 +1,6 @@
 import app from '@plan98/app'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
-import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 import {
   settingsMenu,
   walletDefaultHost,
@@ -21,6 +20,7 @@ import {
   requestKeycardDeletion,
   requestKeycardPaste
 } from './plan98-wallet.js'
+import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 
 import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './gg-synthia.js'
 import JSZip from 'jszip'
