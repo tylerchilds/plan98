@@ -68,3 +68,10 @@ function escapeHyperText(text = '') {
     }[actor])
   )
 }
+
+$.style(`
+  & {
+    padding: 1rem;
+    display: block;
+  }
+`)

@@ -3,6 +3,8 @@ import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { friends } from './plan98-synthia.js'
 import { mpn } from './mpn-wizard.js'
+import { whoami, logout, auth } from './secure-persona.js'
+import { agent } from './agentic-dash.js'
 
 // helper for system settings
 console.log(Object.keys(sideEffects).map((key) => {
@@ -48,20 +50,10 @@ export function sh(message) {
 }
 
 export function update(message) {
-  console.log(message)
   hideModal()
 }
 
-$.teach({ body: `Silly, at your service.
-
-  Do your thing or click "help" and type "help" and then press the "return" key on your typewriter.
-
-  P.s. If you forget who you are, run the "about" sub routine micro process command execution function method.
-
-  P.p.s. If you want to be a Computer Teller, apply by running the "apply" command.
-
-Signed,
-  Wally.`, author: 'assistant' }, mergeMessage)
+$.teach({ body: `Wake up, Eon...`, author: 'assistant' }, mergeMessage)
 
 const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
@@ -107,7 +99,54 @@ for(const command of killCommands) {
   }
 }
 
+function disableSecureMode() {
+  $.teach({ secureEntry: false })
+}
+
+function enableSecureMode() {
+  $.teach({ secureEntry: true })
+}
+
+function normalMode() {
+  $.teach({ modality: null, secureEntry: false })
+}
+
+function partial(response) {
+  $.teach({ thinkingFace: response })
+}
+
+function done(response) {
+  $.teach({ thinkingFace: null, thinking: false })
+  $.teach({ body: response, author: 'assistant' }, mergeMessage)
+}
+
 const modalities = {
+  async agent(program) {
+    if((program === 'exit' || program === 'quit')) {
+      $.teach({ modality: null })
+      return 'Have a good one or two!'
+    }
+    $.teach({ thinking: true })
+    const message = await agent(program, {
+      partial,
+      done
+    })
+    $.teach({ thinking: false })
+    return message
+  },
+
+  async auth(program) {
+    const { secureEntry } = $.learn()
+    if(!secureEntry && (program === 'exit' || program === 'quit')) {
+      $.teach({ modality: null, secureEntry: false })
+      return 'Authentication aborted.'
+    }
+    return await auth(program, {
+      enableSecureMode,
+      disableSecureMode,
+      normalMode
+    })
+  },
   luau(program) {
     if(kill(program)) {
       $.teach({ modality: null })
@@ -139,9 +178,20 @@ const commands = {
   'echo': (...args) => {
     return args.join(' ')
   },
+  'cutestrap': () => {
+    loadModule('<my-computer')
+    return "Don't spend it all in one place!"
+  },
   'color': () => {
     loadModule('<plan98-palette')
     return 'Success!'
+  },
+  'whoami': () => {
+    const res = whoami()
+    return res ? res : 'Not currently a secure deity, run `me` to authenticate'
+  },
+  'logout': () => {
+    return logout()
   },
   'tamashika': () => {
     window.location.href = "steam://rungameid/2996080"
@@ -217,6 +267,21 @@ const commands = {
     throw new Error(args.map(x => JSON.stringify(x)).join(' '))
   },
 
+  async me(...args) {
+    const me = whoami()
+    if(me) {
+      return me
+    } else {
+      $.teach({ modality: 'auth' })
+      return await auth()
+    }
+  },
+
+  async you(...args) {
+    $.teach({ modality: 'agent' })
+    return await agent()
+  },
+
   luau(...args) {
     import('./luau-repl.js').then((module) => {
       imports.haveLuau = module.haveLuau
@@ -254,7 +319,7 @@ const commands = {
 
   clear() {
     $.teach({ messages: [] })
-    return ' '
+    return null
   },
 
   cd(path) {
@@ -521,14 +586,14 @@ Modes:
 /* - load URL
      example: /app/remote-control
 
-<* - load ELF
-     example: <couch-coop
+&lt;* - load ELF
+     example: &lt;couch-coop
 
 PAPER POCKET
 
 ${help}
 
-For further assistance, enter <cool-chat
+For further assistance, enter &lt;cool-chat
 `
   },
 
@@ -559,16 +624,19 @@ function mount(target) {
 
 $.draw((target) => {
   mount(target)
-  const { messages, messageText, messageHeight, thinking } = $.learn()
+  const { secureEntry, messages, messageText, messageHeight, thinking, thinkingFace } = $.learn()
 
   const log = messages.map((message) => `
-    <div class="message -${message.author}">${escapeHyperText(message.body)}</div>
+    <div class="message -${message.author}">${message.body}</div>
   `).join('')
 
   return `
       <div class="scroll-back">
         <div class="messages">
           ${log}
+          <div class="message -assistant">
+            ${thinkingFace||''}
+          </div>
         </div>
       </div>
       <form>
@@ -577,13 +645,23 @@ $.draw((target) => {
             <flying-disk></flying-disk>
           </div>
         ` : ''}
-        <textarea
-          data-bind
-          name="messageText"
-          placeholder="help"
-          ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-          value="${escapeHyperText(messageText)}"
-        ></textarea>
+
+        ${secureEntry ? `
+          <input
+            type="password"
+            data-bind
+            name="messageText"
+            placeholder="help"
+            value="${escapeHyperText(messageText)}">
+        ` : `
+          <textarea
+            data-bind
+            name="messageText"
+            placeholder="help"
+            ${messageHeight ? `style="height: ${messageHeight}px"`:''}
+            value="${escapeHyperText(messageText)}"
+          ></textarea>
+        `}
       </div>
     </div>
   `
@@ -634,6 +712,12 @@ function afterUpdate(target) {
     }
   }
 
+  {
+    const elem = document.querySelector('[name="messageText"]')
+    if(elem) {
+      elem.focus()
+    }
+  }
 }
 
 let sel = []
@@ -686,8 +770,13 @@ const imports = {}
 async function execute(message) {
   if(!message) return
 
-  $.teach(message, history)
-  $.teach({ body: message, author: 'human' }, mergeMessage)
+  const { secureEntry } = $.learn()
+
+  if(!secureEntry) {
+    $.teach(message, history)
+    $.teach({ body: message, author: 'human' }, mergeMessage)
+  }
+
   $.teach({ historyCursor: null, messageHeight: null, messageText: '', messageDraft: '' })
 
   if(message.startsWith('<')) {
@@ -706,7 +795,9 @@ async function execute(message) {
 
   if(modalities[modality]) {
     const result = await modalities[modality](message)
-    $.teach({ body: result, author: 'assistant' }, mergeMessage)
+    if(result) {
+      $.teach({ body: result, author: 'assistant' }, mergeMessage)
+    }
     return
   }
 
@@ -714,13 +805,18 @@ async function execute(message) {
   const program = commands[command] || commands[command.toLowerCase()]
   if(program) {
     try {
-      const result = program.apply($, args)
-      $.teach({ body: result || 'Success!', author: 'assistant' }, mergeMessage)
+      const result = await program.apply($, args)
+      if(result) {
+        $.teach({ body: result || 'Success!', author: 'assistant' }, mergeMessage)
+      }
     } catch(e) {
       $.teach({ body: `Error. Inspect Logs.<br><a href="${window.location.origin + window.location.pathname}?q=${message}&debug=true">Reload in debug mode</a>`, author: 'assistant' }, mergeMessage)
       console.error(e)
     }
     return
+  } else {
+    const body = 'Command not recognized. Ask for `help` if needed.'
+    $.teach({ body, author: 'assistant' }, mergeMessage)
   }
 }
 
@@ -836,17 +932,21 @@ $.style(`
     pointer-events: none;
   }
 
+  & form input,
   & form textarea {
     width: 100%;
     display: block;
-    resize: none;
     border: none;
     border-radius: 0;
     padding: 8px;
-    max-height: 35vh;
     font-size: 1rem;
     background: linear-gradient(155deg, rgba(0,0,0,.7), rgba(0,0,0,.8)), var(--root-theme, mediumseagreen);
     color: rgba(255,255,255,.75);
+  }
+
+  & form textarea {
+    resize: none;
+    max-height: 35vh;
   }
 
   & textarea:focus {
@@ -995,3 +1095,23 @@ function isLastLine(textarea) {
   const textAfterCursor = fullText.substring(cursorPosition);
   return !textAfterCursor.includes('\n');
 }
+
+function interrupt() {
+  normalMode()
+  $.teach({ secureEntry: false, messageHeight: null, messageText: '', messageDraft: '' })
+  $.teach({ body: 'Girl, interrupted.', author: 'assistant' }, mergeMessage)
+}
+
+const hotkeys = {}
+
+$.when('keydown', '[name="messageText"]', (event) => {
+  hotkeys[event.key] = true
+
+  if(hotkeys['Control'] && (event.key === 'c' || event.key === 'C')) {
+    interrupt()
+  }
+})
+
+$.when('keyup', '[name="messageText"]', (event) => {
+  hotkeys[event.key] = false
+})

@@ -22,7 +22,7 @@ import {
   requestKeycardPaste
 } from './plan98-wallet.js'
 
-import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './plan98-synthia.js'
+import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './gg-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
 import {

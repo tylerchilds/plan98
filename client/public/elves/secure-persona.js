@@ -32,8 +32,6 @@ import {
   requestKeycardPaste
 } from './plan98-wallet.js'
 
-
-
 const organization = 'sillyz.computer'
 
 const baseQandA = {
@@ -55,6 +53,50 @@ export const $ = elf('secure-persona', {
   step: 0,
   user: {}
 })
+
+export function whoami() {
+  const { sessionId } = getSession()
+  if(sessionId) {
+    return `${getEmployeeId()}@${getCompanyName()}`
+  } else {
+    return null
+  }
+}
+
+export function logout() {
+  clearSession()
+}
+
+const MAX_ATTEMPTS = 2
+const authSingleton = {}
+
+export async function auth(data, wishbacks) {
+  if(!data) {
+    authSingleton.attempts = 0
+    authSingleton.mode = 'moniker'
+    return 'What is your moniker?'
+  } else if(authSingleton.mode === 'moniker') {
+    setCompanyName(organization)
+    setEmployeeId(data)
+    authSingleton.mode = 'password'
+    wishbacks.enableSecureMode()
+    return 'Enter password:'
+  } else if(authSingleton.mode === 'password' && authSingleton.attempts < MAX_ATTEMPTS) {
+    const authenticated = false
+    if(authenticated) {
+      wishbacks.disableSecureMode()
+    } else {
+      authSingleton.attempts += 1
+      return 'Bad attempt, please try again.'
+    }
+  } else if(authSingleton.attempts === MAX_ATTEMPTS) {
+    wishbacks.normalMode()
+    return 'Too many failed login attempts.'
+  } else {
+    return data
+  }
+}
+
 
 let lastMode = null
 subscribe((link) => {

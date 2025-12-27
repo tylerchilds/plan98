@@ -24,6 +24,10 @@ function crawlerTemplate(html) {
           </div>
         </div>
       </div>
+
+      <button data-skip class="branded-button">
+        Skip Intro
+      </button>
     </div>
 
   `
@@ -78,6 +82,7 @@ function edit(event) {
 }
 
 
+$.when('click', '[data-skip]', go)
 $.when('animationend', 'xml-html', go)
 
 $.when('click', '[data-wallet]', edit)
@@ -380,4 +385,25 @@ $.style(`
     background: transparent;
   }
 
+
+  & [data-skip] {
+    animation: &-fade-up 1000ms forwards 2000ms;
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    opacity: 0;
+    transform: translateY(100%);
+  }
+
+  @keyframes &-fade-up {
+    0% {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 `)

@@ -1,7 +1,7 @@
 import elf from '@silly/elf'
 import { marked } from 'marked'
 import { eventTypes, getSearchResults } from './time-machine.js'
-import { ollama } from './plan98-synthia.js'
+import { ollama } from './gg-synthia.js'
 import { innerHTML } from 'diffhtml'
 
 // Tool implementations
@@ -81,6 +81,41 @@ const agents = {
   },
 }
 
+const serializedAgentLookup = Object.keys(agents)
+
+const agenticSingleton = {}
+
+export async function agent(data, wishbacks) {
+  if(!data) {
+    agenticSingleton.attempts = 0
+    agenticSingleton.mode = 'picker'
+    return 'AGENTIC LOOKUP TABLE:\n' + serializedAgentLookup.map((id, index) => {
+      const agent = agents[id]
+      return `[${index}] ${agent.name}\n`
+    }).join('')
+  } else if(agenticSingleton.mode === 'picker') {
+    const index = parseInt(data)
+    if(serializedAgentLookup[index]) {
+      const agentId = serializedAgentLookup[index]
+      const agent = agents[agentId]
+      $.teach({ agentId, messages: [] })
+      agenticSingleton.mode = 'chat'
+      return `You're on the line with ${agent.name}`
+    } else {
+      return 'Please enter a valid number from the AGENTIC LOOKUP TABLE.'
+    }
+  } else if(agenticSingleton.mode === 'chat') {
+    return await chat(data, {
+      partial: wishbacks.partial,
+      done: wishbacks.done
+    })
+  } else {
+    return data
+  }
+}
+
+
+
 function decodeHtmlEntities(text) {
   const textarea = document.createElement("textarea");
   textarea.innerHTML = text;
@@ -145,6 +180,84 @@ function optionalChatSettings(agent) {
 
   return options
 }
+
+export async function chat(data, { partial, done }) {
+  const newestMessage = { content: data, role: 'user' }
+  $.teach(newestMessage, mergeMessage)
+
+  const { agents, agentId, messages } = $.learn()
+  const context = [
+    { role: 'system', content: agents[agentId].systemMessage },
+    ...messages.map(x => ({ role: x.role, content: x.content })),
+  ]
+
+  const response = await ollama.chat({
+    ...agents[agents],
+    model: agents[agentId].agentModel,
+    messages: context,
+    ...optionalChatSettings(agents[agentId]),
+    stream: true
+  })
+
+  const message = { content: '' }
+  let formattedMessage = ''
+  const toolCalls = []
+
+  for await (const part of response) {
+    if(!message.role) {
+      message.role = part.message.role
+    }
+
+    message.content += part.message.content
+    formattedMessage = marked(message.content || '').trim()
+    partial(formattedMessage)
+
+    if (part.message.tool_calls) {
+      toolCalls.push(...part.message.tool_calls);
+    }
+
+    if(part.done) {
+      if (toolCalls.length > 0) {
+        const toolMessage = {
+          role: "assistant",
+          content: `Calling: ${toolCalls.map(x => x.function.name).join(', ')}`,
+          tool_calls: toolCalls
+        }
+        done(toolMessage)
+        $.teach(toolMessage, mergeMessage)
+
+        for (const toolCall of toolCalls) {
+          const functionName = toolCall.function.name;
+          const functionArgs = toolCall.function.arguments;
+
+          // Execute the tool
+          let toolResult;
+          if (toolImplementations[functionName]) {
+            toolResult = toolImplementations[functionName](functionArgs);
+          } else {
+            toolResult = { error: `Unknown function: ${functionName}` };
+          }
+
+          const toolOutput = {
+            role: "tool",
+            content: JSON.stringify(toolResult),
+            tool_call_id: toolCall.id
+          }
+          done(toolOutput)
+          $.teach(toolOutput, mergeMessage)
+        }
+
+        chat({ partial, done })
+      }
+    }
+  }
+
+  $.teach({ thinking: false })
+  $.teach(message, mergeMessage)
+
+  done(formattedMessage)
+}
+
 
 async function processChat() {
   $.teach({ thinking: true, messageHeight: null, messageString: '' })
