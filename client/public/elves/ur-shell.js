@@ -1,10 +1,39 @@
 import { Self } from '@plan98/types'
+import { marked } from 'marked'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { friends } from './plan98-synthia.js'
 import { mpn } from './mpn-wizard.js'
 import { whoami, logout, auth } from './secure-persona.js'
 import { agent } from './agentic-dash.js'
+
+function decodeHtmlEntities(text) {
+  const textarea = document.createElement("textarea");
+  textarea.innerHTML = text;
+  return textarea.value;
+}
+
+const renderer = new marked.Renderer();
+
+renderer.codespan = (code) => {
+  return `<code>${escapeHyperText(decodeHtmlEntities(code))}</code>`;
+};
+
+// Override code block rendering
+renderer.code = (code, language) => {
+  let decodedCode = decodeHtmlEntities(code); // First decode pass
+  decodedCode = decodeHtmlEntities(decodedCode); // Second decode to fix double encoding
+
+  const langClass = language ? ` class="language-${language}"` : "";
+  return `<pre><code${langClass}>${escapeHyperText(decodedCode)}</code></pre>`;
+};
+
+marked.setOptions({
+  renderer,
+  gfm: true,        // Enable GitHub Flavored Markdown
+  breaks: false,    // Keep standard line breaks
+  smartypants: false, // Prevent automatic quote conversions
+});
 
 // helper for system settings
 console.log(Object.keys(sideEffects).map((key) => {
@@ -199,9 +228,11 @@ const commands = {
   },
   'tamashika': () => {
     window.location.href = "steam://rungameid/2996080"
+    return 'Ascending now...'
   },
   'stardew': () => {
     window.location.href = "steam://rungameid/413150"
+    return 'Have fun, babe.'
   },
   'ide': () => {
     loadPath('/app/plan98-ide')
@@ -279,6 +310,11 @@ const commands = {
       $.teach({ modality: 'auth' })
       return await auth()
     }
+  },
+
+  async agent(...args) {
+    $.teach({ modality: 'agent' })
+    return await agent()
   },
 
   async you(...args) {
@@ -467,41 +503,7 @@ const commands = {
   },
   ...killCommandHandlers,
   'about': (...args) => {
-    return `
-      You are Silly. You were born Silly. You yearn to be Silly. Not today. Not right now.
-
-      You are at work. You are Serious. You are going to get things done and then you can go home and be Silly.
-
-      Focus. memex.
-
-      The shell. You're in the shell. Why? What were you doing here.
-
-      Did you mean to go to the "desktop"?
-
-      Were you troubleshooting the "js" sandbox?
-
-      Were you fixing the "color" picker again?
-
-      Did the "music" box need to be re-tuned?
-
-      Is the economy crashing because "wallet" is down?
-
-      Did you just want to take a break and "draw"?
-
-      FOCUS!
-
-      Were you working on the latest "mobile" prototype?
-
-      Should you log your progress in the time machine "journal"?
-
-      Did you want to (this) post to "bluesky"?
-
-      Are friends over for some couch coop "gaming"?
-
-      Are you fumbling in a pitch meeting and just need the "kiosk"?
-
-      Just forget about it and busk the tiniest violin: "tv".
-    `
+    return `Earth Prime's Number One Lore Bible Platform Engine, lovingly mocking gnu/linux by building on it as sillyz/plan98, an irreverant take on social computing, by @tychi.`
   },
   'help': (...args) => {
     const help = paperPocketHelp()
@@ -631,7 +633,7 @@ $.draw((target) => {
   const { secureEntry, messages, messageText, messageHeight, thinking, thinkingFace } = $.learn()
 
   const log = messages.map((message) => `
-    <div class="message -${message.author}">${message.body}</div>
+    <div class="message -${message.author}">${marked(message.body||'').trim()}</div>
   `).join('')
 
   return `
@@ -639,7 +641,7 @@ $.draw((target) => {
         <div class="messages">
           ${log}
           <div class="message -assistant">
-            ${thinkingFace||''}
+            ${marked(thinkingFace || '').trim()}
           </div>
         </div>
       </div>
@@ -826,7 +828,14 @@ async function execute(message) {
 
 export function loadPath(message) {
   // add some hype to our scene
-  showModal(`<iframe src="${message}"></iframe>`, {
+  showModal(`
+    <div style="display: grid; height: 100%; grid-template-rows: auto 1fr;">
+      <div style="background: black;">
+        <button data-modal-close class="branded-button">Back</button>
+      </div>
+      <iframe src="${message}"></iframe>
+    </div>
+  `, {
     blockExit: true,
     onHide: () => $.teach({ popped: false })
   })
@@ -887,7 +896,14 @@ export async function loadModule(message) {
       }).join('')
 
     // add some hype to our scene
-    showModal(`<${elf} ${attributes}>${innerHTML || innerText}</${elf}>`, {
+    showModal(`
+      <div style="display: grid; height: 100%; grid-template-rows: auto 1fr;">
+        <div style="background: black;">
+          <button data-modal-close class="branded-button">Back</button>
+        </div>
+        <${elf} ${attributes}>${innerHTML || innerText}</${elf}>
+      </div>
+    `, {
       transparent: true,
       blockExit: true,
       onHide: () => $.teach({ popped: false })
@@ -1018,7 +1034,9 @@ $.style(`
     font-family: "Recursive" !important;
   }
 
-
+  & .message p {
+    margin: 0;
+  }
 `)
 
 function escapeHyperText(text = '') {

@@ -178,6 +178,7 @@ $.when('click', '.modal .body', (event) => {
 
 
 $.when('click', '[data-close]', hideModal)
+$.when('click', '[data-modal-close]', hideModal)
 
 $.style(`
   & {
