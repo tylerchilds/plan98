@@ -9,7 +9,7 @@ const authUrl = plan98.env.PLAN98_EMAIL_URL;
 function headers(apikey){
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${apikey}`,
+    Authorization: `Basic ${apikey}`,
   }
 }
 
