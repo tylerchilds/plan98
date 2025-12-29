@@ -2,9 +2,9 @@ import { Self } from '@plan98/types'
 import { marked } from 'marked'
 import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
-import { friends } from './plan98-synthia.js'
+import { users } from './plan98-synthia.js'
 import { mpn } from './mpn-wizard.js'
-import { whoami, logout, auth } from './secure-persona.js'
+import { whoami, logout, auth, friends } from './secure-persona.js'
 import { agent } from './agentic-dash.js'
 
 function decodeHtmlEntities(text) {
@@ -312,6 +312,10 @@ const commands = {
     }
   },
 
+  async friends(...args) {
+    return await friends()
+  },
+
   async agent(...args) {
     $.teach({ modality: 'agent' })
     return await agent()
@@ -467,8 +471,8 @@ const commands = {
   },
 
   su(unix_id) {
-    if(friends[unix_id]) {
-      return loadPath(friends[unix_id].bios)
+    if(users[unix_id]) {
+      return loadPath(users[unix_id].bios)
     } else {
       return 'User not found'
     }

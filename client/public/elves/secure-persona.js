@@ -54,6 +54,8 @@ export const $ = elf('secure-persona', {
   user: {}
 })
 
+init()
+
 export function whoami() {
   const { sessionId } = getSession()
   if(sessionId) {
@@ -66,6 +68,19 @@ export function whoami() {
 export function logout() {
   clearSession()
 }
+
+export async function friends(data, wishbacks) {
+  await __ready()
+  const { persona } = $.learn()
+  if(persona) {
+    return persona.followers.map(x => {
+      return `${x.moniker}@${x.organization}`
+    }).join('<br>')
+  } else {
+    return 'Login with me'
+  }
+}
+
 
 const MAX_ATTEMPTS = 2
 const authSingleton = {}
@@ -555,7 +570,25 @@ function mount(target) {
   setError('')
   target.innerHTML = ''
   target.mounted = true
-  init()
+}
+
+export function __ready() {
+  return new Promise((resolve, reject) => {
+    // wait 30 seconds
+    const timeout = setTimeout(() => {
+      reject('timeout exceeded')
+    }, 1000 * 30)
+
+    function poll() {
+      const { ready } = $.learn()
+      if(ready) {
+        resolve()
+      }
+      requestAnimationFrame(poll)
+    }
+
+    poll()
+  })
 }
 
 function init() {
@@ -563,13 +596,16 @@ function init() {
 
   if(!sessionId) {
     connect()
+    $.teach({ ready: true })
     return
   }
 
   $.teach({ ...baseQandA, mode: 'authenticated' })
   broadcastPersonaActivated()
 
-  getPersona().then(persona => $.teach({ persona }))
+  getPersona().then(persona => {
+    $.teach({ persona, ready: true })
+  })
 }
 
 function broadcastPersonaActivated() {
@@ -615,9 +651,6 @@ $.draw((target) => {
 
   if(modes[mode]) {
     return `
-      <div>
-        <plan98-icon></plan98-icon>
-      </div>
       <div${mode}>
         ${modes[mode](target)}
       </div${mode}>
@@ -629,7 +662,6 @@ function afterUpdate(target) {
   {
     recoverElves(target, 'bayun-feedback')
     recoverElves(target, 'sl-icon')
-    recoverElves(target, 'plan98-icon')
     recoverElves(target, 'flying-disk')
     recoverElves(target, 'secure-followers')
   }

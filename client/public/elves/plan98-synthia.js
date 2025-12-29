@@ -4,7 +4,7 @@ import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia', { synthia: {} })
 import { sh } from './ur-shell.js'
 
-export const friends = {
+export const users = {
   bengo: {
     bios: 'https://plan98.org/app/quick-blog?src=https://www.bengo.is/outbox/'
   },
