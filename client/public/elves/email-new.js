@@ -1,17 +1,15 @@
 import elf from '@silly/elf'
 import { showModal } from '@plan98/modal'
 
-const key = plan98.env.FASTMAIL_API_KEY
-const username = plan98.env.FASTMAIL_USERNAME
-
-const hostname = "api.fastmail.com";
-
-const authUrl = `https://${hostname}/.well-known/jmap`;
+const username = plan98.env.PLAN98_EMAIL_USERNAME
+const password = plan98.env.PLAN98_EMAIL_PASSWORD
+const key = btoa(`${username}:${password}`);
+const authUrl = plan98.env.PLAN98_EMAIL_URL;
 
 function headers(key){
   return {
     "Content-Type": "application/json",
-    Authorization: `Bearer ${key}`,
+    Authorization: `Basic ${key}`,
   }
 }
 

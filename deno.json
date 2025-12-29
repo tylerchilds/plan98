@@ -21,7 +21,7 @@
     "deploy-peer": "cd client && deployctl deploy --no-static --entrypoint=./server.js --prod --exclude=./private --include=./public --include=./server.js --env-file",
     "debug-peer": "cd client && deno run -A --inspect-brk server.js",
     "reverse-peer": "ssh -N -R 1024:localhost:1024 $USER.plan98.org",
-    "start-was": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE npm run dev",
+    "start-was": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE PORT=1088 npm run dev",
     "reverse-was": "ssh -N -R 1024:localhost:1024 $USER.wallet.storage",
     "start-server": "plan98client=$(pwd)/client; cd distros/subsystems/rust-9p/example/unpfs && cargo run --release 'tcp!0.0.0.0!7777' $plan98client",
     "reverse-server": "ssh -N -R 7777:localhost:7777 drive.$USER.me",

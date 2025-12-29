@@ -5,9 +5,8 @@ const secureNodes = {}
 
 const $ = elf('email-view')
 
-const apikey = plan98.env.FASTMAIL_API_KEY
-const hostname = "api.fastmail.com";
-const authUrl = `https://${hostname}/.well-known/jmap`;
+const apikey = plan98.env.PLAN98_EMAIL_PASSWORD
+const authUrl = plan98.env.PLAN98_EMAIL_URL;
 function headers(){
   return {
     "Content-Type": "application/json",
