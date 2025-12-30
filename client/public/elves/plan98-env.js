@@ -1,6 +1,6 @@
 import { Self, Expect, Describe, Dashboard, Bug } from '@plan98/types'
 import Cache from '@silly/cache'
-let cache = Cache('env')
+const cache = Cache('env')
 
 export async function set(key, value, mime) {
   return await (this||cache).put(key, value, mime).catch(Bug)
@@ -37,8 +37,6 @@ export async function tests() {
 
     return done()
   }).catch(Bug)
-
-  cache = Cache('env')
 }
 
 const {
@@ -51,22 +49,25 @@ const {
 
 view((target) => {
   if(target.mounted) {
-    target.innerHTML = model().data
+    const { logs, bugs } = model().data
+    target.innerHTML = `
+      <div style="color: mediumseagreen">
+        ${logs.join('<br>')}
+      </div>
+      <div style="color: firebrick">
+        ${Dashboard().bugs.join('<br>')}
+      </div>
+    `
   } else {
     target.mounted = true
     tests().then(() => {
-      const logs = `
-        <div style="color: mediumseagreen">
-          ${Dashboard().logs.join('<br>')}
-        </div>
-      `
-      const bugs = `
-        <div style="color: firebrick">
-          ${Dashboard().bugs.join('<br>')}
-        </div>
-      `
-      controller({ data: logs + bugs })
+      const { logs, bugs } = Dashboard()
+      controller({
+        data: {
+          logs,
+          bugs
+        }
+      })
     })
   }
 })
-
