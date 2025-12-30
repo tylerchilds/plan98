@@ -509,6 +509,7 @@ function template(body) {
     FASTMAIL_API_KEY: safeEnv('FASTMAIL_API_KEY'),
     FASTMAIL_USERNAME: safeEnv('FASTMAIL_USERNAME'),
 
+    PLAN98_EMAIL: safeEnv('PLAN98_EMAIL'),
     PLAN98_EMAIL_URL: safeEnv('PLAN98_EMAIL_URL'),
     PLAN98_EMAIL_USERNAME: safeEnv('PLAN98_EMAIL_USERNAME'),
     PLAN98_EMAIL_PASSWORD: safeEnv('PLAN98_EMAIL_PASSWORD'),
@@ -674,6 +675,7 @@ function template(body) {
           "@plan98/types": "/public/types.js",
           "@plan98/elf": "/public/plan98.js",
           "@plan98/app": "/public/plan98.js",
+          "@plan98/env": "/public/elves/plan98-env.js",
           "@plan68/app": "/public/plan68.js",
           "@silly/gelf": "/public/gun-module.js",
           "@sillonious/payments": "/public/elves/payment-debugger.js",

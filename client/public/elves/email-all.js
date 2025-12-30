@@ -16,8 +16,11 @@ function headers(apikey){
 const $ = elf('email-all', { mailboxes: [] })
 
 async function query(target, key) {
-  if(target.lastKey === key) return
+  const { inbox_id } = $.learn()
+  if(target.lastKey === key && target.lastInboxId === inbox_id) return
+
   target.lastKey = key
+  target.lastInboxId = inbox_id
 
   await getSession(key).then(async(session) => {
     const api_url = session.apiUrl;
@@ -90,7 +93,9 @@ $.draw(target => {
     <div name="message-list" key="list">
       ${inboxSelector()}
       ${list}
+      <!--
       <flying-disk class="load-more"></flying-disk>
+      -->
     </div>
   `
 }, {
@@ -124,6 +129,10 @@ $.draw(target => {
 
             const { offset } = $.learn()
             const messages = await fetchTen(key, offset)
+            if(!messages || messages.length === 0) {
+              $.teach({ fetching: false })
+              return
+            }
             $.teach({ offset: offset+20, fetching: false })
             $.teach({ messages }, (s,p) => {
               return {
@@ -211,15 +220,17 @@ async function inboxIdQuery(apikey, api_url, account_id) {
   });
 
   const data = await response.json();
+  const mailboxes = data.methodResponses[0][1].list;
 
-  const inbox_id = data.methodResponses[0][1].list[0].id
-  if (!inbox_id.length) {
-    console.error("Could not get an inbox.");
-    process.exit(1);
+  const { inbox_id } = $.learn();
+
+  if(!inbox_id) {
+    const inboxMailbox = mailboxes.find(m => m.role === "inbox");
+    const defaultInboxId = inboxMailbox ? inboxMailbox.id : mailboxes[0].id;
+    $.teach({ inbox_id: defaultInboxId });
   }
-
-  $.teach({ inbox_id })
-  return data.methodResponses[0][1].list
+  
+  return mailboxes
 };
 
 async function mailboxQuery(apikey, api_url, account_id, inbox_id, startPosition, limit=20) {
@@ -277,7 +288,6 @@ async function fetchTen(apikey, offset=0){
     console.log("No inbox");
   }
 
-  $.teach({ offset: offset + 10 })
   return await mailboxQuery(apikey, api_url, account_id, inbox_id, offset).then((emails) => {
     emails["methodResponses"][1][1]["list"].forEach((email) => {
       const from = (email.from || [])[0] || {}

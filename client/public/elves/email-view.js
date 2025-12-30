@@ -5,8 +5,11 @@ const secureNodes = {}
 
 const $ = elf('email-view')
 
-const apikey = plan98.env.PLAN98_EMAIL_PASSWORD
+const username = plan98.env.PLAN98_EMAIL_USERNAME
+const password = plan98.env.PLAN98_EMAIL_PASSWORD
 const authUrl = plan98.env.PLAN98_EMAIL_URL;
+
+const apikey = btoa(`${username}:${password}`);
 function headers(){
   return {
     "Content-Type": "application/json",

@@ -11,6 +11,9 @@ export const string = 'string'
 export const bool = 'boolean'
 export const number = 'number'
 
+export const logs = []
+export const bugs = []
+
 const Types = {
   string,
   bool,
@@ -29,7 +32,10 @@ const Types = {
   Self,
   Saga,
   Expect,
-  Describe
+  Describe,
+  Log,
+  Bug,
+  Dashboard
 }
 
 export default Types
@@ -90,19 +96,38 @@ export function Expect(a, b) {
   if(a === b) {
     Success()
   } else {
-    console.error(a, b)
+    Bug(a, b)
     Failure()
   }
 }
 
-export function Describe(x, a) {
-  console.log(x, a(Success))
+export async function Describe(x, a) {
+  try {
+    Log(x, await a(Success))
+  } catch (error) {
+    Bug(x, error.message)
+    Failure()
+  }
 }
 
-function Success() {
+export function Success() {
   return True()
 }
 
-function Failure() {
-  throw new Error('Strongly Typed No No!')
+export function Failure() {
+  throw new Error('Game Over')
+}
+
+export function Log(...args) {
+  console.log.apply(null, args)
+  logs.push(args.join(' '))
+}
+
+export function Bug(...args) {
+  console.error.apply(null, args)
+  bugs.push(args.join(' '))
+}
+
+export function Dashboard() {
+  return { logs, bugs }
 }

@@ -143,6 +143,7 @@ export default function elf(link, initialState = {}) {
     when: when.bind(this, link),
     on: when.bind(this, link),
     listen: when.bind(this, link),
+    wait: when.bind(this, link),
 
     // link has a mouth that he lets others stuff with their hopes and dreams
     mouth: teach.bind(this, link),

@@ -1,6 +1,7 @@
 import elf from '@silly/elf'
 import { showModal } from '@plan98/modal'
 
+const email = plan98.env.PLAN98_EMAIL
 const username = plan98.env.PLAN98_EMAIL_USERNAME
 const password = plan98.env.PLAN98_EMAIL_PASSWORD
 const key = btoa(`${username}:${password}`);
@@ -38,7 +39,7 @@ const mailboxQuery = async (apiUrl, accountId) => {
     body: JSON.stringify({
       using: ["urn:ietf:params:jmap:core", "urn:ietf:params:jmap:mail"],
       methodCalls: [
-        ["Mailbox/query", { accountId, filter: { name: "Drafts" } }, "a"],
+        ["Mailbox/query", { accountId, filter: { role: "sent" } }, "a"],
       ],
     }),
   });
@@ -63,7 +64,7 @@ const identityQuery = async (apiUrl, accountId) => {
   const data = await response.json();
 
   return await data["methodResponses"][0][1].list.filter(
-    (identity) => identity.email === username
+    (identity) => identity.email === email
   )[0].id;
 };
 
@@ -124,11 +125,10 @@ const draftResponse = async (apiUrl, accountId, draftId, identityId) => {
   const { message, to, from, subject } = $.learn()
 
   const draftObject = {
-    from: [{ email: username }],
+    from: [{ email }],
     to: [{ email: to }],
     subject,
-    keywords: { $draft: true },
-    mailboxIds: { [draftId]: true },
+    mailboxIds: {  [draftId]: true },
     bodyValues: { body: { value: message, charset: "utf-8" } },
     textBody: [{ partId: "body", type: "text/plain" }],
   };
@@ -190,7 +190,7 @@ $.draw(target => {
       <div class="fields">
         <label class="field">
           <span class="label">From</span>
-          <input data-bind name="from" disabled value="${escapeHyperText(from) || username}"/>
+          <input data-bind name="from" disabled value="${escapeHyperText(from) || email}"/>
         </label>
         <label class="field">
           <span class="label">To</span>
