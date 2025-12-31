@@ -1501,7 +1501,7 @@ function end (e) {
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
       title: 'My Computer',
-      url: `/app/joke-book?id=${tray}`
+      url: `/app/ur-shell?id=${tray}`
     })
 
 

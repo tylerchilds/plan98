@@ -10,7 +10,7 @@ The fetch command instructs the human to chase and fetch the ball
 
 */
 
-import elf from '@plan98/elf'
+import { Self } from '@plan98/types'
 import { get, put } from './plan98-wallet.js'
 
 /*
@@ -68,7 +68,8 @@ let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
 const opacities = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
-const $ = elf(tag, {
+const $ = Self(tag, {
+  menuOpen: false,
   recording: false,
   caption: '',
   facingMode: 'environment',
@@ -571,6 +572,138 @@ $.style(`
     overflow-x: auto;
     display: block;
   }
+
+  & .toolbelt-actions button[data-menu] {
+    padding: 0;
+  }
+
+  & .toolbelt-actions button[data-menu] .nonce {
+    width: 3rem;
+  }
+
+  &[data-belt="true"] .toolbelt-actions .menu-group {
+    overflow: hidden;
+  }
+
+  & .toolbelt-grabber,
+  & canvas {
+    touch-action: none;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+  }
+
+  & .action-bar {
+    display: flex;
+    gap: 0;
+  }
+
+  & .action-bar[data-open="false"] [data-mode] {
+    display: none;
+  }
+
+  &[data-belt="true"] .linguistics,
+  &[data-belt="true"] .letterbox,
+  &[data-belt="true"] button[data-menu],
+  &[data-belt="true"] .toolbelt-debugger,
+  &[data-belt="true"] [data-tooltip],
+  &[data-belt="true"] .action-bar {
+    pointer-events: none !important;
+  }
+
+
+  & .toolbelt-actions {
+    z-index: 10;
+    background: transparent;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: none;
+    max-width: 75%;
+    width: 100%;
+    padding: .5rem;
+    overflow: hidden;
+    display: inline-block;
+    transform: translate(var(--belt-offset-x, 0), var(--belt-offset-y, 0));
+    pointer-events: none;
+  }
+
+  & .toolbelt-actions button {
+    pointer-events: all;
+  }
+
+  & .toolbelt-actions .toolbelt-grabber:focus,
+  & .toolbelt-actions .toolbelt-grabber.active,
+  & .toolbelt-actions .toolbelt-grabber:hover {
+    background: var(--root-theme, mediumseagreen);
+    color: white;
+  }
+
+  & .toolbelt-grabber {
+    position: sticky;
+    left: 0;
+  }
+
+  & .menu-group button.toolbelt-grabber {
+    padding: .75rem .25rem;
+    color: var(--root-theme, mediumseagreen);
+  }
+
+  @media screen {
+    & .toolbelt-actions {
+      display: flex;
+    }
+  }
+
+  & .action-bar button,
+  & .toolbelt-actions button {
+    background: black;
+    color: rgba(255,255,255,.85);
+    border: none;
+    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
+    font-size: 1rem;
+    --v-font-mono: 1;
+    --v-font-casl: 0;
+    --v-font-wght: 400;
+    --v-font-slnt: 0;
+    --v-font-crsv: 0;
+    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+    font-family: "Recursive";
+    transition: background 200ms ease-in-out;
+    font-size: 1.5rem;
+    padding: .75rem;
+    line-height: 1;
+    display: inline-flex;
+  }
+
+  & .action-bar button:focus,
+  & .action-bar button.active,
+  & .action-bar button:hover,
+  & .toolbelt-actions button:focus,
+  & .toolbelt-actions button.active,
+  & .toolbelt-actions button:hover {
+    color: #fff;
+    background: var(--root-theme, mediumseagreen);
+  }
+
+  & .action-bar button.enabled,
+  & .toolbelt-actions button.enabled {
+    background: black;
+    color: var(--root-theme, mediumseagreen);
+  }
+
+  & .menu-group {
+    display: flex;
+    margin-right: auto;
+    pointer-events: all;
+    overflow: auto;
+  }
+
+
+
+
 `)
 
 /*
@@ -814,6 +947,11 @@ class VLog extends HTMLElement {
     if(!target.mounted) {
       target.mounted = true
     }
+
+    {
+      const { beltGrabbed } = $.learn()
+      target.dataset.belt = beltGrabbed ? 'true' : 'false'
+    }
   }
 
   disconnectedCallback() {
@@ -880,6 +1018,27 @@ class VLog extends HTMLElement {
           </div>
           <div class="letterbox">
             <video playsinline disablePictureInPicture class="input-video"></video>
+          </div>
+          <div class="toolbelt-actions">
+            <div class="menu-group">
+              <button data-menu data-drag data-tooltip="Menu" class="toolbelt-actuator">
+                <plan98-icon></plan98-icon>
+              </button>
+              <div class="action-bar toolbelt-actuator" data-open="false">
+                <button data-mode="cursor" data-tooltip="Open Windows">
+                  <sl-icon name="cursor"></sl-icon>
+                </button>
+                <button data-mode="move"  data-tooltip="Pan Canvas">
+                  <sl-icon name="arrows-move"></sl-icon>
+                </button>
+                <button data-mode="chat" data-tooltip="Quick Chat">
+                  <sl-icon name="chat"></sl-icon>
+                </button>
+                <button data-mode="camera"  data-tooltip="Conference">
+                  <sl-icon name="camera-reels"></sl-icon>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -962,6 +1121,19 @@ class VLog extends HTMLElement {
         }
       }
     }
+
+    {
+      const { beltOffsetX, beltOffsetY } = $.learn()
+      const toolbelt = target.querySelector('.toolbelt-actions')
+
+      toolbelt.style = `--belt-offset-x: ${beltOffsetX}px; --belt-offset-y: ${beltOffsetY}px;`
+    }
+
+    {
+      const bar = target.querySelector('.action-bar')
+      bar.dataset.open = $.learn().menuOpen
+    }
+
 
     {
       const partialContainer = target.querySelector('.partial')
@@ -1750,3 +1922,91 @@ $.when('click', '[data-toggle-transcription]', async (event) => {
 
   $.teach({ transcriptionEnabled: newState })
 })
+
+$.when('pointerdown', '[data-drag]', grabToolbelt)
+$.when('pointermove', '.viewport', dragToolbelt)
+$.when('pointermove', '[data-drag]', dragToolbelt)
+$.when('pointermove', '.toolbelt-actuator', dragToolbelt)
+$.when('pointerup', '.viewport', ungrabToolbelt)
+$.when('pointerup', '[data-drag]', ungrabToolbelt)
+
+// grab a pane
+function grabToolbelt(event) {
+  const { clientX, clientY } = event;
+
+  // Capture the pointer so we receive all pointer events
+  event.target.setPointerCapture(event.pointerId);
+
+  $.teach({
+    grabStartX: clientX,
+    grabStartY: clientY,
+    capturedPointerId: event.pointerId
+  });
+}
+
+// drag a pane
+let lastBeltX, lastBeltY;
+function dragToolbelt(event) {
+  const { clientX, clientY } = event;
+  const { beltGrabbed, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn();
+
+  // Check if we've moved enough to be considered a drag
+  if (grabStartX !== undefined && grabStartY !== undefined) {
+    const deltaX = Math.abs(clientX - grabStartX);
+    const deltaY = Math.abs(clientY - grabStartY);
+
+    // If we've moved more than 5px, it's a drag
+    if ((deltaX > 5 || deltaY > 5) && !beltGrabbed) {
+      event.preventDefault();
+      $.teach({
+        beltOffsetX: beltOffsetX || 0,
+        beltOffsetY: beltOffsetY || 0,
+        beltGrabbed: true
+      });
+    }
+  }
+
+  if (!beltGrabbed) return;
+
+  event.preventDefault();
+
+  if (lastBeltX !== undefined && lastBeltY !== undefined) {
+    const movementX = clientX - lastBeltX;
+    const movementY = clientY - lastBeltY;
+
+    $.teach({
+      beltOffsetX: beltOffsetX + movementX,
+      beltOffsetY: beltOffsetY + movementY
+    });
+  }
+
+  lastBeltX = clientX;
+  lastBeltY = clientY;
+}
+
+// release a pane
+function ungrabToolbelt(event) {
+  const { beltGrabbed, capturedPointerId } = $.learn();
+
+  // Release pointer capture
+  if (capturedPointerId !== undefined) {
+    event.target.releasePointerCapture(capturedPointerId);
+  }
+
+  if (beltGrabbed) {
+    event.preventDefault();
+  } else {
+    const { menuOpen } = $.learn()
+    $.teach({ menuOpen: !menuOpen })
+  }
+
+
+  $.teach({
+    beltGrabbed: false,
+    grabStartX: undefined,
+    grabStartY: undefined,
+    capturedPointerId: undefined
+  });
+  lastBeltX = undefined;
+  lastBeltY = undefined;
+}

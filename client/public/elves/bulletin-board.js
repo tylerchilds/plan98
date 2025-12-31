@@ -1105,3 +1105,8 @@ self.addEventListener("resize", function () {
     }
   })
 });
+
+$.when('click', '[data-menu]', function updateMode (event) {
+  const { menuOpen } = $.learn()
+  $.teach({ menuOpen: !menuOpen })
+})
