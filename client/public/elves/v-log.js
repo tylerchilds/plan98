@@ -1626,18 +1626,36 @@ function redraw(target) {
   context.globalAlpha = 1;
   context.fillStyle = $.learn().background
   context.fillRect(0, 0, canvas.width, canvas.height)
-  context.globalAlpha = opacity; // 50% transparency
 
   strokeHistory.map(function (stroke) {
-    if (strokeHistory.length === 0) return
+    if (stroke.length === 0) return
 
     context.beginPath()
+    context.strokeStyle = stroke[0].color
+    context.lineCap = 'round'
+    context.lineJoin = 'round'
 
-    let strokePath = [];
-    stroke.map(function (point) {
-      strokePath.push(point)
-      drawOnCanvas(target, strokePath)
-    })
+    // Start at the first point
+    context.moveTo(stroke[0].x, stroke[0].y)
+
+    // Draw through all points
+    for (let i = 1; i < stroke.length; i++) {
+      const point = stroke[i]
+      const opacity = point.opacity === null ? 1 : point.opacity
+      context.globalAlpha = opacity
+      context.lineWidth = point.lineWidth
+
+      if (i < stroke.length - 1) {
+        const xc = (stroke[i].x + stroke[i + 1].x) / 2
+        const yc = (stroke[i].y + stroke[i + 1].y) / 2
+        context.quadraticCurveTo(point.x, point.y, xc, yc)
+      } else {
+        context.lineTo(point.x, point.y)
+      }
+    }
+
+    // Stroke once per complete stroke
+    context.stroke()
   })
 }
 
@@ -1826,32 +1844,38 @@ function end (e) {
 function drawOnCanvas (target, stroke) {
   const { canvas } = engine(target)
   const context = canvas.getContext('2d')
-  context.strokeStyle = stroke.color
+
+  if (stroke.length < 2) return // Don't draw single points
+
+  const lastPoint = stroke[stroke.length - 1]
+  const prevPoint = stroke[stroke.length - 2]
+
+  context.strokeStyle = lastPoint.color
   context.lineCap = 'round'
   context.lineJoin = 'round'
 
-  const l = stroke.length - 1
+  const opacity = lastPoint.opacity === null ? 1 : lastPoint.opacity
+  context.globalAlpha = opacity
+  context.lineWidth = lastPoint.lineWidth
+
+  context.beginPath()
+
   if (stroke.length >= 3) {
-    const point = stroke[l - 1]
-    const xc = (stroke[l].x + point.x) / 2
-    const yc = (stroke[l].y + point.y) / 2
-    const opacity = point.opacity === null ? 1 : point.opacity
-    context.globalAlpha = opacity; // 50% transparency
-    context.lineWidth = point.lineWidth
-    context.quadraticCurveTo(point.x, point.y, xc, yc)
-    context.stroke()
-    context.beginPath()
+    const beforePrev = stroke[stroke.length - 3]
+    const xc = (prevPoint.x + beforePrev.x) / 2
+    const yc = (prevPoint.y + beforePrev.y) / 2
     context.moveTo(xc, yc)
+
+    const xc2 = (lastPoint.x + prevPoint.x) / 2
+    const yc2 = (lastPoint.y + prevPoint.y) / 2
+    context.quadraticCurveTo(prevPoint.x, prevPoint.y, xc2, yc2)
   } else {
-    const point = stroke[l];
-    const opacity = point.opacity === null ? 1 : point.opacity
-    context.globalAlpha = opacity; // 50% transparency
-    context.lineWidth = point.lineWidth
-    context.strokeStyle = point.color
-    context.beginPath()
-    context.moveTo(point.x, point.y)
-    context.stroke()
+    // First segment, just draw a line
+    context.moveTo(prevPoint.x, prevPoint.y)
+    context.lineTo(lastPoint.x, lastPoint.y)
   }
+
+  context.stroke()
 }
 
 async function enableCameraRigging(target) {
