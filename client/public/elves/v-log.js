@@ -10,7 +10,7 @@ The fetch command instructs the human to chase and fetch the ball
 
 */
 
-import { Self } from '@plan98/types'
+import Self from '@plan98/elf'
 import { get, put } from './plan98-wallet.js'
 
 /*
@@ -62,6 +62,8 @@ An app is a nanobot, a machine elf
 
 */
 
+// Generate a unique player ID for this session
+const playerId = self.crypto.randomUUID()
 
 let lineWidth = 0
 let isMousedown = false
@@ -90,7 +92,8 @@ const $ = Self(tag, {
   thickness: 16,
   opacity: .5,
   color: 'dodgerblue',
-  background: 'transparent'
+  background: 'transparent',
+  players: {} // { [playerId]: { currentStroke: [], cursorX: 0, cursorY: 0, color: 'color' } }
 })
 
 /*
@@ -477,7 +480,7 @@ $.style(`
   }
 
   & .clip {
-    
+
   }
 
   & .clip-title {
@@ -547,6 +550,19 @@ $.style(`
     pointer-events: none;
   }
 
+  & .cursor-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    white-space: nowrap;
+    transform: translate(-50%, -150%);
+    z-index: 100;
+  }
+
   & .footer {
     background: var(--active-color, black);
     height: 2rem;
@@ -589,10 +605,10 @@ $.style(`
   & canvas {
     touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
-		-webkit-user-select: none; /* Safari */
-		-khtml-user-select: none; /* Konqueror HTML */
-		-moz-user-select: none; /* Firefox */
-		-ms-user-select: none; /* Internet Explorer/Edge */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
   }
 
   & .action-bar {
@@ -1018,6 +1034,7 @@ class VLog extends HTMLElement {
           </div>
           <div class="letterbox">
             <video playsinline disablePictureInPicture class="input-video"></video>
+            <div class="cursor-tooltips"></div>
           </div>
           <div class="toolbelt-actions">
             <div class="menu-group">
@@ -1110,15 +1127,45 @@ class VLog extends HTMLElement {
       strokeHistory,
       strokeRevisory,
       view,
+      players
     } = $.learn()
 
     {
-      {
-        if(target.strokeHistoryLength !== strokeHistory.length || target.strokeRevisoryLength !== strokeRevisory.length) {
-          target.strokeHistoryLength = strokeHistory.length
-          target.strokeRevisoryLength = strokeRevisory.length
-          redraw(target)
-        }
+      // Check if we need to redraw (any player's stroke changed or history changed)
+      const currentPlayerStrokeLengths = {}
+      for (const pid in (players || {})) {
+        currentPlayerStrokeLengths[pid] = players[pid].currentStroke?.length || 0
+      }
+
+      const needsRedraw = 
+        target.strokeHistoryLength !== strokeHistory.length || 
+        target.strokeRevisoryLength !== strokeRevisory.length ||
+        JSON.stringify(target.playerStrokeLengths) !== JSON.stringify(currentPlayerStrokeLengths)
+
+      if (needsRedraw) {
+        target.strokeHistoryLength = strokeHistory.length
+        target.strokeRevisoryLength = strokeRevisory.length
+        target.playerStrokeLengths = currentPlayerStrokeLengths
+        drawAllStrokes(target)
+      }
+    }
+
+    {
+      // Update cursor tooltips for all players
+      const tooltipsContainer = target.querySelector('.cursor-tooltips')
+      if (tooltipsContainer) {
+        const tooltipHTML = Object.entries(players || {})
+          .filter(([pid, player]) => pid !== playerId && player.cursorX !== undefined)
+          .map(([pid, player]) => {
+            return `
+              <div class="cursor-tooltip" style="left: ${player.cursorX}px; top: ${player.cursorY}px; background: ${player.color || 'rgba(0,0,0,0.8)'}">
+                Player ${pid.slice(0, 6)}
+              </div>
+            `
+          })
+          .join('')
+
+        innerHTML(tooltipsContainer, tooltipHTML)
       }
     }
 
@@ -1390,7 +1437,7 @@ So rather than only allow dog photos, dog allowed man to turn the camera in.
 $.when('click', '[data-background]', async (event) => {
   const { background } = event.target.dataset
   $.teach({ background })
-  redraw(event.target)
+  drawAllStrokes(event.target)
 })
 
 $.when('click', '[data-flip]', async (event) => {
@@ -1607,58 +1654,6 @@ $.when('click', '*', (event) => {
   $.teach({ activeMenu: null, showList: false })
 })
 
-function clearCanvas(canvas) {
-  canvas.width = self.innerWidth;
-  canvas.height = self.innerHeight;
-  const context = canvas.getContext('2d')
-  context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
-}
-
-function redraw(target) {
-  const { canvas } = engine(target)
-
-  if(!canvas) return
-  const { opacity, strokeHistory } = $.learn()
-  const context = canvas.getContext('2d')
-  context.clearRect(0, 0, canvas.width, canvas.height)
-
-  context.globalAlpha = 1;
-  context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
-
-  strokeHistory.map(function (stroke) {
-    if (stroke.length === 0) return
-
-    context.beginPath()
-    context.strokeStyle = stroke[0].color
-    context.lineCap = 'round'
-    context.lineJoin = 'round'
-
-    // Start at the first point
-    context.moveTo(stroke[0].x, stroke[0].y)
-
-    // Draw through all points
-    for (let i = 1; i < stroke.length; i++) {
-      const point = stroke[i]
-      const opacity = point.opacity === null ? 1 : point.opacity
-      context.globalAlpha = opacity
-      context.lineWidth = point.lineWidth
-
-      if (i < stroke.length - 1) {
-        const xc = (stroke[i].x + stroke[i + 1].x) / 2
-        const yc = (stroke[i].y + stroke[i + 1].y) / 2
-        context.quadraticCurveTo(point.x, point.y, xc, yc)
-      } else {
-        context.lineTo(point.x, point.y)
-      }
-    }
-
-    // Stroke once per complete stroke
-    context.stroke()
-  })
-}
-
 function engine(target) {
   const root = target.closest($.link)
   const canvas = root.querySelector('.input-canvas')
@@ -1682,7 +1677,7 @@ function engine(target) {
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
   $.teach({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
-  redraw(event.target)
+  drawAllStrokes(event.target)
 })
 
 $.when('click', '[data-undo]', function undoDraw (event) {
@@ -1700,7 +1695,7 @@ $.when('click', '[data-undo]', function undoDraw (event) {
       ...newState
     }
   })
-  redraw(event.target)
+  drawAllStrokes(event.target)
 })
 
 $.when('click', '[data-redo]', function redoDraw (event) {
@@ -1718,9 +1713,96 @@ $.when('click', '[data-redo]', function redoDraw (event) {
     }
   })
 
-  redraw(event.target)
+  drawAllStrokes(event.target)
 })
 
+/*
+
+Unified drawing function - draws all historical strokes plus all current player strokes
+
+*/
+
+function drawAllStrokes(target) {
+  const { canvas } = engine(target)
+  if (!canvas) return
+
+  const { strokeHistory, players } = $.learn()
+  const context = canvas.getContext('2d')
+
+  // Clear canvas
+  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  // Draw background
+  context.globalAlpha = 1
+  context.fillStyle = $.learn().background
+  context.fillRect(0, 0, canvas.width, canvas.height)
+
+  // Collect all strokes to draw: historical + current from all players
+  const allStrokes = [...strokeHistory]
+
+  // Add current strokes from all players
+  for (const pid in players) {
+    const player = players[pid]
+    if (player.currentStroke && player.currentStroke.length > 0) {
+      allStrokes.push(player.currentStroke)
+    }
+  }
+
+  // Draw all strokes
+  allStrokes.forEach(stroke => {
+    if (stroke.length < 2) return
+
+    context.beginPath()
+    context.moveTo(stroke[0].x, stroke[0].y)
+
+    for (let i = 1; i < stroke.length; i++) {
+      const point = stroke[i]
+      context.strokeStyle = point.color || 'dodgerblue'
+      context.lineCap = 'round'
+      context.lineJoin = 'round'
+      const opacity = point.opacity === null ? 1 : point.opacity
+      context.globalAlpha = opacity
+      context.lineWidth = point.lineWidth || 16
+
+      if (i < stroke.length - 1) {
+        const xc = (stroke[i].x + stroke[i + 1].x) / 2
+        const yc = (stroke[i].y + stroke[i + 1].y) / 2
+        context.quadraticCurveTo(point.x, point.y, xc, yc)
+      } else {
+        context.lineTo(point.x, point.y)
+      }
+    }
+
+    context.stroke()
+  })
+}
+
+/*
+
+Merge function for updating individual player state
+
+*/
+
+function mergePlayer(pid) {
+  return (state, payload) => {
+    return {
+      ...state,
+      players: {
+        ...state.players,
+        [pid]: {
+          ...state.players[pid],
+          ...payload
+        }
+      }
+    }
+  }
+}
+
+/*
+
+Drawing interaction handlers
+
+*/
 
 $.when('touchstart', '.input-canvas', start)
 $.when('mousedown', '.input-canvas', start)
@@ -1728,7 +1810,7 @@ $.when('mousedown', '.input-canvas', start)
 function start(e) {
   const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
   $.teach({ touching: true, activeMenu: null })
-  const { thickness, opacity } = $.learn()
+  const { thickness, opacity, color } = $.learn()
   const context = canvas.getContext('2d')
   let pressure = 0.1;
   let clientX, clientY;
@@ -1754,12 +1836,24 @@ function start(e) {
   const y = relativeY * scaleY;
 
   isMousedown = true
+  points = [] // Reset local points array
 
   lineWidth = Math.log(pressure + 1) * thickness
   context.lineWidth = lineWidth
 
-  points.push({ x, y, lineWidth, opacity })
-  drawOnCanvas(e.target, points)
+  const newPoint = { x, y, lineWidth, color, opacity }
+  points.push(newPoint)
+
+  // Initialize this player's current stroke
+  $.teach({
+    currentStroke: [newPoint],
+    cursorX: relativeX,
+    cursorY: relativeY,
+    color
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  })
 }
 
 $.when('touchmove', '.input-canvas', move)
@@ -1798,8 +1892,19 @@ function move (e) {
   lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
   context.lineWidth = lineWidth
 
-  points.push({ x, y, lineWidth, color, opacity })
-  drawOnCanvas(e.target, points)
+  const newPoint = { x, y, lineWidth, color, opacity }
+  points.push(newPoint)
+
+  // Update this player's current stroke
+  $.teach({
+    currentStroke: [...points],
+    cursorX: relativeX,
+    cursorY: relativeY,
+    color
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  })
 
   requestIdleCallback(() => {
     $.teach({ pressure })
@@ -1808,7 +1913,7 @@ function move (e) {
     if (touch) {
       $.teach({
         touchesHTML: `
-          touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✍️'} <br/>
+          touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✏️'} <br/>
           radiusX = ${touch.radiusX} <br/>
           radiusY = ${touch.radiusY} <br/>
           rotationAngle = ${touch.rotationAngle} <br/>
@@ -1823,59 +1928,34 @@ function move (e) {
 $.when('touchend', '.input-canvas', end)
 $.when('touchleave', '.input-canvas', end)
 $.when('mouseup', '.input-canvas', end)
+
 function end (e) {
   $.teach({ touching: false })
 
   isMousedown = false
 
-  $.teach(points, (state, payload) => {
-    const newState = { ...state }
-    newState.strokeHistory.push([...payload])
-    return {
-      ...newState
-    }
-  })
+  // Move current stroke to history - need to handle this specially
+  // First get the current stroke, then update both history and clear player stroke
+  const state = $.learn()
+  const playerStroke = state.players?.[playerId]?.currentStroke
 
-  points = []
+  if (playerStroke && playerStroke.length > 0) {
+    // Add to history
+    $.teach({
+      strokeHistory: [...state.strokeHistory, playerStroke]
+    })
 
-  lineWidth = 0
-};
-
-function drawOnCanvas (target, stroke) {
-  const { canvas } = engine(target)
-  const context = canvas.getContext('2d')
-
-  if (stroke.length < 2) return // Don't draw single points
-
-  const lastPoint = stroke[stroke.length - 1]
-  const prevPoint = stroke[stroke.length - 2]
-
-  context.strokeStyle = lastPoint.color
-  context.lineCap = 'round'
-  context.lineJoin = 'round'
-
-  const opacity = lastPoint.opacity === null ? 1 : lastPoint.opacity
-  context.globalAlpha = opacity
-  context.lineWidth = lastPoint.lineWidth
-
-  context.beginPath()
-
-  if (stroke.length >= 3) {
-    const beforePrev = stroke[stroke.length - 3]
-    const xc = (prevPoint.x + beforePrev.x) / 2
-    const yc = (prevPoint.y + beforePrev.y) / 2
-    context.moveTo(xc, yc)
-
-    const xc2 = (lastPoint.x + prevPoint.x) / 2
-    const yc2 = (lastPoint.y + prevPoint.y) / 2
-    context.quadraticCurveTo(prevPoint.x, prevPoint.y, xc2, yc2)
-  } else {
-    // First segment, just draw a line
-    context.moveTo(prevPoint.x, prevPoint.y)
-    context.lineTo(lastPoint.x, lastPoint.y)
+    // Clear player's current stroke
+    $.teach({
+      currentStroke: []
+    }, {
+      mergeHandler: mergePlayer,
+      parameters: [playerId]
+    })
   }
 
-  context.stroke()
+  points = []
+  lineWidth = 0
 }
 
 async function enableCameraRigging(target) {
@@ -2017,13 +2097,16 @@ function ungrabToolbelt(event) {
     event.target.releasePointerCapture(capturedPointerId);
   }
 
+  // Only prevent default if we were actually dragging
   if (beltGrabbed) {
     event.preventDefault();
   } else {
-    const { menuOpen } = $.learn()
-    $.teach({ menuOpen: !menuOpen })
+    // Didn't drag, so this was just a click - toggle the menu
+    if (event.target.closest('[data-menu]')) {
+      const { menuOpen } = $.learn()
+      $.teach({ menuOpen: !menuOpen })
+    }
   }
-
 
   $.teach({
     beltGrabbed: false,
