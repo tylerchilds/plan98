@@ -12,7 +12,7 @@ const shortCodes = {};
 const rooms = {};
 const parties = new Map()
 const nicknames = {};
-const tables = new Map()
+const elves = new Map()
 
 const app = express()
 const server = http.createServer(app)
