@@ -2,9 +2,42 @@ import diffHTML from 'diffhtml'
 import geckos from '@geckos.io/client'
 import { getQuickJS } from "quickjs-emscripten"
 
-async function jsvm() {
-  const QuickJS = await getQuickJS()
-  return QuickJS.newContext()
+const QuickJS = await getQuickJS()
+
+function secureEval(query, variables, saneWasher = (x) => x) {
+  let res
+  const vm = QuickJS.newContext()
+
+  for (const [key, value] of Object.entries(variables)) {
+    const handle = vm.newString(value)
+    vm.setProp(vm.global, key, handle)
+    handle.dispose()
+  }
+
+  const evaluation = vm.evalCode(query)
+  if(evaluation.error) {
+    res = {
+      error: vm.dump(
+        evaluation.error
+      ),
+      data: null
+    }
+    evaluation.error.dispose()
+  } else {
+    res = {
+      error: null,
+      data: saneWasher(
+        vm.dump(
+          evaluation.value
+        )
+      )
+    }
+    evaluation.value.dispose()
+  }
+
+  vm.dispose()
+
+  return res
 }
 
 let PLAN98_NODE_ID
@@ -469,25 +502,55 @@ try {
   setTimeout(watch,1000)
 }
 
-function createStore(initialState = {}, subscribe = () => null) {
+function createStore(initialState = {}, broadcast = () => null) {
   let state = {
     ...initialState
   };
 
   return {
     set: function(elf, knowledge, nuance) {
+      const nuanceStr = nuance.toString()
+      const wisdom = secureEval(`
+        const state = JSON.parse(stateStr);
+        const knowledge = JSON.parse(knowledgeStr);
+        const elf = elfStr;
 
-      const merge = typeof nuance === 'function'
-        ? nuance
-        : nuance.mergeHandler.apply(null, nuance.parameters)
-      const wisdom = merge(state[elf] || {}, knowledge);
+        /*
+        const debugInfo = {
+          elf: elf,
+          stateAtKey: state[elf],
+          knowledge: knowledge,
+          fullState: state
+        };
+        */
 
-      state = {
-        ...state,
-        [elf]: wisdom
-      };
+        const merge = ${nuanceStr};
+        const output = merge(state[elf] || {}, knowledge);
 
-      subscribe(elf);
+        /*
+        JSON.stringify({
+          debug: debugInfo,
+          result: output
+        });
+        */
+
+        JSON.stringify(output);
+      `, {
+        stateStr: JSON.stringify(state),
+        knowledgeStr: JSON.stringify(knowledge),
+        elfStr: elf
+      });
+
+      if (wisdom.error) {
+        throw new Error(`Sandboxed execution failed: ${result.error}`);
+      } else {
+        state = {
+          ...state,
+          [elf]: JSON.parse(wisdom.data)
+        };
+
+        broadcast(elf);
+      }
     },
 
     get: function(elf) {

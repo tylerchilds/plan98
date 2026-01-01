@@ -295,7 +295,7 @@ try {
   setTimeout(elves,1000)
 }
 
-function createStore(initialState = {}, subscribe = () => null) {
+function createStore(initialState = {}, broadcast = () => null) {
   let state = {
     ...initialState
   };
@@ -309,7 +309,7 @@ function createStore(initialState = {}, subscribe = () => null) {
         [link]: wisdom
       };
 
-      subscribe(link);
+      broadcast(link);
     },
 
     get: function(link) {

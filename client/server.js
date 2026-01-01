@@ -326,7 +326,7 @@ async function stopRTMPStream(request) {
 }
 
 Deno.serve(
-  { hostname: "localhost", port },
+  { hostname: "::", port },
   async (request) => {
     const url = new URL(request.url);
     let filepath = decodeURIComponent(url.pathname);
