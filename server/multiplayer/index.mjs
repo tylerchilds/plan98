@@ -172,34 +172,34 @@ io.onConnection(channel => {
     }
   });
 
-  channel.on('linkState', ({ table, id, data }) => {
-    const room = `${table}/${id}`
+  channel.on('linkState', ({ elf, id, data }) => {
+    const room = `${elf}/${id}`
     channel.join(room);
 
-    if (!tables.has(room)) {
-      tables.set(room, {
+    if (!elves.has(room)) {
+      elves.set(room, {
         channels: [],
         store: createStore(data || {}, notify.bind(room))
       })
     }
 
-    const party = tables.get(room)
+    const party = elves.get(room)
 
     party.channels.push(channel)
 
     channel.emit('stateCache', {
-      table,
+      elf,
       id,
-      data: party.store.get(table)
+      data: party.store.get(elf)
     })
   });
 
   channel.on('stateUpload', ({ id, data }) => {
-    const { table, knowledge, serializedNuance } = data
+    const { elf, knowledge, serializedNuance } = data
 
-    const room = `${table}/${id}`
-    if(tables.has(room)) {
-      const party = tables.get(room)
+    const room = `${elf}/${id}`
+    if(elves.has(room)) {
+      const party = elves.get(room)
       party.channels.forEach(channel => {
         if(channel) {
           channel.emit('stateDownload', data)
@@ -211,7 +211,7 @@ io.onConnection(channel => {
           ? objectFunction(serializedNuance)
           : stringFunction(serializedNuance)
 
-        party.store.set(table, knowledge, merge)
+        party.store.set(elf, knowledge, merge)
       } catch(e) {
         console.error(e)
       }

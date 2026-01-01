@@ -1,5 +1,11 @@
 import diffHTML from 'diffhtml'
 import geckos from '@geckos.io/client'
+import { getQuickJS } from "quickjs-emscripten"
+
+async function jsvm() {
+  const QuickJS = await getQuickJS()
+  return QuickJS.newContext()
+}
 
 let PLAN98_NODE_ID
 try {
@@ -128,6 +134,14 @@ function udpDownload(data) {
   store.set(elf, knowledge, merge)
 }
 
+function objectFunction({ mergeHandler, parameters }) {
+  return stringFunction(mergeHandler).apply(null, parameters)
+}
+
+function stringFunction(s) {
+  return new Function('return ' + s)()
+}
+
 function udpUpload(elf, knowledge, nuance) {
   const serializedNuance = typeof nuance === 'function'
     ? nuance.toString()
@@ -204,21 +218,14 @@ function udpSync(elf, target) {
   if(target.getAttribute('offline') === 'true') return
   if(target['udpSync']) return
   target['udpSync'] = true
-  
+
   connect(() => {
+
     linkState.call(target, elf)
     subscribeToUpload(elf, udpUpload.bind(target))
     subscribeToDownload(elf, udpDownload.bind(target))
   })
 } 
-
-function objectFunction({ mergeHandler, parameters }) {
-  return stringFunction(mergeHandler).apply(null, parameters)
-}
-
-function stringFunction(s) {
-  return new Function('return ' + s)()
-}
 
 function draw(elf, compositor, lifeCycle={}) {
   insight('plan98:draw', elf)
