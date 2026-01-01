@@ -372,19 +372,19 @@ export function listen(type, elf, handler = () => null) {
   }
 }
 
-let tables = []
+let elves = []
 
 function observe(elf) {
-  tables = [...new Set([...tables, elf])];
+  elves = [...new Set([...elves, elf])];
   maybeCreateReactive([...document.querySelectorAll(elf)])
 }
 
 function disregard(elf) {
-  const index = tables.indexOf(elf);
+  const index = elves.indexOf(elf);
   if(index >= 0) {
-    tables = [
-      ...tables.slice(0, index),
-      ...tables.slice(index + 1)
+    elves = [
+      ...elves.slice(0, index),
+      ...elves.slice(index + 1)
     ];
   }
 }
@@ -396,8 +396,8 @@ function maybeCreateReactive(targets) {
 }
 
 function getSubscribers({ target }) {
-  if(tables.length > 0)
-    return [...target.querySelectorAll(tables.join(', '))];
+  if(elves.length > 0)
+    return [...target.querySelectorAll(elves.join(', '))];
   else
     return []
 }
@@ -414,7 +414,7 @@ function dispatchCreate(target) {
 }
 
 const registry = '/public/elves'
-function elves() {
+function watch() {
   new MutationObserver((mutationsList) => {
     const targets = [...mutationsList]
       .map(getSubscribers)
@@ -464,9 +464,9 @@ function modules({ registry }) {
 }
 
 try {
-  elves()
+  watch()
 } catch(e) {
-  setTimeout(elves,1000)
+  setTimeout(watch,1000)
 }
 
 function createStore(initialState = {}, subscribe = () => null) {
