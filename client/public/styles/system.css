@@ -791,6 +791,9 @@ button, input, optgroup, select, textarea {
   margin-bottom: 1rem;
   position: relative;
   text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 4px;
 }
 
 .field .label {
@@ -803,10 +806,10 @@ button, input, optgroup, select, textarea {
   box-shadow: 0 1px 1px 0 rgba(0,0,0,.2),
   0 1px 2px 2px rgba(0,0,0,.1);
   border-radius: 3px;
-  position: relative;
-  left: .25rem;
+  margin: 0 .5rem;
   color: rgba(0,0,0,.65);
   letter-spacing: 1px;
+  word-break: break-word;
 }
 
 .field [type=checkbox] + .label,
