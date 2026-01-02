@@ -93,7 +93,9 @@ const $ = Self(tag, {
   opacity: .5,
   color: 'dodgerblue',
   background: 'transparent',
-  players: {} // { [playerId]: { currentStroke: [], cursorX: 0, cursorY: 0, color: 'color' } }
+  players: {}, // { [playerId]: { currentStroke: [], cursorX: 0, cursorY: 0, color: 'color' } }
+  videoEnabled: false,
+  audioEnabled: false
 })
 
 /*
@@ -229,16 +231,38 @@ $.when('click', '[data-record]', async (event) => {
     return
   }
 
+  const { videoEnabled, audioEnabled } = $.learn()
+
+  if (!videoEnabled && !audioEnabled) {
+    toast("Please enable video or audio in settings first")
+    return
+  }
+
   try {
     const root = event.target.closest($.link)
     $.teach({ recording: true, transcription: '' })
-    const audioTrack = root.webcamStream.getAudioTracks()[0]
-    const compositedVideoStream = root.outputCanvas.captureStream(24)
-    const product = new MediaStream([
-      compositedVideoStream.getVideoTracks()[0],
-      audioTrack
-    ])
 
+    const tracks = []
+
+    if (audioEnabled && root.webcamStream) {
+      const audioTrack = root.webcamStream.getAudioTracks()[0]
+      if (audioTrack) tracks.push(audioTrack)
+    }
+
+    if (videoEnabled && root.outputCanvas) {
+      // Capture stream at 30fps to ensure smooth recording
+      const compositedVideoStream = root.outputCanvas.captureStream(30)
+      const videoTrack = compositedVideoStream.getVideoTracks()[0]
+      if (videoTrack) tracks.push(videoTrack)
+    }
+
+    if (tracks.length === 0) {
+      toast("No tracks available to record")
+      $.teach({ recording: false })
+      return
+    }
+
+    const product = new MediaStream(tracks)
 
     const { data, error } = await startStream()
 
@@ -251,7 +275,7 @@ $.when('click', '[data-record]', async (event) => {
     mediaRecorder = new MediaRecorder(product, {
       videoBitsPerSecond: 8000000
     });
-    const recordedVideo = root.querySelector('video')
+    const recordedVideo = root.querySelector('video.recorded-playback')
 
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
@@ -272,14 +296,17 @@ $.when('click', '[data-record]', async (event) => {
       videoChunks = [];
 
       const videoUrl = URL.createObjectURL(videoBlob);
-      recordedVideo.src = videoUrl;
 
-      recordedVideo.play()
-        .catch(e => console.error("Error playing recorded audio:", e));
+      if (recordedVideo) {
+        recordedVideo.src = videoUrl;
 
-      recordedVideo.onloadedmetadata = () => {
-        URL.revokeObjectURL(videoUrl);
-      };
+        recordedVideo.play()
+          .catch(e => console.error("Error playing recorded audio:", e));
+
+        recordedVideo.onloadedmetadata = () => {
+          URL.revokeObjectURL(videoUrl);
+        };
+      }
 
       const now = new Date();
       const timestamp = now.toJSON()
@@ -315,7 +342,9 @@ $.when('click', '[data-record]', async (event) => {
 
     mediaRecorder.start(1000);
 
-    recordedVideo.src = ''; // Clear previous recording
+    if (recordedVideo) {
+      recordedVideo.src = ''; // Clear previous recording
+    }
 
     console.log('Recording started...');
 
@@ -369,8 +398,9 @@ $.style(`
     position: absolute;
     inset: 0 0 2rem 0;
     background: var(--background, black);
-    display: grid;
-    place-content: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   & .lingustics {
@@ -392,6 +422,8 @@ $.style(`
   }
 
   & video {
+    position: absolute;
+    inset: 0;
     object-fit: contain;
     width: 100%;
     height: 100%;
@@ -530,12 +562,17 @@ $.style(`
 
   & .letterbox {
     position: relative;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 16/9;
   }
 
   & .letterbox canvas {
     position: absolute;
     inset: 0;
-    max-width: 100%;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
   }
 
   & .input-video {
@@ -800,7 +837,7 @@ const viewRenderers = {
   },
 
   [views.settings]: function (target) {
-    const { xrEnabled, transcriptionEnabled } = $.learn()
+    const { xrEnabled, transcriptionEnabled, videoEnabled, audioEnabled } = $.learn()
     return `
       <div style="text-align: right; position: sticky; top: 0;">
         <button data-cancel class="branded-button">
@@ -808,6 +845,16 @@ const viewRenderers = {
         </button>
       </div>
       <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
+        <h3>Video</h3>
+        <div>
+          <button class="branded-button" data-toggle-video>${videoEnabled?'on':'off'}</button>
+        </div>
+
+        <h3>Audio</h3>
+        <div>
+          <button class="branded-button" data-toggle-audio>${audioEnabled?'on':'off'}</button>
+        </div>
+
         <h3>Background</h3>
         <div class="settings-grid">
           <button class="branded-button -black" data-background="transparent">
@@ -954,9 +1001,11 @@ class VLog extends HTMLElement {
       afterUpdate: this.afterUpdate
     })
 
-    setMediaStream(this).then(() => {
-      this.init(this)
-    })
+    // Start with no media stream since video/audio are off by default
+    loadAllDevices()
+
+    // Initialize without media stream
+    this.init(this)
   }
 
   beforeUpdate(target) {
@@ -1034,6 +1083,7 @@ class VLog extends HTMLElement {
           </div>
           <div class="letterbox">
             <video playsinline disablePictureInPicture class="input-video"></video>
+            <video playsinline disablePictureInPicture class="recorded-playback" style="display: none;"></video>
             <div class="cursor-tooltips"></div>
           </div>
           <div class="toolbelt-actions">
@@ -1065,48 +1115,57 @@ class VLog extends HTMLElement {
       this.afterUpdate(target)
     }
 
-    {
-      target.video = target.querySelector('video')
-      target.video.muted = true
-      target.video.srcObject = target.webcamStream;
-      target.video.autoplay = true;
+    // Setup video element even if stream is not available yet
+    target.video = target.querySelector('video.input-video')
+    target.video.muted = true
+    target.video.autoplay = true;
 
+    const { videoEnabled } = $.learn()
+
+    // Only setup video stream if enabled
+    if (videoEnabled && target.webcamStream) {
+      target.video.srcObject = target.webcamStream;
       await new Promise((resolve) => {
         target.video.addEventListener('loadedmetadata', resolve, { once: true });
       });
     }
 
+    // Setup canvases with default dimensions or from video if available
+    const width = target.video.videoWidth || 1920
+    const height = target.video.videoHeight || 1080
+
     {
-      const width = target.video.videoWidth
-      const height = target.video.videoHeight
-
-      {
-        const letterbox = target.querySelector('.letterbox')
-        target.inputCanvas = document.createElement('canvas')
-        target.inputCanvas.classList.add('input-canvas')
-        target.inputCanvas.width = width;
-        target.inputCanvas.height = height;
-        letterbox.appendChild(target.inputCanvas)
-      }
-
-      {
-        const letterbox = target.querySelector('.letterbox')
-        target.outputCanvas = document.createElement('canvas')
-        target.outputCanvas.classList.add('output-canvas')
-        target.outputCanvas.width = width;
-        target.outputCanvas.height = height;
-        letterbox.appendChild(target.outputCanvas)
-      }
-
-      const ctx = target.outputCanvas.getContext('2d'); 
-      const drawComposite = () => {
-        ctx.drawImage(target.video, 0, 0, width, height);
-        ctx.drawImage(target.inputCanvas, 0, 0, width, height);
-        requestAnimationFrame(drawComposite);
-      }
-
-      drawComposite();
+      const letterbox = target.querySelector('.letterbox')
+      target.inputCanvas = document.createElement('canvas')
+      target.inputCanvas.classList.add('input-canvas')
+      target.inputCanvas.width = width;
+      target.inputCanvas.height = height;
+      letterbox.appendChild(target.inputCanvas)
     }
+
+    {
+      const letterbox = target.querySelector('.letterbox')
+      target.outputCanvas = document.createElement('canvas')
+      target.outputCanvas.classList.add('output-canvas')
+      target.outputCanvas.width = width;
+      target.outputCanvas.height = height;
+      letterbox.appendChild(target.outputCanvas)
+    }
+
+    const ctx = target.outputCanvas.getContext('2d'); 
+    const drawComposite = () => {
+      const { videoEnabled } = $.learn()
+      const currentWidth = target.outputCanvas.width
+      const currentHeight = target.outputCanvas.height
+
+      if (videoEnabled && target.video && target.video.videoWidth > 0) {
+        ctx.drawImage(target.video, 0, 0, currentWidth, currentHeight);
+      }
+      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
+      requestAnimationFrame(drawComposite);
+    }
+
+    drawComposite();
 
     {
       const { transcriptionEnabled } = $.learn()
@@ -1364,21 +1423,57 @@ And dog demanded resolution and quality
 */
 
 async function setMediaStream(target) {
-  const { facingMode } = $.learn()
-  target.webcamStream = await navigator.mediaDevices.getUserMedia({
-    video: {
+  const { facingMode, videoEnabled, audioEnabled } = $.learn()
+
+  // Only request media if at least one is enabled
+  if (!videoEnabled && !audioEnabled) {
+    if (target.webcamStream) {
+      target.webcamStream.getTracks().forEach(track => track.stop());
+      target.webcamStream = null
+    }
+    if (target.video) {
+      target.video.srcObject = null
+    }
+    return
+  }
+
+  const constraints = {}
+
+  if (videoEnabled) {
+    constraints.video = {
       facingMode,
       width: { min: 1280, ideal: 1920, max: 3840 },
       height: { min: 720, ideal: 1080, max: 2160 },
       aspectRatio: { ideal: 16/9 }
-    },
-    audio: {
+    }
+  }
+
+  if (audioEnabled) {
+    constraints.audio = {
       echoCancellation: true,
       noiseSuppression: true,
       channelCount: 1,
       sampleRate
-    },
-  });
+    }
+  }
+
+  try {
+    // Stop existing stream if any
+    if (target.webcamStream) {
+      target.webcamStream.getTracks().forEach(track => track.stop());
+    }
+
+    target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    // Reinitialize Vosk if transcription is enabled and audio is now on
+    const { transcriptionEnabled } = $.learn()
+    if (transcriptionEnabled && audioEnabled && !target.voskContext) {
+      await initializeVosk(target)
+    }
+  } catch (error) {
+    console.error('Error setting media stream:', error)
+    toast('Failed to access media devices')
+  }
 
   loadAllDevices()
 }
@@ -1451,8 +1546,92 @@ $.when('click', '[data-flip]', async (event) => {
 
   const target = event.target.closest($.link)
   await setMediaStream(target)
-  target.video.srcObject = target.webcamStream;
-  target.video.autoplay = true;
+})
+
+/*
+
+Toggle video on/off
+
+*/
+
+$.when('click', '[data-toggle-video]', async (event) => {
+  const { videoEnabled } = $.learn()
+  const newState = !videoEnabled
+
+  $.teach({ videoEnabled: newState })
+
+  const target = event.target.closest($.link)
+  await setMediaStream(target)
+
+  // Update video element and reinitialize canvases with proper dimensions
+  if (newState && target.webcamStream && target.video) {
+    target.video.srcObject = target.webcamStream
+    target.video.muted = true
+    target.video.autoplay = true
+
+    // Explicitly play the video
+    try {
+      await target.video.play()
+    } catch (e) {
+      console.error('Error playing video:', e)
+    }
+
+    // Wait for video metadata to load
+    await new Promise((resolve) => {
+      if (target.video.readyState >= 2) {
+        resolve()
+      } else {
+        target.video.addEventListener('loadedmetadata', resolve, { once: true })
+      }
+    })
+
+    // Update canvas dimensions based on actual video
+    const width = target.video.videoWidth
+    const height = target.video.videoHeight
+
+    if (width && height && target.inputCanvas && target.outputCanvas) {
+      target.inputCanvas.width = width
+      target.inputCanvas.height = height
+      target.outputCanvas.width = width
+      target.outputCanvas.height = height
+
+      // Redraw with new dimensions
+      drawAllStrokes(target)
+    }
+  } else if (!newState && target.video) {
+    // Turn off video
+    target.video.srcObject = null
+  }
+})
+
+/*
+
+Toggle audio on/off
+
+*/
+
+$.when('click', '[data-toggle-audio]', async (event) => {
+  const { audioEnabled } = $.learn()
+  const newState = !audioEnabled
+
+  $.teach({ audioEnabled: newState })
+
+  const target = event.target.closest($.link)
+  await setMediaStream(target)
+
+  // Handle Vosk transcription when audio changes
+  const { transcriptionEnabled } = $.learn()
+  if (transcriptionEnabled) {
+    if (newState && !target.voskContext) {
+      await initializeVosk(target)
+    } else if (!newState && target.voskContext) {
+      const { audioContext, recognizerProcessor, source } = target.voskContext
+      source.disconnect()
+      recognizerProcessor.disconnect()
+      await audioContext.close()
+      target.voskContext = null
+    }
+  }
 })
 
 /*
@@ -1967,6 +2146,13 @@ async function disableCameraRigging(target) {
 }
 
 async function initializeVosk(target) {
+  const { audioEnabled } = $.learn()
+
+  if (!audioEnabled || !target.webcamStream) {
+    console.log('Cannot initialize Vosk: audio not enabled or no stream')
+    return
+  }
+
   const channel = new MessageChannel();
   const model = await Vosk.createModel('/public/cdn/sillyz.computer/models/vosk-model-small-en-us-0.15.tar.gz');
   model.registerPort(channel.port1);
@@ -2009,10 +2195,15 @@ async function initializeVosk(target) {
 }
 
 $.when('click', '[data-toggle-transcription]', async (event) => {
-  const { transcriptionEnabled } = $.learn()
+  const { transcriptionEnabled, audioEnabled } = $.learn()
   const newState = !transcriptionEnabled
 
   const target = event.target.closest($.link)
+
+  if (newState && !audioEnabled) {
+    toast('Please enable audio first to use transcription')
+    return
+  }
 
   if (newState && !target.voskContext) {
     // Enable transcription
@@ -2066,10 +2257,10 @@ function dragToolbelt(event) {
     const movementX = clientX - lastBeltX;
     const movementY = clientY - lastBeltY;
     // Use movementX and movementY here
-      $.teach({
-        beltOffsetX: beltOffsetX + movementX,
-        beltOffsetY: beltOffsetY + movementY
-      })
+    $.teach({
+      beltOffsetX: beltOffsetX + movementX,
+      beltOffsetY: beltOffsetY + movementY
+    })
   } else {
     $.teach({
       x: clientX - beltOffsetX,
