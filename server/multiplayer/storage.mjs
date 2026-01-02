@@ -1,26 +1,49 @@
-export default function createStore(initialState = {}, notify = () => null) {
+export default function createStore(initialState = {}, broadcast = () => null, secureEval) {
   let state = {
     ...initialState
   };
 
   return {
-    set: function(link, knowledge, nuance) {
+    set: function(elf, knowledge, nuance) {
+      let mergeStr;
 
-      const merge = typeof nuance === 'function'
-        ? nuance
-        : nuance.mergeHandler.apply(null, nuance.parameters)
-      const wisdom = merge(state[link] || {}, knowledge);
+      if (typeof nuance === 'function') {
+        mergeStr = nuance.toString();
+      } else if (typeof nuance === 'string') {
+        mergeStr = nuance;
+      } else {
+        console.error('Invalid nuance type:', typeof nuance);
+        return;
+      }
 
-      state = {
-        ...state,
-        [link]: wisdom
-      };
+      const wisdom = secureEval(`
+        const localState = JSON.parse(stateStr);
+        const knowledge = JSON.parse(knowledgeStr);
 
-      notify(link, state);
+        const merge = (${mergeStr});
+
+        const output = merge(localState || {}, knowledge);
+
+        JSON.stringify(output);
+      `, {
+        stateStr: JSON.stringify(state[elf] || {}),
+        knowledgeStr: JSON.stringify(knowledge)
+      });
+
+      if (wisdom.error) {
+        console.error(`Sandboxed execution failed: ${wisdom.error}`);
+      } else {
+        state = {
+          ...state,
+          [elf]: JSON.parse(wisdom.data)
+        };
+
+        broadcast(elf);
+      }
     },
 
-    get: function(link) {
-      return state[link];
+    get: function(elf) {
+      return state[elf];
     }
   }
 }

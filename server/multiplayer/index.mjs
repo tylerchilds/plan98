@@ -1,8 +1,41 @@
 import geckos from '@geckos.io/server'
 import http from 'http'
 import express from 'express'
+import { getQuickJS } from "quickjs-emscripten"
 
 import createStore from './storage.mjs'
+
+const QuickJS = await getQuickJS()
+
+function secureEval(query, variables = {}) {
+  let res
+  const vm = QuickJS.newContext()
+
+  for (const [key, value] of Object.entries(variables)) {
+    const handle = vm.newString(value)
+    vm.setProp(vm.global, key, handle)
+    handle.dispose()
+  }
+
+  const evaluation = vm.evalCode(query)
+  if(evaluation.error) {
+    res = {
+      error: vm.dump(evaluation.error),
+      data: null
+    }
+    evaluation.error.dispose()
+  } else {
+    res = {
+      error: null,
+      data: vm.dump(evaluation.value)
+    }
+    evaluation.value.dispose()
+  }
+
+  vm.dispose()
+
+  return res
+}
 
 function notify(namespace, state) {
   //console.log('updated:', { this: this, namespace, state: JSON.stringify(state) })
@@ -42,9 +75,8 @@ io.onConnection(channel => {
   let currentRoom = null;
   let currentParty = null;
 
-   channel.on('chat message', data => {
+  channel.on('chat message', data => {
     console.log(`got ${data} from "chat message"`)
-    // emit the "chat message" data to all channels in the same room
     io.room(channel.roomId).emit('chat message', data)
   })
 
@@ -70,7 +102,6 @@ io.onConnection(channel => {
         nickname
       });
     }
-
 
     if (rooms[roomName].messages) {
       rooms[roomName].messages.forEach(message => {
@@ -109,7 +140,6 @@ io.onConnection(channel => {
     }
   });
 
-
   /* couch-coop */
 
   channel.on('joinParty', ({ partyId, slot }) => {
@@ -143,10 +173,8 @@ io.onConnection(channel => {
         gamepad: {}
       }
       party.channels[slot] = channel
-
     }
 
-     // Notify host only
     if (party.host) {
       party.host.emit('playerList', party.players)
     }
@@ -179,7 +207,7 @@ io.onConnection(channel => {
     if (!elves.has(room)) {
       elves.set(room, {
         channels: [],
-        store: createStore(data || {}, notify.bind(room))
+        store: createStore(data || {}, notify.bind(room), secureEval)
       })
     }
 
@@ -208,12 +236,12 @@ io.onConnection(channel => {
 
       try {
         const merge = typeof serializedNuance === 'object'
-          ? objectFunction(serializedNuance)
-          : stringFunction(serializedNuance)
+          ? sandbox(serializedNuance, secureEval)
+          : serializedNuance
 
         party.store.set(elf, knowledge, merge)
       } catch(e) {
-        console.error(e)
+        console.error('Error processing stateUpload:', e)
       }
     }
   });
@@ -246,15 +274,30 @@ io.onConnection(channel => {
   });
 });
 
-function objectFunction({ mergeHandler, parameters }) {
-  return stringFunction(mergeHandler).apply(null, parameters)
+function sandbox({ mergeHandler, parameters }, secureEval) {
+  const mergeHandlerStr = mergeHandler.toString();
+  const paramsStr = JSON.stringify(parameters);
+
+  const result = secureEval(`
+    '(function(prev, payload) {' +
+      ' return (' + ${JSON.stringify(mergeHandlerStr)} + ')' +
+      ' .apply(null, ' + paramStr + ')' +
+      ' (prev, payload);' +
+    '})';
+  `, {
+    paramStr: paramsStr,
+  });
+
+  if (result.error) {
+    console.error('Failed to create merge function:', result.error);
+    console.error('Handler:', mergeHandlerStr);
+    console.error('Params:', parameters);
+    return false;
+  }
+
+  console.log('Server generated merge function:', result.data);
+  return result.data;
 }
 
-function stringFunction(s) {
-  return new Function('return ' + s)()
-}
-
-// make sure the client uses the same port
-// @geckos.io/client uses the port 9208 by default
 console.log('relay running on 9208')
 server.listen(9208)

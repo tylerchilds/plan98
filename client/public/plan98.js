@@ -3,6 +3,7 @@ import geckos from '@geckos.io/client'
 import { getQuickJS } from "quickjs-emscripten"
 
 const QuickJS = await getQuickJS()
+const WAIT_TIMEOUT = 2500
 
 function secureEval(query, variables, saneWasher = (x) => x) {
   let res
@@ -99,6 +100,7 @@ export const channel = geckos(config) // default port is 9208
 
 let peerReady = false
 const subscriptions = []
+const readyElves = new Set()
 
 function connect(subscription) {
   if(peerReady) {
@@ -124,6 +126,7 @@ channel.onConnect(error => {
 
   channel.on('stateCache', ({ elf, data }) => {
     if(data) {
+      readyElves.add(elf)
       store.set(elf, data, (state, payload) => {
         return {
           ...state,
@@ -148,6 +151,12 @@ function linkState(elf) {
     id: this.id,
     data: learn(elf)
   });
+
+  setTimeout(() => {
+    if (!readyElves.has(elf)) {
+      readyElves.add(elf)
+    }
+  }, WAIT_TIMEOUT)
 }
 
 function udpDownload(data) {
@@ -162,17 +171,36 @@ function udpDownload(data) {
   if(__plan98_sender_id === PLAN98_NODE_ID) return
 
   const merge = typeof serializedNuance === 'object'
-    ? objectFunction(serializedNuance)
-    : stringFunction(serializedNuance)
-  store.set(elf, knowledge, merge)
+    ? sandbox(serializedNuance)
+    : serializedNuance
+
+  if(merge) {
+    store.set(elf, knowledge, merge)
+  }
 }
 
-function objectFunction({ mergeHandler, parameters }) {
-  return stringFunction(mergeHandler).apply(null, parameters)
-}
 
-function stringFunction(s) {
-  return new Function('return ' + s)()
+function sandbox({ mergeHandler, parameters }) {
+  const mergeHandlerStr = mergeHandler.toString();
+  const paramsStr = JSON.stringify(parameters);
+
+  const result = secureEval(`
+    // Build a self-contained function with params baked in
+    '(' + ${JSON.stringify(mergeHandlerStr)} + ')' +
+      '.apply(null, ' + paramStr + ')';
+  `, {
+    paramStr: paramsStr,
+  });
+
+  if (result.error) {
+    console.error('Failed to create merge function:', result.error);
+    console.error('Handler:', mergeHandlerStr);
+    console.error('Params:', parameters);
+    return false;
+  }
+
+  console.log('Generated merge function:', result.data);
+  return result.data;
 }
 
 function udpUpload(elf, knowledge, nuance) {
@@ -273,7 +301,15 @@ function draw(elf, compositor, lifeCycle={}) {
     middleware.forEach(x => x(elf, event.target))
     const draw = update.bind(this, elf, event.target, compositor, lifeCycle)
     reactiveFunctions[elf][event.target.id] = draw
-    draw()
+
+    const waitForCache = () => {
+      if (readyElves.has(elf)) {
+        draw()
+      } else {
+        setTimeout(waitForCache, 10)
+      }
+    }
+    waitForCache()
   })
 }
 
@@ -509,44 +545,52 @@ function createStore(initialState = {}, broadcast = () => null) {
 
   return {
     set: function(elf, knowledge, nuance) {
-      const nuanceStr = nuance.toString()
+      let mergeStr;
+
+      if (typeof nuance === 'function') {
+        // Local function, already safe
+        mergeStr = nuance.toString();
+      } else if (typeof nuance === 'string') {
+        // String from network, use as-is (will be evaluated in sandbox)
+        mergeStr = nuance;
+      } else {
+        // Object from network, sandbox it first
+        const sandboxed = sandbox(nuance);
+        if (!sandboxed) {
+          console.error('Failed to sandbox merge function');
+          return;
+        }
+        mergeStr = sandboxed;
+      }
+
       const wisdom = secureEval(`
-        const state = JSON.parse(stateStr);
+        const localState = JSON.parse(stateStr);
         const knowledge = JSON.parse(knowledgeStr);
-        const elf = elfStr;
 
-        /*
-        const debugInfo = {
-          elf: elf,
-          stateAtKey: state[elf],
-          knowledge: knowledge,
-          fullState: state
+        const merge = (0, ${mergeStr});
+
+        const debug = {
+          localState,
+          knowledge,
         };
-        */
 
-        const merge = ${nuanceStr};
-        const output = merge(state[elf] || {}, knowledge);
+        const output = merge(localState || {}, knowledge);
 
-        /*
         JSON.stringify({
-          debug: debugInfo,
-          result: output
+          debug,
+          output
         });
-        */
-
-        JSON.stringify(output);
       `, {
-        stateStr: JSON.stringify(state),
+        stateStr: JSON.stringify(state[elf] || {}),
         knowledgeStr: JSON.stringify(knowledge),
-        elfStr: elf
       });
 
       if (wisdom.error) {
-        throw new Error(`Sandboxed execution failed: ${result.error}`);
+        throw new Error(`Sandboxed execution failed: ${wisdom.error}`);
       } else {
         state = {
           ...state,
-          [elf]: JSON.parse(wisdom.data)
+          [elf]: JSON.parse(wisdom.data).output
         };
 
         broadcast(elf);
