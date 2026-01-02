@@ -1155,7 +1155,7 @@ class VLog extends HTMLElement {
       const tooltipsContainer = target.querySelector('.cursor-tooltips')
       if (tooltipsContainer) {
         const tooltipHTML = Object.entries(players || {})
-          .filter(([pid, player]) => pid !== playerId && player.cursorX !== undefined)
+          .filter(([pid, player]) => pid !== playerId && player.activelyDrawing)
           .map(([pid, player]) => {
             return `
               <div class="cursor-tooltip" style="left: ${player.cursorX}px; top: ${player.cursorY}px; background: ${player.color || 'rgba(0,0,0,0.8)'}">
@@ -1849,6 +1849,7 @@ function start(e) {
     currentStroke: [newPoint],
     cursorX: relativeX,
     cursorY: relativeY,
+    activelyDrawing: true,
     color
   }, {
     mergeHandler: mergePlayer,
@@ -1947,7 +1948,8 @@ function end (e) {
 
     // Clear player's current stroke
     $.teach({
-      currentStroke: []
+      currentStroke: [],
+      activelyDrawing: false,
     }, {
       mergeHandler: mergePlayer,
       parameters: [playerId]
@@ -2034,54 +2036,45 @@ $.when('pointermove', '.toolbelt-actuator', dragToolbelt)
 $.when('pointerup', '.viewport', ungrabToolbelt)
 $.when('pointerup', '[data-drag]', ungrabToolbelt)
 
+
 // grab a pane
 function grabToolbelt(event) {
-  const { clientX, clientY } = event;
-
-  // Capture the pointer so we receive all pointer events
-  event.target.setPointerCapture(event.pointerId);
-
-  $.teach({
-    grabStartX: clientX,
-    grabStartY: clientY,
-    capturedPointerId: event.pointerId
-  });
+  event.preventDefault()
+  const { beltOffsetX } = $.learn()
+  if(!beltOffsetX) {
+    $.teach({
+      beltOffsetX: 0,
+      beltOffsetY: 0,
+      beltGrabbed: true
+    })
+  } else {
+    $.teach({
+      beltGrabbed: true
+    })
+  }
 }
 
 // drag a pane
 let lastBeltX, lastBeltY;
 function dragToolbelt(event) {
-  const { clientX, clientY } = event;
-  const { beltGrabbed, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn();
-
-  // Check if we've moved enough to be considered a drag
-  if (grabStartX !== undefined && grabStartY !== undefined) {
-    const deltaX = Math.abs(clientX - grabStartX);
-    const deltaY = Math.abs(clientY - grabStartY);
-
-    // If we've moved more than 5px, it's a drag
-    if ((deltaX > 5 || deltaY > 5) && !beltGrabbed) {
-      event.preventDefault();
-      $.teach({
-        beltOffsetX: beltOffsetX || 0,
-        beltOffsetY: beltOffsetY || 0,
-        beltGrabbed: true
-      });
-    }
-  }
-
-  if (!beltGrabbed) return;
-
-  event.preventDefault();
+  event.preventDefault()
+  const { target, clientX, clientY } = event
+  const { beltGrabbed, beltOffsetX, beltOffsetY } = $.learn()
+  if(!beltGrabbed) return
 
   if (lastBeltX !== undefined && lastBeltY !== undefined) {
     const movementX = clientX - lastBeltX;
     const movementY = clientY - lastBeltY;
-
+    // Use movementX and movementY here
+      $.teach({
+        beltOffsetX: beltOffsetX + movementX,
+        beltOffsetY: beltOffsetY + movementY
+      })
+  } else {
     $.teach({
-      beltOffsetX: beltOffsetX + movementX,
-      beltOffsetY: beltOffsetY + movementY
-    });
+      x: clientX - beltOffsetX,
+      y: clientY - beltOffsetY
+    })
   }
 
   lastBeltX = clientX;
@@ -2090,30 +2083,10 @@ function dragToolbelt(event) {
 
 // release a pane
 function ungrabToolbelt(event) {
-  const { beltGrabbed, capturedPointerId } = $.learn();
-
-  // Release pointer capture
-  if (capturedPointerId !== undefined) {
-    event.target.releasePointerCapture(capturedPointerId);
-  }
-
-  // Only prevent default if we were actually dragging
-  if (beltGrabbed) {
-    event.preventDefault();
-  } else {
-    // Didn't drag, so this was just a click - toggle the menu
-    if (event.target.closest('[data-menu]')) {
-      const { menuOpen } = $.learn()
-      $.teach({ menuOpen: !menuOpen })
-    }
-  }
-
+  event.preventDefault()
   $.teach({
     beltGrabbed: false,
-    grabStartX: undefined,
-    grabStartY: undefined,
-    capturedPointerId: undefined
-  });
+  })
   lastBeltX = undefined;
   lastBeltY = undefined;
 }
