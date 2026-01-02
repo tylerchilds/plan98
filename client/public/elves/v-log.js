@@ -657,15 +657,19 @@ $.style(`
     display: none;
   }
 
+  &[data-belt="true"] .toolbelt-actions,
   &[data-belt="true"] .linguistics,
+  &[data-belt="true"] .letterbox *,
   &[data-belt="true"] .letterbox,
-  &[data-belt="true"] button[data-menu],
   &[data-belt="true"] .toolbelt-debugger,
-  &[data-belt="true"] [data-tooltip],
-  &[data-belt="true"] .action-bar {
+  &[data-belt="true"] .action-bar,
+  &[data-belt="true"] .action-bar * {
     pointer-events: none !important;
   }
 
+  &[data-belt="true"] .toolbelt-actions [data-menu] {
+    pointer-events: all !important;
+  }
 
   & .toolbelt-actions {
     z-index: 10;
@@ -750,13 +754,8 @@ $.style(`
   & .menu-group {
     display: flex;
     margin-right: auto;
-    pointer-events: all;
     overflow: auto;
   }
-
-
-
-
 `)
 
 /*
@@ -1088,10 +1087,10 @@ class VLog extends HTMLElement {
           </div>
           <div class="toolbelt-actions">
             <div class="menu-group">
-              <button data-menu data-drag data-tooltip="Menu" class="toolbelt-actuator">
+              <button data-menu data-drag data-tooltip="Menu">
                 <plan98-icon></plan98-icon>
               </button>
-              <div class="action-bar toolbelt-actuator" data-open="false">
+              <div class="action-bar" data-open="false">
                 <button data-mode="cursor" data-tooltip="Open Windows">
                   <sl-icon name="cursor"></sl-icon>
                 </button>
@@ -2220,52 +2219,63 @@ $.when('click', '[data-toggle-transcription]', async (event) => {
   $.teach({ transcriptionEnabled: newState })
 })
 
-$.when('pointerdown', '[data-drag]', grabToolbelt)
-$.when('pointermove', '.viewport', dragToolbelt)
-$.when('pointermove', '[data-drag]', dragToolbelt)
-$.when('pointermove', '.toolbelt-actuator', dragToolbelt)
-$.when('pointerup', '.viewport', ungrabToolbelt)
-$.when('pointerup', '[data-drag]', ungrabToolbelt)
 
+$.when('pointerdown', '[data-drag]', grabToolbelt)
+$.when('pointermove', '[data-drag]', dragToolbelt)
+$.when('pointermove', '.viewport', dragToolbelt)
+$.when('pointerup', '[data-drag]', ungrabToolbelt)
+$.when('pointerup', '.viewport', ungrabToolbelt)
 
 // grab a pane
 function grabToolbelt(event) {
   event.preventDefault()
-  const { beltOffsetX } = $.learn()
-  if(!beltOffsetX) {
-    $.teach({
-      beltOffsetX: 0,
-      beltOffsetY: 0,
-      beltGrabbed: true
-    })
-  } else {
-    $.teach({
-      beltGrabbed: true
-    })
-  }
+  const { clientX, clientY } = event;
+
+  $.teach({
+    grabStartX: clientX,
+    grabStartY: clientY,
+    beltGrabbed: true,
+    beltDragged: false
+  });
 }
 
 // drag a pane
 let lastBeltX, lastBeltY;
 function dragToolbelt(event) {
-  event.preventDefault()
-  const { target, clientX, clientY } = event
-  const { beltGrabbed, beltOffsetX, beltOffsetY } = $.learn()
+  const { clientX, clientY } = event;
+  const { beltDragged, beltGrabbed, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn();
+
   if(!beltGrabbed) return
+
+  // Check if we've moved enough to be considered a drag
+  if (grabStartX !== undefined && grabStartY !== undefined) {
+    const deltaX = Math.abs(clientX - grabStartX);
+    const deltaY = Math.abs(clientY - grabStartY);
+
+    // If we've moved more than 5px, it's a drag
+    if ((deltaX > 5 || deltaY > 5) && !beltDragged) {
+      event.preventDefault();
+      $.teach({
+        beltOffsetX: beltOffsetX || 0,
+        beltOffsetY: beltOffsetY || 0,
+        beltDragged: true
+      });
+    }
+  }
+
+
+  if (!$.learn().beltDragged) return;
+
+  event.preventDefault();
 
   if (lastBeltX !== undefined && lastBeltY !== undefined) {
     const movementX = clientX - lastBeltX;
     const movementY = clientY - lastBeltY;
-    // Use movementX and movementY here
+
     $.teach({
       beltOffsetX: beltOffsetX + movementX,
-      beltOffsetY: beltOffsetY + movementY
-    })
-  } else {
-    $.teach({
-      x: clientX - beltOffsetX,
-      y: clientY - beltOffsetY
-    })
+      beltOffsetY: beltOffsetY + movementY,
+    });
   }
 
   lastBeltX = clientX;
@@ -2274,10 +2284,25 @@ function dragToolbelt(event) {
 
 // release a pane
 function ungrabToolbelt(event) {
-  event.preventDefault()
+  event.target.releasePointerCapture(event.pointerId);
+  const { beltDragged } = $.learn();
+  // Only prevent default if we were actually dragging
+  if (beltDragged) {
+    event.preventDefault();
+  } else {
+    // Didn't drag, so this was just a click - toggle the menu
+    if (event.target.closest('[data-menu]')) {
+      const { menuOpen } = $.learn()
+      $.teach({ menuOpen: !menuOpen })
+    }
+  }
+
   $.teach({
     beltGrabbed: false,
-  })
+    beltDragged: false,
+    grabStartX: undefined,
+    grabStartY: undefined,
+  });
   lastBeltX = undefined;
   lastBeltY = undefined;
 }
