@@ -648,22 +648,13 @@ $.style(`
     -ms-user-select: none; /* Internet Explorer/Edge */
   }
 
-  & .action-bar {
-    display: flex;
-    gap: 0;
-  }
-
-  & .action-bar[data-open="false"] [data-mode] {
-    display: none;
-  }
-
   &[data-belt="true"] .toolbelt-actions,
   &[data-belt="true"] .linguistics,
+  &[data-belt="true"] .the-compass,
+  &[data-belt="true"] .power,
   &[data-belt="true"] .letterbox *,
   &[data-belt="true"] .letterbox,
-  &[data-belt="true"] .toolbelt-debugger,
-  &[data-belt="true"] .action-bar,
-  &[data-belt="true"] .action-bar * {
+  &[data-belt="true"] .toolbelt-debugger {
     pointer-events: none !important;
   }
 
@@ -681,7 +672,6 @@ $.style(`
     max-width: 75%;
     width: 100%;
     padding: .5rem;
-    overflow: hidden;
     display: inline-block;
     transform: translate(var(--belt-offset-x, 0), var(--belt-offset-y, 0));
     pointer-events: none;
@@ -703,10 +693,15 @@ $.style(`
     left: 0;
   }
 
+  & .the-compass[data-open="false"] .power {
+    display: none;
+  }
+
   & .menu-group button.toolbelt-grabber {
     padding: .75rem .25rem;
     color: var(--root-theme, mediumseagreen);
   }
+
 
   @media screen {
     & .toolbelt-actions {
@@ -714,7 +709,6 @@ $.style(`
     }
   }
 
-  & .action-bar button,
   & .toolbelt-actions button {
     background: black;
     color: rgba(255,255,255,.85);
@@ -735,27 +729,98 @@ $.style(`
     display: inline-flex;
   }
 
-  & .action-bar button:focus,
-  & .action-bar button.active,
-  & .action-bar button:hover,
-  & .toolbelt-actions button:focus,
-  & .toolbelt-actions button.active,
-  & .toolbelt-actions button:hover {
-    color: #fff;
-    background: var(--root-theme, mediumseagreen);
-  }
-
-  & .action-bar button.enabled,
   & .toolbelt-actions button.enabled {
     background: black;
     color: var(--root-theme, mediumseagreen);
   }
 
-  & .menu-group {
-    display: flex;
-    margin-right: auto;
-    overflow: auto;
+  & .the-compass {
+    display: grid;
+    grid-template-columns: repeat(6, calc(100% / 6));
+    grid-template-rows: repeat(6, calc(100% / 6));
+    pointer-events: all;
+    aspect-ratio: 1;
+    margin: auto;
+    max-height: 100%;
+    top: 50%;
+    position: relative;
+    transform: translateY(-50%);
+    width: 12rem;
+    height: 12rem;
+    pointer-events: none;
   }
+
+  & .the-compass button {
+    position: relative;
+    overflow: hidden;
+    touch-action: manipulation;
+    border: none;
+    border-radius: 100%;
+    color: white;
+    background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.75) 25%);
+  }
+
+  & .the-compass button:hover {
+    background-image: radial-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5) 25%, rgba(0,0,0,0) 25%);
+  }
+
+  & .the-compass img {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+  }
+  & .the-compass button{
+    padding: 0;
+  }
+
+  & .the-compass .plus-2 {
+    grid-row: 3 / 5;
+    grid-column: 5 / 7;
+    background-color: var(--green);
+  }
+
+  & .the-compass .minus-2 {
+    grid-row: 3 / 5;
+    grid-column: 1 / 3;
+    background-color: var(--yellow);
+  }
+
+  & .the-compass .minus-7 {
+    grid-row: 1 / 3;
+    grid-column: 2 / 4;
+    background-color: var(--purple);
+    transform: translateY(13%);
+  }
+
+  & .the-compass .plus-7 {
+    grid-row: 1 / 3;
+    grid-column: 4 / 6;
+    background-color: var(--orange);
+    transform: translateY(13%);
+  }
+
+  & .the-compass .minus-5 {
+    grid-row: 5 / 7;
+    grid-column: 2 / 4;
+    background-color: var(--blue);
+    transform: translateY(-13%);
+  }
+
+  & .the-compass .plus-5 {
+    grid-row: 5 / 7;
+    grid-column: 4 / 6;
+    background-color: var(--red);
+    transform: translateY(-13%);
+  }
+
+  & .the-compass .root {
+    grid-row: 3 / 5;
+    grid-column: 3 / 5;
+    background-color: white;
+  }
+
+
 `)
 
 /*
@@ -1086,24 +1151,22 @@ class VLog extends HTMLElement {
             <div class="cursor-tooltips"></div>
           </div>
           <div class="toolbelt-actions">
-            <div class="menu-group">
-              <button data-menu data-drag data-tooltip="Menu">
+            <div class="the-compass">
+              <button data-menu data-drag class="root" data-tooltip="Menu">
                 <plan98-icon></plan98-icon>
               </button>
-              <div class="action-bar" data-open="false">
-                <button data-mode="cursor" data-tooltip="Open Windows">
-                  <sl-icon name="cursor"></sl-icon>
-                </button>
-                <button data-mode="move"  data-tooltip="Pan Canvas">
-                  <sl-icon name="arrows-move"></sl-icon>
-                </button>
-                <button data-mode="chat" data-tooltip="Quick Chat">
-                  <sl-icon name="chat"></sl-icon>
-                </button>
-                <button data-mode="camera"  data-tooltip="Conference">
-                  <sl-icon name="camera-reels"></sl-icon>
-                </button>
-              </div>
+              <button class="power minus-7" data-note="">
+              </button>
+              <button class="power plus-7" data-note="">
+              </button>
+              <button class="power plus-2" data-note="">
+              </button>
+              <button class="power plus-5" data-note="">
+              </button>
+              <button class="power minus-5" data-note="">
+              </button>
+              <button class="power minus-2" data-note="">
+              </button>
             </div>
           </div>
         </div>
@@ -1235,8 +1298,8 @@ class VLog extends HTMLElement {
     }
 
     {
-      const bar = target.querySelector('.action-bar')
-      bar.dataset.open = $.learn().menuOpen
+      const compass = target.querySelector('.the-compass')
+      compass.dataset.open = $.learn().menuOpen
     }
 
 
@@ -1820,7 +1883,7 @@ $.when('click', '[data-menu-target]', (event) => {
 })
 
 $.when('click', '*', (event) => {
-  if(event.target.closest('.action-item')) {
+  if(event.target.closest('.the-compass')) {
     // child of a menu item
     return
   }
@@ -2231,6 +2294,8 @@ function grabToolbelt(event) {
   event.preventDefault()
   const { clientX, clientY } = event;
 
+  console.log({ clientX, clientY })
+
   $.teach({
     grabStartX: clientX,
     grabStartY: clientY,
@@ -2244,6 +2309,8 @@ let lastBeltX, lastBeltY;
 function dragToolbelt(event) {
   const { clientX, clientY } = event;
   const { beltDragged, beltGrabbed, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn();
+
+  console.log({ clientX, clientY })
 
   if(!beltGrabbed) return
 
