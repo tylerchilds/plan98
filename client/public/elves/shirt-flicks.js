@@ -179,6 +179,22 @@ function autoplay(target) {
       </div>
     `
   }
+
+  {
+    const { mode } = $.learn()
+    const vid = theater.querySelector('video')
+
+    if(vid) {
+      if(mode !== target.lastMode) {
+        target.lastMode = mode
+        if(mode === modes.system) {
+          vid.play()
+        } else {
+          vid.pause()
+        }
+      }
+    }
+  }
 }
 
 $.draw((target) => {
@@ -215,7 +231,7 @@ $.draw((target) => {
     <div class="${modes.settings}">
       <div class="pane">
         <div class="pane-view">
-          <brokemon-go></brokemon-go>
+          <iframe src="/app/v-log"></iframe>
         </div>
         <div class="pane-actions">
           <button class="gaming-button -x toolbelt-debugger" data-dom="debugger-button"></button>

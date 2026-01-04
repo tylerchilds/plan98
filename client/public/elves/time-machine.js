@@ -1,4 +1,5 @@
 import app from '@plan98/app'
+import { Horizon } from '@plan98/types'
 import { innerHTML } from 'diffhtml'
 import { toast } from './plan98-toast.js'
 import {
@@ -4154,7 +4155,7 @@ function formatTime(date, options = {
   hour: '2-digit',
   minute: '2-digit',
 }) {
-  return date.toLocaleString('en-US', options);
+  return Horizon(date).toLocaleString('en-US', options);
 }
 
 function stamp(x) {

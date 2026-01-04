@@ -33,7 +33,6 @@ An dog fed man toast.
 import { toast } from './plan98-toast.js'
 import { showModal } from './plan98-modal.js'
 import './plan98-palette.js'
-import './plan98-icon.js'
 
 /*
 
@@ -295,11 +294,6 @@ async function startRecording(event) {
 
   const { videoEnabled, audioEnabled } = $.learn()
 
-  if (!videoEnabled && !audioEnabled) {
-    toast("Please enable video or audio in settings first")
-    return
-  }
-
   try {
     const root = event.target.closest($.link)
     $.teach({ recording: true, transcription: '' })
@@ -311,7 +305,7 @@ async function startRecording(event) {
       if (audioTrack) tracks.push(audioTrack)
     }
 
-    if (videoEnabled && root.outputCanvas) {
+    if (root.outputCanvas) {
       // Capture stream at 30fps to ensure smooth recording
       const compositedVideoStream = root.outputCanvas.captureStream(30)
       const videoTrack = compositedVideoStream.getVideoTracks()[0]
@@ -464,7 +458,7 @@ And finally a button just to take a photo since that's all dog really wanted man
 $.when('click', '[data-screenshot]', screenshot)
 
 function screenshot(event) {
-  const { outputCanvas, src } = engine(event.target)
+  const { outputCanvas } = engine(event.target)
   const { strokeHistory, strokeRevisory } = $.ear()
   const dataURL = outputCanvas.toDataURL('image/jpeg');
   const byteCharacters = atob(dataURL.split(',')[1]);
@@ -483,7 +477,7 @@ function screenshot(event) {
   $.mouth({ image })
 
   // Attempt to upload to server
-  put(src, JSON.stringify(data), { type: 'application/json' }).then(response => {
+  put(image, JSON.stringify(data), { type: 'application/json' }).then(response => {
   }).catch(error => {
     console.warn(error);
   });
@@ -491,7 +485,6 @@ function screenshot(event) {
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
-      updateDraft(data)
       console.log({ image })
       $.mouth({ image })
     } else {
@@ -528,7 +521,6 @@ $.style(`
   & .viewport {
     position: absolute;
     inset: 0;
-    background: var(--background, black);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -696,6 +688,7 @@ $.style(`
     width: 100%;
     max-width: 100%;
     aspect-ratio: 16/9;
+    background: var(--background, black);
   }
 
   & .letterbox canvas {
@@ -863,7 +856,7 @@ $.style(`
     border: none;
     border-radius: 100%;
     color: white;
-    border: 2px solid var(--active-color, mediumseagreen);
+    border: 1px solid var(--active-color, mediumseagreen);
     background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.75) 25%);
   }
 
@@ -919,6 +912,7 @@ $.style(`
     grid-row: 3 / 5;
     grid-column: 3 / 5;
     background-color: white;
+    border-width: 3px;
   }
 `)
 

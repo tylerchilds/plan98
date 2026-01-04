@@ -1,6 +1,6 @@
-import elf from '@plan98/elf'
+import { Self } from '@plan98/types'
 
-const $ = elf('plan98-icon')
+const $ = Self('plan98-icon')
 
 $.draw(() => {
   return `

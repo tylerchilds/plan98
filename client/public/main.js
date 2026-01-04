@@ -1,3 +1,4 @@
+import './elves/plan98-icon.js'
 import('randomuuid').catch(console.error)
 import('./elves/plan98-console.js').catch(console.error)
 //import('./elves/plan98-synthia.js').catch(console.error)
@@ -25,8 +26,8 @@ const newpage = `
   <sillonious-brand host="${plan98.host}"></sillonious-brand>
 `
 
-import('@silly/elf').then(x => {
-  x.default('#main').draw(target => newpage)
+import('@plan98/types').then(({ Self }) => {
+  Self('#main').draw(target => newpage)
 })
 
 if(parameters.get('debug') === 'true') {

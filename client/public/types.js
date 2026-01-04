@@ -23,6 +23,7 @@ const Types = {
   Value,
   Integer,
   Float,
+  Horizon,
   Text,
   Add,
   Subtract,
@@ -59,6 +60,10 @@ export function Integer(x) {
 
 export function Float(x) {
   return parseFloat(x)
+}
+
+export function Horizon(x) {
+  return new Date(x)
 }
 
 export function Text(x='') {
