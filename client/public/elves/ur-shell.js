@@ -515,79 +515,82 @@ const commands = {
 
 PLAN98
 
-help
+<code>help</code>
   display help options
 
-about
+<code>about</code>
   an immersive reality game
 
-${killCommands.join(' ')}
+${killCommands.map(x => `<code>${x}</code>`).join(' ')}
   quit playing around and go outside
 
-color
+<code>color</code>
   launch the color and sound palette
 
-wallet
+<code>wallet</code>
   launch the wallet to access keycards
 
-draw
+<code>draw</code>
   launch the drawing app
 
-journal
+<code>journal</code>
   launch the journal app
 
-desktop
+<code>desktop</code>
   launch the desktop app
 
-mobile
+<code>mobile</code>
   launch the mobile app
 
-music
+<code>music</code>
   launch the music app
 
-gaming
+<code>gaming</code>
   launch the gaming app
 
-kiosk
+<code>kiosk</code>
   launch the kiosk app
 
-bluesky
+<code>bluesky</code>
   launch the bluesky app
 
-tv
+<code>tv</code>
   the tiniest violin
 
 
 
-pwd
+<code>pwd</code>
   print working directory
 
-ls
+<code>ls</code>
   list stuff
 
 cd path
   change directory
 
-clear
+<code>clear</code>
   empty the screen
 
 echo
   re-state the arguments
 
-luau
+<code>luau</code>
   start repl powered by the luau language
 
-error
+<code>js</code>
+  start repl powered by the JavaScript language
+
+<code>error</code>
   throw an error-- like echo, but for debugging the system
 
 
 printenv [...args]
   display environment variables, none for all or one by one
 
-shebang
+<code>shebang</code>
   launch the whole #!shebang
 
-ide
+<code>ide</code>
   change the whole #!shebang
 
 
@@ -608,7 +611,7 @@ For further assistance, enter &lt;cool-chat
   },
 
   shebang() {
-    execute('/app/ur-shell?src=/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
+    execute('/app/door-man?src=/app/mobile-device?src=/app/file-surf?src=/app/paper-pocket?rom=couch-coop')
   }
 }
 
@@ -644,9 +647,11 @@ $.draw((target) => {
       <div class="scroll-back">
         <div class="messages">
           ${log}
-          <div class="message -assistant">
-            ${marked(thinkingFace || '').trim()}
-          </div>
+          ${thinkingFace ? `
+            <div class="message -assistant">
+              ${marked(thinkingFace || '').trim()}
+            </div>
+          `:''}
         </div>
       </div>
       <form>
@@ -705,8 +710,7 @@ function afterUpdate(target) {
       target.lastIndex = messages.length - 1
       const lastChild = target.querySelector('.messages .message:last-child')
       if(lastChild) {
-        const children = [...document.querySelector('.messages').children]
-        document.querySelector('.scroll-back').scrollTop = children[children.length -1].offsetTop
+        document.querySelector('.scroll-back').scrollTop = lastChild.offsetTop
       }
     }
   }
@@ -1026,6 +1030,16 @@ $.style(`
     -webkit-text-fill-color: transparent;
   }
 
+  & .message.-assistant pre,
+  & .message.-assistant code {
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+  }
+
+  & code {
+    cursor: pointer;
+  }
+
   & .title {
     color: var(--root-theme, #E83FB8);
     --v-font-wght: 800;
@@ -1073,6 +1087,13 @@ $.when('input', '[name="messageText"]', (event) => {
   const { value } = event.target;
   $.teach({ messageDraft: value, messageHeight: event.target.scrollHeight })
 });
+
+$.when('click', 'code', (event) => {
+  const value = event.target.innerText;
+  execute(value)
+});
+
+
 
 $.when('keydown', '[name="messageText"]', event => {
   const { history, historyCursor, messageText, messageDraft } = $.learn()

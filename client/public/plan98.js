@@ -15,6 +15,7 @@ function secureEval(query, variables, saneWasher = (x) => x) {
     handle.dispose()
   }
 
+  console.log('seval: ', query, variables)
   const evaluation = vm.evalCode(query)
   if(evaluation.error) {
     res = {
@@ -586,7 +587,7 @@ function createStore(initialState = {}, broadcast = () => null) {
       });
 
       if (wisdom.error) {
-        throw new Error(`Sandboxed execution failed: ${wisdom.error}`);
+        throw new Error(`Sandboxed execution failed: ${JSON.stringify(wisdom.error)}`);
       } else {
         state = {
           ...state,

@@ -365,8 +365,7 @@ code {
 code {
   padding: 4px .5rem;
   overflow: auto;
-  max-width: 100%;
-  display: inline-block;
+  display: inline;
 }
 
 pre {

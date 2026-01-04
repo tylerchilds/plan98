@@ -122,23 +122,23 @@ const $ = elf('typo-hero', {
       list: [
         {
           label: 'Vowels',
-          url: '/cdn/sillyz.computer/lyrics/vowels.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/vowels.txt'
         },
         {
           label: 'Punctuation',
-          url: '/cdn/sillyz.computer/lyrics/punctuation.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/punctuation.txt'
         },
         {
           label: 'Rad Calm',
-          url: '/cdn/sillyz.computer/lyrics/rad-calm.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/rad-calm.txt'
         },
         {
           label: 'Wolf Guy Pub',
-          url: '/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
         },
         {
           label: 'Wonderwall',
-          url: '/cdn/sillyz.computer/lyrics/wonderwall.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/wonderwall.txt'
         },
       ]
     },
@@ -147,27 +147,27 @@ const $ = elf('typo-hero', {
       list: [
         {
           label: 'Vowels',
-          url: '/cdn/sillyz.computer/lyrics/vowels.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/vowels.txt'
         },
         {
           label: 'Punctuation',
-          url: '/cdn/sillyz.computer/lyrics/punctuation.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/punctuation.txt'
         },
         {
           label: 'Teenage Shred',
-          url: '/cdn/sillyz.computer/lyrics/teenage-shred.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/teenage-shred.txt'
         },
         {
           label: 'Rad Calm',
-          url: '/cdn/sillyz.computer/lyrics/rad-calm.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/rad-calm.txt'
         },
         {
           label: 'Wolf Guy Pub',
-          url: '/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/wolf-guy-pub.txt'
         },
         {
           label: 'Viktor Jax Quartz',
-          url: '/cdn/sillyz.computer/lyrics/viktor-jax-quartz.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/viktor-jax-quartz.txt'
         },
       ]
     },
@@ -177,19 +177,19 @@ const $ = elf('typo-hero', {
       list: [
         {
           label: 'Wonderwall',
-          url: '/cdn/sillyz.computer/lyrics/wonderwall.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/wonderwall.txt'
         },
         {
           label: 'Freebird',
-          url: '/cdn/sillyz.computer/lyrics/freebird.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/freebird.txt'
         },
         {
           label: 'Never Gonna Give You Up',
-          url: '/cdn/sillyz.computer/lyrics/never-gonna-give-you-up.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/never-gonna-give-you-up.txt'
         },
         {
           label: 'Eye of the Tiger',
-          url: '/cdn/sillyz.computer/lyrics/eye-of-the-tiger.txt'
+          url: '/public/cdn/sillyz.computer/lyrics/eye-of-the-tiger.txt'
         },
 
       ]

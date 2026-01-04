@@ -202,8 +202,8 @@ $.draw((target) => {
   if(src) {
     requestIdleCallback(() => {
       if(src) {
-        $.teach(self.crypto.randomUUID(), (state, payload) => {
-          const tray = payload
+        $.teach({ tray: self.crypto.randomUUID(), src }, (state, payload) => {
+          const { tray, src } = payload
           const newState = {...state}
           newState.trays[tray] = true
           newState.focusedTray = tray
