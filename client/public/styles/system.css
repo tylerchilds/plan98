@@ -1601,6 +1601,7 @@ sillonious-brand > xml-html {
   display: inline-grid;
   place-content: center;
   border: none;
+  text-shadow: 2px 2px rgba(0,0,0,.85);
 }
 
 .branded-button.-white {
@@ -1620,7 +1621,6 @@ sillonious-brand > xml-html {
   background: firebrick;
   color: black;
 }
-
 .branded-button.-plan98-orange {
   background: darkorange;
   color: black;
@@ -1663,12 +1663,18 @@ sillonious-brand > xml-html {
 .branded-button:focus {
   background: white;
   color: black;
+  text-shadow: 2px 2px rgba(255,255,255,.85);
 }
 
+.branded-button.active,
 .branded-button:active {
-  background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-  color: var(--root-theme, mediumseagreen);
+  background: white;
+  color: black;
+  outline: 2px solid var(--root-theme, mediumseagreen);
+  outline-offset: 2px;
+  text-shadow: none;
 }
+
 
 .brutal {
   margin: 0 auto;

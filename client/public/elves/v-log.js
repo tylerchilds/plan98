@@ -11,6 +11,7 @@ The fetch command instructs the human to chase and fetch the ball
 */
 
 import Self from '@plan98/elf'
+import { Float, Integer } from '@plan98/types'
 import { get, put } from './plan98-wallet.js'
 
 /*
@@ -31,6 +32,8 @@ An dog fed man toast.
 
 import { toast } from './plan98-toast.js'
 import { showModal } from './plan98-modal.js'
+import './plan98-palette.js'
+import './plan98-icon.js'
 
 /*
 
@@ -70,6 +73,65 @@ let isMousedown = false
 let points = []
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 9001, 9002, 9004, 9008]
 const opacities = [0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1]
+const backgrounds = [
+  {
+    key: 'Transparent',
+    value: 'transparent'
+  },
+  {
+    key: 'Black',
+    value: 'black'
+  },
+  {
+    key: 'White',
+    value: 'white'
+  },
+  {
+    key: 'Blue',
+    value: '#0047bb'
+  },
+  {
+    key: 'Green',
+    value: '#00b140'
+  },
+  {
+    key: 'Red',
+    value: 'firebrick'
+  },
+  {
+    key: 'Orange',
+    value: 'darkorange'
+  },
+  {
+    key: 'Yellow',
+    value: 'gold'
+  },
+  {
+    key: 'Green',
+    value: 'mediumseagreen'
+  },
+  {
+    key: 'Blue',
+    value: 'Dodgerblue'
+  },
+  {
+    key: 'Indigo',
+    value: 'slateblue'
+  },
+  {
+    key: 'Violet',
+    value: 'mediumpurple'
+  },
+  {
+    key: 'Otr',
+    value: 'lemonchiffon'
+  },
+  {
+    key: 'Wally',
+    value: '#54796d'
+  },
+]
+
 const $ = Self(tag, {
   menuOpen: false,
   recording: false,
@@ -92,7 +154,7 @@ const $ = Self(tag, {
   thickness: 16,
   opacity: .5,
   color: 'dodgerblue',
-  background: 'transparent',
+  background: 'lemonchiffon',
   players: {}, // { [playerId]: { currentStroke: [], cursorX: 0, cursorY: 0, color: 'color' } }
   videoEnabled: false,
   audioEnabled: false
@@ -226,7 +288,7 @@ async function startStream() {
   })
 }
 
-$.when('click', '[data-record]', async (event) => {
+async function startRecording(event) {
   if (!supportedVideoType) {
     return
   }
@@ -345,15 +407,14 @@ $.when('click', '[data-record]', async (event) => {
     if (recordedVideo) {
       recordedVideo.src = ''; // Clear previous recording
     }
-
-    console.log('Recording started...');
-
   } catch (err) {
     $.teach({ recording: false })
     console.error('Error accessing microphone:', err);
     alert('Could not access microphone. Please ensure you have a microphone and have granted permission.');
   }
-});
+}
+
+$.when('click', '[data-record]', startRecording);
 
 /*
 
@@ -361,7 +422,7 @@ And a button to stop the record
 
 */
 
-$.when('click', '[data-stop]', async () => {
+async function stopRecording(event) {
   const { streamId } = $.learn()
   if (mediaRecorder && mediaRecorder.state === 'recording') {
     mediaRecorder.stop();
@@ -374,9 +435,24 @@ $.when('click', '[data-stop]', async () => {
       });
     }
     $.teach({ recording: false })
-    console.log('Recording stopped.');
   }
-});
+}
+
+$.when('click', '[data-stop]', stopRecording);
+
+/*
+
+And a button to do the other one than we're currently doing
+
+*/
+
+$.when('click', '[data-toggle-recording]', (event) => {
+  if($.learn().recording) {
+    stopRecording(event)
+  } else {
+    startRecording(event)
+  }
+})
 
 /*
 
@@ -396,7 +472,7 @@ $.style(`
 
   & .viewport {
     position: absolute;
-    inset: 0 0 2rem 0;
+    inset: 0;
     background: var(--background, black);
     display: flex;
     align-items: center;
@@ -601,7 +677,6 @@ $.style(`
   }
 
   & .footer {
-    background: var(--active-color, black);
     height: 2rem;
     position: absolute;
     gap: .5rem;
@@ -697,40 +772,16 @@ $.style(`
     display: none;
   }
 
+  & .power {
+    display: grid;
+    height: 100%;
+    place-content: center;
+    background: black;
+    font-size: 2rem;
+  }
+
   & .menu-group button.toolbelt-grabber {
     padding: .75rem .25rem;
-    color: var(--root-theme, mediumseagreen);
-  }
-
-
-  @media screen {
-    & .toolbelt-actions {
-      display: flex;
-    }
-  }
-
-  & .toolbelt-actions button {
-    background: black;
-    color: rgba(255,255,255,.85);
-    border: none;
-    box-shadow: 0px 0px 4px 4px rgba(0,0,0,.10);
-    font-size: 1rem;
-    --v-font-mono: 1;
-    --v-font-casl: 0;
-    --v-font-wght: 400;
-    --v-font-slnt: 0;
-    --v-font-crsv: 0;
-    font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
-    font-family: "Recursive";
-    transition: background 200ms ease-in-out;
-    font-size: 1.5rem;
-    padding: .75rem;
-    line-height: 1;
-    display: inline-flex;
-  }
-
-  & .toolbelt-actions button.enabled {
-    background: black;
     color: var(--root-theme, mediumseagreen);
   }
 
@@ -757,6 +808,7 @@ $.style(`
     border: none;
     border-radius: 100%;
     color: white;
+    border: 2px solid var(--active-color, mediumseagreen);
     background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.75) 25%);
   }
 
@@ -777,40 +829,34 @@ $.style(`
   & .the-compass .plus-2 {
     grid-row: 3 / 5;
     grid-column: 5 / 7;
-    background-color: var(--green);
   }
 
   & .the-compass .minus-2 {
     grid-row: 3 / 5;
     grid-column: 1 / 3;
-    background-color: var(--yellow);
   }
 
   & .the-compass .minus-7 {
     grid-row: 1 / 3;
     grid-column: 2 / 4;
-    background-color: var(--purple);
     transform: translateY(13%);
   }
 
   & .the-compass .plus-7 {
     grid-row: 1 / 3;
     grid-column: 4 / 6;
-    background-color: var(--orange);
     transform: translateY(13%);
   }
 
   & .the-compass .minus-5 {
     grid-row: 5 / 7;
     grid-column: 2 / 4;
-    background-color: var(--blue);
     transform: translateY(-13%);
   }
 
   & .the-compass .plus-5 {
     grid-row: 5 / 7;
     grid-column: 4 / 6;
-    background-color: var(--red);
     transform: translateY(-13%);
   }
 
@@ -819,8 +865,6 @@ $.style(`
     grid-column: 3 / 5;
     background-color: white;
   }
-
-
 `)
 
 /*
@@ -888,15 +932,41 @@ const viewRenderers = {
     `
   },
   [views.brush]: function (target) {
+    const { thickness, opacity, background } = $.learn()
     return `
-      <div style="text-align: right;">
+      <div style="position: sticky; top: 0; text-align: right;">
         <button data-cancel class="branded-button">
           Close
         </button>
       </div>
 
       <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
-             </div>
+        <h3>Thickness</h3>
+        <div class="settings-grid">
+          ${thicknoids.map(x => `
+            <button class="branded-button ${thickness === x ? 'active' : ''}" data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
+              ${x}
+            </button>
+          `).join('')}
+        </div>
+        <h3>Opacities</h3>
+        <div class="settings-grid">
+          ${opacities.map(x => `
+            <button class="branded-button ${opacity === x ? 'active' : ''}" data-tooltip="Set opacity to ${x}" data-opacity="${x}">
+              ${x}
+            </button>
+          `).join('')}
+        </div>
+
+        <h3>Background</h3>
+        <div class="settings-grid">
+          ${backgrounds.map(x => `
+            <button class="branded-button ${background === x.value ? 'active' : ''}" data-tooltip="Set opacity to ${x}" data-background="${x.value}" style="background: ${background === x.value ? 'white' : x.value}">
+              ${x.key}
+            </button>
+          `).join('')}
+        </div>
+      </div>
     `
   },
 
@@ -918,70 +988,6 @@ const viewRenderers = {
         <div>
           <button class="branded-button" data-toggle-audio>${audioEnabled?'on':'off'}</button>
         </div>
-
-        <h3>Background</h3>
-        <div class="settings-grid">
-          <button class="branded-button -black" data-background="transparent">
-            Transparent
-          </button>
-          <button class="branded-button -black" data-background="black">
-            Black
-          </button>
-          <button class="branded-button -white" data-background="white">
-            White
-          </button>
-          <button class="branded-button -chroma-blue" data-background="#0047bb">
-            Blue
-          </button>
-          <button class="branded-button -chroma-green" data-background="#00b140">
-            Green
-          </button>
-          <button class="branded-button -plan98-red" data-background="firebrick">
-            Red
-          </button>
-          <button class="branded-button -plan98-orange" data-background="darkorange">
-            Orange
-          </button>
-          <button class="branded-button -plan98-yellow" data-background="gold">
-            Yellow
-          </button>
-          <button class="branded-button -plan98-green" data-background="mediumseagreen">
-            Green
-          </button>
-          <button class="branded-button -plan98-blue" data-background="dodgerblue">
-            Blue
-          </button>
-          <button class="branded-button -plan98-indigo" data-background="slateblue">
-            Indigo
-          </button>
-          <button class="branded-button -plan98-violet" data-background="mediumpurple">
-            Violet
-          </button>
-          <button class="branded-button -otr" data-background="lemonchiffon">
-            Otr
-          </button>
-          <button class="branded-button -wally" data-background="#54796d">
-            Wally
-          </button>
-        </div>
-
-        <h3>Thickness</h3>
-        <div class="settings-grid">
-          ${thicknoids.map(x => `
-            <button class="branded-button" data-tooltip="Set thicknoid to ${x}" data-thickness="${x}">
-              ${x}
-            </button>
-          `).join('')}
-        </div>
-        <h3>Opacities</h3>
-        <div class="settings-grid">
-          ${opacities.map(x => `
-            <button class="branded-button" data-tooltip="Set opacity to ${x}" data-opacity="${x}">
-              ${x}
-            </button>
-          `).join('')}
-        </div>
-
         <h3>Extend Reality</h3>
         <div>
           <button class="branded-button" data-toggle-xr>${xrEnabled?'on':'off'}</button>
@@ -1033,14 +1039,14 @@ $.when('input', 'plan98-palette', (event) => {
 $.when('click', '[data-thickness]', function  (event) {
   event.preventDefault()
   $.mouth({
-    thickness: parseInt(event.target.dataset.thickness) || 1,
+    thickness: Integer(event.target.dataset.thickness) || 1,
   })
 })
 
 $.when('click', '[data-opacity]', function  (event) {
   event.preventDefault()
   $.mouth({
-    opacity: event.target.dataset.opacity,
+    opacity: Float(event.target.dataset.opacity),
   })
 })
 
@@ -1112,7 +1118,7 @@ class VLog extends HTMLElement {
   async init(target) {
     if(!target.innerHTML) {
       target.innerHTML = `
-        <div class="footer" data-color-picker>
+        <div class="footer">
           <button data-new class="branded-button">
             New
           </button>
@@ -1155,17 +1161,23 @@ class VLog extends HTMLElement {
               <button data-menu data-drag class="root" data-tooltip="Menu">
                 <plan98-icon></plan98-icon>
               </button>
-              <button class="power minus-7" data-note="">
+              <button data-undo class="power minus-7" data-note="">
+                <sl-icon name="arrow-counterclockwise"></sl-icon>
               </button>
-              <button class="power plus-7" data-note="">
+              <button data-redo class="power plus-7" data-note="">
+                <sl-icon name="arrow-clockwise"></sl-icon>
               </button>
-              <button class="power plus-2" data-note="">
+              <button data-color-picker class="power plus-2" data-note="">
+                <sl-icon name="palette"></sl-icon>
               </button>
               <button class="power plus-5" data-note="">
+                <sl-icon name="camera"></sl-icon>
               </button>
-              <button class="power minus-5" data-note="">
+              <button data-toggle-recording class="power minus-5" data-note="">
+                <sl-icon name="camera-video" class="camera-status"></sl-icon>
               </button>
-              <button class="power minus-2" data-note="">
+              <button data-brush-picker class="power minus-2" data-note="">
+                <sl-icon name="border-width"></sl-icon>
               </button>
             </div>
           </div>
@@ -1302,31 +1314,20 @@ class VLog extends HTMLElement {
       compass.dataset.open = $.learn().menuOpen
     }
 
+    {
+      const { color } = $.learn()
+      target.style.setProperty("--active-color", color);
+    }
 
     {
       const partialContainer = target.querySelector('.partial')
-      const actionContainer = target.querySelector('[data-primary-action]')
+      const cameraStatus = target.querySelector('.camera-status')
 
       innerHTML(partialContainer, partial)
 
       if(recording !== target.lastRecording) {
         target.lastRecording = recording
-        innerHTML(actionContainer, recording
-          ? `
-            <div2>
-              <button data-stop class="standard-button bias-negative -large -round">
-                <sl-icon name="stop-circle-fill"></sl-icon>
-              </button>
-            </div2>
-          `
-          : `
-            <div3>
-              <button data-record class="standard-button bias-positive -large -round">
-                <sl-icon name="record-circle-fill"></sl-icon>
-              </button>
-            </div3>
-          `
-        )
+        cameraStatus.setAttribute('name', recording ? 'camera-video-off' : 'camera-video')
       }
     }
 
@@ -2294,8 +2295,6 @@ function grabToolbelt(event) {
   event.preventDefault()
   const { clientX, clientY } = event;
 
-  console.log({ clientX, clientY })
-
   $.teach({
     grabStartX: clientX,
     grabStartY: clientY,
@@ -2309,8 +2308,6 @@ let lastBeltX, lastBeltY;
 function dragToolbelt(event) {
   const { clientX, clientY } = event;
   const { beltDragged, beltGrabbed, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn();
-
-  console.log({ clientX, clientY })
 
   if(!beltGrabbed) return
 

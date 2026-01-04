@@ -21,7 +21,8 @@ const Types = {
   True,
   False,
   Value,
-  Precision,
+  Integer,
+  Float,
   Text,
   Add,
   Subtract,
@@ -52,7 +53,11 @@ export function Value(x) {
   return x
 }
 
-export function Precision(x) {
+export function Integer(x) {
+  return parseFloat(x)
+}
+
+export function Float(x) {
   return parseFloat(x)
 }
 

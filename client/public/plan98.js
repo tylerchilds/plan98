@@ -199,7 +199,7 @@ function sandbox({ mergeHandler, parameters }) {
     return false;
   }
 
-  console.log('Generated merge function:', result.data);
+  //console.log('Generated merge function:', result.data);
   return result.data;
 }
 
