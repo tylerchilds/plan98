@@ -15,7 +15,7 @@ function secureEval(query, variables, saneWasher = (x) => x) {
     handle.dispose()
   }
 
-  console.log('seval: ', query, variables)
+  //console.log('seval: ', query, variables)
   const evaluation = vm.evalCode(query)
   if(evaluation.error) {
     res = {

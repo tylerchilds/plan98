@@ -456,6 +456,61 @@ $.when('click', '[data-toggle-recording]', (event) => {
 
 /*
 
+And finally a button just to take a photo since that's all dog really wanted man to do.
+
+*/
+
+
+$.when('click', '[data-screenshot]', screenshot)
+
+function screenshot(event) {
+  const { outputCanvas, src } = engine(event.target)
+  const { strokeHistory, strokeRevisory } = $.ear()
+  const dataURL = outputCanvas.toDataURL('image/jpeg');
+  const byteCharacters = atob(dataURL.split(',')[1]);
+  const byteNumbers = new Array(byteCharacters.length);
+  for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+  }
+  const byteArray = new Uint8Array(byteNumbers);
+
+  const now = new Date();
+  const timestamp = now.toJSON()
+  const image = `/private/${$.link}/${timestamp}.jpg`
+
+  const data = { src: image, strokeHistory, strokeRevisory }
+
+  $.mouth({ image })
+
+  // Attempt to upload to server
+  put(src, JSON.stringify(data), { type: 'application/json' }).then(response => {
+  }).catch(error => {
+    console.warn(error);
+  });
+
+  // Attempt to upload to server
+  put(image, byteArray, { type: 'image/jpeg' }).then(res => {
+    if(res.ok) {
+      updateDraft(data)
+      console.log({ image })
+      $.mouth({ image })
+    } else {
+      throw new Error('Upload failed')
+    }
+  }).catch(error => {
+    console.warn(error);
+    const link = document.createElement('a');
+    link.download = `${timestamp}.jpg`;
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  })
+}
+
+
+/*
+
 And a bunch of colorful shapes and sizes, since once again, humans.
 
 */
@@ -1170,7 +1225,7 @@ class VLog extends HTMLElement {
               <button data-color-picker class="power plus-2" data-note="">
                 <sl-icon name="palette"></sl-icon>
               </button>
-              <button class="power plus-5" data-note="">
+              <button data-screenshot class="power plus-5" data-note="">
                 <sl-icon name="camera"></sl-icon>
               </button>
               <button data-toggle-recording class="power minus-5" data-note="">
@@ -1898,17 +1953,19 @@ $.when('click', '*', (event) => {
 
 function engine(target) {
   const root = target.closest($.link)
-  const canvas = root.querySelector('.input-canvas')
+  const inputCanvas = root.querySelector('.input-canvas')
+  const outputCanvas = root.querySelector('.output-canvas')
 
-  if(!canvas) return {}
-  const rectangle = canvas.getBoundingClientRect()
+  if(!inputCanvas) return {}
+  const rectangle = inputCanvas.getBoundingClientRect()
 
-  const scaleX = canvas.width / rectangle.width;
-  const scaleY = canvas.height / rectangle.height;
+  const scaleX = inputCanvas.width / rectangle.width;
+  const scaleY = inputCanvas.height / rectangle.height;
 
   return {
     root,
-    canvas,
+    inputCanvas,
+    outputCanvas,
     rectangle,
     scaleX,
     scaleY
@@ -1965,19 +2022,19 @@ Unified drawing function - draws all historical strokes plus all current player 
 */
 
 function drawAllStrokes(target) {
-  const { canvas } = engine(target)
-  if (!canvas) return
+  const { inputCanvas } = engine(target)
+  if (!inputCanvas) return
 
   const { strokeHistory, players } = $.learn()
-  const context = canvas.getContext('2d')
+  const context = inputCanvas.getContext('2d')
 
-  // Clear canvas
-  context.clearRect(0, 0, canvas.width, canvas.height)
+  // Clear inputCanvas
+  context.clearRect(0, 0, inputCanvas.width, inputCanvas.height)
 
   // Draw background
   context.globalAlpha = 1
   context.fillStyle = $.learn().background
-  context.fillRect(0, 0, canvas.width, canvas.height)
+  context.fillRect(0, 0, inputCanvas.width, inputCanvas.height)
 
   // Collect all strokes to draw: historical + current from all players
   const allStrokes = [...strokeHistory]
@@ -2050,10 +2107,10 @@ $.when('touchstart', '.input-canvas', start)
 $.when('mousedown', '.input-canvas', start)
 
 function start(e) {
-  const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
+  const { inputCanvas, rectangle, scaleX, scaleY } = engine(e.target)
   $.teach({ touching: true, activeMenu: null })
   const { thickness, opacity, color } = $.learn()
-  const context = canvas.getContext('2d')
+  const context = inputCanvas.getContext('2d')
   let pressure = 0.1;
   let clientX, clientY;
 
@@ -2104,9 +2161,9 @@ $.when('mousemove', '.input-canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { canvas, rectangle, scaleX, scaleY } = engine(e.target)
+  const { inputCanvas, rectangle, scaleX, scaleY } = engine(e.target)
   const { thickness, opacity, color } = $.learn()
-  const context = canvas.getContext('2d')
+  const context = inputCanvas.getContext('2d')
   if (!isMousedown) return
 
   let pressure = 0.1
