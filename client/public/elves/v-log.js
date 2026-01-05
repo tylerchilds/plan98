@@ -486,7 +486,6 @@ function screenshot(event) {
   // Attempt to upload to server
   put(image, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
-      console.log({ image })
       $.mouth({ image })
     } else {
       throw new Error('Upload failed')
@@ -1321,25 +1320,7 @@ class VLog extends HTMLElement {
         const videoIsLandscape = videoWidth > videoHeight
         const canvasIsPortrait = currentHeight > currentWidth
 
-        console.log('Video:', videoWidth, 'x', videoHeight, 'landscape?', videoIsLandscape)
-        console.log('Canvas:', currentWidth, 'x', currentHeight, 'portrait?', canvasIsPortrait)
-
-        if (canvasIsPortrait && videoIsLandscape) {
-          console.log('ROTATING VIDEO')
-          ctx.save()
-          ctx.translate(currentWidth / 2, currentHeight / 2)
-          ctx.rotate(90 * Math.PI / 180)
-          // After 90° rotation, width becomes height and vice versa
-          const scale = Math.min(currentWidth / videoHeight, currentHeight / videoWidth)
-          ctx.drawImage(target.video,
-            -videoWidth * scale / 2,
-            -videoHeight * scale / 2,
-            videoWidth * scale,
-            videoHeight * scale)
-          ctx.restore()
-        } else {
-          ctx.drawImage(target.video, 0, 0, currentWidth, currentHeight)
-        }
+        ctx.drawImage(target.video, 0, 0, currentWidth, currentHeight)
       }
       ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
       requestAnimationFrame(drawComposite);
@@ -1656,7 +1637,8 @@ async function setMediaStream(target) {
       const { isPortrait, isSquare } = calculateCanvasDimensions(target)
 
       const videoConstraints = {
-        facingMode
+        facingMode,
+        aspectRatio: isSquare ? 1 : (isPortrait ? (9/16) : (16/9))
       }
 
       if (isSquare) {
@@ -2216,7 +2198,7 @@ function drawAllStrokes(target) {
   if (!inputCanvas) return
 
   const { strokeHistory, players } = $.learn()
-  const context = inputCanvas.getContext('2d')
+  const context = inputCanvas.getContext('2d', { willReadFrequently: true })
 
   // Clear inputCanvas
   context.clearRect(0, 0, inputCanvas.width, inputCanvas.height)
