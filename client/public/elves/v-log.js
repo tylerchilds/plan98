@@ -1145,11 +1145,13 @@ class VLog extends HTMLElement {
     // Initialize without media stream
     this.init(this)
 
-    if (screen.orientation) {
-      this.orientationHandler = () => handleOrientationChange(this)
-      screen.orientation.addEventListener('change', this.orientationHandler)
+    if (self.screen?.orientation) {
+      this.orientationHandler = () => {
+        handleOrientationChange(this)
+      }
+      self.screen.orientation.addEventListener('change', this.orientationHandler)
     } else {
-      // Fallback to resize
+      // Fallback to window resize
       this.orientationHandler = () => handleOrientationChange(this)
       self.addEventListener('resize', this.orientationHandler)
     }
@@ -1195,11 +1197,13 @@ class VLog extends HTMLElement {
       this.webcamStream = null
     }
 
-    if (screen.orientation && this.orientationHandler) {
-      screen.orientation.removeEventListener('change', this.orientationHandler)
+
+    if (self.screen?.orientation && this.orientationHandler) {
+      self.screen.orientation.removeEventListener('change', this.orientationHandler)
     } else if (this.orientationHandler) {
       self.removeEventListener('resize', this.orientationHandler)
     }
+
     if (this.resizeHandler) {
       self.removeEventListener('resize', this.resizeHandler)
     }
@@ -1600,18 +1604,21 @@ And dog demanded resolution and quality
 
 function calculateCanvasDimensions(target) {
   const { videoEnabled } = $.learn()
-  // Try to use screen.orientation API first (more reliable)
+
+  // Detect actual device orientation
   let isPortrait = false
   let isSquare = false
-  if (screen.orientation) {
-    const type = screen.orientation.type
-    isPortrait = type.includes('portrait')
+
+  if (self.screen?.orientation) {
+    // Use Screen Orientation API (most reliable)
+    const type = self.screen.orientation.type
+    isPortrait = type.startsWith('portrait')
   } else {
-    // Fallback to window dimensions
-    const windowWidth = self.innerWidth
-    const windowHeight = self.innerHeight
-    isSquare = Math.abs(windowWidth - windowHeight) < 100
-    isPortrait = windowHeight > windowWidth && !isSquare
+    // Fallback: use actual screen dimensions
+    const w = self.screen.width
+    const h = self.screen.height
+    isPortrait = h > w
+    isSquare = Math.abs(w - h) < 100
   }
 
   let width, height
@@ -1672,29 +1679,24 @@ async function setMediaStream(target) {
     if (videoEnabled) {
       const { isPortrait, isSquare } = calculateCanvasDimensions(target)
 
-      // iOS Safari friendly constraints
-      const videoConstraints = {
-        // Start with high resolution request
-        width: { ideal: 1920 },
-        height: { ideal: 1920 }
-      }
+      const videoConstraints = {}
 
-      // Device selection
       if (selectedVideoDeviceId) {
         videoConstraints.deviceId = { exact: selectedVideoDeviceId }
       } else {
         videoConstraints.facingMode = facingMode
       }
 
-      // iOS works much better with aspectRatio than width/height
-      if (isSquare) {
-        videoConstraints.aspectRatio = { ideal: 1.0 }
-      } else if (isPortrait) {
-        // Portrait: taller than wide (9:16)
-        videoConstraints.aspectRatio = { ideal: 0.5625 } // 9/16
+      // Just request dimensions - NO aspectRatio mixing!
+      if (isPortrait) {
+        videoConstraints.width = { ideal: 1080 }
+        videoConstraints.height = { ideal: 1920 }
+      } else if (isSquare) {
+        videoConstraints.width = { ideal: 1440 }
+        videoConstraints.height = { ideal: 1440 }
       } else {
-        // Landscape: wider than tall (16:9)
-        videoConstraints.aspectRatio = { ideal: 1.7778 } // 16/9
+        videoConstraints.width = { ideal: 1920 }
+        videoConstraints.height = { ideal: 1080 }
       }
 
       constraints.video = videoConstraints
@@ -1716,6 +1718,12 @@ async function setMediaStream(target) {
     }
 
     target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    if (videoEnabled && target.webcamStream) {
+      const videoTrack = target.webcamStream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+      console.log('Got video:', settings.width, 'x', settings.height, 'aspect:', settings.aspectRatio)
+    }
 
     if (videoEnabled && target.video) {
       target.video.srcObject = target.webcamStream;
