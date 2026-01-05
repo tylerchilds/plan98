@@ -1306,27 +1306,22 @@ class VLog extends HTMLElement {
       const currentWidth = target.outputCanvas.width
       const currentHeight = target.outputCanvas.height
 
-      ctx.clearRect(0, 0, currentWidth, currentHeight);
-
+      // ADD THIS:
       if (videoEnabled && target.video && target.video.videoWidth > 0) {
         const videoWidth = target.video.videoWidth
         const videoHeight = target.video.videoHeight
 
-        // Just fit the video naturally - no rotation needed if constraints work
-        const scaleX = currentWidth / videoWidth;
-        const scaleY = currentHeight / videoHeight;
-        const scale = Math.min(scaleX, scaleY);
-
-        const scaledWidth = videoWidth * scale;
-        const scaledHeight = videoHeight * scale;
-        const offsetX = (currentWidth - scaledWidth) / 2;
-        const offsetY = (currentHeight - scaledHeight) / 2;
-
-        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+        // Only log on first frame or when video dimensions change
+        if (!target.lastLoggedVideo ||
+            target.lastLoggedVideo.width !== videoWidth ||
+            target.lastLoggedVideo.height !== videoHeight) {
+          console.log('🎬 VIDEO ELEMENT:')
+          console.log('   videoWidth:', videoWidth)
+          console.log('   videoHeight:', videoHeight)
+          console.log('   canvas:', currentWidth, 'x', currentHeight)
+          target.lastLoggedVideo = { width: videoWidth, height: videoHeight }
+        }
       }
-
-      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
-      requestAnimationFrame(drawComposite);
     }
 
     drawComposite();
@@ -1586,26 +1581,36 @@ And dog demanded resolution and quality
 function calculateCanvasDimensions(target) {
   const { videoEnabled } = $.learn()
 
-  // Use window dimensions - these change when device rotates
   const windowWidth = window.innerWidth
   const windowHeight = window.innerHeight
 
-  // Simple: if window is taller than wide, we're in portrait
+  console.log('==========================================')
+  console.log('📐 calculateCanvasDimensions called')
+  console.log('window.innerWidth:', windowWidth)
+  console.log('window.innerHeight:', windowHeight)
+
   const isPortrait = windowHeight > windowWidth
   const isSquare = Math.abs(windowWidth - windowHeight) < 100
+
+  console.log('→ isPortrait:', isPortrait)
+  console.log('→ isSquare:', isSquare)
 
   let width, height
 
   if (isSquare) {
     width = height = 1080
+    console.log('→ Setting SQUARE canvas: 1080x1080')
   } else if (isPortrait) {
     width = 1080
     height = 1920
+    console.log('→ Setting PORTRAIT canvas: 1080x1920')
   } else {
     width = 1920
     height = 1080
+    console.log('→ Setting LANDSCAPE canvas: 1920x1080')
   }
 
+  console.log('=========================================')
   return { width, height, isPortrait, isSquare }
 }
 
@@ -1660,7 +1665,6 @@ async function setMediaStream(target) {
         videoConstraints.facingMode = facingMode
       }
 
-      // Just request dimensions - NO aspectRatio mixing!
       if (isPortrait) {
         videoConstraints.width = { ideal: 1080 }
         videoConstraints.height = { ideal: 1920 }
@@ -1672,6 +1676,7 @@ async function setMediaStream(target) {
         videoConstraints.height = { ideal: 1080 }
       }
 
+      console.log('📹 REQUESTING video with constraints:', JSON.stringify(videoConstraints, null, 2))
       constraints.video = videoConstraints
     }
 
@@ -1693,9 +1698,31 @@ async function setMediaStream(target) {
     target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
 
     if (videoEnabled && target.webcamStream) {
-      const videoTrack = target.webcamStream.getVideoTracks()[0];
-      const settings = videoTrack.getSettings();
-      console.log('Got video:', settings.width, 'x', settings.height, 'aspect:', settings.aspectRatio)
+      target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+      if (videoEnabled && target.webcamStream) {
+        const videoTrack = target.webcamStream.getVideoTracks()[0];
+        const settings = videoTrack.getSettings();
+        console.log('✅ GOT VIDEO:')
+        console.log('   width:', settings.width)
+        console.log('   height:', settings.height)
+        console.log('   aspectRatio:', settings.aspectRatio)
+        console.log('   facingMode:', settings.facingMode)
+
+        // CHECK IF WE GOT WHAT WE ASKED FOR
+        const { isPortrait } = calculateCanvasDimensions(target)
+        const gotPortrait = settings.height > settings.width
+
+        if (isPortrait && !gotPortrait) {
+          console.error('❌ PROBLEM: We wanted portrait but got landscape!')
+          console.error('   Requested: 1080x1920, Got:', settings.width, 'x', settings.height)
+        } else if (!isPortrait && gotPortrait) {
+          console.error('❌ PROBLEM: We wanted landscape but got portrait!')
+          console.error('   Requested: 1920x1080, Got:', settings.width, 'x', settings.height)
+        } else {
+          console.log('✅ Got correct orientation')
+        }
+      }
     }
 
     if (videoEnabled && target.video) {
