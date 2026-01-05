@@ -66,6 +66,7 @@ An app is a nanobot, a machine elf
 
 // Generate a unique player ID for this session
 const playerId = self.crypto.randomUUID()
+let cameraLock = false
 
 let lineWidth = 0
 let isMousedown = false
@@ -1592,66 +1593,104 @@ function calculateCanvasDimensions(target) {
 }
 
 async function setMediaStream(target) {
-  const { facingMode, videoEnabled, audioEnabled } = $.learn()
-
-  // Only request media if at least one is enabled
-  if (!videoEnabled && !audioEnabled) {
-    if (target.webcamStream) {
-      target.webcamStream.getTracks().forEach(track => track.stop());
-      target.webcamStream = null
-    }
-    if (target.video) {
-      target.video.srcObject = null
-    }
+   // Prevent concurrent camera access
+  if (cameraLock) {
+    console.log('Camera access already in progress, skipping...')
     return
   }
 
-  const constraints = {}
-
-  if (videoEnabled) {
-    // Detect orientation
-    const { isPortrait, isSquare } = calculateCanvasDimensions(target)
-
-    const videoConstraints = {
-      facingMode
-    }
-
-    if (isSquare) {
-      // Square aspect ratio - 1:1
-      videoConstraints.aspectRatio = { ideal: 1 }
-      videoConstraints.width = { ideal: 1080 }
-      videoConstraints.height = { ideal: 1080 }
-    } else if (isPortrait) {
-      // Portrait orientation - 9:16
-      videoConstraints.aspectRatio = { ideal: 9/16 }
-      videoConstraints.width = { ideal: 1080 }
-      videoConstraints.height = { ideal: 1920 }
-    } else {
-      // Landscape orientation - 16:9
-      videoConstraints.aspectRatio = { ideal: 16/9 }
-      videoConstraints.width = { ideal: 1920 }
-      videoConstraints.height = { ideal: 1080 }
-    }
-
-    constraints.video = videoConstraints
-  }
-
-  if (audioEnabled) {
-    constraints.audio = {
-      echoCancellation: true,
-      noiseSuppression: true,
-      channelCount: 1,
-      sampleRate
-    }
-  }
+  cameraLock = true
 
   try {
-    // Stop existing stream if any
+    const { facingMode, videoEnabled, audioEnabled } = $.learn()
+
+    // Only request media if at least one is enabled
+    if (!videoEnabled && !audioEnabled) {
+      if (target.webcamStream) {
+        target.webcamStream.getTracks().forEach(track => track.stop());
+        target.webcamStream = null
+      }
+      if (target.video) {
+        target.video.srcObject = null
+      }
+      return
+    }
+
+    // Stop existing stream FIRST and properly disconnect everything
     if (target.webcamStream) {
-      target.webcamStream.getTracks().forEach(track => track.stop());
+      // Disconnect video element from stream first
+      if (target.video) {
+        target.video.srcObject = null
+      }
+
+      // Stop all tracks
+      target.webcamStream.getTracks().forEach(track => {
+        track.stop();
+      });
+      target.webcamStream = null
+    }
+
+    const constraints = {}
+
+    if (videoEnabled) {
+      const { isPortrait, isSquare } = calculateCanvasDimensions(target)
+
+      const videoConstraints = {
+        facingMode
+      }
+
+      if (isSquare) {
+        videoConstraints.aspectRatio = { ideal: 1 }
+        videoConstraints.width = { ideal: 1080 }
+        videoConstraints.height = { ideal: 1080 }
+      } else if (isPortrait) {
+        videoConstraints.aspectRatio = { ideal: 9/16 }
+        videoConstraints.width = { ideal: 1080 }
+        videoConstraints.height = { ideal: 1920 }
+      } else {
+        videoConstraints.aspectRatio = { ideal: 16/9 }
+        videoConstraints.width = { ideal: 1920 }
+        videoConstraints.height = { ideal: 1080 }
+      }
+
+      constraints.video = videoConstraints
+    }
+
+    if (audioEnabled) {
+      constraints.audio = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        channelCount: 1,
+        sampleRate
+      }
     }
 
     target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+    // Connect video element to new stream if video is enabled
+    if (videoEnabled && target.video) {
+      target.video.srcObject = target.webcamStream;
+      target.video.muted = true;
+      target.video.autoplay = true;
+
+      // Wait for video to be ready before playing
+      await new Promise((resolve, reject) => {
+        if (target.video.readyState >= 2) {
+          resolve();
+        } else {
+          target.video.addEventListener('loadedmetadata', resolve, { once: true });
+          target.video.addEventListener('error', reject, { once: true });
+        }
+      });
+
+      // Now try to play
+      try {
+        await target.video.play();
+      } catch (e) {
+        // Autoplay might be blocked, but that's okay
+        console.log('Video autoplay blocked (this is normal):', e.message);
+      }
+    }
 
     // Reinitialize Vosk if transcription is enabled and audio is now on
     const { transcriptionEnabled } = $.learn()
@@ -1660,7 +1699,15 @@ async function setMediaStream(target) {
     }
   } catch (error) {
     console.error('Error setting media stream:', error)
-    toast('Failed to access media devices')
+    toast(`Failed to access media devices: ${error.message}`)
+    // Revert the enabled states on failure
+    if (error.name === 'NotAllowedError') {
+      toast('Camera/microphone permission denied')
+    } else if (error.name === 'NotReadableError' || error.message.includes('videosource')) {
+      toast('Camera is busy or unavailable. Please close other apps using the camera.')
+    }
+  } finally {
+    cameraLock = false // Always release the lock
   }
 
   loadAllDevices()
@@ -1669,9 +1716,24 @@ async function setMediaStream(target) {
 async function handleOrientationChange(target) {
   const { videoEnabled } = $.learn()
 
-  // Detect current orientation
-  const { width, height } = calculateCanvasDimensions(target)
+  // If video is enabled, restart the stream FIRST with new constraints
+  if (videoEnabled) {
+    await setMediaStream(target)
 
+    // Wait for video to be ready
+    if (target.video && target.video.srcObject) {
+      await new Promise((resolve) => {
+        if (target.video.readyState >= 2) {
+          resolve()
+        } else {
+          target.video.addEventListener('loadedmetadata', resolve, { once: true })
+        }
+      })
+    }
+  }
+
+  // NOW detect orientation and get dimensions (potentially from updated video)
+  const { width, height } = calculateCanvasDimensions(target)
 
   // Update canvas dimensions
   if (target.inputCanvas) {
@@ -1686,11 +1748,6 @@ async function handleOrientationChange(target) {
 
   // Redraw everything with new dimensions
   drawAllStrokes(target)
-
-  // If video is enabled, restart the stream with new constraints
-  if (videoEnabled) {
-    await setMediaStream(target)
-  }
 }
 
 async function loadAllDevices() {
@@ -2059,16 +2116,22 @@ function engine(target) {
   const canvasAspect = inputCanvas.width / inputCanvas.height
   const displayAspect = rectangle.width / rectangle.height
 
-  let scaleX, scaleY
+  let scaleX, scaleY, offsetX = 0, offsetY = 0
 
   if (canvasAspect > displayAspect) {
     // Canvas is wider - letterboxed top/bottom
     scaleX = inputCanvas.width / rectangle.width
     scaleY = scaleX
+    // Calculate vertical offset due to letterboxing
+    const displayedHeight = rectangle.width / canvasAspect
+    offsetY = (rectangle.height - displayedHeight) / 2
   } else {
     // Canvas is taller - letterboxed left/right
     scaleY = inputCanvas.height / rectangle.height
     scaleX = scaleY
+    // Calculate horizontal offset due to letterboxing
+    const displayedWidth = rectangle.height * canvasAspect
+    offsetX = (rectangle.width - displayedWidth) / 2
   }
 
   return {
@@ -2077,10 +2140,11 @@ function engine(target) {
     outputCanvas,
     rectangle,
     scaleX,
-    scaleY
+    scaleY,
+    offsetX,
+    offsetY
   }
 }
-
 
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
@@ -2216,7 +2280,7 @@ $.when('touchstart', '.input-canvas', start)
 $.when('mousedown', '.input-canvas', start)
 
 function start(e) {
-  const { inputCanvas, rectangle, scaleX, scaleY } = engine(e.target)
+  const { inputCanvas, rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
   $.teach({ touching: true, activeMenu: null })
   const { thickness, opacity, color } = $.learn()
   const context = inputCanvas.getContext('2d')
@@ -2237,8 +2301,8 @@ function start(e) {
     clientY = e.clientY
   }
 
-  const relativeX = clientX - rectangle.left;
-  const relativeY = clientY - rectangle.top;
+  const relativeX = clientX - rectangle.left - offsetX;
+  const relativeY = clientY - rectangle.top - offsetY;
 
   const x = relativeX * scaleX;
   const y = relativeY * scaleY;
@@ -2270,7 +2334,7 @@ $.when('mousemove', '.input-canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { inputCanvas, rectangle, scaleX, scaleY } = engine(e.target)
+  const { inputCanvas, rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
   const { thickness, opacity, color } = $.learn()
   const context = inputCanvas.getContext('2d')
   if (!isMousedown) return
@@ -2292,8 +2356,8 @@ function move (e) {
     clientY = e.clientY
   }
 
-  const relativeX = clientX - rectangle.left;
-  const relativeY = clientY - rectangle.top;
+  const relativeX = clientX - rectangle.left - offsetX;
+  const relativeY = clientY - rectangle.top - offsetY;
 
   const x = relativeX * scaleX;
   const y = relativeY * scaleY;
