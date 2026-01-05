@@ -1316,7 +1316,30 @@ class VLog extends HTMLElement {
       const currentHeight = target.outputCanvas.height
 
       if (videoEnabled && target.video && target.video.videoWidth > 0) {
-        ctx.drawImage(target.video, 0, 0, currentWidth, currentHeight);
+        const videoWidth = target.video.videoWidth
+        const videoHeight = target.video.videoHeight
+        const videoIsLandscape = videoWidth > videoHeight
+        const canvasIsPortrait = currentHeight > currentWidth
+
+        console.log('Video:', videoWidth, 'x', videoHeight, 'landscape?', videoIsLandscape)
+        console.log('Canvas:', currentWidth, 'x', currentHeight, 'portrait?', canvasIsPortrait)
+
+        if (canvasIsPortrait && videoIsLandscape) {
+          console.log('ROTATING VIDEO')
+          ctx.save()
+          ctx.translate(currentWidth / 2, currentHeight / 2)
+          ctx.rotate(90 * Math.PI / 180)
+          // After 90° rotation, width becomes height and vice versa
+          const scale = Math.min(currentWidth / videoHeight, currentHeight / videoWidth)
+          ctx.drawImage(target.video,
+            -videoWidth * scale / 2,
+            -videoHeight * scale / 2,
+            videoWidth * scale,
+            videoHeight * scale)
+          ctx.restore()
+        } else {
+          ctx.drawImage(target.video, 0, 0, currentWidth, currentHeight)
+        }
       }
       ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
       requestAnimationFrame(drawComposite);
@@ -1575,11 +1598,8 @@ function calculateCanvasDimensions(target) {
 
   let width, height
 
-  if (videoEnabled && target?.video?.videoWidth && target.video.videoHeight) {
-    // Use actual video dimensions if available
-    width = target.video.videoWidth
-    height = target.video.videoHeight
-  } else if (isSquare) {
+  // Always use device orientation, not video orientation
+  if (isSquare) {
     width = height = 1080
   } else if (isPortrait) {
     width = 1080
