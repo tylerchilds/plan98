@@ -1613,7 +1613,6 @@ function calculateCanvasDimensions(target) {
 }
 
 async function setMediaStream(target) {
-  // Prevent concurrent camera access
   if (cameraLock) {
     console.log('Camera access already in progress, skipping...')
     return
@@ -1630,7 +1629,6 @@ async function setMediaStream(target) {
       selectedAudioDeviceId
     } = $.learn()
 
-    // Only request media if at least one is enabled
     if (!videoEnabled && !audioEnabled) {
       if (target.webcamStream) {
         target.webcamStream.getTracks().forEach(track => track.stop());
@@ -1642,14 +1640,10 @@ async function setMediaStream(target) {
       return
     }
 
-    // Stop existing stream FIRST and properly disconnect everything
     if (target.webcamStream) {
-      // Disconnect video element from stream first
       if (target.video) {
         target.video.srcObject = null
       }
-
-      // Stop all tracks
       target.webcamStream.getTracks().forEach(track => {
         track.stop();
       });
@@ -1661,28 +1655,29 @@ async function setMediaStream(target) {
     if (videoEnabled) {
       const { isPortrait, isSquare } = calculateCanvasDimensions(target)
 
-      const videoConstraints = {}
+      // iOS Safari friendly constraints
+      const videoConstraints = {
+        // Start with high resolution request
+        width: { ideal: 1920 },
+        height: { ideal: 1920 }
+      }
 
-      // Use specific device ID if selected, otherwise use facingMode
+      // Device selection
       if (selectedVideoDeviceId) {
         videoConstraints.deviceId = { exact: selectedVideoDeviceId }
       } else {
         videoConstraints.facingMode = facingMode
       }
 
-      // KEY FIX: Request specific width/height (not ideal) to force orientation
+      // iOS works much better with aspectRatio than width/height
       if (isSquare) {
-        videoConstraints.width = { ideal: 1080 }
-        videoConstraints.height = { ideal: 1080 }
+        videoConstraints.aspectRatio = { ideal: 1.0 }
       } else if (isPortrait) {
-        // FORCE PORTRAIT: width < height
-        videoConstraints.width = { ideal: 1080 }
-        videoConstraints.height = { ideal: 1920 }
-        // Remove aspectRatio - it doesn't work reliably on iOS
+        // Portrait: taller than wide (9:16)
+        videoConstraints.aspectRatio = { ideal: 0.5625 } // 9/16
       } else {
-        // FORCE LANDSCAPE: width > height
-        videoConstraints.width = { ideal: 1920 }
-        videoConstraints.height = { ideal: 1080 }
+        // Landscape: wider than tall (16:9)
+        videoConstraints.aspectRatio = { ideal: 1.7778 } // 16/9
       }
 
       constraints.video = videoConstraints
@@ -1696,7 +1691,6 @@ async function setMediaStream(target) {
         sampleRate
       }
 
-      // Use specific device ID if selected
       if (selectedAudioDeviceId) {
         audioConstraints.deviceId = { exact: selectedAudioDeviceId }
       }
@@ -1706,13 +1700,11 @@ async function setMediaStream(target) {
 
     target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
 
-    // Connect video element to new stream if video is enabled
     if (videoEnabled && target.video) {
       target.video.srcObject = target.webcamStream;
       target.video.muted = true;
       target.video.autoplay = true;
 
-      // Wait for video to be ready before playing
       await new Promise((resolve, reject) => {
         if (target.video.readyState >= 2) {
           resolve();
@@ -1722,16 +1714,13 @@ async function setMediaStream(target) {
         }
       });
 
-      // Now try to play
       try {
         await target.video.play();
       } catch (e) {
-        // Autoplay might be blocked, but that's okay
         console.log('Video autoplay blocked (this is normal):', e.message);
       }
     }
 
-    // Reinitialize Vosk if transcription is enabled and audio is now on
     const { transcriptionEnabled } = $.learn()
     if (transcriptionEnabled && audioEnabled && !target.voskContext) {
       await initializeVosk(target)
@@ -1739,14 +1728,13 @@ async function setMediaStream(target) {
   } catch (error) {
     console.error('Error setting media stream:', error)
     toast(`Failed to access media devices: ${error.message}`)
-    // Revert the enabled states on failure
     if (error.name === 'NotAllowedError') {
       toast('Camera/microphone permission denied')
     } else if (error.name === 'NotReadableError' || error.message.includes('videosource')) {
       toast('Camera is busy or unavailable. Please close other apps using the camera.')
     }
   } finally {
-    cameraLock = false // Always release the lock
+    cameraLock = false
   }
 
   loadAllDevices()
