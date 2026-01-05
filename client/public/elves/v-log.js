@@ -687,9 +687,9 @@ $.style(`
     position: relative;
     width: 100%;
     max-width: 100%;
-    height: 100%;
     max-height: 100%;
     background: var(--background, black);
+    margin: auto;
   }
 
   @media (orientation: landscape) {
@@ -1073,7 +1073,7 @@ const viewRenderers = {
   },
   [views.share]: function share(target) {
     const { viewMetadata } = $.ear()
-    const shareLink = `${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
+    const shareLink = `${self.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
     const copyId = self.crypto.randomUUID()
     const label = target.getAttribute('label') || 'Pluto'
 
@@ -1092,7 +1092,7 @@ const viewRenderers = {
         <h3>Share</h3>
 
         <div style="padding: 51px; height: 100%; display: flex; flex-direction: column;">
-          <qr-code src="${window.location.origin}/app/${$.link}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
+          <qr-code src="${self.location.origin}/app/${$.link}?id=${target.closest($.link).id}&label=${label}" style="width: 50vmin; height: 50vmin;" target="_top"></qr-code>
         </div>
       </div>
     `
@@ -1144,6 +1144,14 @@ class VLog extends HTMLElement {
 
     // Initialize without media stream
     this.init(this)
+
+    this.orientationQuery = self.matchMedia("(orientation: portrait)")
+    this.orientationHandler = () => handleOrientationChange(this)
+    this.orientationQuery.addEventListener('change', this.orientationHandler)
+
+    // Listen for window resize (handles square aspect ratio changes)
+    this.resizeHandler = () => handleOrientationChange(this)
+    self.addEventListener('resize', this.resizeHandler)
   }
 
   beforeUpdate(target) {
@@ -1180,6 +1188,13 @@ class VLog extends HTMLElement {
     if(this.webcamStream) {
       this.webcamStream.getTracks().forEach(track => track.stop());
       this.webcamStream = null
+    }
+
+    if (this.orientationQuery && this.orientationHandler) {
+      this.orientationQuery.removeEventListener('change', this.orientationHandler)
+    }
+    if (this.resizeHandler) {
+      self.removeEventListener('resize', this.resizeHandler)
     }
   }
 
@@ -1273,8 +1288,7 @@ class VLog extends HTMLElement {
     }
 
     // Setup canvases with default dimensions or from video if available
-    const width = target.video.videoWidth || 1920
-    const height = target.video.videoHeight || 1080
+    const { width, height } = calculateCanvasDimensions(target)
 
     {
       const letterbox = target.querySelector('.letterbox')
@@ -1421,7 +1435,7 @@ class VLog extends HTMLElement {
       }).join('')
 
       const copyId = self.crypto.randomUUID()
-      const permalink = `${window.location.origin}/app/${$.link}?id=${target.id}`
+      const permalink = `${self.location.origin}/app/${$.link}?id=${target.id}`
 
       area.innerHTML = `
         <div style="display: flex;">
@@ -1553,6 +1567,30 @@ And dog demanded resolution and quality
 
 */
 
+function calculateCanvasDimensions(target) {
+  const { videoEnabled } = $.learn()
+  const isPortrait = self.matchMedia("(orientation: portrait)").matches
+  const isSquare = self.matchMedia("(aspect-ratio: 1/1)").matches
+
+  let width, height
+
+  if (videoEnabled && target?.video?.videoWidth && target.video.videoHeight) {
+    // Use actual video dimensions if available
+    width = target.video.videoWidth
+    height = target.video.videoHeight
+  } else if (isSquare) {
+    width = height = 1080
+  } else if (isPortrait) {
+    width = 1080
+    height = 1920
+  } else {
+    width = 1920
+    height = 1080
+  }
+
+  return { width, height, isPortrait, isSquare }
+}
+
 async function setMediaStream(target) {
   const { facingMode, videoEnabled, audioEnabled } = $.learn()
 
@@ -1571,12 +1609,31 @@ async function setMediaStream(target) {
   const constraints = {}
 
   if (videoEnabled) {
-    constraints.video = {
-      facingMode,
-      width: { min: 1280, ideal: 1920, max: 3840 },
-      height: { min: 720, ideal: 1080, max: 2160 },
-      aspectRatio: { ideal: 16/9 }
+    // Detect orientation
+    const { isPortrait, isSquare } = calculateCanvasDimensions(target)
+
+    const videoConstraints = {
+      facingMode
     }
+
+    if (isSquare) {
+      // Square aspect ratio - 1:1
+      videoConstraints.aspectRatio = { ideal: 1 }
+      videoConstraints.width = { ideal: 1080 }
+      videoConstraints.height = { ideal: 1080 }
+    } else if (isPortrait) {
+      // Portrait orientation - 9:16
+      videoConstraints.aspectRatio = { ideal: 9/16 }
+      videoConstraints.width = { ideal: 1080 }
+      videoConstraints.height = { ideal: 1920 }
+    } else {
+      // Landscape orientation - 16:9
+      videoConstraints.aspectRatio = { ideal: 16/9 }
+      videoConstraints.width = { ideal: 1920 }
+      videoConstraints.height = { ideal: 1080 }
+    }
+
+    constraints.video = videoConstraints
   }
 
   if (audioEnabled) {
@@ -1607,6 +1664,33 @@ async function setMediaStream(target) {
   }
 
   loadAllDevices()
+}
+
+async function handleOrientationChange(target) {
+  const { videoEnabled } = $.learn()
+
+  // Detect current orientation
+  const { width, height } = calculateCanvasDimensions(target)
+
+
+  // Update canvas dimensions
+  if (target.inputCanvas) {
+    target.inputCanvas.width = width
+    target.inputCanvas.height = height
+  }
+
+  if (target.outputCanvas) {
+    target.outputCanvas.width = width
+    target.outputCanvas.height = height
+  }
+
+  // Redraw everything with new dimensions
+  drawAllStrokes(target)
+
+  // If video is enabled, restart the stream with new constraints
+  if (videoEnabled) {
+    await setMediaStream(target)
+  }
 }
 
 async function loadAllDevices() {
@@ -1717,10 +1801,9 @@ $.when('click', '[data-toggle-video]', async (event) => {
     })
 
     // Update canvas dimensions based on actual video
-    const width = target.video.videoWidth
-    const height = target.video.videoHeight
+    const { width, height } = calculateCanvasDimensions(target)
 
-    if (width && height && target.inputCanvas && target.outputCanvas) {
+    if (target.inputCanvas && target.outputCanvas) {
       target.inputCanvas.width = width
       target.inputCanvas.height = height
       target.outputCanvas.width = width
@@ -1809,14 +1892,14 @@ function copyToClipboard(target) {
     range.select().createTextRange();
     document.execCommand("copy");
     toast("Copied to clipboard")
-  } else if (window.getSelection) {
+  } else if (self.getSelection) {
     const range = document.createRange();
     range.selectNode(target);
-    window.getSelection().addRange(range);
+    self.getSelection().addRange(range);
     document.execCommand("copy");
     toast("Copied to clipboard")
   }
-  window.getSelection().removeAllRanges()
+  self.getSelection().removeAllRanges()
 }
 
 /*
@@ -1972,8 +2055,21 @@ function engine(target) {
   if(!inputCanvas) return {}
   const rectangle = inputCanvas.getBoundingClientRect()
 
-  const scaleX = inputCanvas.width / rectangle.width;
-  const scaleY = inputCanvas.height / rectangle.height;
+  // Calculate scales accounting for object-fit: contain
+  const canvasAspect = inputCanvas.width / inputCanvas.height
+  const displayAspect = rectangle.width / rectangle.height
+
+  let scaleX, scaleY
+
+  if (canvasAspect > displayAspect) {
+    // Canvas is wider - letterboxed top/bottom
+    scaleX = inputCanvas.width / rectangle.width
+    scaleY = scaleX
+  } else {
+    // Canvas is taller - letterboxed left/right
+    scaleY = inputCanvas.height / rectangle.height
+    scaleX = scaleY
+  }
 
   return {
     root,
