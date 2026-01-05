@@ -1319,53 +1319,18 @@ class VLog extends HTMLElement {
       if (videoEnabled && target.video && target.video.videoWidth > 0) {
         const videoWidth = target.video.videoWidth
         const videoHeight = target.video.videoHeight
-        const videoIsLandscape = videoWidth > videoHeight
 
-        // Check if DEVICE is in portrait orientation
-        const deviceIsPortrait = self.matchMedia("(orientation: portrait)").matches
+        // Just fit the video naturally - no rotation needed if constraints work
+        const scaleX = currentWidth / videoWidth;
+        const scaleY = currentHeight / videoHeight;
+        const scale = Math.min(scaleX, scaleY);
 
-        // Only rotate on mobile when device is portrait but video is landscape
-        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-        const shouldRotate = deviceIsPortrait && videoIsLandscape && isMobile
+        const scaledWidth = videoWidth * scale;
+        const scaledHeight = videoHeight * scale;
+        const offsetX = (currentWidth - scaledWidth) / 2;
+        const offsetY = (currentHeight - scaledHeight) / 2;
 
-        if (shouldRotate) {
-          // Rotate the video 90 degrees to fit portrait canvas
-          ctx.save();
-
-          // Move to center of canvas
-          ctx.translate(currentWidth / 2, currentHeight / 2);
-
-          // Rotate 90 degrees clockwise
-          ctx.rotate(Math.PI / 2);
-
-          // Calculate scale to FIT (not cover) - after rotation, video width becomes height
-          const scaleX = currentWidth / videoHeight;
-          const scaleY = currentHeight / videoWidth;
-          const scale = Math.min(scaleX, scaleY); // Math.min for natural fit!
-
-          // Draw centered
-          ctx.drawImage(
-            target.video,
-            -videoWidth * scale / 2,
-            -videoHeight * scale / 2,
-            videoWidth * scale,
-            videoHeight * scale
-          );
-
-          ctx.restore();
-        } else {
-          // Draw normally with natural fit
-          const scaleX = currentWidth / videoWidth;
-          const scaleY = currentHeight / videoHeight;
-          const scale = Math.min(scaleX, scaleY); // Math.min for natural fit!
-
-          const scaledWidth = videoWidth * scale;
-          const scaledHeight = videoHeight * scale;
-          const offsetX = (currentWidth - scaledWidth) / 2;
-          const offsetY = (currentHeight - scaledHeight) / 2;
-
-          ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
-        }
+        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
       }
 
       ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
@@ -1696,9 +1661,7 @@ async function setMediaStream(target) {
     if (videoEnabled) {
       const { isPortrait, isSquare } = calculateCanvasDimensions(target)
 
-      const videoConstraints = {
-        aspectRatio: isSquare ? 1 : (isPortrait ? (9/16) : (16/9))
-      }
+      const videoConstraints = {}
 
       // Use specific device ID if selected, otherwise use facingMode
       if (selectedVideoDeviceId) {
@@ -1707,15 +1670,19 @@ async function setMediaStream(target) {
         videoConstraints.facingMode = facingMode
       }
 
+      // KEY FIX: Request specific width/height (not ideal) to force orientation
       if (isSquare) {
-        videoConstraints.width = { ideal: 1080, max: 1920 }
-        videoConstraints.height = { ideal: 1080, max: 1920 }
+        videoConstraints.width = { ideal: 1080 }
+        videoConstraints.height = { ideal: 1080 }
       } else if (isPortrait) {
-        videoConstraints.width = { ideal: 1080, max: 1920 }
-        videoConstraints.height = { ideal: 1920, max: 3840 }
+        // FORCE PORTRAIT: width < height
+        videoConstraints.width = { ideal: 1080 }
+        videoConstraints.height = { ideal: 1920 }
+        // Remove aspectRatio - it doesn't work reliably on iOS
       } else {
-        videoConstraints.width = { ideal: 1920, max: 3840 }
-        videoConstraints.height = { ideal: 1080, max: 1920 }
+        // FORCE LANDSCAPE: width > height
+        videoConstraints.width = { ideal: 1920 }
+        videoConstraints.height = { ideal: 1080 }
       }
 
       constraints.video = videoConstraints
