@@ -1311,71 +1311,33 @@ class VLog extends HTMLElement {
     const ctx = target.outputCanvas.getContext('2d'); 
     const drawComposite = () => {
       const { videoEnabled } = $.learn()
-      const currentWidth = target.outputCanvas.width
-      const currentHeight = target.outputCanvas.height
+  const currentWidth = target.outputCanvas.width
+  const currentHeight = target.outputCanvas.height
 
-      // Always clear the canvas first
-      ctx.clearRect(0, 0, currentWidth, currentHeight);
+  ctx.clearRect(0, 0, currentWidth, currentHeight);
 
-      if (videoEnabled && target.video && target.video.videoWidth > 0) {
-        const videoWidth = target.video.videoWidth
-        const videoHeight = target.video.videoHeight
-        const videoIsLandscape = videoWidth > videoHeight
+  if (videoEnabled && target.video && target.video.videoWidth > 0) {
+    const videoWidth = target.video.videoWidth
+    const videoHeight = target.video.videoHeight
 
-        // Check if DEVICE is in portrait orientation (not just narrow canvas)
-        const deviceIsPortrait = self.matchMedia("(orientation: portrait)").matches
+    // SIMPLE SOLUTION: Just draw the video scaled to fit/cover
+    // iOS Safari automatically handles video orientation based on device orientation
+    // We don't need to rotate manually!
 
-        // Only rotate if:
-        // 1. Device is physically in portrait mode (mobile)
-        // 2. AND video is landscape
-        // 3. AND we're not on desktop (check for touch support or user agent)
-        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
-        const shouldRotate = deviceIsPortrait && videoIsLandscape && isMobile
+    const scaleX = currentWidth / videoWidth;
+    const scaleY = currentHeight / videoHeight;
+    const scale = Math.max(scaleX, scaleY); // Use max to cover, min to fit
 
-        if (shouldRotate) {
-          // Rotate the video 90 degrees to fit portrait canvas
-          ctx.save();
+    const scaledWidth = videoWidth * scale;
+    const scaledHeight = videoHeight * scale;
+    const offsetX = (currentWidth - scaledWidth) / 2;
+    const offsetY = (currentHeight - scaledHeight) / 2;
 
-          // Move to center of canvas
-          ctx.translate(currentWidth / 2, currentHeight / 2);
+    ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+  }
 
-          // Rotate 90 degrees clockwise
-          ctx.rotate(Math.PI / 2);
-
-          // Calculate scale to cover canvas (after rotation, video width becomes height)
-          const scaleX = currentWidth / videoHeight;
-          const scaleY = currentHeight / videoWidth;
-          const scale = Math.max(scaleX, scaleY);
-
-          // Draw centered (note: after rotation, dimensions are swapped)
-          ctx.drawImage(
-            target.video,
-            -videoWidth * scale / 2,
-            -videoHeight * scale / 2,
-            videoWidth * scale,
-            videoHeight * scale
-          );
-
-          ctx.restore();
-        } else {
-          // Draw normally with scale to cover
-          const scaleX = currentWidth / videoWidth;
-          const scaleY = currentHeight / videoHeight;
-          const scale = Math.max(scaleX, scaleY);
-
-          const scaledWidth = videoWidth * scale;
-          const scaledHeight = videoHeight * scale;
-          const offsetX = (currentWidth - scaledWidth) / 2;
-          const offsetY = (currentHeight - scaledHeight) / 2;
-
-          ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
-        }
-      }
-
-      // Draw the stroke layer on top
-      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
-
-      requestAnimationFrame(drawComposite);
+  ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
+  requestAnimationFrame(drawComposite);
     }
 
     drawComposite();
