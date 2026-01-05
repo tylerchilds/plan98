@@ -1302,26 +1302,63 @@ class VLog extends HTMLElement {
 
     const ctx = target.outputCanvas.getContext('2d'); 
     const drawComposite = () => {
-      const { videoEnabled } = $.learn()
+       const { videoEnabled } = $.learn()
       const currentWidth = target.outputCanvas.width
       const currentHeight = target.outputCanvas.height
 
-      // ADD THIS:
+      ctx.clearRect(0, 0, currentWidth, currentHeight);
+
       if (videoEnabled && target.video && target.video.videoWidth > 0) {
         const videoWidth = target.video.videoWidth
         const videoHeight = target.video.videoHeight
 
-        // Only log on first frame or when video dimensions change
-        if (!target.lastLoggedVideo ||
-            target.lastLoggedVideo.width !== videoWidth ||
-            target.lastLoggedVideo.height !== videoHeight) {
-          console.log('🎬 VIDEO ELEMENT:')
-          console.log('   videoWidth:', videoWidth)
-          console.log('   videoHeight:', videoHeight)
-          console.log('   canvas:', currentWidth, 'x', currentHeight)
-          target.lastLoggedVideo = { width: videoWidth, height: videoHeight }
+        // Calculate aspect ratios
+        const videoAspect = videoWidth / videoHeight
+        const canvasAspect = currentWidth / currentHeight
+
+        let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight
+
+        // If aspect ratios don't match, crop the video
+        if (target.needsVideoCrop && Math.abs(videoAspect - canvasAspect) > 0.01) {
+          console.log('🔪 Cropping video:', videoWidth, 'x', videoHeight, '→ canvas:', currentWidth, 'x', currentHeight)
+
+          if (videoAspect > canvasAspect) {
+            // Video is wider than canvas - crop sides
+            sw = videoHeight * canvasAspect
+            sx = (videoWidth - sw) / 2
+            sh = videoHeight
+            sy = 0
+          } else {
+            // Video is taller than canvas - crop top/bottom
+            sh = videoWidth / canvasAspect
+            sy = (videoHeight - sh) / 2
+            sw = videoWidth
+            sx = 0
+          }
+
+          // Draw cropped video
+          ctx.drawImage(
+            target.video,
+            sx, sy, sw, sh,              // Source: crop from video
+            0, 0, currentWidth, currentHeight  // Dest: fill canvas
+          );
+        } else {
+          // No crop needed - just fit naturally
+          const scaleX = currentWidth / videoWidth;
+          const scaleY = currentHeight / videoHeight;
+          const scale = Math.min(scaleX, scaleY);
+
+          const scaledWidth = videoWidth * scale;
+          const scaledHeight = videoHeight * scale;
+          const offsetX = (currentWidth - scaledWidth) / 2;
+          const offsetY = (currentHeight - scaledHeight) / 2;
+
+          ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
         }
       }
+
+      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
+      requestAnimationFrame(drawComposite);
     }
 
     drawComposite();
@@ -1665,18 +1702,19 @@ async function setMediaStream(target) {
         videoConstraints.facingMode = facingMode
       }
 
+      // TRY 1: Use EXACT constraints to force iOS to comply
       if (isPortrait) {
-        videoConstraints.width = { ideal: 1080 }
-        videoConstraints.height = { ideal: 1920 }
+        videoConstraints.width = { exact: 1080 }
+        videoConstraints.height = { exact: 1920 }
       } else if (isSquare) {
-        videoConstraints.width = { ideal: 1440 }
-        videoConstraints.height = { ideal: 1440 }
+        videoConstraints.width = { exact: 1440 }
+        videoConstraints.height = { exact: 1440 }
       } else {
-        videoConstraints.width = { ideal: 1920 }
-        videoConstraints.height = { ideal: 1080 }
+        videoConstraints.width = { exact: 1920 }
+        videoConstraints.height = { exact: 1080 }
       }
 
-      console.log('📹 REQUESTING video with constraints:', JSON.stringify(videoConstraints, null, 2))
+      console.log('📹 REQUESTING with EXACT constraints:', JSON.stringify(videoConstraints, null, 2))
       constraints.video = videoConstraints
     }
 
@@ -1695,33 +1733,56 @@ async function setMediaStream(target) {
       constraints.audio = audioConstraints
     }
 
-    target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+    // Try with exact constraints first
+    try {
+      target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('✅ Exact constraints accepted!')
+    } catch (exactError) {
+      console.warn('⚠️ Exact constraints failed, trying ideal:', exactError.message)
+
+      // Fallback: try with ideal
+      if (videoEnabled && constraints.video) {
+        const { isPortrait, isSquare } = calculateCanvasDimensions(target)
+
+        if (isPortrait) {
+          constraints.video.width = { ideal: 1080 }
+          constraints.video.height = { ideal: 1920 }
+        } else if (isSquare) {
+          constraints.video.width = { ideal: 1440 }
+          constraints.video.height = { ideal: 1440 }
+        } else {
+          constraints.video.width = { ideal: 1920 }
+          constraints.video.height = { ideal: 1080 }
+        }
+
+        console.log('📹 RETRY with ideal:', JSON.stringify(constraints.video, null, 2))
+        target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+        console.log('⚠️ Had to use ideal constraints - will need to crop video')
+
+        // Flag that we need to crop
+        target.needsVideoCrop = true
+      } else {
+        throw exactError
+      }
+    }
 
     if (videoEnabled && target.webcamStream) {
-      target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
+      const videoTrack = target.webcamStream.getVideoTracks()[0];
+      const settings = videoTrack.getSettings();
+      console.log('✅ GOT VIDEO:')
+      console.log('   width:', settings.width)
+      console.log('   height:', settings.height)
+      console.log('   aspectRatio:', settings.aspectRatio)
 
-      if (videoEnabled && target.webcamStream) {
-        const videoTrack = target.webcamStream.getVideoTracks()[0];
-        const settings = videoTrack.getSettings();
-        console.log('✅ GOT VIDEO:')
-        console.log('   width:', settings.width)
-        console.log('   height:', settings.height)
-        console.log('   aspectRatio:', settings.aspectRatio)
-        console.log('   facingMode:', settings.facingMode)
+      const { isPortrait } = calculateCanvasDimensions(target)
+      const gotPortrait = settings.height > settings.width
 
-        // CHECK IF WE GOT WHAT WE ASKED FOR
-        const { isPortrait } = calculateCanvasDimensions(target)
-        const gotPortrait = settings.height > settings.width
-
-        if (isPortrait && !gotPortrait) {
-          console.error('❌ PROBLEM: We wanted portrait but got landscape!')
-          console.error('   Requested: 1080x1920, Got:', settings.width, 'x', settings.height)
-        } else if (!isPortrait && gotPortrait) {
-          console.error('❌ PROBLEM: We wanted landscape but got portrait!')
-          console.error('   Requested: 1920x1080, Got:', settings.width, 'x', settings.height)
-        } else {
-          console.log('✅ Got correct orientation')
-        }
+      if (isPortrait !== gotPortrait) {
+        console.error('❌ Still got wrong orientation - enabling crop mode')
+        target.needsVideoCrop = true
+      } else {
+        console.log('✅ Got correct orientation!')
+        target.needsVideoCrop = false
       }
     }
 
