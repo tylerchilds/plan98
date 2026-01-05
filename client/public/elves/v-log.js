@@ -1549,15 +1549,25 @@ function recoverElves(target, tag) {
 }
 
 function deviceMenu(target) {
-  const { devicesByKind } = $.learn()
+  const { devicesByKind, selectedVideoDeviceId, selectedAudioDeviceId } = $.learn()
 
   const menuItems = []
   for(const kind in devicesByKind) {
-    const devices = devicesByKind[kind].map(x => `
-      <button  class="branded-button" data-${kind}="${x.deviceId}">
-        ${x.label}
-      </button>
-    `).join('')
+    const devices = devicesByKind[kind].map(x => {
+      // Check if this device is currently selected
+      const isSelected =
+        (kind === 'videoinput' && selectedVideoDeviceId === x.deviceId) ||
+        (kind === 'audioinput' && selectedAudioDeviceId === x.deviceId)
+
+      return `
+        <button
+          class="branded-button ${isSelected ? 'active' : ''}"
+          data-${kind}="${x.deviceId}"
+        >
+          ${x.label || `${kind} ${x.deviceId.slice(0, 8)}`}
+        </button>
+      `
+    }).join('')
 
     menuItems.push(`
       <div class="device-kind">
@@ -1577,8 +1587,6 @@ function deviceMenu(target) {
     </div>
   `
 }
-
-
 
 /*
 
@@ -1617,7 +1625,13 @@ async function setMediaStream(target) {
   cameraLock = true
 
   try {
-    const { facingMode, videoEnabled, audioEnabled } = $.learn()
+    const {
+      facingMode,
+      videoEnabled,
+      audioEnabled,
+      selectedVideoDeviceId,
+      selectedAudioDeviceId
+    } = $.learn()
 
     // Only request media if at least one is enabled
     if (!videoEnabled && !audioEnabled) {
@@ -1651,8 +1665,14 @@ async function setMediaStream(target) {
       const { isPortrait, isSquare } = calculateCanvasDimensions(target)
 
       const videoConstraints = {
-        facingMode,
         aspectRatio: isSquare ? 1 : (isPortrait ? (9/16) : (16/9))
+      }
+
+      // Use specific device ID if selected, otherwise use facingMode
+      if (selectedVideoDeviceId) {
+        videoConstraints.deviceId = { exact: selectedVideoDeviceId }
+      } else {
+        videoConstraints.facingMode = facingMode
       }
 
       if (isSquare) {
@@ -1670,12 +1690,19 @@ async function setMediaStream(target) {
     }
 
     if (audioEnabled) {
-      constraints.audio = {
+      const audioConstraints = {
         echoCancellation: true,
         noiseSuppression: true,
         channelCount: 1,
         sampleRate
       }
+
+      // Use specific device ID if selected
+      if (selectedAudioDeviceId) {
+        audioConstraints.deviceId = { exact: selectedAudioDeviceId }
+      }
+
+      constraints.audio = audioConstraints
     }
 
     target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -2526,6 +2553,40 @@ $.when('click', '[data-toggle-transcription]', async (event) => {
   $.teach({ transcriptionEnabled: newState })
 })
 
+$.when('click', '[data-videoinput]', async (event) => {
+  const deviceId = event.target.dataset.videoinput
+  $.teach({ selectedVideoDeviceId: deviceId })
+
+  const target = event.target.closest($.link)
+  await setMediaStream(target)
+})
+
+// Handle audio device selection
+$.when('click', '[data-audioinput]', async (event) => {
+  const deviceId = event.target.dataset.audioinput
+  $.teach({ selectedAudioDeviceId: deviceId })
+
+  const target = event.target.closest($.link)
+  await setMediaStream(target)
+})
+
+// Handle audio output device selection (if supported)
+$.when('click', '[data-audiooutput]', async (event) => {
+  const deviceId = event.target.dataset.audiooutput
+  $.teach({ selectedAudioOutputDeviceId: deviceId })
+
+  // Set sink ID on video element if supported
+  const target = event.target.closest($.link)
+  if (target.video && typeof target.video.setSinkId === 'function') {
+    try {
+      await target.video.setSinkId(deviceId)
+      toast('Audio output device changed')
+    } catch (error) {
+      console.error('Failed to set audio output:', error)
+      toast('Failed to change audio output')
+    }
+  }
+})
 
 $.when('pointerdown', '[data-drag]', grabToolbelt)
 $.when('pointermove', '[data-drag]', dragToolbelt)
