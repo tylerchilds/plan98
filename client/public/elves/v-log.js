@@ -465,7 +465,7 @@ function screenshot(event) {
   const byteCharacters = atob(dataURL.split(',')[1]);
   const byteNumbers = new Array(byteCharacters.length);
   for (let i = 0; i < byteCharacters.length; i++) {
-      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    byteNumbers[i] = byteCharacters.charCodeAt(i);
   }
   const byteArray = new Uint8Array(byteNumbers);
 
@@ -1319,17 +1319,53 @@ class VLog extends HTMLElement {
       if (videoEnabled && target.video && target.video.videoWidth > 0) {
         const videoWidth = target.video.videoWidth
         const videoHeight = target.video.videoHeight
+        const videoIsLandscape = videoWidth > videoHeight
 
-        const scaleX = currentWidth / videoWidth;
-        const scaleY = currentHeight / videoHeight;
-        const scale = Math.min(scaleX, scaleY);
+        // Check if DEVICE is in portrait orientation
+        const deviceIsPortrait = self.matchMedia("(orientation: portrait)").matches
 
-        const scaledWidth = videoWidth * scale;
-        const scaledHeight = videoHeight * scale;
-        const offsetX = (currentWidth - scaledWidth) / 2;
-        const offsetY = (currentHeight - scaledHeight) / 2;
+        // Only rotate on mobile when device is portrait but video is landscape
+        const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+        const shouldRotate = deviceIsPortrait && videoIsLandscape && isMobile
 
-        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+        if (shouldRotate) {
+          // Rotate the video 90 degrees to fit portrait canvas
+          ctx.save();
+
+          // Move to center of canvas
+          ctx.translate(currentWidth / 2, currentHeight / 2);
+
+          // Rotate 90 degrees clockwise
+          ctx.rotate(Math.PI / 2);
+
+          // Calculate scale to FIT (not cover) - after rotation, video width becomes height
+          const scaleX = currentWidth / videoHeight;
+          const scaleY = currentHeight / videoWidth;
+          const scale = Math.min(scaleX, scaleY); // Math.min for natural fit!
+
+          // Draw centered
+          ctx.drawImage(
+            target.video,
+            -videoWidth * scale / 2,
+            -videoHeight * scale / 2,
+            videoWidth * scale,
+            videoHeight * scale
+          );
+
+          ctx.restore();
+        } else {
+          // Draw normally with natural fit
+          const scaleX = currentWidth / videoWidth;
+          const scaleY = currentHeight / videoHeight;
+          const scale = Math.min(scaleX, scaleY); // Math.min for natural fit!
+
+          const scaledWidth = videoWidth * scale;
+          const scaledHeight = videoHeight * scale;
+          const offsetX = (currentWidth - scaledWidth) / 2;
+          const offsetY = (currentHeight - scaledHeight) / 2;
+
+          ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+        }
       }
 
       ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
@@ -1612,7 +1648,7 @@ function calculateCanvasDimensions(target) {
 }
 
 async function setMediaStream(target) {
-   // Prevent concurrent camera access
+  // Prevent concurrent camera access
   if (cameraLock) {
     console.log('Camera access already in progress, skipping...')
     return
