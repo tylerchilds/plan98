@@ -1145,20 +1145,8 @@ class VLog extends HTMLElement {
     // Initialize without media stream
     this.init(this)
 
-    if (self.screen?.orientation) {
-      this.orientationHandler = () => {
-        handleOrientationChange(this)
-      }
-      self.screen.orientation.addEventListener('change', this.orientationHandler)
-    } else {
-      // Fallback to window resize
-      this.orientationHandler = () => handleOrientationChange(this)
-      self.addEventListener('resize', this.orientationHandler)
-    }
-
-    // Listen for window resize (handles square aspect ratio changes)
-    this.resizeHandler = () => handleOrientationChange(this)
-    self.addEventListener('resize', this.resizeHandler)
+    this.orientationHandler = () => handleOrientationChange(this)
+    window.addEventListener('resize', this.orientationHandler)
   }
 
   beforeUpdate(target) {
@@ -1197,15 +1185,8 @@ class VLog extends HTMLElement {
       this.webcamStream = null
     }
 
-
-    if (self.screen?.orientation && this.orientationHandler) {
-      self.screen.orientation.removeEventListener('change', this.orientationHandler)
-    } else if (this.orientationHandler) {
-      self.removeEventListener('resize', this.orientationHandler)
-    }
-
-    if (this.resizeHandler) {
-      self.removeEventListener('resize', this.resizeHandler)
+    if (this.orientationHandler) {
+      window.removeEventListener('resize', this.orientationHandler)
     }
   }
 
@@ -1605,21 +1586,13 @@ And dog demanded resolution and quality
 function calculateCanvasDimensions(target) {
   const { videoEnabled } = $.learn()
 
-  // Detect actual device orientation
-  let isPortrait = false
-  let isSquare = false
+  // Use window dimensions - these change when device rotates
+  const windowWidth = window.innerWidth
+  const windowHeight = window.innerHeight
 
-  if (self.screen?.orientation) {
-    // Use Screen Orientation API (most reliable)
-    const type = self.screen.orientation.type
-    isPortrait = type.startsWith('portrait')
-  } else {
-    // Fallback: use actual screen dimensions
-    const w = self.screen.width
-    const h = self.screen.height
-    isPortrait = h > w
-    isSquare = Math.abs(w - h) < 100
-  }
+  // Simple: if window is taller than wide, we're in portrait
+  const isPortrait = windowHeight > windowWidth
+  const isSquare = Math.abs(windowWidth - windowHeight) < 100
 
   let width, height
 
