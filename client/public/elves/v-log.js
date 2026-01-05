@@ -1640,17 +1640,14 @@ async function setMediaStream(target) {
       }
 
       if (isSquare) {
-        videoConstraints.aspectRatio = { ideal: 1 }
-        videoConstraints.width = { ideal: 1080 }
-        videoConstraints.height = { ideal: 1080 }
+        videoConstraints.width = { ideal: 1080, max: 1920 }
+        videoConstraints.height = { ideal: 1080, max: 1920 }
       } else if (isPortrait) {
-        videoConstraints.aspectRatio = { ideal: 9/16 }
-        videoConstraints.width = { ideal: 1080 }
-        videoConstraints.height = { ideal: 1920 }
+        videoConstraints.width = { ideal: 1080, max: 1920 }
+        videoConstraints.height = { ideal: 1920, max: 3840 }
       } else {
-        videoConstraints.aspectRatio = { ideal: 16/9 }
-        videoConstraints.width = { ideal: 1920 }
-        videoConstraints.height = { ideal: 1080 }
+        videoConstraints.width = { ideal: 1920, max: 3840 }
+        videoConstraints.height = { ideal: 1080, max: 1920 }
       }
 
       constraints.video = videoConstraints
