@@ -1302,7 +1302,7 @@ class VLog extends HTMLElement {
 
     const ctx = target.outputCanvas.getContext('2d'); 
     const drawComposite = () => {
-       const { videoEnabled } = $.learn()
+      const { videoEnabled } = $.learn()
       const currentWidth = target.outputCanvas.width
       const currentHeight = target.outputCanvas.height
 
@@ -1312,6 +1312,49 @@ class VLog extends HTMLElement {
         const videoWidth = target.video.videoWidth
         const videoHeight = target.video.videoHeight
 
+        // Log once when video dimensions change
+        if (!target.lastVideoLog ||
+          target.lastVideoLog.width !== videoWidth ||
+          target.lastVideoLog.height !== videoHeight ||
+          target.lastVideoLog.canvasWidth !== currentWidth ||
+          target.lastVideoLog.canvasHeight !== currentHeight) {
+
+          console.log('==========================================')
+          console.log('🎬 VIDEO ELEMENT ACTUAL DIMENSIONS:')
+          console.log('  video.videoWidth:', videoWidth)
+          console.log('  video.videoHeight:', videoHeight)
+          console.log('  video aspect:', (videoWidth / videoHeight).toFixed(2))
+          console.log('')
+          console.log('📐 CANVAS DIMENSIONS:')
+          console.log('  canvas.width:', currentWidth)
+          console.log('  canvas.height:', currentHeight)
+          console.log('  canvas aspect:', (currentWidth / currentHeight).toFixed(2))
+          console.log('')
+
+          const videoAspect = videoWidth / videoHeight
+          const canvasAspect = currentWidth / currentHeight
+
+          if (videoAspect > 1 && canvasAspect < 1) {
+            console.log('❌ MISMATCH: Video is LANDSCAPE but canvas is PORTRAIT')
+            console.log('   Need to crop video from', videoWidth, 'x', videoHeight)
+            console.log('   To fit canvas', currentWidth, 'x', currentHeight)
+          } else if (videoAspect < 1 && canvasAspect > 1) {
+            console.log('❌ MISMATCH: Video is PORTRAIT but canvas is LANDSCAPE')
+          } else if (Math.abs(videoAspect - canvasAspect) > 0.1) {
+            console.log('⚠️  Aspect ratios differ but both same orientation')
+          } else {
+            console.log('✅ Video and canvas aspects MATCH')
+          }
+          console.log('==========================================')
+
+          target.lastVideoLog = {
+            width: videoWidth,
+            height: videoHeight,
+            canvasWidth: currentWidth,
+            canvasHeight: currentHeight
+          }
+        }
+
         // Calculate aspect ratios
         const videoAspect = videoWidth / videoHeight
         const canvasAspect = currentWidth / currentHeight
@@ -1319,9 +1362,7 @@ class VLog extends HTMLElement {
         let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight
 
         // If aspect ratios don't match, crop the video
-        if (target.needsVideoCrop && Math.abs(videoAspect - canvasAspect) > 0.01) {
-          console.log('🔪 Cropping video:', videoWidth, 'x', videoHeight, '→ canvas:', currentWidth, 'x', currentHeight)
-
+        if (Math.abs(videoAspect - canvasAspect) > 0.01) {
           if (videoAspect > canvasAspect) {
             // Video is wider than canvas - crop sides
             sw = videoHeight * canvasAspect
@@ -1339,7 +1380,7 @@ class VLog extends HTMLElement {
           // Draw cropped video
           ctx.drawImage(
             target.video,
-            sx, sy, sw, sh,              // Source: crop from video
+            sx, sy, sw, sh,                    // Source: crop from video
             0, 0, currentWidth, currentHeight  // Dest: fill canvas
           );
         } else {
