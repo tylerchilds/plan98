@@ -813,6 +813,42 @@ function template(body) {
     </main>
     </data-popover>
     </data-tooltip>
+    <script type="module">
+      import { showModal, hideModal } from '@plan98/modal'
+      let debug = true
+      window.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault()
+          debug = !debug
+          const mode = debug ? debugMode : normalMode
+          mode()
+        }
+      });
+      function normalMode() {
+        hideModal()
+      }
+
+      function debugMode() {
+        const tpl = document.getElementById('source-code-template')
+        const html = tpl.innerHTML
+        showModal(html, { centered: true })
+      }
+
+    </script>
+    <template id="source-code-template">
+      ${shhhhhh_this_is_the_source_code()}
+    </template>
+
   </body>
 </html>`
+}
+
+function shhhhhh_this_is_the_source_code() {
+  return `
+    <div style="width: 100%; height: 100%; max-width: 100vw; max-height: 100vh;">
+      <div style="overflow: auto; height: 100%;">
+        <source-code></source-code>
+      </div>
+    </div>
+  `
 }

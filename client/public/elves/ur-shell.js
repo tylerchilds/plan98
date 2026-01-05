@@ -627,9 +627,9 @@ function mount(target) {
   if(command) {
     execute(command)
   } else if(src) {
-    execute(src)
+    execute(src, { suppressBack: true })
   } else if(rom) {
-    execute('<'+rom)
+    execute('<'+rom, { suppressBack: true })
   } else if(message) {
     sh(message)
   }
@@ -781,7 +781,7 @@ $.when('submit', 'form', (event) => {
 
 const imports = {}
 
-async function execute(message) {
+async function execute(message, options={}) {
   if(!message) return
 
   const { secureEntry } = $.learn()
@@ -795,13 +795,13 @@ async function execute(message) {
 
   if(message.startsWith('<')) {
     $.teach({ body: 'load module', author: 'assistant' }, mergeMessage)
-    loadModule(message)
+    loadModule(message, options)
     return
   }
 
   if(message.startsWith('/')) {
     $.teach({ body: 'load path', author: 'assistant' }, mergeMessage)
-    loadPath(message)
+    loadPath(message, options)
     return
   }
 
@@ -834,16 +834,22 @@ async function execute(message) {
   }
 }
 
-export function loadPath(message) {
-  // add some hype to our scene
-  showModal(`
-    <div style="display: grid; height: 100%; grid-template-rows: auto 1fr;">
+export function loadPath(message, options = {}) {
+  let html = `
+    <div style="display: grid; height: 100%; width: 100%; grid-template-rows: auto 1fr;">
       <div style="background: black;">
         <button data-modal-close class="branded-button">Back</button>
       </div>
       <iframe src="${message}"></iframe>
     </div>
-  `, {
+  `
+
+  if(options.suppressBack) {
+    html = `<iframe src="${message}"></iframe>`
+  }
+
+  // add some hype to our scene
+  showModal(html, {
     blockExit: true,
     onHide: () => $.teach({ popped: false })
   })
@@ -854,7 +860,7 @@ export function loadPath(message) {
 const elements = "a,abbr,address,area,article,aside,audio,b,base,bdi,bdo,blockquote,body,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,head,header,hgroup,hr,html,i,iframe,img,input,ins,kbd,label,legend,li,link,main,map,mark,menu,meta,meter,nav,noscript,object,ol,optgroup,option,output,p,param,picture,pre,progress,q,rp,rt,ruby,s,samp,script,section,select,slot,small,source,span,strong,style,sub,summary,sup,table,tbody,td,template,textarea,tfoot,th,thead,time,title,tr,track,u,ul,var,video,wbr"
 
 
-export async function loadModule(message) {
+export async function loadModule(message, options = {}) {
   const [firstLine, ...lines] = message.split('\n')
 
   const elf = firstLine.slice(1)
@@ -903,23 +909,34 @@ export async function loadModule(message) {
         return `${x}="${properties[x]}" `
       }).join('')
 
-    // add some hype to our scene
-    showModal(`
-      <div style="display: grid; height: 100%; grid-template-rows: auto 1fr;">
+    const elvish = `<${elf} ${attributes}>${innerHTML || innerText}</${elf}>`
+
+
+    let html = `
+      <div style="display: grid; height: 100%; width: 100%; grid-template-rows: auto 1fr;">
         <div style="background: black;">
           <button data-modal-close class="branded-button">Back</button>
         </div>
-        <${elf} ${attributes}>${innerHTML || innerText}</${elf}>
+        ${elvish}
       </div>
-    `, {
-      transparent: true,
+    `
+
+    if(options.suppressBack) {
+      html = `
+        <div style="width: 100%; height: 100%;">
+          ${elvish}
+        </div>
+      `
+    }
+
+    showModal(html, {
       blockExit: true,
       onHide: () => $.teach({ popped: false })
     })
 
     $.teach({ popped: true })
-
   } catch(e) {
+    console.error(e)
     $.teach({ body: 'ELF load failed, ask "help" for assistance', author: 'assistant' }, mergeMessage)
   }
 }

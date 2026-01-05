@@ -687,8 +687,27 @@ $.style(`
     position: relative;
     width: 100%;
     max-width: 100%;
-    aspect-ratio: 16/9;
+    height: 100%;
+    max-height: 100%;
     background: var(--background, black);
+  }
+
+  @media (orientation: landscape) {
+    & .letterbox {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (orientation: portrait) {
+    & .letterbox {
+      aspect-ratio: 9 / 16;
+    }
+  }
+
+  @media (aspect-ratio: 1 / 1) {
+    & .letterbox {
+      aspect-ratio: 1 / 1;
+    }
   }
 
   & .letterbox canvas {

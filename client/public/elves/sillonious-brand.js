@@ -90,7 +90,7 @@ $.draw((target) => {
   }
 
   return `
-    <shirt-flicks></shirt-flicks>
+    <trick-shot></trick-shot>
   `
 })
 

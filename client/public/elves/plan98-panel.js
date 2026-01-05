@@ -69,7 +69,7 @@ function banner() {
   `
 }
 
-const context = `<div class="panel-overlay"><plan98-panel></plan98-panel></div>`
+const context = `<div class="panel-overlay" style="z-index: 100;"><plan98-panel></plan98-panel></div>`
 document.body.insertAdjacentHTML("beforeend", context)
 
 let hideListener = (event) => {
