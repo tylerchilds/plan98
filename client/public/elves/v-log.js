@@ -1311,33 +1311,29 @@ class VLog extends HTMLElement {
     const ctx = target.outputCanvas.getContext('2d'); 
     const drawComposite = () => {
       const { videoEnabled } = $.learn()
-  const currentWidth = target.outputCanvas.width
-  const currentHeight = target.outputCanvas.height
+      const currentWidth = target.outputCanvas.width
+      const currentHeight = target.outputCanvas.height
 
-  ctx.clearRect(0, 0, currentWidth, currentHeight);
+      ctx.clearRect(0, 0, currentWidth, currentHeight);
 
-  if (videoEnabled && target.video && target.video.videoWidth > 0) {
-    const videoWidth = target.video.videoWidth
-    const videoHeight = target.video.videoHeight
+      if (videoEnabled && target.video && target.video.videoWidth > 0) {
+        const videoWidth = target.video.videoWidth
+        const videoHeight = target.video.videoHeight
 
-    // SIMPLE SOLUTION: Just draw the video scaled to fit/cover
-    // iOS Safari automatically handles video orientation based on device orientation
-    // We don't need to rotate manually!
+        const scaleX = currentWidth / videoWidth;
+        const scaleY = currentHeight / videoHeight;
+        const scale = Math.min(scaleX, scaleY);
 
-    const scaleX = currentWidth / videoWidth;
-    const scaleY = currentHeight / videoHeight;
-    const scale = Math.max(scaleX, scaleY); // Use max to cover, min to fit
+        const scaledWidth = videoWidth * scale;
+        const scaledHeight = videoHeight * scale;
+        const offsetX = (currentWidth - scaledWidth) / 2;
+        const offsetY = (currentHeight - scaledHeight) / 2;
 
-    const scaledWidth = videoWidth * scale;
-    const scaledHeight = videoHeight * scale;
-    const offsetX = (currentWidth - scaledWidth) / 2;
-    const offsetY = (currentHeight - scaledHeight) / 2;
+        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+      }
 
-    ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
-  }
-
-  ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
-  requestAnimationFrame(drawComposite);
+      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
+      requestAnimationFrame(drawComposite);
     }
 
     drawComposite();
@@ -1867,10 +1863,19 @@ Toggle video on/off
 */
 
 $.when('click', '[data-toggle-video]', async (event) => {
-  const { videoEnabled } = $.learn()
+  const { videoEnabled, selectedVideoDeviceId, devicesByKind } = $.learn()
   const newState = !videoEnabled
 
-  $.teach({ videoEnabled: newState })
+  // If enabling video and no device selected yet, pick the first one
+  if (newState && !selectedVideoDeviceId && devicesByKind.videoinput?.length > 0) {
+    const firstVideoDevice = devicesByKind.videoinput[0]
+    $.teach({
+      videoEnabled: newState,
+      selectedVideoDeviceId: firstVideoDevice.deviceId
+    })
+  } else {
+    $.teach({ videoEnabled: newState })
+  }
 
   const target = event.target.closest($.link)
   await setMediaStream(target)
@@ -1922,10 +1927,19 @@ Toggle audio on/off
 */
 
 $.when('click', '[data-toggle-audio]', async (event) => {
-  const { audioEnabled } = $.learn()
+  const { audioEnabled, selectedAudioDeviceId, devicesByKind } = $.learn()
   const newState = !audioEnabled
 
-  $.teach({ audioEnabled: newState })
+  // If enabling audio and no device selected yet, pick the first one
+  if (newState && !selectedAudioDeviceId && devicesByKind.audioinput?.length > 0) {
+    const firstAudioDevice = devicesByKind.audioinput[0]
+    $.teach({
+      audioEnabled: newState,
+      selectedAudioDeviceId: firstAudioDevice.deviceId
+    })
+  } else {
+    $.teach({ audioEnabled: newState })
+  }
 
   const target = event.target.closest($.link)
   await setMediaStream(target)
