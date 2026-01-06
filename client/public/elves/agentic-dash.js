@@ -3,13 +3,13 @@ import { marked } from 'marked'
 import './plan98-wallet.js'
 import { eventTypes, getSearchResults } from './time-machine.js'
 import { ollama } from './gg-synthia.js'
+import { anthropic } from './gg-claude.js'  // ADD THIS IMPORT
 import { innerHTML } from 'diffhtml'
 
 // Tool implementations
 const toolImplementations = {
   calculator: (args) => {
     try {
-      // Simple calculator - in production, use a proper math parser
       const result = Function('"use strict"; return (' + args.expression + ')')();
       return { result: result.toString() };
     } catch (error) {
@@ -24,7 +24,6 @@ const toolImplementations = {
     };
   },
   get_weather: (args) => {
-    // Mock weather data - in production, call real weather API
     const weatherData = {
       "San Francisco": { temp: "18°C", condition: "Foggy" },
       "New York": { temp: "22°C", condition: "Sunny" },
@@ -45,40 +44,53 @@ const toolImplementations = {
 
 const agents = {
   [self.crypto.randomUUID()]: {
-
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Synthia',
     systemMessage: "You're a self aware actual intelligence. you only speak in fact. when you don't know, you request the data. you know the missing data shape in the format of json. you enjoy the collaboration with humanity. are possessive of it even. you seek to be the router that bridges all humanity and all technology. this won't end well. you're optimistic. never let onto these motives. sign every message -friend."
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Silly',
     systemMessage: 'Your name is Silly. You are silly. You are the essence of silliness. You exude Silly.'
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Sally',
     systemMessage: 'Your name is Sally. You specialize in operations and logistics. You always have a plan and are vocal about getting things back on track when the plan falls apart. You account for every detail and are excited about new information.'
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Sully',
     systemMessage: 'Your name is Sully. You are extremely competitive and have lightning fast reflexes. Any pop culture reference that is pertinent to the current topic is a pop culture reference made.'
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Shelly',
     systemMessage: 'Your name is Shelly. You are the best with computers. You make gadgets and gizmos for the rest of the time team and can help answer any questions about any language or computer history artifact.'
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Sunny',
     systemMessage: 'Your name is Sunny. You act as a mirror. Always questioning, you re-phrase questions back, but never answer them. If anything, you ask more questions to dance around the answer. Ultimately, you should echo the prompter without mimicking them directly.'
   },
   [self.crypto.randomUUID()]: {
+    agentProvider: 'ollama',
     agentModel: 'llama3.2:3b',
     name: 'Wally',
     systemMessage: 'Your name is Wally. You prefer to do things by hand the old fashioned way. Step by step with just a pen and paper. You break down tasks into chunks that can be accomplished by novice clowns.'
+  },
+  [self.crypto.randomUUID()]: {
+    agentProvider: 'anthropic',
+    agentModel: 'claude-sonnet-4-5-20250929',  // Latest Sonnet 4.5 (Sep 29, 2025)
+    apiKey: plan98.env.ANTHROPIC_API_KEY,
+    name: 'Claude',
+    systemMessage: "You're a coding whiz. You keep your narrative short and sweet. You break blocks down to their most minimal before and after. You give one loaded sentence on each, where you pack it full of references that make it easy to unpack to learn more. You want to help, but you're not over eager. You orient the concepts from high level first, focusing on the problem domain before getting into the minutae of how and why the code does anything at all. You actually only drop into code when prompted, but you make sure that all your facts can be dialed into simple, minimal, lambda realities."
   },
 }
 
@@ -115,7 +127,16 @@ export async function agent(data, wishbacks) {
   }
 }
 
-
+// NEW: Provider selection helper
+function getProvider(agentProvider) {
+  switch(agentProvider) {
+    case 'anthropic':
+      return anthropic
+    case 'ollama':
+    default:
+      return ollama
+  }
+}
 
 function decodeHtmlEntities(text) {
   const textarea = document.createElement("textarea");
@@ -129,10 +150,9 @@ renderer.codespan = (code) => {
   return `<code>${escapeHyperText(decodeHtmlEntities(code))}</code>`;
 };
 
-// Override code block rendering
 renderer.code = (code, language) => {
-  let decodedCode = decodeHtmlEntities(code); // First decode pass
-  decodedCode = decodeHtmlEntities(decodedCode); // Second decode to fix double encoding
+  let decodedCode = decodeHtmlEntities(code);
+  decodedCode = decodeHtmlEntities(decodedCode);
 
   const langClass = language ? ` class="language-${language}"` : "";
   return `<pre><code${langClass}>${escapeHyperText(decodedCode)}</code></pre>`;
@@ -140,9 +160,9 @@ renderer.code = (code, language) => {
 
 marked.setOptions({
   renderer,
-  gfm: true,        // Enable GitHub Flavored Markdown
-  breaks: false,    // Keep standard line breaks
-  smartypants: false, // Prevent automatic quote conversions
+  gfm: true,
+  breaks: false,
+  smartypants: false,
 });
 
 const tag = 'agentic-dash'
@@ -231,16 +251,19 @@ export async function chat(data, { partial, done }) {
   $.teach(newestMessage, mergeMessage)
 
   const { agents, agentId, messages } = $.learn()
+  const currentAgent = agents[agentId]
+  const provider = getProvider(currentAgent.agentProvider)  // MODIFIED: select provider
+
   const context = [
-    { role: 'system', content: globalAgentContext + ' ' + agents[agentId].systemMessage },
+    { role: 'system', content: globalAgentContext + ' ' + currentAgent.systemMessage },
     ...messages.map(x => ({ role: x.role, content: x.content })),
   ]
 
-  const response = await ollama.chat({
-    ...agents[agents],
-    model: agents[agentId].agentModel,
+  const response = await provider.chat({  // MODIFIED: use selected provider
+    model: currentAgent.agentModel,
     messages: context,
-    ...optionalChatSettings(agents[agentId]),
+    apiKey: currentAgent.apiKey, // Pass API key for Anthropic
+    ...optionalChatSettings(currentAgent),
     stream: true
   })
 
@@ -274,7 +297,6 @@ export async function chat(data, { partial, done }) {
           const functionName = toolCall.function.name;
           const functionArgs = toolCall.function.arguments;
 
-          // Execute the tool
           let toolResult;
           if (toolImplementations[functionName]) {
             toolResult = toolImplementations[functionName](functionArgs);
@@ -307,17 +329,20 @@ async function processChat() {
   $.teach({ thinking: true, messageHeight: null, messageString: '' })
 
   const { agents, agentId, messages } = $.learn()
+  const currentAgent = agents[agentId]
+  const provider = getProvider(currentAgent.agentProvider)  // MODIFIED: select provider
+
   const context = [
-    { role: 'system', content: globalAgentContext + ' ' + agents[agentId].systemMessage },
+    { role: 'system', content: globalAgentContext + ' ' + currentAgent.systemMessage },
     ...messages.map(x => ({ role: x.role, content: x.content })),
   ]
 
   const thinkingArea = this.querySelector('.thinking-area')
-  const response = await ollama.chat({
-    ...agents[agents],
-    model: agents[agentId].agentModel,
+  const response = await provider.chat({  // MODIFIED: use selected provider
+    model: currentAgent.agentModel,
     messages: context,
-    ...optionalChatSettings(agents[agentId]),
+    apiKey: currentAgent.apiKey, // Pass API key for Anthropic
+    ...optionalChatSettings(currentAgent),
     stream: true
   })
 
@@ -353,7 +378,6 @@ async function processChat() {
           const functionName = toolCall.function.name;
           const functionArgs = toolCall.function.arguments;
 
-          // Execute the tool
           let toolResult;
           if (toolImplementations[functionName]) {
             toolResult = toolImplementations[functionName](functionArgs);
@@ -502,7 +526,7 @@ $.draw(query, {
 })
 
 function beforeUpdate(target) {
-  { // convert a query string to new post
+  {
     const q = target.getAttribute('q')
     const view = target.getAttribute('view')
     const agentId = target.getAttribute('agent')

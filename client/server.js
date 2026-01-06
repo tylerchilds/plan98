@@ -414,6 +414,63 @@ Deno.serve(
       }
     }
 
+    if (filepath === '/api/anthropic') {
+      try {
+        // Get API key from client's Authorization header
+        const authHeader = request.headers.get('authorization');
+        const apiKey = authHeader?.replace('Bearer ', '');
+
+        if (!apiKey) {
+          return new Response(
+            JSON.stringify({ error: 'API key required in Authorization header' }),
+            {
+              status: 401,
+              headers: { 'content-type': 'application/json' }
+            }
+          );
+        }
+
+        const body = await request.json();
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify(body)
+        });
+
+        // Handle streaming response
+        if (body.stream) {
+          return new Response(response.body, {
+            headers: {
+              'content-type': 'text/event-stream',
+              'cache-control': 'no-cache',
+              'connection': 'keep-alive'
+            }
+          });
+        }
+
+        // Handle regular response
+        const data = await response.json();
+        return new Response(JSON.stringify(data), {
+          headers: {
+            'content-type': 'application/json'
+          }
+        });
+      } catch (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          {
+            status: 500,
+            headers: { 'content-type': 'application/json' }
+          }
+        );
+      }
+    }
+
     try {
       const headers = {
         'content-type': getContentTypeByPath(filepath)
@@ -493,6 +550,8 @@ function template(body) {
     PLAN98_WAS_SIGNER: JSON.stringify(keycard.asJSON),
     PLAN98_REALTIME: safeEnv('PLAN98_REALTIME'),
     PLAN98_PROXY: safeEnv('PLAN98_PROXY'),
+
+    ANTHROPIC_API_KEY: safeEnv('ANTHROPIC_API_KEY'),
 
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
 
