@@ -1633,64 +1633,26 @@ function calculateCanvasDimensions(target) {
   const isPortrait = windowHeight > windowWidth
   const isSquare = Math.abs(windowWidth - windowHeight) < 100
 
-  // MOBILE DETECTION
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const isLowEnd = isMobile && (windowWidth * windowHeight < 1000000) // < 1MP screen
-
   console.log('↳ isPortrait:', isPortrait)
   console.log('↳ isSquare:', isSquare)
-  console.log('↳ isMobile:', isMobile)
-  console.log('↳ isLowEnd:', isLowEnd)
 
   let width, height
 
-  if (isLowEnd) {
-    // Low-end mobile: use screen resolution (much faster)
-    if (isSquare) {
-      const size = Math.min(windowWidth, windowHeight)
-      width = height = size
-      console.log(`↳ Setting LOW-END SQUARE canvas: ${size}x${size}`)
-    } else if (isPortrait) {
-      width = Math.floor(windowWidth * window.devicePixelRatio)
-      height = Math.floor(windowHeight * window.devicePixelRatio)
-      console.log(`↳ Setting LOW-END PORTRAIT canvas: ${width}x${height}`)
-    } else {
-      width = Math.floor(windowWidth * window.devicePixelRatio)
-      height = Math.floor(windowHeight * window.devicePixelRatio)
-      console.log(`↳ Setting LOW-END LANDSCAPE canvas: ${width}x${height}`)
-    }
-  } else if (isMobile) {
-    // Regular mobile: use 720p/1280
-    if (isSquare) {
-      width = height = 720
-      console.log('↳ Setting MOBILE SQUARE canvas: 720x720')
-    } else if (isPortrait) {
-      width = 720
-      height = 1280
-      console.log('↳ Setting MOBILE PORTRAIT canvas: 720x1280')
-    } else {
-      width = 1280
-      height = 720
-      console.log('↳ Setting MOBILE LANDSCAPE canvas: 1280x720')
-    }
+  if (isSquare) {
+    width = height = 1080
+    console.log('↳ Setting SQUARE canvas: 1080x1080')
+  } else if (isPortrait) {
+    width = 1080
+    height = 1920
+    console.log('↳ Setting PORTRAIT canvas: 1080x1920')
   } else {
-    // Desktop: use 1080p
-    if (isSquare) {
-      width = height = 1080
-      console.log('↳ Setting DESKTOP SQUARE canvas: 1080x1080')
-    } else if (isPortrait) {
-      width = 1080
-      height = 1920
-      console.log('↳ Setting DESKTOP PORTRAIT canvas: 1080x1920')
-    } else {
-      width = 1920
-      height = 1080
-      console.log('↳ Setting DESKTOP LANDSCAPE canvas: 1920x1080')
-    }
+    width = 1920
+    height = 1080
+    console.log('↳ Setting LANDSCAPE canvas: 1920x1080')
   }
 
   console.log('=========================================')
-  return { width, height, isPortrait, isSquare, isMobile, isLowEnd }
+  return { width, height, isPortrait, isSquare }
 }
 
 async function setMediaStream(target) {
@@ -2410,10 +2372,7 @@ function drawHistoricalStrokes(target) {
   if (!inputCanvas) return
 
   const { strokeHistory, background } = $.learn()
-  const context = inputCanvas.getContext('2d', {
-    willReadFrequently: false,
-    alpha: false
-  })
+  const context = inputCanvas.getContext('2d', { willReadFrequently: false })
 
   // Clear and draw background
   context.clearRect(0, 0, inputCanvas.width, inputCanvas.height)
@@ -2426,53 +2385,19 @@ function drawHistoricalStrokes(target) {
     if (stroke.length < 2) return
     drawStroke(context, stroke)
   })
-
-  // Mark composite as dirty
-  if (target._compositeDirty) {
-    target._compositeDirty.historical = true
-  }
 }
-
-let drawPlayerStrokeDebounced = {}
 
 function drawPlayerStroke(target, playerId, stroke) {
   if (!stroke || stroke.length < 2) return
 
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-  if (isMobile) {
-    // On mobile: debounce rapid updates
-    if (drawPlayerStrokeDebounced[playerId]) {
-      clearTimeout(drawPlayerStrokeDebounced[playerId])
-    }
-
-    drawPlayerStrokeDebounced[playerId] = setTimeout(() => {
-      _drawPlayerStrokeImmediate(target, playerId, stroke)
-      delete drawPlayerStrokeDebounced[playerId]
-    }, 16) // ~60fps max
-  } else {
-    // Desktop: draw immediately
-    _drawPlayerStrokeImmediate(target, playerId, stroke)
-  }
-}
-
-function _drawPlayerStrokeImmediate(target, playerId, stroke) {
   const canvas = getOrCreatePlayerCanvas(target, playerId)
-  const context = canvas.getContext('2d', { 
-    willReadFrequently: false,
-    alpha: true
-  })
+  const context = canvas.getContext('2d', { willReadFrequently: false })
 
   // Clear this player's canvas
   context.clearRect(0, 0, canvas.width, canvas.height)
 
   // Draw their current stroke
   drawStroke(context, stroke)
-
-  // Mark composite as dirty
-  if (target._compositeDirty) {
-    target._compositeDirty.players = true
-  }
 }
 
 function drawStroke(context, stroke) {
@@ -2500,33 +2425,10 @@ function drawStroke(context, stroke) {
 }
 
 function setupCompositeLoop(target) {
-  const ctx = target.outputCanvas.getContext('2d', { 
-    alpha: false, // Optimization: we don't need alpha
-    desynchronized: true // Optimization: reduce latency
-  })
-
+  const ctx = target.outputCanvas.getContext('2d')
   let lastVideoTime = -1
-  let lastCompositeTime = 0
 
-  // MOBILE: Reduce composite rate to 30fps (saves 50% GPU)
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-  const compositeInterval = isMobile ? 1000 / 30 : 1000 / 60
-
-  // Track what's dirty
-  target._compositeDirty = {
-    video: false,
-    historical: false,
-    players: false
-  }
-
-  const drawComposite = (timestamp) => {
-    // Throttle composite rate on mobile
-    if (timestamp - lastCompositeTime < compositeInterval) {
-      requestAnimationFrame(drawComposite)
-      return
-    }
-    lastCompositeTime = timestamp
-
+  const drawComposite = () => {
     const { videoEnabled } = $.learn()
     const currentWidth = target.outputCanvas.width
     const currentHeight = target.outputCanvas.height
@@ -2535,27 +2437,8 @@ function setupCompositeLoop(target) {
     const videoTime = target.video?.currentTime || 0
     const videoChanged = videoEnabled && videoTime !== lastVideoTime
 
-    if (videoChanged) {
-      target._compositeDirty.video = true
-      lastVideoTime = videoTime
-    }
+    lastVideoTime = videoTime
 
-    // Skip composite if nothing is dirty
-    const anyDirty = target._compositeDirty.video || 
-      target._compositeDirty.historical || 
-      target._compositeDirty.players
-
-    if (!anyDirty && !videoChanged) {
-      requestAnimationFrame(drawComposite)
-      return
-    }
-
-    // Clear dirty flags
-    target._compositeDirty.video = false
-    target._compositeDirty.historical = false
-    target._compositeDirty.players = false
-
-    // COMPOSITE
     ctx.clearRect(0, 0, currentWidth, currentHeight)
 
     // Draw video layer if enabled
@@ -2612,7 +2495,7 @@ function setupCompositeLoop(target) {
     requestAnimationFrame(drawComposite)
   }
 
-  requestAnimationFrame(drawComposite)
+  drawComposite()
 }
 
 /*
@@ -2690,15 +2573,15 @@ function start(e) {
   }, {
     mergeHandler: mergePlayer,
     parameters: [playerId]
+  }, {
+    bypassSecurity: true
   })
 }
 
 $.when('touchmove', '.input-canvas', move)
 $.when('mousemove', '.input-canvas', move)
 
-let moveCounter = 0
-
-function move(e) {
+function move (e) {
   e.preventDefault()
 
   if (!isMousedown) return
@@ -2707,44 +2590,8 @@ function move(e) {
   const { rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
   const { thickness, opacity, color } = $.learn()
 
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
-
-  // MOBILE: Skip every other point for performance
-  if (isMobile) {
-    moveCounter++
-    if (moveCounter % 2 === 0) {
-      // Still track the point but skip rendering/network
-      let pressure = 0.1
-      let clientX, clientY
-
-      if (e.touches && e.touches[0]) {
-        const touch = e.touches[0]
-        if (typeof touch["force"] !== "undefined" && touch["force"] > 0) {
-          pressure = touch["force"]
-        }
-        clientX = touch.clientX
-        clientY = touch.clientY
-      } else {
-        pressure = 1.0
-        clientX = e.clientX
-        clientY = e.clientY
-      }
-
-      const relativeX = clientX - rectangle.left - offsetX
-      const relativeY = clientY - rectangle.top - offsetY
-      const x = relativeX * scaleX
-      const y = relativeY * scaleY
-
-      lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
-      const newPoint = { x, y, lineWidth, color, opacity }
-      points.push(newPoint)
-
-      return // Skip rendering this frame
-    }
-  }
-
   let pressure = 0.1
-  let clientX, clientY
+  let clientX, clientY;
 
   if (e.touches && e.touches[0]) {
     const touch = e.touches[0]
@@ -2754,15 +2601,17 @@ function move(e) {
     clientX = touch.clientX
     clientY = touch.clientY
   } else {
+    // Mouse event
     pressure = 1.0
     clientX = e.clientX
     clientY = e.clientY
   }
 
-  const relativeX = clientX - rectangle.left - offsetX
-  const relativeY = clientY - rectangle.top - offsetY
-  const x = relativeX * scaleX
-  const y = relativeY * scaleY
+  const relativeX = clientX - rectangle.left - offsetX;
+  const relativeY = clientY - rectangle.top - offsetY;
+
+  const x = relativeX * scaleX;
+  const y = relativeY * scaleY;
 
   lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
 
@@ -2783,29 +2632,10 @@ function move(e) {
       }, {
         mergeHandler: mergePlayer,
         parameters: [playerId]
+      }, {
+        bypassSecurity: true
       })
       target._drawRafId = null
-    })
-  }
-
-  // Only send touch debug info on desktop
-  if (!isMobile) {
-    requestIdleCallback(() => {
-      $.teach({ pressure })
-
-      const touch = e.touches ? e.touches[0] : null
-      if (touch) {
-        $.teach({
-          touchesHTML: `
-            touchType = ${touch.touchType} ${touch.touchType === 'direct' ? '👆' : '✏️'} <br/>
-            radiusX = ${touch.radiusX} <br/>
-            radiusY = ${touch.radiusY} <br/>
-            rotationAngle = ${touch.rotationAngle} <br/>
-            altitudeAngle = ${touch.altitudeAngle} <br/>
-            azimuthAngle = ${touch.azimuthAngle} <br/>
-          `
-        })
-      }
     })
   }
 }
@@ -2835,6 +2665,8 @@ function end (e) {
     }, {
       mergeHandler: mergePlayer,
       parameters: [playerId]
+    }, {
+      bypassSecurity: true
     })
   }
 
