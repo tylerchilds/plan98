@@ -724,10 +724,28 @@ $.style(`
 
   & .input-canvas {
     opacity: 0;
+    z-index: 1;
+  }
+
+  & .player-canvases {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  & .player-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
   }
 
   & .output-canvas {
     pointer-events: none;
+    z-index: 3;
   }
 
   & .cursor-tooltip {
@@ -1282,6 +1300,7 @@ class VLog extends HTMLElement {
     // Setup canvases with default dimensions or from video if available
     const { width, height } = calculateCanvasDimensions(target)
 
+    // LAYER 1: Historical strokes (only redraws when history changes)
     {
       const letterbox = target.querySelector('.letterbox')
       target.inputCanvas = document.createElement('canvas')
@@ -1291,6 +1310,16 @@ class VLog extends HTMLElement {
       letterbox.appendChild(target.inputCanvas)
     }
 
+    // LAYER 2: Container for per-player active stroke canvases
+    {
+      const letterbox = target.querySelector('.letterbox')
+      target.playerCanvasContainer = document.createElement('div')
+      target.playerCanvasContainer.classList.add('player-canvases')
+      letterbox.appendChild(target.playerCanvasContainer)
+      target.playerCanvases = {}
+    }
+
+    // LAYER 3: Final composite (video + all layers)
     {
       const letterbox = target.querySelector('.letterbox')
       target.outputCanvas = document.createElement('canvas')
@@ -1300,60 +1329,7 @@ class VLog extends HTMLElement {
       letterbox.appendChild(target.outputCanvas)
     }
 
-    const ctx = target.outputCanvas.getContext('2d'); 
-    const drawComposite = () => {
-      const { videoEnabled } = $.learn()
-      const currentWidth = target.outputCanvas.width
-      const currentHeight = target.outputCanvas.height
-
-      ctx.clearRect(0, 0, currentWidth, currentHeight);
-
-      if (videoEnabled && target.video && target.video.videoWidth > 0) {
-        const videoWidth = target.video.videoWidth
-        const videoHeight = target.video.videoHeight
-
-        const videoAspect = videoWidth / videoHeight
-        const canvasAspect = currentWidth / currentHeight
-
-        let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight
-
-        if (Math.abs(videoAspect - canvasAspect) > 0.01) {
-          if (videoAspect > canvasAspect) {
-            sw = videoHeight * canvasAspect
-            sx = (videoWidth - sw) / 2
-            sh = videoHeight
-            sy = 0
-          } else {
-            sh = videoWidth / canvasAspect
-            sy = (videoHeight - sh) / 2
-            sw = videoWidth
-            sx = 0
-          }
-
-          ctx.drawImage(
-            target.video,
-            sx, sy, sw, sh,
-            0, 0, currentWidth, currentHeight
-          );
-        } else {
-          const scaleX = currentWidth / videoWidth;
-          const scaleY = currentHeight / videoHeight;
-          const scale = Math.min(scaleX, scaleY);
-
-          const scaledWidth = videoWidth * scale;
-          const scaledHeight = videoHeight * scale;
-          const offsetX = (currentWidth - scaledWidth) / 2;
-          const offsetY = (currentHeight - scaledHeight) / 2;
-
-          ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
-        }
-      }
-
-      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight);
-      requestAnimationFrame(drawComposite);
-    }
-
-    drawComposite();
+    setupCompositeLoop(target)
 
     {
       const { transcriptionEnabled } = $.learn()
@@ -1377,23 +1353,57 @@ class VLog extends HTMLElement {
       players
     } = $.learn()
 
-    {
-      // Check if we need to redraw (any player's stroke changed or history changed)
-      const currentPlayerStrokeLengths = {}
-      for (const pid in (players || {})) {
-        currentPlayerStrokeLengths[pid] = players[pid].currentStroke?.length || 0
+    // Initialize tracking if needed
+    if (!target._lastHistoryLength) {
+      target._lastHistoryLength = 0
+      target._lastRevisoryLength = 0
+      target._lastPlayerStrokeLengths = {}
+    }
+
+    // Check if historical strokes changed
+    const historyChanged = target._lastHistoryLength !== strokeHistory.length
+    const revisoryChanged = target._lastRevisoryLength !== strokeRevisory.length
+
+    if (historyChanged || revisoryChanged) {
+      target._lastHistoryLength = strokeHistory.length
+      target._lastRevisoryLength = strokeRevisory.length
+      
+      // Redraw historical layer
+      drawHistoricalStrokes(target)
+    }
+
+    // Check which players' active strokes changed
+    const currentPlayers = new Set(Object.keys(players || {}))
+    const lastPlayers = new Set(Object.keys(target._lastPlayerStrokeLengths))
+
+    // Remove canvases for players who left
+    for (const playerId of lastPlayers) {
+      if (!currentPlayers.has(playerId)) {
+        removePlayerCanvas(target, playerId)
+        delete target._lastPlayerStrokeLengths[playerId]
       }
+    }
 
-      const needsRedraw = 
-        target.strokeHistoryLength !== strokeHistory.length || 
-        target.strokeRevisoryLength !== strokeRevisory.length ||
-        JSON.stringify(target.playerStrokeLengths) !== JSON.stringify(currentPlayerStrokeLengths)
+    // Update canvases for players whose strokes changed
+    for (const pid of currentPlayers) {
+      const player = players[pid]
+      const currentStroke = player.currentStroke || []
+      const lastLength = target._lastPlayerStrokeLengths[pid] || 0
 
-      if (needsRedraw) {
-        target.strokeHistoryLength = strokeHistory.length
-        target.strokeRevisoryLength = strokeRevisory.length
-        target.playerStrokeLengths = currentPlayerStrokeLengths
-        drawAllStrokes(target)
+      if (currentStroke.length !== lastLength) {
+        target._lastPlayerStrokeLengths[pid] = currentStroke.length
+
+        if (currentStroke.length === 0) {
+          // Player finished their stroke, clear their canvas
+          const canvas = target.playerCanvases[pid]
+          if (canvas) {
+            const ctx = canvas.getContext('2d')
+            ctx.clearRect(0, 0, canvas.width, canvas.height)
+          }
+        } else {
+          // Player is drawing, update their canvas
+          drawPlayerStroke(target, pid, currentStroke)
+        }
       }
     }
 
@@ -1522,9 +1532,11 @@ class VLog extends HTMLElement {
     }
 
     {
-      const { background } = $.ear()
+      const { background } = $.learn()
       if(target.background !== background) {
+        target.background = background
         target.style.setProperty('--background', background)
+        drawHistoricalStrokes(target)
       }
     }
 
@@ -1621,22 +1633,22 @@ function calculateCanvasDimensions(target) {
   const isPortrait = windowHeight > windowWidth
   const isSquare = Math.abs(windowWidth - windowHeight) < 100
 
-  console.log('→ isPortrait:', isPortrait)
-  console.log('→ isSquare:', isSquare)
+  console.log('↳ isPortrait:', isPortrait)
+  console.log('↳ isSquare:', isSquare)
 
   let width, height
 
   if (isSquare) {
     width = height = 1080
-    console.log('→ Setting SQUARE canvas: 1080x1080')
+    console.log('↳ Setting SQUARE canvas: 1080x1080')
   } else if (isPortrait) {
     width = 1080
     height = 1920
-    console.log('→ Setting PORTRAIT canvas: 1080x1920')
+    console.log('↳ Setting PORTRAIT canvas: 1080x1920')
   } else {
     width = 1920
     height = 1080
-    console.log('→ Setting LANDSCAPE canvas: 1920x1080')
+    console.log('↳ Setting LANDSCAPE canvas: 1920x1080')
   }
 
   console.log('=========================================')
@@ -1851,8 +1863,15 @@ async function handleOrientationChange(target) {
     target.outputCanvas.height = height
   }
 
+  // Update all player canvases
+  for (const pid in target.playerCanvases) {
+    const canvas = target.playerCanvases[pid]
+    canvas.width = width
+    canvas.height = height
+  }
+
   // Redraw everything with new dimensions
-  drawAllStrokes(target)
+  drawHistoricalStrokes(target)
 }
 
 async function loadAllDevices() {
@@ -1909,7 +1928,7 @@ So rather than only allow dog photos, dog allowed man to turn the camera in.
 $.when('click', '[data-background]', async (event) => {
   const { background } = event.target.dataset
   $.teach({ background })
-  drawAllStrokes(event.target)
+  drawHistoricalStrokes(event.target.closest($.link))
 })
 
 $.when('click', '[data-flip]', async (event) => {
@@ -1980,8 +1999,15 @@ $.when('click', '[data-toggle-video]', async (event) => {
       target.outputCanvas.width = width
       target.outputCanvas.height = height
 
+      // Update all player canvases
+      for (const pid in target.playerCanvases) {
+        const canvas = target.playerCanvases[pid]
+        canvas.width = width
+        canvas.height = height
+      }
+
       // Redraw with new dimensions
-      drawAllStrokes(target)
+      drawHistoricalStrokes(target)
     }
   } else if (!newState && target.video) {
     // Turn off video
@@ -2272,7 +2298,7 @@ function engine(target) {
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
   $.teach({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
-  drawAllStrokes(event.target)
+  drawHistoricalStrokes(event.target.closest($.link))
 })
 
 $.when('click', '[data-undo]', function undoDraw (event) {
@@ -2290,7 +2316,7 @@ $.when('click', '[data-undo]', function undoDraw (event) {
       ...newState
     }
   })
-  drawAllStrokes(event.target)
+  drawHistoricalStrokes(event.target.closest($.link))
 })
 
 $.when('click', '[data-redo]', function redoDraw (event) {
@@ -2308,68 +2334,168 @@ $.when('click', '[data-redo]', function redoDraw (event) {
     }
   })
 
-  drawAllStrokes(event.target)
+  drawHistoricalStrokes(event.target.closest($.link))
 })
 
 /*
 
-Unified drawing function - draws all historical strokes plus all current player strokes
+OPTIMIZED DRAWING FUNCTIONS - MULTIPLAYER AWARE
 
 */
 
-function drawAllStrokes(target) {
-  const { inputCanvas } = engine(target)
+function getOrCreatePlayerCanvas(target, playerId) {
+  if (target.playerCanvases[playerId]) {
+    return target.playerCanvases[playerId]
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = target.inputCanvas.width
+  canvas.height = target.inputCanvas.height
+  canvas.classList.add('player-canvas')
+  canvas.dataset.playerId = playerId
+  target.playerCanvasContainer.appendChild(canvas)
+  target.playerCanvases[playerId] = canvas
+
+  return canvas
+}
+
+function removePlayerCanvas(target, playerId) {
+  const canvas = target.playerCanvases[playerId]
+  if (canvas) {
+    canvas.remove()
+    delete target.playerCanvases[playerId]
+  }
+}
+
+function drawHistoricalStrokes(target) {
+  const { inputCanvas } = target
   if (!inputCanvas) return
 
-  const { strokeHistory, players } = $.learn()
-  const context = inputCanvas.getContext('2d', { willReadFrequently: true })
+  const { strokeHistory, background } = $.learn()
+  const context = inputCanvas.getContext('2d', { willReadFrequently: false })
 
-  // Clear inputCanvas
+  // Clear and draw background
   context.clearRect(0, 0, inputCanvas.width, inputCanvas.height)
-
-  // Draw background
   context.globalAlpha = 1
-  context.fillStyle = $.learn().background
+  context.fillStyle = background
   context.fillRect(0, 0, inputCanvas.width, inputCanvas.height)
 
-  // Collect all strokes to draw: historical + current from all players
-  const allStrokes = [...strokeHistory]
+  // Draw only completed historical strokes
+  strokeHistory.forEach(stroke => {
+    if (stroke.length < 2) return
+    drawStroke(context, stroke)
+  })
+}
 
-  // Add current strokes from all players
-  for (const pid in players) {
-    const player = players[pid]
-    if (player.currentStroke && player.currentStroke.length > 0) {
-      allStrokes.push(player.currentStroke)
+function drawPlayerStroke(target, playerId, stroke) {
+  if (!stroke || stroke.length < 2) return
+
+  const canvas = getOrCreatePlayerCanvas(target, playerId)
+  const context = canvas.getContext('2d', { willReadFrequently: false })
+
+  // Clear this player's canvas
+  context.clearRect(0, 0, canvas.width, canvas.height)
+
+  // Draw their current stroke
+  drawStroke(context, stroke)
+}
+
+function drawStroke(context, stroke) {
+  context.beginPath()
+  context.moveTo(stroke[0].x, stroke[0].y)
+
+  for (let i = 1; i < stroke.length; i++) {
+    const point = stroke[i]
+    context.strokeStyle = point.color || 'dodgerblue'
+    context.lineCap = 'round'
+    context.lineJoin = 'round'
+    context.globalAlpha = point.opacity ?? 1
+    context.lineWidth = point.lineWidth || 16
+
+    if (i < stroke.length - 1) {
+      const xc = (stroke[i].x + stroke[i + 1].x) / 2
+      const yc = (stroke[i].y + stroke[i + 1].y) / 2
+      context.quadraticCurveTo(point.x, point.y, xc, yc)
+    } else {
+      context.lineTo(point.x, point.y)
     }
   }
 
-  // Draw all strokes
-  allStrokes.forEach(stroke => {
-    if (stroke.length < 2) return
+  context.stroke()
+}
 
-    context.beginPath()
-    context.moveTo(stroke[0].x, stroke[0].y)
+function setupCompositeLoop(target) {
+  const ctx = target.outputCanvas.getContext('2d')
+  let lastVideoTime = -1
 
-    for (let i = 1; i < stroke.length; i++) {
-      const point = stroke[i]
-      context.strokeStyle = point.color || 'dodgerblue'
-      context.lineCap = 'round'
-      context.lineJoin = 'round'
-      const opacity = point.opacity === null ? 1 : point.opacity
-      context.globalAlpha = opacity
-      context.lineWidth = point.lineWidth || 16
+  const drawComposite = () => {
+    const { videoEnabled } = $.learn()
+    const currentWidth = target.outputCanvas.width
+    const currentHeight = target.outputCanvas.height
 
-      if (i < stroke.length - 1) {
-        const xc = (stroke[i].x + stroke[i + 1].x) / 2
-        const yc = (stroke[i].y + stroke[i + 1].y) / 2
-        context.quadraticCurveTo(point.x, point.y, xc, yc)
+    // Check if video frame changed
+    const videoTime = target.video?.currentTime || 0
+    const videoChanged = videoEnabled && videoTime !== lastVideoTime
+
+    lastVideoTime = videoTime
+
+    ctx.clearRect(0, 0, currentWidth, currentHeight)
+
+    // Draw video layer if enabled
+    if (videoEnabled && target.video && target.video.videoWidth > 0) {
+      const videoWidth = target.video.videoWidth
+      const videoHeight = target.video.videoHeight
+
+      const videoAspect = videoWidth / videoHeight
+      const canvasAspect = currentWidth / currentHeight
+
+      let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight
+
+      if (Math.abs(videoAspect - canvasAspect) > 0.01) {
+        if (videoAspect > canvasAspect) {
+          sw = videoHeight * canvasAspect
+          sx = (videoWidth - sw) / 2
+          sh = videoHeight
+          sy = 0
+        } else {
+          sh = videoWidth / canvasAspect
+          sy = (videoHeight - sh) / 2
+          sw = videoWidth
+          sx = 0
+        }
+
+        ctx.drawImage(
+          target.video,
+          sx, sy, sw, sh,
+          0, 0, currentWidth, currentHeight
+        );
       } else {
-        context.lineTo(point.x, point.y)
+        const scaleX = currentWidth / videoWidth;
+        const scaleY = currentHeight / videoHeight;
+        const scale = Math.min(scaleX, scaleY);
+
+        const scaledWidth = videoWidth * scale;
+        const scaledHeight = videoHeight * scale;
+        const offsetX = (currentWidth - scaledWidth) / 2;
+        const offsetY = (currentHeight - scaledHeight) / 2;
+
+        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
       }
     }
 
-    context.stroke()
-  })
+    // Draw historical strokes layer
+    ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
+
+    // Draw all active player stroke layers
+    for (const pid in target.playerCanvases) {
+      const canvas = target.playerCanvases[pid]
+      ctx.drawImage(canvas, 0, 0, currentWidth, currentHeight)
+    }
+
+    requestAnimationFrame(drawComposite)
+  }
+
+  drawComposite()
 }
 
 /*
@@ -2395,7 +2521,7 @@ function mergePlayer(pid) {
 
 /*
 
-Drawing interaction handlers
+Drawing interaction handlers - OPTIMIZED
 
 */
 
@@ -2406,7 +2532,6 @@ function start(e) {
   const { inputCanvas, rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
   $.teach({ touching: true, activeMenu: null })
   const { thickness, opacity, color } = $.learn()
-  const context = inputCanvas.getContext('2d')
   let pressure = 0.1;
   let clientX, clientY;
 
@@ -2434,7 +2559,6 @@ function start(e) {
   points = [] // Reset local points array
 
   lineWidth = Math.log(pressure + 1) * thickness
-  context.lineWidth = lineWidth
 
   const newPoint = { x, y, lineWidth, color, opacity }
   points.push(newPoint)
@@ -2457,10 +2581,12 @@ $.when('mousemove', '.input-canvas', move)
 
 function move (e) {
   e.preventDefault()
-  const { inputCanvas, rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
-  const { thickness, opacity, color } = $.learn()
-  const context = inputCanvas.getContext('2d')
+  
   if (!isMousedown) return
+  
+  const target = e.target.closest($.link)
+  const { rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
+  const { thickness, opacity, color } = $.learn()
 
   let pressure = 0.1
   let clientX, clientY;
@@ -2486,21 +2612,28 @@ function move (e) {
   const y = relativeY * scaleY;
 
   lineWidth = (Math.log(pressure + 1) * thickness * 4 * 0.2 + lineWidth * 0.8)
-  context.lineWidth = lineWidth
 
   const newPoint = { x, y, lineWidth, color, opacity }
   points.push(newPoint)
 
-  // Update this player's current stroke
-  $.teach({
-    currentStroke: [...points],
-    cursorX: relativeX,
-    cursorY: relativeY,
-    color
-  }, {
-    mergeHandler: mergePlayer,
-    parameters: [playerId]
-  })
+  // Immediately draw to local player's canvas
+  drawPlayerStroke(target, playerId, points)
+
+  // Throttle network state updates with RAF
+  if (!target._drawRafId) {
+    target._drawRafId = requestAnimationFrame(() => {
+      $.teach({
+        currentStroke: [...points],
+        cursorX: relativeX,
+        cursorY: relativeY,
+        color
+      }, {
+        mergeHandler: mergePlayer,
+        parameters: [playerId]
+      })
+      target._drawRafId = null
+    })
+  }
 
   requestIdleCallback(() => {
     $.teach({ pressure })
@@ -2530,8 +2663,6 @@ function end (e) {
 
   isMousedown = false
 
-  // Move current stroke to history - need to handle this specially
-  // First get the current stroke, then update both history and clear player stroke
   const state = $.learn()
   const playerStroke = state.players?.[playerId]?.currentStroke
 
