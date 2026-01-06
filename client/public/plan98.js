@@ -5,7 +5,37 @@ import { getQuickJS } from "quickjs-emscripten"
 const QuickJS = await getQuickJS()
 const WAIT_TIMEOUT = 2500
 
-function secureEval(query, variables, saneWasher = (x) => x) {
+function secureEval(query, variables, options = {}) {
+  const { 
+    bypassSecurity=false,
+    saneWasher = (x) => x
+  } = options
+
+  if(bypassSecurity) {
+    try {
+      // Create a function with parameters matching your variables
+      const paramNames = Object.keys(variables);
+      const paramValues = Object.values(variables);
+
+      // Build a function that evaluates the query
+      const fn = new Function(...paramNames, `return (${query})`);
+
+      // Execute with the variables as arguments
+      const result = fn(...paramValues);
+      const washedResult = saneWasher(result);
+
+      return {
+        error: null,
+        data: washedResult
+      };
+    } catch (error) {
+      return {
+        error: error.message,
+        data: null
+      };
+    }
+  }
+
   let res
   const vm = QuickJS.newContext()
 
@@ -176,12 +206,13 @@ function udpDownload(data) {
     : serializedNuance
 
   if(merge) {
-    store.set(elf, knowledge, merge)
+    const bypassSecurity = serializedNuance.bypassSecurity
+    store.set(elf, knowledge, merge, { bypassSecurity })
   }
 }
 
 
-function sandbox({ mergeHandler, parameters }) {
+function sandbox({ mergeHandler, parameters, bypassSecurity=false }) {
   const mergeHandlerStr = mergeHandler.toString();
   const paramsStr = JSON.stringify(parameters);
 
@@ -191,6 +222,8 @@ function sandbox({ mergeHandler, parameters }) {
       '.apply(null, ' + paramStr + ')';
   `, {
     paramStr: paramsStr,
+  }, {
+    bypassSecurity
   });
 
   if (result.error) {
@@ -545,7 +578,7 @@ function createStore(initialState = {}, broadcast = () => null) {
   };
 
   return {
-    set: function(elf, knowledge, nuance) {
+    set: function(elf, knowledge, nuance, options={ bypassSecurity: false }) {
       let mergeStr;
 
       if (typeof nuance === 'function') {
@@ -584,6 +617,8 @@ function createStore(initialState = {}, broadcast = () => null) {
       `, {
         stateStr: JSON.stringify(state[elf] || {}),
         knowledgeStr: JSON.stringify(knowledge),
+      }, {
+        bypassSecurity: options.bypassSecurity
       });
 
       if (wisdom.error) {
