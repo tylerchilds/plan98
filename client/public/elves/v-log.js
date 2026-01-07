@@ -157,7 +157,10 @@ const $ = Self(tag, {
   background: 'lemonchiffon',
   players: {}, // { [playerId]: { currentStroke: [], cursorX: 0, cursorY: 0, color: 'color' } }
   videoEnabled: false,
-  audioEnabled: false
+  audioEnabled: false,
+  chromakeyEnabled: false,
+  chromakeyColor: 'dodgerblue',
+  chromakeyTolerance: 30
 })
 
 /*
@@ -1057,26 +1060,49 @@ const viewRenderers = {
   },
 
   [views.settings]: function (target) {
-    const { xrEnabled, transcriptionEnabled, videoEnabled, audioEnabled } = $.learn()
+      const {
+      xrEnabled,
+      transcriptionEnabled,
+      videoEnabled,
+      audioEnabled,
+      chromakeyEnabled,
+      chromakeyColor
+    } = $.learn()
+
     return `
       <div style="text-align: right; position: sticky; top: 0;">
-        <button data-cancel class="branded-button">
-          Close
-        </button>
+        <button data-cancel class="branded-button">Close</button>
       </div>
       <div class="wizard" style="display: flex; flex-direction: column; gap: 1rem;">
         <h3>Video</h3>
         <div>
-          <button class="branded-button" data-toggle-video>${videoEnabled?'on':'off'}</button>
+          <button class="branded-button" data-toggle-video>
+            ${videoEnabled?'on':'off'}
+          </button>
         </div>
 
         <h3>Audio</h3>
         <div>
-          <button class="branded-button" data-toggle-audio>${audioEnabled?'on':'off'}</button>
+          <button class="branded-button" data-toggle-audio>
+            ${audioEnabled?'on':'off'}
+          </button>
         </div>
+
+        <h3>Chromakey</h3>
+        <div>
+          <button class="branded-button" data-toggle-chromakey>
+            ${chromakeyEnabled?'on':'off'}
+          </button>
+        </div>
+        <p style="font-size: 0.9em; color: #666; padding: 0 0.5rem;">
+          Draw with ${chromakeyColor} to reveal video beneath
+        </p>
+
         <h3>Extend Reality</h3>
         <div>
-          <button class="branded-button" data-toggle-xr>${xrEnabled?'on':'off'}</button>
+          <button class="branded-button" data-toggle-xr>
+            ${xrEnabled?'on':'off'}
+          </button>
         </div>
 
         <h3>Devices</h3>
@@ -1084,7 +1110,9 @@ const viewRenderers = {
 
         <h3>Transcription</h3>
         <div>
-          <button class="branded-button" data-toggle-transcription>${transcriptionEnabled?'on':'off'}</button>
+          <button class="branded-button" data-toggle-transcription>
+            ${transcriptionEnabled?'on':'off'}
+          </button>
         </div>
       </div>
     `
@@ -1115,6 +1143,30 @@ const viewRenderers = {
       </div>
     `
   }
+}
+
+/*
+Convert any color format to RGB values
+*/
+function hexToRgb(colorString) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = 1
+  const ctx = canvas.getContext('2d')
+  ctx.fillStyle = colorString
+  ctx.fillRect(0, 0, 1, 1)
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+  return { r, g, b }
+}
+
+/*
+Calculate color distance in RGB space
+*/
+function colorDistance(r1, g1, b1, r2, g2, b2) {
+  return Math.sqrt(
+    Math.pow(r2 - r1, 2) +
+    Math.pow(g2 - g1, 2) +
+    Math.pow(b2 - b1, 2)
+  )
 }
 
 $.when('input', 'plan98-palette', (event) => {
@@ -2429,23 +2481,20 @@ function setupCompositeLoop(target) {
   let lastVideoTime = -1
 
   const drawComposite = () => {
-    const { videoEnabled } = $.learn()
+    const { videoEnabled, chromakeyEnabled, chromakeyColor, chromakeyTolerance } = $.learn()
     const currentWidth = target.outputCanvas.width
     const currentHeight = target.outputCanvas.height
 
-    // Check if video frame changed
     const videoTime = target.video?.currentTime || 0
     const videoChanged = videoEnabled && videoTime !== lastVideoTime
-
     lastVideoTime = videoTime
 
     ctx.clearRect(0, 0, currentWidth, currentHeight)
 
-    // Draw video layer if enabled
+    // LAYER 1: Draw video if enabled
     if (videoEnabled && target.video && target.video.videoWidth > 0) {
       const videoWidth = target.video.videoWidth
       const videoHeight = target.video.videoHeight
-
       const videoAspect = videoWidth / videoHeight
       const canvasAspect = currentWidth / currentHeight
 
@@ -2463,33 +2512,65 @@ function setupCompositeLoop(target) {
           sw = videoWidth
           sx = 0
         }
-
-        ctx.drawImage(
-          target.video,
-          sx, sy, sw, sh,
-          0, 0, currentWidth, currentHeight
-        );
+        ctx.drawImage(target.video, sx, sy, sw, sh, 0, 0, currentWidth, currentHeight)
       } else {
-        const scaleX = currentWidth / videoWidth;
-        const scaleY = currentHeight / videoHeight;
-        const scale = Math.min(scaleX, scaleY);
-
-        const scaledWidth = videoWidth * scale;
-        const scaledHeight = videoHeight * scale;
-        const offsetX = (currentWidth - scaledWidth) / 2;
-        const offsetY = (currentHeight - scaledHeight) / 2;
-
-        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight);
+        const scaleX = currentWidth / videoWidth
+        const scaleY = currentHeight / videoHeight
+        const scale = Math.min(scaleX, scaleY)
+        const scaledWidth = videoWidth * scale
+        const scaledHeight = videoHeight * scale
+        const offsetX = (currentWidth - scaledWidth) / 2
+        const offsetY = (currentHeight - scaledHeight) / 2
+        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight)
       }
     }
 
-    // Draw historical strokes layer
-    ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
+    // LAYER 2+3: Draw strokes with chromakey processing if enabled
+    if (chromakeyEnabled && videoEnabled) {
+      // Create temporary canvas to composite all drawing layers
+      const tempCanvas = document.createElement('canvas')
+      tempCanvas.width = currentWidth
+      tempCanvas.height = currentHeight
+      const tempCtx = tempCanvas.getContext('2d')
 
-    // Draw all active player stroke layers
-    for (const pid in target.playerCanvases) {
-      const canvas = target.playerCanvases[pid]
-      ctx.drawImage(canvas, 0, 0, currentWidth, currentHeight)
+      // Composite all drawing layers
+      tempCtx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
+
+      for (const pid in target.playerCanvases) {
+        tempCtx.drawImage(target.playerCanvases[pid], 0, 0, currentWidth, currentHeight)
+      }
+
+      // Apply chromakey effect
+      const keyRgb = hexToRgb(chromakeyColor)
+      const imageData = tempCtx.getImageData(0, 0, currentWidth, currentHeight)
+      const data = imageData.data
+
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        const a = data[i + 3]
+
+        if (a === 0) continue // Skip already transparent
+
+        const distance = colorDistance(r, g, b, keyRgb.r, keyRgb.g, keyRgb.b)
+
+        // Make chromakey pixels transparent (revealing video)
+        if (distance <= chromakeyTolerance) {
+          data[i + 3] = 0
+        }
+      }
+
+      tempCtx.putImageData(imageData, 0, 0)
+      ctx.drawImage(tempCanvas, 0, 0)
+
+    } else {
+      // No chromakey - draw normally
+      ctx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
+
+      for (const pid in target.playerCanvases) {
+        ctx.drawImage(target.playerCanvases[pid], 0, 0, currentWidth, currentHeight)
+      }
     }
 
     requestAnimationFrame(drawComposite)
@@ -2788,6 +2869,20 @@ $.when('click', '[data-audiooutput]', async (event) => {
       toast('Failed to change audio output')
     }
   }
+})
+
+/*
+Toggle chromakey on/off
+*/
+$.when('click', '[data-toggle-chromakey]', async (event) => {
+  const { chromakeyEnabled, videoEnabled } = $.learn()
+
+  if (!videoEnabled && !chromakeyEnabled) {
+    toast('Please enable video first to use chromakey')
+    return
+  }
+
+  $.teach({ chromakeyEnabled: !chromakeyEnabled })
 })
 
 $.when('pointerdown', '[data-drag]', grabToolbelt)
