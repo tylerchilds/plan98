@@ -70,6 +70,9 @@ const dns = {
   'ncity.executiontime.pub': {
     elf: 'root-shell'
   },
+  'beerdogusa.com': {
+    elf: 'beerdog-usa'
+  },
 }
 
 const standard = window.plan98 || { host: window.location.host }

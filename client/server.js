@@ -552,6 +552,7 @@ function template(body) {
     PLAN98_PROXY: safeEnv('PLAN98_PROXY'),
 
     ANTHROPIC_API_KEY: safeEnv('ANTHROPIC_API_KEY'),
+    ELEVEN_LABS_API_KEY: safeEnv('ELEVEN_LABS_API_KEY'),
 
     BRAID_TEXT_PROXY: safeEnv('BRAID_TEXT_PROXY'),
 
@@ -711,6 +712,7 @@ function template(body) {
           "@did.coop/did-key-ed25519": "https://esm.sh/@did.coop/did-key-ed25519",
           "@dimforge/rapier2d": "https://cdn.skypack.dev/@dimforge/rapier2d-compat",
           "@dimforge/rapier3d": "https://cdn.skypack.dev/@dimforge/rapier3d-compat",
+          "@elevenlabs/elevenlabs-js": "https://esm.sh/@elevenlabs/elevenlabs-js@2.29.0",
           "@fullcalendar/core": "https://cdn.skypack.dev/@fullcalendar/core@6.1.15",
           "@fullcalendar/daygrid": "https://cdn.skypack.dev/@fullcalendar/daygrid@6.1.15",
           "@fullcalendar/timegrid": "https://cdn.skypack.dev/@fullcalendar/timegrid@6.1.15",
