@@ -23,7 +23,8 @@ import {
 } from './plan98-wallet.js'
 import $paperPocket, { afterUpdateTheme, replaceElves } from './paper-pocket.js'
 
-import { launch, getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './gg-synthia.js'
+import { launch } from './plan98-synthia.js'
+import { getModels, agenticToolsPlaceholder, agenticOptionsPlaceholder, agenticFormatPlaceholder } from './gg-synthia.js'
 import JSZip from 'jszip'
 import lunr from 'lunr'
 import {
@@ -1244,11 +1245,23 @@ async function fate() {
         .then(data => {
           const parts = paths[i].split('/')
           const name = parts[parts.length - 1]
-          const event = {
-            handle: { path: paths[i], name },
-            data
-          }
-          $.teach(event, mergeEvent)
+          const [timeKey] = name.split('.json')
+          const spaceKey = getSpaceFromTime(timeKey)
+
+          $.teach({
+            spaceKey,
+            timeKey,
+            path: paths[i],
+            event: {
+              spaceKey,
+              timeKey,
+              handle: { path: paths[i], name },
+              data
+            }
+          }, {
+            mergeHandler: mergeEvent,
+            parameters: []
+          })
           return event
         }).catch(e => {
           return {
@@ -1271,22 +1284,21 @@ async function fate() {
 }
 
 function mergeEvent(state, payload) {
-  const buckets = { ...state.buckets }
-  const cache = [ ...state.cache ]
-  const file = payload
-  try {
-    const [timeKey] = file.handle.name.split('.json')
-    const spaceKey = getSpaceFromTime(timeKey)
-    buckets[spaceKey][timeKey] = timeMachine(spaceKey, timeKey, file)
-    cache[file.handle.path] = true
-  } catch (_e) {
-    console.warn(`Skipping invalid filename: ${file.handle.name}`);
-  }
+  const { spaceKey, timeKey, path, event } = payload
 
   return {
     ...state,
-    cache,
-    buckets,
+    cache: {
+      ...state.cache,
+      [path]: true
+    },
+    buckets: {
+      ...state.buckets,
+      [spaceKey]: {
+        ...state.buckets[spaceKey],
+        [timeKey]: event
+      }
+    }
   }
 }
 
@@ -4098,7 +4110,10 @@ $.when('click', '[data-new]', (event) => {
     $.teach({
       name: 'type',
       value: type
-    }, bound('draft'))
+    }, {
+      mergeHandler: bound,
+      parameters: ['draft']
+    })
   }
 
   const draft = newDraft(type || 'note')

@@ -1,71 +1,20 @@
-import elf from '@plan98/elf'
-import { showModal, isVisible, hideModal } from './plan98-modal.js'
+import { Self } from '@plan98/types'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
-const $ = elf('plan98-synthia', { synthia: {} })
-import './og-synthia.js'
+const $ = Self('og-synthia', { synthia: {} })
 
-export const users = {
-  bengo: {
-    bios: 'https://plan98.org/app/quick-blog?src=https://www.bengo.is/outbox/'
-  },
-  tychi: {
-    bios: '/app/time-machine'
-  }
-}
-
-export function launch() {
-  $.teach({ visible: true, activated: true })
-}
-
-document.addEventListener('pointerup', function(event) {
-  // Skip if clicking on the synthia UI itself
-  if (event.target.closest('plan98-synthia')) {
-    return;
-  }
-
-  // Small delay to let selection finalize
-  setTimeout(() => {
-    const selection = window.getSelection();
-    const selectedText = selection.toString().trim();
-
-    if (selectedText && selectedText.length > 2) {
-      $.teach({ synthia: { prompt: selectedText }, visible: true, activated: false })
-    } else {
-      // Clear when clicking without selecting text
-      $.teach({ visible: false, activated: false, synthia: {} })
-    }
-  }, 10);
-});
-
-const context = document.createElement('plan98-synthia')
-document.body.appendChild(context)
 
 $.draw((target) => {
-  const { visible, activated, synthia } = $.learn()
-  const operation = escapeHyperText(synthia.prompt || '')
-  if(!visible) {
-    target.innerHTML = null
-    return
-  }
+  const { activated, operation } = $.learn()
   target.dataset.activated = activated
-  if(target.innerHTML) return
-  return `
-    <div class="activator-bar">
-      <button class="standard-button -smol bias-generic -round escape">
-        ESC
-      </button>
-      <div class="tabs" style="pointer-events: none;">
-      </div>
-      <button class="synthia">
-        <plan98-icon style="height: 35px; width: 35px;"></plan98-icon>
-      </button>
-    </div>
-    <div class="result">
-      <div class="result-card" class="sandbox">
-      </div>
-    </div>
-  `
+  return ai(operation)
 }, {
+  beforeUpdate(target) {
+    if(!target.mounted) {
+      target.mounted = true
+      const operation = target.getAttribute('operation')
+      $.teach({ operation })
+    }
+  },
   afterUpdate(target) {
     { // recover icons from the virtual dom
       recoverElves(target, 'sl-icon')
@@ -74,16 +23,6 @@ $.draw((target) => {
     }
 
     afterUpdateTheme(null, target)
-
-    {
-      const { synthia } = $.learn()
-      const sandbox = target.querySelector('.sandbox')
-      if(sandbox && synthia.prompt !== target.prompt) {
-        target.prompt = synthia.prompt
-        const operation = escapeHyperText(synthia.prompt || '')
-        sandbox.innerHTML = `<iframe src="/app/og-synthia?operation=${operation}"></iframe>`
-      }
-    }
   }
 })
 
@@ -146,8 +85,8 @@ $.style(`
 
   & .activator-bar {
     position: relative;
-    pointer-events: none;
     z-index: 900000;
+    pointer-events: all;
     padding: 2px;
     justify-content: end;
     display: grid;
@@ -162,7 +101,6 @@ $.style(`
     overflow: hidden;
     box-shadow: 0 0 10px 0px var(--root-theme);
     animation: &-fade-in 500ms ease-out forwards;
-    pointer-events: all;
   }
 
   @keyframes &-fade-in {
@@ -197,12 +135,6 @@ $.style(`
     gap: .5rem;
     flex-wrap: wrap;
     background: rgba(0,0,0,.1);
-  }
-
-  & .sandbox {
-    height: 100%;
-    overflow: hidden;
-    border-radius: 1rem 1rem 0 0;
   }
 `)
 
@@ -252,44 +184,3 @@ $.when('input', '[data-bind]', (event) => {
     }
   })
 })
-
-let isRoot = false
-
-function normalMode() {
-  isRoot = false
-}
-
-
-self.addEventListener('message', function handleMessage(event) {
-  if(event.data.whisper === 'synthia-escape') {
-    handleEscapePropagation()
-  } else { console.log(event) }
-});
-
-
-window.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
-    event.preventDefault()
-    handleEscapePropagation()
-  }
-});
-
-function handleEscapePropagation() {
-  if(self.self !== self.top) {
-    self.parent.postMessage({ whisper: 'synthia-escape' }, "*");
-    return
-  }
-
-  if(isRoot) return
-  if(!isVisible()) {
-    isRoot = true
-    showModal(`
-      <div style="width: 100%; height: 100%; overflow: hidden;">
-        <source-code></source-code>
-      </div>
-    `, { centered: true, onHide: normalMode, blockExit: false })
-  } else {
-    isRoot = false
-    hideModal()
-  }
-}
