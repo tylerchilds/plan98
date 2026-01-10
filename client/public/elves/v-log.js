@@ -1148,14 +1148,25 @@ const viewRenderers = {
 /*
 Convert any color format to RGB values
 */
+const colorCache = new Map()
+
 function hexToRgb(colorString) {
+  if (colorCache.has(colorString)) {
+    return colorCache.get(colorString)
+  }
   const canvas = document.createElement('canvas')
   canvas.width = canvas.height = 1
   const ctx = canvas.getContext('2d')
   ctx.fillStyle = colorString
   ctx.fillRect(0, 0, 1, 1)
   const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
-  return { r, g, b }
+  const result = { r, g, b }
+
+  if (colorCache.size > 100) {
+    colorCache.delete(colorCache.keys().next().value)
+  }
+  colorCache.set(colorString, result)
+  return result
 }
 
 /*
@@ -1201,6 +1212,8 @@ Free to make their own mistakes, they did.
 class VLog extends HTMLElement {
   constructor() {
     super();
+    this._isDestroyed = false
+    this._animationFrameId = null
   }
 
   connectedCallback() {
@@ -1257,6 +1270,17 @@ class VLog extends HTMLElement {
 
     if (this.orientationHandler) {
       window.removeEventListener('resize', this.orientationHandler)
+    }
+
+    this._isDestroyed = true
+    if (this._animationFrameId) {
+      cancelAnimationFrame(this._animationFrameId)
+      this._animationFrameId = null
+    }
+
+    if (this._chromakeyCanvas) {
+      this._chromakeyCanvas = null
+      this._chromakeyCtx = null
     }
   }
 
@@ -1359,6 +1383,7 @@ class VLog extends HTMLElement {
       target.inputCanvas.classList.add('input-canvas')
       target.inputCanvas.width = width;
       target.inputCanvas.height = height;
+      target.inputCanvasCtx = target.inputCanvas.getContext('2d', { willReadFrequently: false })
       letterbox.appendChild(target.inputCanvas)
     }
 
@@ -1378,7 +1403,15 @@ class VLog extends HTMLElement {
       target.outputCanvas.classList.add('output-canvas')
       target.outputCanvas.width = width;
       target.outputCanvas.height = height;
+      target.outputCanvasCtx = target.outputCanvas.getContext('2d')
       letterbox.appendChild(target.outputCanvas)
+    }
+
+    {
+      target._chromakeyCanvas = document.createElement('canvas')
+      target._chromakeyCanvas.width = width
+      target._chromakeyCanvas.height = height
+      target._chromakeyCtx = target._chromakeyCanvas.getContext('2d', { willReadFrequently: true })
     }
 
     setupCompositeLoop(target)
@@ -1420,8 +1453,13 @@ class VLog extends HTMLElement {
       target._lastHistoryLength = strokeHistory.length
       target._lastRevisoryLength = strokeRevisory.length
 
-      // Redraw historical layer
-      drawHistoricalStrokes(target)
+      if (!target._historyRedrawScheduled) {
+        target._historyRedrawScheduled = true
+        requestAnimationFrame(() => {
+          if (!target._isDestroyed) drawHistoricalStrokes(target)
+          target._historyRedrawScheduled = false
+        })
+      }
     }
 
     // Check which players' active strokes changed
@@ -1585,13 +1623,20 @@ class VLog extends HTMLElement {
 
     {
       const { background } = $.learn()
+
       if(target.background !== background) {
         target.background = background
         target.style.setProperty('--background', background)
-        drawHistoricalStrokes(target)
+
+        if (!target._historyRedrawScheduled) {
+          target._historyRedrawScheduled = true
+          requestAnimationFrame(() => {
+            if (!target._isDestroyed) drawHistoricalStrokes(target)
+            target._historyRedrawScheduled = false
+          })
+        }
       }
     }
-
 
     {
       const { xrEnabled } = $.learn()
@@ -1677,39 +1722,26 @@ function calculateCanvasDimensions(target) {
   const windowWidth = window.innerWidth
   const windowHeight = window.innerHeight
 
-  console.log('==========================================')
-  console.log('📐 calculateCanvasDimensions called')
-  console.log('window.innerWidth:', windowWidth)
-  console.log('window.innerHeight:', windowHeight)
-
   const isPortrait = windowHeight > windowWidth
   const isSquare = Math.abs(windowWidth - windowHeight) < 100
-
-  console.log('↳ isPortrait:', isPortrait)
-  console.log('↳ isSquare:', isSquare)
 
   let width, height
 
   if (isSquare) {
     width = height = 1080
-    console.log('↳ Setting SQUARE canvas: 1080x1080')
   } else if (isPortrait) {
     width = 1080
     height = 1920
-    console.log('↳ Setting PORTRAIT canvas: 1080x1920')
   } else {
     width = 1920
     height = 1080
-    console.log('↳ Setting LANDSCAPE canvas: 1920x1080')
   }
 
-  console.log('=========================================')
   return { width, height, isPortrait, isSquare }
 }
 
 async function setMediaStream(target) {
   if (cameraLock) {
-    console.log('Camera access already in progress, skipping...')
     return
   }
 
@@ -1770,7 +1802,6 @@ async function setMediaStream(target) {
         videoConstraints.height = { exact: 1080 }
       }
 
-      console.log('📹 REQUESTING with EXACT constraints:', JSON.stringify(videoConstraints, null, 2))
       constraints.video = videoConstraints
     }
 
@@ -1792,7 +1823,6 @@ async function setMediaStream(target) {
     // Try with exact constraints first
     try {
       target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('✅ Exact constraints accepted!')
     } catch (exactError) {
       console.warn('⚠️ Exact constraints failed, trying ideal:', exactError.message)
 
@@ -1811,9 +1841,7 @@ async function setMediaStream(target) {
           constraints.video.height = { ideal: 1080 }
         }
 
-        console.log('📹 RETRY with ideal:', JSON.stringify(constraints.video, null, 2))
         target.webcamStream = await navigator.mediaDevices.getUserMedia(constraints);
-        console.log('⚠️ Had to use ideal constraints - will need to crop video')
 
         // Flag that we need to crop
         target.needsVideoCrop = true
@@ -1825,10 +1853,6 @@ async function setMediaStream(target) {
     if (videoEnabled && target.webcamStream) {
       const videoTrack = target.webcamStream.getVideoTracks()[0];
       const settings = videoTrack.getSettings();
-      console.log('✅ GOT VIDEO:')
-      console.log('   width:', settings.width)
-      console.log('   height:', settings.height)
-      console.log('   aspectRatio:', settings.aspectRatio)
 
       const { isPortrait } = calculateCanvasDimensions(target)
       const gotPortrait = settings.height > settings.width
@@ -1837,7 +1861,6 @@ async function setMediaStream(target) {
         console.error('❌ Still got wrong orientation - enabling crop mode')
         target.needsVideoCrop = true
       } else {
-        console.log('✅ Got correct orientation!')
         target.needsVideoCrop = false
       }
     }
@@ -2397,7 +2420,10 @@ OPTIMIZED DRAWING FUNCTIONS - MULTIPLAYER AWARE
 
 function getOrCreatePlayerCanvas(target, playerId) {
   if (target.playerCanvases[playerId]) {
-    return target.playerCanvases[playerId]
+    return {
+      canvas: target.playerCanvases[playerId],
+      ctx: target.playerCanvasContexts[playerId]
+    }
   }
 
   const canvas = document.createElement('canvas')
@@ -2406,9 +2432,14 @@ function getOrCreatePlayerCanvas(target, playerId) {
   canvas.classList.add('player-canvas')
   canvas.dataset.playerId = playerId
   target.playerCanvasContainer.appendChild(canvas)
-  target.playerCanvases[playerId] = canvas
 
-  return canvas
+  const ctx = canvas.getContext('2d', { willReadFrequently: false })
+
+  target.playerCanvases[playerId] = canvas
+  target.playerCanvasContexts = target.playerCanvasContexts || {}
+  target.playerCanvasContexts[playerId] = ctx
+
+  return { canvas, ctx }
 }
 
 function removePlayerCanvas(target, playerId) {
@@ -2420,11 +2451,11 @@ function removePlayerCanvas(target, playerId) {
 }
 
 function drawHistoricalStrokes(target) {
-  const { inputCanvas } = target
-  if (!inputCanvas) return
+  const { inputCanvas, inputCanvasCtx } = target
+  if (!inputCanvas || !inputCanvasCtx) return
 
   const { strokeHistory, background } = $.learn()
-  const context = inputCanvas.getContext('2d', { willReadFrequently: false })
+  const context = inputCanvasCtx
 
   // Clear and draw background
   context.clearRect(0, 0, inputCanvas.width, inputCanvas.height)
@@ -2442,14 +2473,9 @@ function drawHistoricalStrokes(target) {
 function drawPlayerStroke(target, playerId, stroke) {
   if (!stroke || stroke.length < 2) return
 
-  const canvas = getOrCreatePlayerCanvas(target, playerId)
-  const context = canvas.getContext('2d', { willReadFrequently: false })
-
-  // Clear this player's canvas
-  context.clearRect(0, 0, canvas.width, canvas.height)
-
-  // Draw their current stroke
-  drawStroke(context, stroke)
+  const { canvas, ctx } = getOrCreatePlayerCanvas(target, playerId)
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+  drawStroke(ctx, stroke)
 }
 
 function drawStroke(context, stroke) {
@@ -2478,16 +2504,12 @@ function drawStroke(context, stroke) {
 
 function setupCompositeLoop(target) {
   const ctx = target.outputCanvas.getContext('2d')
-  let lastVideoTime = -1
 
   const drawComposite = () => {
+    if (target._isDestroyed) return
     const { videoEnabled, chromakeyEnabled, chromakeyColor, chromakeyTolerance } = $.learn()
     const currentWidth = target.outputCanvas.width
     const currentHeight = target.outputCanvas.height
-
-    const videoTime = target.video?.currentTime || 0
-    const videoChanged = videoEnabled && videoTime !== lastVideoTime
-    lastVideoTime = videoTime
 
     ctx.clearRect(0, 0, currentWidth, currentHeight)
 
@@ -2527,11 +2549,15 @@ function setupCompositeLoop(target) {
 
     // LAYER 2+3: Draw strokes with chromakey processing if enabled
     if (chromakeyEnabled && videoEnabled) {
-      // Create temporary canvas to composite all drawing layers
-      const tempCanvas = document.createElement('canvas')
-      tempCanvas.width = currentWidth
-      tempCanvas.height = currentHeight
-      const tempCtx = tempCanvas.getContext('2d')
+      const tempCanvas = target._chromakeyCanvas
+      const tempCtx = target._chromakeyCtx
+
+      if (tempCanvas.width !== currentWidth || tempCanvas.height !== currentHeight) {
+        tempCanvas.width = currentWidth
+        tempCanvas.height = currentHeight
+      } else {
+        tempCtx.clearRect(0, 0, currentWidth, currentHeight)
+      }
 
       // Composite all drawing layers
       tempCtx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
@@ -2573,7 +2599,7 @@ function setupCompositeLoop(target) {
       }
     }
 
-    requestAnimationFrame(drawComposite)
+    target._animationFrameId = requestAnimationFrame(drawComposite)
   }
 
   drawComposite()
@@ -2727,19 +2753,25 @@ $.when('mouseup', '.input-canvas', end)
 
 function end (e) {
   $.teach({ touching: false })
-
   isMousedown = false
 
   const state = $.learn()
   const playerStroke = state.players?.[playerId]?.currentStroke
 
   if (playerStroke && playerStroke.length > 0) {
-    // Add to history
+    const target = e.target.closest($.link)
+
+    // Draw to historical canvas FIRST, before clearing player canvas
+    if (target && target.inputCanvas) {
+      const context = target.inputCanvas.getContext('2d')
+      drawStroke(context, playerStroke)
+    }
+
+    // Now safe to update state
     $.teach({
       strokeHistory: [...state.strokeHistory, playerStroke]
     })
 
-    // Clear player's current stroke
     $.teach({
       currentStroke: [],
       activelyDrawing: false,

@@ -1,4 +1,5 @@
 import './elves/plan98-icon.js'
+import './elves/plan98-synthia.js'
 import('randomuuid').catch(console.error)
 import('./elves/plan98-console.js').catch(console.error)
 //import('./elves/plan98-synthia.js').catch(console.error)

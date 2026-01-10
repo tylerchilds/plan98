@@ -204,6 +204,10 @@ const commands = {
   'apply': () => {
     return 'Apply by emailing tellers@plan98.org with the subject "New Computer Teller: YOUR NAME - NEAREST LIBRARY URL" and a message that tells the tellers a little about yourself.'
   },
+  'now': (...args) => {
+    loadPath('/app/v-log')
+    return "At the end of time, sat a clown."
+  },
   'echo': (...args) => {
     return args.join(' ')
   },
