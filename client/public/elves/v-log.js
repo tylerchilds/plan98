@@ -13,6 +13,7 @@ The fetch command instructs the human to chase and fetch the ball
 import Self from '@plan98/elf'
 import { Float, Integer } from '@plan98/types'
 import { get, put } from './plan98-wallet.js'
+import Chromakey from './chroma-key.js'
 
 /*
 
@@ -1282,9 +1283,16 @@ class VLog extends HTMLElement {
       this._chromakeyCanvas = null
       this._chromakeyCtx = null
     }
+
+    if (this._chromakeyProcessor) {
+      this._chromakeyProcessor.destroy()
+      this._chromakeyProcessor = null
+    }
   }
 
   async init(target) {
+    target._chromakeyProcessor = new Chromakey()
+
     if(!target.innerHTML) {
       target.innerHTML = `
         <div class="footer">
@@ -2548,7 +2556,29 @@ function setupCompositeLoop(target) {
     }
 
     // LAYER 2+3: Draw strokes with chromakey processing if enabled
-    if (chromakeyEnabled && videoEnabled) {
+    if (chromakeyEnabled && videoEnabled && target._chromakeyProcessor?.gl) {
+      const tempCanvas = target._chromakeyCanvas
+      const tempCtx = target._chromakeyCtx
+
+      if (tempCanvas.width !== currentWidth || tempCanvas.height !== currentHeight) {
+        tempCanvas.width = currentWidth
+        tempCanvas.height = currentHeight
+      } else {
+        tempCtx.clearRect(0, 0, currentWidth, currentHeight)
+      }
+
+      // Composite all drawing layers
+      tempCtx.drawImage(target.inputCanvas, 0, 0, currentWidth, currentHeight)
+      for (const pid in target.playerCanvases) {
+        tempCtx.drawImage(target.playerCanvases[pid], 0, 0, currentWidth, currentHeight)
+      }
+
+      // GPU chromakey processing
+      const keyRgb = hexToRgb(chromakeyColor)
+      const processedCanvas = target._chromakeyProcessor.process(tempCanvas, keyRgb, chromakeyTolerance)
+      ctx.drawImage(processedCanvas, 0, 0)
+
+    } else if (chromakeyEnabled && videoEnabled) {
       const tempCanvas = target._chromakeyCanvas
       const tempCtx = target._chromakeyCtx
 
@@ -3003,3 +3033,4 @@ function ungrabToolbelt(event) {
   lastBeltX = undefined;
   lastBeltY = undefined;
 }
+
