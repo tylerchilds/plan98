@@ -1450,8 +1450,7 @@ class VLog extends HTMLElement {
     }
 
     {
-      const id = target.id
-      requestAnimationFrame(gameLoop.bind({ id }))
+      requestAnimationFrame(gameLoop.bind({ id: playerId }))
     }
 
     {
@@ -3277,85 +3276,88 @@ const musicRPC = {
 }
 
 function slideMusicLeft(id) {
-  const { musicX } = state.players[id]
+  const playerState = $.learn().players[id]
+  const { musicX, activeNotes } = playerState
 
-  if(musicX<=0) return
+  if(musicX <= 0) return
+
+  // Release all active notes before sliding
+  releaseAllNotes(id, activeNotes)
 
   $.teach({
     musicX: musicX - 1
   }, {
     mergeHandler: mergePlayer,
-    parameters: [playerId]
+    parameters: [id]
   }, {
     bypassSecurity: true
   })
 }
 
 function slideMusicRight(id) {
-  const { musicX, columns } = state.players[id]
+  const playerState = $.learn().players[id]
+  const { musicX, columns, activeNotes } = playerState
 
-  if(x>=columns-1) return
+  if(musicX >= columns - 1) return
+
+  releaseAllNotes(id, activeNotes)
 
   $.teach({
     musicX: musicX + 1
   }, {
     mergeHandler: mergePlayer,
-    parameters: [playerId]
+    parameters: [id]
   }, {
     bypassSecurity: true
   })
 }
 
 function slideMusicUp(id) {
-  const { musicY } = state.players[id]
+  const playerState = $.learn().players[id]
+  const { musicY, activeNotes } = playerState
 
-  if(musicY<=-spatialOffset) return
+  if(musicY <= -spatialOffset) return
+
+  releaseAllNotes(id, activeNotes)
 
   $.teach({
     musicY: musicY - 1
   }, {
     mergeHandler: mergePlayer,
-    parameters: [playerId]
+    parameters: [id]
   }, {
     bypassSecurity: true
   })
 }
 
 function slideMusicDown(id) {
-  const { musicY, rows } = state.players[id]
+  const playerState = $.learn().players[id]
+  const { musicY, rows, activeNotes } = playerState
 
-  if(musicY>=rows-1-spatialOffset) return
+  if(musicY >= rows - 1 - spatialOffset) return
+
+  releaseAllNotes(id, activeNotes)
 
   $.teach({
     musicY: musicY + 1
   }, {
     mergeHandler: mergePlayer,
-    parameters: [playerId]
+    parameters: [id]
   }, {
     bypassSecurity: true
   })
 }
 
-function standardMusic(player, code) {
-  if(!musicRPC[code]) return
+function releaseAllNotes(id, activeNotes) {
+  if (!activeNotes) return
 
-  if(player[code]) {
-    musicRPC[code]({
-      root: $.learn().players[playerId].root,
-      id: playerId,
-      type: 'click',
-      value: 1
-    })
-  } else {
-    musicRPC[code]({
-      root: $.learn().players[playerId].root,
-      id: playerId,
-      type: 'click',
-      value: 0
-    })
+  for (const note in activeNotes) {
+    if (activeNotes[note]) {
+      release(parseInt(note))
+      updateNote({ id, note: parseInt(note) }, false)
+    }
   }
 }
-
 
 function streamFactory(key, handler) {
   return (value, id) => {
@@ -3448,19 +3450,23 @@ function gamepadDrawingTools(player, id) {
 }
 
 function gamepadMusicTools(player, id) {
-  standardMusic(player, 'a')
-  standardMusic(player, 'b')
-  standardMusic(player, 'x')
-  standardMusic(player, 'y')
-  standardMusic(player, 'lb')
-  standardMusic(player, 'rb')
-  standardMusic(player,'lt')
-  standardMusic(player, 'rt')
-  standardMusic(player, 'ls')
-  standardMusic(player, 'rs')
-  standardMusic(player, 'up')
-  standardMusic(player, 'down')
-  standardMusic(player, 'left')
-  standardMusic(player, 'right')
-  standardMusic(player, 'os')
+  const state = $.learn()
+  const playerState = state.players?.[playerId]
+  if (!playerState) return
+
+  const { musicX, musicY } = playerState
+  const root = noteFromGrid(musicX, musicY + spatialOffset)  // <-- Dynamic root!
+
+  const codes = ['a', 'b', 'x', 'y', 'lb', 'rb', 'lt', 'rt', 'ls', 'rs', 'up', 'down', 'left', 'right', 'os']
+
+  for (const code of codes) {
+    if (!musicRPC[code]) continue
+
+    musicRPC[code]({
+      root,
+      id: playerId,
+      type: 'click',
+      value: player[code] ? 1 : 0
+    })
+  }
 }
