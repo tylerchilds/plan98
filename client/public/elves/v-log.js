@@ -14,6 +14,13 @@ import Self from '@plan98/elf'
 import { Float, Integer } from '@plan98/types'
 import { get, put } from './plan98-wallet.js'
 import Chromakey from './chroma-key.js'
+import { checkButton, checkAxis } from './debug-gamepads.js'
+import {
+  attack,
+  release,
+  attackRelease
+} from './paper-pocket.js'
+
 
 /*
 
@@ -50,6 +57,17 @@ Every universe needs a number. Some like Earth 616, others like it 48000
 */
 
 const sampleRate = 48000;
+const gridUnit = 16
+const spatialOffset = 1
+const center = 60
+const orientation = {
+	x: '0', y: '0', z: '0', yaw: '0', pitch: '0', roll: '0'
+}
+const camera = {
+	x: -2 * gridUnit, y: gridUnit + 4, z: 4*gridUnit, yaw: '0', pitch: '0', roll: '0'
+}
+const rows = 7
+const columns = 13
 
 /*
 
@@ -1430,6 +1448,30 @@ class VLog extends HTMLElement {
         initializeVosk(target)
       }
     }
+
+    {
+      const id = target.id
+      requestAnimationFrame(gameLoop.bind({ id }))
+    }
+
+    {
+      $.teach({
+        musicX: Math.floor(columns/2),
+        musicY: Math.floor(rows/2) - spatialOffset,
+        activeNotes: {},
+        root: center,
+        rows,
+        columns,
+        orientation,
+        camera
+      }, {
+        mergeHandler: mergePlayer,
+        parameters: [playerId]
+      }, {
+        bypassSecurity: true
+      })
+
+    }
   }
 
   afterUpdate(target) {
@@ -2656,6 +2698,25 @@ function mergePlayer(pid) {
   }
 }
 
+function mergePlayerNotes(pid, note) {
+  return (state, payload) => {
+    return {
+      ...state,
+      players: {
+        ...state.players,
+        [pid]: {
+          ...state.players[pid],
+          activeNotes: {
+            ...state.players[pid].activeNotes,
+            [note]: payload
+          }
+        }
+      }
+    }
+  }
+}
+
+
 /*
 
 Drawing interaction handlers - OPTIMIZED
@@ -3034,3 +3095,372 @@ function ungrabToolbelt(event) {
   lastBeltY = undefined;
 }
 
+function audioFactory(url) {
+  const audioPool = [];
+  const poolSize = 3;
+  let poolIndex = 0;
+
+  // Initialize pool
+  for (let i = 0; i < poolSize; i++) {
+    const audio = new Audio(url);
+    audio.preload = 'auto';
+    audio.load();
+    audioPool.push(audio);
+  }
+
+  return function play() {
+    const sound = audioPool[poolIndex];
+    sound.currentTime = 0; // Reset to start
+    sound.play().catch(e => console.log('Play failed:', e));
+
+    // Cycle through pool
+    poolIndex = (poolIndex + 1) % poolSize;
+  }
+}
+
+const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/a.mp3')
+const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/b.mp3')
+
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const manualNotes = {}
+
+function maybe(id, value, note) {
+  if(manualNotes[note]) return
+  if(value === 1) {
+    yes(id, note)
+  } else {
+    no(id, note)
+  }
+}
+
+function yes(id, note) {
+  attack(note)
+  mark(id, note)
+}
+
+function no(id, note) {
+  release(note)
+  unmark(id, note)
+}
+
+function mark(id, note) {
+  updateNote({ id, note }, true)
+}
+
+function unmark(id, note) {
+  const { activeNotes } = $.learn().players[id]
+  if(activeNotes[note]) {
+    updateNote({ id, note }, false)
+  }
+}
+
+function updateNote({ id, note }, payload) {
+  $.teach(payload, {
+    mergeHandler: mergePlayerNotes,
+    parameters: [id, note]
+  }, {
+    bypassSecurity: true
+  })
+}
+
+
+function noteFromGrid(column, row) {
+  const { columns } = $.learn()
+
+  const base = center + 30;
+
+  const evenColumn = column % 2 === 0
+
+  const aboveMedian = column > parseInt(columns / 2)
+  const octave = row * -12
+  const interval = (parseInt(column / 2) * 2)
+
+  return evenColumn
+    ? base + octave + interval
+    : base - 5 + octave + interval + (aboveMedian?12:0)
+}
+
+const musicRPC = {
+  'a': (params) => {
+    const note = params.root
+    maybe(params.id, params.value, note)
+  },
+  'b': (params) => {
+    const note = params.root + 7
+    maybe(params.id, params.value, note)
+  },
+  'x': (params) => {
+    const note = params.root + 2
+    maybe(params.id, params.value, note)
+  },
+  'y': (params) => {
+    const note = params.root + 9
+    maybe(params.id, params.value, note)
+  },
+  'lb': (params) => {
+    const note = params.root + 4
+    maybe(params.id, params.value, note)
+  },
+  'rb': (params) => {
+    const note = params.root + 11
+    maybe(params.id, params.value, note)
+  },
+  'lt': (params) => {
+    const note = params.root + 6
+    maybe(params.id, params.value, note)
+  },
+  'rt': (params) => {
+    const note = params.root + 13
+    maybe(params.id, params.value, note)
+  },
+  'up': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('up', 150, () => {
+        slideMusicUp(params.id)
+      })
+    }
+  },
+  'down': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('down', 150, () => {
+        slideMusicDown(params.id)
+      })
+    }
+  },
+  'left': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('left', 150, () => {
+        slideMusicLeft(params.id)
+      })
+    }
+  },
+  'right': (params) => {
+    if(params.value === 1) {
+      document.activeElement.blur()
+      debounceSpam('right', 150, () => {
+        slideMusicRight(params.id)
+      })
+    }
+  },
+  'os': (params) => {
+    toggleSpam('os', params.value, () => {
+      const { menuOpen } = $.learn()
+      $.teach({
+        menuOpen: !menuOpen,
+      })
+    })
+  }
+}
+
+function slideMusicLeft(id) {
+  const { musicX } = state.players[id]
+
+  if(musicX<=0) return
+
+  $.teach({
+    musicX: musicX - 1
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  }, {
+    bypassSecurity: true
+  })
+}
+
+function slideMusicRight(id) {
+  const { musicX, columns } = state.players[id]
+
+  if(x>=columns-1) return
+
+  $.teach({
+    musicX: musicX + 1
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  }, {
+    bypassSecurity: true
+  })
+}
+
+function slideMusicUp(id) {
+  const { musicY } = state.players[id]
+
+  if(musicY<=-spatialOffset) return
+
+  $.teach({
+    musicY: musicY - 1
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  }, {
+    bypassSecurity: true
+  })
+}
+
+function slideMusicDown(id) {
+  const { musicY, rows } = state.players[id]
+
+  if(musicY>=rows-1-spatialOffset) return
+
+  $.teach({
+    musicY: musicY + 1
+  }, {
+    mergeHandler: mergePlayer,
+    parameters: [playerId]
+  }, {
+    bypassSecurity: true
+  })
+}
+
+function standardMusic(player, code) {
+  if(!musicRPC[code]) return
+
+  if(player[code]) {
+    musicRPC[code]({
+      root: $.learn().players[playerId].root,
+      id: playerId,
+      type: 'click',
+      value: 1
+    })
+  } else {
+    musicRPC[code]({
+      root: $.learn().players[playerId].root,
+      id: playerId,
+      type: 'click',
+      value: 0
+    })
+  }
+}
+
+
+function streamFactory(key, handler) {
+  return (value, id) => {
+    toggleSpam(key, value, () => {
+      handler(id)
+    })
+  }
+}
+
+function gameLoop(time) {
+  const { id } = this
+  const { view, menuOpen } = $.ear()
+  const player = {
+    a: checkButton(0, 0),
+    b: checkButton(0, 1),
+    x: checkButton(0, 3),
+    y: checkButton(0, 2),
+    lb: checkButton(0, 4),
+    rb: checkButton(0, 5),
+    lt: checkButton(0, 6),
+    rt: checkButton(0, 7),
+    select: checkButton(0, 8),
+    start: checkButton(0, 9),
+    ls: checkButton(0, 10),
+    rs: checkButton(0, 11),
+    up: checkButton(0, 12),
+    down: checkButton(0, 13),
+    left: checkButton(0, 14),
+    right: checkButton(0, 15),
+    os: checkButton(0, 16),
+  }
+
+  if(!view && !menuOpen) {
+    gamepadMusicTools(player, id)
+  }
+
+  if(!view && menuOpen) {
+    gamepadDrawingTools(player, id)
+  }
+
+  requestAnimationFrame(gameLoop.bind(this))
+}
+
+function gamepadDrawingTools(player, id) {
+  const streamOs = streamFactory('os', (id) => {
+    $.mouth({
+      menuOpen: false,
+    })
+    playSwipeSound()
+  })
+
+  const streamStart = streamFactory('start', (id) => {
+    $.mouth({
+      showOverlay: true,
+      view: views.settings
+    })
+    playSwipeSound()
+  })
+
+
+  const streamSelect = streamFactory('select', (id) => {
+    $.mouth({
+      showOverlay: true,
+      view: views.share
+    })
+    playSwipeSound()
+  })
+
+  const streamUp = streamFactory('up', (id) => {
+    playStuckSound()
+  })
+  const streamLeft = streamFactory('left', (id) => {
+    playStuckSound()
+  })
+
+  const streamRight = streamFactory('right', (id) => {
+    playStuckSound()
+  })
+  const streamDown = streamFactory('down', (id) => {
+    playStuckSound()
+  })
+
+  streamOs(player.os, id)
+  streamStart(player.start, id)
+  streamSelect(player.select, id)
+  streamUp(player.up, id)
+  streamLeft(player.left, id)
+  streamRight(player.right, id)
+  streamDown(player.down, id)
+}
+
+function gamepadMusicTools(player, id) {
+  standardMusic(player, 'a')
+  standardMusic(player, 'b')
+  standardMusic(player, 'x')
+  standardMusic(player, 'y')
+  standardMusic(player, 'lb')
+  standardMusic(player, 'rb')
+  standardMusic(player,'lt')
+  standardMusic(player, 'rt')
+  standardMusic(player, 'ls')
+  standardMusic(player, 'rs')
+  standardMusic(player, 'up')
+  standardMusic(player, 'down')
+  standardMusic(player, 'left')
+  standardMusic(player, 'right')
+  standardMusic(player, 'os')
+}
