@@ -21,7 +21,6 @@ import {
   attackRelease
 } from './paper-pocket.js'
 
-
 /*
 
 Since man could not reliably communicate telepathically,
@@ -1231,20 +1230,26 @@ Free to make their own mistakes, they did.
 class VLog extends HTMLElement {
   constructor() {
     super();
-    this._isDestroyed = false
-    this._animationFrameId = null
+    // Don't initialize anything in constructor for iOS Safari compatibility
   }
 
   connectedCallback() {
+    // Initialize instance properties here instead of constructor
+    if (this._initialized) return;
+    this._initialized = true;
+    this._isDestroyed = false;
+    this._animationFrameId = null;
+    this._chromakeyCanvas = null;
+    this._chromakeyCtx = null;
+    this._chromakeyProcessor = null;
+
     $.draw(() => null, {
       beforeUpdate: this.beforeUpdate,
       afterUpdate: this.afterUpdate
     })
 
-    // Start with no media stream since video/audio are off by default
     loadAllDevices()
 
-    // Initialize without media stream
     this.init(this)
 
     this.orientationHandler = () => handleOrientationChange(this)
@@ -1306,6 +1311,9 @@ class VLog extends HTMLElement {
       this._chromakeyProcessor.destroy()
       this._chromakeyProcessor = null
     }
+
+    // Reset for potential reconnection
+    this._initialized = false
   }
 
   async init(target) {
