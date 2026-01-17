@@ -540,29 +540,14 @@ function modules({ registry }) {
 
   tags.forEach(async (tag) => {
     const url = `${registry || '.'}/${tag}.js`
-    //if(!plan98 || plan98.registry[tag]) return
-    //plan98.registry[tag] = url
     if(cached[url]) return
     cached[url] = true
     const exists = (await fetch(url, { method: 'HEAD' })).ok
     if(!exists) return
-    let definable = true
+
     await import(url).catch((e) => {
-      definable = false
       console.error(e)
     })
-    try {
-      definable = definable && document.querySelector(tag) && document.querySelector(tag).matches(':not(:defined)')
-      if(definable) {
-        customElements.define(tag, class WebComponent extends HTMLElement {
-          constructor() {
-            super();
-          }
-        });
-      }
-    } catch(e) {
-      console.log('Error defining module:', tag, e)
-    }
   })
 }
 
