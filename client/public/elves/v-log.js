@@ -1837,26 +1837,15 @@ async function setMediaStream(target) {
     const constraints = {}
 
     if (videoEnabled) {
-      const { isPortrait, isSquare } = calculateCanvasDimensions(target)
-
-      const videoConstraints = {}
+      const videoConstraints = {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
+      }
 
       if (selectedVideoDeviceId) {
         videoConstraints.deviceId = { exact: selectedVideoDeviceId }
       } else {
         videoConstraints.facingMode = facingMode
-      }
-
-      // TRY 1: Use EXACT constraints to force iOS to comply
-      if (isPortrait) {
-        videoConstraints.width = { exact: 1080 }
-        videoConstraints.height = { exact: 1920 }
-      } else if (isSquare) {
-        videoConstraints.width = { exact: 1440 }
-        videoConstraints.height = { exact: 1440 }
-      } else {
-        videoConstraints.width = { exact: 1920 }
-        videoConstraints.height = { exact: 1080 }
       }
 
       constraints.video = videoConstraints
@@ -2580,21 +2569,20 @@ function setupCompositeLoop(target) {
       let drawWidth, drawHeight, offsetX, offsetY
 
       if (videoAspect > canvasAspect) {
-        // Video is wider - fit to width, letterbox top/bottom
+        // Video is wider than canvas - fit to width, letterbox top/bottom
         drawWidth = currentWidth
         drawHeight = currentWidth / videoAspect
         offsetX = 0
         offsetY = (currentHeight - drawHeight) / 2
       } else {
-        // Video is taller - fit to height, letterbox left/right
+        // Video is taller than canvas - fit to height, letterbox left/right
         drawHeight = currentHeight
         drawWidth = currentHeight * videoAspect
         offsetX = (currentWidth - drawWidth) / 2
         offsetY = 0
       }
 
-      // Draw entire video frame, no source cropping
-      ctx.drawImage(target.video, 0, 0, videoWidth, videoHeight, offsetX, offsetY, drawWidth, drawHeight)
+      ctx.drawImage(target.video, offsetX, offsetY, drawWidth, drawHeight)
     }
 
     // LAYER 2+3: Draw strokes with chromakey processing if enabled
