@@ -2577,31 +2577,24 @@ function setupCompositeLoop(target) {
       const videoAspect = videoWidth / videoHeight
       const canvasAspect = currentWidth / currentHeight
 
-      let sx = 0, sy = 0, sw = videoWidth, sh = videoHeight
+      let drawWidth, drawHeight, offsetX, offsetY
 
-      if (Math.abs(videoAspect - canvasAspect) > 0.01) {
-        if (videoAspect > canvasAspect) {
-          sw = videoHeight * canvasAspect
-          sx = (videoWidth - sw) / 2
-          sh = videoHeight
-          sy = 0
-        } else {
-          sh = videoWidth / canvasAspect
-          sy = (videoHeight - sh) / 2
-          sw = videoWidth
-          sx = 0
-        }
-        ctx.drawImage(target.video, sx, sy, sw, sh, 0, 0, currentWidth, currentHeight)
+      if (videoAspect > canvasAspect) {
+        // Video is wider - fit to width, letterbox top/bottom
+        drawWidth = currentWidth
+        drawHeight = currentWidth / videoAspect
+        offsetX = 0
+        offsetY = (currentHeight - drawHeight) / 2
       } else {
-        const scaleX = currentWidth / videoWidth
-        const scaleY = currentHeight / videoHeight
-        const scale = Math.min(scaleX, scaleY)
-        const scaledWidth = videoWidth * scale
-        const scaledHeight = videoHeight * scale
-        const offsetX = (currentWidth - scaledWidth) / 2
-        const offsetY = (currentHeight - scaledHeight) / 2
-        ctx.drawImage(target.video, offsetX, offsetY, scaledWidth, scaledHeight)
+        // Video is taller - fit to height, letterbox left/right
+        drawHeight = currentHeight
+        drawWidth = currentHeight * videoAspect
+        offsetX = (currentWidth - drawWidth) / 2
+        offsetY = 0
       }
+
+      // Draw entire video frame, no source cropping
+      ctx.drawImage(target.video, 0, 0, videoWidth, videoHeight, offsetX, offsetY, drawWidth, drawHeight)
     }
 
     // LAYER 2+3: Draw strokes with chromakey processing if enabled
