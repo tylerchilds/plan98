@@ -1,8 +1,4 @@
-import './elves/plan98-icon.js'
-import './elves/plan98-synthia.js'
 import('randomuuid').catch(console.error)
-import('./elves/plan98-console.js').catch(console.error)
-//import('./elves/plan98-synthia.js').catch(console.error)
 
 self.plan98 ||= { env: {} }
 
@@ -17,6 +13,8 @@ self.plan98 = {
 }
 
 const style = document.createElement('link')
+
+console.log({ plan98 })
 
 style.setAttribute('href', `/public/cdn/${window.plan98.host}/default.css`)
 style.setAttribute('rel', `stylesheet`)
@@ -36,3 +34,7 @@ if(parameters.get('debug') === 'true') {
     <plan98-console></plan98-console>
   `)
 }
+
+import('./elves/plan98-icon.js').catch(console.error)
+import('./elves/plan98-synthia.js').catch(console.error)
+import('./elves/plan98-console.js').catch(console.error)

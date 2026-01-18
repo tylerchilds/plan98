@@ -82,7 +82,7 @@ export function update(message) {
   hideModal()
 }
 
-$.teach({ body: `Wake up, Eon...`, author: 'assistant' }, mergeMessage)
+$.teach({ body: `Eon... Timeless Void... Eon... Wake. Up. <code>now</code>`, author: 'assistant' }, mergeMessage)
 
 const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
@@ -516,6 +516,8 @@ const commands = {
   'help': (...args) => {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
+
+For immediate satisfaction, ask questions via email: ty@shirtflicks.app
 
 PLAN98
 

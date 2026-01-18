@@ -41,7 +41,7 @@ TheLanding.Page is my personal blog
 
 const dns = {
   'sillyz.computer': {
-    elf: 'trick-shot'
+    elf: 'ur-shell'
   },
   'cutestrap.com': {
     elf: 'my-computer'
@@ -50,7 +50,7 @@ const dns = {
     elf: 'brokemon-go'
   },
   'plan98.org': {
-    elf: 'ur-shell'
+    elf: 'source-code'
   },
   'shirtflicks.app': {
     elf: 'shirt-flicks'
@@ -75,8 +75,7 @@ const dns = {
   },
 }
 
-const standard = window.plan98 || { host: window.location.host }
-export function currentBusiness(host = standard) {
+export function currentBusiness(host) {
   return doingBusinessAs[host] || doingBusinessAs['sillyz.computer']
 }
 
@@ -86,14 +85,17 @@ $.draw((target) => {
     return target.getAttribute('innerHTML')
   }
 
-  if(dns[self.plan98.host]) {
+  const host = (self.plan98?.host || window.location.host).toLowerCase()
+
+  console.log({ host }, self.plan98.host)
+  if(dns[host]) {
     const domain = dns[self.plan98.host]
 
     return `<${domain.elf}></${domain.elf}>`
   }
 
   return `
-    <trick-shot></trick-shot>
+    <ur-shell></ur-shell>
   `
 })
 
