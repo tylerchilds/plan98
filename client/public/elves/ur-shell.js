@@ -82,7 +82,7 @@ export function update(message) {
   hideModal()
 }
 
-$.teach({ body: `Eon... Timeless Void... Eon... Wake. Up. <code>now</code>`, author: 'assistant' }, mergeMessage)
+$.teach({ body: `Eon... Timeless Void... Eon... Wake. Up. <code>help</code>. <code>me</code>. <code>now</code>.`, author: 'assistant' }, mergeMessage)
 
 const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
@@ -225,7 +225,7 @@ const commands = {
   },
   'whoami': () => {
     const res = whoami()
-    return res ? res : 'Not currently a secure deity, run `me` to authenticate'
+    return res ? res : 'eon... until you tell `me` otherwise.'
   },
   'logout': () => {
     return logout()
@@ -513,6 +513,56 @@ const commands = {
   'about': (...args) => {
     return `Earth Prime's Number One Lore Bible Platform Engine, lovingly mocking gnu/linux by building on it as sillyz/plan98, an irreverant take on social computing, by @tychi.`
   },
+  'continue': (...args) => {
+    loadPath('/app/saga-crawler')
+    return 'ur in the endgame now'
+  },
+  'saga': (...args) => {
+    return `Clown Atlas
+
+It all started with a sad clown kicking rocks in San Francisco.
+
+In the attention economy, this clown was broke.
+
+The sad clown could not get a whiff of attention.
+
+Until one day this clown made up a story.
+
+The story was silly.
+
+The clown said, "Silicon Valley, the war machine, was thwarted by a clown."
+
+And ears perked up at the amusing thought that an empire could be felled by a one-liner.
+
+The every day people of the city started asking questions.
+
+They asked, "Is this clown you?"
+
+The no longer sad clown, but not yet happy clown, bashfully nodded correctly in error.
+
+They asked, "How'd you do it?"
+
+The clown said, "Well, we're working on it with this magic piece of paper."
+
+More amused they inquired further, "Who is we?"
+
+"Well, me and the rest of the circus, of course."
+
+In shock that this sad street clown could have a circus, they asked
+
+"Who is in this circus?"
+
+And the clown smirked and said, "I think you are now."
+
+And every day citizens joined the circus quest to stop the war machine from enslaving the geeks.
+
+And by proxy, liberated themselves completely.
+
+And the rest is quite frankly, just clown history.
+
+<code>continue</code>
+    `
+  },
   'help': (...args) => {
     const help = paperPocketHelp()
     return `Welcome to ur-shell, the Universal Resource Shell!
@@ -526,6 +576,18 @@ PLAN98
 
 <code>about</code>
   an immersive reality game
+
+<code>saga</code>
+  a poetic explanation of the about command
+
+<code>tv</code>
+  Fixing the tiniest violin is the easiest trick in the book. All you do is delete two forward slashes. That's it.
+
+<code>me</code>
+  log in to your account
+
+<code>now</code>
+  open the live broadcasting studio right now right now for right now right now
 
 ${killCommands.map(x => `<code>${x}</code>`).join(' ')}
   quit playing around and go outside
@@ -559,11 +621,6 @@ ${killCommands.map(x => `<code>${x}</code>`).join(' ')}
 
 <code>bluesky</code>
   launch the bluesky app
-
-<code>tv</code>
-  the tiniest violin
-
-
 
 <code>pwd</code>
   print working directory
@@ -1034,7 +1091,7 @@ $.style(`
 
   & .message a:link,
   & .message a:visited {
-    background: linear-gradient(180deg, rgba(0,0,0,.8), var(--root-theme, mediumseagreen), rgba(255,255,255,.8)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(180deg, rgba(255,255,255,.5), var(--root-theme, mediumseagreen), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-decoration: none;

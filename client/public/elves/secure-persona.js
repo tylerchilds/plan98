@@ -1,5 +1,4 @@
 import elf, { subscribe } from '@silly/elf'
-import supabase from '@sillonious/database'
 import { bayunCore, BayunCore } from '@sillonious/vault'
 import {
   getSession,
@@ -67,6 +66,7 @@ export function whoami() {
 
 export function logout() {
   clearSession()
+  return 'Disconnected successfully.'
 }
 
 export async function friends(data, wishbacks) {
@@ -81,37 +81,212 @@ export async function friends(data, wishbacks) {
   }
 }
 
-
-const MAX_ATTEMPTS = 2
-const authSingleton = {}
-
-export async function auth(data, wishbacks) {
-  if(!data) {
-    authSingleton.attempts = 0
-    authSingleton.mode = 'moniker'
-    return 'What is your moniker?'
-  } else if(authSingleton.mode === 'moniker') {
-    setCompanyName(organization)
-    setEmployeeId(data)
-    authSingleton.mode = 'password'
-    wishbacks.enableSecureMode()
-    return 'Enter password:'
-  } else if(authSingleton.mode === 'password' && authSingleton.attempts < MAX_ATTEMPTS) {
-    const authenticated = false
-    if(authenticated) {
-      wishbacks.disableSecureMode()
-    } else {
-      authSingleton.attempts += 1
-      return 'Bad attempt, please try again.'
-    }
-  } else if(authSingleton.attempts === MAX_ATTEMPTS) {
-    wishbacks.normalMode()
-    return 'Too many failed login attempts.'
-  } else {
-    return data
-  }
+const MAX_ATTEMPTS = 3
+const authSingleton = {
+  attempts: 0,
+  mode: 'moniker',
+  questionIndex: 0,
+  questions: [],
+  answers: [],
+  setupQA: [],
+  sessionId: null,
+  isNewUser: false
 }
 
+function resetAuthSingleton() {
+  authSingleton.attempts = 0
+  authSingleton.mode = 'moniker'
+  authSingleton.questionIndex = 0
+  authSingleton.questions = []
+  authSingleton.answers = []
+  authSingleton.setupQA = []
+  authSingleton.sessionId = null
+  authSingleton.isNewUser = false
+}
+
+function completeAuth(sessionId, wishbacks, message = 'You are now authenticated.') {
+  setSessionId(sessionId)
+  authSingleton.mode = 'done'
+  wishbacks.normalMode()
+  return message
+}
+
+function failAuth(wishbacks, message = 'Too many failed attempts. Please try again later.') {
+  resetAuthSingleton()
+  wishbacks.normalMode()
+  return message
+}
+
+function retryAuth(error) {
+  authSingleton.mode = 'moniker'
+  return `${error}. Let's start over. What is your moniker?`
+}
+
+export async function auth(data, wishbacks) {
+  if (!data) {
+    resetAuthSingleton()
+    return 'What is your moniker?'
+  }
+
+  if (authSingleton.mode === 'moniker') {
+    setCompanyName(organization)
+    setEmployeeId(data)
+    authSingleton.mode = 'checking'
+
+    return new Promise((resolve) => {
+      bayunCore.loginWithoutPassword(
+        '',
+        organization,
+        data,
+        (callbackData) => {
+          if (callbackData.sessionId &&
+              callbackData.authenticationResponse === BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS) {
+            authSingleton.sessionId = callbackData.sessionId
+            authSingleton.isNewUser = false
+            authSingleton.questions = callbackData.securityQuestions
+            authSingleton.mode = 'answer-question'
+            authSingleton.questionIndex = 0
+            wishbacks.enableSecureMode()
+            resolve(`Question 1: ${authSingleton.questions[0].questionText}`)
+          }
+        },
+        null,
+        (successData) => {
+          if (successData.sessionId) {
+            resolve(completeAuth(successData.sessionId, wishbacks, 'Welcome back! You are now authenticated.'))
+          }
+        },
+        (error) => {
+          if (error === "BayunErrorEmployeeDoesNotExist") {
+            authSingleton.isNewUser = true
+            authSingleton.mode = 'setup-question'
+            authSingleton.questionIndex = 0
+            resolve("Welcome! Let's set up your security questions.\n\nEnter your first security question:")
+          } else {
+            resolve(retryAuth(`Error: ${error}`))
+          }
+        }
+      )
+    })
+  }
+
+  if (authSingleton.mode === 'setup-question') {
+    authSingleton.setupQA[authSingleton.questionIndex] = { question: data, answer: '' }
+    authSingleton.mode = 'setup-answer'
+    wishbacks.enableSecureMode()
+    return `Enter the answer for: "${data}`
+  }
+
+  if (authSingleton.mode === 'setup-answer') {
+    authSingleton.setupQA[authSingleton.questionIndex].answer = data
+    authSingleton.questionIndex++
+    wishbacks.disableSecureMode()
+
+    if (authSingleton.questionIndex < 5) {
+      authSingleton.mode = 'setup-question'
+      return `Enter security question ${authSingleton.questionIndex + 1}:`
+    }
+
+    authSingleton.mode = 'registering'
+    return new Promise((resolve) => {
+      const handleSuccess = (sessionId) => resolve(completeAuth(sessionId, wishbacks, 'Account created successfully! You are now authenticated.'))
+      const handleValidation = (sqData) => {
+        authSingleton.sessionId = sqData.sessionId
+        bayunCore.validateSecurityQuestions(
+          sqData.sessionId,
+          authSingleton.setupQA.map((qa, i) => ({ questionId: String(i + 1), answer: qa.answer })),
+          () => {},
+          (successData) => handleSuccess(successData.sessionId),
+          (error) => resolve(`Validation failed: ${error}`)
+        )
+      }
+
+      bayunCore.registerEmployeeWithoutPassword(
+        '',
+        organization,
+        getEmployeeId(),
+        `${getEmployeeId()}@${organization}`,
+        true,
+        (authData) => {
+          if (authData.authenticationResponse === BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
+            resolve('Authorization pending. Please contact your admin.')
+          }
+        },
+        (credData) => {
+          if (credData.sessionId) {
+            authSingleton.sessionId = credData.sessionId
+            bayunCore.setNewUserCredentials(
+              credData.sessionId,
+              authSingleton.setupQA,
+              null,
+              false,
+              () => {},
+              (successData) => handleSuccess(successData.sessionId),
+              (error) => resolve(retryAuth(`Setup failed: ${error}`))
+            )
+          }
+        },
+        (sqData) => {
+          if (sqData.authenticationResponse === BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS) {
+            handleValidation(sqData)
+          }
+        },
+        null,
+        (successData) => {
+          if (successData.sessionId) handleSuccess(successData.sessionId)
+        },
+        (error) => resolve(retryAuth(`Registration failed: ${error}`))
+      )
+    })
+  }
+
+  if (authSingleton.mode === 'answer-question') {
+    authSingleton.answers.push({
+      questionId: authSingleton.questions[authSingleton.questionIndex].questionId,
+      answer: data
+    })
+    authSingleton.questionIndex++
+
+    if (authSingleton.questionIndex < authSingleton.questions.length) {
+      const nextQuestion = authSingleton.questions[authSingleton.questionIndex]
+      return `Question ${authSingleton.questionIndex + 1}: ${nextQuestion.questionText}`
+    }
+
+    authSingleton.mode = 'validating'
+    wishbacks.disableSecureMode()
+
+    return new Promise((resolve) => {
+      bayunCore.validateSecurityQuestions(
+        authSingleton.sessionId,
+        authSingleton.answers,
+        null,
+        (successData) => {
+          if (successData.sessionId) {
+            resolve(completeAuth(successData.sessionId, wishbacks, 'Welcome back! You are now authenticated.'))
+          }
+        },
+        (error) => {
+          authSingleton.attempts++
+          if (authSingleton.attempts >= MAX_ATTEMPTS) {
+            return resolve(failAuth(wishbacks))
+          }
+          authSingleton.answers = []
+          authSingleton.questionIndex = 0
+          authSingleton.mode = 'answer-question'
+          wishbacks.enableSecureMode()
+          resolve(`Incorrect answers. Let's try again.\n\nQuestion 1: ${authSingleton.questions[0].questionText}`)
+        }
+      )
+    })
+  }
+
+  if (authSingleton.mode === 'done') {
+    wishbacks.normalMode()
+    return 'You are already authenticated.'
+  }
+
+  return data
+}
 
 let lastMode = null
 subscribe((link) => {
@@ -1074,3 +1249,4 @@ function recoverElves(target, tag) {
     node.replaceWith(newNode)
   })
 }
+
