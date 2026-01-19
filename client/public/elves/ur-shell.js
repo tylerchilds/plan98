@@ -828,9 +828,9 @@ function clearCursor(target) {
 }
 
 
-$.when('keypress', 'form [name="messageText"]', (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
+$.when('keypress', 'form [name="messageText"]', (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
     const message = event.target.value
     execute(message)
   }

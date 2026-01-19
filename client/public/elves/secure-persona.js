@@ -147,7 +147,7 @@ export async function auth(data, wishbacks) {
             authSingleton.mode = 'answer-question'
             authSingleton.questionIndex = 0
             wishbacks.enableSecureMode()
-            resolve(`Question 1: ${authSingleton.questions[0].questionText}`)
+            resolve(`${authSingleton.questions[0].questionText}?`)
           }
         },
         null,
@@ -161,7 +161,7 @@ export async function auth(data, wishbacks) {
             authSingleton.isNewUser = true
             authSingleton.mode = 'setup-question'
             authSingleton.questionIndex = 0
-            resolve("Welcome! Let's set up your security questions.\n\nEnter your first security question:")
+            resolve("Enter security question 1:")
           } else {
             resolve(retryAuth(`Error: ${error}`))
           }
@@ -174,7 +174,7 @@ export async function auth(data, wishbacks) {
     authSingleton.setupQA[authSingleton.questionIndex] = { question: data, answer: '' }
     authSingleton.mode = 'setup-answer'
     wishbacks.enableSecureMode()
-    return `Enter the answer for: "${data}`
+    return `${data}?`
   }
 
   if (authSingleton.mode === 'setup-answer') {
@@ -249,11 +249,13 @@ export async function auth(data, wishbacks) {
 
     if (authSingleton.questionIndex < authSingleton.questions.length) {
       const nextQuestion = authSingleton.questions[authSingleton.questionIndex]
-      return `Question ${authSingleton.questionIndex + 1}: ${nextQuestion.questionText}`
+      return `${nextQuestion.questionText}?`
     }
 
     authSingleton.mode = 'validating'
     wishbacks.disableSecureMode()
+
+    await new Promise(resolve => setTimeout(resolve, 100))
 
     return new Promise((resolve) => {
       bayunCore.validateSecurityQuestions(
@@ -274,7 +276,7 @@ export async function auth(data, wishbacks) {
           authSingleton.questionIndex = 0
           authSingleton.mode = 'answer-question'
           wishbacks.enableSecureMode()
-          resolve(`Incorrect answers. Let's try again.\n\nQuestion 1: ${authSingleton.questions[0].questionText}`)
+          resolve(`Incorrect answers. Let's try again.\n\n${authSingleton.questions[0].questionText}`)
         }
       )
     })
