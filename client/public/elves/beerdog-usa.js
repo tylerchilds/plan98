@@ -2,7 +2,71 @@ import app from '@silly/elf'
 import diffHTML from 'diffhtml'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
-import { products } from './box-art.js'
+
+export const products = {
+  ascension: {
+    title: "Ascension When I'm in your arms (DJJW Mashup)",
+    artist: 'Cleo Sol v Maxwell',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/cleo_sol_v_maxwell-ascension_when_im_in_your_arms/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  pacific: {
+    title: "Pacific Coast Party",
+    artist: 'Smash Mouth',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/smash_mouth-pacific_coast_party/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  sanford: {
+    title: "Sanford and Son Theme",
+    artist: 'Sanford and Son Theme',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/sanford_and_son-theme/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  katchafire: {
+    title: "100",
+    artist: 'Katchafire',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/katchafire-100/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  norman: {
+    title: "That's The Way Love Goes",
+    artist: 'Norman Brown',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/norman_brown-thats-the-way-love-goes/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  standup: {
+    title: "Stand Up",
+    artist: 'Stand N Rock',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/stand_up-stand_n_rock/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  lacs: {
+    title: "Tall grass",
+    artist: 'The Lacs',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/the_lacs-tall_grass/manifest.m3u8',
+    url: '/app/v-log'
+  },
+}
 
 const porlock = [
   'In Xanadu did Kubla Khan and Kubla Khan found Alph.',
@@ -29,7 +93,13 @@ const modes = {
 
 const lolol = {
   '0': {
-    '0'   : products.coop,
+    '0'   : products.sanford,
+    '1'   : products.ascension,
+    '2'   : products.katchafire,
+    '3'   : products.lacs,
+    '4'   : products.standup,
+    '5'   : products.norman,
+    '6'   : products.pacific,
   },
 }
 
@@ -1029,6 +1099,44 @@ $.style(`
     color: white;
     padding: .5rem 1rem;
   }
+
+  & .product-title {
+    color: rgba(255,255,255, .95);
+    font-size: 1.2rem;
+    position: relative;
+    font-weight: bold;
+    z-index: 3;
+    background: black;
+    padding: .5rem;
+  }
+
+  & .product-artist {
+    color: rgba(255,255,255, .85);
+    background: black;
+    position: relative;
+    font-size: .9rem;
+    padding: 4px;
+    z-index: 3;
+  }
+
+  & .product-description {
+    color: rgba(255,255,255, .85);
+    background: black;
+    position: relative;
+    z-index: 3;
+    margin-bottom: 1rem;
+    padding: .5rem;
+    line-height: 1.75;
+  }
+
+  & .product-actions {
+    text-align: right;
+  }
+  & .product-actions button {
+    position: relative;
+    z-index: 3;
+  }
+
 `)
 
 const spamCache = {}
@@ -1267,14 +1375,34 @@ function content(x, y) {
   if(softBoundary(x,y)) {
     value = installFlick(x, y)
   } else {
-    const { keyart, launcher, trailer } = lolol[`${y}`][`${x}`]
+    const product = lolol[`${y}`][`${x}`]
     value = `
-      <div data-trailer="${trailer}" class="transclusion-boundary">
+      <div data-trailer="${product.trailer}" class="transclusion-boundary">
         <div class="shirt-keyart">
-          <img src="${keyart}" />
+          <img src="${product.keyart}" />
         </div>
         <div class="shirt-launcher">
-          ${launcher}
+          <div>
+            <span class="product-title">
+              ${product.title}
+            </span>
+            <span class="product-artist">
+              ${product.artist}
+            </span>
+          </div>
+          <div>
+            <span class="product-description">
+              ${product.description}
+            </span>
+          </div>
+          <div class="product-actions">
+            <button class="gaming-button -a" data-launch="${product.url}">
+              Launch
+            </button>
+            <button class="gaming-button -b" data-browse>
+              Swap
+            </button>
+          </div>
         </div>
       </div>
     `
