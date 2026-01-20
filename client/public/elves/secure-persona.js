@@ -276,7 +276,7 @@ export async function auth(data, wishbacks) {
           authSingleton.questionIndex = 0
           authSingleton.mode = 'answer-question'
           wishbacks.enableSecureMode()
-          resolve(`Incorrect answers. Let's try again.\n\n${authSingleton.questions[0].questionText}`)
+          resolve(`Incorrect answers. Let's try again.\n\n${authSingleton.questions[0].questionText}?`)
         }
       )
     })
