@@ -1,6 +1,5 @@
 import elf from '@plan98/elf'
 import { showPanel } from './plan98-panel.js'
-import { showModal, hideModal } from './plan98-modal.js'
 import { getTheme } from './paper-pocket.js'
 import {
   getSession,
@@ -20,13 +19,18 @@ const rooms = {
 // Local decryption cache - stores decrypted messages
 const table = {}
 
+// Track which messages are being decrypted to avoid duplicate attempts
+const decryptionInProgress = new Set()
+
 const $ = elf('dream-team', {
   messages: {},
   participants: [],
   currentRoom: rooms.general,
   messageText: '',
   messageHeight: null,
-  tick: 0
+  authenticated: !!getSession().sessionId,
+  showOverlay: false,
+  overlayView: null,
 })
 
 // Correct merge handler for adding messages to a specific room
@@ -54,7 +58,12 @@ const modeRenderers = {
     return `
       <div class="settings">
         <div class="settings-area">
-          <div class="settings-title">Settings</div>
+          <div class="settings-header">
+            <div class="settings-title">Settings</div>
+            <button data-close-overlay class="normal-button">
+              Close
+            </button>
+          </div>
           <button data-logout class="normal-button">
             Logout
           </button>
@@ -67,87 +76,8 @@ const modeRenderers = {
 }
 
 $.draw(target => {
-  const modality = target.getAttribute('modality')
-  if(modeRenderers[modality]) {
-    return modeRenderers[modality](target)
-  }
-
-  const {
-    messageText,
-    messageHeight,
-    messages,
-    participants,
-    currentRoom,
-  } = $.learn()
-
-  const session = getSession()
-
-  if(!session.sessionId) {
-    return `
-      <div class="zero-space">
-        <div class="zero-content">
-          <div class="zero-title">Chat Rooms</div>
-          <secure-persona></secure-persona>
-        </div>
-      </div>
-    `
-  }
-
-  mount(target)
-
-  // Get messages for current room from the decryption table
-  const roomMessages = table[currentRoom] || {}
-  const log = Object.values(roomMessages)
-    .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
-    .map((message) => `
-      <div class="message">
-        <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
-      </div>
-    `).join('') || '...'
-
-  return `
-    <div class="chat-app">
-      <div class="rooms">
-        <div class="sticky-item">
-          <button class="show-settings">
-            <sl-icon name="gear-wide-connected"></sl-icon>
-          </button>
-          <button class="show-participants">
-            ${participants.length}
-            <span>
-              <sl-icon name="people"></sl-icon>
-            </span>
-          </button>
-        </div>
-        ${Object.keys(rooms).map(x => {
-          return `
-            <button class="room-select ${currentRoom === x ? 'active':''}" data-value="${rooms[x]}" >${rooms[x]}</button>
-          `
-        }).join('')}
-      </div>
-      <div class="chat-area">
-        <div class="scroll-back">
-          <div class="messages">
-            ${log}
-          </div>
-        </div>
-        <form method="POST" name="send">
-          <div class="fields">
-            <div class="action-row">
-              <button>Send</button>
-            </div>
-            <textarea
-              data-bind
-              name="messageText"
-              placeholder="Say it."
-              value="${escapeHyperText(messageText)}"
-              ${messageHeight ? `style="height: ${messageHeight}px"`:''}
-            ></textarea>
-          </div>
-        </form>
-      </div>
-    </div>
-  `
+  // Don't render anything - afterUpdate handles all DOM building and patching
+  return null
 }, {
   beforeUpdate,
   afterUpdate
@@ -160,7 +90,9 @@ function beforeUpdate(target) {
     if(!target.initialized) {
       target.initialized = true
 
-      $.teach({ currentRoom: rooms[room] ? rooms[room] : rooms.general })
+      $.teach({ 
+        currentRoom: rooms[room] ? rooms[room] : rooms.general 
+      })
 
       if(q) {
         const message = decodeURIComponent(q)
@@ -171,7 +103,9 @@ function beforeUpdate(target) {
 
   {
     const { sessionId } = getSession()
-    const { currentRoom, messages } = $.learn()
+    const { currentRoom, messages, authenticated } = $.learn()
+
+    if(!authenticated) return
 
     if(sessionId && messages[currentRoom]) {
       // Initialize room table if needed
@@ -184,9 +118,13 @@ function beforeUpdate(target) {
       
       Object.keys(roomMessages).forEach(mid => {
         const message = roomMessages[mid]
+        const decryptKey = `${currentRoom}:${mid}`
         
-        // Only decrypt if we haven't already
-        if(!table[currentRoom][mid]) {
+        // Only decrypt if we haven't already and not in progress
+        if(!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
+          // Mark as in progress
+          decryptionInProgress.add(decryptKey)
+          
           // Add to table immediately with placeholder
           table[currentRoom][mid] = {
             ...message,
@@ -200,16 +138,20 @@ function beforeUpdate(target) {
                 ...message,
                 decrypted
               }
-              // Force re-render to show decrypted message
-              $.teach({ tick: $.learn().tick + 1 })
+              decryptionInProgress.delete(decryptKey)
+              // Update only the specific message element
+              updateMessageElement(target, mid, message.author, decrypted)
             })
             .catch(e => {
               console.error('Decryption error:', e)
+              const errorMsg = 'Failed to decrypt message. Are you authorized?'
               table[currentRoom][mid] = {
                 ...message,
-                decrypted: 'Failed to decrypt message. Are you authorized?'
+                decrypted: errorMsg
               }
-              $.teach({ tick: $.learn().tick + 1 })
+              decryptionInProgress.delete(decryptKey)
+              // Update only the specific message element
+              updateMessageElement(target, mid, message.author, errorMsg)
             })
         }
       })
@@ -219,14 +161,147 @@ function beforeUpdate(target) {
   saveCursor(target)
 }
 
-function afterUpdate(target) {
-  replaceCursor(target)
+// Helper function to update a single message without full re-render
+function updateMessageElement(target, messageId, author, decryptedText) {
+  const messageEl = target.querySelector(`[data-message-id="${messageId}"]`)
+  if (messageEl) {
+    messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}:</span> ${escapeHyperText(decryptedText)}`
+  }
+}
 
-  { // recover icons from the virtual dom
-    recoverElves(target, 'sl-icon')
-    recoverElves(target, 'secure-persona')
+function afterUpdate(target) {
+  // Handle modal views first
+  const modality = target.getAttribute('modality')
+  if(modality && modeRenderers[modality]) {
+    if(target.dataset.modality !== modality) {
+      target.dataset.modality = modality
+      target.innerHTML = modeRenderers[modality](target)
+    }
+    return
+  } else if(target.dataset.modality) {
+    // Modality was cleared, reset to main view
+    target.dataset.modality = ''
+    target.innerHTML = ''
+    target.templateBuilt = false // Force template rebuild
   }
 
+  const { authenticated } = $.learn()
+
+  // Initialize DOM template ONCE and never rebuild it
+  if(!target.templateBuilt) {
+    target.templateBuilt = true
+    const { participants } = $.learn()
+    target.innerHTML = `
+      <div class="zero-space">
+        <div class="zero-content">
+          <div class="zero-title">Chat Rooms</div>
+          <secure-persona></secure-persona>
+        </div>
+      </div>
+      <div class="chat-app" style="display: none;">
+        <div class="rooms">
+          <div class="sticky-item">
+            <button class="show-settings">
+              <sl-icon name="gear-wide-connected"></sl-icon>
+            </button>
+            <button class="show-participants">
+              <span class="participant-count">${participants.length}</span>
+              <span>
+                <sl-icon name="people"></sl-icon>
+              </span>
+            </button>
+          </div>
+          ${Object.keys(rooms).map(x => {
+            return `
+              <button class="room-select" data-value="${rooms[x]}" >${rooms[x]}</button>
+            `
+          }).join('')}
+        </div>
+        <div class="chat-area">
+          <div class="scroll-back">
+            <div class="messages">
+            </div>
+          </div>
+          <form method="POST" name="send">
+            <div class="fields">
+              <div class="action-row">
+                <button>Send</button>
+              </div>
+              <textarea
+                data-bind
+                name="messageText"
+                placeholder="Say it."
+              ></textarea>
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="overlay-area"></div>
+    `
+  }
+
+  // Toggle visibility based on authentication
+  const authArea = target.querySelector('.zero-space')
+  const chatArea = target.querySelector('.chat-app')
+  
+  if(authArea && chatArea) {
+    if(authenticated) {
+      authArea.style.display = 'none'
+      chatArea.style.display = 'grid'
+    } else {
+      authArea.style.display = 'block'
+      chatArea.style.display = 'none'
+    }
+  }
+
+  // Handle overlay
+  {
+    const { showOverlay, overlayView } = $.learn()
+    target.dataset.showOverlay = showOverlay ? 'true' : 'false'
+    
+    const overlayArea = target.querySelector('.overlay-area')
+    
+    if(overlayArea && showOverlay && modeRenderers[overlayView]) {
+      if(overlayArea.dataset.view !== overlayView) {
+        overlayArea.dataset.view = overlayView
+        overlayArea.innerHTML = modeRenderers[overlayView](target)
+      }
+    } else if(overlayArea && !showOverlay) {
+      if(overlayArea.innerHTML) {
+        overlayArea.dataset.view = ''
+        overlayArea.innerHTML = ''
+      }
+    }
+  }
+
+  // If not authenticated, nothing else to patch
+  if(!authenticated) return
+
+  // Patch participant count
+  {
+    const { participants } = $.learn()
+    const countEl = target.querySelector('.participant-count')
+    if(countEl && countEl.textContent !== participants.length.toString()) {
+      countEl.textContent = participants.length
+    }
+  }
+
+  // Patch active room
+  {
+    const { currentRoom } = $.learn()
+    if(target.lastRoom !== currentRoom) {
+      target.querySelectorAll('.room-select').forEach(btn => {
+        if(btn.dataset.value === currentRoom) {
+          btn.classList.add('active')
+        } else {
+          btn.classList.remove('active')
+        }
+      })
+      target.lastRoom = currentRoom
+    }
+  }
+
+  // Patch messages
   {
     const { currentRoom } = $.learn()
     const roomMessages = table[currentRoom] || {}
@@ -234,12 +309,43 @@ function afterUpdate(target) {
     
     if(target.lastMessageCount !== messageCount) {
       target.lastMessageCount = messageCount
-      const lastChild = target.querySelector('.messages .message:last-child')
-      if(lastChild) {
-        lastChild.scrollIntoView({ behavior: 'smooth' })
+      const messagesContainer = target.querySelector('.messages')
+      
+      const log = Object.values(roomMessages)
+        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+        .map((message) => `
+          <div class="message" data-message-id="${message.id}">
+            <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
+          </div>
+        `).join('') || '...'
+      
+      messagesContainer.innerHTML = log
+    }
+  }
+
+  // Patch textarea
+  {
+    const { messageText, messageHeight } = $.learn()
+    const textarea = target.querySelector('[name="messageText"]')
+    
+    if(textarea) {
+      if(textarea.lastValue !== messageText) {
+        textarea.lastValue = messageText
+        textarea.value = messageText
+      }
+      
+      if(textarea.lastHeight !== messageHeight) {
+        textarea.lastHeight = messageHeight
+        if(messageHeight) {
+          textarea.style.height = `${messageHeight}px`
+        } else {
+          textarea.style.height = 'auto'
+        }
       }
     }
   }
+
+  replaceCursor(target)
 
   {
     const theme = getTheme()
@@ -248,18 +354,6 @@ function afterUpdate(target) {
       document.body.style.setProperty('--root-theme', theme)
     }
   }
-}
-
-function recoverElves(target, tag) {
-  [...target.querySelectorAll(tag)].map(node => {
-    const nodeParent = node.parentNode
-    const newNode = document.createElement(tag)
-    for (const attr of node.attributes) {
-      newNode.setAttribute(attr.name, attr.value)
-    }
-    node.remove()
-    nodeParent.appendChild(newNode)
-  })
 }
 
 let sel = []
@@ -297,18 +391,23 @@ $.when('click', '[data-help]', function (event) {
 })
 
 $.when('click', '[data-logout]', () => {
-  hideModal()
+  // Clear caches and update authenticated state
+  Object.keys(table).forEach(room => delete table[room])
+  decryptionInProgress.clear()
   clearSession()
+  $.teach({ messages: {}, authenticated: false, showOverlay: false })
 })
 
 $.when('click', '.settings', () => {
-  hideModal()
+  $.teach({ showOverlay: false })
 })
 
 $.when('click', '.show-settings', (event) => {
-  showModal(`
-    <dream-team modality="${modes.settings}"></dream-team>
-  `)
+  $.teach({ showOverlay: true, overlayView: modes.settings })
+})
+
+$.when('click', '[data-close-overlay]', () => {
+  $.teach({ showOverlay: false, overlayView: null })
 })
 
 $.when('click', '.show-participants', (event) => {
@@ -386,6 +485,18 @@ $.when('focus', '[name="messageText"]', (event) => {
 $.when('input', '[name="messageText"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
 });
+
+$.when('secure-persona', 'activated', (event) => {
+  // User has logged in, trigger a re-render to show the chat interface
+  $.teach({ authenticated: true })
+})
+
+$.when('secure-persona', 'deactivated', (event) => {
+  // User has logged out, clear all caches and messages, trigger re-render
+  Object.keys(table).forEach(room => delete table[room])
+  decryptionInProgress.clear()
+  $.teach({ messages: {}, authenticated: false })
+})
 
 function escapeHyperText(text = '') {
   return text.replace(/[&<>'"]/g, 
@@ -602,5 +713,31 @@ $.style(`
     font-weight: bold;
     color: rgba(0,0,0,.65);
     margin-bottom: 1rem;
+  }
+
+  & .overlay-area {
+    background: white;
+    display: none;
+    overflow: auto;
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+  }
+
+  &[data-show-overlay="true"] .overlay-area {
+    display: block;
+  }
+
+  & .settings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  & .settings-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: rgba(0,0,0,.65);
   }
 `)
