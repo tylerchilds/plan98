@@ -31,7 +31,7 @@ import {
   requestKeycardPaste
 } from './plan98-wallet.js'
 
-const organization = 'sillyz.computer'
+const organization = '1998.social'
 
 const baseQandA = {
   question1: 'pass hint 1',
