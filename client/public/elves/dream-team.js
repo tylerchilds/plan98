@@ -18,17 +18,25 @@ const decryptionInProgress = new Set()
 
 const $ = elf('dream-team', {
   messages: {},
+  threads: {}, // { [roomId]: { [parentMessageId]: { [replyId]: message } } }
+  activeThread: null, // messageId of thread being viewed (shown in right panel)
+  threadPanelWidth: 350,
   participants: [],
   currentRoom: null,
   messageText: '',
+  replyText: '',
   messageHeight: null,
+  replyHeight: null,
   authenticated: !!getSession().sessionId,
   myGroups: [],
   otherGroups: [],
   group: '',
+  groupType: 'public', // 'public' or 'private'
   sidebarWidth: 200,
   sidebarVisible: true,
-  activeView: 'chat' // 'chat', 'profile', 'preferences'
+  activeView: 'profile', // 'chat', 'profile', 'preferences', 'new-group', 'video' - default to profile
+  showActionMenu: false, // for three-dot menu in action bar
+  activeMessageMenu: null // for message three-dot menus
 })
 
 // Group management functions
@@ -61,7 +69,7 @@ export async function getOtherGroups() {
 function activateGroup(sessionId, id) {
   bayunCore.getGroupById(sessionId, id)
     .then(result => {
-      $.teach({ currentRoom: result.groupId })
+      $.teach({ currentRoom: result.groupId, showActionMenu: false, activeView: 'chat' })
     })
     .catch(error => {
       console.log("Error caught");
@@ -116,7 +124,7 @@ function beforeUpdate(target) {
 
   {
     const { sessionId } = getSession()
-    const { currentRoom, messages, authenticated } = $.learn()
+    const { currentRoom, messages, threads, authenticated } = $.learn()
 
     if(!authenticated) return
 
@@ -169,6 +177,63 @@ function beforeUpdate(target) {
         }
       })
     }
+
+    // Decrypt thread replies
+    if(sessionId && threads[currentRoom]) {
+      // Initialize thread table if needed
+      if(!table[`${currentRoom}:threads`]) {
+        table[`${currentRoom}:threads`] = {}
+      }
+
+      const roomThreads = threads[currentRoom]
+      
+      Object.keys(roomThreads).forEach(parentId => {
+        if(!table[`${currentRoom}:threads`][parentId]) {
+          table[`${currentRoom}:threads`][parentId] = {}
+        }
+        
+        const threadReplies = roomThreads[parentId]
+        
+        Object.keys(threadReplies).forEach(replyId => {
+          const reply = threadReplies[replyId]
+          const decryptKey = `${currentRoom}:thread:${parentId}:${replyId}`
+          
+          // Only decrypt if we haven't already and not in progress
+          if(!table[`${currentRoom}:threads`][parentId][replyId] && !decryptionInProgress.has(decryptKey)) {
+            // Mark as in progress
+            decryptionInProgress.add(decryptKey)
+            
+            // Add to table immediately with placeholder
+            table[`${currentRoom}:threads`][parentId][replyId] = {
+              ...reply,
+              decrypted: 'Decrypting...'
+            }
+            
+            // Decrypt asynchronously
+            bayunCore.unlockText(sessionId, reply.encrypted)
+              .then(decrypted => {
+                table[`${currentRoom}:threads`][parentId][replyId] = {
+                  ...reply,
+                  decrypted
+                }
+                decryptionInProgress.delete(decryptKey)
+                // Update only the specific reply element
+                updateReplyElement(target, replyId, reply.author, decrypted)
+              })
+              .catch(e => {
+                console.error('Reply decryption error:', e)
+                const errorMsg = 'Failed to decrypt reply.'
+                table[`${currentRoom}:threads`][parentId][replyId] = {
+                  ...reply,
+                  decrypted: errorMsg
+                }
+                decryptionInProgress.delete(decryptKey)
+                updateReplyElement(target, replyId, reply.author, errorMsg)
+              })
+          }
+        })
+      })
+    }
   }
 
   saveCursor(target)
@@ -176,9 +241,17 @@ function beforeUpdate(target) {
 
 // Helper function to update a single message without full re-render
 function updateMessageElement(target, messageId, author, decryptedText) {
-  const messageEl = target.querySelector(`[data-message-id="${messageId}"]`)
+  const messageEl = target.querySelector(`[data-message-id="${messageId}"] .message-body`)
   if (messageEl) {
     messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}:</span> ${escapeHyperText(decryptedText)}`
+  }
+}
+
+// Helper function to update a single reply without full re-render
+function updateReplyElement(target, replyId, author, decryptedText) {
+  const replyEl = target.querySelector(`[data-reply-id="${replyId}"] .message-body`)
+  if (replyEl) {
+    replyEl.innerHTML = `<span class="author">${escapeHyperText(author)}:</span> ${escapeHyperText(decryptedText)}`
   }
 }
 
@@ -209,18 +282,22 @@ function afterUpdate(target) {
           </div>
           
           <div class="sidebar-content">
-            <div class="group-section">
-              <div class="subtitle">MY GROUPS</div>
-              <div class="my-groups">
-              </div>
+            <div class="app-launcher-section">
+              <button class="app-launcher-btn" data-launcher="video">
+                <sl-icon name="camera-video"></sl-icon>
+                <span>Video Chat</span>
+              </button>
             </div>
 
             <div class="group-section">
-              <div class="subtitle">NEW GROUP</div>
-              <input data-bind placeholder="New Friends" type="text" name="group" value="${group}" />
-              <button data-create>
-                Create
-              </button>
+              <div class="subtitle-row">
+                <span class="subtitle">MY GROUPS</span>
+                <button class="add-group-btn" data-new-group>
+                  <sl-icon name="plus"></sl-icon>
+                </button>
+              </div>
+              <div class="my-groups">
+              </div>
             </div>
 
             <div class="group-section">
@@ -231,59 +308,14 @@ function afterUpdate(target) {
           </div>
 
           <div class="sidebar-footer">
-            <button class="preferences-button" data-preferences>
-              <sl-icon name="person-lines-fill"></sl-icon>
+            <button class="footer-button" data-preferences>
+              <sl-icon name="gear"></sl-icon>
               <span>Preferences</span>
             </button>
           </div>
         </div>
         <div class="resizer"></div>
         <div class="main-content">
-          <div class="chat-area">
-            <div class="scroll-back">
-              <div class="messages">
-              </div>
-            </div>
-            <form method="POST" name="send">
-              <div class="fields">
-                <div class="action-row">
-                  <button>Send</button>
-                  <button type="button" data-leave-group class="leave-button" style="display: none;">
-                    Leave Group
-                  </button>
-                </div>
-                <textarea
-                  data-bind
-                  name="messageText"
-                  placeholder="Say it."
-                ></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="profile-area" style="display: none;">
-            <div class="content-header">
-              <h2>Profile</h2>
-              <button class="back-button" data-back-to-chat>
-                <sl-icon name="arrow-left"></sl-icon>
-                Back to Chat
-              </button>
-            </div>
-            <div class="content-body">
-              <secure-persona></secure-persona>
-            </div>
-          </div>
-          <div class="preferences-area" style="display: none;">
-            <div class="content-header">
-              <h2>Preferences</h2>
-              <button class="back-button" data-back-to-chat>
-                <sl-icon name="arrow-left"></sl-icon>
-                Back to Chat
-              </button>
-            </div>
-            <div class="content-body">
-              ${ai('')}
-            </div>
-          </div>
         </div>
       </div>
     `
@@ -291,15 +323,236 @@ function afterUpdate(target) {
 
   // Toggle visibility based on authentication
   const authArea = target.querySelector('.zero-space')
-  const chatArea = target.querySelector('.chat-app')
+  const chatApp = target.querySelector('.chat-app')
   
-  if(authArea && chatArea) {
+  if(authArea && chatApp) {
     if(authenticated) {
       authArea.style.display = 'none'
-      chatArea.style.display = 'grid'
+      chatApp.style.display = 'grid'
     } else {
       authArea.style.display = 'block'
-      chatArea.style.display = 'none'
+      chatApp.style.display = 'none'
+    }
+  }
+
+  // If not authenticated, stop here
+  if(!authenticated) {
+    // Apply sidebar width and visibility
+    {
+      const { sidebarWidth, sidebarVisible } = $.learn()
+      const sidebar = target.querySelector('.sidebar')
+      const chatAppEl = target.querySelector('.chat-app')
+      const toggleBtn = target.querySelector('.toggle-sidebar')
+      
+      if(sidebar && chatAppEl) {
+        if(sidebar.style.width !== `${sidebarWidth}px`) {
+          sidebar.style.width = `${sidebarWidth}px`
+        }
+        
+        chatAppEl.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
+        chatAppEl.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
+        
+        if(toggleBtn && window.innerWidth > 768) {
+          const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
+          if(toggleBtn.style.left !== leftPos) {
+            toggleBtn.style.left = leftPos
+          }
+        }
+      }
+    }
+
+    // Update toggle button icon based on sidebar visibility
+    {
+      const { sidebarVisible } = $.learn()
+      const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
+      if(toggleBtn) {
+        const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
+        if(toggleBtn.getAttribute('name') !== iconName) {
+          toggleBtn.setAttribute('name', iconName)
+        }
+      }
+    }
+    return
+  }
+
+  // Render the active view into main-content
+  {
+    const { activeView, currentRoom } = $.learn()
+    const mainContent = target.querySelector('.main-content')
+    
+    // Determine which view to show
+    let viewToShow = activeView
+    if(activeView === 'chat' && !currentRoom) {
+      viewToShow = 'profile' // Default to profile when no room
+    }
+    
+    // Only re-render if view changed
+    if(mainContent && mainContent.dataset.currentView !== viewToShow) {
+      mainContent.dataset.currentView = viewToShow
+      
+      if(viewToShow === 'chat' && currentRoom) {
+        mainContent.innerHTML = `
+          <div class="chat-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <div class="action-menu-container">
+                  <button class="action-menu-trigger" data-action-menu>
+                    <sl-icon name="three-dots-vertical"></sl-icon>
+                  </button>
+                  <div class="action-menu" data-menu-dropdown>
+                    <button class="action-menu-item" data-leave-group>
+                      <sl-icon name="box-arrow-left"></sl-icon>
+                      <span>Leave Group</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="chat-body">
+              <div class="chat-main">
+                <div class="scroll-back">
+                  <div class="messages">
+                  </div>
+                </div>
+                <form method="POST" name="send">
+                  <div class="fields">
+                    <div class="action-row">
+                      <button>Send</button>
+                    </div>
+                    <textarea
+                      data-bind
+                      name="messageText"
+                      placeholder="Say it."
+                    ></textarea>
+                  </div>
+                </form>
+              </div>
+              <div class="thread-resizer"></div>
+              <div class="thread-panel">
+                <div class="thread-header">
+                  <span class="thread-title">Thread</span>
+                  <button class="close-thread" data-close-thread>
+                    <sl-icon name="x"></sl-icon>
+                  </button>
+                </div>
+                <div class="thread-parent">
+                </div>
+                <div class="thread-scroll">
+                  <div class="thread-messages">
+                  </div>
+                </div>
+                <form method="POST" name="send-reply">
+                  <div class="fields">
+                    <div class="action-row">
+                      <button>Reply</button>
+                    </div>
+                    <textarea
+                      data-bind
+                      name="replyText"
+                      placeholder="Reply to thread..."
+                    ></textarea>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        `
+      } else if(viewToShow === 'profile') {
+        mainContent.innerHTML = `
+          <div class="profile-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <button class="back-button" data-back-to-chat>
+                  <sl-icon name="x"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="content-body">
+              <secure-persona></secure-persona>
+            </div>
+          </div>
+        `
+      } else if(viewToShow === 'preferences') {
+        mainContent.innerHTML = `
+          <div class="preferences-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <button class="back-button" data-back-to-chat>
+                  <sl-icon name="x"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="content-body">
+              ${ai('')}
+            </div>
+          </div>
+        `
+      } else if(viewToShow === 'new-group') {
+        mainContent.innerHTML = `
+          <div class="new-group-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <button class="back-button" data-back-to-chat>
+                  <sl-icon name="x"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="content-body">
+              <div class="new-group-form">
+                <h2>Create New Group</h2>
+                <div class="form-field">
+                  <label for="group-name">Group Name</label>
+                  <input data-bind placeholder="Enter group name..." type="text" name="group" id="group-name" />
+                </div>
+                <div class="form-field">
+                  <label>Group Type</label>
+                  <div class="group-type-toggle">
+                    <button class="type-btn active" data-group-type="public">
+                      <sl-icon name="globe"></sl-icon>
+                      <span>Public</span>
+                    </button>
+                    <button class="type-btn" data-group-type="private">
+                      <sl-icon name="lock"></sl-icon>
+                      <span>Private</span>
+                    </button>
+                  </div>
+                  <p class="type-description" data-type-desc>Anyone can discover and join this group</p>
+                </div>
+                <button class="create-group-btn" data-create>
+                  <sl-icon name="plus-circle"></sl-icon>
+                  <span>Create Group</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if(viewToShow === 'video') {
+        const room = currentRoom || ''
+        mainContent.innerHTML = `
+          <div class="video-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <button class="back-button" data-back-to-chat>
+                  <sl-icon name="x"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="video-content">
+              <iframe class="video-iframe" src="/app/live-help?room=${room}" style="width:100%;height:100%;border:none;"></iframe>
+            </div>
+          </div>
+        `
+      }
     }
   }
 
@@ -340,21 +593,65 @@ function afterUpdate(target) {
     }
   }
 
-  // If not authenticated, nothing else to patch
-  if(!authenticated) return
-
-  // Handle view switching
+  // Handle group type toggle UI
   {
-    const { activeView } = $.learn()
-    const chatArea = target.querySelector('.chat-area')
-    const profileArea = target.querySelector('.profile-area')
-    const preferencesArea = target.querySelector('.preferences-area')
+    const { groupType } = $.learn()
+    const publicBtn = target.querySelector('[data-group-type="public"]')
+    const privateBtn = target.querySelector('[data-group-type="private"]')
+    const typeDesc = target.querySelector('[data-type-desc]')
     
-    if(chatArea && profileArea && preferencesArea) {
-      chatArea.style.display = activeView === 'chat' ? 'grid' : 'none'
-      profileArea.style.display = activeView === 'profile' ? 'block' : 'none'
-      preferencesArea.style.display = activeView === 'preferences' ? 'block' : 'none'
+    if(publicBtn && privateBtn && typeDesc) {
+      publicBtn.classList.toggle('active', groupType === 'public')
+      privateBtn.classList.toggle('active', groupType === 'private')
+      typeDesc.textContent = groupType === 'public' 
+        ? 'Anyone can discover and join this group'
+        : 'Only invited members can join this group'
     }
+  }
+
+  // Handle thread panel visibility
+  {
+    const { activeThread, threadPanelWidth } = $.learn()
+    const threadPanel = target.querySelector('.thread-panel')
+    const threadResizer = target.querySelector('.thread-resizer')
+    const chatBody = target.querySelector('.chat-body')
+    
+    if(threadPanel && threadResizer && chatBody) {
+      if(activeThread) {
+        threadPanel.style.display = 'grid'
+        threadPanel.style.width = `${threadPanelWidth}px`
+        threadResizer.style.display = 'block'
+        chatBody.classList.add('thread-open')
+      } else {
+        threadPanel.style.display = 'none'
+        threadResizer.style.display = 'none'
+        chatBody.classList.remove('thread-open')
+      }
+    }
+  }
+
+  // Handle action menu visibility
+  {
+    const { showActionMenu, currentRoom } = $.learn()
+    const menuDropdown = target.querySelector('[data-menu-dropdown]')
+    const menuContainer = target.querySelector('.action-menu-container')
+    
+    if(menuDropdown && menuContainer) {
+      menuDropdown.classList.toggle('active', showActionMenu)
+      // Hide menu container if no room selected
+      menuContainer.style.display = currentRoom ? 'block' : 'none'
+    }
+  }
+
+  // Handle message menu visibility
+  {
+    const { activeMessageMenu } = $.learn()
+    const allMessageMenus = target.querySelectorAll('.message-menu')
+    
+    allMessageMenus.forEach(menu => {
+      const menuId = menu.dataset.messageDropdown
+      menu.classList.toggle('active', menuId === activeMessageMenu)
+    })
   }
 
   // Patch my groups
@@ -409,39 +706,105 @@ function afterUpdate(target) {
     }
   }
 
-  // Show/hide leave button based on current room
-  {
-    const { currentRoom } = $.learn()
-    const leaveButton = target.querySelector('[data-leave-group]')
-    if(leaveButton) {
-      leaveButton.style.display = currentRoom ? 'inline-block' : 'none'
-    }
-  }
-
   // Patch messages
   {
-    const { currentRoom } = $.learn()
+    const { currentRoom, threads } = $.learn()
     const roomMessages = table[currentRoom] || {}
-    const messageCount = Object.keys(roomMessages).length
+    const roomThreads = threads[currentRoom] || {}
+    // Also check decrypted thread table for counts
+    const decryptedThreads = table[`${currentRoom}:threads`] || {}
+    const messageKeys = Object.keys(roomMessages).join(',')
+    const threadKeys = JSON.stringify(roomThreads)
     
-    if(target.lastMessageCount !== messageCount || target.lastRoom !== currentRoom) {
-      target.lastMessageCount = messageCount
+    if(target.lastMessageKeys !== messageKeys || target.lastRoom !== currentRoom || target.lastThreadKeys !== threadKeys) {
+      target.lastMessageKeys = messageKeys
       target.lastRoom = currentRoom
+      target.lastThreadKeys = threadKeys
       const messagesContainer = target.querySelector('.messages')
       
       const log = Object.values(roomMessages)
+        .filter(message => !message.parentId) // Only show top-level messages
         .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
-        .map((message) => `
-          <div class="message" data-message-id="${message.id}">
-            <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
-          </div>
-        `).join('') || (currentRoom ? '...' : '<div class="empty-state">Select or create a group to start chatting</div>')
+        .map((message) => {
+          // Check both state threads and decrypted table for reply count
+          const stateReplyCount = roomThreads[message.id] ? Object.keys(roomThreads[message.id]).length : 0
+          const tableReplyCount = decryptedThreads[message.id] ? Object.keys(decryptedThreads[message.id]).length : 0
+          const replyCount = Math.max(stateReplyCount, tableReplyCount)
+          const replyIndicator = replyCount > 0 
+            ? `<button class="thread-indicator" data-open-thread="${message.id}">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</button>`
+            : ''
+          
+          return `
+            <div class="message" data-message-id="${message.id}">
+              <div class="message-content">
+                <div class="message-body">
+                  <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
+                </div>
+                ${replyIndicator}
+              </div>
+              <div class="message-menu-container">
+                <button class="message-menu-trigger" data-message-menu="${message.id}">
+                  <sl-icon name="three-dots-vertical"></sl-icon>
+                </button>
+                <div class="message-menu" data-message-dropdown="${message.id}">
+                  <button class="message-menu-item" data-reply="${message.id}">
+                    <sl-icon name="reply"></sl-icon>
+                    <span>Reply</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          `
+        }).join('') || '<div class="empty-state">No messages yet. Start the conversation!</div>'
       
       messagesContainer.innerHTML = log
     }
   }
 
-  // Patch textarea
+  // Patch thread view
+  {
+    const { activeThread, currentRoom } = $.learn()
+    
+    if(activeThread && currentRoom) {
+      const parentMessage = table[currentRoom]?.[activeThread]
+      const threadParent = target.querySelector('.thread-parent')
+      const threadMessages = target.querySelector('.thread-messages')
+      const threadReplies = table[`${currentRoom}:threads`]?.[activeThread] || {}
+      
+      if(threadParent && parentMessage) {
+        const parentHtml = `
+          <div class="message parent-message">
+            <div class="message-body">
+              <span class="author">${escapeHyperText(parentMessage.author)}:</span> ${escapeHyperText(parentMessage.decrypted || 'Decrypting...')}
+            </div>
+          </div>
+        `
+        if(threadParent.dataset.lastParent !== parentHtml) {
+          threadParent.dataset.lastParent = parentHtml
+          threadParent.innerHTML = parentHtml
+        }
+      }
+      
+      if(threadMessages) {
+        const repliesHtml = Object.values(threadReplies)
+          .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+          .map(reply => `
+            <div class="message reply-message" data-reply-id="${reply.id}">
+              <div class="message-body">
+                <span class="author">${escapeHyperText(reply.author)}:</span> ${escapeHyperText(reply.decrypted || 'Decrypting...')}
+              </div>
+            </div>
+          `).join('') || '<div class="empty-state">No replies yet</div>'
+        
+        if(threadMessages.dataset.lastReplies !== repliesHtml) {
+          threadMessages.dataset.lastReplies = repliesHtml
+          threadMessages.innerHTML = repliesHtml
+        }
+      }
+    }
+  }
+
+  // Patch message textarea
   {
     const { messageText, messageHeight } = $.learn()
     const textarea = target.querySelector('[name="messageText"]')
@@ -456,6 +819,28 @@ function afterUpdate(target) {
         textarea.lastHeight = messageHeight
         if(messageHeight) {
           textarea.style.height = `${messageHeight}px`
+        } else {
+          textarea.style.height = 'auto'
+        }
+      }
+    }
+  }
+
+  // Patch reply textarea
+  {
+    const { replyText, replyHeight } = $.learn()
+    const textarea = target.querySelector('[name="replyText"]')
+    
+    if(textarea) {
+      if(textarea.lastValue !== replyText) {
+        textarea.lastValue = replyText
+        textarea.value = replyText
+      }
+      
+      if(textarea.lastHeight !== replyHeight) {
+        textarea.lastHeight = replyHeight
+        if(replyHeight) {
+          textarea.style.height = `${replyHeight}px`
         } else {
           textarea.style.height = 'auto'
         }
@@ -515,10 +900,13 @@ $.when('click', '[data-logout]', () => {
   clearSession()
   $.teach({ 
     messages: {}, 
+    threads: {},
     authenticated: false,
     myGroups: [],
     otherGroups: [],
-    currentRoom: null
+    currentRoom: null,
+    activeThread: null,
+    activeView: 'profile'
   })
 })
 
@@ -528,28 +916,86 @@ $.when('click', '[data-toggle-sidebar]', (event) => {
 })
 
 $.when('click', '[data-profile]', (event) => {
-  $.teach({ activeView: 'profile' })
+  $.teach({ activeView: 'profile', showActionMenu: false })
 })
 
 $.when('click', '[data-preferences]', (event) => {
-  $.teach({ activeView: 'preferences' })
+  $.teach({ activeView: 'preferences', showActionMenu: false })
 })
 
 $.when('click', '[data-back-to-chat]', (event) => {
-  $.teach({ activeView: 'chat' })
+  const { currentRoom } = $.learn()
+  // If we have a room, go to chat, otherwise stay on profile
+  $.teach({ activeView: currentRoom ? 'chat' : 'profile', showActionMenu: false })
+})
+
+// New group view handler
+$.when('click', '[data-new-group]', (event) => {
+  $.teach({ activeView: 'new-group', showActionMenu: false })
+})
+
+// Close thread panel
+$.when('click', '[data-close-thread]', (event) => {
+  $.teach({ activeThread: null })
+})
+
+// App launcher handlers
+$.when('click', '[data-launcher="video"]', (event) => {
+  const { currentRoom } = $.learn()
+  if(currentRoom) {
+    $.teach({ activeView: 'video' })
+  }
+})
+
+// Group type toggle
+$.when('click', '[data-group-type]', (event) => {
+  const groupType = event.target.closest('[data-group-type]').dataset.groupType
+  $.teach({ groupType })
+})
+
+// Action menu toggle
+$.when('click', '[data-action-menu]', (event) => {
+  event.stopPropagation()
+  const { showActionMenu } = $.learn()
+  $.teach({ showActionMenu: !showActionMenu, activeMessageMenu: null })
+})
+
+// Message menu toggle
+$.when('click', '[data-message-menu]', (event) => {
+  event.stopPropagation()
+  const messageId = event.target.closest('[data-message-menu]').dataset.messageMenu
+  const { activeMessageMenu } = $.learn()
+  $.teach({ 
+    activeMessageMenu: activeMessageMenu === messageId ? null : messageId,
+    showActionMenu: false 
+  })
+})
+
+// Close menus when clicking elsewhere
+$.when('click', '', (event) => {
+  const { showActionMenu, activeMessageMenu } = $.learn()
+  if((showActionMenu || activeMessageMenu) && 
+     !event.target.closest('.action-menu-container') && 
+     !event.target.closest('.message-menu-container')) {
+    $.teach({ showActionMenu: false, activeMessageMenu: null })
+  }
 })
 
 // Create group handler
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
-  const { group } = $.learn()
+  const { group, groupType } = $.learn()
   
   if(!group.trim()) return
   
-  const groupType = BayunCore.GroupType.PUBLIC;
-  bayunCore.createGroup(sessionId, group, groupType)
+  // Use PUBLIC or PRIVATE based on selection
+  const bayunGroupType = groupType === 'private' 
+    ? BayunCore.GroupType.PRIVATE 
+    : BayunCore.GroupType.PUBLIC;
+    
+  bayunCore.createGroup(sessionId, group, bayunGroupType)
     .then(result => {
-      $.teach({ currentRoom: result.groupId, group: '' })
+      $.teach({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, activeView: 'chat' })
       getMyGroups()
       getOtherGroups()
     })
@@ -591,7 +1037,7 @@ $.when('click', '[data-leave-group]', () => {
   
   bayunCore.leaveGroup(sessionId, currentRoom)
     .then(result => {
-      $.teach({ currentRoom: null })
+      $.teach({ currentRoom: null, showActionMenu: false, activeView: 'profile', activeThread: null })
       getMyGroups()
       getOtherGroups()
     })
@@ -599,6 +1045,44 @@ $.when('click', '[data-leave-group]', () => {
       console.log("Error caught");
       console.log(error);
     });
+})
+
+// Thread handlers
+$.when('click', '[data-reply]', (event) => {
+  const messageId = event.target.closest('[data-reply]').dataset.reply
+  $.teach({ activeThread: messageId, showActionMenu: false, activeMessageMenu: null })
+})
+
+// Reply count toggles thread open/closed
+$.when('click', '[data-open-thread]', (event) => {
+  const messageId = event.target.dataset.openThread
+  const { activeThread } = $.learn()
+  // Toggle: if already open on this thread, close it
+  const newThread = activeThread === messageId ? null : messageId
+  $.teach({ activeThread: newThread, showActionMenu: false, activeMessageMenu: null })
+})
+
+// Thread panel resizer
+$.when('mousedown', '.thread-resizer', (event) => {
+  event.preventDefault()
+  const target = event.target.closest($.link)
+  const threadPanel = target.querySelector('.thread-panel')
+  const startX = event.pageX
+  const startWidth = threadPanel.offsetWidth
+
+  function handleMouseMove(e) {
+    const deltaX = startX - e.pageX
+    const newWidth = Math.max(250, Math.min(600, startWidth + deltaX))
+    $.teach({ threadPanelWidth: newWidth })
+  }
+
+  function handleMouseUp() {
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
 })
 
 // Resizer functionality
@@ -636,6 +1120,20 @@ $.when('submit', '[name="send"]',(event) => {
   event.preventDefault()
   const messageText = event.target.messageText.value;
   send(messageText)
+});
+
+$.when('keypress', '[name="send-reply"] [name="replyText"]', (e) => {
+  if (e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    const replyText = event.target.value
+    sendReply(replyText)
+  }
+})
+
+$.when('submit', '[name="send-reply"]',(event) => {
+  event.preventDefault()
+  const replyText = event.target.replyText.value;
+  sendReply(replyText)
 });
 
 async function send(messageText) {
@@ -686,6 +1184,59 @@ async function send(messageText) {
   }
 }
 
+async function sendReply(replyText) {
+  if (replyText) {
+    const { currentRoom, activeThread } = $.learn()
+    const { sessionId } = getSession()
+
+    if(!currentRoom || !activeThread) {
+      console.log('No room or thread selected')
+      return
+    }
+
+    if(sessionId) {
+      const encryptedText = await bayunCore.lockText(
+        sessionId, 
+        replyText, 
+        BayunCore.EncryptionPolicy.Company, 
+        BayunCore.KeyGenerationPolicy.Chain, 
+        '91'
+      );
+
+      const reply = {
+        id: self.crypto.randomUUID(),
+        encrypted: encryptedText,
+        author: getEmployeeId(),
+        timestamp: Date.now(),
+        parentId: activeThread
+      }
+      
+      // Store in threads
+      $.teach({
+        room: currentRoom,
+        parentId: activeThread,
+        reply: reply
+      }, (state, payload) => {
+        const { room, parentId, reply } = payload
+        return {
+          ...state,
+          threads: {
+            ...state.threads,
+            [room]: {
+              ...(state.threads[room] || {}),
+              [parentId]: {
+                ...((state.threads[room] || {})[parentId] || {}),
+                [reply.id]: reply
+              }
+            }
+          }
+        }
+      })
+    }
+    $.teach({ replyText: '', replyHeight: null })
+  }
+}
+
 $.when('input', '[data-bind]', event => {
   const { name, value } = event.target;
   $.teach({ [name]: value })
@@ -699,6 +1250,14 @@ $.when('input', '[name="messageText"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
 });
 
+$.when('focus', '[name="replyText"]', (event) => {
+  $.teach({ replyHeight: event.target.scrollHeight })
+});
+
+$.when('input', '[name="replyText"]', (event) => {
+  $.teach({ replyHeight: event.target.scrollHeight })
+});
+
 $.when('secure-persona', 'activated', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
   $.teach({ authenticated: true })
@@ -710,10 +1269,13 @@ $.when('secure-persona', 'deactivated', (event) => {
   decryptionInProgress.clear()
   $.teach({ 
     messages: {}, 
+    threads: {},
     authenticated: false,
     myGroups: [],
     otherGroups: [],
-    currentRoom: null
+    currentRoom: null,
+    activeThread: null,
+    activeView: 'profile'
   })
 })
 
@@ -820,7 +1382,7 @@ $.style(`
     border-top: 1px solid rgba(255,255,255,.1);
   }
 
-  & .preferences-button {
+  & .footer-button {
     width: 100%;
     display: flex;
     align-items: center;
@@ -835,17 +1397,17 @@ $.style(`
     transition: background 200ms ease-in-out;
   }
 
-  & .preferences-button:hover {
+  & .footer-button:hover {
     background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 
-  & .preferences-button sl-icon {
+  & .footer-button sl-icon {
     font-size: 1.2rem;
   }
 
   & .resizer {
     width: 4px;
-    background: rgba(0,0,0,.25);
+    background: black;
     cursor: col-resize;
     flex-shrink: 0;
     transition: background 200ms ease-in-out;
@@ -894,45 +1456,140 @@ $.style(`
 
   & .chat-area {
     display: grid;
-    grid-template-rows: 1fr auto;
+    grid-template-rows: auto 1fr;
     height: 100%;
     background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
     overflow: hidden;
   }
 
-  & .profile-area,
-  & .preferences-area {
+  & .chat-body {
+    display: grid;
+    grid-template-columns: 1fr;
     height: 100%;
-    overflow: auto;
-    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
+    overflow: hidden;
   }
 
-  & .content-header {
+  & .chat-body.thread-open {
+    grid-template-columns: 1fr 4px auto;
+  }
+
+  & .chat-main {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    overflow: hidden;
+  }
+
+  & .thread-resizer {
+    width: 4px;
+    background: black;
+    cursor: col-resize;
+    display: none;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .thread-resizer:hover {
+    background: var(--root-theme, mediumseagreen);
+  }
+
+  & .thread-panel {
+    display: none;
+    grid-template-rows: auto auto 1fr auto;
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
+    border-left: 1px solid rgba(0,0,0,.1);
+    min-width: 250px;
+    max-width: 600px;
+    overflow: hidden;
+  }
+
+  & .thread-header {
     background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-    padding: 1rem;
+    padding: .5rem 1rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid rgba(255,255,255,.1);
   }
 
-  & .content-header h2 {
-    color: white;
-    margin: 0;
-    font-size: 1.25rem;
+  & .thread-title {
+    color: rgba(255,255,255,.85);
+    font-weight: 600;
+  }
+
+  & .close-thread {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .close-thread:hover {
+    background: rgba(255,255,255,.1);
+    color: rgba(255,255,255,.85);
+  }
+
+  & .thread-scroll {
+    overflow: auto;
+  }
+
+  & .profile-area,
+  & .preferences-area,
+  & .new-group-area,
+  & .video-area {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+    overflow: hidden;
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
+  }
+
+  & .video-area {
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
+  }
+
+  & .action-bar {
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
+    min-height: calc(2.5rem + 1rem);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: .5rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  & .action-bar-left {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  & .action-bar-center {
+    flex: 1;
+  }
+
+  & .action-bar-right {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
   }
 
   & .back-button {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    padding: .5rem 1rem;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
     color: rgba(255,255,255,.85);
     border: none;
-    border-radius: 1rem;
+    border-radius: 50%;
     cursor: pointer;
-    font-size: .9rem;
     transition: background 200ms ease-in-out;
   }
 
@@ -940,11 +1597,83 @@ $.style(`
     background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 
-  & .content-body {
-    padding: 2rem;
+  & .back-button sl-icon {
+    font-size: 1.2rem;
   }
 
-  & [name="send"] {
+  & .action-menu-container {
+    position: relative;
+  }
+
+  & .action-menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .action-menu-trigger:hover {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+  }
+
+  & .action-menu-trigger sl-icon {
+    font-size: 1.2rem;
+  }
+
+  & .action-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
+    border-radius: .5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    min-width: 150px;
+    z-index: 200;
+    overflow: hidden;
+  }
+
+  & .action-menu.active {
+    display: block;
+  }
+
+  & .action-menu-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .75rem 1rem;
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    border: none;
+    cursor: pointer;
+    font-size: .9rem;
+    text-align: left;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .action-menu-item:hover {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+  }
+
+  & .action-menu-item sl-icon {
+    font-size: 1rem;
+  }
+
+  & .content-body {
+    padding: 2rem;
+    overflow: auto;
+  }
+
+  & [name="send"],
+  & [name="send-reply"] {
     display: grid;
     grid-template-rows: auto 1fr;
   }
@@ -975,16 +1704,8 @@ $.style(`
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 
-  & .leave-button {
-    background: linear-gradient(rgba(139, 0, 0, .5), rgba(139, 0, 0, .65)), var(--root-theme, mediumseagreen) !important;
-  }
-
-  & .leave-button:hover,
-  & .leave-button:focus {
-    background: linear-gradient(rgba(178, 34, 34, .5), rgba(178, 34, 34, .65)), var(--root-theme, mediumseagreen) !important;
-  }
-
-  & [name="send"] textarea {
+  & [name="send"] textarea,
+  & [name="send-reply"] textarea {
     width: 100%;
     display: block;
     resize: none;
@@ -1010,14 +1731,145 @@ $.style(`
     padding: .5rem;
     display: flex;
     flex-direction: column;
-    justify-content: end;
+    justify-content: flex-end;
     min-height: 100%;
   }
 
+  & .thread-messages {
+    padding: .5rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+  }
+
+  & .thread-messages .message {
+    align-self: flex-end;
+    max-width: 85%;
+  }
+
+  & .reply-message {
+    background: rgba(0,0,0,.05);
+  }
+
+  & .thread-parent {
+    background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.1)), var(--root-theme, mediumseagreen);
+    padding: .5rem;
+    border-bottom: 2px solid rgba(0,0,0,.2);
+  }
+
+  & .thread-parent .message {
+    background: rgba(255,255,255,.5);
+  }
+
   & .message {
-    overflow: auto;
-    border-radius: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    border-radius: .5rem;
     position: relative;
+    padding: .5rem;
+    margin-bottom: .25rem;
+  }
+
+  & .message:hover {
+    background: rgba(255,255,255,.3);
+  }
+
+  & .message:hover .message-menu-trigger {
+    opacity: 1;
+  }
+
+  & .message-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  & .message-body {
+    overflow: auto;
+    word-wrap: break-word;
+  }
+
+  & .message-menu-container {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  & .message-menu-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: transparent;
+    color: rgba(0,0,0,.4);
+    border: none;
+    border-radius: .25rem;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .message-menu-trigger:hover {
+    background: rgba(0,0,0,.1);
+    color: rgba(0,0,0,.7);
+  }
+
+  & .message-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
+    border-radius: .5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    min-width: 120px;
+    z-index: 200;
+    overflow: hidden;
+  }
+
+  & .message-menu.active {
+    display: block;
+  }
+
+  & .message-menu-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    width: 100%;
+    padding: .5rem .75rem;
+    background: transparent;
+    color: rgba(255,255,255,.85);
+    border: none;
+    cursor: pointer;
+    font-size: .85rem;
+    text-align: left;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .message-menu-item:hover {
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+  }
+
+  & .message-menu-item sl-icon {
+    font-size: .9rem;
+  }
+
+  & .thread-indicator {
+    background: transparent;
+    border: 1px solid rgba(0,0,0,.2);
+    color: rgba(0,0,0,.6);
+    cursor: pointer;
+    padding: .25rem .5rem;
+    border-radius: 1rem;
+    font-size: .8rem;
+    margin-top: .25rem;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .thread-indicator:hover {
+    background: rgba(0,0,0,.1);
+    border-color: rgba(0,0,0,.4);
+    color: rgba(0,0,0,.8);
   }
 
   & .empty-state {
@@ -1032,45 +1884,181 @@ $.style(`
     font-weight: bold;
   }
 
+  & .video-content {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .new-group-form {
+    max-width: 400px;
+  }
+
+  & .new-group-form h2 {
+    margin: 0 0 1.5rem 0;
+    color: rgba(0,0,0,.75);
+  }
+
+  & .form-field {
+    margin-bottom: 1.5rem;
+  }
+
+  & .form-field label {
+    display: block;
+    margin-bottom: .5rem;
+    color: rgba(0,0,0,.65);
+    font-weight: 500;
+  }
+
+  & .form-field input {
+    width: 100%;
+    padding: .75rem;
+    border: 1px solid rgba(0,0,0,.2);
+    background: white;
+    color: rgba(0,0,0,.85);
+    border-radius: .5rem;
+    font-size: 1rem;
+  }
+
+  & .form-field input:focus {
+    outline: none;
+    border-color: var(--root-theme, mediumseagreen);
+    box-shadow: 0 0 0 3px rgba(60, 179, 113, .2);
+  }
+
+  & .group-type-toggle {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .5rem;
+  }
+
+  & .type-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    background: white;
+    color: rgba(0,0,0,.5);
+    border: 2px solid rgba(0,0,0,.15);
+    border-radius: .5rem;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .type-btn:hover {
+    border-color: rgba(0,0,0,.3);
+    color: rgba(0,0,0,.7);
+  }
+
+  & .type-btn.active {
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.1)), var(--root-theme, mediumseagreen);
+    border-color: var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,.85);
+  }
+
+  & .type-btn sl-icon {
+    font-size: 1rem;
+  }
+
+  & .type-description {
+    margin: 0;
+    font-size: .85rem;
+    color: rgba(0,0,0,.5);
+    font-style: italic;
+  }
+
+  & .create-group-btn {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.5rem;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    color: white;
+    border: none;
+    border-radius: .5rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .create-group-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
   & .subtitle {
     color: rgba(255,255,255,.65);
     font-weight: 800;
     font-size: .8rem;
-    margin: 2rem .5rem .5rem;
+    margin: 1rem .5rem .5rem;
+  }
+
+  & .app-launcher-section {
+    padding: .5rem;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  & .app-launcher-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-size: .85rem;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .app-launcher-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+  }
+
+  & .app-launcher-btn sl-icon {
+    font-size: 1rem;
+  }
+
+  & .subtitle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1rem .5rem .5rem;
+  }
+
+  & .subtitle-row .subtitle {
+    margin: 0;
+  }
+
+  & .add-group-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: transparent;
+    color: rgba(255,255,255,.65);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .add-group-btn:hover {
+    background: rgba(255,255,255,.1);
+    color: rgba(255,255,255,.85);
+    border-color: rgba(255,255,255,.5);
+  }
+
+  & .add-group-btn sl-icon {
+    font-size: .85rem;
   }
 
   & .group-section {
-    margin-bottom: 1rem;
-  }
-
-  & .group-section input {
-    padding: .5rem;
-    border: 1px solid rgba(255,255,255,.25);
-    background: rgba(255,255,255,.15);
-    color: white;
-    border-radius: 4px;
-    margin: 0 .5rem;
-    width: calc(100% - 1rem);
-  }
-
-  & .group-section input::placeholder {
-    color: rgba(255,255,255,.5);
-  }
-
-  & [data-create] {
-    background: linear-gradient(rgba(30, 144, 255, .5), rgba(30, 144, 255, .65)), var(--root-theme, mediumseagreen);
-    color: white;
-    border: none;
-    padding: .5rem 1rem;
-    border-radius: 4px;
-    margin: .25rem .5rem;
-    cursor: pointer;
-    display: block;
-    width: calc(100% - 1rem);
-  }
-
-  & [data-create]:hover {
-    background: linear-gradient(rgba(30, 144, 255, .65), rgba(30, 144, 255, .85)), var(--root-theme, mediumseagreen);
+    margin-bottom: .5rem;
   }
 
   & .zero-space {
