@@ -1,6 +1,7 @@
 import elf from '@plan98/elf'
 import { showPanel } from './plan98-panel.js'
 import { getTheme } from './paper-pocket.js'
+import { ai } from './paper-pocket.js'
 import {
   getSession,
   clearSession,
@@ -22,55 +23,13 @@ const $ = elf('dream-team', {
   messageText: '',
   messageHeight: null,
   authenticated: !!getSession().sessionId,
-  showOverlay: false,
-  overlayView: null,
   myGroups: [],
   otherGroups: [],
   group: '',
-  sidebarWidth: 200
+  sidebarWidth: 200,
+  sidebarVisible: true,
+  activeView: 'chat' // 'chat', 'profile', 'preferences'
 })
-
-// Correct merge handler for adding messages to a specific room
-function mergeMessage(room) {
-  return (state, payload) => {
-    return {
-      ...state,
-      messages: {
-        ...state.messages,
-        [room]: {
-          ...(state.messages[room] || {}),
-          [payload.id]: payload
-        }
-      }
-    }
-  }
-}
-
-const modes = {
-  settings: 'settings'
-}
-
-const modeRenderers = {
-  [modes.settings]: (target) => {
-    return `
-      <div class="settings">
-        <div class="settings-area">
-          <div class="settings-header">
-            <div class="settings-title">Settings</div>
-            <button data-close-overlay class="normal-button">
-              Close
-            </button>
-          </div>
-          <button data-logout class="normal-button">
-            Logout
-          </button>
-          <hr>
-          <secure-persona></secure-persona>
-        </div>
-      </div>
-    `
-  }
-}
 
 // Group management functions
 export async function getMyGroups() {
@@ -119,7 +78,7 @@ function drawGroupButton(group) {
 }
 
 $.draw(target => {
-  // Don't render anything - afterUpdate handles all DOM building and patching
+  // Don't render anything for main view - afterUpdate handles all DOM building and patching
   return null
 }, {
   beforeUpdate,
@@ -224,21 +183,6 @@ function updateMessageElement(target, messageId, author, decryptedText) {
 }
 
 function afterUpdate(target) {
-  // Handle modal views first
-  const modality = target.getAttribute('modality')
-  if(modality && modeRenderers[modality]) {
-    if(target.dataset.modality !== modality) {
-      target.dataset.modality = modality
-      target.innerHTML = modeRenderers[modality](target)
-    }
-    return
-  } else if(target.dataset.modality) {
-    // Modality was cleared, reset to main view
-    target.dataset.modality = ''
-    target.innerHTML = ''
-    target.templateBuilt = false // Force template rebuild
-  }
-
   const { authenticated } = $.learn()
 
   // Initialize DOM template ONCE and never rebuild it
@@ -253,16 +197,14 @@ function afterUpdate(target) {
         </div>
       </div>
       <div class="chat-app" style="display: none;">
+        <button class="toggle-sidebar" data-toggle-sidebar>
+          <sl-icon name="arrow-left-circle-fill"></sl-icon>
+        </button>
         <div class="sidebar">
           <div class="sidebar-header">
-            <button class="show-settings">
-              <sl-icon name="gear-wide-connected"></sl-icon>
-            </button>
-            <button class="show-participants">
-              <span class="participant-count">${participants.length}</span>
-              <span>
-                <sl-icon name="people"></sl-icon>
-              </span>
+            <button class="profile-button" data-profile>
+              <sl-icon name="person-circle"></sl-icon>
+              <span>Profile</span>
             </button>
           </div>
           
@@ -287,31 +229,63 @@ function afterUpdate(target) {
               </div>
             </div>
           </div>
+
+          <div class="sidebar-footer">
+            <button class="preferences-button" data-preferences>
+              <sl-icon name="person-lines-fill"></sl-icon>
+              <span>Preferences</span>
+            </button>
+          </div>
         </div>
         <div class="resizer"></div>
-        <div class="chat-area">
-          <div class="scroll-back">
-            <div class="messages">
+        <div class="main-content">
+          <div class="chat-area">
+            <div class="scroll-back">
+              <div class="messages">
+              </div>
+            </div>
+            <form method="POST" name="send">
+              <div class="fields">
+                <div class="action-row">
+                  <button>Send</button>
+                  <button type="button" data-leave-group class="leave-button" style="display: none;">
+                    Leave Group
+                  </button>
+                </div>
+                <textarea
+                  data-bind
+                  name="messageText"
+                  placeholder="Say it."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="profile-area" style="display: none;">
+            <div class="content-header">
+              <h2>Profile</h2>
+              <button class="back-button" data-back-to-chat>
+                <sl-icon name="arrow-left"></sl-icon>
+                Back to Chat
+              </button>
+            </div>
+            <div class="content-body">
+              <secure-persona></secure-persona>
             </div>
           </div>
-          <form method="POST" name="send">
-            <div class="fields">
-              <div class="action-row">
-                <button>Send</button>
-                <button type="button" data-leave-group class="leave-button" style="display: none;">
-                  Leave Group
-                </button>
-              </div>
-              <textarea
-                data-bind
-                name="messageText"
-                placeholder="Say it."
-              ></textarea>
+          <div class="preferences-area" style="display: none;">
+            <div class="content-header">
+              <h2>Preferences</h2>
+              <button class="back-button" data-back-to-chat>
+                <sl-icon name="arrow-left"></sl-icon>
+                Back to Chat
+              </button>
             </div>
-          </form>
+            <div class="content-body">
+              ${ai('')}
+            </div>
+          </div>
         </div>
       </div>
-      <div class="overlay-area"></div>
     `
   }
 
@@ -329,31 +303,39 @@ function afterUpdate(target) {
     }
   }
 
-  // Apply sidebar width
+  // Apply sidebar width and visibility
   {
-    const { sidebarWidth } = $.learn()
+    const { sidebarWidth, sidebarVisible } = $.learn()
     const sidebar = target.querySelector('.sidebar')
-    if(sidebar && sidebar.style.width !== `${sidebarWidth}px`) {
-      sidebar.style.width = `${sidebarWidth}px`
+    const chatApp = target.querySelector('.chat-app')
+    const toggleBtn = target.querySelector('.toggle-sidebar')
+    
+    if(sidebar && chatApp) {
+      if(sidebar.style.width !== `${sidebarWidth}px`) {
+        sidebar.style.width = `${sidebarWidth}px`
+      }
+      
+      chatApp.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
+      chatApp.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
+      
+      // Update toggle button position
+      if(toggleBtn && window.innerWidth > 768) {
+        const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
+        if(toggleBtn.style.left !== leftPos) {
+          toggleBtn.style.left = leftPos
+        }
+      }
     }
   }
 
-  // Handle overlay
+  // Update toggle button icon based on sidebar visibility
   {
-    const { showOverlay, overlayView } = $.learn()
-    target.dataset.showOverlay = showOverlay ? 'true' : 'false'
-    
-    const overlayArea = target.querySelector('.overlay-area')
-    
-    if(overlayArea && showOverlay && modeRenderers[overlayView]) {
-      if(overlayArea.dataset.view !== overlayView) {
-        overlayArea.dataset.view = overlayView
-        overlayArea.innerHTML = modeRenderers[overlayView](target)
-      }
-    } else if(overlayArea && !showOverlay) {
-      if(overlayArea.innerHTML) {
-        overlayArea.dataset.view = ''
-        overlayArea.innerHTML = ''
+    const { sidebarVisible } = $.learn()
+    const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
+    if(toggleBtn) {
+      const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
+      if(toggleBtn.getAttribute('name') !== iconName) {
+        toggleBtn.setAttribute('name', iconName)
       }
     }
   }
@@ -361,12 +343,17 @@ function afterUpdate(target) {
   // If not authenticated, nothing else to patch
   if(!authenticated) return
 
-  // Patch participant count
+  // Handle view switching
   {
-    const { participants } = $.learn()
-    const countEl = target.querySelector('.participant-count')
-    if(countEl && countEl.textContent !== participants.length.toString()) {
-      countEl.textContent = participants.length
+    const { activeView } = $.learn()
+    const chatArea = target.querySelector('.chat-area')
+    const profileArea = target.querySelector('.profile-area')
+    const preferencesArea = target.querySelector('.preferences-area')
+    
+    if(chatArea && profileArea && preferencesArea) {
+      chatArea.style.display = activeView === 'chat' ? 'grid' : 'none'
+      profileArea.style.display = activeView === 'profile' ? 'block' : 'none'
+      preferencesArea.style.display = activeView === 'preferences' ? 'block' : 'none'
     }
   }
 
@@ -528,38 +515,28 @@ $.when('click', '[data-logout]', () => {
   clearSession()
   $.teach({ 
     messages: {}, 
-    authenticated: false, 
-    showOverlay: false,
+    authenticated: false,
     myGroups: [],
     otherGroups: [],
     currentRoom: null
   })
 })
 
-$.when('click', '.settings', () => {
-  $.teach({ showOverlay: false })
+$.when('click', '[data-toggle-sidebar]', (event) => {
+  const { sidebarVisible } = $.learn()
+  $.teach({ sidebarVisible: !sidebarVisible })
 })
 
-$.when('click', '.show-settings', (event) => {
-  $.teach({ showOverlay: true, overlayView: modes.settings })
+$.when('click', '[data-profile]', (event) => {
+  $.teach({ activeView: 'profile' })
 })
 
-$.when('click', '[data-close-overlay]', () => {
-  $.teach({ showOverlay: false, overlayView: null })
+$.when('click', '[data-preferences]', (event) => {
+  $.teach({ activeView: 'preferences' })
 })
 
-$.when('click', '.show-participants', (event) => {
-  const { participants } = $.learn()
-  showPanel(`
-    <div id="participants" style="">
-      <div style="font-weight: bold; color: rgba(0,0,0,.65)">${participants.length} Online</div>
-      ${
-        participants.map(x => `
-          <div data-user-id="${x.id}">${x.id.slice(0, 8)}</div>
-        `).join('')
-      }
-    </div>
-  `)
+$.when('click', '[data-back-to-chat]', (event) => {
+  $.teach({ activeView: 'chat' })
 })
 
 // Create group handler
@@ -687,9 +664,22 @@ async function send(messageText) {
         timestamp: Date.now()
       }
       
-      $.teach(message, {
-        mergeHandler: mergeMessage,
-        parameters: [currentRoom]
+      // Store room in the payload itself to avoid closure issues
+      $.teach({
+        room: currentRoom,
+        message: message
+      }, (state, payload) => {
+        const { room, message } = payload
+        return {
+          ...state,
+          messages: {
+            ...state.messages,
+            [room]: {
+              ...(state.messages[room] || {}),
+              [message.id]: message
+            }
+          }
+        }
       })
     }
     $.teach({ messageText: '', messageHeight: null })
@@ -740,10 +730,37 @@ function escapeHyperText(text = '') {
 }
 
 $.style(`
-  & .chat-header {
-    padding: .5rem;
-    background: rgba(0,0,0,.85);
+  & {
+    display: block;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .toggle-sidebar {
+    position: absolute;
+    top: .5rem;
+    left: .5rem;
+    z-index: 150;
+    height: 2.5rem;
+    width: 2.5rem;
+    display: grid;
+    place-content: center;
     color: white;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    transition: all 200ms ease-in-out;
+  }
+
+  & .toggle-sidebar:hover {
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    transform: scale(1.1);
+  }
+
+  & .toggle-sidebar sl-icon {
+    font-size: 1.5rem;
   }
 
   & .sidebar {
@@ -754,21 +771,76 @@ $.style(`
     width: 200px;
     min-width: 150px;
     max-width: 500px;
+    transition: transform 200ms ease-in-out;
   }
 
   & .sidebar-header {
-    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
     display: flex;
-    place-content: center;
+    align-items: center;
+    justify-content: center;
     padding: .5rem;
-    gap: .5rem;
     flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  & .profile-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .profile-button:hover {
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+  }
+
+  & .profile-button sl-icon {
+    font-size: 1.2rem;
   }
 
   & .sidebar-content {
     overflow-y: auto;
     overflow-x: hidden;
     flex: 1;
+  }
+
+  & .sidebar-footer {
+    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
+    padding: .5rem;
+    flex-shrink: 0;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+
+  & .preferences-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .preferences-button:hover {
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+  }
+
+  & .preferences-button sl-icon {
+    font-size: 1.2rem;
   }
 
   & .resizer {
@@ -811,6 +883,13 @@ $.style(`
     grid-template-columns: auto 4px 1fr;
     height: 100%;
     overflow: hidden;
+    position: relative;
+  }
+
+  & .main-content {
+    height: 100%;
+    overflow: hidden;
+    position: relative;
   }
 
   & .chat-area {
@@ -819,6 +898,50 @@ $.style(`
     height: 100%;
     background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
     overflow: hidden;
+  }
+
+  & .profile-area,
+  & .preferences-area {
+    height: 100%;
+    overflow: auto;
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
+  }
+
+  & .content-header {
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+  }
+
+  & .content-header h2 {
+    color: white;
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  & .back-button {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .back-button:hover {
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+  }
+
+  & .content-body {
+    padding: 2rem;
   }
 
   & [name="send"] {
@@ -909,25 +1032,6 @@ $.style(`
     font-weight: bold;
   }
 
-  & .show-settings,
-  & .show-participants {
-    height: 2rem;
-    line-height: 1;
-    color: white;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    border-radius: 1rem;
-    display: grid;
-    padding: .5rem;
-    gap: .5rem;
-    place-content: center;
-    border: none;
-    cursor: pointer;
-  }
-
-  & .show-participants {
-    grid-template-columns: auto auto;
-  }
-
   & .subtitle {
     color: rgba(255,255,255,.65);
     font-weight: 800;
@@ -969,29 +1073,6 @@ $.style(`
     background: linear-gradient(rgba(30, 144, 255, .65), rgba(30, 144, 255, .85)), var(--root-theme, mediumseagreen);
   }
 
-  & .settings {
-    padding: 2rem 0;
-    height: 100%;
-  }
-
-  & .settings-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: rgba(0,0,0,.65);
-    margin-bottom: 1rem;
-  }
-
-  & .settings-area {
-    background: white;
-    max-width: 55ch;
-    margin: 0 auto;
-    padding: 1rem;
-    box-shadow:
-      0 0 6px 6px rgba(0,0,0,.05),
-      0 0 3px 3px rgba(0,0,0,.10),
-      0 0 1px 1px rgba(0,0,0,.15);
-  }
-
   & .zero-space {
     background:
       linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
@@ -1020,29 +1101,56 @@ $.style(`
     margin-bottom: 1rem;
   }
 
-  & .overlay-area {
-    background: white;
-    display: none;
-    overflow: auto;
-    position: absolute;
-    inset: 0;
-    z-index: 50;
+  /* Responsive: Hide sidebar by default on mobile, show toggle button */
+  @media (max-width: 768px) {
+    & .chat-app {
+      grid-template-columns: 1fr;
+    }
+
+    & .sidebar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      z-index: 100;
+      transform: translateX(-100%);
+      box-shadow: 2px 0 8px rgba(0,0,0,.3);
+    }
+
+    & .chat-app[data-sidebar-visible="true"] .sidebar {
+      transform: translateX(0);
+    }
+
+    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
+      left: calc(200px + .5rem);
+    }
+
+    & .resizer {
+      display: none;
+    }
   }
 
-  &[data-show-overlay="true"] .overlay-area {
-    display: block;
-  }
+  /* Desktop: Always show sidebar, hide mobile toggle */
+  @media (min-width: 769px) {
+    & .chat-app[data-sidebar-visible="false"] {
+      grid-template-columns: 4px 1fr;
+    }
 
-  & .settings-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
+    & .chat-app[data-sidebar-visible="false"] .sidebar {
+      display: none;
+    }
 
-  & .settings-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: rgba(0,0,0,.65);
+    & .chat-app[data-sidebar-visible="false"] .resizer {
+      cursor: pointer;
+      background: var(--root-theme, mediumseagreen);
+    }
+
+    & .chat-app[data-sidebar-visible="false"] .toggle-sidebar {
+      left: .5rem;
+    }
+
+    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
+      left: calc(var(--sidebar-width, 200px) + .5rem);
+    }
   }
 `)
