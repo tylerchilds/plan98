@@ -1191,6 +1191,11 @@ export function ai(operation) {
       <agentic-dash q="${encodeURIComponent(operation)}" view="launcher"></agentic-dash>
       </div>
 
+      <div class="synthia-header">Settings</div>
+      <div class="settings-footer">
+        ${settingsMenu()}
+      </div>
+
       <!--
       <div class="ahha">
         matching applications
@@ -1224,11 +1229,6 @@ export function ai(operation) {
             </div>
           `
         }).join('')}
-      </div>
-
-      <div class="synthia-header">Settings</div>
-      <div class="settings-footer">
-        ${settingsMenu()}
       </div>
       <div class="av -banner">
         <div class="av-copy">
@@ -2311,6 +2311,25 @@ $.style(`
   & select option {
   }
 
+  & .search-bar {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    padding: .5rem;
+    background: rgba(255,255,255,.5);
+    gap: .5rem;
+    box-shadow: 0 1px 1px 1px rgba(0,0,0,.15);
+    z-index: 10;
+  }
+
+  & .share-actions {
+    display: flex;
+    padding: .5rem;
+    gap: .5rem;
+    flex-wrap: wrap;
+    background: rgba(0,0,0,.1);
+  }
+
+
 `)
 
 function fakeScrollUp(container, scrollStep=10) {
@@ -2337,3 +2356,4 @@ export function replaceElves(target, tag) {
     nodeParent.appendChild(newNode)
   })
 }
+

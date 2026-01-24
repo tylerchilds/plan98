@@ -17,6 +17,7 @@ const table = {}
 const decryptionInProgress = new Set()
 
 const $ = elf('dream-team', {
+  synthia: {},
   messages: {},
   threads: {}, // { [roomId]: { [parentMessageId]: { [replyId]: message } } }
   activeThread: null, // messageId of thread being viewed (shown in right panel)
@@ -511,6 +512,8 @@ function afterUpdate(target) {
           </div>
         `
       } else if(viewToShow === 'preferences') {
+        const { synthia } = $.learn()
+        const operation = escapeHyperText(synthia.prompt || '')
         mainContent.innerHTML = `
           <div class="preferences-area">
             <div class="action-bar">
@@ -523,7 +526,7 @@ function afterUpdate(target) {
               </div>
             </div>
             <div class="content-body">
-              ${ai('')}
+              ${ai(operation)}
             </div>
           </div>
         `
@@ -884,7 +887,9 @@ function afterUpdate(target) {
           `
         }).join('') || '<div class="empty-state">No messages yet. Start the conversation!</div>'
       
-      messagesContainer.innerHTML = log
+      if(messagesContainer) {
+        messagesContainer.innerHTML = log
+      }
     }
   }
 
@@ -2452,3 +2457,20 @@ $.style(`
     }
   }
 `)
+
+$.when('input', '[data-bind]', (event) => {
+  const { bind } = event.target.dataset
+  $.teach({
+    bind: bind,
+    name: event.target.name,
+    value: event.target.value
+  }, (state, payload) => {
+    return {
+      ...state,
+      [payload.bind]: {
+        ...state[payload.bind],
+        [payload.name]: payload.value
+      }
+    }
+  })
+})
