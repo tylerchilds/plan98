@@ -34,9 +34,12 @@ const $ = elf('dream-team', {
   groupType: 'public', // 'public' or 'private'
   sidebarWidth: 200,
   sidebarVisible: true,
-  activeView: 'profile', // 'chat', 'profile', 'preferences', 'new-group', 'video' - default to profile
+  activeView: 'profile', // 'chat', 'profile', 'preferences', 'new-group', 'video', 'manage-group' - default to profile
   showActionMenu: false, // for three-dot menu in action bar
-  activeMessageMenu: null // for message three-dot menus
+  activeMessageMenu: null, // for message three-dot menus
+  currentGroupInfo: null, // for manage-group view
+  addMemberCompany: '',
+  addMemberEmployee: ''
 })
 
 // Group management functions
@@ -70,6 +73,33 @@ function activateGroup(sessionId, id) {
   bayunCore.getGroupById(sessionId, id)
     .then(result => {
       $.teach({ currentRoom: result.groupId, showActionMenu: false, activeView: 'chat' })
+    })
+    .catch(error => {
+      console.log("Error caught");
+      console.log(error);
+    });
+}
+
+function loadGroupInfo(sessionId, groupId) {
+  bayunCore.getGroupById(sessionId, groupId)
+    .then(result => {
+      const groupList = result.groupMembers.reduce((all, one) => {
+        if(!all[one.companyName]) {
+          all[one.companyName] = {
+            members: []
+          }
+        }
+        all[one.companyName].members.push(one.companyEmployeeId)
+        return all
+      }, {})
+      
+      $.teach({
+        currentGroupInfo: {
+          groupId: result.groupId,
+          groupName: result.groupName,
+          groupList: groupList
+        }
+      })
     })
     .catch(error => {
       console.log("Error caught");
@@ -402,6 +432,10 @@ function afterUpdate(target) {
                     <sl-icon name="three-dots-vertical"></sl-icon>
                   </button>
                   <div class="action-menu" data-menu-dropdown>
+                    <button class="action-menu-item" data-manage-group>
+                      <sl-icon name="people"></sl-icon>
+                      <span>Manage Group</span>
+                    </button>
                     <button class="action-menu-item" data-leave-group>
                       <sl-icon name="box-arrow-left"></sl-icon>
                       <span>Leave Group</span>
@@ -530,6 +564,51 @@ function afterUpdate(target) {
                   <sl-icon name="plus-circle"></sl-icon>
                   <span>Create Group</span>
                 </button>
+              </div>
+            </div>
+          </div>
+        `
+      } else if(viewToShow === 'manage-group') {
+        mainContent.innerHTML = `
+          <div class="manage-group-area">
+            <div class="action-bar">
+              <div class="action-bar-left"></div>
+              <div class="action-bar-center"></div>
+              <div class="action-bar-right">
+                <button class="back-button" data-back-to-chat>
+                  <sl-icon name="x"></sl-icon>
+                </button>
+              </div>
+            </div>
+            <div class="content-body">
+              <div class="manage-group-form">
+                <h2 class="manage-group-title">Manage Group</h2>
+                <div class="manage-group-name"></div>
+                
+                <div class="manage-section">
+                  <h3>Add Member</h3>
+                  <div class="add-member-form">
+                    <div class="form-field">
+                      <label for="add-member-company">Company Name</label>
+                      <input data-bind placeholder="Enter company name..." type="text" name="addMemberCompany" id="add-member-company" />
+                    </div>
+                    <div class="form-field">
+                      <label for="add-member-employee">Employee ID</label>
+                      <input data-bind placeholder="Enter employee ID..." type="text" name="addMemberEmployee" id="add-member-employee" />
+                    </div>
+                    <button class="add-member-btn" data-add-member>
+                      <sl-icon name="person-plus"></sl-icon>
+                      <span>Add Member</span>
+                    </button>
+                  </div>
+                </div>
+                
+                <div class="manage-section">
+                  <h3>Current Members</h3>
+                  <div class="members-list">
+                    <div class="loading-members">Loading members...</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -706,6 +785,52 @@ function afterUpdate(target) {
     }
   }
 
+  // Patch manage group view
+  {
+    const { currentGroupInfo, addMemberCompany, addMemberEmployee } = $.learn()
+    const manageGroupName = target.querySelector('.manage-group-name')
+    const membersList = target.querySelector('.members-list')
+    const addCompanyInput = target.querySelector('[name="addMemberCompany"]')
+    const addEmployeeInput = target.querySelector('[name="addMemberEmployee"]')
+    
+    if(manageGroupName && currentGroupInfo) {
+      manageGroupName.textContent = currentGroupInfo.groupName || ''
+    }
+    
+    if(membersList && currentGroupInfo && currentGroupInfo.groupList) {
+      const membersHtml = Object.keys(currentGroupInfo.groupList).map(company => {
+        const members = currentGroupInfo.groupList[company].members
+        const membersItems = members.map(unix => `
+          <div class="member-item">
+            <span class="member-name">${escapeHyperText(unix)}</span>
+            <button class="remove-member-btn" data-remove-member data-company="${escapeHyperText(company)}" data-unix="${escapeHyperText(unix)}">
+              <sl-icon name="trash"></sl-icon>
+            </button>
+          </div>
+        `).join('')
+        
+        return `
+          <div class="company-group">
+            <div class="company-name">${escapeHyperText(company)}</div>
+            ${membersItems}
+          </div>
+        `
+      }).join('')
+      
+      if(membersList.dataset.lastMembers !== membersHtml) {
+        membersList.dataset.lastMembers = membersHtml
+        membersList.innerHTML = membersHtml || '<div class="no-members">No members found</div>'
+      }
+    }
+    
+    if(addCompanyInput && addCompanyInput.value !== addMemberCompany) {
+      addCompanyInput.value = addMemberCompany
+    }
+    if(addEmployeeInput && addEmployeeInput.value !== addMemberEmployee) {
+      addEmployeeInput.value = addMemberEmployee
+    }
+  }
+
   // Patch messages
   {
     const { currentRoom, threads } = $.learn()
@@ -740,7 +865,9 @@ function afterUpdate(target) {
                 <div class="message-body">
                   <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
                 </div>
-                ${replyIndicator}
+                <div class="message-footer">
+                  ${replyIndicator}
+                </div>
               </div>
               <div class="message-menu-container">
                 <button class="message-menu-trigger" data-message-menu="${message.id}">
@@ -1028,6 +1155,73 @@ $.when('click', '.my-group', (event) => {
   activateGroup(sessionId, id)
 })
 
+// Manage group handler
+$.when('click', '[data-manage-group]', () => {
+  const { currentRoom } = $.learn()
+  const { sessionId } = getSession()
+  
+  if(!currentRoom) return
+  
+  // Load group info and switch to manage view
+  loadGroupInfo(sessionId, currentRoom)
+  $.teach({ activeView: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
+})
+
+// Add member handler
+$.when('click', '[data-add-member]', async () => {
+  const { currentRoom, addMemberCompany, addMemberEmployee } = $.learn()
+  const { sessionId } = getSession()
+  
+  if(!currentRoom || !addMemberCompany.trim() || !addMemberEmployee.trim()) return
+  
+  const groupMembers = [{
+    companyName: addMemberCompany.trim(),
+    companyEmployeeId: addMemberEmployee.trim()
+  }]
+  
+  try {
+    const addMembersResponse = await bayunCore.addMembersToGroup(sessionId, currentRoom, groupMembers)
+    
+    const addedMembersCount = addMembersResponse.addedMembersCount
+    console.log("Total Members Added:", addedMembersCount)
+    
+    if(addMembersResponse.addMemberErrObject.length !== 0) {
+      let errorList = addMembersResponse.addMemberErrObject
+      for(let i = 0; i < errorList.length; i++) {
+        console.log("Error Message:", errorList[i].errorMessage)
+      }
+    }
+    
+    // Clear inputs and refresh group info
+    $.teach({ addMemberCompany: '', addMemberEmployee: '' })
+    loadGroupInfo(sessionId, currentRoom)
+  } catch(error) {
+    console.log("Error caught")
+    console.log(error)
+  }
+})
+
+// Remove member handler
+$.when('click', '[data-remove-member]', (event) => {
+  const { currentRoom } = $.learn()
+  const { sessionId } = getSession()
+  const { company, unix } = event.target.closest('[data-remove-member]').dataset
+  
+  if(!currentRoom || !company || !unix) return
+  
+  bayunCore.removeMemberFromGroup(sessionId, currentRoom, unix, company)
+    .then(result => {
+      console.log("Response received for removeMemberFromGroup.")
+      console.log(result)
+      // Refresh group info
+      loadGroupInfo(sessionId, currentRoom)
+    })
+    .catch(error => {
+      console.log("Error caught")
+      console.log(error)
+    })
+})
+
 // Leave group handler
 $.when('click', '[data-leave-group]', () => {
   const { currentRoom } = $.learn()
@@ -1038,6 +1232,7 @@ $.when('click', '[data-leave-group]', () => {
   bayunCore.leaveGroup(sessionId, currentRoom)
     .then(result => {
       $.teach({ currentRoom: null, showActionMenu: false, activeView: 'profile', activeThread: null })
+      // Refresh group lists after leaving
       getMyGroups()
       getOtherGroups()
     })
@@ -1541,6 +1736,7 @@ $.style(`
   & .profile-area,
   & .preferences-area,
   & .new-group-area,
+  & .manage-group-area,
   & .video-area {
     display: grid;
     grid-template-rows: auto 1fr;
@@ -1742,11 +1938,6 @@ $.style(`
     min-height: 100%;
   }
 
-  & .thread-messages .message {
-    align-self: flex-end;
-    max-width: 85%;
-  }
-
   & .reply-message {
     background: rgba(0,0,0,.05);
   }
@@ -1787,6 +1978,12 @@ $.style(`
   & .message-body {
     overflow: auto;
     word-wrap: break-word;
+  }
+
+  & .message-footer {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: .25rem;
   }
 
   & .message-menu-container {
@@ -1862,7 +2059,6 @@ $.style(`
     padding: .25rem .5rem;
     border-radius: 1rem;
     font-size: .8rem;
-    margin-top: .25rem;
     transition: all 200ms ease-in-out;
   }
 
@@ -1889,17 +2085,131 @@ $.style(`
     overflow: hidden;
   }
 
-  & .new-group-form {
+  & .new-group-form,
+  & .manage-group-form {
     max-width: 400px;
   }
 
-  & .new-group-form h2 {
+  & .new-group-form h2,
+  & .manage-group-form h2 {
     margin: 0 0 1.5rem 0;
     color: rgba(0,0,0,.75);
   }
 
-  & .form-field {
+  & .manage-group-name {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: rgba(0,0,0,.65);
     margin-bottom: 1.5rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+  }
+
+  & .manage-section {
+    margin-bottom: 2rem;
+  }
+
+  & .manage-section h3 {
+    margin: 0 0 1rem 0;
+    color: rgba(0,0,0,.65);
+    font-size: 1rem;
+  }
+
+  & .add-member-form {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  & .add-member-btn {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem 1rem;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    color: white;
+    border: none;
+    border-radius: .5rem;
+    cursor: pointer;
+    font-size: .9rem;
+    transition: background 200ms ease-in-out;
+    margin-top: .5rem;
+    width: fit-content;
+  }
+
+  & .add-member-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+  }
+
+  & .members-list {
+    background: rgba(0,0,0,.05);
+    border-radius: .5rem;
+    padding: .5rem;
+  }
+
+  & .company-group {
+    margin-bottom: 1rem;
+  }
+
+  & .company-group:last-child {
+    margin-bottom: 0;
+  }
+
+  & .company-name {
+    font-weight: 600;
+    color: rgba(0,0,0,.65);
+    padding: .25rem .5rem;
+    background: rgba(0,0,0,.05);
+    border-radius: .25rem;
+    margin-bottom: .5rem;
+    font-size: .85rem;
+  }
+
+  & .member-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: .5rem;
+    border-bottom: 1px solid rgba(0,0,0,.05);
+  }
+
+  & .member-item:last-child {
+    border-bottom: none;
+  }
+
+  & .member-name {
+    color: rgba(0,0,0,.75);
+  }
+
+  & .remove-member-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: transparent;
+    color: rgba(0,0,0,.4);
+    border: none;
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .remove-member-btn:hover {
+    background: rgba(220,53,69,.1);
+    color: #dc3545;
+  }
+
+  & .loading-members,
+  & .no-members {
+    color: rgba(0,0,0,.5);
+    text-align: center;
+    padding: 1rem;
+    font-style: italic;
+  }
+
+  & .form-field {
+    margin-bottom: 1rem;
   }
 
   & .form-field label {
