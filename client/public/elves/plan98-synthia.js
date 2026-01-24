@@ -178,27 +178,6 @@ $.style(`
     }
   }
 
-
-  & .search-bar {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    padding: .5rem;
-    background: rgba(255,255,255,.5);
-    gap: .5rem;
-    position: sticky;
-    top: 0;
-    box-shadow: 0 1px 1px 1px rgba(0,0,0,.15);
-    z-index: 10;
-  }
-
-  & .share-actions {
-    display: flex;
-    padding: .5rem;
-    gap: .5rem;
-    flex-wrap: wrap;
-    background: rgba(0,0,0,.1);
-  }
-
   & .sandbox {
     height: 100%;
     overflow: hidden;

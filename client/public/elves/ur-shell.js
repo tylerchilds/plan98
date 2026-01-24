@@ -208,6 +208,10 @@ const commands = {
     loadPath('/app/v-log')
     return "At the end of time, sat a clown."
   },
+  'team': (...args) => {
+    loadPath('/app/dream-team?id=root')
+    return "if every other tech company is just chat chat chat chat, then same same same same"
+  },
   'echo': (...args) => {
     return args.join(' ')
   },
@@ -580,11 +584,14 @@ PLAN98
 <code>saga</code>
   a poetic explanation of the about command
 
-<code>tv</code>
-  Fixing the tiniest violin is the easiest trick in the book. All you do is delete two forward slashes. That's it.
-
 <code>me</code>
   log in to your account
+
+<code>team</code>
+  open up a new team chat
+
+<code>tv</code>
+  Fixing the tiniest violin is the easiest trick in the book. All you do is delete two forward slashes. That's it.
 
 <code>now</code>
   open the live broadcasting studio right now right now for right now right now

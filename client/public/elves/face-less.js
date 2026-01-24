@@ -10,6 +10,10 @@ const $ = elf('face-less', {
   draftHeight: null
 })
 
+export function shitPost() {
+  console.log('cool')
+}
+
 function getTimeline(targetId) {
   const state = $.learn()
   return state[`timeline-${targetId}`] || []

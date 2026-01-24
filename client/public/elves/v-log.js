@@ -20,6 +20,11 @@ import {
   release,
   attackRelease
 } from './paper-pocket.js'
+import {
+  getSession,
+  getCompanyName,
+  getEmployeeId,
+} from './bayun-wizard.js'
 
 /*
 
@@ -985,6 +990,7 @@ const views = {
   color: 'color',
   brush: 'brush',
   settings: 'settings',
+  social: 'social',
   share: 'share'
 }
 
@@ -1076,7 +1082,16 @@ const viewRenderers = {
       </div>
     `
   },
-
+  [views.social]: function (target) {
+    return `
+      <div style="position: absolute; top: 0; right: 0;">
+        <button data-cancel class="branded-button">
+          Close
+        </button>
+      </div>
+      <iframe src="/app/face-less"></iframe>
+    `
+  },
   [views.settings]: function (target) {
       const {
       xrEnabled,
@@ -1323,7 +1338,7 @@ class VLog extends HTMLElement {
       target.innerHTML = `
         <div class="footer">
           <button data-new class="branded-button">
-            New
+            Scratch
           </button>
           <button data-share  style="margin-left: auto;" class="branded-button">
             Share
@@ -1337,8 +1352,8 @@ class VLog extends HTMLElement {
           </div>
           <div class="center"></div>
           <div class="right">
-            <button data-list class="branded-button">
-              List
+            <button data-social class="branded-button">
+              Social
             </button>
           </div>
         </div>
@@ -2205,6 +2220,9 @@ $.when('click', '[data-settings]', () => {
   $.teach({ showOverlay: true, view: views.settings })
 })
 
+$.when('click', '[data-social]', () => {
+  $.teach({ showOverlay: true, view: views.social })
+})
 
 /*
 
