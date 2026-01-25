@@ -19,6 +19,7 @@ const decryptionInProgress = new Set()
 
 const $ = elf('dream-team', {
   synthia: {},
+  players: {},
   messages: {},
   threads: {}, // { [roomId]: { [parentMessageId]: { [replyId]: message } } }
   activeThread: null, // messageId of thread being viewed (shown in right panel)
@@ -29,7 +30,6 @@ const $ = elf('dream-team', {
   replyText: '',
   messageHeight: null,
   replyHeight: null,
-  authenticated: !!getSession().sessionId,
   myGroups: [],
   otherGroups: [],
   group: '',
@@ -43,6 +43,24 @@ const $ = elf('dream-team', {
   currentGroupInfo: null, // for manage-group view
   addMemberCompany: '',
   addMemberEmployee: ''
+})
+
+const getMyId = () => `${getEmployeeId()}@${getCompanyName()}`
+
+const join = (state, player) => ({
+  ...state,
+  players: {
+    ...state.players,
+    [player.id]: { ...player, online: true }
+  }
+})
+
+const leave = (state, id) => ({
+  ...state,
+  players: {
+    ...state.players,
+    [id]: { ...state.players[id], online: false }
+  }
 })
 
 // Group management functions
@@ -338,58 +356,63 @@ function beforeUpdate(target) {
 
   {
     const { sessionId } = getSession()
-    const { currentRoom, messages, threads, authenticated } = $.learn()
+    const { currentRoom, messages, threads } = $.learn()
 
-    if(!authenticated) return
+    const id = getMyId()
+    const me = $.learn().players[id]
+    const isOnline = !!me?.online
 
-    if(sessionId && messages[currentRoom]) {
-      // Initialize room table if needed
-      if(!table[currentRoom]) {
-        table[currentRoom] = {}
-      }
+    if(isOnline) {
 
-      // Find messages that need decryption
-      const roomMessages = messages[currentRoom]
-
-      Object.keys(roomMessages).forEach(mid => {
-        const message = roomMessages[mid]
-        const decryptKey = `${currentRoom}:${mid}`
-
-        // Only decrypt if we haven't already and not in progress
-        if(!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
-          // Mark as in progress
-          decryptionInProgress.add(decryptKey)
-
-          // Add to table immediately with placeholder
-          table[currentRoom][mid] = {
-            ...message,
-            decrypted: 'Decrypting...'
-          }
-
-          // Decrypt asynchronously
-          bayunCore.unlockText(sessionId, message.encrypted)
-            .then(decrypted => {
-              table[currentRoom][mid] = {
-                ...message,
-                decrypted
-              }
-              decryptionInProgress.delete(decryptKey)
-              // Update only the specific message element
-              updateMessageElement(target, mid, message.author, decrypted)
-            })
-            .catch(e => {
-              console.error('Decryption error:', e)
-              const errorMsg = 'Failed to decrypt message. Are you authorized?'
-              table[currentRoom][mid] = {
-                ...message,
-                decrypted: errorMsg
-              }
-              decryptionInProgress.delete(decryptKey)
-              // Update only the specific message element
-              updateMessageElement(target, mid, message.author, errorMsg)
-            })
+      if(sessionId && messages[currentRoom]) {
+        // Initialize room table if needed
+        if(!table[currentRoom]) {
+          table[currentRoom] = {}
         }
-      })
+
+        // Find messages that need decryption
+        const roomMessages = messages[currentRoom]
+
+        Object.keys(roomMessages).forEach(mid => {
+          const message = roomMessages[mid]
+          const decryptKey = `${currentRoom}:${mid}`
+
+          // Only decrypt if we haven't already and not in progress
+          if(!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
+            // Mark as in progress
+            decryptionInProgress.add(decryptKey)
+
+            // Add to table immediately with placeholder
+            table[currentRoom][mid] = {
+              ...message,
+              decrypted: 'Decrypting...'
+            }
+
+            // Decrypt asynchronously
+            bayunCore.unlockText(sessionId, message.encrypted)
+              .then(decrypted => {
+                table[currentRoom][mid] = {
+                  ...message,
+                  decrypted
+                }
+                decryptionInProgress.delete(decryptKey)
+                // Update only the specific message element
+                updateMessageElement(target, mid, message.author, decrypted)
+              })
+              .catch(e => {
+                console.error('Decryption error:', e)
+                const errorMsg = 'Failed to decrypt message. Are you authorized?'
+                table[currentRoom][mid] = {
+                  ...message,
+                  decrypted: errorMsg
+                }
+                decryptionInProgress.delete(decryptKey)
+                // Update only the specific message element
+                updateMessageElement(target, mid, message.author, errorMsg)
+              })
+          }
+        })
+      }
     }
 
     // Decrypt thread replies
@@ -470,7 +493,9 @@ function updateReplyElement(target, replyId, author, decryptedText) {
 }
 
 function afterUpdate(target) {
-  const { authenticated } = $.learn()
+  const id = getMyId()
+  const me = $.learn().players[id]
+  const isOnline = !!me?.online
 
   // Initialize DOM template ONCE and never rebuild it
   if(!target.templateBuilt) {
@@ -544,7 +569,7 @@ function afterUpdate(target) {
   const chatApp = target.querySelector('.chat-app')
 
   if(authArea && chatApp) {
-    if(authenticated) {
+    if(isOnline) {
       authArea.style.display = 'none'
       chatApp.style.display = 'grid'
     } else {
@@ -554,7 +579,7 @@ function afterUpdate(target) {
   }
 
   // If not authenticated, stop here
-  if(!authenticated) {
+  if(!isOnline) {
     // Apply sidebar width and visibility
     {
       const { sidebarWidth, sidebarVisible } = $.learn()
@@ -1019,16 +1044,6 @@ $.when('click', '[data-logout]', () => {
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
   clearSession()
-  $.teach({ 
-    messages: {}, 
-    threads: {},
-    authenticated: false,
-    myGroups: [],
-    otherGroups: [],
-    currentRoom: null,
-    activeThread: null,
-    view: 'profile'
-  })
 })
 
 $.when('click', '[data-toggle-sidebar]', (event) => {
@@ -1427,7 +1442,12 @@ $.when('input', '[name="replyText"]', (event) => {
 
 $.when('activated', 'secure-persona', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
-  $.teach({ authenticated: true })
+  const id = getMyId()
+  $.teach({
+    id,
+    color: $.learn().color,
+    lastSeen: Date.now()
+  }, join)
 
   getMyGroups()
   getOtherGroups()
@@ -1437,16 +1457,7 @@ $.when('deactivated', 'secure-persona', (event) => {
   // User has logged out, clear all caches and messages, trigger re-render
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
-  $.teach({ 
-    messages: {}, 
-    threads: {},
-    authenticated: false,
-    myGroups: [],
-    otherGroups: [],
-    currentRoom: null,
-    activeThread: null,
-    view: 'profile'
-  })
+  $.teach(getMyId(), leave)
 })
 
 function escapeHyperText(text = '') {
