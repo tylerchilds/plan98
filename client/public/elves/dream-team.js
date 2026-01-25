@@ -336,17 +336,6 @@ function beforeUpdate(target) {
     }
   }
 
-  { // Load groups if authenticated
-    const { sessionId } = getSession()
-    const { authenticated, myGroups } = $.learn()
-
-    if(authenticated && sessionId && !target.groupsLoaded) {
-      target.groupsLoaded = true
-      getMyGroups()
-      getOtherGroups()
-    }
-  }
-
   {
     const { sessionId } = getSession()
     const { currentRoom, messages, threads, authenticated } = $.learn()
@@ -1436,12 +1425,15 @@ $.when('input', '[name="replyText"]', (event) => {
   $.teach({ replyHeight: event.target.scrollHeight })
 });
 
-$.when('secure-persona', 'activated', (event) => {
+$.when('activated', 'secure-persona', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
   $.teach({ authenticated: true })
+
+  getMyGroups()
+  getOtherGroups()
 })
 
-$.when('secure-persona', 'deactivated', (event) => {
+$.when('deactivated', 'secure-persona', (event) => {
   // User has logged out, clear all caches and messages, trigger re-render
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
