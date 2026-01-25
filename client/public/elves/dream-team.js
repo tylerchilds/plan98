@@ -1,4 +1,5 @@
 import elf from '@plan98/elf'
+import diffHTML from 'diffhtml'
 import { showPanel } from './plan98-panel.js'
 import { getTheme } from './paper-pocket.js'
 import { ai } from './paper-pocket.js'
@@ -35,7 +36,8 @@ const $ = elf('dream-team', {
   groupType: 'public', // 'public' or 'private'
   sidebarWidth: 200,
   sidebarVisible: true,
-  activeView: 'profile', // 'chat', 'profile', 'preferences', 'new-group', 'video', 'manage-group' - default to profile
+  view: 'profile', // use views.profile constant
+  iframeSrc: null,
   showActionMenu: false, // for three-dot menu in action bar
   activeMessageMenu: null, // for message three-dot menus
   currentGroupInfo: null, // for manage-group view
@@ -73,7 +75,7 @@ export async function getOtherGroups() {
 function activateGroup(sessionId, id) {
   bayunCore.getGroupById(sessionId, id)
     .then(result => {
-      $.teach({ currentRoom: result.groupId, showActionMenu: false, activeView: 'chat' })
+      $.teach({ currentRoom: result.groupId, showActionMenu: false, view: 'chat' })
     })
     .catch(error => {
       console.log("Error caught");
@@ -93,7 +95,7 @@ function loadGroupInfo(sessionId, groupId) {
         all[one.companyName].members.push(one.companyEmployeeId)
         return all
       }, {})
-      
+
       $.teach({
         currentGroupInfo: {
           groupId: result.groupId,
@@ -106,6 +108,198 @@ function loadGroupInfo(sessionId, groupId) {
       console.log("Error caught");
       console.log(error);
     });
+}
+
+const views = {
+  chat: 'chat',
+  profile: 'profile',
+  preferences: 'preferences',
+  newGroup: 'new-group',
+  manageGroup: 'manage-group',
+  video: 'video',
+  iframe: 'iframe'
+}
+
+const viewRenderers = {
+  [views.chat]: (target) => {
+    const { currentRoom } = $.learn()
+    if (!currentRoom) return viewRenderers[views.profile](target)
+    return `
+      <div class="chat-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <div class="action-menu-container">
+              <button class="action-menu-trigger" data-action-menu>
+                <sl-icon name="three-dots-vertical"></sl-icon>
+              </button>
+              <div class="action-menu" data-menu-dropdown>
+                <button class="action-menu-item" data-manage-group>
+                  <sl-icon name="people"></sl-icon>
+                  <span>Manage Group</span>
+                </button>
+                <button class="action-menu-item" data-leave-group>
+                  <sl-icon name="box-arrow-left"></sl-icon>
+                  <span>Leave Group</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="chat-body">
+          <div class="chat-main">
+            <div class="scroll-back">
+              <div class="messages">
+              </div>
+            </div>
+            <form method="POST" name="send">
+              <div class="fields">
+                <div class="action-row">
+                  <button>Send</button>
+                </div>
+                <textarea
+                  data-bind
+                  name="messageText"
+                  placeholder="Say it."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="thread-resizer"></div>
+          <div class="thread-panel">
+            <div class="thread-header">
+              <span class="thread-title">Thread</span>
+              <button class="close-thread" data-close-thread>
+                <sl-icon name="x"></sl-icon>
+              </button>
+            </div>
+            <div class="thread-parent">
+            </div>
+            <div class="thread-scroll">
+              <div class="thread-messages">
+              </div>
+            </div>
+            <form method="POST" name="send-reply">
+              <div class="fields">
+                <div class="action-row">
+                  <button>Reply</button>
+                </div>
+                <textarea
+                  data-bind
+                  name="replyText"
+                  placeholder="Reply to thread..."
+                ></textarea>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+    `
+  },
+  [views.profile]: (target) => `
+    <div class="profile-area">
+      <secure-persona></secure-persona>
+    </div>
+  `,
+  [views.preferences]: (target) => `
+    <div class="preferences-area ai-content"></div>
+  `,
+  [views.newGroup]: (target) => `
+    <div class="new-group-area">
+      <div class="action-bar">
+        <div class="action-bar-left"></div>
+        <div class="action-bar-center"></div>
+        <div class="action-bar-right">
+          <button class="back-button" data-back-to-chat>
+            <sl-icon name="x"></sl-icon>
+          </button>
+        </div>
+      </div>
+      <div class="content-body">
+        <div class="new-group-form">
+          <h2>Create New Group</h2>
+          <div class="form-field">
+            <label for="group-name">Group Name</label>
+            <input data-bind placeholder="Enter group name..." type="text" name="group" id="group-name" />
+          </div>
+          <div class="form-field">
+            <label>Group Type</label>
+            <div class="group-type-toggle">
+              <button class="type-btn active" data-group-type="public">
+                <sl-icon name="globe"></sl-icon>
+                <span>Public</span>
+              </button>
+              <button class="type-btn" data-group-type="private">
+                <sl-icon name="lock"></sl-icon>
+                <span>Private</span>
+              </button>
+            </div>
+            <p class="type-description" data-type-desc>Anyone can discover and join this group</p>
+          </div>
+          <button class="create-group-btn" data-create>
+            <sl-icon name="plus-circle"></sl-icon>
+            <span>Create Group</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  `,
+  [views.manageGroup]: (target) => `
+    <div class="manage-group-area">
+      <div class="action-bar">
+        <div class="action-bar-left"></div>
+        <div class="action-bar-center"></div>
+        <div class="action-bar-right">
+          <button class="back-button" data-back-to-chat>
+            <sl-icon name="x"></sl-icon>
+          </button>
+        </div>
+      </div>
+      <div class="content-body">
+        <div class="manage-group-form">
+          <h2 class="manage-group-title">Manage Group</h2>
+          <div class="manage-group-name"></div>
+
+          <div class="manage-section">
+            <h3>Add Member</h3>
+            <div class="add-member-form">
+              <div class="form-field">
+                <label for="add-member-company">Company Name</label>
+                <input data-bind placeholder="Enter company name..." type="text" name="addMemberCompany" id="add-member-company" />
+              </div>
+              <div class="form-field">
+                <label for="add-member-employee">Employee ID</label>
+                <input data-bind placeholder="Enter employee ID..." type="text" name="addMemberEmployee" id="add-member-employee" />
+              </div>
+              <button class="add-member-btn" data-add-member>
+                <sl-icon name="person-plus"></sl-icon>
+                <span>Add Member</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="manage-section">
+            <h3>Current Members</h3>
+            <div class="members-list">
+              <div class="loading-members">Loading members...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  `,
+  [views.video]: (target) => {
+    const { currentRoom } = $.learn()
+    return `<iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>`
+  },
+  [views.iframe]: (target) => {
+    const { iframeSrc } = $.learn()
+    return `<iframe src="${iframeSrc}" style="width:100%;height:100%;border:none;"></iframe>`
+  }
 }
 
 function drawGroupButton(group) {
@@ -145,7 +339,7 @@ function beforeUpdate(target) {
   { // Load groups if authenticated
     const { sessionId } = getSession()
     const { authenticated, myGroups } = $.learn()
-    
+
     if(authenticated && sessionId && !target.groupsLoaded) {
       target.groupsLoaded = true
       getMyGroups()
@@ -167,22 +361,22 @@ function beforeUpdate(target) {
 
       // Find messages that need decryption
       const roomMessages = messages[currentRoom]
-      
+
       Object.keys(roomMessages).forEach(mid => {
         const message = roomMessages[mid]
         const decryptKey = `${currentRoom}:${mid}`
-        
+
         // Only decrypt if we haven't already and not in progress
         if(!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
           // Mark as in progress
           decryptionInProgress.add(decryptKey)
-          
+
           // Add to table immediately with placeholder
           table[currentRoom][mid] = {
             ...message,
             decrypted: 'Decrypting...'
           }
-          
+
           // Decrypt asynchronously
           bayunCore.unlockText(sessionId, message.encrypted)
             .then(decrypted => {
@@ -217,29 +411,29 @@ function beforeUpdate(target) {
       }
 
       const roomThreads = threads[currentRoom]
-      
+
       Object.keys(roomThreads).forEach(parentId => {
         if(!table[`${currentRoom}:threads`][parentId]) {
           table[`${currentRoom}:threads`][parentId] = {}
         }
-        
+
         const threadReplies = roomThreads[parentId]
-        
+
         Object.keys(threadReplies).forEach(replyId => {
           const reply = threadReplies[replyId]
           const decryptKey = `${currentRoom}:thread:${parentId}:${replyId}`
-          
+
           // Only decrypt if we haven't already and not in progress
           if(!table[`${currentRoom}:threads`][parentId][replyId] && !decryptionInProgress.has(decryptKey)) {
             // Mark as in progress
             decryptionInProgress.add(decryptKey)
-            
+
             // Add to table immediately with placeholder
             table[`${currentRoom}:threads`][parentId][replyId] = {
               ...reply,
               decrypted: 'Decrypting...'
             }
-            
+
             // Decrypt asynchronously
             bayunCore.unlockText(sessionId, reply.encrypted)
               .then(decrypted => {
@@ -307,11 +501,13 @@ function afterUpdate(target) {
         <div class="sidebar">
           <div class="sidebar-header">
             <button class="profile-button" data-profile>
-              <sl-icon name="person-circle"></sl-icon>
+              <span>
+                <sl-icon name="person-circle"></sl-icon>
+              </span>
               <span>Profile</span>
             </button>
           </div>
-          
+
           <div class="sidebar-content">
             <div class="app-launcher-section">
               <button class="app-launcher-btn" data-launcher="video">
@@ -340,7 +536,9 @@ function afterUpdate(target) {
 
           <div class="sidebar-footer">
             <button class="footer-button" data-preferences>
-              <sl-icon name="gear"></sl-icon>
+              <span>
+                <sl-icon name="gear"></sl-icon>
+              </span>
               <span>Preferences</span>
             </button>
           </div>
@@ -355,7 +553,7 @@ function afterUpdate(target) {
   // Toggle visibility based on authentication
   const authArea = target.querySelector('.zero-space')
   const chatApp = target.querySelector('.chat-app')
-  
+
   if(authArea && chatApp) {
     if(authenticated) {
       authArea.style.display = 'none'
@@ -374,15 +572,15 @@ function afterUpdate(target) {
       const sidebar = target.querySelector('.sidebar')
       const chatAppEl = target.querySelector('.chat-app')
       const toggleBtn = target.querySelector('.toggle-sidebar')
-      
+
       if(sidebar && chatAppEl) {
         if(sidebar.style.width !== `${sidebarWidth}px`) {
           sidebar.style.width = `${sidebarWidth}px`
         }
-        
+
         chatAppEl.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
         chatAppEl.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
-        
+
         if(toggleBtn && window.innerWidth > 768) {
           const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
           if(toggleBtn.style.left !== leftPos) {
@@ -406,235 +604,14 @@ function afterUpdate(target) {
     return
   }
 
-  // Render the active view into main-content
   {
-    const { activeView, currentRoom } = $.learn()
+    const { view } = $.learn()
     const mainContent = target.querySelector('.main-content')
-    
-    // Determine which view to show
-    let viewToShow = activeView
-    if(activeView === 'chat' && !currentRoom) {
-      viewToShow = 'profile' // Default to profile when no room
-    }
-    
-    // Only re-render if view changed
-    if(mainContent && mainContent.dataset.currentView !== viewToShow) {
-      mainContent.dataset.currentView = viewToShow
-      
-      if(viewToShow === 'chat' && currentRoom) {
-        mainContent.innerHTML = `
-          <div class="chat-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <div class="action-menu-container">
-                  <button class="action-menu-trigger" data-action-menu>
-                    <sl-icon name="three-dots-vertical"></sl-icon>
-                  </button>
-                  <div class="action-menu" data-menu-dropdown>
-                    <button class="action-menu-item" data-manage-group>
-                      <sl-icon name="people"></sl-icon>
-                      <span>Manage Group</span>
-                    </button>
-                    <button class="action-menu-item" data-leave-group>
-                      <sl-icon name="box-arrow-left"></sl-icon>
-                      <span>Leave Group</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="chat-body">
-              <div class="chat-main">
-                <div class="scroll-back">
-                  <div class="messages">
-                  </div>
-                </div>
-                <form method="POST" name="send">
-                  <div class="fields">
-                    <div class="action-row">
-                      <button>Send</button>
-                    </div>
-                    <textarea
-                      data-bind
-                      name="messageText"
-                      placeholder="Say it."
-                    ></textarea>
-                  </div>
-                </form>
-              </div>
-              <div class="thread-resizer"></div>
-              <div class="thread-panel">
-                <div class="thread-header">
-                  <span class="thread-title">Thread</span>
-                  <button class="close-thread" data-close-thread>
-                    <sl-icon name="x"></sl-icon>
-                  </button>
-                </div>
-                <div class="thread-parent">
-                </div>
-                <div class="thread-scroll">
-                  <div class="thread-messages">
-                  </div>
-                </div>
-                <form method="POST" name="send-reply">
-                  <div class="fields">
-                    <div class="action-row">
-                      <button>Reply</button>
-                    </div>
-                    <textarea
-                      data-bind
-                      name="replyText"
-                      placeholder="Reply to thread..."
-                    ></textarea>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        `
-      } else if(viewToShow === 'profile') {
-        mainContent.innerHTML = `
-          <div class="profile-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <button class="back-button" data-back-to-chat>
-                  <sl-icon name="x"></sl-icon>
-                </button>
-              </div>
-            </div>
-            <div class="content-body">
-              <secure-persona></secure-persona>
-            </div>
-          </div>
-        `
-      } else if(viewToShow === 'preferences') {
-        const { synthia } = $.learn()
-        const operation = escapeHyperText(synthia.prompt || '')
-        mainContent.innerHTML = `
-          <div class="preferences-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <button class="back-button" data-back-to-chat>
-                  <sl-icon name="x"></sl-icon>
-                </button>
-              </div>
-            </div>
-            <div class="content-body">
-              ${ai(operation)}
-            </div>
-          </div>
-        `
-      } else if(viewToShow === 'new-group') {
-        mainContent.innerHTML = `
-          <div class="new-group-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <button class="back-button" data-back-to-chat>
-                  <sl-icon name="x"></sl-icon>
-                </button>
-              </div>
-            </div>
-            <div class="content-body">
-              <div class="new-group-form">
-                <h2>Create New Group</h2>
-                <div class="form-field">
-                  <label for="group-name">Group Name</label>
-                  <input data-bind placeholder="Enter group name..." type="text" name="group" id="group-name" />
-                </div>
-                <div class="form-field">
-                  <label>Group Type</label>
-                  <div class="group-type-toggle">
-                    <button class="type-btn active" data-group-type="public">
-                      <sl-icon name="globe"></sl-icon>
-                      <span>Public</span>
-                    </button>
-                    <button class="type-btn" data-group-type="private">
-                      <sl-icon name="lock"></sl-icon>
-                      <span>Private</span>
-                    </button>
-                  </div>
-                  <p class="type-description" data-type-desc>Anyone can discover and join this group</p>
-                </div>
-                <button class="create-group-btn" data-create>
-                  <sl-icon name="plus-circle"></sl-icon>
-                  <span>Create Group</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        `
-      } else if(viewToShow === 'manage-group') {
-        mainContent.innerHTML = `
-          <div class="manage-group-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <button class="back-button" data-back-to-chat>
-                  <sl-icon name="x"></sl-icon>
-                </button>
-              </div>
-            </div>
-            <div class="content-body">
-              <div class="manage-group-form">
-                <h2 class="manage-group-title">Manage Group</h2>
-                <div class="manage-group-name"></div>
-                
-                <div class="manage-section">
-                  <h3>Add Member</h3>
-                  <div class="add-member-form">
-                    <div class="form-field">
-                      <label for="add-member-company">Company Name</label>
-                      <input data-bind placeholder="Enter company name..." type="text" name="addMemberCompany" id="add-member-company" />
-                    </div>
-                    <div class="form-field">
-                      <label for="add-member-employee">Employee ID</label>
-                      <input data-bind placeholder="Enter employee ID..." type="text" name="addMemberEmployee" id="add-member-employee" />
-                    </div>
-                    <button class="add-member-btn" data-add-member>
-                      <sl-icon name="person-plus"></sl-icon>
-                      <span>Add Member</span>
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="manage-section">
-                  <h3>Current Members</h3>
-                  <div class="members-list">
-                    <div class="loading-members">Loading members...</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        `
-      } else if(viewToShow === 'video') {
-        const room = currentRoom || ''
-        mainContent.innerHTML = `
-          <div class="video-area">
-            <div class="action-bar">
-              <div class="action-bar-left"></div>
-              <div class="action-bar-center"></div>
-              <div class="action-bar-right">
-                <button class="back-button" data-back-to-chat>
-                  <sl-icon name="x"></sl-icon>
-                </button>
-              </div>
-            </div>
-            <div class="video-content">
-              <iframe class="video-iframe" src="/app/live-help?room=${room}" style="width:100%;height:100%;border:none;"></iframe>
-            </div>
-          </div>
-        `
-      }
+
+    if (mainContent && mainContent.dataset.view !== view) {
+      mainContent.dataset.view = view
+      const renderer = viewRenderers[view] || viewRenderers[views.profile]
+      mainContent.innerHTML = renderer(target)
     }
   }
 
@@ -644,15 +621,15 @@ function afterUpdate(target) {
     const sidebar = target.querySelector('.sidebar')
     const chatApp = target.querySelector('.chat-app')
     const toggleBtn = target.querySelector('.toggle-sidebar')
-    
+
     if(sidebar && chatApp) {
       if(sidebar.style.width !== `${sidebarWidth}px`) {
         sidebar.style.width = `${sidebarWidth}px`
       }
-      
+
       chatApp.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
       chatApp.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
-      
+
       // Update toggle button position
       if(toggleBtn && window.innerWidth > 768) {
         const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
@@ -681,7 +658,7 @@ function afterUpdate(target) {
     const publicBtn = target.querySelector('[data-group-type="public"]')
     const privateBtn = target.querySelector('[data-group-type="private"]')
     const typeDesc = target.querySelector('[data-type-desc]')
-    
+
     if(publicBtn && privateBtn && typeDesc) {
       publicBtn.classList.toggle('active', groupType === 'public')
       privateBtn.classList.toggle('active', groupType === 'private')
@@ -697,7 +674,7 @@ function afterUpdate(target) {
     const threadPanel = target.querySelector('.thread-panel')
     const threadResizer = target.querySelector('.thread-resizer')
     const chatBody = target.querySelector('.chat-body')
-    
+
     if(threadPanel && threadResizer && chatBody) {
       if(activeThread) {
         threadPanel.style.display = 'grid'
@@ -717,7 +694,7 @@ function afterUpdate(target) {
     const { showActionMenu, currentRoom } = $.learn()
     const menuDropdown = target.querySelector('[data-menu-dropdown]')
     const menuContainer = target.querySelector('.action-menu-container')
-    
+
     if(menuDropdown && menuContainer) {
       menuDropdown.classList.toggle('active', showActionMenu)
       // Hide menu container if no room selected
@@ -729,7 +706,7 @@ function afterUpdate(target) {
   {
     const { activeMessageMenu } = $.learn()
     const allMessageMenus = target.querySelectorAll('.message-menu')
-    
+
     allMessageMenus.forEach(menu => {
       const menuId = menu.dataset.messageDropdown
       menu.classList.toggle('active', menuId === activeMessageMenu)
@@ -740,7 +717,7 @@ function afterUpdate(target) {
   {
     const { myGroups, currentRoom } = $.learn()
     const myGroupsContainer = target.querySelector('.my-groups')
-    
+
     if(myGroupsContainer) {
       const groupsHtml = myGroups.map(group => {
         const isActive = currentRoom === group.groupId ? 'active' : ''
@@ -750,7 +727,7 @@ function afterUpdate(target) {
           </button>
         `
       }).join('')
-      
+
       if(myGroupsContainer.dataset.lastGroups !== groupsHtml) {
         myGroupsContainer.dataset.lastGroups = groupsHtml
         myGroupsContainer.innerHTML = groupsHtml
@@ -762,7 +739,7 @@ function afterUpdate(target) {
   {
     const { otherGroups } = $.learn()
     const otherGroupsContainer = target.querySelector('.other-groups')
-    
+
     if(otherGroupsContainer) {
       const groupsHtml = otherGroups.map(group => {
         return `
@@ -771,7 +748,7 @@ function afterUpdate(target) {
           </button>
         `
       }).join('')
-      
+
       if(otherGroupsContainer.dataset.lastGroups !== groupsHtml) {
         otherGroupsContainer.dataset.lastGroups = groupsHtml
         otherGroupsContainer.innerHTML = groupsHtml
@@ -795,11 +772,11 @@ function afterUpdate(target) {
     const membersList = target.querySelector('.members-list')
     const addCompanyInput = target.querySelector('[name="addMemberCompany"]')
     const addEmployeeInput = target.querySelector('[name="addMemberEmployee"]')
-    
+
     if(manageGroupName && currentGroupInfo) {
       manageGroupName.textContent = currentGroupInfo.groupName || ''
     }
-    
+
     if(membersList && currentGroupInfo && currentGroupInfo.groupList) {
       const membersHtml = Object.keys(currentGroupInfo.groupList).map(company => {
         const members = currentGroupInfo.groupList[company].members
@@ -811,7 +788,7 @@ function afterUpdate(target) {
             </button>
           </div>
         `).join('')
-        
+
         return `
           <div class="company-group">
             <div class="company-name">${escapeHyperText(company)}</div>
@@ -819,13 +796,13 @@ function afterUpdate(target) {
           </div>
         `
       }).join('')
-      
+
       if(membersList.dataset.lastMembers !== membersHtml) {
         membersList.dataset.lastMembers = membersHtml
         membersList.innerHTML = membersHtml || '<div class="no-members">No members found</div>'
       }
     }
-    
+
     if(addCompanyInput && addCompanyInput.value !== addMemberCompany) {
       addCompanyInput.value = addMemberCompany
     }
@@ -836,59 +813,61 @@ function afterUpdate(target) {
 
   // Patch messages
   {
-    const { currentRoom, threads } = $.learn()
-    const roomMessages = table[currentRoom] || {}
-    const roomThreads = threads[currentRoom] || {}
-    // Also check decrypted thread table for counts
-    const decryptedThreads = table[`${currentRoom}:threads`] || {}
-    const messageKeys = Object.keys(roomMessages).join(',')
-    const threadKeys = JSON.stringify(roomThreads)
-    
-    if(target.lastMessageKeys !== messageKeys || target.lastRoom !== currentRoom || target.lastThreadKeys !== threadKeys) {
-      target.lastMessageKeys = messageKeys
-      target.lastRoom = currentRoom
-      target.lastThreadKeys = threadKeys
-      const messagesContainer = target.querySelector('.messages')
-      
-      const log = Object.values(roomMessages)
-        .filter(message => !message.parentId) // Only show top-level messages
-        .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
-        .map((message) => {
-          // Check both state threads and decrypted table for reply count
-          const stateReplyCount = roomThreads[message.id] ? Object.keys(roomThreads[message.id]).length : 0
-          const tableReplyCount = decryptedThreads[message.id] ? Object.keys(decryptedThreads[message.id]).length : 0
-          const replyCount = Math.max(stateReplyCount, tableReplyCount)
-          const replyIndicator = replyCount > 0 
-            ? `<button class="thread-indicator" data-open-thread="${message.id}">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</button>`
-            : ''
-          
-          return `
-            <div class="message" data-message-id="${message.id}">
-              <div class="message-content">
-                <div class="message-body">
-                  <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
+    const { view, currentRoom, threads } = $.learn()
+    const messagesContainer = target.querySelector('.messages')
+    if (view === views.chat && messagesContainer) {
+      const roomMessages = table[currentRoom] || {}
+      const roomThreads = threads[currentRoom] || {}
+      // Also check decrypted thread table for counts
+      const decryptedThreads = table[`${currentRoom}:threads`] || {}
+      const messageKeys = Object.keys(roomMessages).join(',')
+      const threadKeys = JSON.stringify(roomThreads)
+
+      if(target.lastMessageKeys !== messageKeys || target.lastRoom !== currentRoom || target.lastThreadKeys !== threadKeys) {
+        target.lastMessageKeys = messageKeys
+        target.lastRoom = currentRoom
+        target.lastThreadKeys = threadKeys
+
+        const log = Object.values(roomMessages)
+          .filter(message => !message.parentId) // Only show top-level messages
+          .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
+          .map((message) => {
+            // Check both state threads and decrypted table for reply count
+            const stateReplyCount = roomThreads[message.id] ? Object.keys(roomThreads[message.id]).length : 0
+            const tableReplyCount = decryptedThreads[message.id] ? Object.keys(decryptedThreads[message.id]).length : 0
+            const replyCount = Math.max(stateReplyCount, tableReplyCount)
+            const replyIndicator = replyCount > 0 
+              ? `<button class="thread-indicator" data-open-thread="${message.id}">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</button>`
+              : ''
+
+            return `
+              <div class="message" data-message-id="${message.id}">
+                <div class="message-content">
+                  <div class="message-body">
+                    <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
+                  </div>
+                  <div class="message-footer">
+                    ${replyIndicator}
+                  </div>
                 </div>
-                <div class="message-footer">
-                  ${replyIndicator}
-                </div>
-              </div>
-              <div class="message-menu-container">
-                <button class="message-menu-trigger" data-message-menu="${message.id}">
-                  <sl-icon name="three-dots-vertical"></sl-icon>
-                </button>
-                <div class="message-menu" data-message-dropdown="${message.id}">
-                  <button class="message-menu-item" data-reply="${message.id}">
-                    <sl-icon name="reply"></sl-icon>
-                    <span>Reply</span>
+                <div class="message-menu-container">
+                  <button class="message-menu-trigger" data-message-menu="${message.id}">
+                    <sl-icon name="three-dots-vertical"></sl-icon>
                   </button>
+                  <div class="message-menu" data-message-dropdown="${message.id}">
+                    <button class="message-menu-item" data-reply="${message.id}">
+                      <sl-icon name="reply"></sl-icon>
+                      <span>Reply</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          `
-        }).join('') || '<div class="empty-state">No messages yet. Start the conversation!</div>'
-      
-      if(messagesContainer) {
-        messagesContainer.innerHTML = log
+            `
+          }).join('') || '<div class="empty-state">No messages yet. Start the conversation!</div>'
+
+        if(messagesContainer) {
+          messagesContainer.innerHTML = log
+        }
       }
     }
   }
@@ -896,13 +875,13 @@ function afterUpdate(target) {
   // Patch thread view
   {
     const { activeThread, currentRoom } = $.learn()
-    
+
     if(activeThread && currentRoom) {
       const parentMessage = table[currentRoom]?.[activeThread]
       const threadParent = target.querySelector('.thread-parent')
       const threadMessages = target.querySelector('.thread-messages')
       const threadReplies = table[`${currentRoom}:threads`]?.[activeThread] || {}
-      
+
       if(threadParent && parentMessage) {
         const parentHtml = `
           <div class="message parent-message">
@@ -916,7 +895,7 @@ function afterUpdate(target) {
           threadParent.innerHTML = parentHtml
         }
       }
-      
+
       if(threadMessages) {
         const repliesHtml = Object.values(threadReplies)
           .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
@@ -927,7 +906,7 @@ function afterUpdate(target) {
               </div>
             </div>
           `).join('') || '<div class="empty-state">No replies yet</div>'
-        
+
         if(threadMessages.dataset.lastReplies !== repliesHtml) {
           threadMessages.dataset.lastReplies = repliesHtml
           threadMessages.innerHTML = repliesHtml
@@ -940,13 +919,13 @@ function afterUpdate(target) {
   {
     const { messageText, messageHeight } = $.learn()
     const textarea = target.querySelector('[name="messageText"]')
-    
+
     if(textarea) {
       if(textarea.lastValue !== messageText) {
         textarea.lastValue = messageText
         textarea.value = messageText
       }
-      
+
       if(textarea.lastHeight !== messageHeight) {
         textarea.lastHeight = messageHeight
         if(messageHeight) {
@@ -962,13 +941,13 @@ function afterUpdate(target) {
   {
     const { replyText, replyHeight } = $.learn()
     const textarea = target.querySelector('[name="replyText"]')
-    
+
     if(textarea) {
       if(textarea.lastValue !== replyText) {
         textarea.lastValue = replyText
         textarea.value = replyText
       }
-      
+
       if(textarea.lastHeight !== replyHeight) {
         textarea.lastHeight = replyHeight
         if(replyHeight) {
@@ -989,7 +968,28 @@ function afterUpdate(target) {
       document.body.style.setProperty('--root-theme', theme)
     }
   }
+
+  {
+    const { view, synthia } = $.learn()
+    const aiContent = target.querySelector('.ai-content')
+
+    if(view === 'preferences' && aiContent) {
+      const operation = escapeHyperText(synthia.prompt || '')
+      diffHTML.innerHTML(aiContent, ai(operation))
+    }
+  }
+
+  { // recover icons from the virtual dom
+    recoverElves(target, 'sl-icon')
+    recoverElves(target, 'plan98-icon')
+    recoverElves(target, 'agentic-dash')
+  }
 }
+
+$.when('click', '.ai-content a[href]', (event) => {
+  event.preventDefault()
+  $.teach({ view: views.iframe, iframeSrc: event.target.href })
+})
 
 let sel = []
 const tags = ['TEXTAREA', 'INPUT']
@@ -1005,7 +1005,7 @@ function saveCursor(target) {
 
 function replaceCursor(target) {
   const field = target.querySelector(`[name="${target.dataset.field}"]`)
-  
+
   if(field) {
     field.focus()
 
@@ -1038,7 +1038,7 @@ $.when('click', '[data-logout]', () => {
     otherGroups: [],
     currentRoom: null,
     activeThread: null,
-    activeView: 'profile'
+    view: 'profile'
   })
 })
 
@@ -1048,22 +1048,16 @@ $.when('click', '[data-toggle-sidebar]', (event) => {
 })
 
 $.when('click', '[data-profile]', (event) => {
-  $.teach({ activeView: 'profile', showActionMenu: false })
+  $.teach({ view: 'profile', showActionMenu: false })
 })
 
 $.when('click', '[data-preferences]', (event) => {
-  $.teach({ activeView: 'preferences', showActionMenu: false })
-})
-
-$.when('click', '[data-back-to-chat]', (event) => {
-  const { currentRoom } = $.learn()
-  // If we have a room, go to chat, otherwise stay on profile
-  $.teach({ activeView: currentRoom ? 'chat' : 'profile', showActionMenu: false })
+  $.teach({ view: 'preferences', showActionMenu: false })
 })
 
 // New group view handler
 $.when('click', '[data-new-group]', (event) => {
-  $.teach({ activeView: 'new-group', showActionMenu: false })
+  $.teach({ view: 'new-group', showActionMenu: false })
 })
 
 // Close thread panel
@@ -1075,7 +1069,7 @@ $.when('click', '[data-close-thread]', (event) => {
 $.when('click', '[data-launcher="video"]', (event) => {
   const { currentRoom } = $.learn()
   if(currentRoom) {
-    $.teach({ activeView: 'video' })
+    $.teach({ view: 'video' })
   }
 })
 
@@ -1107,8 +1101,8 @@ $.when('click', '[data-message-menu]', (event) => {
 $.when('click', '', (event) => {
   const { showActionMenu, activeMessageMenu } = $.learn()
   if((showActionMenu || activeMessageMenu) && 
-     !event.target.closest('.action-menu-container') && 
-     !event.target.closest('.message-menu-container')) {
+    !event.target.closest('.action-menu-container') && 
+    !event.target.closest('.message-menu-container')) {
     $.teach({ showActionMenu: false, activeMessageMenu: null })
   }
 })
@@ -1117,17 +1111,17 @@ $.when('click', '', (event) => {
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
   const { group, groupType } = $.learn()
-  
+
   if(!group.trim()) return
-  
+
   // Use PUBLIC or PRIVATE based on selection
   const bayunGroupType = groupType === 'private' 
     ? BayunCore.GroupType.PRIVATE 
     : BayunCore.GroupType.PUBLIC;
-    
+
   bayunCore.createGroup(sessionId, group, bayunGroupType)
     .then(result => {
-      $.teach({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, activeView: 'chat' })
+      $.teach({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, view: 'chat' })
       getMyGroups()
       getOtherGroups()
     })
@@ -1164,39 +1158,39 @@ $.when('click', '.my-group', (event) => {
 $.when('click', '[data-manage-group]', () => {
   const { currentRoom } = $.learn()
   const { sessionId } = getSession()
-  
+
   if(!currentRoom) return
-  
+
   // Load group info and switch to manage view
   loadGroupInfo(sessionId, currentRoom)
-  $.teach({ activeView: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
+  $.teach({ view: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
 })
 
 // Add member handler
 $.when('click', '[data-add-member]', async () => {
   const { currentRoom, addMemberCompany, addMemberEmployee } = $.learn()
   const { sessionId } = getSession()
-  
+
   if(!currentRoom || !addMemberCompany.trim() || !addMemberEmployee.trim()) return
-  
+
   const groupMembers = [{
     companyName: addMemberCompany.trim(),
     companyEmployeeId: addMemberEmployee.trim()
   }]
-  
+
   try {
     const addMembersResponse = await bayunCore.addMembersToGroup(sessionId, currentRoom, groupMembers)
-    
+
     const addedMembersCount = addMembersResponse.addedMembersCount
     console.log("Total Members Added:", addedMembersCount)
-    
+
     if(addMembersResponse.addMemberErrObject.length !== 0) {
       let errorList = addMembersResponse.addMemberErrObject
       for(let i = 0; i < errorList.length; i++) {
         console.log("Error Message:", errorList[i].errorMessage)
       }
     }
-    
+
     // Clear inputs and refresh group info
     $.teach({ addMemberCompany: '', addMemberEmployee: '' })
     loadGroupInfo(sessionId, currentRoom)
@@ -1211,9 +1205,9 @@ $.when('click', '[data-remove-member]', (event) => {
   const { currentRoom } = $.learn()
   const { sessionId } = getSession()
   const { company, unix } = event.target.closest('[data-remove-member]').dataset
-  
+
   if(!currentRoom || !company || !unix) return
-  
+
   bayunCore.removeMemberFromGroup(sessionId, currentRoom, unix, company)
     .then(result => {
       console.log("Response received for removeMemberFromGroup.")
@@ -1231,12 +1225,12 @@ $.when('click', '[data-remove-member]', (event) => {
 $.when('click', '[data-leave-group]', () => {
   const { currentRoom } = $.learn()
   const { sessionId } = getSession()
-  
+
   if(!currentRoom) return
-  
+
   bayunCore.leaveGroup(sessionId, currentRoom)
     .then(result => {
-      $.teach({ currentRoom: null, showActionMenu: false, activeView: 'profile', activeThread: null })
+      $.teach({ currentRoom: null, showActionMenu: false, view: 'profile', activeThread: null })
       // Refresh group lists after leaving
       getMyGroups()
       getOtherGroups()
@@ -1348,36 +1342,31 @@ async function send(messageText) {
 
     if(sessionId) {
       const encryptedText = await bayunCore.lockText(
-        sessionId, 
-        messageText, 
-        BayunCore.EncryptionPolicy.Company, 
-        BayunCore.KeyGenerationPolicy.Chain, 
-        '91'
+        sessionId,
+        messageText,
+        BayunCore.EncryptionPolicy.Group,
+        BayunCore.KeyGenerationPolicy.Group,
+        currentRoom
       );
 
       const message = {
         id: self.crypto.randomUUID(),
         encrypted: encryptedText,
         author: getEmployeeId(),
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        room: currentRoom
       }
-      
-      // Store room in the payload itself to avoid closure issues
-      $.teach({
-        room: currentRoom,
-        message: message
-      }, (state, payload) => {
-        const { room, message } = payload
-        return {
-          ...state,
-          messages: {
-            ...state.messages,
-            [room]: {
-              ...(state.messages[room] || {}),
+
+      $.teach({ message }, (state, payload) => {
+        const message = payload.message
+        const room = message.room
+        return Object.assign({}, state, {
+          messages: Object.assign({}, state.messages, {
+            [room]: Object.assign({}, state.messages ? state.messages[room] : {}, {
               [message.id]: message
-            }
-          }
-        }
+            })
+          })
+        })
       })
     }
     $.teach({ messageText: '', messageHeight: null })
@@ -1398,9 +1387,9 @@ async function sendReply(replyText) {
       const encryptedText = await bayunCore.lockText(
         sessionId, 
         replyText, 
-        BayunCore.EncryptionPolicy.Company, 
-        BayunCore.KeyGenerationPolicy.Chain, 
-        '91'
+        BayunCore.EncryptionPolicy.Group, 
+        BayunCore.KeyGenerationPolicy.Group, 
+        currentRoom
       );
 
       const reply = {
@@ -1408,39 +1397,28 @@ async function sendReply(replyText) {
         encrypted: encryptedText,
         author: getEmployeeId(),
         timestamp: Date.now(),
-        parentId: activeThread
-      }
-      
-      // Store in threads
-      $.teach({
-        room: currentRoom,
         parentId: activeThread,
-        reply: reply
-      }, (state, payload) => {
-        const { room, parentId, reply } = payload
-        return {
-          ...state,
-          threads: {
-            ...state.threads,
-            [room]: {
-              ...(state.threads[room] || {}),
-              [parentId]: {
-                ...((state.threads[room] || {})[parentId] || {}),
+        room: currentRoom
+      }
+
+      $.teach({ reply }, (state, payload) => {
+        const reply = payload.reply
+        const room = reply.room
+        const parentId = reply.parentId
+        return Object.assign({}, state, {
+          threads: Object.assign({}, state.threads, {
+            [room]: Object.assign({}, state.threads ? state.threads[room] : {}, {
+              [parentId]: Object.assign({}, state.threads && state.threads[room] ? state.threads[room][parentId] : {}, {
                 [reply.id]: reply
-              }
-            }
-          }
-        }
+              })
+            })
+          })
+        })
       })
     }
     $.teach({ replyText: '', replyHeight: null })
   }
 }
-
-$.when('input', '[data-bind]', event => {
-  const { name, value } = event.target;
-  $.teach({ [name]: value })
-})
 
 $.when('focus', '[name="messageText"]', (event) => {
   $.teach({ messageHeight: event.target.scrollHeight })
@@ -1475,7 +1453,7 @@ $.when('secure-persona', 'deactivated', (event) => {
     otherGroups: [],
     currentRoom: null,
     activeThread: null,
-    activeView: 'profile'
+    view: 'profile'
   })
 })
 
@@ -2460,17 +2438,36 @@ $.style(`
 
 $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
-  $.teach({
-    bind: bind,
-    name: event.target.name,
-    value: event.target.value
-  }, (state, payload) => {
-    return {
-      ...state,
-      [payload.bind]: {
-        ...state[payload.bind],
-        [payload.name]: payload.value
+
+  if(bind) {
+    $.teach({
+      bind: bind,
+      name: event.target.name,
+      value: event.target.value
+    }, (state, payload) => {
+      return {
+        ...state,
+        [payload.bind]: {
+          ...state[payload.bind],
+          [payload.name]: payload.value
+        }
       }
-    }
-  })
+    })
+  } else {
+    const { name, value } = event.target;
+    $.teach({ [name]: value })
+  }
 })
+
+function recoverElves(target, tag) {
+  [...target.querySelectorAll(tag)].map(node => {
+    const nodeParent = node.parentNode
+    const newNode = document.createElement(tag)
+    for (const attr of node.attributes) {
+      newNode.setAttribute(attr.name, attr.value)
+    }
+    node.remove()
+    nodeParent.appendChild(newNode)
+  })
+}
+

@@ -266,7 +266,7 @@ const searchEngineMap = {
     url: 'https://en.wikipedia.org/wiki/'
   },
   duckduckgo: {
-    url: 'https://lite.duckduckgo.com/?q=esrach%20terems'
+    url: 'https://lite.duckduckgo.com/?q='
   },
   yahoo: {
     url: 'https://search.yahoo.com/search?p='
