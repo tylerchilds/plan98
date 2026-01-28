@@ -315,7 +315,6 @@ function udpSync(elf, target) {
   target['udpSync'] = true
 
   connect(() => {
-
     linkState.call(target, elf)
     subscribeToUpload(elf, udpUpload.bind(target))
     subscribeToDownload(elf, udpDownload.bind(target))
@@ -366,6 +365,11 @@ export function learn(elf) {
 export function teach(elf, knowledge, nuance = (s, p) => ({...s,...p})) {
   insight('plan98:teach', elf)
   store.set(elf, knowledge, nuance)
+
+  if(this && this.__PLAN98_OFFLINE_ONLY) {
+    return
+  }
+
   notifyUploaders(elf, knowledge, nuance)
 }
 
@@ -433,6 +437,9 @@ export default function Self(elf, initialState = {}) {
     post: teach.bind(this, elf),
     patch: teach.bind(this, elf),
     delete: teach.bind(this, elf),
+    controller: teach.bind(this, elf),
+
+    whisper: teach.bind({ __PLAN98_OFFLINE_ONLY: true }, elf)
   }
 }
 

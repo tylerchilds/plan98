@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import mvc from '@plan98/elf'
 import diffHTML from 'diffhtml'
 import { showPanel } from './plan98-panel.js'
 import { getTheme } from './paper-pocket.js'
@@ -17,7 +17,7 @@ const table = {}
 // Track which messages are being decrypted to avoid duplicate attempts
 const decryptionInProgress = new Set()
 
-const $ = elf('dream-team', {
+const $ = mvc('dream-team', {
   synthia: {},
   players: {},
   messages: {},
@@ -68,7 +68,7 @@ export async function getMyGroups() {
   const { sessionId } = getSession()
   return await bayunCore.getMyGroups(sessionId)
     .then(result => {
-      $.teach({ myGroups: result })
+      $.whisper({ myGroups: result })
       return result
     })
     .catch(error => {
@@ -81,7 +81,7 @@ export async function getOtherGroups() {
   const { sessionId } = getSession()
   return await bayunCore.getUnjoinedPublicGroups(sessionId)
     .then(result => {
-      $.teach({ otherGroups: result })
+      $.whisper({ otherGroups: result })
       return result
     })
     .catch(error => {
@@ -93,7 +93,7 @@ export async function getOtherGroups() {
 function activateGroup(sessionId, id) {
   bayunCore.getGroupById(sessionId, id)
     .then(result => {
-      $.teach({ currentRoom: result.groupId, showActionMenu: false, view: 'chat' })
+      $.whisper({ currentRoom: result.groupId, showActionMenu: false, view: 'chat' })
     })
     .catch(error => {
       console.log("Error caught");
@@ -114,7 +114,7 @@ function loadGroupInfo(sessionId, groupId) {
         return all
       }, {})
 
-      $.teach({
+      $.controller({
         currentGroupInfo: {
           groupId: result.groupId,
           groupName: result.groupName,
@@ -140,7 +140,7 @@ const views = {
 
 const viewRenderers = {
   [views.chat]: (target) => {
-    const { currentRoom } = $.learn()
+    const { currentRoom } = $.model()
     if (!currentRoom) return viewRenderers[views.profile](target)
     return `
       <div class="chat-area">
@@ -311,11 +311,11 @@ const viewRenderers = {
 
   `,
   [views.video]: (target) => {
-    const { currentRoom } = $.learn()
+    const { currentRoom } = $.model()
     return `<iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>`
   },
   [views.iframe]: (target) => {
-    const { iframeSrc } = $.learn()
+    const { iframeSrc } = $.model()
     return `<iframe src="${iframeSrc}" style="width:100%;height:100%;border:none;"></iframe>`
   }
 }
@@ -328,7 +328,7 @@ function drawGroupButton(group) {
   `
 }
 
-$.draw(target => {
+$.view(target => {
   // Don't render anything for main view - afterUpdate handles all DOM building and patching
   return null
 }, {
@@ -344,22 +344,22 @@ function beforeUpdate(target) {
       target.initialized = true
 
       if(room) {
-        $.teach({ currentRoom: room })
+        $.controller({ currentRoom: room })
       }
 
       if(q) {
         const message = decodeURIComponent(q)
-        $.teach({ messageText: message })
+        $.controller({ messageText: message })
       }
     }
   }
 
   {
     const { sessionId } = getSession()
-    const { currentRoom, messages, threads } = $.learn()
+    const { currentRoom, messages, threads } = $.model()
 
     const id = getMyId()
-    const me = $.learn().players[id]
+    const me = $.model().players[id]
     const isOnline = !!me?.online
 
     if(isOnline) {
@@ -494,13 +494,13 @@ function updateReplyElement(target, replyId, author, decryptedText) {
 
 function afterUpdate(target) {
   const id = getMyId()
-  const me = $.learn().players[id]
+  const me = $.model().players[id]
   const isOnline = !!me?.online
 
   // Initialize DOM template ONCE and never rebuild it
   if(!target.templateBuilt) {
     target.templateBuilt = true
-    const { participants, myGroups, otherGroups, group = '' } = $.learn()
+    const { participants, myGroups, otherGroups, group = '' } = $.model()
     target.innerHTML = `
       <div class="zero-space">
         <div class="zero-content">
@@ -582,7 +582,7 @@ function afterUpdate(target) {
   if(!isOnline) {
     // Apply sidebar width and visibility
     {
-      const { sidebarWidth, sidebarVisible } = $.learn()
+      const { sidebarWidth, sidebarVisible } = $.model()
       const sidebar = target.querySelector('.sidebar')
       const chatAppEl = target.querySelector('.chat-app')
       const toggleBtn = target.querySelector('.toggle-sidebar')
@@ -606,7 +606,7 @@ function afterUpdate(target) {
 
     // Update toggle button icon based on sidebar visibility
     {
-      const { sidebarVisible } = $.learn()
+      const { sidebarVisible } = $.model()
       const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
       if(toggleBtn) {
         const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
@@ -619,7 +619,7 @@ function afterUpdate(target) {
   }
 
   {
-    const { view } = $.learn()
+    const { view } = $.model()
     const mainContent = target.querySelector('.main-content')
 
     if (mainContent && mainContent.dataset.view !== view) {
@@ -631,7 +631,7 @@ function afterUpdate(target) {
 
   // Apply sidebar width and visibility
   {
-    const { sidebarWidth, sidebarVisible } = $.learn()
+    const { sidebarWidth, sidebarVisible } = $.model()
     const sidebar = target.querySelector('.sidebar')
     const chatApp = target.querySelector('.chat-app')
     const toggleBtn = target.querySelector('.toggle-sidebar')
@@ -656,7 +656,7 @@ function afterUpdate(target) {
 
   // Update toggle button icon based on sidebar visibility
   {
-    const { sidebarVisible } = $.learn()
+    const { sidebarVisible } = $.model()
     const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
     if(toggleBtn) {
       const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
@@ -668,7 +668,7 @@ function afterUpdate(target) {
 
   // Handle group type toggle UI
   {
-    const { groupType } = $.learn()
+    const { groupType } = $.model()
     const publicBtn = target.querySelector('[data-group-type="public"]')
     const privateBtn = target.querySelector('[data-group-type="private"]')
     const typeDesc = target.querySelector('[data-type-desc]')
@@ -684,7 +684,7 @@ function afterUpdate(target) {
 
   // Handle thread panel visibility
   {
-    const { activeThread, threadPanelWidth } = $.learn()
+    const { activeThread, threadPanelWidth } = $.model()
     const threadPanel = target.querySelector('.thread-panel')
     const threadResizer = target.querySelector('.thread-resizer')
     const chatBody = target.querySelector('.chat-body')
@@ -705,7 +705,7 @@ function afterUpdate(target) {
 
   // Handle action menu visibility
   {
-    const { showActionMenu, currentRoom } = $.learn()
+    const { showActionMenu, currentRoom } = $.model()
     const menuDropdown = target.querySelector('[data-menu-dropdown]')
     const menuContainer = target.querySelector('.action-menu-container')
 
@@ -718,7 +718,7 @@ function afterUpdate(target) {
 
   // Handle message menu visibility
   {
-    const { activeMessageMenu } = $.learn()
+    const { activeMessageMenu } = $.model()
     const allMessageMenus = target.querySelectorAll('.message-menu')
 
     allMessageMenus.forEach(menu => {
@@ -729,7 +729,7 @@ function afterUpdate(target) {
 
   // Patch my groups
   {
-    const { myGroups, currentRoom } = $.learn()
+    const { myGroups, currentRoom } = $.model()
     const myGroupsContainer = target.querySelector('.my-groups')
 
     if(myGroupsContainer) {
@@ -751,7 +751,7 @@ function afterUpdate(target) {
 
   // Patch other groups
   {
-    const { otherGroups } = $.learn()
+    const { otherGroups } = $.model()
     const otherGroupsContainer = target.querySelector('.other-groups')
 
     if(otherGroupsContainer) {
@@ -772,7 +772,7 @@ function afterUpdate(target) {
 
   // Patch group input
   {
-    const { group } = $.learn()
+    const { group } = $.model()
     const groupInput = target.querySelector('[name="group"]')
     if(groupInput && groupInput.value !== group) {
       groupInput.value = group
@@ -781,7 +781,7 @@ function afterUpdate(target) {
 
   // Patch manage group view
   {
-    const { currentGroupInfo, addMemberCompany, addMemberEmployee } = $.learn()
+    const { currentGroupInfo, addMemberCompany, addMemberEmployee } = $.model()
     const manageGroupName = target.querySelector('.manage-group-name')
     const membersList = target.querySelector('.members-list')
     const addCompanyInput = target.querySelector('[name="addMemberCompany"]')
@@ -827,7 +827,7 @@ function afterUpdate(target) {
 
   // Patch messages
   {
-    const { view, currentRoom, threads } = $.learn()
+    const { view, currentRoom, threads } = $.model()
     const messagesContainer = target.querySelector('.messages')
     if (view === views.chat && messagesContainer) {
       const roomMessages = table[currentRoom] || {}
@@ -888,7 +888,7 @@ function afterUpdate(target) {
 
   // Patch thread view
   {
-    const { activeThread, currentRoom } = $.learn()
+    const { activeThread, currentRoom } = $.model()
 
     if(activeThread && currentRoom) {
       const parentMessage = table[currentRoom]?.[activeThread]
@@ -931,7 +931,7 @@ function afterUpdate(target) {
 
   // Patch message textarea
   {
-    const { messageText, messageHeight } = $.learn()
+    const { messageText, messageHeight } = $.model()
     const textarea = target.querySelector('[name="messageText"]')
 
     if(textarea) {
@@ -953,7 +953,7 @@ function afterUpdate(target) {
 
   // Patch reply textarea
   {
-    const { replyText, replyHeight } = $.learn()
+    const { replyText, replyHeight } = $.model()
     const textarea = target.querySelector('[name="replyText"]')
 
     if(textarea) {
@@ -984,7 +984,7 @@ function afterUpdate(target) {
   }
 
   {
-    const { view, synthia } = $.learn()
+    const { view, synthia } = $.model()
     const aiContent = target.querySelector('.ai-content')
 
     if(view === 'preferences' && aiContent) {
@@ -1002,7 +1002,7 @@ function afterUpdate(target) {
 
 $.when('click', '.ai-content a[href]', (event) => {
   event.preventDefault()
-  $.teach({ view: views.iframe, iframeSrc: event.target.href })
+  $.whisper({ view: views.iframe, iframeSrc: event.target.href })
 })
 
 let sel = []
@@ -1047,55 +1047,55 @@ $.when('click', '[data-logout]', () => {
 })
 
 $.when('click', '[data-toggle-sidebar]', (event) => {
-  const { sidebarVisible } = $.learn()
-  $.teach({ sidebarVisible: !sidebarVisible })
+  const { sidebarVisible } = $.model()
+  $.whisper({ sidebarVisible: !sidebarVisible })
 })
 
 $.when('click', '[data-profile]', (event) => {
-  $.teach({ view: 'profile', showActionMenu: false })
+  $.whisper({ view: 'profile', showActionMenu: false })
 })
 
 $.when('click', '[data-preferences]', (event) => {
-  $.teach({ view: 'preferences', showActionMenu: false })
+  $.whisper({ view: 'preferences', showActionMenu: false })
 })
 
 // New group view handler
 $.when('click', '[data-new-group]', (event) => {
-  $.teach({ view: 'new-group', showActionMenu: false })
+  $.whisper({ view: 'new-group', showActionMenu: false })
 })
 
 // Close thread panel
 $.when('click', '[data-close-thread]', (event) => {
-  $.teach({ activeThread: null })
+  $.whisper({ activeThread: null })
 })
 
 // App launcher handlers
 $.when('click', '[data-launcher="video"]', (event) => {
-  const { currentRoom } = $.learn()
+  const { currentRoom } = $.model()
   if(currentRoom) {
-    $.teach({ view: 'video' })
+    $.whisper({ view: 'video' })
   }
 })
 
 // Group type toggle
 $.when('click', '[data-group-type]', (event) => {
   const groupType = event.target.closest('[data-group-type]').dataset.groupType
-  $.teach({ groupType })
+  $.controller({ groupType })
 })
 
 // Action menu toggle
 $.when('click', '[data-action-menu]', (event) => {
   event.stopPropagation()
-  const { showActionMenu } = $.learn()
-  $.teach({ showActionMenu: !showActionMenu, activeMessageMenu: null })
+  const { showActionMenu } = $.model()
+  $.whisper({ showActionMenu: !showActionMenu, activeMessageMenu: null })
 })
 
 // Message menu toggle
 $.when('click', '[data-message-menu]', (event) => {
   event.stopPropagation()
   const messageId = event.target.closest('[data-message-menu]').dataset.messageMenu
-  const { activeMessageMenu } = $.learn()
-  $.teach({ 
+  const { activeMessageMenu } = $.model()
+  $.whisper({ 
     activeMessageMenu: activeMessageMenu === messageId ? null : messageId,
     showActionMenu: false 
   })
@@ -1103,18 +1103,18 @@ $.when('click', '[data-message-menu]', (event) => {
 
 // Close menus when clicking elsewhere
 $.when('click', '', (event) => {
-  const { showActionMenu, activeMessageMenu } = $.learn()
+  const { showActionMenu, activeMessageMenu } = $.model()
   if((showActionMenu || activeMessageMenu) && 
     !event.target.closest('.action-menu-container') && 
     !event.target.closest('.message-menu-container')) {
-    $.teach({ showActionMenu: false, activeMessageMenu: null })
+    $.whisper({ showActionMenu: false, activeMessageMenu: null })
   }
 })
 
 // Create group handler
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
-  const { group, groupType } = $.learn()
+  const { group, groupType } = $.model()
 
   if(!group.trim()) return
 
@@ -1125,7 +1125,7 @@ $.when('click', '[data-create]', () => {
 
   bayunCore.createGroup(sessionId, group, bayunGroupType)
     .then(result => {
-      $.teach({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, view: 'chat' })
+      $.whisper({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, view: 'chat' })
       getMyGroups()
       getOtherGroups()
     })
@@ -1160,19 +1160,19 @@ $.when('click', '.my-group', (event) => {
 
 // Manage group handler
 $.when('click', '[data-manage-group]', () => {
-  const { currentRoom } = $.learn()
+  const { currentRoom } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom) return
 
   // Load group info and switch to manage view
   loadGroupInfo(sessionId, currentRoom)
-  $.teach({ view: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
+  $.whisper({ view: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
 })
 
 // Add member handler
 $.when('click', '[data-add-member]', async () => {
-  const { currentRoom, addMemberCompany, addMemberEmployee } = $.learn()
+  const { currentRoom, addMemberCompany, addMemberEmployee } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom || !addMemberCompany.trim() || !addMemberEmployee.trim()) return
@@ -1196,7 +1196,7 @@ $.when('click', '[data-add-member]', async () => {
     }
 
     // Clear inputs and refresh group info
-    $.teach({ addMemberCompany: '', addMemberEmployee: '' })
+    $.controller({ addMemberCompany: '', addMemberEmployee: '' })
     loadGroupInfo(sessionId, currentRoom)
   } catch(error) {
     console.log("Error caught")
@@ -1206,7 +1206,7 @@ $.when('click', '[data-add-member]', async () => {
 
 // Remove member handler
 $.when('click', '[data-remove-member]', (event) => {
-  const { currentRoom } = $.learn()
+  const { currentRoom } = $.model()
   const { sessionId } = getSession()
   const { company, unix } = event.target.closest('[data-remove-member]').dataset
 
@@ -1227,14 +1227,14 @@ $.when('click', '[data-remove-member]', (event) => {
 
 // Leave group handler
 $.when('click', '[data-leave-group]', () => {
-  const { currentRoom } = $.learn()
+  const { currentRoom } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom) return
 
   bayunCore.leaveGroup(sessionId, currentRoom)
     .then(result => {
-      $.teach({ currentRoom: null, showActionMenu: false, view: 'profile', activeThread: null })
+      $.whisper({ currentRoom: null, showActionMenu: false, view: 'profile', activeThread: null })
       // Refresh group lists after leaving
       getMyGroups()
       getOtherGroups()
@@ -1248,16 +1248,16 @@ $.when('click', '[data-leave-group]', () => {
 // Thread handlers
 $.when('click', '[data-reply]', (event) => {
   const messageId = event.target.closest('[data-reply]').dataset.reply
-  $.teach({ activeThread: messageId, showActionMenu: false, activeMessageMenu: null })
+  $.whisper({ activeThread: messageId, showActionMenu: false, activeMessageMenu: null })
 })
 
 // Reply count toggles thread open/closed
 $.when('click', '[data-open-thread]', (event) => {
   const messageId = event.target.dataset.openThread
-  const { activeThread } = $.learn()
+  const { activeThread } = $.model()
   // Toggle: if already open on this thread, close it
   const newThread = activeThread === messageId ? null : messageId
-  $.teach({ activeThread: newThread, showActionMenu: false, activeMessageMenu: null })
+  $.whisper({ activeThread: newThread, showActionMenu: false, activeMessageMenu: null })
 })
 
 // Thread panel resizer
@@ -1271,7 +1271,7 @@ $.when('mousedown', '.thread-resizer', (event) => {
   function handleMouseMove(e) {
     const deltaX = startX - e.pageX
     const newWidth = Math.max(250, Math.min(600, startWidth + deltaX))
-    $.teach({ threadPanelWidth: newWidth })
+    $.whisper({ threadPanelWidth: newWidth })
   }
 
   function handleMouseUp() {
@@ -1294,7 +1294,7 @@ $.when('mousedown', '.resizer', (event) => {
   function handleMouseMove(e) {
     const deltaX = e.pageX - startX
     const newWidth = Math.max(150, Math.min(500, startWidth + deltaX))
-    $.teach({ sidebarWidth: newWidth })
+    $.whisper({ sidebarWidth: newWidth })
   }
 
   function handleMouseUp() {
@@ -1336,7 +1336,7 @@ $.when('submit', '[name="send-reply"]',(event) => {
 
 async function send(messageText) {
   if (messageText) {
-    const { currentRoom } = $.learn()
+    const { currentRoom } = $.model()
     const { sessionId } = getSession()
 
     if(!currentRoom) {
@@ -1361,7 +1361,7 @@ async function send(messageText) {
         room: currentRoom
       }
 
-      $.teach({ message }, (state, payload) => {
+      $.controller({ message }, (state, payload) => {
         const message = payload.message
         const room = message.room
         return Object.assign({}, state, {
@@ -1373,13 +1373,13 @@ async function send(messageText) {
         })
       })
     }
-    $.teach({ messageText: '', messageHeight: null })
+    $.controller({ messageText: '', messageHeight: null })
   }
 }
 
 async function sendReply(replyText) {
   if (replyText) {
-    const { currentRoom, activeThread } = $.learn()
+    const { currentRoom, activeThread } = $.model()
     const { sessionId } = getSession()
 
     if(!currentRoom || !activeThread) {
@@ -1405,7 +1405,7 @@ async function sendReply(replyText) {
         room: currentRoom
       }
 
-      $.teach({ reply }, (state, payload) => {
+      $.controller({ reply }, (state, payload) => {
         const reply = payload.reply
         const room = reply.room
         const parentId = reply.parentId
@@ -1420,32 +1420,32 @@ async function sendReply(replyText) {
         })
       })
     }
-    $.teach({ replyText: '', replyHeight: null })
+    $.controller({ replyText: '', replyHeight: null })
   }
 }
 
 $.when('focus', '[name="messageText"]', (event) => {
-  $.teach({ messageHeight: event.target.scrollHeight })
+  $.controller({ messageHeight: event.target.scrollHeight })
 });
 
 $.when('input', '[name="messageText"]', (event) => {
-  $.teach({ messageHeight: event.target.scrollHeight })
+  $.controller({ messageHeight: event.target.scrollHeight })
 });
 
 $.when('focus', '[name="replyText"]', (event) => {
-  $.teach({ replyHeight: event.target.scrollHeight })
+  $.controller({ replyHeight: event.target.scrollHeight })
 });
 
 $.when('input', '[name="replyText"]', (event) => {
-  $.teach({ replyHeight: event.target.scrollHeight })
+  $.controller({ replyHeight: event.target.scrollHeight })
 });
 
 $.when('activated', 'secure-persona', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
   const id = getMyId()
-  $.teach({
+  $.controller({
     id,
-    color: $.learn().color,
+    color: $.model().color,
     lastSeen: Date.now()
   }, join)
 
@@ -1457,7 +1457,7 @@ $.when('deactivated', 'secure-persona', (event) => {
   // User has logged out, clear all caches and messages, trigger re-render
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
-  $.teach(getMyId(), leave)
+  $.controller(getMyId(), leave)
 })
 
 function escapeHyperText(text = '') {
@@ -1472,7 +1472,7 @@ function escapeHyperText(text = '') {
   )
 }
 
-$.style(`
+$.skin(`
   & {
     display: block;
     height: 100%;
@@ -2443,7 +2443,7 @@ $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
 
   if(bind) {
-    $.teach({
+    $.controller({
       bind: bind,
       name: event.target.name,
       value: event.target.value
@@ -2458,7 +2458,7 @@ $.when('input', '[data-bind]', (event) => {
     })
   } else {
     const { name, value } = event.target;
-    $.teach({ [name]: value })
+    $.controller({ [name]: value })
   }
 })
 
