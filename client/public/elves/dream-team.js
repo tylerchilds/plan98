@@ -134,7 +134,13 @@ const views = {
   preferences: 'preferences',
   newGroup: 'new-group',
   manageGroup: 'manage-group',
-  video: 'video',
+  shell: 'shell',
+  desktop: 'desktop',
+  mobile: 'mobile',
+  files: 'files',
+  console: 'console',
+  coop: 'coop',
+  studio: 'studio',
   iframe: 'iframe'
 }
 
@@ -143,11 +149,14 @@ const viewRenderers = {
     const { currentRoom } = $.model()
     if (!currentRoom) return viewRenderers[views.profile](target)
     return `
-      <div class="chat-area">
+      <div class="app-area">
         <div class="action-bar">
           <div class="action-bar-left"></div>
           <div class="action-bar-center"></div>
           <div class="action-bar-right">
+            <button class="video-chat-btn" data-launcher="video">
+              <sl-icon name="camera-video"></sl-icon>
+            </button>
             <div class="action-menu-container">
               <button class="action-menu-trigger" data-action-menu>
                 <sl-icon name="three-dots-vertical"></sl-icon>
@@ -217,15 +226,37 @@ const viewRenderers = {
     `
   },
   [views.profile]: (target) => `
-    <div class="profile-area">
+    <div class="app-area">
+      <div class="action-bar">
+        <div class="action-bar-left"></div>
+        <div class="action-bar-center"></div>
+        <div class="action-bar-right">
+          <button class="back-button" data-back-to-chat>
+            <sl-icon name="x"></sl-icon>
+          </button>
+        </div>
+      </div>
+
       <secure-persona></secure-persona>
     </div>
   `,
   [views.preferences]: (target) => `
-    <div class="preferences-area ai-content"></div>
+    <div class="app-area">
+      <div class="action-bar">
+        <div class="action-bar-left"></div>
+        <div class="action-bar-center"></div>
+        <div class="action-bar-right">
+          <button class="back-button" data-back-to-chat>
+            <sl-icon name="x"></sl-icon>
+          </button>
+        </div>
+      </div>
+     
+      <div class="preferences-area ai-content"></div>
+    </div>
   `,
   [views.newGroup]: (target) => `
-    <div class="new-group-area">
+    <div class="app-area">
       <div class="action-bar">
         <div class="action-bar-left"></div>
         <div class="action-bar-center"></div>
@@ -266,7 +297,7 @@ const viewRenderers = {
 
   `,
   [views.manageGroup]: (target) => `
-    <div class="manage-group-area">
+    <div class="app-area">
       <div class="action-bar">
         <div class="action-bar-left"></div>
         <div class="action-bar-center"></div>
@@ -308,15 +339,167 @@ const viewRenderers = {
         </div>
       </div>
     </div>
-
   `,
+  [views.shell]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+        <iframe src="/app/ur-shell?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.desktop]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/multi-task?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.mobile]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/mobile-device?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.files]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/file-surf?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.console]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/paper-pocket?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.coop]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/paper-pocket?rom=couch-coop&id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+  [views.studio]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/v-log?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
   [views.video]: (target) => {
     const { currentRoom } = $.model()
-    return `<iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>`
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
   },
   [views.iframe]: (target) => {
     const { iframeSrc } = $.model()
-    return `<iframe src="${iframeSrc}" style="width:100%;height:100%;border:none;"></iframe>`
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="${iframeSrc}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
   }
 }
 
@@ -349,7 +532,7 @@ function beforeUpdate(target) {
 
       if(q) {
         const message = decodeURIComponent(q)
-        $.controller({ messageText: message })
+        $.whisper({ messageText: message })
       }
     }
   }
@@ -523,13 +706,6 @@ function afterUpdate(target) {
           </div>
 
           <div class="sidebar-content">
-            <div class="app-launcher-section">
-              <button class="app-launcher-btn" data-launcher="video">
-                <sl-icon name="camera-video"></sl-icon>
-                <span>Video Chat</span>
-              </button>
-            </div>
-
             <div class="group-section">
               <div class="subtitle-row">
                 <span class="subtitle">MY GROUPS</span>
@@ -545,6 +721,59 @@ function afterUpdate(target) {
               <div class="subtitle">OTHER GROUPS</div>
               <div class="other-groups">
               </div>
+            </div>
+
+            <div class="app-launcher-section">
+              <div class="subtitle">APPS</div>
+              <button class="app-launcher-btn" data-launcher="shell">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Shell</span>
+              </button>
+
+              <button class="app-launcher-btn" data-launcher="desktop">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Desktop</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="mobile">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Mobile</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="files">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Files</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="console">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Console</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="coop">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Coop</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="studio">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Studio</span>
+              </button>
+              <button class="app-launcher-btn" data-launcher="archive">
+                <span>
+                  <sl-icon name="camera-video"></sl-icon>
+                </span>
+                <span>Archive</span>
+              </button>
             </div>
           </div>
 
@@ -837,7 +1066,10 @@ function afterUpdate(target) {
       const messageKeys = Object.keys(roomMessages).join(',')
       const threadKeys = JSON.stringify(roomThreads)
 
-      if(target.lastMessageKeys !== messageKeys || target.lastRoom !== currentRoom || target.lastThreadKeys !== threadKeys) {
+      const containerIsEmpty = !messagesContainer.dataset.initialized
+
+      if(containerIsEmpty || target.lastMessageKeys !== messageKeys || target.lastRoom !== currentRoom || target.lastThreadKeys !== threadKeys) {
+        messagesContainer.dataset.initialized = 'true'
         target.lastMessageKeys = messageKeys
         target.lastRoom = currentRoom
         target.lastThreadKeys = threadKeys
@@ -1064,17 +1296,20 @@ $.when('click', '[data-new-group]', (event) => {
   $.whisper({ view: 'new-group', showActionMenu: false })
 })
 
+$.when('click', '[data-back-to-chat]', (event) => {
+  const { currentRoom } = $.model()
+  $.whisper({ view: currentRoom ? 'chat' : 'profile', showActionMenu: false })
+})
+
 // Close thread panel
 $.when('click', '[data-close-thread]', (event) => {
   $.whisper({ activeThread: null })
 })
 
 // App launcher handlers
-$.when('click', '[data-launcher="video"]', (event) => {
-  const { currentRoom } = $.model()
-  if(currentRoom) {
-    $.whisper({ view: 'video' })
-  }
+$.when('click', '[data-launcher]', (event) => {
+  const { launcher } = event.target.dataset
+  $.whisper({ view: launcher })
 })
 
 // Group type toggle
@@ -1373,7 +1608,7 @@ async function send(messageText) {
         })
       })
     }
-    $.controller({ messageText: '', messageHeight: null })
+    $.whisper({ messageText: '', messageHeight: null })
   }
 }
 
@@ -1420,24 +1655,24 @@ async function sendReply(replyText) {
         })
       })
     }
-    $.controller({ replyText: '', replyHeight: null })
+    $.whisper({ replyText: '', replyHeight: null })
   }
 }
 
 $.when('focus', '[name="messageText"]', (event) => {
-  $.controller({ messageHeight: event.target.scrollHeight })
+  $.whisper({ messageHeight: event.target.scrollHeight })
 });
 
 $.when('input', '[name="messageText"]', (event) => {
-  $.controller({ messageHeight: event.target.scrollHeight })
+  $.whisper({ messageHeight: event.target.scrollHeight })
 });
 
 $.when('focus', '[name="replyText"]', (event) => {
-  $.controller({ replyHeight: event.target.scrollHeight })
+  $.whisper({ replyHeight: event.target.scrollHeight })
 });
 
 $.when('input', '[name="replyText"]', (event) => {
-  $.controller({ replyHeight: event.target.scrollHeight })
+  $.whisper({ replyHeight: event.target.scrollHeight })
 });
 
 $.when('activated', 'secure-persona', (event) => {
@@ -1719,11 +1954,7 @@ $.skin(`
     overflow: auto;
   }
 
-  & .profile-area,
-  & .preferences-area,
-  & .new-group-area,
-  & .manage-group-area,
-  & .video-area {
+  & .app-area {
     display: grid;
     grid-template-rows: auto 1fr;
     height: 100%;
@@ -1809,6 +2040,28 @@ $.skin(`
     font-size: 1.2rem;
   }
 
+  & .video-chat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 200ms ease-in-out;
+  }
+
+  & .video-chat-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+  }
+
+  & .video-chat-btn sl-icon {
+    font-size: 1.2rem;
+  }
+
   & .action-menu {
     display: none;
     position: absolute;
@@ -1838,6 +2091,7 @@ $.skin(`
     cursor: pointer;
     font-size: .9rem;
     text-align: left;
+    white-space: nowrap;
     transition: background 200ms ease-in-out;
   }
 

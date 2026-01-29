@@ -1,4 +1,4 @@
-import { Ed25519Signer } from "https://esm.sh/@did.coop/did-key-ed25519";
+import { Ed25519Signer } from "https://esm.sh/@did.coop/did-key-ed25519@0.0.14";
 import { StorageClient } from "https://esm.sh/@wallet.storage/fetch-client@^1.1.3"
 import { walk } from "https://deno.land/std/fs/mod.ts";
 import sortPaths from "https://esm.sh/sort-paths@1.1.1"
@@ -709,7 +709,7 @@ function template(body) {
           "@inrupt/solid-client-authn-browser": "https://esm.sh/@inrupt/solid-client-authn-browser@1.17.5?bundle-deps",
           "@lottiefiles/lottie-player": "https://esm.sh/@lottiefiles/lottie-player@2.0.3",
           "@pyscript/core": "https://pyscript.net/snapshots/2023.11.1.RC3/core.js",
-          "@did.coop/did-key-ed25519": "https://esm.sh/@did.coop/did-key-ed25519",
+          "@did.coop/did-key-ed25519": "https://esm.sh/@did.coop/did-key-ed25519@0.0.14",
           "@dimforge/rapier2d": "https://cdn.skypack.dev/@dimforge/rapier2d-compat",
           "@dimforge/rapier3d": "https://cdn.skypack.dev/@dimforge/rapier3d-compat",
           "@elevenlabs/elevenlabs-js": "https://esm.sh/@elevenlabs/elevenlabs-js@2.29.0",
