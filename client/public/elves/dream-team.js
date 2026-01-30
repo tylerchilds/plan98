@@ -10,6 +10,7 @@ import {
   getEmployeeId
 } from './bayun-wizard.js'
 import { bayunCore, BayunCore } from '@sillonious/vault'
+import './secure-followers.js'
 
 // Local decryption cache - stores decrypted messages
 const table = {}
@@ -134,12 +135,14 @@ const views = {
   preferences: 'preferences',
   newGroup: 'new-group',
   manageGroup: 'manage-group',
+  wallet: 'wallet',
   shell: 'shell',
   desktop: 'desktop',
   mobile: 'mobile',
   files: 'files',
   console: 'console',
   coop: 'coop',
+  archive: 'archive',
   studio: 'studio',
   iframe: 'iframe'
 }
@@ -231,13 +234,10 @@ const viewRenderers = {
         <div class="action-bar-left"></div>
         <div class="action-bar-center"></div>
         <div class="action-bar-right">
-          <button class="back-button" data-back-to-chat>
-            <sl-icon name="x"></sl-icon>
-          </button>
         </div>
       </div>
 
-      <secure-persona></secure-persona>
+      <face-less></face-less>
     </div>
   `,
   [views.preferences]: (target) => `
@@ -246,9 +246,6 @@ const viewRenderers = {
         <div class="action-bar-left"></div>
         <div class="action-bar-center"></div>
         <div class="action-bar-right">
-          <button class="back-button" data-back-to-chat>
-            <sl-icon name="x"></sl-icon>
-          </button>
         </div>
       </div>
      
@@ -340,6 +337,24 @@ const viewRenderers = {
       </div>
     </div>
   `,
+  [views.wallet]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+        <iframe src="/app/plan98-wallet?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+
   [views.shell]: (target) => {
     const { currentRoom } = $.model()
     return `
@@ -447,6 +462,25 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.archive]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/time-machine?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+
   [views.studio]: (target) => {
     const { currentRoom } = $.model()
     return `
@@ -687,7 +721,7 @@ function afterUpdate(target) {
     target.innerHTML = `
       <div class="zero-space">
         <div class="zero-content">
-          <div class="zero-title">Chat Rooms</div>
+          <div class="zero-title">Phlogin</div>
           <secure-persona></secure-persona>
         </div>
       </div>
@@ -696,97 +730,104 @@ function afterUpdate(target) {
           <sl-icon name="arrow-left-circle-fill"></sl-icon>
         </button>
         <div class="sidebar">
-          <div class="sidebar-header">
-            <button class="profile-button" data-profile>
-              <span>
-                <sl-icon name="person-circle"></sl-icon>
-              </span>
-              <span>Profile</span>
-            </button>
-          </div>
+          <div class="sidebar-inner">
+            <div class="sidebar-header">
+              <button class="standard-button profile-button" data-profile>
+                <span>
+                  <sl-icon name="person-circle"></sl-icon>
+                </span>
+                <span>Me</span>
+              </button>
+            </div>
 
-          <div class="sidebar-content">
-            <div class="group-section">
-              <div class="subtitle-row">
-                <span class="subtitle">MY GROUPS</span>
-                <button class="add-group-btn" data-new-group>
-                  <sl-icon name="plus"></sl-icon>
+            <div class="sidebar-content">
+              <div class="group-section">
+                <div class="subtitle-row">
+                  <span class="subtitle">MY GROUPS</span>
+                  <button class="add-group-btn" data-new-group>
+                    <sl-icon name="plus"></sl-icon>
+                  </button>
+                </div>
+                <div class="my-groups">
+                </div>
+              </div>
+
+              <div class="group-section">
+                <div class="subtitle">OTHER GROUPS</div>
+                <div class="other-groups">
+                </div>
+              </div>
+
+              <div class="app-launcher-section">
+                <div class="subtitle">APPS</div>
+                <button class="app-launcher-btn" data-launcher="wallet">
+                  <span>
+                    <sl-icon name="key"></sl-icon>
+                  </span>
+                  <span>Keys</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="shell">
+                  <span>
+                    <sl-icon name="terminal"></sl-icon>
+                  </span>
+                  <span>Shell</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="desktop">
+                  <span>
+                    <sl-icon name="window-stack"></sl-icon>
+                  </span>
+                  <span>Doors</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="mobile">
+                  <span>
+                    <sl-icon name="phone"></sl-icon>
+                  </span>
+                  <span>Mobile</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="files">
+                  <span>
+                    <sl-icon name="folder2"></sl-icon>
+                  </span>
+                  <span>Files</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="console">
+                  <span>
+                    <sl-icon name="controller"></sl-icon>
+                  </span>
+                  <span>Console</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="coop">
+                  <span>
+                    <sl-icon name="border"></sl-icon>
+                  </span>
+                  <span>Coop</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="archive">
+                  <span>
+                    <sl-icon name="archive"></sl-icon>
+                  </span>
+                  <span>Archive</span>
+                </button>
+                <button class="app-launcher-btn" data-launcher="studio">
+                  <span>
+                    <sl-icon name="palette"></sl-icon>
+                  </span>
+                  <span>Studio</span>
                 </button>
               </div>
-              <div class="my-groups">
-              </div>
             </div>
 
-            <div class="group-section">
-              <div class="subtitle">OTHER GROUPS</div>
-              <div class="other-groups">
-              </div>
-            </div>
-
-            <div class="app-launcher-section">
-              <div class="subtitle">APPS</div>
-              <button class="app-launcher-btn" data-launcher="shell">
+            <div class="sidebar-footer">
+              <button class="standard-button footer-button" data-preferences>
                 <span>
-                  <sl-icon name="camera-video"></sl-icon>
+                  <sl-icon name="gear"></sl-icon>
                 </span>
-                <span>Shell</span>
-              </button>
-
-              <button class="app-launcher-btn" data-launcher="desktop">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Desktop</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="mobile">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Mobile</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="files">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Files</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="console">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Console</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="coop">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Coop</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="studio">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Studio</span>
-              </button>
-              <button class="app-launcher-btn" data-launcher="archive">
-                <span>
-                  <sl-icon name="camera-video"></sl-icon>
-                </span>
-                <span>Archive</span>
+                <span>Preferences</span>
               </button>
             </div>
-          </div>
-
-          <div class="sidebar-footer">
-            <button class="footer-button" data-preferences>
-              <span>
-                <sl-icon name="gear"></sl-icon>
-              </span>
-              <span>Preferences</span>
-            </button>
+            <div class="resizer"></div>
           </div>
         </div>
-        <div class="resizer"></div>
         <div class="main-content">
         </div>
       </div>
@@ -1752,6 +1793,14 @@ $.skin(`
     transition: transform 200ms ease-in-out;
   }
 
+  & .sidebar-inner {
+    position: relative;
+    padding-right: .5rem;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100%;
+  }
+
   & .sidebar-header {
     background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
     display: flex;
@@ -1765,16 +1814,14 @@ $.skin(`
   & .profile-button {
     width: 100%;
     display: flex;
-    align-items: center;
+    place-items: center;
     gap: .5rem;
-    padding: .75rem 1rem;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 1rem;
-    cursor: pointer;
-    font-size: .9rem;
-    transition: background 200ms ease-in-out;
+  }
+
+  & .profile-button > span ,
+  & .footer-button > span {
+    display: inline-grid;
+    place-items: center;
   }
 
   & .profile-button:hover {
@@ -1803,14 +1850,7 @@ $.skin(`
     display: flex;
     align-items: center;
     gap: .5rem;
-    padding: .75rem 1rem;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 1rem;
     cursor: pointer;
-    font-size: .9rem;
-    transition: background 200ms ease-in-out;
   }
 
   & .footer-button:hover {
@@ -1827,6 +1867,10 @@ $.skin(`
     cursor: col-resize;
     flex-shrink: 0;
     transition: background 200ms ease-in-out;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
   }
 
   & .resizer:hover {
@@ -1858,7 +1902,7 @@ $.skin(`
 
   & .chat-app {
     display: grid;
-    grid-template-columns: auto 4px 1fr;
+    grid-template-columns: auto 1fr;
     height: 100%;
     overflow: hidden;
     position: relative;
@@ -2546,6 +2590,9 @@ $.skin(`
 
   & .app-launcher-section {
     padding: .5rem;
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
     border-bottom: 1px solid rgba(255,255,255,.1);
   }
 
@@ -2560,7 +2607,6 @@ $.skin(`
     border: none;
     border-radius: 1rem;
     cursor: pointer;
-    font-size: .85rem;
     transition: background 200ms ease-in-out;
   }
 
@@ -2662,16 +2708,12 @@ $.skin(`
     & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
       left: calc(200px + .5rem);
     }
-
-    & .resizer {
-      display: none;
-    }
   }
 
   /* Desktop: Always show sidebar, hide mobile toggle */
   @media (min-width: 769px) {
     & .chat-app[data-sidebar-visible="false"] {
-      grid-template-columns: 4px 1fr;
+      grid-template-columns: 1fr;
     }
 
     & .chat-app[data-sidebar-visible="false"] .sidebar {
@@ -2679,7 +2721,6 @@ $.skin(`
     }
 
     & .chat-app[data-sidebar-visible="false"] .resizer {
-      cursor: pointer;
       background: var(--root-theme, mediumseagreen);
     }
 

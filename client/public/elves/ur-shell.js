@@ -82,7 +82,7 @@ export function update(message) {
   hideModal()
 }
 
-$.teach({ body: `Eon... Timeless Void... Eon... Wake. Up. <code>help</code>. <code>me</code>. <code>now</code>.`, author: 'assistant' }, mergeMessage)
+$.teach({ body: `Eon... Timeless Void... Eon... Wake. Up. <code>help</code>. <code>me</code>. or. <code>our</code>. <code>team</code>. <code>now</code>.`, author: 'assistant' }, mergeMessage)
 
 const endpoint = '/plan98/about'
 fetch(window.location.origin + endpoint)
@@ -211,6 +211,10 @@ const commands = {
   'team': (...args) => {
     loadPath('/app/dream-team?id=root')
     return "if every other tech company is just chat chat chat chat, then same same same same"
+  },
+  'our': (...args) => {
+    loadPath('/app/paper-pocket?rom=couch-coop')
+    return "high school musical 20th anniversary party"
   },
   'echo': (...args) => {
     return args.join(' ')

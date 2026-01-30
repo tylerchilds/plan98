@@ -1,11 +1,12 @@
-import elf from "@plan98/elf"
+import { Self } from "@plan98/types"
 
 const views = {
   createPost: 'createPost',
+  account: 'account',
   profile: 'profile',
 }
 
-const $ = elf('face-less', {
+const $ = Self('face-less', {
   draft: '',
   draftHeight: null
 })
@@ -38,8 +39,8 @@ function getProfile(targetId) {
     handle: 'anonymous',
     description: '',
     followersCount: 0,
-    followsCount: 0,
-    postsCount: 0,
+    followingCount: 0,
+    mutualsCount: 0,
     viewer: {}
   }
 }
@@ -47,6 +48,17 @@ function getProfile(targetId) {
 function setProfile(targetId, profile) {
   $.teach({ [`profile-${targetId}`]: profile })
 }
+
+$.when('click', '.manage-account', (event) => {
+  const targetId = event.target.closest('face-less').id
+  $.teach({ activeTarget: targetId, currentView: views.account })
+})
+
+$.when('click', '.view-profile', (event) => {
+  const targetId = event.target.closest('face-less').id
+  $.teach({ activeTarget: targetId, currentView: views.profile })
+})
+
 
 $.when('click', '.new-post', (event) => {
   const targetId = event.target.closest('face-less').id
@@ -100,7 +112,7 @@ $.when('submit', '[action="post"]', async (event) => {
   $.teach({ draft: '', draftHeight: null, currentView: views.profile })
 })
 
-$.when('input', '[data-bind]', (event) => {
+$.when('input', '[data-input]', (event) => {
   $.teach({ [event.target.name]: event.target.value })
 })
 
@@ -138,14 +150,17 @@ function renderProfile(profile) {
     displayName,
     handle,
     description,
+    mutualsCount,
     followersCount,
-    followsCount,
-    postsCount,
+    followingCount,
     viewer
   } = profile
 
   return `
     <div class="profile">
+      <button class="manage-account">
+        Account
+      </button>
       <div class="hero">
         ${banner ? `<img src="${banner}" />` : ''}
       </div>
@@ -162,6 +177,14 @@ function renderProfile(profile) {
           <div class="profile-stats">
             <div class="stat">
               <div class="stat-value">
+                ${mutualsCount}
+              </div>
+              <div class="stat-label">
+                Mutuals
+              </div>
+            </div>
+            <div class="stat">
+              <div class="stat-value">
                 ${followersCount}
               </div>
               <div class="stat-label">
@@ -170,18 +193,10 @@ function renderProfile(profile) {
             </div>
             <div class="stat">
               <div class="stat-value">
-                ${followsCount}
+                ${followingCount}
               </div>
               <div class="stat-label">
                 Following
-              </div>
-            </div>
-            <div class="stat">
-              <div class="stat-value">
-                ${postsCount}
-              </div>
-              <div class="stat-label">
-                Posts
               </div>
             </div>
           </div>
@@ -294,7 +309,7 @@ function renderCreatePost() {
           <div class="text-well">
             <textarea
               class="draft-content"
-              data-bind
+              data-input
               name="draft"
               placeholder="What's good?"
               ${draftHeight ? `style="height: ${draftHeight}px"` : ''}
@@ -312,15 +327,43 @@ function renderCreatePost() {
 }
 
 $.draw(target => {
-  const { currentView } = $.learn()
+  const { currentView, authenticated } = $.learn()
   const targetId = target.id || 'default'
+
+  if(!authenticated) {
+    return `<secure-persona></secure-persona>`
+  }
 
   if (currentView === views.createPost) {
     return renderCreatePost()
   }
 
+  if (currentView === views.account) {
+    return `
+      <div>
+        <button class="view-profile">
+          Profile
+        </button>
+        <secure-persona></secure-persona>
+      </div>
+    `
+  }
+
   return renderProfileView(targetId)
 })
+
+$.when('activated', 'secure-persona', (event) => {
+  $.teach({
+    authenticated: true
+  })
+})
+
+$.when('deactivated', 'secure-persona', (event) => {
+  $.teach({
+    authenticated: false
+  })
+})
+
 
 $.style(`
   & {
@@ -387,7 +430,7 @@ $.style(`
   }
 
   & .post-displayname {
-    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), mediumseagreen;
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-decoration: none;
@@ -418,7 +461,7 @@ $.style(`
     grid-template-columns: auto 1fr;
     align-items: center;
     gap: .5rem;
-    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), mediumseagreen;
+    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     border: none;
@@ -430,10 +473,10 @@ $.style(`
 
   & .footer-action:hover,
   & .footer-action:focus {
-    background: linear-gradient(135deg, rgba(0,0,0,.05), rgba(0,0,0,.35)), mediumseagreen;
+    background: linear-gradient(135deg, rgba(0,0,0,.05), rgba(0,0,0,.35)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    color: mediumseagreen;
+    color: var(--root-theme, mediumseagreen);
     opacity: 1;
   }
 
@@ -538,7 +581,7 @@ $.style(`
     right: 1rem;
     bottom: 1rem;
     padding: .5rem 1rem;
-    border: 2px solid mediumseagreen;
+    border: 2px solid var(--root-theme, mediumseagreen);
     background: rgba(0,0,0,.65);
     border-radius: 100px;
     color: rgba(255,255,255,.85);
@@ -546,9 +589,9 @@ $.style(`
     place-content: center;
     font-size: 1rem;
     background:
-      linear-gradient(335deg, mediumseagreen, rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      mediumseagreen;
+      var(--root-theme, mediumseagreen);
     z-index: 5;
     cursor: pointer;
   }
@@ -556,9 +599,38 @@ $.style(`
   & .new-post:hover,
   & .new-post:focus {
     background:
-      linear-gradient(335deg, mediumseagreen, rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
       linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
-      mediumseagreen;
+      var(--root-theme, mediumseagreen);
+  }
+
+  & .view-profile,
+  & .manage-account {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    padding: .5rem 1rem;
+    border: 2px solid var(--root-theme, mediumseagreen);
+    background: rgba(0,0,0,.65);
+    border-radius: 100px;
+    color: rgba(255,255,255,.85);
+    display: grid;
+    place-content: center;
+    font-size: 1rem;
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
+      var(--root-theme, mediumseagreen);
+    z-index: 5;
+    cursor: pointer;
+  }
+
+  & .view-profile:hover,
+  & .view-profile:focus {
+    background:
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
+      var(--root-theme, mediumseagreen);
   }
 
   & .overlay-background {
@@ -619,9 +691,9 @@ $.style(`
   & .standard-button {
     padding: .5rem 1rem;
     background:
-      linear-gradient(335deg, mediumseagreen, rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
       linear-gradient(-65deg, rgba(0,0,0,.5), rgba(255,255,255,.15)),
-      mediumseagreen;
+      var(--root-theme, mediumseagreen);
     color: white;
     border: none;
     border-radius: 4px;
@@ -632,9 +704,9 @@ $.style(`
   & .standard-button:hover,
   & .standard-button:focus {
     background:
-      linear-gradient(335deg, mediumseagreen, rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
+      linear-gradient(335deg, var(--root-theme, mediumseagreen), rgba(255,255,255,.15) 20%, rgba(255,255,255,.25)),
       linear-gradient(-65deg, rgba(0,0,0,.35), rgba(255,255,255,.35)),
-      mediumseagreen;
+      var(--root-theme, mediumseagreen);
   }
 
   & .standard-button.-clear {

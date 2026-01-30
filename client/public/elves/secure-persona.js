@@ -833,7 +833,15 @@ $.draw((target) => {
       </div${mode}>
     `
   }
-}, { afterUpdate })
+}, { beforeUpdate, afterUpdate })
+
+function beforeUpdate(target) {
+  {
+    if(getSessionId()) {
+      broadcastPersonaActivated()
+    }
+  }
+}
 
 function afterUpdate(target) {
   {

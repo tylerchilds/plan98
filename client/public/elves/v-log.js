@@ -1084,12 +1084,14 @@ const viewRenderers = {
   },
   [views.social]: function (target) {
     return `
-      <div style="position: absolute; top: 0; right: 0;">
-        <button data-cancel class="branded-button">
-          Close
-        </button>
+      <div style="display: grid; grid-template-rows: auto 1fr; height: 100%;">
+        <div style="background: black; text-align: right;">
+          <button data-cancel class="branded-button">
+            Close
+          </button>
+        </div>
+        <iframe src="/app/dream-team" style="height: 100%;"></iframe>
       </div>
-      <iframe src="/app/face-less"></iframe>
     `
   },
   [views.settings]: function (target) {

@@ -30,11 +30,11 @@ $.draw((target) => {
       <div class="relationship-member">
         <label class="field">
           <span class="label">Moniker</span>
-          <input data-bind="follower" name="moniker" value="${escapeHyperText(follower.moniker)}"/>
+          <input data-map="follower" name="moniker" value="${escapeHyperText(follower.moniker)}"/>
         </label>
         <label class="field">
           <span class="label">Organization</span>
-          <input data-bind="follower" name="organization" value="${escapeHyperText(follower.organization)}"/>
+          <input data-map="follower" name="organization" value="${escapeHyperText(follower.organization)}"/>
         </label>
         <button data-add-follower class="standard-button -round bias-positive">
           <sl-icon name="plus-lg"></sl-icon>
@@ -450,7 +450,7 @@ function recoverElves(target, tag) {
   })
 }
 
-$.when('input', '[data-bind]', handleBind)
+$.when('input', '[data-map]', handleBind)
 
 const formats = {
   'stringify': (value) => {
@@ -467,14 +467,14 @@ function formatify(format, value) {
 }
 
 function handleBind(event) {
-  const { bind, format } = event.target.dataset
-  if(bind) {
+  const { map, format } = event.target.dataset
+  if(map) {
     $.teach({
       name: event.target.name,
       value: formatify(format, event.target.value)
     }, {
       mergeHandler: bound,
-      parameters: [bind]
+      parameters: [map]
     })
   } else {
     $.teach({ 
