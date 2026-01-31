@@ -648,7 +648,7 @@ $.draw((target) => {
       <div class="widget-frame">
         <div class="viewport">
           <div class="super-items">
-            <button key="os" class="standard-button bias-generic -small" data-press="os">
+            <button key="os" class="clear" data-press="os">
               PaperPocket
             </button>
           </div>
@@ -657,10 +657,10 @@ $.draw((target) => {
             <${rom} ${src?`src="${src}"`:''}></${rom}>
           </div>
           <div class="menu-items">
-            <button key="options" class="standard-button bias-generic select -smol" data-press="select">
+            <button key="options" class="clear" data-press="select">
               Settings
             </button>
-            <button key="start" class="standard-button bias-generic start -smol" data-press="start">
+            <button key="start" class="clear" data-press="start">
               Start
             </button>
           </div>
@@ -1847,6 +1847,7 @@ $.style(`
   & .widget-frame {
     pointer-events: all;
     overflow: hidden;
+    height: 100%;
   }
 
   & .game {
@@ -1982,17 +1983,8 @@ $.style(`
     color: rgba(0,0,0,1);
   }
 
-
-  & .chrome[data-full="true"] .widget-frame {
-    padding: 0;
-  }
-
   & .chrome[data-full="true"] .controller {
     display: none;
-  }
-
-  & .chrome[data-headless="true"] .widget-frame {
-    padding: 0;
   }
 
   & .chrome[data-headless="true"] .controller {
@@ -2011,6 +2003,7 @@ $.style(`
     pointer-events: none;
     padding-top: 1rem;
     text-align: center;
+    height: 150px;
   }
 
   & .gamepad-grid {
