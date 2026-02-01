@@ -53,8 +53,6 @@ export const $ = elf('secure-persona', {
   user: {}
 })
 
-init()
-
 export function whoami() {
   const { sessionId } = getSession()
   if(sessionId) {
@@ -304,7 +302,7 @@ subscribe((link) => {
   }
 })
 
-async function maybeProvsionPersonaKeycard() {
+export async function maybeProvsionPersonaKeycard(options={}) {
   const { sessionId, companyEmployeeId, companyName } = getSession()
 
   if(!sessionId) return
@@ -315,12 +313,13 @@ async function maybeProvsionPersonaKeycard() {
 
   if(!exists) {
     await provisionActiveKeycard({
-      type: KEYCARD_TYPES.PERSONA,
       title: 'Persona',
       logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
       description: 'Secure social graph',
+      ...options,
       companyEmployeeId,
-      companyName
+      companyName,
+      type: KEYCARD_TYPES.PERSONA,
     })
 
     const groupType = BayunCore.GroupType.PRIVATE;
@@ -836,6 +835,12 @@ $.draw((target) => {
 }, { beforeUpdate, afterUpdate })
 
 function beforeUpdate(target) {
+  {
+    if(!target.mounted) {
+      target.mounted = true
+      init()
+    }
+  }
   {
     if(getSessionId()) {
       broadcastPersonaActivated()

@@ -11,6 +11,14 @@ const $ = Self('face-less', {
   draftHeight: null
 })
 
+$.when('json-rpc', 'quick-start', async (event) => {
+  if(event.detail.method === 'done') {
+    event.target.closest($.link).innerHTML = ''
+    $.teach({ authenticated: true })
+  }
+})
+
+
 export function shitPost() {
   console.log('cool')
 }
@@ -328,10 +336,11 @@ function renderCreatePost() {
 
 $.draw(target => {
   const { currentView, authenticated } = $.learn()
-  const targetId = target.id || 'default'
 
   if(!authenticated) {
-    return `<secure-persona></secure-persona>`
+    return `
+      <quick-start></quick-start>
+    `
   }
 
   if (currentView === views.createPost) {
@@ -349,7 +358,7 @@ $.draw(target => {
     `
   }
 
-  return renderProfileView(targetId)
+  return renderProfileView(target.id)
 })
 
 $.when('activated', 'secure-persona', (event) => {

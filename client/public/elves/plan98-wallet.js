@@ -19,7 +19,7 @@ const ERROR_P98_KEYCARD_REJECTED = '003'
 const ERROR_P98_KEYCARD_TIMEOUT = '004'
 const ERROR_P98_BOOTSTRAP_FAILED = '005'
 
-export const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:8080'
+export const walletDefaultHost = plan98.env.PLAN98_WAS_HOST || 'http://localhost:1088'
 
 const Types = {
   File: {

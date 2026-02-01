@@ -1532,6 +1532,7 @@ sillonious-brand > xml-html {
 .wizard {
   margin: 0 auto;
   max-width: 480px;
+  width: 100%;
   padding: 3rem .5rem 3rem;
 }
 
