@@ -1,5 +1,15 @@
 import { Self } from "@plan98/types"
 
+import {
+  getPersona,
+} from './secure-persona.js'
+
+import {
+  getSession
+} from './bayun-wizard.js'
+
+import { get, put } from './plan98-wallet.js'
+
 const views = {
   createPost: 'createPost',
   account: 'account',
@@ -18,33 +28,76 @@ $.when('json-rpc', 'quick-start', async (event) => {
   }
 })
 
-
-export function shitPost() {
-  console.log('cool')
-}
-
-function getTimeline(targetId) {
+function getTimeline(id) {
   const state = $.learn()
-  return state[`timeline-${targetId}`] || []
+  return state[id] || []
 }
 
-function setTimeline(targetId, posts) {
-  $.teach({ [`timeline-${targetId}`]: posts })
+function setTimeline(timelineUR, post) {
+  $.teach({ timelineUR, post }, (state, payload) => {
+    return {
+      ...state,
+      [payload.timelineUR]: [
+        ...(state[payload.timelineUR] || []),
+        payload.post
+      ]
+    }
+  })
 }
 
-function addPost(targetId, post) {
-  const timeline = getTimeline(targetId)
-  setTimeline(targetId, [post, ...timeline])
+export async function fetchTimeline(timelineUR = "public") {
+  const timelinePath = `/${$.link}/${timelineUR}.json`
+  return await get(timelinePath)
 }
 
-function getProfile(targetId) {
-  const state = $.learn()
-  return state[`profile-${targetId}`] || {
+export async function publish(post, timelineUR = "public") {
+  const { companyEmployeeId, companyName } = $.learn()
+  const timelinePath = `/${$.link}/${timelineUR}.json`
+
+  const resource = {
+    uri: timelinePath,
+    cid: crypto.randomUUID(),
+    author: {
+      moniker: companyEmployeeId,
+      group: companyName
+    },
+    record: post
+  }
+
+  setTimeline(timelineUR, resource)
+
+  const response = await get(timelinePath)
+    .catch(error => {
+      console.error(error)
+    })
+
+  if(response) {
+    const json = await response.text()
+    const data = JSON.parse(json)
+
+    put(timelinePath, JSON.stringify({
+      ...data,
+      timeline: [
+        ...(data.timeline || []),
+        resource
+      ]
+    }), { type: 'application/json' })
+  } else {
+    put(timelinePath, JSON.stringify({
+      timeline: [
+        resource
+      ]
+    }), { type: 'application/json' })
+  }
+}
+
+function getProfile() {
+  return {
     avatar: null,
     banner: null,
     createdAt: new Date().toISOString(),
-    displayName: 'Anonymous User',
-    handle: 'anonymous',
+    moniker: 'Anonymous User',
+    group: 'anonymous',
     description: '',
     followersCount: 0,
     followingCount: 0,
@@ -57,20 +110,24 @@ function setProfile(targetId, profile) {
   $.teach({ [`profile-${targetId}`]: profile })
 }
 
+function getTimelineUR(target) {
+  return target.closest('face-less').getAttribute('ur') || 'public'
+}
+
 $.when('click', '.manage-account', (event) => {
-  const targetId = event.target.closest('face-less').id
-  $.teach({ activeTarget: targetId, currentView: views.account })
+  const timelineUR = getTimelineUR(event.target)
+  $.teach({ activeTimeline: timelineUR, currentView: views.account })
 })
 
 $.when('click', '.view-profile', (event) => {
-  const targetId = event.target.closest('face-less').id
-  $.teach({ activeTarget: targetId, currentView: views.profile })
+  const timelineUR = getTimelineUR(event.target)
+  $.teach({ activeTimeline: timelineUR, currentView: views.profile })
 })
 
 
 $.when('click', '.new-post', (event) => {
-  const targetId = event.target.closest('face-less').id
-  $.teach({ activeTarget: targetId, currentView: views.createPost })
+  const timelineUR = getTimelineUR(event.target)
+  $.teach({ activeTimeline: timelineUR, currentView: views.createPost })
 })
 
 $.when('click', '[data-cancel-draft]', () => {
@@ -79,43 +136,18 @@ $.when('click', '[data-cancel-draft]', () => {
 
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()
-  const { draft, activeTarget } = $.learn()
+  const { draft, activeTimeline } = $.learn()
   
   if (!draft.trim()) return
 
-  const profile = getProfile(activeTarget)
-
   // Bluesky-compatible post structure
-  const post = {
-    uri: `at://${profile.handle}/app.bsky.feed.post/${crypto.randomUUID()}`,
-    cid: crypto.randomUUID(),
-    author: {
-      did: `did:plc:${crypto.randomUUID()}`,
-      handle: profile.handle,
-      displayName: profile.displayName,
-      avatar: profile.avatar
-    },
-    record: {
-      $type: 'app.bsky.feed.post',
-      text: draft,
-      createdAt: new Date().toISOString(),
-      facets: []
-    },
-    embed: null,
-    replyCount: 0,
-    repostCount: 0,
-    likeCount: 0,
-    viewer: {}
+  const historicalNugget = {
+    $type: 'computer.sillyz.data.text',
+    text: draft,
+    createdAt: new Date().toLocaleString('en-us'),
   }
 
-  addPost(activeTarget, { post })
-  
-  // Update post count
-  const currentProfile = getProfile(activeTarget)
-  setProfile(activeTarget, {
-    ...currentProfile,
-    postsCount: currentProfile.postsCount + 1
-  })
+  publish(historicalNugget, activeTimeline)
 
   $.teach({ draft: '', draftHeight: null, currentView: views.profile })
 })
@@ -155,8 +187,8 @@ function renderProfile(profile) {
     avatar,
     banner,
     createdAt,
-    displayName,
-    handle,
+    moniker,
+    group,
     description,
     mutualsCount,
     followersCount,
@@ -211,10 +243,10 @@ function renderProfile(profile) {
         </div>
         <div class="profile-contact">
           <div class="profile-displayname">
-            ${escapeHyperText(displayName)}
+            ${escapeHyperText(moniker)}
           </div>
-          <div class="profile-handle">
-            ${escapeHyperText(handle)}
+          <div class="profile-group">
+            ${escapeHyperText(group)}
           </div>
           <div class="profile-description">${escapeHyperText(description)}</div>
           <div class="profile-since">
@@ -226,47 +258,68 @@ function renderProfile(profile) {
   `
 }
 
-function renderPost(record) {
-  const { post, reason } = record
+const recordRenderers = {
+  'computer.sillyz.data.video': (record) => {
+    return `
+      <was-video src="${record.src}"></was-video>
+    `
+  },
+  'computer.sillyz.data.image': (record) => {
+    return `
+      <was-image src="${record.src}"></was-video>
+    `
+  },
+  'computer.sillyz.data.text': (record) => {
+    return escapeHyperText(record.text)
+  },
+  text: (record) => {
+    return escapeHyperText(record.text)
+  }
+}
+
+function renderRecord(record) {
+
+  return (recordRenderers[record.$type] || recordRenderers.text)(record)
+}
+
+function renderPost(resource) {
+  const { cid, uri, record, author } = resource
 
   return `
-    <div class="post" data-cid="${post.cid}" data-uri="${post.uri}">
+    <div class="post" data-cid="${cid}" data-uri="${uri}">
       <div class="post-gutter">
         <div class="post-avatar">
-          ${post.author.avatar 
-            ? `<img src="${post.author.avatar}" class="avatar" />`
-            : `<div class="avatar placeholder"></div>`
-          }
+          <div class="avatar placeholder"></div>
         </div>
       </div>
       <div class="post-content">
         <div class="post-meta">
-          <span class="post-displayname">${escapeHyperText(post.author.displayName)}</span>
-          <span class="post-handle">
-            ${escapeHyperText(post.author.handle)}
+          <span class="post-displayname">${escapeHyperText(resource.author.moniker)}</span>
+          <span class="post-group">
+            ${escapeHyperText(author.group)}
           </span>
           <span class="post-timestamp">
-            ${new Date(post.record.createdAt).toLocaleDateString()}
+            ${new Date(record.createdAt).toLocaleDateString()}
           </span>
         </div>
         <div class="body">
-          <div class="post-text">${escapeHyperText(post.record.text)}</div>
+          <div class="post-text">${renderRecord(record)}</div>
           <div class="post-footer">
             <div class="post-action-container">
-              <button data-action="reply" data-cid="${post.cid}" data-uri="${post.uri}" class="footer-action">
-                ${post.replyCount}
+              <button data-action="reply" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+                0
                 <span>💬</span>
               </button>
             </div>
             <div class="post-action-container">
-              <button data-action="repost" data-cid="${post.cid}" data-uri="${post.uri}" class="footer-action">
-                ${post.repostCount}
+              <button data-action="repost" data-cid="$cid}" data-uri="${uri}" class="footer-action">
+                0
                 <span>🔄</span>
               </button>
             </div>
             <div class="post-action-container">
-              <button data-action="like" data-cid="${post.cid}" data-uri="${post.uri}" class="footer-action">
-                ${post.likeCount}
+              <button data-action="like" data-cid="${cid}" data-uri="${uri}" class="footer-action">
+                0
                 <span>❤️</span>
               </button>
             </div>
@@ -284,17 +337,19 @@ function renderTimeline(timeline) {
   return timeline.map(renderPost).join('')
 }
 
-function renderProfileView(targetId) {
-  const profile = getProfile(targetId)
-  const timeline = getTimeline(targetId)
+function renderProfileView(timelineUR) {
+  const profile = getProfile()
+  const timeline = getTimeline(timelineUR)
 
   return `
     <button class="new-post">
-      + New Post
+      Create
     </button>
-    ${renderProfile(profile)}
-    <div class="feed">
-      ${renderTimeline(timeline)}
+    <div class="scrollable-view">
+      ${renderProfile(profile)}
+      <div class="feed">
+        ${renderTimeline(timeline)}
+      </div>
     </div>
   `
 }
@@ -358,7 +413,30 @@ $.draw(target => {
     `
   }
 
-  return renderProfileView(target.id)
+  return renderProfileView(target.ur || 'public')
+}, {
+  async beforeUpdate(target) {
+    if(!target.mounted) {
+      target.mounted = true
+      try {
+        const timelineUR = getTimelineUR(target)
+
+        const response = await fetchTimeline(timelineUR)
+        const json = await response.text()
+
+        const data = JSON.parse(json)
+
+        $.teach({ timelineUR, data }, (state, payload) => {
+          return {
+            ...state,
+            [payload.timelineUR]: payload.data.timeline
+          }
+        })
+      } catch(error) {
+        console.log(error)
+      }
+    }
+  }
 })
 
 $.when('activated', 'secure-persona', (event) => {
@@ -382,9 +460,14 @@ $.style(`
     height: 100%;
   }
 
+  & .scrollable-view {
+    overflow: auto;
+    height: 100%;
+  }
+
   & .feed {
     display: flex;
-    flex-direction: column;
+    flex-direction: column-reverse;
   }
 
   & .empty-timeline {
@@ -446,7 +529,7 @@ $.style(`
     font-weight: bold;
   }
 
-  & .post-handle {
+  & .post-group {
     color: rgba(0,0,0,.65);
   }
 
@@ -573,7 +656,7 @@ $.style(`
     color: rgba(255,255,255,1);
   }
 
-  & .profile-handle {
+  & .profile-group {
     color: rgba(255,255,255,.45);
   }
 

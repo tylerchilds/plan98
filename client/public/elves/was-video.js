@@ -6,24 +6,25 @@ const tag = 'was-video'
 const $ = elf(tag)
 
 function draw(target) {
-  if(target.shadowRoot && target.shadowRoot.innerHTML) return
-   target.shadowRoot.innerHTML = `
-     <style>
-      :host {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
-
-      :host video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-     </style>
-     <video controls="true"></video>
-   `
+  if(target.innerHTML) return
+  return `
+    <video controls="true"></video>
+  `
 }
+
+$.style(`
+  & {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  & video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`)
 
 function afterUpdate(target) {
   if(!target.initialized) {
@@ -31,7 +32,7 @@ function afterUpdate(target) {
     const src = target.getAttribute('src')
     if(src) {
       get(src).then(blob => {
-        const video = target.shadowRoot.querySelector('video')
+        const video = target.querySelector('video')
         const videoUrl = URL.createObjectURL(blob);
         video.src = videoUrl;
       })
@@ -42,17 +43,15 @@ function afterUpdate(target) {
 class SecureVideo extends HTMLElement {
   constructor() {
     super();
-    this.attachShadow({ mode: 'open' })
-    // Initialize your component here
     $.draw(draw, { afterUpdate })
   }
 
   connectedCallback() {
-    const video = this.shadowRoot.querySelector('video')
+    const _video = this.querySelector('video')
   }
 
   disconnectedCallback() {
-    const video = this.shadowRoot.querySelector('video')
+    const video = this.querySelector('video')
     if (video.srcObject) {
       video.pause();
       video.srcObject.getTracks().forEach(track => track.stop());

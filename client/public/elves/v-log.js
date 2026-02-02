@@ -18,13 +18,7 @@ import { checkButton, checkAxis } from './debug-gamepads.js'
 import {
   attack,
   release,
-  attackRelease
 } from './paper-pocket.js'
-import {
-  getSession,
-  getCompanyName,
-  getEmployeeId,
-} from './bayun-wizard.js'
 
 /*
 
@@ -45,6 +39,14 @@ An dog fed man toast.
 import { toast } from './plan98-toast.js'
 import { showModal } from './plan98-modal.js'
 import './plan98-palette.js'
+
+/*
+
+And dog let man bark at nothing in particular
+
+*/
+
+import { publish } from './face-less.js'
 
 /*
 
@@ -398,21 +400,23 @@ async function startRecording(event) {
       const { transcription } = $.learn()
       const videoSrc = `/private/${$.link}/${timestamp}.${extensions[supportedVideoType]}`
       const historicalNugget = {
+        $type: 'computer.sillyz.data.video',
         id: self.crypto.randomUUID(),
         src: videoSrc,
         title: 'Recorded Entry',
-        author: 'Wally Wollaston',
         description: 'A video recorded now about another time or place',
-        when: new Date().toLocaleString('en-us'),
+        createdAt: new Date().toLocaleString('en-us'),
         transcription
       }
 
-      $.teach(historicalNugget, appendToHistoricalRecord)
-      $.mouth({ videoSrc: videoSrc })
+      //$.teach(historicalNugget, appendToHistoricalRecord)
+      publish(historicalNugget)
+      /*
       put(documentSrc, JSON.stringify($.ear()), { type: 'application/json' }).then(response => {
       }).catch(error => {
         console.warn(error);
       });
+      */
 
       put(videoSrc, videoBlob, { type: supportedVideoType }).then(response => {
         if (!response.ok) {
@@ -497,22 +501,33 @@ function screenshot(event) {
 
   const now = new Date();
   const timestamp = now.toJSON()
-  const image = `/private/${$.link}/${timestamp}.jpg`
+  const imageSrc = `/private/${$.link}/${timestamp}.jpg`
 
-  const data = { src: image, strokeHistory, strokeRevisory }
-
-  $.mouth({ image })
+  const historicalNugget = {
+    $type: 'computer.sillyz.data.image',
+    id: self.crypto.randomUUID(),
+    src: imageSrc,
+    strokeHistory,
+    strokeRevisory,
+    title: 'Recorded Entry',
+    description: 'A video recorded now about another time or place',
+    createdAt: new Date().toLocaleString('en-us'),
+  }
 
   // Attempt to upload to server
+  //
+  publish(historicalNugget)
+  /*
   put(image, JSON.stringify(data), { type: 'application/json' }).then(response => {
   }).catch(error => {
     console.warn(error);
   });
+  */
 
   // Attempt to upload to server
-  put(image, byteArray, { type: 'image/jpeg' }).then(res => {
+  put(imageSrc, byteArray, { type: 'image/jpeg' }).then(res => {
     if(res.ok) {
-      $.mouth({ image })
+      console.log('successful upload')
     } else {
       throw new Error('Upload failed')
     }

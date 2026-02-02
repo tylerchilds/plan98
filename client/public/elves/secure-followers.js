@@ -36,7 +36,7 @@ $.draw((target) => {
           <span class="label">Organization</span>
           <input data-map="follower" name="organization" value="${escapeHyperText(follower.organization)}"/>
         </label>
-        <button data-add-follower class="standard-button -round bias-positive">
+        <button data-add-follower class="standard-button -small -round bias-positive">
           <sl-icon name="plus-lg"></sl-icon>
         </button>
       </div>
