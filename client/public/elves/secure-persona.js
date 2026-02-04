@@ -288,30 +288,14 @@ export async function auth(data, wishbacks) {
   return data
 }
 
-let lastMode = null
-subscribe((link) => {
-  if(link === $.link) {
-    const { mode } = $.learn()
-    if(mode !== lastMode) {
-      lastMode = mode
-
-      if(mode === 'authenticated') {
-        maybeProvsionPersonaKeycard()
-      }
-    }
-  }
-})
-
-export async function maybeProvsionPersonaKeycard(options={}) {
+export async function provisionPersonaKeycard(options={}) {
   const { sessionId, companyEmployeeId, companyName } = getSession()
 
-  if(!sessionId) return
+  if(!sessionId) {
+    throw new Error('No active session. Please authenticate first.')
+  }
 
-  const exists = listKeycards().find(x => {
-    return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
-  })
-
-  if(!exists) {
+  try {
     await provisionActiveKeycard({
       title: 'Persona',
       logoUrl: '/public/cdn/sillyz.computer/default-picture.png',
@@ -321,14 +305,20 @@ export async function maybeProvsionPersonaKeycard(options={}) {
       companyName,
       type: KEYCARD_TYPES.PERSONA,
     })
+  } catch(e) {
+    throw new Error(`Failed to create local keycard: ${e.message || e}`)
+  }
 
+  let group
+  try {
     const groupType = BayunCore.GroupType.PRIVATE;
-    const group = await bayunCore.createGroup(sessionId, `${companyEmployeeId}@${companyName}:friends`, groupType)
-    .catch(error => {
-      console.log(error);
-    });
+    group = await bayunCore.createGroup(sessionId, `${companyEmployeeId}@${companyName}:friends`, groupType)
+  } catch(e) {
+    throw new Error(`Failed to create secure group: ${e.message || e}`)
+  }
 
-    await updatePersona({
+  try {
+    await putPersona({
       moniker: companyEmployeeId,
       organization: companyName,
       groupId: group.groupId,
@@ -336,6 +326,8 @@ export async function maybeProvsionPersonaKeycard(options={}) {
       followers: [],
       following: []
     })
+  } catch(e) {
+    throw new Error(`Failed to save persona: ${e.message || e}`)
   }
 }
 
@@ -345,15 +337,10 @@ export function persona() {
 
 async function updatePersona(payload, mergeHandler=(s,p) => ({...s,...p})) {
   const persona = await getPersona()
-    .catch(e => {
-      console.error(e)
-      return {}
-    })
-
+debugger
   const data = mergeHandler(persona, payload)
-
   $.teach({ persona: data })
-  return await putPersona(data).catch(console.error)
+  return await putPersona(data)
 }
 
 export async function putPersona(persona) {
@@ -373,9 +360,6 @@ export async function putPersona(persona) {
     .then(res => {
       console.debug({ res })
       return res
-    })
-    .catch(e => {
-      console.debug(e)
     })
 }
 

@@ -5,7 +5,7 @@ import {
 } from './bayun-wizard.js'
 import {
   getPersona,
-  maybeProvsionPersonaKeycard,
+  provisionPersonaKeycard,
   handleSessionEnd
 } from './secure-persona.js'
 import {
@@ -21,14 +21,33 @@ const forms = {
   access: 'access',
   success: 'success',
   leave: 'leave',
-  template: 'template'
+  template: 'template',
+  welcomeBack: 'welcomeBack'
 }
 
 const tag = 'quick-start'
 const $ = elf(tag, {
   storageHost: walletDefaultHost,
   form: forms.loading,
+  loading: false,
+  errors: []
 })
+
+function renderErrors() {
+  const { errors } = $.learn()
+
+  if(errors.length > 0) {
+    return `
+      <div class="errors-list">
+        ${errors.map(error => `
+          <div>${error}</div>
+        `).join('')}
+      </div>
+    `
+  } else {
+    return ''
+  }
+}
 
 const formRenderers = {
   [forms.loading]: (target) => {
@@ -42,6 +61,7 @@ const formRenderers = {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <div class="form-title">
         Title
@@ -89,6 +109,7 @@ const formRenderers = {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <div class="form-title">
         About
@@ -119,6 +140,7 @@ const formRenderers = {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <div class="form-title">
         Your Move
@@ -143,6 +165,7 @@ const formRenderers = {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <div class="form-title">
         Persona
@@ -171,41 +194,51 @@ const formRenderers = {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <secure-persona></secure-persona>
     `
   },
   [forms.access]: (target) => {
-    const { storageHost } = $.learn()
+    const { storageHost, loading } = $.learn()
     const { sessionId, companyEmployeeId, companyName } = getSession()
+
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
-      <div>
-        You are ${companyEmployeeId}@${companyName} <button class="standard-button -smol" data-logout>Switch</button>
-      </div?
       <div class="form-title">
         Access
       </div>
-
+      <div>
+        You are ${companyEmployeeId}@${companyName} <button class="standard-button -smol" data-logout>Switch</button>
+      </div>
       <div class="form-description">
         Configure your storage provider so that you know the full supply chain of your own information.
       </div>
       <label class="field">
         <span class="label">Storage Host</span>
-        <input type="text" value="${storageHost}" />
+        <input type="text" data-bind name="storageHost" value="${storageHost}" />
       </label>
 
-      <button class="standard-button bias-positive -large" data-submit="${forms.access}">
-        Set Access Point
-      </button>
+      ${ loading ? `
+          <div3>
+            <flying-disk></flying-disk>
+          </div3>
+        ` : `
+          <button class="standard-button bias-positive -large" data-submit="${forms.access}">
+            Set Access Point
+          </button>
+        `
+      }
     `
   },
   [forms.success]: (target) => {
     return `
       <div>
         <plan98-icon></plan98-icon>
+        ${renderErrors()}
       </div>
       <div class="form-title">
         Ready!
@@ -227,44 +260,67 @@ const formRenderers = {
       </button>
     `
   },
+  [forms.welcomeBack]: (target) => {
+    const { sessionId, companyEmployeeId, companyName } = getSession()
+    return `
+      <div>
+        <plan98-icon></plan98-icon>
+        ${renderErrors()}
+      </div>
+      <div class="form-title">
+        Welcome Back
+      </div>
+      <div class="form-description">
+        You're signed in as <strong>${companyEmployeeId}@${companyName}</strong>
+      </div>
+
+      <button class="standard-button bias-positive -large" data-submit="${forms.leave}">
+        Continue
+      </button>
+      <button class="standard-button bias-generic" data-logout>
+        Switch Persona
+      </button>
+    `
+  },
 }
 
 const formValidators = {
   [forms.template]: (state, target) => {
-    $.teach({ form: forms.template })
+    $.teach({ form: forms.template, errors: [] })
   },
   [forms.learn]: (state, target) => {
-    $.teach({ form: forms.learn })
+    $.teach({ form: forms.learn, errors: [] })
   },
   [forms.provision]: async (state, target) => {
     const { sessionId, companyEmployeeId, companyName } = getSession()
 
     if(!sessionId) {
-      $.teach({ form: forms.authentication })
+      $.teach({ form: forms.authentication, errors: [] })
     } else {
-      $.teach({ form: forms.access })
+      $.teach({ form: forms.access, errors: [] })
     }
   },
   [forms.access]: async (state, target) => {
     const errors = []
     const { storageHost } = $.learn()
     try {
-      await maybeProvsionPersonaKeycard({ host: storageHost })
+      await provisionPersonaKeycard({ host: storageHost })
     } catch(e) {
-      errors.push(e)
+      const errorMessage = e instanceof Error ? e.message : String(e)
+      errors.push(errorMessage)
     }
 
     if(errors.length === 0) {
-      $.teach({ form: forms.success })
+      $.teach({ form: forms.success, errors: [] })
     } else {
       $.teach({ errors })
     }
   },
   [forms.first]: (state, target) => {
-    $.teach({ form: forms.first })
+    $.teach({ form: forms.first, errors: [] })
   },
   [forms.second]: (state, target) => {
-    $.teach({ form: forms.second })
+    $.teach({ form: forms.second, errors: [] })
   },
   [forms.leave]: (state, target) => {
     target.dispatchEvent(new CustomEvent('json-rpc', {
@@ -286,12 +342,16 @@ $.when('click', '[data-logout]', (event) => {
 })
 
 
-$.when('click', '[data-submit]', (event) => {
+$.when('click', '[data-submit]', async (event) => {
+  const root = event.target.closest($.link)
+  $.teach({ errors: [], loading: true })
+
   const { submit } = event.target.dataset
   if(formValidators[submit]) {
-    const root = event.target.closest($.link)
-    formValidators[submit]($.learn(), root)
+    await formValidators[submit]($.learn(), root)
   }
+
+  $.teach({ loading: false })
 })
 
 $.style(`
@@ -355,13 +415,13 @@ $.when('input', '[data-bind]', function handleBind(event) {
   const { bind } = event.target.dataset
   if(bind) {
     $.teach({
+      __bind: bind,
       name: event.target.name,
       value: event.target.value
     }, bindData)
   } else {
     $.teach({ 
-      name: event.target.name,
-      value: event.target.value
+      [event.target.name]: event.target.value,
     })
   }
 })
@@ -380,11 +440,12 @@ function bindData(state, payload) {
 }
 
 $.draw((target) => {
-  const { form } = $.learn()
+  const { form, errors, loading } = $.learn()
   const html = formRenderers[form] ? formRenderers[form](target) : ''
 
-  if(form === target.lastForm) return
-  target.lastForm = form
+  const cacheKey = `${form}:${loading}:${errors.length}:${errors.join(',')}`
+  if(cacheKey === target.lastCacheKey) return
+  target.lastCacheKey = cacheKey
   target.innerHTML = `
     <div class="wizard">
       ${html}
@@ -397,15 +458,20 @@ $.draw((target) => {
 
       getPersona().then((persona) => {
         if(persona) {
+          /*
           target.dispatchEvent(new CustomEvent('json-rpc', {
             detail: {
               jsonrpc: "2.0",
               method: 'done',
             }
           }))
+          */
+          $.teach({ form: forms.welcomeBack })
         } else {
           $.teach({ form: forms.first })
         }
+      }).catch(() => {
+        $.teach({ form: forms.first })
       })
     }
   },

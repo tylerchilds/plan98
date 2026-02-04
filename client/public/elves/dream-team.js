@@ -14,6 +14,8 @@ import './secure-followers.js'
 
 // Local decryption cache - stores decrypted messages
 const table = {}
+let lastMyGroupIds = null
+let lastOtherGroupIds = null
 
 // Track which messages are being decrypted to avoid duplicate attempts
 const decryptionInProgress = new Set()
@@ -997,23 +999,26 @@ function afterUpdate(target) {
     })
   }
 
-  // Patch my groups
   {
     const { myGroups, currentRoom } = $.model()
     const myGroupsContainer = target.querySelector('.my-groups')
 
     if(myGroupsContainer) {
-      const groupsHtml = myGroups.map(group => {
-        const isActive = currentRoom === group.groupId ? 'active' : ''
-        return `
-          <button class="room-select my-group ${isActive}" data-id="${group.groupId}">
-            ${group.groupName}
-          </button>
-        `
-      }).join('')
+      // Cheap array comparison by IDs only
+      const currentIds = myGroups.map(g => g.groupId).join(',') + ':' + currentRoom
 
-      if(myGroupsContainer.dataset.lastGroups !== groupsHtml) {
-        myGroupsContainer.dataset.lastGroups = groupsHtml
+      if(lastMyGroupIds !== currentIds) {
+        lastMyGroupIds = currentIds
+
+        const groupsHtml = myGroups.map(group => {
+          const isActive = currentRoom === group.groupId ? 'active' : ''
+          return `
+            <button class="room-select my-group ${isActive}" data-id="${group.groupId}">
+              ${group.groupName}
+            </button>
+          `
+        }).join('')
+
         myGroupsContainer.innerHTML = groupsHtml
       }
     }
@@ -1264,12 +1269,6 @@ function afterUpdate(target) {
       const operation = escapeHyperText(synthia.prompt || '')
       diffHTML.innerHTML(aiContent, ai(operation))
     }
-  }
-
-  { // recover icons from the virtual dom
-    recoverElves(target, 'sl-icon')
-    recoverElves(target, 'plan98-icon')
-    recoverElves(target, 'agentic-dash')
   }
 }
 
@@ -1716,6 +1715,8 @@ $.when('input', '[name="replyText"]', (event) => {
   $.whisper({ replyHeight: event.target.scrollHeight })
 });
 
+let groupsLoaded = false
+
 $.when('activated', 'secure-persona', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
   const id = getMyId()
@@ -1725,12 +1726,16 @@ $.when('activated', 'secure-persona', (event) => {
     lastSeen: Date.now()
   }, join)
 
-  getMyGroups()
-  getOtherGroups()
+  if (!groupsLoaded) {
+    groupsLoaded = true
+    getMyGroups()
+    getOtherGroups()
+  }
 })
 
 $.when('deactivated', 'secure-persona', (event) => {
   // User has logged out, clear all caches and messages, trigger re-render
+  groupsLoaded = false
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
   $.controller(getMyId(), leave)
@@ -2756,16 +2761,3 @@ $.when('input', '[data-bind]', (event) => {
     $.controller({ [name]: value })
   }
 })
-
-function recoverElves(target, tag) {
-  [...target.querySelectorAll(tag)].map(node => {
-    const nodeParent = node.parentNode
-    const newNode = document.createElement(tag)
-    for (const attr of node.attributes) {
-      newNode.setAttribute(attr.name, attr.value)
-    }
-    node.remove()
-    nodeParent.appendChild(newNode)
-  })
-}
-
