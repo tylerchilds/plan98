@@ -5,8 +5,8 @@ const tag = 'was-image'
 const $ = elf(tag)
 
 function draw(target) {
-  if(target.shadowRoot && target.shadowRoot.innerHTML) return
-  target.shadowRoot.innerHTML = `
+  if(target && targetinnerHTML) return
+  target.innerHTML = `
     <style>
       :host {
         display: grid;
@@ -29,9 +29,6 @@ function draw(target) {
 }
 
 function beforeUpdate(target) {
-  if(!target.shadowRoot) {
-    target.attachShadow({ mode: 'open' })
-  }
 }
 
 function afterUpdate(target) {
@@ -41,7 +38,7 @@ function afterUpdate(target) {
     if(src) {
       get(src).then(blob => {
         const data = new Blob([blob], { type: blob.type });
-        const image = target.shadowRoot.querySelector('img')
+        const image = target.querySelector('img')
         image.src = URL.createObjectURL(data);
       })
     }

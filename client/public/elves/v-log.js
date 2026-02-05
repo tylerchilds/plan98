@@ -585,7 +585,8 @@ $.style(`
     background: black;
   }
 
-  & video {
+  & .input-video,
+  & .recorded-playback {
     position: absolute;
     inset: 0;
     object-fit: contain;
@@ -1055,6 +1056,10 @@ const viewRenderers = {
     `
   },
   [views.color]: function (target) {
+    const { view } = $.learn()
+
+    if(target.view === view) return
+
     return `
       <plan98-palette></plan98-palette>
     `
@@ -1098,6 +1103,10 @@ const viewRenderers = {
     `
   },
   [views.social]: function (target) {
+    const { view } = $.learn()
+
+    if(target.view === view) return
+
     return `
       <div style="display: grid; grid-template-rows: auto 1fr; height: 100%;">
         <div style="background: black; text-align: right;">
@@ -1105,7 +1114,7 @@ const viewRenderers = {
             Close
           </button>
         </div>
-        <iframe src="/app/dream-team" style="height: 100%;"></iframe>
+        <face-less></face-less>
       </div>
     `
   },
@@ -1168,7 +1177,10 @@ const viewRenderers = {
     `
   },
   [views.share]: function share(target) {
-    const { viewMetadata } = $.ear()
+    const { view } = $.learn()
+
+    if(target.view === view) return
+
     const shareLink = `${self.location.origin}/app/${$.link}?id=${target.closest($.link).id}`
     const copyId = self.crypto.randomUUID()
     const label = target.getAttribute('label') || 'Pluto'
@@ -1683,7 +1695,10 @@ class VLog extends HTMLElement {
 
     if(showOverlay) {
       const area = document.querySelector('.overlay-area')
-      innerHTML(area, (viewRenderers[view] || (() => '404'))(target))
+      const html = (viewRenderers[view] || (() => '404'))(target)
+      if(html) {
+        innerHTML(area, html)
+      }
       target.dataset.showOverlay = true
     } else {
       const area = document.querySelector('.overlay-area')
@@ -1740,23 +1755,8 @@ class VLog extends HTMLElement {
       }
     }
 
-    {
-      recoverElves(target, 'qr-code')
-      recoverElves(target, 'plan98-palette')
-    }
+    target.view = view
   }
-}
-
-function recoverElves(target, tag) {
-  [...target.querySelectorAll(tag)].map(node => {
-    const nodeParent = node.parentNode
-    const newNode = document.createElement(tag)
-    for (const attr of node.attributes) {
-      newNode.setAttribute(attr.name, attr.value)
-    }
-    node.remove()
-    nodeParent.appendChild(newNode)
-  })
 }
 
 function deviceMenu(target) {

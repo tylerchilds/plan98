@@ -17,6 +17,8 @@ $.style(`
     display: block;
     width: 100%;
     height: 100%;
+    font-size: 0;
+    line-height: 0;
   }
 
   & video {
@@ -34,7 +36,9 @@ function afterUpdate(target) {
       get(src).then(blob => {
         const video = target.querySelector('video')
         const videoUrl = URL.createObjectURL(blob);
-        video.src = videoUrl;
+        if(video) {
+          video.src = videoUrl;
+        }
       })
     }
   }
@@ -52,7 +56,7 @@ class SecureVideo extends HTMLElement {
 
   disconnectedCallback() {
     const video = this.querySelector('video')
-    if (video.srcObject) {
+    if (video && video.srcObject) {
       video.pause();
       video.srcObject.getTracks().forEach(track => track.stop());
       video.srcObject = null;

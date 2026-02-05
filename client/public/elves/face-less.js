@@ -817,6 +817,29 @@ $.style(`
     padding: 2rem;
     color: rgba(0,0,0,.5);
   }
+
+  & was-video {
+    height: auto;
+    background: black;
+    max-height: 300px;
+  }
+
+  & was-video video {
+    object-fit: contain;
+    max-height: 300px;
+  }
+
+  & was-image {
+    height: auto;
+    background: black;
+    max-height: 300px;
+  }
+
+  & was-image img {
+    object-fit: contain;
+    max-height: 300px;
+  }
+
 `)
 
 export default $
