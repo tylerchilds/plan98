@@ -185,7 +185,8 @@ const $ = Self(tag, {
   audioEnabled: false,
   chromakeyEnabled: false,
   chromakeyColor: 'dodgerblue',
-  chromakeyTolerance: 30
+  chromakeyTolerance: 30,
+  passphrase: ''
 })
 
 /*
@@ -301,14 +302,16 @@ async function safeAsync(call) {
   });
 }
 
-async function startStream() {
+async function startStream(hasAudio) {
+  const { passphrase } = $.learn()
+
   return await safeAsync(async () => {
     const response = await fetch('/rtmp/start', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        rtmpUrl: 'rtmp://localhost:1935/live',
-        streamKey: 'abc123'
+        passphrase,
+        hasAudio
       })
     });
 
@@ -328,10 +331,27 @@ async function startRecording(event) {
     $.teach({ recording: true, transcription: '' })
 
     const tracks = []
+    let hasAudio = false  // Track actual audio availability
 
     if (audioEnabled && root.webcamStream) {
       const audioTrack = root.webcamStream.getAudioTracks()[0]
-      if (audioTrack) tracks.push(audioTrack)
+
+      console.log('Audio check:', {
+        audioEnabled,
+        hasWebcamStream: !!root.webcamStream,
+        audioTrack: audioTrack ? {
+          id: audioTrack.id,
+          label: audioTrack.label,
+          enabled: audioTrack.enabled,
+          muted: audioTrack.muted,
+          readyState: audioTrack.readyState
+        } : null
+      });
+
+      if (audioTrack) {
+        tracks.push(audioTrack)
+        hasAudio = true  // We actually have audio
+      }
     }
 
     if (root.outputCanvas) {
@@ -349,19 +369,85 @@ async function startRecording(event) {
 
     const product = new MediaStream(tracks)
 
-    const { data, error } = await startStream()
+    console.log('MediaStream tracks:', {
+      video: product.getVideoTracks().length,
+      audio: product.getAudioTracks().length,
+      hasAudio
+    });
+
+    const { data, error } = await startStream(hasAudio)
 
     if(!error) {
       const { streamId } = data
       $.teach({ streamId })
     }
 
-
-    mediaRecorder = new MediaRecorder(product, {
+     const recorderOptions = {
       videoBitsPerSecond: 8000000
-    });
+    };
+
+    // If we have audio, use a codec that supports it
+    // If we don't have audio, use video-only codec
+    if (hasAudio) {
+      recorderOptions.mimeType = 'video/webm;codecs=vp8,opus';
+    } else {
+      recorderOptions.mimeType = 'video/webm;codecs=vp8';
+    }
+
+    // Verify the mimeType is supported
+    if (!MediaRecorder.isTypeSupported(recorderOptions.mimeType)) {
+      console.warn('Preferred mimeType not supported, falling back to default');
+      recorderOptions.mimeType = supportedVideoType;
+    }
+
+    console.log('MediaRecorder config:', recorderOptions);
+
+    mediaRecorder = new MediaRecorder(product, recorderOptions);
+
     const recordedVideo = root.querySelector('video.recorded-playback')
 
+    mediaRecorder.ondataavailable = async (event) => {
+      if (event.data.size > 0) {
+        videoChunks.push(event.data);
+
+        const { streamId } = $.learn()
+        if(streamId) {
+          // Retry logic for chunk sending
+          let retries = 3;
+          while (retries > 0) {
+            try {
+              const response = await fetch(`/rtmp/chunk?streamId=${streamId}`, {
+                method: 'POST',
+                body: event.data
+              });
+
+              if (response.ok) {
+                break; // Success
+              } else if (response.status === 410) {
+                // Stream ended permanently
+                console.warn('Stream ended on server');
+                $.teach({ streamId: null, recording: false });
+                break;
+              } else if (response.status === 503) {
+                // Temporary - retry
+                retries--;
+                await new Promise(resolve => setTimeout(resolve, 100));
+              } else {
+                throw new Error(`Server error: ${response.status}`);
+              }
+            } catch (err) {
+              console.error('Chunk send failed:', err);
+              retries--;
+              if (retries > 0) {
+                await new Promise(resolve => setTimeout(resolve, 100));
+              } else {
+                console.error('Failed to send chunk after retries');
+              }
+            }
+          }
+        }
+      }
+    };
     mediaRecorder.ondataavailable = (event) => {
       if (event.data.size > 0) {
         videoChunks.push(event.data);
@@ -1125,7 +1211,8 @@ const viewRenderers = {
       videoEnabled,
       audioEnabled,
       chromakeyEnabled,
-      chromakeyColor
+      chromakeyColor,
+      passphrase
     } = $.learn()
 
     return `
@@ -1156,6 +1243,15 @@ const viewRenderers = {
         <p style="font-size: 0.9em; color: #666; padding: 0 0.5rem;">
           Draw with ${chromakeyColor} to reveal video beneath
         </p>
+
+        <h3>Live Stream</h3>
+        <div>
+          <label class="field">
+            <span class="label">Passphrase</span>
+            <input data-bind name="passphrase" type="password" value="${escapeHyperText(passphrase)}"/>
+          </label>
+        </div>
+
 
         <h3>Extend Reality</h3>
         <div>
@@ -2330,14 +2426,13 @@ And dog provided a way to declaratively bind data and views
 $.when('input', '[data-bind]', function handleBind(event) {
   const { bind } = event.target.dataset
   if(bind) {
-    $.teach({
+    $.whisper({
       name: event.target.name,
       value: event.target.value
     }, bound(bind))
   } else {
-    $.teach({ 
-      name: event.target.name,
-      value: event.target.value
+    $.whisper({
+      [event.target.name]: event.target.value,
     })
   }
 })

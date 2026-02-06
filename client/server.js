@@ -241,36 +241,100 @@ async function proxy(request) {
 }
 
 const activeStreams = new Map();
+const streamWriteQueues = new Map(); // Track write queues
 
 // Your stream functions here
 async function startRTMPStream(request) {
-  const { streamKey, rtmpUrl } = await request.json();
+  const { passphrase, hasAudio } = await request.json();
+
+  const streamKey = safeEnv('OWNCAST_STREAM_KEY', null)
+  const rtmpUrl = safeEnv('OWNCAST_STREAM_URL', null)
 
   if (!streamKey || !rtmpUrl) {
     return new Response('Missing streamKey or rtmpUrl', { status: 400 });
   }
 
+  if (passphrase !== PASSPHRASE) {
+    return new Response('incorrect passphrase', { status: 400 });
+  }
+
   const streamId = crypto.randomUUID();
 
-  const command = new Deno.Command('ffmpeg', {
-    args: [
+  let args;
+
+  if (hasAudio) {
+    // With audio from WebM
+    args = [
+      '-re',
       '-f', 'webm',
       '-i', 'pipe:0',
       '-c:v', 'libx264',
       '-preset', 'veryfast',
-      '-b:v', '3000k',
+      '-tune', 'zerolatency',
+      '-b:v', '2500k',
+      '-maxrate', '2500k',
+      '-bufsize', '5000k',
+      '-pix_fmt', 'yuv420p',
+      '-g', '60',
+      '-r', '30',
       '-c:a', 'aac',
       '-b:a', '128k',
+      '-ar', '48000',
+      '-ac', '2',
       '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
       `${rtmpUrl}/${streamKey}`
-    ],
+    ];
+  } else {
+    // Without audio - generate silent audio
+    args = [
+      '-f', 'lavfi',
+      '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
+      '-re',
+      '-f', 'webm',
+      '-i', 'pipe:0',
+      '-map', '1:v',  // Map video from input 1 (pipe)
+      '-map', '0:a',  // Map audio from input 0 (anullsrc)
+      '-c:v', 'libx264',
+      '-preset', 'veryfast',
+      '-tune', 'zerolatency',
+      '-b:v', '2500k',
+      '-maxrate', '2500k',
+      '-bufsize', '5000k',
+      '-pix_fmt', 'yuv420p',
+      '-g', '60',
+      '-r', '30',
+      '-c:a', 'aac',
+      '-b:a', '128k',
+      '-ar', '48000',
+      '-ac', '2',
+      '-shortest',
+      '-f', 'flv',
+      '-flvflags', 'no_duration_filesize',
+      `${rtmpUrl}/${streamKey}`
+    ];
+  }
+
+  console.log('FFmpeg command:', args.join(' '));
+
+  const command = new Deno.Command('ffmpeg', {
+    args,
     stdin: 'piped',
     stdout: 'piped',
     stderr: 'piped'
   });
 
   const process = command.spawn();
+
+  (async () => {
+    const decoder = new TextDecoder();
+    for await (const chunk of process.stderr) {
+      console.error('FFmpeg:', decoder.decode(chunk));
+    }
+  })();
+
   activeStreams.set(streamId, process);
+  streamWriteQueues.set(streamId, Promise.resolve()); // Initialize queue
 
   console.log('Started stream:', streamId, 'Active streams:', activeStreams.size);
 
@@ -283,23 +347,59 @@ async function sendVideoChunk(request) {
   const url = new URL(request.url);
   const streamId = url.searchParams.get('streamId');
 
-  console.log('Looking for stream:', streamId, 'Available:', Array.from(activeStreams.keys()));
-
   const process = activeStreams.get(streamId);
 
   if (!process) {
+    console.warn('Stream not found:', streamId);
     return new Response('Stream not found', { status: 404 });
   }
 
   try {
     const chunk = await request.arrayBuffer();
-    const writer = process.stdin.getWriter();
-    await writer.write(new Uint8Array(chunk));
-    writer.releaseLock();
+
+    // Get the current queue for this stream
+    let writeQueue = streamWriteQueues.get(streamId) || Promise.resolve();
+
+    // Chain this write onto the queue
+    writeQueue = writeQueue.then(async () => {
+      if (!process.stdin) {
+        throw new Error('Stream stdin not available');
+      }
+
+      const writer = process.stdin.getWriter();
+      try {
+        await writer.write(new Uint8Array(chunk));
+      } finally {
+        writer.releaseLock();
+      }
+    }).catch(error => {
+      // Log but don't throw - keeps queue alive
+      console.error('Write error for stream', streamId, ':', error.message);
+
+      if (error.name === 'BrokenPipe' || error.code === 'EPIPE') {
+        activeStreams.delete(streamId);
+        streamWriteQueues.delete(streamId);
+      }
+
+      throw error; // Re-throw for the response
+    });
+
+    // Update the queue
+    streamWriteQueues.set(streamId, writeQueue);
+
+    // Wait for this write to complete
+    await writeQueue;
 
     return new Response('OK');
   } catch (error) {
-    console.error('Chunk write error:', error);
+    console.error('Chunk write error:', error.name, error.message);
+
+    if (error.name === 'BrokenPipe' || error.code === 'EPIPE') {
+      activeStreams.delete(streamId);
+      streamWriteQueues.delete(streamId);
+      return new Response('Stream ended', { status: 410 });
+    }
+
     return new Response(error.message, { status: 500 });
   }
 }
@@ -316,6 +416,7 @@ async function stopRTMPStream(request) {
       const writer = process.stdin.getWriter();
       await writer.close();
       activeStreams.delete(streamId);
+      streamWriteQueues.delete(streamId); // Clean up queue
     }
 
     return new Response('OK');
