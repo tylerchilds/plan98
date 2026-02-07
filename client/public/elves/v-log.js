@@ -471,8 +471,10 @@ async function startRecording(event) {
       if (recordedVideo) {
         recordedVideo.src = videoUrl;
 
+        /*
         recordedVideo.play()
           .catch(e => console.error("Error playing recorded audio:", e));
+        */
 
         recordedVideo.onloadedmetadata = () => {
           URL.revokeObjectURL(videoUrl);
