@@ -16,37 +16,58 @@ const lazy = async resource => {
 ].map(lazy).map(console.log)
 
 const $ = Self('sticky-menu', {
-  route: null
+  route: null,
+  name: 'gh057'
 })
 
 const elves = {
+  gh057: {
+    label: 'Gh057',
+    prop: '--white',
+    fallback: 'white',
+    description: 'A pre-ghost. A spirit never fully-formed to once yet live to have had died.'
+  },
   silly: {
+    label: 'Silly',
     prop: '--orange',
-    fallback: 'darkorange'
+    fallback: 'darkorange',
+    description: 'A plucky feller.'
   },
   sally: {
+    label: 'Sally',
     prop: '--blue',
-    fallback: 'dodgerblue'
+    fallback: 'dodgerblue',
+    description: 'Meticulous, crafty.'
   },
   shelly: {
+    label: 'Shelly',
     prop: '--purple',
-    fallback: 'mediumpurple'
+    fallback: 'mediumpurple',
+    description: 'Cunning, clever.'
   },
   wally: {
+    label: 'Wally',
     prop: '--green',
-    fallback: 'mediumseagreen'
+    fallback: 'mediumseagreen',
+    description: 'Long-winded, yet helpful.'
   },
   sully: {
+    label: 'Sully',
     prop: '--red',
-    fallback: 'firebrick'
+    fallback: 'firebrick',
+    description: 'Dexterous and tactical.'
   },
   sonny: {
+    label: 'Sonny',
     prop: '--yellow',
-    fallback: 'gold'
+    fallback: 'gold',
+    description: 'Cute and quirky.'
   },
   eon: {
+    label: 'Eon',
     prop: '--brown',
-    fallback: 'sienna'
+    fallback: 'sienna',
+    description: 'The Fate of Destiny.'
   },
 }
 
@@ -69,7 +90,7 @@ function elfCursor({ fallback }={fallback: 'lightgray' }) {
 }
 
 function bindElf(name) {
-  return () => {
+  return (event) => {
     $.teach({ name })
     document.body.style.cursor = elfCursor(elves[name])
     localStorage.setItem($.link + '://character', name)
@@ -102,8 +123,12 @@ $.skin(`
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive" !important;
     text-decoration: none;
+  }
+
+  & div > a:first-child {
     font-size: 2rem;
     line-height: 1;
+    margin: 1rem 0;
   }
 
   & a:link,
@@ -141,13 +166,16 @@ $.skin(`
   }
 
   & .menu {
-    display: grid;
-    place-content: center;
+    padding: calc(0.382rem * 4) calc(0.618rem * 4);
     background: lemonchiffon;
   }
 
+  & .menu > div > a {
+    display: inline-block;
+  }
+
   & .menu > div > span {
-    --v-font-wght: 400;
+    --v-font-wght: 500;
     --v-font-slnt: 0;
     --v-font-crsv: 0;
     --v-font-casl: 0;
@@ -156,7 +184,7 @@ $.skin(`
     font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
     font-family: "Recursive" !important;
     text-decoration: none;
-    color: rgba(0,0,0,.75);
+    color: rgba(0,0,0,.5);
     display: block;
     margin-bottom: 0.618rem;
     margin-left: 0.382rem;
@@ -177,6 +205,9 @@ $.skin(`
     margin-left: 0.382rem;
   }
 
+  & .menu > div > span + p {
+    color: rgba(0,0,0,.65);
+  }
 
   &[data-route] .sticky {
     opacity: 1;
@@ -260,6 +291,7 @@ $.skin(`
   }
 `)
 
+$.when('pointerenter', '.gh057', bindElf('gh057'))
 $.when('pointerenter', '.sonny', bindElf('sonny'))
 $.when('pointerenter', '.sally', bindElf('sally'))
 $.when('pointerenter', '.shelly', bindElf('shelly'))
@@ -277,61 +309,110 @@ $.when('click', 'a', (event) => {
   saveHistory({ type: historyTypes.navigate, [historyTypes.navigate]: data }, event.target.href)
 })
 
-
 $.view(() => {
-  const { route } = $.model()
+  const { route, name } = $.model()
   return `
     <div class="sticky">
       <iframe src="${route}"></iframe>
     </div>
     <div class="menu">
+      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg">
       <div>
         <a href="/app/plan98-camera">
           Camera
         </a>
         <span>Your Phone <em class="sonny">(Sonny)</em></span>
+        <p>
+          Scan the paper code with your camera and try my camera on your phone.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/plan98-gallery">
           Gallery
         </a>
         <span>My Phone <em class="sally">(Sally)</em></span>
+        <p>
+          We can selectively share photos from our galleries.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/v-log">
           Studio
         </a>
         <span>My Bag <em class="shelly">(Shelly)</em></span>
+        <p>
+          We can put on a whole production, from script to sketch.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/shirt-flicks">
           Console
         </a>
         <span>My Box <em class="sully">(Sully)</em></span>
+        <p>
+          We can drop whole mix tapes of our nonsense.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/ur-shell">
           Shell
         </a>
         <span>My Mind <em class="silly">(Silly)</em></span>
+        <p>
+          We can summon anything from a word or two.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/dream-team?id=newbies">
-          Elves
+          Elf Team
         </a>
         <span>Our Mind <em class="wally">(Wally)</em></span>
+        <p>
+          And chat about why that's confusing in real time.
+        </p>
       </div>
+
+      <hr>
 
       <div>
         <a href="/app/source-code">
           Machines
         </a>
         <span>Self-Transformers <em class="eon">(Eon)</em></span>
+        <p>
+          And your endless adventure is only just beginning.
+        </p>
+      </div>
+
+      <hr>
+
+      <div>
+        <p>
+          ${elves[name].description}
+        </p>
+        <span>About You<em class="${name}">(${elves[name].label})</em></span>
+        <a href="/app/saga-crawler">
+          Quest
+        </a>
+
+        <a href="/app/was-code?src=/public/elves/sticky-menu.js">
+          (Remix)
+        </a>
       </div>
     </div>
   `

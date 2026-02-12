@@ -1,5 +1,4 @@
 import diffHTML from 'diffhtml'
-// fallback for non-secure lan parties
 
 const logs = {}
 
