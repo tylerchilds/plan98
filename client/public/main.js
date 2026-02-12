@@ -1,4 +1,5 @@
 import('randomuuid').catch(console.error)
+import('/public/elves/sticky-menu.js').catch(console.error)
 
 self.plan98 ||= { env: {} }
 

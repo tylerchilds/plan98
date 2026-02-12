@@ -160,6 +160,10 @@ const backgrounds = [
 const $ = Self(tag, {
   menuOpen: false,
   recording: false,
+  kind: null,
+  showDeviceList: false,
+  showModeList: false,
+  mode: 'photo',
   caption: '',
   facingMode: 'environment',
   transcription: '',
@@ -899,8 +903,15 @@ $.style(`
     left: 0;
     right: 0;
     z-index: 10;
+    display: grid;
+    align-content: end;
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  & .footer .left,
+  & .footer .center,
+  & .footer .right {
     display: flex;
-    align-content: center;
   }
 
   & .settings-grid {
@@ -916,19 +927,6 @@ $.style(`
     display: block;
   }
 
-  & .toolbelt-actions button[data-menu] {
-    padding: 0;
-  }
-
-  & .toolbelt-actions button[data-menu] .nonce {
-    width: 3rem;
-  }
-
-  &[data-belt="true"] .toolbelt-actions .menu-group {
-    overflow: hidden;
-  }
-
-  & .toolbelt-grabber,
   & canvas {
     touch-action: none;
     user-select: none; /* supported by Chrome and Opera */
@@ -936,156 +934,6 @@ $.style(`
     -khtml-user-select: none; /* Konqueror HTML */
     -moz-user-select: none; /* Firefox */
     -ms-user-select: none; /* Internet Explorer/Edge */
-  }
-
-  &[data-belt="true"] .toolbelt-actions,
-  &[data-belt="true"] .linguistics,
-  &[data-belt="true"] .the-compass,
-  &[data-belt="true"] .power,
-  &[data-belt="true"] .letterbox *,
-  &[data-belt="true"] .letterbox,
-  &[data-belt="true"] .toolbelt-debugger {
-    pointer-events: none !important;
-  }
-
-  &[data-belt="true"] .toolbelt-actions [data-menu] {
-    pointer-events: all !important;
-  }
-
-  & .toolbelt-actions {
-    z-index: 10;
-    background: transparent;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    display: none;
-    max-width: 75%;
-    width: 100%;
-    padding: .5rem;
-    display: inline-block;
-    transform: translate(var(--belt-offset-x, 0), var(--belt-offset-y, 0));
-    pointer-events: none;
-  }
-
-  & .toolbelt-actions button {
-    pointer-events: all;
-  }
-
-  & .toolbelt-actions .toolbelt-grabber:focus,
-  & .toolbelt-actions .toolbelt-grabber.active,
-  & .toolbelt-actions .toolbelt-grabber:hover {
-    background: var(--root-theme, mediumseagreen);
-    color: white;
-  }
-
-  & .toolbelt-grabber {
-    position: sticky;
-    left: 0;
-  }
-
-  & .the-compass[data-open="false"] .power {
-    display: none;
-  }
-
-  & .power {
-    display: grid;
-    height: 100%;
-    place-content: center;
-    background: black;
-    font-size: 2rem;
-  }
-
-  & .menu-group button.toolbelt-grabber {
-    padding: .75rem .25rem;
-    color: var(--root-theme, mediumseagreen);
-  }
-
-  & .the-compass {
-    display: grid;
-    grid-template-columns: repeat(6, calc(100% / 6));
-    grid-template-rows: repeat(6, calc(100% / 6));
-    pointer-events: all;
-    aspect-ratio: 1;
-    margin: auto;
-    max-height: 100%;
-    top: 50%;
-    position: relative;
-    transform: translateY(-50%);
-    width: 12rem;
-    height: 12rem;
-    pointer-events: none;
-  }
-
-  & .the-compass button {
-    position: relative;
-    overflow: hidden;
-    touch-action: manipulation;
-    border: none;
-    border-radius: 100%;
-    color: white;
-    border: 1px solid var(--active-color, mediumseagreen);
-    background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,1) 25%, rgba(0,0,0,.75) 25%);
-  }
-
-  & .the-compass button:hover {
-    background-image: radial-gradient(rgba(0,0,0,.5), rgba(0,0,0,.5) 25%, rgba(0,0,0,0) 25%);
-  }
-
-  & .the-compass img {
-    position: relative;
-    z-index: 2;
-    width: 100%;
-    height: 100%;
-  }
-  & .the-compass button{
-    padding: 0;
-  }
-
-  & .the-compass .plus-2 {
-    grid-row: 3 / 5;
-    grid-column: 5 / 7;
-  }
-
-  & .the-compass .minus-2 {
-    grid-row: 3 / 5;
-    grid-column: 1 / 3;
-  }
-
-  & .the-compass .minus-7 {
-    grid-row: 1 / 3;
-    grid-column: 2 / 4;
-    transform: translateY(13%);
-  }
-
-  & .the-compass .plus-7 {
-    grid-row: 1 / 3;
-    grid-column: 4 / 6;
-    transform: translateY(13%);
-  }
-
-  & .the-compass .minus-5 {
-    grid-row: 5 / 7;
-    grid-column: 2 / 4;
-    transform: translateY(-13%);
-  }
-
-  & .the-compass .plus-5 {
-    grid-row: 5 / 7;
-    grid-column: 4 / 6;
-    transform: translateY(-13%);
-  }
-
-  & .the-compass .root {
-    grid-row: 3 / 5;
-    grid-column: 3 / 5;
-    background-color: white;
-    border-width: 3px;
-  }
-
-  & .device-list {
-    position: absolute;
-    top: 0;
-    transform: translateY(-100%);
   }
 `)
 
@@ -1214,7 +1062,6 @@ const viewRenderers = {
   },
   [views.settings]: function (target) {
       const {
-      xrEnabled,
       transcriptionEnabled,
       videoEnabled,
       audioEnabled,
@@ -1259,17 +1106,6 @@ const viewRenderers = {
             <input data-bind name="passphrase" type="password" value="${escapeHyperText(passphrase)}"/>
           </label>
         </div>
-
-
-        <h3>Extend Reality</h3>
-        <div>
-          <button class="branded-button" data-toggle-xr>
-            ${xrEnabled?'on':'off'}
-          </button>
-        </div>
-
-        <h3>Devices</h3>
-        ${deviceMenu(target)}
 
         <h3>Transcription</h3>
         <div>
@@ -1413,6 +1249,27 @@ class VLog extends HTMLElement {
       const { beltGrabbed } = $.learn()
       target.dataset.belt = beltGrabbed ? 'true' : 'false'
     }
+
+    {
+      const { kind } = $.learn()
+      target.dataset.device = kind
+    }
+
+    {
+      const { showDeviceList } = $.learn()
+      target.dataset.showDeviceList = showDeviceList
+    }
+
+    {
+      const { showModeList } = $.learn()
+      target.dataset.showModeList = showModeList
+    }
+
+    {
+      const { mode } = $.learn()
+      target.dataset.activeMode = mode
+    }
+
   }
 
   disconnectedCallback() {
@@ -1470,10 +1327,41 @@ class VLog extends HTMLElement {
     if(!target.innerHTML) {
       target.innerHTML = `
         <div class="footer">
-          <div class="device-list"></div>
-          <button data-new class="branded-button">
-            Devices
-          </button>
+          <div class="left">
+            <div class="device-list"></div>
+            <button data-device-toggle class="branded-button">
+              Devices
+            </button>
+          </div>
+
+          <div class="center">
+            <button data-show-mode="photo" data-screenshot class="">
+              <sl-icon name="camera"></sl-icon>
+            </button>
+            <button data-show-mode="video" data-toggle-recording class="">
+              <sl-icon name="camera-video" class="camera-status"></sl-icon>
+            </button>
+          </div>
+
+          <div class="right">
+            <div style="margin-left: auto;">
+              <div class="mode-list">
+                <div>
+                  <button data-mode="photo" class="branded-button">
+                    Photo
+                  </button>
+                </div>
+                <div>
+                  <button data-mode="video" class="branded-button">
+                    Video
+                  </button>
+                </div>
+              </div>
+              <button data-mode-toggle class="branded-button">
+                Mode
+              </button>
+            </div>
+          </div>
         </div>
         <div class="taskbar -top">
           <div class="left">
@@ -1499,37 +1387,19 @@ class VLog extends HTMLElement {
             <video playsinline disablePictureInPicture class="recorded-playback" style="display: none;"></video>
             <div class="cursor-tooltips"></div>
           </div>
-          <div class="toolbelt-actions">
-            <div class="the-compass">
-              <button data-menu data-drag class="root" data-tooltip="Menu">
-                <plan98-icon></plan98-icon>
-              </button>
-              <button data-undo class="power minus-7" data-note="">
-                <sl-icon name="arrow-counterclockwise"></sl-icon>
-              </button>
-              <button data-redo class="power plus-7" data-note="">
-                <sl-icon name="arrow-clockwise"></sl-icon>
-              </button>
-              <button data-color-picker class="power plus-2" data-note="">
-                <sl-icon name="palette"></sl-icon>
-              </button>
-              <button data-screenshot class="power plus-5" data-note="">
-                <sl-icon name="camera"></sl-icon>
-              </button>
-              <button data-toggle-recording class="power minus-5" data-note="">
-                <sl-icon name="camera-video" class="camera-status"></sl-icon>
-              </button>
-              <button data-brush-picker class="power minus-2" data-note="">
-                <sl-icon name="border-width"></sl-icon>
-              </button>
-            </div>
-          </div>
         </div>
 
         <div class="panel-area"></div>
         <div class="overlay-area"></div>
       `
       this.afterUpdate(target)
+    }
+
+    {
+      const { videoEnabled, audioEnabled } = $.learn()
+      if (videoEnabled || audioEnabled) {
+        await setMediaStream(target)
+      }
     }
 
     // Setup video element even if stream is not available yet
@@ -1598,7 +1468,7 @@ class VLog extends HTMLElement {
     }
 
     {
-      requestAnimationFrame(gameLoop.bind({ id: playerId }))
+      //requestAnimationFrame(gameLoop.bind({ id: playerId }))
     }
 
     {
@@ -1714,18 +1584,6 @@ class VLog extends HTMLElement {
     }
 
     {
-      const { beltOffsetX, beltOffsetY } = $.learn()
-      const toolbelt = target.querySelector('.toolbelt-actions')
-
-      toolbelt.style = `--belt-offset-x: ${beltOffsetX}px; --belt-offset-y: ${beltOffsetY}px;`
-    }
-
-    {
-      const compass = target.querySelector('.the-compass')
-      compass.dataset.open = $.learn().menuOpen
-    }
-
-    {
       const { color } = $.learn()
       target.style.setProperty("--active-color", color);
     }
@@ -1811,25 +1669,6 @@ class VLog extends HTMLElement {
       if(area.innerHTML) area.innerHTML = ''
     }
 
-    { // menu items
-      const { activeMenu } = $.learn()
-      const currentlyActive = target.querySelector('[data-menu-target].active')
-      if(currentlyActive) {
-        currentlyActive.classList.remove('active')
-      }
-      const activeItem = target.querySelector(`[data-menu-target="${activeMenu}"]`)
-      if(activeItem) {
-        activeItem.classList.add('active')
-      }
-    }
-
-    {
-      const { color } = $.ear()
-      if(target.color !== color) {
-        target.style.setProperty('--active-color', color)
-      }
-    }
-
     {
       const { background } = $.learn()
 
@@ -1864,6 +1703,77 @@ class VLog extends HTMLElement {
   }
 }
 
+$.when('click', '[data-mode]', (event) => {
+  $.teach({ mode: event.target.dataset.mode })
+})
+
+$.when('click', '[data-mode-toggle]', (event) => {
+  $.teach({ showModeList: !$.learn().showModeList })
+})
+
+$.when('click', '[data-device-toggle]', (event) => {
+  $.teach({ showDeviceList: !$.learn().showDeviceList })
+})
+
+$.when('click', '[data-kind]', (event) => {
+  const { kind } = $.learn()
+
+  if(kind !== event.target.dataset.kind) {
+    $.teach({ kind: event.target.dataset.kind })
+  } else {
+    $.teach({ kind: null })
+  }
+})
+
+$.style(`
+
+  & .device-list {
+    display: none;
+    position: absolute;
+    top: 0;
+    transform: translateY(-100%);
+  }
+
+  & .mode-list {
+    display: none;
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateY(-100%);
+  }
+
+  & .device-options {
+    display: none;
+  }
+
+  &[data-device="audioinput"] [data-device="audioinput"] .device-options,
+  &[data-device="audiooutput"] [data-device="audiooutput"] .device-options,
+  &[data-device="videoinput"] [data-device="videoinput"] .device-options {
+    display: block;
+  }
+
+  &[data-show-device-list="true"] .device-list {
+    display: block;
+  }
+
+  &[data-show-mode-list="true"] .mode-list {
+    display: block;
+  }
+
+  & [data-show-mode] {
+    display: none;
+  }
+
+  &[data-active-mode="video"] [data-show-mode="video"] {
+    display: block;
+  }
+
+  &[data-active-mode="photo"] [data-show-mode="photo"] {
+    display: block;
+  }
+`)
+
+
 function deviceMenu(target) {
   const { devicesByKind, selectedVideoDeviceId, selectedAudioDeviceId } = $.learn()
 
@@ -1873,6 +1783,7 @@ function deviceMenu(target) {
       // Check if this device is currently selected
       const isSelected =
         (kind === 'videoinput' && selectedVideoDeviceId === x.deviceId) ||
+        (kind === 'audiooutput' && selectedVideoDeviceId === x.deviceId) ||
         (kind === 'audioinput' && selectedAudioDeviceId === x.deviceId)
 
       return `
@@ -1886,13 +1797,13 @@ function deviceMenu(target) {
     }).join('')
 
     menuItems.push(`
-      <div class="device-kind">
+      <div data-device="${kind}" class="device-kind">
         <div class="device-options">
           ${devices}
         </div>
-        <div class="device-label">
+        <button data-kind="${kind}" class="branded-button">
           ${kind}
-        </div>
+        </button>
       </div>
     `)
   }
@@ -2146,7 +2057,9 @@ async function loadAllDevices() {
           if(!devicesByKind[device.kind]) {
             devicesByKind[device.kind] = []
           }
-          devicesByKind[device.kind].push(device)
+          if(device.deviceId) {
+            devicesByKind[device.kind].push(device)
+          }
         });
 
         $.teach({ devicesByKind })
@@ -2318,13 +2231,6 @@ And dog provided a panel with a list of all memories
 
 */
 
-$.when('click', '[data-list]', () => {
-  const { showList } = $.learn()
-
-  $.teach({ showList: !showList })
-  event.stopImmediatePropagation()
-})
-
 $.when('click', '[data-color-picker]', () => {
   $.teach({ showOverlay: true, view: views.color })
 })
@@ -2406,7 +2312,6 @@ And dog gave man the ability to close without changes
 $.when('click', '[data-cancel]', (event) => {
   $.teach({
     showOverlay: false,
-    showList: false,
     view: null,
     objectId: null
   })
@@ -2494,25 +2399,6 @@ try {
   console.error(e)
 }
 
-$.when('click', '[data-menu-target]', (event) => {
-  const { activeMenu } = $.learn()
-  const { menuTarget } = event.target.dataset
-  $.teach({ activeMenu: activeMenu === menuTarget ? null : menuTarget })
-})
-
-$.when('click', '*', (event) => {
-  if(event.target.closest('.the-compass')) {
-    // child of a menu item
-    return
-  }
-
-  if(event.target.closest('.panel-area')) {
-    return
-  }
-
-  $.teach({ activeMenu: null, showList: false })
-})
-
 function engine(target) {
   const root = target.closest($.link)
   const inputCanvas = root.querySelector('.input-canvas')
@@ -2557,7 +2443,7 @@ function engine(target) {
 
 $.when('click', '[data-new]', function (event) {
   event.preventDefault()
-  $.teach({ activeMenu: null, strokeHistory: [], strokeRevisory: [] })
+  $.teach({ strokeHistory: [], strokeRevisory: [] })
   drawHistoricalStrokes(event.target.closest($.link))
 })
 
@@ -2855,7 +2741,7 @@ $.when('mousedown', '.input-canvas', start)
 
 function start(e) {
   const { inputCanvas, rectangle, scaleX, scaleY, offsetX, offsetY } = engine(e.target)
-  $.teach({ touching: true, activeMenu: null })
+  $.teach({ touching: true })
   const { thickness, opacity, color } = $.learn()
   let pressure = 0.1;
   let clientX, clientY;

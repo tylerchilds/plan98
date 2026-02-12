@@ -548,7 +548,7 @@ $.style(`
     z-index: 10;
     background: transparent;
     display: none;
-    background: rgba(0,0,0,.2);
+    background: lightgray;
   }
 
   @media screen {

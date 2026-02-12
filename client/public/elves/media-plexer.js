@@ -90,6 +90,7 @@ $.style(`
     background: black;
     place-items: center;
     max-height: 100%;
+    height: 100%;
   }
 
   & .fallback {
