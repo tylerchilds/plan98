@@ -50,7 +50,7 @@ const elves = {
   },
 }
 
-function elfCursor({ fallback }) {
+function elfCursor({ fallback }={fallback: 'lightgray' }) {
   const mainPoints = '0,0 68,26 80,30 90,38 95,50 97,62 95,74 90,84 82,90 72,95 60,97 48,95 38,90 30,82 25,72 23,60 25,48 30,38 26,68'
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 100 100">
@@ -387,3 +387,10 @@ addEventListener("popstate", async (event) => {
     restoreHistory(patch)
   }
 });
+
+// initialize so we can come back to here
+if(self.location.pathname === '/') {
+  saveHistory({ type: historyTypes.navigate, [historyTypes.navigate]: {
+    route: null
+  }}, self.location.href)
+}

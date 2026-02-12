@@ -914,6 +914,18 @@ $.style(`
     display: flex;
   }
 
+  & .footer .center {
+    position: relative;
+  }
+
+  & .footer .fixed-center {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+  }
+
   & .settings-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
@@ -1252,7 +1264,11 @@ class VLog extends HTMLElement {
 
     {
       const { kind } = $.learn()
-      target.dataset.device = kind
+      if(kind) {
+        target.dataset.device = kind
+      } else {
+        delete target.dataset.device
+      }
     }
 
     {
@@ -1335,12 +1351,14 @@ class VLog extends HTMLElement {
           </div>
 
           <div class="center">
-            <button data-show-mode="photo" data-screenshot class="">
-              <sl-icon name="camera"></sl-icon>
-            </button>
-            <button data-show-mode="video" data-toggle-recording class="">
-              <sl-icon name="camera-video" class="camera-status"></sl-icon>
-            </button>
+            <div class="fixed-center">
+              <button data-show-mode="photo" data-screenshot class="">
+                <sl-icon name="camera"></sl-icon>
+              </button>
+              <button data-show-mode="video" data-toggle-recording class="">
+                <sl-icon name="camera-video" class="camera-status"></sl-icon>
+              </button>
+            </div>
           </div>
 
           <div class="right">
@@ -1596,6 +1614,7 @@ class VLog extends HTMLElement {
 
       if(recording !== target.lastRecording) {
         target.lastRecording = recording
+        target.dataset.recording = recording
         cameraStatus.setAttribute('name', recording ? 'camera-video-off' : 'camera-video')
       }
     }
@@ -1746,36 +1765,92 @@ $.style(`
     display: none;
   }
 
-  &[data-device="audioinput"] [data-device="audioinput"] .device-options,
-  &[data-device="audiooutput"] [data-device="audiooutput"] .device-options,
-  &[data-device="videoinput"] [data-device="videoinput"] .device-options {
+   &[data-device="audioinput"] [data-device-kind="audioinput"] .device-options,
+  &[data-device="audiooutput"] [data-device-kind="audiooutput"] .device-options,
+  &[data-device="videoinput"] [data-device-kind="videoinput"] .device-options {
     display: block;
+  } 
+
+  &[data-device="audioinput"] [data-kind="audioinput"],
+  &[data-device="audiooutput"] [data-kind="audiooutput"],
+  &[data-device="videoinput"] [data-kind="videoinput"] {
+    background: dodgerblue;
+    text-shadow: revert;
+  }
+
+  & .device-options .branded-button.active {
+    background: gold;
+    text-shadow: revert;
+  }
+
+  &[data-active-mode="photo"] .mode-list [data-mode="photo"],
+  &[data-active-mode="video"] .mode-list [data-mode="video"] {
+    background: mediumseagreen;
+    text-shadow: revert;
   }
 
   &[data-show-device-list="true"] .device-list {
     display: block;
   }
 
+  &[data-show-device-list="true"] [data-device-toggle] {
+    background: darkorange;
+    text-shadow: revert;
+  }
+
   &[data-show-mode-list="true"] .mode-list {
     display: block;
   }
 
+  &[data-show-mode-list="true"] [data-mode-toggle] {
+    background: mediumpurple;
+    text-shadow: revert;
+  }
+
   & [data-show-mode] {
     display: none;
+    width: 46px;
+    height: 46px;
+    border: 3px solid black;
+    border-radius: 100%;
+    border-radius: 100%;
+    place-items: center;
+    background: white;
+    color: black;
   }
 
   &[data-active-mode="video"] [data-show-mode="video"] {
-    display: block;
+    display: grid;
   }
 
   &[data-active-mode="photo"] [data-show-mode="photo"] {
-    display: block;
+    display: grid;
+  }
+
+  &[data-recording="true"] [data-show-mode="video"] {
+    background: firebrick;
+    border: 3px solid white;
+    color: white;
   }
 `)
 
+$.when('click', '*:not([data-device-toggle])', (event) => {
+  if(event.target.closest('.device-list')) {
+    return
+  }
+  $.teach({ showDeviceList: false })
+})
+
+$.when('click', '*:not([data-mode-toggle])', (event) => {
+  if(event.target.closest('.mode-list')) {
+    return
+  }
+  $.teach({ showModeList: false })
+})
+
 
 function deviceMenu(target) {
-  const { devicesByKind, selectedVideoDeviceId, selectedAudioDeviceId } = $.learn()
+  const { devicesByKind, selectedVideoDeviceId, selectedAudioDeviceId, selectedAudioOutputDeviceId } = $.learn()
 
   const menuItems = []
   for(const kind in devicesByKind) {
@@ -1783,7 +1858,7 @@ function deviceMenu(target) {
       // Check if this device is currently selected
       const isSelected =
         (kind === 'videoinput' && selectedVideoDeviceId === x.deviceId) ||
-        (kind === 'audiooutput' && selectedVideoDeviceId === x.deviceId) ||
+        (kind === 'audiooutput' && selectedAudioOutputDeviceId === x.deviceId) ||
         (kind === 'audioinput' && selectedAudioDeviceId === x.deviceId)
 
       return `
@@ -1796,8 +1871,8 @@ function deviceMenu(target) {
       `
     }).join('')
 
-    menuItems.push(`
-      <div data-device="${kind}" class="device-kind">
+     menuItems.push(`
+      <div data-device-kind="${kind}" class="device-kind">
         <div class="device-options">
           ${devices}
         </div>
@@ -1809,9 +1884,7 @@ function deviceMenu(target) {
   }
 
   return `
-    <div class="device-list">
-      ${menuItems.join('')}
-    </div>
+    ${menuItems.join('')}
   `
 }
 
@@ -1980,6 +2053,30 @@ async function setMediaStream(target) {
       }
     }
 
+    if (target.webcamStream) {
+      const videoTrack = target.webcamStream.getVideoTracks()[0]
+      const audioTrack = target.webcamStream.getAudioTracks()[0]
+      const updates = {}
+
+      if (videoTrack && !$.learn().selectedVideoDeviceId) {
+        const settings = videoTrack.getSettings()
+        if (settings.deviceId) {
+          updates.selectedVideoDeviceId = settings.deviceId
+        }
+      }
+
+      if (audioTrack && !$.learn().selectedAudioDeviceId) {
+        const settings = audioTrack.getSettings()
+        if (settings.deviceId) {
+          updates.selectedAudioDeviceId = settings.deviceId
+        }
+      }
+
+      if (Object.keys(updates).length > 0) {
+        $.teach(updates)
+      }
+    }
+
     const { transcriptionEnabled } = $.learn()
     if (transcriptionEnabled && audioEnabled && !target.voskContext) {
       await initializeVosk(target)
@@ -1996,7 +2093,15 @@ async function setMediaStream(target) {
     cameraLock = false
   }
 
-  loadAllDevices()
+  await loadAllDevices()
+
+  // Sync default audio output after devices are enumerated
+  if (!$.learn().selectedAudioOutputDeviceId) {
+    const { devicesByKind } = $.learn()
+    if (devicesByKind.audiooutput?.length > 0) {
+      $.teach({ selectedAudioOutputDeviceId: devicesByKind.audiooutput[0].deviceId })
+    }
+  }
 }
 
 async function handleOrientationChange(target) {
