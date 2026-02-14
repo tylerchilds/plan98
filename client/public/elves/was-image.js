@@ -5,7 +5,7 @@ const tag = 'was-image'
 const $ = elf(tag)
 
 function draw(target) {
-  if(target && targetinnerHTML) return
+  if(target && target.innerHTML) return
   target.innerHTML = `
     <style>
       :host {

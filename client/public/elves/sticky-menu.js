@@ -316,7 +316,6 @@ $.view(() => {
       <iframe src="${route}"></iframe>
     </div>
     <div class="menu">
-      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg">
       <div>
         <a href="/app/plan98-camera">
           Camera
@@ -366,7 +365,7 @@ $.view(() => {
       <hr>
 
       <div>
-        <a href="/app/ur-shell">
+        <a href="/app/multi-task?src=/app/ur-shell">
           Shell
         </a>
         <span>My Mind <em class="silly">(Silly)</em></span>
@@ -403,17 +402,25 @@ $.view(() => {
 
       <div>
         <p>
-          ${elves[name].description}
+          ${(elves[name] || {}).description}
         </p>
-        <span>About You<em class="${name}">(${elves[name].label})</em></span>
+        <span>About You<em class="${name}">(${(elves[name] || {}).label})</em></span>
+      </div>
+
+      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg">
+
+      <div>
+        When you're ready, try the
         <a href="/app/saga-crawler">
           Quest
         </a>
+        .
 
         <a href="/app/was-code?src=/public/elves/sticky-menu.js">
           (Remix)
         </a>
       </div>
+
     </div>
   `
 }, {

@@ -46,7 +46,7 @@ And dog let man bark at nothing in particular
 
 */
 
-import { publish } from './face-less.js'
+import { publish } from './plan98-gallery.js'
 
 /*
 
@@ -510,9 +510,12 @@ async function startRecording(event) {
       });
       */
 
-      put(videoSrc, videoBlob, { type: supportedVideoType }).then(response => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+      put(videoSrc, videoBlob, { type: supportedVideoType }).then(res => {
+        if(!res || !res.ok) {
+          throw new Error('Upload failed')
+        }
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
         }
 
       }).catch(error => {
@@ -582,58 +585,55 @@ $.when('click', '[data-screenshot]', screenshot)
 
 function screenshot(event) {
   const { outputCanvas } = engine(event.target)
+  if (!outputCanvas) {
+    toast("Camera not ready")
+    return
+  }
+
   const { strokeHistory, strokeRevisory } = $.ear()
-  const dataURL = outputCanvas.toDataURL('image/jpeg');
-  const byteCharacters = atob(dataURL.split(',')[1]);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
 
-  const now = new Date();
-  const timestamp = now.toJSON()
-  const imageSrc = `/private/${$.link}/${timestamp}.jpg`
-
-  const historicalNugget = {
-    $type: 'computer.sillyz.data.image',
-    id: self.crypto.randomUUID(),
-    src: imageSrc,
-    strokeHistory,
-    strokeRevisory,
-    title: 'Recorded Entry',
-    description: 'A video recorded now about another time or place',
-    createdAt: new Date().toLocaleString('en-us'),
-  }
-
-  // Attempt to upload to server
-  //
-  publish(historicalNugget)
-  /*
-  put(image, JSON.stringify(data), { type: 'application/json' }).then(response => {
-  }).catch(error => {
-    console.warn(error);
-  });
-  */
-
-  // Attempt to upload to server
-  put(imageSrc, byteArray, { type: 'image/jpeg' }).then(res => {
-    if(res.ok) {
-      console.log('successful upload')
-    } else {
-      throw new Error('Upload failed')
+  outputCanvas.toBlob((blob) => {
+    if (!blob) {
+      toast("Failed to capture image")
+      return
     }
-  }).catch(error => {
-    console.warn(error);
-    const link = document.createElement('a');
-    link.download = `${timestamp}.jpg`;
-    link.href = dataURL;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  })
-}
 
+    const now = new Date()
+    const timestamp = now.toJSON()
+    const imageSrc = `/private/${$.link}/${timestamp}.jpg`
+
+    const historicalNugget = {
+      $type: 'computer.sillyz.data.image',
+      id: self.crypto.randomUUID(),
+      src: imageSrc,
+      strokeHistory,
+      strokeRevisory,
+      title: 'Recorded Entry',
+      description: 'A video recorded now about another time or place',
+      createdAt: new Date().toLocaleString('en-us'),
+    }
+
+    publish(historicalNugget)
+
+    put(imageSrc, blob, { type: 'image/jpeg' }).then(res => {
+      if (!res || !res.ok) {
+        throw new Error('Upload failed')
+      }
+      console.log('successful upload')
+    }).catch(error => {
+      console.warn(error)
+      // Fallback: download locally
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.download = `${timestamp}.jpg`
+      link.href = url
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+    })
+  }, 'image/jpeg', 0.92)
+}
 
 /*
 

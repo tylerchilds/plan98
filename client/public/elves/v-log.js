@@ -46,7 +46,7 @@ And dog let man bark at nothing in particular
 
 */
 
-import { publish } from './face-less.js'
+import { publish } from './plan98-gallery.js'
 
 /*
 
@@ -1202,7 +1202,7 @@ const viewRenderers = {
             Close
           </button>
         </div>
-        <face-less></face-less>
+        <plan98-gallery></plan98-gallery>
       </div>
     `
   },
