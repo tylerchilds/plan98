@@ -1217,8 +1217,6 @@ function query(target) {
   fate()
 }
 
-fate()
-
 async function fate() {
   const signer = await getSigner()
   const storage = getStorage()
@@ -1240,7 +1238,7 @@ async function fate() {
       const resources = paths.map(x => space.resource(x))
 
       const events = await resources
-        .filter(x => !cache.includes(x.path))
+        .filter(x => !cache[x.path])
         .map((resource, i) => resource.get({ signer }).then(res => res.json())
         .then(data => {
           const parts = paths[i].split('/')
@@ -1258,11 +1256,8 @@ async function fate() {
               handle: { path: paths[i], name },
               data
             }
-          }, {
-            mergeHandler: mergeEvent,
-            parameters: []
-          })
-          return event
+          }, mergeEvent)
+          return { spaceKey, timeKey, handle: { path: paths[i], name }, data }
         }).catch(e => {
           return {
             error: e,
@@ -1277,7 +1272,7 @@ async function fate() {
 
   const events = await get(`time-machine`).then(addData).catch(async (error) => {
     await touch('time-machine')
-    get('time-machine').then(addData)
+    return get('time-machine').then(addData)  // add return
   })
 
   reIndex(events)
@@ -1385,7 +1380,7 @@ function reIndex(events=[]) {
     this.field('keywords')
     this.field('type')
 
-    events.forEach(event => {
+    events.filter(Boolean).forEach(event => {
       if(event.data) {
         const node = {
           id: event.data.id,
@@ -3890,12 +3885,7 @@ function newEventPath(draft) {
 }
 
 export async function save(draft, context={}) {
-  let path
-  if(context.path) {
-    path = context.path
-  } else {
-    path = newEventPath(draft)
-  }
+  let path = context.path || newEventPath(draft)
 
   const event = {
     ...(schemas[draft.type] || {}),
@@ -3903,13 +3893,10 @@ export async function save(draft, context={}) {
     persona: currentPersona()
   }
 
-  // Attempt to upload to server
-  await put(path, JSON.stringify(event), { type: 'application/json' }).then(response => {
-  }).catch(error => {
-    console.warn(error);
-  });
+  await put(path, JSON.stringify(event), { type: 'application/json' })
 
-  await appendPath(path)
+  // Don't await fate() here — let caller handle it
+  appendPath(path) // fire and forget
 
   const { spaceKey, timeKey } = getSpaceTimeFromEventPath(path)
   return { path, spaceKey, timeKey }
@@ -4001,11 +3988,9 @@ async function removePath(path) {
 }
 
 
-
 $.when('click', '[data-action="post"]', async (event) => {
   event.preventDefault()
 
-  // Get current date and time for filename
   const { draft, context } = $.learn()
 
   if(draft) {
@@ -4016,17 +4001,34 @@ $.when('click', '[data-action="post"]', async (event) => {
       toast(e.message, { type: 'error' })
       $.teach({ view: views.create })
     })
-    if(data) {
-      toast('Saved!', { type: 'success' })
-      await fate()
-      $.teach({ view: draft.type, space: data.spaceKey, time: data.timeKey })
-    }
 
+    if(data) {
+      // Optimistically update buckets so UI is instant
+      const { spaceKey, timeKey, path } = data
+      $.teach({
+        spaceKey,
+        timeKey,
+        path,
+        event: {
+          spaceKey,
+          timeKey,
+          handle: { path, name: path.split('/').pop() },
+          data: { ...schemas[draft.type], ...draft }
+        }
+      }, mergeEvent)
+
+      toast('Saved!', { type: 'success' })
+      $.teach({ view: draft.type, space: spaceKey, time: timeKey })
+
+      // Re-index in background, don't block UI
+      fate()
+    }
   } else {
     $.teach({ view: views.create })
     toast('Incomplete information, please try again.', { type: 'error' })
   }
 })
+
 
 $.when('click', '[data-destroy]', async (event) => {
   event.preventDefault()

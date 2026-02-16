@@ -2,8 +2,6 @@ import app from '@plan98/app'
 import 'aframe'
 import { get, put } from './plan98-wallet.js'
 
-const GRAVITY = 0.00001;
-let lastTime
 
 const orientation = {
 	x: '0', y: '0', z: '0', roll: '0', pitch: '0', yaw: '0'
@@ -68,11 +66,7 @@ robot.draw((target) => {
     context.fillStyle = '#000' // solid color
     context.imageSmoothingEnabled = false
 
-    setInterval(() => {
-      {
-        increment(target)
-      }
-    }, 100)
+    startLoop(target)
   }
 }, {
   beforeUpdate(target) {
@@ -183,64 +177,54 @@ function draw3d(data) {
 	`
 }
 
-function increment(target) {
-  const currentTime = new Date()
-  const dt = (currentTime - lastTime) / 16.67;
-  lastTime = currentTime;
+const GRAVITY = 80;
+let lastTime = performance.now();
 
-  const irix = target.querySelector('.irix')
-  const { blocks } = robot.learn()
-	celestials().map(name => {
-    const node = target.querySelector(`[id="${name}"]`)
-    if(node) {
-      node.outerHTML = component(name)
-    }
-	})
-
-  if(blocks) {
-    const models = blocks.map((block, i) => {
-      if(block) {
-        return draw3d(
-          aBox({...block.position}, {...block.properties})
-        )
-      }
-    }).join('')
-    irix.innerHTML = models
+function startLoop(target) {
+  lastTime = performance.now();
+  function loop() {
+    increment(target);
+    requestAnimationFrame(loop);
   }
- 
-  {
-    requestIdleCallback(() => {
-      robot.teach(null, (state) => {
-        const newBlocks = state.blocks.map(block => {
-          const { position, properties } = block
-          properties.vy += GRAVITY * dt;
-          properties.y += properties.vy * dt;
-          // Reset acceleration each frame
-          let ax = 0, ay = 0;
+  requestAnimationFrame(loop);
+}
 
-          // Add gravity
-          ay += GRAVITY;
+function increment(target) {
+  const now = performance.now();
+  const dt = (now - lastTime) / 1000;
+  lastTime = now;
 
-          // Add other forces (wind, thrust, etc.)
-          // ax += windForceX;
-          // ay += windForceY;
+  robot.whisper({ gravity: GRAVITY, dt }, (state, payload) => {
+    const { gravity, dt } = payload;
+    const blocks = state.blocks;
+    if (!blocks || !blocks.length) return state;
 
-          // Apply acceleration to velocity
-          //properties.vx += ax * dt;
-          properties.vy += ay * dt;
+    const newBlocks = blocks.map(block => {
+      const position = { ...block.position };
+      const properties = { ...block.properties };
 
-          // Apply velocity to position
-          //position.x += properties.vx * dt;
-          position.y += properties.vy * dt;
+      if (!properties.vy) properties.vy = 0;
+      properties.vy += gravity * dt;
+      position.y -= properties.vy * dt;
 
-          return { position, properties }
-        })
-        return {
-          ...state,
-          blocks: newBlocks
-        }
-      })
-    })
+      if (position.y < 0) {
+        position.y = 0;
+        properties.vy = 0;
+      }
+
+      return { position, properties };
+    });
+
+    return { ...state, blocks: newBlocks };
+  });
+
+  const { blocks } = robot.learn();
+  const irix = target.querySelector('.irix');
+
+  if (blocks && blocks.length && irix) {
+    irix.innerHTML = blocks.map(block =>
+      block ? draw3d(aBox(block.position, block.properties)) : ''
+    ).join('');
   }
 }
 

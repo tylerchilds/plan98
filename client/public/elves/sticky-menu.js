@@ -220,6 +220,7 @@ $.skin(`
     opacity: 0;
   }
 
+  & .gh057::before,
   & .sally::before,
   & .sully::before,
   & .sonny::before,
@@ -285,6 +286,11 @@ $.skin(`
   & .silly::before {
     background-color: var(--orange);
   }
+
+  & .gh057::before {
+    background-color: var(--white, white);
+  }
+
 
   & .eon::before {
     background-color: var(--brown);
