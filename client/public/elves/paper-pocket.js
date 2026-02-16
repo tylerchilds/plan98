@@ -6,6 +6,75 @@ import * as Tone from 'tone@next'
 import { SampleLibrary } from '/public/cdn/attentionandlearninglab.com/Tonejs-Instruments.js'
 import { BUTTON_CODES, overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
+export const elves = {
+  gh057: {
+    label: 'Gh057',
+    prop: '--white',
+    fallback: 'white',
+    description: 'A pre-ghost. A spirit never fully-formed to once yet live to have had died.'
+  },
+  silly: {
+    label: 'Silly',
+    prop: '--orange',
+    fallback: 'darkorange',
+    description: 'A plucky feller.'
+  },
+  sally: {
+    label: 'Sally',
+    prop: '--blue',
+    fallback: 'dodgerblue',
+    description: 'Meticulous, crafty.'
+  },
+  shelly: {
+    label: 'Shelly',
+    prop: '--purple',
+    fallback: 'mediumpurple',
+    description: 'Cunning, clever.'
+  },
+  wally: {
+    label: 'Wally',
+    prop: '--green',
+    fallback: 'mediumseagreen',
+    description: 'Long-winded, yet helpful.'
+  },
+  sully: {
+    label: 'Sully',
+    prop: '--red',
+    fallback: 'firebrick',
+    description: 'Dexterous and tactical.'
+  },
+  sonny: {
+    label: 'Sonny',
+    prop: '--yellow',
+    fallback: 'gold',
+    description: 'Cute and quirky.'
+  },
+  eon: {
+    label: 'Eon',
+    prop: '--brown',
+    fallback: 'sienna',
+    description: 'The Fate of Destiny.'
+  },
+}
+
+function elfCursor({ fallback }={fallback: 'lightgray' }) {
+  const mainPoints = '0,0 68,26 80,30 90,38 95,50 97,62 95,74 90,84 82,90 72,95 60,97 48,95 38,90 30,82 25,72 23,60 25,48 30,38 26,68'
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 100 100">
+    <polygon points="${mainPoints}" fill="${fallback}"/>
+
+    <line x1="0" y1="0" x2="68" y2="26" stroke="rgba(255,255,255,0.25)" stroke-width="12"/>
+    <line x1="0" y1="0" x2="60" y2="32" stroke="rgba(255,255,255,0.1)" stroke-width="12"/>
+    <line x1="0" y1="0" x2="50" y2="40" stroke="rgba(255,255,255,0.01)" stroke-width="12"/>
+
+    <line x1="0" y1="0" x2="26" y2="68" stroke="rgba(0,0,0,0.25)" stroke-width="12"/>
+    <line x1="0" y1="0" x2="32" y2="60" stroke="rgba(0,0,0,0.1)" stroke-width="12"/>
+    <line x1="0" y1="0" x2="40" y2="50" stroke="rgba(0,0,0,0.01)" stroke-width="12"/>
+  </svg>`
+
+  return `url('data:image/svg+xml,${encodeURIComponent(svg)}') 0 0, auto`
+}
+
 const modes = {
   game: 'game',
   app: 'app',
@@ -281,6 +350,7 @@ let current
 // load samples / choose 4 random instruments from the list //
 const instruments = ['piano', 'bass-electric', 'bassoon', 'cello', 'clarinet', 'contrabass', 'flute', 'french-horn', 'guitar-acoustic', 'guitar-electric','guitar-nylon', 'harmonium', 'harp', 'organ', 'saxophone', 'trombone', 'trumpet', 'tuba', 'violin', 'xylophone']
 
+const characters = [...Object.keys(elves)/*, ...Object.keys(SPECIES) */]
 const themes = ['lightgray', 'firebrick','darkorange','gold','mediumseagreen','dodgerblue','mediumpurple', 'lemonchiffon']
 const bpmOptions = ['20', '40', '60', '80', '100', '120', '140', '160', '180', '200', '220', '240', '280', '300', '320', '340', '360']
 const noteDurationOptions = ['4m', '2m', '1m', '1n', '2n', '4n', '8n', '16n', '32n', '64n']
@@ -383,8 +453,11 @@ Move right or "A"ffirm to continue.
   },
 }
 
+const character = getCharacter()
+
 const $ = elf('paper-pocket', {
   fullScreen: getScreenPreference(),
+  character,
   theme: getTheme(),
   instrument: getInstrument(),
   searchEngine: getSearchEngine(),
@@ -412,6 +485,12 @@ const $ = elf('paper-pocket', {
       description: 'The sound of the console',
       options: getInstruments(),
       value: getInstrument()
+    },
+    character: {
+      label: 'Character',
+      description: 'The active cursor',
+      options: getCharacters(),
+      value: getCharacter()
     },
     theme: {
       label: 'Theme',
@@ -452,6 +531,8 @@ const $ = elf('paper-pocket', {
   },
   pause: systemMenu
 })
+
+document.body.style.cursor = elfCursor(elves[character])
 
 export default $
 
@@ -549,6 +630,19 @@ export function setScreenPreference(preference) {
   $.teach({ fullScreen: preference })
 }
 
+export function getCharacters() {
+  return characters
+}
+
+export function setCharacter(character) {
+  localStorage.setItem('paper-pocket/character', character)
+  document.body.style.cursor = elfCursor(elves[character])
+  $.teach({ character })
+}
+
+export function getCharacter() {
+  return localStorage.getItem('paper-pocket/character') || 'gh057'
+}
 
 
 export function getThemes() {
@@ -784,6 +878,14 @@ export function afterUpdateTheme(scope, target) {
     if(target.theme !== theme) {
       target.theme = theme
       document.body.style.setProperty('--root-theme', theme)
+    }
+  }
+
+  {
+    const { character } = s.learn()
+    if(target.character !== character) {
+      target.character = character
+      document.body.style.setProperty('--root-character', character)
     }
   }
 
@@ -1030,6 +1132,10 @@ export const sideEffects = {
   theme: (value) => {
     if(!value) return
     setTheme(value)
+  },
+  character: (value) => {
+    if(!value) return
+    setCharacter(value)
   },
   searchEngine: (value) => {
     if(!value) return

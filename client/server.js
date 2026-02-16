@@ -78,6 +78,8 @@ try {
   console.log("Using CDN import map");
 }
 
+const cachedDefaultTemplate = template();
+
 function page() {
   const index = template()
   return new DOMParser().parseFromString(index, "text/html");
@@ -583,68 +585,51 @@ Deno.serve(
         'content-type': getContentTypeByPath(filepath)
       }
 
-      const storageId = walletDefaultHost
-      if(storageId) {
-        const storageUrl = new URL(storageId)
-        const storage = new StorageClient(storageUrl)
-        const space = storage.space({
-          signer,
-          id: `urn:uuid:${spaceId}`
-        })
-
-        console.log(spaceId)
-        console.log(space)
-
-        const resource = space.resource(filepath)
-
-        const data = await resource.get({ signer })
-          .then(async res => {
-            if(res.status !== 200) {
-              throw new Error('Failed private lookup: '+ filepath)
-            }
-            return res
-          }).catch((e) => {
-            return null
-          })
-
-        if(data) {
-          console.log('Serving ' + filepath + ' from ' + spaceId + ' @ ' + storageId)
-          if(request.method === 'HEAD') {
-            return new Response(null, {
-              status: 200,
-              headers
-            });
+      // Try disk FIRST (fast)
+      try {
+        const file = await Deno.open("." + filepath, { read: true });
+        if (file) {
+          console.log('Serving ' + filepath + ' from disk.');
+          if (request.method === 'HEAD') {
+            file.close();
+            return new Response(null, { status: 200, headers });
           }
-          return new Response(await data.blob(), {
-            status: 200,
-            headers
+          return new Response(file.readable, { status: 200, headers });
+        }
+      } catch {
+        // Not on disk — try remote storage (slow)
+        const storageId = walletDefaultHost;
+        if (storageId) {
+          const storageUrl = new URL(storageId);
+          const storage = new StorageClient(storageUrl);
+          const space = storage.space({
+            signer,
+            id: `urn:uuid:${spaceId}`
           });
+          const resource = space.resource(filepath);
+          const data = await resource.get({ signer }).catch(() => null);
+
+          if (data?.status === 200) {
+            console.log('Serving ' + filepath + ' from ' + spaceId + ' @ ' + storageId);
+            if (request.method === 'HEAD') {
+              return new Response(null, { status: 200, headers });
+            }
+            return new Response(await data.blob(), { status: 200, headers });
+          }
         }
       }
 
-      const file = await Deno.open("." + filepath, { read: true });
-      if(file) {
-        console.log('Serving ' + filepath + ' from disk.')
-        if(request.method === 'HEAD') {
-          file.close()
-          return new Response(null, {
-            status: 200,
-            headers
-          });
-        }
-        return new Response(file.readable, {
-          status: 200,
-          headers
-        });
-      }
+      // Neither disk nor remote had it
+      return new Response(cachedDefaultTemplate, {
+        status: 404,
+        headers: { 'content-type': 'text/html' }
+      });
 
     } catch(e) {
-      console.error(e)
-      return new Response(template(), {
+      console.error(e);
+      return new Response(cachedDefaultTemplate, {
         status: 404,
-        headers: {
-          'content-type': 'text/html'
-        }
+        headers: { 'content-type': 'text/html' }
       });
     }
   },

@@ -18,7 +18,7 @@
     "debug-client": "deno run -A --inspect-brk client.js",
     "reverse-client": "ssh -N -R 1998:localhost:1024 local.$USER.me",
     "start-peer": "cd client && deno run -A server.js",
-    "deploy-peer": "cd client && deployctl deploy --no-static --entrypoint=./server.js --prod --exclude=./private --include=./public --include=./server.js --env-file",
+    "deploy-peer": "cd client && deployctl deploy --no-static --entrypoint=./server.js --prod --exclude=./private --exclude=.env --include=./public --include=./server.js --env-file",
     "debug-peer": "cd client && deno run -A --inspect-brk server.js",
     "reverse-peer": "ssh -N -R 1024:localhost:1024 $USER.plan98.org",
     "start-was": "cd server/was/wallet-attached-storage-server-main && CORS_ALLOW_ALL_ORIGINS=TRUE PORT=1088 npm run dev",

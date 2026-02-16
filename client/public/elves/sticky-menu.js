@@ -1,4 +1,5 @@
 import { Self } from '@plan98/types'
+import { getCharacter, setCharacter, elves } from './paper-pocket.js'
 
 // miss u kevin, rip
 const lazy = async resource => {
@@ -17,87 +18,15 @@ const lazy = async resource => {
 
 const $ = Self('sticky-menu', {
   route: null,
-  name: 'gh057'
+  name: getCharacter() || Object.keys(elves[0])
 })
-
-const elves = {
-  gh057: {
-    label: 'Gh057',
-    prop: '--white',
-    fallback: 'white',
-    description: 'A pre-ghost. A spirit never fully-formed to once yet live to have had died.'
-  },
-  silly: {
-    label: 'Silly',
-    prop: '--orange',
-    fallback: 'darkorange',
-    description: 'A plucky feller.'
-  },
-  sally: {
-    label: 'Sally',
-    prop: '--blue',
-    fallback: 'dodgerblue',
-    description: 'Meticulous, crafty.'
-  },
-  shelly: {
-    label: 'Shelly',
-    prop: '--purple',
-    fallback: 'mediumpurple',
-    description: 'Cunning, clever.'
-  },
-  wally: {
-    label: 'Wally',
-    prop: '--green',
-    fallback: 'mediumseagreen',
-    description: 'Long-winded, yet helpful.'
-  },
-  sully: {
-    label: 'Sully',
-    prop: '--red',
-    fallback: 'firebrick',
-    description: 'Dexterous and tactical.'
-  },
-  sonny: {
-    label: 'Sonny',
-    prop: '--yellow',
-    fallback: 'gold',
-    description: 'Cute and quirky.'
-  },
-  eon: {
-    label: 'Eon',
-    prop: '--brown',
-    fallback: 'sienna',
-    description: 'The Fate of Destiny.'
-  },
-}
-
-function elfCursor({ fallback }={fallback: 'lightgray' }) {
-  const mainPoints = '0,0 68,26 80,30 90,38 95,50 97,62 95,74 90,84 82,90 72,95 60,97 48,95 38,90 30,82 25,72 23,60 25,48 30,38 26,68'
-
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 100 100">
-    <polygon points="${mainPoints}" fill="${fallback}"/>
-
-    <line x1="0" y1="0" x2="68" y2="26" stroke="rgba(255,255,255,0.25)" stroke-width="12"/>
-    <line x1="0" y1="0" x2="60" y2="32" stroke="rgba(255,255,255,0.1)" stroke-width="12"/>
-    <line x1="0" y1="0" x2="50" y2="40" stroke="rgba(255,255,255,0.01)" stroke-width="12"/>
-
-    <line x1="0" y1="0" x2="26" y2="68" stroke="rgba(0,0,0,0.25)" stroke-width="12"/>
-    <line x1="0" y1="0" x2="32" y2="60" stroke="rgba(0,0,0,0.1)" stroke-width="12"/>
-    <line x1="0" y1="0" x2="40" y2="50" stroke="rgba(0,0,0,0.01)" stroke-width="12"/>
-  </svg>`
-
-  return `url('data:image/svg+xml,${encodeURIComponent(svg)}') 0 0, auto`
-}
 
 function bindElf(name) {
   return (event) => {
     $.teach({ name })
-    document.body.style.cursor = elfCursor(elves[name])
-    localStorage.setItem($.link + '://character', name)
+    setCharacter(name)
   }
 }
-
-bindElf(localStorage.getItem($.link + '://character'))()
 
 export function character() {
   return $.learn().name
@@ -291,9 +220,8 @@ $.skin(`
     background-color: var(--white, white);
   }
 
-
   & .eon::before {
-    background-color: var(--brown);
+    background-color: var(--gray);
   }
 `)
 
