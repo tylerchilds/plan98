@@ -12,6 +12,10 @@ import {
 import { bayunCore, BayunCore } from '@sillonious/vault'
 import './secure-followers.js'
 
+import { Editor } from '@tiptap/core'
+import StarterKit from '@tiptap/starter-kit'
+import Placeholder from '@tiptap/extension-placeholder'
+
 // Local decryption cache - stores decrypted messages
 const table = {}
 let lastMyGroupIds = null
@@ -19,6 +23,7 @@ let lastOtherGroupIds = null
 
 // Track which messages are being decrypted to avoid duplicate attempts
 const decryptionInProgress = new Set()
+let wasAtBottom = true
 
 const $ = mvc('dream-team', {
   synthia: {},
@@ -29,8 +34,8 @@ const $ = mvc('dream-team', {
   threadPanelWidth: 350,
   participants: [],
   currentRoom: null,
-  messageText: '',
-  replyText: '',
+  //messageText: '',
+  //replyText: '',
   messageHeight: null,
   replyHeight: null,
   myGroups: [],
@@ -42,6 +47,7 @@ const $ = mvc('dream-team', {
   view: 'profile', // use views.profile constant
   iframeSrc: null,
   showActionMenu: false, // for three-dot menu in action bar
+  showAttachments: false,
   activeMessageMenu: null, // for message three-dot menus
   currentGroupInfo: null, // for manage-group view
   addMemberCompany: '',
@@ -182,27 +188,37 @@ const viewRenderers = {
         </div>
         <div class="chat-body">
           <div class="chat-main">
-            <div class="scroll-back">
+            <div class="scroll-back" data-scrollback="main">
               <div class="messages">
               </div>
+              <button class="scroll-anchor-btn" data-scroll-anchor="main" style="display:none;">
+                <sl-icon name="arrow-down"></sl-icon>
+              </button>
             </div>
             <form method="POST" name="send">
               <div class="fields">
                 <div class="action-row">
-                  <div class="formatting-tools"></div>
+                  <div class="formatting-tools">
+                    <button type="button" class="fmt-btn" data-format="bold"><sl-icon name="type-bold"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="italic"><sl-icon name="type-italic"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="strikethrough"><sl-icon name="type-strikethrough"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="code"><sl-icon name="code"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="list-ul"><sl-icon name="list-ul"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="list-ol"><sl-icon name="list-ol"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="blockquote"><sl-icon name="blockquote-left"></sl-icon></button>
+                  </div>
                 </div>
                 <div class="compose-row">
                   <button type="button" class="compose-btn attach-btn" data-attach>
                     <sl-icon name="paperclip"></sl-icon>
                   </button>
-                  <textarea
-                    data-bind
-                    name="messageText"
-                    placeholder="Start a conversation..."
-                  ></textarea>
+                  <div class="tiptap-editor" data-editor="main"></div>
                   <button type="submit" class="compose-btn send-btn">
                     <sl-icon name="arrow-up"></sl-icon>
                   </button>
+                </div>
+                <div class="attachments-panel">
+                  <plan98-gallery></plan98-gallery>
                 </div>
               </div>
             </form>
@@ -215,29 +231,33 @@ const viewRenderers = {
                 <sl-icon name="x"></sl-icon>
               </button>
             </div>
-            <div class="thread-parent">
-            </div>
             <div class="thread-scroll">
+              <div class="thread-parent">
+              </div>
               <div class="thread-messages">
               </div>
             </div>
             <form method="POST" name="send-reply">
               <div class="fields">
                 <div class="action-row">
-                  <div class="formatting-tools"></div>
+                  <div class="formatting-tools">
+                    <button type="button" class="fmt-btn" data-format="bold"><sl-icon name="type-bold"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="italic"><sl-icon name="type-italic"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="strikethrough"><sl-icon name="type-strikethrough"></sl-icon></button>
+                    <button type="button" class="fmt-btn" data-format="code"><sl-icon name="code"></sl-icon></button>
+                  </div>
                 </div>
                 <div class="compose-row">
-                  <button type="button" class="compose-btn attach-btn" data-attach>
+                  <button type="button" class="compose-btn attach-btn" data-attach-reply>
                     <sl-icon name="paperclip"></sl-icon>
                   </button>
-                  <textarea
-                    data-bind
-                    name="replyText"
-                    placeholder="Reply thoughtfully..."
-                  ></textarea>
+                  <div class="tiptap-editor" data-editor="reply"></div>
                   <button type="submit" class="compose-btn send-btn">
                     <sl-icon name="arrow-up"></sl-icon>
                   </button>
+                </div>
+                <div class="attachments-panel attachments-panel-reply">
+                  <plan98-gallery></plan98-gallery>
                 </div>
               </div>
             </form>
@@ -585,7 +605,7 @@ function beforeUpdate(target) {
 
       if(q) {
         const message = decodeURIComponent(q)
-        $.whisper({ messageText: message })
+        //$.whisper({ messageText: message })
       }
     }
   }
@@ -712,19 +732,26 @@ function beforeUpdate(target) {
   saveCursor(target)
 }
 
-// Helper function to update a single message without full re-render
 function updateMessageElement(target, messageId, author, decryptedText) {
   const messageEl = target.querySelector(`[data-message-id="${messageId}"] .message-body`)
   if (messageEl) {
-    messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}:</span> ${escapeHyperText(decryptedText)}`
+    messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(decryptedText)}`
+
+    // Scroll if user was at bottom
+    if (wasAtBottom) {
+      const scrollback = target.querySelector('[data-scrollback="main"]')
+      if (scrollback) scrollback.scrollTop = scrollback.scrollHeight
+    }
   }
 }
 
-// Helper function to update a single reply without full re-render
 function updateReplyElement(target, replyId, author, decryptedText) {
   const replyEl = target.querySelector(`[data-reply-id="${replyId}"] .message-body`)
   if (replyEl) {
-    replyEl.innerHTML = `<span class="author">${escapeHyperText(author)}:</span> ${escapeHyperText(decryptedText)}`
+    replyEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(decryptedText)}`
+
+    const threadScroll = target.querySelector('.thread-scroll')
+    if (threadScroll) threadScroll.scrollTop = threadScroll.scrollHeight
   }
 }
 
@@ -912,9 +939,35 @@ function afterUpdate(target) {
     const mainContent = target.querySelector('.main-content')
 
     if (mainContent && mainContent.dataset.view !== view) {
+      // Leaving chat — clean up editors before innerHTML wipe
+      if (mainContent.dataset.view === views.chat) {
+        destroyTiptapEditors()
+      }
       mainContent.dataset.view = view
       const renderer = viewRenderers[view] || viewRenderers[views.profile]
       mainContent.innerHTML = renderer(target)
+    }
+  }
+
+  {
+    const { view } = $.model()
+    if (view === views.chat) {
+      const mainEditor = target.querySelector('[data-editor="main"]')
+      const replyEditor = target.querySelector('[data-editor="reply"]')
+      if (mainEditor) initTiptapEditor(mainEditor, 'main', 'Start a conversation...')
+      if (replyEditor) initTiptapEditor(replyEditor, 'reply', 'Reply thoughtfully...')
+    }
+  }
+
+  {
+    const { showAttachments } = $.model()
+    const attachPanel = target.querySelector('.attachments-panel:not(.attachments-panel-reply)')
+    const attachBtn = target.querySelector('[data-attach]')
+    if (attachPanel) {
+      attachPanel.classList.toggle('open', showAttachments)
+    }
+    if (attachBtn) {
+      attachBtn.classList.toggle('active', showAttachments)
     }
   }
 
@@ -1153,7 +1206,7 @@ function afterUpdate(target) {
               <div class="message" data-message-id="${message.id}">
                 <div class="message-content">
                   <div class="message-body">
-                    <span class="author">${escapeHyperText(message.author)}:</span> ${escapeHyperText(message.decrypted || 'Decrypting...')}
+                    <span class="author">${escapeHyperText(message.author)}</span> ${message.decrypted ? sanitizeHTML(message.decrypted) : escapeHyperText('Decrypting...')}
                   </div>
                   <div class="message-footer">
                     ${replyIndicator}
@@ -1195,7 +1248,7 @@ function afterUpdate(target) {
         const parentHtml = `
           <div class="message parent-message">
             <div class="message-body">
-              <span class="author">${escapeHyperText(parentMessage.author)}:</span> ${escapeHyperText(parentMessage.decrypted || 'Decrypting...')}
+              <span class="author">${escapeHyperText(parentMessage.author)}</span> ${parentMessage.decrypted ? sanitizeHTML(parentMessage.decrypted) : escapeHyperText('Decrypting...')}
             </div>
           </div>
         `
@@ -1211,7 +1264,7 @@ function afterUpdate(target) {
           .map(reply => `
             <div class="message reply-message" data-reply-id="${reply.id}">
               <div class="message-body">
-                <span class="author">${escapeHyperText(reply.author)}:</span> ${escapeHyperText(reply.decrypted || 'Decrypting...')}
+                <span class="author">${escapeHyperText(reply.author)}</span> ${reply.decrypted ? sanitizeHTML(reply.decrypted) : escapeHyperText('Decrypting...')}
               </div>
             </div>
           `).join('') || '<div class="empty-state">No replies yet</div>'
@@ -1225,6 +1278,7 @@ function afterUpdate(target) {
   }
 
   // Patch message textarea
+  /*
   {
     const { messageText, messageHeight } = $.model()
     const textarea = target.querySelector('[name="messageText"]')
@@ -1245,8 +1299,10 @@ function afterUpdate(target) {
       }
     }
   }
+  */
 
   // Patch reply textarea
+  /*
   {
     const { replyText, replyHeight } = $.model()
     const textarea = target.querySelector('[name="replyText"]')
@@ -1267,6 +1323,7 @@ function afterUpdate(target) {
       }
     }
   }
+  */
 
   replaceCursor(target)
 
@@ -1295,11 +1352,72 @@ function afterUpdate(target) {
       btn.classList.toggle('active', btn.dataset.launcher === view)
     })
   }
+
+  {
+    const scrollback = target.querySelector('[data-scrollback="main"]')
+    const scrollBtn = target.querySelector('[data-scroll-anchor="main"]')
+
+    if (scrollback && scrollBtn) {
+      // Set up scroll listener once
+      if (!scrollback._scrollListenerAttached) {
+        scrollback._scrollListenerAttached = true
+
+        scrollback.addEventListener('scroll', () => {
+          const threshold = 80
+          const atBottom = scrollback.scrollHeight - scrollback.scrollTop - scrollback.clientHeight < threshold
+          wasAtBottom = atBottom
+          scrollBtn.style.display = atBottom ? 'none' : 'flex'
+        })
+
+        // Start scrolled to bottom
+        scrollback.scrollTop = scrollback.scrollHeight
+        wasAtBottom = true
+      }
+
+      // If user was at bottom when new messages arrived, scroll down
+      if (wasAtBottom) {
+        requestAnimationFrame(() => {
+          scrollback.scrollTop = scrollback.scrollHeight
+        })
+      }
+    }
+  }
 }
 
 $.when('click', '.ai-content a[href]', (event) => {
   event.preventDefault()
   $.whisper({ view: views.iframe, iframeSrc: event.target.href })
+})
+
+$.when('click', '[data-format]', (event) => {
+  const format = event.target.closest('[data-format]').dataset.format
+  // Determine which editor based on closest form
+  const form = event.target.closest('form')
+  const name = form?.name === 'send-reply' ? 'reply' : 'main'
+  const editor = editors[name]
+  if (!editor) return
+
+  const commands = {
+    'bold': () => editor.chain().focus().toggleBold().run(),
+    'italic': () => editor.chain().focus().toggleItalic().run(),
+    'strikethrough': () => editor.chain().focus().toggleStrike().run(),
+    'code': () => editor.chain().focus().toggleCode().run(),
+    'list-ul': () => editor.chain().focus().toggleBulletList().run(),
+    'list-ol': () => editor.chain().focus().toggleOrderedList().run(),
+    'blockquote': () => editor.chain().focus().toggleBlockquote().run()
+  }
+
+  if (commands[format]) commands[format]()
+})
+
+$.when('click', '[data-attach]', (event) => {
+  const { showAttachments } = $.model()
+  $.whisper({ showAttachments: !showAttachments })
+})
+
+$.when('click', '[data-attach-reply]', (event) => {
+  const panel = event.target.closest('form')?.querySelector('.attachments-panel-reply')
+  if (panel) panel.classList.toggle('open')
 })
 
 let sel = []
@@ -1606,36 +1724,52 @@ $.when('mousedown', '.resizer', (event) => {
   document.addEventListener('mouseup', handleMouseUp)
 })
 
-$.when('keypress', '[name="send"] [name="messageText"]', (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    const messageText = event.target.value
-    send(messageText)
+$.when('keydown', '.tiptap-content', (e) => {
+   if (e.key === 'Enter' && !e.shiftKey) {
+    const form = e.target.closest('form')
+    const name = form?.name === 'send-reply' ? 'reply' : 'main'
+    const editor = editors[name]
+
+    // Let Tiptap handle Enter normally inside lists, blockquotes, and code blocks
+    if (editor && (
+      editor.isActive('bulletList') ||
+      editor.isActive('orderedList') ||
+      editor.isActive('blockquote') ||
+      editor.isActive('codeBlock')
+    )) {
+      return // don't prevent default, let Tiptap do its thing
+    }
+
+    e.preventDefault()
+    if (form?.name === 'send') {
+      send()
+    } else if (form?.name === 'send-reply') {
+      sendReply()
+    }
   }
 })
 
-$.when('submit', '[name="send"]',(event) => {
+$.when('submit', '[name="send"]', (event) => {
   event.preventDefault()
-  const messageText = event.target.messageText.value;
-  send(messageText)
-});
+  send()
+})
 
-$.when('keypress', '[name="send-reply"] [name="replyText"]', (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    const replyText = event.target.value
-    sendReply(replyText)
+$.when('submit', '[name="send-reply"]', (event) => {
+  event.preventDefault()
+  sendReply()
+})
+
+$.when('click', '[data-scroll-anchor]', (event) => {
+  const target = event.target.closest($.link)
+  const scrollback = target.querySelector('[data-scrollback="main"]')
+  if (scrollback) {
+    scrollback.scrollTo({ top: scrollback.scrollHeight, behavior: 'smooth' })
   }
 })
 
-$.when('submit', '[name="send-reply"]',(event) => {
-  event.preventDefault()
-  const replyText = event.target.replyText.value;
-  sendReply(replyText)
-});
-
-async function send(messageText) {
-  if (messageText) {
+async function send() {
+  const messageText = getTiptapText('main')
+  if (messageText.trim()) {
     const { currentRoom } = $.model()
     const { sessionId } = getSession()
 
@@ -1645,9 +1779,10 @@ async function send(messageText) {
     }
 
     if(sessionId) {
+      const messageHTML = getTiptapHTML('main')
       const encryptedText = await bayunCore.lockText(
         sessionId,
-        messageText,
+        messageHTML,
         BayunCore.EncryptionPolicy.Group,
         BayunCore.KeyGenerationPolicy.Group,
         currentRoom
@@ -1673,12 +1808,21 @@ async function send(messageText) {
         })
       })
     }
-    $.whisper({ messageText: '', messageHeight: null })
+    clearTiptapEditor('main')
+    $.whisper({ showAttachments: false })
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const scrollback = document.querySelector(`${$.link} [data-scrollback="main"]`)
+        if (scrollback) scrollback.scrollTop = scrollback.scrollHeight
+        wasAtBottom = true
+      })
+    })
   }
 }
 
-async function sendReply(replyText) {
-  if (replyText) {
+async function sendReply() {
+  const replyText = getTiptapText('reply')
+  if (replyText.trim()) {
     const { currentRoom, activeThread } = $.model()
     const { sessionId } = getSession()
 
@@ -1688,9 +1832,10 @@ async function sendReply(replyText) {
     }
 
     if(sessionId) {
+      const replyHTML = getTiptapHTML('reply')
       const encryptedText = await bayunCore.lockText(
         sessionId, 
-        replyText, 
+        replyHTML, 
         BayunCore.EncryptionPolicy.Group, 
         BayunCore.KeyGenerationPolicy.Group, 
         currentRoom
@@ -1720,25 +1865,15 @@ async function sendReply(replyText) {
         })
       })
     }
-    $.whisper({ replyText: '', replyHeight: null })
+    clearTiptapEditor('reply')
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const threadScroll = document.querySelector(`${$.link} .thread-scroll`)
+        if (threadScroll) threadScroll.scrollTop = threadScroll.scrollHeight
+      })
+    })
   }
 }
-
-$.when('focus', '[name="messageText"]', (event) => {
-  $.whisper({ messageHeight: event.target.scrollHeight })
-});
-
-$.when('input', '[name="messageText"]', (event) => {
-  $.whisper({ messageHeight: event.target.scrollHeight })
-});
-
-$.when('focus', '[name="replyText"]', (event) => {
-  $.whisper({ replyHeight: event.target.scrollHeight })
-});
-
-$.when('input', '[name="replyText"]', (event) => {
-  $.whisper({ replyHeight: event.target.scrollHeight })
-});
 
 let groupsLoaded = false
 
@@ -1759,10 +1894,10 @@ $.when('activated', 'secure-persona', (event) => {
 })
 
 $.when('deactivated', 'secure-persona', (event) => {
-  // User has logged out, clear all caches and messages, trigger re-render
   groupsLoaded = false
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
+  destroyTiptapEditors()
   $.controller(getMyId(), leave)
 })
 
@@ -1776,6 +1911,91 @@ function escapeHyperText(text = '') {
       '"': '&quot;'
     }[actor])
   )
+}
+
+function sanitizeHTML(html = '') {
+  const allowed = ['p','br','strong','em','s','code','pre','ul','ol','li','blockquote']
+  const div = document.createElement('div')
+  div.innerHTML = html
+
+  function clean(node) {
+    const children = [...node.childNodes]
+    for (const child of children) {
+      if (child.nodeType === 3) continue // text nodes are fine
+      if (child.nodeType !== 1) { child.remove(); continue }
+
+      const tag = child.tagName.toLowerCase()
+      if (!allowed.includes(tag)) {
+        // unwrap: keep children, remove the tag
+        while (child.firstChild) child.parentNode.insertBefore(child.firstChild, child)
+        child.remove()
+      } else {
+        // strip all attributes
+        while (child.attributes.length > 0) child.removeAttribute(child.attributes[0].name)
+        clean(child)
+      }
+    }
+  }
+
+  clean(div)
+  return div.innerHTML
+}
+
+const editors = {}
+
+function initTiptapEditor(container, name, placeholderText) {
+  if (!container) return null
+
+  // If editor exists but its DOM is detached, destroy it
+  if (editors[name]) {
+    if (!editors[name].options.element?.isConnected) {
+      editors[name].destroy()
+      delete editors[name]
+    } else {
+      return editors[name]
+    }
+  }
+
+  const editor = new Editor({
+    element: container,
+    extensions: [
+      StarterKit,
+      Placeholder.configure({ placeholder: placeholderText })
+    ],
+    content: '',
+    editorProps: {
+      attributes: {
+        class: 'tiptap-content'
+      }
+    }
+  })
+
+  editors[name] = editor
+  return editor
+}
+
+function getTiptapText(name) {
+  const editor = editors[name]
+  if (!editor) return ''
+  return editor.getText()
+}
+
+function getTiptapHTML(name) {
+  const editor = editors[name]
+  if (!editor) return ''
+  return editor.getHTML()
+}
+
+function clearTiptapEditor(name) {
+  const editor = editors[name]
+  if (editor) editor.commands.clearContent()
+}
+
+function destroyTiptapEditors() {
+  Object.keys(editors).forEach(name => {
+    editors[name].destroy()
+    delete editors[name]
+  })
 }
 
 $.skin(`
@@ -1983,7 +2203,7 @@ $.skin(`
 
   & .thread-panel {
     display: none;
-    grid-template-rows: auto auto 1fr auto;
+    grid-template-rows: auto 1fr auto;
     background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
     border-left: 1px solid rgba(0,0,0,.1);
     min-width: 250px;
@@ -2813,6 +3033,127 @@ $.skin(`
     & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
       left: calc(var(--sidebar-width, 200px) + .5rem);
     }
+  }
+
+   & .tiptap-editor {
+    min-height: 2.5rem;
+    max-height: 35vh;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  & .tiptap-content {
+    outline: none;
+    padding: 8px;
+    color: rgba(255,255,255,.85);
+    font-size: 1rem;
+    min-height: 1.5em;
+    word-wrap: break-word;
+  }
+
+  & .tiptap-content p {
+    margin: 0;
+  }
+
+  & .tiptap-content p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    color: rgba(255,255,255,.35);
+    pointer-events: none;
+    float: left;
+    height: 0;
+  }
+
+  & .tiptap-content blockquote {
+    border-left: 3px solid rgba(255,255,255,.3);
+    padding-left: .75rem;
+    margin: .25rem 0;
+  }
+
+  & .tiptap-content code {
+    background: rgba(0,0,0,.3);
+    padding: .1rem .3rem;
+    border-radius: 3px;
+    font-size: .9em;
+  }
+
+  & .tiptap-content ul,
+  & .tiptap-content ol {
+    padding-left: 1.5rem;
+    margin: .25rem 0;
+  }
+
+  & .fmt-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    background: transparent;
+    color: rgba(255,255,255,.45);
+    border: none;
+    border-radius: .25rem;
+    cursor: pointer;
+    transition: all 150ms ease-in-out;
+  }
+
+  & .fmt-btn:hover {
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.1);
+  }
+
+  & .fmt-btn sl-icon {
+    font-size: .9rem;
+  }
+
+  & .attachments-panel {
+    display: none;
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.9)), var(--root-theme, mediumseagreen);
+    border-top: 1px solid rgba(255,255,255,.1);
+    height: 200px;
+    overflow: auto;
+  }
+
+  & .attachments-panel.open {
+    display: block;
+  }
+
+  & .attach-btn.active {
+    color: rgba(255,255,255,.85);
+    background: rgba(255,255,255,.1);
+  }
+
+  & .scroll-anchor-btn {
+    position: sticky;
+    bottom: .5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.8)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    z-index: 10;
+    transition: all 200ms ease-in-out;
+  }
+
+  & .scroll-anchor-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--root-theme, mediumseagreen);
+    transform: translateX(-50%) scale(1.1);
+  }
+
+  & .scroll-anchor-btn sl-icon {
+    font-size: 1.2rem;
+  }
+
+  & .preferences-area {
+    height: 100%;
+    overflow: auto;
   }
 `)
 
