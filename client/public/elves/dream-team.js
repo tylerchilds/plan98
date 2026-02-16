@@ -144,6 +144,7 @@ const views = {
   files: 'files',
   console: 'console',
   coop: 'coop',
+  video: 'video',
   archive: 'archive',
   studio: 'studio',
   iframe: 'iframe'
@@ -188,13 +189,21 @@ const viewRenderers = {
             <form method="POST" name="send">
               <div class="fields">
                 <div class="action-row">
-                  <button>Send</button>
+                  <div class="formatting-tools"></div>
                 </div>
-                <textarea
-                  data-bind
-                  name="messageText"
-                  placeholder="Say it."
-                ></textarea>
+                <div class="compose-row">
+                  <button type="button" class="compose-btn attach-btn" data-attach>
+                    <sl-icon name="paperclip"></sl-icon>
+                  </button>
+                  <textarea
+                    data-bind
+                    name="messageText"
+                    placeholder="Start a conversation..."
+                  ></textarea>
+                  <button type="submit" class="compose-btn send-btn">
+                    <sl-icon name="arrow-up"></sl-icon>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -215,13 +224,21 @@ const viewRenderers = {
             <form method="POST" name="send-reply">
               <div class="fields">
                 <div class="action-row">
-                  <button>Reply</button>
+                  <div class="formatting-tools"></div>
                 </div>
-                <textarea
-                  data-bind
-                  name="replyText"
-                  placeholder="Reply to thread..."
-                ></textarea>
+                <div class="compose-row">
+                  <button type="button" class="compose-btn attach-btn" data-attach>
+                    <sl-icon name="paperclip"></sl-icon>
+                  </button>
+                  <textarea
+                    data-bind
+                    name="replyText"
+                    placeholder="Reply thoughtfully..."
+                  ></textarea>
+                  <button type="submit" class="compose-btn send-btn">
+                    <sl-icon name="arrow-up"></sl-icon>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -239,7 +256,7 @@ const viewRenderers = {
         </div>
       </div>
 
-      <face-less></face-less>
+      <plan98-gallery></plan98-gallery>
     </div>
   `,
   [views.preferences]: (target) => `
@@ -1270,6 +1287,14 @@ function afterUpdate(target) {
       diffHTML.innerHTML(aiContent, ai(operation))
     }
   }
+
+  {
+    const { view } = $.model()
+    const launcherBtns = target.querySelectorAll('[data-launcher]')
+    launcherBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.launcher === view)
+    })
+  }
 }
 
 $.when('click', '.ai-content a[href]', (event) => {
@@ -2160,20 +2185,69 @@ $.skin(`
   & [name="send"],
   & [name="send-reply"] {
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto auto;
   }
 
   & .action-row {
     background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-    text-align: right;
-    padding: 4px;
+    padding: 4px 8px;
     display: flex;
     gap: .5rem;
-    justify-content: flex-end;
+    align-items: center;
+    min-height: 2rem;
   }
 
-  & .normal-button,
-  & .action-row button {
+  & .formatting-tools {
+    display: flex;
+    gap: .25rem;
+    align-items: center;
+    flex: 1;
+  }
+
+  & .compose-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: end;
+    background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), var(--root-theme, mediumseagreen);
+  }
+
+  & .compose-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    background: transparent;
+    color: rgba(255,255,255,.5);
+    border: none;
+    cursor: pointer;
+    transition: all 200ms ease-in-out;
+    flex-shrink: 0;
+  }
+
+  & .compose-btn:hover {
+    color: rgba(255,255,255,.85);
+  }
+
+  & .compose-btn sl-icon {
+    font-size: 1.1rem;
+  }
+
+  & .send-btn {
+    background: linear-gradient(rgba(0,0,0,.3), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,.85);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    margin: 0 .25rem .25rem 0;
+  }
+
+  & .send-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), var(--root-theme, mediumseagreen);
+    color: white;
+  }
+
+  & .normal-button {
     padding: .5rem 1rem;
     border-radius: 4px;
     border: none;
@@ -2183,9 +2257,7 @@ $.skin(`
   }
 
   & .normal-button:hover,
-  & .normal-button:focus,
-  & .action-row button:hover,
-  & .action-row button:focus {
+  & .normal-button:focus {
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 
@@ -2194,7 +2266,7 @@ $.skin(`
     width: 100%;
     display: block;
     resize: none;
-    background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), var(--root-theme, mediumseagreen);
+    background: transparent;
     border: none;
     color: rgba(255,255,255,.85);
     border-radius: 0;
@@ -2619,6 +2691,11 @@ $.skin(`
     background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 
+  & .app-launcher-btn.active {
+    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    color: rgba(255,255,255,1);
+  }
+
   & .app-launcher-btn sl-icon {
     font-size: 1rem;
   }
@@ -2743,7 +2820,7 @@ $.when('input', '[data-bind]', (event) => {
   const { bind } = event.target.dataset
 
   if(bind) {
-    $.controller({
+    $.whisper({
       bind: bind,
       name: event.target.name,
       value: event.target.value
@@ -2758,6 +2835,6 @@ $.when('input', '[data-bind]', (event) => {
     })
   } else {
     const { name, value } = event.target;
-    $.controller({ [name]: value })
+    $.whisper({ [name]: value })
   }
 })
