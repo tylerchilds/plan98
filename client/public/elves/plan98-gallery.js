@@ -21,7 +21,12 @@ const $ = Self('plan98-gallery', {
   draft: '',
   draftHeight: null,
   thumbSize: 180,
+  selected: {}, // { [cid]: true }
 })
+
+function isPickerMode(target) {
+  return target.closest($.link)?.getAttribute('mode') === 'picker'
+}
 
 $.when('json-rpc', 'quick-start', async (event) => {
   if(event.detail.method === 'done') {
@@ -139,7 +144,40 @@ $.when('click', '.gallery-thumb', (event) => {
   const thumb = event.target.closest('.gallery-thumb')
   if (!thumb) return
   const cid = thumb.dataset.cid
+
+  if (isPickerMode(event.target)) {
+    // Toggle selection
+    const { selected } = $.learn()
+    const next = { ...selected }
+    if (next[cid]) {
+      delete next[cid]
+    } else {
+      next[cid] = true
+    }
+    $.teach({ selected: next })
+    return
+  }
+
   $.teach({ currentView: views.detail, detailCid: cid })
+})
+
+$.when('click', '[data-share-selected]', (event) => {
+  const target = event.target.closest($.link)
+  const timelineUR = target.getAttribute('ur') || 'public'
+  const timeline = getTimeline(timelineUR)
+  const { selected } = $.learn()
+
+  const items = timeline.filter(r => selected[r.cid])
+  if (!items.length) return
+
+  // Dispatch event for parent to consume
+  target.dispatchEvent(new CustomEvent('gallery-share', {
+    bubbles: true,
+    detail: { items }
+  }))
+
+  // Clear selection
+  $.teach({ selected: {} })
 })
 
 $.when('click', '.back-to-gallery', () => {
@@ -354,25 +392,34 @@ $.draw(target => {
     const activeView = !authenticated ? 'auth'
       : (currentView || 'profile')
 
-    target.querySelectorAll('[data-view]').forEach(el => {
-      el.hidden = el.dataset.view !== activeView
-    })
-
-    // Draft sync
-    const textarea = target.querySelector('[name="draft"]')
-    if (textarea && document.activeElement !== textarea) {
-      textarea.value = draft || ''
+    // In picker mode, always show profile view and skip view management
+    if (isPickerMode(target)) {
+      target.querySelectorAll('[data-view]').forEach(el => {
+        el.hidden = el.dataset.view !== 'profile'
+      })
+    } else {
+      target.querySelectorAll('[data-view]').forEach(el => {
+        el.hidden = el.dataset.view !== activeView
+      })
     }
-    if (textarea && draftHeight) {
-      textarea.style.height = draftHeight + 'px'
-    }
-    const counter = target.querySelector('.draft-counter')
-    if (counter) counter.textContent = 300 - (draft || '').length
 
-    // Profile
-    const profileContainer = target.querySelector('.profile-container')
-    if (profileContainer && !profileContainer.hasChildNodes()) {
-      profileContainer.innerHTML = renderProfile(getProfile())
+    if (!isPickerMode(target)) {
+      // Draft sync
+      const textarea = target.querySelector('[name="draft"]')
+      if (textarea && document.activeElement !== textarea) {
+        textarea.value = draft || ''
+      }
+      if (textarea && draftHeight) {
+        textarea.style.height = draftHeight + 'px'
+      }
+      const counter = target.querySelector('.draft-counter')
+      if (counter) counter.textContent = 300 - (draft || '').length
+
+      // Profile
+      const profileContainer = target.querySelector('.profile-container')
+      if (profileContainer && !profileContainer.hasChildNodes()) {
+        profileContainer.innerHTML = renderProfile(getProfile())
+      }
     }
 
     // Gallery grid — append new thumbs
@@ -401,16 +448,48 @@ $.draw(target => {
       }
     }
 
-    // Detail view
-    const detailContainer = target.querySelector('.detail-container')
-    if (activeView === 'detail' && detailCid && detailContainer) {
-      const current = detailContainer.querySelector(`.detail-view[data-cid="${detailCid}"]`)
-      if (!current) {
-        const resource = timeline.find(r => r.cid === detailCid)
-        if (resource) {
-          detailContainer.innerHTML = renderDetailView(resource)
+    if (!isPickerMode(target)) {
+      // Detail view
+      const detailContainer = target.querySelector('.detail-container')
+      if (activeView === 'detail' && detailCid && detailContainer) {
+        const current = detailContainer.querySelector(`.detail-view[data-cid="${detailCid}"]`)
+        if (!current) {
+          const resource = timeline.find(r => r.cid === detailCid)
+          if (resource) {
+            detailContainer.innerHTML = renderDetailView(resource)
+          }
         }
       }
+    }
+
+    if (isPickerMode(target)) {
+      const { selected } = $.learn()
+      const thumbs = target.querySelectorAll('.gallery-thumb')
+      thumbs.forEach(thumb => {
+        thumb.classList.toggle('selected', !!selected[thumb.dataset.cid])
+      })
+
+      // Show/hide share button
+      let shareBtn = target.querySelector('[data-share-selected]')
+      const count = Object.keys(selected).length
+
+      if (count > 0 && !shareBtn) {
+        const btn = document.createElement('button')
+        btn.setAttribute('data-share-selected', '')
+        btn.setAttribute('type', 'button') 
+        btn.className = 'share-selected-btn'
+        target.querySelector('.gallery-view:not([hidden])')?.appendChild(btn)
+        shareBtn = btn
+      }
+
+      if (shareBtn) {
+        shareBtn.textContent = count > 0 ? `Share ${count} item${count > 1 ? 's' : ''}` : ''
+        shareBtn.style.display = count > 0 ? 'block' : 'none'
+      }
+
+      // Hide the "Create" button in picker mode
+      const newPost = target.querySelector('.new-post')
+      if (newPost) newPost.style.display = 'none'
     }
   }
 })
@@ -765,6 +844,49 @@ $.style(`
 
   & [data-view] {
     height: 100%;
+  }
+
+  & .gallery-thumb.selected {
+    outline: 3px solid var(--root-theme, mediumseagreen);
+    outline-offset: -3px;
+    opacity: .85;
+  }
+
+  & .gallery-thumb.selected::after {
+    content: '✓';
+    position: absolute;
+    top: .25rem;
+    right: .25rem;
+    width: 1.5rem;
+    height: 1.5rem;
+    background: var(--root-theme, mediumseagreen);
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-content: center;
+    font-size: .75rem;
+    font-weight: bold;
+  }
+
+  & .share-selected-btn {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: .5rem 1.5rem;
+    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    color: white;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+
+  & .share-selected-btn:hover {
+    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 `)
 

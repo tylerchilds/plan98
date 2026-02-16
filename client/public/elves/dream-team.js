@@ -34,8 +34,8 @@ const $ = mvc('dream-team', {
   threadPanelWidth: 350,
   participants: [],
   currentRoom: null,
-  //messageText: '',
-  //replyText: '',
+  attachments: [],      // main message attachments
+  replyAttachments: [], // reply attachments
   messageHeight: null,
   replyHeight: null,
   myGroups: [],
@@ -217,8 +217,9 @@ const viewRenderers = {
                     <sl-icon name="arrow-up"></sl-icon>
                   </button>
                 </div>
+                <div class="attachment-preview" data-preview="main"></div>
                 <div class="attachments-panel">
-                  <plan98-gallery></plan98-gallery>
+                  <plan98-gallery mode="picker"></plan98-gallery>
                 </div>
               </div>
             </form>
@@ -256,6 +257,7 @@ const viewRenderers = {
                     <sl-icon name="arrow-up"></sl-icon>
                   </button>
                 </div>
+                <div class="attachment-preview" data-preview="reply"></div>
                 <div class="attachments-panel attachments-panel-reply">
                   <plan98-gallery></plan98-gallery>
                 </div>
@@ -732,12 +734,70 @@ function beforeUpdate(target) {
   saveCursor(target)
 }
 
+function parseDecrypted(decryptedText) {
+  try {
+    const parsed = JSON.parse(decryptedText)
+    return {
+      html: parsed.html || '',
+      attachments: parsed.attachments || []
+    }
+  } catch {
+    // Legacy messages that are just plain HTML
+    return { html: decryptedText, attachments: [] }
+  }
+}
+
+function renderDecrypted(decryptedText) {
+  if (!decryptedText || decryptedText === 'Decrypting...') return escapeHyperText('Decrypting...')
+  const { html, attachments } = parseDecrypted(decryptedText)
+  return sanitizeHTML(html) + renderAttachments(attachments)
+}
+
+function renderAttachmentPreview(attachments) {
+  if (!attachments || !attachments.length) return ''
+  return attachments.map(att => {
+    const record = att.record || att
+    const cid = att.cid || ''
+    if (record.$type === 'computer.sillyz.data.image') {
+      return `<div class="preview-item" data-remove-attachment="${cid}">
+        <was-image src="${record.src}"></was-image>
+        <button class="preview-remove"><sl-icon name="x"></sl-icon></button>
+      </div>`
+    }
+    if (record.$type === 'computer.sillyz.data.video') {
+      return `<div class="preview-item" data-remove-attachment="${cid}">
+        <was-video src="${record.src}"></was-video>
+        <button class="preview-remove"><sl-icon name="x"></sl-icon></button>
+      </div>`
+    }
+    return `<div class="preview-item text-preview" data-remove-attachment="${cid}">
+      <span>${escapeHyperText((record.text || '').slice(0, 40))}</span>
+      <button class="preview-remove"><sl-icon name="x"></sl-icon></button>
+    </div>`
+  }).join('')
+}
+
+function renderAttachments(attachments) {
+  if (!attachments.length) return ''
+  return `<div class="message-attachments">${
+    attachments.map(att => {
+      if (att.$type === 'computer.sillyz.data.image') {
+        return `<was-image src="${att.src}" class="attachment-thumb"></was-image>`
+      }
+      if (att.$type === 'computer.sillyz.data.video') {
+        return `<was-video src="${att.src}" class="attachment-thumb"></was-video>`
+      }
+      return `<div class="attachment-text">${escapeHyperText((att.text || '').slice(0, 120))}</div>`
+    }).join('')
+  }</div>`
+}
+
 function updateMessageElement(target, messageId, author, decryptedText) {
   const messageEl = target.querySelector(`[data-message-id="${messageId}"] .message-body`)
   if (messageEl) {
-    messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(decryptedText)}`
+    const { html, attachments } = parseDecrypted(decryptedText)
+    messageEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(html)}${renderAttachments(attachments)}`
 
-    // Scroll if user was at bottom
     if (wasAtBottom) {
       const scrollback = target.querySelector('[data-scrollback="main"]')
       if (scrollback) scrollback.scrollTop = scrollback.scrollHeight
@@ -748,7 +808,8 @@ function updateMessageElement(target, messageId, author, decryptedText) {
 function updateReplyElement(target, replyId, author, decryptedText) {
   const replyEl = target.querySelector(`[data-reply-id="${replyId}"] .message-body`)
   if (replyEl) {
-    replyEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(decryptedText)}`
+    const { html, attachments } = parseDecrypted(decryptedText)
+    replyEl.innerHTML = `<span class="author">${escapeHyperText(author)}</span> ${sanitizeHTML(html)}${renderAttachments(attachments)}`
 
     const threadScroll = target.querySelector('.thread-scroll')
     if (threadScroll) threadScroll.scrollTop = threadScroll.scrollHeight
@@ -1202,11 +1263,12 @@ function afterUpdate(target) {
               ? `<button class="thread-indicator" data-open-thread="${message.id}">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</button>`
               : ''
 
+            const { html, attachments } = parseDecrypted(message.decrypted)
             return `
               <div class="message" data-message-id="${message.id}">
                 <div class="message-content">
                   <div class="message-body">
-                    <span class="author">${escapeHyperText(message.author)}</span> ${message.decrypted ? sanitizeHTML(message.decrypted) : escapeHyperText('Decrypting...')}
+                    <span class="author">${escapeHyperText(message.author)}</span> ${message.decrypted === 'Decrypting...' ? 'Decrypting...' : sanitizeHTML(html) + renderAttachments(attachments)}
                   </div>
                   <div class="message-footer">
                     ${replyIndicator}
@@ -1248,7 +1310,7 @@ function afterUpdate(target) {
         const parentHtml = `
           <div class="message parent-message">
             <div class="message-body">
-              <span class="author">${escapeHyperText(parentMessage.author)}</span> ${parentMessage.decrypted ? sanitizeHTML(parentMessage.decrypted) : escapeHyperText('Decrypting...')}
+              <span class="author">${escapeHyperText(parentMessage.author)}</span> ${renderDecrypted(parentMessage.decrypted)}
             </div>
           </div>
         `
@@ -1264,7 +1326,7 @@ function afterUpdate(target) {
           .map(reply => `
             <div class="message reply-message" data-reply-id="${reply.id}">
               <div class="message-body">
-                <span class="author">${escapeHyperText(reply.author)}</span> ${reply.decrypted ? sanitizeHTML(reply.decrypted) : escapeHyperText('Decrypting...')}
+                <span class="author">${escapeHyperText(reply.author)}</span> ${renderDecrypted(reply.decrypted)}
               </div>
             </div>
           `).join('') || '<div class="empty-state">No replies yet</div>'
@@ -1382,6 +1444,28 @@ function afterUpdate(target) {
       }
     }
   }
+
+  {
+    const { attachments, replyAttachments } = $.model()
+
+    const mainPreview = target.querySelector('[data-preview="main"]')
+    if (mainPreview) {
+      const html = renderAttachmentPreview(attachments)
+      if (mainPreview.dataset.last !== html) {
+        mainPreview.dataset.last = html
+        mainPreview.innerHTML = html
+      }
+    }
+
+    const replyPreview = target.querySelector('[data-preview="reply"]')
+    if (replyPreview) {
+      const html = renderAttachmentPreview(replyAttachments)
+      if (replyPreview.dataset.last !== html) {
+        replyPreview.dataset.last = html
+        replyPreview.innerHTML = html
+      }
+    }
+  }
 }
 
 $.when('click', '.ai-content a[href]', (event) => {
@@ -1418,6 +1502,15 @@ $.when('click', '[data-attach]', (event) => {
 $.when('click', '[data-attach-reply]', (event) => {
   const panel = event.target.closest('form')?.querySelector('.attachments-panel-reply')
   if (panel) panel.classList.toggle('open')
+})
+
+$.when('click', '[data-remove-attachment]', (event) => {
+  const cid = event.target.closest('[data-remove-attachment]').dataset.removeAttachment
+  const form = event.target.closest('form')
+  const isReply = form?.name === 'send-reply'
+  const key = isReply ? 'replyAttachments' : 'attachments'
+  const current = $.model()[key] || []
+  $.whisper({ [key]: current.filter(a => a.cid !== cid) })
 })
 
 let sel = []
@@ -1769,111 +1862,138 @@ $.when('click', '[data-scroll-anchor]', (event) => {
 
 async function send() {
   const messageText = getTiptapText('main')
-  if (messageText.trim()) {
-    const { currentRoom } = $.model()
-    const { sessionId } = getSession()
+  const { attachments } = $.model()
+  if (!messageText.trim() && (!attachments || !attachments.length)) return
 
-    if(!currentRoom) {
-      console.log('No room selected')
-      return
+  const { currentRoom } = $.model()
+  const { sessionId } = getSession()
+
+  if(!currentRoom) {
+    console.log('No room selected')
+    return
+  }
+
+  if(sessionId) {
+    const { attachments } = $.model()
+    const messageHTML = getTiptapHTML('main')
+    const payload = JSON.stringify({
+      html: messageHTML,
+      attachments: attachments.map(a => a.record)
+    })
+    const encryptedText = await bayunCore.lockText(
+      sessionId,
+      payload,
+      BayunCore.EncryptionPolicy.Group,
+      BayunCore.KeyGenerationPolicy.Group,
+      currentRoom
+    );
+
+    const message = {
+      id: self.crypto.randomUUID(),
+      encrypted: encryptedText,
+      author: getEmployeeId(),
+      timestamp: Date.now(),
+      room: currentRoom
     }
 
-    if(sessionId) {
-      const messageHTML = getTiptapHTML('main')
-      const encryptedText = await bayunCore.lockText(
-        sessionId,
-        messageHTML,
-        BayunCore.EncryptionPolicy.Group,
-        BayunCore.KeyGenerationPolicy.Group,
-        currentRoom
-      );
-
-      const message = {
-        id: self.crypto.randomUUID(),
-        encrypted: encryptedText,
-        author: getEmployeeId(),
-        timestamp: Date.now(),
-        room: currentRoom
-      }
-
-      $.controller({ message }, (state, payload) => {
-        const message = payload.message
-        const room = message.room
-        return Object.assign({}, state, {
-          messages: Object.assign({}, state.messages, {
-            [room]: Object.assign({}, state.messages ? state.messages[room] : {}, {
-              [message.id]: message
-            })
+    $.controller({ message }, (state, payload) => {
+      const message = payload.message
+      const room = message.room
+      return Object.assign({}, state, {
+        messages: Object.assign({}, state.messages, {
+          [room]: Object.assign({}, state.messages ? state.messages[room] : {}, {
+            [message.id]: message
           })
         })
       })
-    }
-    clearTiptapEditor('main')
-    $.whisper({ showAttachments: false })
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const scrollback = document.querySelector(`${$.link} [data-scrollback="main"]`)
-        if (scrollback) scrollback.scrollTop = scrollback.scrollHeight
-        wasAtBottom = true
-      })
     })
   }
+  clearTiptapEditor('main')
+  $.whisper({ showAttachments: false, attachments: [] })
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const scrollback = document.querySelector(`${$.link} [data-scrollback="main"]`)
+      if (scrollback) scrollback.scrollTop = scrollback.scrollHeight
+      wasAtBottom = true
+    })
+  })
 }
 
 async function sendReply() {
   const replyText = getTiptapText('reply')
-  if (replyText.trim()) {
-    const { currentRoom, activeThread } = $.model()
-    const { sessionId } = getSession()
+  const { replyAttachments } = $.model()
+  if (!replyText.trim() && (!replyAttachments || !replyAttachments.length)) return
 
-    if(!currentRoom || !activeThread) {
-      console.log('No room or thread selected')
-      return
+  const { currentRoom, activeThread } = $.model()
+  const { sessionId } = getSession()
+
+  if(!currentRoom || !activeThread) {
+    console.log('No room or thread selected')
+    return
+  }
+
+  if(sessionId) {
+    const replyHTML = getTiptapHTML('reply')
+    const { replyAttachments } = $.model()
+    const payload = JSON.stringify({
+      html: replyHTML,
+      attachments: replyAttachments.map(a => a.record)
+    })
+    const encryptedText = await bayunCore.lockText(
+      sessionId,
+      payload,
+      BayunCore.EncryptionPolicy.Group, 
+      BayunCore.KeyGenerationPolicy.Group, 
+      currentRoom
+    );
+
+    const reply = {
+      id: self.crypto.randomUUID(),
+      encrypted: encryptedText,
+      author: getEmployeeId(),
+      timestamp: Date.now(),
+      parentId: activeThread,
+      room: currentRoom
     }
 
-    if(sessionId) {
-      const replyHTML = getTiptapHTML('reply')
-      const encryptedText = await bayunCore.lockText(
-        sessionId, 
-        replyHTML, 
-        BayunCore.EncryptionPolicy.Group, 
-        BayunCore.KeyGenerationPolicy.Group, 
-        currentRoom
-      );
-
-      const reply = {
-        id: self.crypto.randomUUID(),
-        encrypted: encryptedText,
-        author: getEmployeeId(),
-        timestamp: Date.now(),
-        parentId: activeThread,
-        room: currentRoom
-      }
-
-      $.controller({ reply }, (state, payload) => {
-        const reply = payload.reply
-        const room = reply.room
-        const parentId = reply.parentId
-        return Object.assign({}, state, {
-          threads: Object.assign({}, state.threads, {
-            [room]: Object.assign({}, state.threads ? state.threads[room] : {}, {
-              [parentId]: Object.assign({}, state.threads && state.threads[room] ? state.threads[room][parentId] : {}, {
-                [reply.id]: reply
-              })
+    $.controller({ reply }, (state, payload) => {
+      const reply = payload.reply
+      const room = reply.room
+      const parentId = reply.parentId
+      return Object.assign({}, state, {
+        threads: Object.assign({}, state.threads, {
+          [room]: Object.assign({}, state.threads ? state.threads[room] : {}, {
+            [parentId]: Object.assign({}, state.threads && state.threads[room] ? state.threads[room][parentId] : {}, {
+              [reply.id]: reply
             })
           })
         })
       })
-    }
-    clearTiptapEditor('reply')
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        const threadScroll = document.querySelector(`${$.link} .thread-scroll`)
-        if (threadScroll) threadScroll.scrollTop = threadScroll.scrollHeight
-      })
     })
   }
+  clearTiptapEditor('reply')
+  $.whisper({ replyAttachments: [] })
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const threadScroll = document.querySelector(`${$.link} .thread-scroll`)
+      if (threadScroll) threadScroll.scrollTop = threadScroll.scrollHeight
+    })
+  })
 }
+
+$.when('gallery-share', 'plan98-gallery', (event) => {
+  const form = event.target.closest('form')
+  const isReply = form?.name === 'send-reply'
+  const { items } = event.detail
+  const key = isReply ? 'replyAttachments' : 'attachments'
+  const current = $.model()[key] || []
+
+  // Dedupe by cid
+  const existing = new Set(current.map(i => i.cid))
+  const merged = [...current, ...items.filter(i => !existing.has(i.cid))]
+
+  $.whisper({ [key]: merged, showAttachments: false })
+})
 
 let groupsLoaded = false
 
@@ -3154,6 +3274,86 @@ $.skin(`
   & .preferences-area {
     height: 100%;
     overflow: auto;
+  }
+
+  & .message-attachments {
+    display: flex;
+    gap: .25rem;
+    flex-wrap: wrap;
+    margin-top: .25rem;
+  }
+
+  & .attachment-thumb {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: .25rem;
+  }
+
+  & .attachment-text {
+    background: rgba(0,0,0,.05);
+    padding: .25rem .5rem;
+    border-radius: .25rem;
+    font-size: .85rem;
+    max-width: 200px;
+  }
+
+  & .attachment-preview {
+    display: flex;
+    gap: .25rem;
+    padding: .25rem .5rem;
+    overflow-x: auto;
+    background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+  }
+
+  & .attachment-preview:empty {
+    display: none;
+  }
+
+  & .preview-item {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: .25rem;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  & .preview-item img,
+  & .preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  & .preview-item.text-preview {
+    background: rgba(255,255,255,.1);
+    display: grid;
+    place-content: center;
+    padding: .25rem;
+    font-size: .6rem;
+    color: rgba(255,255,255,.65);
+  }
+
+  & .preview-remove {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    background: rgba(0,0,0,.7);
+    color: white;
+    border: none;
+    border-radius: 0 0 0 .25rem;
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    font-size: .6rem;
+  }
+
+  & .preview-remove:hover {
+    background: rgba(220,53,69,.9);
   }
 `)
 
