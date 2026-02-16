@@ -4,6 +4,8 @@ import { get } from './plan98-wallet.js'
 const tag = 'was-image'
 const $ = elf(tag)
 
+const blobCache = {}
+
 function draw(target) {
   if(target && target.innerHTML) return
   target.innerHTML = `
@@ -35,13 +37,22 @@ function afterUpdate(target) {
   if(!target.initialized) {
     target.initialized = true
     const src = target.getAttribute('src')
-    if(src) {
-      get(src).then(blob => {
-        const data = new Blob([blob], { type: blob.type });
-        const image = target.querySelector('img')
-        image.src = URL.createObjectURL(data);
-      })
+    if(!src) return
+
+    const image = target.querySelector('img')
+
+    // Cache hit — instant
+    if (blobCache[src]) {
+      image.src = blobCache[src]
+      return
     }
+
+    get(src).then(blob => {
+      const data = new Blob([blob], { type: blob.type });
+      const url = URL.createObjectURL(data);
+      blobCache[src] = url
+      image.src = url
+    })
   }
 }
 

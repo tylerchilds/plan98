@@ -5,11 +5,43 @@ const tag = 'was-video'
 
 const $ = elf(tag)
 
+const blobCache = {}
+
 function draw(target) {
-  if(target.innerHTML) return
+  if(target && target.innerHTML) return
   return `
-    <video controls="true"></video>
+    <video></video>
   `
+}
+
+function afterUpdate(target) {
+  if(!target.initialized) {
+    target.initialized = true
+
+    const video = target.querySelector('video')
+    if (!video) return
+
+    // Apply nocontrols attribute
+    if (target.hasAttribute('nocontrols')) {
+      video.removeAttribute('controls')
+    } else {
+      video.setAttribute('controls', 'true')
+    }
+
+    const src = target.getAttribute('src')
+    if(!src) return
+
+    if (blobCache[src]) {
+      video.src = blobCache[src]
+      return
+    }
+
+    get(src).then(blob => {
+      const url = URL.createObjectURL(blob);
+      blobCache[src] = url
+      if (video) video.src = url
+    })
+  }
 }
 
 $.style(`
@@ -27,22 +59,6 @@ $.style(`
     object-fit: cover;
   }
 `)
-
-function afterUpdate(target) {
-  if(!target.initialized) {
-    target.initialized = true
-    const src = target.getAttribute('src')
-    if(src) {
-      get(src).then(blob => {
-        const video = target.querySelector('video')
-        const videoUrl = URL.createObjectURL(blob);
-        if(video) {
-          video.src = videoUrl;
-        }
-      })
-    }
-  }
-}
 
 class SecureVideo extends HTMLElement {
   constructor() {

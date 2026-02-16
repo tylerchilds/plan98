@@ -235,7 +235,7 @@ function renderProfile(profile) {
   `
 }
 
-function renderThumb(resource) {
+function renderThumb(resource, picker) {
   const { cid, record } = resource
   const type = record.$type
 
@@ -250,7 +250,7 @@ function renderThumb(resource) {
   if (type === 'computer.sillyz.data.video') {
     return `
       <button class="gallery-thumb" data-cid="${cid}">
-        <was-video src="${record.src}"></was-video>
+        <was-video src="${record.src}" nocontrols></was-video>
         <div class="thumb-play-icon">▶</div>
       </button>
     `
@@ -432,7 +432,7 @@ $.draw(target => {
       )
       timeline.forEach(resource => {
         if (!existingCids.has(resource.cid)) {
-          grid.insertAdjacentHTML('beforeend', renderThumb(resource))
+          grid.insertAdjacentHTML('beforeend', renderThumb(resource, isPickerMode(target)))
         }
       })
     }
@@ -486,10 +486,6 @@ $.draw(target => {
         shareBtn.textContent = count > 0 ? `Share ${count} item${count > 1 ? 's' : ''}` : ''
         shareBtn.style.display = count > 0 ? 'block' : 'none'
       }
-
-      // Hide the "Create" button in picker mode
-      const newPost = target.querySelector('.new-post')
-      if (newPost) newPost.style.display = 'none'
     }
   }
 })

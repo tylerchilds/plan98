@@ -218,6 +218,7 @@ const viewRenderers = {
                   </button>
                 </div>
                 <div class="attachment-preview" data-preview="main"></div>
+                <div class="attachments-resizer" data-resize-attachments></div>
                 <div class="attachments-panel">
                   <plan98-gallery mode="picker"></plan98-gallery>
                 </div>
@@ -258,8 +259,9 @@ const viewRenderers = {
                   </button>
                 </div>
                 <div class="attachment-preview" data-preview="reply"></div>
+                <div class="attachments-resizer" data-resize-attachments-reply></div>
                 <div class="attachments-panel attachments-panel-reply">
-                  <plan98-gallery></plan98-gallery>
+                  <plan98-gallery mode="picker"></plan98-gallery>
                 </div>
               </div>
             </form>
@@ -1030,6 +1032,10 @@ function afterUpdate(target) {
     if (attachBtn) {
       attachBtn.classList.toggle('active', showAttachments)
     }
+    const attachResizer = target.querySelector('[data-resize-attachments]')
+    if (attachResizer) {
+      attachResizer.style.display = showAttachments ? 'block' : 'none'
+    }
   }
 
   // Apply sidebar width and visibility
@@ -1500,8 +1506,13 @@ $.when('click', '[data-attach]', (event) => {
 })
 
 $.when('click', '[data-attach-reply]', (event) => {
-  const panel = event.target.closest('form')?.querySelector('.attachments-panel-reply')
-  if (panel) panel.classList.toggle('open')
+  const form = event.target.closest('form')
+  const panel = form?.querySelector('.attachments-panel-reply')
+  const resizer = form?.querySelector('[data-resize-attachments-reply]')
+  if (panel) {
+    const isOpen = panel.classList.toggle('open')
+    if (resizer) resizer.style.display = isOpen ? 'block' : 'none'
+  }
 })
 
 $.when('click', '[data-remove-attachment]', (event) => {
@@ -1769,6 +1780,40 @@ $.when('click', '[data-open-thread]', (event) => {
   // Toggle: if already open on this thread, close it
   const newThread = activeThread === messageId ? null : messageId
   $.whisper({ activeThread: newThread, showActionMenu: false, activeMessageMenu: null })
+})
+
+$.when('click', '.message-attachments was-image img', (event) => {
+  const src = event.target.closest('was-image').getAttribute('src')
+  if (!src) return
+
+  // Create fullscreen overlay
+  const overlay = document.createElement('div')
+  overlay.className = 'fullscreen-overlay'
+  overlay.innerHTML = `<was-image src="${src}" class="fullscreen-image"></was-image>`
+  overlay.addEventListener('click', () => overlay.remove())
+  event.target.closest($.link).appendChild(overlay)
+})
+
+$.when('mousedown', '[data-resize-attachments], [data-resize-attachments-reply]', (event) => {
+  event.preventDefault()
+  const panel = event.target.nextElementSibling
+  if (!panel) return
+  const startY = event.pageY
+  const startHeight = panel.offsetHeight
+
+  function handleMouseMove(e) {
+    const deltaY = startY - e.pageY
+    const newHeight = Math.max(100, Math.min(600, startHeight + deltaY))
+    panel.style.height = `${newHeight}px`
+  }
+
+  function handleMouseUp() {
+    document.removeEventListener('mousemove', handleMouseMove)
+    document.removeEventListener('mouseup', handleMouseUp)
+  }
+
+  document.addEventListener('mousemove', handleMouseMove)
+  document.addEventListener('mouseup', handleMouseUp)
 })
 
 // Thread panel resizer
@@ -2244,6 +2289,17 @@ $.skin(`
   }
 
   & .resizer:hover {
+    background: var(--root-theme, mediumseagreen);
+  }
+
+  & .attachments-resizer {
+    display: none;
+    height: 4px;
+    background: rgba(255,255,255,.1);
+    cursor: row-resize;
+  }
+
+  & .attachments-resizer:hover {
     background: var(--root-theme, mediumseagreen);
   }
 
@@ -3354,6 +3410,24 @@ $.skin(`
 
   & .preview-remove:hover {
     background: rgba(220,53,69,.9);
+  }
+
+  & .fullscreen-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0,0,0,.9);
+    display: grid;
+    place-content: center;
+    cursor: zoom-out;
+  }
+
+  & .fullscreen-image {
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
   }
 `)
 
