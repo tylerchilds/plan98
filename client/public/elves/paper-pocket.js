@@ -72,7 +72,15 @@ function elfCursor({ fallback }={fallback: 'lightgray' }) {
     <line x1="0" y1="0" x2="40" y2="50" stroke="rgba(0,0,0,0.01)" stroke-width="12"/>
   </svg>`
 
-  return `url('data:image/svg+xml,${encodeURIComponent(svg)}') 0 0, auto`
+  const url = `url('data:image/svg+xml,${encodeURIComponent(svg)}') 0 0, auto`
+  const styleId = 'elf-cursor-style';
+  let style = document.getElementById(styleId);
+  if (!style) {
+    style = document.createElement('style');
+    style.id = styleId;
+    document.head.appendChild(style);
+  }
+  style.textContent = `* { cursor: ${url} !important; }`;
 }
 
 const modes = {
@@ -532,7 +540,7 @@ const $ = elf('paper-pocket', {
   pause: systemMenu
 })
 
-document.body.style.cursor = elfCursor(elves[character])
+elfCursor(elves[character])
 
 export default $
 
@@ -636,7 +644,7 @@ export function getCharacters() {
 
 export function setCharacter(character) {
   localStorage.setItem('paper-pocket/character', character)
-  document.body.style.cursor = elfCursor(elves[character])
+  elfCursor(elves[character])
   $.teach({ character })
 }
 

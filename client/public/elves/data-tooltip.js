@@ -95,8 +95,8 @@ const tooltipStyles = `
       opacity: 0;
       transform-origin: right bottom;
       transform: translate(
-        max(0px, calc(-100% + var(--x) - 3px)),
-        max(0px, calc(-100% + var(--y) - 3px))
+        min(calc(100vw - 100%), calc(var(--x) + 24px)),
+        min(calc(100vh - 100%), calc(var(--y) + 24px))
       );
       font-size: 13px;
       transition: opacity 100ms ease-in-out;
@@ -105,7 +105,7 @@ const tooltipStyles = `
       max-width: 200px;
       z-index: -1;
       pointer-events: none;
-      border-radius: 4px;
+      border-radius: 0 4px 4px 4px;
     }
 
     .data-tooltip.active {

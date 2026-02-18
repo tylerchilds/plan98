@@ -332,7 +332,7 @@ $.draw(target => {
       <quick-start></quick-start>
     </div>
     <div data-view="profile" class="gallery-view" hidden>
-      <button class="new-post">Create</button>
+      <button class="new-post" data-tooltip="oooops">Create</button>
       <div class="scrollable-view">
         <div class="profile-container"></div>
         <div class="gallery-grid"></div>
@@ -727,8 +727,8 @@ $.style(`
   & .view-profile,
   & .manage-account {
     position: fixed;
-    right: 1rem;
-    top: 1rem;
+    right: .5rem;
+    top: .5rem;
     padding: .5rem 1rem;
     border: 2px solid var(--root-theme, mediumseagreen);
     border-radius: 100px;
@@ -753,7 +753,7 @@ $.style(`
   }
 
   & .overlay-background {
-    padding: 2rem 0;
+    padding: 0;
     height: 100%;
     background: rgba(0,0,0,.15);
     backdrop-filter: blur(2px);
@@ -763,7 +763,6 @@ $.style(`
   & .form-card {
     display: grid;
     background: white;
-    max-width: 55ch;
     margin: 0 auto;
     padding: .5rem;
     box-shadow:

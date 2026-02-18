@@ -55,6 +55,10 @@ $.style(`
     grid-template-rows: auto 1fr;
   }
 
+  & paper-pocket {
+    pointer-events: all;
+  }
+
   & .result {
     pointer-events: all;
     position: relative;

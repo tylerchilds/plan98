@@ -153,6 +153,7 @@ const views = {
   video: 'video',
   archive: 'archive',
   studio: 'studio',
+  brain: 'brain',
   iframe: 'iframe'
 }
 
@@ -170,7 +171,7 @@ const viewRenderers = {
               <sl-icon name="camera-video"></sl-icon>
             </button>
             <div class="action-menu-container">
-              <button class="action-menu-trigger" data-action-menu>
+              <button class="video-chat-btn action-menu-trigger" data-action-menu>
                 <sl-icon name="three-dots-vertical"></sl-icon>
               </button>
               <div class="action-menu" data-menu-dropdown>
@@ -523,6 +524,24 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.brain]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/brain-storm?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
 
   [views.studio]: (target) => {
     const { currentRoom } = $.model()
@@ -835,13 +854,13 @@ function afterUpdate(target) {
         </div>
       </div>
       <div class="chat-app" style="display: none;">
-        <button class="toggle-sidebar" data-toggle-sidebar>
+        <button class="toggle-sidebar" data-toggle-sidebar data-tooltip="hey,<br>whooops i didnt' amean to <br> make ups">
           <sl-icon name="arrow-left-circle-fill"></sl-icon>
         </button>
         <div class="sidebar">
           <div class="sidebar-inner">
             <div class="sidebar-header">
-              <button class="standard-button profile-button" data-profile>
+              <button class="standard-button bias-generic profile-button" data-profile>
                 <span>
                   <sl-icon name="person-circle"></sl-icon>
                 </span>
@@ -923,11 +942,17 @@ function afterUpdate(target) {
                   </span>
                   <span>Studio</span>
                 </button>
+                <button class="app-launcher-btn" data-launcher="brain">
+                  <span>
+                    <sl-icon name="cloud-lightning"></sl-icon>
+                  </span>
+                  <span>Brain Storm</span>
+                </button>
               </div>
             </div>
 
             <div class="sidebar-footer">
-              <button class="standard-button footer-button" data-preferences>
+              <button class="standard-button bias-generic footer-button" data-preferences>
                 <span>
                   <sl-icon name="gear"></sl-icon>
                 </span>
@@ -2200,7 +2225,7 @@ $.skin(`
   & .sidebar {
     display: flex;
     flex-direction: column;
-    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
     overflow: hidden;
     width: 200px;
     min-width: 150px;
@@ -2217,7 +2242,6 @@ $.skin(`
   }
 
   & .sidebar-header {
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2254,7 +2278,6 @@ $.skin(`
   }
 
   & .sidebar-footer {
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
     padding: .5rem;
     flex-shrink: 0;
     border-top: 1px solid rgba(255,255,255,.1);
@@ -2304,21 +2327,21 @@ $.skin(`
   }
 
   & .room-select {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.65);
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,.85);
     border: 0;
-    padding: .5rem 1rem;
-    margin: .25rem .5rem;
+    padding: calc(0.382rem) calc(0.618rem);
+    text-overflow: ellipsis;
+    overflow: hidden;
     text-align: left;
-    border-radius: 1rem;
     cursor: pointer;
     display: block;
-    width: calc(100% - 1rem);
+    width: 100%;
   }
 
   & .room-select:hover {
-    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,1)), var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,1);
   }
 
   & .room-select.active {
@@ -2437,7 +2460,6 @@ $.skin(`
   }
 
   & .action-bar {
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
     min-height: calc(2.5rem + 1rem);
     display: flex;
     justify-content: flex-end;
@@ -2486,24 +2508,6 @@ $.skin(`
 
   & .action-menu-container {
     position: relative;
-  }
-
-  & .action-menu-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    background: transparent;
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background 200ms ease-in-out;
-  }
-
-  & .action-menu-trigger:hover {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
   }
 
   & .action-menu-trigger sl-icon {
@@ -2585,7 +2589,6 @@ $.skin(`
   }
 
   & .action-row {
-    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
     padding: 4px 8px;
     display: flex;
     gap: .5rem;
@@ -2604,7 +2607,6 @@ $.skin(`
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: end;
-    background: linear-gradient(rgba(0,0,0,.7), rgba(0,0,0,.7)), var(--root-theme, mediumseagreen);
   }
 
   & .compose-btn {
@@ -2614,7 +2616,7 @@ $.skin(`
     width: 2.5rem;
     height: 2.5rem;
     background: transparent;
-    color: rgba(255,255,255,.5);
+    color: rgba(0,0,0,.5);
     border: none;
     cursor: pointer;
     transition: all 200ms ease-in-out;
@@ -2622,7 +2624,7 @@ $.skin(`
   }
 
   & .compose-btn:hover {
-    color: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
   }
 
   & .compose-btn sl-icon {
@@ -3055,7 +3057,7 @@ $.skin(`
   }
 
   & .subtitle {
-    color: rgba(255,255,255,.65);
+    color: rgba(0,0,0,.65);
     font-weight: 800;
     font-size: .8rem;
     margin: 1rem .5rem .5rem;
@@ -3070,26 +3072,26 @@ $.skin(`
   }
 
   & .app-launcher-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .5rem 1rem;
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 1rem;
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,.85);
+    border: 0;
+    padding: calc(0.382rem) calc(0.618rem);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    text-align: left;
     cursor: pointer;
-    transition: background 200ms ease-in-out;
+    display: block;
+    width: 100%;
   }
 
   & .app-launcher-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,1)), var(--root-theme, mediumseagreen);
+    color: rgba(0,0,0,1);
   }
 
   & .app-launcher-btn.active {
     background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,1);
+    color: rgba(255,255,255,.85);
   }
 
   & .app-launcher-btn sl-icon {
@@ -3133,6 +3135,14 @@ $.skin(`
 
   & .group-section {
     margin-bottom: .5rem;
+  }
+
+  & .my-groups,
+  & .other-groups {
+    display: flex;
+    flex-direction: column;
+    gap: .25rem;
+    padding: .5rem;
   }
 
   & .zero-space {
@@ -3221,7 +3231,7 @@ $.skin(`
   & .tiptap-content {
     outline: none;
     padding: 8px;
-    color: rgba(255,255,255,.85);
+    color: rgba(0,0,0,.85);
     font-size: 1rem;
     min-height: 1.5em;
     word-wrap: break-word;
@@ -3233,14 +3243,14 @@ $.skin(`
 
   & .tiptap-content p.is-editor-empty:first-child::before {
     content: attr(data-placeholder);
-    color: rgba(255,255,255,.35);
+    color: rgba(0,0,0,.35);
     pointer-events: none;
     float: left;
     height: 0;
   }
 
   & .tiptap-content blockquote {
-    border-left: 3px solid rgba(255,255,255,.3);
+    border-left: 3px solid rgba(0,0,0,.3);
     padding-left: .75rem;
     margin: .25rem 0;
   }
@@ -3265,7 +3275,7 @@ $.skin(`
     width: 1.75rem;
     height: 1.75rem;
     background: transparent;
-    color: rgba(255,255,255,.45);
+    color: rgba(0,0,0,.45);
     border: none;
     border-radius: .25rem;
     cursor: pointer;
@@ -3273,8 +3283,8 @@ $.skin(`
   }
 
   & .fmt-btn:hover {
-    color: rgba(255,255,255,.85);
-    background: rgba(255,255,255,.1);
+    color: rgba(0,0,0,.85);
+    background: rgba(0,0,0,.1);
   }
 
   & .fmt-btn sl-icon {
@@ -3284,7 +3294,7 @@ $.skin(`
   & .attachments-panel {
     display: none;
     background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.9)), var(--root-theme, mediumseagreen);
-    border-top: 1px solid rgba(255,255,255,.1);
+    border-top: 1px solid rgba(0,0,0,.1);
     height: 200px;
     overflow: auto;
   }
@@ -3294,8 +3304,8 @@ $.skin(`
   }
 
   & .attach-btn.active {
-    color: rgba(255,255,255,.85);
-    background: rgba(255,255,255,.1);
+    color: rgba(0,0,0,.85);
+    background: rgba(0,0,0,.1);
   }
 
   & .scroll-anchor-btn {
@@ -3359,7 +3369,7 @@ $.skin(`
     gap: .25rem;
     padding: .25rem .5rem;
     overflow-x: auto;
-    background: linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(rgba(255,255,255,.75), rgba(255,255,255,.75)), var(--root-theme, mediumseagreen);
   }
 
   & .attachment-preview:empty {

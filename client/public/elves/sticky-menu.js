@@ -254,7 +254,7 @@ $.view(() => {
         <a href="/app/plan98-camera">
           Camera
         </a>
-        <span>Your Phone <em class="sonny">(Sonny)</em></span>
+        <span>Your Phone <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em></span>
         <p>
           Scan the paper code with your camera and try my camera on your phone.
         </p>
@@ -266,7 +266,7 @@ $.view(() => {
         <a href="/app/plan98-gallery">
           Gallery
         </a>
-        <span>My Phone <em class="sally">(Sally)</em></span>
+        <span>My Phone <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em></span>
         <p>
           We can selectively share photos from our galleries.
         </p>
@@ -278,7 +278,7 @@ $.view(() => {
         <a href="/app/v-log">
           Studio
         </a>
-        <span>My Bag <em class="shelly">(Shelly)</em></span>
+        <span>My Bag <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em></span>
         <p>
           We can put on a whole production, from script to sketch.
         </p>
@@ -290,7 +290,7 @@ $.view(() => {
         <a href="/app/shirt-flicks">
           Console
         </a>
-        <span>My Box <em class="sully">(Sully)</em></span>
+        <span>My Box <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em></span>
         <p>
           We can drop whole mix tapes of our nonsense.
         </p>
@@ -302,7 +302,7 @@ $.view(() => {
         <a href="/app/multi-task?src=/app/ur-shell">
           Shell
         </a>
-        <span>My Mind <em class="silly">(Silly)</em></span>
+        <span>My Mind <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em></span>
         <p>
           We can summon anything from a word or two.
         </p>
@@ -314,7 +314,7 @@ $.view(() => {
         <a href="/app/dream-team?id=newbies">
           Elf Team
         </a>
-        <span>Our Mind <em class="wally">(Wally)</em></span>
+        <span>Our Mind <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em></span>
         <p>
           And chat about why that's confusing in real time.
         </p>
@@ -326,7 +326,7 @@ $.view(() => {
         <a href="/app/source-code">
           Machines
         </a>
-        <span>Self-Transformers <em class="eon">(Eon)</em></span>
+        <span>Self-Transformers <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em></span>
         <p>
           And your endless adventure is only just beginning.
         </p>
@@ -341,7 +341,7 @@ $.view(() => {
         <span>About You<em class="${name}">(${(elves[name] || {}).label})</em></span>
       </div>
 
-      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg">
+      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg" alt="an elephant eared elf clown jester slings a sticky scope with silly starting an elemental event." data-tooltip="Formless puppet.">
 
       <div>
         When you're ready, try the
