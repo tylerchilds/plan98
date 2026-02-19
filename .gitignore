@@ -1,4 +1,5 @@
 client/public/vendor/deps/
+client/public/cdn/cache/
 
 backups/
 .env
