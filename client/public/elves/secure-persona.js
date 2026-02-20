@@ -319,6 +319,8 @@ export async function provisionPersonaKeycard(options={}) {
 
   try {
     await putPersona({
+      profileURL: null,
+      bannerURL: null,
       moniker: companyEmployeeId,
       organization: companyName,
       groupId: group.groupId,
@@ -337,14 +339,21 @@ export function persona() {
 
 async function updatePersona(payload, mergeHandler=(s,p) => ({...s,...p})) {
   const persona = await getPersona()
-debugger
   const data = mergeHandler(persona, payload)
   $.teach({ persona: data })
   return await putPersona(data)
 }
 
 export async function putPersona(persona) {
-  const keycard = getKeycard()
+  const { companyEmployeeId, companyName } = getSession()
+  const personaKeycard = listKeycards().find(x => {
+
+    return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
+  })
+
+  if(!personaKeycard) return
+
+  const keycard = getKeycard(personaKeycard.id)
 
   const signer = await getSigner(keycard)
   const storage = getStorage(keycard)
@@ -366,6 +375,7 @@ export async function putPersona(persona) {
 export async function getPersona() {
   const { companyEmployeeId, companyName } = getSession()
   const personaKeycard = listKeycards().find(x => {
+
     return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
   })
 
@@ -491,46 +501,49 @@ export async function blockFollow(moniker, organization) {
 const modes = {
   error: function error(target) {
     return `
-      <div class="form-title">
-        Session Error
-      </div>
-      <div class="form-description">
-        There was an error linking your persona, press retry to try again.
-      </div>
+      <div class="wizard">
+        <div class="form-title">
+          Session Error
+        </div>
+        <div class="form-description">
+          There was an error linking your persona, press retry to try again.
+        </div>
 
-      <div>
-        <button class="standard-button -bias-negative persona-deactivate" data-action="handleSessionEnd">
-          <span style="display: grid; place-content: center;">
-            <sl-icon name="emoji-frown"></sl-icon>
-          </span>
-          Retry
-        </button>
+        <div>
+          <button class="standard-button -bias-negative persona-deactivate" data-action="handleSessionEnd">
+            <span style="display: grid; place-content: center;">
+              <sl-icon name="emoji-frown"></sl-icon>
+            </span>
+            Retry
+          </button>
+        </div>
       </div>
-
     `
   },
   onboard: function intake(target) {
     return `
-      <div class="persona-form">
-        <div class="form-title">
-          Activate Persona
-        </div>
+      <div class="wizard">
+        <div class="persona-form">
+          <div class="form-title">
+            Activate Persona
+          </div>
 
-        <div class="form-description">
-          Your persona is your secure callsign for encrypting data with <strong>${organization}</strong>.
+          <div class="form-description">
+            Your persona is your secure callsign for encrypting data with <strong>${organization}</strong>.
+          </div>
+          <div>
+            <bayun-feedback></bayun-feedback>
+          </div>
+          <form method="POST" name="insert">
+            <label class="field">
+              <span class="label">Persona</span>
+              <input type="text" name="account" required/>
+            </label>
+            <button class="standard-button bias-positive" type="submit">
+              Activate
+            </button>
+          </form>
         </div>
-        <div>
-          <bayun-feedback></bayun-feedback>
-        </div>
-        <form method="POST" name="insert">
-          <label class="field">
-            <span class="label">Persona</span>
-            <input type="text" name="account" required/>
-          </label>
-          <button class="standard-button bias-positive" type="submit">
-            Activate
-          </button>
-        </form>
       </div>
     `
   },
@@ -551,52 +564,54 @@ const modes = {
     const persona = getEmployeeId()
     const organization = getCompanyName()
     return `
-      <div class="persona-form">
-        <div class="form-title">
-          Create Credentials
-        </div>
+      <div class="wizard">
+        <div class="persona-form">
+          <div class="form-title">
+            Create Credentials
+          </div>
 
-        <div class="form-description">
-          To establish credentials for <strong>${persona}@${organization}</strong>, please customize the questionnaire below.
+          <div class="form-description">
+            To establish credentials for <strong>${persona}@${organization}</strong>, please customize the questionnaire below.
+          </div>
+          <div>
+            <bayun-feedback></bayun-feedback>
+          </div>
+          <form method="POST" name="provision">
+            <label class="field">
+              <span class="label -as-input">
+                <input class="name-pair" name="question1" value="${question1}"/>
+              </span>
+              <input type="password" class="name-pair" name="answer1" value="${answer1}"/>
+            </label>
+            <label class="field">
+              <span class="label -as-input">
+                <input class="name-pair" name="question2" value="${question2}"/>
+              </span>
+              <input type="password" class="name-pair" name="answer2" value="${answer2}"/>
+            </label>
+            <label class="field">
+              <span class="label -as-input">
+                <input class="name-pair" name="question3" value="${question3}"/>
+              </span>
+              <input type="password" class="name-pair" name="answer3" value="${answer3}"/>
+            </label>
+            <label class="field">
+              <span class="label -as-input">
+                <input class="name-pair" name="question4" value="${question4}"/>
+              </span>
+              <input type="password" class="name-pair" name="answer4" value="${answer4}"/>
+            </label>
+            <label class="field">
+              <span class="label -as-input">
+                <input class="name-pair" name="question5" value="${question5}"/>
+              </span>
+              <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
+            </label>
+            <button class="standard-button bias-positive" type="submit">
+              Provision
+            </button>
+          </form>
         </div>
-        <div>
-          <bayun-feedback></bayun-feedback>
-        </div>
-        <form method="POST" name="provision">
-          <label class="field">
-            <span class="label -as-input">
-              <input class="name-pair" name="question1" value="${question1}"/>
-            </span>
-            <input type="password" class="name-pair" name="answer1" value="${answer1}"/>
-          </label>
-          <label class="field">
-            <span class="label -as-input">
-              <input class="name-pair" name="question2" value="${question2}"/>
-            </span>
-            <input type="password" class="name-pair" name="answer2" value="${answer2}"/>
-          </label>
-          <label class="field">
-            <span class="label -as-input">
-              <input class="name-pair" name="question3" value="${question3}"/>
-            </span>
-            <input type="password" class="name-pair" name="answer3" value="${answer3}"/>
-          </label>
-          <label class="field">
-            <span class="label -as-input">
-              <input class="name-pair" name="question4" value="${question4}"/>
-            </span>
-            <input type="password" class="name-pair" name="answer4" value="${answer4}"/>
-          </label>
-          <label class="field">
-            <span class="label -as-input">
-              <input class="name-pair" name="question5" value="${question5}"/>
-            </span>
-            <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
-          </label>
-          <button class="standard-button bias-positive" type="submit">
-            Provision
-          </button>
-        </form>
       </div>
     `
   },
@@ -613,74 +628,104 @@ const modes = {
     const companyEmployeeId = getEmployeeId()
     const companyName = getCompanyName()
     return `
-      <div key="challenge" class="persona-form">
-        <div class="form-title">
-          Answer Challenge
-        </div>
+      <div class="wizard">
+        <div key="challenge" class="persona-form">
+          <div class="form-title">
+            Answer Challenge
+          </div>
 
-        <div class="form-description">
-          Correctly provide answers for the questions below to begin the secure session for <strong>${companyEmployeeId}@${companyName}</strong>
-        </div>
-        <div>
-          <bayun-feedback></bayun-feedback>
-        </div>
+          <div class="form-description">
+            Correctly provide answers for the questions below to begin the secure session for <strong>${companyEmployeeId}@${companyName}</strong>
+          </div>
+          <div>
+            <bayun-feedback></bayun-feedback>
+          </div>
 
-        <form method="POST" name="validate">
-          <label class="field">
-            <span class="label">${questions[1]}</span>
-            <input type="password" class="name-pair" name="answer1" value="${answer1}"/>
-          </label>
-          <label class="field">
-            <span class="label">${questions[2]}</span>
-            <input type="password" class="name-pair" name="answer2" value="${answer2}"/>
-          </label>
-          <label class="field">
-            <span class="label">${questions[3]}</span>
-            <input type="password" class="name-pair" name="answer3" value="${answer3}"/>
-          </label>
-          <label class="field">
-            <span class="label">${questions[4]}</span>
-            <input type="password" class="name-pair" name="answer4" value="${answer4}"/>
-          </label>
-          <label class="field">
-            <span class="label">${questions[5]}</span>
-            <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
-          </label>
-          <button class="standard-button bias-positive" type="submit">
-            Validate
-          </button>
-        </form>
+          <form method="POST" name="validate">
+            <label class="field">
+              <span class="label">${questions[1]}</span>
+              <input type="password" class="name-pair" name="answer1" value="${answer1}"/>
+            </label>
+            <label class="field">
+              <span class="label">${questions[2]}</span>
+              <input type="password" class="name-pair" name="answer2" value="${answer2}"/>
+            </label>
+            <label class="field">
+              <span class="label">${questions[3]}</span>
+              <input type="password" class="name-pair" name="answer3" value="${answer3}"/>
+            </label>
+            <label class="field">
+              <span class="label">${questions[4]}</span>
+              <input type="password" class="name-pair" name="answer4" value="${answer4}"/>
+            </label>
+            <label class="field">
+              <span class="label">${questions[5]}</span>
+              <input type="password" class="name-pair" name="answer5" value="${answer5}"/>
+            </label>
+            <button class="standard-button bias-positive" type="submit">
+              Validate
+            </button>
+          </form>
+        </div>
       </div>
     `
   },
   authenticated: function authenticated(target) {
     const companyEmployeeId = getEmployeeId()
     const companyName = getCompanyName()
+    const { persona } = $.learn()
 
     return `
-      <div class="form-title">
-        Connected
-        <span style="display: inline-grid; place-content: center;">
-          <button class="standard-button -small -round bias-generic" data-action="handleSessionEnd">
-            <sl-icon name="cloud-slash"></sl-icon>
-          </button>
-        </span>
-      </div>
-      <div class="form-description">
-        Persona: <strong>${companyEmployeeId}</strong><br/>
-        Provider: <strong>${companyName}</strong><br/>
-      </div>
+      <div class="wizard">
+        <div>
+          ${persona.bannerURL ? `
+            <button data-pick="bannerURL" class="nothing">
+              <was-image class="nothing" src="${persona.bannerURL}"></was-image>
+            </button>
+          ` : `
+            <button data-pick="bannerURL">Add Banner</button>
+          `}
+        </div>
+        <div class="form-title">
+          Connected
+          <span style="display: inline-grid; place-content: center;">
+            <button class="standard-button -small -round bias-generic" data-action="handleSessionEnd">
+              <sl-icon name="cloud-slash"></sl-icon>
+            </button>
+          </span>
+        </div>
+        <div>
+          ${persona.profileURL ? `
+            <button class="nothing" data-pick="profileURL">
+              <was-image src="${persona.profileURL}"></was-image>
+            </button>
+          ` : `
+            <button data-pick="profileURL">Add Profile</button>
+          `}
+        </div>
+        <div class="form-description">
+          Persona: <strong>${companyEmployeeId}</strong><br/>
+          Provider: <strong>${companyName}</strong><br/>
+        </div>
 
-      <div>
-        <secure-followers></secure-followers>
+        <div>
+          <secure-followers></secure-followers>
+        </div>
       </div>
     `
   },
   loading: function loading(target) {
     return `
-      <div key="loader" class="persona-bar">
-        <flying-disk></flying-disk>
+      <div class="wizard">
+        <div key="loader" class="persona-bar">
+          <flying-disk></flying-disk>
+        </div>
       </div>
+    `
+  },
+  gallery: function gallery(target) {
+    return `
+      <plan98-gallery mode="picker" limit="1" enforceTypes="computer.sillyz.data.image"></plan98-gallery>
     `
   }
 }
@@ -730,6 +775,13 @@ function mount(target) {
   setError('')
   target.innerHTML = ''
   target.mounted = true
+
+  schedule(() => {
+    init()
+    if(getSessionId()) {
+      broadcastPersonaActivated()
+    }
+  })
 }
 
 export function __ready() {
@@ -819,22 +871,12 @@ $.draw((target) => {
 }, { beforeUpdate, afterUpdate })
 
 function beforeUpdate(target) {
-  {
-    if(!target.mounted) {
-      target.mounted = true
-      init()
-    }
-  }
-  {
-    if(getSessionId()) {
-      broadcastPersonaActivated()
-    }
-  }
 }
 
 function afterUpdate(target) {
   {
     recoverElves(target, 'bayun-feedback')
+    recoverElves(target, 'was-image')
     recoverElves(target, 'sl-icon')
     recoverElves(target, 'flying-disk')
     recoverElves(target, 'secure-followers')
@@ -1161,14 +1203,11 @@ async function provision(event) {
 $.style(`
   & {
     display: block;
-    margin: 0 auto;
     height: 100%;
     position: relative;
     z-index: 2;
     background: white;
     color: rgba(0,0,0,.85);
-    max-width: 55ch;
-    padding: 0 .5rem;
   }
   
   & .persona-bar {
@@ -1231,12 +1270,6 @@ $.style(`
     font-weight: 800;
     margin-top: 2rem;
   }
-
-  & {
-    display: block;
-    max-width: 55ch;
-    margin: auto;
-  }
 `)
 
 function recoverElves(target, tag) {
@@ -1248,4 +1281,23 @@ function recoverElves(target, tag) {
     node.replaceWith(newNode)
   })
 }
+
+$.when('click', '[data-pick]', (event) => {
+  $.teach({ mode: 'gallery', personaAttribute: event.target.dataset.pick  })
+})
+
+$.when('gallery-share', 'plan98-gallery', (event) => {
+  const { items } = event.detail
+  const { personaAttribute } = $.learn()
+
+  $.teach({ mode: 'authenticated', personaAttribute: null })
+
+  if(items[0] && personaAttribute) {
+    updatePersona({
+      [personaAttribute]: items[0].record.src
+    })
+  } else {
+    $.teach({ personaAttribute: null })
+  }
+})
 

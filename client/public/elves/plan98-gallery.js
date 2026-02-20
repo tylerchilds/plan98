@@ -1,10 +1,6 @@
 import { Self } from "@plan98/types"
 
 import {
-  getPersona,
-} from './secure-persona.js'
-
-import {
   getSession
 } from './bayun-wizard.js'
 
@@ -26,6 +22,19 @@ const $ = Self('plan98-gallery', {
 
 function isPickerMode(target) {
   return target.closest($.link)?.getAttribute('mode') === 'picker'
+}
+
+function getEnforceTypes(target) {
+  const raw = target.closest($.link)?.getAttribute('enforceTypes') || ''
+  if (!raw.trim()) return null
+  return raw.split(',').map(t => t.trim()).filter(Boolean)
+}
+
+function getLimit(target) {
+  const raw = target.closest($.link)?.getAttribute('limit')
+  if (!raw) return Infinity
+  const n = parseInt(raw, 10)
+  return isNaN(n) ? Infinity : n
 }
 
 $.when('json-rpc', 'quick-start', async (event) => {
@@ -146,14 +155,28 @@ $.when('click', '.gallery-thumb', (event) => {
   const cid = thumb.dataset.cid
 
   if (isPickerMode(event.target)) {
-    // Toggle selection
+    const limit = getLimit(event.target)
     const { selected } = $.learn()
     const next = { ...selected }
+
     if (next[cid]) {
+      // Deselect
       delete next[cid]
     } else {
+      const currentCount = Object.keys(next).length
+      if (currentCount >= limit) {
+        if (limit === 1) {
+          // For limit=1, replace the existing selection
+          const existingKey = Object.keys(next)[0]
+          delete next[existingKey]
+        } else {
+          // At capacity for multi-select, do nothing
+          return
+        }
+      }
       next[cid] = true
     }
+
     $.teach({ selected: next })
     return
   }
@@ -235,9 +258,15 @@ function renderProfile(profile) {
   `
 }
 
-function renderThumb(resource, picker) {
+function renderThumb(resource, options = {}) {
   const { cid, record } = resource
   const type = record.$type
+  const { enforceTypes } = options
+
+  // In enforceTypes mode, skip non-allowed types entirely — they won't appear in the grid
+  if (enforceTypes && !enforceTypes.includes(type)) {
+    return ''
+  }
 
   if (type === 'computer.sillyz.data.image') {
     return `
@@ -364,7 +393,7 @@ $.draw(target => {
     </div>
     <div data-view="account" hidden>
       <button class="view-profile">Profile</button>
-      <secure-persona></secure-persona>
+      tbd
     </div>
   `
 }, {
@@ -422,9 +451,10 @@ $.draw(target => {
       }
     }
 
-    // Gallery grid — append new thumbs
+    // Gallery grid — append new thumbs, filtering by enforceTypes when in picker mode
     const timelineUR = target.ur || 'public'
     const timeline = getTimeline(timelineUR)
+    const enforceTypes = isPickerMode(target) ? getEnforceTypes(target) : null
     const grid = target.querySelector('.gallery-grid')
     if (grid) {
       const existingCids = new Set(
@@ -432,7 +462,8 @@ $.draw(target => {
       )
       timeline.forEach(resource => {
         if (!existingCids.has(resource.cid)) {
-          grid.insertAdjacentHTML('beforeend', renderThumb(resource, isPickerMode(target)))
+          const html = renderThumb(resource, { enforceTypes })
+          if (html) grid.insertAdjacentHTML('beforeend', html)
         }
       })
     }
@@ -464,42 +495,55 @@ $.draw(target => {
 
     if (isPickerMode(target)) {
       const { selected } = $.learn()
+      const limit = getLimit(target)
+      const count = Object.keys(selected).length
+
+      // Sync selected highlight state on thumbs
       const thumbs = target.querySelectorAll('.gallery-thumb')
       thumbs.forEach(thumb => {
         thumb.classList.toggle('selected', !!selected[thumb.dataset.cid])
       })
 
-      // Show/hide share button
-      let shareBtn = target.querySelector('[data-share-selected]')
-      const count = Object.keys(selected).length
+      // Dim unselectable thumbs when at capacity (only meaningful for multi-select)
+      if (limit > 1 && limit !== Infinity) {
+        const atLimit = count >= limit
+        thumbs.forEach(thumb => {
+          const isSelected = !!selected[thumb.dataset.cid]
+          thumb.classList.toggle('at-limit', atLimit && !isSelected)
+        })
+      }
 
-      if (count > 0 && !shareBtn) {
+      // Confirm button — always present in picker mode, disabled until something is selected
+      let confirmBtn = target.querySelector('[data-share-selected]')
+      if (!confirmBtn) {
         const btn = document.createElement('button')
         btn.setAttribute('data-share-selected', '')
-        btn.setAttribute('type', 'button') 
+        btn.setAttribute('type', 'button')
         btn.className = 'share-selected-btn'
         target.querySelector('.gallery-view:not([hidden])')?.appendChild(btn)
-        shareBtn = btn
+        confirmBtn = btn
       }
 
-      if (shareBtn) {
-        shareBtn.textContent = count > 0 ? `Share ${count} item${count > 1 ? 's' : ''}` : ''
-        shareBtn.style.display = count > 0 ? 'block' : 'none'
+      if (count > 0) {
+        const countLabel = limit !== Infinity ? `${count}/${limit} ` : `${count} `
+        confirmBtn.textContent = `Confirm ${countLabel}selection`
+        confirmBtn.disabled = false
+      } else {
+        confirmBtn.textContent = limit === 1
+          ? 'Select an image to continue'
+          : limit !== Infinity
+            ? `Select up to ${limit} items`
+            : 'Select items to continue'
+        confirmBtn.disabled = true
       }
+
+      confirmBtn.style.display = 'block'
     }
   }
 })
 
 $.when('input', '.thumb-slider', (event) => {
   $.teach({ thumbSize: parseInt(event.target.value) })
-})
-
-$.when('activated', 'secure-persona', (event) => {
-  $.teach({ authenticated: true })
-})
-
-$.when('deactivated', 'secure-persona', (event) => {
-  $.teach({ authenticated: false })
 })
 
 $.style(`
@@ -550,6 +594,12 @@ $.style(`
     margin: 0;
     cursor: pointer;
     background: rgba(0,0,0,.05);
+    transition: opacity .15s ease;
+  }
+
+  & .gallery-thumb.at-limit {
+    opacity: .35;
+    cursor: not-allowed;
   }
 
   & .gallery-thumb img,
@@ -878,9 +928,17 @@ $.style(`
     font-weight: 600;
     z-index: 10;
     box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    white-space: nowrap;
+    transition: background .15s ease, opacity .15s ease;
   }
 
-  & .share-selected-btn:hover {
+  & .share-selected-btn:disabled {
+    opacity: .4;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  & .share-selected-btn:not(:disabled):hover {
     background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
   }
 `)

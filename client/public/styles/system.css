@@ -1704,3 +1704,11 @@ sillonious-brand > xml-html {
     color: black;
   }
 }
+
+.nothing {
+  border: none;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: transparent;
+}

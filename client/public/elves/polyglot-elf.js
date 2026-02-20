@@ -53,6 +53,8 @@ let _running = false
 
 function teardown() {
   _running = false
+  _micSource = null
+  _processorNode = null
   if (_recognizer) {
     try { _recognizer.remove() } catch (e) {}
     _recognizer = null
@@ -77,11 +79,16 @@ function teardown() {
 }
 
 // ─── TTS queue ────────────────────────────────────────────────────────────────
+// While ElevenLabs is speaking we disconnect the mic source from the processor
+// so Vosk never hears the output — prevents the translation feedback loop.
 let ttsQueue = Promise.resolve()
 let currentAudio = null
+let _micSource = null        // set by init(), read here to mute/unmute
+let _processorNode = null    // set by init(), disconnected while speaking
 
 function speakTranslation(text) {
   ttsQueue = ttsQueue.then(async () => {
+    if (!_running) return
     try {
       if (currentAudio) {
         currentAudio.pause()
@@ -107,6 +114,11 @@ function speakTranslation(text) {
       const audio = new Audio(url)
       currentAudio = audio
 
+      // Disconnect mic from Vosk before playback starts
+      if (_micSource && _processorNode) {
+        try { _micSource.disconnect(_processorNode) } catch (e) {}
+      }
+
       await audio.play()
       await new Promise(resolve => {
         audio.onended = resolve
@@ -115,8 +127,17 @@ function speakTranslation(text) {
 
       URL.revokeObjectURL(url)
       currentAudio = null
+
+      // Reconnect mic to Vosk after playback ends
+      if (_running && _micSource && _processorNode) {
+        try { _micSource.connect(_processorNode) } catch (e) {}
+      }
     } catch (e) {
       console.error('TTS error', e)
+      // Always reconnect on error so we don't get stuck muted
+      if (_running && _micSource && _processorNode) {
+        try { _micSource.connect(_processorNode) } catch (e) {}
+      }
     }
   })
 }
@@ -338,7 +359,13 @@ async function init(target) {
   )
 
   recognizerProcessor.connect(audioContext.destination)
-  audioContext.createMediaStreamSource(mediaStream).connect(recognizerProcessor)
+
+  const micSource = audioContext.createMediaStreamSource(mediaStream)
+  micSource.connect(recognizerProcessor)
+
+  // Store refs so speakTranslation can mute/unmute the mic during playback
+  _micSource = micSource
+  _processorNode = recognizerProcessor
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
