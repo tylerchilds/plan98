@@ -400,6 +400,12 @@ $.draw(target => {
   async beforeUpdate(target) {
     if (!target.mounted) {
       target.mounted = true
+
+      try {
+        const session = await getSession()
+        if (session) $.teach({ authenticated: true })
+      } catch(e) { console.error(e) }
+
       try {
         const timelineUR = getTimelineUR(target)
         const response = await fetchTimeline(timelineUR)
@@ -452,7 +458,7 @@ $.draw(target => {
     }
 
     // Gallery grid — append new thumbs, filtering by enforceTypes when in picker mode
-    const timelineUR = target.ur || 'public'
+    const timelineUR = getTimelineUR(target)
     const timeline = getTimeline(timelineUR)
     const enforceTypes = isPickerMode(target) ? getEnforceTypes(target) : null
     const grid = target.querySelector('.gallery-grid')

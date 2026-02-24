@@ -150,7 +150,11 @@ const formRenderers = {
       </div>
 
       <div class="form-description">
-        When you're ready to control your own destiny, press "Start", otherwise keep learning until this feels important to you, personally.
+        When you're ready to control your own destiny, press "Start", otherwise keep learning the hard way until this feels important to you, personally.
+      </div>
+
+      <div class="form-description">
+        Gen-Z has coined this paradigm shift as "Pre-De-Platforming".
       </div>
 
       <button class="standard-button bias-positive -large" data-submit="${forms.second}">
