@@ -3,6 +3,8 @@ import geckos from '@geckos.io/client'
 import { getQuickJS } from "quickjs-emscripten"
 
 const logs = {}
+const store = createStore({}, notify)
+
 const QuickJS = await getQuickJS()
 const WAIT_TIMEOUT = 2500
 
@@ -114,7 +116,6 @@ function notify(elf) {
     .map(key => notifications[key](elf))
 }
 
-const store = createStore({}, notify)
 
 const config = plan98.env.PLAN98_REALTIME ?
   {
