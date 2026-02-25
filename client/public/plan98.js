@@ -2,6 +2,7 @@ import diffHTML from 'diffhtml'
 import geckos from '@geckos.io/client'
 import { getQuickJS } from "quickjs-emscripten"
 
+const logs = {}
 const QuickJS = await getQuickJS()
 const WAIT_TIMEOUT = 2500
 
@@ -79,9 +80,6 @@ try {
   PLAN98_NODE_ID = uuidv4()
 }
 
-// fallback for non-secure lan parties
-
-const logs = {}
 
 export function insights() {
   return logs
