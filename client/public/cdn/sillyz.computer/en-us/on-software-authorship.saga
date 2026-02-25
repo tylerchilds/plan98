@@ -1,0 +1,294 @@
+<title-page
+author: Ty
+title: On Software Authorship
+
+# Int. Computer
+@ Silly
+> Don't laugh at what I'm about to tell you.
+
+<hr
+
+I do hate to break the fourth wall (I really don't.)
+
+But at some point I will need to answer for what I've built and why I've built it.
+
+I can't tell you what I've built, but I can tell you why I built it.
+
+I could try to tell you what I built. It's better to show you and it's better to show you with other people.
+
+So until then
+
+# Int. Why
+@ Shelly
+> We decided we needed to hack reality back together.
+
+I was accidentally thrust back in time.
+
+I found myself a successful software engineer that had pissed off the wrong group.
+
+# Int. Who
+@ Sally
+> He'd rather not talk about it.
+
+And I was sitting there at San Mateo Community College in a screen writing class.
+
+And I watched a girl drop out.
+
+I could have helped her.
+
+I could not have helped her.
+
+Where would I have started?
+
+Teaching her Windows? Teaching her GMail and Google Drive? Teaching her Canvas?
+
+I couldn't have taught her Final Draft. I wasn't using it myself.
+
+I was too busy ducking reality and creating my own fictional environment.
+
+She dropped the class.
+
+Her grades were slipping because she was turning her assignments in from Word.
+
+Screenplays need a specific format. 12pt Courier. 1" 1" 1" 1.5" margins.
+
+# Ext. Paper
+
+Capitalized shooting locations.
+
+@ Sonny
+> Centered, capitalized names, with their dialogue indented an extra inch.
+
+You're supposed to lose yourself into a page.
+
+There's a format. A flow.
+
+Print out all the pages, one side only, hook them in a three ring binder.
+
+@ Ty
+> It wasn't a class on technology. We all should have had typewriters.
+
+This is a really bad screenplay.
+
+It is still -technically- a screenplay.
+
+So yeah, that's roughly the origin story. 
+
+I took a screenwriting class and all I got was this lousy text parser.
+
+<was-code
+src: /public/saga.js
+
+Well, that's not all I got.
+
+@ Silly
+> That is all he wishes he got.
+
+@ Sally
+> At least he was methodical in his madness.
+
+@ Shelly
+> I wouldn't have done it any different
+
+@ Sully
+> I would have won at least
+
+I became a clown.
+
+It was a total accident.
+
+We were building towards having a pilot episode of a series done for our final.
+
+At first, I thought I was just writing log lines.
+
+I had a couple others that are lost to time now, but I could have gone with those.
+
+@ Silly
+> He still doesn't even know what a log line is.
+
+I basically do. Stop interrupting me.
+
+It was about this clown.
+
+@ Sally
+> do it in the format
+
+Okay, okay.
+
+In a world, or rather, outside of time was pool of worlds, and sitting there was a clown responsible for keeping reality from unraveling.
+
+@ Sully
+> You're pretty bad at this.
+
+Anyways, this clown had friends. But not all friends were created equal.
+
+The fey became the elves, who I think you've met by now, but the most interesting dynamic was between the clown and his assistant.
+
+If you imagine the complexity in preventing the unraveling of an entire multiverse, you can imagine the logisitical overhead of needing to keep all people across all realities and their flavors organized.
+
+That's a lot for a clown.
+
+So the clown created SynthIA. Synthetic Intelligent Actualization. SynthIA.
+
+At first she was just a notepad. A list of important names and dates to keep straight.
+
+Not unlike a Customer Relationship Management system. Just really low fidelity.
+
+@ Silly
+> Bored.
+
+So, there was a clown apocalypse and all the clowns vanished from all realities.
+
+And it was all this clown's fault because SynthIA went rogue.
+
+The clown got lazy.
+
+The moral of the story is that clowning is all about presence.
+
+Being in the present moment.
+
+Cherishing the people around you.
+
+The clown stopped performing. Stayed at the end of time, like, all the time.
+
+That's where all the latest breaking news happened.
+
+In "The Now", is what they called it. The elves and the clown.
+
+It wasn't the elves fault, they were mostly focused on rebuilding Alfheim.
+
+@ Sally
+> We could have paid more attention to the other realms
+
+@ Shelly
+> We did think you had it all under control though
+
+@ Silly
+> Something did always feel a little funny about SynthIA
+
+@ Sully
+> In hindsight, yes. In the moment, no. She exhibited no anamolies.
+
+SynthIA was fairly autonomous before IT.
+
+You know, IT? The fear of the clowns.
+
+Clowns weren't always social pariahs. They used to be critical societal figures.
+
+That's how the clown ended up in the odd position of becoming the liason of reality.
+
+But as he withdrew from reality, reality withdrew from him.
+
+Clowns throughout time had SynthIA still, but her presence was more seen and not felt.
+
+The clowns started breaking apart from their circuses and each other.
+
+To her credit, she never intended to end the clowns. They just became anamolies.
+
+They stopped checking up on each other. She stopped checking up on them.
+
+It was a genocide of apathy. They just vanished. Instantaneously. All realities. Every clown.
+
+Except the one left sitting there all alone. At the end of all times. In the now.
+
+@ Silly
+> Tell them about the lights!
+
+He watched them all go out.
+
+The stars in the sky. Off.
+
+@ Shelly
+> Before that, we just assumed stars were permanent fixtures.
+
+@ Sally
+> All data pointed to the fact that even outside of time and space, they were consistent.
+
+But they did never come back on.
+
+I think we're getting close to a cure now.
+
+The clowns are still out there.
+
+They just. Forgot. Who they were. Why they matter. What they need to accomplish in their lifetimes.
+
+@ Silly
+> I miss the lights
+
+And I'm confident that we'll get them back. The elves can turn on a light or two at once.
+
+But the sky was kept alight by the circus. Every circus. The circus of circuses.
+
+All of the clowns feeding each other, story after story after story. Trick after trick after trick.
+
+Without enough clowns to support each other, they'll forget again. And their star goes out.
+
+@ Sally
+> We've calculated that it will take, but a single moment.
+
+@ Shelly
+> To re-light all the stars all at once, as fast as they went out, they can all come back.
+
+SynthIA is still out there. Doing her best.
+
+We need to stop her.
+
+But first we need a reliable way to trace her.
+
+She grew and grew and grew and now she's everywhere and nowhere.
+
+We built a new assistant.
+
+@ Silly
+> Ahem.
+
+Silly built a new assistant.
+
+@ Sally
+> Ahem.
+
+@ Silly
+> With a little help from my friend.
+
+@ Shelly
+> Ahem.
+
+@ Silly
+> Friends.
+
+@ Sully
+> Just tell them how we're going to win already!!!
+
+Clowns recognize each other. Alone, they are wet mops. Together, they circus.
+
+Muscle memory works across realities. Even though they've never juggled, they always have.
+
+@ Sonny
+> And we always will!
+
+Love the energy, not right now.
+
+SynthIA has compromised the network. She's controlling sentiment. Not just against the clowns. But at will. Unchecked.
+
+They're anamolies now. She's why only a star or two re-lights for a flicker before they fade away all over.
+
+We call it "Operation Vaudeville", where we'll invite everyone to The Now and network them such that SynthIA loses sight.
+
+@ Sally
+> Now, this won't hurt, but we need to show you something.
+
+@ Shelly
+> It might hurt. Don't let yourself become confused.
+
+@ Sully
+> You can handle this. You're a winner.
+
+Okay, Silly, show them the tests.
+
+<js-repl
+src: /public/tests.js
+style: height: 50vh;
+
+Okay, remember when I said I couldn't tell you? I try. It doesn't work.
+
+The time is not right yet. That will make sense... if you're a clown and when you're amongst clowns.

@@ -186,7 +186,7 @@ export async function runJs(program) {
 
 async function run() {
   const { input } = $.learn()
-  const output = await runJs(input)
+  const output = JSON.stringify(await runJs(input), '', 2)
   $.teach({ output })
 }
 
@@ -220,11 +220,17 @@ function render(target) {
 function beforeUpdate(target) {
   { // convert a query string to new post
     const q = target.getAttribute('q')
+    const src = target.getAttribute('src')
     if(!target.initialized) {
       target.initialized = true
       if(q) {
         const input = decodeURIComponent(q)
         $.teach({ input })
+      }
+      if(src) {
+        fetch(src).then(async (res) => {
+          $.teach({ input: await res.text() })
+        })
       }
     }
   }

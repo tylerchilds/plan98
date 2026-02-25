@@ -1041,9 +1041,8 @@ $.style(`
       right: 0;
       padding: 0 1rem;
       position: absolute;
-      height: 2rem;
       display: grid;
-      place-items: start;
+      place-items: end;
       font-size: 1rem;
       color: rgba(0,0,0,.65);
       opacity: .25;
@@ -1057,9 +1056,8 @@ $.style(`
       right: 0;
       padding: 0 1rem;
       position: absolute;
-      height: 2rem;
       display: grid;
-      place-items: start;
+      place-items: end;
       font-size: 1rem;
       color: rgba(0,0,0,.65);
       opacity: .25;

@@ -15,5 +15,6 @@ $.style(`
     margin: 1rem auto;
     max-width: 6in;
     place-self: start end;
+    position: relative;
   }
 `)

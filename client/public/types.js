@@ -129,12 +129,16 @@ export function Failure() {
 }
 
 export function Log(...args) {
-  console.log.apply(null, args)
+  if (typeof console !== 'undefined') {
+    console.log.apply(null, args)
+  }
   logs.push(args.join(' '))
 }
 
 export function Bug(...args) {
-  console.error.apply(null, args)
+  if (typeof console !== 'undefined') {
+    console.error.apply(null, args)
+  }
   bugs.push(args.join(' '))
 }
 

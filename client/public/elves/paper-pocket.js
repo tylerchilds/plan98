@@ -96,6 +96,10 @@ export const systemMenu = {
     label: "Favorites",
     list: [
       {
+        label: 'On Software Authoship',
+        url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/on-software-authorship.saga&rom=silly-script'
+      },
+      {
         label: 'Plan98:Memex',
         url: '/app/paper-pocket?src=/public/cdn/sillyz.computer/en-us/memex.saga&rom=silly-script'
       },

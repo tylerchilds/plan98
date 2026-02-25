@@ -16,5 +16,6 @@ $.style(`
     place-self: end start;
     text-align: center;
     max-width: 6in;
+    position: relative;
   }
 `)
