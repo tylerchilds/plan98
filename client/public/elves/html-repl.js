@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import { Self } from '@plan98/types'
 
 const data = {
   input: `<non-collection
@@ -12,7 +12,7 @@ const data = {
   output: null
 }
 
-const $ = elf('html-repl', data)
+const $ = Self('html-repl', data)
 export default $
 
 function run() {
