@@ -10,7 +10,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/cleo_sol_v_maxwell-ascension_when_im_in_your_arms/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   pacific: {
@@ -19,7 +19,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/smash_mouth-pacific_coast_party/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   sanford: {
@@ -28,7 +28,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/sanford_and_son-theme/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   katchafire: {
@@ -37,7 +37,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/katchafire-100/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   norman: {
@@ -46,7 +46,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/norman_brown-thats-the-way-love-goes/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   standup: {
@@ -55,7 +55,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/stand_up-stand_n_rock/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   lacs: {
@@ -64,7 +64,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/the_lacs-tall_grass/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   benson: {
@@ -73,7 +73,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/george_benson-give_me_the_night/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   rainbow: {
@@ -82,7 +82,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/israel_iz_kamakawiwoole-somewhere_over_the_rainbow/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 
   moon: {
@@ -91,7 +91,7 @@ export const products = {
     description: 'Music Video',
     keyart: '/public/cdn/boxart.svg',
     trailer: '/private/beerdogusa.com/teresa_teng-the_moon_represents_my_heart/manifest.m3u8',
-    url: '/app/v-log'
+    url: '/app/polyglot-elf'
   },
 }
 
@@ -287,9 +287,9 @@ function autoplay(target) {
       if(mode !== target.lastMode) {
         target.lastMode = mode
         if(mode === modes.system) {
-          //vid.play()
+          vid.play()
         } else {
-          //vid.pause()
+          vid.pause()
         }
       }
     }
