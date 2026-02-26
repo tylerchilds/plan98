@@ -1,4 +1,4 @@
-import app from '@silly/elf'
+import { Self } from '@plan98/types'
 import diffHTML from 'diffhtml'
 import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
@@ -66,6 +66,33 @@ export const products = {
     trailer: '/private/beerdogusa.com/the_lacs-tall_grass/manifest.m3u8',
     url: '/app/v-log'
   },
+
+  benson: {
+    title: "Give Me The Night",
+    artist: 'George Benson',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/george_benson-give_me_the_night/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  rainbow: {
+    title: "Somewhere over the Rainbow",
+    artist: "Israel IZ Kamakawiwoʻole",
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/israel_iz_kamakawiwoole-somewhere_over_the_rainbow/manifest.m3u8',
+    url: '/app/v-log'
+  },
+
+  moon: {
+    title: "The Moon Represents My Heart",
+    artist: "Teresa Teng",
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/teresa_teng-the_moon_represents_my_heart/manifest.m3u8',
+    url: '/app/v-log'
+  },
 }
 
 const porlock = [
@@ -93,6 +120,14 @@ const modes = {
 
 const lolol = {
   '0': {
+    '0'   : products.sanford,
+    '1'   : products.benson,
+    '2'   : products.rainbow,
+    '3'   : products.standup,
+    '4'   : products.moon,
+  },
+
+  '1': {
     '0'   : products.sanford,
     '1'   : products.ascension,
     '2'   : products.katchafire,
@@ -129,7 +164,7 @@ function audioFactory(url) {
 const playSwipeSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/a.mp3')
 const playStuckSound = audioFactory('/public/cdn/sillyz.computer/beat-tape-extractor/output/b.mp3')
 
-const $ = app('beerdog-usa', {
+const $ = Self('beerdog-usa', {
   rows: 1,
   columns: 1,
   instances: {},
