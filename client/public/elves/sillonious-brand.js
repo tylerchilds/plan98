@@ -41,7 +41,7 @@ TheLanding.Page is my personal blog
 
 const dns = {
   'sillyz.computer': {
-    elf: 'sticky-menu'
+    elf: 'elf-boot'
   },
   'cutestrap.com': {
     elf: 'my-computer'

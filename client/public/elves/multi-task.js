@@ -1494,6 +1494,8 @@ function end (e) {
     const tray = self.crypto.randomUUID()
     const width = Math.max(300, Math.abs(x))
     const height = Math.max(150, Math.abs(y))
+
+    const src = event.target.closest($.link).getAttribute('src')
     setState(tray, {
       width,
       height,
@@ -1501,7 +1503,7 @@ function end (e) {
       y: invertY ? startY + y : startY,
       z: trayZ + 1,
       title: 'My Computer',
-      url: `/app/ur-shell?id=${tray}`
+      url: src ? `${src}?${tray}` : `/app/ur-shell?id=${tray}`
     })
 
 

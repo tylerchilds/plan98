@@ -72,7 +72,13 @@ async function print(event) {
   preview.focus(); // necessary for IE >= 10*/
 }
 
+function pitch(event) {
+  const { input } = $.learn()
+  self.location.href = `/app/paper-pocket?data=${encodeURIComponent(btoa(input))}&rom=silly-script`
+}
+
 $.when('click', '[data-print]', print)
+$.when('click', '[data-pitch]', pitch)
 $.when('click', '[data-edit]', () => $.teach({ output: null }))
 
 $.draw(render, { beforeUpdate, afterUpdate })
@@ -81,7 +87,8 @@ function render(target) {
   const { input } = $.learn()
   return `
     <div class="action-bar">
-      <button style="float: right; margin-left: 1rem;" data-print class="standard-button">Preview</button>
+      <button style="float: right; margin-left: 1rem;" data-print class="standard-button bias-generic">Preview</button>
+      <button style="float: right; margin-left: 1rem;" data-pitch class="standard-button bias-positive">Pitch</button>
       <div class="title">Saga</div>
     </div>
     <div class="input">

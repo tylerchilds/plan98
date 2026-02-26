@@ -211,22 +211,32 @@ function sourceFile(target) {
     ? file
     : (function initialize() {
       requestIdleCallback(() => {
-        let file = ''
-        fetch(src).then(async res => {
-          if(res.status === 404) {
+        const encodedData = target.getAttribute('data')
 
-            file = 'untitled'
-          } else {
-            file = await res.text()
-          }
-        }).catch((error) => {
-          console.error(error)
-        }).finally(() => {
+        if(encodedData) {
+          const file = atob(decodeURIComponent(encodedData))
           $.teach({
             [src]: file,
             shotCount: countShots(file),
           })
-        })
+        } else {
+          let file = ''
+          fetch(src).then(async res => {
+            if(res.status === 404) {
+
+              file = 'untitled'
+            } else {
+              file = await res.text()
+            }
+          }).catch((error) => {
+            console.error(error)
+          }).finally(() => {
+            $.teach({
+              [src]: file,
+              shotCount: countShots(file),
+            })
+          })
+        }
       })
       return file
     })()

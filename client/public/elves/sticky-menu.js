@@ -7,6 +7,7 @@ const lazy = async resource => {
 }
 
 [
+  '/public/elves/saga-repl.js',
   '/public/elves/plan98-camera.js',
   '/public/elves/plan98-gallery.js',
   '/public/elves/v-log.js',
@@ -250,13 +251,22 @@ $.view(() => {
       <iframe src="${route}"></iframe>
     </div>
     <div class="menu">
+      <div style="display: grid; height: 200px; text-align: center; place-content: center;">
+        <a href="/app/saga-repl?src=/public/cdn/sillyz.computer/en-us/on-software-authorship.saga">
+          Saga
+        </a>
+        <p style="text-transform: uppercase;">
+          A story with no end in sight
+        </p>
+      </div>
+
       <div>
         <a href="/app/plan98-camera">
           Camera
         </a>
         <span>Your Phone <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em></span>
         <p>
-          Scan the paper code with your camera and try my camera on your phone.
+          A simple point and shoot camera and camcorder.
         </p>
       </div>
 
@@ -268,7 +278,7 @@ $.view(() => {
         </a>
         <span>My Phone <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em></span>
         <p>
-          We can selectively share photos from our galleries.
+          A personal collection of hyper media
         </p>
       </div>
 
@@ -280,7 +290,7 @@ $.view(() => {
         </a>
         <span>My Bag <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em></span>
         <p>
-          We can put on a whole production, from script to sketch.
+          A real-time production platform
         </p>
       </div>
 
@@ -292,19 +302,19 @@ $.view(() => {
         </a>
         <span>My Box <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em></span>
         <p>
-          We can drop whole mix tapes of our nonsense.
+          A portable home media entertainment system
         </p>
       </div>
 
       <hr>
 
       <div>
-        <a href="/app/multi-task?src=/app/ur-shell">
+        <a href="/app/ur-shell">
           Shell
         </a>
         <span>My Mind <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em></span>
         <p>
-          We can summon anything from a word or two.
+          A terminal for precision human-computer augmentation
         </p>
       </div>
 
@@ -316,7 +326,7 @@ $.view(() => {
         </a>
         <span>Our Mind <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em></span>
         <p>
-          And chat about why that's confusing in real time.
+          A real-time end to end encrypted social chat
         </p>
       </div>
 
@@ -324,11 +334,11 @@ $.view(() => {
 
       <div>
         <a href="/app/source-code">
-          Machines
+          Code
         </a>
-        <span>Self-Transformers <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em></span>
+        <span>Our Machines <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em></span>
         <p>
-          And your endless adventure is only just beginning.
+          The source code
         </p>
       </div>
 

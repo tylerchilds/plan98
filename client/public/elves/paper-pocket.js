@@ -748,7 +748,7 @@ export function quantize(callback) {
 
 $.draw((target) => {
   if(target.innerHTML) return
-  const { rom, src, mode, fullScreen, theme, headless } = $.learn()
+  const { rom, src, data, mode, fullScreen, theme, headless } = $.learn()
   return `
     <div class="chrome" style="--theme: ${theme}" data-headless="${headless}" data-full="${fullScreen}">
       <div class="widget-frame">
@@ -760,7 +760,7 @@ $.draw((target) => {
           </div>
           <div class="system"></div>
           <div class="game">
-            <${rom} ${src?`src="${src}"`:''}></${rom}>
+            <${rom} ${data?`data="${data}"`:''} ${src?`src="${src}"`:''}></${rom}>
           </div>
           <div class="menu-items">
             <button key="options" class="clear" data-press="select">
@@ -811,8 +811,9 @@ $.draw((target) => {
         target.mounted = true
         const rom = target.getAttribute('rom')
         const src = target.getAttribute('src')
+        const data = target.getAttribute('data')
         if(rom) {
-          $.teach({ rom, src })
+          $.teach({ rom, src, data })
         }
 
       }
