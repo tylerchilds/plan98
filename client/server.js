@@ -17,6 +17,23 @@ function safeEnv(key, type='') {
   return Deno.env.get(key) || type
 }
 
+const ALLOWED_ORIGINS = safeEnv('PLAN98_ALLOWED_ORIGINS', '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+function corsHeaders(request) {
+  const origin = request.headers.get('origin') ?? '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) || 
+    (ALLOWED_ORIGINS.includes('localhost') && origin.startsWith('http://localhost'));
+  return allowed ? {
+    'access-control-allow-origin': origin,
+    'vary': 'Origin',
+    'access-control-allow-methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'access-control-allow-headers': 'Content-Type, Authorization',
+  } : {};
+}
+
 const SECRET_KEY = safeEnv('PLAN98_SIGNER', null)
 const signer = SECRET_KEY
   ? await Ed25519Signer.fromJSON(SECRET_KEY)
@@ -110,6 +127,7 @@ async function fileSystem(request) {
     const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
+        ...corsHeaders(request),
         "content-type": "application/json; charset=utf-8"
       },
     });
@@ -148,6 +166,7 @@ async function fileSystem(request) {
 
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
+        ...corsHeaders(request),
         "content-type": "application/json; charset=utf-8"
       },
     });
@@ -163,6 +182,7 @@ async function mp3s(request) {
     const data = await fetch('https://'+world+'/plan98/about').then(res => res.json())
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
+        ...corsHeaders(request),
         "content-type": "application/json; charset=utf-8"
       },
     });
@@ -203,6 +223,7 @@ async function mp3s(request) {
 
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
+        ...corsHeaders(request),
         "content-type": "application/json; charset=utf-8"
       },
     });
@@ -347,7 +368,10 @@ async function startRTMPStream(request) {
   console.log('Started stream:', streamId, 'Active streams:', activeStreams.size);
 
   return new Response(JSON.stringify({ streamId }), {
-    headers: { 'content-type': 'application/json' }
+    headers: {
+      ...corsHeaders(request),
+      'content-type': 'application/json'
+    }
   });
 }
 
@@ -437,6 +461,11 @@ async function stopRTMPStream(request) {
 Deno.serve(
   { hostname: "::", port },
   async (request) => {
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, { status: 204, headers: corsHeaders(request) });
+    }
+
     const url = new URL(request.url);
     let filepath = decodeURIComponent(url.pathname);
 
