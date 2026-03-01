@@ -37,5 +37,5 @@ if(parameters.get('debug') === 'true') {
 }
 
 import('./elves/plan98-icon.js').catch(console.error)
-import('./elves/plan98-synthia.js').catch(console.error)
+//import('./elves/plan98-synthia.js').catch(console.error)
 import('./elves/plan98-console.js').catch(console.error)

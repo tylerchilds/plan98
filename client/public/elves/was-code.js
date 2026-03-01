@@ -106,7 +106,9 @@ function saveFile(src, file, { root }) {
 
 $.draw(target => {
   mount(target)
-  const { src, activeMenu } = $.learn()
+  const { activeMenu } = $.learn()
+  const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
+
   const { file } = sourceFile(target)
   const stack = target.getAttribute('stack')
 
@@ -266,9 +268,10 @@ $.draw(target => {
   afterUpdate: (target) => {
     {
       const data = $.learn()
-      const {file} = data[data.src] || {}
-      if(target.view && file && target.lastSrc !== data.src) {
-        target.lastSrc = data.src
+      const instanceSrc = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
+      const {file} = data[instanceSrc] || {}
+      if(target.view && file && target.lastSrc !== instanceSrc) {
+        target.lastSrc = instanceSrc
         target.view.dispatch({
           changes: { from: 0, to: target.view.state.doc.length, insert: file }
         });

@@ -46,6 +46,7 @@
     "@silly/elf": "/public/elf.js",
     "@silly/saga": "/public/saga.js",
     "@silly/cache": "/public/cache.js",
+    "@plan4/as2": "/public/as2.js",
     "@plan98/types": "/public/types.js",
     "@plan98/elf": "/public/plan98.js",
     "@plan98/app": "/public/plan98.js",

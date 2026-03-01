@@ -6,6 +6,9 @@
 
 import elf from '@silly/elf'
 import saga from "@silly/saga"
+import "@plan4/as2"
+
+export const as2 = globalThis.as2
 
 export const string = 'string'
 export const bool = 'boolean'
@@ -33,6 +36,7 @@ const Types = {
   Box,
   Self,
   Saga,
+  Activities,
   Expect,
   Describe,
   Log,
@@ -102,6 +106,10 @@ export function Saga(x) {
   return saga(Text(x))
 }
 
+export function Activities(x) {
+  return as2.activities(Text(x))
+}
+
 export function Expect(a, b) {
   if(a === b) {
     Success()
@@ -110,7 +118,6 @@ export function Expect(a, b) {
     Failure()
   }
 }
-
 export async function Describe(x, a) {
   try {
     Log(x, await a(Success))

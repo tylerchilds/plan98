@@ -77,7 +77,7 @@ So yeah, that's roughly the origin story.
 I took a screenwriting class and all I got was this lousy text parser.
 
 <was-code
-src: /public/saga.js
+src: /public/as2.js
 
 Well, that's not all I got.
 
@@ -292,3 +292,18 @@ style: height: 50vh;
 Okay, remember when I said I couldn't tell you? I try. It doesn't work.
 
 The time is not right yet. That will make sense... if you're a clown and when you're amongst clowns.
+
+<html-repl
+style: height: 50vh;
+
+So by this point, by transitive property, we should now be able to see pan-saga.
+
+<pan-saga
+src: /public/cdn/sillyz.computer/en-us/on-software-authorship.saga
+
+And from a a manual point of view.
+
+<was-code
+src: /public/elves/hello-as2.js
+
+Which given the right renderers, will produce the desired social platform.

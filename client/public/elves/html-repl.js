@@ -33,7 +33,7 @@ function render(target) {
     <div class="action-bar">
       <button style="float: right; margin-left: 1rem;" data-run class="standard-button">Run</button>
       <button style="float: right;" data-edit class="standard-button -outlined hide-full">Edit</button>
-      <div class="title">HyperScope</div>
+      <div class="title">Elf Tunnel B</div>
     </div>
     <div class="input ${output?'invisible':'visible'}">
       <textarea

@@ -44,6 +44,16 @@ async function vendorUrl(url: string): Promise<string> {
   const diskPath = `./client${localPath}`;
   fetched.set(url, localPath);
 
+  // Skip fetch if already on disk
+  try {
+    await Deno.stat(diskPath);
+    console.log(`  [cached] ${url}`);
+    count++;
+    return localPath;
+  } catch {
+    // Not on disk — fall through to fetch
+  }
+
   try {
     process.stdout?.write?.(`\r  [${count}] ${url.slice(0, 80)}...`) 
     console.log(`  [${count}] ${url}`);
