@@ -393,7 +393,7 @@ $.draw(target => {
     </div>
     <div data-view="account" hidden>
       <button class="view-profile">Profile</button>
-      tbd
+      <secure-persona></secure-persona>
     </div>
   `
 }, {

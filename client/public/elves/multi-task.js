@@ -15,7 +15,7 @@ const initial = {
   trayZ: 3,
   focusedTray: null,
   trays: {},
-  showSettings: false,
+  showSocial: false,
   profile: {
     banner: null
   }
@@ -88,8 +88,7 @@ function render(target) {
   const taskContainer = target.querySelector('.tasks')
   return function runtime(tray) {
     const {
-      suggestions,
-      suggestIndex,
+      showSocial,
       focusedTray
     } = $.learn()
     
@@ -185,7 +184,7 @@ function render(target) {
 
       taskNode.style = ``
 
-      if(focusedTray === tray) {
+      if(!showSocial && focusedTray === tray) {
         taskNode.dataset.focused = true
       } else {
         taskNode.dataset.focused = false
@@ -239,11 +238,12 @@ $.draw((target) => {
     </div>
     <div class="taskbar">
       <div class="left">
+        <button data-start-menu class="taskbar-button"></button>
       </div>
       <div class="center tasks"></div>
       <div class="right">
-        <button data-settings-menu class="to-settings taskbar-button">
-          <sl-icon name="gear-wide-connected"></sl-icon>
+        <button class="to-social taskbar-button">
+          <sl-icon name="people-fill"></sl-icon>
         </button>
       </div>
     </div>
@@ -332,22 +332,10 @@ function afterUpdate(target) {
   }
 
   {
-    const { showSettings } = $.learn()
-    const device = target.querySelector('.settings-menu mobile-device')
+    const { showSocial } = $.learn()
 
-    if(`${showSettings}` !== target.dataset.showSettings) {
-      target.dataset.showSettings = showSettings
-
-      if(device && showSettings) {
-        device.dispatchEvent(new CustomEvent('json-rpc', {
-          detail: {
-            jsonrpc: "2.0",
-            method: 'pushState',
-            params: { showSettings: true, showHome: false, systemPane: null  }
-          }
-        }))
-      }
-
+    if(`${showSocial}` !== target.dataset.showSocial) {
+      target.dataset.showSocial = showSocial
     }
   }
 
@@ -414,16 +402,14 @@ function afterUpdate(target) {
 
 function settingsMenu(target) {
   return `
-    <div class="faux-mobile">
-      <mobile-device id="did:${target.id}" settings="true" src="/app/file-surf?src=/app/paper-pocket&src=/public/cdn/sillyz.computer/en-us/hyper-text.saga&rom=hyper-script"></mobile-device>
-    </div>
+    <dream-team></dream-team>
   `
 }
 
-$.when('click', '.to-settings', toSettings)
+$.when('click', '.to-social', toSocial)
 
-function toSettings() {
-  $.teach({ showSettings: !$.learn().showSettings })
+function toSocial() {
+  $.teach({ showSocial: !$.learn().showSocial })
 }
 
 function toggleMax(event) {
@@ -480,7 +466,7 @@ function closeSystemMenu(event) {
 }
 
 function closeSettingsMenu(event) {
-  $.teach({ showSettings: false })
+  $.teach({ showSocial: false })
 }
 
 function minimize(tray) {
@@ -878,7 +864,7 @@ $.style(`
     background-position: center -50%;
   }
 
-  & .taskbar-button[data-settings-menu] {
+  & .to-social {
     border-radius: 100%;
   }
 
@@ -1342,27 +1328,13 @@ $.style(`
   & .settings-menu {
     position: absolute;
     inset: 0;
-    background: black;
-    overflow: auto;
-    z-index: 2;
-    background:
-      linear-gradient(335deg, var(--root-theme, lightgray), rgba(0,0,0,.15) 20%, rgba(0,0,0,.25)),
-      linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
-      var(--root-theme, lightgray);
-    display: flex;
-    flex-direction: column;
-    padding: .5rem;
-    gap: .5rem;
     z-index: 200;
     display: none;
   }
 
-  &[data-show-settings="true"] .settings-menu {
-    display: grid;
-    place-items: end;
+  &[data-show-social="true"] .settings-menu {
+    display: block;
   }
-
 
   & .faux-mobile {
     max-width: 320px;
@@ -1379,7 +1351,7 @@ $.style(`
 `)
 
 $.when('click', '[data-start-menu]', () => {
-  $.teach({ showStart: !$.learn().showStart, showSettings: false })
+  $.teach({ showStart: !$.learn().showStart, showSocial: false })
 })
 
 $.when('click', '.tray-wake', wake)
@@ -1393,7 +1365,13 @@ function wake (e) {
 
 $.when('click', '.task', focusTray)
 function focusTray (e) {
-  const { trayZ } = $.learn()
+  const { trayZ, showSocial } = $.learn()
+
+  if(showSocial) {
+    $.teach({ showSocial: false })
+    return
+  }
+
   const { tray } = event.target.dataset
 
   const { z, maximized } = $.learn()[tray]
@@ -1583,6 +1561,5 @@ $.when('click', '.tray-min', toggleMin)
 $.when('click', '.tray-max', toggleMax)
 
 $.when('click', '.system-menu', closeSystemMenu)
-$.when('click', '.settings-menu', closeSettingsMenu)
 $.when('click', '.pane-select', selectPane)
 $.when('click', '.app-select', selectApp)
