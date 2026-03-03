@@ -25,7 +25,7 @@ const ALLOWED_ORIGINS = safeEnv('PLAN98_ALLOWED_ORIGINS', '')
 function corsHeaders(request) {
   const origin = request.headers.get('origin') ?? '';
   const allowed = ALLOWED_ORIGINS.includes(origin) || 
-    (ALLOWED_ORIGINS.includes('localhost') && origin.startsWith('http://localhost'));
+    (ALLOWED_ORIGINS.includes('localhost') && origin.startsWith('http://localhost:'));
   return allowed ? {
     'access-control-allow-origin': origin,
     'vary': 'Origin',
@@ -280,11 +280,11 @@ async function startRTMPStream(request) {
   const rtmpUrl = safeEnv('OWNCAST_STREAM_URL', null)
 
   if (!streamKey || !rtmpUrl) {
-    return new Response('Missing streamKey or rtmpUrl', { status: 400 });
+    return new Response('Missing streamKey or rtmpUrl', { status: 400, headers: corsHeaders(request) });
   }
 
   if (passphrase !== PASSPHRASE) {
-    return new Response('incorrect passphrase', { status: 400 });
+    return new Response('incorrect passphrase', { status: 400, headers: corsHeaders(request) });
   }
 
   const streamId = crypto.randomUUID();
@@ -383,7 +383,7 @@ async function sendVideoChunk(request) {
 
   if (!process) {
     console.warn('Stream not found:', streamId);
-    return new Response('Stream not found', { status: 404 });
+    return new Response('Stream not found', { status: 404, headers: corsHeaders(request) });
   }
 
   try {
@@ -422,17 +422,17 @@ async function sendVideoChunk(request) {
     // Wait for this write to complete
     await writeQueue;
 
-    return new Response('OK');
+    return new Response('OK', { headers: corsHeaders(request) });
   } catch (error) {
     console.error('Chunk write error:', error.name, error.message);
 
     if (error.name === 'BrokenPipe' || error.code === 'EPIPE') {
       activeStreams.delete(streamId);
       streamWriteQueues.delete(streamId);
-      return new Response('Stream ended', { status: 410 });
+      return new Response('Stream ended', { status: 410, headers: corsHeaders(request) });
     }
 
-    return new Response(error.message, { status: 500 });
+    return new Response(error.message, { status: 500, headers: corsHeaders(request) });
   }
 }
 
@@ -451,10 +451,10 @@ async function stopRTMPStream(request) {
       streamWriteQueues.delete(streamId); // Clean up queue
     }
 
-    return new Response('OK');
+    return new Response('OK', { headers: corsHeaders(request) } );
   } catch (error) {
     console.error('Stop stream error:', error);
-    return new Response(error.message, { status: 500 });
+    return new Response(error.message, { status: 500, headers: corsHeaders(request) });
   }
 }
 
@@ -485,6 +485,7 @@ Deno.serve(
       const data = await proxy(request)
       return new Response(JSON.stringify(data, null, 2), {
         headers: {
+          ...corsHeaders(request),
           "content-type": "application/json; charset=utf-8"
         },
       });
@@ -532,6 +533,7 @@ Deno.serve(
         </div>
       `), {
         headers: {
+          ...corsHeaders(request),
           'content-type': 'text/html',
         },
         status: 200
@@ -545,6 +547,7 @@ Deno.serve(
       if(file) {
         return new Response(file, {
           headers: {
+            ...corsHeaders(request),
             'content-type': 'text/html',
           },
           status: 200
@@ -563,7 +566,10 @@ Deno.serve(
             JSON.stringify({ error: 'API key required in Authorization header' }),
             {
               status: 401,
-              headers: { 'content-type': 'application/json' }
+              headers: {
+                ...corsHeaders(request),
+                'content-type': 'application/json'
+              }
             }
           );
         }
@@ -584,6 +590,7 @@ Deno.serve(
         if (body.stream) {
           return new Response(response.body, {
             headers: {
+              ...corsHeaders(request),
               'content-type': 'text/event-stream',
               'cache-control': 'no-cache',
               'connection': 'keep-alive'
@@ -595,6 +602,7 @@ Deno.serve(
         const data = await response.json();
         return new Response(JSON.stringify(data), {
           headers: {
+            ...corsHeaders(request),
             'content-type': 'application/json'
           }
         });
@@ -602,6 +610,7 @@ Deno.serve(
         return new Response(
           JSON.stringify({ error: error.message }),
           {
+            ...corsHeaders(request),
             status: 500,
             headers: { 'content-type': 'application/json' }
           }
@@ -611,6 +620,7 @@ Deno.serve(
 
     try {
       const headers = {
+        ...corsHeaders(request),
         'content-type': getContentTypeByPath(filepath)
       }
 
@@ -651,14 +661,20 @@ Deno.serve(
       // Neither disk nor remote had it
       return new Response(cachedDefaultTemplate, {
         status: 404,
-        headers: { 'content-type': 'text/html' }
+        headers: {
+          ...corsHeaders(request),
+          'content-type': 'text/html'
+        }
       });
 
     } catch(e) {
       console.error(e);
       return new Response(cachedDefaultTemplate, {
         status: 404,
-        headers: { 'content-type': 'text/html' }
+        headers: {
+          ...corsHeaders(request),
+          'content-type': 'text/html'
+        }
       });
     }
   },

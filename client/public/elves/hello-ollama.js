@@ -45,7 +45,8 @@ const $ = elf('hello-ollama', {
 function send(message) {
   const { model } = $.learn()
   $.teach({ body: message, author: 'human' }, mergeMessage)
-  const url = "http://localhost:11434/api/generate";
+  const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
+  const url = host + "/api/generate";
   const headers = {
     "Content-Type": "application/json",
   }
