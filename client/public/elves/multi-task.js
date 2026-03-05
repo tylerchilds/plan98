@@ -23,53 +23,38 @@ const initial = {
 
 const $ = elf('multi-task', initial)
 
-function renderGroups(systemPane) {
-  const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
-
-  return `
-    <div class="group-list">
-      ${groups.map((x) => {
-        return `
-          <button class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
-            ${systemMenu[x.key].label}
-          </button>
-        `
-      }).join('')}
-    </div>
-  `
-}
-
-function renderApplications(pane) {
-  return pane ? `
-    <div class="application-list">
-      ${systemMenu[pane].list.filter(x => x.url).map(({ label, url }) => {
-        return `
-          <button class="app-select" data-url="${url}" data-title="${label}">
-            <div class="iconography">
-            </div>
-            <span class="app-label">
-              ${label}
-            </span>
-          </button>
-        `
-      }).join('')}
-    </div>
-  ` : ``
-}
-
 function renderSystemMenu() {
   const {
     systemPane
   } = $.learn()
-
+  const groups = Object.keys(systemMenu).map(key => ({ key, ...systemMenu[key] }))
 
   return `
     <div class="system">
-      <div class="groups">
-        ${renderGroups(systemPane)}
-      </div>
-      <div class="applications">
-        ${renderApplications(systemPane)}
+      <div class="unified-results">
+        ${groups.map((x) => {
+          return `
+            <div class="pane-select ${systemPane === x.key?'active':''}" data-pane="${x.key}">
+              <div>
+                ${systemMenu[x.key].label}
+              </div>
+              <div class="button-group">
+                ${systemMenu[systemPane].list.filter(x => x.url).map(({ label, url }) => {
+                  return `
+                    <button class="app-select" data-url="${url}" data-title="${label}">
+                      <div class="iconography">
+                      </div>
+                      <span class="app-label">
+                        ${label}
+                      </span>
+                    </button>
+                  `
+                }).join('')}
+              </div>
+
+            </div>
+          `
+        }).join('')}
       </div>
     </div>
   `
@@ -324,10 +309,8 @@ function afterUpdate(target) {
 
     if(systemPane && target.lastPane !== systemPane) {
       target.lastPane = systemPane
-      const groups = target.querySelector('.groups')
-      const applications = target.querySelector('.applications')
-      diffHTML.innerHTML(groups, renderGroups(systemPane))
-      diffHTML.innerHTML(applications, renderApplications(systemPane))
+      const sysMen = target.querySelector('.system-menu')
+      diffHTML.innerHTML(sysMen, renderSystemMenu(systemPane))
     }
   }
 
@@ -715,13 +698,13 @@ $.style(`
     overflow: hidden;
     inset: 0;
     z-index: 100;
-    background: rgba(255,255,255,.25);
+    background: rgba(0,0,0,.85);
     backdrop-filter: blur(2px);
   }
 
   &[data-menu="true"] .system-menu {
     display: grid;
-    place-items: end start;
+    place-items: center;
   }
 
   & [data-snap] {
@@ -1238,9 +1221,9 @@ $.style(`
     display: grid;
     grid-template-columns: auto 1fr;
     border: 3px solid var(--root-theme, mediumseagreen);
-    border-left: 0;
-    border-bottom: 0;
-    border-top-right-radius: 1rem;
+    background: rgba(0,0,0,.85);
+    border: 1px rgba(255,255,255,.15);
+    border-radius: 1rem;
     overflow: hidden;
     height: 100%;
     max-height: 80%;
@@ -1248,14 +1231,12 @@ $.style(`
 
   & .groups {
     overflow: hidden;
-    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), var(--root-theme, mediumseagreen);
     padding: .5rem;
     max-height: 100%;
     justify-content: end;
   }
 
   & .pane-select {
-    background: rgba(0,0,0,.25);
     color: rgba(255,255,255,.85);
     border: 0;
     padding: .5rem 1rem;
@@ -1263,9 +1244,12 @@ $.style(`
     border-radius: 1rem;
   }
 
+  & .unified-results {
+    height: 100%;
+    overflow: auto;
+  }
+
   & .pane-select.active {
-    background: linear-gradient(rgba(0,0,0,.55), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
   }
 
   & .group-list,
@@ -1280,8 +1264,6 @@ $.style(`
   & .applications {
     overflow: hidden;
     padding: .5rem;
-    background: rgba(255,255,255,.75);
-    backdrop-filter: blur(10px);
   }
 
   & .iconography {
@@ -1303,7 +1285,7 @@ $.style(`
 
   & .app-label {
     background: rgba(0,0,0,.25);
-    color: rgba(0,0,0,.85);
+    color: rgba(255,255,255,.85);
     border: 0;
     position: relative;
     z-index: 2;
@@ -1312,7 +1294,7 @@ $.style(`
   }
 
   & .app-label {
-    background: linear-gradient(135deg, rgba(0,0,0,.35), rgba(0,0,0,.75)), var(--root-theme, mediumseagreen);
+    background: linear-gradient(135deg, rgba(255,255,255,.55), rgba(255,255,255,.95)), var(--root-theme, mediumseagreen);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }

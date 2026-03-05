@@ -110,6 +110,8 @@ skin(`
     display: block;
     height: 100%;
     overflow: auto;
+    background: white;
+    color: black;
   }
 
   & .activity-log {

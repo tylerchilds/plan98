@@ -11,7 +11,9 @@ const enableFaceRecognition = false;
 const baseURL = plan98.env.VAULT_BASE_URL; // provided on admin panel
 const bayunServerPublicKey = plan98.env.VAULT_PUBLIC_KEY; // provided on admin panel
 
-export const bayunCore = BayunCore.init(
+const requirementsMet = appId && appSecret && appSalt && baseURL && bayunServerPublicKey
+
+export const bayunCore = requirementsMet ? BayunCore.init(
   appId,
   appSecret,
   appSalt,
@@ -19,7 +21,7 @@ export const bayunCore = BayunCore.init(
   baseURL,
   bayunServerPublicKey,
   enableFaceRecognition
-);
+) : null;
 
 const vault = {
   bayunCore

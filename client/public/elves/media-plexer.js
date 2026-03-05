@@ -49,7 +49,7 @@ function codeRenderer(path) {
 
 function sagaRenderer(path) {
   return `
-    <hyper-script src="${path}"></hyper-script>
+    <hello-as2 src="${path}"></hello-as2>
   `
 }
 

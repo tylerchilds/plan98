@@ -7,6 +7,7 @@ const lazy = async resource => {
 }
 
 [
+  '/public/elves/elf-boot.js',
   '/public/elves/saga-repl.js',
   '/public/elves/plan98-camera.js',
   '/public/elves/plan98-gallery.js',
@@ -40,7 +41,6 @@ $.skin(`
     overflow: hidden;
     place-items: center;
     grid-template-areas: 'zone';
-    background: black;
   }
 
   & a {
@@ -100,6 +100,10 @@ $.skin(`
     background: lemonchiffon;
   }
 
+  & .menu > div {
+    margin: 1rem 0;
+  }
+
   & .menu > div > a {
     display: inline-block;
   }
@@ -117,7 +121,6 @@ $.skin(`
     color: rgba(0,0,0,.5);
     display: block;
     margin-bottom: 0.618rem;
-    margin-left: 0.382rem;
   }
 
   & .menu > div > span > em {
@@ -252,11 +255,68 @@ $.view(() => {
     </div>
     <div class="menu">
       <div style="display: grid; height: 200px; text-align: center; place-content: center;">
-        <a href="/app/saga-repl?src=/public/cdn/sillyz.computer/en-us/on-software-authorship.saga">
-          Saga
+        <a href="/app/elf-boot?src=/app/paper-pocket?rom=couch-coop">
+          Virtual Machines
         </a>
         <p style="text-transform: uppercase;">
-          A story with no end in sight
+          Tiny encapsulated E.L.F. sandboxed scripts to secure boot to the <a href="/public/plan98.js">plan98.js runtime</a>
+        </p>
+        <p>
+          Executable and Linkable Format
+        </p>
+        <p>
+          <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em>
+
+          <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em>
+
+          <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em>
+
+          <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em>
+
+          <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em>
+
+          <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em>
+
+          <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em>
+        </p>
+      </div>
+
+      <iframe style="height: 50vh;" src="/app/was-code?src=/public/elves/elf-boot.js"></iframe>
+
+<blockquote>
+## API
+<br>
+<br>
+function Self("custom-tag", optionalInitialState={}): return object:
+<br>
+<br>
+* model(): returns state
+<br>
+* view((target: dom)=>vdom|null): on new state tick, attach view to dom node
+<br>
+* controller(data, merge(s,p)): with data as payload p, merge into state s.
+<br>
+* skin("styles"): a declarative collection of styles for runtime optimization
+<br>
+* when(EventType, "custom-tag", handler((event: Event)=> null)
+<br>
+* link: the current custom tag
+<br>
+<br>
+Mantra: When in doubt, trust thine Self for within thyself lie the elves themselves.
+<br>
+Learn to Draw in Style and When to Teach them!
+<br>
+Head, .., .., .., eyes, ears, mouth, (no nose!), hand, body...
+</blockquote>
+
+      <div>
+        <a href="/app/saga-repl">
+          Saga
+        </a>
+        <span>Practice Senctences and Structure</span>
+        <p>
+          A guise under the act of a ruse
         </p>
       </div>
 
@@ -264,7 +324,7 @@ $.view(() => {
         <a href="/app/plan98-camera">
           Camera
         </a>
-        <span>Your Phone <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em></span>
+        <span>Take Photos and Videos</span>
         <p>
           A simple point and shoot camera and camcorder.
         </p>
@@ -276,7 +336,7 @@ $.view(() => {
         <a href="/app/plan98-gallery">
           Gallery
         </a>
-        <span>My Phone <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em></span>
+        <span>View Your Memories</span>
         <p>
           A personal collection of hyper media
         </p>
@@ -288,7 +348,7 @@ $.view(() => {
         <a href="/app/v-log">
           Studio
         </a>
-        <span>My Bag <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em></span>
+        <span>Broadcast Right Now</span>
         <p>
           A real-time production platform
         </p>
@@ -300,7 +360,7 @@ $.view(() => {
         <a href="/app/shirt-flicks">
           Console
         </a>
-        <span>My Box <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em></span>
+        <span>Sit Back and Relax</span>
         <p>
           A portable home media entertainment system
         </p>
@@ -312,7 +372,7 @@ $.view(() => {
         <a href="/app/ur-shell">
           Shell
         </a>
-        <span>My Mind <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em></span>
+        <span>Go Deep When Needed</span>
         <p>
           A terminal for precision human-computer augmentation
         </p>
@@ -324,7 +384,7 @@ $.view(() => {
         <a href="/app/dream-team?id=newbies">
           Elf Team
         </a>
-        <span>Our Mind <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em></span>
+        <span>Have Real Meetings</span>
         <p>
           A real-time end to end encrypted social chat
         </p>
@@ -336,7 +396,7 @@ $.view(() => {
         <a href="/app/source-code">
           Code
         </a>
-        <span>Our Machines <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em></span>
+        <span>Edit From Within</span>
         <p>
           The source code
         </p>
@@ -351,7 +411,9 @@ $.view(() => {
         <span>About You<em class="${name}">(${(elves[name] || {}).label})</em></span>
       </div>
 
+      <a href="/app/quick-sketch" style="display: block;">
       <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg" alt="an elephant eared elf clown jester slings a sticky scope with silly starting an elemental event." data-tooltip="Formless puppet.">
+      </a>
 
       <div>
         When you're ready, try the

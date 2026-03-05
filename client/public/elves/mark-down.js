@@ -15,8 +15,8 @@ renderer.codespan = (code) => {
 
 // Override code block rendering
 renderer.code = (code, language) => {
-  let decodedCode = decodeHtmlEntities(code); // First decode pass
-  decodedCode = decodeHtmlEntities(decodedCode); // Second decode to fix double encoding
+  const decodedCode = decodeHtmlEntities(code); // First decode pass
+  //decodedCode = decodeHtmlEntities(decodedCode); // Second decode to fix double encoding
 
   const langClass = language ? ` class="language-${language}"` : "";
   return `<pre><code${langClass}>${escapeHyperText(decodedCode)}</code></pre>`;
@@ -24,9 +24,11 @@ renderer.code = (code, language) => {
 
 marked.setOptions({
   renderer,
-  gfm: true,        // Enable GitHub Flavored Markdown
-  breaks: false,    // Keep standard line breaks
-  smartypants: false, // Prevent automatic quote conversions
+  gfm: true,
+  breaks: false,
+  smartypants: false,
+  headerIds: false,
+  mangle: false
 });
 
 
@@ -36,6 +38,7 @@ $.draw((target) => {
   const { view } = $.learn()
   if(target.initialized) return view
   target.initialized = true
+  $.teach({ view: marked(target.innerText) })
 
   const src = target.getAttribute('src')
   if(src) {
@@ -54,7 +57,7 @@ $.draw((target) => {
     })
   }
 
-  return view
+  target.innerHTML = view
 })
 
 function escapeHyperText(text = '') {

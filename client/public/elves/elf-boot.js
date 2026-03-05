@@ -24,7 +24,7 @@ import('@plan98/types')
 
 
 
-      .view(() => `<multi-task
+      .view((target) => `<multi-task
 
 
 
@@ -33,7 +33,25 @@ import('@plan98/types')
 
 
 
-        src="/app/sticky-menu"
+        src="/app/file-surf?${
+
+
+
+
+
+
+
+
+          target.getAttribute('src')?`src=${target.getAttribute('src')}`:''
+
+
+
+
+
+
+
+
+        }"
 
 
 
@@ -60,4 +78,4 @@ import('@plan98/types')
 
 
 
-// steve: art, andy: business, doug: architect, ty: clown
+// quadouble spaced

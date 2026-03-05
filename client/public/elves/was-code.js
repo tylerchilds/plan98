@@ -139,11 +139,11 @@ $.draw(target => {
           <button class="launch" data-src="/app/ur-shell">Shell</button>
           <button class="launch" data-src="/app/plan98-wallet">Wallet</button>
           <button class="launch" data-src="/app/file-surf">Files</button>
-          <button class="launch" data-src="/app/door-man">Desktop</button>
+          <button class="launch" data-src="/app/multi-task">Desktop</button>
           <button class="launch" data-src="/app/mobile-device">Mobile</button>
           <button class="launch" data-src="/app/paper-pocket">Handheld</button>
           <button class="launch" data-src="/app/couch-coop">Console</button>
-          <button class="launch" data-src="/app/shirt-flicks">Shirt</button>
+          <button class="launch" data-src="/app/sticky-menu">Paper</button>
         </div>
       </div>
 
