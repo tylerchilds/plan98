@@ -11,6 +11,106 @@
     < embed actor element
 */
 
+// ---------------------------------------------------------------------------
+// SagaParser — stateful line-by-line parser (internal)
+// ---------------------------------------------------------------------------
+
+function SagaParser() {
+  this.location  = undefined
+  this.character = undefined
+  this.pending   = undefined
+}
+
+SagaParser.prototype.pushLine = function(raw) {
+  var line = raw.trim()
+
+  if (this.pending) {
+    if (!line) return [this._flushPending()]
+    var attrMatch = line.match(/^([\w-]+):\s*(.*)/)
+    if (attrMatch) {
+      var key = attrMatch[1]
+      var val = attrMatch[2].trim()
+      this.pending.attrs.push({ key: key, value: val === '' ? null : val })
+      return []
+    }
+    var flushed = this._flushPending()
+    return [flushed].concat(this.pushLine(raw))
+  }
+
+  if (!line) return []
+
+  var sigil = line[0]
+  var text  = line.slice(1).trim()
+
+  if (sigil === '#') { this.location  = text; return [] }
+  if (sigil === '@') { this.character = text; return [] }
+  if (sigil === '&' || sigil === '!') return []
+
+  if (sigil === '>') {
+    var activity = {
+      type:   'Create',
+      actor:  { name: this.character !== undefined ? this.character : 'Unknown' },
+      object: { type: 'Note', content: text }
+    }
+    if (this.location !== undefined) activity.location = this.location
+    return [activity]
+  }
+
+  if (sigil === '^') {
+    return [{ type: 'Effect', content: text }]
+  }
+
+  if (sigil === '<') {
+    this.pending = { tagName: text, attrs: [] }
+    return []
+  }
+
+  return [{ type: 'Narrate', actor: { type: 'Narrator' }, content: line }]
+}
+
+SagaParser.prototype.flush = function() {
+  return this.pending ? [this._flushPending()] : []
+}
+
+SagaParser.prototype._flushPending = function() {
+  var tagName = this.pending.tagName
+  var attrs   = this.pending.attrs
+  this.pending = undefined
+  var attrStr = ''
+  for (var i = 0; i < attrs.length; i++) {
+    var k = attrs[i].key
+    var v = attrs[i].value
+    attrStr += v === null ? (' ' + k) : (' ' + k + '="' + v + '"')
+  }
+  var content = attrs.length === 0
+    ? '<' + tagName + '>'
+    : '<' + tagName + attrStr + '></' + tagName + '>'
+  return { type: 'Narrate', actor: { type: 'Narrator' }, content: content }
+}
+
+// ---------------------------------------------------------------------------
+// activities() — parses saga text into an array of AS2 JSON activity objects
+// ---------------------------------------------------------------------------
+
+function activities(script) {
+  if (!script) return []
+  var parser = new SagaParser()
+  var result = []
+  var lines  = ('' + script).split('\n')
+  var emitted, i, j
+  for (i = 0; i < lines.length; i++) {
+    emitted = parser.pushLine(lines[i])
+    for (j = 0; j < emitted.length; j++) result.push(emitted[j])
+  }
+  emitted = parser.flush()
+  for (j = 0; j < emitted.length; j++) result.push(emitted[j])
+  return result
+}
+
+// ---------------------------------------------------------------------------
+// as2() — renders saga text to hypertext HTML string
+// ---------------------------------------------------------------------------
+
 function as2(script) {
   if(!script) return ''
   script = '' + script
@@ -101,141 +201,9 @@ function as2(script) {
 }
 
 // ---------------------------------------------------------------------------
-// activities() — parses saga text into an array of AS2 JSON activity objects
-// ---------------------------------------------------------------------------
-function activities(script) {
-  if(!script) return []
-  script = '' + script
-
-  var result = []
-  var location = ''
-  var currentActor = ''
-  var time = 'NORMAL_TIME'
-  var embedName = ''
-  var embedAttrs = {}
-
-  function flushEmbed() {
-    var attrs = ''
-    var keys = Object.keys(embedAttrs)
-    for (var k = 0; k < keys.length; k++) {
-      attrs += ' ' + keys[k] + '="' + embedAttrs[keys[k]] + '"'
-    }
-    var content = '<' + embedName + attrs + '></' + embedName + '>'
-    result.push({
-      type: 'Narrate',
-      actor: { type: 'Narrator' },
-      content: content,
-      location: location || undefined
-    })
-    embedName = ''
-    embedAttrs = {}
-    time = 'NORMAL_TIME'
-  }
-
-  var lines = script.split('\n')
-
-  for (var i = 0; i < lines.length; i++) {
-    var beat = lines[i].trim()
-
-    if (time === 'EMBED_TIME') {
-      if (!beat) {
-        // blank line closes the embed
-        flushEmbed()
-        continue
-      }
-      var sep = beat.indexOf(':')
-      if (sep > -1) {
-        var key = beat.substring(0, sep).trim()
-        var val = beat.substring(sep + 1).trim()
-        if (key) {
-          embedAttrs[key] = val
-          continue
-        }
-      }
-      // non-property line closes the embed and reprocesses this line
-      flushEmbed()
-      // fall through to normal processing below
-    }
-
-    if (!beat) continue
-
-    var rune = beat[0]
-    var text = beat.slice(1).trim()
-
-    switch(rune) {
-      case '#':
-        location = text
-        break
-
-      case '@':
-        currentActor = text.split('&')[0].trim()
-        break
-
-      case '>':
-        if (currentActor) {
-          result.push({
-            type: 'Create',
-            actor: { name: currentActor },
-            object: { type: 'Note', content: text },
-            location: location || undefined
-          })
-        } else {
-          result.push({
-            type: 'Narrate',
-            actor: { type: 'Narrator' },
-            content: text,
-            location: location || undefined
-          })
-        }
-        break
-
-      case '<':
-        embedName = text
-        embedAttrs = {}
-        time = 'EMBED_TIME'
-        break
-
-      case '!':
-        result.push({
-          type: 'Narrate',
-          actor: { type: 'Narrator' },
-          content: text,
-          location: location || undefined
-        })
-        break
-
-      case '^':
-        result.push({
-          type: 'Effect',
-          content: text,
-          location: location || undefined
-        })
-        break
-
-      case '&':
-        break
-
-      default:
-        currentActor = ''
-        result.push({
-          type: 'Narrate',
-          actor: { type: 'Narrator' },
-          content: beat,
-          location: location || undefined
-        })
-        break
-    }
-  }
-
-  // flush any unclosed embed at end of input
-  if (time === 'EMBED_TIME') flushEmbed()
-
-  return result
-}
-
-// ---------------------------------------------------------------------------
 // templates
 // ---------------------------------------------------------------------------
+
 var templates = {
   'thelanding.page': spa,
   'wrapper': wrapper,
@@ -262,12 +230,15 @@ function screenplay(content) {
 // ---------------------------------------------------------------------------
 // exports
 // ---------------------------------------------------------------------------
+
+as2.activities = activities
+
 globalThis.as2 = as2
-globalThis.as2.activities = activities
 
 // ---------------------------------------------------------------------------
 // polyglot stdin runner — only when invoked directly as a script
 // ---------------------------------------------------------------------------
+
 var isQuickJS = typeof scriptArgs !== 'undefined'
 var isDeno    = typeof Deno !== 'undefined'
 var isBun     = typeof Bun !== 'undefined'
