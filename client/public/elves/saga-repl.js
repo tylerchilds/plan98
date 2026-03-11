@@ -1,4 +1,4 @@
-import { Self, Saga } from '@plan98/types'
+import { Self, Saga, Activities } from '@plan98/types'
 
 const data = {
   input: `<title-page
@@ -77,6 +77,12 @@ function pitch(event) {
   self.location.href = `/app/paper-pocket?data=${encodeURIComponent(btoa(input))}&rom=silly-script`
 }
 
+function parade(event) {
+  const { input } = $.learn()
+  console.log({ activities: Activities(input) })
+}
+
+$.when('click', '[data-parade]', parade)
 $.when('click', '[data-print]', print)
 $.when('click', '[data-pitch]', pitch)
 $.when('click', '[data-edit]', () => $.teach({ output: null }))
@@ -87,8 +93,9 @@ function render(target) {
   const { input } = $.learn()
   return `
     <div class="action-bar">
-      <button style="float: right; margin-left: 1rem;" data-print class="standard-button bias-generic">Preview</button>
       <button style="float: right; margin-left: 1rem;" data-pitch class="standard-button bias-positive">Pitch</button>
+      <button style="float: right; margin-left: 1rem;" data-print class="standard-button bias-generic">Preview</button>
+      <button style="float: right; margin-left: 1rem;" data-parade class="standard-button bias-generic">Parade</button>
       <div class="title">Saga</div>
     </div>
     <div class="input">

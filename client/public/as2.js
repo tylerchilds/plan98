@@ -9,10 +9,122 @@
     > quote
     & parenthetical
     < embed actor element
+
+  media keys (inside < blocks, promoted to AS2 attachment):
+    src        - media URL
+    href       - link URL (promotes to Link type)
+    mediaType  - MIME type (image/*, audio/*, video/*, text/html → Link)
+    width      - pixel width
+    height     - pixel height
+    duration   - seconds
+    name       - media label / alt text
 */
 
 // ---------------------------------------------------------------------------
-// SagaParser — stateful line-by-line parser (internal)
+// AS2 defaults
+// ---------------------------------------------------------------------------
+
+function defaultActivity(overrides) {
+  var base = {
+    '@context': 'https://www.w3.org/ns/activitystreams',
+    type:       null,
+    id:         null,
+    published:  null,
+    updated:    null,
+    actor:      null,
+    object:     null,
+    location:   null,
+    target:     null,
+    to:         null,
+    cc:         null,
+    audience:   null,
+  }
+  var keys = Object.keys(overrides)
+  for (var i = 0; i < keys.length; i++) base[keys[i]] = overrides[keys[i]]
+  return base
+}
+
+function defaultActor(overrides) {
+  var base = {
+    type: 'Person',
+    id:   null,
+    name: null,
+    url:  null,
+    icon: null,
+  }
+  var keys = Object.keys(overrides || {})
+  for (var i = 0; i < keys.length; i++) base[keys[i]] = overrides[keys[i]]
+  return base
+}
+
+function defaultObject(overrides) {
+  var base = {
+    type:        'Note',
+    id:          null,
+    content:     null,
+    mediaType:   'text/plain',
+    url:         null,
+    tag:         [],
+    attachment:  [],
+  }
+  var keys = Object.keys(overrides || {})
+  for (var i = 0; i < keys.length; i++) base[keys[i]] = overrides[keys[i]]
+  return base
+}
+
+function defaultLocation(name) {
+  return {
+    type:      'Place',
+    name:      name || null,
+    longitude: null,
+    latitude:  null,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// media helpers
+// ---------------------------------------------------------------------------
+
+// Keys that belong in attachment rather than HTML attributes
+var MEDIA_KEYS = { src: 1, href: 1, mediaType: 1, width: 1, height: 1, duration: 1, name: 1 }
+
+function inferMediaType(mediaType, href) {
+  if (href && !mediaType) return 'Link'
+  if (!mediaType) return null
+  if (mediaType.indexOf('image/') === 0) return 'Image'
+  if (mediaType.indexOf('audio/') === 0) return 'Audio'
+  if (mediaType.indexOf('video/') === 0) return 'Video'
+  if (mediaType === 'text/html') return 'Link'
+  return 'Document'
+}
+
+function buildAttachment(attrs) {
+  // Collect media keys from attrs array
+  var media = {}
+  var hasMedia = false
+  for (var i = 0; i < attrs.length; i++) {
+    if (MEDIA_KEYS[attrs[i].key]) {
+      media[attrs[i].key] = attrs[i].value
+      hasMedia = true
+    }
+  }
+  if (!hasMedia) return null
+
+  var attachType = inferMediaType(media.mediaType, media.href)
+
+  return {
+    type:      attachType || 'Document',
+    mediaType: media.mediaType  || null,
+    url:       media.src || media.href || null,
+    name:      media.name      || null,
+    width:     media.width     ? parseInt(media.width, 10)  : null,
+    height:    media.height    ? parseInt(media.height, 10) : null,
+    duration:  media.duration  ? parseInt(media.duration, 10) : null,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// SagaParser â€" stateful line-by-line parser (internal)
 // ---------------------------------------------------------------------------
 
 function SagaParser() {
@@ -47,17 +159,30 @@ SagaParser.prototype.pushLine = function(raw) {
   if (sigil === '&' || sigil === '!') return []
 
   if (sigil === '>') {
-    var activity = {
+    var attachment = null
+    // inline pending media would come from a prior < block resolved before >
+    // but > itself can't carry attrs; attachment stays null unless set via <
+    var obj = defaultObject({ content: text })
+    var act = defaultActor({
+      name: this.character !== undefined ? this.character : 'Unknown'
+    })
+    var activity = defaultActivity({
       type:   'Create',
-      actor:  { name: this.character !== undefined ? this.character : 'Unknown' },
-      object: { type: 'Note', content: text }
+      actor:  act,
+      object: obj,
+    })
+    if (this.location !== undefined) {
+      activity.location = defaultLocation(this.location)
     }
-    if (this.location !== undefined) activity.location = this.location
     return [activity]
   }
 
   if (sigil === '^') {
-    return [{ type: 'Effect', content: text }]
+    return [defaultActivity({
+      type:   'Effect',
+      actor:  defaultActor({ type: 'Narrator', name: 'Narrator' }),
+      object: defaultObject({ type: 'Note', content: text }),
+    })]
   }
 
   if (sigil === '<') {
@@ -65,7 +190,11 @@ SagaParser.prototype.pushLine = function(raw) {
     return []
   }
 
-  return [{ type: 'Narrate', actor: { type: 'Narrator' }, content: line }]
+  return [defaultActivity({
+    type:   'Narrate',
+    actor:  defaultActor({ type: 'Narrator', name: 'Narrator' }),
+    object: defaultObject({ content: line }),
+  })]
 }
 
 SagaParser.prototype.flush = function() {
@@ -76,20 +205,33 @@ SagaParser.prototype._flushPending = function() {
   var tagName = this.pending.tagName
   var attrs   = this.pending.attrs
   this.pending = undefined
+
+  // Build HTML output (non-media keys only)
   var attrStr = ''
   for (var i = 0; i < attrs.length; i++) {
     var k = attrs[i].key
     var v = attrs[i].value
+    if (MEDIA_KEYS[k]) continue  // skip media keys from HTML attrs
     attrStr += v === null ? (' ' + k) : (' ' + k + '="' + v + '"')
   }
   var content = attrs.length === 0
     ? '<' + tagName + '>'
     : '<' + tagName + attrStr + '></' + tagName + '>'
-  return { type: 'Narrate', actor: { type: 'Narrator' }, content: content }
+
+  // Build attachment if any media keys present
+  var attachment = buildAttachment(attrs)
+  var obj = defaultObject({ type: 'Element', content: content })
+  if (attachment) obj.attachment = [attachment]
+
+  return defaultActivity({
+    type:   'Narrate',
+    actor:  defaultActor({ type: 'Narrator', name: 'Narrator' }),
+    object: obj,
+  })
 }
 
 // ---------------------------------------------------------------------------
-// activities() — parses saga text into an array of AS2 JSON activity objects
+// activities() â€" parses saga text into an array of AS2 JSON activity objects
 // ---------------------------------------------------------------------------
 
 function activities(script) {
@@ -108,7 +250,7 @@ function activities(script) {
 }
 
 // ---------------------------------------------------------------------------
-// as2() — renders saga text to hypertext HTML string
+// as2() â€" renders saga text to hypertext HTML string
 // ---------------------------------------------------------------------------
 
 function as2(script) {
@@ -180,12 +322,33 @@ function as2(script) {
       var properties = actors[actor]
       var innerHTML = ''
       var innerText = ''
+      // Only non-media keys become HTML attributes
       var attributes = Object.keys(properties).map(function(x) {
         if(x === 'html') { innerHTML = properties[x]; return '' }
         if(x === 'text') { innerText = properties[x]; return '' }
+        if(MEDIA_KEYS[x]) return ''  // skip media keys
         return [x, '="', properties[x], '" '].join('')
       }).join('')
-      scene += "<"+actor+" "+attributes+">"+(innerHTML || innerText)+"</"+actor+">"
+      // Media keys: render src as appropriate element inside tag
+      var mediaSrc = properties['src'] || properties['href'] || ''
+      var mediaType = properties['mediaType'] || ''
+      var mediaInner = ''
+      if (mediaSrc) {
+        if (mediaType.indexOf('image/') === 0) {
+          mediaInner = '<img src="'+mediaSrc+'"'
+          if (properties['width'])  mediaInner += ' width="'+properties['width']+'"'
+          if (properties['height']) mediaInner += ' height="'+properties['height']+'"'
+          if (properties['name'])   mediaInner += ' alt="'+properties['name']+'"'
+          mediaInner += '>'
+        } else if (mediaType.indexOf('audio/') === 0) {
+          mediaInner = '<audio src="'+mediaSrc+'" controls></audio>'
+        } else if (mediaType.indexOf('video/') === 0) {
+          mediaInner = '<video src="'+mediaSrc+'" controls></video>'
+        } else if (mediaType === 'text/html' || properties['href']) {
+          mediaInner = '<a href="'+mediaSrc+'">'+(properties['name'] || mediaSrc)+'</a>'
+        }
+      }
+      scene += "<"+actor+" "+attributes+">"+(innerHTML || mediaInner || innerText)+"</"+actor+">"
       time = 'NORMAL_TIME'
       if(value) normalTime(line)
       return
@@ -236,7 +399,7 @@ as2.activities = activities
 globalThis.as2 = as2
 
 // ---------------------------------------------------------------------------
-// polyglot stdin runner — only when invoked directly as a script
+// polyglot stdin runner â€" only when invoked directly as a script
 // ---------------------------------------------------------------------------
 
 var isQuickJS = typeof scriptArgs !== 'undefined'

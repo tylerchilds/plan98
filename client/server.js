@@ -5,11 +5,13 @@ import sortPaths from "https://esm.sh/sort-paths@1.1.1"
 import { DOMParser } from "npm:linkedom@0.18.5";
 import { config } from "https://deno.land/x/dotenv/mod.ts";
 import { typeByExtension } from "https://deno.land/std@0.186.0/media_types/type_by_extension.ts";
-import CryptoJS from 'https://esm.sh/crypto-js@4.2.0';
+import { buildIndex } from './public/elves/build-index.js';
 
 config()
 const PASSPHRASE = safeEnv('PLAN98_PASSPHRASE')
 self.DOMParser = DOMParser
+
+const byPath = (x) => x.path
 
 const port = safeEnv('PLAN98_PORT', 1024)
 
@@ -96,6 +98,7 @@ try {
 }
 
 const cachedDefaultTemplate = template();
+const cachedSagaIndex = await sagaIndex()
 
 function page() {
   const index = template()
@@ -118,7 +121,6 @@ async function showApp(request, tag) {
   return template(body)
 }
 
-const byPath = (x) => x.path
 async function fileSystem(request) {
   const { search } = new URL(request.url);
   const parameters = new URLSearchParams(search)
@@ -159,6 +161,7 @@ async function fileSystem(request) {
 
     const data = {
       plan98: {
+        sagaIndex: cachedSagaIndex,
         type: 'FileSystem',
         children: [kids(paths)]
       }
@@ -174,6 +177,51 @@ async function fileSystem(request) {
   }
 }
 
+async function fileSystemByExtension(ext) {
+  let paths = []
+
+  const currentPath = Deno.cwd()
+  const files = walk(currentPath, {
+    skip: [
+      /\.git/,
+      /\.autosave/,
+      /\.swp/,
+      /\.swo/,
+      /\.env/,
+      /node_modules/,
+      /backup/,
+      /db/
+    ],
+    includeDirs: false
+  })
+
+  for await(const file of files) {
+    const { name } = file
+    const [_, path] = file.path.split(currentPath)
+    if(name.endsWith(ext)) {
+      paths.push({ path, name })
+    }
+  }
+
+  paths = sortPaths([...paths], byPath, '/')
+
+  return {
+    plan98: {
+      type: 'FileSystem',
+      children: [kids(paths)]
+    }
+  }
+}
+
+function sagas(request) {
+  return new Response(JSON.stringify(cachedSagaIndex, null, 2), {
+    headers: {
+      ...corsHeaders(request),
+      "content-type": "application/json; charset=utf-8"
+    },
+  });
+}
+
 async function mp3s(request) {
   const { search } = new URL(request.url);
   const parameters = new URLSearchParams(search)
@@ -187,40 +235,7 @@ async function mp3s(request) {
       },
     });
   } else {
-    let paths = []
-
-    const currentPath = Deno.cwd() + (parameters.get('cwd') || '')
-    const files = walk(currentPath, {
-      skip: [
-        /\.git/,
-        /\.autosave/,
-        /\.swp/,
-        /\.swo/,
-        /\.env/,
-        /node_modules/,
-        /backup/,
-        /db/
-      ],
-      includeDirs: false
-    })
-
-    for await(const file of files) {
-      const { name } = file
-      const [_, path] = file.path.split(currentPath)
-      if(name.endsWith('.mp3')) {
-        paths.push({ path, name })
-      }
-    }
-
-    paths = sortPaths([...paths], byPath, '/')
-
-    const data = {
-      plan98: {
-        type: 'FileSystem',
-        children: [kids(paths)]
-      }
-    }
-
+    const data = await fileSystemByExtension('.mp3')
     return new Response(JSON.stringify(data, null, 2), {
       headers: {
         ...corsHeaders(request),
@@ -481,6 +496,10 @@ Deno.serve(
       return mp3s(request)
     }
 
+    if(filepath === '/plan98/sagas') {
+      return sagas(request)
+    }
+
     if(filepath.startsWith('/proxy/')) {
       const data = await proxy(request)
       return new Response(JSON.stringify(data, null, 2), {
@@ -679,6 +698,13 @@ Deno.serve(
     }
   },
 );
+
+async function sagaIndex() {
+  const { plan98 } = await fileSystemByExtension('.saga')
+  const result = buildIndex(plan98)
+  return result
+  //idx = lunr.Index.load(index)
+}
 
 function template(body) {
   const configObject = {

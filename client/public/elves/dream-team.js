@@ -151,6 +151,7 @@ const views = {
   console: 'console',
   coop: 'coop',
   video: 'video',
+  board: 'board',
   archive: 'archive',
   studio: 'studio',
   brain: 'brain',
@@ -167,6 +168,9 @@ const viewRenderers = {
           <div class="action-bar-left"></div>
           <div class="action-bar-center"></div>
           <div class="action-bar-right">
+            <button class="video-chat-btn" data-launcher="board">
+              <sl-icon name="easel"></sl-icon>
+            </button>
             <button class="video-chat-btn" data-launcher="video">
               <sl-icon name="camera-video"></sl-icon>
             </button>
@@ -561,6 +565,25 @@ const viewRenderers = {
       </div>
     `
   },
+  [views.board]: (target) => {
+    const { currentRoom } = $.model()
+    return `
+      <div class="app-area">
+        <div class="action-bar">
+          <div class="action-bar-left"></div>
+          <div class="action-bar-center"></div>
+          <div class="action-bar-right">
+            <button class="back-button" data-back-to-chat>
+              <sl-icon name="x"></sl-icon>
+            </button>
+          </div>
+        </div>
+
+        <iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
+      </div>
+    `
+  },
+
   [views.video]: (target) => {
     const { currentRoom } = $.model()
     return `

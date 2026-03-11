@@ -4,6 +4,9 @@ import {
 } from '@plan98/types'
 
 const objectRenderers = {
+  'Element': (object, root) => {
+    return object.content
+  },
   'Note': (object, root) => {
     return object.content
   }
@@ -16,10 +19,10 @@ function renderObject(object, root) {
 
 const activityRenderers = {
   'Narrate': (activity, root) => {
-    const { actor, content, location, type } = activity
+    const { actor, object, location, type } = activity
     return `
       <div class="narration" data-location="${location}" data-type="${type}">
-        ${content}
+        ${renderObject(object, root)}
       </div>
     `
   },

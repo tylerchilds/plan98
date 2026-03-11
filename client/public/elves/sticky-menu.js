@@ -1,4 +1,5 @@
 import { Self } from '@plan98/types'
+import { innerHTML } from 'diffhtml'
 import { getCharacter, setCharacter, elves } from './paper-pocket.js'
 
 // miss u kevin, rip
@@ -55,10 +56,11 @@ $.skin(`
     text-decoration: none;
   }
 
-  & div > a:first-child {
+  & div > a:first-of-type {
+    display: inline-block;
     font-size: 2rem;
     line-height: 1;
-    margin: 1rem 0;
+    margin: 2rem 0 1rem;
   }
 
   & a:link,
@@ -104,11 +106,11 @@ $.skin(`
     margin: 1rem 0;
   }
 
-  & .menu > div > a {
+  & .menu div > a {
     display: inline-block;
   }
 
-  & .menu > div > span {
+  & .menu div > span {
     --v-font-wght: 500;
     --v-font-slnt: 0;
     --v-font-crsv: 0;
@@ -123,7 +125,7 @@ $.skin(`
     margin-bottom: 0.618rem;
   }
 
-  & .menu > div > span > em {
+  & .menu div > span > em {
     --v-font-wght: 100;
     --v-font-slnt: -15;
     --v-font-crsv: 0;
@@ -247,41 +249,31 @@ $.when('click', 'a', (event) => {
   saveHistory({ type: historyTypes.navigate, [historyTypes.navigate]: data }, event.target.href)
 })
 
-$.view(() => {
-  const { route, name } = $.model()
+$.view((target) => {
+  if(target.innerHTML) return
   return `
-    <div class="sticky">
-      <iframe src="${route}"></iframe>
+    <div class="sticky" data-dom="iframe">
     </div>
     <div class="menu">
-      <div style="display: grid; height: 200px; text-align: center; place-content: center;">
-        <a href="/app/elf-boot?src=/app/paper-pocket?rom=couch-coop">
-          Virtual Machines
-        </a>
-        <p style="text-transform: uppercase;">
-          Tiny encapsulated E.L.F. sandboxed scripts to secure boot to the <a href="/public/plan98.js">plan98.js runtime</a>
-        </p>
-        <p>
-          Executable and Linkable Format
-        </p>
-        <p>
-          <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em>
+      <div style="max-width: 70ch; margin: 0 auto; ">
+        <div style="display: grid; text-align: center; place-content: center;">
+          <qr-code style="max-width: 180px;" data-fg="dodgerblue" data-bg="transparent" src="/app/multi-task?id=${target.id}&src=/app/sticky-menu"></qr-code>
+          <a href="/app/elf-boot?src=/app/paper-pocket?rom=couch-coop">
+            Virtual Machines
+          </a>
+          <p style="text-transform: uppercase;">
+            Tiny encapsulated E.L.F. sandboxed scripts to secure boot to the <a href="/public/plan98.js">plan98.js runtime</a>
+          </p>
+          <a href="/app/quick-sketch" style="display: block;">
+            <img style="max-width: 320px;" class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg" alt="an elephant eared elf clown jester slings a sticky scope with silly starting an elemental event." data-tooltip="Formless puppet.">
+          </a>
 
-          <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em>
+          <p>
+            Executable and Linkable Format
+          </p>
+        </div>
 
-          <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em>
-
-          <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em>
-
-          <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em>
-
-          <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em>
-
-          <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em>
-        </p>
-      </div>
-
-      <iframe style="height: 50vh;" src="/app/was-code?src=/public/elves/elf-boot.js"></iframe>
+        <iframe style="height: 50vh;" src="/app/was-code?src=/public/elves/elf-boot.js"></iframe>
 
 <blockquote>
 ## API
@@ -303,130 +295,148 @@ function Self("custom-tag", optionalInitialState={}): return object:
 * link: the current custom tag
 <br>
 <br>
-Mantra: When in doubt, trust thine Self for within thyself lie the elves themselves.
-<br>
-Learn to Draw in Style and When to Teach them!
-<br>
-Head, .., .., .., eyes, ears, mouth, (no nose!), hand, body...
+_When in doubt, trust thine Self for within thyself lie the elves themselves._
 </blockquote>
 
-      <div>
-        <a href="/app/saga-repl">
-          Saga
-        </a>
-        <span>Practice Senctences and Structure</span>
+        <div>
+          <a href="/app/saga-repl">
+            Saga
+          </a>
+          <span>Practice Senctences and Structure</span>
+          <p>
+            A guise under the act of a ruse
+          </p>
+        </div>
+        <hr>
+        <div>
+          <a href="/app/plan98-camera">
+            Camera
+          </a>
+          <span>Take Photos and Videos</span>
+          <p>
+            A simple point and shoot camera and camcorder.
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/plan98-gallery">
+            Gallery
+          </a>
+          <span>View Your Memories</span>
+          <p>
+            A personal collection of hyper media
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/v-log">
+            Studio
+          </a>
+          <span>Broadcast Right Now</span>
+          <p>
+            A real-time production platform
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/shirt-flicks">
+            Console
+          </a>
+          <span>Sit Back and Relax</span>
+          <p>
+            A portable home media entertainment system
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/ur-shell">
+            Shell
+          </a>
+          <span>Go Deep When Needed</span>
+          <p>
+            A terminal for precision human-computer augmentation
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/dream-team?id=newbies">
+            Elf Team
+          </a>
+          <span>Have Real Meetings</span>
+          <p>
+            A real-time end to end encrypted social chat
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/source-code">
+            Code
+          </a>
+          <span>Edit From Within</span>
+          <p>
+            The source code
+          </p>
+        </div>
+
+        <hr>
+
+        <div>
+          <a href="/app/paper-pocket?rom=typo-hero">
+            Typo Hero
+          </a>
+          <span>Learn to Type</span>
+          <p>
+            In the most technically efficient way possible
+          </p>
+        </div>
+
+        <hr>
+
+        <div data-dom="flavor-text">
+        </div>
+
         <p>
-          A guise under the act of a ruse
+          <em class="silly" data-tooltip="An autobiography of a mime in training. The War on Clowns or-- why do comics get typecast to frown upon the other mediums.">(Silly)</em>
+          <br>
+
+          <em class="sally" data-tooltip="Sally, here... I'm direct. With rapid reinforcement, we attune in new realities faster.">(Sally)</em>
+
+          <em class="sully" data-tooltip="Good game. I'm competetive. I'm good. I'm proud of it. If you win, you're the best. Good luck.">(Sully)</em>
+
+          <em class="shelly" data-tooltip="If you need something cracked, I'm Shelly. If you need someone resposible, call Sally.">(Shelly)</em>
+          <br>
+
+          <em class="sonny" data-tooltip="Hey. I'm Sonny. I'm new around here. Things always turn out okay with the right team.">(Sonny)</em>
+
+          <em class="wally" data-tooltip="This whole thing is clout-chasing my fault's fault. I'm done time traveling. For good. After that one final show.">(Wally)</em>
+
+          <em class="eon" data-tooltip="What'll I be-- who'll I see-- as one of the ones-- at the moooooovies.">(Eon)</em>
         </p>
+
+        <div>
+          When you're ready, try the
+          <a href="/app/saga-crawler">
+            Quest
+          </a>
+          .
+
+          <a href="/app/was-code?src=/public/elves/sticky-menu.js">
+            (Remix)
+          </a>
+        </div>
       </div>
-
-      <div>
-        <a href="/app/plan98-camera">
-          Camera
-        </a>
-        <span>Take Photos and Videos</span>
-        <p>
-          A simple point and shoot camera and camcorder.
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/plan98-gallery">
-          Gallery
-        </a>
-        <span>View Your Memories</span>
-        <p>
-          A personal collection of hyper media
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/v-log">
-          Studio
-        </a>
-        <span>Broadcast Right Now</span>
-        <p>
-          A real-time production platform
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/shirt-flicks">
-          Console
-        </a>
-        <span>Sit Back and Relax</span>
-        <p>
-          A portable home media entertainment system
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/ur-shell">
-          Shell
-        </a>
-        <span>Go Deep When Needed</span>
-        <p>
-          A terminal for precision human-computer augmentation
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/dream-team?id=newbies">
-          Elf Team
-        </a>
-        <span>Have Real Meetings</span>
-        <p>
-          A real-time end to end encrypted social chat
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <a href="/app/source-code">
-          Code
-        </a>
-        <span>Edit From Within</span>
-        <p>
-          The source code
-        </p>
-      </div>
-
-      <hr>
-
-      <div>
-        <p>
-          ${(elves[name] || {}).description}
-        </p>
-        <span>About You<em class="${name}">(${(elves[name] || {}).label})</em></span>
-      </div>
-
-      <a href="/app/quick-sketch" style="display: block;">
-      <img class="gh057" src="/public/cdn/sillyz.computer/self-portrait.jpeg" alt="an elephant eared elf clown jester slings a sticky scope with silly starting an elemental event." data-tooltip="Formless puppet.">
-      </a>
-
-      <div>
-        When you're ready, try the
-        <a href="/app/saga-crawler">
-          Quest
-        </a>
-        .
-
-        <a href="/app/was-code?src=/public/elves/sticky-menu.js">
-          (Remix)
-        </a>
-      </div>
-
     </div>
   `
 }, {
@@ -444,8 +454,30 @@ Head, .., .., .., eyes, ears, mouth, (no nose!), hand, body...
     }
   },
   afterUpdate(target) {
+    const { route, name } = $.model()
     {
-      //
+      const iframe = target.querySelector('[data-dom="iframe"]')
+      if(iframe && target.route !== route) {
+        target.route = route
+
+        innerHTML(iframe, `
+          <iframe src="${route}"></iframe>
+        `)
+      }
+
+    }
+    {
+      const flavorText = target.querySelector('[data-dom="flavor-text"]')
+      if(flavorText && target.name !== name) {
+        target.name = name
+
+        innerHTML(flavorText, `
+          <p>
+            ${(elves[name] || {}).description}
+          </p>
+          <span>About You<em class="${name}">(${(elves[name] || {}).label})</em></span>
+        `)
+      }
     }
   }
 })

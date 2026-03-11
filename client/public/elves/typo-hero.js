@@ -194,8 +194,45 @@ const $ = elf('typo-hero', {
 
       ]
     },
-  }
 
+    sagas: {
+      label: "Sagas",
+      list: [
+        {
+          label: 'Plan4',
+          url: '/public/sagas/sillyz.computer/plan4.saga'
+        },
+        {
+          label: 'Rejected Juggler Script',
+          url: '/public/sagas/2024-02-24-time.saga'
+        },
+        {
+          label: 'Hello Wally',
+          url: '/public/sagas/sillyz.computer/en-us/index.saga'
+        },
+        {
+          label: 'Handy Dandy',
+          url: '/public/sagas/sillyz.computer/en-us/start.saga'
+        },
+        {
+          label: 'Ethnography',
+          url: '/public/sagas/sillyz.computer/ethnography.saga'
+        },
+        {
+          label: 'Saga Crawler',
+          url: '/public/cdn/sillyz.computer/en-us/saga-crawler.saga'
+        },
+        {
+          label: 'Pitch Deck',
+          url: '/public/sagas/sillyz.computer/en-us/pitch-deck.saga'
+        },
+        {
+          label: 'tychi',
+          url: '/public/sagas/sillyz.computer/en-us/1998.social/tychi.saga'
+        }
+      ]
+    },
+  },
 })
 
 const lightnessStops = [
@@ -455,7 +492,7 @@ $.draw((target) => {
       </div>
       <div class="typing-bar">
         <div class="active-phrase">
-          ${currentLine}
+          ${escapeHyperText(currentLine)}
         </div>
         <div class="character-chord">
           ${drawChord(currentLine[0])}
