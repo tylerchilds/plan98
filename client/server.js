@@ -734,6 +734,7 @@ function template(body) {
     ROWS_N_COLUMNS_LICENSE_KEY: safeEnv('ROWS_N_COLUMNS_LICENSE_KEY'),
     HEAVY_ASSET_CDN_URL: safeEnv('HEAVY_ASSET_CDN_URL'),
     JITSI_MAGIC_COOKIE: safeEnv('JITSI_MAGIC_COOKIE'),
+    OLLAMA_HOST: safeEnv('OLLAMA_HOST'),
   };
 
   const ENVIRONMENT_VARIABLES = Object.entries(configObject)

@@ -20,7 +20,8 @@
 
     "vendor": "deno run -A vendor.ts",
 
-    "start-peer": "cd client && deno run -A server.js",
+    "start-peer": "cd client && deno task start",
+    "deploy-peer": "cd client && deno task deploy",
     "deploy-peer": "cd client && deployctl deploy --no-static --entrypoint=./server.js --prod --exclude=./private --exclude=.env --include=./public --include=./server.js --env-file",
     "debug-peer": "cd client && deno run -A --inspect-brk server.js",
     "reverse-peer": "ssh -N -R 1024:localhost:1024 $USER.plan98.org",
@@ -118,15 +119,5 @@
     "zod": "npm:zod@^3.22.4",
     "zod-to-json-schema": "npm:zod-to-json-schema@^3.22.5"
   },
-  "compilerOptions": {},
-  "deploy": {
-    "project": "b4b54450-dd7a-4a96-8504-02b5471377d7",
-    "exclude": [
-      "./private",
-      "./public",
-      "**/node_modules"
-    ],
-    "include": [],
-    "entrypoint": "client/server.js"
-  }
+  "compilerOptions": {}
 }

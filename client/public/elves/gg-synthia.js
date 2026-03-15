@@ -5,7 +5,7 @@ import { Ollama } from 'ollama/browser'
 const $ = elf('gg-synthia', { synthia: {} })
 import { update } from './ur-shell.js'
 
-const host = plan98.env.OLLAMA_HOST || 'http://localhost:11434'
+const host = plan98.env.OLLAMA_HOST || ''
 export const ollama = new Ollama({
   host,
 })

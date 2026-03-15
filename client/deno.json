@@ -1,0 +1,22 @@
+{
+  "tasks": {
+    "start": "deno run -A server.js",
+    "deploy": "deployctl deploy --no-static --entrypoint=./server.js --prod --env-file"
+  },
+  "deploy": {
+    "project": "b4b54450-dd7a-4a96-8504-02b5471377d7",
+    "include": [
+      "./server.js",
+      "./public"
+    ],
+    "exclude": [
+      ".env",
+      "./private",
+      "**/node_modules"
+    ],
+    "entrypoint": "server.js"
+  },
+  "imports": {
+    "lunr": "https://esm.sh/lunr@2.3.9"
+  }
+}

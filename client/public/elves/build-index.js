@@ -1,4 +1,4 @@
-import lunr from 'lunr'
+import lunr from 'https://esm.sh/lunr@2.3.9'
 
 const Types = {
   File: { type: 'File' },
