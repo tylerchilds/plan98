@@ -1712,3 +1712,41 @@ sillonious-brand > xml-html {
   background: transparent;
   color: transparent;
 }
+
+.classic-button {
+  padding: 4px;
+  background: #ccc;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  border-bottom: 1px solid #555;
+  border-right: 1px solid #555;
+  font-weight: 100;
+  --v-font-mono: 1;
+  --v-font-casl: 0;
+  --v-font-wght: 300;
+  --v-font-slnt: 0;
+  --v-font-crsv: 0;
+  font-size: .9rem;
+  font-variation-settings: "MONO" var(--v-font-mono), "CASL" var(--v-font-casl), "wght" var(--v-font-wght), "slnt" var(--v-font-slnt), "CRSV" var(--v-font-crsv);
+  font-family: "Recursive";
+  color: #222;
+  border-radius: 0;
+  display: inline-grid;
+  place-content: center;
+}
+
+.classic-button:hover,
+.classic-button:focus {
+  background: #eee;
+  color: #111;
+}
+
+.classic-button.active,
+.classic-button:active {
+  background: black;
+  color: white;
+  outline: 2px solid var(--root-theme, mediumseagreen);
+  outline-offset: 2px;
+}
+
+

@@ -33,7 +33,7 @@ import('@plan98/types')
 
 
 
-        src="/app/file-surf?${
+        src="/app/sticky-menu?${
 
 
 

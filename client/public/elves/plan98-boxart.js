@@ -1,6 +1,5 @@
 import elf from '@silly/elf'
 import { toast } from './plan98-toast.js'
-import { launch } from './plan98-synthia.js'
 
 /*
  <blockquote>
@@ -43,25 +42,18 @@ function readyCountdown() {
   }, 1000)
 }
 
-$.when('click', '[data-wallet]', (event) => {
-  launch()
-})
-
 $.draw((target) => {
   countdown(target)
   const title = target.getAttribute('title') || 'Plan98'
-  const subtitle = target.getAttribute('subtitle') || 'REBOOT YOUR SELF'
+  const subtitle = target.getAttribute('subtitle') || 'REBOOT YOUR*ELF'
 
   if(target.innerHTML) return
 
   return `
     <div class="wallet-header">
-      <button data-wallet>
-        <plan98-icon></plan98-icon>
-      </button>
     </div>
     <div style="display: grid; height: 100%; position: relative;">
-      <footer>
+      <footer style="display: none;">
         <div>
           <a href="https://tychi.me">Help</a>
         </div>
@@ -75,7 +67,6 @@ $.draw((target) => {
       <div name="square">
         <section class="layout">
           <div class="horizon">
-            <plan98-icon></plan98-icon>
           </div>
           <div class="land">
             <div class="elements"></div>
@@ -174,7 +165,7 @@ function diffuse(event) {
 }
 
 function start(event) {
-  self.location.href = '/app/saga-crawler'
+  self.top.location.href = '/app/lore-baby'
 }
 
 $.style(`
@@ -188,7 +179,7 @@ $.style(`
 
   &:not([data-started="true"])::before {
     content: '';
-    background-image: linear-gradient(-25deg, rgba(0,0,0,1), rgba(0,0,0,.85));
+    background: lemonchiffon;
     position: absolute;
     inset: 0;
   }

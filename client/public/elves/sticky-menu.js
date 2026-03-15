@@ -256,11 +256,12 @@ $.view((target) => {
     </div>
     <div class="menu">
       <div style="max-width: 70ch; margin: 0 auto; ">
-        <div style="display: grid; text-align: center; place-content: center;">
-          <qr-code style="max-width: 180px;" data-fg="dodgerblue" data-bg="transparent" src="/app/multi-task?id=${target.id}&src=/app/sticky-menu"></qr-code>
-          <a href="/app/elf-boot?src=/app/paper-pocket?rom=couch-coop">
+        <div style="display: grid; text-align: center; place-content: center; gap: 1rem;">
+          <a href="/app/paper-pocket?rom=couch-coop">
             Virtual Machines
           </a>
+          <iframe src="/app/plan98-boxart" style="height: 50vh;"></iframe>
+          <qr-code style="max-width: 180px;" data-fg="dodgerblue" data-bg="transparent" src="/app/multi-task?id=${target.id}"></qr-code>
           <p style="text-transform: uppercase;">
             Tiny encapsulated E.L.F. sandboxed scripts to secure boot to the <a href="/public/plan98.js">plan98.js runtime</a>
           </p>
@@ -443,6 +444,11 @@ _When in doubt, trust thine Self for within thyself lie the elves themselves._
   beforeUpdate(target) {
     const { route } = $.model()
 
+    if(!target.mounted) {
+      target.mounted = true
+      $.controller({ route: target.getAttribute('src') })
+    }
+
     {
       if(target.dataset.route && !route) {
         delete target.dataset.route
@@ -483,7 +489,7 @@ _When in doubt, trust thine Self for within thyself lie the elves themselves._
 })
 
 function saveHistory(patch, url) {
-  self.history.pushState({
+  self.top.history.pushState({
     type: `${$.link}-navigation`,
     patch
   }, "", url);
@@ -507,7 +513,7 @@ function navigateHistory(data) {
   $.controller(data)
 }
 
-addEventListener("popstate", async (event) => {
+self.top.addEventListener("popstate", async (event) => {
   const { type, patch } = event.state || {}
   if(type === `${$.link}-navigation`) {
     restoreHistory(patch)
