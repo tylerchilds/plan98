@@ -458,18 +458,25 @@ document.addEventListener('wheel', (event) => {
 // --- touch scroll (mobile) ---
 
 let touchStartY = 0
+let touchStartX = 0
 let touchStartIndex = null
 
 $.when('touchstart', '.suggestions', event => {
   touchStartY = event.touches[0].clientY
+  touchStartX = event.touches[0].clientX
   touchStartIndex = $.learn().suggestIndex ?? 0
 })
 
 $.when('touchmove', '.suggestions', event => {
-  event.preventDefault()
   const dy = touchStartY - event.touches[0].clientY
-  const { suggestionsLength } = $.learn()
+  const dx = touchStartX - event.touches[0].clientX
 
+  // Only hijack clearly vertical gestures
+  if (Math.abs(dy) < Math.abs(dx)) return
+
+  event.preventDefault()
+
+  const { suggestionsLength } = $.learn()
   const delta = Math.round(dy / 48)
   const next = Math.max(0, Math.min(suggestionsLength - 1, (touchStartIndex ?? 0) + delta))
 
@@ -545,6 +552,8 @@ $.skin(`
     z-index: 500;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
+    overscroll-behavior: contain;
+    max-height: 60vh;
   }
 
   & .suggestions .auto-item {
