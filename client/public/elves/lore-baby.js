@@ -30,6 +30,8 @@ export const documents = [];
 export let idx
 
 const $ = Self('lore-baby', {
+  edit: true,
+  url: null,
   suggestIndex: null,
   suggestions: [],
   search: '/public/cdn/sillyz.computer/en-us/on-software-authorship.saga',
@@ -40,6 +42,7 @@ const $ = Self('lore-baby', {
 
 async function print(event) {
   const { input } = $.learn()
+  $.teach({ edit: true })
   const html = Saga(input)
 
   const existing = document.getElementById('__print_dialog__')
@@ -106,7 +109,6 @@ async function print(event) {
     })
     dialog.style.display = 'none'
     document.body.appendChild(screenplay)
-    // Force completely unconstrained
     screenplay.style.cssText = `
       display: block !important;
       height: auto !important;
@@ -120,14 +122,12 @@ async function print(event) {
   }
 
   const afterPrint = () => {
-    // Restore all hidden body children
     Array.from(document.body.children).forEach(el => {
       if ('printHidden' in el.dataset) {
         el.style.display = el.dataset.printHidden
         delete el.dataset.printHidden
       }
     })
-    // Move screenplay back into dialog
     const screenplay = document.body.querySelector('.screenplay')
     if (screenplay) dialog.insertAdjacentElement('afterbegin', screenplay)
     dialog.style.display = ''
@@ -149,12 +149,14 @@ async function print(event) {
 
 function pitch(event) {
   const { input } = $.learn()
-  $.teach({ search: `/app/paper-pocket?data=${encodeURIComponent(btoa(input))}&rom=silly-script` })
+  const url = `/app/paper-pocket?data=${encodeURIComponent(btoa(input))}&rom=silly-script`
+  $.teach({ edit: false, url })
 }
 
 function parade(event) {
   const { input } = $.learn()
-  console.log({ activities: Activities(input) })
+  const data = encodeURIComponent(btoa(input))
+  $.teach({ edit: false, url: null, data })
 }
 
 function search(event) {
@@ -168,7 +170,6 @@ $.when('click', '[data-parade]', parade)
 $.when('click', '[data-print]', print)
 $.when('click', '[data-pitch]', pitch)
 $.when('click', '[data-search]', search)
-$.when('click', '[data-edit]', () => $.teach({ output: null }))
 
 fetch('/plan98/about').then(res => res.json()).then((data) => {
   p98 = data.plan98
@@ -209,10 +210,10 @@ function render(target) {
 }
 
 function beforeUpdate(target) {
-    const { ready, search } = $.model()
-    if(!ready) {
-      $.controller({ ready: true })
-    }
+  const { ready, search } = $.model()
+  if(!ready) {
+    $.controller({ ready: true })
+  }
 
   {
     const q = target.getAttribute('q')
@@ -234,15 +235,12 @@ function beforeUpdate(target) {
 
 function afterUpdate(target) {
   library(target.querySelector('.library'))
-
-  {
-    display(target)
-  }
+  display(target)
 }
 
 function escapeHyperText(text = '') {
   if(!text) return ''
-  return text.replace(/[&<>'"]/g, 
+  return text.replace(/[&<>'"]/g,
     actor => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -258,10 +256,29 @@ $.when('input', '[data-bind]', (event) => {
 })
 
 function display(target) {
-  const { input } = $.learn()
+  const { edit, url, data, input } = $.learn()
   const irix = target.querySelector('.irix')
-  if(!irix) return
-  if(!input) return
+  if (!irix) return
+  if (!input) return
+
+  if (!edit && url) {
+    if (target.lastUrl !== url) {
+      target.lastUrl = url
+      innerHTML(irix, `<iframe src="${url}" frameborder="0"></iframe>`)
+    }
+    return
+  }
+
+  if (!edit && data) {
+    if (target.lastParade !== data) {
+      target.lastParade = data
+      innerHTML(irix, `<hello-as2 data="${data}"></hello-as2>`)
+    }
+    return
+  }
+
+  target.lastParade = null
+  target.lastUrl = null
   innerHTML(irix, `
     <textarea
       name="input"
@@ -338,7 +355,7 @@ $.when('keydown', 'input[name="search"]', event => {
       fetch(item.path).then(async (res) => {
         $.teach({ input: await res.text() })
       })
-      $.teach({ search: item.path })
+      $.teach({ search: item.path, data: null, edit: true })
       document.activeElement.blur()
       return
     }
@@ -350,7 +367,7 @@ $.when('keydown', 'input[name="search"]', event => {
     fetch(value).then(async (res) => {
       $.teach({ input: await res.text() })
     })
-    $.teach({ search: value })
+    $.teach({ search: value, data: null, edit: true })
   }
 })
 
@@ -361,7 +378,7 @@ $.when('click', '.auto-item', event => {
   fetch(path).then(async (res) => {
     $.teach({ input: await res.text() })
   })
-  $.teach({ showSuggestions: false, suggestIndex: index, search: path })
+  $.teach({ showSuggestions: false, suggestIndex: index, data: null, search: path, edit: true })
 })
 
 $.when('input', 'input[name="search"]', (event) => {
@@ -571,6 +588,17 @@ $.skin(`
     color: rgba(255,255,255,.85);
     font-weight: bold;
     font-size: 1.5rem;
+  }
+
+  & .irix {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  & .irix iframe {
+    border: none;
+    height: 100%;
+    width: 100%;
   }
 
   & .irix textarea {
