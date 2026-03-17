@@ -38,52 +38,113 @@ const $ = Self('lore-baby', {
   suggestionsLength: 0,
 })
 
-
 async function print(event) {
-  const template = await fetch('/').then(async res => {
-    return await res.text()
-  })
   const { input } = $.learn()
   const html = Saga(input)
-  if(event.target.preview) event.target.preview.close()
-  event.target.preview = window.open('', 'PRINT');
-  const { preview } = event.target
 
-  const page = new DOMParser().parseFromString(template, "text/html");
-  page.body.innerHTML = ''
-  page.body.insertAdjacentHTML('beforeend', `
-    <div class="screenplay">
-      ${html}
-    </div>
+  const existing = document.getElementById('__print_dialog__')
+  if (existing) existing.remove()
+
+  const dialog = document.createElement('dialog')
+  dialog.id = '__print_dialog__'
+  dialog.innerHTML = `
+    <div class="screenplay">${html}</div>
     <div class="print-banner">
-      <button class="standard-button bias-positive" onclick="(()=>{window.print();window.close()})()">Print</button>
-      <button class="standard-button bias-generic" onclick="(()=>{window.close()})()">Cancel</button>
+      <button class="standard-button bias-generic" id="__print_cancel__">Cancel</button>
+      <button class="standard-button bias-positive" id="__print_go__">Print</button>
     </div>
-    <style type="text/css">
-      body {overflow: auto; height: auto !important; }
-      xml-html {height: 100%; overflow: auto; }
-      .print-banner {
-        padding: 1rem;
-        text-align: right;
-        color: white;
+    <style>
+      #__print_dialog__ {
         position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        margin: 0;
+        padding: 0;
+        border: none;
+        overflow-y: auto;
+        background: white;
+        z-index: 9000;
+      }
+      #__print_dialog__::backdrop { display: none; }
+      .print-banner {
+        position: fixed;
+        bottom: 0;
         left: 0;
-        top: 0;
         right: 0;
+        padding: .75rem 1rem;
+        display: flex;
+        gap: .5rem;
+        justify-content: flex-end;
         z-index: 9001;
       }
-
+      title-page {
+        display: block;
+        break-after: page;
+        page-break-after: always;
+        height: 9in;
+      }
+      @page { size: letter portrait; margin: 1in; }
       @media print {
-        .print-banner {
-          display: none;
-        }
+        .print-banner { display: none; }
       }
     </style>
-  `)
+  `
 
-  preview.document.write(`<!DOCTYPE html>${page.documentElement.outerHTML}`)
-  preview.document.close(); // necessary for IE >= 10
-  preview.focus(); // necessary for IE >= 10*/
+  document.body.appendChild(dialog)
+  dialog.showModal()
+
+  const beforePrint = () => {
+    const screenplay = dialog.querySelector('.screenplay')
+    Array.from(document.body.children).forEach(el => {
+      if (el !== dialog) {
+        el.dataset.printHidden = el.style.display
+        el.style.display = 'none'
+      }
+    })
+    dialog.style.display = 'none'
+    document.body.appendChild(screenplay)
+    // Force completely unconstrained
+    screenplay.style.cssText = `
+      display: block !important;
+      height: auto !important;
+      max-height: none !important;
+      overflow: visible !important;
+      position: static !important;
+      clip: auto !important;
+      clip-path: none !important;
+    `
+    document.body.style.cssText = 'margin:0;padding:0;background:white;overflow:visible;height:auto;'
+  }
+
+  const afterPrint = () => {
+    // Restore all hidden body children
+    Array.from(document.body.children).forEach(el => {
+      if ('printHidden' in el.dataset) {
+        el.style.display = el.dataset.printHidden
+        delete el.dataset.printHidden
+      }
+    })
+    // Move screenplay back into dialog
+    const screenplay = document.body.querySelector('.screenplay')
+    if (screenplay) dialog.insertAdjacentElement('afterbegin', screenplay)
+    dialog.style.display = ''
+    document.body.style.cssText = ''
+  }
+
+  window.addEventListener('beforeprint', beforePrint)
+  window.addEventListener('afterprint', afterPrint)
+
+  document.getElementById('__print_go__').onclick = () => window.print()
+
+  document.getElementById('__print_cancel__').onclick = () => {
+    window.removeEventListener('beforeprint', beforePrint)
+    window.removeEventListener('afterprint', afterPrint)
+    dialog.close()
+    dialog.remove()
+  }
 }
 
 function pitch(event) {
