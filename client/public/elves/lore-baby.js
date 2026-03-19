@@ -40,6 +40,9 @@ const $ = Self('lore-baby', {
   suggestionsLength: 0,
 })
 
+const ITEM_HEIGHT = 32
+const OVERSCAN = 3
+
 async function print(event) {
   const { input } = $.learn()
   $.teach({ edit: true })
@@ -289,37 +292,106 @@ function display(target) {
   `)
 }
 
+function getVirtualWindow(scrollTop, containerHeight, totalItems) {
+  const visibleStart = Math.floor(scrollTop / ITEM_HEIGHT)
+  const visibleEnd = Math.ceil((scrollTop + containerHeight) / ITEM_HEIGHT)
+  const start = Math.max(0, visibleStart - OVERSCAN)
+  const end = Math.min(totalItems - 1, visibleEnd + OVERSCAN)
+  return { start, end }
+}
+
+function renderVirtualList(container, suggestions, suggestIndex) {
+  const totalItems = suggestions.length
+  const scrollTop = container.scrollTop
+  const containerHeight = container.clientHeight || 300
+
+  const { start, end } = getVirtualWindow(scrollTop, containerHeight, totalItems)
+
+  const paddingTop = start * ITEM_HEIGHT
+  const paddingBottom = Math.max(0, (totalItems - end - 1) * ITEM_HEIGHT)
+
+  const items = suggestions.slice(start, end + 1).map((x, i) => {
+    const globalIndex = start + i
+    const item = documents.find(y => y.path === x.ref)
+    if (!item) return ''
+    return `
+      <button
+        type="button"
+        class="auto-item ${suggestIndex === globalIndex ? 'active' : ''}"
+        data-name="${item.name}"
+        data-path="${item.path}"
+        data-index="${globalIndex}"
+        style="height:${ITEM_HEIGHT}px"
+      >
+        <div class="name">${item.name}</div>
+      </button>
+    `
+  }).join('')
+
+  innerHTML(container, `
+    <div class="virtual-spacer-top" style="height:${paddingTop}px"></div>
+    ${items}
+    <div class="virtual-spacer-bottom" style="height:${paddingBottom}px"></div>
+  `)
+}
+
 function library(target) {
+  if (!target) return
   const { search, suggestions, suggestIndex, showSuggestions } = $.learn()
 
-  const start = Math.max(suggestIndex - 3, 0)
-  const end = Math.min(suggestIndex + 4, suggestions.length - 1)
+  if (!target.libraryInitialized) {
+    target.libraryInitialized = true
+    innerHTML(target, `
+      <div class="search">
+        <input placeholder="Search..." data-bind type="text" value="${escapeHyperText(search || '')}" name="search" autocomplete="off" />
+      </div>
+      <div class="suggestions"></div>
+    `)
 
-  const html = `
-    <div class="search">
-      <input placeholder="Search..." data-bind type="text" value="${escapeHyperText(search || '')}" name="search" autocomplete="off" />
-    </div>
-    <div class="suggestions">
-      ${showSuggestions ? suggestions.slice(start, end).map((x, i) => {
-        const globalIndex = start + i
-        const item = documents.find(y => y.path === x.ref)
+    const suggestionsEl = target.querySelector('.suggestions')
 
-        return `
-          <button type="button" class="auto-item ${suggestIndex === globalIndex ? 'active' : ''}" data-name="${item.name}" data-path="${item.path}" data-index="${globalIndex}">
-            <div class="name">
-              ${item.name}
-            </div>
-          </button>
-        `
-      }).join('') : ''}
-    </div>
-  `
+    suggestionsEl.addEventListener('scroll', () => {
+      const { suggestions, showSuggestions } = $.learn()
+      if (!showSuggestions || !suggestions.length) return
 
-  if(target) {
-    innerHTML(target, html)
+      // Update DOM directly during scroll — bypass state entirely
+      renderVirtualList(suggestionsEl, suggestions, null)
+
+      // Only commit suggestIndex to state once scroll settles
+      clearTimeout(suggestionsEl._scrollSettle)
+      suggestionsEl._scrollSettle = setTimeout(() => {
+        const newIndex = Math.round(suggestionsEl.scrollTop / ITEM_HEIGHT)
+        const clamped = Math.max(0, Math.min(suggestions.length - 1, newIndex))
+        $.teach({ suggestIndex: clamped })
+      }, 150)
+    }, { passive: true })
+  }
+
+  const input = target.querySelector('input[name="search"]')
+  if (input && document.activeElement !== input) {
+    input.value = search || ''
+  }
+
+  const suggestionsEl = target.querySelector('.suggestions')
+  if (!suggestionsEl) return
+
+  if (!showSuggestions || suggestions.length === 0) {
+    innerHTML(suggestionsEl, '')
     return
-  } else {
-    return html
+  }
+
+  renderVirtualList(suggestionsEl, suggestions, suggestIndex)
+
+  // Sync scroll to suggestIndex when driven by keyboard
+  if (suggestIndex !== null) {
+    const itemTop = suggestIndex * ITEM_HEIGHT
+    const itemBottom = itemTop + ITEM_HEIGHT
+    const { scrollTop, clientHeight } = suggestionsEl
+    if (itemTop < scrollTop) {
+      suggestionsEl.scrollTop = itemTop
+    } else if (itemBottom > scrollTop + clientHeight) {
+      suggestionsEl.scrollTop = itemBottom - clientHeight
+    }
   }
 }
 
@@ -402,93 +474,13 @@ $.when('blur', 'input[name="search"]', event => {
   $.teach({ showSuggestions: false })
 })
 
-$.when('mouseenter', '.auto-item', event => {
-  const index = parseInt(event.target.closest('.auto-item')?.dataset.index)
-  if (isNaN(index)) return
-  if (Math.abs(velocity) < 0.5) {
-    $.teach({ suggestIndex: index })
-  }
-})
-
-// --- wheel / momentum scroll ---
-
-let rafId = null
-let velocity = 0
-let accumulated = 0
-const THRESHOLD = 20
-
+// Desktop wheel — scaled down for deliberate feel, snap handles landing
 document.addEventListener('wheel', (event) => {
-  if (!event.target.closest('.suggestions')) return
+  const suggestionsEl = event.target.closest('.suggestions')
+  if (!suggestionsEl) return
   event.preventDefault()
-
-  accumulated += event.deltaY
-  velocity += event.deltaY * 0.1
-
-  if (rafId) cancelAnimationFrame(rafId)
-
-  function tick() {
-    if (Math.abs(velocity) < 0.5) {
-      velocity = 0
-      accumulated = 0
-      return
-    }
-
-    const shouldStep = Math.abs(accumulated) >= THRESHOLD
-
-    if (shouldStep) {
-      const { suggestionsLength } = $.learn()
-      const current = $.learn().suggestIndex ?? 0
-      const next = Math.max(0, Math.min(suggestionsLength - 1, current + Math.sign(velocity)))
-
-      $.teach({ suggestIndex: next })
-
-      const active = document.querySelector('.suggestions .auto-item.active')
-      if (active) active.scrollIntoView({ block: 'nearest', behavior: 'instant' })
-
-      accumulated -= Math.sign(accumulated) * THRESHOLD
-    }
-
-    velocity *= 0.85
-    rafId = requestAnimationFrame(tick)
-  }
-
-  rafId = requestAnimationFrame(tick)
+  suggestionsEl.scrollTop += event.deltaY * 0.3
 }, { passive: false })
-
-// --- touch scroll (mobile) ---
-
-let touchStartY = 0
-let touchStartX = 0
-let touchStartIndex = null
-
-$.when('touchstart', '.suggestions', event => {
-  touchStartY = event.touches[0].clientY
-  touchStartX = event.touches[0].clientX
-  touchStartIndex = $.learn().suggestIndex ?? 0
-})
-
-$.when('touchmove', '.suggestions', event => {
-  const dy = touchStartY - event.touches[0].clientY
-  const dx = touchStartX - event.touches[0].clientX
-
-  // Only hijack clearly vertical gestures
-  if (Math.abs(dy) < Math.abs(dx)) return
-
-  event.preventDefault()
-
-  const { suggestionsLength } = $.learn()
-  const delta = Math.round(dy / 48)
-  const next = Math.max(0, Math.min(suggestionsLength - 1, (touchStartIndex ?? 0) + delta))
-
-  $.teach({ suggestIndex: next })
-
-  const active = document.querySelector('.suggestions .auto-item.active')
-  if (active) active.scrollIntoView({ block: 'nearest', behavior: 'instant' })
-}, { passive: false })
-
-$.when('touchend', '.suggestions', event => {
-  touchStartIndex = $.learn().suggestIndex
-})
 
 $.skin(`
   & {
@@ -524,46 +516,40 @@ $.skin(`
     border: none;
   }
 
-  & .suggestions .auto-item,
-  & .search .auto-item {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5));
-    background-color: var(--button-color, lemonchiffon);
-    border: none;
-    color: white;
-    transition: background-color 200ms ease-in-out;
-    padding: 1rem;
-    display: block;
-  }
-
-  & .search .auto-item:focus,
-  & .search .auto-item:hover {
-    background-image: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.75));
-  }
-
   & .suggestions {
-    display: flex;
-    text-align: left;
+    display: block;
     overflow-y: auto;
     overflow-x: hidden;
-    flex-direction: column;
     position: absolute;
     left: 0;
     right: 0;
     z-index: 500;
+    max-height: 60vh;
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     overscroll-behavior: contain;
-    max-height: 60vh;
+    scroll-snap-type: y mandatory;
+  }
+
+  & .virtual-spacer-top,
+  & .virtual-spacer-bottom {
+    display: block;
+    width: 100%;
   }
 
   & .suggestions .auto-item {
     color: #999;
     background: #000;
+    border: none;
     transition: all 100ms ease-in-out;
-    padding: .5rem;
+    padding: 0 .5rem;
     width: 100%;
     text-align: left;
     max-width: 100%;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
+    scroll-snap-align: start;
   }
 
   & .suggestions .auto-item:focus,
@@ -575,6 +561,12 @@ $.skin(`
   & .suggestions .auto-item.active {
     color: dodgerblue;
     background: lemonchiffon;
+  }
+
+  & .suggestions .auto-item .name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   & [data-suggestion] {
