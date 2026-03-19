@@ -152,7 +152,7 @@ async function print(event) {
 
 function pitch(event) {
   const { input } = $.learn()
-  const url = `/app/paper-pocket?data=${encodeURIComponent(btoa(input))}&rom=silly-script`
+  const url = `/app/saga-pitch?data=${encodeURIComponent(btoa(input))}`
   $.teach({ edit: false, url })
 }
 
@@ -202,9 +202,6 @@ function render(target) {
         </button>
         <button data-print class="classic-button">
           <sl-icon name="printer"></sl-icon>
-        </button>
-        <button data-parade class="classic-button">
-          <sl-icon name="joystick"></sl-icon>
         </button>
       </div>
       <div class="irix"></div>

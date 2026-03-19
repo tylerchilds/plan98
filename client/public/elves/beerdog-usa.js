@@ -4,6 +4,24 @@ import { checkButton, checkAxis } from './debug-gamepads.js'
 import { consoleShow, consoleHide } from './plan98-console.js'
 
 export const products = {
+  rockyou: {
+    title: "We Will Rock You",
+    artist: 'Queen',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/queen-we-will-rock-you/manifest.m3u8',
+    url: '/app/polyglot-elf'
+  },
+
+  champions: {
+    title: "We Are The Champions",
+    artist: 'Queen',
+    description: 'Music Video',
+    keyart: '/public/cdn/boxart.svg',
+    trailer: '/private/beerdogusa.com/queen-we-are-the-champions/manifest.m3u8',
+    url: '/app/polyglot-elf'
+  },
+
   ascension: {
     title: "Ascension When I'm in your arms (DJJW Mashup)",
     artist: 'Cleo Sol v Maxwell',
@@ -119,6 +137,11 @@ const modes = {
 }
 
 const lolol = {
+  '-1': {
+    '0'   : products.rockyou,
+    '1'   : products.champions,
+  },
+
   '0': {
     '0'   : products.sanford,
     '1'   : products.benson,

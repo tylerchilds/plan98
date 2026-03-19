@@ -300,7 +300,7 @@ _When in doubt, trust thine Self for within thyself lie the elves themselves._
 </blockquote>
 
         <div>
-          <a href="/app/saga-repl">
+          <a href="/app/lore-baby">
             Saga
           </a>
           <span>Practice Senctences and Structure</span>

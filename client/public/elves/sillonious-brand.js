@@ -41,7 +41,7 @@ TheLanding.Page is my personal blog
 
 const dns = {
   'sillyz.computer': {
-    elf: 'elf-boot'
+    elf: 'lore-baby'
   },
   'cutestrap.com': {
     elf: 'my-computer'
@@ -68,7 +68,7 @@ const dns = {
     elf: 'time-machine'
   },
   'ncity.executiontime.pub': {
-    elf: 'root-shell'
+    elf: 'elf-boot'
   },
   'beerdogusa.com': {
     elf: 'beerdog-usa'
