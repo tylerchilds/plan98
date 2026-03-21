@@ -126,11 +126,10 @@ const config = plan98.env.PLAN98_REALTIME ?
     port: 9208
   }
 
-export const channel = geckos(config) // default port is 9208
+const channel = geckos(config) // default port is 9208
 
 let peerReady = false
 const subscriptions = []
-const readyElves = new Set()
 
 function connect(subscription) {
   if(peerReady) {
@@ -145,18 +144,19 @@ function processSubscriptionQueue() {
   subscriptions.forEach(x => x())
 }
 
+let isConnected = false
 channel.onConnect(error => {
   if (error) {
     console.error(error.message)
     return
   }
 
+  isConnected = true
   peerReady = true
   processSubscriptionQueue()
 
   channel.on('stateCache', ({ elf, data }) => {
     if(data) {
-      readyElves.add(elf)
       store.set(elf, data, (state, payload) => {
         return {
           ...state,
@@ -176,17 +176,13 @@ channel.onConnect(error => {
 })
 
 function linkState(elf) {
-  channel.emit('linkState', {
-    elf,
-    id: this.id,
-    data: learn(elf)
-  });
-
-  setTimeout(() => {
-    if (!readyElves.has(elf)) {
-      readyElves.add(elf)
-    }
-  }, WAIT_TIMEOUT)
+  if(isConnected) {
+    channel.emit('linkState', {
+      elf,
+      id: this.id,
+      data: learn(elf)
+    });
+  }
 }
 
 function udpDownload(data) {
@@ -334,14 +330,7 @@ function draw(elf, compositor, lifeCycle={}) {
     const draw = update.bind(this, elf, event.target, compositor, lifeCycle)
     reactiveFunctions[elf][event.target.id] = draw
 
-    const waitForCache = () => {
-      if (readyElves.has(elf)) {
-        draw()
-      } else {
-        setTimeout(waitForCache, 10)
-      }
-    }
-    waitForCache()
+    draw()
   })
 }
 
