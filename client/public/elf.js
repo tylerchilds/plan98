@@ -125,10 +125,14 @@ export default function elf(link, initialState = {}) {
     subject: learn.bind(this, link),
     predicate: learn.bind(this, link),
 
+    m: learn.bind(this, link),
+
     // link has a head to keep all his facts straight in the current moment in time
     head: draw.bind(this, link),
     draw: draw.bind(this, link),
     render: draw.bind(this, link),
+
+    v: draw.bind(this, link),
 
     // link has an eye through which to spy reality
     eye: style.bind(this, link),
@@ -137,12 +141,16 @@ export default function elf(link, initialState = {}) {
     skin: style.bind(this, link),
     fashion: style.bind(this, link),
 
+    s: style.bind(this, link),
+
     // link has a hand to move the pieces into place at his command
     hand: when.bind(this, link),
     when: when.bind(this, link),
     on: when.bind(this, link),
     listen: when.bind(this, link),
     wait: when.bind(this, link),
+
+    e: when.bind(this, link),
 
     // link has a mouth that he lets others stuff with their hopes and dreams
     mouth: teach.bind(this, link),
@@ -153,6 +161,8 @@ export default function elf(link, initialState = {}) {
     post: teach.bind(this, link),
     patch: teach.bind(this, link),
     delete: teach.bind(this, link),
+
+    c: teach.bind(this, link),
   }
 }
 
