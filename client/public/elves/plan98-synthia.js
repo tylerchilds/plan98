@@ -1,4 +1,4 @@
-import elf from '@plan98/elf'
+import elf from '@silly/elf'
 import { showModal, isVisible, hideModal } from './plan98-modal.js'
 import { ai, getSearchEngineConfig, afterUpdateTheme } from './paper-pocket.js'
 const $ = elf('plan98-synthia', { synthia: {} })
