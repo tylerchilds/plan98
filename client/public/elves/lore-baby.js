@@ -480,6 +480,38 @@ document.addEventListener('wheel', (event) => {
 }, { passive: false })
 
 $.skin(`
+  @media print {
+    html, body {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    [data-print] {
+      display: none;
+    }
+    #eruda{
+      display: none !important;
+    }
+  }
+
+
+  @page {
+    size: 8.5in 11in;
+    margin: 1in 1in 1in 1.5in;
+  }
+
+  @page {
+    @top-right {
+      content: counter(page) '.';
+    }
+  }
+
+  @page:first {
+    @top-right {
+      content: '';
+    }
+  }
+
   & {
     position: relative;
     width: 100%;
