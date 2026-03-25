@@ -34,7 +34,7 @@ const $ = Self('lore-baby', {
   url: null,
   suggestIndex: null,
   suggestions: [],
-  search: '/public/cdn/sillyz.computer/en-us/on-software-authorship.saga',
+  search: '/public/cdn/sillyz.computer/en-us/elevator-pitch.saga',
   input: saga.input,
   output: saga.output,
   suggestionsLength: 0,

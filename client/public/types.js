@@ -59,7 +59,7 @@ export function Value(x) {
 }
 
 export function Integer(x) {
-  return parseFloat(x)
+  return parseInt(x, 10)
 }
 
 export function Float(x) {

@@ -1,0 +1,58 @@
+<title-page
+title: Elevator Pitch
+author: Tyler Childs
+agent: contact with specialized agent upon request
+contact: ty@plan98.org
+
+# Int. Elevator
+
+An unsuspecting audience encounters an emergency clown
+
+@ Ty
+> Hey, I'm a software engineer and founder
+
+@ Victim
+> What do you do?
+
+@ Ty
+> I make screenplays that break the fourth wall.
+
+Ty pull out his smart phone from his pocket
+
+@ Ty
+> here, watch this video
+
+The video is recursive and shows a clown in an elevator, pitching a video about a clown pitching in an elevator
+
+<cdn-video
+autoplay: true
+src: /private/beerdogusa.com/queen-we-are-the-champions/manifest.m3u8
+
+@ Ty
+> Joking aside, what even is a computer other than a series of programs?
+
+<iframe
+style: background: white
+src: /public/types.js
+
+<was-code
+src: /public/plan98.js
+
+<ur-shell
+
+<lore-baby
+
+<multi-task
+
+<shirt-flicks
+
+<v-log
+
+<paper-pocket
+
+<hail-mary
+
+@ Ty
+> Thanks for playing!
+
+^ Fade out
