@@ -5,19 +5,10 @@ import { getQuickJS } from "quickjs-emscripten"
 const logs = {}
 const store = createStore({}, notify)
 
-let QuickJS = null
-let quickJSReady = null
+const QuickJS = await getQuickJS()
+const WAIT_TIMEOUT = 2500
 
-function getQuickJSInstance() {
-  if (!quickJSReady) {
-    quickJSReady = getQuickJS().then(instance => {
-      QuickJS = instance
-    })
-  }
-  return quickJSReady
-}
-
-async function secureEval(query, variables, options = {}) {
+function secureEval(query, variables, options = {}) {
   const { 
     bypassSecurity=false,
     saneWasher = (x) => x
@@ -47,8 +38,6 @@ async function secureEval(query, variables, options = {}) {
       };
     }
   }
-
-  await getQuickJSInstance()
 
   let res
   const vm = QuickJS.newContext()
@@ -218,11 +207,11 @@ function udpDownload(data) {
 }
 
 
-async function sandbox({ mergeHandler, parameters, bypassSecurity=false }) {
+function sandbox({ mergeHandler, parameters, bypassSecurity=false }) {
   const mergeHandlerStr = mergeHandler.toString();
   const paramsStr = JSON.stringify(parameters);
 
-  const result = await secureEval(`
+  const result = secureEval(`
     // Build a self-contained function with params baked in
     '(' + ${JSON.stringify(mergeHandlerStr)} + ')' +
       '.apply(null, ' + paramStr + ')';
@@ -569,7 +558,7 @@ function createStore(initialState = {}, broadcast = () => null) {
   };
 
   return {
-    set: async function(elf, knowledge, nuance, options={ bypassSecurity: false }) {
+    set: function(elf, knowledge, nuance, options={ bypassSecurity: false }) {
       let mergeStr;
 
       if (typeof nuance === 'function') {
@@ -588,7 +577,7 @@ function createStore(initialState = {}, broadcast = () => null) {
         mergeStr = sandboxed;
       }
 
-      const wisdom = await secureEval(`
+      const wisdom = secureEval(`
         const localState = JSON.parse(stateStr);
         const knowledge = JSON.parse(knowledgeStr);
 
