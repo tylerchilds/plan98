@@ -6,7 +6,6 @@ const logs = {}
 const store = createStore({}, notify)
 
 const QuickJS = await getQuickJS()
-const WAIT_TIMEOUT = 2500
 
 function secureEval(query, variables, options = {}) {
   const { 
@@ -126,7 +125,7 @@ const config = plan98.env.PLAN98_REALTIME ?
     port: 9208
   }
 
-const channel = geckos(config) // default port is 9208
+export const channel = geckos(config) // default port is 9208
 
 let peerReady = false
 const subscriptions = []
