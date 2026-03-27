@@ -17,7 +17,7 @@ const lazy = async resource => {
   '/public/elves/ur-shell.js',
   '/public/elves/dream-team.js',
   '/public/elves/source-code.js'
-].map(lazy).map(console.log)
+].map(lazy)
 
 const $ = Self('sticky-menu', {
   route: null,
