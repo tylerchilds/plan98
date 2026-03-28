@@ -106,7 +106,7 @@ export function getMemberId() {
 
 
 
-const organization = 'sillyz.computer'
+const organization = 'plan98.org'
 
 const baseQandA = {
   question1: 'pass hint 1',
