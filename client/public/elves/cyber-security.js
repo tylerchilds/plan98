@@ -748,7 +748,7 @@ const modes = {
     return `
       <div class="wizard">
         <div>
-          ${persona.bannerURL ? `
+          ${persona && persona.bannerURL ? `
             <button data-pick="bannerURL" class="nothing">
               <was-image class="nothing" src="${persona.bannerURL}"></was-image>
             </button>
@@ -765,7 +765,7 @@ const modes = {
           </span>
         </div>
         <div>
-          ${persona.profileURL ? `
+          ${persona && persona.profileURL ? `
             <button class="nothing" data-pick="profileURL">
               <was-image src="${persona.profileURL}"></was-image>
             </button>
