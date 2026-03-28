@@ -6,11 +6,11 @@ import { ai } from './paper-pocket.js'
 import {
   getSession,
   clearSession,
-  getCompanyName,
-  getEmployeeId
-} from './bayun-wizard.js'
-import { bayunCore, BayunCore } from '@sillonious/vault'
-import './secure-followers.js'
+  getOrgName,
+  getMemberId,
+  bayunCore,
+  BayunCore
+} from './cyber-security.js'
 
 import { Editor } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
@@ -54,7 +54,7 @@ const $ = mvc('dream-team', {
   addMemberEmployee: ''
 })
 
-const getMyId = () => `${getEmployeeId()}@${getCompanyName()}`
+const getMyId = () => `${getMemberId()}@${getOrgName()}`
 
 const join = (state, player) => ({
   ...state,
@@ -873,7 +873,7 @@ function afterUpdate(target) {
       <div class="zero-space">
         <div class="zero-content">
           <div class="zero-title">Phlogin</div>
-          <secure-persona></secure-persona>
+          <cyber-security></cyber-security>
         </div>
       </div>
       <div class="chat-app" style="display: none;">
@@ -1984,7 +1984,7 @@ async function send() {
     const message = {
       id: self.crypto.randomUUID(),
       encrypted: encryptedText,
-      author: getEmployeeId(),
+      author: getMemberId(),
       timestamp: Date.now(),
       room: currentRoom
     }
@@ -2043,7 +2043,7 @@ async function sendReply() {
     const reply = {
       id: self.crypto.randomUUID(),
       encrypted: encryptedText,
-      author: getEmployeeId(),
+      author: getMemberId(),
       timestamp: Date.now(),
       parentId: activeThread,
       room: currentRoom
@@ -2090,7 +2090,7 @@ $.when('gallery-share', 'plan98-gallery', (event) => {
 
 let groupsLoaded = false
 
-$.when('activated', 'secure-persona', (event) => {
+$.when('activated', 'cyber-security', (event) => {
   // User has logged in, trigger a re-render to show the chat interface
   const id = getMyId()
   $.controller({
@@ -2106,7 +2106,7 @@ $.when('activated', 'secure-persona', (event) => {
   }
 })
 
-$.when('deactivated', 'secure-persona', (event) => {
+$.when('deactivated', 'cyber-security', (event) => {
   groupsLoaded = false
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()

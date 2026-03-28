@@ -2386,7 +2386,7 @@ const viewRenderers = {
       </div>
       <identity class="overlay-background" style="overflow: auto;">
         <div class="wizard">
-          <secure-persona></secure-persona>
+          <cyber-security></cyber-security>
         </div>
       </identity>
     `

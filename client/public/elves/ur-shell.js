@@ -4,7 +4,7 @@ import { showModal, hideModal } from '@plan98/modal'
 import $paperPocket, { sideEffects, systemMenu, getTheme, afterUpdateTheme } from './paper-pocket.js'
 import { users } from './plan98-synthia.js'
 import { mpn } from './mpn-wizard.js'
-import { whoami, logout, auth, friends } from './secure-persona.js'
+import { whoami, logout, auth, friends } from './cyber-security.js'
 import { agent } from './agentic-dash.js'
 
 function decodeHtmlEntities(text) {

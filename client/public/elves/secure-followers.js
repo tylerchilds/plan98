@@ -1,15 +1,13 @@
 import elf  from '@plan98/elf'
-import { bayunCore } from '@sillonious/vault'
 import {
+  bayunCore,
   getSession,
   clearSession,
-} from './bayun-wizard.js'
-import {
   addFollow,
   blockFollow,
   persona,
   getPersona
-} from './secure-persona.js'
+} from './cyber-security.js'
 
 const $ = elf('secure-followers', { follower: {moniker: '', organization: 'sillyz.computer' }, followers: [], syncStatus: null })
 
@@ -216,7 +214,12 @@ async function mount(target) {
 }
 
 function query() {
-  $.teach({ loading: false, followers: persona().followers || [] })
+  const { followers } = persona ? (persona()||{}) : {}
+  if(persona()) {
+    $.teach({ loading: false, followers: followers || [] })
+  } else {
+    $.teach({ loading: false, followers: [] })
+  }
 }
 
 $.when('click', '.unfollow', async (event) => {

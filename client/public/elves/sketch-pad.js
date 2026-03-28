@@ -813,7 +813,7 @@ function friends(target) {
           </div>
           <div class="frame-body">
             <div class="wizard">
-              <secure-persona></secure-persona>
+              <cyber-security></cyber-security>
             </div>
           </div>
           <div class="frame-footer">
