@@ -136,7 +136,7 @@ function accept() {
 }
 
 function decline() {
-  window.location.href = '/app/ur-shell'
+  window.location.href = 'https://ncity.executiontime.pub'
 }
 
 $.when('click', '.good-button', accept)
