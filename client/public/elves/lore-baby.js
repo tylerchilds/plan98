@@ -3,9 +3,6 @@ import { innerHTML } from 'diffhtml'
 import lunr from 'lunr'
 import natsort from 'natsort'
 import { vim, Vim } from "@replit/codemirror-vim"
-import { javascript } from "@codemirror/lang-javascript";
-import { html } from "@codemirror/lang-html";
-import { css } from "@codemirror/lang-css";
 
 import { gruvboxDark } from '@uiw/codemirror-theme-gruvbox-dark';
 
@@ -30,31 +27,12 @@ function persist(target, $, _flags) {
 	}
 }
 
-function sourceFile(target) {
-  const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
-  const data = $.model()[src] || {}
-  return data
+function sourceFile() {
+  const data = $.model()
+  return data[data.src] || {}
 }
 
 const saga = {
-  input: `<title-page
-author: Your Name
-title: Telling Your Story
-
-# Ext. Public Space
-
-Some TEXT describing FEATURES in the WILD
-
-@ Character
-& excited
-> Look at this
-
-! Remove this line later
-
-^ Fade to black
-
-...
-`,
   output: null
 }
 
@@ -68,7 +46,6 @@ const $ = Self('lore-baby', {
   suggestIndex: null,
   suggestions: [],
   src: '/public/cdn/sillyz.computer/en-us/elevator-pitch.saga',
-  input: saga.input,
   output: saga.output,
   suggestionsLength: 0,
 })
@@ -77,9 +54,9 @@ const ITEM_HEIGHT = 32
 const OVERSCAN = 3
 
 async function print(event) {
-  const { input } = $.model()
+  const { file } = sourceFile()
   $.controller({ edit: true })
-  const html = Saga(input)
+  const html = Saga(file)
 
   const existing = document.getElementById('__print_dialog__')
   if (existing) existing.remove()
@@ -184,15 +161,27 @@ async function print(event) {
 }
 
 function pitch(event) {
-  const { input } = $.model()
-  const url = `/app/saga-pitch?data=${encodeURIComponent(btoa(input))}`
-  $.controller({ edit: false, url })
+  const { edit } = $.model()
+
+  if(!edit) {
+    $.controller({ edit: true, url: null, data: null })
+  } else {
+    const { file } = sourceFile()
+    const url = `/app/saga-pitch?data=${encodeURIComponent(btoa(file))}`
+    $.controller({ edit: false, url })
+  }
 }
 
 function parade(event) {
-  const { input } = $.model()
-  const data = encodeURIComponent(btoa(input))
-  $.controller({ edit: false, url: null, data })
+  const { edit } = $.model()
+
+  if(!edit) {
+    $.controller({ edit: true, url: null, data: null })
+  } else {
+    const { file } = sourceFile()
+    const data = encodeURIComponent(btoa(file))
+    $.controller({ edit: false, url: null, data })
+  }
 }
 
 function search(event) {
@@ -221,7 +210,7 @@ fetch('/plan98/about').then(res => res.json()).then((data) => {
 
 function render(target) {
   const { ready } = $.model()
-  const { file } = sourceFile(target)
+  const { file } = sourceFile()
 
   if(ready && !target.innerHTML) {
     target.innerHTML = `
@@ -278,9 +267,6 @@ function render(target) {
         basicSetup,
         EditorView.lineWrapping,
         gruvboxDark,
-        javascript(),
-        html(),
-        css(),
         vimKeymap,
         EditorView.updateListener.of(
           persist(target, $, {})
@@ -372,14 +358,16 @@ $.e('input', '[data-bind]', (event) => {
 })
 
 function display(target) {
-  const { edit, url, data, input } = $.model()
+  const { edit, url, data } = $.model()
+  const { file } = sourceFile()
   const irix = target.querySelector('.irix')
   if (!irix) return
-  if (!input) return
+  if (!file) return
 
   if (!edit && url) {
     if (target.lastUrl !== url) {
       target.lastUrl = url
+      target.dataset.mode = 'browser'
       innerHTML(irix, `<iframe src="${url}" frameborder="0"></iframe>`)
     }
     return
@@ -387,12 +375,14 @@ function display(target) {
 
   if (!edit && data) {
     if (target.lastParade !== data) {
+      target.dataset.mode = 'parade'
       target.lastParade = data
       innerHTML(irix, `<hello-as2 data="${data}"></hello-as2>`)
     }
     return
   }
 
+  target.dataset.mode = 'edit'
   target.lastParade = null
   target.lastUrl = null
   innerHTML(irix, '')
@@ -633,6 +623,7 @@ $.skin(`
     position: relative;
     width: 100%;
     max-height: 100%;
+    background: #282828;
     display: grid;
     height: 100%;
     grid-template-rows: auto 1fr;
@@ -723,7 +714,7 @@ $.skin(`
     display: grid;
     gap: 2px;
     grid-template-columns: auto 1fr auto auto auto;
-    background: black;
+    background: rgba(0,0,0,.5);
     color: #8ec07c;
     padding: 2px;
   }
@@ -776,5 +767,22 @@ $.skin(`
 
   & .cm-vim-panel input {
     color: white;
+  }
+
+  & .editor {
+    height: 100%;
+    display: none;
+  }
+
+  & .cm-editor {
+    height: 100%;
+  }
+
+  &[data-mode="edit"] .irix {
+    display: none;
+  }
+
+  &[data-mode="edit"] .editor {
+    display: block;
   }
 `)
