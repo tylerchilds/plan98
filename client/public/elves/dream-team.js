@@ -3176,6 +3176,7 @@ $.skin(`
       var(--root-theme, mediumseagreen);
     height: 100%;
     padding: 1rem 0;
+    overflow: auto;
   }
 
   & .zero-content {

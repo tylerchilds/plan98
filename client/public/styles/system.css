@@ -1591,6 +1591,19 @@ sillonious-brand > xml-html {
   height: auto;
 }
 
+.minimal-button {
+  padding: 4px;
+  font-weight: bold;
+  background: #282828;
+  color: #ebdbb2;
+  border-radius: 0;
+  border: 1px solid #77958a;
+  display: inline-grid;
+  place-content: center;
+}
+
+
+
 .branded-button {
   padding: .5rem 1rem;
   font-weight: bold;

@@ -2,6 +2,39 @@ import { Self, Saga, Activities } from '@plan98/types'
 import { innerHTML } from 'diffhtml'
 import lunr from 'lunr'
 import natsort from 'natsort'
+import { vim, Vim } from "@replit/codemirror-vim"
+import { javascript } from "@codemirror/lang-javascript";
+import { html } from "@codemirror/lang-html";
+import { css } from "@codemirror/lang-css";
+
+import { gruvboxDark } from '@uiw/codemirror-theme-gruvbox-dark';
+
+import { EditorView } from '@codemirror/view'
+import { EditorState } from '@codemirror/state'
+
+import {
+  basicSetup
+} from "codemirror"
+
+function persist(target, $, _flags) {
+	return (update) => {
+    if(update.changes.inserted.length < 0) return
+
+    const srcNode = target.closest('[src]')
+
+    if(srcNode) {
+      const src = srcNode.getAttribute('src')
+      const file = update.view.state.doc.toString()
+      $.controller({ [src]: { file, src }})
+    }
+	}
+}
+
+function sourceFile(target) {
+  const src = target.closest('[src]')?.getAttribute('src') || '/public' + window.location.pathname
+  const data = $.model()[src] || {}
+  return data
+}
 
 const saga = {
   input: `<title-page
@@ -34,7 +67,7 @@ const $ = Self('lore-baby', {
   url: null,
   suggestIndex: null,
   suggestions: [],
-  search: '/public/cdn/sillyz.computer/en-us/elevator-pitch.saga',
+  src: '/public/cdn/sillyz.computer/en-us/elevator-pitch.saga',
   input: saga.input,
   output: saga.output,
   suggestionsLength: 0,
@@ -44,8 +77,8 @@ const ITEM_HEIGHT = 32
 const OVERSCAN = 3
 
 async function print(event) {
-  const { input } = $.learn()
-  $.teach({ edit: true })
+  const { input } = $.model()
+  $.controller({ edit: true })
   const html = Saga(input)
 
   const existing = document.getElementById('__print_dialog__')
@@ -151,28 +184,28 @@ async function print(event) {
 }
 
 function pitch(event) {
-  const { input } = $.learn()
+  const { input } = $.model()
   const url = `/app/saga-pitch?data=${encodeURIComponent(btoa(input))}`
-  $.teach({ edit: false, url })
+  $.controller({ edit: false, url })
 }
 
 function parade(event) {
-  const { input } = $.learn()
+  const { input } = $.model()
   const data = encodeURIComponent(btoa(input))
-  $.teach({ edit: false, url: null, data })
+  $.controller({ edit: false, url: null, data })
 }
 
 function search(event) {
-  $.teach({ search: '' })
+  $.controller({ search: '' })
   query('')
   const root = event.target.closest($.link)
   root.querySelector('input[name="search"]').focus()
 }
 
-$.when('click', '[data-parade]', parade)
-$.when('click', '[data-print]', print)
-$.when('click', '[data-pitch]', pitch)
-$.when('click', '[data-search]', search)
+$.e('click', '[data-parade]', parade)
+$.e('click', '[data-print]', print)
+$.e('click', '[data-pitch]', pitch)
+$.e('click', '[data-search]', search)
 
 fetch('/plan98/about').then(res => res.json()).then((data) => {
   p98 = data.plan98
@@ -187,49 +220,132 @@ fetch('/plan98/about').then(res => res.json()).then((data) => {
 })
 
 function render(target) {
-  const { ready } = $.learn()
+  const { ready } = $.model()
+  const { file } = sourceFile(target)
 
   if(ready && !target.innerHTML) {
-    return `
+    target.innerHTML = `
       <div class="action-bar">
-        <button data-search class="classic-button">
+        <button data-search class="minimal-button">
           <sl-icon name="search"></sl-icon>
         </button>
         <div class="library">
         </div>
-        <button data-pitch class="classic-button">
+        <button data-pitch class="minimal-button">
           <sl-icon name="projector"></sl-icon>
         </button>
-        <button data-print class="classic-button">
+        <button data-print class="minimal-button">
           <sl-icon name="printer"></sl-icon>
         </button>
       </div>
       <div class="irix"></div>
+      <div class="editor"></div>
     `
+
+    const vimKeymap = vim({
+      status: true, // Show Vim status line
+      // Configure Vim to prevent scrolling with special handling
+      // for arrow keys and space in both modes
+      config: {
+        insertModeKeys: {
+          // Map arrow keys in insert mode to prevent scrolling
+          "Up": "goLineUp",
+          "Down": "goLineDown",
+          "Left": "goCharLeft",
+          "Right": "goCharRight" 
+        },
+        normalModeKeys: {
+          // Explicitly map space to do nothing beyond normal Vim behavior
+          "Space": " ",
+          // Map arrow keys in normal mode
+          "Up": "k",
+          "Down": "j",
+          "Left": "h",
+          "Right": "l"
+        }
+      }
+    });
+
+    const preventKeyPropagation = EditorView.domEventHandlers({
+      keydown: (event) => {
+        event.stopPropagation()
+        return false
+      }
+    })
+
+    const config = {
+      extensions: [
+        basicSetup,
+        EditorView.lineWrapping,
+        gruvboxDark,
+        javascript(),
+        html(),
+        css(),
+        vimKeymap,
+        EditorView.updateListener.of(
+          persist(target, $, {})
+        ),
+        preventKeyPropagation
+      ]
+    }
+
+    target.editorState = EditorState.create({
+      ...config,
+      doc: file
+    })
+
+    target.view = new EditorView({
+      parent: target.querySelector('.editor'),
+      state: target.editorState
+    })
+
+    requestIdleCallback(() => {
+      target.view.contentDOM.addEventListener("focus", console.log)
+    })
   }
 }
 
 function beforeUpdate(target) {
-  const { ready, search } = $.model()
+  const { ready, src } = $.model()
   if(!ready) {
     $.controller({ ready: true })
   }
 
   {
     const q = target.getAttribute('q')
-    const src = target.getAttribute('src') || search
+    const url = target.getAttribute('src') || src
     if(!target.initialized) {
       target.initialized = true
       if(q) {
-        const input = decodeURIComponent(q)
-        $.teach({ input })
+        const file = decodeURIComponent(q)
+        $.controller({ src: url, [url]: { file, src: url } })
       }
-      if(src) {
-        fetch(src).then(async (res) => {
-          $.teach({ input: await res.text() })
+      if(url) {
+        fetch(url).then(async blob => {
+          const file = await blob.text()
+          $.controller({ src: url, [url]: { file, src: url }})
+          insert(target, file)
+        }).catch(e => {
+          fetch(path).then(async blob => {
+            const file = await blob.text()
+            $.controller({ src: url, [url]: { file, src: url }})
+            insert(target, file)
+          }).catch(e2 => {
+            console.error(e)
+            console.error(e2)
+          })
         })
+
       }
     }
+  }
+}
+
+function insert(target, file) {
+  if(target.view) {
+    target.view.dispatch({
+      changes: { from: 0, to: target.view.state.doc.length, insert: file }
+    });
   }
 }
 
@@ -251,12 +367,12 @@ function escapeHyperText(text = '') {
   )
 }
 
-$.when('input', '[data-bind]', (event) => {
-  $.teach({[event.target.name]: event.target.value })
+$.e('input', '[data-bind]', (event) => {
+  $.controller({[event.target.name]: event.target.value })
 })
 
 function display(target) {
-  const { edit, url, data, input } = $.learn()
+  const { edit, url, data, input } = $.model()
   const irix = target.querySelector('.irix')
   if (!irix) return
   if (!input) return
@@ -279,14 +395,7 @@ function display(target) {
 
   target.lastParade = null
   target.lastUrl = null
-  innerHTML(irix, `
-    <textarea
-      name="input"
-      data-bind="input"
-      placeholder="Say it, don't spray it."
-      value="${escapeHyperText(input)}"
-    ></textarea>
-  `)
+  innerHTML(irix, '')
 }
 
 function getVirtualWindow(scrollTop, containerHeight, totalItems) {
@@ -334,13 +443,13 @@ function renderVirtualList(container, suggestions, suggestIndex) {
 
 function library(target) {
   if (!target) return
-  const { search, suggestions, suggestIndex, showSuggestions } = $.learn()
+  const { src, suggestions, suggestIndex, showSuggestions } = $.model()
 
   if (!target.libraryInitialized) {
     target.libraryInitialized = true
     innerHTML(target, `
       <div class="search">
-        <input placeholder="Search..." data-bind type="text" value="${escapeHyperText(search || '')}" name="search" autocomplete="off" />
+        <input placeholder="Search..." data-bind type="text" value="${escapeHyperText(src || '')}" name="search" autocomplete="off" />
       </div>
       <div class="suggestions"></div>
     `)
@@ -348,7 +457,7 @@ function library(target) {
     const suggestionsEl = target.querySelector('.suggestions')
 
     suggestionsEl.addEventListener('scroll', () => {
-      const { suggestions, showSuggestions } = $.learn()
+      const { suggestions, showSuggestions } = $.model()
       if (!showSuggestions || !suggestions.length) return
 
       // Update DOM directly during scroll — bypass state entirely
@@ -359,14 +468,14 @@ function library(target) {
       suggestionsEl._scrollSettle = setTimeout(() => {
         const newIndex = Math.round(suggestionsEl.scrollTop / ITEM_HEIGHT)
         const clamped = Math.max(0, Math.min(suggestions.length - 1, newIndex))
-        $.teach({ suggestIndex: clamped })
+        $.controller({ suggestIndex: clamped })
       }, 150)
     }, { passive: true })
   }
 
   const input = target.querySelector('input[name="search"]')
   if (input && document.activeElement !== input) {
-    input.value = search || ''
+    input.value = src || ''
   }
 
   const suggestionsEl = target.querySelector('.suggestions')
@@ -396,14 +505,15 @@ const down = 40;
 const up = 38;
 const enter = 13;
 
-$.when('keydown', 'input[name="search"]', event => {
-  const { suggestionsLength, suggestIndex } = $.learn()
+$.e('keydown', 'input[name="search"]', event => {
+  const root = event.target.closest($.link)
+  const { suggestionsLength, suggestIndex } = $.model()
 
   if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
     if(nextIndex >= suggestionsLength - 1) return
-    $.teach({ suggestIndex: nextIndex })
+    $.controller({ suggestIndex: nextIndex })
     return
   }
 
@@ -411,20 +521,22 @@ $.when('keydown', 'input[name="search"]', event => {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? suggestionsLength - 2 : suggestIndex - 1
     if(nextIndex < 0) return
-    $.teach({ suggestIndex: nextIndex })
+    $.controller({ suggestIndex: nextIndex })
     return
   }
 
   if(event.keyCode === enter && suggestIndex !== null) {
     event.preventDefault()
-    const { suggestions, suggestIndex } = $.learn()
+    const { suggestions, suggestIndex } = $.model()
     const item = documents.find(y => suggestions[suggestIndex].ref === y.path)
 
     if(item) {
       fetch(item.path).then(async (res) => {
-        $.teach({ input: await res.text() })
+        const file = await res.text()
+        $.controller({ src: item.path, [item.path]: { file, src: item.path }})
+        insert(root, file)
       })
-      $.teach({ search: item.path, data: null, edit: true })
+      $.controller({ src: item.path, data: null, edit: true })
       document.activeElement.blur()
       return
     }
@@ -434,23 +546,28 @@ $.when('keydown', 'input[name="search"]', event => {
     const { value } = event.target
     self.history.pushState({ type: `${$.link}-navigation`, path: value }, "")
     fetch(value).then(async (res) => {
-      $.teach({ input: await res.text() })
+      const file = await res.text()
+      $.controller({ src: value, [value]: { file, src: value }})
+      insert(root, file)
     })
-    $.teach({ search: value, data: null, edit: true })
+    $.controller({ src: value, data: null, edit: true })
   }
 })
 
-$.when('click', '.auto-item', event => {
+$.e('click', '.auto-item', event => {
   event.preventDefault()
+  const root = event.target.closest($.link)
   const { path } = event.target.dataset
   const index = parseInt(event.target.closest('.auto-item').dataset.index)
   fetch(path).then(async (res) => {
-    $.teach({ input: await res.text() })
+    const file = await res.text()
+    $.controller({ src: path, [path]: { file, src: path }})
+    insert(root, file)
   })
-  $.teach({ showSuggestions: false, suggestIndex: index, data: null, search: path, edit: true })
+  $.controller({ showSuggestions: false, suggestIndex: index, data: null, src: path, edit: true })
 })
 
-$.when('input', 'input[name="search"]', (event) => {
+$.e('input', 'input[name="search"]', (event) => {
   const { value } = event.target
   query(value)
 })
@@ -458,17 +575,17 @@ $.when('input', 'input[name="search"]', (event) => {
 function query(value) {
   const sort = natsort()
   const suggestions = idx.search(value).sort((a, b) => sort(a.ref, b.ref))
-  $.teach({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length })
+  $.controller({ suggestions, suggestIndex: null, suggestionsLength: suggestions.length })
 }
 
-$.when('focus', 'input[name="search"]', event => {
-  $.teach({ showSuggestions: true })
+$.e('focus', 'input[name="search"]', event => {
+  $.controller({ showSuggestions: true })
 })
 
-$.when('blur', 'input[name="search"]', event => {
+$.e('blur', 'input[name="search"]', event => {
   const next = event.relatedTarget
   if (next && next.closest('.suggestions')) return
-  $.teach({ showSuggestions: false })
+  $.controller({ showSuggestions: false })
 })
 
 // Desktop wheel — scaled down for deliberate feel, snap handles landing
@@ -532,7 +649,7 @@ $.skin(`
   }
 
   & .search input {
-    color: #222;
+    color: #ebb22e;
     display: block;
     margin: auto;
     text-align: left;
@@ -606,11 +723,12 @@ $.skin(`
     display: grid;
     gap: 2px;
     grid-template-columns: auto 1fr auto auto auto;
-    background: #ccc;
+    background: black;
+    color: #8ec07c;
     padding: 2px;
   }
 
-  & .action-bar .classic-button {
+  & .action-bar .minimal-button {
     aspect-ratio: 1;
   }
 
@@ -656,4 +774,7 @@ $.skin(`
     display: none;
   }
 
+  & .cm-vim-panel input {
+    color: white;
+  }
 `)

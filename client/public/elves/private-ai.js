@@ -46,8 +46,6 @@ const { m, v, c, e, s } = MVCES(elf, {
   })
 })()
 
-// ─── View ─────────────────────────────────────────────────────────────────────
-
 v(() => {
   const { models, modelId, url, key, ready, error, draft, messages, streaming, thinking } = m()
 
@@ -141,8 +139,6 @@ v(() => {
   `
 })
 
-// ─── Model loading ────────────────────────────────────────────────────────────
-
 async function loadModels() {
   const { url, key } = m()
 
@@ -161,8 +157,6 @@ async function loadModels() {
   const modelId = models[0]?.id || ''
   c({ models, modelId })
 }
-
-// ─── Internal chat / streaming (for the UI) ───────────────────────────────────
 
 async function sendMessage(userContent) {
   const { url, key, modelId, messages } = m()
@@ -282,8 +276,6 @@ function scrollToBottom() {
   if (feed) feed.scrollTop = feed.scrollHeight
 }
 
-// ─── Events ───────────────────────────────────────────────────────────────────
-
 e('submit', 'form[name="connect"]', event => {
   event.preventDefault()
   const { url, key } = m()
@@ -322,8 +314,6 @@ e('click', '[name="clear"]', event => {
   c({ messages: [], error: '', thinking: '' })
 })
 
-// ─── Cache fix: always write both url+key together ────────────────────────────
-
 e('input', '[data-store="creds"]', event => {
   const { name, value } = event.target
 
@@ -335,15 +325,11 @@ e('input', '[data-store="creds"]', event => {
   cache.put('creds', { url, key })
 })
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 function escapeHyperText(text = '') {
   return String(text).replace(/[&<>'"]/g, ch => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
   }[ch]))
 }
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 s(`
   & {
@@ -499,8 +485,6 @@ s(`
     opacity: .6;
   }
 `)
-
-// ─── Agentic platform adapter ─────────────────────────────────────────────────
 
 export const starLordButta = {
   async chat({ model, messages, stream = true, apiKey, ...rest }) {
