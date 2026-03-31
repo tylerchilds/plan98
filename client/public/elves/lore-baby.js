@@ -13,6 +13,8 @@ import {
   basicSetup
 } from "codemirror"
 
+import { sagaSyntaxHighlighter, sagaTheme } from './saga-highlighter.js'
+
 function persist(target, $, _flags) {
 	return (update) => {
     if(update.changes.inserted.length < 0) return
@@ -185,8 +187,7 @@ function parade(event) {
 }
 
 function search(event) {
-  $.controller({ search: '' })
-  query('')
+  $.controller({ search: '', suggestions: [], suggestIndex: null, showSuggestions: true })
   const root = event.target.closest($.link)
   root.querySelector('input[name="search"]').focus()
 }
@@ -268,6 +269,8 @@ function render(target) {
         EditorView.lineWrapping,
         gruvboxDark,
         vimKeymap,
+        sagaSyntaxHighlighter,
+        sagaTheme,
         EditorView.updateListener.of(
           persist(target, $, {})
         ),
@@ -473,6 +476,7 @@ function library(target) {
 
   if (!showSuggestions || suggestions.length === 0) {
     innerHTML(suggestionsEl, '')
+    suggestionsEl.scrollTop = 0   // ← reset so next open starts clean
     return
   }
 
@@ -502,7 +506,7 @@ $.e('keydown', 'input[name="search"]', event => {
   if(event.keyCode === down) {
     event.preventDefault()
     const nextIndex = (suggestIndex === null) ? 0 : suggestIndex + 1
-    if(nextIndex >= suggestionsLength - 1) return
+    if(nextIndex >= suggestionsLength) return
     $.controller({ suggestIndex: nextIndex })
     return
   }
@@ -569,7 +573,7 @@ function query(value) {
 }
 
 $.e('focus', 'input[name="search"]', event => {
-  $.controller({ showSuggestions: true })
+  $.controller({ showSuggestions: true, suggestIndex: null })
 })
 
 $.e('blur', 'input[name="search"]', event => {
@@ -640,7 +644,7 @@ $.skin(`
   }
 
   & .search input {
-    color: #ebb22e;
+    color: #d79921;          /* neutral_yellow, was #ebb22e */
     display: block;
     margin: auto;
     text-align: left;
@@ -675,8 +679,8 @@ $.skin(`
   }
 
   & .suggestions .auto-item {
-    color: #999;
-    background: #000;
+    color: #a89984;          /* light4 */
+    background: #3c3836;     /* bg1 */
     border: none;
     transition: all 100ms ease-in-out;
     padding: 0 .5rem;
@@ -691,13 +695,13 @@ $.skin(`
 
   & .suggestions .auto-item:focus,
   & .suggestions .auto-item:hover {
-    color: #fff;
-    background: #555;
+    color: #ebdbb2;          /* fg */
+    background: #504945;     /* bg2 */
   }
 
   & .suggestions .auto-item.active {
-    color: dodgerblue;
-    background: lemonchiffon;
+    color: #fbf1c7;          /* fg0 */
+    background: #665c54;     /* bg3 */
   }
 
   & .suggestions .auto-item .name {
@@ -771,6 +775,7 @@ $.skin(`
 
   & .editor {
     height: 100%;
+    overflow: auto;
     display: none;
   }
 
