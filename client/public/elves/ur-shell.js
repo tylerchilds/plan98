@@ -246,6 +246,14 @@ const commands = {
     window.location.href = "steam://rungameid/413150"
     return 'Have fun, babe.'
   },
+  'gravity': (...args) => {
+    if(args[0] === 'matters') {
+      window.location.href = "steam://rungameid/3359450"
+      return 'Powered by Nixiesoft.'
+    }
+
+    return 'does not matter'
+  },
   'ide': () => {
     loadPath('/app/plan98-ide')
     return 'Success!'
