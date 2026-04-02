@@ -5,7 +5,20 @@ import { getQuickJS } from "quickjs-emscripten"
 const logs = {}
 const store = createStore({}, notify)
 
-const QuickJS = await getQuickJS()
+let QuickJS = null;
+const queue = [];
+
+getQuickJS().then(instance => {
+  QuickJS = instance;
+  queue.forEach(fn => fn());
+  queue.length = 0;
+
+  try {
+    watch()
+  } catch(e) {
+    setTimeout(watch,1000)
+  }
+});
 
 function secureEval(query, variables, options = {}) {
   const { 
@@ -376,6 +389,12 @@ export default function Self(elf, initialState = {}) {
   teach(elf, initialState)
 
   return {
+    m: learn.bind(this, elf),
+    v: draw.bind(this, elf),
+    c: teach.bind(this, elf),
+    e: when.bind(this, elf),
+    s: style.bind(this, elf),
+
     // link is a human that is permitted to be an elf per order of the deku tree
     link: elf,
     elf: elf,
@@ -472,6 +491,10 @@ export function listen(type, elf, handler = () => null) {
 let elves = []
 
 function observe(elf) {
+  if (!QuickJS) {
+    queue.push(() => observe(elf));
+    return;
+  }
   elves = [...new Set([...elves, elf])];
   maybeCreateReactive([...document.querySelectorAll(elf)])
 }
@@ -545,12 +568,6 @@ function modules({ registry }) {
   })
 }
 
-try {
-  watch()
-} catch(e) {
-  setTimeout(watch,1000)
-}
-
 function createStore(initialState = {}, broadcast = () => null) {
   let state = {
     ...initialState
@@ -558,6 +575,11 @@ function createStore(initialState = {}, broadcast = () => null) {
 
   return {
     set: function(elf, knowledge, nuance, options={ bypassSecurity: false }) {
+      if (!QuickJS) {
+        queue.push(() => this.set(elf, knowledge, nuance, options));
+        return;
+      }
+
       let mergeStr;
 
       if (typeof nuance === 'function') {

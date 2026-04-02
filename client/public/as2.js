@@ -13,7 +13,7 @@
   media keys (inside < blocks, promoted to AS2 attachment):
     src        - media URL
     href       - link URL (promotes to Link type)
-    mediaType  - MIME type (image/*, audio/*, video/*, text/html → Link)
+    mediaType  - MIME type (image/*, audio/*, video/*, text/html -> Link)
     width      - pixel width
     height     - pixel height
     duration   - seconds
@@ -99,7 +99,6 @@ function inferMediaType(mediaType, href) {
 }
 
 function buildAttachment(attrs) {
-  // Collect media keys from attrs array
   var media = {}
   var hasMedia = false
   for (var i = 0; i < attrs.length; i++) {
@@ -124,7 +123,7 @@ function buildAttachment(attrs) {
 }
 
 // ---------------------------------------------------------------------------
-// SagaParser â€" stateful line-by-line parser (internal)
+// SagaParser - stateful line-by-line parser (internal)
 // ---------------------------------------------------------------------------
 
 function SagaParser() {
@@ -159,9 +158,6 @@ SagaParser.prototype.pushLine = function(raw) {
   if (sigil === '&' || sigil === '!') return []
 
   if (sigil === '>') {
-    var attachment = null
-    // inline pending media would come from a prior < block resolved before >
-    // but > itself can't carry attrs; attachment stays null unless set via <
     var obj = defaultObject({ content: text })
     var act = defaultActor({
       name: this.character !== undefined ? this.character : 'Unknown'
@@ -204,23 +200,25 @@ SagaParser.prototype.flush = function() {
 SagaParser.prototype._flushPending = function() {
   var tagName = this.pending.tagName
   var attrs   = this.pending.attrs
+  var innerHTML = ''
+  var innerText = ''
+  var attrStr = ''
+  var content, attachment, obj
+  var i, k, v
+
   this.pending = undefined
 
-  // Build HTML output (non-media keys only)
-  var attrStr = ''
-  for (var i = 0; i < attrs.length; i++) {
-    var k = attrs[i].key
-    var v = attrs[i].value
-    if (MEDIA_KEYS[k]) continue  // skip media keys from HTML attrs
+  for (i = 0; i < attrs.length; i++) {
+    k = attrs[i].key
+    v = attrs[i].value
+    if (k === 'html') { innerHTML = v || ''; continue }
+    if (k === 'text') { innerText = v || ''; continue }
     attrStr += v === null ? (' ' + k) : (' ' + k + '="' + v + '"')
   }
-  var content = attrs.length === 0
-    ? '<' + tagName + '>'
-    : '<' + tagName + attrStr + '></' + tagName + '>'
 
-  // Build attachment if any media keys present
-  var attachment = buildAttachment(attrs)
-  var obj = defaultObject({ type: 'Element', content: content })
+  content = '<' + tagName + attrStr + '>' + (innerHTML || innerText) + '</' + tagName + '>'
+  attachment = buildAttachment(attrs)
+  obj = defaultObject({ type: 'Element', content: content })
   if (attachment) obj.attachment = [attachment]
 
   return defaultActivity({
@@ -231,7 +229,7 @@ SagaParser.prototype._flushPending = function() {
 }
 
 // ---------------------------------------------------------------------------
-// activities() â€" parses saga text into an array of AS2 JSON activity objects
+// activities() - parses saga text into an array of AS2 JSON activity objects
 // ---------------------------------------------------------------------------
 
 function activities(script) {
@@ -250,7 +248,7 @@ function activities(script) {
 }
 
 // ---------------------------------------------------------------------------
-// as2() â€" renders saga text to hypertext HTML string
+// as2() - renders saga text to hypertext HTML string
 // ---------------------------------------------------------------------------
 
 function as2(script) {
@@ -322,33 +320,14 @@ function as2(script) {
       var properties = actors[actor]
       var innerHTML = ''
       var innerText = ''
-      // Only non-media keys become HTML attributes
+
       var attributes = Object.keys(properties).map(function(x) {
         if(x === 'html') { innerHTML = properties[x]; return '' }
         if(x === 'text') { innerText = properties[x]; return '' }
-        if(MEDIA_KEYS[x]) return ''  // skip media keys
-        return [x, '="', properties[x], '" '].join('')
-      }).join('')
-      // Media keys: render src as appropriate element inside tag
-      var mediaSrc = properties['src'] || properties['href'] || ''
-      var mediaType = properties['mediaType'] || ''
-      var mediaInner = ''
-      if (mediaSrc) {
-        if (mediaType.indexOf('image/') === 0) {
-          mediaInner = '<img src="'+mediaSrc+'"'
-          if (properties['width'])  mediaInner += ' width="'+properties['width']+'"'
-          if (properties['height']) mediaInner += ' height="'+properties['height']+'"'
-          if (properties['name'])   mediaInner += ' alt="'+properties['name']+'"'
-          mediaInner += '>'
-        } else if (mediaType.indexOf('audio/') === 0) {
-          mediaInner = '<audio src="'+mediaSrc+'" controls></audio>'
-        } else if (mediaType.indexOf('video/') === 0) {
-          mediaInner = '<video src="'+mediaSrc+'" controls></video>'
-        } else if (mediaType === 'text/html' || properties['href']) {
-          mediaInner = '<a href="'+mediaSrc+'">'+(properties['name'] || mediaSrc)+'</a>'
-        }
-      }
-      scene += "<"+actor+" "+attributes+">"+(innerHTML || mediaInner || innerText)+"</"+actor+">"
+        return x + '="' + properties[x] + '"'
+      }).filter(Boolean).join(' ')
+
+      scene += '<' + actor + (attributes ? ' ' + attributes : '') + '>' + (innerHTML || innerText) + '</' + actor + '>'
       time = 'NORMAL_TIME'
       if(value) normalTime(line)
       return
@@ -399,7 +378,7 @@ as2.activities = activities
 globalThis.as2 = as2
 
 // ---------------------------------------------------------------------------
-// polyglot stdin runner â€" only when invoked directly as a script
+// polyglot stdin runner - only when invoked directly as a script
 // ---------------------------------------------------------------------------
 
 var isQuickJS = typeof scriptArgs !== 'undefined'
