@@ -57,17 +57,17 @@ v((target) => {
   }
 
   const leftMost = `
-    <button data-back ${index !== 0 ? '' : 'style="visibility: hidden;"' } class="minimal-button">Back</button>
+    <button data-back ${index !== 0 ? '' : 'style="visibility: hidden;"' } class="minimal-button">&lt;</button>
   `
   const rightMost = `
-    <button data-next ${index !== activities.length - 1 ? '' : 'style="visibility: hidden;"' } class="minimal-button">Next</button>
+    <button data-next ${index !== activities.length - 1 ? '' : 'style="visibility: hidden;"' } class="minimal-button">&gt;</button>
   `
 
   target.innerHTML = `
     <div class="tim-cookin">
       <div class="action-bar">
         <div>
-          <button data-crawl class="minimal-button">Quit</button>
+          <button data-crawl class="minimal-button">Q</button>
         </div>
         <div>
           ${leftMost}
@@ -76,7 +76,7 @@ v((target) => {
           ${rightMost}
         </div>
         <div style="text-align: right;">
-          <button data-load class="minimal-button">Reload</button>
+          <button data-load class="minimal-button">R</button>
         </div>
       </div>
       <div class="arena" key="${index}">

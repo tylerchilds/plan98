@@ -68,7 +68,7 @@ const dns = {
     elf: 'time-machine'
   },
   'ncity.executiontime.pub': {
-    elf: 'elf-boot'
+    elf: 'blue-note'
   },
   'beerdogusa.com': {
     elf: 'beerdog-usa'

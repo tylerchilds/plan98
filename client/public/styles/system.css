@@ -1600,6 +1600,7 @@ sillonious-brand > xml-html {
   border: 1px solid #77958a;
   display: inline-grid;
   place-content: center;
+  min-width: 32px;
 }
 
 .branded-button {
