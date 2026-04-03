@@ -8,6 +8,7 @@ const schemas = {
     loading: false,
     activities: null,
     index: 0,
+    saga: ''
   }
 }
 
@@ -53,6 +54,9 @@ v((target) => {
         <div>
           ${leftMost}
         </div>
+        <div>
+          <button data-crawl class="minimal-button">Crawl</button>
+        </div>
         <div style="text-align: right;">
           ${rightMost}
         </div>
@@ -83,10 +87,25 @@ e('click', 'button[data-load]', ({ target }) => {
         .flatMap(Activities)
         .map(x => x?.object?.content || '')
         .reverse()
-      c({ loading: false, activities })
+
+      c({
+        loading: false,
+        activities,
+        saga: data
+          .feed
+          .flatMap(item => item
+            .post
+            ?.record
+            ?.text || ''
+          ).reverse().join('\n')
+      })
     })
 
   c({ loading: true, activities: [] })
+})
+
+e('click', 'button[data-crawl]', ({ target }) => {
+  self.location.href = `/app/saga-crawler?data=${encodeURIComponent(btoa(m().saga))}`
 })
 
 e('click', 'button[data-back]', ({ target }) => {
@@ -118,7 +137,7 @@ s(`
   & .action-bar {
     background: rgba(0,0,0,.5);
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr auto 1fr;
   }
 
   & .arena {

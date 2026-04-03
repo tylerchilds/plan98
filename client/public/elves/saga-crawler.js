@@ -42,30 +42,40 @@ $.draw(() => null, {
     if(target.initialized) return
     target.initialized = true
     const src = target.getAttribute('src') || DEFAULT_SRC
+    const encodedData = target.getAttribute('data')
     const next = target.getAttribute('next') || '/app/shirt-flicks'
     const duration = target.getAttribute('duration')
 
     requestIdleCallback(() => {
-      let file = ''
-      fetch(src).then(async res => {
-        if(res.status === 404) {
+      if(encodedData) {
+        const file = atob(decodeURIComponent(encodedData))
+        const screenplay = Saga(file)
+        if(typeof screenplay === 'string') {
+          target.innerHTML = crawlerTemplate(screenplay)
+        }
+      } else {
 
-          file = 'untitled'
-        } else {
-          file = await res.text()
-        }
-      }).catch((error) => {
-        console.error(error)
-      }).finally(() => {
-        try {
-          const screenplay = Saga(file)
-          if(typeof screenplay === 'string') {
-            target.innerHTML = crawlerTemplate(screenplay)
+        let file = ''
+        fetch(src).then(async res => {
+          if(res.status === 404) {
+
+            file = 'untitled'
+          } else {
+            file = await res.text()
           }
-        } catch(e) {
-          target.innerHTML = e.message
-        }
-      })
+        }).catch((error) => {
+          console.error(error)
+        }).finally(() => {
+          try {
+            const screenplay = Saga(file)
+            if(typeof screenplay === 'string') {
+              target.innerHTML = crawlerTemplate(screenplay)
+            }
+          } catch(e) {
+            target.innerHTML = e.message
+          }
+        })
+      }
     })
   }
 })
