@@ -1,4 +1,4 @@
-import { Activities } from '@plan98/types'
+import { Activities, Text } from '@plan98/types'
 import MVCES from '@plan98/elf'
 import { escapeHyperText } from '@silly/helpers'
 
@@ -105,7 +105,7 @@ e('click', 'button[data-load]', ({ target }) => {
 })
 
 e('click', 'button[data-crawl]', ({ target }) => {
-  self.location.href = `/app/saga-crawler?data=${encodeURIComponent(btoa(m().saga))}`
+  self.location.href = `/app/saga-crawler?data=${encodeURIComponent(btoa(Text(m().saga)))}`
 })
 
 e('click', 'button[data-back]', ({ target }) => {
