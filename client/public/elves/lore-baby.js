@@ -40,6 +40,7 @@ const saga = {
 
 export let p98
 export const documents = [];
+export const docMap = new Map();
 export let idx
 
 const $ = Self('lore-baby', {
@@ -202,7 +203,10 @@ fetch('/plan98/about').then(res => res.json()).then((data) => {
   const { sagaIndex } = p98
   if(sagaIndex) {
     idx = lunr.Index.load(sagaIndex.index)
-    sagaIndex.documents.forEach(x => documents.push(x))
+    sagaIndex.documents.forEach(x => {
+      documents.push(x)
+      docMap.set(x.path, x)
+    })
     $.view(render, { beforeUpdate, afterUpdate })
   }
 }).catch(() => {
@@ -399,19 +403,34 @@ function getVirtualWindow(scrollTop, containerHeight, totalItems) {
   return { start, end }
 }
 
+function initVirtualContainer(container) {
+  container.innerHTML = ''
+  const top = document.createElement('div')
+  const list = document.createElement('div')
+  const bottom = document.createElement('div')
+  top.className = 'virtual-spacer-top'
+  bottom.className = 'virtual-spacer-bottom'
+  container.append(top, list, bottom)
+  container._vTop = top
+  container._vList = list
+  container._vBottom = bottom
+}
+
 function renderVirtualList(container, suggestions, suggestIndex) {
+  if (!container._vList) initVirtualContainer(container)
+
   const totalItems = suggestions.length
   const scrollTop = container.scrollTop
   const containerHeight = container.clientHeight || 300
 
   const { start, end } = getVirtualWindow(scrollTop, containerHeight, totalItems)
 
-  const paddingTop = start * ITEM_HEIGHT
-  const paddingBottom = Math.max(0, (totalItems - end - 1) * ITEM_HEIGHT)
+  container._vTop.style.height = (start * ITEM_HEIGHT) + 'px'
+  container._vBottom.style.height = (Math.max(0, totalItems - end - 1) * ITEM_HEIGHT) + 'px'
 
   const items = suggestions.slice(start, end + 1).map((x, i) => {
     const globalIndex = start + i
-    const item = documents.find(y => y.path === x.ref)
+    const item = docMap.get(x.ref)
     if (!item) return ''
     return `
       <button
@@ -427,11 +446,7 @@ function renderVirtualList(container, suggestions, suggestIndex) {
     `
   }).join('')
 
-  innerHTML(container, `
-    <div class="virtual-spacer-top" style="height:${paddingTop}px"></div>
-    ${items}
-    <div class="virtual-spacer-bottom" style="height:${paddingBottom}px"></div>
-  `)
+  innerHTML(container._vList, items)
 }
 
 function library(target) {
@@ -453,16 +468,20 @@ function library(target) {
       const { suggestions, showSuggestions } = $.model()
       if (!showSuggestions || !suggestions.length) return
 
-      // Update DOM directly during scroll — bypass state entirely
-      renderVirtualList(suggestionsEl, suggestions, null)
+      if (suggestionsEl._rafPending) return
+      suggestionsEl._rafPending = true
 
-      // Only commit suggestIndex to state once scroll settles
-      clearTimeout(suggestionsEl._scrollSettle)
-      suggestionsEl._scrollSettle = setTimeout(() => {
-        const newIndex = Math.round(suggestionsEl.scrollTop / ITEM_HEIGHT)
-        const clamped = Math.max(0, Math.min(suggestions.length - 1, newIndex))
-        $.controller({ suggestIndex: clamped })
-      }, 150)
+      requestAnimationFrame(() => {
+        suggestionsEl._rafPending = false
+        renderVirtualList(suggestionsEl, suggestions, null)
+
+        clearTimeout(suggestionsEl._scrollSettle)
+        suggestionsEl._scrollSettle = setTimeout(() => {
+          const newIndex = Math.round(suggestionsEl.scrollTop / ITEM_HEIGHT)
+          const clamped = Math.max(0, Math.min(suggestions.length - 1, newIndex))
+          $.controller({ suggestIndex: clamped })
+        }, 150)
+      })
     }, { passive: true })
   }
 
@@ -476,7 +495,11 @@ function library(target) {
 
   if (!showSuggestions || suggestions.length === 0) {
     innerHTML(suggestionsEl, '')
-    suggestionsEl.scrollTop = 0   // ← reset so next open starts clean
+    // Re-initialize next open so _vList refs are fresh
+    delete suggestionsEl._vTop
+    delete suggestionsEl._vList
+    delete suggestionsEl._vBottom
+    suggestionsEl.scrollTop = 0
     return
   }
 
@@ -582,13 +605,27 @@ $.e('blur', 'input[name="search"]', event => {
   $.controller({ showSuggestions: false })
 })
 
-// Desktop wheel — scaled down for deliberate feel, snap handles landing
+// Ramped wheel: slow for precise nudges, fast for big flicks
+// sqrt curve: small deltas stay small, large ones accelerate naturally
 document.addEventListener('wheel', (event) => {
   const suggestionsEl = event.target.closest('.suggestions')
   if (!suggestionsEl) return
   event.preventDefault()
-  suggestionsEl.scrollTop += event.deltaY * 0.3
+
+  const raw = event.deltaY
+  const sign = raw < 0 ? -1 : 1
+  const abs = Math.abs(raw)
+
+  // Normalize to item units (40px = 1 item), apply sqrt ramp, then scale back.
+  // A single trackpad tick (~4px raw) moves ~0.3 items — sub-item precision.
+  // A confident flick (~120px raw) moves ~2.6 items — skips a few rows naturally.
+  const normalized = abs / ITEM_HEIGHT
+  const ramped = sign * Math.sqrt(normalized) * ITEM_HEIGHT
+
+  suggestionsEl.scrollTop += ramped
 }, { passive: false })
+
+
 
 $.skin(`
   @media print {
@@ -632,6 +669,12 @@ $.skin(`
     height: 100%;
     grid-template-rows: auto 1fr;
     overflow: hidden;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: none;
   }
 
   & .search {
@@ -669,7 +712,6 @@ $.skin(`
     -webkit-overflow-scrolling: touch;
     touch-action: pan-y;
     overscroll-behavior: contain;
-    scroll-snap-type: y mandatory;
   }
 
   & .virtual-spacer-top,
@@ -690,7 +732,6 @@ $.skin(`
     display: flex;
     align-items: center;
     box-sizing: border-box;
-    scroll-snap-align: start;
   }
 
   & .suggestions .auto-item:focus,

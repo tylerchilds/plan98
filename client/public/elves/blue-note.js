@@ -1,6 +1,6 @@
 import { Activities, Text } from '@plan98/types'
 import MVCES from '@plan98/elf'
-import { escapeHyperText } from '@silly/helpers'
+import { escapeHyperText, mod } from '@silly/helpers'
 
 const schemas = {
   'org.plan98.blue-note': {
@@ -57,10 +57,10 @@ v((target) => {
   }
 
   const leftMost = `
-    <button data-back ${index !== 0 ? '' : 'style="visibility: hidden;"' } class="minimal-button">&lt;</button>
+    <button data-back class="minimal-button">&lt;</button>
   `
   const rightMost = `
-    <button data-next ${index !== activities.length - 1 ? '' : 'style="visibility: hidden;"' } class="minimal-button">&gt;</button>
+    <button data-next class="minimal-button">&gt;</button>
   `
 
   target.innerHTML = `
@@ -69,9 +69,9 @@ v((target) => {
         <div>
           <button data-crawl class="minimal-button">Q</button>
         </div>
-        <div>
+        <div class="url-grid">
           ${leftMost}
-          <span style="color: #8ec07c">NETDIR://</span>
+          <span class="protocol">NETDIR://</span>
           <input value="${escapeHyperText(moniker)}" name="moniker"/>
           ${rightMost}
         </div>
@@ -106,19 +106,14 @@ e('click', 'button[data-crawl]', ({ target }) => {
 })
 
 e('click', 'button[data-back]', ({ target }) => {
-  const { index } = m()
-
-  if(index !== 0) {
-    c({ index: index - 1 })
-  }
+  const { index, activities } = m()
+  c({ index: mod(index - 1, activities.length) })
 })
 
 e('click', 'button[data-next]', ({ target }) => {
   const { index, activities } = m()
 
-  if(index !== activities.length -1) {
-    c({ index: index + 1 })
-  }
+  c({ index: mod(index + 1, activities.length) })
 })
 
 e('input', '[name="moniker"]', ({ target }) => c({ moniker: target.value }))
@@ -129,12 +124,19 @@ s(`
     height: 100%;
     overflow; hidden;
     font: 'Courier' 12pt;
+    user-select: none; /* supported by Chrome and Opera */
+		-webkit-user-select: none; /* Safari */
+		-khtml-user-select: none; /* Konqueror HTML */
+		-moz-user-select: none; /* Firefox */
+		-ms-user-select: none; /* Internet Explorer/Edge */
+    touch-action: none;
   }
 
   & .action-bar {
     background: rgba(0,0,0,.85);
     display: grid;
     grid-template-columns: 1fr auto 1fr;
+    padding: 2px;
   }
 
   & .arena {
@@ -151,7 +153,8 @@ s(`
 
   & input {
     color: #d79921;          /* neutral_yellow, was #ebb22e */
-    display: inline-block;
+    display: block;
+    width: 100%;
     margin: auto;
     text-align: left;
     background: transparent;
@@ -160,6 +163,19 @@ s(`
     margin: 0 auto;
     border-radius: 0;
     border: none;
+  }
+
+  & .url-grid {
+    grid-template-columns: auto auto 1fr auto;
+    display: grid;
+    gap: 4px;
+    place-content: center;
+  }
+
+  & .protocol {
+    color: #8ec07c;
+    display: grid;
+    place-content: center;
   }
 
 `)
