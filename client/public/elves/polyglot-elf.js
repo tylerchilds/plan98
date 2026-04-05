@@ -32,521 +32,532 @@ const MODELS_PATH = '/public/cdn/cache/alphacephei.com/models/'
 const WORKLET_PATH = '/public/cdn/sillyz.computer/models/vosk-browser/recognizer-processor.js'
 
 const $ = elf('polyglot-elf', {
-  consented: false,
   sourceModel: VOSK_LANGUAGES[0].model,
   from: VOSK_LANGUAGES[0].code,
   to: 'es',
-  destinationLanguages: [],
-  outputMode: 'text',
-  status: 'Ready',
-  caption: '',
+  status: 'idle',
   translated: '',
   partial: '',
+  micMuted: true,    // starts muted — first unmute triggers init
+  spoken: false,
+  labels: {},
 })
 
-// ─── Cleanup refs ─────────────────────────────────────────────────────────────
+// --- Cleanup refs -----------------------------------------------------------
 let _audioContext = null
 let _mediaStream = null
 let _recognizer = null
 let _model = null
+let _channel = null
 let _running = false
+let _micSource = null
+let _processorNode = null
+let currentAudio = null
+let _ttsActive = false
 
 function teardown() {
   _running = false
-  _micSource = null
-  _processorNode = null
+  _ttsActive = false
+
+  if (currentAudio) { currentAudio.pause(); currentAudio = null }
+
+  if (_micSource) {
+    try { _micSource.disconnect() } catch (e) {}
+    _micSource = null
+  }
+  if (_processorNode) {
+    try { _processorNode.disconnect() } catch (e) {}
+    _processorNode = null
+  }
+
+  if (_channel) {
+    try { _channel.port1.close() } catch (e) {}
+    _channel = null
+  }
+
   if (_recognizer) {
     try { _recognizer.remove() } catch (e) {}
     _recognizer = null
   }
-  if (_audioContext) {
-    try { _audioContext.close() } catch (e) {}
-    _audioContext = null
-  }
-  if (_mediaStream) {
-    _mediaStream.getTracks().forEach(t => t.stop())
-    _mediaStream = null
-  }
+
   if (_model) {
     try { _model.terminate() } catch (e) {}
     _model = null
   }
-  if (currentAudio) {
-    currentAudio.pause()
-    currentAudio = null
+
+  if (_mediaStream) {
+    _mediaStream.getTracks().forEach(t => t.stop())
+    _mediaStream = null
   }
-  ttsQueue = Promise.resolve()
+
+  if (_audioContext) {
+    try { _audioContext.close() } catch (e) {}
+    _audioContext = null
+  }
 }
 
-// ─── TTS queue ────────────────────────────────────────────────────────────────
-// While ElevenLabs is speaking we disconnect the mic source from the processor
-// so Vosk never hears the output — prevents the translation feedback loop.
-let ttsQueue = Promise.resolve()
-let currentAudio = null
-let _micSource = null        // set by init(), read here to mute/unmute
-let _processorNode = null    // set by init(), disconnected while speaking
+// --- TTS --------------------------------------------------------------------
+// Drop-if-busy: if ElevenLabs is already speaking, skip the new result.
+// Never queue — stale audio is worse than silence.
+async function speakTranslation(text) {
+  if (_ttsActive) {
+    console.log('[polyglot] tts busy, dropping:', text)
+    return
+  }
+  _ttsActive = true
 
-function speakTranslation(text) {
-  ttsQueue = ttsQueue.then(async () => {
-    if (!_running) return
-    try {
-      if (currentAudio) {
-        currentAudio.pause()
-        currentAudio = null
-      }
+  // Disconnect mic from Vosk during playback to prevent feedback loop
+  if (_micSource && _processorNode) {
+    try { _micSource.disconnect(_processorNode) } catch (e) {}
+  }
 
-      const stream = await elevenlabs.textToSpeech.convert(VOICE_ID, {
-        text,
-        modelId: 'eleven_multilingual_v2',
-        outputFormat: 'mp3_44100_128',
-      })
+  try {
+    if (currentAudio) { currentAudio.pause(); currentAudio = null }
 
-      const chunks = []
-      const reader = stream.getReader()
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-        chunks.push(value)
-      }
+    const stream = await elevenlabs.textToSpeech.convert(VOICE_ID, {
+      text,
+      modelId: 'eleven_multilingual_v2',
+      outputFormat: 'mp3_44100_128',
+      languageCode: $.learn().to,
+      voiceSettings: {
+        stability: 0.75,        // consistent across short utterances, no drift
+        similarityBoost: 0.85,  // clear pronunciation, close to source voice
+        style: 0.0,             // no style exaggeration — lower latency, more stable
+        useSpeakerBoost: true,  // sharper clarity on translated speech
+      },
+    })
 
-      const blob = new Blob(chunks, { type: 'audio/mpeg' })
-      const url = URL.createObjectURL(blob)
-      const audio = new Audio(url)
-      currentAudio = audio
-
-      // Disconnect mic from Vosk before playback starts
-      if (_micSource && _processorNode) {
-        try { _micSource.disconnect(_processorNode) } catch (e) {}
-      }
-
-      await audio.play()
-      await new Promise(resolve => {
-        audio.onended = resolve
-        audio.onerror = resolve
-      })
-
-      URL.revokeObjectURL(url)
-      currentAudio = null
-
-      // Reconnect mic to Vosk after playback ends
-      if (_running && _micSource && _processorNode) {
-        try { _micSource.connect(_processorNode) } catch (e) {}
-      }
-    } catch (e) {
-      console.error('TTS error', e)
-      // Always reconnect on error so we don't get stuck muted
-      if (_running && _micSource && _processorNode) {
-        try { _micSource.connect(_processorNode) } catch (e) {}
-      }
+    const chunks = []
+    const reader = stream.getReader()
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
     }
+
+    const blob = new Blob(chunks, { type: 'audio/mpeg' })
+    const url = URL.createObjectURL(blob)
+    const audio = new Audio(url)
+    currentAudio = audio
+
+    await audio.play()
+    await new Promise(resolve => { audio.onended = resolve; audio.onerror = resolve })
+
+    URL.revokeObjectURL(url)
+    currentAudio = null
+  } catch (e) {
+    console.error('TTS error', e)
+  } finally {
+    _ttsActive = false
+    // Reconnect mic after playback (or on error)
+    if (_running && _micSource && _processorNode) {
+      try { _micSource.connect(_processorNode) } catch (e) {}
+    }
+  }
+}
+
+// --- UI label translation ---------------------------------------------------
+// Serialized through a queue — one request at a time, skips 'en' (no-op).
+// Not called on module load; called after first user interaction to avoid
+// hammering LibreTranslate before the tab is ready.
+const UI_LABELS = {
+  from: 'from',
+  to: 'to',
+  listen: 'listen',
+  muted: 'muted',
+  idle: 'idle',
+  spoken: 'spoken',
+  silent: 'silent',
+}
+
+let _labelQueue = Promise.resolve()
+
+function refreshLabels() {
+  _labelQueue = _labelQueue.then(async () => {
+    const { from, to } = $.learn()
+    const keys = Object.keys(UI_LABELS)
+    const labels = {}
+
+    for (const k of keys) {
+      labels[`${k}_from`] = from === 'en'
+        ? UI_LABELS[k]
+        : await translate(UI_LABELS[k], { to: from, from: 'en' }).catch(() => UI_LABELS[k])
+      labels[`${k}_to`] = to === 'en'
+        ? UI_LABELS[k]
+        : await translate(UI_LABELS[k], { to, from: 'en' }).catch(() => UI_LABELS[k])
+    }
+
+    $.teach({ labels, status: `${labels.idle_from} / ${labels.idle_to}` })
   })
 }
 
-// ─── Language list ────────────────────────────────────────────────────────────
-async function loadLanguages() {
-  try {
-    const res = await fetch(plan98.env.LIBRE_TRANSLATE_URL + '/languages', {
-      headers: { 'Content-Type': 'application/json' },
-    })
-    const languages = await res.json()
-
-    const seen = new Set()
-    const allTargets = languages
-      .flatMap(l => l.targets.map(code => {
-        const match = languages.find(x => x.code === code)
-        return { code, name: match?.name || code }
-      }))
-      .filter(({ code }) => !seen.has(code) && seen.add(code))
-      .sort((a, b) => a.name.localeCompare(b.name))
-
-    $.teach({ destinationLanguages: allTargets })
-  } catch (e) {
-    console.error('Failed to load languages', e)
-  }
+const LANG_NAMES = {
+  es: 'Spanish', en: 'English', fr: 'French', de: 'German',
+  pt: 'Portuguese', it: 'Italian', ru: 'Russian', zh: 'Chinese',
+  ar: 'Arabic', ja: 'Japanese', ko: 'Korean', nl: 'Dutch',
+  tr: 'Turkish', fa: 'Farsi', ca: 'Catalan',
 }
 
-loadLanguages()
-
-// ─── Draw ─────────────────────────────────────────────────────────────────────
+// --- Draw -------------------------------------------------------------------
 $.draw((target) => {
   const {
-    consented,
     sourceModel,
     to,
-    destinationLanguages,
-    outputMode,
-    status,
-    caption,
     translated,
     partial,
+    micMuted,
+    spoken,
+    labels,
   } = $.learn()
 
-  if (!consented) {
-    return `
-      <div data-setup>
-        <h2>Polyglot</h2>
-        <p>Real-time speech translation. Speak — your listener reads or hears in their language.</p>
+  const muteLabel = micMuted
+    ? (labels.muted_from ? `${labels.muted_from}/${labels.muted_to}` : 'muted')
+    : (labels.listen_from ? `${labels.listen_from}/${labels.listen_to}` : 'unmuted')
 
-        <label class="field">
-          <span class="label">Speaker language</span>
-          <select name="sourceModel" data-bind>
+  const spokenLabel = spoken
+    ? (labels.spoken_from ? `${labels.spoken_from}/${labels.spoken_to}` : 'unmuted')
+    : (labels.silent_from ? `${labels.silent_from}/${labels.silent_to}` : 'muted')
+
+  return `
+    <div class="tim-cookin">
+
+      <div class="action-bar">
+        <div>
+          <button data-quit class="minimal-button">Q</button>
+        </div>
+        <div class="url-grid">
+          <span class="protocol">LOL://</span>
+          <select name="sourceModel" data-bind-model>
             ${VOSK_LANGUAGES.map(l => `
               <option value="${l.model}" ${sourceModel === l.model ? 'selected' : ''}>${l.name}</option>
             `).join('')}
           </select>
-        </label>
-
-        <label class="field">
-          <span class="label">Listener language</span>
-          <select name="to" data-bind>
-            ${destinationLanguages.map(l => `
-              <option value="${l.code}" ${to === l.code ? 'selected' : ''}>${l.name}</option>
+          <span class="sep">→</span>
+          <select name="to" data-bind-to>
+            ${Object.entries(LANG_NAMES).map(([code, name]) => `
+              <option value="${code}" ${to === code ? 'selected' : ''}>${name}</option>
             `).join('')}
           </select>
-        </label>
+        </div>
+        <div style="text-align: right;">
+          <button data-reset class="minimal-button">R</button>
+        </div>
+      </div>
 
-        <label class="field">
-          <span class="label">Output mode</span>
-          <div class="toggle-group">
-            <label class="toggle-option">
-              <input type="radio" name="outputMode" value="text" ${outputMode === 'text' ? 'checked' : ''} data-bind-radio />
-              <span>📖 Text</span>
-            </label>
-            <label class="toggle-option">
-              <input type="radio" name="outputMode" value="speak" ${outputMode === 'speak' ? 'checked' : ''} data-bind-radio />
-              <span>🔊 Speak (ElevenLabs)</span>
-            </label>
+      <div class="arena">
+        <div class="translated ${translated ? '' : 'empty'}">${translated || '_'}</div>
+      </div>
+
+      <div class="bottom-bar">
+        <div class="partial-hint">${partial ? partial + '…' : '\u00a0'}</div>
+        <div class="status-bar">
+          <div class="io-control">
+            <span class="io-label">input</span>
+            <button data-mute class="footer-button ${micMuted ? 'muted' : 'active'}">${muteLabel}</button>
           </div>
-        </label>
-
-        <button data-load>Start</button>
+          <div class="io-control io-right">
+            <span class="io-label">output</span>
+            <button data-spoken style="margin-left: auto;" class="footer-button ${spoken ? 'active' : 'muted'}">${spokenLabel}</button> 
+          </div>
+        </div>
       </div>
-    `
-  }
 
-  return `
-    <div class="panel source-panel">
-      <div class="panel-label">Speaker</div>
-      <div class="caption">
-        <span class="committed">${caption}</span><span class="partial">${partial ? ' ' + partial + '…' : ''}</span>
-      </div>
-    </div>
-
-    <div class="panel listener-panel">
-      <div class="panel-label">Listener ${outputMode === 'speak' ? '🔊' : '📖'}</div>
-      <div class="caption">
-        <span class="committed">${translated}</span><span class="partial">${partial ? ' ···' : ''}</span>
-      </div>
-    </div>
-
-    <div class="status-bar">
-      <span class="status-dot ${status === 'Listening…' ? 'active' : ''}"></span>
-      <span>${status}</span>
-      <button data-stop>⏹ Stop</button>
     </div>
   `
 })
 
-// ─── Event handlers ───────────────────────────────────────────────────────────
-$.when('change', '[data-bind]', (event) => {
-  const { name, value } = event.target
-  $.teach({ [name]: value })
-  if (name === 'sourceModel') {
-    const lang = VOSK_LANGUAGES.find(l => l.model === value)
-    if (lang) $.teach({ from: lang.code })
+// --- Event handlers ---------------------------------------------------------
+$.when('change', '[data-bind-model]', (event) => {
+  const model = event.target.value
+  const lang = VOSK_LANGUAGES.find(l => l.model === model)
+  $.teach({ sourceModel: model, translated: '', partial: '', ...(lang ? { from: lang.code } : {}) })
+  refreshLabels()
+  // Source model changed — must reinit Vosk with the new language model
+  if (_running) {
+    teardown()
+    $.teach({ micMuted: false })
+    init(event.target.closest($.link))
   }
 })
 
-$.when('change', '[data-bind-radio]', (event) => {
-  $.teach({ [event.target.name]: event.target.value })
+$.when('change', '[data-bind-to]', (event) => {
+  // Target language is read at translate-time — no reinit needed
+  $.teach({ to: event.target.value })
+  refreshLabels()
 })
 
-$.when('click', '[data-load]', (event) => {
-  $.teach({ consented: true })
-  init(event.target.closest($.link))
-})
-
-$.when('click', '[data-stop]', () => {
+$.when('click', '[data-quit]', () => {
   teardown()
-  $.teach({
-    consented: false,
-    caption: '',
-    translated: '',
-    partial: '',
-    status: 'Ready',
-  })
+  self.location.href = '/app/quick-sketch'
 })
 
-// ─── Core pipeline ────────────────────────────────────────────────────────────
+$.when('click', '[data-reset]', () => {
+  console.clear()
+  $.teach({ translated: '', partial: '', status: 'idle' })
+})
+
+$.when('click', '[data-mute]', (event) => {
+  const { micMuted } = $.learn()
+  const next = !micMuted
+  $.teach({ micMuted: next })
+
+  if (next) {
+    if (_micSource && _processorNode) {
+      try { _micSource.disconnect(_processorNode) } catch (e) {}
+    }
+  } else {
+    if (!_running) {
+      init(event.target.closest($.link))
+      refreshLabels()
+    } else if (_micSource && _processorNode) {
+      try { _micSource.connect(_processorNode) } catch (e) {}
+    }
+  }
+})
+
+$.when('click', '[data-spoken]', () => {
+  $.teach({ spoken: !$.learn().spoken })
+})
+
+// --- Core pipeline ----------------------------------------------------------
+let _initInProgress = false
+
 async function init(target) {
-  const { sourceModel } = $.learn()
-  const channel = new MessageChannel()
+  if (_initInProgress) return
+  _initInProgress = true
 
-  $.teach({ status: 'Loading model…' })
-  const model = await Vosk.createModel(MODELS_PATH + sourceModel)
-  model.registerPort(channel.port1)
-  _model = model
+  // Tear down first and give the worker a tick to actually stop
+  if (_running) {
+    teardown()
+    await new Promise(r => setTimeout(r, 100))
+  }
 
-  const sampleRate = 48000
-  const recognizer = new model.KaldiRecognizer(sampleRate)
-  recognizer.setWords(true)
-  _recognizer = recognizer
-  _running = true
+  try {
+    const { sourceModel } = $.learn()
+    const channel = new MessageChannel()
+    _channel = channel
 
-  $.teach({ status: 'Listening…' })
+    $.teach({ status: 'loading model...' })
+    const model = await Vosk.createModel(MODELS_PATH + sourceModel)
+    model.registerPort(channel.port1)
+    _model = model
 
-  recognizer.on('partialresult', (message) => {
-    if (!_running) return
-    $.teach({ partial: message.result.partial || '' })
-  })
+    const sampleRate = 48000
+    const recognizer = new model.KaldiRecognizer(sampleRate)
+    recognizer.setWords(true)
+    _recognizer = recognizer
+    _running = true
 
-  recognizer.on('result', async (message) => {
-    if (!_running) return
-    const text = message.result?.text
-    if (!text) return
+    $.teach({ status: 'listening...' })
 
-    const { caption } = $.learn()
-    $.teach({
-      caption: [caption, text].filter(Boolean).join(' '),
-      partial: '',
+    recognizer.on('partialresult', (message) => {
+      if (!_running) return
+      $.teach({ partial: message.result.partial || '' })
     })
 
-    const { to, from, outputMode, translated } = $.learn()
-    let result = text
-    if (from !== to) {
-      try {
-        result = await translate(text, { to, from })
-      } catch (e) {
-        result = `[${text}]`
+    recognizer.on('result', async (message) => {
+      if (!_running) return
+      const text = message.result?.text
+      if (!text) return
+
+      $.teach({ partial: '' })
+      console.log('[polyglot] source:', text)
+
+      const { to, from, spoken, micMuted } = $.learn()
+      if (micMuted) return
+
+      let result = text
+      if (from !== to) {
+        try { result = await translate(text, { to, from }) }
+        catch (e) { result = `[${text}]` }
       }
-    }
 
-    // Check again after async translate — stop may have been pressed during await
-    if (!_running) return
+      if (!_running) return
 
-    $.teach({ translated: [translated, result].filter(Boolean).join(' ') })
+      console.log('[polyglot] translated:', result)
+      $.teach({ translated: [$.learn().translated, result].filter(Boolean).join(' ') })
 
-    if (outputMode === 'speak') {
-      speakTranslation(result)
-    }
-  })
+      if (spoken) speakTranslation(result)
+    })
 
-  const mediaStream = await navigator.mediaDevices.getUserMedia({
-    video: false,
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      channelCount: 1,
-      sampleRate,
-    },
-  })
-  _mediaStream = mediaStream
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      video: false,
+      audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1, sampleRate },
+    })
+    _mediaStream = mediaStream
 
-  const audioContext = new AudioContext()
-  _audioContext = audioContext
+    const audioContext = new AudioContext()
+    _audioContext = audioContext
 
-  await audioContext.audioWorklet.addModule(WORKLET_PATH)
+    await audioContext.audioWorklet.addModule(WORKLET_PATH)
 
-  const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', {
-    channelCount: 1,
-    numberOfInputs: 1,
-    numberOfOutputs: 1,
-  })
+    const recognizerProcessor = new AudioWorkletNode(audioContext, 'recognizer-processor', {
+      channelCount: 1, numberOfInputs: 1, numberOfOutputs: 1,
+    })
 
-  recognizerProcessor.port.postMessage(
-    { action: 'init', recognizerId: recognizer.id },
-    [channel.port2]
-  )
+    recognizerProcessor.port.postMessage(
+      { action: 'init', recognizerId: recognizer.id },
+      [channel.port2]
+    )
 
-  recognizerProcessor.connect(audioContext.destination)
+    recognizerProcessor.connect(audioContext.destination)
 
-  const micSource = audioContext.createMediaStreamSource(mediaStream)
-  micSource.connect(recognizerProcessor)
+    const micSource = audioContext.createMediaStreamSource(mediaStream)
+    micSource.connect(recognizerProcessor)
 
-  // Store refs so speakTranslation can mute/unmute the mic during playback
-  _micSource = micSource
-  _processorNode = recognizerProcessor
+    _micSource = micSource
+    _processorNode = recognizerProcessor
+
+  } catch (e) {
+    console.error('[polyglot] init failed:', e)
+    teardown()
+    $.teach({ micMuted: true, status: 'init failed' })
+  } finally {
+    _initInProgress = false
+  }
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
+// --- Styles -----------------------------------------------------------------
 $.style(`
   & {
-    background: #1e272e;
-    color: #dfe6e9;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr auto;
+    display: block;
     height: 100%;
     overflow: hidden;
-    font-family: system-ui, sans-serif;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 12pt;
+    user-select: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    touch-action: none;
   }
 
-  & [data-setup] {
-    grid-column: 1 / -1;
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-    padding: 2rem;
-    max-width: 480px;
-    margin: auto;
-    width: 100%;
-    box-sizing: border-box;
+  & .tim-cookin {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: hidden;
   }
 
-  & [data-setup] h2 {
-    margin: 0;
-    font-size: 1.5rem;
+  & .action-bar {
+    background: rgba(0,0,0,.85);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    padding: 2px;
   }
 
-  & [data-setup] p {
-    margin: 0;
-    opacity: 0.6;
-    font-size: 0.9rem;
-    line-height: 1.5;
+  & .url-grid {
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 4px;
+    place-content: center;
   }
 
-  & .field {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
+  & .protocol {
+    color: #8ec07c;
+    font-size: 0.75rem;
+    padding: 0 4px;
+    white-space: nowrap;
   }
 
-  & .label {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    opacity: 0.55;
+  & .sep {
+    color: #665c54;
+    font-size: 0.75rem;
   }
 
   & select {
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    border: 1px solid #485460;
-    background: #2f3640;
-    color: #dfe6e9;
-    font-size: 0.95rem;
-    cursor: pointer;
-    width: 100%;
-  }
-
-  & .toggle-group {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  & .toggle-option {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
-    border: 1px solid #485460;
-    background: #2f3640;
-    cursor: pointer;
-    font-size: 0.9rem;
-  }
-
-  & .toggle-option:has(input:checked) {
-    border-color: #00b894;
-    background: #1d3a32;
-  }
-
-  & button[data-load] {
-    padding: 0.75rem;
-    border-radius: 8px;
+    color: #d79921;
+    background: transparent;
     border: none;
-    background: #00b894;
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    padding: 2px;
     cursor: pointer;
-    letter-spacing: 0.02em;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
   }
 
-  & button[data-load]:hover {
-    background: #00cba3;
+  & select option {
+    background: #1a1a1a;
+    color: #d79921;
   }
 
-  & .panel {
+  & .footer-button.active { color: #8ec07c; }
+
+  & .footer-button {
+    background: transparent;
+    border: none;
+    color: #a89984;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+    cursor: pointer;
+    padding: 2px 6px;
+    letter-spacing: 0.05em;
+  }
+
+  & .footer-button:hover { color: #ebdbb2; }
+  & .footer-button.muted { color: #cc241d; }
+  & .footer-button.go { color: #8ec07c; }
+  & .footer-button.stop { color: #cc241d; }
+
+  & .arena {
+    overflow: auto;
+    padding: 1.5rem 1.25rem;
+    background: #1d2021;
     display: flex;
-    flex-direction: column;
-    padding: 1.5rem;
-    overflow: hidden;
-    border-right: 1px solid #2f3640;
+    align-items: flex-start;
   }
 
-  & .listener-panel {
-    border-right: none;
-    background: #1a252f;
-  }
-
-  & .panel-label {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.4;
-    margin-bottom: 0.75rem;
-  }
-
-  & .caption {
-    flex: 1;
-    overflow-y: auto;
-    font-size: 1.5rem;
-    line-height: 1.6;
+  & .translated {
+    font-size: clamp(1.4rem, 4.5vw, 3rem);
+    color: #ebdbb2;
+    line-height: 1.3;
     word-break: break-word;
   }
 
-  & .committed {
-    color: #dfe6e9;
+  & .translated.empty { color: #504945; font-style: italic; }
+
+  & .bottom-bar {
+    background: rgba(0,0,0,.85);
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #3c3836;
   }
 
-  & .partial {
-    color: #636e72;
+  & .partial-hint {
+    font-size: 0.72rem;
+    color: #665c54;
+    letter-spacing: 0.04em;
+    padding: 2px 8px;
+    min-height: 18px;
     font-style: italic;
   }
 
   & .status-bar {
-    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+    padding: 4px;
+    border-top: 1px solid #3c3836;
+  }
+
+  & .io-control {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1.25rem;
-    background: #141d23;
-    font-size: 0.8rem;
-    opacity: 0.8;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
   }
 
-  & .status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: #485460;
-    flex-shrink: 0;
+  & .io-control.io-right {
+    align-items: flex-end;
   }
 
-  & .status-dot.active {
-    background: #00b894;
-    box-shadow: 0 0 6px #00b894;
-    animation: pulse 1.5s ease-in-out infinite;
-  }
+  & .io-label {
+    font-size: 0.65rem;
+    color: #665c54;
+    letter-spacing: 0.05em;
+    padding: 0 6px;
+  }`)
 
-  & .status-bar span:last-of-type {
-    flex: 1;
-  }
-
-  & button[data-stop] {
-    background: #d63031;
-    border: none;
-    border-radius: 5px;
-    color: white;
-    padding: 0.25rem 0.75rem;
-    font-size: 0.8rem;
-    cursor: pointer;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
-  }
-`)

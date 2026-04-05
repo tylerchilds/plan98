@@ -262,8 +262,12 @@ const commands = {
     loadPath('/app/plan98-wallet')
     return 'Success!'
   },
+  'lol': () => {
+    loadPath('/app/polyglot-elf')
+    return 'LOL!'
+  },
   'focus': () => {
-    window.location.href = '/app/time-machine'
+    window.location.href = '/app/lore-baby'
     return 'Success!'
   },
   'memex': () => {
