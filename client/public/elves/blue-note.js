@@ -1,6 +1,7 @@
 import { Activities, Text } from '@plan98/types'
 import MVCES from '@plan98/elf'
 import { escapeHyperText, mod } from '@silly/helpers'
+import { BUTTON_CODES, overrideButton, checkButton, checkAxis } from './debug-gamepads.js'
 
 const schemas = {
   'org.plan98.blue-note': {
@@ -14,7 +15,21 @@ const schemas = {
 
 const schema = 'org.plan98.blue-note'
 
-const { m, v, c, e, s } = MVCES('blue-note', schemas[schema])
+const { m, v, c, e, s, link } = MVCES('blue-note', schemas[schema])
+
+const slideBack = (event) => {
+  const { index, activities } = m()
+  c({ index: mod(index - 1, activities.length) })
+}
+
+const slideNext = (event) => {
+  const { index, activities } = m()
+
+  c({ index: mod(index + 1, activities.length) })
+}
+
+e('click', 'button[data-back]', slideBack)
+e('click', 'button[data-next]', slideNext)
 
 function sillySky(moniker) {
   const address = `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${moniker}`
@@ -105,17 +120,6 @@ e('click', 'button[data-crawl]', ({ target }) => {
   self.location.href = `/app/saga-crawler?data=${encodeURIComponent(btoa(Text(m().saga)))}`
 })
 
-e('click', 'button[data-back]', ({ target }) => {
-  const { index, activities } = m()
-  c({ index: mod(index - 1, activities.length) })
-})
-
-e('click', 'button[data-next]', ({ target }) => {
-  const { index, activities } = m()
-
-  c({ index: mod(index + 1, activities.length) })
-})
-
 e('input', '[name="moniker"]', ({ target }) => c({ moniker: target.value }))
 
 s(`
@@ -179,3 +183,238 @@ s(`
   }
 
 `)
+
+const spamCache = {}
+
+function debounceSpam(code, timeout, callback) {
+  if(spamCache[code]) return
+  spamCache[code] = true
+
+  callback()
+
+  setTimeout(() => {
+    spamCache[code] = false
+  }, timeout)
+}
+
+const toggleCache = {}
+function toggleSpam(code, value, callback) {
+  if(!toggleCache[code] && value === 1) {
+    callback()
+  }
+
+  toggleCache[code] = value
+}
+
+const commonActions = {
+  'a': (params) => {
+    toggleSpam('a', params.value, () => {
+    })
+  },
+  'b': (params) => {
+    toggleSpam('b', params.value, () => {
+    })
+  },
+  'x': (params) => {
+    toggleSpam('x', params.value, () => {
+    })
+  },
+}
+
+const performRPC = {
+  ...commonActions,
+  'y': (params) => {
+  },
+  'up': (params) => {
+    if(params.value === 1) {
+      debounceSpam('up', 250, () => {
+        slideBack()
+      })
+    }
+  },
+  'down': (params) => {
+    if(params.value === 1) {
+      debounceSpam('down', 250, () => {
+        slideNext()
+      })
+    }
+  },
+  'left': (params) => {
+    if(params.value === 1) {
+      debounceSpam('left', 250, () => {
+        slideBack()
+      })
+    }
+  },
+  'right': (params) => {
+    if(params.value === 1) {
+      debounceSpam('right', 250, () => {
+        slideNext()
+      })
+    }
+  },
+}
+
+
+e('json-rpc', (event) => {
+  const { method, params } = event.detail
+
+  if(performRPC[method]) {
+    performRPC[method](params)
+  }
+})
+
+function standardAction(code) {
+  return (target, params) => {
+    notification(target, code, params)
+  }
+}
+
+const actions = {
+  a: standardAction('a'),
+  b: standardAction('b'),
+  x: standardAction('x'),
+  y: standardAction('y'),
+  lb: standardAction('lb'),
+  rb: standardAction('rb'),
+  lt: standardAction('lt'),
+  rt: standardAction('rt'),
+  ls: standardAction('ls'),
+  rs: standardAction('rs'),
+  select: standardAction('select'),
+  start: standardAction('start'),
+  up: standardAction('up'),
+  down: standardAction('down'),
+  left: standardAction('left'),
+  right: standardAction('right'),
+}
+
+function notification(node, method, params) {
+  if(node) {
+    node.dispatchEvent(new CustomEvent('json-rpc', {
+      detail: {
+        jsonrpc: "2.0",
+        method: method,
+        params
+      }
+    }))
+  }
+}
+
+function standardFire(player, node, code) {
+  if(player[code]) {
+    actions[code](node, {
+      type: 'click',
+      value: 1
+    })
+  } else {
+    actions[code](node, {
+      type: 'click',
+      value: 0
+    })
+  }
+}
+
+const forceCache = {}
+
+// essentially make sure the button was released to ensure the screen
+function forceAcknowledge(code, value, callback) {
+  if(value === 0 && !forceCache[code]) {
+    forceCache[code] = 0
+    return
+  }
+  if(forceCache[code] === 1 || (forceCache[code] === 0 && value === 1)) {
+    forceCache[code] = 1
+    callback()
+  }
+}
+
+function clearAcknowledge(code) {
+  delete forceCache[code]
+}
+
+
+function player1(code) {
+  return checkButton(0, BUTTON_CODES[code])
+}
+
+function gameLoop(time) {
+  const { paused } = m()
+
+  if(!paused) {
+    const node = document.querySelector(link)
+
+    if(node) {
+      const player = {
+        a: player1('a'),
+        b: player1('b'),
+        x: player1('x'),
+        y: player1('y'),
+        lb: player1('lb'),
+        rb: player1('rb'),
+        lt: player1('lt'),
+        rt: player1('rt'),
+        select: player1('select'),
+        start: player1('start'),
+        ls: player1('ls'),
+        rs: player1('rs'),
+        up: player1('up'),
+        down: player1('down'),
+        left: player1('left'),
+        right: player1('right'),
+        os: player1('os'),
+      }
+
+      standardFire(player, node, 'a')
+      standardFire(player, node, 'b')
+      standardFire(player, node, 'x')
+      standardFire(player, node, 'y')
+      standardFire(player, node, 'lb')
+      standardFire(player, node, 'rb')
+      standardFire(player, node, 'lt')
+      standardFire(player, node, 'rt')
+      standardFire(player, node, 'ls')
+      standardFire(player, node, 'rs')
+      standardFire(player, node, 'up')
+      standardFire(player, node, 'down')
+      standardFire(player, node, 'left')
+      standardFire(player, node, 'right')
+
+      selectFire(player.select)
+
+      startFire(player.start)
+
+      toggleSpam('os', player.os, () => {
+        toggleOS()
+      })
+    }
+  }
+
+  requestAnimationFrame(gameLoop)
+}
+
+gameLoop()
+
+function selectFire(value) {
+  toggleSpam('select', value, () => {
+    toggleSettings()
+  })
+}
+
+function startFire(value) {
+  toggleSpam('start', value, () => {
+    togglePause()
+  })
+}
+
+function toggleOS (event) {
+  $.teach({ index: 0 })
+}
+
+function toggleSettings (event) {
+  $.teach({ index: 0 })
+}
+
+function togglePause (event) {
+  $.teach({ index: 0 })
+}
