@@ -44,6 +44,7 @@
     "@sillonious/computer": "/public/sillyz.computer.js",
     "@silly/tag": "/public/module.js",
     "@silly/elf": "/public/elf.js",
+    "@silly/sky": "/public/elves/blue-sky.js",
     "@silly/helpers": "/public/elves/hyper-helpers.js",
     "@silly/saga": "/public/saga.js",
     "@silly/cache": "/public/cache.js",

@@ -648,7 +648,15 @@ $.when('submit', '[action="confirmDelete"]', async (event) => {
   }
 })
 
+export async function shirtPost(nonsense) {
+  const facets = await detectFacets(nonsense)
 
+  return await agent.post({
+    text: nonsense,
+    facets,
+    createdAt: new Date().toISOString()
+  })
+}
 
 $.when('submit', '[action="post"]', async (event) => {
   event.preventDefault()

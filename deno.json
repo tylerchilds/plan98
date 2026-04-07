@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "exports": "./mod.ts",
   "tasks": {
+    "start-peer": "cd client && deno task start",
     "test": "deno run --allow-env --config deno.json --location http://localhost client/public/tests.js",
     "provision": "./provision.sh",
     "package": "deno run -A .deno/to-npm.js",
@@ -20,7 +21,6 @@
 
     "vendor": "deno run -A vendor.ts",
 
-    "start-peer": "cd client && deno task start",
     "deploy-peer": "cd client && deno task deploy",
     "deploy-peer": "cd client && deployctl deploy --no-static --entrypoint=./server.js --prod --exclude=./private --exclude=.env --include=./public --include=./server.js --env-file",
     "debug-peer": "cd client && deno run -A --inspect-brk server.js",
