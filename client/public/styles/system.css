@@ -223,6 +223,8 @@ body {
   box-sizing: border-box;
   height: 100%;
   min-height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -273,7 +275,7 @@ h1 {
 }
 
 h1::after {
-  content: '*';
+  content: ' *';
 }
 
 h2 {
@@ -283,7 +285,7 @@ h2 {
 }
 
 h2::after {
-  content: '**';
+  content: ' **';
 }
 
 
@@ -296,7 +298,7 @@ h3 {
 }
 
 h3::after {
-  content: '***';
+  content: ' #';
 }
 
 h4 {
@@ -308,7 +310,7 @@ h4 {
 }
 
 h4::after {
-  content: '****';
+  content: ' ##';
 }
 
 h5 {
@@ -321,7 +323,7 @@ h5 {
 }
 
 h5::after {
-  content: '*****';
+  content: ' .';
 }
 
 h6 {
@@ -334,7 +336,7 @@ h6 {
 }
 
 h6::after {
-  content: '******';
+  content: ' ..';
 }
 
 blockquote {
@@ -365,7 +367,7 @@ code {
 code {
   padding: 4px .5rem;
   overflow: auto;
-  display: inline;
+  display: inline-block;
 }
 
 pre {
@@ -1692,9 +1694,6 @@ sillonious-brand > xml-html {
   margin: 0 auto;
   max-width: 480px;
   padding: 3rem .5rem 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 
   & button,
   & a:link,

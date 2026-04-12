@@ -4,7 +4,7 @@ const $ = tag('source-code')
 
 
 
-$.draw(() => {
+$.draw((t) => {
   const entries = performance.getEntriesByType('resource');
 
   const nautiloids = entries.map((entry) => {
@@ -13,6 +13,6 @@ $.draw(() => {
   });
 
   return `
-    <was-code src="/public/plan98.js" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
+    <was-code src="${t.getAttribute('src')|| '/public/plan98.js'}" stack="${[...new Set(['/public/index.html', ...nautiloids])]}"></was-code>
   `
 })

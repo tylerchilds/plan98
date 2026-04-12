@@ -1,4 +1,5 @@
 import elf from '@silly/elf'
+import $paperPocket, { afterUpdateTheme } from './paper-pocket.js'
 
 /*
 
@@ -44,12 +45,18 @@ $.draw((target) => {
       <iframe class="live-view" src="/app/${elf}"></iframe>
     </div>
     <div data-scrub>
-      <button class="sillyz-switch">?</button>
+      <button class="sillyz-switch standard-button -smol">Modality Toggle</button>
     </div>
     <div class="slot2">
-      <was-code class="live-code" src="/public/elves/${elf}.js"></was-code>
+      <source-code class="live-code" src="/public/elves/${elf}.js"></source-code>
     </div>
   `
+}, {
+  afterUpdate(target) {
+    {
+      afterUpdateTheme($paperPocket, target)
+    }
+  }
 })
 
 $.when('save-success', '.live-code', (event) => {
@@ -150,7 +157,7 @@ $.style(`
     top: var(--offset, 100vh);
     transform: translateY(-10px);
     offset: 10px;
-    background: linear-gradient(black, white, black);
+    background: linear-gradient(black, var(--root-theme, white), black);
     z-index: 10;
     cursor: row-resize;
     height: 10px;
@@ -159,18 +166,7 @@ $.style(`
   }
 
   & .sillyz-switch {
-    border: 0;
-    padding: 5px;
-    background: mediumpurple;
-    text-shadow: 1px 1px white;
-    color: black;
     transform: translateY(-50%);
-    background: radial-gradient(white, black);
-    width: 2rem;
-    height: 2rem;
-    display: inline-grid;
-    place-content: center;
-    border-radius: 100%;
   }
 
   &[style*="--offset"][style*="10px"] .sillyz-switch {

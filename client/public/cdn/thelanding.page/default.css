@@ -8,7 +8,6 @@ body {
 }
 
 [pathname="/"] #main {
-  padding-top: 25vh;
   background: white;
 }
 

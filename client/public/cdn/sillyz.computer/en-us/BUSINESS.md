@@ -1,10 +1,10 @@
-[COMPUTER TELLERS APPLY HERE](https://plan98.org/)
+[Admins Only](/app/was-code?src=/public/cdn/sillyz.computer/en-us/BUSINESS.md)
 
 # Business Model
 
 A single representative to manage customer support requests, lift 50 lbs, and fulfill merchandise pickups and returns.
 
-**Two Year Runway Per Employee**
+## Two Year Runway Per Employee
 
 ```
 1 person working
@@ -87,10 +87,30 @@ You are their friendly, neighborhood computer teller!
 
 Honestly, this is just formalizing the paper work and the career path that you have already demonstrated the aptitude for by being free tech-support at every family gathering ever.
 
-### Sample Sales Script
+### Sample Sales Scripts
 
-[TheLanding.Page](https://thelanding.page) is powered by the [SaaS Platform](/app/was-code?src=/public/elves/saas-platform.js), which is a wrapper for the [Business Model](/app/was-code?src=/public/elves/business-model.js) that you can learn more about in the educational genre on [Shirt Flicks](https://shirtflicks.app). Take this [free rendition for any kids in your heart](https://sillyz.computer) powered by [Plan98](https://plan98.org).
+Call me on [ty@shirtflicks.app](mailto:ty@shirtflicks.app), that's [ty@shirtflicks.app](mailto:ty@shirtflicks.app).
 
-[COMPUTER TELLERS APPLY HERE](https://plan98.org/)
+Oh? [ShirtFlicks.App](https://shirtflicks.app) is an addictive Swipe Scroller, the bottom of the barrel audio/visual content produced with art, music, and code from [Sillyz.Computer](https://sillyz.computer).
 
-[Admins Only](/app/was-code?src=/public/cdn/sillyz.computer/en-us/BUSINESS.md)
+Oh? [Sillyz.Computer](https://sillyz.computer) is an entertainment experience that goes, "Once upon a time there was an Elf named Silly and I played his 'Computer Agent', and the rest is Computer History." And then I tell people that we're both building and you can follow us on [ComedyMap.Org](https://comedymap.org).
+
+Oh? [ComedyMap.Org](https://comedymap.org) is a private way for entertainers to share their current and future location with fans, built on [Plan98.Org](https://plan98.org).
+
+Oh? [Plan98.Org](https://plan98.org) is a collaborative operating system that combines the merits of Windows 98, Plan9, NLS, and Xanadu. You can read more about business models on [TheLanding.Page](https://thelanding.page).
+
+Oh? [TheLanding.Page](https://thelanding.page) is powered by the [SaaS Platform](/app/was-code?src=/public/elves/saas-platform.js) and the [Brand Config](/app/was-code?src=/public/elves/sillonious-brand.js). Just edit those in place or ask how to quit vim on [Vim Sky](https://plan98.org/app/vim-sky).
+
+Oh? [Vim Sky](https://plan98.org/app/vim-sky) is how I post to [Blue Sky](https://plan98.org/app/blue-sky), which is to twitter as [Cutestrap.Com](/?world=cutestrap.com) is to Bootstrap.
+
+Oh? [Cutestrap.Com](/?world=cutestrap.com) is the brand personality behind all of it. In lore, a collaboration between Sally, Shelly, and Wally.
+
+### Sample Bio
+
+Tyler Childs is the [CSS.CEO](https://css.ceo), but you can call him [TyChi.Me](https://tychi.me)-- a cereal tinkerer founder, with initatives ranging from indie projects such as the in web production lab [Sillyz.Computer](https://sillyz.computer) to the Memex Team-Up Initiative: the [Plan98.Org](https://plan98.org) platform.
+
+"Ty" partners with individuals, families, small businesses, and corporations to solve problems reflected in the generic solutions like [ComedyMap.Org](https://comedymap.org), [Cutestrap.Com](/?world=cutestrap.com), [ShirtFlicks.App](https://shirtflicks.app), [TheLanding.Page](https://thelanding.page), and more probably. He's pals with over 500 Elves on SinkedIn (wip).
+
+His greatest claim to fame is reverse-engineering his way into the Cyberpunk 2077 lore by seizing control of [NCity.ExecutionTime.Pub](https://ncity.executiontime.pub) and then using that power and responsibility as V to become the greatest edge-runner and net-runner hybrid cyber clown class to set the bar for the next generation of Bard College graduates.
+
+[Get In Touch](mailto:ty@shirtflicks.app)
