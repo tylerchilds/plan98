@@ -91,7 +91,7 @@ Honestly, this is just formalizing the paper work and the career path that you h
 
 Call me on [ty@shirtflicks.app](mailto:ty@shirtflicks.app), that's [ty@shirtflicks.app](mailto:ty@shirtflicks.app).
 
-Oh? [ShirtFlicks.App](https://shirtflicks.app) is an addictive Swipe Scroller, the bottom of the barrel audio/visual content produced with art, music, and code from [Sillyz.Computer](https://sillyz.computer).
+Oh? [ShirtFlicks.App](https://shirtflicks.app) is a set top box to clothing line powered by entertaining audio and visual content produced with art, music, and code from [Sillyz.Computer](https://sillyz.computer).
 
 Oh? [Sillyz.Computer](https://sillyz.computer) is an entertainment experience that goes, "Once upon a time there was an Elf named Silly and I played his 'Computer Agent', and the rest is Computer History." And then I tell people that we're both building and you can follow us on [ComedyMap.Org](https://comedymap.org).
 
@@ -111,6 +111,6 @@ Tyler Childs is the [CSS.CEO](https://css.ceo), but you can call him [TyChi.Me](
 
 "Ty" partners with individuals, families, small businesses, and corporations to solve problems reflected in the generic solutions like [ComedyMap.Org](https://comedymap.org), [Cutestrap.Com](/?world=cutestrap.com), [ShirtFlicks.App](https://shirtflicks.app), [TheLanding.Page](https://thelanding.page), and more probably. He's pals with over 500 Elves on SinkedIn (wip).
 
-His greatest claim to fame is reverse-engineering his way into the Cyberpunk 2077 lore by seizing control of [NCity.ExecutionTime.Pub](https://ncity.executiontime.pub) and then using that power and responsibility as V to become the greatest edge-runner and net-runner hybrid cyber clown class to set the bar for the next generation of Bard College graduates.
+His greatest claim to fame is reverse-engineering his way into the Cyberpunk 2077 lore by unlocking the in-game easter egg, [NCity.ExecutionTime.Pub](https://ncity.executiontime.pub), and then using that power and responsibility as V to become the greatest edge-runner and net-runner hybrid cyber clown class to set the bar for the next generation of Bard College graduates.
 
 [Get In Touch](mailto:ty@shirtflicks.app)

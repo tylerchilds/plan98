@@ -146,6 +146,8 @@ s(`
   & .arena {
     height: 100%;
     overflow: auto;
+    display: grid;
+    place-items: center;
   }
 
   & .tim-cookin {
@@ -408,13 +410,13 @@ function startFire(value) {
 }
 
 function toggleOS (event) {
-  $.teach({ index: 0 })
+  c({ index: 0 })
 }
 
 function toggleSettings (event) {
-  $.teach({ index: 0 })
+  c({ index: 0 })
 }
 
 function togglePause (event) {
-  $.teach({ index: 0 })
+  c({ index: 0 })
 }

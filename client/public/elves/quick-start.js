@@ -2,12 +2,10 @@ import elf from '@silly/elf'
 import {
   getSession,
   clearSession,
-} from './bayun-wizard.js'
-import {
   getPersona,
   provisionPersonaKeycard,
   handleSessionEnd
-} from './secure-persona.js'
+} from './cyber-security.js'
 import {
   walletDefaultHost
 } from './plan98-wallet.js'
@@ -200,12 +198,12 @@ const formRenderers = {
         <plan98-icon></plan98-icon>
         ${renderErrors()}
       </div>
-      <secure-persona></secure-persona>
+      <cyber-security></cyber-security>
     `
   },
   [forms.access]: (target) => {
     const { storageHost, loading } = $.learn()
-    const { sessionId, companyEmployeeId, companyName } = getSession()
+    const { sessionId, memberId, org } = getSession()
 
     return `
       <div>
@@ -216,7 +214,7 @@ const formRenderers = {
         Access
       </div>
       <div>
-        You are ${companyEmployeeId}@${companyName} <button class="standard-button -smol" data-logout>Switch</button>
+        You are ${memberId}@${org} <button class="standard-button -smol" data-logout>Switch</button>
       </div>
       <div class="form-description">
         Configure your storage provider so that you know the full supply chain of your own information.
@@ -336,7 +334,7 @@ const formValidators = {
   },
 }
 
-$.when('activated', 'secure-persona', (event) => {
+$.when('activated', 'cyber-security', (event) => {
   $.teach({ form: forms.access })
 })
 

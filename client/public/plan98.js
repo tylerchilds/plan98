@@ -576,12 +576,14 @@ function createStore(initialState = {}, broadcast = () => null) {
   return {
     set: function(elf, knowledge, nuance, options={ bypassSecurity: false }) {
       if (!QuickJS) {
-        // Apply initial state directly without sandboxing; security trade-off-- worth it for Silly.
         if (typeof nuance === 'function') {
+          // Local call: apply once now, never re-queue
           state = { ...state, [elf]: nuance(state[elf] || {}, knowledge) }
           broadcast(elf)
+        } else {
+          // Network merge needs sandboxing: defer until QuickJS ready
+          queue.push(() => this.set(elf, knowledge, nuance, options));
         }
-        queue.push(() => this.set(elf, knowledge, nuance, options));
         return;
       }
 

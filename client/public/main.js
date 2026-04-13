@@ -1,5 +1,6 @@
 import('randomuuid').catch(console.error)
 import { showModal, isVisible, hideModal } from './elves/plan98-modal.js'
+import './elves/dream-team.js'
 
 self.plan98 ||= { env: {} }
 

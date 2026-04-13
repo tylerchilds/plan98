@@ -65,7 +65,7 @@ export function clearSession() {
 
 export function logout() {
   const sessionId = getSessionId()
-  bayunCore.logout(sessionId)
+  bayunCore.logout({ sessionId })
   state['ls/bayun'] = {}
   clearSession()
   return 'Disconnected successfully.'
@@ -202,11 +202,11 @@ export async function auth(data, wishbacks) {
     authSingleton.mode = 'checking'
 
     return new Promise((resolve) => {
-      bayunCore.loginWithoutPassword(
-        '',
-        organization,
-        data,
-        (callbackData) => {
+      bayunCore.loginWithoutPassword({
+        sessionId: '',
+        orgName: organization,
+        orgMemberId: data,
+        securityQuestionsCallback: (callbackData) => {
           if (callbackData.sessionId &&
               callbackData.authenticationResponse === BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS) {
             authSingleton.sessionId = callbackData.sessionId
@@ -218,13 +218,13 @@ export async function auth(data, wishbacks) {
             resolve(`${authSingleton.questions[0].questionText}?`)
           }
         },
-        null,
-        (successData) => {
+        passphraseCallback: null,
+        successCallback: (successData) => {
           if (successData.sessionId) {
             resolve(completeAuth(successData.sessionId, wishbacks, 'Welcome back! You are now authenticated.'))
           }
         },
-        (error) => {
+        failureCallback: (error) => {
           if (error === "BayunErrorEmployeeDoesNotExist") {
             authSingleton.isNewUser = true
             authSingleton.mode = 'setup-question'
@@ -233,8 +233,9 @@ export async function auth(data, wishbacks) {
           } else {
             resolve(retryAuth(`Error: ${error}`))
           }
-        }
-      )
+        },
+        localDataEncryptionMode: localStorageMode,
+      })
     })
   }
 
@@ -260,51 +261,52 @@ export async function auth(data, wishbacks) {
       const handleSuccess = (sessionId) => resolve(completeAuth(sessionId, wishbacks, 'Account created successfully! You are now authenticated.'))
       const handleValidation = (sqData) => {
         authSingleton.sessionId = sqData.sessionId
-        bayunCore.validateSecurityQuestions(
-          sqData.sessionId,
-          authSingleton.setupQA.map((qa, i) => ({ questionId: String(i + 1), answer: qa.answer })),
-          () => {},
-          (successData) => handleSuccess(successData.sessionId),
-          (error) => resolve(`Validation failed: ${error}`)
-        )
+        bayunCore.validateSecurityQuestions({
+          sessionId: sqData.sessionId,
+          answers: authSingleton.setupQA.map((qa, i) => ({ questionId: String(i + 1), answer: qa.answer })),
+          authorizeMemberCallback: () => {},
+          successCallback: (successData) => handleSuccess(successData.sessionId),
+          failureCallback: (error) => resolve(`Validation failed: ${error}`),
+        })
       }
 
-      bayunCore.registerEmployeeWithoutPassword(
-        '',
-        organization,
-        getMemberId(),
-        `${getMemberId()}@${organization}`,
-        true,
-        (authData) => {
+      bayunCore.registerMemberWithoutPassword({
+        sessionId: '',
+        orgName: organization,
+        orgMemberId: getMemberId(),
+        email: `${getMemberId()}@${organization}`,
+        isOrgOwnedEmail: true,
+        authorizeMemberCallback: (authData) => {
           if (authData.authenticationResponse === BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
             resolve('Authorization pending. Please contact your admin.')
           }
         },
-        (credData) => {
+        newUserCredentialsCallback: (credData) => {
           if (credData.sessionId) {
             authSingleton.sessionId = credData.sessionId
-            bayunCore.setNewUserCredentials(
-              credData.sessionId,
-              authSingleton.setupQA,
-              null,
-              false,
-              () => {},
-              (successData) => handleSuccess(successData.sessionId),
-              (error) => resolve(retryAuth(`Setup failed: ${error}`))
-            )
+            bayunCore.setNewUserCredentials({
+              sessionId: credData.sessionId,
+              securityQuestions: authSingleton.setupQA,
+              passphrase: null,
+              registerFaceId: false,
+              authorizeMemberCallback: () => {},
+              successCallback: (successData) => handleSuccess(successData.sessionId),
+              failureCallback: (error) => resolve(retryAuth(`Setup failed: ${error}`)),
+            })
           }
         },
-        (sqData) => {
+        securityQuestionsCallback: (sqData) => {
           if (sqData.authenticationResponse === BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS) {
             handleValidation(sqData)
           }
         },
-        null,
-        (successData) => {
+        passphraseCallback: null,
+        successCallback: (successData) => {
           if (successData.sessionId) handleSuccess(successData.sessionId)
         },
-        (error) => resolve(retryAuth(`Registration failed: ${error}`))
-      )
+        failureCallback: (error) => resolve(retryAuth(`Registration failed: ${error}`)),
+        localDataEncryptionMode: localStorageMode,
+      })
     })
   }
 
@@ -326,16 +328,16 @@ export async function auth(data, wishbacks) {
     await new Promise(resolve => setTimeout(resolve, 100))
 
     return new Promise((resolve) => {
-      bayunCore.validateSecurityQuestions(
-        authSingleton.sessionId,
-        authSingleton.answers,
-        null,
-        (successData) => {
+      bayunCore.validateSecurityQuestions({
+        sessionId: authSingleton.sessionId,
+        answers: authSingleton.answers,
+        authorizeMemberCallback: null,
+        successCallback: (successData) => {
           if (successData.sessionId) {
             resolve(completeAuth(successData.sessionId, wishbacks, 'Welcome back! You are now authenticated.'))
           }
         },
-        (error) => {
+        failureCallback: (error) => {
           authSingleton.attempts++
           if (authSingleton.attempts >= MAX_ATTEMPTS) {
             return resolve(failAuth(wishbacks))
@@ -345,8 +347,8 @@ export async function auth(data, wishbacks) {
           authSingleton.mode = 'answer-question'
           wishbacks.enableSecureMode()
           resolve(`Incorrect answers. Let's try again.\n\n${authSingleton.questions[0].questionText}?`)
-        }
-      )
+        },
+      })
     })
   }
 
@@ -382,7 +384,11 @@ export async function provisionPersonaKeycard(options={}) {
   let group
   try {
     const groupType = BayunCore.GroupType.PRIVATE;
-    group = await bayunCore.createGroup(sessionId, `${companyEmployeeId}@${companyName}:friends`, groupType)
+    group = await bayunCore.createGroup({
+      sessionId,
+      groupName: `${companyEmployeeId}@${companyName}:friends`,
+      groupType,
+    })
   } catch(e) {
     throw new Error(`Failed to create secure group: ${e.message || e}`)
   }
@@ -417,7 +423,6 @@ async function updatePersona(payload, mergeHandler=(s,p) => ({...s,...p})) {
 export async function putPersona(persona) {
   const { companyEmployeeId, companyName } = getSession()
   const personaKeycard = listKeycards().find(x => {
-
     return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
   })
 
@@ -445,7 +450,6 @@ export async function putPersona(persona) {
 export async function getPersona() {
   const { companyEmployeeId, companyName } = getSession()
   const personaKeycard = listKeycards().find(x => {
-
     return x.companyName === companyName && x.companyEmployeeId === companyEmployeeId
   })
 
@@ -460,7 +464,6 @@ export async function getPersona() {
     signer,
     id: `urn:uuid:${keycard.id}`
   })
-
 
   const config = space.resource('/.plan98/persona.json')
 
@@ -479,12 +482,12 @@ export async function addFollow(moniker, organization) {
   let error = false
   if(persona.groupId) {
     const { sessionId } = getSession()
-    const result = await bayunCore.addParticipantToGroup(
+    const result = await bayunCore.addParticipantToGroup({
       sessionId,
-      persona.groupId,
-      moniker,
-      organization
-    ).catch(e => {
+      groupId: persona.groupId,
+      orgMemberId: moniker,
+      orgName: organization,
+    }).catch(e => {
       error = true
       console.error(e)
     })
@@ -526,12 +529,12 @@ export async function blockFollow(moniker, organization) {
   let error = false
   if(persona.groupId) {
     const { sessionId } = getSession()
-    const result = bayunCore.removeParticipantFromGroup(
+    const result = bayunCore.removeParticipantFromGroup({
       sessionId,
-      persona.groupId,
-      moniker,
-      organization
-    ).catch(e => {
+      groupId: persona.groupId,
+      orgMemberId: moniker,
+      orgName: organization,
+    }).catch(e => {
       error = true
       console.error(e)
     })
@@ -542,7 +545,7 @@ export async function blockFollow(moniker, organization) {
         function (state, payload) {
           const followers = [...state.followers].map(x => {
             if(x.moniker === moniker && x.organization === organization) {
-              x.approved = false 
+              x.approved = false
             }
             return x
           })
@@ -837,7 +840,7 @@ $.when('submit', '[name="insert"]', async (event) => {
   setOrgName(data.organization)
 
   $.teach({ data })
-  start()
+  start(data)
 })
 
 function mount(target) {
@@ -856,20 +859,19 @@ function mount(target) {
 
 export function __ready() {
   return new Promise((resolve, reject) => {
-    // wait 30 seconds
     const timeout = setTimeout(() => {
+      clearInterval(poll)
       reject('timeout exceeded')
     }, 1000 * 30)
 
-    function poll() {
+    const poll = setInterval(() => {
       const { ready } = $.learn()
       if(ready) {
+        clearTimeout(timeout)
+        clearInterval(poll)
         resolve()
       }
-      requestAnimationFrame(poll)
-    }
-
-    poll()
+    }, 100)
   })
 }
 
@@ -906,7 +908,7 @@ async function connect() {
   const { data } = $.learn()
   $.teach({ mode: 'loading'  })
 
-  if(!data) {
+  if(!data || !data.persona) {
     $.teach({ mode: 'onboard' })
     return
   }
@@ -919,7 +921,7 @@ async function connect() {
   const sessionId = getSessionId()
 
   if(!sessionId) {
-    start()
+    start(data)
     return
   }
 
@@ -964,9 +966,6 @@ const securityQuestionsCallback = data => {
   if (data.sessionId) {
     if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS){
       let securityQuestionsArray = data.securityQuestions;
-      //securityQuestionsArray is a list of Security Question Objects with questionId, questionText 
-      // Iterate through securityQuestionsArray
-      // debugger
 
       const questions = {}
       securityQuestionsArray.forEach(val=>{
@@ -978,32 +977,29 @@ const securityQuestionsCallback = data => {
         questions,
         mode: 'challenge'
       })
-      //Show custom UI to take user input for the answers.
-      //Call validateSecurityQuestions function with the user provided answers.
     }
   }
 }
 
 $.when('submit', '[name="provision"]', (event) => {
   event.preventDefault()
-  provision(event) 
+  provision(event)
 })
 
 $.when('submit', '[name="validate"]', (event) => {
   event.preventDefault()
-  validate(event) 
+  validate(event)
 })
 
-function start(event) {
-  const companyEmployeeId = getMemberId()
-  const companyName = getOrgName()
+function start(data) {
+  const companyEmployeeId = data.persona || getMemberId()
+  const companyName = data.organization || getOrgName()
   const prerequirements = !!companyName && !!companyEmployeeId
 
   if(prerequirements) {
     const successCallback = data => {
       if (data.sessionId) {
         setSessionId(data.sessionId)
-        //LoggedIn Successfully
         $.teach({
           ...baseQandA,
           mode: 'authenticated'
@@ -1014,22 +1010,23 @@ function start(event) {
 
     const failureCallback = error => {
       if(error === "BayunErrorEmployeeDoesNotExist") {
-        provision()
+        provision({ persona: companyEmployeeId, organization: companyName })
       }
     };
 
     $.teach({ mode: 'loading'  })
 
     schedule(() => {
-      bayunCore.loginWithoutPassword(
-        '', //sessionId,
-        companyName,
-        companyEmployeeId,
+      bayunCore.loginWithoutPassword({
+        sessionId: '',
+        orgName: companyName,
+        orgMemberId: companyEmployeeId,
         securityQuestionsCallback,
-        null, //passphraseCallback,
+        passphraseCallback: null,
         successCallback,
-        failureCallback
-      );
+        failureCallback,
+        localDataEncryptionMode: localStorageMode,
+      });
     })
   } else {
     setError('Missing information.')
@@ -1046,33 +1043,12 @@ function securityQuestionsAnswersActivation() {
     answer5,
   } = $.learn()
 
-  //Take User Input for Security Questions and Answers
-  //Here securityQuestionsAnswers object is created just for reference
-  const qa=[];
-  qa.push({
-    questionId: '1',
-    answer: answer1
-  });
-
-  qa.push({
-    questionId: '2',
-    answer: answer2
-  });
-
-  qa.push({
-    questionId: '3',
-    answer: answer3
-  });
-
-  qa.push({
-    questionId: '4',
-    answer: answer4
-  });
-
-  qa.push({
-    questionId: '5',
-    answer: answer5
-  });
+  const qa = [];
+  qa.push({ questionId: '1', answer: answer1 });
+  qa.push({ questionId: '2', answer: answer2 });
+  qa.push({ questionId: '3', answer: answer3 });
+  qa.push({ questionId: '4', answer: answer4 });
+  qa.push({ questionId: '5', answer: answer5 });
 
   return qa
 }
@@ -1098,23 +1074,13 @@ function validate(event) {
     $.teach({ mode: 'challenge'  })
   };
 
-  bayunCore.validateSecurityQuestions(
+  bayunCore.validateSecurityQuestions({
     sessionId,
-    securityQuestionsAnswersActivation(),
-    null,
+    answers: securityQuestionsAnswersActivation(),
+    authorizeMemberCallback: null,
     successCallback,
-    failureCallback
-  );
-}
-
-function authorizeEmployee(event) {
-  return function authorizeEmployeeCallback(data){
-    if (data.sessionId) {
-      if (data.authenticationResponse == BayunCore.AuthenticateResponse.AUTHORIZATION_PENDING) {
-        // You can get employeePublicKey in data.employeePublicKey for it's authorization
-      }
-    }
-  };
+    failureCallback,
+  });
 }
 
 function newUserCredentials(event) {
@@ -1130,67 +1096,37 @@ function newUserCredentials(event) {
       };
 
       const failureCallback = error => {
-        //setError(error)
         $.teach({ mode: 'provision'  })
       };
 
-      // Take user Input for optional registerFaceId
-      const registerFaceId=false;
-
-      bayunCore.setNewUserCredentials(
-        data.sessionId,
-        securityQuestionsAnswersSetup(),
-        null, //passphrase,
-        registerFaceId,
-        authorizeEmployee(event),
+      bayunCore.setNewUserCredentials({
+        sessionId: data.sessionId,
+        securityQuestions: securityQuestionsAnswersSetup(),
+        passphrase: null,
+        registerFaceId: false,
+        authorizeMemberCallback: () => {},
         successCallback,
-        failureCallback
-      );
+        failureCallback,
+      });
     }
   }
 }
 
 function securityQuestionsAnswersSetup() {
   const {
-    question1,
-    answer1,
-    question2,
-    answer2,
-    question3,
-    answer3,
-    question4,
-    answer4,
-    question5,
-    answer5,
+    question1, answer1,
+    question2, answer2,
+    question3, answer3,
+    question4, answer4,
+    question5, answer5,
   } = $.learn()
 
-  //Take User Input for Security Questions and Answers
-  //Here securityQuestionsAnswers object is created just for reference
-  const qa=[];
-  qa.push({
-    question: question1,
-    answer: answer1
-  });
-
-  qa.push({
-    question: question2,
-    answer: answer2
-  });
-
-  qa.push({
-    question: question3,
-    answer: answer3
-  });
-
-  qa.push({
-    question: question4,
-    answer: answer4
-  });
-
-  qa.push({
-    question: question5,
-    answer: answer5
-  });
+  const qa = [];
+  qa.push({ question: question1, answer: answer1 });
+  qa.push({ question: question2, answer: answer2 });
+  qa.push({ question: question3, answer: answer3 });
+  qa.push({ question: question4, answer: answer4 });
+  qa.push({ question: question5, answer: answer5 });
 
   return qa
 }
@@ -1199,71 +1135,60 @@ function securityQuestions(event) {
   return function securityQuestionsCallback(data) {
     if (data.sessionId) {
       if(data.authenticationResponse == BayunCore.AuthenticateResponse.VERIFY_SECURITY_QUESTIONS){
-
-        // we can get the questions from data.securityQuestions,
-        // but we already have the first pass in memory
-        // data.securityQuestions;
-
         const successCallback = data => {
-          //Security Questions' Answers validated and registered employee successfully.
-          //Login to continue.
           login(event)
         };
 
         const failureCallback = error => {
           console.error(error)
-          //setError(error)
           $.teach({ mode: 'provision'  })
         };
 
-        bayunCore.validateSecurityQuestions(
-          data.sessionId,
-          securityQuestionsAnswersActivation(),
-          authorizeEmployee(event),
+        bayunCore.validateSecurityQuestions({
+          sessionId: data.sessionId,
+          answers: securityQuestionsAnswersActivation(),
+          authorizeMemberCallback: () => {},
           successCallback,
-          failureCallback
-        );
+          failureCallback,
+        });
       }
     }
   };
 }
 
-async function provision(event) {
-  $.teach({
-    mode: 'provision',
-  })
+async function provision(data) {
+  const companyEmployeeId = (data && data.persona) || getMemberId()
+  const companyName = (data && data.organization) || getOrgName()
 
-  const companyEmployeeId = getMemberId()
-  const companyName = getOrgName()
+  $.teach({ mode: 'provision' })
+
   const prerequirements = !!companyName && !!companyEmployeeId
 
   if(prerequirements) {
     const successCallback = data => {
-      validate(event)
+      validate()
     };
 
     const failureCallback = error => {
-      //setError(error)
-      $.teach({
-        mode: 'provision',
-      })
+      $.teach({ mode: 'provision' })
     };
 
     $.teach({ mode: 'loading'  })
 
-    bayunCore.registerEmployeeWithoutPassword(
-      '', //sessionId,
-      companyName,
-      companyEmployeeId,
-      `${companyEmployeeId}@${companyName}`,
-      true, //isCompanyOwnedEmail,
-      authorizeEmployee(event),
-      newUserCredentials(event),
-      securityQuestions(event),
-      null, //passphraseCallback,
+    bayunCore.registerMemberWithoutPassword({
+      sessionId: '',
+      orgName: companyName,
+      orgMemberId: companyEmployeeId,
+      email: `${companyEmployeeId}@${companyName}`,
+      isOrgOwnedEmail: true,
+      authorizeMemberCallback: () => {},
+      newUserCredentialsCallback: newUserCredentials(),
+      securityQuestionsCallback: securityQuestions(),
+      passphraseCallback: null,
       successCallback,
-      failureCallback
-    );
+      failureCallback,
+      localDataEncryptionMode: localStorageMode,
+    });
   } else {
     setError('Missing Information.')
     $.teach({ mode: 'challenge'  })
@@ -1370,4 +1295,3 @@ $.when('gallery-share', 'plan98-gallery', (event) => {
     $.teach({ personaAttribute: null })
   }
 })
-

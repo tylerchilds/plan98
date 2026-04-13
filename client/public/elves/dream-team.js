@@ -21,6 +21,116 @@ const table = {}
 let lastMyGroupIds = null
 let lastOtherGroupIds = null
 
+// Decryption concurrency queue
+const DECRYPT_CONCURRENCY = 8
+let activeDecryptions = 0
+const decryptQueue = []
+
+function flushDecryptQueue() {
+  while (decryptQueue.length > 0 && activeDecryptions < DECRYPT_CONCURRENCY) {
+    const task = decryptQueue.shift()
+    activeDecryptions++
+    task().finally(() => {
+      activeDecryptions--
+      flushDecryptQueue()
+    })
+  }
+}
+
+function queueDecrypt(task) {
+  decryptQueue.push(task)
+  flushDecryptQueue()
+}
+
+// Track what we've already scheduled decryption for to avoid re-scanning
+let lastDecryptRoom = null
+let lastDecryptMessageKeys = ''
+let lastDecryptThreadKeys = ''
+
+function maybeDecrypt(target) {
+  const { sessionId } = getSession()
+  if (!sessionId) return
+
+  const { currentRoom, messages, threads } = $.model()
+  if (!currentRoom) return
+
+  const roomMessages = messages[currentRoom] || {}
+  const roomThreads = threads[currentRoom] || {}
+
+  const msgKeys = Object.keys(roomMessages).join(',')
+  const thrKeys = Object.entries(roomThreads).map(([k, v]) => `${k}:${Object.keys(v).length}`).join(',')
+
+  // Only scan if something actually changed
+  if (lastDecryptRoom === currentRoom && lastDecryptMessageKeys === msgKeys && lastDecryptThreadKeys === thrKeys) return
+  lastDecryptRoom = currentRoom
+  lastDecryptMessageKeys = msgKeys
+  lastDecryptThreadKeys = thrKeys
+
+  if (!table[currentRoom]) table[currentRoom] = {}
+
+  Object.keys(roomMessages).forEach(mid => {
+    const message = roomMessages[mid]
+    const decryptKey = `${currentRoom}:${mid}`
+
+    if (!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
+      decryptionInProgress.add(decryptKey)
+      table[currentRoom][mid] = { ...message, decrypted: 'Decrypting...' }
+
+      queueDecrypt(() =>
+        bayunCore.unlockText({ sessionId, lockedText: message.encrypted })
+          .then(decrypted => {
+            table[currentRoom][mid] = { ...message, decrypted }
+            decryptionInProgress.delete(decryptKey)
+            updateMessageElement(target, mid, message.author, decrypted)
+          })
+          .catch(e => {
+            console.error('Decryption error:', e)
+            const errorMsg = 'Failed to decrypt message. Are you authorized?'
+            table[currentRoom][mid] = { ...message, decrypted: errorMsg }
+            decryptionInProgress.delete(decryptKey)
+            updateMessageElement(target, mid, message.author, errorMsg)
+          })
+      )
+    }
+  })
+
+  if (!table[`${currentRoom}:threads`]) table[`${currentRoom}:threads`] = {}
+
+  Object.keys(roomThreads).forEach(parentId => {
+    if (!table[`${currentRoom}:threads`][parentId]) table[`${currentRoom}:threads`][parentId] = {}
+
+    const threadReplies = roomThreads[parentId]
+
+    Object.keys(threadReplies).forEach(replyId => {
+      const reply = threadReplies[replyId]
+      const decryptKey = `${currentRoom}:thread:${parentId}:${replyId}`
+
+      if (!table[`${currentRoom}:threads`][parentId][replyId] && !decryptionInProgress.has(decryptKey)) {
+        decryptionInProgress.add(decryptKey)
+        table[`${currentRoom}:threads`][parentId][replyId] = { ...reply, decrypted: 'Decrypting...' }
+
+        queueDecrypt(() =>
+          bayunCore.unlockText({ sessionId, lockedText: reply.encrypted })
+            .then(decrypted => {
+              table[`${currentRoom}:threads`][parentId][replyId] = { ...reply, decrypted }
+              decryptionInProgress.delete(decryptKey)
+              updateReplyElement(target, replyId, reply.author, decrypted)
+            })
+            .catch(e => {
+              console.error('Reply decryption error:', e)
+              const errorMsg = 'Failed to decrypt reply.'
+              table[`${currentRoom}:threads`][parentId][replyId] = { ...reply, decrypted: errorMsg }
+              decryptionInProgress.delete(decryptKey)
+              updateReplyElement(target, replyId, reply.author, errorMsg)
+            })
+        )
+      }
+    })
+  })
+}
+
+
+
 // Track which messages are being decrypted to avoid duplicate attempts
 const decryptionInProgress = new Set()
 let wasAtBottom = true
@@ -75,7 +185,11 @@ const leave = (state, id) => ({
 // Group management functions
 export async function getMyGroups() {
   const { sessionId } = getSession()
-  return await bayunCore.getMyGroups(sessionId)
+  if(!sessionId) {
+    console.error('no session id...')
+    return
+  }
+  return await bayunCore.getMyGroups({ sessionId })
     .then(result => {
       $.whisper({ myGroups: result })
       return result
@@ -88,7 +202,11 @@ export async function getMyGroups() {
 
 export async function getOtherGroups() {
   const { sessionId } = getSession()
-  return await bayunCore.getUnjoinedPublicGroups(sessionId)
+  if(!sessionId) {
+    console.error('no session id...')
+    return
+  }
+  return await bayunCore.getUnjoinedPublicGroups({ sessionId })
     .then(result => {
       $.whisper({ otherGroups: result })
       return result
@@ -100,7 +218,7 @@ export async function getOtherGroups() {
 }
 
 function activateGroup(sessionId, id) {
-  bayunCore.getGroupById(sessionId, id)
+  bayunCore.getGroupById({ sessionId, groupId: id })
     .then(result => {
       $.whisper({ currentRoom: result.groupId, showActionMenu: false, view: 'chat' })
     })
@@ -111,7 +229,7 @@ function activateGroup(sessionId, id) {
 }
 
 function loadGroupInfo(sessionId, groupId) {
-  bayunCore.getGroupById(sessionId, groupId)
+  bayunCore.getGroupById({ sessionId, groupId })
     .then(result => {
       const groupList = result.groupMembers.reduce((all, one) => {
         if(!all[one.companyName]) {
@@ -402,7 +520,6 @@ const viewRenderers = {
       </div>
     `
   },
-
   [views.shell]: (target) => {
     const { currentRoom } = $.model()
     return `
@@ -433,7 +550,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/multi-task?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -451,7 +567,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/mobile-device?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -469,7 +584,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/file-surf?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -487,7 +601,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/paper-pocket?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -505,7 +618,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/paper-pocket?rom=couch-coop&id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -523,7 +635,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/time-machine?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -541,12 +652,10 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/brain-storm?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
   },
-
   [views.studio]: (target) => {
     const { currentRoom } = $.model()
     return `
@@ -560,7 +669,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/v-log?id=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -578,12 +686,10 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
   },
-
   [views.video]: (target) => {
     const { currentRoom } = $.model()
     return `
@@ -597,7 +703,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="/app/live-help?room=${currentRoom || ''}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -615,7 +720,6 @@ const viewRenderers = {
             </button>
           </div>
         </div>
-
         <iframe src="${iframeSrc}" style="width:100%;height:100%;border:none;"></iframe>
       </div>
     `
@@ -631,7 +735,6 @@ function drawGroupButton(group) {
 }
 
 $.view(target => {
-  // Don't render anything for main view - afterUpdate handles all DOM building and patching
   return null
 }, {
   beforeUpdate,
@@ -651,128 +754,15 @@ function beforeUpdate(target) {
 
       if(q) {
         const message = decodeURIComponent(q)
-        //$.whisper({ messageText: message })
       }
     }
   }
 
   {
-    const { sessionId } = getSession()
-    const { currentRoom, messages, threads } = $.model()
-
     const id = getMyId()
     const me = $.model().players[id]
     const isOnline = !!me?.online
-
-    if(isOnline) {
-
-      if(sessionId && messages[currentRoom]) {
-        // Initialize room table if needed
-        if(!table[currentRoom]) {
-          table[currentRoom] = {}
-        }
-
-        // Find messages that need decryption
-        const roomMessages = messages[currentRoom]
-
-        Object.keys(roomMessages).forEach(mid => {
-          const message = roomMessages[mid]
-          const decryptKey = `${currentRoom}:${mid}`
-
-          // Only decrypt if we haven't already and not in progress
-          if(!table[currentRoom][mid] && !decryptionInProgress.has(decryptKey)) {
-            // Mark as in progress
-            decryptionInProgress.add(decryptKey)
-
-            // Add to table immediately with placeholder
-            table[currentRoom][mid] = {
-              ...message,
-              decrypted: 'Decrypting...'
-            }
-
-            // Decrypt asynchronously
-            bayunCore.unlockText(sessionId, message.encrypted)
-              .then(decrypted => {
-                table[currentRoom][mid] = {
-                  ...message,
-                  decrypted
-                }
-                decryptionInProgress.delete(decryptKey)
-                // Update only the specific message element
-                updateMessageElement(target, mid, message.author, decrypted)
-              })
-              .catch(e => {
-                console.error('Decryption error:', e)
-                const errorMsg = 'Failed to decrypt message. Are you authorized?'
-                table[currentRoom][mid] = {
-                  ...message,
-                  decrypted: errorMsg
-                }
-                decryptionInProgress.delete(decryptKey)
-                // Update only the specific message element
-                updateMessageElement(target, mid, message.author, errorMsg)
-              })
-          }
-        })
-      }
-    }
-
-    // Decrypt thread replies
-    if(sessionId && threads[currentRoom]) {
-      // Initialize thread table if needed
-      if(!table[`${currentRoom}:threads`]) {
-        table[`${currentRoom}:threads`] = {}
-      }
-
-      const roomThreads = threads[currentRoom]
-
-      Object.keys(roomThreads).forEach(parentId => {
-        if(!table[`${currentRoom}:threads`][parentId]) {
-          table[`${currentRoom}:threads`][parentId] = {}
-        }
-
-        const threadReplies = roomThreads[parentId]
-
-        Object.keys(threadReplies).forEach(replyId => {
-          const reply = threadReplies[replyId]
-          const decryptKey = `${currentRoom}:thread:${parentId}:${replyId}`
-
-          // Only decrypt if we haven't already and not in progress
-          if(!table[`${currentRoom}:threads`][parentId][replyId] && !decryptionInProgress.has(decryptKey)) {
-            // Mark as in progress
-            decryptionInProgress.add(decryptKey)
-
-            // Add to table immediately with placeholder
-            table[`${currentRoom}:threads`][parentId][replyId] = {
-              ...reply,
-              decrypted: 'Decrypting...'
-            }
-
-            // Decrypt asynchronously
-            bayunCore.unlockText(sessionId, reply.encrypted)
-              .then(decrypted => {
-                table[`${currentRoom}:threads`][parentId][replyId] = {
-                  ...reply,
-                  decrypted
-                }
-                decryptionInProgress.delete(decryptKey)
-                // Update only the specific reply element
-                updateReplyElement(target, replyId, reply.author, decrypted)
-              })
-              .catch(e => {
-                console.error('Reply decryption error:', e)
-                const errorMsg = 'Failed to decrypt reply.'
-                table[`${currentRoom}:threads`][parentId][replyId] = {
-                  ...reply,
-                  decrypted: errorMsg
-                }
-                decryptionInProgress.delete(decryptKey)
-                updateReplyElement(target, replyId, reply.author, errorMsg)
-              })
-          }
-        })
-      })
-    }
+    if (isOnline) maybeDecrypt(target)
   }
 
   saveCursor(target)
@@ -786,7 +776,6 @@ function parseDecrypted(decryptedText) {
       attachments: parsed.attachments || []
     }
   } catch {
-    // Legacy messages that are just plain HTML
     return { html: decryptedText, attachments: [] }
   }
 }
@@ -865,7 +854,6 @@ function afterUpdate(target) {
   const me = $.model().players[id]
   const isOnline = !!me?.online
 
-  // Initialize DOM template ONCE and never rebuild it
   if(!target.templateBuilt) {
     target.templateBuilt = true
     const { participants, myGroups, otherGroups, group = '' } = $.model()
@@ -877,7 +865,7 @@ function afterUpdate(target) {
         </div>
       </div>
       <div class="chat-app" style="display: none;">
-        <button class="toggle-sidebar" data-toggle-sidebar data-tooltip="hey,<br>whooops i didnt' amean to <br> make ups">
+        <button class="toggle-sidebar" data-toggle-sidebar>
           <sl-icon name="arrow-left-circle-fill"></sl-icon>
         </button>
         <div class="sidebar">
@@ -912,63 +900,43 @@ function afterUpdate(target) {
               <div class="app-launcher-section">
                 <div class="subtitle">APPS</div>
                 <button class="app-launcher-btn" data-launcher="wallet">
-                  <span>
-                    <sl-icon name="key"></sl-icon>
-                  </span>
+                  <span><sl-icon name="key"></sl-icon></span>
                   <span>Keys</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="shell">
-                  <span>
-                    <sl-icon name="terminal"></sl-icon>
-                  </span>
+                  <span><sl-icon name="terminal"></sl-icon></span>
                   <span>Shell</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="desktop">
-                  <span>
-                    <sl-icon name="window-stack"></sl-icon>
-                  </span>
+                  <span><sl-icon name="window-stack"></sl-icon></span>
                   <span>Doors</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="mobile">
-                  <span>
-                    <sl-icon name="phone"></sl-icon>
-                  </span>
+                  <span><sl-icon name="phone"></sl-icon></span>
                   <span>Mobile</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="files">
-                  <span>
-                    <sl-icon name="folder2"></sl-icon>
-                  </span>
+                  <span><sl-icon name="folder2"></sl-icon></span>
                   <span>Files</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="console">
-                  <span>
-                    <sl-icon name="controller"></sl-icon>
-                  </span>
+                  <span><sl-icon name="controller"></sl-icon></span>
                   <span>Console</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="coop">
-                  <span>
-                    <sl-icon name="border"></sl-icon>
-                  </span>
+                  <span><sl-icon name="border"></sl-icon></span>
                   <span>Coop</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="archive">
-                  <span>
-                    <sl-icon name="archive"></sl-icon>
-                  </span>
+                  <span><sl-icon name="archive"></sl-icon></span>
                   <span>Archive</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="studio">
-                  <span>
-                    <sl-icon name="palette"></sl-icon>
-                  </span>
+                  <span><sl-icon name="palette"></sl-icon></span>
                   <span>Studio</span>
                 </button>
                 <button class="app-launcher-btn" data-launcher="brain">
-                  <span>
-                    <sl-icon name="cloud-lightning"></sl-icon>
-                  </span>
+                  <span><sl-icon name="cloud-lightning"></sl-icon></span>
                   <span>Brain Storm</span>
                 </button>
               </div>
@@ -976,9 +944,7 @@ function afterUpdate(target) {
 
             <div class="sidebar-footer">
               <button class="standard-button bias-generic footer-button" data-preferences>
-                <span>
-                  <sl-icon name="gear"></sl-icon>
-                </span>
+                <span><sl-icon name="gear"></sl-icon></span>
                 <span>Preferences</span>
               </button>
             </div>
@@ -991,7 +957,6 @@ function afterUpdate(target) {
     `
   }
 
-  // Toggle visibility based on authentication
   const authArea = target.querySelector('.zero-space')
   const chatApp = target.querySelector('.chat-app')
 
@@ -1005,9 +970,7 @@ function afterUpdate(target) {
     }
   }
 
-  // If not authenticated, stop here
   if(!isOnline) {
-    // Apply sidebar width and visibility
     {
       const { sidebarWidth, sidebarVisible } = $.model()
       const sidebar = target.querySelector('.sidebar')
@@ -1015,31 +978,21 @@ function afterUpdate(target) {
       const toggleBtn = target.querySelector('.toggle-sidebar')
 
       if(sidebar && chatAppEl) {
-        if(sidebar.style.width !== `${sidebarWidth}px`) {
-          sidebar.style.width = `${sidebarWidth}px`
-        }
-
+        if(sidebar.style.width !== `${sidebarWidth}px`) sidebar.style.width = `${sidebarWidth}px`
         chatAppEl.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
         chatAppEl.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
-
         if(toggleBtn && window.innerWidth > 768) {
           const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
-          if(toggleBtn.style.left !== leftPos) {
-            toggleBtn.style.left = leftPos
-          }
+          if(toggleBtn.style.left !== leftPos) toggleBtn.style.left = leftPos
         }
       }
     }
-
-    // Update toggle button icon based on sidebar visibility
     {
       const { sidebarVisible } = $.model()
       const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
       if(toggleBtn) {
         const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
-        if(toggleBtn.getAttribute('name') !== iconName) {
-          toggleBtn.setAttribute('name', iconName)
-        }
+        if(toggleBtn.getAttribute('name') !== iconName) toggleBtn.setAttribute('name', iconName)
       }
     }
     return
@@ -1050,10 +1003,7 @@ function afterUpdate(target) {
     const mainContent = target.querySelector('.main-content')
 
     if (mainContent && mainContent.dataset.view !== view) {
-      // Leaving chat — clean up editors before innerHTML wipe
-      if (mainContent.dataset.view === views.chat) {
-        destroyTiptapEditors()
-      }
+      if (mainContent.dataset.view === views.chat) destroyTiptapEditors()
       mainContent.dataset.view = view
       const renderer = viewRenderers[view] || viewRenderers[views.profile]
       mainContent.innerHTML = renderer(target)
@@ -1074,19 +1024,12 @@ function afterUpdate(target) {
     const { showAttachments } = $.model()
     const attachPanel = target.querySelector('.attachments-panel:not(.attachments-panel-reply)')
     const attachBtn = target.querySelector('[data-attach]')
-    if (attachPanel) {
-      attachPanel.classList.toggle('open', showAttachments)
-    }
-    if (attachBtn) {
-      attachBtn.classList.toggle('active', showAttachments)
-    }
+    if (attachPanel) attachPanel.classList.toggle('open', showAttachments)
+    if (attachBtn) attachBtn.classList.toggle('active', showAttachments)
     const attachResizer = target.querySelector('[data-resize-attachments]')
-    if (attachResizer) {
-      attachResizer.style.display = showAttachments ? 'block' : 'none'
-    }
+    if (attachResizer) attachResizer.style.display = showAttachments ? 'block' : 'none'
   }
 
-  // Apply sidebar width and visibility
   {
     const { sidebarWidth, sidebarVisible } = $.model()
     const sidebar = target.querySelector('.sidebar')
@@ -1094,36 +1037,25 @@ function afterUpdate(target) {
     const toggleBtn = target.querySelector('.toggle-sidebar')
 
     if(sidebar && chatApp) {
-      if(sidebar.style.width !== `${sidebarWidth}px`) {
-        sidebar.style.width = `${sidebarWidth}px`
-      }
-
+      if(sidebar.style.width !== `${sidebarWidth}px`) sidebar.style.width = `${sidebarWidth}px`
       chatApp.dataset.sidebarVisible = sidebarVisible ? 'true' : 'false'
       chatApp.style.setProperty('--sidebar-width', `${sidebarWidth}px`)
-
-      // Update toggle button position
       if(toggleBtn && window.innerWidth > 768) {
         const leftPos = sidebarVisible ? `calc(${sidebarWidth}px + .5rem)` : '.5rem'
-        if(toggleBtn.style.left !== leftPos) {
-          toggleBtn.style.left = leftPos
-        }
+        if(toggleBtn.style.left !== leftPos) toggleBtn.style.left = leftPos
       }
     }
   }
 
-  // Update toggle button icon based on sidebar visibility
   {
     const { sidebarVisible } = $.model()
     const toggleBtn = target.querySelector('.toggle-sidebar sl-icon')
     if(toggleBtn) {
       const iconName = sidebarVisible ? 'arrow-left-circle-fill' : 'arrow-right-circle-fill'
-      if(toggleBtn.getAttribute('name') !== iconName) {
-        toggleBtn.setAttribute('name', iconName)
-      }
+      if(toggleBtn.getAttribute('name') !== iconName) toggleBtn.setAttribute('name', iconName)
     }
   }
 
-  // Handle group type toggle UI
   {
     const { groupType } = $.model()
     const publicBtn = target.querySelector('[data-group-type="public"]')
@@ -1133,13 +1065,12 @@ function afterUpdate(target) {
     if(publicBtn && privateBtn && typeDesc) {
       publicBtn.classList.toggle('active', groupType === 'public')
       privateBtn.classList.toggle('active', groupType === 'private')
-      typeDesc.textContent = groupType === 'public' 
+      typeDesc.textContent = groupType === 'public'
         ? 'Anyone can discover and join this group'
         : 'Only invited members can join this group'
     }
   }
 
-  // Handle thread panel visibility
   {
     const { activeThread, threadPanelWidth } = $.model()
     const threadPanel = target.querySelector('.thread-panel')
@@ -1160,7 +1091,6 @@ function afterUpdate(target) {
     }
   }
 
-  // Handle action menu visibility
   {
     const { showActionMenu, currentRoom } = $.model()
     const menuDropdown = target.querySelector('[data-menu-dropdown]')
@@ -1168,16 +1098,13 @@ function afterUpdate(target) {
 
     if(menuDropdown && menuContainer) {
       menuDropdown.classList.toggle('active', showActionMenu)
-      // Hide menu container if no room selected
       menuContainer.style.display = currentRoom ? 'block' : 'none'
     }
   }
 
-  // Handle message menu visibility
   {
     const { activeMessageMenu } = $.model()
     const allMessageMenus = target.querySelectorAll('.message-menu')
-
     allMessageMenus.forEach(menu => {
       const menuId = menu.dataset.messageDropdown
       menu.classList.toggle('active', menuId === activeMessageMenu)
@@ -1189,7 +1116,6 @@ function afterUpdate(target) {
     const myGroupsContainer = target.querySelector('.my-groups')
 
     if(myGroupsContainer) {
-      // Cheap array comparison by IDs only
       const currentIds = myGroups.map(g => g.groupId).join(',') + ':' + currentRoom
 
       if(lastMyGroupIds !== currentIds) {
@@ -1209,7 +1135,6 @@ function afterUpdate(target) {
     }
   }
 
-  // Patch other groups
   {
     const { otherGroups } = $.model()
     const otherGroupsContainer = target.querySelector('.other-groups')
@@ -1230,16 +1155,12 @@ function afterUpdate(target) {
     }
   }
 
-  // Patch group input
   {
     const { group } = $.model()
     const groupInput = target.querySelector('[name="group"]')
-    if(groupInput && groupInput.value !== group) {
-      groupInput.value = group
-    }
+    if(groupInput && groupInput.value !== group) groupInput.value = group
   }
 
-  // Patch manage group view
   {
     const { currentGroupInfo, addMemberCompany, addMemberEmployee } = $.model()
     const manageGroupName = target.querySelector('.manage-group-name')
@@ -1247,9 +1168,7 @@ function afterUpdate(target) {
     const addCompanyInput = target.querySelector('[name="addMemberCompany"]')
     const addEmployeeInput = target.querySelector('[name="addMemberEmployee"]')
 
-    if(manageGroupName && currentGroupInfo) {
-      manageGroupName.textContent = currentGroupInfo.groupName || ''
-    }
+    if(manageGroupName && currentGroupInfo) manageGroupName.textContent = currentGroupInfo.groupName || ''
 
     if(membersList && currentGroupInfo && currentGroupInfo.groupList) {
       const membersHtml = Object.keys(currentGroupInfo.groupList).map(company => {
@@ -1277,25 +1196,19 @@ function afterUpdate(target) {
       }
     }
 
-    if(addCompanyInput && addCompanyInput.value !== addMemberCompany) {
-      addCompanyInput.value = addMemberCompany
-    }
-    if(addEmployeeInput && addEmployeeInput.value !== addMemberEmployee) {
-      addEmployeeInput.value = addMemberEmployee
-    }
+    if(addCompanyInput && addCompanyInput.value !== addMemberCompany) addCompanyInput.value = addMemberCompany
+    if(addEmployeeInput && addEmployeeInput.value !== addMemberEmployee) addEmployeeInput.value = addMemberEmployee
   }
 
-  // Patch messages
   {
     const { view, currentRoom, threads } = $.model()
     const messagesContainer = target.querySelector('.messages')
     if (view === views.chat && messagesContainer) {
       const roomMessages = table[currentRoom] || {}
       const roomThreads = threads[currentRoom] || {}
-      // Also check decrypted thread table for counts
       const decryptedThreads = table[`${currentRoom}:threads`] || {}
       const messageKeys = Object.keys(roomMessages).join(',')
-      const threadKeys = JSON.stringify(roomThreads)
+      const threadKeys = Object.entries(roomThreads).map(([k, v]) => `${k}:${Object.keys(v).length}`).join(',')
 
       const containerIsEmpty = !messagesContainer.dataset.initialized
 
@@ -1306,14 +1219,13 @@ function afterUpdate(target) {
         target.lastThreadKeys = threadKeys
 
         const log = Object.values(roomMessages)
-          .filter(message => !message.parentId) // Only show top-level messages
+          .filter(message => !message.parentId)
           .sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0))
           .map((message) => {
-            // Check both state threads and decrypted table for reply count
             const stateReplyCount = roomThreads[message.id] ? Object.keys(roomThreads[message.id]).length : 0
             const tableReplyCount = decryptedThreads[message.id] ? Object.keys(decryptedThreads[message.id]).length : 0
             const replyCount = Math.max(stateReplyCount, tableReplyCount)
-            const replyIndicator = replyCount > 0 
+            const replyIndicator = replyCount > 0
               ? `<button class="thread-indicator" data-open-thread="${message.id}">${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</button>`
               : ''
 
@@ -1343,14 +1255,11 @@ function afterUpdate(target) {
             `
           }).join('') || '<div class="empty-state">No messages yet. Start the conversation!</div>'
 
-        if(messagesContainer) {
-          messagesContainer.innerHTML = log
-        }
+        if(messagesContainer) messagesContainer.innerHTML = log
       }
     }
   }
 
-  // Patch thread view
   {
     const { activeThread, currentRoom } = $.model()
 
@@ -1393,54 +1302,6 @@ function afterUpdate(target) {
     }
   }
 
-  // Patch message textarea
-  /*
-  {
-    const { messageText, messageHeight } = $.model()
-    const textarea = target.querySelector('[name="messageText"]')
-
-    if(textarea) {
-      if(textarea.lastValue !== messageText) {
-        textarea.lastValue = messageText
-        textarea.value = messageText
-      }
-
-      if(textarea.lastHeight !== messageHeight) {
-        textarea.lastHeight = messageHeight
-        if(messageHeight) {
-          textarea.style.height = `${messageHeight}px`
-        } else {
-          textarea.style.height = 'auto'
-        }
-      }
-    }
-  }
-  */
-
-  // Patch reply textarea
-  /*
-  {
-    const { replyText, replyHeight } = $.model()
-    const textarea = target.querySelector('[name="replyText"]')
-
-    if(textarea) {
-      if(textarea.lastValue !== replyText) {
-        textarea.lastValue = replyText
-        textarea.value = replyText
-      }
-
-      if(textarea.lastHeight !== replyHeight) {
-        textarea.lastHeight = replyHeight
-        if(replyHeight) {
-          textarea.style.height = `${replyHeight}px`
-        } else {
-          textarea.style.height = 'auto'
-        }
-      }
-    }
-  }
-  */
-
   replaceCursor(target)
 
   {
@@ -1474,7 +1335,6 @@ function afterUpdate(target) {
     const scrollBtn = target.querySelector('[data-scroll-anchor="main"]')
 
     if (scrollback && scrollBtn) {
-      // Set up scroll listener once
       if (!scrollback._scrollListenerAttached) {
         scrollback._scrollListenerAttached = true
 
@@ -1485,12 +1345,10 @@ function afterUpdate(target) {
           scrollBtn.style.display = atBottom ? 'none' : 'flex'
         })
 
-        // Start scrolled to bottom
         scrollback.scrollTop = scrollback.scrollHeight
         wasAtBottom = true
       }
 
-      // If user was at bottom when new messages arrived, scroll down
       if (wasAtBottom) {
         requestAnimationFrame(() => {
           scrollback.scrollTop = scrollback.scrollHeight
@@ -1529,7 +1387,6 @@ $.when('click', '.ai-content a[href]', (event) => {
 
 $.when('click', '[data-format]', (event) => {
   const format = event.target.closest('[data-format]').dataset.format
-  // Determine which editor based on closest form
   const form = event.target.closest('form')
   const name = form?.name === 'send-reply' ? 'reply' : 'main'
   const editor = editors[name]
@@ -1607,7 +1464,6 @@ $.when('click', '[data-help]', function (event) {
 })
 
 $.when('click', '[data-logout]', () => {
-  // Clear caches and update authenticated state
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
   clearSession()
@@ -1626,7 +1482,6 @@ $.when('click', '[data-preferences]', (event) => {
   $.whisper({ view: 'preferences', showActionMenu: false })
 })
 
-// New group view handler
 $.when('click', '[data-new-group]', (event) => {
   $.whisper({ view: 'new-group', showActionMenu: false })
 })
@@ -1636,64 +1491,56 @@ $.when('click', '[data-back-to-chat]', (event) => {
   $.whisper({ view: currentRoom ? 'chat' : 'profile', showActionMenu: false })
 })
 
-// Close thread panel
 $.when('click', '[data-close-thread]', (event) => {
   $.whisper({ activeThread: null })
 })
 
-// App launcher handlers
 $.when('click', '[data-launcher]', (event) => {
   const { launcher } = event.target.dataset
   $.whisper({ view: launcher })
 })
 
-// Group type toggle
 $.when('click', '[data-group-type]', (event) => {
   const groupType = event.target.closest('[data-group-type]').dataset.groupType
   $.controller({ groupType })
 })
 
-// Action menu toggle
 $.when('click', '[data-action-menu]', (event) => {
   event.stopPropagation()
   const { showActionMenu } = $.model()
   $.whisper({ showActionMenu: !showActionMenu, activeMessageMenu: null })
 })
 
-// Message menu toggle
 $.when('click', '[data-message-menu]', (event) => {
   event.stopPropagation()
   const messageId = event.target.closest('[data-message-menu]').dataset.messageMenu
   const { activeMessageMenu } = $.model()
-  $.whisper({ 
+  $.whisper({
     activeMessageMenu: activeMessageMenu === messageId ? null : messageId,
-    showActionMenu: false 
+    showActionMenu: false
   })
 })
 
-// Close menus when clicking elsewhere
 $.when('click', '', (event) => {
   const { showActionMenu, activeMessageMenu } = $.model()
-  if((showActionMenu || activeMessageMenu) && 
-    !event.target.closest('.action-menu-container') && 
+  if((showActionMenu || activeMessageMenu) &&
+    !event.target.closest('.action-menu-container') &&
     !event.target.closest('.message-menu-container')) {
     $.whisper({ showActionMenu: false, activeMessageMenu: null })
   }
 })
 
-// Create group handler
 $.when('click', '[data-create]', () => {
   const { sessionId } = getSession()
   const { group, groupType } = $.model()
 
   if(!group.trim()) return
 
-  // Use PUBLIC or PRIVATE based on selection
-  const bayunGroupType = groupType === 'private' 
-    ? BayunCore.GroupType.PRIVATE 
+  const bayunGroupType = groupType === 'private'
+    ? BayunCore.GroupType.PRIVATE
     : BayunCore.GroupType.PUBLIC;
 
-  bayunCore.createGroup(sessionId, group, bayunGroupType)
+  bayunCore.createGroup({ sessionId, groupName: group, groupType: bayunGroupType })
     .then(result => {
       $.whisper({ currentRoom: result.groupId, group: '', groupType: 'public', showActionMenu: false, view: 'chat' })
       getMyGroups()
@@ -1705,11 +1552,10 @@ $.when('click', '[data-create]', () => {
     });
 })
 
-// Join group from other groups (click on other-group button)
 $.when('click', '.other-group', (event) => {
   const { sessionId } = getSession()
   const { id } = event.target.dataset
-  bayunCore.joinPublicGroup(sessionId, id)
+  bayunCore.joinPublicGroup({ sessionId, groupId: id })
     .then(result => {
       getMyGroups()
       getOtherGroups()
@@ -1721,51 +1567,50 @@ $.when('click', '.other-group', (event) => {
     });
 })
 
-// Select group from my groups
 $.when('click', '.my-group', (event) => {
   const { sessionId } = getSession()
   const { id } = event.target.dataset
   activateGroup(sessionId, id)
 })
 
-// Manage group handler
 $.when('click', '[data-manage-group]', () => {
   const { currentRoom } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom) return
 
-  // Load group info and switch to manage view
   loadGroupInfo(sessionId, currentRoom)
   $.whisper({ view: 'manage-group', showActionMenu: false, addMemberCompany: '', addMemberEmployee: '' })
 })
 
-// Add member handler
 $.when('click', '[data-add-member]', async () => {
   const { currentRoom, addMemberCompany, addMemberEmployee } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom || !addMemberCompany.trim() || !addMemberEmployee.trim()) return
 
-  const groupMembers = [{
-    companyName: addMemberCompany.trim(),
-    companyEmployeeId: addMemberEmployee.trim()
+  const groupParticipants = [{
+    orgName: addMemberCompany.trim(),
+    orgMemberId: addMemberEmployee.trim()
   }]
 
   try {
-    const addMembersResponse = await bayunCore.addMembersToGroup(sessionId, currentRoom, groupMembers)
+    const addMembersResponse = await bayunCore.addParticipantsToGroup({
+      sessionId,
+      groupId: currentRoom,
+      groupParticipants,
+    })
 
-    const addedMembersCount = addMembersResponse.addedMembersCount
+    const addedMembersCount = addMembersResponse.addedParticipantsCount
     console.log("Total Members Added:", addedMembersCount)
 
-    if(addMembersResponse.addMemberErrObject.length !== 0) {
-      let errorList = addMembersResponse.addMemberErrObject
+    if(addMembersResponse.addParticipantErrObject && addMembersResponse.addParticipantErrObject.length !== 0) {
+      let errorList = addMembersResponse.addParticipantErrObject
       for(let i = 0; i < errorList.length; i++) {
         console.log("Error Message:", errorList[i].errorMessage)
       }
     }
 
-    // Clear inputs and refresh group info
     $.controller({ addMemberCompany: '', addMemberEmployee: '' })
     loadGroupInfo(sessionId, currentRoom)
   } catch(error) {
@@ -1774,7 +1619,6 @@ $.when('click', '[data-add-member]', async () => {
   }
 })
 
-// Remove member handler
 $.when('click', '[data-remove-member]', (event) => {
   const { currentRoom } = $.model()
   const { sessionId } = getSession()
@@ -1782,11 +1626,15 @@ $.when('click', '[data-remove-member]', (event) => {
 
   if(!currentRoom || !company || !unix) return
 
-  bayunCore.removeMemberFromGroup(sessionId, currentRoom, unix, company)
+  bayunCore.removeParticipantFromGroup({
+    sessionId,
+    groupId: currentRoom,
+    orgMemberId: unix,
+    orgName: company,
+  })
     .then(result => {
-      console.log("Response received for removeMemberFromGroup.")
+      console.log("Response received for removeParticipantFromGroup.")
       console.log(result)
-      // Refresh group info
       loadGroupInfo(sessionId, currentRoom)
     })
     .catch(error => {
@@ -1795,17 +1643,15 @@ $.when('click', '[data-remove-member]', (event) => {
     })
 })
 
-// Leave group handler
 $.when('click', '[data-leave-group]', () => {
   const { currentRoom } = $.model()
   const { sessionId } = getSession()
 
   if(!currentRoom) return
 
-  bayunCore.leaveGroup(sessionId, currentRoom)
+  bayunCore.leaveGroup({ sessionId, groupId: currentRoom })
     .then(result => {
       $.whisper({ currentRoom: null, showActionMenu: false, view: 'profile', activeThread: null })
-      // Refresh group lists after leaving
       getMyGroups()
       getOtherGroups()
     })
@@ -1815,17 +1661,14 @@ $.when('click', '[data-leave-group]', () => {
     });
 })
 
-// Thread handlers
 $.when('click', '[data-reply]', (event) => {
   const messageId = event.target.closest('[data-reply]').dataset.reply
   $.whisper({ activeThread: messageId, showActionMenu: false, activeMessageMenu: null })
 })
 
-// Reply count toggles thread open/closed
 $.when('click', '[data-open-thread]', (event) => {
   const messageId = event.target.dataset.openThread
   const { activeThread } = $.model()
-  // Toggle: if already open on this thread, close it
   const newThread = activeThread === messageId ? null : messageId
   $.whisper({ activeThread: newThread, showActionMenu: false, activeMessageMenu: null })
 })
@@ -1834,7 +1677,6 @@ $.when('click', '.message-attachments was-image img', (event) => {
   const src = event.target.closest('was-image').getAttribute('src')
   if (!src) return
 
-  // Create fullscreen overlay
   const overlay = document.createElement('div')
   overlay.className = 'fullscreen-overlay'
   overlay.innerHTML = `<was-image src="${src}" class="fullscreen-image"></was-image>`
@@ -1864,7 +1706,6 @@ $.when('mousedown', '[data-resize-attachments], [data-resize-attachments-reply]'
   document.addEventListener('mouseup', handleMouseUp)
 })
 
-// Thread panel resizer
 $.when('mousedown', '.thread-resizer', (event) => {
   event.preventDefault()
   const target = event.target.closest($.link)
@@ -1887,7 +1728,6 @@ $.when('mousedown', '.thread-resizer', (event) => {
   document.addEventListener('mouseup', handleMouseUp)
 })
 
-// Resizer functionality
 $.when('mousedown', '.resizer', (event) => {
   event.preventDefault()
   const target = event.target.closest($.link)
@@ -1911,19 +1751,18 @@ $.when('mousedown', '.resizer', (event) => {
 })
 
 $.when('keydown', '.tiptap-content', (e) => {
-   if (e.key === 'Enter' && !e.shiftKey) {
+  if (e.key === 'Enter' && !e.shiftKey) {
     const form = e.target.closest('form')
     const name = form?.name === 'send-reply' ? 'reply' : 'main'
     const editor = editors[name]
 
-    // Let Tiptap handle Enter normally inside lists, blockquotes, and code blocks
     if (editor && (
       editor.isActive('bulletList') ||
       editor.isActive('orderedList') ||
       editor.isActive('blockquote') ||
       editor.isActive('codeBlock')
     )) {
-      return // don't prevent default, let Tiptap do its thing
+      return
     }
 
     e.preventDefault()
@@ -1973,13 +1812,13 @@ async function send() {
       html: messageHTML,
       attachments: attachments.map(a => a.record)
     })
-    const encryptedText = await bayunCore.lockText(
+    const encryptedText = await bayunCore.lockText({
       sessionId,
-      payload,
-      BayunCore.EncryptionPolicy.Group,
-      BayunCore.KeyGenerationPolicy.Group,
-      currentRoom
-    );
+      text: payload,
+      encryptionPolicy: BayunCore.EncryptionPolicy.GROUP,
+      keyGenerationPolicy: BayunCore.KeyGenerationPolicy.GROUP,
+      groupId: currentRoom,
+    });
 
     const message = {
       id: self.crypto.randomUUID(),
@@ -2032,13 +1871,13 @@ async function sendReply() {
       html: replyHTML,
       attachments: replyAttachments.map(a => a.record)
     })
-    const encryptedText = await bayunCore.lockText(
+    const encryptedText = await bayunCore.lockText({
       sessionId,
-      payload,
-      BayunCore.EncryptionPolicy.Group, 
-      BayunCore.KeyGenerationPolicy.Group, 
-      currentRoom
-    );
+      text: payload,
+      encryptionPolicy: BayunCore.EncryptionPolicy.GROUP,
+      keyGenerationPolicy: BayunCore.KeyGenerationPolicy.GROUP,
+      groupId: currentRoom,
+    });
 
     const reply = {
       id: self.crypto.randomUUID(),
@@ -2081,7 +1920,6 @@ $.when('gallery-share', 'plan98-gallery', (event) => {
   const key = isReply ? 'replyAttachments' : 'attachments'
   const current = $.model()[key] || []
 
-  // Dedupe by cid
   const existing = new Set(current.map(i => i.cid))
   const merged = [...current, ...items.filter(i => !existing.has(i.cid))]
 
@@ -2091,7 +1929,6 @@ $.when('gallery-share', 'plan98-gallery', (event) => {
 let groupsLoaded = false
 
 $.when('activated', 'cyber-security', (event) => {
-  // User has logged in, trigger a re-render to show the chat interface
   const id = getMyId()
   $.controller({
     id,
@@ -2110,12 +1947,17 @@ $.when('deactivated', 'cyber-security', (event) => {
   groupsLoaded = false
   Object.keys(table).forEach(room => delete table[room])
   decryptionInProgress.clear()
+  decryptQueue.length = 0
+  activeDecryptions = 0
+  lastDecryptRoom = null
+  lastDecryptMessageKeys = ''
+  lastDecryptThreadKeys = ''
   destroyTiptapEditors()
   $.controller(getMyId(), leave)
 })
 
 function escapeHyperText(text = '') {
-  return text.replace(/[&<>'"]/g, 
+  return text.replace(/[&<>'"]/g,
     actor => ({
       '&': '&amp;',
       '<': '&lt;',
@@ -2134,16 +1976,14 @@ function sanitizeHTML(html = '') {
   function clean(node) {
     const children = [...node.childNodes]
     for (const child of children) {
-      if (child.nodeType === 3) continue // text nodes are fine
+      if (child.nodeType === 3) continue
       if (child.nodeType !== 1) { child.remove(); continue }
 
       const tag = child.tagName.toLowerCase()
       if (!allowed.includes(tag)) {
-        // unwrap: keep children, remove the tag
         while (child.firstChild) child.parentNode.insertBefore(child.firstChild, child)
         child.remove()
       } else {
-        // strip all attributes
         while (child.attributes.length > 0) child.removeAttribute(child.attributes[0].name)
         clean(child)
       }
@@ -2159,7 +1999,6 @@ const editors = {}
 function initTiptapEditor(container, name, placeholderText) {
   if (!container) return null
 
-  // If editor exists but its DOM is detached, destroy it
   if (editors[name]) {
     if (!editors[name].options.element?.isConnected) {
       editors[name].destroy()
@@ -2211,6 +2050,29 @@ function destroyTiptapEditors() {
   })
 }
 
+$.when('input', '[data-bind]', (event) => {
+  const { bind } = event.target.dataset
+
+  if(bind) {
+    $.whisper({
+      bind: bind,
+      name: event.target.name,
+      value: event.target.value
+    }, (state, payload) => {
+      return {
+        ...state,
+        [payload.bind]: {
+          ...state[payload.bind],
+          [payload.name]: payload.value
+        }
+      }
+    })
+  } else {
+    const { name, value } = event.target;
+    $.whisper({ [name]: value })
+  }
+})
+
 $.skin(`
   & {
     display: block;
@@ -2241,9 +2103,7 @@ $.skin(`
     transform: scale(1.1);
   }
 
-  & .toggle-sidebar sl-icon {
-    font-size: 1.5rem;
-  }
+  & .toggle-sidebar sl-icon { font-size: 1.5rem; }
 
   & .sidebar {
     display: flex;
@@ -2280,8 +2140,7 @@ $.skin(`
     gap: .5rem;
   }
 
-  & .profile-button > span ,
-  & .footer-button > span {
+  & .profile-button > span, & .footer-button > span {
     display: inline-grid;
     place-items: center;
   }
@@ -2290,15 +2149,9 @@ $.skin(`
     background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 
-  & .profile-button sl-icon {
-    font-size: 1.2rem;
-  }
+  & .profile-button sl-icon { font-size: 1.2rem; }
 
-  & .sidebar-content {
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1;
-  }
+  & .sidebar-content { overflow-y: auto; overflow-x: hidden; flex: 1; }
 
   & .sidebar-footer {
     padding: .5rem;
@@ -2306,21 +2159,13 @@ $.skin(`
     border-top: 1px solid rgba(255,255,255,.1);
   }
 
-  & .footer-button {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    cursor: pointer;
-  }
+  & .footer-button { width: 100%; display: flex; align-items: center; gap: .5rem; cursor: pointer; }
 
   & .footer-button:hover {
     background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
   }
 
-  & .footer-button sl-icon {
-    font-size: 1.2rem;
-  }
+  & .footer-button sl-icon { font-size: 1.2rem; }
 
   & .resizer {
     width: 4px;
@@ -2329,14 +2174,10 @@ $.skin(`
     flex-shrink: 0;
     transition: background 200ms ease-in-out;
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; right: 0; bottom: 0;
   }
 
-  & .resizer:hover {
-    background: var(--root-theme, mediumseagreen);
-  }
+  & .resizer:hover { background: var(--root-theme, mediumseagreen); }
 
   & .attachments-resizer {
     display: none;
@@ -2345,9 +2186,7 @@ $.skin(`
     cursor: row-resize;
   }
 
-  & .attachments-resizer:hover {
-    background: var(--root-theme, mediumseagreen);
-  }
+  & .attachments-resizer:hover { background: var(--root-theme, mediumseagreen); }
 
   & .room-select {
     background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
@@ -2380,48 +2219,17 @@ $.skin(`
     position: relative;
   }
 
-  & .main-content {
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-  }
+  & .main-content { height: 100%; overflow: hidden; position: relative; }
 
-  & .chat-area {
-    display: grid;
-    grid-template-rows: auto 1fr;
-    height: 100%;
-    background: linear-gradient(rgba(255,255,255,.65), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
-    overflow: hidden;
-  }
-
-  & .chat-body {
-    display: grid;
-    grid-template-columns: 1fr;
-    height: 100%;
-    overflow: hidden;
-  }
-
-  & .chat-body.thread-open {
-    grid-template-columns: 1fr 4px auto;
-  }
-
-  & .chat-main {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    overflow: hidden;
-  }
+  & .chat-body { display: grid; grid-template-columns: 1fr; height: 100%; overflow: hidden; }
+  & .chat-body.thread-open { grid-template-columns: 1fr 4px auto; }
+  & .chat-main { display: grid; grid-template-rows: 1fr auto; overflow: hidden; }
 
   & .thread-resizer {
-    width: 4px;
-    background: black;
-    cursor: col-resize;
-    display: none;
+    width: 4px; background: black; cursor: col-resize; display: none;
     transition: background 200ms ease-in-out;
   }
-
-  & .thread-resizer:hover {
-    background: var(--root-theme, mediumseagreen);
-  }
+  & .thread-resizer:hover { background: var(--root-theme, mediumseagreen); }
 
   & .thread-panel {
     display: none;
@@ -2442,33 +2250,17 @@ $.skin(`
     border-bottom: 1px solid rgba(255,255,255,.1);
   }
 
-  & .thread-title {
-    color: rgba(255,255,255,.85);
-    font-weight: 600;
-  }
+  & .thread-title { color: rgba(255,255,255,.85); font-weight: 600; }
 
   & .close-thread {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    background: transparent;
-    color: rgba(255,255,255,.65);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    width: 2rem; height: 2rem;
+    background: transparent; color: rgba(255,255,255,.65);
+    border: none; border-radius: 50%; cursor: pointer;
     transition: all 200ms ease-in-out;
   }
-
-  & .close-thread:hover {
-    background: rgba(255,255,255,.1);
-    color: rgba(255,255,255,.85);
-  }
-
-  & .thread-scroll {
-    overflow: auto;
-  }
+  & .close-thread:hover { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); }
+  & .thread-scroll { overflow: auto; }
 
   & .app-area {
     display: grid;
@@ -2476,10 +2268,6 @@ $.skin(`
     height: 100%;
     overflow: hidden;
     background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)), var(--root-theme, mediumseagreen);
-  }
-
-  & .video-area {
-    background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
   }
 
   & .action-bar {
@@ -2491,682 +2279,242 @@ $.skin(`
     border-bottom: 1px solid rgba(255,255,255,.1);
   }
 
-  & .action-bar-left {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
-
-  & .action-bar-center {
-    flex: 1;
-  }
-
-  & .action-bar-right {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
+  & .action-bar-left { display: flex; align-items: center; gap: .5rem; }
+  & .action-bar-center { flex: 1; }
+  & .action-bar-right { display: flex; align-items: center; gap: .5rem; }
 
   & .back-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    width: 2.5rem; height: 2.5rem;
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
+    color: rgba(255,255,255,.85); border: none; border-radius: 50%; cursor: pointer;
     transition: background 200ms ease-in-out;
   }
+  & .back-button:hover { background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen); }
+  & .back-button sl-icon { font-size: 1.2rem; }
 
-  & .back-button:hover {
-    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-  }
-
-  & .back-button sl-icon {
-    font-size: 1.2rem;
-  }
-
-  & .action-menu-container {
-    position: relative;
-  }
-
-  & .action-menu-trigger sl-icon {
-    font-size: 1.2rem;
-  }
+  & .action-menu-container { position: relative; }
+  & .action-menu-trigger sl-icon { font-size: 1.2rem; }
 
   & .video-chat-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    display: flex; align-items: center; justify-content: center;
+    width: 2.5rem; height: 2.5rem;
     background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
+    color: rgba(255,255,255,.85); border: none; border-radius: 50%; cursor: pointer;
     transition: background 200ms ease-in-out;
   }
-
-  & .video-chat-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-  }
-
-  & .video-chat-btn sl-icon {
-    font-size: 1.2rem;
-  }
+  & .video-chat-btn:hover { background: linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen); }
+  & .video-chat-btn sl-icon { font-size: 1.2rem; }
 
   & .action-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
+    display: none; position: absolute; top: 100%; right: 0;
     background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
-    border-radius: .5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,.3);
-    min-width: 150px;
-    z-index: 200;
-    overflow: hidden;
+    border-radius: .5rem; box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    min-width: 150px; z-index: 200; overflow: hidden;
   }
-
-  & .action-menu.active {
-    display: block;
-  }
+  & .action-menu.active { display: block; }
 
   & .action-menu-item {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    width: 100%;
-    padding: .75rem 1rem;
-    background: transparent;
-    color: rgba(255,255,255,.85);
-    border: none;
-    cursor: pointer;
-    font-size: .9rem;
-    text-align: left;
-    white-space: nowrap;
+    display: flex; align-items: center; gap: .5rem; width: 100%;
+    padding: .75rem 1rem; background: transparent; color: rgba(255,255,255,.85);
+    border: none; cursor: pointer; font-size: .9rem; text-align: left; white-space: nowrap;
     transition: background 200ms ease-in-out;
   }
+  & .action-menu-item:hover { background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen); }
+  & .action-menu-item sl-icon { font-size: 1rem; }
 
-  & .action-menu-item:hover {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-  }
+  & .content-body { padding: 2rem; overflow: auto; }
 
-  & .action-menu-item sl-icon {
-    font-size: 1rem;
-  }
+  & [name="send"], & [name="send-reply"] { display: grid; grid-template-rows: auto auto; }
 
-  & .content-body {
-    padding: 2rem;
-    overflow: auto;
-  }
-
-  & [name="send"],
-  & [name="send-reply"] {
-    display: grid;
-    grid-template-rows: auto auto;
-  }
-
-  & .action-row {
-    padding: 4px 8px;
-    display: flex;
-    gap: .5rem;
-    align-items: center;
-    min-height: 2rem;
-  }
-
-  & .formatting-tools {
-    display: flex;
-    gap: .25rem;
-    align-items: center;
-    flex: 1;
-  }
-
-  & .compose-row {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    align-items: end;
-  }
+  & .action-row { padding: 4px 8px; display: flex; gap: .5rem; align-items: center; min-height: 2rem; }
+  & .formatting-tools { display: flex; gap: .25rem; align-items: center; flex: 1; }
+  & .compose-row { display: grid; grid-template-columns: auto 1fr auto; align-items: end; }
 
   & .compose-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    background: transparent;
-    color: rgba(0,0,0,.5);
-    border: none;
-    cursor: pointer;
-    transition: all 200ms ease-in-out;
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 2.5rem; height: 2.5rem; background: transparent; color: rgba(0,0,0,.5);
+    border: none; cursor: pointer; transition: all 200ms ease-in-out; flex-shrink: 0;
   }
-
-  & .compose-btn:hover {
-    color: rgba(0,0,0,.85);
-  }
-
-  & .compose-btn sl-icon {
-    font-size: 1.1rem;
-  }
+  & .compose-btn:hover { color: rgba(0,0,0,.85); }
+  & .compose-btn sl-icon { font-size: 1.1rem; }
 
   & .send-btn {
     background: linear-gradient(rgba(0,0,0,.3), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border-radius: 50%;
-    width: 2rem;
-    height: 2rem;
+    color: rgba(255,255,255,.85); border-radius: 50%; width: 2rem; height: 2rem;
     margin: 0 .25rem .25rem 0;
   }
+  & .send-btn:hover { background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), var(--root-theme, mediumseagreen); color: white; }
 
-  & .send-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.15), rgba(0,0,0,.35)), var(--root-theme, mediumseagreen);
-    color: white;
-  }
-
-  & .normal-button {
-    padding: .5rem 1rem;
-    border-radius: 4px;
-    border: none;
-    color: white;
-    background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-    cursor: pointer;
-  }
-
-  & .normal-button:hover,
-  & .normal-button:focus {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
-  }
-
-  & [name="send"] textarea,
-  & [name="send-reply"] textarea {
-    width: 100%;
-    display: block;
-    resize: none;
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,.85);
-    border-radius: 0;
-    padding: 8px;
-    max-height: 35vh;
-    font-size: 1rem;
-  }
-
-  & textarea:focus {
-    outline-offset: -2px;
-  }
-
-  & .scroll-back {
-    height: 100%;
-    overflow: auto;
-  }
+  & .scroll-back { height: 100%; overflow: auto; }
 
   & .messages {
-    padding: .5rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    min-height: 100%;
+    padding: .5rem; display: flex; flex-direction: column;
+    justify-content: flex-end; min-height: 100%;
   }
 
-  & .thread-messages {
-    padding: .5rem;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-  }
-
-  & .reply-message {
-    background: rgba(0,0,0,.05);
-  }
+  & .thread-messages { padding: .5rem; display: flex; flex-direction: column; min-height: 100%; }
+  & .reply-message { background: rgba(0,0,0,.05); }
 
   & .thread-parent {
     background: linear-gradient(rgba(0,0,0,.1), rgba(0,0,0,.1)), var(--root-theme, mediumseagreen);
-    padding: .5rem;
-    border-bottom: 2px solid rgba(0,0,0,.2);
+    padding: .5rem; border-bottom: 2px solid rgba(0,0,0,.2);
   }
-
-  & .thread-parent .message {
-    background: rgba(255,255,255,.5);
-  }
+  & .thread-parent .message { background: rgba(255,255,255,.5); }
 
   & .message {
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
-    border-radius: .5rem;
-    position: relative;
-    padding: .5rem;
-    margin-bottom: .25rem;
+    display: flex; align-items: flex-start; gap: .5rem;
+    border-radius: .5rem; position: relative; padding: .5rem; margin-bottom: .25rem;
   }
-
-  & .message:hover {
-    background: rgba(255,255,255,.3);
-  }
-
-  & .message:hover .message-menu-trigger {
-    opacity: 1;
-  }
-
-  & .message-content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  & .message-body {
-    overflow: auto;
-    word-wrap: break-word;
-  }
-
-  & .message-footer {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: .25rem;
-  }
-
-  & .message-menu-container {
-    position: relative;
-    flex-shrink: 0;
-  }
+  & .message:hover { background: rgba(255,255,255,.3); }
+  & .message:hover .message-menu-trigger { opacity: 1; }
+  & .message-content { flex: 1; min-width: 0; }
+  & .message-body { overflow: auto; word-wrap: break-word; }
+  & .message-footer { display: flex; justify-content: flex-end; margin-top: .25rem; }
+  & .message-menu-container { position: relative; flex-shrink: 0; }
 
   & .message-menu-trigger {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    background: transparent;
-    color: rgba(0,0,0,.4);
-    border: none;
-    border-radius: .25rem;
-    cursor: pointer;
-    opacity: 0;
+    display: flex; align-items: center; justify-content: center;
+    width: 1.75rem; height: 1.75rem; background: transparent; color: rgba(0,0,0,.4);
+    border: none; border-radius: .25rem; cursor: pointer; opacity: 0;
     transition: all 200ms ease-in-out;
   }
-
-  & .message-menu-trigger:hover {
-    background: rgba(0,0,0,.1);
-    color: rgba(0,0,0,.7);
-  }
+  & .message-menu-trigger:hover { background: rgba(0,0,0,.1); color: rgba(0,0,0,.7); }
 
   & .message-menu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    right: 0;
+    display: none; position: absolute; top: 100%; right: 0;
     background: linear-gradient(rgba(0,0,0,.95), rgba(0,0,0,.95)), var(--root-theme, mediumseagreen);
-    border-radius: .5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,.3);
-    min-width: 120px;
-    z-index: 200;
-    overflow: hidden;
+    border-radius: .5rem; box-shadow: 0 4px 12px rgba(0,0,0,.3);
+    min-width: 120px; z-index: 200; overflow: hidden;
   }
-
-  & .message-menu.active {
-    display: block;
-  }
+  & .message-menu.active { display: block; }
 
   & .message-menu-item {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    width: 100%;
-    padding: .5rem .75rem;
-    background: transparent;
-    color: rgba(255,255,255,.85);
-    border: none;
-    cursor: pointer;
-    font-size: .85rem;
-    text-align: left;
+    display: flex; align-items: center; gap: .5rem; width: 100%;
+    padding: .5rem .75rem; background: transparent; color: rgba(255,255,255,.85);
+    border: none; cursor: pointer; font-size: .85rem; text-align: left;
     transition: background 200ms ease-in-out;
   }
-
-  & .message-menu-item:hover {
-    background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen);
-  }
-
-  & .message-menu-item sl-icon {
-    font-size: .9rem;
-  }
+  & .message-menu-item:hover { background: linear-gradient(rgba(0,0,0,.25), rgba(0,0,0,.45)), var(--root-theme, mediumseagreen); }
+  & .message-menu-item sl-icon { font-size: .9rem; }
 
   & .thread-indicator {
-    background: transparent;
-    border: 1px solid rgba(0,0,0,.2);
-    color: rgba(0,0,0,.6);
-    cursor: pointer;
-    padding: .25rem .5rem;
-    border-radius: 1rem;
-    font-size: .8rem;
+    background: transparent; border: 1px solid rgba(0,0,0,.2); color: rgba(0,0,0,.6);
+    cursor: pointer; padding: .25rem .5rem; border-radius: 1rem; font-size: .8rem;
     transition: all 200ms ease-in-out;
   }
+  & .thread-indicator:hover { background: rgba(0,0,0,.1); border-color: rgba(0,0,0,.4); color: rgba(0,0,0,.8); }
 
-  & .thread-indicator:hover {
-    background: rgba(0,0,0,.1);
-    border-color: rgba(0,0,0,.4);
-    color: rgba(0,0,0,.8);
-  }
+  & .empty-state { color: rgba(0,0,0,.35); text-align: center; padding: 2rem; font-style: italic; }
+  & .author { color: rgba(0,0,0,.5); font-weight: bold; }
 
-  & .empty-state {
-    color: rgba(0,0,0,.35);
-    text-align: center;
-    padding: 2rem;
-    font-style: italic;
-  }
-
-  & .author {
-    color: rgba(0,0,0,.5);
-    font-weight: bold;
-  }
-
-  & .video-content {
-    height: 100%;
-    overflow: hidden;
-  }
-
-  & .new-group-form,
-  & .manage-group-form {
-    max-width: 400px;
-  }
-
-  & .new-group-form h2,
-  & .manage-group-form h2 {
-    margin: 0 0 1.5rem 0;
-    color: rgba(0,0,0,.75);
-  }
+  & .new-group-form, & .manage-group-form { max-width: 400px; }
+  & .new-group-form h2, & .manage-group-form h2 { margin: 0 0 1.5rem 0; color: rgba(0,0,0,.75); }
 
   & .manage-group-name {
-    font-size: 1.2rem;
-    font-weight: 600;
-    color: rgba(0,0,0,.65);
-    margin-bottom: 1.5rem;
-    padding-bottom: .5rem;
-    border-bottom: 1px solid rgba(0,0,0,.1);
+    font-size: 1.2rem; font-weight: 600; color: rgba(0,0,0,.65);
+    margin-bottom: 1.5rem; padding-bottom: .5rem; border-bottom: 1px solid rgba(0,0,0,.1);
   }
 
-  & .manage-section {
-    margin-bottom: 2rem;
-  }
-
-  & .manage-section h3 {
-    margin: 0 0 1rem 0;
-    color: rgba(0,0,0,.65);
-    font-size: 1rem;
-  }
-
-  & .add-member-form {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
-  }
+  & .manage-section { margin-bottom: 2rem; }
+  & .manage-section h3 { margin: 0 0 1rem 0; color: rgba(0,0,0,.65); font-size: 1rem; }
+  & .add-member-form { display: flex; flex-direction: column; gap: .5rem; }
 
   & .add-member-btn {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .5rem 1rem;
+    display: flex; align-items: center; gap: .5rem; padding: .5rem 1rem;
     background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-    color: white;
-    border: none;
-    border-radius: .5rem;
-    cursor: pointer;
-    font-size: .9rem;
-    transition: background 200ms ease-in-out;
-    margin-top: .5rem;
-    width: fit-content;
+    color: white; border: none; border-radius: .5rem; cursor: pointer; font-size: .9rem;
+    transition: background 200ms ease-in-out; margin-top: .5rem; width: fit-content;
   }
+  & .add-member-btn:hover { background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen); }
 
-  & .add-member-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
-  }
-
-  & .members-list {
-    background: rgba(0,0,0,.05);
-    border-radius: .5rem;
-    padding: .5rem;
-  }
-
-  & .company-group {
-    margin-bottom: 1rem;
-  }
-
-  & .company-group:last-child {
-    margin-bottom: 0;
-  }
+  & .members-list { background: rgba(0,0,0,.05); border-radius: .5rem; padding: .5rem; }
+  & .company-group { margin-bottom: 1rem; }
+  & .company-group:last-child { margin-bottom: 0; }
 
   & .company-name {
-    font-weight: 600;
-    color: rgba(0,0,0,.65);
-    padding: .25rem .5rem;
-    background: rgba(0,0,0,.05);
-    border-radius: .25rem;
-    margin-bottom: .5rem;
-    font-size: .85rem;
+    font-weight: 600; color: rgba(0,0,0,.65); padding: .25rem .5rem;
+    background: rgba(0,0,0,.05); border-radius: .25rem; margin-bottom: .5rem; font-size: .85rem;
   }
 
   & .member-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: .5rem;
-    border-bottom: 1px solid rgba(0,0,0,.05);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .5rem; border-bottom: 1px solid rgba(0,0,0,.05);
   }
-
-  & .member-item:last-child {
-    border-bottom: none;
-  }
-
-  & .member-name {
-    color: rgba(0,0,0,.75);
-  }
+  & .member-item:last-child { border-bottom: none; }
+  & .member-name { color: rgba(0,0,0,.75); }
 
   & .remove-member-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    background: transparent;
-    color: rgba(0,0,0,.4);
-    border: none;
-    border-radius: .25rem;
-    cursor: pointer;
-    transition: all 200ms ease-in-out;
+    display: flex; align-items: center; justify-content: center;
+    width: 1.75rem; height: 1.75rem; background: transparent; color: rgba(0,0,0,.4);
+    border: none; border-radius: .25rem; cursor: pointer; transition: all 200ms ease-in-out;
   }
+  & .remove-member-btn:hover { background: rgba(220,53,69,.1); color: #dc3545; }
 
-  & .remove-member-btn:hover {
-    background: rgba(220,53,69,.1);
-    color: #dc3545;
-  }
+  & .loading-members, & .no-members { color: rgba(0,0,0,.5); text-align: center; padding: 1rem; font-style: italic; }
 
-  & .loading-members,
-  & .no-members {
-    color: rgba(0,0,0,.5);
-    text-align: center;
-    padding: 1rem;
-    font-style: italic;
-  }
-
-  & .form-field {
-    margin-bottom: 1rem;
-  }
-
-  & .form-field label {
-    display: block;
-    margin-bottom: .5rem;
-    color: rgba(0,0,0,.65);
-    font-weight: 500;
-  }
-
+  & .form-field { margin-bottom: 1rem; }
+  & .form-field label { display: block; margin-bottom: .5rem; color: rgba(0,0,0,.65); font-weight: 500; }
   & .form-field input {
-    width: 100%;
-    padding: .75rem;
-    border: 1px solid rgba(0,0,0,.2);
-    background: white;
-    color: rgba(0,0,0,.85);
-    border-radius: .5rem;
-    font-size: 1rem;
+    width: 100%; padding: .75rem; border: 1px solid rgba(0,0,0,.2);
+    background: white; color: rgba(0,0,0,.85); border-radius: .5rem; font-size: 1rem;
   }
+  & .form-field input:focus { outline: none; border-color: var(--root-theme, mediumseagreen); box-shadow: 0 0 0 3px rgba(60,179,113,.2); }
 
-  & .form-field input:focus {
-    outline: none;
-    border-color: var(--root-theme, mediumseagreen);
-    box-shadow: 0 0 0 3px rgba(60, 179, 113, .2);
-  }
-
-  & .group-type-toggle {
-    display: flex;
-    gap: .5rem;
-    margin-bottom: .5rem;
-  }
+  & .group-type-toggle { display: flex; gap: .5rem; margin-bottom: .5rem; }
 
   & .type-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: .5rem;
-    padding: .75rem 1rem;
-    background: white;
-    color: rgba(0,0,0,.5);
-    border: 2px solid rgba(0,0,0,.15);
-    border-radius: .5rem;
-    cursor: pointer;
-    font-size: .9rem;
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: .5rem;
+    padding: .75rem 1rem; background: white; color: rgba(0,0,0,.5);
+    border: 2px solid rgba(0,0,0,.15); border-radius: .5rem; cursor: pointer; font-size: .9rem;
     transition: all 200ms ease-in-out;
   }
-
-  & .type-btn:hover {
-    border-color: rgba(0,0,0,.3);
-    color: rgba(0,0,0,.7);
-  }
-
+  & .type-btn:hover { border-color: rgba(0,0,0,.3); color: rgba(0,0,0,.7); }
   & .type-btn.active {
     background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.1)), var(--root-theme, mediumseagreen);
-    border-color: var(--root-theme, mediumseagreen);
-    color: rgba(0,0,0,.85);
+    border-color: var(--root-theme, mediumseagreen); color: rgba(0,0,0,.85);
   }
-
-  & .type-btn sl-icon {
-    font-size: 1rem;
-  }
-
-  & .type-description {
-    margin: 0;
-    font-size: .85rem;
-    color: rgba(0,0,0,.5);
-    font-style: italic;
-  }
+  & .type-btn sl-icon { font-size: 1rem; }
+  & .type-description { margin: 0; font-size: .85rem; color: rgba(0,0,0,.5); font-style: italic; }
 
   & .create-group-btn {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-    padding: .75rem 1.5rem;
+    display: flex; align-items: center; gap: .5rem; padding: .75rem 1.5rem;
     background: linear-gradient(rgba(0,0,0,.5), rgba(0,0,0,.65)), var(--root-theme, mediumseagreen);
-    color: white;
-    border: none;
-    border-radius: .5rem;
-    cursor: pointer;
-    font-size: 1rem;
+    color: white; border: none; border-radius: .5rem; cursor: pointer; font-size: 1rem;
     transition: background 200ms ease-in-out;
   }
+  & .create-group-btn:hover { background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen); }
 
-  & .create-group-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.35), rgba(0,0,0,.5)), var(--root-theme, mediumseagreen);
-  }
-
-  & .subtitle {
-    color: rgba(0,0,0,.65);
-    font-weight: 800;
-    font-size: .8rem;
-    margin: 1rem .5rem .5rem;
-  }
+  & .subtitle { color: rgba(0,0,0,.65); font-weight: 800; font-size: .8rem; margin: 1rem .5rem .5rem; }
 
   & .app-launcher-section {
-    padding: .5rem;
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
+    padding: .5rem; display: flex; flex-direction: column; gap: .25rem;
     border-bottom: 1px solid rgba(255,255,255,.1);
   }
 
   & .app-launcher-btn {
     background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.65)), var(--root-theme, mediumseagreen);
-    color: rgba(0,0,0,.85);
-    border: 0;
-    padding: calc(0.382rem) calc(0.618rem);
-    text-overflow: ellipsis;
-    overflow: hidden;
-    text-align: left;
-    cursor: pointer;
-    display: block;
-    width: 100%;
+    color: rgba(0,0,0,.85); border: 0; padding: calc(0.382rem) calc(0.618rem);
+    text-overflow: ellipsis; overflow: hidden; text-align: left; cursor: pointer; display: block; width: 100%;
   }
+  & .app-launcher-btn:hover { background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,1)), var(--root-theme, mediumseagreen); color: rgba(0,0,0,1); }
+  & .app-launcher-btn.active { background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen); color: rgba(255,255,255,.85); }
+  & .app-launcher-btn sl-icon { font-size: 1rem; }
 
-  & .app-launcher-btn:hover {
-    background: linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,1)), var(--root-theme, mediumseagreen);
-    color: rgba(0,0,0,1);
-  }
-
-  & .app-launcher-btn.active {
-    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.85)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-  }
-
-  & .app-launcher-btn sl-icon {
-    font-size: 1rem;
-  }
-
-  & .subtitle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 1rem .5rem .5rem;
-  }
-
-  & .subtitle-row .subtitle {
-    margin: 0;
-  }
+  & .subtitle-row { display: flex; align-items: center; justify-content: space-between; margin: 1rem .5rem .5rem; }
+  & .subtitle-row .subtitle { margin: 0; }
 
   & .add-group-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.5rem;
-    height: 1.5rem;
-    background: transparent;
-    color: rgba(255,255,255,.65);
-    border: 1px solid rgba(255,255,255,.3);
-    border-radius: .25rem;
-    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    width: 1.5rem; height: 1.5rem; background: transparent; color: rgba(255,255,255,.65);
+    border: 1px solid rgba(255,255,255,.3); border-radius: .25rem; cursor: pointer;
     transition: all 200ms ease-in-out;
   }
+  & .add-group-btn:hover { background: rgba(255,255,255,.1); color: rgba(255,255,255,.85); border-color: rgba(255,255,255,.5); }
+  & .add-group-btn sl-icon { font-size: .85rem; }
 
-  & .add-group-btn:hover {
-    background: rgba(255,255,255,.1);
-    color: rgba(255,255,255,.85);
-    border-color: rgba(255,255,255,.5);
-  }
-
-  & .add-group-btn sl-icon {
-    font-size: .85rem;
-  }
-
-  & .group-section {
-    margin-bottom: .5rem;
-  }
-
-  & .my-groups,
-  & .other-groups {
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-    padding: .5rem;
-  }
+  & .group-section { margin-bottom: .5rem; }
+  & .my-groups, & .other-groups { display: flex; flex-direction: column; gap: .25rem; padding: .5rem; }
 
   & .zero-space {
     background:
@@ -3174,316 +2522,101 @@ $.skin(`
       linear-gradient(-35deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       linear-gradient(-65deg, rgba(0,0,0,.15), rgba(0,0,0,.5)),
       var(--root-theme, mediumseagreen);
-    height: 100%;
-    padding: 1rem 0;
-    overflow: auto;
+    height: 100%; padding: 1rem 0; overflow: auto;
   }
 
   & .zero-content {
-    background: white;
-    max-width: 55ch;
-    margin: 0 auto;
-    padding: 1rem;
-    box-shadow:
-      0 0 6px 6px rgba(0,0,0,.05),
-      0 0 3px 3px rgba(0,0,0,.10),
-      0 0 1px 1px rgba(0,0,0,.15);
+    background: white; max-width: 55ch; margin: 0 auto; padding: 1rem;
+    box-shadow: 0 0 6px 6px rgba(0,0,0,.05), 0 0 3px 3px rgba(0,0,0,.10), 0 0 1px 1px rgba(0,0,0,.15);
   }
 
-  & .zero-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: rgba(0,0,0,.65);
-    margin-bottom: 1rem;
-  }
+  & .zero-title { font-size: 1.5rem; font-weight: bold; color: rgba(0,0,0,.65); margin-bottom: 1rem; }
 
-  /* Responsive: Hide sidebar by default on mobile, show toggle button */
   @media (max-width: 768px) {
-    & .chat-app {
-      grid-template-columns: 1fr;
-    }
-
+    & .chat-app { grid-template-columns: 1fr; }
     & .sidebar {
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      z-index: 100;
-      transform: translateX(-100%);
-      box-shadow: 2px 0 8px rgba(0,0,0,.3);
+      position: absolute; left: 0; top: 0; bottom: 0; z-index: 100;
+      transform: translateX(-100%); box-shadow: 2px 0 8px rgba(0,0,0,.3);
     }
-
-    & .chat-app[data-sidebar-visible="true"] .sidebar {
-      transform: translateX(0);
-    }
-
-    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
-      left: calc(200px + .5rem);
-    }
+    & .chat-app[data-sidebar-visible="true"] .sidebar { transform: translateX(0); }
+    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar { left: calc(200px + .5rem); }
   }
 
-  /* Desktop: Always show sidebar, hide mobile toggle */
   @media (min-width: 769px) {
-    & .chat-app[data-sidebar-visible="false"] {
-      grid-template-columns: 1fr;
-    }
-
-    & .chat-app[data-sidebar-visible="false"] .sidebar {
-      display: none;
-    }
-
-    & .chat-app[data-sidebar-visible="false"] .resizer {
-      background: var(--root-theme, mediumseagreen);
-    }
-
-    & .chat-app[data-sidebar-visible="false"] .toggle-sidebar {
-      left: .5rem;
-    }
-
-    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar {
-      left: calc(var(--sidebar-width, 200px) + .5rem);
-    }
+    & .chat-app[data-sidebar-visible="false"] { grid-template-columns: 1fr; }
+    & .chat-app[data-sidebar-visible="false"] .sidebar { display: none; }
+    & .chat-app[data-sidebar-visible="false"] .resizer { background: var(--root-theme, mediumseagreen); }
+    & .chat-app[data-sidebar-visible="false"] .toggle-sidebar { left: .5rem; }
+    & .chat-app[data-sidebar-visible="true"] .toggle-sidebar { left: calc(var(--sidebar-width, 200px) + .5rem); }
   }
 
-   & .tiptap-editor {
-    min-height: 2.5rem;
-    max-height: 35vh;
-    overflow-y: auto;
-    flex: 1;
-  }
+  & .tiptap-editor { min-height: 2.5rem; max-height: 35vh; overflow-y: auto; flex: 1; }
 
   & .tiptap-content {
-    outline: none;
-    padding: 8px;
-    color: rgba(0,0,0,.85);
-    font-size: 1rem;
-    min-height: 1.5em;
-    word-wrap: break-word;
+    outline: none; padding: 8px; color: rgba(0,0,0,.85); font-size: 1rem;
+    min-height: 1.5em; word-wrap: break-word;
   }
-
-  & .tiptap-content p {
-    margin: 0;
-  }
-
+  & .tiptap-content p { margin: 0; }
   & .tiptap-content p.is-editor-empty:first-child::before {
-    content: attr(data-placeholder);
-    color: rgba(0,0,0,.35);
-    pointer-events: none;
-    float: left;
-    height: 0;
+    content: attr(data-placeholder); color: rgba(0,0,0,.35); pointer-events: none; float: left; height: 0;
   }
-
-  & .tiptap-content blockquote {
-    border-left: 3px solid rgba(0,0,0,.3);
-    padding-left: .75rem;
-    margin: .25rem 0;
-  }
-
-  & .tiptap-content code {
-    background: rgba(0,0,0,.3);
-    padding: .1rem .3rem;
-    border-radius: 3px;
-    font-size: .9em;
-  }
-
-  & .tiptap-content ul,
-  & .tiptap-content ol {
-    padding-left: 1.5rem;
-    margin: .25rem 0;
-  }
+  & .tiptap-content blockquote { border-left: 3px solid rgba(0,0,0,.3); padding-left: .75rem; margin: .25rem 0; }
+  & .tiptap-content code { background: rgba(0,0,0,.3); padding: .1rem .3rem; border-radius: 3px; font-size: .9em; }
+  & .tiptap-content ul, & .tiptap-content ol { padding-left: 1.5rem; margin: .25rem 0; }
 
   & .fmt-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    background: transparent;
-    color: rgba(0,0,0,.45);
-    border: none;
-    border-radius: .25rem;
-    cursor: pointer;
-    transition: all 150ms ease-in-out;
+    display: flex; align-items: center; justify-content: center;
+    width: 1.75rem; height: 1.75rem; background: transparent; color: rgba(0,0,0,.45);
+    border: none; border-radius: .25rem; cursor: pointer; transition: all 150ms ease-in-out;
   }
-
-  & .fmt-btn:hover {
-    color: rgba(0,0,0,.85);
-    background: rgba(0,0,0,.1);
-  }
-
-  & .fmt-btn sl-icon {
-    font-size: .9rem;
-  }
+  & .fmt-btn:hover { color: rgba(0,0,0,.85); background: rgba(0,0,0,.1); }
+  & .fmt-btn sl-icon { font-size: .9rem; }
 
   & .attachments-panel {
     display: none;
     background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.9)), var(--root-theme, mediumseagreen);
-    border-top: 1px solid rgba(0,0,0,.1);
-    height: 200px;
-    overflow: auto;
+    border-top: 1px solid rgba(0,0,0,.1); height: 200px; overflow: auto;
   }
-
-  & .attachments-panel.open {
-    display: block;
-  }
-
-  & .attach-btn.active {
-    color: rgba(0,0,0,.85);
-    background: rgba(0,0,0,.1);
-  }
+  & .attachments-panel.open { display: block; }
+  & .attach-btn.active { color: rgba(0,0,0,.85); background: rgba(0,0,0,.1); }
 
   & .scroll-anchor-btn {
-    position: sticky;
-    bottom: .5rem;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
+    position: sticky; bottom: .5rem; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; justify-content: center;
+    width: 2.25rem; height: 2.25rem;
     background: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.8)), var(--root-theme, mediumseagreen);
-    color: rgba(255,255,255,.85);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,.3);
-    z-index: 10;
-    transition: all 200ms ease-in-out;
+    color: rgba(255,255,255,.85); border: none; border-radius: 50%; cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.3); z-index: 10; transition: all 200ms ease-in-out;
   }
+  & .scroll-anchor-btn:hover { background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--root-theme, mediumseagreen); transform: translateX(-50%) scale(1.1); }
+  & .scroll-anchor-btn sl-icon { font-size: 1.2rem; }
 
-  & .scroll-anchor-btn:hover {
-    background: linear-gradient(rgba(0,0,0,.4), rgba(0,0,0,.6)), var(--root-theme, mediumseagreen);
-    transform: translateX(-50%) scale(1.1);
-  }
+  & .preferences-area { height: 100%; overflow: auto; }
 
-  & .scroll-anchor-btn sl-icon {
-    font-size: 1.2rem;
-  }
-
-  & .preferences-area {
-    height: 100%;
-    overflow: auto;
-  }
-
-  & .message-attachments {
-    display: flex;
-    gap: .25rem;
-    flex-wrap: wrap;
-    margin-top: .25rem;
-  }
-
-  & .attachment-thumb {
-    width: 120px;
-    height: 120px;
-    object-fit: cover;
-    border-radius: .25rem;
-  }
-
-  & .attachment-text {
-    background: rgba(0,0,0,.05);
-    padding: .25rem .5rem;
-    border-radius: .25rem;
-    font-size: .85rem;
-    max-width: 200px;
-  }
+  & .message-attachments { display: flex; gap: .25rem; flex-wrap: wrap; margin-top: .25rem; }
+  & .attachment-thumb { width: 120px; height: 120px; object-fit: cover; border-radius: .25rem; }
+  & .attachment-text { background: rgba(0,0,0,.05); padding: .25rem .5rem; border-radius: .25rem; font-size: .85rem; max-width: 200px; }
 
   & .attachment-preview {
-    display: flex;
-    gap: .25rem;
-    padding: .25rem .5rem;
-    overflow-x: auto;
+    display: flex; gap: .25rem; padding: .25rem .5rem; overflow-x: auto;
     background: linear-gradient(rgba(255,255,255,.75), rgba(255,255,255,.75)), var(--root-theme, mediumseagreen);
   }
+  & .attachment-preview:empty { display: none; }
 
-  & .attachment-preview:empty {
-    display: none;
-  }
-
-  & .preview-item {
-    position: relative;
-    width: 60px;
-    height: 60px;
-    flex-shrink: 0;
-    border-radius: .25rem;
-    overflow: hidden;
-    cursor: pointer;
-  }
-
-  & .preview-item img,
-  & .preview-item video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  & .preview-item.text-preview {
-    background: rgba(255,255,255,.1);
-    display: grid;
-    place-content: center;
-    padding: .25rem;
-    font-size: .6rem;
-    color: rgba(255,255,255,.65);
-  }
+  & .preview-item { position: relative; width: 60px; height: 60px; flex-shrink: 0; border-radius: .25rem; overflow: hidden; cursor: pointer; }
+  & .preview-item img, & .preview-item video { width: 100%; height: 100%; object-fit: cover; }
+  & .preview-item.text-preview { background: rgba(255,255,255,.1); display: grid; place-content: center; padding: .25rem; font-size: .6rem; color: rgba(255,255,255,.65); }
 
   & .preview-remove {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 1.25rem;
-    height: 1.25rem;
-    background: rgba(0,0,0,.7);
-    color: white;
-    border: none;
-    border-radius: 0 0 0 .25rem;
-    cursor: pointer;
-    display: grid;
-    place-content: center;
-    font-size: .6rem;
+    position: absolute; top: 0; right: 0; width: 1.25rem; height: 1.25rem;
+    background: rgba(0,0,0,.7); color: white; border: none; border-radius: 0 0 0 .25rem;
+    cursor: pointer; display: grid; place-content: center; font-size: .6rem;
   }
-
-  & .preview-remove:hover {
-    background: rgba(220,53,69,.9);
-  }
+  & .preview-remove:hover { background: rgba(220,53,69,.9); }
 
   & .fullscreen-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    background: rgba(0,0,0,.9);
-    display: grid;
-    place-content: center;
-    cursor: zoom-out;
+    position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,.9);
+    display: grid; place-content: center; cursor: zoom-out;
   }
-
-  & .fullscreen-image {
-    max-width: 90vw;
-    max-height: 90vh;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-  }
+  & .fullscreen-image { max-width: 90vw; max-height: 90vh; width: auto; height: auto; object-fit: contain; }
 `)
-
-$.when('input', '[data-bind]', (event) => {
-  const { bind } = event.target.dataset
-
-  if(bind) {
-    $.whisper({
-      bind: bind,
-      name: event.target.name,
-      value: event.target.value
-    }, (state, payload) => {
-      return {
-        ...state,
-        [payload.bind]: {
-          ...state[payload.bind],
-          [payload.name]: payload.value
-        }
-      }
-    })
-  } else {
-    const { name, value } = event.target;
-    $.whisper({ [name]: value })
-  }
-})

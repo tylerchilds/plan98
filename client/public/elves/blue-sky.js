@@ -84,7 +84,7 @@ const $ = elf('blue-sky', {
   moniker: blueskyCreds.moniker,
   searchQuery: {},
   password: '',
-  mode: modes.timeline,
+  mode: modes.me,
   draft: '',
   draftHeight: null
 }, {
