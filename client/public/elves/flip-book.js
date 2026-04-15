@@ -3,32 +3,79 @@
 In the beginning, Dog gave man the gift of sequential images,
 and called it animation.
 
-Man's first instruction: draw
+Dog also gave man the ability to draw with friends,
+to key out colors,
+and to rotoscope over moving pictures.
+
+Multiplayer architecture — v-log pattern:
+
+  SHARED (travels over WebRTC via @plan98/elf):
+    frames[]          — ordered frame id array
+    frameStrokes{}    — { [frameId]: stroke[][] } plain JSON, replayed locally
+    current           — playback position
+    canvasW/H, fps, loopMode, playing
+
+  PLAYER-NAMESPACED ($.teach with mergePlayer + bypassSecurity):
+    players[pid].currentStroke  — active stroke being drawn right now
+    players[pid].cursorX/Y      — cursor position in canvas coords
+    players[pid].color          — their current color
+    players[pid].frameId        — which frame they're on
+    players[pid].activelyDrawing
+
+  LOCAL ONLY (never in elf state):
+    db[frameId].drawCanvas      — pixel canvas, rebuilt from frameStrokes on-demand
+    db[frameId].videoCanvas     — extracted video frame pixels
+    db[frameId].hasVideo
 
 */
 
-import elf from '@silly/elf'
+import elf from '@plan98/elf'
 import { Integer } from '@plan98/types'
+import Chromakey from './chroma-key.js'
 
 const tag = 'flip-book'
+const playerId = self.crypto.randomUUID()
 
 /*
 
-The frame is a hypermedia object.
-Each frame may contain children — a universe within a universe.
+db — local per peer. ensureFrame() creates it on first encounter of an id.
+When a remote frame id arrives that we haven't seen, ensureFrame + replayStrokes.
 
 */
 
 const db = {}
 
-function makeFrame(w, h, id) {
-  id = id || crypto.randomUUID()
-  const canvas = document.createElement('canvas')
-  canvas.width = w
-  canvas.height = h
-  db[id] = { id, canvas, strokes: [], children: null, childIndex: 0 }
-  return id
+function ensureFrame(id, w, h) {
+  if (db[id]) return db[id]
+  const drawCanvas  = document.createElement('canvas')
+  const videoCanvas = document.createElement('canvas')
+  drawCanvas.width  = videoCanvas.width  = w
+  drawCanvas.height = videoCanvas.height = h
+  db[id] = { id, drawCanvas, videoCanvas, hasVideo: false, children: null, childIndex: 0 }
+  return db[id]
 }
+
+/*
+
+replayStrokes — draw all committed strokes for a frame onto its local drawCanvas.
+Called whenever frameStrokes changes for a frame (peer committed a stroke).
+
+*/
+
+function replayStrokes(frameId) {
+  const { frameStrokes, canvasW, canvasH } = $.learn()
+  const f = ensureFrame(frameId, canvasW, canvasH)
+  const ctx = f.drawCanvas.getContext('2d')
+  ctx.clearRect(0, 0, canvasW, canvasH)
+  const strokes = frameStrokes[frameId] || []
+  strokes.forEach(stroke => drawStroke(ctx, stroke))
+}
+
+/*
+
+Presets, thicknoids, palette.
+
+*/
 
 const PRESETS = [
   { label: '8×8',    w: 8,    h: 8    },
@@ -45,15 +92,10 @@ const PRESETS = [
   { label: '9:16',   w: 1080, h: 1920 },
 ]
 
-/*
-
-Gruvbox — warm, terminal, alive.
-Transparent joins the palette. Erasure is also a mark.
-
-*/
+const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
 
 const PALETTE = [
-  { color: 'transparent', label: '∅' },
+  { color: 'transparent' },
   { color: '#1d2021' }, { color: '#282828' }, { color: '#3c3836' },
   { color: '#504945' }, { color: '#665c54' }, { color: '#7c6f64' },
   { color: '#928374' }, { color: '#a89984' }, { color: '#d5c4a1' },
@@ -65,400 +107,285 @@ const PALETTE = [
   { color: '#d3869b' }, { color: '#076678' },
 ]
 
-/*
-
-The tools.
-draw  — pixel brush, auto-fills closed shapes on stroke end
-pen   — bezier stroke with explicit fill color
-erase — clear pixels
-fill  — flood fill
-pan   — move the viewport
-
-*/
-
-const TOOLS = {
-  draw:  'draw',
-  pen:   'pen',
-  erase: 'erase',
-  fill:  'fill',
-  pan:   'pan',
-}
+const TOOLS = { draw: 'draw', pen: 'pen', erase: 'erase', fill: 'fill', pan: 'pan' }
+const VIEWS = { color: 'color', brush: 'brush', canvas: 'canvas', settings: 'settings', export: 'export' }
 
 /*
 
-The views — what the overlay shows.
-
-*/
-
-const VIEWS = {
-  color:    'color',
-  brush:    'brush',
-  canvas:   'canvas',
-  settings: 'settings',
-  export:   'export',
-}
-
-/*
-
-The state is the soul of the application.
+State. Only serializable things here.
 
 */
 
 const $ = elf(tag, {
-  frames:       [],
-  current:      0,
-  canvasW:      320,
-  canvasH:      240,
-  tool:         TOOLS.draw,
-  color:        '#ebdbb2',
-  fillColor:    '#d79921',
-  brushSize:    4,
-  onion:        true,
-  zoom:         2,
-  panX:         0,
-  panY:         0,
-  playing:      false,
-  fps:          12,
-  loopMode:     'loop',
-  menuOpen:     false,
-  view:         null,
-  showOverlay:  false,
-  // toolbelt drag (v-log pattern)
-  beltGrabbed:  false,
-  beltDragged:  false,
-  beltOffsetX:  0,
-  beltOffsetY:  0,
-  grabStartX:   undefined,
-  grabStartY:   undefined,
+  // shared frame data
+  frames:             [],    // string[] — frame ids in order
+  frameStrokes:       {},    // { [frameId]: stroke[][] }
+  current:            0,
+
+  // canvas config
+  canvasW:            320,
+  canvasH:            240,
+
+  // drawing config (local preference — also shared so peers see your color)
+  tool:               TOOLS.draw,
+  color:              '#ebdbb2',
+  fillColor:          '#d79921',
+  opacity:            1,
+  thickness:          8,
+
+  // playback
+  onion:              true,
+  zoom:               2,
+  panX:               0,
+  panY:               0,
+  playing:            false,
+  fps:                12,
+  loopMode:           'loop',
+
+  // UI
+  menuOpen:           false,
+  view:               null,
+  showOverlay:        false,
+
+  // chromakey
+  chromakeyEnabled:   false,
+  chromakeyColor:     '#00b140',
+  chromakeyTolerance: 30,
+
+  // toolbelt drag
+  beltGrabbed:        false,
+  beltDragged:        false,
+  beltOffsetX:        0,
+  beltOffsetY:        0,
+  grabStartX:         undefined,
+  grabStartY:         undefined,
+
+  // players map — player-namespaced, set via mergePlayer
+  players:            {},
 })
 
 /*
 
-Dog said: let there be style.
-Minimal. Dark. Warm.
+mergePlayer — v-log pattern exactly.
+Updates players[pid] without touching anyone else's state.
+
+*/
+
+function mergePlayer(pid) {
+  return (state, payload) => ({
+    ...state,
+    players: {
+      ...state.players,
+      [pid]: { ...state.players[pid], ...payload }
+    }
+  })
+}
+
+/*
+
+mergeFrameStrokes — appends a committed stroke to a frame's stroke list.
+This is what travels to peers — plain JSON, no pixels.
+
+*/
+
+/*
+
+mergeFrameStrokes — uses mergeHandler+parameters pattern so the function
+survives plan98 QuickJS serialization. Parameters are JSON-serialized
+separately and injected as arguments on the receiving peer.
+
+*/
+
+function appendStrokeMerge(frameId) {
+  return (state, stroke) => ({
+    ...state,
+    frameStrokes: {
+      ...state.frameStrokes,
+      [frameId]: [...(state.frameStrokes[frameId] || []), stroke]
+    }
+  })
+}
+
+/*
+
+Style.
 
 */
 
 $.style(`
   & {
-    display: block;
-    width: 100%;
-    height: 100%;
-    background: #1d2021;
-    color: #ebdbb2;
+    display: block; width: 100%; height: 100%;
+    background: #1d2021; color: #ebdbb2;
     font-family: 'DM Mono', 'Courier New', monospace;
-    overflow: hidden;
-    position: relative;
-    touch-action: none;
+    overflow: hidden; position: relative; touch-action: none;
   }
-
   & * { box-sizing: border-box; }
+  & .app { display: grid; grid-template-rows: 1fr auto; height: 100%; width: 100%; }
 
-  /*
-    Root layout: artboard (1fr) + film reel (auto)
-    Taskbar corners sit absolutely over the artboard.
-  */
-
-  & .app {
-    display: grid;
-    grid-template-rows: 1fr auto;
-    height: 100%;
-    width: 100%;
-  }
-
-  /* ── ARTBOARD ── */
-
-  & .artboard {
-    position: relative;
-    overflow: hidden;
-    background: #1c1c1c;
-  }
-
-  & .artboard-inner {
-    position: absolute;
-    transform-origin: 0 0;
-  }
-
+  & .artboard { position: relative; overflow: hidden; background: #1c1c1c; }
+  & .artboard-inner { position: absolute; transform-origin: 0 0; }
   & .artboard-inner::before {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background-image:
       linear-gradient(45deg, #262626 25%, transparent 25%),
       linear-gradient(-45deg, #262626 25%, transparent 25%),
       linear-gradient(45deg, transparent 75%, #262626 75%),
       linear-gradient(-45deg, transparent 75%, #262626 75%);
-    background-size: 8px 8px;
-    background-position: 0 0, 0 4px, 4px -4px, -4px 0;
-    background-color: #1d2021;
-    z-index: 0;
+    background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+    background-color: #1d2021; z-index: 0;
   }
 
-  & .onion-layer {
-    position: absolute;
-    top: 0; left: 0;
-    pointer-events: none;
-    image-rendering: pixelated;
+  & .onion-layer { position: absolute; top: 0; left: 0; pointer-events: none; image-rendering: pixelated; }
+
+  & .output-canvas {
+    display: block; image-rendering: pixelated; position: relative; z-index: 10;
+    touch-action: none; user-select: none; -webkit-user-select: none;
   }
 
-  & .draw-canvas {
-    display: block;
-    image-rendering: pixelated;
-    position: relative;
-    z-index: 10;
-    touch-action: none;
-    user-select: none;
+  /* player presence canvases — one per remote peer, same-frame only */
+  & .player-canvases { position: absolute; inset: 0; pointer-events: none; z-index: 11; }
+  & .player-canvas { position: absolute; top: 0; left: 0; pointer-events: none; image-rendering: pixelated; }
+
+  /* cursor label for each remote player */
+  & .player-cursor {
+    position: absolute; pointer-events: none; z-index: 30;
+    transform: translate(-2px, -2px);
+  }
+  & .player-cursor .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    border: 1px solid rgba(0,0,0,.5);
+  }
+  & .player-cursor .label {
+    position: absolute; left: 10px; top: -2px;
+    font-size: .5rem; white-space: nowrap;
+    background: rgba(0,0,0,.7); padding: 1px 4px; border-radius: 2px;
+    color: white;
   }
 
-  & .pen-preview {
-    position: absolute;
-    top: 0; left: 0;
-    pointer-events: none;
-    z-index: 11;
-    image-rendering: pixelated;
+  & .drop-overlay {
+    display: none; position: absolute; inset: 0; z-index: 30;
+    background: rgba(215,153,33,.15); border: 3px dashed #d79921;
+    align-items: center; justify-content: center;
+    font-size: 1.2rem; color: #fabd2f; pointer-events: none;
   }
+  & .drop-overlay.active { display: flex; }
 
   /* ── FILM REEL ── */
-
   & .film-reel {
-    background: #1d2021;
-    border-top: 1px solid #3c3836;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 8px;
-    overflow-x: auto;
-    overflow-y: hidden;
-    height: 80px;
-    flex-shrink: 0;
+    background: #1d2021; border-top: 1px solid #3c3836;
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 8px; overflow-x: auto; overflow-y: hidden;
+    height: 80px; flex-shrink: 0;
   }
-
   & .film-reel::-webkit-scrollbar { height: 3px; }
-  & .film-reel::-webkit-scrollbar-track { background: transparent; }
   & .film-reel::-webkit-scrollbar-thumb { background: #504945; border-radius: 2px; }
 
   & .reel-add {
-    flex-shrink: 0;
-    width: 52px; height: 60px;
-    border: 1px dashed #504945;
-    background: transparent;
-    color: #665c54;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border-radius: 2px;
-    display: grid;
-    place-items: center;
-    transition: all 80ms;
+    flex-shrink: 0; width: 52px; height: 60px;
+    border: 1px dashed #504945; background: transparent;
+    color: #665c54; font-size: 1.2rem; cursor: pointer;
+    border-radius: 2px; display: grid; place-items: center; transition: all 80ms;
   }
   & .reel-add:hover { border-color: #d79921; color: #fabd2f; }
 
   & .reel-frame {
-    flex-shrink: 0;
-    position: relative;
-    cursor: pointer;
-    border: 2px solid #3c3836;
-    border-radius: 2px;
-    overflow: hidden;
-    background: #282828;
-    height: 60px;
-    transition: border-color 80ms;
+    flex-shrink: 0; position: relative; cursor: pointer;
+    border: 2px solid #3c3836; border-radius: 2px;
+    overflow: hidden; background: #282828; height: 60px; transition: border-color 80ms;
   }
   & .reel-frame:hover { border-color: #7c6f64; }
   & .reel-frame.active { border-color: #fabd2f; }
-
-  & .reel-frame canvas {
-    display: block;
-    height: 100%;
-    width: auto;
-    image-rendering: pixelated;
-  }
-
-  & .reel-num {
-    position: absolute;
-    bottom: 1px; left: 3px;
-    font-size: .45rem;
-    color: #665c54;
-    pointer-events: none;
-  }
+  & .reel-frame canvas { display: block; height: 100%; width: auto; image-rendering: pixelated; }
+  & .reel-num { position: absolute; bottom: 1px; left: 3px; font-size: .45rem; color: #665c54; pointer-events: none; }
   & .reel-frame.active .reel-num { color: #fabd2f; }
-
   & .reel-del {
-    position: absolute;
-    top: 1px; right: 1px;
-    width: 12px; height: 12px;
-    background: rgba(29,32,33,.85);
-    border: none;
-    color: #665c54;
-    font-size: .5rem;
-    cursor: pointer;
-    border-radius: 1px;
-    display: none;
-    place-items: center;
-    z-index: 3;
+    position: absolute; top: 1px; right: 1px; width: 12px; height: 12px;
+    background: rgba(29,32,33,.85); border: none; color: #665c54; font-size: .5rem;
+    cursor: pointer; border-radius: 1px; display: none; place-items: center; z-index: 3;
   }
   & .reel-frame:hover .reel-del { display: grid; }
   & .reel-del:hover { color: #fb4934; }
 
-  & .sub-badge {
-    position: absolute;
-    top: 1px; left: 3px;
-    font-size: .4rem;
-    color: #fe8019;
-    pointer-events: none;
+  /* player presence dots on reel frames */
+  & .reel-player-dots {
+    position: absolute; top: 1px; right: 14px;
+    display: flex; gap: 2px; pointer-events: none;
   }
+  & .reel-player-dot { width: 5px; height: 5px; border-radius: 50%; }
 
-  /* ── CORNER TASKBARS (absolute over artboard) ── */
+  & .reel-badge { position: absolute; top: 1px; left: 3px; font-size: .4rem; pointer-events: none; }
 
+  /* ── CORNER TASKBARS ── */
   & .taskbar {
-    position: absolute;
-    left: 0; right: 0;
-    z-index: 5;
-    padding: .5rem;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: .5rem;
-    pointer-events: none;
+    position: absolute; left: 0; right: 0; z-index: 5; padding: .5rem;
+    display: grid; grid-template-columns: 1fr auto 1fr; gap: .5rem; pointer-events: none;
   }
   & .taskbar.-top { top: 0; }
   & .taskbar.-bottom { bottom: 0; }
-
-  & .taskbar button,
-  & .taskbar .right { pointer-events: all; }
+  & .taskbar button, & .taskbar .right { pointer-events: all; }
   & .taskbar .right { text-align: right; }
 
   & .corner-btn {
-    background: rgba(29,32,33,.75);
-    border: 1px solid #3c3836;
-    color: #a89984;
-    font-family: 'DM Mono', monospace;
-    font-size: .65rem;
-    padding: .25rem .5rem;
-    cursor: pointer;
-    border-radius: 2px;
-    backdrop-filter: blur(4px);
-    transition: all 80ms;
-    white-space: nowrap;
+    background: rgba(29,32,33,.75); border: 1px solid #3c3836; color: #a89984;
+    font-family: 'DM Mono', monospace; font-size: .65rem;
+    padding: .25rem .5rem; cursor: pointer; border-radius: 2px;
+    backdrop-filter: blur(4px); transition: all 80ms; white-space: nowrap;
   }
   & .corner-btn:hover { border-color: #d79921; color: #fabd2f; }
-  & .corner-btn.active { background: #d79921; color: #282828; border-color: #d79921; }
-
-  /* ── ZOOM INDICATOR ── */
 
   & .zoom-pill {
-    position: absolute;
-    bottom: 88px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    align-items: center;
-    gap: .3rem;
-    background: rgba(29,32,33,.8);
-    border: 1px solid #3c3836;
-    padding: .2rem .45rem;
-    border-radius: 100px;
-    z-index: 6;
-    backdrop-filter: blur(4px);
-    pointer-events: none;
+    position: absolute; bottom: 88px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: .3rem;
+    background: rgba(29,32,33,.8); border: 1px solid #3c3836;
+    padding: .2rem .45rem; border-radius: 100px;
+    z-index: 6; backdrop-filter: blur(4px); pointer-events: none;
   }
-  & .zoom-pill span {
-    font-size: .6rem;
-    color: #665c54;
-  }
+  & .zoom-pill span { font-size: .6rem; color: #665c54; }
 
-  /* ── v-log COMPASS TOOLBELT ── */
-
-  &[data-belt="true"] .artboard *,
-  &[data-belt="true"] .taskbar,
-  &[data-belt="true"] .zoom-pill {
+  /* ── COMPASS TOOLBELT — v-log pattern ── */
+  &[data-belt="true"] .artboard *, &[data-belt="true"] .taskbar, &[data-belt="true"] .zoom-pill {
     pointer-events: none !important;
   }
-
-  &[data-belt="true"] .toolbelt-actions [data-menu] {
-    pointer-events: all !important;
-  }
+  &[data-belt="true"] .toolbelt-actions [data-menu] { pointer-events: all !important; }
 
   & .toolbelt-actions {
-    position: absolute;
-    bottom: 80px;
-    right: 0;
-    z-index: 20;
-    padding: .5rem;
+    position: absolute; bottom: 80px; right: 0; z-index: 20; padding: .5rem;
     display: inline-block;
     transform: translate(var(--belt-offset-x, 0px), var(--belt-offset-y, 0px));
-    pointer-events: none;
-    touch-action: none;
-    user-select: none;
+    pointer-events: none; touch-action: none; user-select: none;
   }
-
-  & .toolbelt-actions button {
-    pointer-events: all;
-  }
+  & .toolbelt-actions button { pointer-events: all; }
 
   & .the-compass {
     display: grid;
     grid-template-columns: repeat(6, calc(100% / 6));
     grid-template-rows: repeat(6, calc(100% / 6));
-    aspect-ratio: 1;
-    width: 10rem;
-    height: 10rem;
-    pointer-events: none;
+    aspect-ratio: 1; width: 10rem; height: 10rem; pointer-events: none;
   }
-
   & .the-compass button {
-    position: relative;
-    overflow: hidden;
-    touch-action: manipulation;
-    border: none;
-    border-radius: 100%;
-    color: #ebdbb2;
-    border: 1px solid #d79921;
+    position: relative; overflow: hidden; touch-action: manipulation;
+    border-radius: 100%; color: #ebdbb2; border: 1px solid #d79921;
     background-image: radial-gradient(rgba(29,32,33,1), rgba(29,32,33,1) 25%, rgba(29,32,33,.75) 25%);
-    pointer-events: all;
-    cursor: pointer;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-image 80ms;
+    pointer-events: all; cursor: pointer; padding: 0; transition: background-image 80ms;
   }
-
   & .the-compass button:hover {
     background-image: radial-gradient(rgba(215,153,33,.6), rgba(215,153,33,.6) 25%, rgba(29,32,33,0) 25%);
     color: #fabd2f;
   }
-
   & .the-compass button.active {
     background-image: radial-gradient(#d79921, #d79921 25%, rgba(29,32,33,0) 25%);
     color: #282828;
   }
-
   & .the-compass button .icon {
-    position: relative;
-    z-index: 2;
-    font-size: 1.1rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; line-height: 1; z-index: 2; pointer-events: none;
   }
-
-  /* compass root — center */
   & .the-compass .root {
-    grid-row: 3 / 5;
-    grid-column: 3 / 5;
-    background-color: #1d2021;
-    border-width: 2px;
-    border-color: #fabd2f;
-    color: #fabd2f;
-    cursor: grab;
+    grid-row: 3 / 5; grid-column: 3 / 5;
+    background-color: #1d2021; border-width: 2px; border-color: #fabd2f; color: #fabd2f; cursor: grab;
   }
-
-  & .the-compass .root .icon {
-    font-size: 1.3rem;
-  }
-
-  /* compass positions — mirrors v-log */
+  & .the-compass .root .icon { font-size: 1.3rem; }
   & .the-compass .plus-2  { grid-row: 3 / 5; grid-column: 5 / 7; }
   & .the-compass .minus-2 { grid-row: 3 / 5; grid-column: 1 / 3; }
   & .the-compass .minus-7 { grid-row: 1 / 3; grid-column: 2 / 4; transform: translateY(13%); }
@@ -466,228 +393,110 @@ $.style(`
   & .the-compass .minus-5 { grid-row: 5 / 7; grid-column: 2 / 4; transform: translateY(-13%); }
   & .the-compass .plus-5  { grid-row: 5 / 7; grid-column: 4 / 6; transform: translateY(-13%); }
 
-  /* ── OVERLAY PANEL ── */
-
+  /* ── OVERLAY ── */
   & .overlay-area {
-    display: none;
-    position: absolute;
-    inset: 0;
-    z-index: 50;
-    background: rgba(29,32,33,.92);
-    overflow: auto;
-    backdrop-filter: blur(6px);
+    display: none; position: absolute; inset: 0; z-index: 50;
+    background: rgba(29,32,33,.92); overflow: auto; backdrop-filter: blur(6px);
   }
   & .overlay-area.open { display: block; }
-
-  & .overlay-inner {
-    max-width: 360px;
-    margin: 3rem auto;
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  & .overlay-title {
-    font-size: .6rem;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    color: #665c54;
-    margin-bottom: .25rem;
-  }
-
+  & .overlay-inner { max-width: 380px; margin: 3rem auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+  & .overlay-title { font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: #665c54; margin-bottom: .25rem; }
   & .overlay-close {
-    position: absolute;
-    top: .75rem; right: .75rem;
-    background: transparent;
-    border: 1px solid #504945;
-    color: #665c54;
-    width: 28px; height: 28px;
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: .9rem;
-    display: grid;
-    place-items: center;
+    position: absolute; top: .75rem; right: .75rem; background: transparent;
+    border: 1px solid #504945; color: #665c54; width: 28px; height: 28px;
+    border-radius: 2px; cursor: pointer; font-size: .9rem; display: grid; place-items: center;
   }
   & .overlay-close:hover { color: #ebdbb2; border-color: #928374; }
 
-  & .color-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-
+  & .color-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
   & .swatch {
-    aspect-ratio: 1;
-    border-radius: 2px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: transform 80ms;
-    position: relative;
+    aspect-ratio: 1; border-radius: 2px; cursor: pointer;
+    border: 2px solid transparent; transition: transform 80ms;
   }
   & .swatch.transparent-swatch {
     background: repeating-conic-gradient(#504945 0% 25%, #3c3836 0% 50%) 0 0 / 8px 8px;
   }
-  & .swatch:hover { transform: scale(1.15); z-index: 1; }
+  & .swatch:hover { transform: scale(1.15); z-index: 1; position: relative; }
   & .swatch.active { border-color: #fabd2f; }
 
-  & .color-row-label {
-    font-size: .55rem;
-    color: #665c54;
-    letter-spacing: .08em;
-    margin-bottom: .2rem;
-  }
-
-  & input[type=color] {
-    width: 100%;
-    height: 28px;
-    border: 1px solid #504945;
-    background: #3c3836;
-    cursor: pointer;
-    border-radius: 2px;
-    padding: 2px;
-  }
-
+  & input[type=color] { width: 100%; height: 28px; border: 1px solid #504945; background: #3c3836; cursor: pointer; border-radius: 2px; padding: 2px; }
   & input[type=range] { accent-color: #d79921; width: 100%; }
 
-  & .range-row { display: flex; align-items: center; gap: .5rem; }
-  & .range-val { font-size: .65rem; color: #928374; min-width: 1.5rem; text-align: right; }
+  & .thicknoid-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; }
+  & .thicknoid-btn {
+    padding: .3rem .1rem; font-family: 'DM Mono', monospace; font-size: .6rem;
+    background: #3c3836; border: 1px solid #504945; color: #928374;
+    cursor: pointer; border-radius: 2px; text-align: center; transition: all 80ms;
+  }
+  & .thicknoid-btn:hover { border-color: #d79921; color: #ebdbb2; }
+  & .thicknoid-btn.active { border-color: #d79921; color: #fabd2f; background: rgba(215,153,33,.12); }
+
+  & .opacity-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 3px; }
+  & .opacity-btn {
+    padding: .25rem .1rem; font-family: 'DM Mono', monospace; font-size: .6rem;
+    background: #3c3836; border: 1px solid #504945; color: #928374;
+    cursor: pointer; border-radius: 2px; text-align: center; transition: all 80ms;
+  }
+  & .opacity-btn:hover { border-color: #d79921; color: #ebdbb2; }
+  & .opacity-btn.active { border-color: #d79921; color: #fabd2f; background: rgba(215,153,33,.12); }
 
   & .preset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; }
   & .preset-btn {
-    padding: .3rem .15rem;
-    font-family: 'DM Mono', monospace;
-    font-size: .55rem;
-    background: #3c3836;
-    border: 1px solid #504945;
-    color: #928374;
-    cursor: pointer;
-    border-radius: 2px;
-    text-align: center;
-    transition: all 80ms;
+    padding: .3rem .15rem; font-family: 'DM Mono', monospace; font-size: .55rem;
+    background: #3c3836; border: 1px solid #504945; color: #928374;
+    cursor: pointer; border-radius: 2px; text-align: center; transition: all 80ms;
   }
   & .preset-btn:hover { border-color: #d79921; color: #ebdbb2; }
   & .preset-btn.active { border-color: #d79921; color: #fabd2f; background: rgba(215,153,33,.12); }
 
   & .dims-row { display: flex; gap: 4px; align-items: center; }
-  & .dims-row input {
-    width: 60px;
-    background: #3c3836;
-    border: 1px solid #504945;
-    color: #ebdbb2;
-    font-family: 'DM Mono', monospace;
-    font-size: .7rem;
-    padding: .25rem .3rem;
-    border-radius: 2px;
-  }
+  & .dims-row input { width: 60px; background: #3c3836; border: 1px solid #504945; color: #ebdbb2; font-family: 'DM Mono', monospace; font-size: .7rem; padding: .25rem .3rem; border-radius: 2px; }
   & .dims-row span { font-size: .65rem; color: #665c54; }
 
   & .row-btn {
-    padding: .3rem .6rem;
-    background: #3c3836;
-    border: 1px solid #504945;
-    color: #a89984;
-    font-family: 'DM Mono', monospace;
-    font-size: .65rem;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 80ms;
-    width: 100%;
-    text-align: left;
+    padding: .3rem .6rem; background: #3c3836; border: 1px solid #504945; color: #a89984;
+    font-family: 'DM Mono', monospace; font-size: .65rem; cursor: pointer;
+    border-radius: 2px; transition: all 80ms; width: 100%; text-align: left;
   }
   & .row-btn:hover { border-color: #d79921; color: #fabd2f; }
   & .row-btn.active { background: #d79921; color: #282828; border-color: #d79921; }
 
-  & .tl-select {
-    background: #3c3836;
-    border: 1px solid #504945;
-    color: #ebdbb2;
-    font-family: 'DM Mono', monospace;
-    font-size: .7rem;
-    padding: .2rem .3rem;
-    border-radius: 2px;
-    cursor: pointer;
-    width: 100%;
-  }
+  & .tl-select { background: #3c3836; border: 1px solid #504945; color: #ebdbb2; font-family: 'DM Mono', monospace; font-size: .7rem; padding: .2rem .3rem; border-radius: 2px; cursor: pointer; width: 100%; }
+  & .field-row { display: flex; align-items: center; gap: .5rem; }
+  & .field-row label { font-size: .6rem; color: #928374; white-space: nowrap; min-width: 4rem; }
+  & .ck-color-row { display: flex; gap: .5rem; align-items: center; }
+  & .ck-preview { width: 28px; height: 28px; border-radius: 3px; border: 1px solid #504945; flex-shrink: 0; }
 
-  & .field-row {
-    display: flex;
-    align-items: center;
-    gap: .5rem;
-  }
-  & .field-row label { font-size: .6rem; color: #928374; white-space: nowrap; min-width: 3rem; }
-
-  /* ── DARKROOM ── */
-
-  & .darkroom {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(29,32,33,.97);
-    z-index: 100;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1.25rem;
-  }
+  & .darkroom { display: none; position: fixed; inset: 0; background: rgba(29,32,33,.97); z-index: 100; flex-direction: column; align-items: center; justify-content: center; gap: 1.25rem; }
   & .darkroom.open { display: flex; }
   & .dr-canvas { image-rendering: pixelated; cursor: zoom-in; max-width: 88vw; max-height: 65vh; }
   & .dr-canvas.zoomed { cursor: zoom-out; transform: scale(var(--dr-zoom, 1)); }
   & .dr-controls { display: flex; align-items: center; gap: .75rem; }
-  & .dr-btn {
-    background: #3c3836;
-    border: 1px solid #504945;
-    color: #a89984;
-    font-family: 'DM Mono', monospace;
-    font-size: .7rem;
-    padding: .3rem .65rem;
-    cursor: pointer;
-    border-radius: 2px;
-    transition: all 80ms;
-  }
+  & .dr-btn { background: #3c3836; border: 1px solid #504945; color: #a89984; font-family: 'DM Mono', monospace; font-size: .7rem; padding: .3rem .65rem; cursor: pointer; border-radius: 2px; transition: all 80ms; }
   & .dr-btn:hover { border-color: #d79921; color: #fabd2f; }
   & .dr-btn.active { background: #d79921; color: #282828; border-color: #d79921; }
   & .dr-counter { font-size: .65rem; color: #665c54; min-width: 4rem; text-align: center; }
-  & .dr-close {
-    position: absolute;
-    top: .75rem; right: .75rem;
-    background: transparent;
-    border: 1px solid #504945;
-    color: #665c54;
-    width: 28px; height: 28px;
-    border-radius: 2px;
-    cursor: pointer;
-    font-size: .9rem;
-    display: grid;
-    place-items: center;
-  }
+  & .dr-close { position: absolute; top: .75rem; right: .75rem; background: transparent; border: 1px solid #504945; color: #665c54; width: 28px; height: 28px; border-radius: 2px; cursor: pointer; font-size: .9rem; display: grid; place-items: center; }
   & .dr-close:hover { color: #ebdbb2; border-color: #928374; }
   & .dr-title { font-size: .65rem; color: #928374; letter-spacing: .08em; }
 
-  /* sub-animation overlay */
-  & .sub-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(29,32,33,.95);
-    z-index: 200;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-  }
+  & .sub-overlay { position: fixed; inset: 0; background: rgba(29,32,33,.95); z-index: 200; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
   & .sub-title { font-size: .65rem; color: #fe8019; letter-spacing: .1em; }
   & .sub-controls { display: flex; gap: .5rem; align-items: center; }
 
+  & .import-progress { position: absolute; inset: 0; z-index: 40; background: rgba(29,32,33,.9); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; }
+  & .import-progress.active { display: flex; }
+  & .import-bar-outer { width: 200px; height: 6px; background: #3c3836; border-radius: 3px; overflow: hidden; }
+  & .import-bar-inner { height: 100%; background: #d79921; border-radius: 3px; width: 0%; }
+  & .import-label { font-size: .65rem; color: #928374; }
+
   & ::-webkit-scrollbar { width: 3px; height: 3px; }
-  & ::-webkit-scrollbar-track { background: transparent; }
   & ::-webkit-scrollbar-thumb { background: #504945; border-radius: 2px; }
 `)
 
 /*
 
-Dog drew the interface.
-Minimal. Corners for context. Compass for tools.
+Draw — afterUpdate boots once, update() is minimal.
 
 */
 
@@ -697,111 +506,66 @@ $.draw(target => {
 }, { beforeUpdate, afterUpdate })
 
 function beforeUpdate(target) {
-  const { beltGrabbed } = $.learn()
-  target.dataset.belt = beltGrabbed ? 'true' : 'false'
+  target.dataset.belt = $.learn().beltGrabbed ? 'true' : 'false'
+}
+
+function toolIcon(t) {
+  return { draw: '✏', pen: '🖊', erase: '⬜', fill: '⬛', pan: '✋' }[t] || '✏'
+}
+function nextTool(t) {
+  const o = [TOOLS.draw, TOOLS.pen, TOOLS.erase, TOOLS.fill, TOOLS.pan]
+  return o[(o.indexOf(t) + 1) % o.length]
 }
 
 function mount(target) {
-  const { canvasW, canvasH, zoom, tool, fps, loopMode, beltOffsetX, beltOffsetY } = $.learn()
-
+  const { canvasW, canvasH } = $.learn()
   return `
     <div class="app">
-
-      <!-- ── ARTBOARD (1fr) ── -->
       <div class="artboard" data-artboard>
         <div class="artboard-inner" data-artboard-inner>
-          <canvas class="draw-canvas" data-draw-canvas></canvas>
-          <canvas class="pen-preview" data-pen-preview></canvas>
+          <canvas class="output-canvas" data-output-canvas></canvas>
+          <div class="player-canvases" data-player-canvases></div>
         </div>
-
-        <!-- zoom pill -->
+        <div class="drop-overlay" data-drop-overlay>↓ drop video to import frames</div>
+        <div class="import-progress" data-import-progress>
+          <div class="import-label" data-import-label>extracting frames…</div>
+          <div class="import-bar-outer"><div class="import-bar-inner" data-import-bar></div></div>
+        </div>
         <div class="zoom-pill">
-          <span data-zoom-lbl>${zoom}00%</span>
+          <span data-zoom-lbl>200%</span>
           <span style="color:#3c3836">|</span>
           <span data-dim-lbl>${canvasW}×${canvasH}</span>
         </div>
-
-        <!-- top corners -->
         <div class="taskbar -top">
-          <div class="left">
-            <button class="corner-btn" data-open-view="settings">⚙ settings</button>
-          </div>
+          <div class="left"><button class="corner-btn" data-open-view="settings">⚙ settings</button></div>
           <div class="center"></div>
-          <div class="right">
-            <button class="corner-btn" data-open-view="canvas">⬜ canvas</button>
-          </div>
+          <div class="right"><button class="corner-btn" data-open-view="canvas">⬜ canvas</button></div>
         </div>
-
-        <!-- bottom corners -->
         <div class="taskbar -bottom">
-          <div class="left">
-            <button class="corner-btn" data-new-frame>+ frame</button>
-          </div>
+          <div class="left"><button class="corner-btn" data-new-frame>+ frame</button></div>
           <div class="center"></div>
-          <div class="right">
-            <button class="corner-btn" data-darkroom-open>▶ play</button>
-          </div>
+          <div class="right"><button class="corner-btn" data-darkroom-open>▶ play</button></div>
         </div>
-
-        <!-- ── COMPASS TOOLBELT (v-log pattern) ── -->
-        <div class="toolbelt-actions" style="--belt-offset-x:${beltOffsetX}px;--belt-offset-y:${beltOffsetY}px;">
+        <div class="toolbelt-actions" data-toolbelt>
           <div class="the-compass">
-
-            <!-- root: grab handle + menu toggle -->
-            <button data-menu data-drag class="root" data-tooltip="Tools">
-              <span class="icon">${toolIcon(tool)}</span>
-            </button>
-
-            <!-- N: color picker -->
-            <button class="minus-7" data-open-view="color" data-tooltip="Color">
-              <span class="icon" style="width:1.1rem;height:1.1rem;border-radius:50%;background:${$.learn().color === 'transparent' ? 'repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/6px 6px' : $.learn().color};border:1px solid #665c54;display:block;"></span>
-            </button>
-
-            <!-- NE: brush -->
-            <button class="plus-7" data-open-view="brush" data-tooltip="Brush size">
-              <span class="icon">✏</span>
-            </button>
-
-            <!-- E: redo -->
-            <button class="plus-2" data-redo data-tooltip="Redo">
-              <span class="icon">↷</span>
-            </button>
-
-            <!-- SE: export -->
-            <button class="plus-5" data-open-view="export" data-tooltip="Export">
-              <span class="icon">↓</span>
-            </button>
-
-            <!-- S: next tool -->
-            <button class="minus-5" data-cycle-tool data-tooltip="Cycle tool">
-              <span class="icon">${nextToolIcon(tool)}</span>
-            </button>
-
-            <!-- W: undo -->
-            <button class="minus-2" data-undo data-tooltip="Undo">
-              <span class="icon">↶</span>
-            </button>
-
+            <button data-menu data-drag class="root"><span class="icon" data-root-icon>✏</span></button>
+            <button class="minus-7" data-open-view="color"><span class="icon" data-color-icon></span></button>
+            <button class="plus-7" data-open-view="brush"><span class="icon">≡</span></button>
+            <button class="plus-2" data-redo><span class="icon">↷</span></button>
+            <button class="plus-5" data-open-view="export"><span class="icon">↓</span></button>
+            <button class="minus-5" data-cycle-tool><span class="icon" data-cycle-icon>🖊</span></button>
+            <button class="minus-2" data-undo><span class="icon">↶</span></button>
           </div>
         </div>
-
-        <!-- overlay panel -->
         <div class="overlay-area" data-overlay>
           <div class="overlay-inner" data-overlay-inner></div>
           <button class="overlay-close" data-close-overlay>✕</button>
         </div>
-
       </div>
-
-      <!-- ── FILM REEL (auto) ── -->
       <div class="film-reel" data-film-reel>
-        <!-- frames injected here -->
         <button class="reel-add" data-new-frame>+</button>
       </div>
-
     </div>
-
-    <!-- ── DARKROOM ── -->
     <div class="darkroom" data-darkroom>
       <button class="dr-close" data-darkroom-close>✕</button>
       <div class="dr-title" data-dr-title>flipbook</div>
@@ -811,751 +575,829 @@ function mount(target) {
         <button class="dr-btn active" data-dr-play>⏸ pause</button>
         <button class="dr-btn" data-dr-next>next ›</button>
         <span class="dr-counter" data-dr-counter>1 / 1</span>
-        <span style="font-size:.6rem;color:#665c54;">click to zoom</span>
+        <span style="font-size:.6rem;color:#665c54">click to zoom</span>
       </div>
     </div>
   `
 }
 
-function toolIcon(tool) {
-  return { draw: '✏', pen: '🖊', erase: '⬜', fill: '⬛', pan: '✋' }[tool] || '✏'
-}
+/*
 
-function nextToolIcon(tool) {
-  const order = [TOOLS.draw, TOOLS.pen, TOOLS.erase, TOOLS.fill, TOOLS.pan]
-  const next = order[(order.indexOf(tool) + 1) % order.length]
-  return toolIcon(next)
-}
+update() — only belt position + compass icons.
+Reel and cursor overlays are updated imperatively when data changes.
+
+*/
 
 function update(target) {
-  // Belt offset
-  const { beltOffsetX, beltOffsetY, menuOpen, tool, view } = $.learn()
-  const toolbelt = target.querySelector('.toolbelt-actions')
+  const { beltOffsetX, beltOffsetY, tool, color } = $.learn()
+  const toolbelt = target.querySelector('[data-toolbelt]')
   if (toolbelt) toolbelt.style.cssText = `--belt-offset-x:${beltOffsetX}px;--belt-offset-y:${beltOffsetY}px;`
-
-  // Compass open/closed
-  const compass = target.querySelector('.the-compass')
-  if (compass) compass.dataset.open = menuOpen
-
-  // Tool icon on root
-  const root = target.querySelector('.the-compass .root .icon')
-  if (root) root.textContent = toolIcon(tool)
-
-  // Cycle tool icon
-  const cycleBtn = target.querySelector('[data-cycle-tool] .icon')
-  if (cycleBtn) cycleBtn.textContent = nextToolIcon(tool)
-
-  // Color swatch on color button — it's a styled span, not a text icon
-  const colorIcon = target.querySelector('[data-open-view="color"] .icon')
+  const ri = target.querySelector('[data-root-icon]'); if (ri) ri.textContent = toolIcon(tool)
+  const ci = target.querySelector('[data-cycle-icon]'); if (ci) ci.textContent = toolIcon(nextTool(tool))
+  const colorIcon = target.querySelector('[data-color-icon]')
   if (colorIcon) {
-    const c = $.learn().color
-    colorIcon.style.cssText = `width:1.1rem;height:1.1rem;border-radius:50%;background:${c === 'transparent' ? 'repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/6px 6px' : c};border:1px solid #665c54;display:block;`
+    colorIcon.style.cssText = color === 'transparent'
+      ? 'position:absolute;inset:20%;border-radius:50%;background:repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/8px 8px;display:block;'
+      : `position:absolute;inset:20%;border-radius:50%;background:${color};display:block;`
   }
-
-  // Zoom / dim labels
-  const zl = target.querySelector('[data-zoom-lbl]')
-  const dl = target.querySelector('[data-dim-lbl]')
-  const { zoom, canvasW, canvasH } = $.learn()
-  if (zl) zl.textContent = zoom >= 1 ? `${zoom * 100|0}%` : `${Math.round(zoom*100)}%`
-  if (dl) dl.textContent = `${canvasW}×${canvasH}`
-
   return null
 }
 
 function afterUpdate(target) {
-  if (!target._mounted) {
-    target._mounted = true
-    boot(target)
-  }
+  if (!target._mounted) { target._mounted = true; boot(target); return }
+  // fires on every elf state change — drives frame/stroke sync
+  if (target._onStateChange) target._onStateChange()
 }
 
 /*
 
-Boot — the moment of creation.
+Boot.
+Does NOT overwrite frames if they already exist in shared state (peer joined late).
+Instead, syncs local db to whatever frames are already there.
 
 */
 
 function boot(target) {
-  const { canvasW, canvasH } = $.learn()
+  const { canvasW, canvasH, frames } = $.learn()
 
-  target._artboard      = target.querySelector('[data-artboard]')
-  target._artboardInner = target.querySelector('[data-artboard-inner]')
-  target._drawCanvas    = target.querySelector('[data-draw-canvas]')
-  target._penPreview    = target.querySelector('[data-pen-preview]')
-  target._darkroom      = target.querySelector('[data-darkroom]')
-  target._drCanvas      = target.querySelector('[data-dr-canvas]')
-  target._onionCanvases = []
+  target._artboard        = target.querySelector('[data-artboard]')
+  target._artboardInner   = target.querySelector('[data-artboard-inner]')
+  target._outputCanvas    = target.querySelector('[data-output-canvas]')
+  target._playerCanvasCtr = target.querySelector('[data-player-canvases]')
+  target._darkroom        = target.querySelector('[data-darkroom]')
+  target._drCanvas        = target.querySelector('[data-dr-canvas]')
+  target._onionCanvases   = []
+  target._playerCanvasMap = {}
+  target._chromakey       = new Chromakey()
+
+  target._drawCanvas  = document.createElement('canvas')
+  target._videoCanvas = document.createElement('canvas')
+  target._drawCanvas.width  = target._videoCanvas.width  = canvasW
+  target._drawCanvas.height = target._videoCanvas.height = canvasH
 
   initCanvas(target, canvasW, canvasH)
 
-  const f0 = makeFrame(canvasW, canvasH)
-  $.teach({ frames: [f0], current: 0 })
+  if (frames.length === 0) {
+    // First peer — create the first frame
+    const f0 = crypto.randomUUID()
+    ensureFrame(f0, canvasW, canvasH)
+    $.teach({ frames: [f0], frameStrokes: { [f0]: [] }, current: 0 })
+    teachPlayer({ frameId: f0 })
+  } else {
+    // Late-joining peer — ensure all existing frames exist locally, replay their strokes
+    frames.forEach(id => {
+      ensureFrame(id, canvasW, canvasH)
+      replayStrokes(id)
+    })
+    teachPlayer({ frameId: frames[$.learn().current] })
+  }
+
   loadCurrentFrame(target)
   fitZoom(target)
-
   renderReel(target)
-  updateHdr(target)
+  setupCompositeLoop(target)
   attachDrawEvents(target)
+  attachDropEvents(target)
+
+  // Watch for remote frame/stroke changes
+  watchSharedState(target)
 }
 
 /*
 
-Canvas initialization.
+watchSharedState — responds to peers adding frames or committing strokes.
+Runs on a rAF loop comparing a local snapshot of frames + frameStrokes.
+
+*/
+
+function watchSharedState(target) {
+  const _knownCounts = {}  // frameId -> stroke count we have locally rendered
+  let _lastFrameStr = JSON.stringify($.learn().frames)
+
+  // React immediately on every elf state change — no polling delay
+  function onStateChange() {
+    if (target._destroyed) return
+    const state = $.learn()
+    const framesStr = JSON.stringify(state.frames)
+    let reelDirty = false
+
+    // ── new or removed frames ─────────────────────────────────────────────
+    if (framesStr !== _lastFrameStr) {
+      _lastFrameStr = framesStr
+      state.frames.forEach(id => {
+        ensureFrame(id, state.canvasW, state.canvasH)
+        replayStrokes(id)
+        _knownCounts[id] = (state.frameStrokes[id] || []).length
+      })
+      loadCurrentFrame(target)
+      renderOnion(target)
+      reelDirty = true
+    }
+
+    // ── new strokes on any frame ──────────────────────────────────────────
+    state.frames.forEach(id => {
+      const sharedLen = (state.frameStrokes[id] || []).length
+      const knownLen  = _knownCounts[id] ?? -1
+      if (sharedLen !== knownLen) {
+        _knownCounts[id] = sharedLen
+        ensureFrame(id, state.canvasW, state.canvasH)
+        replayStrokes(id)
+        if (id === state.frames[state.current]) {
+          const ctx = target._drawCanvas.getContext('2d')
+          ctx.clearRect(0, 0, state.canvasW, state.canvasH)
+          ctx.drawImage(db[id].drawCanvas, 0, 0)
+        }
+        reelDirty = true
+      }
+    })
+
+    if (reelDirty) renderReel(target)
+  }
+
+  // Store so afterUpdate can call it on every elf state change
+  target._onStateChange = onStateChange
+
+  // Run once immediately to catch state already present (late join)
+  onStateChange()
+
+  // rAF loop — lightweight, only for live peer cursors + active strokes
+  const cursorLoop = () => {
+    if (target._destroyed) return
+    const state = $.learn()
+    updatePeerCanvases(target, state)
+    renderPlayerCursors(target)
+    requestAnimationFrame(cursorLoop)
+  }
+  requestAnimationFrame(cursorLoop)
+}
+
+/*
+
+updatePeerCanvases — draws remote players' active strokes onto per-player canvases.
+These are shown by the composite loop.
+
+*/
+
+function updatePeerCanvases(target, state) {
+  const currentFrameId = (state.frames || [])[state.current]
+  const { zoom } = state
+
+  Object.entries(state.players || {}).forEach(([pid, p]) => {
+    if (pid === playerId) return
+
+    if (!p.currentStroke?.length || p.frameId !== currentFrameId) {
+      // peer not drawing on this frame — clear their canvas
+      const c = target._playerCanvasMap[pid]
+      if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height)
+      return
+    }
+
+    // ensure canvas exists
+    let c = target._playerCanvasMap[pid]
+    if (!c) {
+      c = document.createElement('canvas')
+      c.width  = state.canvasW
+      c.height = state.canvasH
+      c.style.cssText = `position:absolute;top:0;left:0;width:${state.canvasW*zoom}px;height:${state.canvasH*zoom}px;pointer-events:none;image-rendering:pixelated;`
+      target._playerCanvasCtr.appendChild(c)
+      target._playerCanvasMap[pid] = c
+    }
+
+    const ctx = c.getContext('2d')
+    ctx.clearRect(0, 0, c.width, c.height)
+    drawStroke(ctx, p.currentStroke)
+  })
+}
+
+/*
+
+teachPlayer — shorthand for player-namespaced $.teach.
+
+*/
+
+function teachPlayer(payload) {
+  $.teach(payload,
+    { mergeHandler: mergePlayer, parameters: [playerId] },
+    { bypassSecurity: true }
+  )
+}
+
+/*
+
+Canvas init.
 
 */
 
 function initCanvas(target, w, h) {
   const { zoom } = $.learn()
-  const dc = target._drawCanvas
-  const pp = target._penPreview
+  target._outputCanvas.width  = w; target._outputCanvas.height = h
+  target._drawCanvas.width    = w; target._drawCanvas.height   = h
+  target._videoCanvas.width   = w; target._videoCanvas.height  = h
 
-  dc.width = w; dc.height = h
-  if (pp) { pp.width = w; pp.height = h }
-
-  applyZoomToCanvases(target, zoom)
-
-  // rebuild onion layers
   target._onionCanvases.forEach(c => c.remove())
   target._onionCanvases = []
-  const opacities = [0.2, 0.4, 0.6, 0.8]
-  opacities.forEach((op, i) => {
+  ;[0.2, 0.4, 0.6, 0.8].forEach((op, i) => {
     const c = document.createElement('canvas')
-    c.className = 'onion-layer'
-    c.width = w; c.height = h
-    c.style.opacity = op
-    c.style.zIndex = i + 1
-    target._artboardInner.insertBefore(c, dc)
+    c.className = 'onion-layer'; c.width = w; c.height = h
+    c.style.opacity = op; c.style.zIndex = i + 1
+    target._artboardInner.insertBefore(c, target._outputCanvas)
     target._onionCanvases.push(c)
   })
 
-  applyZoomToCanvases(target, zoom)
+  applyZoomStyles(target)
 }
 
-function applyZoomToCanvases(target, zoom) {
-  const { canvasW, canvasH } = $.learn()
-  const w = canvasW, h = canvasH
-  const dc = target._drawCanvas
-  const pp = target._penPreview
-
-  const px = (n) => (n * zoom) + 'px'
-
-  if (dc) { dc.style.width = px(w); dc.style.height = px(h) }
-  if (pp) { pp.style.width = px(w); pp.style.height = px(h) }
-
-  target._onionCanvases.forEach(c => {
-    c.style.width = px(w); c.style.height = px(h)
-  })
+function applyZoomStyles(target) {
+  const { canvasW: w, canvasH: h, zoom } = $.learn()
+  const px = n => (n * zoom) + 'px'
+  target._outputCanvas.style.width  = px(w)
+  target._outputCanvas.style.height = px(h)
+  target._onionCanvases.forEach(c => { c.style.width = px(w); c.style.height = px(h) })
+  target._playerCanvasCtr.style.width  = px(w)
+  target._playerCanvasCtr.style.height = px(h)
+  const lbl = target.querySelector('[data-zoom-lbl]')
+  if (lbl) lbl.textContent = zoom >= 1 ? `${zoom*100|0}%` : `${Math.round(zoom*100)}%`
 }
 
 function setZoom(target, z) {
-  const zoom = Math.max(0.25, Math.min(32, z))
-  $.teach({ zoom })
-  applyZoomToCanvases(target, zoom)
-  const lbl = target.querySelector('[data-zoom-lbl]')
-  if (lbl) lbl.textContent = zoom >= 1 ? `${zoom * 100|0}%` : `${Math.round(zoom*100)}%`
+  $.whisper({ zoom: Math.max(0.25, Math.min(32, z)) })
+  applyZoomStyles(target)
 }
 
 function fitZoom(target) {
   const { canvasW, canvasH } = $.learn()
   const rect = target._artboard.getBoundingClientRect()
-  const z = Math.min((rect.width - 40) / canvasW, (rect.height - 80) / canvasH)
-  setZoom(target, Math.max(0.25, z))
-
-  // center in artboard
-  const zv = $.learn().zoom
-  const cx = (rect.width  - canvasW * zv) / 2
-  const cy = (rect.height - canvasH * zv) / 2
-  $.teach({ panX: cx, panY: cy })
+  const zoom = Math.max(0.25, Math.min((rect.width - 40) / canvasW, (rect.height - 80) / canvasH))
+  const cx = (rect.width  - canvasW * zoom) / 2
+  const cy = (rect.height - canvasH * zoom) / 2
+  $.whisper({ zoom, panX: cx, panY: cy })
+  applyZoomStyles(target)
   target._artboardInner.style.transform = `translate(${cx}px,${cy}px)`
-}
-
-function updateHdr(target) {
-  const { canvasW, canvasH, zoom } = $.learn()
-  const dl = target.querySelector('[data-dim-lbl]')
-  const zl = target.querySelector('[data-zoom-lbl]')
-  if (dl) dl.textContent = `${canvasW}×${canvasH}`
-  if (zl) zl.textContent = zoom >= 1 ? `${zoom * 100|0}%` : `${Math.round(zoom*100)}%`
 }
 
 /*
 
-Frame management — the passage of time.
+Frame management.
+addFrame creates the frame locally AND teaches the new id into shared frames[].
+Other peers' watchSharedState sees the new id and calls ensureFrame locally.
 
 */
 
-function saveCurrentFrame(target) {
-  const { frames, current } = $.learn()
-  if (!frames.length) return
-  const f = db[frames[current]]
-  const ctx = f.canvas.getContext('2d')
-  ctx.clearRect(0, 0, f.canvas.width, f.canvas.height)
-  ctx.drawImage(target._drawCanvas, 0, 0)
-}
-
 function loadCurrentFrame(target) {
-  const { frames, current } = $.learn()
-  const ctx = target._drawCanvas.getContext('2d')
-  ctx.clearRect(0, 0, target._drawCanvas.width, target._drawCanvas.height)
+  const { frames, current, canvasW, canvasH } = $.learn()
+  target._drawCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
+  target._videoCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
   if (!frames.length) return
-  ctx.drawImage(db[frames[current]].canvas, 0, 0)
+  const f = ensureFrame(frames[current], canvasW, canvasH)
+  target._drawCanvas.getContext('2d').drawImage(f.drawCanvas, 0, 0)
+  if (f.hasVideo) target._videoCanvas.getContext('2d').drawImage(f.videoCanvas, 0, 0)
 }
 
 function gotoFrame(target, idx) {
-  saveCurrentFrame(target)
   $.teach({ current: idx })
+  teachPlayer({ frameId: $.learn().frames[idx] })
   loadCurrentFrame(target)
   renderOnion(target)
   renderReel(target)
 }
 
-function addFrame(target, copyFrom = null) {
-  const { frames, current, canvasW, canvasH } = $.learn()
-  const id = makeFrame(canvasW, canvasH)
-  if (copyFrom !== null && frames[copyFrom]) {
-    db[id].canvas.getContext('2d').drawImage(db[frames[copyFrom]].canvas, 0, 0)
+function addFrame(target, copyFromIdx = null) {
+  const { frames, current, canvasW, canvasH, frameStrokes } = $.learn()
+  const id = crypto.randomUUID()
+  ensureFrame(id, canvasW, canvasH)
+
+  // copy strokes if duplicating
+  let newStrokes = []
+  if (copyFromIdx !== null && frames[copyFromIdx]) {
+    const srcId = frames[copyFromIdx]
+    newStrokes = [...(frameStrokes[srcId] || [])]
+    // also copy pixels locally
+    db[id].drawCanvas.getContext('2d').drawImage(db[srcId].drawCanvas, 0, 0)
   }
+
   const newFrames = [...frames]
   newFrames.splice(current + 1, 0, id)
-  saveCurrentFrame(target)
-  $.teach({ frames: newFrames, current: current + 1 })
+
+  $.teach({
+    frames: newFrames,
+    current: current + 1,
+    frameStrokes: { ...frameStrokes, [id]: newStrokes }
+  })
+  teachPlayer({ frameId: id })
+
   loadCurrentFrame(target)
   renderOnion(target)
   renderReel(target)
 }
 
 function deleteFrame(target, idx) {
-  const { frames } = $.learn()
+  const { frames, frameStrokes } = $.learn()
   if (frames.length <= 1) return
+  const id = frames[idx]
   const newFrames = frames.filter((_, i) => i !== idx)
-  let cur = $.learn().current
-  if (cur >= newFrames.length) cur = newFrames.length - 1
-  saveCurrentFrame(target)
-  $.teach({ frames: newFrames, current: cur })
-  loadCurrentFrame(target)
-  renderOnion(target)
-  renderReel(target)
+  let cur = $.learn().current; if (cur >= newFrames.length) cur = newFrames.length - 1
+  const newStrokes = { ...frameStrokes }; delete newStrokes[id]
+  $.teach({ frames: newFrames, current: cur, frameStrokes: newStrokes })
+  loadCurrentFrame(target); renderOnion(target); renderReel(target)
 }
 
 function applyDims(target, w, h) {
   const { frames } = $.learn()
-  saveCurrentFrame(target)
   frames.forEach(id => {
-    const f = db[id]
-    const tmp = document.createElement('canvas')
-    tmp.width = w; tmp.height = h
-    tmp.getContext('2d').drawImage(f.canvas, 0, 0, w, h)
-    f.canvas = tmp
+    const f = ensureFrame(id, w, h)
+    ;['drawCanvas','videoCanvas'].forEach(key => {
+      const tmp = document.createElement('canvas'); tmp.width=w; tmp.height=h
+      tmp.getContext('2d').drawImage(f[key], 0, 0, w, h); f[key] = tmp
+    })
+    replayStrokes(id)
   })
   $.teach({ canvasW: w, canvasH: h })
-  target._drawCanvas.width = w; target._drawCanvas.height = h
-  if (target._penPreview) { target._penPreview.width = w; target._penPreview.height = h }
-  target._onionCanvases.forEach(c => { c.width = w; c.height = h })
   initCanvas(target, w, h)
-  loadCurrentFrame(target)
-  renderOnion(target)
-  renderReel(target)
-  updateHdr(target)
-  fitZoom(target)
+  loadCurrentFrame(target); renderOnion(target); renderReel(target); fitZoom(target)
+  const dl = target.querySelector('[data-dim-lbl]'); if (dl) dl.textContent = `${w}×${h}`
 }
 
 /*
 
-Onion skinning — the ghost of frames past.
+Onion skinning.
 
 */
 
 function renderOnion(target) {
-  const { frames, current, onion } = $.learn()
+  const { frames, current, onion, canvasW, canvasH } = $.learn()
   target._onionCanvases.forEach((c, i) => {
-    const ctx = c.getContext('2d')
-    ctx.clearRect(0, 0, c.width, c.height)
+    const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height)
     if (!onion) return
-    const frameIdx = current - (4 - i)
-    if (frameIdx >= 0 && frames[frameIdx]) {
-      ctx.drawImage(db[frames[frameIdx]].canvas, 0, 0)
+    const fi = current - (4 - i)
+    if (fi >= 0 && frames[fi]) {
+      const f = ensureFrame(frames[fi], canvasW, canvasH)
+      if (f.hasVideo) ctx.drawImage(f.videoCanvas, 0, 0)
+      ctx.drawImage(f.drawCanvas, 0, 0)
     }
   })
 }
 
 /*
 
-Film reel renderer — the horizontal strip of panels.
-Frame selection fixed: del button stops propagation imperatively.
+Film reel — del stops propagation imperatively.
+Also renders player presence dots on frames.
 
 */
 
 function renderReel(target) {
-  const { frames, current } = $.learn()
-  const reel = target.querySelector('[data-film-reel]')
-  if (!reel) return
-
-  // preserve the add button
+  const { frames, current, players } = $.learn()
+  const reel = target.querySelector('[data-film-reel]'); if (!reel) return
   const addBtn = reel.querySelector('[data-new-frame]')
   reel.innerHTML = ''
 
   frames.forEach((id, idx) => {
-    const f = db[id]
-
+    const f = ensureFrame(id, $.learn().canvasW, $.learn().canvasH)
     const div = document.createElement('div')
     div.className = 'reel-frame' + (idx === current ? ' active' : '')
 
-    // thumb canvas
-    const c = document.createElement('canvas')
-    c.width = f.canvas.width; c.height = f.canvas.height
-    c.getContext('2d').drawImage(f.canvas, 0, 0)
+    const thumb = document.createElement('canvas')
+    thumb.width = f.drawCanvas.width; thumb.height = f.drawCanvas.height
+    const tctx = thumb.getContext('2d')
+    if (f.hasVideo) tctx.drawImage(f.videoCanvas, 0, 0)
+    tctx.drawImage(f.drawCanvas, 0, 0)
 
-    const num = document.createElement('span')
-    num.className = 'reel-num'; num.textContent = idx + 1
+    const num = document.createElement('span'); num.className = 'reel-num'; num.textContent = idx + 1
 
-    const del = document.createElement('button')
-    del.className = 'reel-del'; del.textContent = '✕'
-    // Imperative — stops propagation before the frame click fires
-    del.addEventListener('click', (e) => {
-      e.stopPropagation()
-      saveCurrentFrame(target)
-      deleteFrame(target, idx)
-    })
+    const del = document.createElement('button'); del.className = 'reel-del'; del.textContent = '✕'
+    del.addEventListener('click', e => { e.stopPropagation(); deleteFrame(target, idx) })
 
-    if (f.children) {
-      const badge = document.createElement('span')
-      badge.className = 'sub-badge'; badge.textContent = '↳'
-      div.appendChild(badge)
+    // player presence dots — who is on this frame
+    const peersHere = Object.entries(players || {}).filter(([pid, p]) => pid !== playerId && p.frameId === id)
+    if (peersHere.length) {
+      const dotsRow = document.createElement('div'); dotsRow.className = 'reel-player-dots'
+      peersHere.forEach(([pid, p]) => {
+        const dot = document.createElement('div'); dot.className = 'reel-player-dot'
+        dot.style.background = p.color || '#fabd2f'
+        dot.title = pid.slice(0, 6)
+        dotsRow.appendChild(dot)
+      })
+      div.appendChild(dotsRow)
     }
 
-    // Frame click — select this frame
+    if (f.hasVideo) { const b=document.createElement('span');b.className='reel-badge';b.style.color='#83a598';b.textContent='▶';div.appendChild(b) }
+    if (f.children) { const b=document.createElement('span');b.className='reel-badge';b.style.cssText='color:#fe8019;left:10px';b.textContent='↳';div.appendChild(b) }
+
+    div.appendChild(thumb); div.appendChild(num); div.appendChild(del)
     div.addEventListener('click', () => gotoFrame(target, idx))
-
-    // Right-click — open sub-animation
-    div.addEventListener('contextmenu', (e) => {
-      e.preventDefault()
-      openSubAnimation(target, id)
-    })
-
-    div.appendChild(c); div.appendChild(num); div.appendChild(del)
+    div.addEventListener('dblclick', () => addFrame(target, idx))
+    div.addEventListener('contextmenu', e => { e.preventDefault(); openSubAnimation(target, id) })
     reel.appendChild(div)
   })
 
-  // re-append add button
   if (addBtn) reel.appendChild(addBtn)
-
-  // scroll active into view
   const active = reel.querySelector('.active')
   if (active) active.scrollIntoView({ inline: 'nearest', block: 'nearest' })
 }
 
 /*
 
-Drawing — man's sacred act of mark-making.
-
-draw mode: freehand pixel brush, auto-fills closed shape on mouseup
-pen mode:  click to place bezier points, double-click to close + fill
+renderPlayerCursors — draws colored cursor dots + labels for all peers
+on the artboard-inner, in canvas coords scaled to zoom.
+Only shows peers on the current frame.
 
 */
 
-let _drawing  = false
-let _lastPx   = null
-let _panStart  = null
-let _panOrigin = null
-let _penPoints = []    // pen mode: array of {x,y}
-let _drawPoints = []   // draw mode: stroke points for auto-fill
-
-const _undoStack = {}
-
-function getCanvasPos(target, e) {
-  const { zoom } = $.learn()
-  const rect = target._drawCanvas.getBoundingClientRect()
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  return {
-    x: Math.floor((clientX - rect.left) / zoom),
-    y: Math.floor((clientY - rect.top)  / zoom)
+function renderPlayerCursors(target) {
+  const { players, frames, current, zoom } = $.learn()
+  let container = target._artboardInner.querySelector('.player-cursors-overlay')
+  if (!container) {
+    container = document.createElement('div')
+    container.className = 'player-cursors-overlay'
+    container.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:25;'
+    target._artboardInner.appendChild(container)
   }
+
+  const currentFrameId = frames[current]
+  container.innerHTML = Object.entries(players || {})
+    .filter(([pid, p]) => pid !== playerId && p.activelyDrawing && p.frameId === currentFrameId)
+    .map(([pid, p]) => `
+      <div class="player-cursor" style="left:${p.cursorX * zoom}px;top:${p.cursorY * zoom}px">
+        <div class="dot" style="background:${p.color || '#fabd2f'}"></div>
+        <div class="label" style="color:${p.color || '#fabd2f'}">${pid.slice(0,6)}</div>
+      </div>
+    `).join('')
 }
 
-function captureUndo(target) {
-  const { frames, current, tool } = $.learn()
-  if (tool === 'pan' || !frames.length) return
-  const id = frames[current]
-  if (!_undoStack[id]) _undoStack[id] = []
-  const ctx = target._drawCanvas.getContext('2d')
-  _undoStack[id].push(ctx.getImageData(0, 0, target._drawCanvas.width, target._drawCanvas.height))
-  if (_undoStack[id].length > 30) _undoStack[id].shift()
-}
+/*
 
-function undoFrame(target) {
-  const { frames, current } = $.learn()
-  if (!frames.length) return
-  const id = frames[current]
-  if (!_undoStack[id] || !_undoStack[id].length) return
-  target._drawCanvas.getContext('2d').putImageData(_undoStack[id].pop(), 0, 0)
-  saveCurrentFrame(target)
-  renderReel(target)
-}
+drawStroke — v-log verbatim.
 
-function redoFrame(target) {
-  // redo stack omitted for brevity — placeholder
-}
+*/
 
-function plotPixel(ctx, x, y) {
-  const { tool, color, brushSize } = $.learn()
-  const half = Math.floor(brushSize / 2)
-  if (tool === 'erase' || color === 'transparent') {
-    ctx.clearRect(x - half, y - half, brushSize, brushSize)
-  } else {
-    ctx.fillStyle = color
-    ctx.fillRect(x - half, y - half, brushSize, brushSize)
+function drawStroke(context, stroke) {
+  if (!stroke || stroke.length < 2) return
+  context.beginPath()
+  context.moveTo(stroke[0].x, stroke[0].y)
+  for (let i = 1; i < stroke.length; i++) {
+    const point = stroke[i]
+    context.strokeStyle = point.color || '#ebdbb2'
+    context.lineCap = 'round'; context.lineJoin = 'round'
+    context.globalAlpha = point.opacity ?? 1
+    context.lineWidth = point.lineWidth || 8
+    if (i < stroke.length - 1) {
+      const xc = (stroke[i].x + stroke[i+1].x) / 2
+      const yc = (stroke[i].y + stroke[i+1].y) / 2
+      context.quadraticCurveTo(point.x, point.y, xc, yc)
+    } else {
+      context.lineTo(point.x, point.y)
+    }
   }
-}
-
-function plotLine(ctx, x0, y0, x1, y1) {
-  const dx = Math.abs(x1-x0), dy = Math.abs(y1-y0)
-  const sx = x0<x1?1:-1, sy = y0<y1?1:-1
-  let err = dx-dy, x = x0, y = y0
-  while (true) {
-    plotPixel(ctx, x, y)
-    if (x===x1 && y===y1) break
-    const e2 = 2*err
-    if (e2>-dy) { err-=dy; x+=sx }
-    if (e2< dx) { err+=dx; y+=sy }
-  }
+  context.stroke()
+  context.globalAlpha = 1
 }
 
 function hexToRgba(hex) {
-  if (!hex || hex === 'transparent') return { r:0, g:0, b:0, a:0 }
-  return {
-    r: parseInt(hex.slice(1,3), 16),
-    g: parseInt(hex.slice(3,5), 16),
-    b: parseInt(hex.slice(5,7), 16),
-    a: 255
-  }
+  if (!hex || hex === 'transparent') return { r:0,g:0,b:0,a:0 }
+  return { r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16), a:255 }
 }
 
 function floodFill(ctx, x, y, fillColor, w, h) {
-  if (fillColor === 'transparent') {
-    // flood-erase
-    floodErase(ctx, x, y, w, h)
-    return
-  }
-  const img = ctx.getImageData(0, 0, w, h)
-  const d = img.data
-  const ti = (y * w + x) * 4
-  const tr = d[ti], tg = d[ti+1], tb = d[ti+2], ta = d[ti+3]
-  const fc = hexToRgba(fillColor)
-  if (tr===fc.r && tg===fc.g && tb===fc.b && ta===fc.a) return
-  const stack = [[x,y]], vis = new Uint8Array(w * h)
-  while (stack.length) {
-    const [cx,cy] = stack.pop()
-    if (cx<0||cx>=w||cy<0||cy>=h) continue
-    const i = cy*w+cx; if (vis[i]) continue
-    const pi = i*4
-    if (d[pi]!==tr||d[pi+1]!==tg||d[pi+2]!==tb||d[pi+3]!==ta) continue
-    vis[i]=1; d[pi]=fc.r; d[pi+1]=fc.g; d[pi+2]=fc.b; d[pi+3]=fc.a
+  const img=ctx.getImageData(0,0,w,h),d=img.data
+  const ti=(y*w+x)*4,tr=d[ti],tg=d[ti+1],tb=d[ti+2],ta=d[ti+3]
+  const fc=hexToRgba(fillColor)
+  if(tr===fc.r&&tg===fc.g&&tb===fc.b&&ta===fc.a)return
+  const stack=[[x,y]],vis=new Uint8Array(w*h)
+  while(stack.length){
+    const[cx,cy]=stack.pop();if(cx<0||cx>=w||cy<0||cy>=h)continue
+    const i=cy*w+cx;if(vis[i])continue;const pi=i*4
+    if(d[pi]!==tr||d[pi+1]!==tg||d[pi+2]!==tb||d[pi+3]!==ta)continue
+    vis[i]=1;d[pi]=fc.r;d[pi+1]=fc.g;d[pi+2]=fc.b;d[pi+3]=fc.a
     stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1])
   }
-  ctx.putImageData(img, 0, 0)
-}
-
-function floodErase(ctx, x, y, w, h) {
-  const img = ctx.getImageData(0, 0, w, h)
-  const d = img.data
-  const ti = (y * w + x) * 4
-  const tr = d[ti], tg = d[ti+1], tb = d[ti+2], ta = d[ti+3]
-  if (ta === 0) return
-  const stack = [[x,y]], vis = new Uint8Array(w * h)
-  while (stack.length) {
-    const [cx,cy] = stack.pop()
-    if (cx<0||cx>=w||cy<0||cy>=h) continue
-    const i = cy*w+cx; if (vis[i]) continue
-    const pi = i*4
-    if (d[pi]!==tr||d[pi+1]!==tg||d[pi+2]!==tb||d[pi+3]!==ta) continue
-    vis[i]=1; d[pi+3]=0
-    stack.push([cx+1,cy],[cx-1,cy],[cx,cy+1],[cx,cy-1])
-  }
-  ctx.putImageData(img, 0, 0)
+  ctx.putImageData(img,0,0)
 }
 
 /*
 
-Auto-fill for draw mode.
-When the stroke ends and the shape appears roughly closed,
-flood-fill the interior with fillColor.
+Composite loop — video → committed+active draw → output.
 
 */
 
-function tryAutoFill(target) {
-  const { color, fillColor, canvasW, canvasH } = $.learn()
-  if (!_drawPoints.length) return
+function setupCompositeLoop(target) {
+  const ctx = target._outputCanvas.getContext('2d')
+  const ckCanvas = document.createElement('canvas')
+  let ckCtx = null
 
-  // Check if start and end are close enough to be "closed"
-  const first = _drawPoints[0]
-  const last  = _drawPoints[_drawPoints.length - 1]
-  const dist  = Math.hypot(last.x - first.x, last.y - first.y)
+  const loop = () => {
+    if (target._destroyed) return
+    const { canvasW:w, canvasH:h, chromakeyEnabled, chromakeyColor, chromakeyTolerance } = $.learn()
 
-  if (dist > 12) return // not closed enough
-
-  // find centroid of stroke
-  const cx = Math.round(_drawPoints.reduce((s, p) => s + p.x, 0) / _drawPoints.length)
-  const cy = Math.round(_drawPoints.reduce((s, p) => s + p.y, 0) / _drawPoints.length)
-
-  const ctx = target._drawCanvas.getContext('2d')
-  floodFill(ctx, cx, cy, fillColor, canvasW, canvasH)
-}
-
-/*
-
-Pen mode rendering — preview bezier path on the preview canvas.
-
-*/
-
-function renderPenPreview(target) {
-  const pp = target._penPreview
-  if (!pp) return
-  const { color, fillColor, brushSize } = $.learn()
-  const ctx = pp.getContext('2d')
-  ctx.clearRect(0, 0, pp.width, pp.height)
-
-  if (_penPoints.length < 2) {
-    if (_penPoints.length === 1) {
-      ctx.fillStyle = color === 'transparent' ? 'rgba(255,255,255,0.3)' : color
-      ctx.fillRect(_penPoints[0].x - 2, _penPoints[0].y - 2, 4, 4)
+    if (chromakeyEnabled && (ckCanvas.width!==w||ckCanvas.height!==h)) {
+      ckCanvas.width=w; ckCanvas.height=h
+      ckCtx=ckCanvas.getContext('2d',{willReadFrequently:true})
     }
-    return
+
+    ctx.clearRect(0,0,w,h)
+    ctx.drawImage(target._videoCanvas,0,0)
+
+    if (chromakeyEnabled) {
+      if (!ckCtx) ckCtx=ckCanvas.getContext('2d',{willReadFrequently:true})
+      ckCtx.clearRect(0,0,w,h)
+      ckCtx.drawImage(target._drawCanvas,0,0)
+      if (target._activeCanvas) ckCtx.drawImage(target._activeCanvas,0,0)
+      if (target._chromakey?.gl) {
+        ctx.drawImage(target._chromakey.process(ckCanvas,hexToRgb(chromakeyColor),chromakeyTolerance),0,0)
+      } else {
+        const keyRgb=hexToRgb(chromakeyColor),img=ckCtx.getImageData(0,0,w,h),d=img.data
+        for(let i=0;i<d.length;i+=4){if(d[i+3]===0)continue;if(colorDistance(d[i],d[i+1],d[i+2],keyRgb.r,keyRgb.g,keyRgb.b)<=chromakeyTolerance)d[i+3]=0}
+        ckCtx.putImageData(img,0,0); ctx.drawImage(ckCanvas,0,0)
+      }
+    } else {
+      ctx.drawImage(target._drawCanvas,0,0)
+      if (target._activeCanvas) ctx.drawImage(target._activeCanvas,0,0)
+    }
+
+    // draw other players' active strokes (maintained by updatePeerCanvases)
+    Object.values(target._playerCanvasMap || {}).forEach(pc => {
+      ctx.drawImage(pc, 0, 0)
+    })
+
+    requestAnimationFrame(loop)
   }
-
-  ctx.beginPath()
-  ctx.moveTo(_penPoints[0].x, _penPoints[0].y)
-  for (let i = 1; i < _penPoints.length - 1; i++) {
-    const mx = (_penPoints[i].x + _penPoints[i+1].x) / 2
-    const my = (_penPoints[i].y + _penPoints[i+1].y) / 2
-    ctx.quadraticCurveTo(_penPoints[i].x, _penPoints[i].y, mx, my)
-  }
-  const last = _penPoints[_penPoints.length - 1]
-  ctx.lineTo(last.x, last.y)
-
-  ctx.strokeStyle = color === 'transparent' ? 'rgba(255,255,255,0.4)' : color
-  ctx.lineWidth = brushSize
-  ctx.lineCap = 'round'
-  ctx.lineJoin = 'round'
-  ctx.globalAlpha = 0.85
-  ctx.stroke()
-  ctx.globalAlpha = 1
-
-  // draw point handles
-  _penPoints.forEach((p, i) => {
-    ctx.fillStyle = i === 0 ? '#fabd2f' : '#d79921'
-    ctx.fillRect(p.x - 2, p.y - 2, 4, 4)
-  })
+  loop()
 }
 
-function commitPenPath(target) {
-  if (_penPoints.length < 2) { _penPoints = []; return }
-  const { color, fillColor, brushSize, canvasW, canvasH } = $.learn()
-  const ctx = target._drawCanvas.getContext('2d')
+/*
 
-  ctx.beginPath()
-  ctx.moveTo(_penPoints[0].x, _penPoints[0].y)
-  for (let i = 1; i < _penPoints.length - 1; i++) {
-    const mx = (_penPoints[i].x + _penPoints[i+1].x) / 2
-    const my = (_penPoints[i].y + _penPoints[i+1].y) / 2
-    ctx.quadraticCurveTo(_penPoints[i].x, _penPoints[i].y, mx, my)
-  }
-  ctx.lineTo(_penPoints[_penPoints.length-1].x, _penPoints[_penPoints.length-1].y)
-  ctx.closePath()
+Chromakey helpers.
 
-  // fill
-  if (fillColor && fillColor !== 'transparent') {
-    ctx.fillStyle = fillColor
-    ctx.fill()
-  }
+*/
 
-  // stroke
-  if (color && color !== 'transparent') {
-    ctx.strokeStyle = color
-    ctx.lineWidth = brushSize
-    ctx.lineCap = 'round'
-    ctx.lineJoin = 'round'
-    ctx.stroke()
-  }
+const _colorCache = new Map()
+function hexToRgb(s) {
+  if (_colorCache.has(s)) return _colorCache.get(s)
+  const c=document.createElement('canvas');c.width=c.height=1
+  const ctx=c.getContext('2d');ctx.fillStyle=s;ctx.fillRect(0,0,1,1)
+  const[r,g,b]=ctx.getImageData(0,0,1,1).data
+  const result={r,g,b}
+  if(_colorCache.size>100)_colorCache.delete(_colorCache.keys().next().value)
+  _colorCache.set(s,result);return result
+}
+function colorDistance(r1,g1,b1,r2,g2,b2){return Math.sqrt((r2-r1)**2+(g2-g1)**2+(b2-b1)**2)}
 
-  // clear preview
-  const pp = target._penPreview
-  if (pp) pp.getContext('2d').clearRect(0, 0, pp.width, pp.height)
+/*
 
-  _penPoints = []
-  saveCurrentFrame(target)
+Undo — local only, ImageData snapshots per frame.
+
+*/
+
+const _undoStack = {}
+
+function captureUndo(target) {
+  const { frames, current, tool } = $.learn()
+  if (tool==='pan'||!frames.length) return
+  const id=frames[current]
+  if (!_undoStack[id]) _undoStack[id]=[]
+  _undoStack[id].push(target._drawCanvas.getContext('2d').getImageData(0,0,target._drawCanvas.width,target._drawCanvas.height))
+  if (_undoStack[id].length>30) _undoStack[id].shift()
+}
+
+function undoFrame(target) {
+  const { frames, current }=$.learn(); if(!frames.length)return
+  const id=frames[current]
+  if (!_undoStack[id]?.length) return
+  target._drawCanvas.getContext('2d').putImageData(_undoStack[id].pop(),0,0)
+  if (target._activeCanvas) target._activeCanvas.getContext('2d').clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
+  // sync back to local db so reel thumb is correct
+  db[id].drawCanvas.getContext('2d').clearRect(0,0,db[id].drawCanvas.width,db[id].drawCanvas.height)
+  db[id].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
   renderReel(target)
 }
 
 /*
 
-Attach draw events imperatively — canvas needs direct refs.
+Draw events — pointer unified, pressure via e.pressure.
+Active stroke → _activeCanvas during drag.
+On commit → stroke pushed to shared frameStrokes (travels to peers).
+Peers' watchSharedState sees the new stroke length, calls replayStrokes.
 
 */
 
+let _drawing=false,_lineWidth=0,_points=[],_penPoints=[],_panStart=null,_panOrigin=null,_lastClickTime=0,_drawRafId=null
+
+function getCanvasPos(target, e) {
+  const { zoom }=$.learn(), rect=target._outputCanvas.getBoundingClientRect()
+  const clientX=e.touches?e.touches[0].clientX:e.clientX
+  const clientY=e.touches?e.touches[0].clientY:e.clientY
+  return { x:Math.floor((clientX-rect.left)/zoom), y:Math.floor((clientY-rect.top)/zoom) }
+}
+
 function attachDrawEvents(target) {
-  const dc = target._drawCanvas
+  const oc = target._outputCanvas
+  target._activeCanvas=document.createElement('canvas')
+  target._activeCanvas.width=target._drawCanvas.width
+  target._activeCanvas.height=target._drawCanvas.height
 
-  let _lastClickTime = 0
+  oc.addEventListener('pointerdown', e => {
+    oc.setPointerCapture(e.pointerId)
+    const { tool }=$.learn()
+    if (tool==='pan'){startPan(target,e);return}
 
-  dc.addEventListener('mousedown', e => {
-    const { tool } = $.learn()
-    if (tool === 'pan') { startPan(target, e); return }
-
-    if (tool === 'pen') {
-      const { x, y } = getCanvasPos(target, e)
-      const now = Date.now()
-      if (now - _lastClickTime < 350 && _penPoints.length > 1) {
-        // double-click = commit path
-        captureUndo(target)
-        commitPenPath(target)
-      } else {
-        _penPoints.push({ x, y })
-        renderPenPreview(target)
-      }
-      _lastClickTime = now
-      return
+    const now=Date.now()
+    if (now-_lastClickTime<350){
+      addFrame(target,$.learn().current); _lastClickTime=0; return
     }
+    _lastClickTime=now
+
+    if (tool==='pen'){const{x,y}=getCanvasPos(target,e);_penPoints.push({x,y});renderPenPreview(target);return}
 
     captureUndo(target)
-    _drawing = true
-    _drawPoints = []
-    const ctx = dc.getContext('2d')
-    const { x, y } = getCanvasPos(target, e)
+    _drawing=true; _points=[]
+    const{x,y}=getCanvasPos(target,e)
 
-    if (tool === 'fill') {
-      const { color, canvasW, canvasH } = $.learn()
-      floodFill(ctx, x, y, color, canvasW, canvasH)
-      saveCurrentFrame(target); renderReel(target)
-      _drawing = false
-      return
+    if (tool==='fill'){
+      const{color,canvasW,canvasH}=$.learn()
+      floodFill(target._drawCanvas.getContext('2d'),x,y,color,canvasW,canvasH)
+      commitCurrentPixels(target); _drawing=false; return
     }
 
-    plotPixel(ctx, x, y)
-    _drawPoints.push({ x, y })
-    _lastPx = { x, y }
+    const{thickness,opacity,color}=$.learn()
+    const pressure=e.pressure>0?e.pressure:1.0
+    _lineWidth=Math.log(pressure+1)*thickness
+    const pt={x,y,lineWidth:_lineWidth,color,opacity}
+    _points.push(pt)
+    teachPlayer({currentStroke:[pt],cursorX:x,cursorY:y,activelyDrawing:true,color})
   })
 
-  dc.addEventListener('mousemove', e => {
-    const { tool } = $.learn()
-    if (tool === 'pan') { movePan(target, e); return }
-    if (tool === 'pen') {
-      // preview line from last point to cursor
-      if (_penPoints.length > 0) {
-        const { x, y } = getCanvasPos(target, e)
-        const preview = [..._penPoints, { x, y }]
-        const saved = _penPoints
-        _penPoints = preview
-        renderPenPreview(target)
-        _penPoints = saved
+  oc.addEventListener('pointermove', e => {
+    const{tool}=$.learn()
+    if (tool==='pan'){movePan(target,e);return}
+    if (tool==='pen'){
+      if(_penPoints.length>0){
+        const{x,y}=getCanvasPos(target,e)
+        const preview=[..._penPoints,{x,y}],saved=_penPoints
+        _penPoints=preview; renderPenPreview(target); _penPoints=saved
       }
       return
     }
     if (!_drawing) return
-    const ctx = dc.getContext('2d')
-    const { x, y } = getCanvasPos(target, e)
-    if (_lastPx) plotLine(ctx, _lastPx.x, _lastPx.y, x, y)
-    else plotPixel(ctx, x, y)
-    _drawPoints.push({ x, y })
-    _lastPx = { x, y }
+
+    const{x,y}=getCanvasPos(target,e)
+    const{thickness,opacity,color}=$.learn()
+    const pressure=e.pressure>0?e.pressure:1.0
+    _lineWidth=Math.log(pressure+1)*thickness*4*0.2+_lineWidth*0.8
+
+    const pt={x,y,lineWidth:_lineWidth,color,opacity}
+    _points.push(pt)
+
+    // draw full current stroke to _activeCanvas
+    const actCtx=target._activeCanvas.getContext('2d')
+    actCtx.clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
+    drawStroke(actCtx,_points)
+
+    // throttle multiplayer broadcast
+    if (!_drawRafId){
+      _drawRafId=requestAnimationFrame(()=>{
+        teachPlayer({currentStroke:[..._points],cursorX:x,cursorY:y,color,activelyDrawing:true})
+        _drawRafId=null
+      })
+    }
   })
 
-  dc.addEventListener('mouseup', e => {
-    if ($.learn().tool === 'pan') { endPan(target); return }
-    if ($.learn().tool === 'pen') return
-    if (!_drawing) return
-    _drawing = false; _lastPx = null
+  oc.addEventListener('pointerup', e => {
+    const{tool}=$.learn()
+    if (tool==='pan'){endPan(target);return}
+    if (tool==='pen')return
+    if (!_drawing)return
+    _drawing=false; _lineWidth=0
 
-    // draw mode auto-fill
-    if ($.learn().tool === TOOLS.draw) {
-      tryAutoFill(target)
+    if (_points.length>=2){
+      drawStroke(target._drawCanvas.getContext('2d'),_points)
+    } else if (_points.length===1){
+      const{color,opacity,thickness}=$.learn(),ctx=target._drawCanvas.getContext('2d')
+      ctx.fillStyle=color;ctx.globalAlpha=opacity
+      ctx.beginPath();ctx.arc(_points[0].x,_points[0].y,thickness/2,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1
     }
 
-    saveCurrentFrame(target)
-    renderReel(target)
-    _drawPoints = []
+    target._activeCanvas.getContext('2d').clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
+    teachPlayer({currentStroke:[],activelyDrawing:false})
+
+    // commit stroke to shared state — peers will replay it
+    if (_points.length>0) {
+      const{frames,current,frameStrokes}=$.learn()
+      const frameId=frames[current]
+      const committed=[..._points]
+      // update local db immediately so reel thumb is current
+      db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
+      db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
+      // teach full frameStrokes — plain spread merge, survives server cache on reload
+      const {frameStrokes: fs} = $.learn()
+      $.teach({
+        frameStrokes: {
+          ...fs,
+          [frameId]: [...(fs[frameId] || []), committed]
+        }
+      })
+      renderReel(target)
+    }
+    _points=[]
   })
 
-  dc.addEventListener('mouseleave', e => {
-    if (_drawing) {
-      _drawing = false; _lastPx = null
-      if ($.learn().tool === TOOLS.draw) tryAutoFill(target)
-      saveCurrentFrame(target); renderReel(target)
-      _drawPoints = []
-    }
+  oc.addEventListener('pointercancel',()=>{
+    _drawing=false;_points=[]
+    if(target._activeCanvas)target._activeCanvas.getContext('2d').clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
+    teachPlayer({currentStroke:[],activelyDrawing:false})
     endPan(target)
   })
 
-  dc.addEventListener('touchstart', e => {
-    e.preventDefault()
-    const { tool } = $.learn()
-    if (tool === 'pan') { startPan(target, e); return }
-    if (tool === 'pen') {
-      const { x, y } = getCanvasPos(target, e)
-      _penPoints.push({ x, y }); renderPenPreview(target); return
-    }
-    captureUndo(target)
-    _drawing = true; _drawPoints = []
-    const ctx = dc.getContext('2d')
-    const { x, y } = getCanvasPos(target, e)
-    plotPixel(ctx, x, y); _drawPoints.push({ x, y }); _lastPx = { x, y }
-  }, { passive: false })
-
-  dc.addEventListener('touchmove', e => {
-    e.preventDefault()
-    const { tool } = $.learn()
-    if (tool === 'pan') { movePan(target, e); return }
-    if (tool === 'pen') return
-    if (!_drawing) return
-    const ctx = dc.getContext('2d')
-    const { x, y } = getCanvasPos(target, e)
-    if (_lastPx) plotLine(ctx, _lastPx.x, _lastPx.y, x, y)
-    _drawPoints.push({ x, y }); _lastPx = { x, y }
-  }, { passive: false })
-
-  dc.addEventListener('touchend', e => {
-    e.preventDefault()
-    if ($.learn().tool === 'pen') return
-    _drawing = false; _lastPx = null
-    if ($.learn().tool === TOOLS.draw) tryAutoFill(target)
-    saveCurrentFrame(target); renderReel(target); _drawPoints = []
+  oc.addEventListener('dblclick',()=>{
+    if($.learn().tool==='pen'&&_penPoints.length>1){captureUndo(target);commitPenPath(target)}
   })
 
-  // Escape cancels pen path
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && _penPoints.length) {
-      _penPoints = []
-      if (target._penPreview) target._penPreview.getContext('2d').clearRect(0,0,target._penPreview.width,target._penPreview.height)
-    }
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&_penPoints.length){_penPoints=[];renderPenPreview(target)}
   })
 }
 
 /*
 
-Pan — man's desire to wander.
+commitCurrentPixels — for fill tool, sync pixels to db then teach stroke marker.
 
 */
 
-function startPan(target, e) {
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  _panStart  = { x: clientX, y: clientY }
-  _panOrigin = { x: $.learn().panX, y: $.learn().panY }
-  target._artboard.style.cursor = 'grabbing'
+function commitCurrentPixels(target) {
+  const{frames,current}=$.learn()
+  const frameId=frames[current]
+  db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
+  db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
+  // teach an empty sentinel stroke so peers know to re-request
+  // (fill isn't stroke-replayable — for now it's local only, same as undo)
+  renderReel(target)
 }
 
-function movePan(target, e) {
-  if (!_panStart) return
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const clientY = e.touches ? e.touches[0].clientY : e.clientY
-  const panX = _panOrigin.x + (clientX - _panStart.x)
-  const panY = _panOrigin.y + (clientY - _panStart.y)
-  $.teach({ panX, panY })
-  target._artboardInner.style.transform = `translate(${panX}px,${panY}px)`
+/*
+
+Pan, pen preview, pen commit.
+
+*/
+
+function startPan(target,e){
+  const clientX=e.touches?e.touches[0].clientX:e.clientX,clientY=e.touches?e.touches[0].clientY:e.clientY
+  _panStart={x:clientX,y:clientY};_panOrigin={x:$.learn().panX,y:$.learn().panY}
+  target._artboard.style.cursor='grabbing'
+}
+function movePan(target,e){
+  if(!_panStart)return
+  const clientX=e.touches?e.touches[0].clientX:e.clientX,clientY=e.touches?e.touches[0].clientY:e.clientY
+  const panX=_panOrigin.x+(clientX-_panStart.x),panY=_panOrigin.y+(clientY-_panStart.y)
+  $.whisper({panX,panY}); target._artboardInner.style.transform=`translate(${panX}px,${panY}px)`
+}
+function endPan(target){_panStart=null;target._artboard.style.cursor=''}
+
+function renderPenPreview(target){
+  let pp=target._penPreviewCanvas
+  if(!pp){
+    const{canvasW,canvasH,zoom}=$.learn()
+    pp=document.createElement('canvas');pp.width=canvasW;pp.height=canvasH
+    pp.style.cssText=`position:absolute;top:0;left:0;width:${canvasW*zoom}px;height:${canvasH*zoom}px;pointer-events:none;z-index:12;image-rendering:pixelated;`
+    target._artboardInner.appendChild(pp);target._penPreviewCanvas=pp
+  }
+  const{canvasW,canvasH,color,fillColor,thickness}=$.learn()
+  const ctx=pp.getContext('2d');ctx.clearRect(0,0,canvasW,canvasH)
+  if(_penPoints.length<1)return
+  ctx.beginPath();ctx.moveTo(_penPoints[0].x,_penPoints[0].y)
+  for(let i=1;i<_penPoints.length;i++){
+    if(i<_penPoints.length-1){const mx=(_penPoints[i].x+_penPoints[i+1].x)/2,my=(_penPoints[i].y+_penPoints[i+1].y)/2;ctx.quadraticCurveTo(_penPoints[i].x,_penPoints[i].y,mx,my)}
+    else ctx.lineTo(_penPoints[i].x,_penPoints[i].y)
+  }
+  if(fillColor&&fillColor!=='transparent'){ctx.fillStyle=fillColor;ctx.globalAlpha=.35;ctx.fill();ctx.globalAlpha=1}
+  if(color&&color!=='transparent'){ctx.strokeStyle=color;ctx.lineWidth=thickness;ctx.lineCap='round';ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([])}
+  _penPoints.forEach((p,i)=>{ctx.fillStyle=i===0?'#fabd2f':'#d79921';ctx.fillRect(p.x-2,p.y-2,4,4)})
 }
 
-function endPan(target) {
-  _panStart = null
-  target._artboard.style.cursor = ''
+function commitPenPath(target){
+  if(_penPoints.length<2){_penPoints=[];return}
+  const{color,fillColor,thickness,opacity,frames,current,frameStrokes}=$.learn()
+  const ctx=target._drawCanvas.getContext('2d')
+  ctx.beginPath();ctx.moveTo(_penPoints[0].x,_penPoints[0].y)
+  for(let i=1;i<_penPoints.length-1;i++){
+    const mx=(_penPoints[i].x+_penPoints[i+1].x)/2,my=(_penPoints[i].y+_penPoints[i+1].y)/2
+    ctx.quadraticCurveTo(_penPoints[i].x,_penPoints[i].y,mx,my)
+  }
+  ctx.lineTo(_penPoints[_penPoints.length-1].x,_penPoints[_penPoints.length-1].y)
+  ctx.closePath();ctx.globalAlpha=opacity
+  if(fillColor&&fillColor!=='transparent'){ctx.fillStyle=fillColor;ctx.fill()}
+  if(color&&color!=='transparent'){ctx.strokeStyle=color;ctx.lineWidth=thickness;ctx.lineCap='round';ctx.stroke()}
+  ctx.globalAlpha=1
+  if(target._penPreviewCanvas)target._penPreviewCanvas.getContext('2d').clearRect(0,0,target._penPreviewCanvas.width,target._penPreviewCanvas.height)
+  const frameId=frames[current]
+  db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
+  db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
+  // encode pen path as a synthetic stroke for sync — build point array along the bezier
+  const syntheticStroke=_penPoints.map(p=>({...p,lineWidth:thickness,color,opacity}))
+  const {frameStrokes: fspen} = $.learn()
+  $.teach({
+    frameStrokes: {
+      ...fspen,
+      [frameId]: [...(fspen[frameId] || []), syntheticStroke]
+    }
+  })
+  _penPoints=[]; renderReel(target)
 }
 
 /*
@@ -1564,35 +1406,20 @@ Playback.
 
 */
 
-let _playInterval = null
-let _playDir = 1
-
-function startPlayback(target) {
-  $.teach({ playing: true })
-  _playDir = 1
-  _playInterval = setInterval(() => {
-    const { frames, current, loopMode } = $.learn()
-    saveCurrentFrame(target)
-    let next = current + _playDir
-    if (loopMode === 'loop') {
-      next = ((next % frames.length) + frames.length) % frames.length
-    } else if (loopMode === 'pingpong') {
-      if (next >= frames.length) { next = frames.length - 2; _playDir = -1 }
-      else if (next < 0) { next = 1; _playDir = 1 }
-    } else {
-      if (next >= frames.length) { next = frames.length - 1; stopPlayback(target); return }
-    }
-    $.teach({ current: Math.max(0, Math.min(frames.length - 1, next)) })
-    loadCurrentFrame(target)
-    renderOnion(target)
-    renderReel(target)
-  }, 1000 / $.learn().fps)
+let _playInterval=null,_playDir=1
+function startPlayback(target){
+  $.teach({playing:true});_playDir=1
+  _playInterval=setInterval(()=>{
+    const{frames,current,loopMode}=$.learn()
+    let next=current+_playDir
+    if(loopMode==='loop')next=((next%frames.length)+frames.length)%frames.length
+    else if(loopMode==='pingpong'){if(next>=frames.length){next=frames.length-2;_playDir=-1}else if(next<0){next=1;_playDir=1}}
+    else{if(next>=frames.length){next=frames.length-1;stopPlayback(target);return}}
+    $.teach({current:Math.max(0,Math.min(frames.length-1,next))})
+    loadCurrentFrame(target);renderOnion(target);renderReel(target)
+  },1000/$.learn().fps)
 }
-
-function stopPlayback(target) {
-  $.teach({ playing: false })
-  clearInterval(_playInterval)
-}
+function stopPlayback(target){$.teach({playing:false});clearInterval(_playInterval)}
 
 /*
 
@@ -1600,75 +1427,35 @@ Darkroom.
 
 */
 
-let _drPlaying = false, _drInterval = null, _drZoomed = false, _drDir = 1
-
-function openDarkroom(target) {
-  const { canvasW, canvasH } = $.learn()
-  const dc = target._drCanvas
+let _drPlaying=false,_drInterval=null,_drZoomed=false,_drDir=1
+function openDarkroom(target){
+  const{canvasW,canvasH}=$.learn(),dc=target._drCanvas
   target._darkroom.classList.add('open')
-  dc.width = canvasW; dc.height = canvasH
-
-  const scale = Math.min((window.innerWidth*.85)/canvasW, (window.innerHeight*.62)/canvasH)
-  dc.style.width  = (canvasW * scale) + 'px'
-  dc.style.height = (canvasH * scale) + 'px'
-  dc.style.setProperty('--dr-zoom', scale * 2)
-
-  if (!dc._zoomWired) {
-    dc._zoomWired = true
-    dc.addEventListener('click', () => {
-      _drZoomed = !_drZoomed
-      dc.classList.toggle('zoomed', _drZoomed)
-    })
-  }
-  drRenderFrame(target); drStart(target)
+  dc.width=canvasW;dc.height=canvasH
+  const scale=Math.min((window.innerWidth*.85)/canvasW,(window.innerHeight*.62)/canvasH)
+  dc.style.width=(canvasW*scale)+'px';dc.style.height=(canvasH*scale)+'px';dc.style.setProperty('--dr-zoom',scale*2)
+  if(!dc._zoomWired){dc._zoomWired=true;dc.addEventListener('click',()=>{_drZoomed=!_drZoomed;dc.classList.toggle('zoomed',_drZoomed)})}
+  drRenderFrame(target);drStart(target)
 }
-
-function closeDarkroom(target) {
-  target._darkroom.classList.remove('open')
-  drStop(target)
-  _drZoomed = false
-  target._drCanvas.classList.remove('zoomed')
+function closeDarkroom(target){target._darkroom.classList.remove('open');drStop(target);_drZoomed=false;target._drCanvas.classList.remove('zoomed')}
+function drRenderFrame(target){
+  const{frames,current,canvasW,canvasH,fps,loopMode}=$.learn(),dc=target._drCanvas,ctx=dc.getContext('2d')
+  ctx.clearRect(0,0,dc.width,dc.height)
+  if(frames.length){const f=ensureFrame(frames[current],canvasW,canvasH);if(f.hasVideo)ctx.drawImage(f.videoCanvas,0,0);ctx.drawImage(f.drawCanvas,0,0)}
+  const counter=target.querySelector('[data-dr-counter]');if(counter)counter.textContent=`${current+1} / ${frames.length}`
+  const title=target.querySelector('[data-dr-title]');if(title)title.textContent=`${canvasW}×${canvasH} · ${fps}fps · ${loopMode}`
 }
-
-function drRenderFrame(target) {
-  const { frames, current, canvasW, canvasH, fps, loopMode } = $.learn()
-  const dc = target._drCanvas
-  const ctx = dc.getContext('2d')
-  ctx.clearRect(0, 0, dc.width, dc.height)
-  if (frames.length) ctx.drawImage(db[frames[current]].canvas, 0, 0)
-  const counter = target.querySelector('[data-dr-counter]')
-  if (counter) counter.textContent = `${current+1} / ${frames.length}`
-  const title = target.querySelector('[data-dr-title]')
-  if (title) title.textContent = `${canvasW}×${canvasH} · ${fps}fps · ${loopMode}`
+function drStart(target){
+  _drPlaying=true;const btn=target.querySelector('[data-dr-play]');if(btn){btn.textContent='⏸ pause';btn.classList.add('active')}
+  _drDir=1;_drInterval=setInterval(()=>{
+    const{frames,current,loopMode}=$.learn();let next=current+_drDir
+    if(loopMode==='loop')next=((next%frames.length)+frames.length)%frames.length
+    else if(loopMode==='pingpong'){if(next>=frames.length){next=frames.length-2;_drDir=-1}else if(next<0){next=1;_drDir=1}}
+    else{if(next>=frames.length){next=frames.length-1;drStop(target);return}}
+    $.teach({current:Math.max(0,Math.min(frames.length-1,next))});drRenderFrame(target)
+  },1000/$.learn().fps)
 }
-
-function drStart(target) {
-  _drPlaying = true
-  const btn = target.querySelector('[data-dr-play]')
-  if (btn) { btn.textContent = '⏸ pause'; btn.classList.add('active') }
-  _drDir = 1
-  _drInterval = setInterval(() => {
-    const { frames, current, loopMode } = $.learn()
-    let next = current + _drDir
-    if (loopMode === 'loop') {
-      next = ((next % frames.length) + frames.length) % frames.length
-    } else if (loopMode === 'pingpong') {
-      if (next >= frames.length) { next = frames.length - 2; _drDir = -1 }
-      else if (next < 0) { next = 1; _drDir = 1 }
-    } else {
-      if (next >= frames.length) { next = frames.length - 1; drStop(target); return }
-    }
-    $.teach({ current: Math.max(0, Math.min(frames.length-1, next)) })
-    drRenderFrame(target)
-  }, 1000 / $.learn().fps)
-}
-
-function drStop(target) {
-  _drPlaying = false
-  clearInterval(_drInterval)
-  const btn = target.querySelector('[data-dr-play]')
-  if (btn) { btn.textContent = '▶ play'; btn.classList.remove('active') }
-}
+function drStop(target){_drPlaying=false;clearInterval(_drInterval);const btn=target.querySelector('[data-dr-play]');if(btn){btn.textContent='▶ play';btn.classList.remove('active')}}
 
 /*
 
@@ -1676,475 +1463,259 @@ Export.
 
 */
 
-async function exportMp4(target) {
-  const { frames, canvasW, canvasH, fps, loopMode } = $.learn()
-  saveCurrentFrame(target)
-  const off = document.createElement('canvas')
-  off.width = canvasW; off.height = canvasH
-  const octx = off.getContext('2d')
-  const mime = MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ? 'video/webm;codecs=vp8' : 'video/webm'
-  const stream = off.captureStream(fps)
-  const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 8_000_000 })
-  const chunks = []
-  rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
-  rec.onstop = () => {
-    const blob = new Blob(chunks, { type: mime })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url; a.download = 'flipbook.webm'; a.click()
-    setTimeout(() => URL.revokeObjectURL(url), 5000)
-  }
+async function exportMp4(target){
+  const{frames,canvasW,canvasH,fps,loopMode}=$.learn()
+  const off=document.createElement('canvas');off.width=canvasW;off.height=canvasH;const octx=off.getContext('2d')
+  const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':'video/webm'
+  const stream=off.captureStream(fps),rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8_000_000})
+  const chunks=[];rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)}
+  rec.onstop=()=>{const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='flipbook.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}
   rec.start()
-  let sequence = [...frames]
-  if (loopMode === 'pingpong') sequence = [...frames, ...[...frames].reverse().slice(1,-1)]
-  for (const id of sequence) {
-    octx.clearRect(0,0,canvasW,canvasH)
-    octx.drawImage(db[id].canvas,0,0)
-    await new Promise(r => setTimeout(r, 1000/fps))
-  }
+  let seq=[...frames];if(loopMode==='pingpong')seq=[...frames,...[...frames].reverse().slice(1,-1)]
+  for(const id of seq){const f=ensureFrame(id,canvasW,canvasH);octx.clearRect(0,0,canvasW,canvasH);if(f.hasVideo)octx.drawImage(f.videoCanvas,0,0);octx.drawImage(f.drawCanvas,0,0);await new Promise(r=>setTimeout(r,1000/fps))}
   rec.stop()
 }
 
 /*
 
-Sub-animation — right-click a reel frame to enter.
+Video import.
 
 */
 
-function openSubAnimation(target, parentId) {
-  const f = db[parentId]
-  const { canvasW, canvasH, fps } = $.learn()
+function attachDropEvents(target){
+  const ab=target._artboard
+  ab.addEventListener('dragover',e=>{e.preventDefault();if(e.dataTransfer.types.includes('Files'))target.querySelector('[data-drop-overlay]').classList.add('active')})
+  ab.addEventListener('dragleave',e=>{if(!ab.contains(e.relatedTarget))target.querySelector('[data-drop-overlay]').classList.remove('active')})
+  ab.addEventListener('drop',async e=>{e.preventDefault();target.querySelector('[data-drop-overlay]').classList.remove('active');const f=[...e.dataTransfer.files].find(f=>f.type.startsWith('video/'));if(f)await importVideo(target,f)})
+}
 
-  if (!f.children) {
-    const child0 = makeFrame(canvasW, canvasH)
-    db[child0].canvas.getContext('2d').drawImage(f.canvas, 0, 0)
-    const child1 = makeFrame(canvasW, canvasH)
-    f.children = [child0, child1]; f.childIndex = 0
+async function importVideo(target,file){
+  const{fps,canvasW,canvasH,frames,current,frameStrokes}=$.learn()
+  const progress=target.querySelector('[data-import-progress]'),bar=target.querySelector('[data-import-bar]'),lbl=target.querySelector('[data-import-label]')
+  progress.classList.add('active')
+  const url=URL.createObjectURL(file),video=document.createElement('video');video.src=url;video.muted=true;video.preload='auto'
+  await new Promise(r=>{video.onloadedmetadata=r})
+  const duration=video.duration,totalFrames=Math.min(Math.ceil(duration*fps),240),interval=duration/totalFrames
+  const replaceAll=confirm(`Import ${totalFrames} frames?\nOK = insert after current\nCancel = replace all`)===false
+  const vw=video.videoWidth,vh=video.videoHeight
+  if(vw!==canvasW||vh!==canvasH){if(confirm(`Resize project to ${vw}×${vh}?`))applyDims(target,vw,vh)}
+  const{canvasW:w,canvasH:h}=$.learn()
+  const off=document.createElement('canvas');off.width=w;off.height=h;const octx=off.getContext('2d')
+  let newFrames=replaceAll?[]:[...frames],newStrokes=replaceAll?{}:{...frameStrokes}
+  for(let i=0;i<totalFrames;i++){
+    video.currentTime=i*interval;await new Promise(r=>{video.onseeked=r})
+    octx.clearRect(0,0,w,h);octx.drawImage(video,0,0,w,h)
+    const id=crypto.randomUUID();const f=ensureFrame(id,w,h)
+    f.videoCanvas.getContext('2d').drawImage(off,0,0);f.hasVideo=true
+    newStrokes[id]=[]
+    const insertAt=replaceAll?i:current+1+i;newFrames.splice(insertAt,0,id)
+    bar.style.width=`${Math.round(((i+1)/totalFrames)*100)}%`;lbl.textContent=`frame ${i+1} / ${totalFrames}`
   }
-
-  const overlay = document.createElement('div')
-  overlay.className = 'sub-overlay'
-  const title = document.createElement('div')
-  title.className = 'sub-title'
-  const subCanvas = document.createElement('canvas')
-  subCanvas.width = canvasW; subCanvas.height = canvasH
-  const scale = Math.min((window.innerWidth*.7)/canvasW, (window.innerHeight*.55)/canvasH)
-  subCanvas.style.cssText = `width:${canvasW*scale}px;height:${canvasH*scale}px;image-rendering:pixelated;border:1px solid #3c3836;cursor:crosshair;`
-
-  let subIdx = f.childIndex || 0, subDrawing = false
-
-  function renderSub() {
-    const ctx = subCanvas.getContext('2d')
-    ctx.clearRect(0,0,canvasW,canvasH)
-    ctx.drawImage(db[f.children[subIdx]].canvas,0,0)
-    title.textContent = `↳ sub-animation · cel ${subIdx+1}/${f.children.length}`
-  }
-  function updateParent() {
-    const pctx = db[parentId].canvas.getContext('2d')
-    pctx.clearRect(0,0,canvasW,canvasH)
-    pctx.drawImage(db[f.children[f.childIndex||0]].canvas,0,0)
-  }
-
-  subCanvas.addEventListener('mousedown', e => {
-    subDrawing = true
-    const r = subCanvas.getBoundingClientRect()
-    const x = Math.floor((e.clientX-r.left)/scale), y = Math.floor((e.clientY-r.top)/scale)
-    const { color, brushSize } = $.learn()
-    const cc = db[f.children[subIdx]].canvas.getContext('2d')
-    const sc = subCanvas.getContext('2d')
-    ;[cc,sc].forEach(ctx => { ctx.fillStyle=color; ctx.fillRect(x,y,brushSize,brushSize) })
-  })
-  subCanvas.addEventListener('mousemove', e => {
-    if (!subDrawing) return
-    const r = subCanvas.getBoundingClientRect()
-    const x = Math.floor((e.clientX-r.left)/scale), y = Math.floor((e.clientY-r.top)/scale)
-    const { color, brushSize } = $.learn()
-    const cc = db[f.children[subIdx]].canvas.getContext('2d')
-    const sc = subCanvas.getContext('2d')
-    ;[cc,sc].forEach(ctx => { ctx.fillStyle=color; ctx.fillRect(x,y,brushSize,brushSize) })
-  })
-  subCanvas.addEventListener('mouseup', () => { subDrawing=false; updateParent() })
-
-  const controls = document.createElement('div'); controls.className = 'sub-controls'
-  function makeBtn(label) { const b = document.createElement('button'); b.className='dr-btn'; b.textContent=label; return b }
-
-  const prevBtn = makeBtn('‹ prev')
-  prevBtn.addEventListener('click', () => { subIdx=Math.max(0,subIdx-1); f.childIndex=subIdx; renderSub() })
-  const nextBtn = makeBtn('next ›')
-  nextBtn.addEventListener('click', () => { subIdx=Math.min(f.children.length-1,subIdx+1); f.childIndex=subIdx; renderSub() })
-  const addBtn = makeBtn('+ cel')
-  addBtn.addEventListener('click', () => { const nid=makeFrame(canvasW,canvasH); f.children.splice(subIdx+1,0,nid); subIdx++; f.childIndex=subIdx; renderSub() })
-  let subInt=null
-  const playBtn = makeBtn('▶')
-  playBtn.addEventListener('click', () => {
-    if (subInt){clearInterval(subInt);subInt=null;playBtn.textContent='▶';return}
-    playBtn.textContent='⏸'
-    subInt=setInterval(()=>{subIdx=(subIdx+1)%f.children.length;f.childIndex=subIdx;renderSub()},1000/fps)
-  })
-  const closeBtn = makeBtn('✕ close')
-  closeBtn.addEventListener('click', () => {
-    clearInterval(subInt); updateParent(); saveCurrentFrame(target); renderReel(target); overlay.remove()
-  })
-
-  controls.append(prevBtn,nextBtn,addBtn,playBtn,closeBtn)
-  overlay.append(title,subCanvas,controls)
-  document.body.appendChild(overlay); renderSub()
+  URL.revokeObjectURL(url);progress.classList.remove('active')
+  const newCurrent=replaceAll?0:current+1
+  $.teach({frames:newFrames,frameStrokes:newStrokes,current:newCurrent})
+  loadCurrentFrame(target);renderOnion(target);renderReel(target)
 }
 
 /*
 
-Overlay panel renderer.
+Sub-animation (local only — not synced).
 
 */
 
-function openView(target, view) {
-  $.teach({ view, showOverlay: true })
-  const overlay = target.querySelector('[data-overlay]')
-  const inner   = target.querySelector('[data-overlay-inner]')
-  if (!overlay || !inner) return
-  overlay.classList.add('open')
-  inner.innerHTML = renderView(view, target)
-  wireOverlay(inner, target)
+function openSubAnimation(target,parentId){
+  const f=db[parentId]||ensureFrame(parentId,$.learn().canvasW,$.learn().canvasH)
+  const{canvasW,canvasH,fps}=$.learn()
+  if(!f.children){
+    const c0=crypto.randomUUID(),c1=crypto.randomUUID()
+    ensureFrame(c0,canvasW,canvasH);ensureFrame(c1,canvasW,canvasH)
+    db[c0].drawCanvas.getContext('2d').drawImage(f.drawCanvas,0,0)
+    f.children=[c0,c1];f.childIndex=0
+  }
+  const overlay=document.createElement('div');overlay.className='sub-overlay'
+  const title=document.createElement('div');title.className='sub-title'
+  const sc=document.createElement('canvas');sc.width=canvasW;sc.height=canvasH
+  const scale=Math.min((window.innerWidth*.7)/canvasW,(window.innerHeight*.55)/canvasH)
+  sc.style.cssText=`width:${canvasW*scale}px;height:${canvasH*scale}px;image-rendering:pixelated;border:1px solid #3c3836;cursor:crosshair;`
+  let subIdx=f.childIndex||0,subDrawing=false
+  function renderSub(){const ctx=sc.getContext('2d');ctx.clearRect(0,0,canvasW,canvasH);ctx.drawImage(db[f.children[subIdx]].drawCanvas,0,0);title.textContent=`↳ cel ${subIdx+1}/${f.children.length}`}
+  function updateParent(){const pctx=db[parentId].drawCanvas.getContext('2d');pctx.clearRect(0,0,canvasW,canvasH);pctx.drawImage(db[f.children[f.childIndex||0]].drawCanvas,0,0)}
+  sc.addEventListener('pointerdown',e=>{subDrawing=true;const r=sc.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/scale),y=Math.floor((e.clientY-r.top)/scale),{color,thickness}=$.learn(),cc=db[f.children[subIdx]].drawCanvas.getContext('2d'),sctx=sc.getContext('2d');[cc,sctx].forEach(c=>{c.fillStyle=color;c.fillRect(x,y,thickness,thickness)})})
+  sc.addEventListener('pointermove',e=>{if(!subDrawing)return;const r=sc.getBoundingClientRect(),x=Math.floor((e.clientX-r.left)/scale),y=Math.floor((e.clientY-r.top)/scale),{color,thickness}=$.learn(),cc=db[f.children[subIdx]].drawCanvas.getContext('2d'),sctx=sc.getContext('2d');[cc,sctx].forEach(c=>{c.fillStyle=color;c.fillRect(x,y,thickness,thickness)})})
+  sc.addEventListener('pointerup',()=>{subDrawing=false;updateParent()})
+  const controls=document.createElement('div');controls.className='sub-controls'
+  function makeBtn(l){const b=document.createElement('button');b.className='dr-btn';b.textContent=l;return b}
+  const prev=makeBtn('‹'),next=makeBtn('›'),add=makeBtn('+cel'),play=makeBtn('▶'),close=makeBtn('✕')
+  prev.onclick=()=>{subIdx=Math.max(0,subIdx-1);f.childIndex=subIdx;renderSub()}
+  next.onclick=()=>{subIdx=Math.min(f.children.length-1,subIdx+1);f.childIndex=subIdx;renderSub()}
+  add.onclick=()=>{const nid=crypto.randomUUID();ensureFrame(nid,canvasW,canvasH);f.children.splice(subIdx+1,0,nid);subIdx++;f.childIndex=subIdx;renderSub()}
+  let subInt=null
+  play.onclick=()=>{if(subInt){clearInterval(subInt);subInt=null;play.textContent='▶';return}play.textContent='⏸';subInt=setInterval(()=>{subIdx=(subIdx+1)%f.children.length;f.childIndex=subIdx;renderSub()},1000/fps)}
+  close.onclick=()=>{clearInterval(subInt);updateParent();renderReel(target);overlay.remove()}
+  controls.append(prev,next,add,play,close);overlay.append(title,sc,controls);document.body.appendChild(overlay);renderSub()
 }
 
-function closeOverlay(target) {
-  $.teach({ view: null, showOverlay: false })
-  const overlay = target.querySelector('[data-overlay]')
-  if (overlay) overlay.classList.remove('open')
+/*
+
+Overlay panel.
+
+*/
+
+function openView(target,view){
+  $.whisper({view,showOverlay:true})
+  const overlay=target.querySelector('[data-overlay]'),inner=target.querySelector('[data-overlay-inner]')
+  if(!overlay||!inner)return
+  overlay.classList.add('open');inner.innerHTML=renderView(view);wireOverlay(inner,target)
+}
+function closeOverlay(target){
+  $.whisper({view:null,showOverlay:false})
+  const overlay=target.querySelector('[data-overlay]');if(overlay)overlay.classList.remove('open')
 }
 
-function renderView(view, target) {
-  const { color, fillColor, brushSize, onion, fps, loopMode, canvasW, canvasH } = $.learn()
-
-  if (view === VIEWS.color) {
-    const stroke = color
-    const fill   = fillColor
-    return `
-      <div class="overlay-title">stroke color</div>
-      <div class="color-grid">
-        ${PALETTE.map(p => `
-          <div class="swatch ${p.color === 'transparent' ? 'transparent-swatch' : ''} ${stroke === p.color ? 'active' : ''}"
-            style="${p.color !== 'transparent' ? `background:${p.color}` : ''}"
-            data-set-color="${p.color}">
-          </div>
-        `).join('')}
-      </div>
-      <input type="color" value="${stroke !== 'transparent' ? stroke : '#ebdbb2'}" data-custom-color>
-      <div class="overlay-title" style="margin-top:.75rem;">fill color</div>
-      <div class="color-grid">
-        ${PALETTE.map(p => `
-          <div class="swatch ${p.color === 'transparent' ? 'transparent-swatch' : ''} ${fill === p.color ? 'active' : ''}"
-            style="${p.color !== 'transparent' ? `background:${p.color}` : ''}"
-            data-set-fill="${p.color}">
-          </div>
-        `).join('')}
-      </div>
-      <input type="color" value="${fill !== 'transparent' ? fill : '#d79921'}" data-custom-fill>
-    `
-  }
-
-  if (view === VIEWS.brush) {
-    return `
-      <div class="overlay-title">brush size</div>
-      <div class="range-row">
-        <input type="range" min="1" max="64" value="${brushSize}" data-brush-slider>
-        <span class="range-val" data-brush-val>${brushSize}</span>
-      </div>
-      <div class="overlay-title" style="margin-top:.75rem;">onion skin</div>
-      <button class="row-btn ${onion ? 'active' : ''}" data-toggle-onion>
-        ${onion ? '● on' : '○ off'}
-      </button>
-    `
-  }
-
-  if (view === VIEWS.canvas) {
-    return `
-      <div class="overlay-title">preset</div>
-      <div class="preset-grid">
-        ${PRESETS.map(p => `
-          <button class="preset-btn ${p.w===canvasW&&p.h===canvasH?'active':''}"
-            data-preset-w="${p.w}" data-preset-h="${p.h}">${p.label}</button>
-        `).join('')}
-      </div>
-      <div class="overlay-title" style="margin-top:.75rem;">custom</div>
-      <div class="dims-row">
-        <input type="number" value="${canvasW}" min="1" max="3840" data-cust-w>
-        <span>×</span>
-        <input type="number" value="${canvasH}" min="1" max="2160" data-cust-h>
-        <button class="row-btn" style="width:auto;" data-apply-dims>ok</button>
-      </div>
-    `
-  }
-
-  if (view === VIEWS.settings) {
-    return `
-      <div class="overlay-title">playback</div>
-      <div class="field-row">
-        <label>fps</label>
-        <select class="tl-select" data-fps-select>
-          ${[1,2,4,6,8,12,24,30,60].map(v => `<option value="${v}" ${v===fps?'selected':''}>${v}</option>`).join('')}
-        </select>
-      </div>
-      <div class="field-row" style="margin-top:.4rem;">
-        <label>mode</label>
-        <select class="tl-select" data-loop-select>
-          ${['loop','pingpong','once'].map(v => `<option value="${v}" ${v===loopMode?'selected':''}>${v}</option>`).join('')}
-        </select>
-      </div>
-    `
-  }
-
-  if (view === VIEWS.export) {
-    return `
-      <div class="overlay-title">export</div>
-      <button class="row-btn" data-do-export>↓ export webm</button>
-      <button class="row-btn" style="margin-top:.4rem;" data-do-play>▶ fullscreen play</button>
-    `
-  }
-
+function renderView(view){
+  const{color,fillColor,thickness,opacity,onion,fps,loopMode,canvasW,canvasH,chromakeyEnabled,chromakeyColor,chromakeyTolerance}=$.learn()
+  if(view===VIEWS.color)return`
+    <div class="overlay-title">stroke</div>
+    <div class="color-grid">${PALETTE.map(p=>`<div class="swatch ${p.color==='transparent'?'transparent-swatch':''} ${color===p.color?'active':''}" style="${p.color!=='transparent'?`background:${p.color}`:''}" data-set-color="${p.color}"></div>`).join('')}</div>
+    <input type="color" value="${color!=='transparent'?color:'#ebdbb2'}" data-custom-color style="margin-top:.5rem;">
+    <div class="overlay-title" style="margin-top:.75rem;">fill (pen mode)</div>
+    <div class="color-grid">${PALETTE.map(p=>`<div class="swatch ${p.color==='transparent'?'transparent-swatch':''} ${fillColor===p.color?'active':''}" style="${p.color!=='transparent'?`background:${p.color}`:''}" data-set-fill="${p.color}"></div>`).join('')}</div>
+    <input type="color" value="${fillColor!=='transparent'?fillColor:'#d79921'}" data-custom-fill style="margin-top:.5rem;">
+  `
+  if(view===VIEWS.brush)return`
+    <div class="overlay-title">size</div>
+    <div class="thicknoid-grid">${thicknoids.map(t=>`<button class="thicknoid-btn ${thickness===t?'active':''}" data-thick="${t}">${t}</button>`).join('')}</div>
+    <div class="overlay-title" style="margin-top:.75rem;">opacity</div>
+    <div class="opacity-grid">${[0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1].map(o=>`<button class="opacity-btn ${opacity===o?'active':''}" data-opacity="${o}">${o}</button>`).join('')}</div>
+    <div class="overlay-title" style="margin-top:.75rem;">onion skin</div>
+    <button class="row-btn ${onion?'active':''}" data-toggle-onion>${onion?'● on':'○ off'}</button>
+  `
+  if(view===VIEWS.canvas)return`
+    <div class="overlay-title">preset</div>
+    <div class="preset-grid">${PRESETS.map(p=>`<button class="preset-btn ${p.w===canvasW&&p.h===canvasH?'active':''}" data-preset-w="${p.w}" data-preset-h="${p.h}">${p.label}</button>`).join('')}</div>
+    <div class="overlay-title" style="margin-top:.75rem;">custom</div>
+    <div class="dims-row"><input type="number" value="${canvasW}" min="1" max="3840" data-cust-w><span>×</span><input type="number" value="${canvasH}" min="1" max="2160" data-cust-h><button class="row-btn" style="width:auto;" data-apply-dims>ok</button></div>
+  `
+  if(view===VIEWS.settings)return`
+    <div class="overlay-title">playback</div>
+    <div class="field-row"><label>fps</label><select class="tl-select" data-fps-select>${[1,2,4,6,8,12,24,30,60].map(v=>`<option value="${v}" ${v===fps?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="field-row" style="margin-top:.4rem;"><label>mode</label><select class="tl-select" data-loop-select>${['loop','pingpong','once'].map(v=>`<option value="${v}" ${v===loopMode?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="overlay-title" style="margin-top:.75rem;">chromakey</div>
+    <button class="row-btn ${chromakeyEnabled?'active':''}" data-toggle-ck>${chromakeyEnabled?'● on':'○ off'}</button>
+    <div class="ck-color-row" style="margin-top:.5rem;"><div class="ck-preview" style="background:${chromakeyColor};" data-ck-preview></div><input type="color" value="${chromakeyColor}" data-ck-color></div>
+    <div class="field-row" style="margin-top:.4rem;"><label>tolerance</label><input type="range" min="0" max="150" value="${chromakeyTolerance}" data-ck-tolerance><span style="font-size:.6rem;color:#928374;min-width:2rem;">${chromakeyTolerance}</span></div>
+  `
+  if(view===VIEWS.export)return`
+    <div class="overlay-title">export</div>
+    <button class="row-btn" data-do-export>↓ export webm</button>
+    <button class="row-btn" style="margin-top:.4rem;" data-do-play>▶ fullscreen play</button>
+  `
   return ''
 }
 
-function wireOverlay(inner, target) {
-  // color swatches
-  inner.querySelectorAll('[data-set-color]').forEach(el => {
-    el.addEventListener('click', () => {
-      $.teach({ color: el.dataset.setColor })
-      inner.querySelectorAll('[data-set-color]').forEach(s => s.classList.remove('active'))
-      el.classList.add('active')
-      // update compass color swatch
-      const colorBtn = target.querySelector('[data-open-view="color"] span')
-      if (colorBtn) {
-        const c = $.learn().color
-        colorBtn.style.background = c === 'transparent'
-          ? 'repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/8px 8px'
-          : c
-      }
-    })
-  })
-
-  inner.querySelectorAll('[data-set-fill]').forEach(el => {
-    el.addEventListener('click', () => {
-      $.teach({ fillColor: el.dataset.setFill })
-      inner.querySelectorAll('[data-set-fill]').forEach(s => s.classList.remove('active'))
-      el.classList.add('active')
-    })
-  })
-
-  const customColor = inner.querySelector('[data-custom-color]')
-  if (customColor) customColor.addEventListener('input', e => { $.teach({ color: e.target.value }) })
-
-  const customFill = inner.querySelector('[data-custom-fill]')
-  if (customFill) customFill.addEventListener('input', e => { $.teach({ fillColor: e.target.value }) })
-
-  // brush
-  const brushSlider = inner.querySelector('[data-brush-slider]')
-  if (brushSlider) brushSlider.addEventListener('input', e => {
-    const v = Integer(e.target.value)
-    $.teach({ brushSize: v })
-    const lbl = inner.querySelector('[data-brush-val]')
-    if (lbl) lbl.textContent = v
-  })
-
-  const onionBtn = inner.querySelector('[data-toggle-onion]')
-  if (onionBtn) onionBtn.addEventListener('click', () => {
-    const next = !$.learn().onion
-    $.teach({ onion: next })
-    onionBtn.classList.toggle('active', next)
-    onionBtn.textContent = next ? '● on' : '○ off'
-    renderOnion(target)
-  })
-
-  // canvas presets
-  inner.querySelectorAll('[data-preset-w]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      applyDims(target, Integer(btn.dataset.presetW), Integer(btn.dataset.presetH))
-      closeOverlay(target)
-    })
-  })
-
-  const applyBtn = inner.querySelector('[data-apply-dims]')
-  if (applyBtn) applyBtn.addEventListener('click', () => {
-    const w = Integer(inner.querySelector('[data-cust-w]').value) || 320
-    const h = Integer(inner.querySelector('[data-cust-h]').value) || 240
-    applyDims(target, w, h)
-    closeOverlay(target)
-  })
-
-  // settings
-  const fpsSelect = inner.querySelector('[data-fps-select]')
-  if (fpsSelect) fpsSelect.addEventListener('change', e => $.teach({ fps: Integer(e.target.value) }))
-
-  const loopSelect = inner.querySelector('[data-loop-select]')
-  if (loopSelect) loopSelect.addEventListener('change', e => $.teach({ loopMode: e.target.value }))
-
-  // export
-  const doExport = inner.querySelector('[data-do-export]')
-  if (doExport) doExport.addEventListener('click', () => { closeOverlay(target); exportMp4(target) })
-
-  const doPlay = inner.querySelector('[data-do-play]')
-  if (doPlay) doPlay.addEventListener('click', () => { closeOverlay(target); openDarkroom(target) })
+function wireOverlay(inner,target){
+  inner.querySelectorAll('[data-set-color]').forEach(el=>el.addEventListener('click',()=>{$.whisper({color:el.dataset.setColor});inner.querySelectorAll('[data-set-color]').forEach(s=>s.classList.remove('active'));el.classList.add('active')}))
+  inner.querySelectorAll('[data-set-fill]').forEach(el=>el.addEventListener('click',()=>{$.whisper({fillColor:el.dataset.setFill});inner.querySelectorAll('[data-set-fill]').forEach(s=>s.classList.remove('active'));el.classList.add('active')}))
+  const cc=inner.querySelector('[data-custom-color]');if(cc)cc.addEventListener('input',e=>$.whisper({color:e.target.value}))
+  const cf=inner.querySelector('[data-custom-fill]');if(cf)cf.addEventListener('input',e=>$.whisper({fillColor:e.target.value}))
+  inner.querySelectorAll('[data-thick]').forEach(btn=>btn.addEventListener('click',()=>{$.whisper({thickness:Integer(btn.dataset.thick)});inner.querySelectorAll('[data-thick]').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}))
+  inner.querySelectorAll('[data-opacity]').forEach(btn=>btn.addEventListener('click',()=>{$.whisper({opacity:parseFloat(btn.dataset.opacity)});inner.querySelectorAll('[data-opacity]').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}))
+  const ob=inner.querySelector('[data-toggle-onion]');if(ob)ob.addEventListener('click',()=>{const n=!$.learn().onion;$.whisper({onion:n});ob.classList.toggle('active',n);ob.textContent=n?'● on':'○ off';renderOnion(target)})
+  inner.querySelectorAll('[data-preset-w]').forEach(btn=>btn.addEventListener('click',()=>{applyDims(target,Integer(btn.dataset.presetW),Integer(btn.dataset.presetH));closeOverlay(target)}))
+  const ab=inner.querySelector('[data-apply-dims]');if(ab)ab.addEventListener('click',()=>{applyDims(target,Integer(inner.querySelector('[data-cust-w]').value)||320,Integer(inner.querySelector('[data-cust-h]').value)||240);closeOverlay(target)})
+  const fs=inner.querySelector('[data-fps-select]');if(fs)fs.addEventListener('change',e=>$.teach({fps:Integer(e.target.value)}))
+  const ls=inner.querySelector('[data-loop-select]');if(ls)ls.addEventListener('change',e=>$.teach({loopMode:e.target.value}))
+  const ct=inner.querySelector('[data-toggle-ck]');if(ct)ct.addEventListener('click',()=>{const n=!$.learn().chromakeyEnabled;$.whisper({chromakeyEnabled:n});ct.classList.toggle('active',n);ct.textContent=n?'● on':'○ off'})
+  const ckc=inner.querySelector('[data-ck-color]');if(ckc)ckc.addEventListener('input',e=>{$.whisper({chromakeyColor:e.target.value});const p=inner.querySelector('[data-ck-preview]');if(p)p.style.background=e.target.value})
+  const ckt=inner.querySelector('[data-ck-tolerance]');if(ckt)ckt.addEventListener('input',e=>{const v=Integer(e.target.value);$.whisper({chromakeyTolerance:v});ckt.nextElementSibling.textContent=v})
+  const de=inner.querySelector('[data-do-export]');if(de)de.addEventListener('click',()=>{closeOverlay(target);exportMp4(target)})
+  const dp=inner.querySelector('[data-do-play]');if(dp)dp.addEventListener('click',()=>{closeOverlay(target);openDarkroom(target)})
 }
 
 /*
 
-v-log compass toolbelt drag — exact pattern.
+v-log compass toolbelt drag.
 
 */
 
-let _lastBeltX, _lastBeltY
+let _lastBeltX,_lastBeltY
 
-$.when('pointerdown', '[data-drag]', (event) => {
+$.when('pointerdown','[data-drag]',event=>{
   event.preventDefault()
-  const { clientX, clientY } = event
-  $.teach({
-    grabStartX: clientX,
-    grabStartY: clientY,
-    beltGrabbed: true,
-    beltDragged: false
-  })
+  $.whisper({grabStartX:event.clientX,grabStartY:event.clientY,beltGrabbed:true,beltDragged:false})
 })
-
-$.when('pointermove', '.artboard', (event) => {
-  const { clientX, clientY } = event
-  const { beltGrabbed, beltDragged, beltOffsetX, beltOffsetY, grabStartX, grabStartY } = $.learn()
-  if (!beltGrabbed) return
-
-  if (grabStartX !== undefined && grabStartY !== undefined) {
-    const dx = Math.abs(clientX - grabStartX)
-    const dy = Math.abs(clientY - grabStartY)
-    if ((dx > 5 || dy > 5) && !beltDragged) {
-      event.preventDefault()
-      $.teach({ beltOffsetX: beltOffsetX || 0, beltOffsetY: beltOffsetY || 0, beltDragged: true })
-    }
-  }
-
-  if (!$.learn().beltDragged) return
+$.when('pointermove','.artboard',event=>{
+  const{beltGrabbed,beltDragged,beltOffsetX,beltOffsetY,grabStartX,grabStartY}=$.learn()
+  if(!beltGrabbed)return
+  if(grabStartX!==undefined){const dx=Math.abs(event.clientX-grabStartX),dy=Math.abs(event.clientY-grabStartY);if((dx>5||dy>5)&&!beltDragged){event.preventDefault();$.whisper({beltOffsetX:beltOffsetX||0,beltOffsetY:beltOffsetY||0,beltDragged:true})}}
+  if(!$.learn().beltDragged)return
   event.preventDefault()
-
-  if (_lastBeltX !== undefined && _lastBeltY !== undefined) {
-    $.teach({
-      beltOffsetX: beltOffsetX + (clientX - _lastBeltX),
-      beltOffsetY: beltOffsetY + (clientY - _lastBeltY),
-    })
-  }
-  _lastBeltX = clientX; _lastBeltY = clientY
+  if(_lastBeltX!==undefined&&_lastBeltY!==undefined)$.whisper({beltOffsetX:beltOffsetX+(event.clientX-_lastBeltX),beltOffsetY:beltOffsetY+(event.clientY-_lastBeltY)})
+  _lastBeltX=event.clientX;_lastBeltY=event.clientY
 })
-
-$.when('pointerup', '.artboard', (event) => {
+$.when('pointerup','[data-drag]',event=>{
   event.target.releasePointerCapture(event.pointerId)
-  const { beltDragged } = $.learn()
-  if (!beltDragged && event.target.closest('[data-menu]')) {
-    $.teach({ menuOpen: !$.learn().menuOpen })
-  }
-  $.teach({ beltGrabbed: false, beltDragged: false, grabStartX: undefined, grabStartY: undefined })
-  _lastBeltX = undefined; _lastBeltY = undefined
+  if(!$.learn().beltDragged)$.whisper({menuOpen:!$.learn().menuOpen})
+  $.whisper({beltGrabbed:false,beltDragged:false,grabStartX:undefined,grabStartY:undefined})
+  _lastBeltX=undefined;_lastBeltY=undefined
 })
-
-$.when('pointerup', '[data-drag]', (event) => {
+$.when('pointerup','.artboard',event=>{
   event.target.releasePointerCapture(event.pointerId)
-  const { beltDragged } = $.learn()
-  if (!beltDragged) {
-    $.teach({ menuOpen: !$.learn().menuOpen })
-  }
-  $.teach({ beltGrabbed: false, beltDragged: false, grabStartX: undefined, grabStartY: undefined })
-  _lastBeltX = undefined; _lastBeltY = undefined
+  $.whisper({beltGrabbed:false,beltDragged:false,grabStartX:undefined,grabStartY:undefined})
+  _lastBeltX=undefined;_lastBeltY=undefined
 })
 
 /*
 
-Events — man communicating with the machine.
+Events.
 
 */
 
-$.when('click', '[data-open-view]', (event) => {
-  const root = event.target.closest(tag); if (!root) return
-  const view = event.target.closest('[data-open-view]').dataset.openView
-  const { showOverlay, view: currentView } = $.learn()
-  if (showOverlay && currentView === view) { closeOverlay(root); return }
-  openView(root, view)
+$.when('click','[data-open-view]',event=>{
+  const root=event.target.closest(tag);if(!root)return
+  const view=event.target.closest('[data-open-view]').dataset.openView
+  const{showOverlay,view:cv}=$.learn()
+  if(showOverlay&&cv===view){closeOverlay(root);return}
+  openView(root,view)
 })
-
-$.when('click', '[data-close-overlay]', (event) => {
-  const root = event.target.closest(tag); if (!root) return
-  closeOverlay(root)
-})
-
-$.when('click', '[data-new-frame]', (event) => {
-  const root = event.target.closest(tag); if (!root) return
-  addFrame(root)
-})
-
-$.when('click', '[data-cycle-tool]', (event) => {
-  const order = [TOOLS.draw, TOOLS.pen, TOOLS.erase, TOOLS.fill, TOOLS.pan]
-  const { tool } = $.learn()
-  const next = order[(order.indexOf(tool) + 1) % order.length]
-  $.teach({ tool: next })
-})
-
-$.when('click', '[data-undo]', (event) => {
-  const root = event.target.closest(tag); if (!root) return
-  undoFrame(root)
-})
-
-$.when('click', '[data-redo]', (event) => {
-  // placeholder
-})
-
-$.when('click', '[data-darkroom-open]', (e) => { const r = e.target.closest(tag); if (r) openDarkroom(r) })
-$.when('click', '[data-darkroom-close]', (e) => { const r = e.target.closest(tag); if (r) closeDarkroom(r) })
-
-$.when('click', '[data-dr-play]', (e) => {
-  const root = e.target.closest(tag); if (!root) return
-  _drPlaying ? drStop(root) : drStart(root)
-})
-
-$.when('click', '[data-dr-prev]', (e) => {
-  const root = e.target.closest(tag); if (!root) return
-  drStop(root)
-  $.teach({ current: Math.max(0, $.learn().current - 1) })
-  drRenderFrame(root)
-})
-
-$.when('click', '[data-dr-next]', (e) => {
-  const root = e.target.closest(tag); if (!root) return
-  drStop(root)
-  const { frames, current } = $.learn()
-  $.teach({ current: Math.min(frames.length - 1, current + 1) })
-  drRenderFrame(root)
-})
+$.when('click','[data-close-overlay]',event=>{const r=event.target.closest(tag);if(r)closeOverlay(r)})
+$.when('click','[data-new-frame]',event=>{const r=event.target.closest(tag);if(r)addFrame(r)})
+$.when('click','[data-cycle-tool]',()=>$.whisper({tool:nextTool($.learn().tool)}))
+$.when('click','[data-undo]',event=>{const r=event.target.closest(tag);if(r)undoFrame(r)})
+$.when('click','[data-darkroom-open]',e=>{const r=e.target.closest(tag);if(r)openDarkroom(r)})
+$.when('click','[data-darkroom-close]',e=>{const r=e.target.closest(tag);if(r)closeDarkroom(r)})
+$.when('click','[data-dr-play]',e=>{const r=e.target.closest(tag);if(!r)return;_drPlaying?drStop(r):drStart(r)})
+$.when('click','[data-dr-prev]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);$.teach({current:Math.max(0,$.learn().current-1)});drRenderFrame(r)})
+$.when('click','[data-dr-next]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);const{frames,current}=$.learn();$.teach({current:Math.min(frames.length-1,current+1)});drRenderFrame(r)})
 
 /*
 
-Keyboard shortcuts.
+Keyboard.
 
 */
 
-document.addEventListener('keydown', e => {
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return
-  const root = document.querySelector(tag); if (!root) return
-
-  if ((e.key === 'z' || e.key === 'Z') && (e.ctrlKey || e.metaKey)) { undoFrame(root); return }
-
-  const { frames, current, playing, zoom } = $.learn()
-  if (e.key === 'ArrowRight' || e.key === '.') gotoFrame(root, Math.min(frames.length-1, current+1))
-  if (e.key === 'ArrowLeft'  || e.key === ',') gotoFrame(root, Math.max(0, current-1))
-  if (e.key === 'n') addFrame(root)
-  if (e.key === 'd') addFrame(root, current)
-  if (e.key === ' ')  { e.preventDefault(); playing ? stopPlayback(root) : startPlayback(root) }
-  if (e.key === 'p')  openDarkroom(root)
-  if (e.key === 'Escape') { closeDarkroom(root); closeOverlay(root) }
-  if (e.key === '+' || e.key === '=') setZoom(root, zoom + 1)
-  if (e.key === '-') setZoom(root, Math.max(0.25, zoom - 0.25))
-
-  const toolKeys = { b: TOOLS.draw, v: TOOLS.pen, e: TOOLS.erase, f: TOOLS.fill, h: TOOLS.pan }
-  if (toolKeys[e.key]) $.teach({ tool: toolKeys[e.key] })
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return
+  const root=document.querySelector(tag);if(!root)return
+  if((e.key==='z'||e.key==='Z')&&(e.ctrlKey||e.metaKey)){undoFrame(root);return}
+  const{frames,current,playing,zoom,tool}=$.learn()
+  if(e.key==='ArrowRight'||e.key==='.')gotoFrame(root,Math.min(frames.length-1,current+1))
+  if(e.key==='ArrowLeft'||e.key===',')gotoFrame(root,Math.max(0,current-1))
+  if(e.key==='n')addFrame(root)
+  if(e.key==='d')addFrame(root,current)
+  if(e.key===' '){e.preventDefault();playing?stopPlayback(root):startPlayback(root)}
+  if(e.key==='p')openDarkroom(root)
+  if(e.key==='Escape'){closeDarkroom(root);closeOverlay(root)}
+  if(e.key==='+'||e.key==='=')setZoom(root,zoom+1)
+  if(e.key==='-')setZoom(root,Math.max(0.25,zoom-0.25))
+  if(e.key==='Tab'){e.preventDefault();$.whisper({tool:nextTool(tool)})}
+  const tk={b:TOOLS.draw,v:TOOLS.pen,e:TOOLS.erase,f:TOOLS.fill,h:TOOLS.pan}
+  if(tk[e.key])$.whisper({tool:tk[e.key]})
 })
 
 /*
 
 Dog rested.
-And on the seventh frame, man drew something worth watching.
 
 */
 
@@ -2155,4 +1726,5 @@ customElements.define(tag, class FlipBook extends HTMLElement {
     if (!this.id) this.id = crypto.randomUUID()
     this.dispatchEvent(new Event('create'))
   }
+  disconnectedCallback() { this._destroyed = true }
 })
