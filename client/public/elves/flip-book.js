@@ -30,6 +30,7 @@ Multiplayer architecture — v-log pattern:
 import elf from '@plan98/elf'
 import { Integer } from '@plan98/types'
 import Chromakey from './chroma-key.js'
+import './plan98-palette.js'
 
 const tag = 'flip-book'
 const playerId = self.crypto.randomUUID()
@@ -92,21 +93,8 @@ const PRESETS = [
 
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
 
-const PALETTE = [
-  { color: 'transparent' },
-  { color: '#1d2021' }, { color: '#282828' }, { color: '#3c3836' },
-  { color: '#504945' }, { color: '#665c54' }, { color: '#7c6f64' },
-  { color: '#928374' }, { color: '#a89984' }, { color: '#d5c4a1' },
-  { color: '#ebdbb2' }, { color: '#fbf1c7' }, { color: '#cc241d' },
-  { color: '#fb4934' }, { color: '#d65d0e' }, { color: '#fe8019' },
-  { color: '#d79921' }, { color: '#fabd2f' }, { color: '#98971a' },
-  { color: '#b8bb26' }, { color: '#458588' }, { color: '#83a598' },
-  { color: '#689d6a' }, { color: '#8ec07c' }, { color: '#b16286' },
-  { color: '#d3869b' }, { color: '#076678' },
-]
-
 const TOOLS = { draw: 'draw', pen: 'pen', erase: 'erase', fill: 'fill', pan: 'pan' }
-const VIEWS = { color: 'color', brush: 'brush', canvas: 'canvas', settings: 'settings', export: 'export' }
+const VIEWS = { brush: 'brush', canvas: 'canvas', settings: 'settings', export: 'export' }
 
 /*
 
@@ -127,6 +115,7 @@ const $ = elf(tag, {
   tool:               TOOLS.draw,
   color:              '#ebdbb2',
   fillColor:          '#d79921',
+  colorTarget:        'stroke',  // 'stroke' | 'fill'
   opacity:            1,
   thickness:          8,
 
@@ -327,7 +316,7 @@ $.style(`
   & .taskbar.-top { top: 0; }
   & .taskbar.-bottom { bottom: 0; }
   & .taskbar button, & .taskbar .right { pointer-events: all; }
-  & .taskbar .right { text-align: right; }
+  & .taskbar .right { display: flex; justify-content: flex-end; align-items: center; }
 
   & .corner-btn {
     background: rgba(29,32,33,.75); border: 1px solid #3c3836; color: #a89984;
@@ -337,17 +326,31 @@ $.style(`
   }
   & .corner-btn:hover { border-color: #d79921; color: #fabd2f; }
 
-  & .zoom-pill {
-    position: absolute; bottom: 88px; left: 50%; transform: translateX(-50%);
-    display: flex; align-items: center; gap: .3rem;
-    background: rgba(29,32,33,.8); border: 1px solid #3c3836;
-    padding: .2rem .45rem; border-radius: 100px;
-    z-index: 6; backdrop-filter: blur(4px); pointer-events: none;
+  & .zoom-widget {
+    display: inline-flex; align-items: center; gap: 0;
+    background: rgba(29,32,33,.75); border: 1px solid #3c3836;
+    border-radius: 2px; backdrop-filter: blur(4px); overflow: hidden;
   }
-  & .zoom-pill span { font-size: .6rem; color: #665c54; }
+  & .zoom-btn {
+    background: transparent; border: none; color: #a89984;
+    font-family: 'DM Mono', monospace; font-size: .8rem;
+    padding: .2rem .4rem; cursor: pointer; line-height: 1; flex-shrink: 0;
+    transition: all 80ms;
+  }
+  & .zoom-btn:hover { background: rgba(215,153,33,.15); color: #fabd2f; }
+  & .zoom-label {
+    background: transparent; border: none; border-left: 1px solid #3c3836; border-right: 1px solid #3c3836;
+    color: #665c54; font-family: 'DM Mono', monospace; font-size: .6rem;
+    padding: .2rem .35rem; cursor: pointer; display: flex; align-items: center; gap: .25rem;
+    transition: color 80ms, border-color 80ms; white-space: nowrap;
+  }
+  & .zoom-label:hover { color: #fabd2f; border-color: #d79921; }
+  & .zoom-sep { color: #3c3836; }
+  & [data-zoom-lbl] { display: inline-block; min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+  & [data-dim-lbl]  { display: inline-block; min-width: 5.5em; font-variant-numeric: tabular-nums; }
 
   /* ── COMPASS TOOLBELT — v-log pattern ── */
-  &[data-belt="true"] .artboard *, &[data-belt="true"] .taskbar, &[data-belt="true"] .zoom-pill {
+  &[data-belt="true"] .artboard *, &[data-belt="true"] .taskbar {
     pointer-events: none !important;
   }
   &[data-belt="true"] .toolbelt-actions [data-menu] { pointer-events: all !important; }
@@ -369,17 +372,20 @@ $.style(`
   & .the-compass button {
     position: relative; overflow: hidden; touch-action: manipulation;
     border-radius: 100%; color: #ebdbb2; border: 1px solid #d79921;
-    background-image: radial-gradient(rgba(29,32,33,1), rgba(29,32,33,1) 25%, rgba(29,32,33,.75) 25%);
-    pointer-events: all; cursor: pointer; padding: 0; transition: background-image 80ms;
+    background: #1d2021;
+    pointer-events: all; cursor: pointer; padding: 0; transition: background 80ms, opacity 80ms, transform 80ms;
   }
-  & .the-compass button:hover {
-    background-image: radial-gradient(rgba(215,153,33,.6), rgba(215,153,33,.6) 25%, rgba(29,32,33,0) 25%);
-    color: #fabd2f;
+  & .the-compass button:hover { background: rgba(215,153,33,.25); color: #fabd2f; }
+  & .the-compass button.active { background: #d79921; color: #282828; }
+
+  /* petals hidden when compass closed */
+  & .the-compass[data-open="false"] button:not(.root) {
+    opacity: 0; pointer-events: none; transform: scale(0.5);
   }
-  & .the-compass button.active {
-    background-image: radial-gradient(#d79921, #d79921 25%, rgba(29,32,33,0) 25%);
-    color: #282828;
+  & .the-compass[data-open="true"] button:not(.root) {
+    opacity: 1; pointer-events: all; transform: scale(1);
   }
+  & .the-compass button * { pointer-events: none; }
   & .the-compass button .icon {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
@@ -402,7 +408,7 @@ $.style(`
     display: none; position: absolute; inset: 0; z-index: 50;
     background: rgba(29,32,33,.92); overflow: auto; backdrop-filter: blur(6px);
   }
-  & .overlay-area.open { display: block; }
+  & .overlay-area.open { display: flex; flex-direction: column; }
   & .overlay-inner { max-width: 380px; margin: 3rem auto; padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
   & .overlay-title { font-size: .6rem; letter-spacing: .12em; text-transform: uppercase; color: #665c54; margin-bottom: .25rem; }
   & .overlay-close {
@@ -411,17 +417,6 @@ $.style(`
     border-radius: 2px; cursor: pointer; font-size: .9rem; display: grid; place-items: center;
   }
   & .overlay-close:hover { color: #ebdbb2; border-color: #928374; }
-
-  & .color-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-  & .swatch {
-    aspect-ratio: 1; border-radius: 2px; cursor: pointer;
-    border: 2px solid transparent; transition: transform 80ms;
-  }
-  & .swatch.transparent-swatch {
-    background: repeating-conic-gradient(#504945 0% 25%, #3c3836 0% 50%) 0 0 / 8px 8px;
-  }
-  & .swatch:hover { transform: scale(1.15); z-index: 1; position: relative; }
-  & .swatch.active { border-color: #fabd2f; }
 
   & input[type=color] { width: 100%; height: 28px; border: 1px solid #504945; background: #3c3836; cursor: pointer; border-radius: 2px; padding: 2px; }
   & input[type=range] { accent-color: #d79921; width: 100%; }
@@ -535,15 +530,20 @@ function mount(target) {
           <div class="import-label" data-import-label>extracting frames…</div>
           <div class="import-bar-outer"><div class="import-bar-inner" data-import-bar></div></div>
         </div>
-        <div class="zoom-pill">
-          <span data-zoom-lbl>200%</span>
-          <span style="color:#3c3836">|</span>
-          <span data-dim-lbl>${canvasW}×${canvasH}</span>
-        </div>
         <div class="taskbar -top">
           <div class="left"><button class="corner-btn" data-open-view="settings">⚙ settings</button></div>
           <div class="center"></div>
-          <div class="right"><button class="corner-btn" data-open-view="canvas">⬜ canvas</button></div>
+          <div class="right">
+            <div class="zoom-widget">
+              <button class="zoom-btn" data-zoom-out>−</button>
+              <button class="zoom-label" data-open-view="canvas">
+                <span data-zoom-lbl>200%</span>
+                <span class="zoom-sep">|</span>
+                <span data-dim-lbl>${canvasW}×${canvasH}</span>
+              </button>
+              <button class="zoom-btn" data-zoom-in>+</button>
+            </div>
+          </div>
         </div>
         <div class="taskbar -bottom">
           <div class="left"><button class="corner-btn" data-new-frame>+ frame</button></div>
@@ -593,9 +593,11 @@ Reel and cursor overlays are updated imperatively when data changes.
 */
 
 function update(target) {
-  const { beltOffsetX, beltOffsetY, tool, color } = $.learn()
+  const { beltOffsetX, beltOffsetY, tool, color, menuOpen } = $.learn()
   const toolbelt = target.querySelector('[data-toolbelt]')
   if (toolbelt) toolbelt.style.cssText = `--belt-offset-x:${beltOffsetX}px;--belt-offset-y:${beltOffsetY}px;`
+  const compass = target.querySelector('.the-compass')
+  if (compass) compass.dataset.open = menuOpen ? 'true' : 'false'
   const ri = target.querySelector('[data-root-icon]'); if (ri) ri.textContent = toolIcon(tool)
   const ci = target.querySelector('[data-cycle-icon]'); if (ci) ci.textContent = toolIcon(nextTool(tool))
   const colorIcon = target.querySelector('[data-color-icon]')
@@ -663,6 +665,10 @@ function boot(target) {
   loadCurrentFrame(target)
   fitZoom(target)
   renderReel(target)
+
+  // start compass closed
+  const compass = target.querySelector('.the-compass')
+  if (compass) compass.dataset.open = 'false'
   setupCompositeLoop(target)
   attachDrawEvents(target)
   attachDropEvents(target)
@@ -1329,9 +1335,12 @@ function drawStroke(context, stroke) {
   context.globalCompositeOperation = 'source-over'
 }
 
-function hexToRgba(hex) {
-  if (!hex || hex === 'transparent') return { r:0,g:0,b:0,a:0 }
-  return { r:parseInt(hex.slice(1,3),16), g:parseInt(hex.slice(3,5),16), b:parseInt(hex.slice(5,7),16), a:255 }
+function hexToRgba(colorStr) {
+  if (!colorStr || colorStr === 'transparent') return { r:0,g:0,b:0,a:0 }
+  const c=document.createElement('canvas');c.width=c.height=1
+  const ctx=c.getContext('2d');ctx.fillStyle=colorStr;ctx.fillRect(0,0,1,1)
+  const [r,g,b,a]=ctx.getImageData(0,0,1,1).data
+  return {r,g,b,a}
 }
 
 function floodFill(ctx, x, y, fillColor, w, h) {
@@ -1486,15 +1495,15 @@ function attachDrawEvents(target) {
     const{x,y}=getCanvasPos(target,e)
 
     if (tool==='fill'){
-      const{color,canvasW,canvasH}=$.learn()
+      const{fillColor,canvasW,canvasH}=$.learn()
       const current=target._localCurrent??0
       const{frames}=$.learn()
       const frameId=frames[current]
-      floodFill(target._drawCanvas.getContext('2d'),x,y,color,canvasW,canvasH)
+      floodFill(target._drawCanvas.getContext('2d'),x,y,fillColor,canvasW,canvasH)
       db[frameId].drawCanvas.getContext('2d').clearRect(0,0,canvasW,canvasH)
       db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
       const fs=$.learn().frameStrokes
-      $.teach({frameStrokes:{...fs,[frameId]:[...(fs[frameId]||[]),[{x,y,fill:true,color,lineWidth:0,opacity:1}]]}})
+      $.teach({frameStrokes:{...fs,[frameId]:[...(fs[frameId]||[]),[{x,y,fill:true,color:fillColor,lineWidth:0,opacity:1}]]}})
       _drawing=false; renderReel(target); return
     }
 
@@ -1862,15 +1871,32 @@ Overlay panel.
 
 */
 
-function openView(target,view){
-  $.whisper({view,showOverlay:true})
-  const overlay=target.querySelector('[data-overlay]'),inner=target.querySelector('[data-overlay-inner]')
-  if(!overlay||!inner)return
-  overlay.classList.add('open');inner.innerHTML=renderView(view);wireOverlay(inner,target)
+function openPalette(target, colorTarget) {
+  $.whisper({ colorTarget, showOverlay: true, view: 'palette' })
+  const overlay = target.querySelector('[data-overlay]')
+  const inner   = target.querySelector('[data-overlay-inner]')
+  if (!overlay || !inner) return
+  overlay.classList.add('open')
+  inner.style.cssText = 'height:100%;padding:0;margin:0;max-width:none;display:flex;flex-direction:column;'
+  inner.innerHTML = `<plan98-palette data-color-target="${colorTarget}"></plan98-palette>`
+}
+
+function openView(target, view) {
+  $.whisper({ view, showOverlay: true, colorTarget: null })
+  const overlay = target.querySelector('[data-overlay]')
+  const inner   = target.querySelector('[data-overlay-inner]')
+  if (!overlay || !inner) return
+  overlay.classList.add('open')
+  inner.style.cssText = ''
+  inner.innerHTML = renderView(view)
+  wireOverlay(inner, target)
 }
 function closeOverlay(target){
-  $.whisper({view:null,showOverlay:false})
-  const overlay=target.querySelector('[data-overlay]');if(overlay)overlay.classList.remove('open')
+  $.whisper({view:null,showOverlay:false,colorTarget:null})
+  const overlay=target.querySelector('[data-overlay]')
+  if(overlay)overlay.classList.remove('open')
+  const inner=target.querySelector('[data-overlay-inner]')
+  if(inner){inner.style.cssText='';inner.innerHTML=''}
 }
 
 function renderView(view){
@@ -1888,6 +1914,11 @@ function renderView(view){
     <div class="thicknoid-grid">${thicknoids.map(t=>`<button class="thicknoid-btn ${thickness===t?'active':''}" data-thick="${t}">${t}</button>`).join('')}</div>
     <div class="overlay-title" style="margin-top:.75rem;">opacity</div>
     <div class="opacity-grid">${[0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1].map(o=>`<button class="opacity-btn ${opacity===o?'active':''}" data-opacity="${o}">${o}</button>`).join('')}</div>
+    <div class="overlay-title" style="margin-top:.75rem;">fill color <span style="font-size:.5rem;color:#504945">(pen mode)</span></div>
+    <button class="row-btn" data-pick-fill style="display:flex;align-items:center;gap:.5rem;">
+      <span style="display:inline-block;width:14px;height:14px;border-radius:2px;border:1px solid #504945;background:${fillColor==='transparent'?'repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/6px 6px':fillColor};flex-shrink:0;"></span>
+      <span>pick fill</span>
+    </button>
     <div class="overlay-title" style="margin-top:.75rem;">onion skin</div>
     <button class="row-btn ${onion?'active':''}" data-toggle-onion>${onion?'● on':'○ off'}</button>
   `
@@ -1915,10 +1946,6 @@ function renderView(view){
 }
 
 function wireOverlay(inner,target){
-  inner.querySelectorAll('[data-set-color]').forEach(el=>el.addEventListener('click',()=>{$.whisper({color:el.dataset.setColor});inner.querySelectorAll('[data-set-color]').forEach(s=>s.classList.remove('active'));el.classList.add('active')}))
-  inner.querySelectorAll('[data-set-fill]').forEach(el=>el.addEventListener('click',()=>{$.whisper({fillColor:el.dataset.setFill});inner.querySelectorAll('[data-set-fill]').forEach(s=>s.classList.remove('active'));el.classList.add('active')}))
-  const cc=inner.querySelector('[data-custom-color]');if(cc)cc.addEventListener('input',e=>$.whisper({color:e.target.value}))
-  const cf=inner.querySelector('[data-custom-fill]');if(cf)cf.addEventListener('input',e=>$.whisper({fillColor:e.target.value}))
   inner.querySelectorAll('[data-thick]').forEach(btn=>btn.addEventListener('click',()=>{$.whisper({thickness:Integer(btn.dataset.thick)});inner.querySelectorAll('[data-thick]').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}))
   inner.querySelectorAll('[data-opacity]').forEach(btn=>btn.addEventListener('click',()=>{$.whisper({opacity:parseFloat(btn.dataset.opacity)});inner.querySelectorAll('[data-opacity]').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}))
   const ob=inner.querySelector('[data-toggle-onion]');if(ob)ob.addEventListener('click',()=>{const n=!$.learn().onion;$.whisper({onion:n});ob.classList.toggle('active',n);ob.textContent=n?'● on':'○ off';renderOnion(target)})
@@ -1975,12 +2002,34 @@ Events.
 $.when('click','[data-open-view]',event=>{
   const root=event.target.closest(tag);if(!root)return
   const view=event.target.closest('[data-open-view]').dataset.openView
+  if(view==='color'){openPalette(root,'stroke');return}
   const{showOverlay,view:cv}=$.learn()
   if(showOverlay&&cv===view){closeOverlay(root);return}
   openView(root,view)
 })
+
+// palette input — routes to stroke or fill based on data-color-target attribute
+$.when('input','plan98-palette',event=>{
+  const{color}=event.detail
+  const colorTarget=event.target.dataset.colorTarget
+  if(colorTarget==='fill'){
+    $.whisper({fillColor:color,showOverlay:false,view:null,colorTarget:null})
+  } else {
+    $.whisper({color,showOverlay:false,view:null,colorTarget:null})
+  }
+  const root=event.target.closest(tag)
+  if(root)closeOverlay(root)
+})
+
+// pick-fill button inside brush overlay
+$.when('click','[data-pick-fill]',event=>{
+  const root=event.target.closest(tag);if(!root)return
+  openPalette(root,'fill')
+})
 $.when('click','[data-close-overlay]',event=>{const r=event.target.closest(tag);if(r)closeOverlay(r)})
 $.when('click','[data-new-frame]',event=>{const r=event.target.closest(tag);if(r)addFrame(r)})
+$.when('click','[data-zoom-in]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom+0.25)})
+$.when('click','[data-zoom-out]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom-0.25)})
 $.when('click','[data-cycle-tool]',()=>$.whisper({tool:nextTool($.learn().tool)}))
 $.when('click','[data-undo]',event=>{const r=event.target.closest(tag);if(r)undoFrame(r)})
 $.when('click','[data-darkroom-open]',e=>{const r=e.target.closest(tag);if(r)openDarkroom(r)})
