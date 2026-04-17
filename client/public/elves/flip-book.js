@@ -1774,14 +1774,40 @@ Export.
 
 async function exportMp4(target){
   const{frames,canvasW,canvasH,fps,loopMode}=$.learn()
-  const off=document.createElement('canvas');off.width=canvasW;off.height=canvasH;const octx=off.getContext('2d')
+  const off=document.createElement('canvas');off.width=canvasW;off.height=canvasH
+  const octx=off.getContext('2d')
   const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':'video/webm'
-  const stream=off.captureStream(fps),rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8_000_000})
-  const chunks=[];rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)}
-  rec.onstop=()=>{const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='flipbook.webm';a.click();setTimeout(()=>URL.revokeObjectURL(url),5000)}
-  rec.start()
-  let seq=[...frames];if(loopMode==='pingpong')seq=[...frames,...[...frames].reverse().slice(1,-1)]
-  for(const id of seq){const f=ensureFrame(id,canvasW,canvasH);octx.clearRect(0,0,canvasW,canvasH);if(f.hasVideo)octx.drawImage(f.videoCanvas,0,0);octx.drawImage(f.drawCanvas,0,0);await new Promise(r=>setTimeout(r,1000/fps))}
+  const mspf=Math.round(1000/fps)  // ms per frame
+
+  let seq=[...frames]
+  if(loopMode==='pingpong') seq=[...frames,...[...frames].reverse().slice(1,-1)]
+
+  const stream=off.captureStream(fps)
+  const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:8_000_000})
+  const chunks=[]
+  rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)}
+  rec.onstop=()=>{
+    const blob=new Blob(chunks,{type:mime})
+    const url=URL.createObjectURL(blob)
+    const a=document.createElement('a');a.href=url;a.download='flipbook.webm';a.click()
+    setTimeout(()=>URL.revokeObjectURL(url),5000)
+  }
+
+  // start with a small timeslice so ondataavailable fires regularly
+  rec.start(mspf)
+
+  for(const id of seq){
+    const f=ensureFrame(id,canvasW,canvasH)
+    octx.clearRect(0,0,canvasW,canvasH)
+    if(f.hasVideo) octx.drawImage(f.videoCanvas,0,0)
+    octx.drawImage(f.drawCanvas,0,0)
+    // hold this frame for exactly one frame duration
+    // use two back-to-back waits: one rAF to ensure the canvas stream
+    // captures the new pixels, then the remainder of the frame time
+    await new Promise(r=>requestAnimationFrame(r))
+    await new Promise(r=>setTimeout(r,mspf))
+  }
+
   rec.stop()
 }
 
