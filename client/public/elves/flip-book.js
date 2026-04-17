@@ -133,8 +133,8 @@ const $ = elf(tag, {
   view:               null,
   showOverlay:        false,
 
-  // chromakey
-  chromakeyEnabled:   false,
+  // camera
+  videoEnabled:       false,
   chromakeyColor:     '#00b140',
   chromakeyTolerance: 30,
 
@@ -547,7 +547,7 @@ function mount(target) {
         </div>
         <div class="taskbar -bottom">
           <div class="left"><button class="corner-btn" data-new-frame>+ frame</button></div>
-          <div class="center"></div>
+          <div class="center" data-capture-slot></div>
           <div class="right"><button class="corner-btn" data-darkroom-open>▶ play</button></div>
         </div>
         <div class="toolbelt-actions" data-toolbelt>
@@ -593,7 +593,7 @@ Reel and cursor overlays are updated imperatively when data changes.
 */
 
 function update(target) {
-  const { beltOffsetX, beltOffsetY, tool, color, menuOpen } = $.learn()
+  const { beltOffsetX, beltOffsetY, tool, color, menuOpen, videoEnabled } = $.learn()
   const toolbelt = target.querySelector('[data-toolbelt]')
   if (toolbelt) toolbelt.style.cssText = `--belt-offset-x:${beltOffsetX}px;--belt-offset-y:${beltOffsetY}px;`
   const compass = target.querySelector('.the-compass')
@@ -606,6 +606,8 @@ function update(target) {
       ? 'position:absolute;inset:20%;border-radius:50%;background:repeating-conic-gradient(#504945 0% 25%,#3c3836 0% 50%) 0 0/8px 8px;display:block;'
       : `position:absolute;inset:20%;border-radius:50%;background:${color};display:block;`
   }
+  const slot = target.querySelector('[data-capture-slot]')
+  if (slot) slot.innerHTML = videoEnabled ? '<button class="corner-btn" data-capture-frame>📷 capture</button>' : ''
   return null
 }
 
@@ -1926,15 +1928,7 @@ function closeOverlay(target){
 }
 
 function renderView(view){
-  const{color,fillColor,thickness,opacity,onion,fps,loopMode,canvasW,canvasH,chromakeyEnabled,chromakeyColor,chromakeyTolerance}=$.learn()
-  if(view===VIEWS.color)return`
-    <div class="overlay-title">stroke</div>
-    <div class="color-grid">${PALETTE.map(p=>`<div class="swatch ${p.color==='transparent'?'transparent-swatch':''} ${color===p.color?'active':''}" style="${p.color!=='transparent'?`background:${p.color}`:''}" data-set-color="${p.color}"></div>`).join('')}</div>
-    <input type="color" value="${color!=='transparent'?color:'#ebdbb2'}" data-custom-color style="margin-top:.5rem;">
-    <div class="overlay-title" style="margin-top:.75rem;">fill (pen mode)</div>
-    <div class="color-grid">${PALETTE.map(p=>`<div class="swatch ${p.color==='transparent'?'transparent-swatch':''} ${fillColor===p.color?'active':''}" style="${p.color!=='transparent'?`background:${p.color}`:''}" data-set-fill="${p.color}"></div>`).join('')}</div>
-    <input type="color" value="${fillColor!=='transparent'?fillColor:'#d79921'}" data-custom-fill style="margin-top:.5rem;">
-  `
+  const{fillColor,thickness,opacity,onion,fps,loopMode,canvasW,canvasH,chromakeyEnabled,chromakeyColor,chromakeyTolerance,videoEnabled}=$.learn()
   if(view===VIEWS.brush)return`
     <div class="overlay-title">size</div>
     <div class="thicknoid-grid">${thicknoids.map(t=>`<button class="thicknoid-btn ${thickness===t?'active':''}" data-thick="${t}">${t}</button>`).join('')}</div>
@@ -1958,6 +1952,8 @@ function renderView(view){
     <div class="overlay-title">playback</div>
     <div class="field-row"><label>fps</label><select class="tl-select" data-fps-select>${[1,2,4,6,8,12,24,30,60].map(v=>`<option value="${v}" ${v===fps?'selected':''}>${v}</option>`).join('')}</select></div>
     <div class="field-row" style="margin-top:.4rem;"><label>mode</label><select class="tl-select" data-loop-select>${['loop','pingpong','once'].map(v=>`<option value="${v}" ${v===loopMode?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="overlay-title" style="margin-top:.75rem;">camera</div>
+    <button class="row-btn ${videoEnabled?'active':''}" data-toggle-camera>${videoEnabled?'● on':'○ off'}</button>
     <div class="overlay-title" style="margin-top:.75rem;">chromakey</div>
     <button class="row-btn ${chromakeyEnabled?'active':''}" data-toggle-ck>${chromakeyEnabled?'● on':'○ off'}</button>
     <div class="ck-color-row" style="margin-top:.5rem;"><div class="ck-preview" style="background:${chromakeyColor};" data-ck-preview></div><input type="color" value="${chromakeyColor}" data-ck-color></div>
@@ -2054,7 +2050,83 @@ $.when('click','[data-pick-fill]',event=>{
 })
 $.when('click','[data-close-overlay]',event=>{const r=event.target.closest(tag);if(r)closeOverlay(r)})
 $.when('click','[data-new-frame]',event=>{const r=event.target.closest(tag);if(r)addFrame(r)})
-$.when('click','[data-zoom-in]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom+0.25)})
+$.when('click','[data-toggle-camera]', async event => {
+  const root = event.target.closest(tag); if (!root) return
+  const { videoEnabled } = $.learn()
+  if (videoEnabled) {
+    // turn off
+    if (root._cameraStream) {
+      root._cameraStream.getTracks().forEach(t => t.stop())
+      root._cameraStream = null
+    }
+    if (root._cameraVideo) { root._cameraVideo.srcObject = null }
+    $.whisper({ videoEnabled: false })
+    event.target.classList.remove('active')
+    event.target.textContent = '○ off'
+  } else {
+    // turn on
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+      root._cameraStream = stream
+      if (!root._cameraVideo) {
+        const v = document.createElement('video')
+        v.muted = true; v.autoplay = true; v.playsInline = true
+        v.style.display = 'none'
+        document.body.appendChild(v)
+        root._cameraVideo = v
+      }
+      root._cameraVideo.srcObject = stream
+      await root._cameraVideo.play().catch(()=>{})
+      $.whisper({ videoEnabled: true })
+      event.target.classList.add('active')
+      event.target.textContent = '● on'
+    } catch(err) {
+      console.error('Camera access denied:', err)
+    }
+  }
+  closeOverlay(root)
+})
+
+$.when('click','[data-capture-frame]', event => {
+  const root = event.target.closest(tag); if (!root) return
+  captureFrame(root)
+})
+
+function captureFrame(target) {
+  const { frames, canvasW, canvasH } = $.learn()
+  const current = target._localCurrent ?? 0
+  if (!frames.length || !target._cameraVideo) return
+  const frameId = frames[current]
+  const f = ensureFrame(frameId, canvasW, canvasH)
+
+  // draw the current camera frame into the frame's videoCanvas
+  const ctx = f.videoCanvas.getContext('2d')
+  const v = target._cameraVideo
+  const vw = v.videoWidth, vh = v.videoHeight
+  if (!vw || !vh) return
+
+  // letterbox-fit the camera into the canvas dimensions
+  const vAspect = vw / vh
+  const cAspect = canvasW / canvasH
+  let sw, sh, sx, sy
+  if (vAspect > cAspect) {
+    sh = vh; sw = vh * cAspect
+    sy = 0;  sx = (vw - sw) / 2
+  } else {
+    sw = vw; sh = vw / cAspect
+    sx = 0;  sy = (vh - sh) / 2
+  }
+
+  ctx.clearRect(0, 0, canvasW, canvasH)
+  ctx.drawImage(v, sx, sy, sw, sh, 0, 0, canvasW, canvasH)
+  f.hasVideo = true
+
+  // also refresh target's videoCanvas so composite loop shows it immediately
+  target._videoCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
+  target._videoCanvas.getContext('2d').drawImage(f.videoCanvas, 0, 0)
+
+  renderReel(target)
+}
 $.when('click','[data-zoom-out]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom-0.25)})
 $.when('click','[data-cycle-tool]',()=>$.whisper({tool:nextTool($.learn().tool)}))
 $.when('click','[data-undo]',event=>{const r=event.target.closest(tag);if(r)undoFrame(r)})
