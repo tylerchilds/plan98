@@ -12,19 +12,17 @@ Multiplayer architecture — v-log pattern:
   SHARED (travels over WebRTC via @plan98/elf):
     frames[]          — ordered frame id array
     frameStrokes{}    — { [frameId]: stroke[][] } plain JSON, replayed locally
-    current           — playback position
-    canvasW/H, fps, loopMode, playing
+    players[pid]      — presence: color, cursorX/Y, frameId, activelyDrawing, currentStroke
+    canvasW/H, fps, loopMode
 
-  PLAYER-NAMESPACED ($.teach with mergePlayer + bypassSecurity):
-    players[pid].currentStroke  — active stroke being drawn right now
-    players[pid].cursorX/Y      — cursor position in canvas coords
-    players[pid].color          — their current color
-    players[pid].frameId        — which frame they're on
-    players[pid].activelyDrawing
+  NOTE: `current` is NO LONGER shared state. Each peer tracks their own
+  viewport position via target._localCurrent. players[pid].frameId is the
+  presence signal used for reel dots and cursor visibility.
 
   LOCAL ONLY (never in elf state):
-    db[frameId].drawCanvas      — pixel canvas, rebuilt from frameStrokes on-demand
-    db[frameId].videoCanvas     — extracted video frame pixels
+    target._localCurrent              — this peer's current frame index
+    db[frameId].drawCanvas            — pixel canvas, rebuilt from frameStrokes on-demand
+    db[frameId].videoCanvas           — extracted video frame pixels
     db[frameId].hasVideo
 
 */
@@ -112,7 +110,7 @@ const VIEWS = { color: 'color', brush: 'brush', canvas: 'canvas', settings: 'set
 
 /*
 
-State. Only serializable things here.
+State. current is removed from shared state — each peer owns their viewport.
 
 */
 
@@ -120,7 +118,6 @@ const $ = elf(tag, {
   // shared frame data
   frames:             [],    // string[] — frame ids in order
   frameStrokes:       {},    // { [frameId]: stroke[][] }
-  current:            0,
 
   // canvas config
   canvasW:            320,
@@ -183,16 +180,8 @@ function mergePlayer(pid) {
 
 /*
 
-mergeFrameStrokes — appends a committed stroke to a frame's stroke list.
-This is what travels to peers — plain JSON, no pixels.
-
-*/
-
-/*
-
-mergeFrameStrokes — uses mergeHandler+parameters pattern so the function
-survives plan98 QuickJS serialization. Parameters are JSON-serialized
-separately and injected as arguments on the receiving peer.
+appendStrokeMerge — uses mergeHandler+parameters pattern so the function
+survives plan98 QuickJS serialization.
 
 */
 
@@ -295,16 +284,31 @@ $.style(`
   }
   & .reel-frame:hover { border-color: #7c6f64; }
   & .reel-frame.active { border-color: #fabd2f; }
-  & .reel-frame canvas { display: block; height: 100%; width: auto; image-rendering: pixelated; }
+  & .reel-frame canvas { display: block; height: 100%; width: auto; image-rendering: pixelated; pointer-events: none; }
   & .reel-num { position: absolute; bottom: 1px; left: 3px; font-size: .45rem; color: #665c54; pointer-events: none; }
   & .reel-frame.active .reel-num { color: #fabd2f; }
   & .reel-del {
     position: absolute; top: 1px; right: 1px; width: 12px; height: 12px;
     background: rgba(29,32,33,.85); border: none; color: #665c54; font-size: .5rem;
-    cursor: pointer; border-radius: 1px; display: none; place-items: center; z-index: 3;
+    cursor: pointer; border-radius: 1px; display: none; place-items: center; z-index: 4;
   }
   & .reel-frame:hover .reel-del { display: grid; }
   & .reel-del:hover { color: #fb4934; }
+
+  & .reel-menu {
+    position: fixed; z-index: 1000;
+    display: flex; flex-direction: column; gap: 3px;
+    background: #1d2021; border: 1px solid #504945;
+    border-radius: 3px; padding: 3px; box-shadow: 0 4px 12px rgba(0,0,0,.5);
+  }
+  & .reel-menu-btn {
+    background: #3c3836; border: 1px solid #504945; color: #a89984;
+    font-family: 'DM Mono', monospace; font-size: .6rem;
+    padding: .3rem .6rem; cursor: pointer; border-radius: 2px;
+    text-align: left; white-space: nowrap; transition: all 80ms;
+  }
+  & .reel-menu-btn:hover { border-color: #d79921; color: #fabd2f; }
+  & .reel-menu-btn.-danger:hover { border-color: #fb4934; color: #fb4934; }
 
   /* player presence dots on reel frames */
   & .reel-player-dots {
@@ -620,6 +624,9 @@ Instead, syncs local db to whatever frames are already there.
 function boot(target) {
   const { canvasW, canvasH, frames } = $.learn()
 
+  // ── local viewport position — never shared ──
+  target._localCurrent = 0
+
   target._artboard        = target.querySelector('[data-artboard]')
   target._artboardInner   = target.querySelector('[data-artboard-inner]')
   target._outputCanvas    = target.querySelector('[data-output-canvas]')
@@ -641,7 +648,7 @@ function boot(target) {
     // First peer — create the first frame
     const f0 = crypto.randomUUID()
     ensureFrame(f0, canvasW, canvasH)
-    $.teach({ frames: [f0], frameStrokes: { [f0]: [] }, current: 0 })
+    $.teach({ frames: [f0], frameStrokes: { [f0]: [] } })
     teachPlayer({ frameId: f0 })
   } else {
     // Late-joining peer — ensure all existing frames exist locally, replay their strokes
@@ -649,7 +656,8 @@ function boot(target) {
       ensureFrame(id, canvasW, canvasH)
       replayStrokes(id)
     })
-    teachPlayer({ frameId: frames[$.learn().current] })
+    target._localCurrent = 0
+    teachPlayer({ frameId: frames[0] })
   }
 
   loadCurrentFrame(target)
@@ -666,15 +674,21 @@ function boot(target) {
 /*
 
 watchSharedState — responds to peers adding frames or committing strokes.
-Runs on a rAF loop comparing a local snapshot of frames + frameStrokes.
+Uses _onStateChange hook called from afterUpdate on every elf state change.
+
+FIX: _knownCounts initialised to -1 so the very first onStateChange pass
+always triggers replayStrokes for every frame, even when elf delivers the
+full state atomically (late-join burst).
 
 */
 
 function watchSharedState(target) {
-  const _knownCounts = {}  // frameId -> stroke count we have locally rendered
-  let _lastFrameStr = JSON.stringify($.learn().frames)
+  // initialise ALL known frames to -1 so first pass always replays
+  const _knownCounts = {}
+  $.learn().frames.forEach(id => { _knownCounts[id] = -1 })
 
-  // React immediately on every elf state change — no polling delay
+  let _lastFrameStr = ''  // force frames diff on first run
+
   function onStateChange() {
     if (target._destroyed) return
     const state = $.learn()
@@ -684,11 +698,18 @@ function watchSharedState(target) {
     // ── new or removed frames ─────────────────────────────────────────────
     if (framesStr !== _lastFrameStr) {
       _lastFrameStr = framesStr
+
+      // clamp _localCurrent if frames were deleted
+      if (target._localCurrent >= state.frames.length) {
+        target._localCurrent = Math.max(0, state.frames.length - 1)
+      }
+
       state.frames.forEach(id => {
+        // new frame from a peer — init to -1 so stroke pass below replays it
+        if (!(_knownCounts[id] >= 0)) _knownCounts[id] = -1
         ensureFrame(id, state.canvasW, state.canvasH)
-        replayStrokes(id)
-        _knownCounts[id] = (state.frameStrokes[id] || []).length
       })
+
       loadCurrentFrame(target)
       renderOnion(target)
       reelDirty = true
@@ -702,7 +723,8 @@ function watchSharedState(target) {
         _knownCounts[id] = sharedLen
         ensureFrame(id, state.canvasW, state.canvasH)
         replayStrokes(id)
-        if (id === state.frames[state.current]) {
+        // only refresh draw canvas if this is the frame we're currently viewing
+        if (id === state.frames[target._localCurrent]) {
           const ctx = target._drawCanvas.getContext('2d')
           ctx.clearRect(0, 0, state.canvasW, state.canvasH)
           ctx.drawImage(db[id].drawCanvas, 0, 0)
@@ -717,8 +739,11 @@ function watchSharedState(target) {
   // Store so afterUpdate can call it on every elf state change
   target._onStateChange = onStateChange
 
-  // Run once immediately to catch state already present (late join)
+  // Run immediately — catches state already present at boot time.
+  // Also run after a tick to catch any elf burst that arrived before
+  // the hook was wired up.
   onStateChange()
+  setTimeout(onStateChange, 0)
 
   // rAF loop — lightweight, only for live peer cursors + active strokes
   const cursorLoop = () => {
@@ -734,12 +759,12 @@ function watchSharedState(target) {
 /*
 
 updatePeerCanvases — draws remote players' active strokes onto per-player canvases.
-These are shown by the composite loop.
+Compares against target._localCurrent so peers on different frames don't bleed through.
 
 */
 
 function updatePeerCanvases(target, state) {
-  const currentFrameId = (state.frames || [])[state.current]
+  const currentFrameId = (state.frames || [])[target._localCurrent]
   const { zoom } = state
 
   Object.entries(state.players || {}).forEach(([pid, p]) => {
@@ -838,13 +863,14 @@ function fitZoom(target) {
 /*
 
 Frame management.
-addFrame creates the frame locally AND teaches the new id into shared frames[].
-Other peers' watchSharedState sees the new id and calls ensureFrame locally.
+All frame navigation writes to target._localCurrent only.
+Shared state carries only frames[] and frameStrokes{}.
 
 */
 
 function loadCurrentFrame(target) {
-  const { frames, current, canvasW, canvasH } = $.learn()
+  const { frames, canvasW, canvasH } = $.learn()
+  const current = target._localCurrent ?? 0
   target._drawCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
   target._videoCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
   if (!frames.length) return
@@ -854,15 +880,17 @@ function loadCurrentFrame(target) {
 }
 
 function gotoFrame(target, idx) {
-  $.teach({ current: idx })
-  teachPlayer({ frameId: $.learn().frames[idx] })
+  const { frames } = $.learn()
+  target._localCurrent = Math.max(0, Math.min(frames.length - 1, idx))
+  teachPlayer({ frameId: frames[target._localCurrent] })
   loadCurrentFrame(target)
   renderOnion(target)
   renderReel(target)
 }
 
 function addFrame(target, copyFromIdx = null) {
-  const { frames, current, canvasW, canvasH, frameStrokes } = $.learn()
+  const { frames, canvasW, canvasH, frameStrokes } = $.learn()
+  const current = target._localCurrent ?? 0
   const id = crypto.randomUUID()
   ensureFrame(id, canvasW, canvasH)
 
@@ -875,12 +903,15 @@ function addFrame(target, copyFromIdx = null) {
     db[id].drawCanvas.getContext('2d').drawImage(db[srcId].drawCanvas, 0, 0)
   }
 
+  const insertAfter = copyFromIdx !== null ? copyFromIdx : current
   const newFrames = [...frames]
-  newFrames.splice(current + 1, 0, id)
+  newFrames.splice(insertAfter + 1, 0, id)
+
+  // advance local viewport to the new frame
+  target._localCurrent = insertAfter + 1
 
   $.teach({
     frames: newFrames,
-    current: current + 1,
     frameStrokes: { ...frameStrokes, [id]: newStrokes }
   })
   teachPlayer({ frameId: id })
@@ -895,9 +926,12 @@ function deleteFrame(target, idx) {
   if (frames.length <= 1) return
   const id = frames[idx]
   const newFrames = frames.filter((_, i) => i !== idx)
-  let cur = $.learn().current; if (cur >= newFrames.length) cur = newFrames.length - 1
+  // clamp local current
+  let cur = target._localCurrent ?? 0
+  if (cur >= newFrames.length) cur = newFrames.length - 1
+  target._localCurrent = cur
   const newStrokes = { ...frameStrokes }; delete newStrokes[id]
-  $.teach({ frames: newFrames, current: cur, frameStrokes: newStrokes })
+  $.teach({ frames: newFrames, frameStrokes: newStrokes })
   loadCurrentFrame(target); renderOnion(target); renderReel(target)
 }
 
@@ -919,12 +953,13 @@ function applyDims(target, w, h) {
 
 /*
 
-Onion skinning.
+Onion skinning — uses target._localCurrent.
 
 */
 
 function renderOnion(target) {
-  const { frames, current, onion, canvasW, canvasH } = $.learn()
+  const { frames, onion, canvasW, canvasH } = $.learn()
+  const current = target._localCurrent ?? 0
   target._onionCanvases.forEach((c, i) => {
     const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height)
     if (!onion) return
@@ -939,13 +974,197 @@ function renderOnion(target) {
 
 /*
 
-Film reel — del stops propagation imperatively.
-Also renders player presence dots on frames.
+Reel drag-to-reorder.
+Ghost follows pointer, drop indicator shows between frames,
+edge-scroll kicks in with velocity proportional to proximity.
+
+*/
+
+function startReelDrag(target, frameDiv, idx, e) {
+  const reel = target.querySelector('[data-film-reel]')
+  const rect = frameDiv.getBoundingClientRect()
+
+  // ghost
+  const ghost = document.createElement('canvas')
+  const f = db[$.learn().frames[idx]]
+  if (f) {
+    ghost.width = f.drawCanvas.width; ghost.height = f.drawCanvas.height
+    ghost.getContext('2d').drawImage(f.drawCanvas, 0, 0)
+  }
+  ghost.style.cssText = `
+    position:fixed; pointer-events:none; z-index:9999;
+    width:${rect.width}px; height:${rect.height}px;
+    image-rendering:pixelated; opacity:.85;
+    border:2px solid #fabd2f; border-radius:2px;
+    left:${rect.left}px; top:${rect.top}px;
+  `
+  document.body.appendChild(ghost)
+
+  // drop indicator
+  const indicator = document.createElement('div')
+  indicator.style.cssText = `
+    position:fixed; pointer-events:none; z-index:9998;
+    width:3px; background:#fabd2f; border-radius:2px;
+    top:${reel.getBoundingClientRect().top + 4}px;
+    height:${reel.getBoundingClientRect().height - 8}px;
+    display:none;
+  `
+  document.body.appendChild(indicator)
+
+  return {
+    reel, ghost, indicator,
+    fromIdx: idx,
+    dropIdx: idx,
+    offsetX: e.clientX - rect.left,
+    scrollRaf: null
+  }
+}
+
+function updateReelDrag(state, e) {
+  const { ghost, indicator, reel } = state
+  const reelRect = reel.getBoundingClientRect()
+
+  // move ghost
+  ghost.style.left = `${e.clientX - state.offsetX}px`
+
+  // edge scroll
+  const ZONE = 48
+  const distFromLeft  = e.clientX - reelRect.left
+  const distFromRight = reelRect.right - e.clientX
+  let scrollVel = 0
+  if (distFromLeft < ZONE)  scrollVel = -((ZONE - distFromLeft)  / ZONE) * 12
+  if (distFromRight < ZONE) scrollVel =  ((ZONE - distFromRight) / ZONE) * 12
+
+  if (state.scrollRaf) cancelAnimationFrame(state.scrollRaf)
+  if (scrollVel !== 0) {
+    const scroll = () => {
+      reel.scrollLeft += scrollVel
+      state.scrollRaf = requestAnimationFrame(scroll)
+    }
+    state.scrollRaf = requestAnimationFrame(scroll)
+  } else {
+    state.scrollRaf = null
+  }
+
+  // find drop position from frame divs
+  const frames = [...reel.querySelectorAll('.reel-frame')]
+  let dropIdx = frames.length
+  let indicatorX = null
+
+  for (let i = 0; i < frames.length; i++) {
+    const r = frames[i].getBoundingClientRect()
+    const mid = r.left + r.width / 2
+    if (e.clientX < mid) {
+      dropIdx = i
+      indicatorX = r.left - 2
+      break
+    }
+    if (i === frames.length - 1) {
+      indicatorX = r.right + 2
+    }
+  }
+
+  state.dropIdx = dropIdx
+
+  if (indicatorX !== null) {
+    indicator.style.display = 'block'
+    indicator.style.left = `${indicatorX}px`
+  }
+}
+
+function endReelDrag(target, state, e) {
+  if (state.scrollRaf) cancelAnimationFrame(state.scrollRaf)
+  state.ghost.remove()
+  state.indicator.remove()
+
+  const { fromIdx, dropIdx } = state
+  // adjust dropIdx for removal of fromIdx
+  let toIdx = dropIdx > fromIdx ? dropIdx - 1 : dropIdx
+  if (toIdx === fromIdx) return  // no move
+
+  const { frames, frameStrokes } = $.learn()
+  const newFrames = [...frames]
+  const [moved] = newFrames.splice(fromIdx, 1)
+  newFrames.splice(toIdx, 0, moved)
+
+  // keep _localCurrent tracking the same frame
+  const currentId = frames[target._localCurrent]
+  target._localCurrent = newFrames.indexOf(currentId)
+
+  $.teach({ frames: newFrames, frameStrokes })
+  renderReel(target)
+  renderOnion(target)
+}
+
+/*
+
+showReelMenu — long-press context menu anchored above the frame.
+Delete (top, further away) and Duplicate (bottom, closer to thumb).
+
+*/
+
+function showReelMenu(target, frameDiv, idx, id) {
+  document.querySelector('.reel-menu')?.remove()
+
+  const menu = document.createElement('div')
+  menu.className = 'reel-menu'
+  menu.style.cssText = `
+    position:fixed; z-index:9999;
+    display:flex; flex-direction:column; gap:3px;
+    background:#1d2021; border:1px solid #504945;
+    border-radius:3px; padding:4px;
+    box-shadow:0 4px 16px rgba(0,0,0,.7);
+    font-family:'DM Mono','Courier New',monospace;
+  `
+
+  const mkBtn = (label, danger) => {
+    const b = document.createElement('button')
+    b.textContent = label
+    b.style.cssText = `
+      background:#3c3836; border:1px solid ${danger ? '#fb4934' : '#504945'};
+      color:${danger ? '#fb4934' : '#a89984'};
+      font-family:'DM Mono','Courier New',monospace; font-size:.65rem;
+      padding:.35rem .7rem; cursor:pointer; border-radius:2px;
+      text-align:left; white-space:nowrap; display:block; width:100%;
+    `
+    b.addEventListener('pointerover', () => { b.style.background = danger ? 'rgba(251,73,52,.15)' : 'rgba(215,153,33,.15)'; b.style.borderColor = danger ? '#fb4934' : '#d79921'; b.style.color = danger ? '#fb4934' : '#fabd2f' })
+    b.addEventListener('pointerout',  () => { b.style.background = '#3c3836'; b.style.borderColor = danger ? '#fb4934' : '#504945'; b.style.color = danger ? '#fb4934' : '#a89984' })
+    return b
+  }
+
+  const delBtn = mkBtn('✕  delete', true)
+  const dupBtn = mkBtn('⊕  duplicate', false)
+
+  menu.appendChild(delBtn)
+  menu.appendChild(dupBtn)
+  document.body.appendChild(menu)
+
+  // position above the frame — measure after append
+  const rect = frameDiv.getBoundingClientRect()
+  const mh = menu.offsetHeight
+  const top = rect.top - mh - 8
+  menu.style.left = `${rect.left}px`
+  menu.style.top  = `${Math.max(4, top)}px`
+
+  dupBtn.addEventListener('pointerdown', e => { e.stopPropagation(); menu.remove(); addFrame(target, idx) })
+  delBtn.addEventListener('pointerdown', e => { e.stopPropagation(); menu.remove(); deleteFrame(target, idx) })
+
+  const dismiss = e => {
+    if (!menu.contains(e.target)) { menu.remove(); document.removeEventListener('pointerdown', dismiss) }
+  }
+  setTimeout(() => document.addEventListener('pointerdown', dismiss), 0)
+}
+
+/*
+
+Film reel — uses target._localCurrent for active highlight.
+Presence dots still driven by players[pid].frameId (correct — peer-namespaced).
 
 */
 
 function renderReel(target) {
-  const { frames, current, players } = $.learn()
+  const { frames, players } = $.learn()
+  const current = target._localCurrent ?? 0
   const reel = target.querySelector('[data-film-reel]'); if (!reel) return
   const addBtn = reel.querySelector('[data-new-frame]')
   reel.innerHTML = ''
@@ -964,9 +1183,8 @@ function renderReel(target) {
     const num = document.createElement('span'); num.className = 'reel-num'; num.textContent = idx + 1
 
     const del = document.createElement('button'); del.className = 'reel-del'; del.textContent = '✕'
-    del.addEventListener('click', e => { e.stopPropagation(); deleteFrame(target, idx) })
 
-    // player presence dots — who is on this frame
+    // player presence dots — peers on this frame (by their frameId, not our current)
     const peersHere = Object.entries(players || {}).filter(([pid, p]) => pid !== playerId && p.frameId === id)
     if (peersHere.length) {
       const dotsRow = document.createElement('div'); dotsRow.className = 'reel-player-dots'
@@ -982,10 +1200,65 @@ function renderReel(target) {
     if (f.hasVideo) { const b=document.createElement('span');b.className='reel-badge';b.style.color='#83a598';b.textContent='▶';div.appendChild(b) }
     if (f.children) { const b=document.createElement('span');b.className='reel-badge';b.style.cssText='color:#fe8019;left:10px';b.textContent='↳';div.appendChild(b) }
 
-    div.appendChild(thumb); div.appendChild(num); div.appendChild(del)
-    div.addEventListener('click', () => gotoFrame(target, idx))
-    div.addEventListener('dblclick', () => addFrame(target, idx))
-    div.addEventListener('contextmenu', e => { e.preventDefault(); openSubAnimation(target, id) })
+    div.dataset.reelIdx = idx
+    div.dataset.reelId = id
+
+    // full-area click catcher — sits above thumb/num, below del button
+    const catcher = document.createElement('div')
+    catcher.style.cssText = 'position:absolute;inset:0;z-index:2;'
+    catcher.dataset.reelIdx = idx
+    catcher.dataset.reelId = id
+
+    div.appendChild(thumb); div.appendChild(num); div.appendChild(catcher); div.appendChild(del)
+
+    let _pressTimer = null
+    let _dragState = null
+
+    const cancelPress = () => { if (_pressTimer) { clearTimeout(_pressTimer); _pressTimer = null } }
+
+    catcher.addEventListener('pointerdown', e => {
+      e.preventDefault()
+      catcher.setPointerCapture(e.pointerId)
+      const startX = e.clientX, startY = e.clientY
+      let moved = false
+
+      _pressTimer = setTimeout(() => {
+        _pressTimer = null
+        if (!moved) showReelMenu(target, div, idx, id)
+      }, 400)
+
+      const onMove = e => {
+        const dx = e.clientX - startX, dy = e.clientY - startY
+        if (!moved && Math.sqrt(dx*dx + dy*dy) > 6) {
+          moved = true
+          cancelPress()
+          // start drag
+          _dragState = startReelDrag(target, div, idx, e)
+        }
+        if (_dragState) updateReelDrag(_dragState, e)
+      }
+
+      const onUp = e => {
+        catcher.removeEventListener('pointermove', onMove)
+        catcher.removeEventListener('pointerup', onUp)
+        catcher.removeEventListener('pointercancel', onUp)
+        if (_dragState) {
+          endReelDrag(target, _dragState, e)
+          _dragState = null
+        } else if (_pressTimer) {
+          cancelPress()
+          gotoFrame(target, idx)
+        }
+      }
+
+      catcher.addEventListener('pointermove', onMove)
+      catcher.addEventListener('pointerup', onUp)
+      catcher.addEventListener('pointercancel', onUp)
+    })
+
+    catcher.addEventListener('contextmenu', e => e.preventDefault())
+    del.addEventListener('click', e => { e.stopPropagation(); deleteFrame(target, idx) })
+
     reel.appendChild(div)
   })
 
@@ -996,14 +1269,13 @@ function renderReel(target) {
 
 /*
 
-renderPlayerCursors — draws colored cursor dots + labels for all peers
-on the artboard-inner, in canvas coords scaled to zoom.
-Only shows peers on the current frame.
+renderPlayerCursors — uses target._localCurrent for same-frame check.
 
 */
 
 function renderPlayerCursors(target) {
-  const { players, frames, current, zoom } = $.learn()
+  const { players, frames, zoom } = $.learn()
+  const current = target._localCurrent ?? 0
   let container = target._artboardInner.querySelector('.player-cursors-overlay')
   if (!container) {
     container = document.createElement('div')
@@ -1030,12 +1302,17 @@ drawStroke — v-log verbatim.
 */
 
 function drawStroke(context, stroke) {
+  if (stroke?.length === 1 && stroke[0].fill) {
+    floodFill(context, stroke[0].x, stroke[0].y, stroke[0].color, context.canvas.width, context.canvas.height)
+    return
+  }
   if (!stroke || stroke.length < 2) return
   context.beginPath()
   context.moveTo(stroke[0].x, stroke[0].y)
   for (let i = 1; i < stroke.length; i++) {
     const point = stroke[i]
-    context.strokeStyle = point.color || '#ebdbb2'
+    context.globalCompositeOperation = point.erase ? 'destination-out' : 'source-over'
+    context.strokeStyle = point.erase ? 'rgba(0,0,0,1)' : (point.color || '#ebdbb2')
     context.lineCap = 'round'; context.lineJoin = 'round'
     context.globalAlpha = point.opacity ?? 1
     context.lineWidth = point.lineWidth || 8
@@ -1049,6 +1326,7 @@ function drawStroke(context, stroke) {
   }
   context.stroke()
   context.globalAlpha = 1
+  context.globalCompositeOperation = 'source-over'
 }
 
 function hexToRgba(hex) {
@@ -1149,7 +1427,8 @@ Undo — local only, ImageData snapshots per frame.
 const _undoStack = {}
 
 function captureUndo(target) {
-  const { frames, current, tool } = $.learn()
+  const { frames, tool } = $.learn()
+  const current = target._localCurrent ?? 0
   if (tool==='pan'||!frames.length) return
   const id=frames[current]
   if (!_undoStack[id]) _undoStack[id]=[]
@@ -1158,7 +1437,9 @@ function captureUndo(target) {
 }
 
 function undoFrame(target) {
-  const { frames, current }=$.learn(); if(!frames.length)return
+  const { frames }=$.learn()
+  const current = target._localCurrent ?? 0
+  if(!frames.length)return
   const id=frames[current]
   if (!_undoStack[id]?.length) return
   target._drawCanvas.getContext('2d').putImageData(_undoStack[id].pop(),0,0)
@@ -1178,7 +1459,7 @@ Peers' watchSharedState sees the new stroke length, calls replayStrokes.
 
 */
 
-let _drawing=false,_lineWidth=0,_points=[],_penPoints=[],_panStart=null,_panOrigin=null,_lastClickTime=0,_drawRafId=null
+let _drawing=false,_lineWidth=0,_points=[],_penPoints=[],_panStart=null,_panOrigin=null,_drawRafId=null
 
 function getCanvasPos(target, e) {
   const { zoom }=$.learn(), rect=target._outputCanvas.getBoundingClientRect()
@@ -1198,12 +1479,6 @@ function attachDrawEvents(target) {
     const { tool }=$.learn()
     if (tool==='pan'){startPan(target,e);return}
 
-    const now=Date.now()
-    if (now-_lastClickTime<350){
-      addFrame(target,$.learn().current); _lastClickTime=0; return
-    }
-    _lastClickTime=now
-
     if (tool==='pen'){const{x,y}=getCanvasPos(target,e);_penPoints.push({x,y});renderPenPreview(target);return}
 
     captureUndo(target)
@@ -1212,14 +1487,21 @@ function attachDrawEvents(target) {
 
     if (tool==='fill'){
       const{color,canvasW,canvasH}=$.learn()
+      const current=target._localCurrent??0
+      const{frames}=$.learn()
+      const frameId=frames[current]
       floodFill(target._drawCanvas.getContext('2d'),x,y,color,canvasW,canvasH)
-      commitCurrentPixels(target); _drawing=false; return
+      db[frameId].drawCanvas.getContext('2d').clearRect(0,0,canvasW,canvasH)
+      db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
+      const fs=$.learn().frameStrokes
+      $.teach({frameStrokes:{...fs,[frameId]:[...(fs[frameId]||[]),[{x,y,fill:true,color,lineWidth:0,opacity:1}]]}})
+      _drawing=false; renderReel(target); return
     }
 
     const{thickness,opacity,color}=$.learn()
     const pressure=e.pressure>0?e.pressure:1.0
     _lineWidth=Math.log(pressure+1)*thickness
-    const pt={x,y,lineWidth:_lineWidth,color,opacity}
+    const pt={x,y,lineWidth:_lineWidth,color,opacity,erase:tool==='erase'}
     _points.push(pt)
     teachPlayer({currentStroke:[pt],cursorX:x,cursorY:y,activelyDrawing:true,color})
   })
@@ -1242,13 +1524,30 @@ function attachDrawEvents(target) {
     const pressure=e.pressure>0?e.pressure:1.0
     _lineWidth=Math.log(pressure+1)*thickness*4*0.2+_lineWidth*0.8
 
-    const pt={x,y,lineWidth:_lineWidth,color,opacity}
+    const pt={x,y,lineWidth:_lineWidth,color,opacity,erase:tool==='erase'}
     _points.push(pt)
 
-    // draw full current stroke to _activeCanvas
-    const actCtx=target._activeCanvas.getContext('2d')
-    actCtx.clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
-    drawStroke(actCtx,_points)
+    if (tool === 'erase') {
+      // erase must draw directly to _drawCanvas — destination-out on _activeCanvas
+      // (which is transparent) would be invisible until commit
+      const ctx = target._drawCanvas.getContext('2d')
+      ctx.globalCompositeOperation = 'destination-out'
+      ctx.strokeStyle = 'rgba(0,0,0,1)'
+      ctx.lineWidth = pt.lineWidth; ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+      const pts = _points
+      if (pts.length >= 2) {
+        ctx.beginPath()
+        ctx.moveTo(pts[pts.length-2].x, pts[pts.length-2].y)
+        ctx.lineTo(pt.x, pt.y)
+        ctx.stroke()
+      }
+      ctx.globalCompositeOperation = 'source-over'
+    } else {
+      // draw full current stroke to _activeCanvas
+      const actCtx=target._activeCanvas.getContext('2d')
+      actCtx.clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
+      drawStroke(actCtx,_points)
+    }
 
     // throttle multiplayer broadcast
     if (!_drawRafId){
@@ -1279,13 +1578,13 @@ function attachDrawEvents(target) {
 
     // commit stroke to shared state — peers will replay it
     if (_points.length>0) {
-      const{frames,current,frameStrokes}=$.learn()
+      const{frames,frameStrokes}=$.learn()
+      const current = target._localCurrent ?? 0
       const frameId=frames[current]
       const committed=[..._points]
       // update local db immediately so reel thumb is current
       db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
       db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
-      // teach full frameStrokes — plain spread merge, survives server cache on reload
       const {frameStrokes: fs} = $.learn()
       $.teach({
         frameStrokes: {
@@ -1321,12 +1620,11 @@ commitCurrentPixels — for fill tool, sync pixels to db then teach stroke marke
 */
 
 function commitCurrentPixels(target) {
-  const{frames,current}=$.learn()
+  const{frames}=$.learn()
+  const current = target._localCurrent ?? 0
   const frameId=frames[current]
   db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
   db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
-  // teach an empty sentinel stroke so peers know to re-request
-  // (fill isn't stroke-replayable — for now it's local only, same as undo)
   renderReel(target)
 }
 
@@ -1372,7 +1670,8 @@ function renderPenPreview(target){
 
 function commitPenPath(target){
   if(_penPoints.length<2){_penPoints=[];return}
-  const{color,fillColor,thickness,opacity,frames,current,frameStrokes}=$.learn()
+  const{color,fillColor,thickness,opacity,frames,frameStrokes}=$.learn()
+  const current = target._localCurrent ?? 0
   const ctx=target._drawCanvas.getContext('2d')
   ctx.beginPath();ctx.moveTo(_penPoints[0].x,_penPoints[0].y)
   for(let i=1;i<_penPoints.length-1;i++){
@@ -1388,7 +1687,6 @@ function commitPenPath(target){
   const frameId=frames[current]
   db[frameId].drawCanvas.getContext('2d').clearRect(0,0,db[frameId].drawCanvas.width,db[frameId].drawCanvas.height)
   db[frameId].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
-  // encode pen path as a synthetic stroke for sync — build point array along the bezier
   const syntheticStroke=_penPoints.map(p=>({...p,lineWidth:thickness,color,opacity}))
   const {frameStrokes: fspen} = $.learn()
   $.teach({
@@ -1402,7 +1700,7 @@ function commitPenPath(target){
 
 /*
 
-Playback.
+Playback — uses target._localCurrent.
 
 */
 
@@ -1410,12 +1708,13 @@ let _playInterval=null,_playDir=1
 function startPlayback(target){
   $.teach({playing:true});_playDir=1
   _playInterval=setInterval(()=>{
-    const{frames,current,loopMode}=$.learn()
+    const{frames,loopMode}=$.learn()
+    const current = target._localCurrent ?? 0
     let next=current+_playDir
     if(loopMode==='loop')next=((next%frames.length)+frames.length)%frames.length
     else if(loopMode==='pingpong'){if(next>=frames.length){next=frames.length-2;_playDir=-1}else if(next<0){next=1;_playDir=1}}
     else{if(next>=frames.length){next=frames.length-1;stopPlayback(target);return}}
-    $.teach({current:Math.max(0,Math.min(frames.length-1,next))})
+    target._localCurrent=Math.max(0,Math.min(frames.length-1,next))
     loadCurrentFrame(target);renderOnion(target);renderReel(target)
   },1000/$.learn().fps)
 }
@@ -1423,13 +1722,14 @@ function stopPlayback(target){$.teach({playing:false});clearInterval(_playInterv
 
 /*
 
-Darkroom.
+Darkroom — self-contained playback cursor, doesn't touch _localCurrent.
 
 */
 
-let _drPlaying=false,_drInterval=null,_drZoomed=false,_drDir=1
+let _drPlaying=false,_drInterval=null,_drZoomed=false,_drDir=1,_drCurrent=0
 function openDarkroom(target){
   const{canvasW,canvasH}=$.learn(),dc=target._drCanvas
+  _drCurrent = target._localCurrent ?? 0
   target._darkroom.classList.add('open')
   dc.width=canvasW;dc.height=canvasH
   const scale=Math.min((window.innerWidth*.85)/canvasW,(window.innerHeight*.62)/canvasH)
@@ -1439,20 +1739,20 @@ function openDarkroom(target){
 }
 function closeDarkroom(target){target._darkroom.classList.remove('open');drStop(target);_drZoomed=false;target._drCanvas.classList.remove('zoomed')}
 function drRenderFrame(target){
-  const{frames,current,canvasW,canvasH,fps,loopMode}=$.learn(),dc=target._drCanvas,ctx=dc.getContext('2d')
+  const{frames,canvasW,canvasH,fps,loopMode}=$.learn(),dc=target._drCanvas,ctx=dc.getContext('2d')
   ctx.clearRect(0,0,dc.width,dc.height)
-  if(frames.length){const f=ensureFrame(frames[current],canvasW,canvasH);if(f.hasVideo)ctx.drawImage(f.videoCanvas,0,0);ctx.drawImage(f.drawCanvas,0,0)}
-  const counter=target.querySelector('[data-dr-counter]');if(counter)counter.textContent=`${current+1} / ${frames.length}`
+  if(frames.length){const f=ensureFrame(frames[_drCurrent],canvasW,canvasH);if(f.hasVideo)ctx.drawImage(f.videoCanvas,0,0);ctx.drawImage(f.drawCanvas,0,0)}
+  const counter=target.querySelector('[data-dr-counter]');if(counter)counter.textContent=`${_drCurrent+1} / ${frames.length}`
   const title=target.querySelector('[data-dr-title]');if(title)title.textContent=`${canvasW}×${canvasH} · ${fps}fps · ${loopMode}`
 }
 function drStart(target){
   _drPlaying=true;const btn=target.querySelector('[data-dr-play]');if(btn){btn.textContent='⏸ pause';btn.classList.add('active')}
   _drDir=1;_drInterval=setInterval(()=>{
-    const{frames,current,loopMode}=$.learn();let next=current+_drDir
+    const{frames,loopMode}=$.learn();let next=_drCurrent+_drDir
     if(loopMode==='loop')next=((next%frames.length)+frames.length)%frames.length
     else if(loopMode==='pingpong'){if(next>=frames.length){next=frames.length-2;_drDir=-1}else if(next<0){next=1;_drDir=1}}
     else{if(next>=frames.length){next=frames.length-1;drStop(target);return}}
-    $.teach({current:Math.max(0,Math.min(frames.length-1,next))});drRenderFrame(target)
+    _drCurrent=Math.max(0,Math.min(frames.length-1,next));drRenderFrame(target)
   },1000/$.learn().fps)
 }
 function drStop(target){_drPlaying=false;clearInterval(_drInterval);const btn=target.querySelector('[data-dr-play]');if(btn){btn.textContent='▶ play';btn.classList.remove('active')}}
@@ -1490,7 +1790,8 @@ function attachDropEvents(target){
 }
 
 async function importVideo(target,file){
-  const{fps,canvasW,canvasH,frames,current,frameStrokes}=$.learn()
+  const{fps,canvasW,canvasH,frames,frameStrokes}=$.learn()
+  const current = target._localCurrent ?? 0
   const progress=target.querySelector('[data-import-progress]'),bar=target.querySelector('[data-import-bar]'),lbl=target.querySelector('[data-import-label]')
   progress.classList.add('active')
   const url=URL.createObjectURL(file),video=document.createElement('video');video.src=url;video.muted=true;video.preload='auto'
@@ -1512,8 +1813,8 @@ async function importVideo(target,file){
     bar.style.width=`${Math.round(((i+1)/totalFrames)*100)}%`;lbl.textContent=`frame ${i+1} / ${totalFrames}`
   }
   URL.revokeObjectURL(url);progress.classList.remove('active')
-  const newCurrent=replaceAll?0:current+1
-  $.teach({frames:newFrames,frameStrokes:newStrokes,current:newCurrent})
+  target._localCurrent = replaceAll ? 0 : current + 1
+  $.teach({frames:newFrames,frameStrokes:newStrokes})
   loadCurrentFrame(target);renderOnion(target);renderReel(target)
 }
 
@@ -1685,8 +1986,8 @@ $.when('click','[data-undo]',event=>{const r=event.target.closest(tag);if(r)undo
 $.when('click','[data-darkroom-open]',e=>{const r=e.target.closest(tag);if(r)openDarkroom(r)})
 $.when('click','[data-darkroom-close]',e=>{const r=e.target.closest(tag);if(r)closeDarkroom(r)})
 $.when('click','[data-dr-play]',e=>{const r=e.target.closest(tag);if(!r)return;_drPlaying?drStop(r):drStart(r)})
-$.when('click','[data-dr-prev]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);$.teach({current:Math.max(0,$.learn().current-1)});drRenderFrame(r)})
-$.when('click','[data-dr-next]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);const{frames,current}=$.learn();$.teach({current:Math.min(frames.length-1,current+1)});drRenderFrame(r)})
+$.when('click','[data-dr-prev]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);_drCurrent=Math.max(0,_drCurrent-1);drRenderFrame(r)})
+$.when('click','[data-dr-next]',e=>{const r=e.target.closest(tag);if(!r)return;drStop(r);const{frames}=$.learn();_drCurrent=Math.min(frames.length-1,_drCurrent+1);drRenderFrame(r)})
 
 /*
 
@@ -1698,11 +1999,12 @@ document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return
   const root=document.querySelector(tag);if(!root)return
   if((e.key==='z'||e.key==='Z')&&(e.ctrlKey||e.metaKey)){undoFrame(root);return}
-  const{frames,current,playing,zoom,tool}=$.learn()
+  const{frames,playing,zoom,tool}=$.learn()
+  const current = root._localCurrent ?? 0
   if(e.key==='ArrowRight'||e.key==='.')gotoFrame(root,Math.min(frames.length-1,current+1))
   if(e.key==='ArrowLeft'||e.key===',')gotoFrame(root,Math.max(0,current-1))
   if(e.key==='n')addFrame(root)
-  if(e.key==='d')addFrame(root,current)
+  if(e.key==='d')addFrame(root,current)  // 'd' duplicates current frame
   if(e.key===' '){e.preventDefault();playing?stopPlayback(root):startPlayback(root)}
   if(e.key==='p')openDarkroom(root)
   if(e.key==='Escape'){closeDarkroom(root);closeOverlay(root)}
