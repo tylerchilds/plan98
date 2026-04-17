@@ -41,7 +41,6 @@ function sillySky(moniker) {
         .map(item => item.post?.record?.text || '')
         .flatMap(Activities)
         .map(x => x?.object?.content || '')
-        .reverse()
 
       c({
         loading: false,
@@ -148,6 +147,10 @@ s(`
     overflow: auto;
     display: grid;
     place-items: center;
+  }
+
+  & .arena > * {
+    width: 100%;
   }
 
   & .tim-cookin {

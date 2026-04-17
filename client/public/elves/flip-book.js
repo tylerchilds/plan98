@@ -31,6 +31,8 @@ import elf from '@plan98/elf'
 import { Integer } from '@plan98/types'
 import Chromakey from './chroma-key.js'
 import './plan98-palette.js'
+import { publish } from './plan98-gallery.js'
+import { put } from './plan98-wallet.js'
 
 const tag = 'flip-book'
 const playerId = self.crypto.randomUUID()
@@ -1774,12 +1776,12 @@ Export.
 
 */
 
-async function exportMp4(target){
+async function exportMp4(target, { save=false, download=true }={}){
   const{frames,canvasW,canvasH,fps,loopMode}=$.learn()
   const off=document.createElement('canvas');off.width=canvasW;off.height=canvasH
   const octx=off.getContext('2d')
   const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp8')?'video/webm;codecs=vp8':'video/webm'
-  const mspf=Math.round(1000/fps)  // ms per frame
+  const mspf=Math.round(1000/fps)
 
   let seq=[...frames]
   if(loopMode==='pingpong') seq=[...frames,...[...frames].reverse().slice(1,-1)]
@@ -1790,26 +1792,37 @@ async function exportMp4(target){
   rec.ondataavailable=e=>{if(e.data.size>0)chunks.push(e.data)}
   rec.onstop=()=>{
     const blob=new Blob(chunks,{type:mime})
-    const url=URL.createObjectURL(blob)
-    const a=document.createElement('a');a.href=url;a.download='flipbook.webm';a.click()
-    setTimeout(()=>URL.revokeObjectURL(url),5000)
+
+    if(save){
+      const timestamp=new Date().toJSON()
+      const src=`/private/${tag}/${timestamp}.webm`
+      publish({
+        $type: 'computer.sillyz.data.video',
+        id: self.crypto.randomUUID(),
+        src,
+        title: 'Flipbook',
+        description: `${frames.length} frames · ${fps}fps`,
+        createdAt: new Date().toLocaleString('en-us'),
+      })
+      put(src, blob, { type: mime }).catch(err => console.warn('upload failed:', err))
+    }
+
+    if(download){
+      const url=URL.createObjectURL(blob)
+      const a=document.createElement('a');a.href=url;a.download='flipbook.webm';a.click()
+      setTimeout(()=>URL.revokeObjectURL(url),5000)
+    }
   }
 
-  // start with a small timeslice so ondataavailable fires regularly
   rec.start(mspf)
-
   for(const id of seq){
     const f=ensureFrame(id,canvasW,canvasH)
     octx.clearRect(0,0,canvasW,canvasH)
     if(f.hasVideo) octx.drawImage(f.videoCanvas,0,0)
     octx.drawImage(f.drawCanvas,0,0)
-    // hold this frame for exactly one frame duration
-    // use two back-to-back waits: one rAF to ensure the canvas stream
-    // captures the new pixels, then the remainder of the frame time
     await new Promise(r=>requestAnimationFrame(r))
     await new Promise(r=>setTimeout(r,mspf))
   }
-
   rec.stop()
 }
 
@@ -1961,7 +1974,8 @@ function renderView(view){
   `
   if(view===VIEWS.export)return`
     <div class="overlay-title">export</div>
-    <button class="row-btn" data-do-export>↓ export webm</button>
+    <button class="row-btn" data-do-export>↓ download webm</button>
+    <button class="row-btn" style="margin-top:.4rem;" data-do-save>☁ save to gallery</button>
     <button class="row-btn" style="margin-top:.4rem;" data-do-play>▶ fullscreen play</button>
   `
   return ''
@@ -1978,7 +1992,8 @@ function wireOverlay(inner,target){
   const ct=inner.querySelector('[data-toggle-ck]');if(ct)ct.addEventListener('click',()=>{const n=!$.learn().chromakeyEnabled;$.whisper({chromakeyEnabled:n});ct.classList.toggle('active',n);ct.textContent=n?'● on':'○ off'})
   const ckc=inner.querySelector('[data-ck-color]');if(ckc)ckc.addEventListener('input',e=>{$.whisper({chromakeyColor:e.target.value});const p=inner.querySelector('[data-ck-preview]');if(p)p.style.background=e.target.value})
   const ckt=inner.querySelector('[data-ck-tolerance]');if(ckt)ckt.addEventListener('input',e=>{const v=Integer(e.target.value);$.whisper({chromakeyTolerance:v});ckt.nextElementSibling.textContent=v})
-  const de=inner.querySelector('[data-do-export]');if(de)de.addEventListener('click',()=>{closeOverlay(target);exportMp4(target)})
+  const de=inner.querySelector('[data-do-export]');if(de)de.addEventListener('click',()=>{closeOverlay(target);exportMp4(target,{download:true,save:false})})
+  const ds=inner.querySelector('[data-do-save]');if(ds)ds.addEventListener('click',()=>{closeOverlay(target);exportMp4(target,{download:false,save:true})})
   const dp=inner.querySelector('[data-do-play]');if(dp)dp.addEventListener('click',()=>{closeOverlay(target);openDarkroom(target)})
 }
 
