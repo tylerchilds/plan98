@@ -1,5 +1,4 @@
 import '/public/cdn/bayunsystems.com/BayunCoreSDK/lib/bayun-sandbox.js'
-import '/public/cdn/bayunsystems.com/BayunCoreSDK/lib/vishwam-lib.js'
 
 import { Self } from '@plan98/types'
 import { state } from 'statebus'
@@ -103,8 +102,6 @@ export function setMemberId(x) {
 export function getMemberId() {
   return state['ls/bayun'].memberId
 }
-
-
 
 const organization = 'plan98.org'
 
@@ -1009,7 +1006,8 @@ function start(data) {
     };
 
     const failureCallback = error => {
-      if(error === "BayunErrorEmployeeDoesNotExist") {
+      //if(error === "BayunErrorEmployeeDoesNotExist") {
+      if(error === "Invalid org or member name") {
         provision({ persona: companyEmployeeId, organization: companyName })
       }
     };

@@ -79,18 +79,36 @@ Presets, thicknoids, palette.
 */
 
 const PRESETS = [
-  { label: '8×8',    w: 8,    h: 8    },
-  { label: '16×16',  w: 16,   h: 16   },
-  { label: '32×32',  w: 32,   h: 32   },
-  { label: '64×64',  w: 64,   h: 64   },
-  { label: '88×31',  w: 88,   h: 31   },
-  { label: '120×60', w: 120,  h: 60   },
-  { label: '240×60', w: 240,  h: 60   },
-  { label: 'HD',     w: 1280, h: 720  },
-  { label: 'FHD',    w: 1920, h: 1080 },
-  { label: '4K',     w: 3840, h: 2160 },
-  { label: '1:1',    w: 1080, h: 1080 },
-  { label: '9:16',   w: 1080, h: 1920 },
+  // pixel / retro
+  { label: '8×8',     w: 8,    h: 8    },
+  { label: '16×16',   w: 16,   h: 16   },
+  { label: '32×32',   w: 32,   h: 32   },
+  { label: '64×64',   w: 64,   h: 64   },
+  { label: '128×128', w: 128,  h: 128  },
+  { label: '256×256', w: 256,  h: 256  },
+  // banners
+  { label: '88×31',   w: 88,   h: 31   },
+  { label: '120×60',  w: 120,  h: 60   },
+  { label: '240×60',  w: 240,  h: 60   },
+  { label: '468×60',  w: 468,  h: 60   },
+  { label: '728×90',  w: 728,  h: 90   },
+  // social / video
+  { label: '320×240', w: 320,  h: 240  },
+  { label: '480×270', w: 480,  h: 270  },
+  { label: '640×360', w: 640,  h: 360  },
+  { label: 'HD',      w: 1280, h: 720  },
+  { label: 'FHD',     w: 1920, h: 1080 },
+  { label: '4K',      w: 3840, h: 2160 },
+  // square
+  { label: '512×512', w: 512,  h: 512  },
+  { label: '1:1',     w: 1080, h: 1080 },
+  // portrait
+  { label: '9:16',    w: 1080, h: 1920 },
+  { label: '4:5',     w: 1080, h: 1350 },
+  { label: '2:3',     w: 1080, h: 1620 },
+  // film
+  { label: '2.39:1',  w: 2390, h: 1000 },
+  { label: '16mm',    w: 720,  h: 540  },
 ]
 
 const thicknoids = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]
@@ -115,7 +133,7 @@ const $ = elf(tag, {
 
   // drawing config (local preference — also shared so peers see your color)
   tool:               TOOLS.draw,
-  color:              '#ebdbb2',
+  color:              'dodgerblue',
   fillColor:          '#d79921',
   colorTarget:        'stroke',  // 'stroke' | 'fill'
   opacity:            1,
@@ -202,17 +220,16 @@ $.style(`
   & * { box-sizing: border-box; }
   & .app { display: grid; grid-template-rows: 1fr auto; height: 100%; width: 100%; }
 
-  & .artboard { position: relative; overflow: hidden; background: #1c1c1c; }
+  & .artboard {
+    position: relative; overflow: hidden;
+    background-color: #1d2021;
+    background-image: radial-gradient(circle, #3c3836 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
   & .artboard-inner { position: absolute; transform-origin: 0 0; }
   & .artboard-inner::before {
     content: ''; position: absolute; inset: 0;
-    background-image:
-      linear-gradient(45deg, #262626 25%, transparent 25%),
-      linear-gradient(-45deg, #262626 25%, transparent 25%),
-      linear-gradient(45deg, transparent 75%, #262626 75%),
-      linear-gradient(-45deg, transparent 75%, #262626 75%);
-    background-size: 8px 8px; background-position: 0 0, 0 4px, 4px -4px, -4px 0;
-    background-color: #1d2021; z-index: 0;
+    background-color: #282828; z-index: 0;
   }
 
   & .onion-layer { position: absolute; top: 0; left: 0; pointer-events: none; image-rendering: pixelated; }
@@ -676,9 +693,33 @@ function boot(target) {
   setupCompositeLoop(target)
   attachDrawEvents(target)
   attachDropEvents(target)
+  attachArtboardPan(target)
 
   // Watch for remote frame/stroke changes
   watchSharedState(target)
+}
+
+function attachArtboardPan(target) {
+  const ab = target._artboard
+
+  ab.addEventListener('pointerdown', e => {
+    // only fire when clicking the artboard background itself, not the canvas
+    if (e.target !== ab) return
+    e.preventDefault()
+    ab.setPointerCapture(e.pointerId)
+    startPan(target, e)
+
+    const onMove = e => movePan(target, e)
+    const onUp = e => {
+      endPan(target)
+      ab.removeEventListener('pointermove', onMove)
+      ab.removeEventListener('pointerup', onUp)
+      ab.removeEventListener('pointercancel', onUp)
+    }
+    ab.addEventListener('pointermove', onMove)
+    ab.addEventListener('pointerup', onUp)
+    ab.addEventListener('pointercancel', onUp)
+  })
 }
 
 /*
@@ -828,6 +869,8 @@ function initCanvas(target, w, h) {
   target._outputCanvas.width  = w; target._outputCanvas.height = h
   target._drawCanvas.width    = w; target._drawCanvas.height   = h
   target._videoCanvas.width   = w; target._videoCanvas.height  = h
+  if (target._activeCanvas) { target._activeCanvas.width = w; target._activeCanvas.height = h }
+  if (target._penPreviewCanvas) { target._penPreviewCanvas.width = w; target._penPreviewCanvas.height = h }
 
   target._onionCanvases.forEach(c => c.remove())
   target._onionCanvases = []
@@ -855,8 +898,19 @@ function applyZoomStyles(target) {
 }
 
 function setZoom(target, z) {
-  $.whisper({ zoom: Math.max(0.25, Math.min(32, z)) })
+  const { canvasW, canvasH, panX, panY, zoom: oldZoom } = $.learn()
+  const newZoom = Math.max(0.25, Math.min(32, z))
+  const rect = target._artboard.getBoundingClientRect()
+
+  // keep the canvas center fixed in the viewport during zoom
+  const centerX = rect.width  / 2
+  const centerY = rect.height / 2
+  const newPanX = centerX - (centerX - panX) * (newZoom / oldZoom)
+  const newPanY = centerY - (centerY - panY) * (newZoom / oldZoom)
+
+  $.whisper({ zoom: newZoom, panX: newPanX, panY: newPanY })
   applyZoomStyles(target)
+  target._artboardInner.style.transform = `translate(${newPanX}px,${newPanY}px)`
 }
 
 function fitZoom(target) {
@@ -884,7 +938,8 @@ function loadCurrentFrame(target) {
   target._drawCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
   target._videoCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
   if (!frames.length) return
-  const f = ensureFrame(frames[current], canvasW, canvasH)
+  const frameId = frames[current]
+  const f = ensureFrame(frameId, canvasW, canvasH)
   target._drawCanvas.getContext('2d').drawImage(f.drawCanvas, 0, 0)
   if (f.hasVideo) target._videoCanvas.getContext('2d').drawImage(f.videoCanvas, 0, 0)
 }
@@ -1433,34 +1488,87 @@ function colorDistance(r1,g1,b1,r2,g2,b2){return Math.sqrt((r2-r1)**2+(g2-g1)**2
 
 /*
 
-Undo — local only, ImageData snapshots per frame.
+Undo/Redo — local only, per-frame, in-memory.
+Stacks live on target._undoStack[frameId] and target._redoStack[frameId].
+Keyed by frameId — switching frames never corrupts another frame's history.
 
 */
 
-const _undoStack = {}
+const MAX_HISTORY = 30
+
+function _getUndoStack(target, id) {
+  if (!target._undoStack) target._undoStack = {}
+  if (!target._undoStack[id]) target._undoStack[id] = []
+  return target._undoStack[id]
+}
+
+function _getRedoStack(target, id) {
+  if (!target._redoStack) target._redoStack = {}
+  if (!target._redoStack[id]) target._redoStack[id] = []
+  return target._redoStack[id]
+}
+
+// Each stack entry is { strokeCount, strokes[] } — the full stroke list
+// snapshot at that point, so undo/redo just restores that list.
 
 function captureUndo(target) {
-  const { frames, tool } = $.learn()
+  const { frames, tool, frameStrokes } = $.learn()
   const current = target._localCurrent ?? 0
-  if (tool==='pan'||!frames.length) return
-  const id=frames[current]
-  if (!_undoStack[id]) _undoStack[id]=[]
-  _undoStack[id].push(target._drawCanvas.getContext('2d').getImageData(0,0,target._drawCanvas.width,target._drawCanvas.height))
-  if (_undoStack[id].length>30) _undoStack[id].shift()
+  if (tool === 'pan' || !frames.length) return
+  const id = frames[current]
+  const undo = _getUndoStack(target, id)
+  undo.push([...(frameStrokes[id] || [])])
+  if (undo.length > MAX_HISTORY) undo.shift()
+  if (!target._redoStack) target._redoStack = {}
+  target._redoStack[id] = []
+}
+
+function _applyStrokes(target, id, strokes) {
+  const { canvasW, canvasH } = $.learn()
+  // update shared frameStrokes
+  const fs = $.learn().frameStrokes
+  $.teach({ frameStrokes: { ...fs, [id]: strokes } })
+  // replay locally
+  const f = ensureFrame(id, canvasW, canvasH)
+  const ctx = f.drawCanvas.getContext('2d')
+  ctx.clearRect(0, 0, canvasW, canvasH)
+  strokes.forEach(stroke => drawStroke(ctx, stroke))
+  // sync to _drawCanvas
+  target._drawCanvas.getContext('2d').clearRect(0, 0, canvasW, canvasH)
+  target._drawCanvas.getContext('2d').drawImage(f.drawCanvas, 0, 0)
+  if (target._activeCanvas) target._activeCanvas.getContext('2d')
+    .clearRect(0, 0, target._activeCanvas.width, target._activeCanvas.height)
+  renderReel(target)
 }
 
 function undoFrame(target) {
-  const { frames }=$.learn()
+  const { frames, frameStrokes } = $.learn()
   const current = target._localCurrent ?? 0
-  if(!frames.length)return
-  const id=frames[current]
-  if (!_undoStack[id]?.length) return
-  target._drawCanvas.getContext('2d').putImageData(_undoStack[id].pop(),0,0)
-  if (target._activeCanvas) target._activeCanvas.getContext('2d').clearRect(0,0,target._activeCanvas.width,target._activeCanvas.height)
-  // sync back to local db so reel thumb is correct
-  db[id].drawCanvas.getContext('2d').clearRect(0,0,db[id].drawCanvas.width,db[id].drawCanvas.height)
-  db[id].drawCanvas.getContext('2d').drawImage(target._drawCanvas,0,0)
-  renderReel(target)
+  if (!frames.length) return
+  const id = frames[current]
+  const undo = _getUndoStack(target, id)
+  if (!undo.length) return
+  const redo = _getRedoStack(target, id)
+  // save current strokes to redo
+  redo.push([...(frameStrokes[id] || [])])
+  if (redo.length > MAX_HISTORY) redo.shift()
+  // restore previous strokes
+  _applyStrokes(target, id, undo.pop())
+}
+
+function redoFrame(target) {
+  const { frames, frameStrokes } = $.learn()
+  const current = target._localCurrent ?? 0
+  if (!frames.length) return
+  const id = frames[current]
+  const redo = _getRedoStack(target, id)
+  if (!redo.length) return
+  const undo = _getUndoStack(target, id)
+  // save current strokes to undo
+  undo.push([...(frameStrokes[id] || [])])
+  if (undo.length > MAX_HISTORY) undo.shift()
+  // restore next strokes
+  _applyStrokes(target, id, redo.pop())
 }
 
 /*
@@ -2142,9 +2250,11 @@ function captureFrame(target) {
 
   renderReel(target)
 }
+$.when('click','[data-zoom-in]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom+0.25)})
 $.when('click','[data-zoom-out]',e=>{const r=e.target.closest(tag);if(!r)return;setZoom(r,$.learn().zoom-0.25)})
 $.when('click','[data-cycle-tool]',()=>$.whisper({tool:nextTool($.learn().tool)}))
 $.when('click','[data-undo]',event=>{const r=event.target.closest(tag);if(r)undoFrame(r)})
+$.when('click','[data-redo]',event=>{const r=event.target.closest(tag);if(r)redoFrame(r)})
 $.when('click','[data-darkroom-open]',e=>{const r=e.target.closest(tag);if(r)openDarkroom(r)})
 $.when('click','[data-darkroom-close]',e=>{const r=e.target.closest(tag);if(r)closeDarkroom(r)})
 $.when('click','[data-dr-play]',e=>{const r=e.target.closest(tag);if(!r)return;_drPlaying?drStop(r):drStart(r)})
@@ -2160,14 +2270,15 @@ Keyboard.
 document.addEventListener('keydown',e=>{
   if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return
   const root=document.querySelector(tag);if(!root)return
+  if((e.key==='z'||e.key==='Z')&&(e.ctrlKey||e.metaKey)&&e.shiftKey){redoFrame(root);return}
   if((e.key==='z'||e.key==='Z')&&(e.ctrlKey||e.metaKey)){undoFrame(root);return}
+  if((e.key==='y'||e.key==='Y')&&(e.ctrlKey||e.metaKey)){redoFrame(root);return}
   const{frames,playing,zoom,tool}=$.learn()
   const current = root._localCurrent ?? 0
   if(e.key==='ArrowRight'||e.key==='.')gotoFrame(root,Math.min(frames.length-1,current+1))
   if(e.key==='ArrowLeft'||e.key===',')gotoFrame(root,Math.max(0,current-1))
   if(e.key==='n')addFrame(root)
-  if(e.key==='d')addFrame(root,current)  // 'd' duplicates current frame
-  if(e.key===' '){e.preventDefault();playing?stopPlayback(root):startPlayback(root)}
+  if(e.key==='d')addFrame(root,current)
   if(e.key==='p')openDarkroom(root)
   if(e.key==='Escape'){closeDarkroom(root);closeOverlay(root)}
   if(e.key==='+'||e.key==='=')setZoom(root,zoom+1)
