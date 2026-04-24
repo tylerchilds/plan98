@@ -80,8 +80,8 @@ function addRecoveryCode(event) {
     (s, p) => ({
       ...s,
       pairs: [...s.pairs, [p.questionKey, p.answerKey]],
-      [questionKey]: 'Recovery Hint: ' + p.id,
-      [answerKey]: '',
+      [p.questionKey]: 'Recovery Hint: ' + p.id,
+      [p.answerKey]: '',
     })
   )
 }
