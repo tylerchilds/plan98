@@ -206,7 +206,7 @@ $.v((target) => {
 })
 
 $.s(`
-  & { display: block; }
+  & { display: block; height: 100%; overflow: auto; }
 
   & .recovery-code {
     display: grid;
