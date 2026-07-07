@@ -1,0 +1,97 @@
+# Chapter 1
+
+Jo is a tiny elf that likes coding and coffee.
+
+Every morning Jo wakes up with a cup of Joe writing jo.
+
+Jo made a whole computer in jo. Jo wants to teach you jo.
+
+This is the Book of Jo
+
+# Chapter 2: undefined
+
+Before Jo built a computer, that computer did not exist.
+
+That computer before being defined was undefined.
+
+The first word Jo put into the computer was
+
+undefined
+
+And undefined was defined and it was good.
+
+# Chapter 3: null
+
+While undefined helped Jo build the computer, it was missing something: nothing.
+
+While the computer was technically defined as undefined it was empty.
+
+Jo called this empty computer: null.
+
+The computer exists, but it is empty.
+
+# Chapter 4: 0
+
+While Jo was building the tiny computer, it was clear that null was four bytes.
+
+Jo found it a little silly that something that was nothing was 4.
+
+So Jo created a system of integers and made 0 nothing, stored as 1 byte.
+
+# Chapter 5: false
+
+Everyone watching Jo build the computer said, "Everything is wrong!"
+
+And Jo said, "False!" because undefined, null, and 0 were not wrong.
+
+They just evaluated to false.
+
+Jo realized there was a misunderstanding about his computer.
+
+The absolute beauty of mathematics was lost on natural language speakers.
+
+Jo decided to infuse the computer with natural language.
+
+# Chapter 6: true
+
+Jo realized the power of a computer was in the facts. The truth.
+
+To get uncover the truth, Jo decided to build back up to it using jo.
+
+Jo gave jo true to stand in stark opposition to undefined, null, 0, false, and the ilk.
+
+true is joined in posivity by everything else yet to come, as well as the non-zero integers.
+
+# Chapter 7: function
+
+Once Jo had enough of reality defined, it was time to expand it.
+
+Jo made a new word: function.
+
+The function of the function is to function.
+
+A function may return a value from the void.
+
+function hello() {
+  return "Hello"
+}
+
+Jo wrote a function to say, "Hello".
+
+hello() will return "Hello".
+
+# Chapter 8: if/else
+
+Jo realized the computer needed to key off of reality for dynamic interaction.
+
+To test this with everything Jo built so far, Jo wanted a program.
+
+This program would say "Hello" to positivity and "Goodbye" to negativity.
+
+function socialHelper(vibe) {
+  if(vibe) {
+    return "Hello"
+  } else {
+    return "Goodbye"
+  }
+}
