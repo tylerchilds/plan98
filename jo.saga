@@ -193,7 +193,7 @@ Jo will not leave you there though. Continue with Jo into the great unknown?
 
 Jo made the reality function to keep up with an ever evolving world.
 
-To define a reaility, give it an initial state and a callback for updates.
+To define a reality, give it an initial state and a callback for updates.
 
 Data can be read via get() and Jo can write data with set(), surgically.
 
@@ -269,15 +269,15 @@ function connect(target, initialState = {}, compositor) {
 
   function view(link) {
     const draw = update.bind(this, target, compositor)
-    reactiveFunctions[target.id] = draw
+    reactiveFunctions[link] = draw
     draw()
   }
 
   return {
-    link: link,
+    link: target.id,
 
-    model: fiction.get.bind(this, link),
-    view: view.bind(this, link),
-    controller: fiction.set.bind(this, link),
+    model: fiction.get.bind(this, target.id),
+    view: view.bind(this, targret.id),
+    controller: fiction.set.bind(this, target.id),
   }
 }
