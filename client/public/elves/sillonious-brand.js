@@ -68,7 +68,10 @@ const dns = {
     elf: 'time-machine'
   },
   'ncity.executiontime.pub': {
-    elf: 'blue-note'
+    elf: 'ninjami-cards'
+  },
+  'ninjami.net': {
+    elf: 'ninjami-cards'
   },
   'beerdogusa.com': {
     elf: 'beerdog-usa'

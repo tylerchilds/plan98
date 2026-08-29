@@ -10,7 +10,7 @@ $.draw((target) => {
     const { body, type } = $.learn()[id]
 
     return `
-      <button class="toast-message standard-button -soft ${type}" key="${id}" data-close="${id}">
+      <button class="toast-message -soft ${type}" key="${id}" data-close="${id}">
         ${body}
       </button>
     `
@@ -81,45 +81,52 @@ export function untoast(id) {
 $.style(`
   & {
     position: absolute;
-    top: 4px;
-    left: 4px;
-    right: 4px;
-    width: 280px;
-    max-width: calc(100vw - 2rem);
+    top: .5rem;
+    right: .5rem;
     margin: auto;
     place-content: center;
     z-index: 9000;
     overflow: auto;
     max-height: 100vh;
     display: flex;
-    flex-direction: column-reverse;
+    flex-direction: column;
     gap: .5rem;
   }
 
   & .toast-message {
-    --toast-color: black;
+    --toast-color: white;
     position: relative;
     width: 100%;
     border-radius: 0;
+    background: lemonchiffon;
+    text-align: left;
+    border: none;
+    color: var(--toast-color);
+    border-top: rgba(255,255,255,.1);
+    border-bottom: 1px solid var(--toast-color);
+    padding: .5rem;
+    line-height: 2;
+    max-width: 280px;
+  }
+
+  & .toast-message::after {
+    content: "X";
+    padding-left: 1rem;
   }
 
   & .toast-message.success {
     --toast-color: mediumseagreen;
-    --root-theme: mediumseagreen;
   }
 
   & .toast-message.error {
     --toast-color: firebrick;
-    --root-theme: firebrick;
   }
 
   & .toast-message.warn {
     --toast-color: gold;
-    --root-theme: gold;
   }
 
   & .toast-message.info {
     --toast-color: dodgerblue;
-    --root-theme: dodgerblue;
   }
 `)
