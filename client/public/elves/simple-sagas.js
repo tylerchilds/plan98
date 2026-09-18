@@ -2,7 +2,7 @@ import { Self, Saga } from '@plan98/types'
 
 const $ = Self('simple-sagas', {
   saga: "Here's a little story, I got to tell...",
-  orientation: screen.orientation.type
+  orientation: screen.orientation.type,
 })
 
 const isPortrait = () => $.model().orientation.startsWith('portrait');
@@ -14,12 +14,18 @@ $.draw(() => {
   if(isPortrait()) {
     const escapedSaga = escapeHyperText(saga)
     return `
-      <textarea name="typewriter">${escapedSaga}</textarea>
+      <div>
+        <textarea name="typewriter">${escapedSaga}</textarea>
+      </div>
     `
   }
 
   if(isLandscape()) {
-    return Saga(saga)
+    return `
+      <div>
+        ${Saga(saga)}
+      </div>
+    `
   }
 })
 
@@ -46,7 +52,14 @@ screen.orientation.addEventListener('change', (event) => {
 });
 
 $.style(`
-  [name="typewriter"] {
+  & {
+    padding: 2rem 1rem;
+    display: block;
+    height: 100%;
+    font-family: 'courier';
+  }
+
+  & [name="typewriter"] {
     width: 100%;
     height: 100%;
     border: none;
